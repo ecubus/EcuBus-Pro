@@ -104,7 +104,7 @@
     "@vue/eslint-config-typescript": "^12.0.0",
     "ali-oss": "^6.21.0",
     "electron": "^32.2.3",
-    "electron-builder": "24.7.0",
+    "electron-builder": "24.13.3",
     "electron-vite": "^2.3.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",

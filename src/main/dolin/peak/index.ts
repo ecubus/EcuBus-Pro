@@ -27,9 +27,9 @@ function buf2str(buf: Buffer) {
 
 export class PeakLin extends LinBase {
     queue = queue((task: QueueItem, cb) => {
-        if(task.discard){
+        if (task.discard) {
             cb()
-        }else{
+        } else {
             this._write(task.data).then(task.resolve).catch(task.reject).finally(cb)
         }
     }, 1)
@@ -42,15 +42,21 @@ export class PeakLin extends LinBase {
         sendMsg: LinMsg
     }
     static loadDllPath(dllPath: string) {
-        LIN.LoadDll(dllPath)
+        if (process.platform == 'win32') {
+            LIN.LoadDll(dllPath)
+        }
     }
     static getLibVersion() {
-        const v = new LIN.TLINVersion()
-        const result = LIN.LIN_GetVersion(v)
-        if (result == 0) {
-            return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
+        if (process.platform == 'win32') {
+            const v = new LIN.TLINVersion()
+            const result = LIN.LIN_GetVersion(v)
+            if (result == 0) {
+                return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
+            } else {
+                throw new Error(err2Str(result))
+            }
         } else {
-            throw new Error(err2Str(result))
+            return 'only support windows'
         }
     }
     startTs: number
@@ -346,7 +352,7 @@ export class PeakLin extends LinBase {
 
 
     }
-    
+
     read(frameId: number) {
         return this.lastFrame.get(frameId)
     }
@@ -369,24 +375,28 @@ export class PeakLin extends LinBase {
 
     static getValidDevices(): LinDevice[] {
         const devices: LinDevice[] = []
-        const dd = new LIN.HLINHW_JS(100);
-        const count = new LIN.INT_JS()
-        const result = LIN.LIN_GetAvailableHardware(dd.cast(), 100, count.cast())
+        if (process.platform == 'win32') {
+            const dd = new LIN.HLINHW_JS(100);
+            const count = new LIN.INT_JS()
+            const result = LIN.LIN_GetAvailableHardware(dd.cast(), 100, count.cast())
 
-        if (result == 0) {
-            for (let i = 0; i < count.value(); i++) {
-                const handle = dd.getitem(i)
-                const labelBuffer = Buffer.alloc(256)
-                LIN.LIN_GetHardwareParam(handle, LIN.hwpName, labelBuffer)
-                devices.push({
-                    label: `${buf2str(labelBuffer)} (${handle})`,
-                    id: handle.toString(),
-                    handle
-                })
+            if (result == 0) {
+                for (let i = 0; i < count.value(); i++) {
+                    const handle = dd.getitem(i)
+                    const labelBuffer = Buffer.alloc(256)
+                    LIN.LIN_GetHardwareParam(handle, LIN.hwpName, labelBuffer)
+                    devices.push({
+                        label: `${buf2str(labelBuffer)} (${handle})`,
+                        id: handle.toString(),
+                        handle
+                    })
+                }
+                return devices
+            } else {
+                throw new Error(err2Str(result))
             }
-            return devices
         } else {
-            throw new Error(err2Str(result))
+            return devices
         }
     }
     private registerClient() {

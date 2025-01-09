@@ -16,6 +16,7 @@ import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { CanLOG } from '../../log'
 import ZLG from './../build/Release/zlg.node'
+import { platform } from 'os'
 
 interface CANFrame {
   canId: number
@@ -164,7 +165,10 @@ export class ZLG_CAN extends CanBase {
     this.close(true)
   }
   static loadDllPath(dllPath: string) {
-    ZLG.LoadDll(dllPath)
+    if(process.platform=='win32'){
+      ZLG.LoadDll(dllPath)
+    }
+    
   }
   _read(frame: CANFrame, ts: number) {
     if (this.tsOffset == undefined) {
@@ -290,34 +294,41 @@ export class ZLG_CAN extends CanBase {
     null
   }
   static override getValidDevices(): CanDevice[] {
-    const zcanArray: CanDevice[] = [
-      {
-        label: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_0',
-        id: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_0',
-        handle: `${ZLG.ZCAN_USBCANFD_200U}_0_0`
-      },
-      {
-        label: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_1',
-        id: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_1',
-        handle: `${ZLG.ZCAN_USBCANFD_200U}_0_1`
-      },
-      {
-        label: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_0',
-        id: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_0',
-        handle: `${ZLG.ZCAN_USBCANFD_200U}_1_0`
-      },
-      {
-        label: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_1',
-        id: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_1',
-        handle: `${ZLG.ZCAN_USBCANFD_200U}_1_1`
-      }
-    ]
-
-    return zcanArray
+    if (process.platform == 'win32') {
+      const zcanArray: CanDevice[] = [
+        {
+          label: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_200U}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_1',
+          id: 'ZCAN_USBCANFD_200U_INDEX_0_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCANFD_200U}_0_1`
+        },
+        {
+          label: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_200U}_1_0`
+        },
+        {
+          label: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_1',
+          id: 'ZCAN_USBCANFD_200U_INDEX_1_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCANFD_200U}_1_1`
+        }
+      ]
+      return zcanArray
+    }
+    return []
   }
+  
   static override getLibVersion(): string {
-    return '24.4.3.11'
+    if (process.platform == 'win32') {
+      return '24.4.3.11'
+    }
+    return 'only support windows'
   }
+  
   close(isReset = false, msg?: string) {
     // clearInterval(this.timer)
 

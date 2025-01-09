@@ -123,11 +123,15 @@ export class KVASER_CAN extends CanBase {
     KV.CreateTSFN(this.handle, this.id, this.callback.bind(this))
   }
   static loadDllPath(dllPath: string) {
-    KV.LoadDll(dllPath)
-    KV.canInitializeLibrary()
+    if(process.platform=='win32'){
+      KV.LoadDll(dllPath)
+      KV.canInitializeLibrary()
+    }
   }
   static unloadDll() {
-    KV.canUnloadLibrary()
+    if(process.platform=='win32'){
+      KV.canUnloadLibrary()
+    }
   }
   callback() {
     while (!this.closed) {
@@ -246,33 +250,39 @@ export class KVASER_CAN extends CanBase {
     null
   }
   static override getValidDevices(): CanDevice[] {
-    KV.canUnloadLibrary()
-    KV.canInitializeLibrary()
-    const tsClass = new KV.JSINT32()
-    const status = KV.canGetNumberOfChannels(tsClass.cast())
-    if (status != 0) {
-      throw new Error(err2str(status))
+    if (process.platform == 'win32') {
+      KV.canUnloadLibrary()
+      KV.canInitializeLibrary()
+      const tsClass = new KV.JSINT32()
+      const status = KV.canGetNumberOfChannels(tsClass.cast())
+      if (status != 0) {
+        throw new Error(err2str(status))
+      }
+      const num = tsClass.value()
+      const devices: CanDevice[] = []
+      for (let i = 0; i < num; i++) {
+        const buf = Buffer.alloc(1024)
+        KV.canGetChannelData(i, 13, buf)
+        const serial = buf2str(buf)
+        devices.push({
+          id: `kvaser-${i}`,
+          handle: i,
+          label: `${serial}`
+        })
+      }
+      return devices
     }
-    const num = tsClass.value()
-    const devices: CanDevice[] = []
-    for (let i = 0; i < num; i++) {
-      const buf = Buffer.alloc(1024)
-      // KV.canGetChannelData(i, 26, buf)
-      // const desc = buf2str(buf)
-      KV.canGetChannelData(i, 13, buf)
-      const serial = buf2str(buf)
-      devices.push({
-        id: `kvaser-${i}`,
-        handle: i,
-        label: `${serial}`
-      })
-    }
-    return devices
+    return []
   }
+
   static override getLibVersion(): string {
-    const v = KV.canGetVersion()
-    return `${v}`
+    if (process.platform == 'win32') {
+      const v = KV.canGetVersion()
+      return `${v}`
+    }
+    return 'only support windows'
   }
+
   close(isReset = false, msg?: string) {
 
     this.readAbort.abort()

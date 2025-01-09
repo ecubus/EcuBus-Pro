@@ -479,28 +479,31 @@ export class PEAK_TP extends CanBase implements CanTp {
   }
   static getValidDevices() {
     const devices: CanDevice[] = []
-    const buf = Buffer.alloc(1)
-    for (const label of Object.keys(allDevice)) {
-      const result = peak.CANTP_GetValue_2016(
-        allDevice[label],
-        peak.PCANTP_PARAMETER_CHANNEL_CONDITION,
-        buf
-      )
-      if (result === 0) {
-        if (buf[0] == peak.PCANTP_CHANNEL_AVAILABLE) {
-          devices.push({
-            label: label,
-            id: label,
-            handle: allDevice[label],
-            busy: false
-          })
-        } else if (buf[0] == (peak.PCANTP_CHANNEL_AVAILABLE | peak.PCANTP_CHANNEL_OCCUPIED)) {
-          devices.push({
-            label: label,
-            id: label,
-            handle: allDevice[label],
-            busy: true
-          })
+    if (process.platform == 'win32') {
+
+      const buf = Buffer.alloc(1)
+      for (const label of Object.keys(allDevice)) {
+        const result = peak.CANTP_GetValue_2016(
+          allDevice[label],
+          peak.PCANTP_PARAMETER_CHANNEL_CONDITION,
+          buf
+        )
+        if (result === 0) {
+          if (buf[0] == peak.PCANTP_CHANNEL_AVAILABLE) {
+            devices.push({
+              label: label,
+              id: label,
+              handle: allDevice[label],
+              busy: false
+            })
+          } else if (buf[0] == (peak.PCANTP_CHANNEL_AVAILABLE | peak.PCANTP_CHANNEL_OCCUPIED)) {
+            devices.push({
+              label: label,
+              id: label,
+              handle: allDevice[label],
+              busy: true
+            })
+          }
         }
       }
     }
@@ -508,16 +511,22 @@ export class PEAK_TP extends CanBase implements CanTp {
     return devices.sort((a, b) => a.handle - b.handle)
   }
   static getLibVersion() {
-    const buf = Buffer.alloc(1024)
-    const result = peak.CANTP_GetValue_2016(0, peak.PCANTP_PARAMETER_API_VERSION, buf)
-    if (result == 0) {
-      return buf2str(buf)
+    if (process.platform == 'win32') {
+      const buf = Buffer.alloc(1024)
+      const result = peak.CANTP_GetValue_2016(0, peak.PCANTP_PARAMETER_API_VERSION, buf)
+      if (result == 0) {
+        return buf2str(buf)
+      } else {
+        throw new Error(err2str(result))
+      }
     } else {
-      throw new Error(err2str(result))
+      return 'only support windows'
     }
   }
   static loadDllPath(dllPath: string) {
-    peak.LoadDll(dllPath)
+    if (process.platform == 'win32') {
+      peak.LoadDll(dllPath)
+    }
   }
   setOption(option: string, value: any) {
     if (option.startsWith('PEAK:')) {
@@ -715,11 +724,11 @@ export class PEAK_TP extends CanBase implements CanTp {
               const items = this.pendingBaseCmds.get(id)
 
               if (items) {
-                
+
                 const item = items.shift()!
                 //tx notification, item always exists
                 peak.CANTP_MsgDataFree_2016(item.msg)
-                if(items.length==0){
+                if (items.length == 0) {
                   this.pendingBaseCmds.delete(id)
                 }
                 const message: CanMessage = {

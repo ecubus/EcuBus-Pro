@@ -229,7 +229,7 @@ export class Layout {
         title: 'message',
         label: 'Message',
         id: 'message',
-
+        layoutType: 'bottom'
       }
 
 
@@ -612,7 +612,7 @@ export class Layout {
         item.pos.y = 0
       }
 
-
+      this.data.project.wins[id].layoutType = layoutType
       await nextTick()
       this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`, true, layoutType)
       this.clickWin(id)
@@ -649,7 +649,8 @@ export class Layout {
         options: {
           params: this.data.project.wins[id]?.options.params,
           name: options?.name
-        }
+        },
+        layoutType: layoutType
       }
       if (options?.params) {
         this.data.project.wins[id].options.params = options.params

@@ -340,7 +340,7 @@
     </div>
     <div class="footer">
       <div v-for="item in project.project.wins" :key="item.id">
-        <div v-if="layoutMaster.getLayoutType(item.id) == 'bottom'" :id="`win${item.id}`">
+        <div v-if="item.layoutType == 'bottom'" :id="`win${item.id}`">
           <div class="titleBar" :style="{
             width: `${contentW}px`,
             height: '25px',
@@ -621,7 +621,7 @@ const handleSelect = (keyPath: string[]) => {
 }
 
 const hideLayout = computed(() => {
-  return Object.values(project.project.wins).filter((item) => item.hide && layoutMaster.getLayoutType(item.id) == undefined)
+  return Object.values(project.project.wins).filter((item) => item.hide && item.layoutType == undefined)
 })
 
 const heightOffset = computed(() => {
@@ -641,7 +641,7 @@ const heightOffset = computed(() => {
 const bottomH = computed(() => {
   let h = 0
   for (const w of Object.values(project.project.wins)) {
-    if (layoutMaster.getLayoutType(w.id) == 'bottom') {
+    if (w.layoutType == 'bottom') {
       h += w.pos.h
     }
   }

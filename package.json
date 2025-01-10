@@ -32,6 +32,7 @@
     "cli:dev": "electron-vite dev -c cli.vite.ts -w --entry cli/out/ecb_cli2.js",
     "cli:build": "electron-vite build -c cli.vite.ts",
     "cli:build:win": "electron-vite build -c cli.vite.ts && cd cli && npm run win",
+    "cli:build:linux": "electron-vite build -c cli.vite.ts && cd cli && npm run linux",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",

@@ -39,5 +39,19 @@ nsis:
   createStartMenuShortcut: true
   artifactName: EcuBus-Pro ${version}.exe
   guid: 98123fde-012f-5ff3-8b50-881449dac91a
+linux:
+  target: deb
+  icon: ./build/icon.icns
+  executableName: ecubuspro
+  description: EcuBus-Pro
+  category: Development
+  desktop:
+    Name: EcuBus-Pro
+    Comment: EcuBus-Pro
+    Terminal: false
+    Type: Application
+    Icon: ecubuspro
+    Categoried: Development
+  maintainer: https://github.com/ecubus/EcuBus-Pro
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

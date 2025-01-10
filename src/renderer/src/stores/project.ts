@@ -21,7 +21,7 @@ export interface Project {
     title:string,
     label:string,
     id:string,
-    layoutType?:'bottom'|'top'|'left'|'right',
+
     options: {
       name?: string
       params: Record<string, string>

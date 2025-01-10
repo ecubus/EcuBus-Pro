@@ -265,8 +265,9 @@
       <div class="right2" v-if="layoutMaster.right2.value"></div>
       <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
 
-        <div v-show="!item.hide" v-if="item.layoutType == undefined" :id="`win${item.id}`" class="uds-window" :style="{
-          transform: `translate(${item.pos.x}px, ${item.pos.y}px)`,
+        <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`" class="uds-window" :style="{
+          top: `${item.pos.y}px`,
+          left: `${item.pos.x}px`,
           width: `${item.pos.w}px`,
           height: `${item.pos.h}px`
         }">
@@ -339,7 +340,7 @@
     </div>
     <div class="footer">
       <div v-for="item in project.project.wins" :key="item.id">
-        <div v-if="item.layoutType == 'bottom'" :id="`win${item.id}`">
+        <div v-if="layoutMaster.getLayoutType(item.id) == 'bottom'" :id="`win${item.id}`">
           <div class="titleBar" :style="{
             width: `${contentW}px`,
             height: '25px',
@@ -620,7 +621,7 @@ const handleSelect = (keyPath: string[]) => {
 }
 
 const hideLayout = computed(() => {
-  return Object.values(project.project.wins).filter((item) => item.hide && item.layoutType == undefined)
+  return Object.values(project.project.wins).filter((item) => item.hide && layoutMaster.getLayoutType(item.id) == undefined)
 })
 
 const heightOffset = computed(() => {
@@ -640,7 +641,7 @@ const heightOffset = computed(() => {
 const bottomH = computed(() => {
   let h = 0
   for (const w of Object.values(project.project.wins)) {
-    if (w.layoutType == 'bottom') {
+    if (layoutMaster.getLayoutType(w.id) == 'bottom') {
       h += w.pos.h
     }
   }

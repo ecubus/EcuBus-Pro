@@ -6,13 +6,12 @@ import PhAddressBook from '@iconify/icons-ph/address-book'
 import database from '@iconify/icons-material-symbols/database'
 import { Component, Ref, defineAsyncComponent, nextTick, ref } from 'vue'
 import { isEqual, cloneDeep } from 'lodash'
-import interact from 'interactjs'
 import { ElMessageBox } from 'element-plus'
 import EventEmitter from 'events'
 import deviceIcon from '@iconify/icons-material-symbols/important-devices-outline'
 import logIcon from '@iconify/icons-material-symbols/text-ad-outline-rounded'
 import scriptIcon from '@iconify/icons-material-symbols/code-blocks-outline'
-import { useProjectStore,State as ProjectState} from '@r/stores/project'
+import { useProjectStore, State as ProjectState } from '@r/stores/project'
 import stepIcon from '@iconify/icons-material-symbols/step-rounded'
 import msgIcon from '@iconify/icons-material-symbols/terminal'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
@@ -36,7 +35,7 @@ export interface LayoutItem {
   minW?: number
   minH?: number
   label: string
-  layoutType?:'bottom'|'top'|'left'|'right'
+  layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
   network: {
@@ -81,13 +80,13 @@ const layoutMap: Record<string, LayoutItem> = {
   //   key: 'can',
   //   component: defineAsyncComponent(() => import('./components/config/node/canNode.vue'))
   // },
-  message:{
+  message: {
     i: 'Message',
     x: 0,
     y: 0,
     w: 600,
     h: 300,
-    layoutType:'bottom',
+    layoutType: 'bottom',
     label: 'Message',
     key: 'message',
     component: defineAsyncComponent(() => import('./log.vue')),
@@ -148,7 +147,7 @@ const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./lini.vue')),
     icon: interIcon
   },
-  linPanel:{
+  linPanel: {
     i: 'Panel',
     x: 0,
     y: 0,
@@ -157,9 +156,9 @@ const layoutMap: Record<string, LayoutItem> = {
     label: 'Panel',
     key: 'Panel',
     component: defineAsyncComponent(() => import('./linPanel.vue')),
-    icon:panelIcon
+    icon: panelIcon
   },
-  ldf:{
+  ldf: {
     i: 'LDF',
     x: 0,
     y: 0,
@@ -186,14 +185,14 @@ const layoutMap: Record<string, LayoutItem> = {
 export class Layout {
   parentElement: HTMLElement | null = null
   grid = 20
-  zIndex =1
+  zIndex = 1
   width = 0
   height = 0
   maxWinId = ref<undefined | string>()
   validLayout: Record<string, LayoutItem> = {}
   winRef: Record<string, any> = {}
-  modify=ref<Record<string,boolean>>({})
-  winEl: Record<string, HTMLElement> = {}
+  modify = ref<Record<string, boolean>>({})
+  private winEl: Record<string, any> = {}
   event = new EventEmitter()
   activeWin = ref('')
   left1 = ref(false)
@@ -216,7 +215,7 @@ export class Layout {
     this.height = h
   }
   async restoreWin() {
-    if(Object.values(this.data.project.wins).length==0){
+    if (Object.values(this.data.project.wins).length == 0) {
       this.data.project.wins['message'] = {
         "pos": {
           "x": 383,
@@ -224,15 +223,15 @@ export class Layout {
           "w": 1280,
           "h": 200
         },
-        options:{
-          params:{}
+        options: {
+          params: {}
         },
         title: 'message',
         label: 'Message',
         id: 'message',
-        layoutType: "bottom",
+
       }
-      
+
 
     }
     for (const l of Object.values(this.data.project.wins)) {
@@ -271,16 +270,19 @@ export class Layout {
   offAll(event: string) {
     this.event.removeAllListeners(event)
   }
-  layoutInit(id: string, dragSelect: string, resizeSelect: string, enable: boolean = true,layoutType?:'bottom'|'top'|'left'|'right') {
+  getLayoutType(id: string) {
+    return this.validLayout[this.data.project.wins[id].title].layoutType
+  }
+  layoutInit(id: string, dragSelect: string, resizeSelect: string, enable: boolean, layoutType?: 'bottom' | 'top' | 'left' | 'right') {
     const target = document.querySelector(resizeSelect) as HTMLElement
     target.style.position = 'absolute'
     target.style.zIndex = `${this.zIndex++}`
     //store id into element data
     target.dataset.id = id
-    if(this.winEl[id]==undefined){
-      this.winEl[id] = target
-    
-      target.addEventListener('mousedown', ()=>{
+    if (this.winEl[id] == undefined) {
+      this.winEl[id] = window.jQuery(target)
+
+      target.addEventListener('mousedown', () => {
         this.activeWin.value = id
         target.style.zIndex = `${this.zIndex++}`
       })
@@ -289,247 +291,222 @@ export class Layout {
     const drag = document.querySelector(dragSelect) as HTMLElement
     if (target && this.parentElement && data) {
 
-      const v={ left: true, right: true, bottom: true, top: true }
-      if(layoutType=='bottom'){
-        v.left=false
-        v.right=false
-        v.bottom=false
+      let v = 'e, s'
+
+      if (layoutType == 'bottom') {
+        v = 'n'
       }
-      interact(target).resizable({
-        enabled: enable,
-        margin: 8,
-        // resize from all edges and corners
-        edges: v,
-        listeners: {
-          move: (event) => {
-            if (data.isMax) {
-              return
-            }
+      this.winEl[id].resizable(
+        {
+          containment: layoutType == 'bottom' ? false : this.parentElement,
+          handles: v,
+          grid: [this.grid, this.grid],
+          animate: true,
+          disabled: !enable,
+          aspectRatio: false,
+          minWidth: this.validLayout[data.title].minW || 200,
+          minHeight: this.validLayout[data.title].minH || 100,
+          resize: (e, ui) => {
 
-            let width = event.rect.width
-            const widthL = Math.floor(width / this.grid) * this.grid
-            const widthH = Math.ceil(width / this.grid) * this.grid
-            if (width - widthL < widthH - width) {
-              width = widthL
-            } else {
-              width = widthH
-            }
-            let height = event.rect.height
-            const heightL = Math.floor(height / this.grid) * this.grid
-            const heightH = Math.ceil(height / this.grid) * this.grid
-            if (height - heightL < heightH - height) {
-              height = heightL
-            } else {
-              height = heightH
-            }
-            if (height > (this.height + 20)) {
-              height = this.height + 20
-            } else {
-              data.pos.y += (event.deltaRect.top)
-            }
-            if (width > (this.width + 20)) {
-              width = this.width + 20
-            } else {
-              data.pos.x += (event.deltaRect.left)
-            }
-            if(data.pos.y<0){
-              data.pos.y=0
-            }
-            
-            data.pos.w = width
-            data.pos.h = height
-            // this.data.project.wins[id].pos={x:data.x,y:data.y,w:data.w,h:data.h}
-
-
+            data.pos.w = ui.size.width
+            data.pos.h = ui.size.height
           }
-        },
-        modifiers: [
-          // keep the edges inside the parent
-          // interact.modifiers.restrictEdges({
-          //   outer: 'parent'
-          // }),
-
-          // minimum size
-          interact.modifiers.restrictSize({
-            min: {
-              width: this.validLayout[id]?.minW || 200,
-              height: this.validLayout[id]?.minH || 50
-            }
-          })
-        ],
-
-        inertia: true
-      })
-      if(drag){
-        interact(drag).draggable({
-          // enable inertial throwing
-          inertia: true,
-          enabled: enable,
-          ignoreFrom: '.uds-no-drag',
-          // keep the element within the area of it's parent
-          modifiers: [
-            interact.modifiers.restrictRect({
-              restriction: this.parentElement,
-              endOnly: false,
-              elementRect: { top: 0, left: 0.7, bottom: 1, right: 0.1 }
-            }),
-            interact.modifiers.snap({
-              targets: [
-                // 定义吸附点
-                interact.snappers.grid({ x: this.grid, y: this.grid })
-              ],
-              range: Infinity // 吸附范围
-            })
-          ],
-          // // enable autoScroll
-          // autoScroll: true,
-
-          listeners: {
-            // call this function on every dragmove event
-            move: (event) => {
+        }
+      )
+      if (drag) {
+    
+          this.winEl[id].draggable({
+           
+            handle:drag,
+            cancel: '.uds-no-drag',
+            scroll: false,
+            disabled: !enable,
+            cursor: 'pointer',
+            containment  : this.parentElement,
+            snap: ".uds-window", 
+            snapMode: "outer",
+            drag: (e, ui) => {
               if (data.isMax) {
-                return
+                e.preventDefault()
               }
-
-              if ((event.pageX < this.leftThret) || ((this.left1.value || this.left2.value || this.left.value) && event.pageX <= this.leftThret + 20)) {
-                if (event.pageY < this.height / 3) {
-                  this.left.value = false
-                  this.left1.value = true
-                  this.left2.value = false
-                  this.right.value = false
-                  this.right1.value = false
-                  this.right2.value = false
-                } else if (event.pageY > this.height / 3 * 2) {
-                  this.left.value = false
-                  this.left1.value = false
-                  this.left2.value = true
-                  this.right.value = false
-                  this.right1.value = false
-                  this.right2.value = false
-                } else {
-                  this.left.value = true
-                  this.left1.value = false
-                  this.left2.value = false
-                  this.right.value = false
-                  this.right1.value = false
-                  this.right2.value = false
-                }
-              } else if ((this.left1.value || this.left2.value || this.left.value) && event.pageX > this.leftThret + 20) {
-                this.left.value = false
-                this.left1.value = false
-                this.left2.value = false
-                this.right.value = false
-                this.right1.value = false
-                this.right2.value = false
-              }
-
-              if ((event.pageX > (this.width - this.leftThret)) || ((this.right.value || this.right1.value || this.right2.value) && event.pageX >= (this.width - this.leftThret - 20))) {
-                if (event.pageY < this.height / 3) {
-                  this.left.value = false
-                  this.left1.value = false
-                  this.left2.value = false
-                  this.right.value = false
-                  this.right1.value = true
-                  this.right2.value = false
-                } else if (event.pageY > this.height / 3 * 2) {
-                  this.left.value = false
-                  this.left1.value = false
-                  this.left2.value = false
-                  this.right.value = false
-                  this.right1.value = false
-                  this.right2.value = true
-                } else {
-                  this.left.value = false
-                  this.left1.value = false
-                  this.left2.value = false
-                  this.right.value = true
-                  this.right1.value = false
-                  this.right2.value = false
-                }
-              } else if ((this.right.value || this.right1.value || this.right2.value) && event.pageX < (this.width - this.leftThret - 20)) {
-                this.left.value = false
-                this.left1.value = false
-                this.left2.value = false
-                this.right.value = false
-                this.right1.value = false
-                this.right2.value = false
-              }
-
-              // keep the dragged position in the data-x/data-y attributes
-              let x = data.pos.x + event.dx
-
-              let y = data.pos.y + event.dy
-              const xL = Math.floor(x / this.grid) * this.grid
-              const xH = Math.ceil(x / this.grid) * this.grid
-
-              const yL = Math.floor(y / this.grid) * this.grid
-              const yH = Math.ceil(y / this.grid) * this.grid
-              if (x - xL < xH - x) {
-                x = xL
-              } else {
-                x = xH
-              }
-              if (y - yL < yH - y) {
-                y = yL
-              } else {
-                y = yH
-              }
-              data.pos.x = x
-              data.pos.y = y
-
-
-
+             
 
             },
-
-            // call this function on every dragend event
-            end: () => {
-              if (this.left1.value) {
-                data.pos.x = 0
-                data.pos.y = 0
-                data.pos.w = this.width / 2
-                data.pos.h = this.height / 2
-              }
-              else if (this.left2.value) {
-                data.pos.x = 0
-                data.pos.y = this.height / 2
-                data.pos.w = this.width / 2
-                data.pos.h = this.height / 2
-              }
-              else if (this.left.value) {
-                data.pos.x = 0
-                data.pos.y = 0
-                data.pos.w = this.width / 2
-                data.pos.h = this.height
-              }
-              else if (this.right1.value) {
-                data.pos.x = this.width / 2
-                data.pos.y = 0
-                data.pos.w = this.width / 2
-                data.pos.h = this.height / 2
-              }
-              else if (this.right2.value) {
-                data.pos.x = this.width / 2
-                data.pos.y = this.height / 2
-                data.pos.w = this.width / 2
-                data.pos.h = this.height / 2
-              }
-              else if (this.right.value) {
-                data.pos.x = this.width / 2
-                data.pos.y = 0
-                data.pos.w = this.width / 2
-                data.pos.h = this.height
-              }
-              this.left1.value = false
-              this.left2.value = false
-              this.left.value = false
-              this.right1.value = false
-              this.right2.value = false
-              this.right.value = false
-              this.data.project.wins[id].pos
+            stop: (e, ui) => {
+              data.pos.x = ui.position.left
+              data.pos.y = ui.position.top
             }
-          }
-        })
+          });
+        
+        // interact(drag).draggable({
+        //   // enable inertial throwing
+        //   inertia: true,
+        //   enabled: enable,
+        //   ignoreFrom: '.uds-no-drag',
+        //   // keep the element within the area of it's parent
+        //   modifiers: [
+        //     interact.modifiers.restrictRect({
+        //       restriction: this.parentElement,
+        //       endOnly: false,
+        //       elementRect: { top: 0, left: 0.7, bottom: 1, right: 0.1 }
+        //     }),
+        //     interact.modifiers.snap({
+        //       targets: [
+        //         // 定义吸附点
+        //         interact.snappers.grid({ x: this.grid, y: this.grid })
+        //       ],
+        //       range: Infinity // 吸附范围
+        //     })
+        //   ],
+        //   // // enable autoScroll
+        //   // autoScroll: true,
+
+        //   listeners: {
+        //     // call this function on every dragmove event
+        //     move: (event) => {
+        //       if (data.isMax) {
+        //         return
+        //       }
+
+        //       if ((event.pageX < this.leftThret) || ((this.left1.value || this.left2.value || this.left.value) && event.pageX <= this.leftThret + 20)) {
+        //         if (event.pageY < this.height / 3) {
+        //           this.left.value = false
+        //           this.left1.value = true
+        //           this.left2.value = false
+        //           this.right.value = false
+        //           this.right1.value = false
+        //           this.right2.value = false
+        //         } else if (event.pageY > this.height / 3 * 2) {
+        //           this.left.value = false
+        //           this.left1.value = false
+        //           this.left2.value = true
+        //           this.right.value = false
+        //           this.right1.value = false
+        //           this.right2.value = false
+        //         } else {
+        //           this.left.value = true
+        //           this.left1.value = false
+        //           this.left2.value = false
+        //           this.right.value = false
+        //           this.right1.value = false
+        //           this.right2.value = false
+        //         }
+        //       } else if ((this.left1.value || this.left2.value || this.left.value) && event.pageX > this.leftThret + 20) {
+        //         this.left.value = false
+        //         this.left1.value = false
+        //         this.left2.value = false
+        //         this.right.value = false
+        //         this.right1.value = false
+        //         this.right2.value = false
+        //       }
+
+        //       if ((event.pageX > (this.width - this.leftThret)) || ((this.right.value || this.right1.value || this.right2.value) && event.pageX >= (this.width - this.leftThret - 20))) {
+        //         if (event.pageY < this.height / 3) {
+        //           this.left.value = false
+        //           this.left1.value = false
+        //           this.left2.value = false
+        //           this.right.value = false
+        //           this.right1.value = true
+        //           this.right2.value = false
+        //         } else if (event.pageY > this.height / 3 * 2) {
+        //           this.left.value = false
+        //           this.left1.value = false
+        //           this.left2.value = false
+        //           this.right.value = false
+        //           this.right1.value = false
+        //           this.right2.value = true
+        //         } else {
+        //           this.left.value = false
+        //           this.left1.value = false
+        //           this.left2.value = false
+        //           this.right.value = true
+        //           this.right1.value = false
+        //           this.right2.value = false
+        //         }
+        //       } else if ((this.right.value || this.right1.value || this.right2.value) && event.pageX < (this.width - this.leftThret - 20)) {
+        //         this.left.value = false
+        //         this.left1.value = false
+        //         this.left2.value = false
+        //         this.right.value = false
+        //         this.right1.value = false
+        //         this.right2.value = false
+        //       }
+
+        //       // keep the dragged position in the data-x/data-y attributes
+        //       let x = data.pos.x + event.dx
+
+        //       let y = data.pos.y + event.dy
+        //       const xL = Math.floor(x / this.grid) * this.grid
+        //       const xH = Math.ceil(x / this.grid) * this.grid
+
+        //       const yL = Math.floor(y / this.grid) * this.grid
+        //       const yH = Math.ceil(y / this.grid) * this.grid
+        //       if (x - xL < xH - x) {
+        //         x = xL
+        //       } else {
+        //         x = xH
+        //       }
+        //       if (y - yL < yH - y) {
+        //         y = yL
+        //       } else {
+        //         y = yH
+        //       }
+        //       data.pos.x = x
+        //       data.pos.y = y
+
+
+
+
+        //     },
+
+        //     // call this function on every dragend event
+        //     end: () => {
+        //       if (this.left1.value) {
+        //         data.pos.x = 0
+        //         data.pos.y = 0
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height / 2
+        //       }
+        //       else if (this.left2.value) {
+        //         data.pos.x = 0
+        //         data.pos.y = this.height / 2
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height / 2
+        //       }
+        //       else if (this.left.value) {
+        //         data.pos.x = 0
+        //         data.pos.y = 0
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height
+        //       }
+        //       else if (this.right1.value) {
+        //         data.pos.x = this.width / 2
+        //         data.pos.y = 0
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height / 2
+        //       }
+        //       else if (this.right2.value) {
+        //         data.pos.x = this.width / 2
+        //         data.pos.y = this.height / 2
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height / 2
+        //       }
+        //       else if (this.right.value) {
+        //         data.pos.x = this.width / 2
+        //         data.pos.y = 0
+        //         data.pos.w = this.width / 2
+        //         data.pos.h = this.height
+        //       }
+        //       this.left1.value = false
+        //       this.left2.value = false
+        //       this.left.value = false
+        //       this.right1.value = false
+        //       this.right2.value = false
+        //       this.right.value = false
+        //       this.data.project.wins[id].pos
+        //     }
+        //   }
+        // })
       }
     }
   }
@@ -538,13 +515,13 @@ export class Layout {
     if (item == undefined) {
       return
     }
-
+    const layoutType = this.validLayout[item.title].layoutType
     if (item.isMax) {
 
       item.isMax = false
       this.maxWinId.value = undefined
       item.pos = cloneDeep(item.backupPos ?? item.pos)
-      this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`)
+      this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, true, layoutType)
       this.event.emit(`max:${key}`, item, false)
     } else {
       this.maxWinId.value = key
@@ -555,7 +532,7 @@ export class Layout {
       item.pos = { x: 0, y: -28, w: this.width, h: this.height + 30 }
       item.hide = false
       item.isMax = true
-      this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, false)
+      this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, false, layoutType)
       this.event.emit(`max:${key}`, item, false)
     }
   }
@@ -585,8 +562,8 @@ export class Layout {
         if (item.pos.y > (maxH - 50)) {
           item.pos.y = maxH - 50
         }
-        if(item.pos.y<0&&!item.isMax){
-          item.pos.y=0
+        if (item.pos.y < 0 && !item.isMax) {
+          item.pos.y = 0
         }
       }
 
@@ -609,7 +586,7 @@ export class Layout {
     if (this.maxWinId.value && this.maxWinId.value != id) {
       this.maxWin(this.maxWinId.value)
     }
-
+    const layoutType = this.validLayout[title].layoutType
     const item = this.data.project.wins[id]
     if (item) {
       /* the same win is already exist*/
@@ -631,13 +608,13 @@ export class Layout {
       if (item.hide && switchHide) {
         item.hide = false
       }
-      if(item.pos.y<0&&!item.isMax){
-        item.pos.y=0
+      if (item.pos.y < 0 && !item.isMax) {
+        item.pos.y = 0
       }
-      item.layoutType = this.validLayout[title].layoutType
-   
+
+
       await nextTick()
-      this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`)
+      this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`, true, layoutType)
       this.clickWin(id)
       this.event.emit('add', this.data.project.wins[id])
     } else {
@@ -655,14 +632,14 @@ export class Layout {
           x = activePos.x + 20
           y = activePos.y + 20
         }
-       
+
       }
 
-      if(x<0){
-        x= this.width/2
+      if (x < 0) {
+        x = this.width / 2
       }
-      if(y<0){
-        y= this.height/2
+      if (y < 0) {
+        y = this.height / 2
       }
       this.data.project.wins[id] = {
         pos: this.data.project.wins[id]?.pos ?? { x: x, y: y, w: t1.w, h: t1.h },
@@ -677,10 +654,10 @@ export class Layout {
       if (options?.params) {
         this.data.project.wins[id].options.params = options.params
       }
-      this.data.project.wins[id].layoutType = this.validLayout[title].layoutType
+
 
       await nextTick()
-      this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`)
+      this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`, true, layoutType)
       this.event.emit('add', this.data.project.wins[id])
       // this.data.projectDirty = true
       this.clickWin(id)
@@ -689,9 +666,9 @@ export class Layout {
     this.activeWin.value = id
   }
   setWinModified(key: string, modified: boolean) {
-   this.modify.value[key] = modified
-     
-    
+    this.modify.value[key] = modified
+
+
   }
   removeWin(key: string, force?: boolean) {
     const item = this.data.project.wins[key]
@@ -703,7 +680,7 @@ export class Layout {
         delete this.winEl[key]
         delete this.data.project.wins[key]
         // this.data.projectDirty = true
-        if(key==this.maxWinId.value){
+        if (key == this.maxWinId.value) {
           this.maxWinId.value = undefined
         }
       }
@@ -752,7 +729,9 @@ export class Layout {
     if (this.maxWinId.value == key) {
       this.maxWin(this.maxWinId.value)
     }
-    this.winEl[key].style.zIndex = '-1'
+    //fix style with Jquery
+    // this.winEl[key].style.zIndex = '-1'
+    this.winEl[key].css('z-index', '-1')
     item.hide = true
     this.event.emit('min', item)
   }

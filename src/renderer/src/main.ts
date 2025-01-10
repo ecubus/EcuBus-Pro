@@ -16,6 +16,11 @@ import enUS from 'vxe-pc-ui/lib/language/en-US'
 import VxeUIPluginRenderElement from '@vxe-ui/plugin-render-element'
 import { Router } from 'vue-router'
 import './helper'
+import jQuery from 'jquery';
+window.jQuery = jQuery;
+await import("jquery-ui/dist/jquery-ui.js");
+import 'jquery-ui/dist/themes/base/jquery-ui.css'
+
 
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)

@@ -201,7 +201,6 @@ import paramVue from './param.vue'
 import closeIcon from '@iconify/icons-material-symbols/close'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
-import interact from 'interactjs'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
@@ -740,28 +739,18 @@ defineExpose({
 
 
 onMounted(() => {
-  interact('#testerServiceShift').resizable({
-    // resize from all edges and corners
-    edges: { left: false, right: true, bottom: false, top: false },
-    listeners: {
-      move: (event) => {
-        leftWidth.value += event.deltaRect.right
-      }
-    },
-    modifiers: [
-      // keep the edges inside the parent
-      interact.modifiers.restrictEdges({
-        outer: '#networkMain'
-      }),
+  window.jQuery('#testerServiceShift').resizable({
+        handles:'e',
+        // resize from all edges and corners
+        resize: (e, ui) => {
 
-      // minimum size
-      interact.modifiers.restrictSize({
-        min: { width: 300, height: 200 }
-      })
-    ],
-
-    inertia: true
-  })
+            leftWidth.value = ui.size.width
+           
+        },
+        maxWidth:400,
+        minWidth:200,
+    })
+  
 
   nextTick(() => {
     buildTree()

@@ -25,6 +25,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: Api
+    jQuery: any
     store:{
       set:(property:string, val:unknown)=>void
       get:(key: string)=>unknown

@@ -46,7 +46,6 @@
 import { Ref, computed, inject, nextTick, onBeforeMount, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
-import interact from 'interactjs'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import { useDataStore } from '@r/stores/data'
@@ -66,7 +65,7 @@ const props = defineProps<{
 const winKey = 'hardware'
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
-const leftWidth = ref(150)
+const leftWidth = ref(200)
 const dataModify = ref(false)
 const treeRef = ref()
 const devices = useDataStore()
@@ -316,24 +315,19 @@ onBeforeMount(() => {
     buildTree()
 })
 onMounted(() => {
-
-    interact(`#${winKey}Shift`).resizable({
+   
+    window.jQuery(`#${winKey}Shift`).resizable({
+        handles:'e',
         // resize from all edges and corners
-        edges: { left: false, right: true, bottom: false, top: false },
-        listeners: {
-            move: (event) => {
-                leftWidth.value += event.deltaRect.right
-            }
-        },
-        modifiers: [
-            // minimum size
-            interact.modifiers.restrictSize({
-                min: { width: 150, height: 200 }
-            })
-        ],
+        resize: (e, ui) => {
 
-        inertia: true
+            leftWidth.value = ui.size.width
+           
+        },
+        maxWidth:400,
+        minWidth:150,
     })
+        
     if (deviceId.value) {
         const node = treeRef.value?.getNode(deviceId.value)
         if (node) {

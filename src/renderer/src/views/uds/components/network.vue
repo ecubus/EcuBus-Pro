@@ -62,13 +62,13 @@ import editIcon from '@iconify/icons-material-symbols/edit'
 import locationDisabled from '@iconify/icons-material-symbols/location-disabled'
 import { Layout } from '../layout'
 import { v4 } from 'uuid'
-import interact from 'interactjs'
 import { useDataStore } from '@r/stores/data'
 import deviceIcon from '@iconify/icons-material-symbols/important-devices-outline'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
 import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
+import { max } from 'lodash'
 
 interface Tree {
   id: string
@@ -313,28 +313,19 @@ watch([w, h, leftWidth], () => {
 const loading = ref(true)
 onMounted(() => {
   loading.value = true
-  interact('#networkShift').resizable({
-    // resize from all edges and corners
-    edges: { left: false, right: true, bottom: false, top: false },
-    listeners: {
-      move: (event) => {
-        leftWidth.value += event.deltaRect.right
-      }
-    },
-    modifiers: [
-      // keep the edges inside the parent
-      interact.modifiers.restrictEdges({
-        outer: '#networkMain'
-      }),
+  window.jQuery('#networkShift').resizable({
+        handles:'e',
+        containment: '#networkMain',
+        // resize from all edges and corners
+        resize: (e, ui) => {
 
-      // minimum size
-      interact.modifiers.restrictSize({
-        min: { width: 200, height: 200 }
-      })
-    ],
-
-    inertia: true
-  })
+            leftWidth.value = ui.size.width
+           
+        },
+        maxWidth:400,
+        minWidth:200,
+    })
+  
   paper = new joint.dia.Paper({
     el: document.getElementById('networkGraph'),
     model: udsView.graph,

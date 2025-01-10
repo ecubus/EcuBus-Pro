@@ -44,7 +44,6 @@
 import { Ref, computed, inject, nextTick, onMounted, onUnmounted, provide, ref, toRef, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
-import interact from 'interactjs'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import { useDataStore } from '@r/stores/data'
@@ -240,23 +239,18 @@ function buildTree() {
 
 const layout = inject('layout') as Layout
 onMounted(() => {
-    interact(`#${winKey}Shift`).resizable({
+    window.jQuery(`#${winKey}Shift`).resizable({
+        handles:'e',
         // resize from all edges and corners
-        edges: { left: false, right: true, bottom: false, top: false },
-        listeners: {
-            move: (event) => {
-                leftWidth.value += event.deltaRect.right
-            }
-        },
-        modifiers: [
-            // minimum size
-            interact.modifiers.restrictSize({
-                min: { width: 150, height: 200 }
-            })
-        ],
+        resize: (e, ui) => {
 
-        inertia: true
+            leftWidth.value = ui.size.width
+           
+        },
+        maxWidth:400,
+        minWidth:150,
     })
+    
 
 
     nextTick(() => {

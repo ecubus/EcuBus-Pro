@@ -37,7 +37,7 @@
                      <el-dropdown-menu>
                         <el-checkbox-group v-model="checkList" size="small" style="width: 200px;margin:10px">
                          
-                           <el-checkbox v-for="item of LogFilter" :key="item.v" :value="item.label" @change="filterChange(item.v, $event)"/>
+                           <el-checkbox v-for="item of LogFilter" :key="item.v" :label="item.label" :value="item.v" @change="filterChange(item.v, $event)"/>
 
 
                         </el-checkbox-group>

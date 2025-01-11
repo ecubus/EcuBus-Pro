@@ -38,7 +38,7 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
-  graph:{
+  graph: {
     i: 'Graph',
     x: 0,
     y: 0,
@@ -224,6 +224,16 @@ export class Layout {
   setWinSize(h: number, w: number) {
     this.width = w
     this.height = h
+
+    for (const l of Object.keys(this.data.project.wins)) {
+      if (this.winEl[l]) {
+        const offset = this.winEl[l].offset()
+        const topGap = offset.top - this.data.project.wins[l].pos.y
+        if (this.data.project.wins[l].layoutType!='bottom') {
+          this.winEl[l].draggable('option', 'containment', [200 - this.data.project.wins[l].pos.w, topGap, this.width - 100, topGap + this.height - 50])
+        }
+      }
+    }
   }
   async restoreWin() {
     if (Object.values(this.data.project.wins).length == 0) {
@@ -307,12 +317,13 @@ export class Layout {
       if (layoutType == 'bottom') {
         v = 'n'
       }
+
       this.winEl[id].resizable(
         {
           containment: layoutType == 'bottom' ? false : this.parentElement,
           handles: v,
-          grid: [this.grid, this.grid],
-          animate: true,
+          // grid: [this.grid, this.grid],
+          animate: false,
           disabled: !enable,
           aspectRatio: false,
           minWidth: this.validLayout[data.title].minW || 200,
@@ -325,30 +336,33 @@ export class Layout {
         }
       )
       if (drag) {
-    
-          this.winEl[id].draggable({
-           
-            handle:drag,
-            cancel: '.uds-no-drag',
-            scroll: false,
-            disabled: !enable,
-            cursor: 'pointer',
-            containment  : this.parentElement,
-            snap: ".uds-window", 
-            snapMode: "outer",
-            drag: (e, ui) => {
-              if (data.isMax) {
-                e.preventDefault()
-              }
-             
+        //get this.winEl[id] offset form client
+        const offset = this.winEl[id].offset()
+        const topGap = offset.top - data.pos.y
+        this.winEl[id].draggable({
+          snapTolerance: 10,
+          handle: drag,
+          cancel: '.uds-no-drag',
+          scroll: false,
+          disabled: !enable,
 
-            },
-            stop: (e, ui) => {
-              data.pos.x = ui.position.left
-              data.pos.y = ui.position.top
+          cursor: 'move',
+          containment: [200 - data.pos.w, topGap, this.width - 100, topGap + this.height - 50],
+          snap: ".uds-window",
+          snapMode: "outer",
+          drag: (e, ui) => {
+            if (data.isMax) {
+              e.preventDefault()
             }
-          });
-        
+
+
+          },
+          stop: (e, ui) => {
+            data.pos.x = ui.position.left
+            data.pos.y = ui.position.top
+          }
+        });
+
         // interact(drag).draggable({
         //   // enable inertial throwing
         //   inertia: true,

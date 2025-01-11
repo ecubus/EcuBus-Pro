@@ -303,8 +303,8 @@ const tableData = computed(() => {
             })
             tables.push(t)
         }
-      
-     
+
+
     }
     return tables
 })
@@ -477,10 +477,36 @@ watch(() => dbName, () => {
     })
 })
 
-let schNotify
+function schChanged(log: {
+    message: {
+        method: string,
+        data: {
+            msg: string,
+            ts: number
+        }
+    }
+    instance: string
+}) {
+    const selfDevice = dataBase.ia[editIndex.value].devices[0]
+    if (selfDevice && dataBase.devices[selfDevice] && dataBase.devices[selfDevice].linDevice?.name == log.instance) {
+        if (log.message.data.msg.startsWith('schChanged')) {
+            //this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
+            //extract sch name
+            const regex = /schChanged, changed from (.*) to (.*) at slot (.*)/
+            const result = regex.exec(log.message.data.msg)
+            if (result) {
+                const schName = result[2]
+                // const rIndex = parseInt(result[2])
+                if (schName) {
+                    activeSch.value = schName
+                }
+            }
+        }
+    }
+}
 
 onUnmounted(() => {
-    schNotify()
+    window.logBus.detach('linEvent', schChanged)
 }),
     onMounted(() => {
         // Get initial active SCH
@@ -490,33 +516,7 @@ onUnmounted(() => {
             }
         })
 
-        schNotify = window.electron.ipcRenderer.on(`ipc-log-linEvent`, (_event: any, log: {
-            message: {
-                method: string,
-                data: {
-                    msg: string,
-                    ts: number
-                }
-            }
-            instance: string
-        }) => {
-            const selfDevice = dataBase.ia[editIndex.value].devices[0]
-            if (selfDevice && dataBase.devices[selfDevice] && dataBase.devices[selfDevice].linDevice?.name == log.instance) {
-                if (log.message.data.msg.startsWith('schChanged')) {
-                    //this.log.sendEvent(`schChanged, table ${schName} slot ${rIndex}`,getTsUs())
-                    //extract sch name
-                    const regex = /schChanged, changed from (.*) to (.*) at slot (.*)/
-                    const result = regex.exec(log.message.data.msg)
-                    if (result) {
-                        const schName = result[2]
-                        // const rIndex = parseInt(result[2])
-                        if (schName) {
-                            activeSch.value = schName
-                        }
-                    }
-                }
-            }
-        })
+        window.logBus.on(`linEvent`,schChanged)
 
         // Set activeStates all true
         for (const table of tableData.value) {

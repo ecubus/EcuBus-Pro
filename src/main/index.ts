@@ -66,21 +66,36 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
 });
 
 
+class LogQueue {
+  list: any[] = []
+  timer: any
+  constructor(private win: BrowserWindow, private period = 50) {
+    this.timer = setInterval(() => {
+      if (this.list.length) {
+       
+        this.win.webContents.send('ipc-log', this.list)
+        this.list = []
+      }
+
+    }, this.period)
+  }
+}
+
 class ElectronLog extends Transport {
   win: BrowserWindow
-  constructor(win: BrowserWindow, opts?: Transport.TransportStreamOptions) {
+  constructor(private q: LogQueue, win: BrowserWindow, opts?: Transport.TransportStreamOptions) {
     super(opts)
     this.win = win
   }
 
   log(info: any, callback: () => void) {
-    
-    
-    let ipcc = 'ipc-log-main'
+   
     if (info.message?.method) {
-      ipcc = `ipc-log-${info.message.method}`
+      this.q.list.push(info)
+    }else{
+      this.win.webContents.send('ipc-log-main', info)
     }
-    this.win.webContents.send(ipcc, info)
+    
     callback()
   }
 }
@@ -101,8 +116,9 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
-  createLogs([() => new ElectronLog(mainWindow,{
-    level:'debug'
+  const logQ= new LogQueue(mainWindow)
+  createLogs([() => new ElectronLog(logQ,mainWindow, {
+    level: 'debug'
   })], [])
   ipcMain.on('minimize', () => {
     mainWindow?.minimize()

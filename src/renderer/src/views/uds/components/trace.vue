@@ -36,10 +36,9 @@
                   <template #dropdown>
                      <el-dropdown-menu>
                         <el-checkbox-group v-model="checkList" size="small" style="width: 200px;margin:10px">
-                           <el-checkbox label="CAN" value="canBase" @change="filterChange('canBase', $event)" />
-                           <el-checkbox label="LIN" value="linBase" @change="filterChange('linBase', $event)" />
-                           <el-checkbox label="UDS" value="uds" @change="filterChange('uds', $event)" />
-                           <el-checkbox label="ETH" value="ipBase" @change="filterChange('ipBase', $event)" />
+                         
+                           <el-checkbox v-for="item of LogFilter" :key="item.v" :value="item.label" @change="filterChange(item.v, $event)"/>
+
 
                         </el-checkbox-group>
                      </el-dropdown-menu>
@@ -196,9 +195,9 @@ function insertData1(data: LogData[]) {
    })
 }
 
-let logList: LogItem[] = []
-function _logDisplay(vals: LogItem[]) {
 
+function logDisplay(vals: LogItem[]) {
+   
    // Don't process logs when paused
    if (isPaused.value) return
 
@@ -413,77 +412,29 @@ function _logDisplay(vals: LogItem[]) {
    
 
 }
-function logDisplay(_event: any, val: LogItem) {
-   logList.push(val)
-}
+
 const props = defineProps<{
    height: number
    // start: boolean
 }>()
-// const start = toRef(props, 'start')
 
-let timer: any = null
 
 
 defineExpose({
    clearLog
 })
 
-let list: Record<string, () => void>={}
-function filterChange(method: 'uds' | 'canBase'|'ipBase'|'linBase', val: boolean) {
-   if (method == 'uds') {
-      if(list['udsSent']){
-         list['udsSent']()
-      }
-      if(list['udsRecv']){
-         list['udsRecv']()
-      }
-    
-   
-      if (val) {
-         list['udsSent']=window.electron.ipcRenderer.on(`ipc-log-udsSent`, logDisplay)
-         list['udsRecv']=window.electron.ipcRenderer.on(`ipc-log-udsRecv`, logDisplay)
-       
-      }
-   } else if (method == 'canBase') {
-      if(list['canBase']){
-         list['canBase']()
-      }
-      if(list['canError']){
-         list['canError']()
-      }
-      if (val) {
-         window.electron.ipcRenderer.on(`ipc-log-canBase`, logDisplay)
-         window.electron.ipcRenderer.on(`ipc-log-canError`, logDisplay)
-      }
-   } else if (method == 'ipBase') {
-      if(list['ipBase']){
-         list['ipBase']()
-      }
-      if(list['ipError']){
-         list['ipError']()
-      }
-      if (val) {
-         window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
-         window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
-      }
-   }else if (method == 'linBase') {
-      if(list['linBase']){
-         list['linBase']()
-      }
-      if(list['linError']){
-         list['linError']()
-      }
-      if(list['linEvent']){
-         list['linEvent']()
-      }
-      if (val) {
-         window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
-         window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
-         window.electron.ipcRenderer.on(`ipc-log-linEvent`, logDisplay)
-      }
-   }
 
+function filterChange(method: 'uds' | 'canBase'|'ipBase'|'linBase', val: boolean) {
+   const i=LogFilter.value.find((v)=>v.v==method)
+   if(i){
+      i.value.forEach((v)=>{
+         window.logBus.detach(v, logDisplay)
+         if(val){
+            window.logBus.on(v, logDisplay)
+         }
+      })
+   }
 }
 
 const tableHeight=toRef(props,'height')
@@ -595,43 +546,60 @@ function togglePause() {
    isPaused.value = !isPaused.value
 }
 
+
+const LogFilter=ref<{
+   label:string,
+   v:'uds' | 'canBase'|'ipBase'|'linBase',
+   value:string[]
+}[]>([
+   {
+      label:'CAN',
+      v:'canBase',
+      value:['canBase','canError']
+   },
+   {
+      label:'LIN',
+      v:'linBase',
+      value:['linBase','linError','linWarning','linEvent']
+   },
+   {
+      label:'UDS',
+      v:'uds',
+      value:['udsSent','udsRecv']
+   },
+   {
+      label:'ETH',
+      v:'ipBase',
+      value:['ipBase','ipError']
+   }
+])
+
+
 // function toggleAutoScroll() {
 //    autoScroll.value = !autoScroll.value
 // }
 
 onMounted(() => {
    for (const item of checkList.value) {
-      if (item == 'canBase') {
-         list['canBase']=window.electron.ipcRenderer.on(`ipc-log-canBase`, logDisplay)
-         list['canError']=window.electron.ipcRenderer.on(`ipc-log-canError`, logDisplay)
-      } else if (item == 'uds') {
-         list['udsSent']=window.electron.ipcRenderer.on(`ipc-log-udsSent`, logDisplay)
-         list['udsRecv']=window.electron.ipcRenderer.on(`ipc-log-udsRecv`, logDisplay)
-      } else if (item == 'ipBase') {
-         list['ipBase']=window.electron.ipcRenderer.on(`ipc-log-ipBase`, logDisplay)
-         list['ipError']=window.electron.ipcRenderer.on(`ipc-log-ipError`, logDisplay)
-      } else if (item == 'linBase') {
-         list['linBase']=window.electron.ipcRenderer.on(`ipc-log-linBase`, logDisplay)
-         list['linError']=window.electron.ipcRenderer.on(`ipc-log-linError`, logDisplay)
-         list['linEvent']=window.electron.ipcRenderer.on(`ipc-log-linEvent`, logDisplay)
+     
+      const v=LogFilter.value.find((v)=>v.v==item)
+      if(v){
+         for(const val of v.value){
+            window.logBus.on(val, logDisplay)
+         }
       }
    }
-   // Initial timer setup
-   timer = setInterval(() => {
-      if (logList.length > 0) {
-         _logDisplay(logList)
-         logList = []
-      }
-   }, 50)
+  
 
 })
 
 onUnmounted(() => {
-   for(const f of Object.values(list)){
-      f()
-   }
-   list={}
-   clearInterval(timer)
+   LogFilter.value.forEach((v)=>{
+      for(const val of v.value){
+         window.logBus.detach(val, logDisplay)
+      }
+   })
+   
 })
 
 

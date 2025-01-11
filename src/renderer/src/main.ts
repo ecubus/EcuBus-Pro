@@ -7,8 +7,8 @@ import 'animate.css';
 import router from './router'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createPinia } from 'pinia'
-import {VxeLoading,VxeTooltip} from 'vxe-pc-ui'
-import { VxeUI} from 'vxe-table'
+import { VxeLoading, VxeTooltip } from 'vxe-pc-ui'
+import { VxeUI } from 'vxe-table'
 
 import "vxe-table/lib/style.css"
 import 'vxe-pc-ui/lib/style.css'
@@ -20,7 +20,26 @@ import jQuery from 'jquery';
 window.jQuery = jQuery;
 await import("jquery-ui/dist/jquery-ui.js");
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
+import EventBus from './event'
 
+
+window.logBus = new EventBus()
+
+window.electron.ipcRenderer.on('ipc-log', (event, data) => {
+  const group = {}
+  data.forEach((item: any) => {
+    if (!group[item.message.method]) {
+      group[item.message.method] = []
+    }
+    group[item.message.method].push(item)
+
+  })
+
+  for (const key of Object.keys(group)) {
+    
+    window.logBus.emit(key, undefined, group[key])
+  }
+})
 
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)
@@ -29,9 +48,9 @@ VxeUI.setLanguage('en-US')
 const pinia = createPinia()
 
 declare module 'pinia' {
-    export interface PiniaCustomProperties {
-        router: Router
-    }
+  export interface PiniaCustomProperties {
+    router: Router
+  }
 }
 pinia.use(({ store }) => { store.router = markRaw(router) });
 const app = createApp(App)

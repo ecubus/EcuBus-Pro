@@ -117,33 +117,15 @@ You can also consider sponsoring us to get extra technical support services. If 
 - [X] One-to-one technical consulting service
 - [X] Help to write addon code to access 0x27,0x29 dll functions
 
-## Contributors
+## Thanks
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/frankie-zeng"><img src="https://avatars.githubusercontent.com/u/43364599?v=4?s=100" width="100px;" alt="frankie"/><br /><sub><b>frankie</b></sub></a><br /><a href="#projectManagement-frankie-zeng" title="Project Management">📆</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/apps/dependabot"><img src="https://avatars.githubusercontent.com/in/29110?v=4?s=100" width="100px;" alt="dependabot[bot]"/><br /><sub><b>dependabot[bot]</b></sub></a><br /><a href="https://github.com/ecubus/EcuBus-Pro/commits?author=dependabot[bot]" title="Documentation">📖</a></td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td align="center" size="13px" colspan="7">
-        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
-          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
-        </img>
-      </td>
-    </tr>
-  </tfoot>
-</table>
+This project exists thanks to all the people who have contributed:
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+<a href="https://github.com/ecubus/EcuBus-Pro/graphs/contributors"><img src="https://opencollective.com/ecubus/contributors.svg?width=890&amp;button=false"></a>
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+Your contributions are always welcome! Please have a look at the [contribution guidelines](./.github/contributing.md) first.
+
+Your logo will show up here.
 
 ## License
 Apache-2.0

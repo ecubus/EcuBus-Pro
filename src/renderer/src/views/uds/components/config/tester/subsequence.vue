@@ -266,17 +266,20 @@ function ceilClick(val: any) {
   actionRow.value = val.rowIndex;
 }
 
-function error(_event: any, val: LogItem) {
-  if(val.message.id!=props.id){
-    return
-  }
-  for (let i = 0; i < excuseResults.value.length; i++) {
-    if (excuseResults.value[i].status == 'progress' || excuseResults.value[i].status == 'start') {
-      excuseResults.value[i].status = 'error'
-      excuseResults.value[i].msg = 'Error'
-      break
+function error(vals: LogItem[]) {
+  for (const val of vals) {
+    if (val.message.id != props.id) {
+      continue
+    }
+    for (let i = 0; i < excuseResults.value.length; i++) {
+      if (excuseResults.value[i].status == 'progress' || excuseResults.value[i].status == 'start') {
+        excuseResults.value[i].status = 'error'
+        excuseResults.value[i].msg = 'Error'
+        break
+      }
     }
   }
+ 
 }
 
 
@@ -315,20 +318,22 @@ interface LogItem {
   }
 
 }
-function logDisplay(_event: any, val: LogItem) {
- 
-  if(val.message.id!=props.id){
-    return
+function logDisplay(vals: LogItem[]) {
+  for (const val of vals) {
+    if (val.message.id != props.id) {
+      continue
+    }
+    excuseResults.value[val.message.data.index].status = val.message.data.action
+    if (val.message.data.action == 'start') {
+      excuseResults.value[val.message.data.index].msg = 'Running'
+    } else if (val.message.data.action == 'finished') {
+      excuseResults.value[val.message.data.index].msg = 'Success'
+    }
+    if (val.message.data.percent) {
+      excuseResults.value[val.message.data.index].msg = val.message.data.percent.toFixed(2) + '%'
+    }
   }
-  excuseResults.value[val.message.data.index].status = val.message.data.action
-  if (val.message.data.action == 'start') {
-    excuseResults.value[val.message.data.index].msg = 'Running'
-  } else if (val.message.data.action == 'finished') {
-    excuseResults.value[val.message.data.index].msg = 'Success'
-  }
-  if (val.message.data.percent) {
-    excuseResults.value[val.message.data.index].msg = val.message.data.percent.toFixed(2) + '%'
-  }
+  
 }
 function clear(){
   
@@ -343,7 +348,7 @@ defineExpose({
   clear
 })
 
-let list: Array<() => void> = []
+
 onMounted(() => {
   for (let i = 0; i < data.value.services.length; i++) {
     excuseResults.value.push({
@@ -351,14 +356,13 @@ onMounted(() => {
       msg: 'Not Start'
     })
   }
-  list.push(window.electron.ipcRenderer.on(`ipc-log-udsIndex`, logDisplay))
-  list.push(window.electron.ipcRenderer.on(`ipc-log-udsError`, error))
+  window.logBus.on('udsIndex', logDisplay)
+  window.logBus.on('udsError', error)
+  
 })
 onUnmounted(() => {
-  list.forEach((v) => {
-    v()
-  })
-  list = []
+  window.logBus.detach('udsIndex', logDisplay)
+  window.logBus.detach('udsError', error)
 })
 
 </script>

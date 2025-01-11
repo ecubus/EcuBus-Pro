@@ -19,13 +19,14 @@ import type { Api } from './api'
 import type { Ref } from 'vue'
 import path from 'path'
 import { Logger} from 'winston'
-
+import EventBus from './../renderer/src/event'
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: Api
     jQuery: any
+    logBus:EventBus
     store:{
       set:(property:string, val:unknown)=>void
       get:(key: string)=>unknown

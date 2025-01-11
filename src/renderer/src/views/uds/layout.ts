@@ -17,7 +17,7 @@ import msgIcon from '@iconify/icons-material-symbols/terminal'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
 import panelIcon from '@iconify/icons-material-symbols/pan-tool'
 import log from 'electron-log'
-
+import graphIcon from '@iconify/icons-ep/histogram'
 
 
 type WinsType = ProjectState["project"]['wins'];
@@ -38,6 +38,17 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
+  graph:{
+    i: 'Graph',
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 400,
+    label: 'Graph',
+    key: 'graph',
+    component: defineAsyncComponent(() => import('./graph.vue')),
+    icon: graphIcon
+  },
   network: {
     i: 'Network',
     x: 0,

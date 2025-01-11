@@ -31,10 +31,15 @@
               <span>Stop</span>
             </div>
             <el-divider direction="vertical" style="height: 54px;" />
-            <div class="grid girdenable" @click="handleSelect(['trace'])">
+            <div class="grid mingird girdenable" @click="handleSelect(['trace'])">
               <Icon :icon="logIcon" style="font-size: 24px; " />
               <span>Trace</span>
             </div>
+            <div class="grid mingird girdenable" @click="handleSelect(['graph'])">
+              <Icon :icon="graphIcon" style="font-size: 24px; " />
+              <span>Graph</span>
+            </div>
+            <el-divider direction="vertical" style="height: 54px;" />
             <div class="grid girdenable" @click="handleSelect(['message'])">
               <Icon :icon="msgIcon" style="font-size: 24px; " />
               <span>Message</span>
@@ -431,6 +436,7 @@ import codeIcon from '@iconify/icons-material-symbols/code-blocks-outline'
 import pinIcon from '@iconify/icons-material-symbols/push-pin-outline'
 import interIcon from '@iconify/icons-material-symbols/interactive-space-outline'
 import dataBaseIcon from '@iconify/icons-material-symbols/database'
+import graphIcon from '@iconify/icons-ep/histogram'
 import logo from '@r/assets/logo64.png'
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'

@@ -18,7 +18,8 @@ export const useDataStore = defineStore('useDataStore', {
     nodes: {},
     database:{
       lin:{}
-    }
+    },
+    graphs:{}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {

@@ -31,11 +31,12 @@
               <span>Stop</span>
             </div>
             <el-divider direction="vertical" style="height: 54px;" />
-            <div class="grid mingird girdenable" @click="handleSelect(['trace'])">
+            <div class="grid girdenable" @click="handleSelect(['trace'])">
               <Icon :icon="logIcon" style="font-size: 24px; " />
               <span>Trace</span>
             </div>
-            <div class="grid mingird girdenable" @click="handleSelect(['graph'])">
+            <el-divider direction="vertical" style="height: 54px;" />
+            <div class="grid girdenable" @click="handleSelect(['graph'])">
               <Icon :icon="graphIcon" style="font-size: 24px; " />
               <span>Graph</span>
             </div>

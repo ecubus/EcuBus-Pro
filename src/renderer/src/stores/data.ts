@@ -48,7 +48,8 @@ export const useDataStore = defineStore('useDataStore', {
         tester:this.tester,
         subFunction:this.subFunction,
         nodes:this.nodes,
-        database:this.database
+        database:this.database,
+        graphs:this.graphs
       }
     }
   }

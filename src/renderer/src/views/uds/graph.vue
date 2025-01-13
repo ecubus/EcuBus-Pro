@@ -1,23 +1,37 @@
 <template>
     <div class="uds-graph">
-        <div style="justify-content: flex-start;display: flex;align-items: center;gap:4px;padding-left: 5px;padding: 1px"
+        <div style="justify-content: flex-start;display: flex;align-items: center;gap:0px;padding-left: 5px;padding: 1px"
             class="border-bottom">
-            <el-button-group>
 
+            <el-button-group>
                 <el-button link type="primary" :class="{ 'pause-active': hideTree }" @click="treeHide">
                     <Icon :icon="hideIcon" />
                 </el-button>
-                <el-button link type="primary" @click="addNode">
-                    <Icon :icon="addIcon" />
-                </el-button>
-                <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom"
-                    :show-after="1000">
+
+                <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
                     <el-button :type="isPaused ? 'success' : 'warning'" link :class="{ 'pause-active': isPaused }">
                         <Icon :icon="isPaused ? playIcon : pauseIcon" />
                     </el-button>
 
                 </el-tooltip>
             </el-button-group>
+            <el-divider direction="vertical"></el-divider>
+            <el-button-group>
+                <el-tooltip effect="light" content="Add Variables" placement="bottom" >
+                    <el-button link type="primary" @click="addNode" disabled>
+                        <Icon :icon="addIcon" />
+                    </el-button>
+
+                </el-tooltip>
+                <el-tooltip effect="light" content="Add Signals" placement="bottom">
+                    <el-button link type="primary" @click="addSignal">
+                        <Icon :icon="waveIcon" />
+                    </el-button>
+
+                </el-tooltip>
+            </el-button-group>
+
+
 
         </div>
         <div>
@@ -54,10 +68,11 @@
                 <div class="shift" id="graphShift" v-show="!hideTree" />
                 <div class="right" :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px' }">
                     <div class="canvas-container" :style="{ width: canvasWidth + 'px', height: height + 'px' }">
-                        <div  v-if="isZoomY" style="position: absolute;top:5px;right:3px;color:var(--el-color-primary);">
+                        <div v-if="isZoomY" style="position: absolute;top:5px;right:3px;color:var(--el-color-primary);">
                             <Icon :icon="zoomInIcon" />
                         </div>
-                        <div v-if="isDragging " style="position: absolute;top:5px;right:3px;color:var(--el-color-primary);">
+                        <div v-if="isDragging"
+                            style="position: absolute;top:5px;right:3px;color:var(--el-color-primary);">
                             <Icon :icon="dragVerticalIcon" />
                         </div>
                         <div v-for="(chart, index) in enabledCharts" :key="chart.id" :style="{
@@ -70,6 +85,9 @@
                 </div>
             </div>
         </div>
+        <el-dialog v-model="signalDialogVisible" v-if="signalDialogVisible" title="Add Signals" width="95%" align-center :append-to="appendId">
+            <signal :height="tableHeight" :width="width" />
+        </el-dialog>
     </div>
 </template>
 <script lang="ts" setup>
@@ -82,6 +100,7 @@ import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import zoomInIcon from '@iconify/icons-material-symbols/zoom-in'
 import dragVerticalIcon from '@iconify/icons-material-symbols/drag-pan'
+import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data';
@@ -92,6 +111,7 @@ import { GridComponent, DataZoomComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
 import { formatter } from 'element-plus'
+import signal from './components/signal.vue'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 
@@ -105,28 +125,19 @@ const props = defineProps<{
 }>()
 const popoverRefs = ref<Record<string, any>>({})
 const graphs = useDataStore().graphs
-
+const appendId=computed(()=>props.editIndex?`#win${props.editIndex}`:'#wingraph')
 const height = computed(() => props.height - 22)
-
+const tableHeight = computed(() => height.value*2/3 )
 // 修改测试数据
 const filteredTreeData = computed<GraphNode[]>(() => {
-    return [{
-        name: 'Signal 1',
-        id: '1',
-        color: '#ff4444',
-        enable: true,
-        disZoom:true
-    }, {
-        name: 'Signal 2',
-        id: '2',
-        color: '#44ff44',
-        enable: true
-    }, {
-        name: 'Signal 3',
-        id: '3',
-        color: '#4444ff',
-        enable: false
-    }]
+    const list:GraphNode[]=[]
+    for(const v of Object.values(graphs)){
+        if(v.graph&&v.graph.id!=props.editIndex){
+            continue
+        }
+        list.push(v)
+    }
+    return list
 })
 
 const defaultProps = {
@@ -198,9 +209,9 @@ const chartInstances: Record<string, echarts.ECharts> = {}
 
 // 替换拖拽相关的状态和处理函数
 const isDragging = ref(false)
-const isZoomY=ref(false)
+const isZoomY = ref(false)
 const inYArea = ref(false)
- 
+
 
 // 修改初始化图表实例函数
 const initChart = (chartId: string) => {
@@ -213,15 +224,15 @@ const initChart = (chartId: string) => {
 
         // 使用 echarts 事件
         chart.on('mousedown', (params) => {
-       
-            if(params.componentType=='yAxis'||params.componentType=='series'){
-                if(params.event?.event.ctrlKey){
+
+            if (params.componentType == 'yAxis' || params.componentType == 'series') {
+                if (params.event?.event.ctrlKey) {
                     isDragging.value = false
-                }else{
+                } else {
                     isDragging.value = true
                 }
-                
-                
+
+
             }
         })
         chart.on('dataZoom', (event: any) => {
@@ -243,12 +254,12 @@ const initChart = (chartId: string) => {
             })
         });
         chart.on('mouseover', (params) => {
-            if(params.componentType=='yAxis'||params.componentType=='series'){
+            if (params.componentType == 'yAxis' || params.componentType == 'series') {
                 inYArea.value = true
-                
-                if(params.event?.event.ctrlKey&&!graphs[chartId].disZoom){
+
+                if (params.event?.event.ctrlKey && !graphs[chartId].disZoom) {
                     isZoomY.value = true
-                  
+
                 }
             }
         })
@@ -261,14 +272,14 @@ const initChart = (chartId: string) => {
 
         // Add keyup handler to reset cursor when ctrl is released
         document.addEventListener('keyup', (event) => {
-            
-            
+
+
             isZoomY.value = false
-            
+
         })
-        
+
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Control' && inYArea.value&&!graphs[chartId].disZoom) {
+            if (event.key === 'Control' && inYArea.value && !graphs[chartId].disZoom) {
                 isZoomY.value = true
             }
             isDragging.value = false
@@ -279,8 +290,8 @@ const initChart = (chartId: string) => {
             isZoomY.value = false
         })
         dom.addEventListener('mousemove', (event) => {
-            if(event.ctrlKey){
-                isDragging.value=false
+            if (event.ctrlKey) {
+                isDragging.value = false
             }
             if (isDragging.value) {
 
@@ -304,23 +315,23 @@ const initChart = (chartId: string) => {
 
         // Add wheel event handler for zooming
         dom.addEventListener('wheel', (event: WheelEvent) => {
-            
-            if (event.ctrlKey&&isZoomY.value) { // Only zoom when Ctrl is pressed
-               
-                
+
+            if (event.ctrlKey && isZoomY.value) { // Only zoom when Ctrl is pressed
+
+
                 const yAxis = (chart.getOption() as any).yAxis[0];
-                const range=yAxis.max-yAxis.min
-                const offset=range*0.05
-                if(event.deltaY<0){
+                const range = yAxis.max - yAxis.min
+                const offset = range * 0.05
+                if (event.deltaY < 0) {
                     //zoom in
-                    
+
                     chart.setOption({
                         yAxis: {
                             min: yAxis.min - offset,
                             max: yAxis.max + offset
                         }
                     });
-                }else{
+                } else {
                     //zoom out
                     chart.setOption({
                         yAxis: {
@@ -362,7 +373,7 @@ const updateChartOption = (chartId: string) => {
     if (chart && chartInstances[chartId]) {
         const option = getChartOption(chart, index)
         chartInstances[chartId].setOption(option)
-      
+
 
     }
 }
@@ -379,7 +390,7 @@ watch([() => canvasWidth.value, () => height.value], () => {
 
 const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
     const isLast = index === enabledCharts.value.length - 1
-
+    const isFirst = index === 0
     const option: ECBasicOption = {
         animation: false,
         dataZoom: [
@@ -387,17 +398,17 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
                 show: isLast,
                 type: 'slider',
                 height: 12,
-                bottom:10,
-                showDetail : true,
-                showDataShadow:false
+                bottom: 10,
+                showDetail: true,
+                showDataShadow: false
             },
-            
+
 
         ],
         grid: {
             left: '60px',  // 增加左边距，为标题留出空间
             right: '20px',
-            top: '20px',
+            top: isFirst ? '20px' : '10px',
             bottom: isLast ? '45px' : '4px',
             containLabel: false
         },
@@ -540,6 +551,17 @@ onUnmounted(() => {
         instance.dispose()
     })
 })
+
+const signalDialogVisible = ref(false)
+
+const addSignal = () => {
+    signalDialogVisible.value = true
+}
+
+const handleAddSignal = () => {
+    signalDialogVisible.value = false
+    // Add logic to handle selected signals
+}
 </script>
 <style scoped>
 .pause-active {
@@ -674,6 +696,12 @@ onUnmounted(() => {
 :deep(.chart-container .echarts) {
     width: 100% !important;
     height: 100% !important;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 </style>
 

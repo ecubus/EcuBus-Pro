@@ -4,17 +4,17 @@
             <template #toolbar>
                 <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Add Encoding Type" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Add Encoding Type" placement="bottom" >
                             <el-button link @click="addEncode">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Edit Encoding Type" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Encoding Type" placement="bottom" >
                             <el-button link type="success" @click="editEncode" :disabled="selectedIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Encoding Type" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Delete Encoding Type" placement="bottom" >
                             <el-button link type="danger" @click="deleteEncode" :disabled="selectedIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>

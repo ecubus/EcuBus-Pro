@@ -1,20 +1,20 @@
 <template>
   <div>
     <div class="tools">
-      <el-tooltip effect="light" content="Add a new sequence" placement="bottom" :show-after="1000">
+      <el-tooltip effect="light" content="Add a new sequence" placement="bottom" >
         <el-button type="primary" size="small" link plain @click="addNewSeq" :disabled="start">
           <Icon :icon="addCircle" class="icon" />
         </el-button>
       </el-tooltip>
       <el-divider direction="vertical" />
       <el-button-group>
-        <el-tooltip effect="light" content="Run chosen sequence" placement="bottom" :show-after="1000">
+        <el-tooltip effect="light" content="Run chosen sequence" placement="bottom" >
           <el-button :disabled="!activeTabName || start||!tester.targetDeviceId" type="success" size="small" link plain @click="startSeq">
             <Icon :icon="playIcon" class="icon" />
           </el-button>
         </el-tooltip>
         <!-- stop -->
-        <el-tooltip effect="light" content="Stop chosen sequence" placement="bottom" :show-after="1000">
+        <el-tooltip effect="light" content="Stop chosen sequence" placement="bottom" >
           <el-button :disabled="!activeTabName || !start" type="danger" size="small" link plain @click="stopSeq">
             <Icon :icon="stopIcon" class="icon" />
           </el-button>

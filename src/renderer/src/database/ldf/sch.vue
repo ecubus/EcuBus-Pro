@@ -4,17 +4,17 @@
             <template #toolbar>
                 <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Add Schedule Table" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Add Schedule Table" placement="bottom" >
                             <el-button link @click="addSch">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Edit Schedule" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Schedule" placement="bottom" >
                             <el-button link type="success" @click="editSchedule" :disabled="selectedIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Schedule" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Delete Schedule" placement="bottom" >
                             <el-button link type="danger" @click="deleteSch" :disabled="selectedIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>

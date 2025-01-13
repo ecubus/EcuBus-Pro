@@ -29,7 +29,7 @@
                         <Icon :icon="isExpanded ? tableCollapseIcon : tableExpandIcon" style="font-size: 18px;" />
                     </el-button>
                     <el-divider direction="vertical"></el-divider>
-                    <el-tooltip effect="light" content="Edit Connect" placement="bottom" :show-after="1000">
+                    <el-tooltip effect="light" content="Edit Connect" placement="bottom" >
                         <el-button type="primary" link @click="editConnect">
                             <Icon :icon="linkIcon" style="rotate: -45deg;font-size: 18px;" />
                         </el-button>

@@ -61,22 +61,22 @@
             <template #toolbar>
                 <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Edit Connect" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Connect" placement="bottom" >
                             <el-button type="primary" link @click="editConnect">
                                 <Icon :icon="linkIcon" style="rotate: -45deg;font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Add Frame" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Add Frame" placement="bottom" >
                             <el-button link @click="addFrame">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Edit Frame" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Frame" placement="bottom" >
                             <el-button link type="success" @click="editFrame" :disabled="popoverIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Frame" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Delete Frame" placement="bottom" >
                             <el-button link type="danger" @click="deleteFrame"
                                 :disabled="popoverIndex < 0 || periodTimer[popoverIndex] == true">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />

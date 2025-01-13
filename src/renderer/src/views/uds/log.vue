@@ -9,7 +9,7 @@
             <template #toolbar>
                 <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Clear Message" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Clear Message" placement="bottom" >
                             <el-button type="danger" link @click="clearLog">
                                 <Icon :icon="circlePlusFilled" />
                             </el-button>

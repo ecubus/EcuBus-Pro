@@ -272,10 +272,11 @@
       <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
 
         <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`" class="uds-window" :style="{
+          transform: 'translate(0px, 0px)',
           top: `${item.pos.y}px`,
           left: `${item.pos.x}px`,
           width: `${item.pos.w}px`,
-          height: `${item.pos.h}px`
+          height: `${item.pos.h}px`,
         }">
           <div class="titleBar" :style="{
             width: `${item.pos.w - 2}px`,

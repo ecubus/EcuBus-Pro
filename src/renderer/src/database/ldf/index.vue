@@ -3,19 +3,19 @@
         <el-tabs class="ldfTabs" type="card" v-model="editableTabsValue" addable v-if="!loading">
             <template #add-icon>
                 <el-tooltip  effect="light" content="Delete Database" placement="bottom"
-                    :show-after="1000">
+                    >
                     <el-button type="info"  link @click="deleteDatabase">
                         <Icon :icon="deleteIcon" />
                     </el-button>
                 </el-tooltip>
                 <el-tooltip v-if="errorList.length == 0" effect="light" content="Save Database" placement="bottom"
-                    :show-after="1000">
+                    >
                     <el-button type="success"  link @click="saveDataBase">
                         <Icon :icon="saveIcon" :disabled="globalStart"/>
                     </el-button>
                 </el-tooltip>
                 <el-tooltip v-else effect="light" content="Fix errors to save the database" placement="bottom"
-                    :show-after="1000">
+                    >
 
                     <el-button type="danger"  link  @click="handleTabSwitch('General')" :disabled="globalStart">
                         <Icon :icon="saveIcon" />

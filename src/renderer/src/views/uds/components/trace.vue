@@ -11,19 +11,19 @@
          <template #toolbar>
             <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px">
                <el-button-group>
-                  <el-tooltip effect="light" content="Clear Log" placement="bottom" :show-after="1000">
+                  <el-tooltip effect="light" content="Clear Log" placement="bottom" >
                      <el-button type="danger" link @click="clearLog">
                         <Icon :icon="circlePlusFilled" />
                      </el-button>
                   </el-tooltip>
                   
-                  <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" :show-after="1000">
+                  <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
                      <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
                         <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
                      </el-button>
                   </el-tooltip> -->
                </el-button-group>
-               <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" :show-after="1000">
+               <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom" >
                      <el-button :type="isPaused ? 'success' : 'warning'" link @click="togglePause" :class="{ 'pause-active': isPaused }">
                         <Icon :icon="isPaused ? playIcon : pauseIcon" />
                      </el-button>

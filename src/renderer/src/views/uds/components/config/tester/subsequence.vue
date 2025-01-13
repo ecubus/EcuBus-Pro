@@ -79,12 +79,12 @@
           <el-input v-model="data.name" size="small" style="width:100px;margin:4px;" />
           <el-divider direction="vertical" />
           <el-button-group>
-            <el-tooltip effect="light" content="Add a new service" placement="bottom" :show-after="1000">
+            <el-tooltip effect="light" content="Add a new service" placement="bottom" >
               <el-button type="primary" link size="small" @click="addService" :disabled="props.disabled">
                 <Icon :icon="circlePlusFilled" class="icon" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Remove" placement="bottom" :show-after="1000">
+            <el-tooltip effect="light" content="Remove" placement="bottom" >
               <el-button type="danger" link size="small" :disabled="actionRow == -1 || props.disabled"
                 @click="deleteService">
                 <Icon :icon="removeIcon" class="icon" />

@@ -5,18 +5,18 @@
                 <div
                     style="justify-content: flex-start;display: flex;align-items: center;gap:8px;margin-left: 5px;margin-bottom: 5px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Add Signal" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Add Signal" placement="bottom" >
                             <el-button link @click="addNewSignal">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
 
-                        <el-tooltip effect="light" content="Edit Signal" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Signal" placement="bottom" >
                             <el-button link type="success" @click="editSignal" :disabled="popoverIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Signal" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Delete Signal" placement="bottom" >
                             <el-button link type="danger" @click="deleteSignal" :disabled="popoverIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>

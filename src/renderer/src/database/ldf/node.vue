@@ -5,22 +5,22 @@
                 <div
                     style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Add Node" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Add Node" placement="bottom" >
                             <el-button link @click="addNewSlaveNode">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Copy Node" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Copy Node" placement="bottom" >
                             <el-button link type="info" @click="copySlaveNode" :disabled="selectedIndex < 0">
                                 <Icon :icon="copyIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Edit Node" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Edit Node" placement="bottom" >
                             <el-button link type="success" @click="editSlaveNode" :disabled="selectedIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Node" placement="bottom" :show-after="1000">
+                        <el-tooltip effect="light" content="Delete Node" placement="bottom" >
                             <el-button link type="danger" @click="removeSlaveNode" :disabled="selectedIndex < 0">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
                             </el-button>

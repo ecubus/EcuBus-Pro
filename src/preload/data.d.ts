@@ -27,6 +27,18 @@ export interface LinInter {
 }
 export type Inter = CanInter | LinInter
 export type NodeItem = CanNode | EthNode | LinNode
+
+
+export type GraphBindSignalValue = {
+    dbName:string,
+    dbKey:string,
+    signalName:string,
+    frameId:number
+    startBit:number,
+    bitLength:number,
+}
+export type GraphBindVariableValue = {
+}
 export type GraphNode = {
     enable: boolean,
     id: string,
@@ -37,7 +49,10 @@ export type GraphNode = {
         name:string,
     },
     disZoom?:boolean,
-    yAxis?:YAXisOption
+    yAxis?:YAXisOption,
+    type:'signal' | 'variable',
+    bindValue: 'signal' extends typeof type ? GraphBindSignalValue : GraphBindVariableValue
+  
 }
 export interface DataSet {
     devices: Record<string, UdsDevice>

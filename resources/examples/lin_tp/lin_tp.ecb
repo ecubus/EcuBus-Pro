@@ -741,6 +741,46 @@
           "name": "lin"
         }
       }
+    },
+    "graphs": {
+      "5a70c6c3-0715-4a57-beaa-4fbf2482ce4d": {
+        "type": "signal",
+        "enable": true,
+        "id": "5a70c6c3-0715-4a57-beaa-4fbf2482ce4d",
+        "name": "Motor1Position",
+        "color": "#c3b0a6",
+        "yAxis": {
+          "min": 0,
+          "max": 4294967295
+        },
+        "bindValue": {
+          "signalName": "Motor1Position",
+          "startBit": 7,
+          "bitLength": 32,
+          "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
+          "dbName": "lin",
+          "frameId": 51
+        }
+      },
+      "a24faf73-f615-42e3-9674-10894a08b169": {
+        "type": "signal",
+        "enable": true,
+        "id": "a24faf73-f615-42e3-9674-10894a08b169",
+        "name": "Motor1Temp",
+        "color": "#dbe52e",
+        "yAxis": {
+          "min": 0,
+          "max": 127
+        },
+        "bindValue": {
+          "signalName": "Motor1Temp",
+          "startBit": 0,
+          "bitLength": 7,
+          "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
+          "dbName": "lin",
+          "frameId": 51
+        }
+      }
     }
   },
   "project": {
@@ -822,6 +862,18 @@
           "name": "Tester_lin_1"
         },
         "hide": false
+      },
+      "graph": {
+        "pos": {
+          "x": 338,
+          "y": 80,
+          "w": 1095,
+          "h": 400
+        },
+        "title": "graph",
+        "label": "Graph",
+        "id": "graph",
+        "options": {}
       }
     },
     "example": {

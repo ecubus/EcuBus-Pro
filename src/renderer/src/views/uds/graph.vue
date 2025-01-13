@@ -17,7 +17,7 @@
             </el-button-group>
             <el-divider direction="vertical"></el-divider>
             <el-button-group>
-                <el-tooltip effect="light" content="Add Variables" placement="bottom" >
+                <el-tooltip effect="light" content="Add Variables" placement="bottom">
                     <el-button link type="primary" @click="addNode" disabled>
                         <Icon :icon="addIcon" />
                     </el-button>
@@ -85,8 +85,9 @@
                 </div>
             </div>
         </div>
-        <el-dialog v-model="signalDialogVisible" v-if="signalDialogVisible" title="Add Signals" width="95%" align-center :append-to="appendId">
-            <signal :height="tableHeight" :width="width" />
+        <el-dialog v-model="signalDialogVisible" v-if="signalDialogVisible" title="Add Signal" width="95%" align-center
+            :append-to="appendId">
+            <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
         </el-dialog>
     </div>
 </template>
@@ -125,36 +126,27 @@ const props = defineProps<{
 }>()
 const popoverRefs = ref<Record<string, any>>({})
 const graphs = useDataStore().graphs
-const appendId=computed(()=>props.editIndex?`#win${props.editIndex}`:'#wingraph')
+const appendId = computed(() => props.editIndex ? `#win${props.editIndex}` : '#wingraph')
 const height = computed(() => props.height - 22)
-const tableHeight = computed(() => height.value*2/3 )
+const tableHeight = computed(() => height.value * 2 / 3)
 // 修改测试数据
-const filteredTreeData = computed<GraphNode[]>(() => {
-    const list:GraphNode[]=[]
-    for(const v of Object.values(graphs)){
-        if(v.graph&&v.graph.id!=props.editIndex){
-            continue
-        }
-        list.push(v)
-    }
-    return list
-})
+const filteredTreeData = ref<GraphNode[]>([])
+
+
+
+
 
 const defaultProps = {
     label: 'label',
 }
 
-const defaultCheckedKeys = computed(() => {
-    return Object.values(filteredTreeData.value)
-        .filter(node => node.enable)
-        .map(node => node.id)
-})
+const defaultCheckedKeys = ref<string[]>([])
 
 const handleCheckChange = (data: GraphNode, checked: boolean) => {
 
-    if (data.id && graphs[data.id]) {
-        graphs[data.id].enable = checked
-    }
+
+    graphs[data.id].enable = checked
+
 }
 
 const handleNodeClick = (data: any) => {
@@ -165,6 +157,7 @@ function treeHide() {
     hideTree.value = !hideTree.value;
     // 如果需要在隐藏/显示时保存之前的宽度，可以添加相关逻辑
 }
+
 
 const addNode = () => {
     // 这里添加你的节点添加逻辑
@@ -297,10 +290,16 @@ const initChart = (chartId: string) => {
 
                 const range = chartInstances[chartId].getOption().yAxis as ECBasicOption['yAxis'] as any
                 const { min, max } = range[0]
-                const deltaY = event.movementY
+                const offset = (max - min)
+                let deltaY = event.movementY
+                if (deltaY > 0) {
+                    deltaY += offset * 0.05
+                } else {
+                    deltaY -= offset * 0.05
+                }
                 const newRange = {
-                    min: min + deltaY * 0.1,
-                    max: max + deltaY * 0.1
+                    min: min + deltaY * 0.05,
+                    max: max + deltaY * 0.05
                 }
 
                 chartInstances[chartId].setOption({
@@ -321,33 +320,28 @@ const initChart = (chartId: string) => {
 
                 const yAxis = (chart.getOption() as any).yAxis[0];
                 const range = yAxis.max - yAxis.min
+                //offset 为range的指数，range越小offset越小，range越大offset越大
                 const offset = range * 0.05
+
                 if (event.deltaY < 0) {
                     //zoom in
 
-                    chart.setOption({
-                        yAxis: {
-                            min: yAxis.min - offset,
-                            max: yAxis.max + offset
-                        }
-                    });
-                } else {
-                    //zoom out
                     chart.setOption({
                         yAxis: {
                             min: yAxis.min + offset,
                             max: yAxis.max - offset
                         }
                     });
+                } else {
+                    //zoom out
+                    chart.setOption({
+                        yAxis: {
+                            min: yAxis.min - offset,
+                            max: yAxis.max + offset
+                        }
+                    });
                 }
-                // const newRange = calculateYAxisZoom(yAxis.min, yAxis.max, event.deltaY, zoomPoint);
-                // console.log(newRange)
-                // chart.setOption({
-                //     yAxis: {
-                //         min: newRange.min,
-                //         max: newRange.max
-                //     }
-                // });
+
             }
         }, { passive: false });
 
@@ -362,6 +356,11 @@ const initChart = (chartId: string) => {
         })
 
         updateChartOption(chartId)
+        if (graphs[chartId]) {
+            chart.setOption({
+                yAxis: graphs[chartId].yAxis
+            })
+        }
     }
 }
 
@@ -379,7 +378,7 @@ const updateChartOption = (chartId: string) => {
 }
 
 // 监听图表容器大小变化
-watch([() => canvasWidth.value, () => height.value], () => {
+watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
     nextTick(() => {
         Object.values(chartInstances).forEach(instance => {
             instance.resize()
@@ -465,8 +464,14 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
             max: 20,
             axisLabel: {
                 show: true,
-                formatter: (value: number) => Number.isInteger(value) ? value.toFixed(0) : ''
-
+                formatter: (value: number) => {
+                    let val = Number.isInteger(value) ? value.toFixed(0) : ''
+                    //如果val太大，显示科学计数法
+                    if (val.length > 5) {
+                        val = value.toExponential()
+                    }
+                    return val
+                },
             },
             name: chart.name,
             nameLocation: 'middle',
@@ -514,6 +519,18 @@ onMounted(() => {
         maxWidth: 300,
         minWidth: 100,
     })
+  
+
+
+    for (const v of Object.values(graphs)) {
+        if (v.graph && v.graph.id != props.editIndex) {
+            continue
+        }
+        filteredTreeData.value.push(v)
+    }
+    defaultCheckedKeys.value = Object.values(filteredTreeData.value)
+        .filter(node => node.enable)
+        .map(node => node.id)
     // 初始化所有图表
     nextTick(() => {
         enabledCharts.value.forEach(chart => {
@@ -523,17 +540,17 @@ onMounted(() => {
 })
 
 // 监听启用图表的变化
-watch(() => enabledCharts.value, (newCharts) => {
+watch(() => enabledCharts.value, () => {
     nextTick(() => {
         // 初始化新增的图表
-        newCharts.forEach(chart => {
+        enabledCharts.value.forEach(chart => {
             if (!chartInstances[chart.id]) {
                 initChart(chart.id)
             }
         })
         // 清理已移除的图表
         Object.keys(chartInstances).forEach(id => {
-            if (!newCharts.find(c => c.id === id)) {
+            if (!enabledCharts.value.find(c => c.id === id)) {
                 chartInstances[id].dispose()
                 delete chartInstances[id]
             }
@@ -558,9 +575,10 @@ const addSignal = () => {
     signalDialogVisible.value = true
 }
 
-const handleAddSignal = () => {
+const handleAddSignal = (node: GraphNode) => {
     signalDialogVisible.value = false
-    // Add logic to handle selected signals
+    graphs[node.id] = node
+
 }
 </script>
 <style scoped>

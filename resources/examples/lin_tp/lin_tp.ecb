@@ -163,7 +163,7 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "Motor2",
+        "workNode": "SeatECU",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
         "script": "node.ts"
       }
@@ -349,7 +349,8 @@
                 "Motor1",
                 "Motor2"
               ],
-              "singleType": "Scalar"
+              "singleType": "Scalar",
+              "value": 2
             },
             "MotorSelection": {
               "signalName": "MotorSelection",
@@ -743,66 +744,23 @@
       }
     },
     "graphs": {
-      "5a70c6c3-0715-4a57-beaa-4fbf2482ce4d": {
+      "lin.lin.signals.MotorDirection": {
         "type": "signal",
         "enable": true,
-        "id": "5a70c6c3-0715-4a57-beaa-4fbf2482ce4d",
-        "name": "Motor1Position",
-        "color": "rgba(171, 195, 166, 1)",
+        "id": "lin.lin.signals.MotorDirection",
+        "name": "MotorDirection",
+        "color": "#35120a",
         "yAxis": {
-          "min": -156286461.08869028,
-          "max": 231694167.74837723,
-          "splitLine": {
-            "show": false
-          }
+          "min": 0,
+          "max": 3
         },
         "bindValue": {
-          "signalName": "Motor1Position",
-          "startBit": 7,
-          "bitLength": 32,
-          "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
-          "dbName": "lin",
-          "frameId": 51
-        },
-        "disZoom": false
-      },
-      "lin.655bf90d-b010-49b5-9cf8-a9787319b5b4.signals.Motor1_Dynamic_Sig": {
-        "type": "signal",
-        "enable": true,
-        "id": "lin.655bf90d-b010-49b5-9cf8-a9787319b5b4.signals.Motor1_Dynamic_Sig",
-        "name": "Motor1_Dynamic_Sig",
-        "color": "#1641bb",
-        "yAxis": {
-          "min": -11.633600512000099,
-          "max": 5.087909887999894,
-          "splitLine": {
-            "show": false
-          }
-        },
-        "bindValue": {
-          "signalName": "Motor1_Dynamic_Sig",
+          "signalName": "MotorDirection",
           "startBit": 0,
-          "bitLength": 8,
+          "bitLength": 2,
           "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
           "dbName": "lin",
-          "frameId": 53
-        },
-        "disZoom": false,
-        "xAxis": {
-          "splitLine": {
-            "show": false,
-            "lineStyle": {
-              "type": "dotted"
-            }
-          },
-          "axisPointer": {
-            "show": false
-          }
-        },
-        "series": {
-          "showSymbol": false,
-          "symbolSize": 6,
-          "symbol": "circle"
+          "frameId": 45
         }
       }
     }
@@ -827,8 +785,8 @@
       },
       "network": {
         "pos": {
-          "x": 950,
-          "y": 120,
+          "x": 960,
+          "y": 8,
           "w": 600,
           "h": 400
         },
@@ -836,12 +794,12 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 159,
-          "y": 42,
+          "x": 49,
+          "y": 162,
           "w": 700,
           "h": 400
         },
@@ -854,20 +812,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
-      },
-      "trace": {
-        "pos": {
-          "x": 414,
-          "y": 46,
-          "w": 1180,
-          "h": 420
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {},
-        "hide": true
+        "hide": false
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -889,14 +834,43 @@
       },
       "graph": {
         "pos": {
-          "x": 200,
-          "y": 191,
-          "w": 1806,
-          "h": 625
+          "x": 409,
+          "y": 123,
+          "w": 1192,
+          "h": 493
         },
         "title": "graph",
         "label": "Graph",
         "id": "graph",
+        "options": {}
+      },
+      "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
+        "pos": {
+          "x": 1012.5,
+          "y": 17,
+          "w": 700,
+          "h": 400
+        },
+        "title": "linPanel",
+        "label": "Panel",
+        "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
+        "options": {
+          "params": {
+            "editIndex": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba"
+          },
+          "name": "Node 1"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 731.5,
+          "y": 54,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
         "options": {}
       }
     },

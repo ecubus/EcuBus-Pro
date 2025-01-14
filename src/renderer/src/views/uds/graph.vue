@@ -220,6 +220,7 @@ const handleDelete = (data: GraphNode, event: Event) => {
     }
     filteredTreeData.value.splice(index, 1)
     delete graphs[data.id]
+    window.logBus.detach(data.id,dataUpdate)
 }
 
 const enabledCharts = computed(() => {
@@ -474,7 +475,6 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
         xAxis: {
             type: 'value',
             min: 0,
-            max: 15,
             name: isLast ? '[s]' : '',
             nameLocation: 'end',
             nameGap: 0,
@@ -482,7 +482,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
                 fontSize: 12,
                 padding: [0, 0, 0, 5] // 调整 [s] 的位置，上右下左
             },
-            interval: 1,
+            
 
             axisLabel: {
                 show: isLast,
@@ -520,6 +520,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
 
 
             },
+            
             min: 0,
             max: 20,
             axisLabel: {
@@ -553,7 +554,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
             type: 'line',
             triggerLineEvent: true,
             showSymbol: false,
-            data: generateMockData(100),  // 使用处理后的数据
+          
             itemStyle: {
                 color: chart.color
             },
@@ -598,10 +599,67 @@ onMounted(() => {
             if (!chartInstances[chart.id]) {
                 initChart(chart.id)
             }
-
+            window.logBus.on(chart.id,dataUpdate)
         })
     })
 })
+
+function dataUpdate(key: string, datas: (number|string)[][]) {
+    
+    if(isPaused.value){
+        return
+    }
+    console.log('dataUpdate', key, datas)
+    // 获取对应的echarts实例
+    const chart = chartInstances[key]
+    if (!chart) return
+
+    // 转换数据格式为echarts需要的格式 [time, value]
+    const chartData = datas
+
+    // 获取当前的option
+    // const option = chart.getOption()
+    
+    // 更新数据
+    chart.setOption({
+        series: [{
+            data: chartData
+        }]
+    })
+
+    // // 自动调整X轴范围
+    // if (chartData.length > 0) {
+    //     const times = chartData.map(item => item[0])
+    //     const minTime = Math.min(...times)
+    //     const maxTime = Math.max(...times)
+    //     const range = maxTime - minTime
+        
+    //     chart.setOption({
+    //         xAxis: {
+    //             min: minTime,
+    //             max: maxTime + range * 0.1 // 留出10%的空间
+    //         }
+    //     })
+    // }
+
+    // // 如果是最后一个启用的图表，同步其他图表的x轴范围
+    // const lastEnabledChart = enabledCharts.value[enabledCharts.value.length - 1]
+    // if (lastEnabledChart && lastEnabledChart.id === key) {
+    //     const xAxis = chart.getOption().xAxis[0]
+    //     enabledCharts.value.forEach(c => {
+    //         if (c.id !== key) {
+    //             chartInstances[c.id].setOption({
+    //                 xAxis: {
+    //                     min: xAxis.min,
+    //                     max: xAxis.max
+    //                 }
+    //             })
+    //         }
+    //     })
+    // }
+}
+
+
 
 // 监听启用图表的变化
 watch(() => enabledCharts.value, () => {
@@ -652,6 +710,11 @@ onUnmounted(() => {
         instance.off('mouseup')
         instance.dispose()
     })
+    //detach
+    filteredTreeData.value.forEach(key => {
+        window.logBus.detach(key.id,dataUpdate)
+    })
+
 })
 
 const signalDialogVisible = ref(false)
@@ -685,7 +748,7 @@ const handleAddSignal = (node: GraphNode) => {
 
     }
     filteredTreeData.value.push(node)
-
+    window.logBus.on(node.id,dataUpdate)
     graphs[node.id] = node
     nextTick(() => {
         treeRef.value.setChecked(node.id, true)

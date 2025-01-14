@@ -112,7 +112,7 @@ function getLinSignals() {
             //add signals in the frame
             for (const signalId of frame.signals) {
                 const signalItem: TreeItem = {
-                    id: `lin.${key}.signals.${signalId.name}`,
+                    id: `lin.${ldf.name}.signals.${signalId.name}`,
                     name: signalId.name,
                     children: [],
                     type: 'signal',

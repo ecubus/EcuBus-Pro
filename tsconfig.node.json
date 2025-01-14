@@ -8,7 +8,7 @@
     "test/**/*.test.ts",
   ],
   //for testing
-  "files": ["src/renderer/src/database/ldfParse.ts"],
+  "files": ["src/renderer/src/database/ldfParse.ts","src/renderer/src/worker/dataParse.ts"],
   "compilerOptions": {
     "composite": true,
     "noUnusedLocals": false,

@@ -27,6 +27,7 @@ declare global {
     api: Api
     jQuery: any
     logBus:EventBus
+    dataParseWorker:Worker
     store:{
       set:(property:string, val:unknown)=>void
       get:(key: string)=>unknown

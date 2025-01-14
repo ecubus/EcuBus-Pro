@@ -30,6 +30,10 @@ export const useDataStore = defineStore('useDataStore', {
         window.globalStart.value = true
        
         const project=useProjectStore()
+        window.dataParseWorker.postMessage({
+          method:'initDataBase',
+          data:cloneDeep(this.database)
+        })
         window.electron.ipcRenderer.invoke('ipc-global-start',cloneDeep(project.projectInfo),cloneDeep(this.devices),cloneDeep(this.tester),cloneDeep(this.nodes),cloneDeep(this.database)).catch((e: any) => {
           window.globalStart.value = false
         })

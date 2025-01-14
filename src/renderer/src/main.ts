@@ -22,8 +22,11 @@ await import("jquery-ui/dist/jquery-ui.js");
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
 import EventBus from './event'
 
+import DataParseWorker from './worker/dataParse.ts?worker'
 
+const dataParseWorker = new DataParseWorker()
 window.logBus = new EventBus()
+window.dataParseWorker=dataParseWorker  
 
 window.electron.ipcRenderer.on('ipc-log', (event, data) => {
   const group = {}
@@ -38,6 +41,11 @@ window.electron.ipcRenderer.on('ipc-log', (event, data) => {
   for (const key of Object.keys(group)) {
     
     window.logBus.emit(key, undefined, group[key])
+    // 解析数据
+    dataParseWorker.postMessage({
+      method:key,
+      data:group[key]
+    })
   }
 })
 

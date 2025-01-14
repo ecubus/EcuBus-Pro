@@ -359,6 +359,7 @@ export default abstract class LinBase {
                     }
                     const lastDiag = this.sch?.diag
                     this.write({
+                        database:db.name,
                         frameId: frameId,
                         data: this.sch?.diag?.msg.data || data,
                         direction: this.sch?.diag?.msg.direction || LinDirection.SEND,

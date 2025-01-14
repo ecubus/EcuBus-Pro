@@ -4,7 +4,7 @@ import type { TesterInfo } from 'src/main/share/tester';
 import type { EthNode } from 'src/main/share/doip';
 import type {LDF} from 'src/renderer/src/database/ldfParse'
 import type {LinNode} from 'src/main/share/lin'
-import type {YAXisOption} from 'echarts/types/dist/shared'
+import type {YAXisOption,XAXisOption,LineSeriesOption} from 'echarts/types/dist/shared'
 
 
 
@@ -46,10 +46,11 @@ export type GraphNode = {
     color: string,
     graph?:{
         id:string,
-        name:string,
     },
     disZoom?:boolean,
     yAxis?:YAXisOption,
+    xAxis?:XAXisOption,
+    series?:SeriesOption,
     type:'signal' | 'variable',
     bindValue: 'signal' extends typeof type ? GraphBindSignalValue : GraphBindVariableValue
   

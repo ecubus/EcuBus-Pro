@@ -38,14 +38,19 @@
             <div class="main">
                 <div class="left" v-show="!hideTree">
                     <el-scrollbar :height="height">
-                        <el-tree highlight-current node-key="id" :data="filteredTreeData" :props="defaultProps"
-                            show-checkbox empty-text="Add" :default-checked-keys="defaultCheckedKeys"
-                            @check-change="handleCheckChange" @node-click="handleNodeClick">
+                        <el-tree highlight-current node-key="id" :data="filteredTreeData" ref="treeRef"
+                            :props="defaultProps" empty-text="Add"
+                            @node-click="handleNodeClick">
                             <template #default="{ data }">
                                 <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="100"
-                                    trigger="contextmenu" popper-class="node-menu" @show="handleContextMenu(data)">
+                                    trigger="contextmenu" popper-class="node-menu">
                                     <template #reference>
                                         <span class="tree-node">
+                                            <el-checkbox 
+                                                v-model="data.enable"
+                                                @change="(val) => handleCheckChange(data, val)"
+                                                class="custom-checkbox"
+                                            />
                                             <span class="color-block" :style="{ backgroundColor: data.color }" />
                                             <span class="node-label">{{ data.name }}</span>
                                         </span>
@@ -89,6 +94,11 @@
             :append-to="appendId">
             <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
         </el-dialog>
+        
+        <el-dialog v-model="editDialogVisible" v-if="editDialogVisible&&editingNode" title="Edit Signal" width="500px" align-center
+            :append-to="appendId">
+            <edit-signal :height="tableHeight" :node="editingNode" @save="handleEditSave" @cancel="handleEditCancel" />
+        </el-dialog>
     </div>
 </template>
 <script lang="ts" setup>
@@ -111,8 +121,9 @@ import { LineChart } from 'echarts/charts'
 import { GridComponent, DataZoomComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
-import { formatter } from 'element-plus'
+import { ElNotification, formatter } from 'element-plus'
 import signal from './components/signal.vue'
+import editSignal from './components/editSignal.vue'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 
@@ -131,7 +142,7 @@ const height = computed(() => props.height - 22)
 const tableHeight = computed(() => height.value * 2 / 3)
 // 修改测试数据
 const filteredTreeData = ref<GraphNode[]>([])
-
+const treeRef = ref()
 
 
 
@@ -140,17 +151,8 @@ const defaultProps = {
     label: 'label',
 }
 
-const defaultCheckedKeys = ref<string[]>([])
-
-const handleCheckChange = (data: GraphNode, checked: boolean) => {
-
-
-    graphs[data.id].enable = checked
-
-}
-
 const handleNodeClick = (data: any) => {
-    console.log(data)
+    // console.log(data)
 }
 
 function treeHide() {
@@ -158,6 +160,14 @@ function treeHide() {
     // 如果需要在隐藏/显示时保存之前的宽度，可以添加相关逻辑
 }
 
+function handleCheckChange(data: GraphNode, checked: boolean) {
+    graphs[data.id].enable = checked
+    filteredTreeData.value.forEach(node => {
+        if (node.id === data.id) {
+            node.enable = checked
+        }
+    })
+}
 
 const addNode = () => {
     // 这里添加你的节点添加逻辑
@@ -169,19 +179,47 @@ const canvasWidth = computed(() => {
     return hideTree.value ? props.width : props.width - leftWidth.value - 5
 })
 
-const handleContextMenu = (data: GraphNode) => {
-    console.log('Right click on node:', data)
-}
+
 
 const handleEdit = (data: GraphNode, event: Event) => {
-    // unref(popoverRef).popperRef?.delayHide?.()
     popoverRefs.value[data.id]?.hide()
+    editingNode.value = { ...data }
+    editDialogVisible.value = true
+}
+
+const handleEditSave = (updatedNode: GraphNode) => {
+    // Update the node in both filteredTreeData and graphs
+    const index = filteredTreeData.value.findIndex(node => node.id === updatedNode.id)
+    if (index !== -1) {
+        filteredTreeData.value[index] = updatedNode
+        graphs[updatedNode.id] = updatedNode
+        chartInstances[updatedNode.id].setOption({
+            yAxis: updatedNode.yAxis,
+            xAxis: updatedNode.xAxis,
+            series: updatedNode.series
+        })
+    }
+    
+    editDialogVisible.value = false
+    editingNode.value = null
+}
+
+const handleEditCancel = () => {
+    editDialogVisible.value = false
+    editingNode.value = null
 }
 
 const handleDelete = (data: GraphNode, event: Event) => {
 
     popoverRefs.value[data.id]?.hide()
-
+    const index = filteredTreeData.value.findIndex(v => v.id == data.id)
+    // 删除图表实例
+    if (chartInstances[data.id]) {
+        chartInstances[data.id].dispose()
+        delete chartInstances[data.id]
+    }
+    filteredTreeData.value.splice(index, 1)
+    delete graphs[data.id]
 }
 
 const enabledCharts = computed(() => {
@@ -249,7 +287,7 @@ const initChart = (chartId: string) => {
         chart.on('mouseover', (params) => {
             if (params.componentType == 'yAxis' || params.componentType == 'series') {
                 inYArea.value = true
-
+                
                 if (params.event?.event.ctrlKey && !graphs[chartId].disZoom) {
                     isZoomY.value = true
 
@@ -281,21 +319,21 @@ const initChart = (chartId: string) => {
         dom.addEventListener('mouseup', (event) => {
             isDragging.value = false
             isZoomY.value = false
+            inYArea.value=false
         })
         dom.addEventListener('mousemove', (event) => {
             if (event.ctrlKey) {
                 isDragging.value = false
             }
             if (isDragging.value) {
-
                 const range = chartInstances[chartId].getOption().yAxis as ECBasicOption['yAxis'] as any
                 const { min, max } = range[0]
                 const offset = (max - min)
                 let deltaY = event.movementY
                 if (deltaY > 0) {
-                    deltaY += offset * 0.05
+                    deltaY += offset * 0.2
                 } else {
-                    deltaY -= offset * 0.05
+                    deltaY -= offset * 0.2
                 }
                 const newRange = {
                     min: min + deltaY * 0.05,
@@ -309,39 +347,59 @@ const initChart = (chartId: string) => {
                     }
                 })
 
+                // 更新graph的yAxis信息
+                const node = filteredTreeData.value.find(n => n.id === chartId)
+                if (node) {
+                    node.yAxis = {
+                        ...node.yAxis,
+                        min: newRange.min,
+                        max: newRange.max
+                    }
+                    graphs[chartId].yAxis = node.yAxis
+                }
             }
         })
 
         // Add wheel event handler for zooming
         dom.addEventListener('wheel', (event: WheelEvent) => {
-
-            if (event.ctrlKey && isZoomY.value) { // Only zoom when Ctrl is pressed
-
-
+            if (event.ctrlKey && isZoomY.value) {
+              
+                if(graphs[chartId].disZoom){
+                    isZoomY.value=false
+                    return
+                }
                 const yAxis = (chart.getOption() as any).yAxis[0];
                 const range = yAxis.max - yAxis.min
-                //offset 为range的指数，range越小offset越小，range越大offset越大
-                const offset = range * 0.05
+                const offset = range * 0.2
 
+                let newMin: number, newMax: number
                 if (event.deltaY < 0) {
                     //zoom in
-
-                    chart.setOption({
-                        yAxis: {
-                            min: yAxis.min + offset,
-                            max: yAxis.max - offset
-                        }
-                    });
+                    newMin = yAxis.min + offset
+                    newMax = yAxis.max - offset
                 } else {
                     //zoom out
-                    chart.setOption({
-                        yAxis: {
-                            min: yAxis.min - offset,
-                            max: yAxis.max + offset
-                        }
-                    });
+                    newMin = yAxis.min - offset
+                    newMax = yAxis.max + offset
                 }
 
+                chart.setOption({
+                    yAxis: {
+                        min: newMin,
+                        max: newMax
+                    }
+                });
+
+                // 更新graph的yAxis信息
+                const node = filteredTreeData.value.find(n => n.id === chartId)
+                if (node) {
+                    node.yAxis = {
+                        ...node.yAxis,
+                        min: newMin,
+                        max: newMax
+                    }
+                    graphs[chartId].yAxis = node.yAxis
+                }
             }
         }, { passive: false });
 
@@ -358,7 +416,9 @@ const initChart = (chartId: string) => {
         updateChartOption(chartId)
         if (graphs[chartId]) {
             chart.setOption({
-                yAxis: graphs[chartId].yAxis
+                yAxis: graphs[chartId].yAxis,
+                xAxis: graphs[chartId].xAxis,
+                series: graphs[chartId].series
             })
         }
     }
@@ -396,7 +456,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
             {
                 show: isLast,
                 type: 'slider',
-                height: 12,
+                height: 20,
                 bottom: 10,
                 showDetail: true,
                 showDataShadow: false
@@ -405,7 +465,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
 
         ],
         grid: {
-            left: '60px',  // 增加左边距，为标题留出空间
+            left: '80px',  // 增加左边距，为标题留出空间
             right: '20px',
             top: isFirst ? '20px' : '10px',
             bottom: isLast ? '45px' : '4px',
@@ -463,22 +523,26 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
             min: 0,
             max: 20,
             axisLabel: {
+                fontSize: 10,
                 show: true,
                 formatter: (value: number) => {
                     let val = Number.isInteger(value) ? value.toFixed(0) : ''
                     //如果val太大，显示科学计数法
-                    if (val.length > 5) {
+                    if (val.length > 6) {
                         val = value.toExponential()
+                    }
+                    if(val.length>6){
+                        return ''
                     }
                     return val
                 },
             },
             name: chart.name,
             nameLocation: 'middle',
-            nameGap: 45,  // 调整标题距离轴的距离
+            nameGap: 65,  // 调整标题距离轴的距离
             nameRotate: 90,  // 垂直旋转文字
             nameTextStyle: {
-                fontSize: 12,
+                fontSize: 11,
                 padding: [0, 0, 0, 5],  // 微调文字位置
                 align: 'center',
                 color: chart.color
@@ -519,7 +583,7 @@ onMounted(() => {
         maxWidth: 300,
         minWidth: 100,
     })
-  
+
 
 
     for (const v of Object.values(graphs)) {
@@ -528,13 +592,13 @@ onMounted(() => {
         }
         filteredTreeData.value.push(v)
     }
-    defaultCheckedKeys.value = Object.values(filteredTreeData.value)
-        .filter(node => node.enable)
-        .map(node => node.id)
     // 初始化所有图表
     nextTick(() => {
         enabledCharts.value.forEach(chart => {
-            initChart(chart.id)
+            if (!chartInstances[chart.id]) {
+                initChart(chart.id)
+            }
+
         })
     })
 })
@@ -555,6 +619,27 @@ watch(() => enabledCharts.value, () => {
                 delete chartInstances[id]
             }
         })
+        //update grid and dataZoom for all charts
+        enabledCharts.value.forEach((c, index) => {
+            const isLast = index === enabledCharts.value.length - 1
+            const isFirst = index === 0
+            chartInstances[c.id].setOption({
+                grid: {
+                    top: isFirst ? '20px' : '10px',
+                    bottom: isLast ? '45px' : '4px',
+                },
+                dataZoom: [
+                    {
+                        show: isLast,
+                        type: 'slider',
+                        height: 12,
+                        bottom: 10,
+                        showDetail: true,
+                        showDataShadow: false
+                    },
+                ]
+            })
+        })
     })
 })
 
@@ -570,6 +655,8 @@ onUnmounted(() => {
 })
 
 const signalDialogVisible = ref(false)
+const editDialogVisible = ref(false)
+const editingNode = ref<GraphNode | null>(null)
 
 const addSignal = () => {
     signalDialogVisible.value = true
@@ -577,9 +664,36 @@ const addSignal = () => {
 
 const handleAddSignal = (node: GraphNode) => {
     signalDialogVisible.value = false
+
+    //check existing graph
+    const existed = filteredTreeData.value.find(v => v.id == node.id)
+    if (existed) {
+        ElNotification({
+            offset: 50,
+            message: 'Signal already exists',
+            type: 'warning',
+            appendTo: appendId.value
+        })
+        return
+    }
+
+
+    if (props.editIndex) {
+        node.graph = {
+            id: props.editIndex,
+        }
+
+    }
+    filteredTreeData.value.push(node)
+
     graphs[node.id] = node
+    nextTick(() => {
+        treeRef.value.setChecked(node.id, true)
+    })
 
 }
+
+
 </script>
 <style scoped>
 .pause-active {
@@ -656,6 +770,19 @@ const handleAddSignal = (node: GraphNode) => {
     overflow: hidden;
 }
 
+.custom-checkbox {
+    flex-shrink: 0;
+}
+
+:deep(.el-checkbox__inner) {
+    width: 14px;
+    height: 14px;
+}
+
+:deep(.el-checkbox__input) {
+    line-height: 14px;
+}
+
 .color-block {
     flex-shrink: 0;
     display: inline-block;
@@ -665,6 +792,7 @@ const handleAddSignal = (node: GraphNode) => {
 }
 
 .node-label {
+    font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -748,10 +748,13 @@
         "enable": true,
         "id": "5a70c6c3-0715-4a57-beaa-4fbf2482ce4d",
         "name": "Motor1Position",
-        "color": "#c3b0a6",
+        "color": "rgba(171, 195, 166, 1)",
         "yAxis": {
-          "min": 0,
-          "max": 4294967295
+          "min": -156286461.08869028,
+          "max": 231694167.74837723,
+          "splitLine": {
+            "show": false
+          }
         },
         "bindValue": {
           "signalName": "Motor1Position",
@@ -760,25 +763,46 @@
           "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
           "dbName": "lin",
           "frameId": 51
-        }
+        },
+        "disZoom": false
       },
-      "a24faf73-f615-42e3-9674-10894a08b169": {
+      "lin.655bf90d-b010-49b5-9cf8-a9787319b5b4.signals.Motor1_Dynamic_Sig": {
         "type": "signal",
         "enable": true,
-        "id": "a24faf73-f615-42e3-9674-10894a08b169",
-        "name": "Motor1Temp",
-        "color": "#dbe52e",
+        "id": "lin.655bf90d-b010-49b5-9cf8-a9787319b5b4.signals.Motor1_Dynamic_Sig",
+        "name": "Motor1_Dynamic_Sig",
+        "color": "#1641bb",
         "yAxis": {
-          "min": 0,
-          "max": 127
+          "min": -11.633600512000099,
+          "max": 5.087909887999894,
+          "splitLine": {
+            "show": false
+          }
         },
         "bindValue": {
-          "signalName": "Motor1Temp",
+          "signalName": "Motor1_Dynamic_Sig",
           "startBit": 0,
-          "bitLength": 7,
+          "bitLength": 8,
           "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
           "dbName": "lin",
-          "frameId": 51
+          "frameId": 53
+        },
+        "disZoom": false,
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dotted"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "series": {
+          "showSymbol": false,
+          "symbolSize": 6,
+          "symbol": "circle"
         }
       }
     }
@@ -812,12 +836,12 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": false
+        "hide": true
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 33,
-          "y": 15,
+          "x": 159,
+          "y": 42,
           "w": 700,
           "h": 400
         },
@@ -830,12 +854,12 @@
           },
           "name": "Lin IA"
         },
-        "hide": false
+        "hide": true
       },
       "trace": {
         "pos": {
-          "x": 700,
-          "y": 0,
+          "x": 414,
+          "y": 46,
           "w": 1180,
           "h": 420
         },
@@ -843,7 +867,7 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": false
+        "hide": true
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -861,14 +885,14 @@
           },
           "name": "Tester_lin_1"
         },
-        "hide": false
+        "hide": true
       },
       "graph": {
         "pos": {
-          "x": 338,
-          "y": 80,
-          "w": 1095,
-          "h": 400
+          "x": 200,
+          "y": 191,
+          "w": 1806,
+          "h": 625
         },
         "title": "graph",
         "label": "Graph",

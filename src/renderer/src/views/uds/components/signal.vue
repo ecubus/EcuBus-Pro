@@ -24,7 +24,7 @@
 </template>
 <script setup lang="ts">
 import { useDataStore } from '@r/stores/data';
-import { computed, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import type { VxeGridProps } from 'vxe-table'
 import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import databaseIcon from '@iconify/icons-material-symbols/database'
@@ -162,7 +162,7 @@ function addSignal() {
         emits('addSignal',{
           type:'signal',
           enable:true,
-          id:v4(),
+          id:highlightedRow.value.id,
           name:highlightedRow.value.name,
           color:randomColor(),
           yAxis:{

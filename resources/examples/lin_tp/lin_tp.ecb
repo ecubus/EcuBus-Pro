@@ -350,7 +350,7 @@
                 "Motor2"
               ],
               "singleType": "Scalar",
-              "value": 1
+              "value": 2
             },
             "MotorSelection": {
               "signalName": "MotorSelection",
@@ -751,8 +751,8 @@
         "name": "MotorDirection",
         "color": "rgba(247, 36, 12, 1)",
         "yAxis": {
-          "min": 0,
-          "max": 3,
+          "min": 0.43999999999999984,
+          "max": 3.440000000000002,
           "splitLine": {
             "show": false
           }
@@ -818,8 +818,8 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 49,
-          "y": 162,
+          "x": 31,
+          "y": 31,
           "w": 700,
           "h": 400
         },
@@ -832,7 +832,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": false
+        "hide": true
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -852,22 +852,10 @@
         },
         "hide": true
       },
-      "graph": {
-        "pos": {
-          "x": 1088,
-          "y": 207,
-          "w": 1192,
-          "h": 493
-        },
-        "title": "graph",
-        "label": "Graph",
-        "id": "graph",
-        "options": {}
-      },
       "trace": {
         "pos": {
-          "x": 749,
-          "y": 41,
+          "x": 658,
+          "y": 34,
           "w": 700,
           "h": 400
         },
@@ -878,8 +866,8 @@
       },
       "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
         "pos": {
-          "x": 388,
-          "y": 171,
+          "x": 918,
+          "y": 167,
           "w": 700,
           "h": 400
         },
@@ -892,6 +880,18 @@
           },
           "name": "Node 1"
         }
+      },
+      "graph": {
+        "pos": {
+          "x": 25,
+          "y": 27,
+          "w": 600,
+          "h": 400
+        },
+        "title": "graph",
+        "label": "Graph",
+        "id": "graph",
+        "options": {}
       }
     },
     "example": {

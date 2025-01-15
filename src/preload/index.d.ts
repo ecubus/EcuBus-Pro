@@ -33,6 +33,7 @@ declare global {
       get:(key: string)=>unknown
     }
     globalStart:Ref<boolean>
+    startTime:number
     path:typeof path
     MonacoEnvironment:any
     readmePath:string

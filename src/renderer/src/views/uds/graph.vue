@@ -1,38 +1,39 @@
 <template>
     <div class="uds-graph">
-        <div style="justify-content: flex-start;display: flex;align-items: center;gap:0px;padding-left: 5px;padding: 1px"
+        <div style="justify-content: space-between;display: flex;align-items: center;gap:0px;padding-left: 5px;padding: 1px"
             class="border-bottom">
-
-            <el-button-group>
-                <el-button link type="primary" :class="{ 'pause-active': hideTree }" @click="treeHide">
-                    <Icon :icon="hideIcon" />
-                </el-button>
-
-                <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
-                    <el-button :type="isPaused ? 'success' : 'warning'" link :class="{ 'pause-active': isPaused }">
-                        <Icon :icon="isPaused ? playIcon : pauseIcon" />
+            <div style="display: flex;align-items: center;gap:4px;">
+                <el-button-group>
+                    <el-button link type="primary" :class="{ 'pause-active': hideTree }" @click="treeHide">
+                        <Icon :icon="hideIcon" />
                     </el-button>
 
-                </el-tooltip>
-            </el-button-group>
-            <el-divider direction="vertical"></el-divider>
-            <el-button-group>
-                <el-tooltip effect="light" content="Add Variables" placement="bottom">
-                    <el-button link type="primary" @click="addNode" disabled>
-                        <Icon :icon="addIcon" />
-                    </el-button>
+                    <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+                        <el-button :type="isPaused ? 'success' : 'warning'" link :class="{ 'pause-active': isPaused }" @click="isPaused = !isPaused">
+                            <Icon :icon="isPaused ? playIcon : pauseIcon" />
+                        </el-button>
 
-                </el-tooltip>
-                <el-tooltip effect="light" content="Add Signals" placement="bottom">
-                    <el-button link type="primary" @click="addSignal">
-                        <Icon :icon="waveIcon" />
-                    </el-button>
+                    </el-tooltip>
+                </el-button-group>
+                <el-divider direction="vertical"></el-divider>
+                <el-button-group>
+                    <el-tooltip effect="light" content="Add Variables" placement="bottom">
+                        <el-button link type="primary" @click="addNode" disabled>
+                            <Icon :icon="addIcon" />
+                        </el-button>
 
-                </el-tooltip>
-            </el-button-group>
+                    </el-tooltip>
+                    <el-tooltip effect="light" content="Add Signals" placement="bottom">
+                        <el-button link type="primary" @click="addSignal">
+                            <Icon :icon="waveIcon" />
+                        </el-button>
 
-
-
+                    </el-tooltip>
+                </el-button-group>
+            </div>
+            <span style="margin-right: 10px;font-size: 12px;color: var(--el-text-color-regular)">
+                Time: {{ time }}s
+            </span>
         </div>
         <div>
             <div class="main">
@@ -140,7 +141,7 @@ const tableHeight = computed(() => height.value * 2 / 3)
 // 修改测试数据
 const filteredTreeData = ref<GraphNode[]>([])
 const treeRef = ref()
-
+const time=ref(0)
 
 
 
@@ -189,7 +190,7 @@ const handleEditSave = (updatedNode: GraphNode) => {
     if (index !== -1) {
         filteredTreeData.value[index] = updatedNode
         graphs[updatedNode.id] = updatedNode
-        
+
         // 更新图表配置
         chartInstances[updatedNode.id].setOption({
             yAxis: {
@@ -211,7 +212,7 @@ const handleEditSave = (updatedNode: GraphNode) => {
                 }
             }
         })
-        
+
         // 如果有缓存的数据，使用新的颜色重绘
         if (chartDataCache[updatedNode.id]?.length > 0) {
             chartInstances[updatedNode.id].setOption({
@@ -230,10 +231,44 @@ const handleEditCancel = () => {
     editDialogVisible.value = false
     editingNode.value = null
 }
+const updateTime = () => {
+    if(isPaused.value){
+        return
+    }
+    // 更新x轴范围
+    let maxX = 5
+    Object.values(chartDataCache).forEach((v) => {
+        const lastOne = v[v.length - 1]
+        if(lastOne){
+            const val=lastOne[0] as number
+            if (val > maxX) {
+                maxX = val
+            }
+        }
+    })
+    const ts = (Date.now() - window.startTime) / 1000
+    time.value=ts
+    if(ts>maxX){
+        maxX=ts
+    }
+   
+    maxX = Math.ceil(maxX) + 5
+    enabledCharts.value.forEach(c => {
+        chartInstances[c.id].setOption({
+            xAxis: {
+               
+                max: maxX
+            }
+        })
+    })
+}
 watch(() => window.globalStart.value, (val) => {
 
     if (val) {
-        console.log('start')
+        //clear cache
+        Object.keys(chartDataCache).forEach(key => {
+            chartDataCache[key] = []
+        })
         //clear all charts data and set start to 0
         enabledCharts.value.forEach(c => {
             chartInstances[c.id].setOption({
@@ -246,6 +281,12 @@ watch(() => window.globalStart.value, (val) => {
                 }
             })
         })
+        if (timer) {
+            clearInterval(timer)
+        }
+        timer = setInterval(updateTime, 500)
+    } else {
+        clearInterval(timer)
     }
 
 })
@@ -257,6 +298,7 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
     if (isPaused.value) {
         return
     }
+
 
     // 获取对应的echarts实例
     const chart = chartInstances[key]
@@ -274,28 +316,16 @@ function dataUpdate(key: string, datas: (number | string)[][]) {
     if (chartDataCache[key].length > 1000) {
         chartDataCache[key].splice(0, chartDataCache[key].length - 1000)
     }
-     // 更新x轴范围
-     let maxX=0
-    Object.values(chartDataCache).forEach((v) => {
-        const lastOne=v.slice(-1)[0][0] as number
-       
-        if (lastOne>maxX) {
-            maxX=lastOne
-        }
-    })
-    maxX+=5
   
+
     // 更新图表
     chart.setOption({
-        xAxis: {
-            max: maxX
-        },
         series: {
             data: chartDataCache[key]
         }
     })
 
-   
+
 }
 
 const enabledCharts = computed(() => {
@@ -318,7 +348,7 @@ const chartInstances: Record<string, echarts.ECharts> = {}
 const isDragging = ref(false)
 const isZoomY = ref(false)
 const inYArea = ref(false)
-
+let timer
 
 // 修改初始化图表实例函数
 const initChart = (chartId: string) => {
@@ -678,6 +708,9 @@ onMounted(() => {
             window.logBus.on(chart.id, dataUpdate)
         })
     })
+    if (window.globalStart.value) {
+        timer = setInterval(updateTime, 500);
+    }
 })
 
 // 监听启用图表的变化
@@ -721,6 +754,7 @@ watch(() => enabledCharts.value, () => {
 })
 
 onUnmounted(() => {
+    clearInterval(timer)
     // 清理所有图表实例
     Object.values(chartInstances).forEach(instance => {
         instance.off('mousedown')

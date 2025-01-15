@@ -350,7 +350,7 @@
                 "Motor2"
               ],
               "singleType": "Scalar",
-              "value": 2
+              "value": 1
             },
             "MotorSelection": {
               "signalName": "MotorSelection",
@@ -749,10 +749,13 @@
         "enable": true,
         "id": "lin.lin.signals.MotorDirection",
         "name": "MotorDirection",
-        "color": "#35120a",
+        "color": "rgba(247, 36, 12, 1)",
         "yAxis": {
           "min": 0,
-          "max": 3
+          "max": 3,
+          "splitLine": {
+            "show": false
+          }
         },
         "bindValue": {
           "signalName": "MotorDirection",
@@ -761,6 +764,23 @@
           "dbKey": "655bf90d-b010-49b5-9cf8-a9787319b5b4",
           "dbName": "lin",
           "frameId": 45
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "series": {
+          "showSymbol": false,
+          "symbolSize": 6,
+          "symbol": "circle"
         }
       }
     }
@@ -785,7 +805,7 @@
       },
       "network": {
         "pos": {
-          "x": 960,
+          "x": 950,
           "y": 8,
           "w": 600,
           "h": 400
@@ -834,8 +854,8 @@
       },
       "graph": {
         "pos": {
-          "x": 409,
-          "y": 123,
+          "x": 1088,
+          "y": 207,
           "w": 1192,
           "h": 493
         },
@@ -844,10 +864,22 @@
         "id": "graph",
         "options": {}
       },
+      "trace": {
+        "pos": {
+          "x": 749,
+          "y": 41,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
       "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
         "pos": {
-          "x": 1012.5,
-          "y": 17,
+          "x": 388,
+          "y": 171,
           "w": 700,
           "h": 400
         },
@@ -860,18 +892,6 @@
           },
           "name": "Node 1"
         }
-      },
-      "trace": {
-        "pos": {
-          "x": 731.5,
-          "y": 54,
-          "w": 700,
-          "h": 400
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {}
       }
     },
     "example": {

@@ -127,11 +127,9 @@ function parseLinData(data: LinMsg[]) {
                         result[signalKey] = []
                     }
 
-                  
-                    const ts= Math.ceil((msg.ts || 0)/1000) 
                     //转为秒
-                    //todo
-
+                    const ts= parseFloat(((msg.ts || 0)/1000000).toFixed(3))
+                   
                     result[signalKey].push([ts, value])
                 }
             }

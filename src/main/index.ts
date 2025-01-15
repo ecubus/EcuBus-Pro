@@ -69,7 +69,7 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
 class LogQueue {
   list: any[] = []
   timer: any
-  constructor(private win: BrowserWindow, private period = 50) {
+  constructor(private win: BrowserWindow, private period = 100) {
     this.timer = setInterval(() => {
       if (this.list.length) {
        

@@ -39,18 +39,15 @@
                 <div class="left" v-show="!hideTree">
                     <el-scrollbar :height="height">
                         <el-tree highlight-current node-key="id" :data="filteredTreeData" ref="treeRef"
-                            :props="defaultProps" empty-text="Add"
-                            @node-click="handleNodeClick">
+                            :props="defaultProps" empty-text="Add" @node-click="handleNodeClick">
                             <template #default="{ data }">
                                 <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="100"
                                     trigger="contextmenu" popper-class="node-menu">
                                     <template #reference>
                                         <span class="tree-node">
-                                            <el-checkbox 
-                                                v-model="data.enable"
+                                            <el-checkbox v-model="data.enable"
                                                 @change="(val) => handleCheckChange(data, val)"
-                                                class="custom-checkbox"
-                                            />
+                                                class="custom-checkbox" />
                                             <span class="color-block" :style="{ backgroundColor: data.color }" />
                                             <span class="node-label">{{ data.name }}</span>
                                         </span>
@@ -94,9 +91,9 @@
             :append-to="appendId">
             <signal :height="tableHeight" :width="width" @add-signal="handleAddSignal" />
         </el-dialog>
-        
-        <el-dialog v-model="editDialogVisible" v-if="editDialogVisible&&editingNode" title="Edit Signal" width="500px" align-center
-            :append-to="appendId">
+
+        <el-dialog v-model="editDialogVisible" v-if="editDialogVisible && editingNode" title="Edit Signal" width="500px"
+            align-center :append-to="appendId">
             <edit-signal :height="tableHeight" :node="editingNode" @save="handleEditSave" @cancel="handleEditCancel" />
         </el-dialog>
     </div>
@@ -188,18 +185,43 @@ const handleEdit = (data: GraphNode, event: Event) => {
 }
 
 const handleEditSave = (updatedNode: GraphNode) => {
-    // Update the node in both filteredTreeData and graphs
-    const index = filteredTreeData.value.findIndex(node => node.id === updatedNode.id)
+    const index = filteredTreeData.value.findIndex(v => v.id === updatedNode.id)
     if (index !== -1) {
         filteredTreeData.value[index] = updatedNode
         graphs[updatedNode.id] = updatedNode
+        
+        // 更新图表配置
         chartInstances[updatedNode.id].setOption({
-            yAxis: updatedNode.yAxis,
+            yAxis: {
+                ...updatedNode.yAxis,
+                // 更新轴标签颜色
+                nameTextStyle: {
+                    color: updatedNode.color
+                }
+            },
             xAxis: updatedNode.xAxis,
-            series: updatedNode.series
+            series: {
+                ...updatedNode.series,
+                // 更新线条颜色
+                lineStyle: {
+                    color: updatedNode.color
+                },
+                itemStyle: {
+                    color: updatedNode.color
+                }
+            }
         })
+        
+        // 如果有缓存的数据，使用新的颜色重绘
+        if (chartDataCache[updatedNode.id]?.length > 0) {
+            chartInstances[updatedNode.id].setOption({
+                series: {
+                    data: chartDataCache[updatedNode.id]
+                }
+            })
+        }
     }
-    
+
     editDialogVisible.value = false
     editingNode.value = null
 }
@@ -208,19 +230,72 @@ const handleEditCancel = () => {
     editDialogVisible.value = false
     editingNode.value = null
 }
+watch(() => window.globalStart.value, (val) => {
 
-const handleDelete = (data: GraphNode, event: Event) => {
-
-    popoverRefs.value[data.id]?.hide()
-    const index = filteredTreeData.value.findIndex(v => v.id == data.id)
-    // 删除图表实例
-    if (chartInstances[data.id]) {
-        chartInstances[data.id].dispose()
-        delete chartInstances[data.id]
+    if (val) {
+        console.log('start')
+        //clear all charts data and set start to 0
+        enabledCharts.value.forEach(c => {
+            chartInstances[c.id].setOption({
+                series: {
+                    data: []
+                },
+                xAxis: {
+                    min: 0,
+                    max: 10
+                }
+            })
+        })
     }
-    filteredTreeData.value.splice(index, 1)
-    delete graphs[data.id]
-    window.logBus.detach(data.id,dataUpdate)
+
+})
+
+// 添加数据缓存
+const chartDataCache: Record<string, (number | string)[][]> = {}
+
+function dataUpdate(key: string, datas: (number | string)[][]) {
+    if (isPaused.value) {
+        return
+    }
+
+    // 获取对应的echarts实例
+    const chart = chartInstances[key]
+    if (!chart) return
+
+    // 初始化或获取缓存数据
+    if (!chartDataCache[key]) {
+        chartDataCache[key] = []
+    }
+
+    // 添加新数据
+    chartDataCache[key] = chartDataCache[key].concat(datas)
+
+    // 如果数据超过1000个点，移除最早的数据
+    if (chartDataCache[key].length > 1000) {
+        chartDataCache[key].splice(0, chartDataCache[key].length - 1000)
+    }
+     // 更新x轴范围
+     let maxX=0
+    Object.values(chartDataCache).forEach((v) => {
+        const lastOne=v.slice(-1)[0][0] as number
+       
+        if (lastOne>maxX) {
+            maxX=lastOne
+        }
+    })
+    maxX+=5
+  
+    // 更新图表
+    chart.setOption({
+        xAxis: {
+            max: maxX
+        },
+        series: {
+            data: chartDataCache[key]
+        }
+    })
+
+   
 }
 
 const enabledCharts = computed(() => {
@@ -288,7 +363,7 @@ const initChart = (chartId: string) => {
         chart.on('mouseover', (params) => {
             if (params.componentType == 'yAxis' || params.componentType == 'series') {
                 inYArea.value = true
-                
+
                 if (params.event?.event.ctrlKey && !graphs[chartId].disZoom) {
                     isZoomY.value = true
 
@@ -320,7 +395,7 @@ const initChart = (chartId: string) => {
         dom.addEventListener('mouseup', (event) => {
             isDragging.value = false
             isZoomY.value = false
-            inYArea.value=false
+            inYArea.value = false
         })
         dom.addEventListener('mousemove', (event) => {
             if (event.ctrlKey) {
@@ -364,9 +439,9 @@ const initChart = (chartId: string) => {
         // Add wheel event handler for zooming
         dom.addEventListener('wheel', (event: WheelEvent) => {
             if (event.ctrlKey && isZoomY.value) {
-              
-                if(graphs[chartId].disZoom){
-                    isZoomY.value=false
+
+                if (graphs[chartId].disZoom) {
+                    isZoomY.value = false
                     return
                 }
                 const yAxis = (chart.getOption() as any).yAxis[0];
@@ -475,6 +550,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
         xAxis: {
             type: 'value',
             min: 0,
+            max: 10,
             name: isLast ? '[s]' : '',
             nameLocation: 'end',
             nameGap: 0,
@@ -482,7 +558,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
                 fontSize: 12,
                 padding: [0, 0, 0, 5] // 调整 [s] 的位置，上右下左
             },
-            
+
 
             axisLabel: {
                 show: isLast,
@@ -520,7 +596,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
 
 
             },
-            
+
             min: 0,
             max: 20,
             axisLabel: {
@@ -532,7 +608,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
                     if (val.length > 6) {
                         val = value.toExponential()
                     }
-                    if(val.length>6){
+                    if (val.length > 6) {
                         return ''
                     }
                     return val
@@ -554,7 +630,7 @@ const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
             type: 'line',
             triggerLineEvent: true,
             showSymbol: false,
-          
+
             itemStyle: {
                 color: chart.color
             },
@@ -599,67 +675,10 @@ onMounted(() => {
             if (!chartInstances[chart.id]) {
                 initChart(chart.id)
             }
-            window.logBus.on(chart.id,dataUpdate)
+            window.logBus.on(chart.id, dataUpdate)
         })
     })
 })
-
-function dataUpdate(key: string, datas: (number|string)[][]) {
-    
-    if(isPaused.value){
-        return
-    }
-    console.log('dataUpdate', key, datas)
-    // 获取对应的echarts实例
-    const chart = chartInstances[key]
-    if (!chart) return
-
-    // 转换数据格式为echarts需要的格式 [time, value]
-    const chartData = datas
-
-    // 获取当前的option
-    // const option = chart.getOption()
-    
-    // 更新数据
-    chart.setOption({
-        series: [{
-            data: chartData
-        }]
-    })
-
-    // // 自动调整X轴范围
-    // if (chartData.length > 0) {
-    //     const times = chartData.map(item => item[0])
-    //     const minTime = Math.min(...times)
-    //     const maxTime = Math.max(...times)
-    //     const range = maxTime - minTime
-        
-    //     chart.setOption({
-    //         xAxis: {
-    //             min: minTime,
-    //             max: maxTime + range * 0.1 // 留出10%的空间
-    //         }
-    //     })
-    // }
-
-    // // 如果是最后一个启用的图表，同步其他图表的x轴范围
-    // const lastEnabledChart = enabledCharts.value[enabledCharts.value.length - 1]
-    // if (lastEnabledChart && lastEnabledChart.id === key) {
-    //     const xAxis = chart.getOption().xAxis[0]
-    //     enabledCharts.value.forEach(c => {
-    //         if (c.id !== key) {
-    //             chartInstances[c.id].setOption({
-    //                 xAxis: {
-    //                     min: xAxis.min,
-    //                     max: xAxis.max
-    //                 }
-    //             })
-    //         }
-    //     })
-    // }
-}
-
-
 
 // 监听启用图表的变化
 watch(() => enabledCharts.value, () => {
@@ -710,11 +729,14 @@ onUnmounted(() => {
         instance.off('mouseup')
         instance.dispose()
     })
+    // 清理数据缓存
+    Object.keys(chartDataCache).forEach(key => {
+        delete chartDataCache[key]
+    })
     //detach
     filteredTreeData.value.forEach(key => {
-        window.logBus.detach(key.id,dataUpdate)
+        window.logBus.detach(key.id, dataUpdate)
     })
-
 })
 
 const signalDialogVisible = ref(false)
@@ -748,7 +770,7 @@ const handleAddSignal = (node: GraphNode) => {
 
     }
     filteredTreeData.value.push(node)
-    window.logBus.on(node.id,dataUpdate)
+    window.logBus.on(node.id, dataUpdate)
     graphs[node.id] = node
     nextTick(() => {
         treeRef.value.setChecked(node.id, true)
@@ -756,6 +778,22 @@ const handleAddSignal = (node: GraphNode) => {
 
 }
 
+// 在删除图表时也要清理对应的缓存
+const handleDelete = (data: GraphNode, event: Event) => {
+    popoverRefs.value[data.id]?.hide()
+    const index = filteredTreeData.value.findIndex(v => v.id == data.id)
+    // 删除图表实例
+    if (chartInstances[data.id]) {
+        chartInstances[data.id].dispose()
+        delete chartInstances[data.id]
+    }
+    // 删除数据缓存
+    delete chartDataCache[data.id]
+
+    filteredTreeData.value.splice(index, 1)
+    delete graphs[data.id]
+    window.logBus.detach(data.id, dataUpdate)
+}
 
 </script>
 <style scoped>

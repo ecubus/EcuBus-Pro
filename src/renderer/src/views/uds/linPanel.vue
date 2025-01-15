@@ -420,7 +420,7 @@ watch([selectedDB, workNode], () => {
         const db = dataBase.database.lin[selectedDB.value] as LDF
         for (const frame of tableData.value) {
             for (const signal of frame.childList) {
-                updateSignalDisplayValues(frame.name, signal, false) // 使用初始值
+                updateSignalDisplayValues(frame.name, signal, true) // 使用初始值
             }
         }
     })
@@ -432,7 +432,7 @@ onMounted(() => {
       
     for (const frame of tableData.value) {
         for (const signal of frame.childList) {
-            updateSignalDisplayValues(frame.name, signal, false) // 使用初始值
+            updateSignalDisplayValues(frame.name, signal, true) // 使用初始值
         }
     }
     

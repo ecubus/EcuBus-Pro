@@ -102,6 +102,7 @@ export class NodeLinItem {
                 }, jsPath, this.log, this.tester)
                 this.pool.registerHandler('sendLinFrame', this.sendFrame.bind(this))
                 this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
+                this.pool.registerHandler('setSignal', this.setSignal.bind(this))
                 //find tester
                 for (const c of nodeItem.channel) {
                     const baseItem = this.linBaseMap.get(c)
@@ -117,7 +118,7 @@ export class NodeLinItem {
                             const tp = new LIN_TP(baseItem)
                             for (const addr of this.tester.address) {
                                 if (addr.type == 'lin' && addr.linAddr) {
-                                    const idT = tp.getReadId(LinMode.MASTER,addr.linAddr)
+                                    const idT = tp.getReadId(LinMode.MASTER, addr.linAddr)
                                     tp.event.on(idT, (data) => {
                                         if (data instanceof TpError) {
                                             //TODO:
@@ -141,7 +142,7 @@ export class NodeLinItem {
                                             }
                                         }
                                     })
-                                    const idR = tp.getReadId(LinMode.SLAVE,addr.linAddr)
+                                    const idR = tp.getReadId(LinMode.SLAVE, addr.linAddr)
                                     tp.event.on(idR, (data) => {
                                         if (data instanceof TpError) {
                                             //TODO:
@@ -190,7 +191,7 @@ export class NodeLinItem {
         this.pool?.stop()
         this.lintp.forEach(tp => {
             tp.close(false)
-          })
+        })
 
     }
     async start() {
@@ -225,88 +226,110 @@ export class NodeLinItem {
         throw new Error(`device ${frame.device} not found`)
 
     }
+    setSignal(pool: UdsTester, data: {
+        signal: string,
+        value: number|number[]
+    }) {
+
+
+        const s=data.signal.split('.')
+        // 验证数据库是否存在
+        if (!this.db||s[0]!='LIN'||s[1]!=this.db.name) {
+            throw new Error('LIN database not found')
+        }
+        
+        const signalName=s[2]
+       
+        const signal = this.db.signals[signalName]
+        if (!signal) {
+            throw new Error(`Signal ${signalName} not found`)
+        }
+
+        // 更新信号值
+        updateSignalVal(this.db, signalName, data.value)
+    }
     async sendDiag(pool: UdsTester, data: {
         device?: string
         address?: string
         service: ServiceItem
         isReq: boolean
-      }): Promise<number> {
+    }): Promise<number> {
         if (this.tester) {
-          if (this.tester.address.length == 0) {
-            throw new Error(`address not found in ${this.tester.name}`)
-          }
-          let buf
-      
-    
-          if (data.isReq) {
-            buf = getTxPdu(data.service)
-          } else {
-            buf = getRxPdu(data.service)
-          }
-          if (this.nodeItem.channel.length == 0) {
-            throw new Error(`channel not found`)
-          } else if (this.nodeItem.channel.length == 1 || data.device == undefined) {
-    
-            if ((this.tester.address.length == 1 || data.address == undefined) && (this.tester.address[0].linAddr)) {
-              const mode=data.isReq?LinMode.MASTER:LinMode.SLAVE
-              const raddr = this.tester.address[0].linAddr
-         
-              const ts = await this.lintp[0].writeTp(mode,raddr, buf,this.nodeItem.id)
-              
-              return ts
+            if (this.tester.address.length == 0) {
+                throw new Error(`address not found in ${this.tester.name}`)
+            }
+            let buf
+
+
+            if (data.isReq) {
+                buf = getTxPdu(data.service)
             } else {
-              //find address
-              const addr = this.tester.address.find((a) => a.linAddr?.name == data.address)
-              if (addr && addr.linAddr) {
-                const mode=data.isReq?LinMode.MASTER:LinMode.SLAVE
-                const raddr =addr.linAddr
-              
-                const ts = await this.lintp[0].writeTp(mode,raddr, buf,this.nodeItem.id)
-               
-                return ts
-              }
+                buf = getRxPdu(data.service)
             }
-          } else {
-            //find device
-            let index = -1
-            for (let i = 0; i < this.nodeItem.channel.length; i++) {
-              if (this.linBaseMap.get(this.nodeItem.channel[i])?.info.name == data.device) {
-                index = i
-                break
-              }
-            }
-            if (index >= 0) {
-    
-              if ((this.tester.address.length == 1 || data.address == undefined) && this.tester.address[0].linAddr) {
-                const mode=data.isReq?LinMode.MASTER:LinMode.SLAVE
-                const raddr = this.tester.address[0].linAddr
-               
-    
-                const ts = await this.lintp[index].writeTp(mode,raddr, buf, this.nodeItem.id)
-               
-                return ts
-              } else {
-                //find address
-                const addr = this.tester.address.find((a) => a.linAddr?.name == data.address)
-                if (addr && addr.linAddr) {
-                  const mode=data.isReq?LinMode.MASTER:LinMode.SLAVE
-                  const raddr = addr.linAddr
-                   
-                  const ts = await this.lintp[index].writeTp(mode,raddr, buf,this.nodeItem.id)
-            
-                  return ts
+            if (this.nodeItem.channel.length == 0) {
+                throw new Error(`channel not found`)
+            } else if (this.nodeItem.channel.length == 1 || data.device == undefined) {
+
+                if ((this.tester.address.length == 1 || data.address == undefined) && (this.tester.address[0].linAddr)) {
+                    const mode = data.isReq ? LinMode.MASTER : LinMode.SLAVE
+                    const raddr = this.tester.address[0].linAddr
+
+                    const ts = await this.lintp[0].writeTp(mode, raddr, buf, this.nodeItem.id)
+
+                    return ts
+                } else {
+                    //find address
+                    const addr = this.tester.address.find((a) => a.linAddr?.name == data.address)
+                    if (addr && addr.linAddr) {
+                        const mode = data.isReq ? LinMode.MASTER : LinMode.SLAVE
+                        const raddr = addr.linAddr
+
+                        const ts = await this.lintp[0].writeTp(mode, raddr, buf, this.nodeItem.id)
+
+                        return ts
+                    }
                 }
-              }
+            } else {
+                //find device
+                let index = -1
+                for (let i = 0; i < this.nodeItem.channel.length; i++) {
+                    if (this.linBaseMap.get(this.nodeItem.channel[i])?.info.name == data.device) {
+                        index = i
+                        break
+                    }
+                }
+                if (index >= 0) {
+
+                    if ((this.tester.address.length == 1 || data.address == undefined) && this.tester.address[0].linAddr) {
+                        const mode = data.isReq ? LinMode.MASTER : LinMode.SLAVE
+                        const raddr = this.tester.address[0].linAddr
+
+
+                        const ts = await this.lintp[index].writeTp(mode, raddr, buf, this.nodeItem.id)
+
+                        return ts
+                    } else {
+                        //find address
+                        const addr = this.tester.address.find((a) => a.linAddr?.name == data.address)
+                        if (addr && addr.linAddr) {
+                            const mode = data.isReq ? LinMode.MASTER : LinMode.SLAVE
+                            const raddr = addr.linAddr
+
+                            const ts = await this.lintp[index].writeTp(mode, raddr, buf, this.nodeItem.id)
+
+                            return ts
+                        }
+                    }
+                }
+
             }
-    
-          }
-    
-    
+
+
         } else {
-          throw new Error(`Does't found attached tester`)
+            throw new Error(`Does't found attached tester`)
         }
         return 0;
-      }
+    }
 }
 
 

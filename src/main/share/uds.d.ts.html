@@ -248,6 +248,11 @@ declare const allServicesRecv: readonly [
         "{{this}}.recv",
     {{/each}}
 ];
+declare const allSignal: readonly [
+    {{#each this.signals}}
+        "{{this}}",
+    {{/each}}
+];
 interface Jobs {
 {{#each this.jobs}}
     "{{this.name}}": ({{#each this.param}}{{this}},{{/each}}) => DiagRequest[]|Promise<DiagRequest[]>;
@@ -273,6 +278,12 @@ type ServiceNameSend = (typeof allServicesSend)[number];
  * @category UDS
  */
 type ServiceNameRecv = (typeof allServicesRecv)[number];
+/**
+ * All signals name config in Diagnostic Service.
+ * @category LIN
+ * @category CAN
+ */
+type SignalName = (typeof allSignal)[number];
 /**
  * All jobs name config in Diagnostic Service.
  * @category UDS
@@ -1001,10 +1012,10 @@ declare class UtilClass {
  *
  *     ```ts
  *     Util.On('Can.DiagRequest.send', async (req) => {
- *        // The req is a `DiagRequest`
- *        console.log(req.getServiceName(), ': send');
- *     });
- *     ```
+   *        // The req is a `DiagRequest`
+   *        console.log(req.getServiceName(), ': send');
+   *     });
+   *     ```
  *
  * 3. *recv function*
  *     > * This function will be called after the response message has been received.
@@ -1012,24 +1023,50 @@ declare class UtilClass {
  *
  *     ```ts
  *     Util.On('Can.DiagRequest.recv', async (req) => {
- *        // The req is a `DiagResponse`
- *        console.log(req.getServiceName(), ':recv');
- *     });
- *     ```
+   *        // The req is a `DiagResponse`
+   *        console.log(req.getServiceName(), ':recv');
+   *     });
+   *     ```
  *
  * 4. **More**
- *     > For more details, please refer to {@link UDSClass | `UDSClass`} class.
+ *     > For more details, please refer to the {@link UDSClass | `UDSClass`} class.
  */
 declare const Util: UtilClass;
 /**
  * Sends a CAN message
  *
  * @category CAN
- * @param {CanMessage} msg - The CAN message to be sent.
- * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp.
+ * @param {CanMessage} msg - The CAN message to be sent
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
  */
-declare function outputCan(msg: CanMessage): Promise<number>;
-declare function outputLin(msg: LinMsg): Promise<number>;
+declare function output(msg: CanMessage): Promise<number>;
+/**
+ * Sends a LIN message
+ *
+ * @category LIN
+ * @param {LinMsg} msg - The LIN message to be sent
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
+ */
+declare function output(msg: LinMsg): Promise<number>;
+/**
+ * Set a signal value
+ *
+ * @category LIN
+ * @category CAN
+ * @param {SignalName} signal - The signal to set
+ * @param {number|number[]} value - The value to set, can be single number or array
+ * @returns {Promise<void>} - Returns a promise that resolves when value is set
+ *
+ * @example
+ * ```ts
+ * // Set single value signal
+ * await setSignal('LIN.lin.xxxx', 123);
+ *
+ * // Set array value signal
+ * await setSignal('LIN.lin.xxxx', [1, 2, 3, 4]);
+ * ```
+ */
+declare function setSignal(signal: SignalName, value: number | number[]): Promise<void>;
 /**
  * Register a virtual entity
  *
@@ -1040,4 +1077,4 @@ declare function outputLin(msg: LinMsg): Promise<number>;
  */
 declare function RegisterEthVirtualEntity(entity: VinInfo, ip?: string): Promise<void>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type TesterName, Util, UtilClass, outputCan, outputLin };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, output, setSignal };

@@ -1,4 +1,4 @@
-import { DiagResponse,DiagRequest, ServiceItem, outputLin, LinDirection, LinChecksumType} from "ECB";
+import { DiagResponse,DiagRequest, ServiceItem, output, LinDirection, LinChecksumType, setSignal} from "ECB";
 
 
 
@@ -9,10 +9,18 @@ Util.On("Tester_lin_1.DiagnosticSessionControl160.send",async (v)=>{
 })
 
 Util.OnKey('c',async ()=>{
-    await outputLin({
+    await output({
         frameId: 0x3c,
         data: Buffer.from([2,1,0xb6,0xff,0xff,0xff,0xff,0xff]),
         direction: LinDirection.SEND,
         checksumType: LinChecksumType.CLASSIC
     })
 })
+
+let val=0
+const timer=setInterval(() => {
+    console.log("setSignal",val)
+    setSignal({
+        signalName:"MotorDirection",  
+    },val++)
+}, 2000);

@@ -27,6 +27,7 @@ const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
 const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
+const allSignal = ['{{{signalName}}}'] as const
 
 interface Jobs { string: (data: Buffer) => string }
 /**
@@ -49,6 +50,13 @@ export type ServiceNameSend = (typeof allServicesSend)[number]
  * @category UDS
  */
 export type ServiceNameRecv = (typeof allServicesRecv)[number]
+
+/**
+ * All signals name config in Diagnostic Service.
+ * @category LIN
+ * @category CAN
+ */
+export type SignalName = (typeof allSignal)[number]
 
 /**
  * All jobs name config in Diagnostic Service.
@@ -1122,10 +1130,10 @@ export class UtilClass {
  * 
  *     ```ts
  *     Util.On('Can.DiagRequest.send', async (req) => {
- *        // The req is a `DiagRequest`
- *        console.log(req.getServiceName(), ': send');
- *     });
- *     ```
+   *        // The req is a `DiagRequest`
+   *        console.log(req.getServiceName(), ': send');
+   *     });
+   *     ```
  * 
  * 3. *recv function*
  *     > * This function will be called after the response message has been received.
@@ -1133,30 +1141,52 @@ export class UtilClass {
  * 
  *     ```ts
  *     Util.On('Can.DiagRequest.recv', async (req) => {
- *        // The req is a `DiagResponse`
- *        console.log(req.getServiceName(), ':recv');
- *     });
- *     ```
+   *        // The req is a `DiagResponse`
+   *        console.log(req.getServiceName(), ':recv');
+   *     });
+   *     ```
  * 
  * 4. **More**
- *     > For more details, please refer to {@link UDSClass | `UDSClass`} class.
+ *     > For more details, please refer to the {@link UDSClass | `UDSClass`} class.
  */
 export const Util = new UtilClass()
 global.Util = Util
 
 /**
+ * Type guard to check if the message is a LinMsg
+ */
+function isLinMsg(msg: CanMessage | LinMsg): msg is LinMsg {
+  return 'frameId' in msg;
+}
+
+/**
+ * Type guard to check if the message is a CanMessage
+ */
+function isCanMsg(msg: CanMessage | LinMsg): msg is CanMessage {
+  return 'id' in msg;
+}
+
+/**
  * Sends a CAN message
  * 
  * @category CAN
- * @param {CanMessage} msg - The CAN message to be sent.
- * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp.
+ * @param {CanMessage} msg - The CAN message to be sent
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
  */
-export async function outputCan(msg: CanMessage): Promise<number> {
+export async function output(msg: CanMessage): Promise<number>;
+/**
+ * Sends a LIN message
+ * 
+ * @category LIN
+ * @param {LinMsg} msg - The LIN message to be sent
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
+ */
+export async function output(msg: LinMsg): Promise<number>;
+export async function output(msg: CanMessage | LinMsg): Promise<number> {
   const p: Promise<number> = new Promise((resolve, reject) => {
-
     workerpool.workerEmit({
       id: id,
-      event: 'sendCanFrame',
+      event: isLinMsg(msg) ? 'sendLinFrame' : 'sendCanFrame',
       data: msg
     })
     emitMap.set(id, { resolve, reject })
@@ -1165,30 +1195,7 @@ export async function outputCan(msg: CanMessage): Promise<number> {
   try {
     return await p
   } catch (e: any) {
-    const err = new Error('outputCan error:' + e.toString())
-    //pop stack
-    //just got 0,2,3
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
-}
-
-export async function outputLin(msg: LinMsg): Promise<number> {
-  const p: Promise<number> = new Promise((resolve, reject) => {
-
-    workerpool.workerEmit({
-      id: id,
-      event: 'sendLinFrame',
-      data: msg
-    })
-    emitMap.set(id, { resolve, reject })
-    id++
-  })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('outputLin error:' + e.toString())
+    const err = new Error('output error:' + e.toString())
     //pop stack
     //just got 0,2,3
     const stack = err.stack?.split('\n') || []
@@ -1199,6 +1206,47 @@ export async function outputLin(msg: LinMsg): Promise<number> {
 
 
 
+
+/**
+ * Set a signal value
+ * 
+ * @category LIN
+ * @category CAN
+ * @param {SignalName} signal - The signal to set
+ * @param {number|number[]} value - The value to set, can be single number or array
+ * @returns {Promise<void>} - Returns a promise that resolves when value is set
+ * 
+ * @example
+ * ```ts
+ * // Set single value signal
+ * await setSignal('LIN.lin.xxxx', 123);
+ * 
+ * // Set array value signal
+ * await setSignal('LIN.lin.xxxx', [1, 2, 3, 4]);
+ * ```
+ */
+export async function setSignal(signal: SignalName, value: number|number[]): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id, 
+      event: 'setSignal',
+      data: {
+        signal,
+        value
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  try {
+    return await p
+  } catch (e: any) {
+    const err = new Error('setSignal error: ' + e.toString())
+    const stack = err.stack?.split('\n') || []
+    err.stack = [stack[0], stack[2], stack[3]].join('\n')
+    throw err
+  }
+}
 
 let rightEntity: EntityAddr | undefined
 

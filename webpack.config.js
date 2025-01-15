@@ -96,6 +96,14 @@ class MyCustomPlugin {
 {{/each}}
 }`)
 
+    content=content.replace(
+    `declare const allSignal: readonly ["{{{signalName}}}"];`,
+`declare const allSignal: readonly [
+    {{#each this.signals}}
+        "{{this}}",
+    {{/each}}
+];`)
+
         //write 
         fs.writeFileSync(path.resolve(__dirname,'src','main','share','uds.d.ts.html'),content)
         //bundle cryptoExt.d.ts

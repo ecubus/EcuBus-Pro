@@ -1,0 +1,213 @@
+VERSION ""
+
+
+NS_ : 
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+
+BO_ 2028 Battery: 61 Vector__XXX
+ SG_ StateOfChargeBMS m257 : 63|8@0+ (0.5,3) [0|100] "%" Vector__XXX
+ SG_ R m98M : 15|16@0+ (1,0) [0|0] "unit" Vector__XXX
+ SG_ S M : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ MinCellVoltage m257 : 231|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ MaxCellVoltage m257 : 215|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ StateOfChargeDisplay m261 : 279|8@0+ (0.5,3) [0|0] "%" Vector__XXX
+ SG_ BatteryTemperature1 m257 : 159|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryTemperature2 m257 : 167|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryTemperature3 m257 : 175|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryTemperature4 m257 : 183|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryMinTemperature m257 : 151|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryMaxTemperature m257 : 143|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryHeaterTemperature1 m261 : 215|8@0- (1,0) [0|0] "degC" Vector__XXX
+ SG_ BatteryVoltageAuxillary m257 : 263|8@0+ (0.1,0) [11|14.6] "V" Vector__XXX
+ SG_ BatteryTemperature5 m257 : 191|8@0- (1,0) [0|0.5] "V" Vector__XXX
+ SG_ BatteryFanFeedback m257 : 255|8@0+ (1,0) [0|120] "Hz" Vector__XXX
+ SG_ BatteryFanStatus m257 : 247|8@0+ (1,0) [0|9] "" Vector__XXX
+ SG_ NormalChargePort m257 : 101|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ RapidChargePort m257 : 102|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ OperatingTime m257 : 399|32@0+ (0.00027777777,0) [0|1000000] "hours" Vector__XXX
+ SG_ MinDeterioration m261 : 247|16@0+ (0.1,0) [0|100] "%" Vector__XXX
+ SG_ MinDeteriorationCellNo m261 : 271|8@0+ (1,0) [0|98] "" Vector__XXX
+ SG_ MinCellVoltageCellNo m257 : 239|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ MaxCellVoltageCellNo m257 : 223|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Charging m257 : 103|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ CCC_CumulativeChargeCurrent m257 : 271|32@0+ (0.1,0) [0|1000000] "Ah" Vector__XXX
+ SG_ CDC_CumulativeDischargeCurrent m257 : 303|32@0+ (0.1,0) [0|1000000] "Ah" Vector__XXX
+ SG_ CEC_CumulativeEnergyCharged m257 : 335|32@0+ (0.1,0) [0|1000000] "kWh" Vector__XXX
+ SG_ CED_CumulativeEnergyDischarged m257 : 367|32@0+ (0.1,0) [0|1000000] "kWh" Vector__XXX
+ SG_ BMSMainRelay m257 : 96|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BMSIgnition m257 : 426|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BatteryDCVoltage m257 : 127|16@0+ (0.1,0) [0|0] "V" Vector__XXX
+ SG_ BatteryCurrent m257 : 111|16@0- (0.1,0) [-230|230] "A" Vector__XXX
+ SG_ BatteryAvailableChargePower m261 : 159|16@0+ (0.01,0) [0|270] "kW" Vector__XXX
+ SG_ BatteryAvailableDischargePower m261 : 175|16@0+ (0.01,0) [0|270] "kW" Vector__XXX
+ SG_ CellVoltage01 m258 : 63|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage02 m258 : 71|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage03 m258 : 79|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage04 m258 : 87|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage05 m258 : 95|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage06 m258 : 103|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage07 m258 : 111|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage08 m258 : 119|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage09 m258 : 127|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage10 m258 : 135|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage11 m258 : 143|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage12 m258 : 151|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage13 m258 : 159|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage14 m258 : 167|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage15 m258 : 175|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage16 m258 : 183|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage17 m258 : 191|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage18 m258 : 199|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage19 m258 : 207|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ CellVoltage20 m258 : 215|8@0+ (0.02,0) [2.8|4.2] "V" Vector__XXX
+ SG_ StateOfHealth m261 : 231|16@0+ (0.1,0) [0|100] "%" Vector__XXX
+
+BO_ 1979 TempAndSpeed: 53 Vector__XXX
+ SG_ IndoorTemperature m256 : 71|8@0+ (0.5,-40) [-50|50] "degC" Vector__XXX
+ SG_ R m98M : 15|16@0+ (1,0) [0|0] "unit" Vector__XXX
+ SG_ S M : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ OutdoorTemperature m256 : 79|8@0+ (0.5,-40) [-50|50] "degC" Vector__XXX
+ SG_ VehicleSpeed m256 : 263|8@0+ (1,0) [0|200] "kmh" Vector__XXX
+
+BO_ 1960 Tire: 63 Vector__XXX
+ SG_ R m98M : 15|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ S M : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ TirePressureFrontLeft m49163 : 63|8@0+ (0.2,0) [0|120] "psi" Vector__XXX
+ SG_ TirePressureFrontRight m49163 : 103|8@0+ (0.2,0) [0|120] "psi" Vector__XXX
+ SG_ TirePressureBackLeft m49163 : 143|8@0+ (0.2,0) [0|120] "psi" Vector__XXX
+ SG_ TirePressureBackRight m49163 : 183|8@0+ (0.2,0) [0|120] "psi" Vector__XXX
+ SG_ TireTemperatureFrontLeft m49163 : 71|8@0+ (1,-50) [-40|65] "degC" Vector__XXX
+ SG_ TireTemperatureFrontRight m49163 : 111|8@0+ (1,-50) [-40|65] "degC" Vector__XXX
+ SG_ TireTemperatureBackLeft m49163 : 151|8@0+ (1,-50) [-40|65] "degC" Vector__XXX
+ SG_ TireTemperatureBackRight m49163 : 191|8@0+ (1,-50) [-40|65] "degC" Vector__XXX
+
+
+
+BA_DEF_ SG_  "SignalIgnore" INT 0 1;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","StandardCAN_FD","ExtendedCAN_FD","J1939PG";
+BA_DEF_ BO_  "MessageIgnore" INT 0 1;
+BA_DEF_ BO_  "TransportProtocolType" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "ProtocolType" STRING ;
+BA_DEF_  "DatabaseCompiler" STRING ;
+BA_DEF_DEF_  "SignalIgnore" 0;
+BA_DEF_DEF_  "VFrameFormat" "";
+BA_DEF_DEF_  "MessageIgnore" 0;
+BA_DEF_DEF_  "TransportProtocolType" "";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "ProtocolType" "";
+BA_DEF_DEF_  "DatabaseCompiler" "CSS Electronics (wwww.csselectronics.com)";
+BA_ "BusType" "CAN";
+BA_ "ProtocolType" "";
+BA_ "VFrameFormat" BO_ 2028 0;
+BA_ "SignalIgnore" SG_ 2028 R 1;
+BA_ "SignalIgnore" SG_ 2028 S 1;
+BA_ "SignalIgnore" SG_ 1979 R 1;
+BA_ "SignalIgnore" SG_ 1979 S 1;
+BA_ "VFrameFormat" BO_ 1960 0;
+BA_ "SignalIgnore" SG_ 1960 R 1;
+BA_ "SignalIgnore" SG_ 1960 S 1;
+BA_ "TransportProtocolType" BO_ 1979 "ISOTP";
+BA_ "TransportProtocolType" BO_ 2028 "ISOTP";
+BA_ "TransportProtocolType" BO_ 1960 "ISOTP";
+
+SG_MUL_VAL_ 2028 StateOfChargeBMS R 257-257;
+SG_MUL_VAL_ 2028 R S 98-98;
+SG_MUL_VAL_ 2028 MinCellVoltage R 257-257;
+SG_MUL_VAL_ 2028 MaxCellVoltage R 257-257;
+SG_MUL_VAL_ 2028 StateOfChargeDisplay R 261-261;
+SG_MUL_VAL_ 2028 BatteryTemperature1 R 257-257;
+SG_MUL_VAL_ 2028 BatteryTemperature2 R 257-257;
+SG_MUL_VAL_ 2028 BatteryTemperature3 R 257-257;
+SG_MUL_VAL_ 2028 BatteryTemperature4 R 257-257;
+SG_MUL_VAL_ 2028 BatteryMinTemperature R 257-257;
+SG_MUL_VAL_ 2028 BatteryMaxTemperature R 257-257;
+SG_MUL_VAL_ 2028 BatteryHeaterTemperature1 R 261-261;
+SG_MUL_VAL_ 2028 BatteryVoltageAuxillary R 257-257;
+SG_MUL_VAL_ 2028 BatteryTemperature5 R 257-257;
+SG_MUL_VAL_ 2028 BatteryFanFeedback R 257-257;
+SG_MUL_VAL_ 2028 BatteryFanStatus R 257-257;
+SG_MUL_VAL_ 2028 NormalChargePort R 257-257;
+SG_MUL_VAL_ 2028 RapidChargePort R 257-257;
+SG_MUL_VAL_ 2028 OperatingTime R 257-257;
+SG_MUL_VAL_ 2028 MinDeterioration R 261-261;
+SG_MUL_VAL_ 2028 MinDeteriorationCellNo R 261-261;
+SG_MUL_VAL_ 2028 MinCellVoltageCellNo R 257-257;
+SG_MUL_VAL_ 2028 MaxCellVoltageCellNo R 257-257;
+SG_MUL_VAL_ 2028 Charging R 257-257;
+SG_MUL_VAL_ 2028 CCC_CumulativeChargeCurrent R 257-257;
+SG_MUL_VAL_ 2028 CDC_CumulativeDischargeCurrent R 257-257;
+SG_MUL_VAL_ 2028 CEC_CumulativeEnergyCharged R 257-257;
+SG_MUL_VAL_ 2028 CED_CumulativeEnergyDischarged R 257-257;
+SG_MUL_VAL_ 2028 BMSMainRelay R 257-257;
+SG_MUL_VAL_ 2028 BMSIgnition R 257-257;
+SG_MUL_VAL_ 2028 BatteryDCVoltage R 257-257;
+SG_MUL_VAL_ 2028 BatteryCurrent R 257-257;
+SG_MUL_VAL_ 2028 BatteryAvailableChargePower R 261-261;
+SG_MUL_VAL_ 2028 BatteryAvailableDischargePower R 261-261;
+SG_MUL_VAL_ 2028 CellVoltage01 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage02 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage03 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage04 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage05 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage06 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage07 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage08 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage09 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage10 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage11 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage12 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage13 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage14 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage15 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage16 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage17 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage18 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage19 R 258-258;
+SG_MUL_VAL_ 2028 CellVoltage20 R 258-258;
+SG_MUL_VAL_ 2028 StateOfHealth R 261-261;
+SG_MUL_VAL_ 1979 IndoorTemperature R 256-256;
+SG_MUL_VAL_ 1979 R S 98-98;
+SG_MUL_VAL_ 1979 OutdoorTemperature R 256-256;
+SG_MUL_VAL_ 1979 VehicleSpeed R 256-256;
+SG_MUL_VAL_ 1960 R S 98-98;
+SG_MUL_VAL_ 1960 TirePressureFrontLeft R 49163-49163;
+SG_MUL_VAL_ 1960 TirePressureFrontRight R 49163-49163;
+SG_MUL_VAL_ 1960 TirePressureBackLeft R 49163-49163;
+SG_MUL_VAL_ 1960 TirePressureBackRight R 49163-49163;
+SG_MUL_VAL_ 1960 TireTemperatureFrontLeft R 49163-49163;
+SG_MUL_VAL_ 1960 TireTemperatureFrontRight R 49163-49163;
+SG_MUL_VAL_ 1960 TireTemperatureBackLeft R 49163-49163;
+SG_MUL_VAL_ 1960 TireTemperatureBackRight R 49163-49163;

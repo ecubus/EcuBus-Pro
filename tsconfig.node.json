@@ -6,9 +6,8 @@
     "src/cli/**/*.ts",
     "src/preload/**/*",
     "test/**/*.test.ts",
+    "src/renderer/src/database/**/*.ts"
   ],
-  //for testing
-  "files": ["src/renderer/src/database/ldfParse.ts","src/renderer/src/worker/dataParse.ts"],
   "compilerOptions": {
     "composite": true,
     "noUnusedLocals": false,

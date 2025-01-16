@@ -1,0 +1,6 @@
+{
+    "type": "module",
+    "scripts": {
+        "build": "tsx gen_dts_signature.ts"
+    }
+  }

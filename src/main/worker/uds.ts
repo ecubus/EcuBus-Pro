@@ -1152,19 +1152,6 @@ export class UtilClass {
 export const Util = new UtilClass()
 global.Util = Util
 
-/**
- * Type guard to check if the message is a LinMsg
- */
-function isLinMsg(msg: CanMessage | LinMsg): msg is LinMsg {
-  return 'frameId' in msg;
-}
-
-/**
- * Type guard to check if the message is a CanMessage
- */
-function isCanMsg(msg: CanMessage | LinMsg): msg is CanMessage {
-  return 'id' in msg;
-}
 
 /**
  * Sends a CAN message
@@ -1186,7 +1173,7 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
   const p: Promise<number> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
       id: id,
-      event: isLinMsg(msg) ? 'sendLinFrame' : 'sendCanFrame',
+      event: 'output',
       data: msg
     })
     emitMap.set(id, { resolve, reject })
@@ -1212,17 +1199,17 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
  * 
  * @category LIN
  * @category CAN
- * @param {SignalName} signal - The signal to set
+ * @param {SignalName} signal - The signal to set, dbName.SignalName
  * @param {number|number[]} value - The value to set, can be single number or array
  * @returns {Promise<void>} - Returns a promise that resolves when value is set
  * 
  * @example
  * ```ts
  * // Set single value signal
- * await setSignal('LIN.lin.xxxx', 123);
+ * await setSignal(lin.xxxx', 123);
  * 
  * // Set array value signal
- * await setSignal('LIN.lin.xxxx', [1, 2, 3, 4]);
+ * await setSignal('lin.xxxx', [1, 2, 3, 4]);
  * ```
  */
 export async function setSignal(signal: SignalName, value: number|number[]): Promise<void> {

@@ -18,7 +18,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, NodeLinItem, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { LinInter } from 'src/preload/data'
+import { DataSet, LinInter } from 'src/preload/data'
 import { LinMode, LinNode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import {TpError as LinTpError} from '../dolin/lintp'
@@ -45,21 +45,20 @@ ipcMain.handle('ipc-get-build-status', async (event, ...arg) => {
 ipcMain.handle('ipc-create-project', async (event, ...arg) => {
     const projectPath = arg[0] as string
     const projectName = arg[1] as string
-    const testers = arg[2]
-    const nodes = arg[3]
-    await createProject(projectPath, projectName, testers, nodes, 'ECB')
-    await refreshProject(projectPath, projectName, testers, 'ECB')
+    const data = arg[2] as DataSet
+    
+    await createProject(projectPath, projectName, data, 'ECB')
+    await refreshProject(projectPath, projectName, data, 'ECB')
     await shell.openPath(path.join(projectPath, `${projectName}.code-workspace`))
 })
 
 ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     const projectPath = arg[0] as string
     const projectName = arg[1] as string
-    const testers = arg[2]
-    const nodes = arg[3]
-    const entry = arg[4] as string
+    const data = arg[2] as DataSet
+    const entry=arg[3] as string
 
-    const result = await compileTsc(projectPath, projectName, testers, nodes, entry, esbuildWin, path.join(libPath, 'js'), 'ECB')
+    const result = await compileTsc(projectPath, projectName, data, entry, esbuildWin, path.join(libPath, 'js'), 'ECB')
     if (result.length > 0) {
         for (const err of result) {
             sysLog.error(`${err.file}:${err.line} build error: ${err.message}`)

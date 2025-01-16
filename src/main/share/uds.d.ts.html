@@ -1053,17 +1053,17 @@ declare function output(msg: LinMsg): Promise<number>;
  *
  * @category LIN
  * @category CAN
- * @param {SignalName} signal - The signal to set
+ * @param {SignalName} signal - The signal to set, dbName.SignalName
  * @param {number|number[]} value - The value to set, can be single number or array
  * @returns {Promise<void>} - Returns a promise that resolves when value is set
  *
  * @example
  * ```ts
  * // Set single value signal
- * await setSignal('LIN.lin.xxxx', 123);
+ * await setSignal(lin.xxxx', 123);
  *
  * // Set array value signal
- * await setSignal('LIN.lin.xxxx', [1, 2, 3, 4]);
+ * await setSignal('lin.xxxx', [1, 2, 3, 4]);
  * ```
  */
 declare function setSignal(signal: SignalName, value: number | number[]): Promise<void>;

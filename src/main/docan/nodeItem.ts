@@ -39,7 +39,7 @@ export class NodeItem {
           MODE: 'node',
           NAME: nodeItem.name,
         }, jsPath, this.log, this.tester)
-        this.pool.registerHandler('sendCanFrame', this.sendFrame.bind(this))
+        this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         //find tester
         for (const c of nodeItem.channel) {

@@ -10,14 +10,13 @@ import { ServiceId } from './share/service'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
 type HandlerMap = {
-  sendCanFrame: (pool: UdsTester, data: CanMessage) => Promise<number>
+  output: (pool: UdsTester, data: any) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
     device?: string
     address?: string
     service: ServiceItem
     isReq: boolean
   }) => Promise<number>
-  sendLinFrame: (pool: UdsTester, data: LinMsg) => Promise<number>
   setSignal: (pool: UdsTester, data: {
     signal: string,
     value: number|number[]
@@ -86,7 +85,9 @@ export default class UdsTester {
     })
     const d = (this.pool as any)._getWorker()
     this.worker = d
-
+    d.worker.globalOn=(payload:any)=>{
+      this.eventHandler(payload,()=>{},()=>{})
+    }
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
         const str = data.toString().trim()

@@ -247,11 +247,10 @@ const updateTime = () => {
         }
     })
     const ts = (Date.now() - window.startTime) / 1000
-    time.value=ts
     if(ts>maxX){
         maxX=ts
     }
-   
+    time.value=maxX
     maxX = Math.ceil(maxX) + 5
     enabledCharts.value.forEach(c => {
         chartInstances[c.id].setOption({

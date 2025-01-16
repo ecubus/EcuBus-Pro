@@ -100,7 +100,7 @@ export class NodeLinItem {
                     MODE: 'node',
                     NAME: nodeItem.name,
                 }, jsPath, this.log, this.tester)
-                this.pool.registerHandler('sendLinFrame', this.sendFrame.bind(this))
+                this.pool.registerHandler('output', this.sendFrame.bind(this))
                 this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
                 this.pool.registerHandler('setSignal', this.setSignal.bind(this))
                 //find tester
@@ -231,20 +231,18 @@ export class NodeLinItem {
         value: number|number[]
     }) {
 
-
         const s=data.signal.split('.')
         // 验证数据库是否存在
-        if (!this.db||s[0]!='LIN'||s[1]!=this.db.name) {
+        if (!this.db||s[0]!=this.db.name) {
             throw new Error('LIN database not found')
         }
         
-        const signalName=s[2]
-       
+        const signalName=s[1]
+        
         const signal = this.db.signals[signalName]
         if (!signal) {
             throw new Error(`Signal ${signalName} not found`)
         }
-
         // 更新信号值
         updateSignalVal(this.db, signalName, data.value)
     }

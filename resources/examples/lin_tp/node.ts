@@ -18,9 +18,9 @@ Util.OnKey('c',async ()=>{
 })
 
 let val=0
-const timer=setInterval(() => {
+setInterval(() => {
     console.log("setSignal",val)
-    setSignal({
-        signalName:"MotorDirection",  
-    },val++)
+    setSignal("lin.MotorDirection",val++).then(()=>{
+        console.log("setSignal success")
+    })
 }, 2000);

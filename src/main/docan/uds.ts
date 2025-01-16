@@ -99,6 +99,8 @@ import { DOIP, DOIP_SOCKET } from '../doip'
 import LinBase from '../dolin/base'
 import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 import { LinMode } from '../share/lin'
+import { LDF } from 'src/renderer/src/database/ldfParse'
+import { DataSet } from 'src/preload/data'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -150,10 +152,10 @@ interface ProjectConfig {
   projectPath: string
   projectName: string
 }
-export function updateUdsDts(testers: Record<string, TesterInfo>) {
+export function updateUdsDts(data:DataSet) {
   const nameString: string[] = []
   const jobs: { name: string; param: string[] }[] = []
-  for (const tester of Object.values(testers)) {
+  for (const tester of Object.values(data.tester)) {
     nameString.push(`${tester.name}.*`)
     for (const items of Object.values(tester.allServiceList)) {
       for (const item of items) {
@@ -172,13 +174,21 @@ export function updateUdsDts(testers: Record<string, TesterInfo>) {
       }
     }
   }
+  //const Signals
+  const signals:string[]=[]
+  for(const ldf of Object.values(data.database.lin)){
+    for(const sig of Object.values(ldf.signals)){
+      signals.push(`${ldf.name}.${sig.signalName}`)
+    }
+  }
   //lib
 
   const libTmpl = Handlebars.compile(udsHeaderStr)
   const libResult = libTmpl({
-    testers: Object.values(testers).map((item) => item.name),
+    testers: Object.values(data.tester).map((item) => item.name),
     services: [...new Set(nameString)],
     jobs: jobs,
+    signals:signals
   })
   return libResult
 }
@@ -895,7 +905,7 @@ export async function deleteTester(projectPath: string, projectName: string, nod
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   }
 }
-export async function createProject(projectPath: string, projectName: string, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode>, vendor = 'YT') {
+export async function createProject(projectPath: string, projectName: string, data:DataSet,vendor = 'YT') {
   //create node_modules
   const nodeModulesPath = path.join(projectPath, 'node_modules')
   if (!fs.existsSync(nodeModulesPath)) {
@@ -961,14 +971,14 @@ export * from './uds'
 export * from './crc'
 export * from './cryptoExt'
     `)
-  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(testers))
+  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
   await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
   await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {
     (tsconfig as any).files = []
-    for (const tester of Object.values(testers)) {
+    for (const tester of Object.values(data.tester)) {
       if (tester.script) {
         if (path.isAbsolute(tester.script) === false) {
           ((tsconfig as any).files as string[]).push(tester.script)
@@ -979,7 +989,7 @@ export * from './cryptoExt'
 
       }
     }
-    for (const node of Object.values(nodes)) {
+    for (const node of Object.values(data.nodes)) {
       if (node.script) {
         if (path.isAbsolute(node.script) === false) {
           ((tsconfig as any).files as string[]).push(node.script)
@@ -995,7 +1005,7 @@ export * from './cryptoExt'
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
     const tsconfig = json5.parse(contnet)
     tsconfig.files = tsconfig.files || []
-    for (const tester of Object.values(testers)) {
+    for (const tester of Object.values(data.tester)) {
       if (tester.script) {
 
         if (path.isAbsolute(tester.script) === false) {
@@ -1012,7 +1022,7 @@ export * from './cryptoExt'
         }
       }
     }
-    for (const node of Object.values(nodes)) {
+    for (const node of Object.values(data.nodes)) {
       if (node.script) {
         if (path.isAbsolute(node.script) === false) {
           if ((tsconfig.files as string[]).indexOf(node.script) == -1) {
@@ -1049,7 +1059,7 @@ export * from './cryptoExt'
 
 }
 
-export async function refreshProject(projectPath: string, projectName: string, testers: Record<string, TesterInfo>, vendor = 'YT') {
+export async function refreshProject(projectPath: string, projectName: string, data: DataSet, vendor = 'YT') {
   //create node_modules
   const nodeModulesPath = path.join(projectPath, 'node_modules')
   if (!fs.existsSync(nodeModulesPath)) {
@@ -1066,12 +1076,12 @@ export async function refreshProject(projectPath: string, projectName: string, t
   if (!fs.existsSync(vendorPath)) {
     await fsP.mkdir(vendorPath)
   }
-  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(testers))
+  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
 }
 
-export async function compileTsc(projectPath: string, projectName: string, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode>, entry: string, esbuildPath: string, libPath: string, vendor = 'YT') {
+export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, vendor = 'YT') {
 
-  await createProject(projectPath, projectName, testers, nodes, vendor)
+  await createProject(projectPath, projectName,data)
   if (entry) {
     let script = entry
     if (path.isAbsolute(script) === false) {

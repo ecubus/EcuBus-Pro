@@ -33,9 +33,9 @@ describe('LIN Signal Parse', () => {
         const result = parseLinData([msg])
         console.log(result)
         expect(result['lin.test.ldf.signals.Motor1LinError']).toBeDefined()
-        expect(result['lin.test.ldf.signals.Motor1LinError'][0].val).toBe(1)
+        expect(result['lin.test.ldf.signals.Motor1LinError'][0][1]).toBe(1)
         const buf=Buffer.from([0xf5,0xf1,0,4]).readUInt32BE()
-        expect(result['lin.test.ldf.signals.Motor1Position'][0].val).toBe(buf)
+        expect(result['lin.test.ldf.signals.Motor1Position'][0][1]).toBe(buf)
     })
 
     test('parse byte array signal - Motor1Position', () => {
@@ -50,7 +50,7 @@ describe('LIN Signal Parse', () => {
 
         const result = parseLinData([msg])
         expect(result['lin.test.ldf.signals.MotorDirection']).toBeDefined()
-        expect(result['lin.test.ldf.signals.MotorDirection'][0].val).toBe(1)
+        expect(result['lin.test.ldf.signals.MotorDirection'][0][1]).toBe(1)
     })
 
     test('parse bit signal - Motor1LinError', () => {
@@ -65,9 +65,9 @@ describe('LIN Signal Parse', () => {
 
         const result = parseLinData([msg])
         expect(result['lin.test.ldf.signals.MotorSelection']).toBeDefined()
-        expect(result['lin.test.ldf.signals.MotorSelection'][0].val).toBe(0xd)
+        expect(result['lin.test.ldf.signals.MotorSelection'][0][1]).toBe(0xd)
         expect(result['lin.test.ldf.signals.MotorDirection']).toBeDefined()
-        expect(result['lin.test.ldf.signals.MotorDirection'][0].val).toBe(0)
+        expect(result['lin.test.ldf.signals.MotorDirection'][0][1]).toBe(0)
         
     })
 

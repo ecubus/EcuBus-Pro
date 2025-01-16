@@ -90,7 +90,7 @@
     "vxe-pc-ui": "^4.2.53",
     "vxe-table": "4.9.4",
     "winston": "^3.17.0",
-    "workerpool": "https://github.com/frankie-zeng/workerpool.git#efa4bab"
+    "workerpool": "github:frankie-zeng/workerpool#24f9e85"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",

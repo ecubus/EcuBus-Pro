@@ -202,7 +202,7 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
 
             if (project.projectInfo.path) {
                 if (action == 'edit') {
-                    window.electron.ipcRenderer.invoke('ipc-create-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tester), cloneDeep(dataBase.nodes)).catch((e: any) => {
+                    window.electron.ipcRenderer.invoke('ipc-create-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData())).catch((e: any) => {
                         ElMessageBox.alert(e.message, 'Error', {
                             confirmButtonText: 'OK',
                             type: 'error',
@@ -213,7 +213,7 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
                 } else {
                     buildStatus.value = ''
                     buildLoading.value = true
-                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tester), cloneDeep(dataBase.nodes), data.value.script)
+                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), data.value.script)
                         .then((val) => {
                             if (val.length > 0) {
 

@@ -79,7 +79,7 @@ const BA_DEF_SGTYPE = createToken({ name: "BA_DEF_SGTYPE", pattern: /BA_DEF_SGTY
 const BA_DEF_DEF = createToken({ name: "BA_DEF_DEF", pattern: /BA_DEF_DEF_/ });
 const BA_DEF_REL = createToken({ name: "BA_DEF_REL", pattern: /BA_DEF_REL_/ });
 const BA_SGTYPE = createToken({ name: "BA_SGTYPE", pattern: /BA_SGTYPE_/ });
-const BA_DEF = createToken({ name: "BA_DEF", pattern: /BA_DEF_/ });
+const BA_DEF = createToken({ name: "BA_DEF", pattern: /BA_DEF_\s+/ });
 const BA_REL = createToken({ name: "BA_REL", pattern: /BA_REL_/ });
 const BA = createToken({ name: "BA", pattern: /BA_/ });
 
@@ -115,10 +115,16 @@ const BS = createToken({ name: "BS", pattern: /BS_/ });
 const SG = createToken({ name: "SG", pattern: /SG_/ });
 const CM = createToken({ name: "CM", pattern: /CM_/ });
 
+const NS_DESC = createToken({ name: "NS_DESC", pattern: /NS_DESC_/ });
+
 // 基本tokens
 const StringLiteral = createToken({ name: "StringLiteral", pattern: /"[^"]*"/ });
 const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z_][a-zA-Z0-9_]*/ });
-const Number = createToken({ name: "Number", pattern: /\d+(\.\d+)?/ });
+// 修改 Number token 以支持科学记数法
+const Number = createToken({ 
+    name: "Number", 
+    pattern: /[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?\s*/ 
+});
 const Colon = createToken({ name: "Colon", pattern: /:/ });
 const Semicolon = createToken({ name: "Semicolon", pattern: /;/ });
 const Pipe = createToken({ name: "Pipe", pattern: /\|/ });
@@ -131,11 +137,21 @@ const Comma = createToken({ name: "Comma", pattern: /,/ });
 const Plus = createToken({ name: "Plus", pattern: /\+/ });
 const Minus = createToken({ name: "Minus", pattern: /-/ });
 
+// 在基本 tokens 部分添加新的 tokens
+const MultiplexerIndicator = createToken({ 
+    name: "MultiplexerIndicator", 
+    pattern: /[mM][a-zA-Z0-9_]*/ 
+});
+
+const ENUM = createToken({ name: "ENUM", pattern: /ENUM/ });
+const INT = createToken({ name: "INT", pattern: /INT/ });
+
 // 定义allTokens数组，保持相同的顺序
 const allTokens = [
+   
     WhiteSpace, Comment,
     // 按长度/特异性排序
-    BA_DEF_DEF_REL, BA_DEF_SGTYPE, BA_DEF_DEF, BA_DEF_REL,
+    BA_DEF_DEF_REL, BA_DEF_SGTYPE, BA_DEF_DEF, BA_DEF_REL, // 新增 BA_DEF_DEF_
     BA_SGTYPE, BA_DEF, BA_REL, BA,
     SIGTYPE_VALTYPE, SIG_VALTYPE, SIG_TYPE_REF, SIG_GROUP, SG_MUL_VAL,
     SGTYPE_VAL, SGTYPE,
@@ -144,16 +160,17 @@ const allTokens = [
     BO_TX_BU, BO, BU,
     CAT_DEF, CAT,
     ENVVAR_DATA, EV_DATA,
+    NS_DESC,
     Version, FILTER, NS, BS, SG, CM,
-    StringLiteral, Identifier, Number,
-    Plus, Minus,
+    ENUM, INT, // 新增
     Colon, Semicolon, Pipe, At,
     OpenParen, CloseParen, OpenBracket, CloseBracket,
+    StringLiteral,  Number, Plus, Minus,Identifier, MultiplexerIndicator,
     Comma
 ];
 
 // 创建lexer
-const JsonLexer = new Lexer(allTokens);
+export const JsonLexer = new Lexer(allTokens);
 
 class DBCParser extends CstParser {
     constructor() {
@@ -162,74 +179,104 @@ class DBCParser extends CstParser {
     }
 
     private version = this.RULE("versionClause", () => {
-        this.CONSUME(Version);
-        this.CONSUME(StringLiteral);
+        this.CONSUME1(Version);
+        this.CONSUME1(StringLiteral);
+        this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
     private busConfig = this.RULE("busConfigClause", () => {
-        this.CONSUME(BS);
-        this.CONSUME(Colon);
-        this.CONSUME(Number);
-        this.CONSUME(Semicolon);
+        this.CONSUME1(BS);
+        this.CONSUME1(Colon);
+        this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
     private nodes = this.RULE("nodesClause", () => {
-        this.CONSUME(BU);
+        this.CONSUME1(BU);
+        this.CONSUME1(Colon);
         this.MANY(() => {
-            this.CONSUME(Identifier);
+            this.CONSUME1(Identifier); // List of CAN-Nodes separated by whitespaces
         });
-        this.CONSUME(Semicolon);
+        this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
     private signal = this.RULE("signalClause", () => {
-        this.CONSUME(SG);
-        this.CONSUME1(Identifier); // Signal name
+        // SG_ <SignalName> [M|m<MultiplexerIdentifier>]
+        this.CONSUME1(SG);
+        this.CONSUME1(Identifier); // SignalName (required)
+        
+        // Multiplexer part (optional)
         this.OPTION(() => {
-            this.OR([
-                { ALT: () => this.CONSUME(StringLiteral) }, // M
-                { ALT: () => {
-                    this.CONSUME2(Identifier); // m
-                    this.CONSUME(Number); // multiplexer value
-                }}
+            
+            this.CONSUME2(Identifier);  // 匹配 M 或 m
+           
+        });
+
+        // : <StartBit>|<Length>@<Endianness><Signed>
+        this.CONSUME1(Colon);
+        this.CONSUME2(Number);  // StartBit (required)
+        this.CONSUME1(Pipe);    // | separator
+        this.CONSUME3(Number);  // Length (required)
+        this.CONSUME1(At);      // @ separator
+        this.CONSUME4(Number);  // Endianness (required): 1=Intel, 0=Motorola
+        
+        // Sign indicator
+        this.OR1([
+            { ALT: () => this.CONSUME1(Plus) },   // unsigned (+)
+            { ALT: () => this.CONSUME1(Minus) }   // signed (-)
+        ]);
+
+        // (<Factor>,<Offset>)
+        this.CONSUME1(OpenParen);
+        this.CONSUME5(Number);  // Factor (required)
+        this.CONSUME1(Comma);
+        this.CONSUME6(Number);  // Offset (required)
+        this.CONSUME1(CloseParen);
+
+        // [<Min>|<Max>]
+        this.CONSUME1(OpenBracket);
+        this.CONSUME7(Number);  // Minimum value (required)
+        this.CONSUME2(Pipe);    // | separator
+        this.CONSUME8(Number);  // Maximum value (required)
+        this.CONSUME1(CloseBracket);
+        
+        // "[Unit]" (optional)
+        this.OPTION2(() => {
+            this.OR2([
+                { ALT: () => this.CONSUME2(StringLiteral) }, // quoted unit
+                { ALT: () => this.CONSUME3(Identifier) }     // unquoted unit
             ]);
         });
-        this.CONSUME(Colon);
-        this.CONSUME1(Number); // Start bit
-        this.CONSUME(Pipe);
-        this.CONSUME2(Number); // Length
-        this.CONSUME(At);
-        this.CONSUME3(Number); // Endianness
-        this.OR1([
-            { ALT: () => this.CONSUME(Plus) },
-            { ALT: () => this.CONSUME(Minus) }
-        ]); // Sign indicator
-        this.CONSUME(OpenParen);
-        this.CONSUME5(Number); // Factor
-        this.CONSUME(Comma);
-        this.CONSUME6(Number); // Offset
-        this.CONSUME(CloseParen);
-        this.CONSUME(OpenBracket);
-        this.CONSUME7(Number); // Minimum
-        this.CONSUME1(Pipe);
-        this.CONSUME8(Number); // Maximum
-        this.CONSUME(CloseBracket);
-        this.CONSUME2(StringLiteral); // Unit
+
+        // Receiving nodes (required, at least one)
         this.AT_LEAST_ONE_SEP({
             SEP: Comma,
-            DEF: () => this.CONSUME3(Identifier) // Receiving nodes
+            DEF: () => {
+                this.OR3([
+                    { ALT: () => this.CONSUME4(Identifier) },      // node name
+                    { ALT: () => this.CONSUME3(StringLiteral) }    // Vector__XXX or special names
+                ]);
+            }
         });
-        this.CONSUME(Semicolon);
+        
+        this.OPTION3(() => this.CONSUME1(Semicolon));
     });
 
     private message = this.RULE("messageClause", () => {
-        this.CONSUME(BO);
-        this.CONSUME(Number); // Message ID
-        this.CONSUME(Identifier); // Message name
-        this.CONSUME(Colon);
-        this.CONSUME1(Number); // Message length
-        this.CONSUME1(StringLiteral); // Sending node
-        // Add semicolon after message header
-        this.CONSUME(Semicolon);
+        this.CONSUME1(BO);
+        this.CONSUME1(Number); // Message ID in decimal or hex format
+
+        this.OR1([
+            { ALT: () => this.CONSUME1(Identifier) }, // Standard message name
+            { ALT: () => this.CONSUME1(StringLiteral) } // Message name with special characters
+        ]);
+        this.CONSUME1(Colon);  // Colon after message ID
+        this.CONSUME2(Number); // Message length (in bytes)
+        this.OR2([
+            { ALT: () => this.CONSUME2(Identifier) }, // Standard node name
+            { ALT: () => this.CONSUME2(StringLiteral) } // Node name with special characters or Vector__XXX
+        ]);
+        this.OPTION(() => this.CONSUME2(Semicolon));
+        
         // Signals are optional
         this.MANY(() => {
             this.SUBRULE(this.signal);
@@ -237,102 +284,247 @@ class DBCParser extends CstParser {
     });
 
     private valueTable = this.RULE("valueTableClause", () => {
-        this.CONSUME(VAL_TABLE);
-        this.CONSUME(Identifier); // Table name
+        this.CONSUME1(VAL_TABLE);
+        this.CONSUME1(Identifier); // Table name
         this.MANY(() => {
-            this.CONSUME(Number);
-            this.CONSUME(StringLiteral);
+            this.CONSUME1(Number);
+            this.CONSUME1(StringLiteral);
         });
-        this.CONSUME(Semicolon);
+        this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
     private attribute = this.RULE("attributeClause", () => {
-        this.CONSUME(BA_DEF);
+        this.CONSUME1(BA_DEF);
         this.OPTION(() => {
-            this.OR([
-                { ALT: () => this.CONSUME(BU) },
-                { ALT: () => this.CONSUME(BO) },
-                { ALT: () => this.CONSUME(SG) }
+            this.OR1([
+                { ALT: () => this.CONSUME1(BU) },
+                { ALT: () => this.CONSUME1(BO) },
+                { ALT: () => this.CONSUME1(SG) }
             ]);
         });
-        this.CONSUME(StringLiteral); // Attribute name
-        this.OR1([
-            { ALT: () => this.CONSUME(Identifier) }, // Type
-            { ALT: () => this.CONSUME1(StringLiteral) } // Enum values
+
+        // 属性名
+        this.CONSUME1(StringLiteral);
+
+        // 属性类型和值
+        this.OR2([
+            { 
+                ALT: () => {
+                    // ENUM "value1","value2",...
+                    this.CONSUME(ENUM);
+                    this.AT_LEAST_ONE_SEP({
+                        SEP: Comma,
+                        DEF: () => this.CONSUME2(StringLiteral)
+                    });
+                }
+            },
+            {
+                ALT: () => {
+                    // INT min max
+                    this.CONSUME(INT);
+                    this.CONSUME1(Number); // Min
+                    this.CONSUME2(Number); // Max
+                }
+            },
+            { 
+                ALT: () => this.CONSUME1(Identifier) // 其他类型
+            }
         ]);
-        this.OPTION1(() => {
-            this.CONSUME1(Number); // Min
-            this.CONSUME2(Number); // Max
+
+        this.OPTION1(() => this.CONSUME1(Semicolon));
+    });
+
+    // 添加新的规则处理属性默认值
+    private attributeDefault = this.RULE("attributeDefaultClause", () => {
+        this.CONSUME(BA_DEF_DEF);
+        this.CONSUME(StringLiteral); // 属性名称
+        
+        // 默认值可以是数字、字符串或标识符
+        this.OR([
+            { ALT: () => this.CONSUME(Number) },      // 数字值
+            { ALT: () => this.CONSUME1(StringLiteral) },// 字符串值
+            { ALT: () => this.CONSUME(Identifier) }   // 标识符值
+        ]);
+        
+        this.OPTION(() => this.CONSUME(Semicolon));
+    });
+
+    // 添加新的规则处理属性赋值
+    private attributeAssignment = this.RULE("attributeAssignmentClause", () => {
+        this.CONSUME(BA);
+        this.CONSUME(StringLiteral); // AttributeName
+        
+        // 属性赋值有多种格式
+        this.OR([
+            { 
+                // 简单全局属性: BA_ "BusType" "CAN";
+                ALT: () => {
+                    this.OR1([
+                        { ALT: () => this.CONSUME1(StringLiteral) },
+                        { ALT: () => this.CONSUME1(Number) }
+                    ]);
+                }
+            },
+            {
+                // 节点属性: BA_ "AttributeName" BU_ NodeName Value;
+                ALT: () => {
+                    this.CONSUME(BU);
+                    this.CONSUME2(Identifier); // NodeName
+                    this.OR2([
+                        { ALT: () => this.CONSUME2(StringLiteral) },
+                        { ALT: () => this.CONSUME2(Number) }
+                    ]);
+                }
+            },
+            {
+                // 消息属性: BA_ "AttributeName" BO_ MessageID Value;
+                ALT: () => {
+                    this.CONSUME(BO);
+                    this.CONSUME3(Number); // MessageID
+                    this.OR3([
+                        { ALT: () => this.CONSUME3(StringLiteral) },
+                        { ALT: () => this.CONSUME4(Number) }
+                    ]);
+                }
+            },
+            {
+                // 信号属性: BA_ "AttributeName" SG_ MessageID SignalName Value;
+                ALT: () => {
+                    this.CONSUME(SG);
+                    this.CONSUME5(Number); // MessageID
+                    this.CONSUME3(Identifier); // SignalName
+                    this.OR4([
+                        { ALT: () => this.CONSUME4(StringLiteral) },
+                        { ALT: () => this.CONSUME6(Number) }
+                    ]);
+                }
+            }
+        ]);
+        
+        this.OPTION(() => this.CONSUME(Semicolon));
+    });
+
+    // 添加新的规则处理多路复用信号值
+    private multiplexedValue = this.RULE("multiplexedValueClause", () => {
+        this.CONSUME(SG_MUL_VAL);
+        this.CONSUME1(Number);        // Message ID
+        this.CONSUME1(Identifier);    // Signal name
+        this.CONSUME2(Identifier);    // Signal name
+        this.CONSUME3(Number);      // Signal
+
+        this.CONSUME4(Number);      // Signal
+        
+        this.OPTION(() => this.CONSUME(Semicolon));
+    });
+
+    private valueDefinition = this.RULE("valueDefinitionClause", () => {
+        this.CONSUME1(VAL);
+        this.CONSUME1(Number); // CAN-ID
+        this.CONSUME1(Identifier); // SignalName
+        this.MANY(() => {
+            this.CONSUME2(Number); // Value
+            this.CONSUME2(StringLiteral); // Value description
         });
-        this.CONSUME(Semicolon);
+        this.OPTION(() => this.CONSUME1(Semicolon));
+    });
+
+    private comment = this.RULE("commentClause", () => {
+        this.CONSUME1(CM);
+        this.OR([
+            {
+                ALT: () => {
+                    this.CONSUME1(SG);
+                    this.CONSUME1(Number); // CAN-ID
+                    this.CONSUME2(Identifier); // SignalName
+                }
+            },
+            {
+                ALT: () => {
+                    this.CONSUME2(BO);
+                    this.CONSUME2(Number); // CAN-ID
+                }
+            },
+            {
+                ALT: () => {
+                    this.CONSUME3(BU);
+                    this.CONSUME3(Identifier); // NodeName
+                }
+            }
+        ]);
+        this.CONSUME1(StringLiteral); // DescriptionText
+        this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
     private nsSection = this.RULE("nsSection", () => {
-        this.CONSUME(NS);
-        this.CONSUME(Colon);
+        this.CONSUME1(NS);
+        this.CONSUME1(Colon);
+        
+        // 在冒号后面需要一个换行，我们可以跳过它因为已经在 lexer 中设置了 WhiteSpace 为 SKIPPED
+        
+        // 标识符列表
         this.MANY(() => {
             this.OR([
-                { ALT: () => this.CONSUME(Identifier) },
-                { ALT: () => this.CONSUME(NS) },
-                { ALT: () => this.CONSUME(CM) },
-                { ALT: () => this.CONSUME(BA_DEF) },
-                { ALT: () => this.CONSUME(BA) },
-                { ALT: () => this.CONSUME(VAL) },
-                { ALT: () => this.CONSUME(CAT_DEF) },
-                { ALT: () => this.CONSUME(CAT) },
-                { ALT: () => this.CONSUME(FILTER) },
-                { ALT: () => this.CONSUME(BA_DEF_DEF) },
-                { ALT: () => this.CONSUME(EV_DATA) },
-                { ALT: () => this.CONSUME(ENVVAR_DATA) },
-                { ALT: () => this.CONSUME(SGTYPE) },
-                { ALT: () => this.CONSUME(SGTYPE_VAL) },
-                { ALT: () => this.CONSUME(BA_DEF_SGTYPE) },
-                { ALT: () => this.CONSUME(BA_SGTYPE) },
-                { ALT: () => this.CONSUME(SIG_TYPE_REF) },
-                { ALT: () => this.CONSUME(VAL_TABLE) },
-                { ALT: () => this.CONSUME(SIG_GROUP) },
-                { ALT: () => this.CONSUME(SIG_VALTYPE) },
-                { ALT: () => this.CONSUME(SIGTYPE_VALTYPE) },
-                { ALT: () => this.CONSUME(BO_TX_BU) },
-                { ALT: () => this.CONSUME(BA_DEF_REL) },
-                { ALT: () => this.CONSUME(BA_REL) },
-                { ALT: () => this.CONSUME(BA_DEF_DEF_REL) },
-                { ALT: () => this.CONSUME(BU_SG_REL) },
-                { ALT: () => this.CONSUME(BU_EV_REL) },
-                { ALT: () => this.CONSUME(BU_BO_REL) },
-                { ALT: () => this.CONSUME(SG_MUL_VAL) }
+                { ALT: () => this.CONSUME1(NS_DESC) },
+                { ALT: () => this.CONSUME1(CM) },
+                { ALT: () => this.CONSUME1(BA_DEF) },
+                { ALT: () => this.CONSUME1(BA) },
+                { ALT: () => this.CONSUME1(VAL) },
+                { ALT: () => this.CONSUME1(CAT_DEF) },
+                { ALT: () => this.CONSUME1(CAT) },
+                { ALT: () => this.CONSUME1(FILTER) },
+                { ALT: () => this.CONSUME1(BA_DEF_DEF) },
+                { ALT: () => this.CONSUME1(EV_DATA) },
+                { ALT: () => this.CONSUME1(ENVVAR_DATA) },
+                { ALT: () => this.CONSUME1(SGTYPE) },
+                { ALT: () => this.CONSUME1(SGTYPE_VAL) },
+                { ALT: () => this.CONSUME1(BA_DEF_SGTYPE) },
+                { ALT: () => this.CONSUME1(BA_SGTYPE) },
+                { ALT: () => this.CONSUME1(SIG_TYPE_REF) },
+                { ALT: () => this.CONSUME1(VAL_TABLE) },
+                { ALT: () => this.CONSUME1(SIG_GROUP) },
+                { ALT: () => this.CONSUME1(SIG_VALTYPE) },
+                { ALT: () => this.CONSUME1(SIGTYPE_VALTYPE) },
+                { ALT: () => this.CONSUME1(BO_TX_BU) },
+                { ALT: () => this.CONSUME1(BA_DEF_REL) },
+                { ALT: () => this.CONSUME1(BA_REL) },
+                { ALT: () => this.CONSUME1(BA_DEF_DEF_REL) },
+                { ALT: () => this.CONSUME1(BU_SG_REL) },
+                { ALT: () => this.CONSUME1(BU_EV_REL) },
+                { ALT: () => this.CONSUME1(BU_BO_REL) },
+                { ALT: () => this.CONSUME1(SG_MUL_VAL) }
             ]);
         });
-        this.CONSUME(Semicolon);
+        
+        // 最后消费分号
+        // this.CONSUME1(Semicolon);
     });
 
     public dbcFile = this.RULE("dbcFile", () => {
-        // Version section
-        this.SUBRULE(this.version);
-        this.CONSUME(Semicolon);
+        // Version section is optional
+        this.OPTION(() => {
+            this.SUBRULE(this.version);
+        });
         
         // NS_ section
         this.SUBRULE(this.nsSection);
         
         // BS_ section
-        this.CONSUME(BS);
-        this.CONSUME(Colon);
-        this.CONSUME(Semicolon);
+        this.SUBRULE(this.busConfig);
         
         // BU_ section
-        this.CONSUME(BU);
-        this.CONSUME(Colon);
-        this.MANY(() => {
-            this.CONSUME(Identifier);
-        });
-        this.CONSUME1(Semicolon);
+        this.SUBRULE(this.nodes);
         
         // 剩余部分
-        this.MANY1(() => {
+        this.MANY(() => {
             this.OR([
-                { ALT: () => this.SUBRULE(this.message) },
-                { ALT: () => this.SUBRULE(this.valueTable) },
-                { ALT: () => this.SUBRULE(this.attribute) }
+                { ALT: () => this.SUBRULE2(this.message) },
+                { ALT: () => this.SUBRULE2(this.valueTable) },
+                { ALT: () => this.SUBRULE2(this.attribute) },
+                { ALT: () => this.SUBRULE2(this.attributeDefault) },
+                { ALT: () => this.SUBRULE2(this.attributeAssignment) },
+                { ALT: () => this.SUBRULE2(this.multiplexedValue) },
+                { ALT: () => this.SUBRULE2(this.comment) },
+                { ALT: () => this.SUBRULE2(this.valueDefinition) } // 添加对信号值定义的处理
             ]);
         });
     });
@@ -340,37 +532,3 @@ class DBCParser extends CstParser {
 
 export const parser = new DBCParser()
 export const productions: Record<string, Rule> = parser.getGAstProductions();
-
-// Create visitor implementation
-
-
-// Update the parse function
-export function parseDBCFile(text: string) {
-    // Remove comments and empty lines
-    const cleanText = text.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '')
-                         .replace(/^\s*\n/gm, '');
-    const lexingResult = JsonLexer.tokenize(cleanText);
- 
-    if (lexingResult.errors.length > 0) {
-        throw new Error(`Lexing errors: ${lexingResult.errors[0].message}`);
-    }
-
-    parser.input = lexingResult.tokens;
-
-    const cst = parser.dbcFile();
-    if (parser.errors.length > 0) {
-        const error = parser.errors[0];
-        const { line, column } = getLineAndColumn(text, error.token.startOffset);
-        throw new Error(`Parsing errors at line ${line}, column ${column}: ${error.message}`);
-    }
-
-    return cst;
-}
-
-function getLineAndColumn(text: string, offset: number): { line: number; column: number } {
-    const lines = text.slice(0, offset).split('\n');
-    return {
-        line: lines.length,
-        column: lines[lines.length - 1].length + 1
-    };
-}

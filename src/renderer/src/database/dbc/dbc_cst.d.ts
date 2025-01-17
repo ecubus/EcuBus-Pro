@@ -8,7 +8,7 @@ export interface VersionClauseCstNode extends CstNode {
 export type VersionClauseCstChildren = {
   Version: IToken[];
   StringLiteral: IToken[];
-  Semicolon: IToken[];
+  Semicolon?: IToken[];
 };
 
 export interface BusConfigClauseCstNode extends CstNode {
@@ -19,8 +19,7 @@ export interface BusConfigClauseCstNode extends CstNode {
 export type BusConfigClauseCstChildren = {
   BS: IToken[];
   Colon: IToken[];
-  Number: IToken[];
-  Semicolon: IToken[];
+  Semicolon?: IToken[];
 };
 
 export interface NodesClauseCstNode extends CstNode {
@@ -30,8 +29,9 @@ export interface NodesClauseCstNode extends CstNode {
 
 export type NodesClauseCstChildren = {
   BU: IToken[];
+  Colon: IToken[];
   Identifier?: IToken[];
-  Semicolon: IToken[];
+  Semicolon?: IToken[];
 };
 
 export interface SignalClauseCstNode extends CstNode {
@@ -42,17 +42,19 @@ export interface SignalClauseCstNode extends CstNode {
 export type SignalClauseCstChildren = {
   SG: IToken[];
   Identifier: (IToken)[];
-  StringLiteral: (IToken)[];
-  Number: (IToken)[];
   Colon: IToken[];
+  Number: (IToken)[];
   Pipe: (IToken)[];
   At: IToken[];
+  Plus?: IToken[];
+  Minus?: IToken[];
   OpenParen: IToken[];
   Comma: (IToken)[];
   CloseParen: IToken[];
   OpenBracket: IToken[];
   CloseBracket: IToken[];
-  Semicolon: IToken[];
+  StringLiteral?: (IToken)[];
+  Semicolon?: IToken[];
 };
 
 export interface MessageClauseCstNode extends CstNode {
@@ -63,9 +65,10 @@ export interface MessageClauseCstNode extends CstNode {
 export type MessageClauseCstChildren = {
   BO: IToken[];
   Number: (IToken)[];
-  Identifier: IToken[];
+  Identifier?: (IToken)[];
+  StringLiteral?: (IToken)[];
   Colon: IToken[];
-  StringLiteral: IToken[];
+  Semicolon?: IToken[];
   signalClause?: SignalClauseCstNode[];
 };
 
@@ -79,7 +82,7 @@ export type ValueTableClauseCstChildren = {
   Identifier: IToken[];
   Number?: IToken[];
   StringLiteral?: IToken[];
-  Semicolon: IToken[];
+  Semicolon?: IToken[];
 };
 
 export interface AttributeClauseCstNode extends CstNode {
@@ -93,9 +96,120 @@ export type AttributeClauseCstChildren = {
   BO?: IToken[];
   SG?: IToken[];
   StringLiteral: (IToken)[];
-  Identifier?: IToken[];
+  ENUM?: IToken[];
+  Comma?: IToken[];
+  INT?: IToken[];
   Number?: (IToken)[];
-  Semicolon: IToken[];
+  Identifier?: IToken[];
+  Semicolon?: IToken[];
+};
+
+export interface AttributeDefaultClauseCstNode extends CstNode {
+  name: "attributeDefaultClause";
+  children: AttributeDefaultClauseCstChildren;
+}
+
+export type AttributeDefaultClauseCstChildren = {
+  BA_DEF_DEF: IToken[];
+  StringLiteral: (IToken)[];
+  Number?: IToken[];
+  Identifier?: IToken[];
+  Semicolon?: IToken[];
+};
+
+export interface AttributeAssignmentClauseCstNode extends CstNode {
+  name: "attributeAssignmentClause";
+  children: AttributeAssignmentClauseCstChildren;
+}
+
+export type AttributeAssignmentClauseCstChildren = {
+  BA: IToken[];
+  StringLiteral: (IToken)[];
+  Number?: (IToken)[];
+  BU?: IToken[];
+  Identifier?: (IToken)[];
+  BO?: IToken[];
+  SG?: IToken[];
+  Semicolon?: IToken[];
+};
+
+export interface MultiplexedValueClauseCstNode extends CstNode {
+  name: "multiplexedValueClause";
+  children: MultiplexedValueClauseCstChildren;
+}
+
+export type MultiplexedValueClauseCstChildren = {
+  SG_MUL_VAL: IToken[];
+  Number: (IToken)[];
+  Identifier: (IToken)[];
+  Semicolon?: IToken[];
+};
+
+export interface ValueDefinitionClauseCstNode extends CstNode {
+  name: "valueDefinitionClause";
+  children: ValueDefinitionClauseCstChildren;
+}
+
+export type ValueDefinitionClauseCstChildren = {
+  VAL: IToken[];
+  Number: (IToken)[];
+  Identifier: IToken[];
+  StringLiteral?: IToken[];
+  Semicolon?: IToken[];
+};
+
+export interface CommentClauseCstNode extends CstNode {
+  name: "commentClause";
+  children: CommentClauseCstChildren;
+}
+
+export type CommentClauseCstChildren = {
+  CM: IToken[];
+  SG?: IToken[];
+  Number?: (IToken)[];
+  Identifier?: (IToken)[];
+  BO?: IToken[];
+  BU?: IToken[];
+  StringLiteral: IToken[];
+  Semicolon?: IToken[];
+};
+
+export interface NsSectionCstNode extends CstNode {
+  name: "nsSection";
+  children: NsSectionCstChildren;
+}
+
+export type NsSectionCstChildren = {
+  NS: IToken[];
+  Colon: IToken[];
+  NS_DESC?: IToken[];
+  CM?: IToken[];
+  BA_DEF?: IToken[];
+  BA?: IToken[];
+  VAL?: IToken[];
+  CAT_DEF?: IToken[];
+  CAT?: IToken[];
+  FILTER?: IToken[];
+  BA_DEF_DEF?: IToken[];
+  EV_DATA?: IToken[];
+  ENVVAR_DATA?: IToken[];
+  SGTYPE?: IToken[];
+  SGTYPE_VAL?: IToken[];
+  BA_DEF_SGTYPE?: IToken[];
+  BA_SGTYPE?: IToken[];
+  SIG_TYPE_REF?: IToken[];
+  VAL_TABLE?: IToken[];
+  SIG_GROUP?: IToken[];
+  SIG_VALTYPE?: IToken[];
+  SIGTYPE_VALTYPE?: IToken[];
+  BO_TX_BU?: IToken[];
+  BA_DEF_REL?: IToken[];
+  BA_REL?: IToken[];
+  BA_DEF_DEF_REL?: IToken[];
+  BU_SG_REL?: IToken[];
+  BU_EV_REL?: IToken[];
+  BU_BO_REL?: IToken[];
+  SG_MUL_VAL?: IToken[];
 };
 
 export interface DbcFileCstNode extends CstNode {
@@ -105,11 +219,17 @@ export interface DbcFileCstNode extends CstNode {
 
 export type DbcFileCstChildren = {
   versionClause?: VersionClauseCstNode[];
-  busConfigClause?: BusConfigClauseCstNode[];
-  nodesClause?: NodesClauseCstNode[];
+  nsSection: NsSectionCstNode[];
+  busConfigClause: BusConfigClauseCstNode[];
+  nodesClause: NodesClauseCstNode[];
   messageClause?: MessageClauseCstNode[];
   valueTableClause?: ValueTableClauseCstNode[];
   attributeClause?: AttributeClauseCstNode[];
+  attributeDefaultClause?: AttributeDefaultClauseCstNode[];
+  attributeAssignmentClause?: AttributeAssignmentClauseCstNode[];
+  multiplexedValueClause?: MultiplexedValueClauseCstNode[];
+  commentClause?: CommentClauseCstNode[];
+  valueDefinitionClause?: ValueDefinitionClauseCstNode[];
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -120,5 +240,11 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   messageClause(children: MessageClauseCstChildren, param?: IN): OUT;
   valueTableClause(children: ValueTableClauseCstChildren, param?: IN): OUT;
   attributeClause(children: AttributeClauseCstChildren, param?: IN): OUT;
+  attributeDefaultClause(children: AttributeDefaultClauseCstChildren, param?: IN): OUT;
+  attributeAssignmentClause(children: AttributeAssignmentClauseCstChildren, param?: IN): OUT;
+  multiplexedValueClause(children: MultiplexedValueClauseCstChildren, param?: IN): OUT;
+  valueDefinitionClause(children: ValueDefinitionClauseCstChildren, param?: IN): OUT;
+  commentClause(children: CommentClauseCstChildren, param?: IN): OUT;
+  nsSection(children: NsSectionCstChildren, param?: IN): OUT;
   dbcFile(children: DbcFileCstChildren, param?: IN): OUT;
 }

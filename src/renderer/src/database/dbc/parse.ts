@@ -1,64 +1,6 @@
 import { CstChildrenDictionary, CstNode, CstParser, IToken, Lexer, Rule, createToken } from "chevrotain";
 
-// DBC File Structure Interfaces
-export interface DBCVersion {
-    version: string;
-}
 
-export interface BusConfig {
-    speed: number;  // in kBit/s
-}
-
-export interface Signal {
-    name: string;
-    multiplexerIndicator?: string;  // M for multiplexer, m<value> for multiplexed
-    startBit: number;
-    length: number;
-    isLittleEndian: boolean;  // 1 = little-endian (Intel), 0 = big-endian (Motorola)
-    isSigned: boolean;        // true = signed, false = unsigned
-    factor: number;
-    offset: number;
-    minimum?: number;
-    maximum?: number;
-    unit?: string;
-    receivers: string[];
-    comment?: string;
-    values?: Record<number, string>;  // Value table
-    attributes?: Record<string, any>; // Signal attributes
-}
-
-export interface Message {
-    id: number;
-    name: string;
-    length: number;
-    sender: string;
-    signals: Record<string, Signal>;
-    comment?: string;
-    attributes?: Record<string, any>;
-    transmitters?: string[];
-}
-
-export interface ValueTable {
-    name: string;
-    values: Record<number, string>;
-}
-
-export interface Attribute {
-    name: string;
-    type: 'INT' | 'FLOAT' | 'STRING' | 'ENUM';
-    definition: any;
-    defaultValue: any;
-}
-
-export interface DBC {
-    version?: string;
-    busConfig?: BusConfig;
-    nodes: string[];
-    messages: Record<number, Message>;
-    valueTables: Record<string, ValueTable>;
-    attributes: Record<string, Attribute>;
-    comments: Record<string, string>;
-}
 
 // 首先定义所有的tokens
 const WhiteSpace = createToken({

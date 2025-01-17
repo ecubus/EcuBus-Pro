@@ -1,5 +1,5 @@
-import { DBC, JsonLexer, parser } from "./dbc/parse";
-import { DBCVisitor } from "./dbc/dbcVisitor";
+import {  JsonLexer, parser } from "./dbc/parse";
+import { DBC, DBCVisitor } from "./dbc/dbcVisitor";
 
 // 添加一个函数来创建行号映射
 function createLineMapping(originalText: string, processedText: string): number[] {
@@ -119,8 +119,8 @@ export default function parse(text: string): DBC {
             const formattedErrors=formatParserError(parser.errors[0], cleanText, originalText, lineMapping)
             throw new Error(`Parsing errors:\n${formattedErrors}`);
         }
-        // const visitor = new DBCVisitor();
-        // return visitor.visit(cst);
+        const visitor = new DBCVisitor();
+        return visitor.visit(cst);
     } catch (err) {
         if (err instanceof Error) {
             throw err;

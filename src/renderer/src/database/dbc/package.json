@@ -1,6 +1,6 @@
 {
     "type": "module",
     "scripts": {
-        "build": "npx tsx gen_dts_signature.ts"
+        "build": "tsx gen_dts_signature.ts"
     }
   }

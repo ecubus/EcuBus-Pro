@@ -78,7 +78,6 @@ const CloseBracket = createToken({ name: "CloseBracket", pattern: /\]/ });
 const Comma = createToken({ name: "Comma", pattern: /,/ });
 const Plus = createToken({ name: "Plus", pattern: /\+/ });
 const Minus = createToken({ name: "Minus", pattern: /-/ });
-
 // 在基本 tokens 部分添加新的 tokens
 const MultiplexerIndicator = createToken({ 
     name: "MultiplexerIndicator", 
@@ -120,6 +119,19 @@ class DBCParser extends CstParser {
         this.performSelfAnalysis();
     }
 
+    // Add new subrule for identifier or string literal
+    private identifierOrString = this.RULE("identifierOrString", () => {
+        this.OR1([
+            { ALT: () => this.CONSUME(Identifier) },
+            { ALT: () => this.CONSUME(StringLiteral) }
+        ]);
+    });
+    private sgReceiver = this.RULE("sgReceiver", () => {
+        this.OR1([
+            { ALT: () => this.CONSUME(Identifier) },
+            { ALT: () => this.CONSUME(StringLiteral) }
+        ]);
+    });
     private version = this.RULE("versionClause", () => {
         this.CONSUME1(Version);
         this.CONSUME1(StringLiteral);
@@ -166,37 +178,33 @@ class DBCParser extends CstParser {
             { ALT: () => this.CONSUME1(Plus) },   // unsigned (+)
             { ALT: () => this.CONSUME1(Minus) }   // signed (-)
         ]);
-
-        // (<Factor>,<Offset>)
+      
         this.CONSUME1(OpenParen);
         this.CONSUME5(Number);  // Factor (required)
         this.CONSUME1(Comma);
         this.CONSUME6(Number);  // Offset (required)
-        this.CONSUME1(CloseParen);
-
-        // [<Min>|<Max>]
-        this.CONSUME1(OpenBracket);
-        this.CONSUME7(Number);  // Minimum value (required)
-        this.CONSUME2(Pipe);    // | separator
-        this.CONSUME8(Number);  // Maximum value (required)
-        this.CONSUME1(CloseBracket);
+        this.CONSUME1(CloseParen);     
+        // (<Factor>,<Offset>)
+        
+        this.OPTION1(() => {
+            // [<Min>|<Max>]
+            this.CONSUME1(OpenBracket);
+            this.CONSUME7(Number);  // Minimum value (required)
+            this.CONSUME2(Pipe);    // | separator
+            this.CONSUME8(Number);  // Maximum value (required)
+            this.CONSUME1(CloseBracket);
+        })
         
         // "[Unit]" (optional)
         this.OPTION2(() => {
-            this.OR2([
-                { ALT: () => this.CONSUME2(StringLiteral) }, // quoted unit
-                { ALT: () => this.CONSUME3(Identifier) }     // unquoted unit
-            ]);
+            this.SUBRULE(this.identifierOrString); // Replace OR with subrule
         });
 
         // Receiving nodes (required, at least one)
         this.AT_LEAST_ONE_SEP({
             SEP: Comma,
             DEF: () => {
-                this.OR3([
-                    { ALT: () => this.CONSUME4(Identifier) },      // node name
-                    { ALT: () => this.CONSUME3(StringLiteral) }    // Vector__XXX or special names
-                ]);
+                this.SUBRULE(this.sgReceiver);
             }
         });
         
@@ -206,17 +214,10 @@ class DBCParser extends CstParser {
     private message = this.RULE("messageClause", () => {
         this.CONSUME1(BO);
         this.CONSUME1(Number); // Message ID in decimal or hex format
-
-        this.OR1([
-            { ALT: () => this.CONSUME1(Identifier) }, // Standard message name
-            { ALT: () => this.CONSUME1(StringLiteral) } // Message name with special characters
-        ]);
+        this.SUBRULE(this.identifierOrString); // Replace OR with subrule
         this.CONSUME1(Colon);  // Colon after message ID
         this.CONSUME2(Number); // Message length (in bytes)
-        this.OR2([
-            { ALT: () => this.CONSUME2(Identifier) }, // Standard node name
-            { ALT: () => this.CONSUME2(StringLiteral) } // Node name with special characters or Vector__XXX
-        ]);
+        this.SUBRULE2(this.identifierOrString); // Replace OR with subrule
         this.OPTION(() => this.CONSUME2(Semicolon));
         
         // Signals are optional
@@ -370,28 +371,30 @@ class DBCParser extends CstParser {
         this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
+    // Add new subrules for comment alternatives
+    private signalComment = this.RULE("signalComment", () => {
+        this.CONSUME1(SG);
+        this.CONSUME1(Number); // CAN-ID
+        this.CONSUME1(Identifier); // SignalName
+    });
+
+    private messageComment = this.RULE("messageComment", () => {
+        this.CONSUME1(BO);
+        this.CONSUME1(Number); // CAN-ID
+    });
+
+    private nodeComment = this.RULE("nodeComment", () => {
+        this.CONSUME1(BU);
+        this.CONSUME1(Identifier); // NodeName
+    });
+
+    // Modified comment rule using subrules
     private comment = this.RULE("commentClause", () => {
         this.CONSUME1(CM);
         this.OR([
-            {
-                ALT: () => {
-                    this.CONSUME1(SG);
-                    this.CONSUME1(Number); // CAN-ID
-                    this.CONSUME2(Identifier); // SignalName
-                }
-            },
-            {
-                ALT: () => {
-                    this.CONSUME2(BO);
-                    this.CONSUME2(Number); // CAN-ID
-                }
-            },
-            {
-                ALT: () => {
-                    this.CONSUME3(BU);
-                    this.CONSUME3(Identifier); // NodeName
-                }
-            }
+            { ALT: () => this.SUBRULE(this.signalComment) },
+            { ALT: () => this.SUBRULE(this.messageComment) },
+            { ALT: () => this.SUBRULE(this.nodeComment) }
         ]);
         this.CONSUME1(StringLiteral); // DescriptionText
         this.OPTION(() => this.CONSUME1(Semicolon));

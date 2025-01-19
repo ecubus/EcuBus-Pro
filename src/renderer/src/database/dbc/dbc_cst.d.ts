@@ -1,5 +1,25 @@
 import type { CstNode, ICstVisitor, IToken } from "chevrotain";
 
+export interface IdentifierOrStringCstNode extends CstNode {
+  name: "identifierOrString";
+  children: IdentifierOrStringCstChildren;
+}
+
+export type IdentifierOrStringCstChildren = {
+  Identifier?: IToken[];
+  StringLiteral?: IToken[];
+};
+
+export interface SgReceiverCstNode extends CstNode {
+  name: "sgReceiver";
+  children: SgReceiverCstChildren;
+}
+
+export type SgReceiverCstChildren = {
+  Identifier?: IToken[];
+  StringLiteral?: IToken[];
+};
+
 export interface VersionClauseCstNode extends CstNode {
   name: "versionClause";
   children: VersionClauseCstChildren;
@@ -51,9 +71,10 @@ export type SignalClauseCstChildren = {
   OpenParen: IToken[];
   Comma: (IToken)[];
   CloseParen: IToken[];
-  OpenBracket: IToken[];
-  CloseBracket: IToken[];
-  StringLiteral?: (IToken)[];
+  OpenBracket?: IToken[];
+  CloseBracket?: IToken[];
+  identifierOrString?: IdentifierOrStringCstNode[];
+  sgReceiver: SgReceiverCstNode[];
   Semicolon?: IToken[];
 };
 
@@ -65,8 +86,7 @@ export interface MessageClauseCstNode extends CstNode {
 export type MessageClauseCstChildren = {
   BO: IToken[];
   Number: (IToken)[];
-  Identifier?: (IToken)[];
-  StringLiteral?: (IToken)[];
+  identifierOrString: (IdentifierOrStringCstNode)[];
   Colon: IToken[];
   Semicolon?: IToken[];
   signalClause?: SignalClauseCstNode[];
@@ -158,6 +178,37 @@ export type ValueDefinitionClauseCstChildren = {
   Semicolon?: IToken[];
 };
 
+export interface SignalCommentCstNode extends CstNode {
+  name: "signalComment";
+  children: SignalCommentCstChildren;
+}
+
+export type SignalCommentCstChildren = {
+  SG: IToken[];
+  Number: IToken[];
+  Identifier: IToken[];
+};
+
+export interface MessageCommentCstNode extends CstNode {
+  name: "messageComment";
+  children: MessageCommentCstChildren;
+}
+
+export type MessageCommentCstChildren = {
+  BO: IToken[];
+  Number: IToken[];
+};
+
+export interface NodeCommentCstNode extends CstNode {
+  name: "nodeComment";
+  children: NodeCommentCstChildren;
+}
+
+export type NodeCommentCstChildren = {
+  BU: IToken[];
+  Identifier: IToken[];
+};
+
 export interface CommentClauseCstNode extends CstNode {
   name: "commentClause";
   children: CommentClauseCstChildren;
@@ -165,11 +216,9 @@ export interface CommentClauseCstNode extends CstNode {
 
 export type CommentClauseCstChildren = {
   CM: IToken[];
-  SG?: IToken[];
-  Number?: (IToken)[];
-  Identifier?: (IToken)[];
-  BO?: IToken[];
-  BU?: IToken[];
+  signalComment?: SignalCommentCstNode[];
+  messageComment?: MessageCommentCstNode[];
+  nodeComment?: NodeCommentCstNode[];
   StringLiteral: IToken[];
   Semicolon?: IToken[];
 };
@@ -233,6 +282,8 @@ export type DbcFileCstChildren = {
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
+  identifierOrString(children: IdentifierOrStringCstChildren, param?: IN): OUT;
+  sgReceiver(children: SgReceiverCstChildren, param?: IN): OUT;
   versionClause(children: VersionClauseCstChildren, param?: IN): OUT;
   busConfigClause(children: BusConfigClauseCstChildren, param?: IN): OUT;
   nodesClause(children: NodesClauseCstChildren, param?: IN): OUT;
@@ -244,6 +295,9 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   attributeAssignmentClause(children: AttributeAssignmentClauseCstChildren, param?: IN): OUT;
   multiplexedValueClause(children: MultiplexedValueClauseCstChildren, param?: IN): OUT;
   valueDefinitionClause(children: ValueDefinitionClauseCstChildren, param?: IN): OUT;
+  signalComment(children: SignalCommentCstChildren, param?: IN): OUT;
+  messageComment(children: MessageCommentCstChildren, param?: IN): OUT;
+  nodeComment(children: NodeCommentCstChildren, param?: IN): OUT;
   commentClause(children: CommentClauseCstChildren, param?: IN): OUT;
   nsSection(children: NsSectionCstChildren, param?: IN): OUT;
   dbcFile(children: DbcFileCstChildren, param?: IN): OUT;

@@ -105,6 +105,46 @@ export type ValueTableClauseCstChildren = {
   Semicolon?: IToken[];
 };
 
+export interface EnumTypeCstNode extends CstNode {
+  name: "enumType";
+  children: EnumTypeCstChildren;
+}
+
+export type EnumTypeCstChildren = {
+  ENUM: IToken[];
+  StringLiteral: IToken[];
+  Comma?: IToken[];
+};
+
+export interface IntTypeCstNode extends CstNode {
+  name: "intType";
+  children: IntTypeCstChildren;
+}
+
+export type IntTypeCstChildren = {
+  INT: IToken[];
+  Number: (IToken)[];
+};
+
+export interface HexTypeCstNode extends CstNode {
+  name: "hexType";
+  children: HexTypeCstChildren;
+}
+
+export type HexTypeCstChildren = {
+  HEX: IToken[];
+  Number: (IToken)[];
+};
+
+export interface OtherTypeCstNode extends CstNode {
+  name: "otherType";
+  children: OtherTypeCstChildren;
+}
+
+export type OtherTypeCstChildren = {
+  Identifier: IToken[];
+};
+
 export interface AttributeClauseCstNode extends CstNode {
   name: "attributeClause";
   children: AttributeClauseCstChildren;
@@ -115,12 +155,12 @@ export type AttributeClauseCstChildren = {
   BU?: IToken[];
   BO?: IToken[];
   SG?: IToken[];
-  StringLiteral: (IToken)[];
-  ENUM?: IToken[];
-  Comma?: IToken[];
-  INT?: IToken[];
-  Number?: (IToken)[];
-  Identifier?: IToken[];
+  EV?: IToken[];
+  StringLiteral: IToken[];
+  enumType?: EnumTypeCstNode[];
+  intType?: IntTypeCstNode[];
+  hexType?: HexTypeCstNode[];
+  otherType?: OtherTypeCstNode[];
   Semicolon?: IToken[];
 };
 
@@ -137,6 +177,51 @@ export type AttributeDefaultClauseCstChildren = {
   Semicolon?: IToken[];
 };
 
+export interface GlobalAttributeAssignmentCstNode extends CstNode {
+  name: "globalAttributeAssignment";
+  children: GlobalAttributeAssignmentCstChildren;
+}
+
+export type GlobalAttributeAssignmentCstChildren = {
+  StringLiteral?: IToken[];
+  Number?: IToken[];
+};
+
+export interface NodeAttributeAssignmentCstNode extends CstNode {
+  name: "nodeAttributeAssignment";
+  children: NodeAttributeAssignmentCstChildren;
+}
+
+export type NodeAttributeAssignmentCstChildren = {
+  BU: IToken[];
+  Identifier: IToken[];
+  StringLiteral?: IToken[];
+  Number?: IToken[];
+};
+
+export interface MessageAttributeAssignmentCstNode extends CstNode {
+  name: "messageAttributeAssignment";
+  children: MessageAttributeAssignmentCstChildren;
+}
+
+export type MessageAttributeAssignmentCstChildren = {
+  BO: IToken[];
+  Number: (IToken)[];
+  StringLiteral?: IToken[];
+};
+
+export interface SignalAttributeAssignmentCstNode extends CstNode {
+  name: "signalAttributeAssignment";
+  children: SignalAttributeAssignmentCstChildren;
+}
+
+export type SignalAttributeAssignmentCstChildren = {
+  SG: IToken[];
+  Number: (IToken)[];
+  Identifier: IToken[];
+  StringLiteral?: IToken[];
+};
+
 export interface AttributeAssignmentClauseCstNode extends CstNode {
   name: "attributeAssignmentClause";
   children: AttributeAssignmentClauseCstChildren;
@@ -144,12 +229,11 @@ export interface AttributeAssignmentClauseCstNode extends CstNode {
 
 export type AttributeAssignmentClauseCstChildren = {
   BA: IToken[];
-  StringLiteral: (IToken)[];
-  Number?: (IToken)[];
-  BU?: IToken[];
-  Identifier?: (IToken)[];
-  BO?: IToken[];
-  SG?: IToken[];
+  StringLiteral: IToken[];
+  globalAttributeAssignment?: GlobalAttributeAssignmentCstNode[];
+  nodeAttributeAssignment?: NodeAttributeAssignmentCstNode[];
+  messageAttributeAssignment?: MessageAttributeAssignmentCstNode[];
+  signalAttributeAssignment?: SignalAttributeAssignmentCstNode[];
   Semicolon?: IToken[];
 };
 
@@ -160,8 +244,9 @@ export interface MultiplexedValueClauseCstNode extends CstNode {
 
 export type MultiplexedValueClauseCstChildren = {
   SG_MUL_VAL: IToken[];
-  Number: (IToken)[];
+  Number: IToken[];
   Identifier: (IToken)[];
+  RangeList: IToken[];
   Semicolon?: IToken[];
 };
 
@@ -290,8 +375,16 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   signalClause(children: SignalClauseCstChildren, param?: IN): OUT;
   messageClause(children: MessageClauseCstChildren, param?: IN): OUT;
   valueTableClause(children: ValueTableClauseCstChildren, param?: IN): OUT;
+  enumType(children: EnumTypeCstChildren, param?: IN): OUT;
+  intType(children: IntTypeCstChildren, param?: IN): OUT;
+  hexType(children: HexTypeCstChildren, param?: IN): OUT;
+  otherType(children: OtherTypeCstChildren, param?: IN): OUT;
   attributeClause(children: AttributeClauseCstChildren, param?: IN): OUT;
   attributeDefaultClause(children: AttributeDefaultClauseCstChildren, param?: IN): OUT;
+  globalAttributeAssignment(children: GlobalAttributeAssignmentCstChildren, param?: IN): OUT;
+  nodeAttributeAssignment(children: NodeAttributeAssignmentCstChildren, param?: IN): OUT;
+  messageAttributeAssignment(children: MessageAttributeAssignmentCstChildren, param?: IN): OUT;
+  signalAttributeAssignment(children: SignalAttributeAssignmentCstChildren, param?: IN): OUT;
   attributeAssignmentClause(children: AttributeAssignmentClauseCstChildren, param?: IN): OUT;
   multiplexedValueClause(children: MultiplexedValueClauseCstChildren, param?: IN): OUT;
   valueDefinitionClause(children: ValueDefinitionClauseCstChildren, param?: IN): OUT;

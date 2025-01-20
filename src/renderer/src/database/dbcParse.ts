@@ -120,7 +120,7 @@ export default function parse(text: string): DBC {
             throw new Error(`Parsing errors:\n${formattedErrors}`);
         }
         const visitor = new DBCVisitor();
-        visitor.visit(cst);
+        return visitor.visit(cst);
     } catch (err) {
         if (err instanceof Error) {
             throw err;

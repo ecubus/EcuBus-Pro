@@ -56,6 +56,7 @@ const NS = createToken({ name: "NS", pattern: /NS_/ });
 const BS = createToken({ name: "BS", pattern: /BS_/ });
 const SG = createToken({ name: "SG", pattern: /SG_/ });
 const CM = createToken({ name: "CM", pattern: /CM_/ });
+const EV = createToken({ name: "EV", pattern: /EV_/ });
 
 const NS_DESC = createToken({ name: "NS_DESC", pattern: /NS_DESC_/ });
 
@@ -78,14 +79,16 @@ const CloseBracket = createToken({ name: "CloseBracket", pattern: /\]/ });
 const Comma = createToken({ name: "Comma", pattern: /,/ });
 const Plus = createToken({ name: "Plus", pattern: /\+/ });
 const Minus = createToken({ name: "Minus", pattern: /-/ });
-// 在基本 tokens 部分添加新的 tokens
-const MultiplexerIndicator = createToken({ 
-    name: "MultiplexerIndicator", 
-    pattern: /[mM][a-zA-Z0-9_]*/ 
-});
+
 
 const ENUM = createToken({ name: "ENUM", pattern: /ENUM/ });
 const INT = createToken({ name: "INT", pattern: /INT/ });
+const HEX = createToken({ name: "HEX", pattern: /HEX/ });
+
+const RangeList = createToken({ 
+    name: "RangeList", 
+    pattern: /\d+-\d+(,\s*\d+-\d+)*\s*/ 
+});
 
 // 定义allTokens数组，保持相同的顺序
 const allTokens = [
@@ -102,11 +105,13 @@ const allTokens = [
     CAT_DEF, CAT,
     ENVVAR_DATA, EV_DATA,
     NS_DESC,
-    Version, FILTER, NS, BS, SG, CM,
-    ENUM, INT, // 新增
+    Version, FILTER, NS, BS, SG, CM,EV,
+    ENUM, INT,HEX, // 新增
+    RangeList,
     Colon, Semicolon, Pipe, At,
     OpenParen, CloseParen, OpenBracket, CloseBracket,
-    StringLiteral,  Number, Plus, Minus,Identifier, MultiplexerIndicator,
+    StringLiteral,  Number, Plus, Minus,Identifier,
+   
     Comma
 ];
 
@@ -236,13 +241,39 @@ class DBCParser extends CstParser {
         this.OPTION(() => this.CONSUME1(Semicolon));
     });
 
+    // Add new subrules for attribute types
+    private enumType = this.RULE("enumType", () => {
+        this.CONSUME(ENUM);
+        this.AT_LEAST_ONE_SEP({
+            SEP: Comma,
+            DEF: () => this.CONSUME(StringLiteral)
+        });
+    });
+
+    private intType = this.RULE("intType", () => {
+        this.CONSUME(INT);
+        this.CONSUME1(Number); // Min
+        this.CONSUME2(Number); // Max
+    });
+
+    private hexType = this.RULE("hexType", () => {
+        this.CONSUME(HEX);
+        this.CONSUME1(Number); // Min
+        this.CONSUME2(Number); // Max
+    });
+
+    private otherType = this.RULE("otherType", () => {
+        this.CONSUME(Identifier);
+    });
+
     private attribute = this.RULE("attributeClause", () => {
         this.CONSUME1(BA_DEF);
         this.OPTION(() => {
             this.OR1([
                 { ALT: () => this.CONSUME1(BU) },
                 { ALT: () => this.CONSUME1(BO) },
-                { ALT: () => this.CONSUME1(SG) }
+                { ALT: () => this.CONSUME1(SG) },
+                { ALT: () => this.CONSUME1(EV) }
             ]);
         });
 
@@ -251,27 +282,10 @@ class DBCParser extends CstParser {
 
         // 属性类型和值
         this.OR2([
-            { 
-                ALT: () => {
-                    // ENUM "value1","value2",...
-                    this.CONSUME(ENUM);
-                    this.AT_LEAST_ONE_SEP({
-                        SEP: Comma,
-                        DEF: () => this.CONSUME2(StringLiteral)
-                    });
-                }
-            },
-            {
-                ALT: () => {
-                    // INT min max
-                    this.CONSUME(INT);
-                    this.CONSUME1(Number); // Min
-                    this.CONSUME2(Number); // Max
-                }
-            },
-            { 
-                ALT: () => this.CONSUME1(Identifier) // 其他类型
-            }
+            { ALT: () => this.SUBRULE(this.enumType) },
+            { ALT: () => this.SUBRULE(this.intType) },
+            { ALT: () => this.SUBRULE(this.hexType) },
+            { ALT: () => this.SUBRULE(this.otherType) }
         ]);
 
         this.OPTION1(() => this.CONSUME1(Semicolon));
@@ -292,56 +306,52 @@ class DBCParser extends CstParser {
         this.OPTION(() => this.CONSUME(Semicolon));
     });
 
-    // 添加新的规则处理属性赋值
+    // Add new subrules for attribute assignments
+    private globalAttributeAssignment = this.RULE("globalAttributeAssignment", () => {
+        this.OR1([
+            { ALT: () => this.CONSUME1(StringLiteral) },
+            { ALT: () => this.CONSUME1(Number) }
+        ]);
+    });
+
+    private nodeAttributeAssignment = this.RULE("nodeAttributeAssignment", () => {
+        this.CONSUME(BU);
+        this.CONSUME2(Identifier); // NodeName
+        this.OR2([
+            { ALT: () => this.CONSUME2(StringLiteral) },
+            { ALT: () => this.CONSUME2(Number) }
+        ]);
+    });
+
+    private messageAttributeAssignment = this.RULE("messageAttributeAssignment", () => {
+        this.CONSUME(BO);
+        this.CONSUME3(Number); // MessageID
+        this.OR3([
+            { ALT: () => this.CONSUME3(StringLiteral) },
+            { ALT: () => this.CONSUME4(Number) }
+        ]);
+    });
+
+    private signalAttributeAssignment = this.RULE("signalAttributeAssignment", () => {
+        this.CONSUME(SG);
+        this.CONSUME5(Number); // MessageID
+        this.CONSUME3(Identifier); // SignalName
+        this.OR4([
+            { ALT: () => this.CONSUME4(StringLiteral) },
+            { ALT: () => this.CONSUME6(Number) }
+        ]);
+    });
+
     private attributeAssignment = this.RULE("attributeAssignmentClause", () => {
         this.CONSUME(BA);
         this.CONSUME(StringLiteral); // AttributeName
         
         // 属性赋值有多种格式
         this.OR([
-            { 
-                // 简单全局属性: BA_ "BusType" "CAN";
-                ALT: () => {
-                    this.OR1([
-                        { ALT: () => this.CONSUME1(StringLiteral) },
-                        { ALT: () => this.CONSUME1(Number) }
-                    ]);
-                }
-            },
-            {
-                // 节点属性: BA_ "AttributeName" BU_ NodeName Value;
-                ALT: () => {
-                    this.CONSUME(BU);
-                    this.CONSUME2(Identifier); // NodeName
-                    this.OR2([
-                        { ALT: () => this.CONSUME2(StringLiteral) },
-                        { ALT: () => this.CONSUME2(Number) }
-                    ]);
-                }
-            },
-            {
-                // 消息属性: BA_ "AttributeName" BO_ MessageID Value;
-                ALT: () => {
-                    this.CONSUME(BO);
-                    this.CONSUME3(Number); // MessageID
-                    this.OR3([
-                        { ALT: () => this.CONSUME3(StringLiteral) },
-                        { ALT: () => this.CONSUME4(Number) }
-                    ]);
-                }
-            },
-            {
-                // 信号属性: BA_ "AttributeName" SG_ MessageID SignalName Value;
-                ALT: () => {
-                    this.CONSUME(SG);
-                    this.CONSUME5(Number); // MessageID
-                    this.CONSUME3(Identifier); // SignalName
-                    this.OR4([
-                        { ALT: () => this.CONSUME4(StringLiteral) },
-                        { ALT: () => this.CONSUME6(Number) }
-                    ]);
-                }
-            }
+            { ALT: () => this.SUBRULE(this.globalAttributeAssignment) },
+            { ALT: () => this.SUBRULE(this.nodeAttributeAssignment) },
+            { ALT: () => this.SUBRULE(this.messageAttributeAssignment) },
+            { ALT: () => this.SUBRULE(this.signalAttributeAssignment) }
         ]);
         
         this.OPTION(() => this.CONSUME(Semicolon));
@@ -353,10 +363,7 @@ class DBCParser extends CstParser {
         this.CONSUME1(Number);        // Message ID
         this.CONSUME1(Identifier);    // Signal name
         this.CONSUME2(Identifier);    // Signal name
-        this.CONSUME3(Number);      // Signal
-
-        this.CONSUME4(Number);      // Signal
-        
+        this.CONSUME2(RangeList);    // Signal name
         this.OPTION(() => this.CONSUME(Semicolon));
     });
 
@@ -410,22 +417,22 @@ class DBCParser extends CstParser {
         this.MANY(() => {
             this.OR([
                 { ALT: () => this.CONSUME1(NS_DESC) },
-                { ALT: () => this.CONSUME1(CM) },
-                { ALT: () => this.CONSUME1(BA_DEF) },
-                { ALT: () => this.CONSUME1(BA) },
-                { ALT: () => this.CONSUME1(VAL) },
+                { ALT: () => this.CONSUME1(CM) },  //done
+                { ALT: () => this.CONSUME1(BA_DEF) }, //done
+                { ALT: () => this.CONSUME1(BA) }, //done
+                { ALT: () => this.CONSUME1(VAL) }, //done
                 { ALT: () => this.CONSUME1(CAT_DEF) },
                 { ALT: () => this.CONSUME1(CAT) },
                 { ALT: () => this.CONSUME1(FILTER) },
-                { ALT: () => this.CONSUME1(BA_DEF_DEF) },
-                { ALT: () => this.CONSUME1(EV_DATA) },
+                { ALT: () => this.CONSUME1(BA_DEF_DEF) }, //done
+                { ALT: () => this.CONSUME1(EV_DATA) },//done
                 { ALT: () => this.CONSUME1(ENVVAR_DATA) },
                 { ALT: () => this.CONSUME1(SGTYPE) },
                 { ALT: () => this.CONSUME1(SGTYPE_VAL) },
                 { ALT: () => this.CONSUME1(BA_DEF_SGTYPE) },
                 { ALT: () => this.CONSUME1(BA_SGTYPE) },
                 { ALT: () => this.CONSUME1(SIG_TYPE_REF) },
-                { ALT: () => this.CONSUME1(VAL_TABLE) },
+                { ALT: () => this.CONSUME1(VAL_TABLE) },//done
                 { ALT: () => this.CONSUME1(SIG_GROUP) },
                 { ALT: () => this.CONSUME1(SIG_VALTYPE) },
                 { ALT: () => this.CONSUME1(SIGTYPE_VALTYPE) },

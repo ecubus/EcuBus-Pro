@@ -52,6 +52,7 @@ export interface NodeItem{
 }
 
 export interface DBC {
+    name:string
     version?: string;
     busConfig?: BusConfig;
     nodes: Record<string, NodeItem>; 
@@ -142,7 +143,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     }
     dbcFile(ctx: DbcFileCstChildren): DBC {
         const dbc: DBC = {
-           
+            name:'',
             nodes: {},
             messages: {},
             valueTables: {},

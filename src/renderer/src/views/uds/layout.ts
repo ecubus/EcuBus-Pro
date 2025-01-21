@@ -179,7 +179,18 @@ const layoutMap: Record<string, LayoutItem> = {
     key: 'LDF',
     component: defineAsyncComponent(() => import('../../database/ldf/index.vue')),
     icon: database
-  }
+  },
+  dbc: {
+    i: 'DBC',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'DBC',
+    key: 'DBC',
+    component: defineAsyncComponent(() => import('../../database/dbc/index.vue')),
+    icon: database
+  },  
   // script: {
   //   i: 'Script',
   //   x: 0,

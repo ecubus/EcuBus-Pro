@@ -3,6 +3,7 @@ import type { UdsDevice } from 'src/main/share/uds';
 import type { TesterInfo } from 'src/main/share/tester';
 import type { EthNode } from 'src/main/share/doip';
 import type {LDF} from 'src/renderer/src/database/ldfParse'
+import type {DBC} from 'src/renderer/src/database/dbc/dbcVisitor'
 import type {LinNode} from 'src/main/share/lin'
 import type {YAXisOption,XAXisOption,LineSeriesOption} from 'echarts/types/dist/shared'
 
@@ -63,6 +64,7 @@ export interface DataSet {
     ia: Record<string, Inter>
     database:{
         lin:Record<string,LDF>
+        can:Record<string,DBC>
     },
     graphs: Record<string, GraphNode>
 }

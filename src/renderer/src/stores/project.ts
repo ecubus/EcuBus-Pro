@@ -2,7 +2,7 @@
 import { Action, ElMessage, ElMessageBox } from 'element-plus'
 import { defineStore } from 'pinia'
 import { useDataStore } from './data'
-import { sortBy, toPairs, fromPairs, cloneDeep, assign } from 'lodash'
+import { sortBy, toPairs, fromPairs, cloneDeep, assign, merge } from 'lodash'
 import { error,info} from 'electron-log'
 
 
@@ -170,7 +170,7 @@ export const useProjectStore = defineStore('project', {
             const data = useDataStore()
 
             data.$patch((ss) => {
-              assign(ss,rdata.data)
+              merge(ss,rdata.data)
             })
             this.project = rdata.project
             this.open = true

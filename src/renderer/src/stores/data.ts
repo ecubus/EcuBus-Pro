@@ -17,7 +17,8 @@ export const useDataStore = defineStore('useDataStore', {
     subFunction: {},
     nodes: {},
     database:{
-      lin:{}
+      lin:{},
+      can:{}
     },
     graphs:{}
   }),

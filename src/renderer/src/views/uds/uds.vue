@@ -182,7 +182,7 @@
                       </el-dropdown-item> -->
                     <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF)
                     </el-dropdown-item>
-                    <el-dropdown-item icon="Plus" disabled command="addCan">Add CAN (DBC)
+                    <el-dropdown-item icon="Plus" command="addCan">Add CAN (DBC)
                     </el-dropdown-item>
                     <el-dropdown-item divider v-for="item, index in dataBaseList" :command="item.url" :key="item.url"
                       :disabled="item.disabled" :divided="index == 0">
@@ -550,7 +550,7 @@ async function openDatabase(testerIndex: string) {
     if (file == undefined) {
       return
     }
-
+    
 
     if (type == 'lin') {
 
@@ -564,6 +564,14 @@ async function openDatabase(testerIndex: string) {
       })
 
 
+    }else if(type == 'can'){
+      const id = v4()
+      layoutMaster.addWin('dbc', `${id}`, {
+        params: {
+          'edit-index': id,
+          'dbcFile': file,
+        }
+      })
     }
 
 
@@ -579,11 +587,25 @@ async function openDatabase(testerIndex: string) {
           name: dataBase.database.lin[key].name,
           params: {
             'edit-index': key,
-            'ldf': dataBase.database.lin[key],
-
+            
           }
         })
         break
+      }
+    }
+  }
+  else if (testerIndex.startsWith('CAN.')) {
+    const name = testerIndex.split('.')[1]
+    //for can
+    for (const key of Object.keys(dataBase.database.can)) {
+      if (dataBase.database.can[key].name == name) {
+        layoutMaster.addWin('dbc', key, {
+          name: dataBase.database.can[key].name,
+          params: {
+            'edit-index': key,
+           
+          }
+        })
       }
     }
   }

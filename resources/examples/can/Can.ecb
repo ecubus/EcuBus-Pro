@@ -1,0 +1,1854 @@
+{
+  "data": {
+    "devices": {},
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {
+        "364e0ceb-1a60-4dd1-ab4d-5299b419d4f3": {
+          "name": "test",
+          "nodes": {},
+          "messages": {
+            "1960": {
+              "id": 1960,
+              "name": "Tire",
+              "length": 63,
+              "sender": "Vector__XXX",
+              "signals": {
+                "R": {
+                  "name": "R",
+                  "startBit": 15,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m98M",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "S",
+                    "range": [
+                      98
+                    ]
+                  }
+                },
+                "S": {
+                  "name": "S",
+                  "startBit": 7,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "M",
+                  "minimum": 0,
+                  "maximum": 0
+                },
+                "TirePressureFrontLeft": {
+                  "name": "TirePressureFrontLeft",
+                  "startBit": 63,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.2,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "psi",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TirePressureFrontRight": {
+                  "name": "TirePressureFrontRight",
+                  "startBit": 103,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.2,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "psi",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TirePressureBackLeft": {
+                  "name": "TirePressureBackLeft",
+                  "startBit": 143,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.2,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "psi",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TirePressureBackRight": {
+                  "name": "TirePressureBackRight",
+                  "startBit": 183,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.2,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "psi",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TireTemperatureFrontLeft": {
+                  "name": "TireTemperatureFrontLeft",
+                  "startBit": 71,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": -50,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": -40,
+                  "maximum": 65,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TireTemperatureFrontRight": {
+                  "name": "TireTemperatureFrontRight",
+                  "startBit": 111,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": -50,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": -40,
+                  "maximum": 65,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TireTemperatureBackLeft": {
+                  "name": "TireTemperatureBackLeft",
+                  "startBit": 151,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": -50,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": -40,
+                  "maximum": 65,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                },
+                "TireTemperatureBackRight": {
+                  "name": "TireTemperatureBackRight",
+                  "startBit": 191,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": -50,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m49163",
+                  "minimum": -40,
+                  "maximum": 65,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      49163
+                    ]
+                  }
+                }
+              },
+              "attributes": {
+                "VFrameFormat": {
+                  "name": "VFrameFormat",
+                  "attrType": "message",
+                  "type": "ENUM",
+                  "enumList": [
+                    "StandardCAN",
+                    "ExtendedCAN",
+                    "StandardCAN_FD",
+                    "ExtendedCAN_FD",
+                    "J1939PG"
+                  ],
+                  "defaultValue": "",
+                  "currentValue": 0
+                },
+                "TransportProtocolType": {
+                  "name": "TransportProtocolType",
+                  "attrType": "message",
+                  "type": "STRING",
+                  "defaultValue": "",
+                  "currentValue": "ISOTP"
+                }
+              }
+            },
+            "1979": {
+              "id": 1979,
+              "name": "TempAndSpeed",
+              "length": 53,
+              "sender": "Vector__XXX",
+              "signals": {
+                "IndoorTemperature": {
+                  "name": "IndoorTemperature",
+                  "startBit": 71,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.5,
+                  "offset": -40,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m256",
+                  "minimum": -50,
+                  "maximum": 50,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      256
+                    ]
+                  }
+                },
+                "R": {
+                  "name": "R",
+                  "startBit": 15,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "unit",
+                  "multiplexerIndicator": "m98M",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "S",
+                    "range": [
+                      98
+                    ]
+                  }
+                },
+                "S": {
+                  "name": "S",
+                  "startBit": 7,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "M",
+                  "minimum": 0,
+                  "maximum": 0
+                },
+                "OutdoorTemperature": {
+                  "name": "OutdoorTemperature",
+                  "startBit": 79,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.5,
+                  "offset": -40,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m256",
+                  "minimum": -50,
+                  "maximum": 50,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      256
+                    ]
+                  }
+                },
+                "VehicleSpeed": {
+                  "name": "VehicleSpeed",
+                  "startBit": 263,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "kmh",
+                  "multiplexerIndicator": "m256",
+                  "minimum": 0,
+                  "maximum": 200,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      256
+                    ]
+                  }
+                }
+              },
+              "attributes": {
+                "TransportProtocolType": {
+                  "name": "TransportProtocolType",
+                  "attrType": "message",
+                  "type": "STRING",
+                  "defaultValue": "",
+                  "currentValue": "ISOTP"
+                }
+              }
+            },
+            "2028": {
+              "id": 2028,
+              "name": "Battery",
+              "length": 61,
+              "sender": "Vector__XXX",
+              "signals": {
+                "StateOfChargeBMS": {
+                  "name": "StateOfChargeBMS",
+                  "startBit": 63,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.5,
+                  "offset": 3,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "%",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "R": {
+                  "name": "R",
+                  "startBit": 15,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "unit",
+                  "multiplexerIndicator": "m98M",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "S",
+                    "range": [
+                      98
+                    ]
+                  }
+                },
+                "S": {
+                  "name": "S",
+                  "startBit": 7,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {
+                    "SignalIgnore": {
+                      "name": "SignalIgnore",
+                      "attrType": "signal",
+                      "type": "INT",
+                      "min": 0,
+                      "max": 1,
+                      "defaultValue": 0,
+                      "currentValue": 1
+                    }
+                  },
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "M",
+                  "minimum": 0,
+                  "maximum": 0
+                },
+                "MinCellVoltage": {
+                  "name": "MinCellVoltage",
+                  "startBit": 231,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "MaxCellVoltage": {
+                  "name": "MaxCellVoltage",
+                  "startBit": 215,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "StateOfChargeDisplay": {
+                  "name": "StateOfChargeDisplay",
+                  "startBit": 279,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.5,
+                  "offset": 3,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "%",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "BatteryTemperature1": {
+                  "name": "BatteryTemperature1",
+                  "startBit": 159,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryTemperature2": {
+                  "name": "BatteryTemperature2",
+                  "startBit": 167,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryTemperature3": {
+                  "name": "BatteryTemperature3",
+                  "startBit": 175,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryTemperature4": {
+                  "name": "BatteryTemperature4",
+                  "startBit": 183,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryMinTemperature": {
+                  "name": "BatteryMinTemperature",
+                  "startBit": 151,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryMaxTemperature": {
+                  "name": "BatteryMaxTemperature",
+                  "startBit": 143,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryHeaterTemperature1": {
+                  "name": "BatteryHeaterTemperature1",
+                  "startBit": 215,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "degC",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "BatteryVoltageAuxillary": {
+                  "name": "BatteryVoltageAuxillary",
+                  "startBit": 263,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 11,
+                  "maximum": 14.6,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryTemperature5": {
+                  "name": "BatteryTemperature5",
+                  "startBit": 191,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0.5,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryFanFeedback": {
+                  "name": "BatteryFanFeedback",
+                  "startBit": 255,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "Hz",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 120,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryFanStatus": {
+                  "name": "BatteryFanStatus",
+                  "startBit": 247,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 9,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "NormalChargePort": {
+                  "name": "NormalChargePort",
+                  "startBit": 101,
+                  "length": 1,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "RapidChargePort": {
+                  "name": "RapidChargePort",
+                  "startBit": 102,
+                  "length": 1,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "OperatingTime": {
+                  "name": "OperatingTime",
+                  "startBit": 399,
+                  "length": 32,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.00027777777,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "hours",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "MinDeterioration": {
+                  "name": "MinDeterioration",
+                  "startBit": 247,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "%",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "MinDeteriorationCellNo": {
+                  "name": "MinDeteriorationCellNo",
+                  "startBit": 271,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 98,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "MinCellVoltageCellNo": {
+                  "name": "MinCellVoltageCellNo",
+                  "startBit": 239,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "MaxCellVoltageCellNo": {
+                  "name": "MaxCellVoltageCellNo",
+                  "startBit": 223,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "Charging": {
+                  "name": "Charging",
+                  "startBit": 103,
+                  "length": 1,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "CCC_CumulativeChargeCurrent": {
+                  "name": "CCC_CumulativeChargeCurrent",
+                  "startBit": 271,
+                  "length": 32,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "Ah",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "CDC_CumulativeDischargeCurrent": {
+                  "name": "CDC_CumulativeDischargeCurrent",
+                  "startBit": 303,
+                  "length": 32,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "Ah",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "CEC_CumulativeEnergyCharged": {
+                  "name": "CEC_CumulativeEnergyCharged",
+                  "startBit": 335,
+                  "length": 32,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "kWh",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "CED_CumulativeEnergyDischarged": {
+                  "name": "CED_CumulativeEnergyDischarged",
+                  "startBit": 367,
+                  "length": 32,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "kWh",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 1000000,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BMSMainRelay": {
+                  "name": "BMSMainRelay",
+                  "startBit": 96,
+                  "length": 1,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BMSIgnition": {
+                  "name": "BMSIgnition",
+                  "startBit": 426,
+                  "length": 1,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryDCVoltage": {
+                  "name": "BatteryDCVoltage",
+                  "startBit": 127,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m257",
+                  "minimum": 0,
+                  "maximum": 0,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryCurrent": {
+                  "name": "BatteryCurrent",
+                  "startBit": 111,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": true,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "A",
+                  "multiplexerIndicator": "m257",
+                  "minimum": -230,
+                  "maximum": 230,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      257
+                    ]
+                  }
+                },
+                "BatteryAvailableChargePower": {
+                  "name": "BatteryAvailableChargePower",
+                  "startBit": 159,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.01,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "kW",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 270,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "BatteryAvailableDischargePower": {
+                  "name": "BatteryAvailableDischargePower",
+                  "startBit": 175,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.01,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "kW",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 270,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                },
+                "CellVoltage01": {
+                  "name": "CellVoltage01",
+                  "startBit": 63,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage02": {
+                  "name": "CellVoltage02",
+                  "startBit": 71,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage03": {
+                  "name": "CellVoltage03",
+                  "startBit": 79,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage04": {
+                  "name": "CellVoltage04",
+                  "startBit": 87,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage05": {
+                  "name": "CellVoltage05",
+                  "startBit": 95,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage06": {
+                  "name": "CellVoltage06",
+                  "startBit": 103,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage07": {
+                  "name": "CellVoltage07",
+                  "startBit": 111,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage08": {
+                  "name": "CellVoltage08",
+                  "startBit": 119,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage09": {
+                  "name": "CellVoltage09",
+                  "startBit": 127,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage10": {
+                  "name": "CellVoltage10",
+                  "startBit": 135,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage11": {
+                  "name": "CellVoltage11",
+                  "startBit": 143,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage12": {
+                  "name": "CellVoltage12",
+                  "startBit": 151,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage13": {
+                  "name": "CellVoltage13",
+                  "startBit": 159,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage14": {
+                  "name": "CellVoltage14",
+                  "startBit": 167,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage15": {
+                  "name": "CellVoltage15",
+                  "startBit": 175,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage16": {
+                  "name": "CellVoltage16",
+                  "startBit": 183,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage17": {
+                  "name": "CellVoltage17",
+                  "startBit": 191,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage18": {
+                  "name": "CellVoltage18",
+                  "startBit": 199,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage19": {
+                  "name": "CellVoltage19",
+                  "startBit": 207,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "CellVoltage20": {
+                  "name": "CellVoltage20",
+                  "startBit": 215,
+                  "length": 8,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.02,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "V",
+                  "multiplexerIndicator": "m258",
+                  "minimum": 2.8,
+                  "maximum": 4.2,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      258
+                    ]
+                  }
+                },
+                "StateOfHealth": {
+                  "name": "StateOfHealth",
+                  "startBit": 231,
+                  "length": 16,
+                  "isLittleEndian": false,
+                  "isSigned": false,
+                  "factor": 0.1,
+                  "offset": 0,
+                  "attributes": {},
+                  "receivers": [
+                    "Vector__XXX"
+                  ],
+                  "unit": "%",
+                  "multiplexerIndicator": "m261",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "multiplexerRange": {
+                    "name": "R",
+                    "range": [
+                      261
+                    ]
+                  }
+                }
+              },
+              "attributes": {
+                "VFrameFormat": {
+                  "name": "VFrameFormat",
+                  "attrType": "message",
+                  "type": "ENUM",
+                  "enumList": [
+                    "StandardCAN",
+                    "ExtendedCAN",
+                    "StandardCAN_FD",
+                    "ExtendedCAN_FD",
+                    "J1939PG"
+                  ],
+                  "defaultValue": "",
+                  "currentValue": 0
+                },
+                "TransportProtocolType": {
+                  "name": "TransportProtocolType",
+                  "attrType": "message",
+                  "type": "STRING",
+                  "defaultValue": "",
+                  "currentValue": "ISOTP"
+                }
+              }
+            }
+          },
+          "valueTables": {},
+          "attributes": {
+            "SignalIgnore": {
+              "name": "SignalIgnore",
+              "attrType": "signal",
+              "type": "INT",
+              "min": 0,
+              "max": 1,
+              "defaultValue": 0
+            },
+            "VFrameFormat": {
+              "name": "VFrameFormat",
+              "attrType": "message",
+              "type": "ENUM",
+              "enumList": [
+                "StandardCAN",
+                "ExtendedCAN",
+                "StandardCAN_FD",
+                "ExtendedCAN_FD",
+                "J1939PG"
+              ],
+              "defaultValue": ""
+            },
+            "MessageIgnore": {
+              "name": "MessageIgnore",
+              "attrType": "message",
+              "type": "INT",
+              "min": 0,
+              "max": 1,
+              "defaultValue": 0
+            },
+            "TransportProtocolType": {
+              "name": "TransportProtocolType",
+              "attrType": "message",
+              "type": "STRING",
+              "defaultValue": ""
+            },
+            "BusType": {
+              "name": "BusType",
+              "attrType": "network",
+              "type": "STRING",
+              "defaultValue": "",
+              "currentValue": "CAN"
+            },
+            "ProtocolType": {
+              "name": "ProtocolType",
+              "attrType": "network",
+              "type": "STRING",
+              "defaultValue": "",
+              "currentValue": ""
+            },
+            "DatabaseCompiler": {
+              "name": "DatabaseCompiler",
+              "attrType": "network",
+              "type": "STRING",
+              "defaultValue": "CSS Electronics (wwww.csselectronics.com)"
+            }
+          },
+          "comments": [],
+          "version": ""
+        }
+      }
+    },
+    "graphs": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-loading="loading">
         <el-tabs class="dbcTabs" type="card" v-model="editableTabsValue" addable v-if="!loading">
             <template #add-icon>
                 <el-tooltip  effect="light" content="Delete Database" placement="bottom"
@@ -191,27 +191,44 @@ function deleteDatabase(){
         type: 'warning'
     }).then(() => {
         database.$patch(() => {
-            delete database.database.lin[props.editIndex]
+            delete database.database.can[props.editIndex]
         })
         layout.removeWin(props.editIndex,true)
     }).catch(null)
 }
 function saveDataBase() {
+    // Check for duplicate database name
+    const isDuplicateName = Object.entries(database.database.can)
+        .some(([key, db]) => {
+            // Skip comparing with itself
+            if (key === props.editIndex) return false;
+            return db.name === dbcObj.value.name;
+        });
+
+    if (isDuplicateName) {
+        ElNotification({
+            offset: 50,
+            type: 'error',
+            message: `Database name "${dbcObj.value.name}" already exists`,
+            appendTo: `#win${props.editIndex}`
+        });
+        return;
+    }
+
     valid().then(() => {
         database.$patch(() => {
-            
             database.database.can[props.editIndex] = cloneDeep(dbcObj.value)
-        })
-        layout.changeWinName(props.editIndex, dbcObj.value.name)
-        layout.setWinModified(props.editIndex, false)
+        });
+        layout.changeWinName(props.editIndex, dbcObj.value.name);
+        layout.setWinModified(props.editIndex, false);
 
         ElNotification({
             offset: 50,
             type: 'success',
             message: "The database has been saved successfully",
             appendTo: `#win${props.editIndex}`
-        })
-    }).catch(null)
+        });
+    }).catch(null);
 }
 function handleTabSwitch(tabName: string) {
     editableTabsValue.value = tabName
@@ -231,11 +248,13 @@ const loading=ref(true)
 onMounted(() => {
     // Add your onMounted logic here
     if (!existed.value&&props.dbcFile) {
+        loading.value=true
         window.electron.ipcRenderer.invoke('ipc-fs-readFile', props.dbcFile).then((content: string) => {
            
             try{
                 const result = dbcParse(content)
                 dbcObj.value = result
+                dbcObj.value.name=window.path.parse(props.dbcFile!).name
                 loading.value=false
             }catch(err:any){
                 ElMessageBox.alert('Parse failed', 'Error', {

@@ -262,6 +262,7 @@ onMounted(() => {
             try{
                 const result = ldfParse(content)
                 ldfObj.value = result
+                ldfObj.value.name=window.path.parse(props.ldfFile!).name
                 loading.value=false
             }catch(err:any){
                 ElMessageBox.alert('Parse failed', 'Error', {

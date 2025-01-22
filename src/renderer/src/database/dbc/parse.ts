@@ -1,4 +1,5 @@
 import { CstChildrenDictionary, CstNode, CstParser, IToken, Lexer, Rule, createToken } from "chevrotain";
+import { Signal } from "./dbcVisitor";
 
 
 
@@ -484,3 +485,21 @@ class DBCParser extends CstParser {
 
 export const parser = new DBCParser()
 export const productions: Record<string, Rule> = parser.getGAstProductions();
+
+
+
+
+export function multiCalc(signal:Signal){
+     if(signal.multiplexerIndicator){
+        if(signal.multiplexerIndicator=='M'){
+            return 'Multiplexor'
+        }else if(signal.multiplexerIndicator.endsWith('M')){
+
+            return `${signal.multiplexerRange?.name} = 0x${parseInt(signal.multiplexerIndicator.slice(1,-1),10).toString(16)} Multiplexor`
+        }else{
+            return `${signal.multiplexerRange?.name} = 0x${parseInt(signal.multiplexerIndicator.slice(1),10).toString(16)}`
+        }
+     }else{
+        return ''
+     }
+}

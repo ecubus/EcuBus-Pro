@@ -68,6 +68,7 @@ export interface BusConfig {
 
 export interface Signal {
     name: string;
+    messageName:string;
     startBit: number;
     length: number;
     isLittleEndian: boolean;  // 1 = little-endian (Intel), 0 = big-endian (Motorola)
@@ -330,6 +331,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
         if (ctx.signalClause) {
             ctx.signalClause.forEach((signalNode: SignalClauseCstNode) => {
                 const signal = this.visit(signalNode);
+                signal.messageName=message.name
                 message.signals[signal.name] = signal;
             });
         }
@@ -338,6 +340,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
 
     signalClause(ctx: SignalClauseCstChildren): Signal {
         const signal: Signal = {
+            messageName:'',
             name: ctx.Identifier[0].image,
             startBit: parseInt(ctx.Number[0].image, 10),
             length: parseInt(ctx.Number[1].image, 10),

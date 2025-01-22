@@ -5,49 +5,64 @@
                 <span style="font-size: 12px;width: 100px;text-align: center;">DB Name</span>
                 <el-input size="small" v-model="dbcObj.name" style="width: 100%;"/>
             </div>
-            <el-scrollbar :height="h - 77 + 'px'">
-                <el-tree
-                highlight-current
-                    ref="treeRef"
-                    :data="treeData"
-                    :expand-on-click-node="false"
-                    :props="defaultProps"
-                    @node-click="handleNodeClick"
-                    default-expand-all
+            <div class="search-box">
+                <el-input
+                    v-model="treeQuery"
+                    size="small"
+                    placeholder="Filter tree nodes..."
+                    clearable
+                    @input="onTreeQueryChanged"
+                    @clear="onTreeQueryChanged"
                 >
-                    <template #default="{ node, data }">
-                        <div class="tree-node">
-                            <Icon 
-                                :icon="
-                                    data.type === 'signal' ? waveIcon : 
-                                    data.type === 'message' ? messageIcon :
-                                    data.type === 'node' ? nodeIcon :
-                                    data.type === 'category' ? (
-                                        data.label === 'Node' ? nodeIcon :
-                                        data.label === 'Message' ? messageIcon :
-                                        data.label === 'Signal' ? waveIcon : ''
-                                    ) : ''
-                                "
-                                class="tree-icon"
-                            />
-                            <span class="treeLabel" :class="{ 'category-label': data.type === 'category' }">
-                                {{ node.label }}
-                            </span>
-                        </div>
+                    <template #prefix>
+                        <Icon :icon="searchIcon" />
                     </template>
-                </el-tree>
-            </el-scrollbar>
+                </el-input>
+            </div>
+            <el-tree-v2
+                ref="treeRef"
+                :data="treeData"
+                :props="defaultProps"
+                :height="h - 117"
+                :item-size="24"
+                highlight-current
+                :expand-on-click-node="false"
+                :filter-method="treeFilterMethod"
+                @node-click="handleNodeClick"
+            >
+                <template #default="{ node, data }">
+                    <div class="tree-node">
+                        <Icon 
+                            :icon="getNodeIcon(data)"
+                            class="tree-icon"
+                        />
+                        <span class="treeLabel" :class="{ 'category-label': data.type === 'category' }">
+                            {{ node.label }}
+                        </span>
+                    </div>
+                </template>
+            </el-tree-v2>
         </div>
         <div class="shift" id="dbcOverviewShift" />
         <div class="right">
             <VxeGrid ref="xGrid" v-bind="gridOptions">
-                <!-- <template #toolbar>
+                <template #toolbar>
                     <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;padding: 8px;">
-                        <span style="font-size: 14px;color: var(--el-text-color-secondary);">
-                            {{ currentView === 'signals' ? 'Signals' : 'Messages' }}
-                        </span>
+                        <el-input
+                            v-model="searchText"
+                            placeholder="Search by name..."
+                            style="width: 200px"
+                            size="small"
+                            clearable
+                            @input="handleSearch"
+                            @clear="handleSearch"
+                        >
+                            <template #prefix>
+                                <Icon :icon="searchIcon" />
+                            </template>
+                        </el-input>
                     </div>
-                </template> -->
+                </template>
             </VxeGrid>
         </div>
     </div>
@@ -65,6 +80,9 @@ import removeIcon from '@iconify/icons-ep/remove';
 import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import messageIcon from '@iconify/icons-material-symbols/business-messages-outline'
 import nodeIcon from '@iconify/icons-material-symbols/point-scan'
+import { multiCalc } from "./parse";
+import searchIcon from '@iconify/icons-material-symbols/search'
+import { ElTreeV2 } from "element-plus";
 // import { validateLDF } from './validator'
 
 const dbcObj = defineModel<DBC>({
@@ -139,18 +157,34 @@ const treeData = computed(() => {
         }
     ];
 
-    return t;
+    // Add id field to each node
+    const addIds = (nodes: any[], prefix = '') => {
+        return nodes.map((node, index) => ({
+            ...node,
+            id: `${prefix}${index}`,
+            children: node.children ? addIds(node.children, `${prefix}${index}-`) : undefined
+        }));
+    };
+
+    return addIds(t);
 });
 
 const defaultProps = {
+    value: 'id',
+    label: 'label',
     children: 'children',
-    label: 'label'
 }
 
 // Table configurations
 const signalColumns:VxeGridProps['columns'] = [
     { field: 'name', title: 'Name', minWidth: 120,fixed: 'left'},
     { field: 'messageName', title: 'Message', minWidth: 120 },
+    { 
+        field: 'multiplexerIndicator', 
+        title: 'Multiplexer', 
+        width: 100,
+        formatter: ({ row }) => multiCalc(row) || '-'
+    },
     { field: 'startBit', title: 'Start Bit', width: 100 },
     { field: 'length', title: 'Length', width: 80 },
     { field: 'isLittleEndian', title: 'Byte Order', width: 100,
@@ -171,27 +205,64 @@ const signalColumns:VxeGridProps['columns'] = [
         }
     },
     { field: 'comment', title: 'Comment', width: 200 },
-    { 
-        field: 'multiplexerIndicator', 
-        title: 'Multiplexer', 
-        width: 100,
-        formatter: ({ cellValue }) => cellValue || '-'
-    }
+    
 ]
 
-const messageColumns = [
-    { field: 'name', title: 'Name', minWidth: 150 },
+// Add message columns configuration
+const messageColumns: VxeGridProps['columns'] = [
+    { field: 'name', title: 'Name', minWidth: 150, fixed: 'left' },
     { field: 'id', title: 'ID', width: 100,
         formatter: ({ cellValue }) => `0x${Number(cellValue).toString(16).toUpperCase()}` },
     { field: 'length', title: 'Length', width: 100 },
     { field: 'sender', title: 'Sender', width: 120 },
-    { field: 'signalCount', title: 'Signals', width: 100 }
+    { field: 'receivers', title: 'Receivers', width: 150,
+        formatter: ({ row }) => {
+            const receivers = row.signals
+                ? [...new Set(Object.values<Signal>(row.signals).flatMap(signal => signal.receivers))]
+                : [];
+            return receivers.join(', ');
+        }
+    },
+    { field: 'role', title: 'Role', width: 100 },
+    { field: 'signalCount', title: 'Signals', width: 100,
+        formatter: ({ row }) => Object.keys(row.signals).length },
+    { field: 'comment', title: 'Comment', width: 200 }
 ]
 
 const signalData = ref<Signal[]>([]);
-const messageData = ref<Signal[]>([]);
+const xGrid = ref();
 
-const xGrid = ref()
+// Add search related refs
+const searchText = ref('')
+let tableData:any[] = []
+
+// Modify insert data function
+function insertData(data: any[]) {
+    tableData = data // Store original data
+    xGrid.value.insertAt(data)
+}
+
+// Add search function
+const handleSearch = () => {
+    xGrid.value?.remove() // Clear current data
+    
+    const filterVal = searchText.value.trim().toLowerCase()
+    if (filterVal) {
+        const filteredData = tableData.filter(item => {
+            // Search in name
+            if (item.name?.toLowerCase().includes(filterVal)) return true
+            
+            
+            
+            return false
+        })
+        
+        xGrid.value.insertAt(filteredData)
+    } else {
+        // If no search text, show all data
+        xGrid.value.insertAt(tableData)
+    }
+}
 
 const gridOptions = computed<VxeGridProps>(() => ({
     border: true,
@@ -200,44 +271,50 @@ const gridOptions = computed<VxeGridProps>(() => ({
     showOverflow: true,
     columnConfig: { resizable: true },
     scrollY: {
-         enabled: true,
-         gt: 0,
-         mode:'wheel'
-      },
-    columns:signalColumns,
-    data: currentView.value === 'signals' ? signalData.value : messageData.value
+        enabled: true,
+        gt: 0,
+        mode: 'wheel'
+    },
+    toolbarConfig: {
+        slots: { tools: 'toolbar' }
+    },
+    columns: currentView.value === 'signals' ? signalColumns : messageColumns,
 }))
 
 // Handle tree node click
 const handleNodeClick = (data: any) => {
+    searchText.value = '' // Clear search text when switching nodes
     if (data.type === 'message') {
-        currentView.value = 'signals';
-        // Show all signals in this message
-        signalData.value = Object.entries(data.data.signals).map(([name, signal]: [string, any]) => ({
-            name,
-            messageName: data.data.name,
-            ...signal,
-            // Add value table and comment if they exist
-            valueTable: signal.valueTable,
-            values: signal.values,
-            comment: signal.comment || '',
-            multiplexerIndicator: signal.multiplexerIndicator
-        }));
+        currentView.value = 'signals'
+        const signals = Object.values<Signal>(data.data.signals)
+            .sort((a, b) => a.startBit - b.startBit)
+        xGrid.value?.remove()
+        insertData(signals)
     } else if (data.type === 'signal') {
-        currentView.value = 'signals';
-        // Show single signal
-        signalData.value = [{
-            name: data.data.name,
-            messageName: data.data.messageName,
-            ...data.data,
-            // Add value table and comment if they exist
-            valueTable: data.data.valueTable,
-            values: data.data.values,
-            comment: data.data.comment || '',
-            multiplexerIndicator: data.data.multiplexerIndicator
-        }];
+        currentView.value = 'signals'
+        xGrid.value?.remove()
+        insertData([data.data])
+    } else if (data.type === 'node') {
+        currentView.value = 'messages'
+        const nodeName = data.label
+        const nodeMessages = Object.entries(dbcObj.value.messages)
+            .filter(([_, msg]) => {
+                if (msg.sender === nodeName) return true
+                return Object.values(msg.signals).some(signal => 
+                    signal.receivers.includes(nodeName)
+                )
+            })
+            .map(([id, msg]) => ({
+                ...msg,
+                id: parseInt(id),
+                role: msg.sender === nodeName ? 'Sender' : 'Receiver'
+            }))
+            .sort((a, b) => a.id - b.id)
+        
+        xGrid.value?.remove()
+        insertData(nodeMessages)
     }
-};
+}
 
 const removeNode = (data: any) => {
     // Handle node removal logic
@@ -258,10 +335,51 @@ onMounted(() => {
     });
 });
 
+// Add clear function
+function clearData() {
+    xGrid.value?.remove();
+}
 
 defineExpose({
-    validate
-})
+    validate,
+    clearData
+});
+
+const treeRef = ref<InstanceType<typeof ElTreeV2>>()
+const treeQuery = ref('')
+
+// Helper function to get node icon
+const getNodeIcon = (data: any) => {
+    if (data.type === 'signal') return waveIcon
+    if (data.type === 'message') return messageIcon
+    if (data.type === 'node') return nodeIcon
+    if (data.type === 'category') {
+        if (data.label === 'Node') return nodeIcon
+        if (data.label === 'Message') return messageIcon
+        if (data.label === 'Signal') return waveIcon
+    }
+    return ''
+}
+
+const onTreeQueryChanged = () => {
+    treeRef.value?.filter(treeQuery.value)
+}
+
+const treeFilterMethod = (query: string, node: any) => {
+    // Always show category nodes
+    if (node.type === 'category') return true
+    
+    const searchText = query.toLowerCase()
+    const nodeLabel = node.label.toLowerCase()
+    
+    // For message nodes, also search in ID
+    if (node.type === 'message') {
+        const idMatch = node.label.toLowerCase().includes(searchText)
+        return idMatch || nodeLabel.includes(searchText)
+    }
+    
+    return nodeLabel.includes(searchText)
+}
 
 </script>
 
@@ -278,6 +396,8 @@ defineExpose({
     left: 0px;
     width: v-bind(leftWidth + 'px');
     z-index: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .shift {
@@ -356,5 +476,40 @@ defineExpose({
 :deep(.vxe-toolbar) {
     background-color: var(--el-fill-color-light);
     border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+/* Add styles for el-tree-v2 */
+:deep(.el-tree-node__content) {
+    height: 24px;
+}
+
+:deep(.el-tree-node__expand-icon) {
+    margin-right: 4px;
+}
+
+/* Add styles for role column */
+:deep(.vxe-table--body td.role-column) {
+    .sender {
+        color: var(--el-color-success);
+    }
+    .receiver {
+        color: var(--el-color-warning);
+    }
+}
+
+:deep(.keyword-highlight) {
+    color: var(--el-color-primary);
+    font-weight: bold;
+}
+
+.search-box {
+    padding: 6px;
+    background-color: var(--el-fill-color-light);
+    border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+/* Adjust tree height to account for search box */
+:deep(.el-tree-v2) {
+    height: v-bind(h - 117 + 'px') !important;
 }
 </style>

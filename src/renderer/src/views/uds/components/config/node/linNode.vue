@@ -52,7 +52,7 @@
     </el-divider>
     <el-form-item label="Database" prop="database">
       <el-select v-model="data.database" placeholder="No Database" clearable style="width: 300px" @change="clearDatabase">
-        <el-option v-for="item in dbList" :key="item.value" :label="`Lin.${item.label}`" :value="item.value">
+        <el-option v-for="item in dbList" :key="item.value" :label="`LIN.${item.label}`" :value="item.value">
         </el-option>
       </el-select>
     </el-form-item>

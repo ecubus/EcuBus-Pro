@@ -1,6 +1,27 @@
 {
   "data": {
-    "devices": {},
+    "devices": {
+      "c37b699c-2fda-41e5-979f-0e8ac0e8a5ce": {
+        "type": "can",
+        "canDevice": {
+          "id": "c37b699c-2fda-41e5-979f-0e8ac0e8a5ce",
+          "name": "PEAK_0",
+          "handle": 81,
+          "vendor": "peak",
+          "canfd": false,
+          "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_68"
+          }
+        }
+      }
+    },
     "ia": {},
     "tester": {},
     "subFunction": {},
@@ -68376,22 +68397,17 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13": {
+      "hardware": {
         "pos": {
-          "x": 820,
-          "y": 230.5,
-          "w": 700,
-          "h": 400
+          "x": 713,
+          "y": 258.5,
+          "w": 600,
+          "h": 552
         },
-        "title": "dbc",
-        "label": "DBC",
-        "id": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
-        "options": {
-          "params": {
-            "edit-index": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13"
-          },
-          "name": "Model3CAN"
-        }
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
       }
     }
   }

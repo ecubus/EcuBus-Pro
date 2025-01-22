@@ -24,7 +24,6 @@
         </template>
       </el-select>
     </el-form-item>
-
     <el-divider content-position="left">
       Can Parameters
     </el-divider>
@@ -105,7 +104,15 @@
         </template>
       </vxe-grid>
     </el-form-item>
-
+    <el-divider content-position="left">
+      Database
+    </el-divider>
+    <el-form-item label="Database" prop="database">
+      <el-select v-model="data.database" placeholder="No Database" clearable style="width: 300px">
+        <el-option v-for="item in dbList" :key="item.value" :label="`CAN.${item.label}`" :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
     <el-divider />
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
@@ -149,6 +156,7 @@ const data = ref<CanBaseInfo>({
   handle: "",
   vendor: "simulate",
   canfd: false,
+  database: "",
 
   bitrate: {
     sjw: 1,
@@ -252,6 +260,16 @@ const clockList = computed(() => {
   return [];
 });
 
+const dbList = computed(() => {
+  const list: { label: string; value: string }[] = [];
+  for (const key of Object.keys(devices.database.can)) {
+    list.push({
+      label: devices.database.can[key].name,
+      value: key
+    });
+  }
+  return list;
+});
 
 function canFdChange() {
   if (data.value.canfd) {

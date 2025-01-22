@@ -22,6 +22,7 @@ export interface CanBaseInfo {
   canfd: boolean
   bitrate:CanBitrate
   bitratefd?: CanBitrate
+  database?:string
 }
 
 

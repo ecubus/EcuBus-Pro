@@ -205,7 +205,6 @@ const signalColumns:VxeGridProps['columns'] = [
         }
     },
     { field: 'comment', title: 'Comment', width: 200 },
-    
 ]
 
 // Add message columns configuration
@@ -362,6 +361,7 @@ const getNodeIcon = (data: any) => {
 }
 
 const onTreeQueryChanged = () => {
+    console.log(treeQuery.value)    
     treeRef.value?.filter(treeQuery.value)
 }
 

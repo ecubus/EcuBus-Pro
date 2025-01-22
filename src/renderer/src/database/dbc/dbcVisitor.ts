@@ -105,6 +105,7 @@ export interface Message {
 
 export interface ValueTable {
     name: string;
+    comment?: string;
     values: {label:string,value:number}[]
 }
 
@@ -132,8 +133,8 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     }
     hexType(ctx: HexTypeCstChildren){
         return {
-            min:parseInt(ctx.Number[0].image, 16),
-            max:parseInt(ctx.Number[1].image, 16)
+            min:Number(ctx.Number[0].image),
+            max:Number(ctx.Number[1].image)
         }
     }
     enumType(ctx:EnumTypeCstChildren){

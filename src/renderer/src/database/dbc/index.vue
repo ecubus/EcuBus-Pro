@@ -45,6 +45,12 @@
                     </div>
                 </template>
             </el-tab-pane>
+            <el-tab-pane name="Value Tables" label="Value Tables">
+                <ValTable v-model="dbcObj" ref="valueTableRef" :edit-index="props.editIndex" :height="h" :width="w" />
+            </el-tab-pane>
+            <el-tab-pane name="Attributes" label="Attributes">
+                <AttrTable v-model="dbcObj" ref="attrTableRef" :edit-index="props.editIndex" :height="h" :width="w" />
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -53,6 +59,8 @@
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, toRef, inject, provide, Ref } from "vue";
 import Overview from './overfiew.vue'
+import ValTable from './valTable.vue'
+import AttrTable from './attrTable.vue'
 import dbcParse from '../dbcParse'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'

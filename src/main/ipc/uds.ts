@@ -606,6 +606,9 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
             canfd: fd,
             remote: ia.remote || false
 
+        },{
+            database:ia.database,
+            name:ia.name
         })
         const b = Buffer.alloc(len)
         for (const [index, d] of ia.data.entries()) {
@@ -642,6 +645,9 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
             canfd: fd,
             remote: ia.remote || false
 
+        },{
+            database:ia.database,
+            name:ia.name
         })
         const b = Buffer.alloc(len)
         for (const [index, d] of ia.data.entries()) {

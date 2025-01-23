@@ -40,7 +40,7 @@ export class SIMULATE_CAN extends CanBase {
     busInitStatus[info.handle] = true
     this.info = info
     this.event = vBusCountEvent[info.handle]
-    this.log = new CanLOG('SIMULATE', `SIMULATE-${this.info.handle}`, this.event)
+    this.log = new CanLOG('SIMULATE', info.name, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
 
@@ -86,6 +86,7 @@ export class SIMULATE_CAN extends CanBase {
     id: number,
     msgType: CanMsgType,
     data: Buffer,
+    extra?:{database?:string,name?:string}
   ) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
@@ -117,9 +118,9 @@ export class SIMULATE_CAN extends CanBase {
 
 
     }
-    return this._writeBase(id, msgType, cmdId, data)
+    return this._writeBase(id, msgType, cmdId, data,extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer) {
+  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         const msg: CanMessage = {
@@ -129,6 +130,8 @@ export class SIMULATE_CAN extends CanBase {
           id,
           msgType,
           device: this.info.name,
+          database:extra?.database,
+          name:extra?.name
         }
         setTimeout(() => {
           //txNotify
@@ -136,7 +139,7 @@ export class SIMULATE_CAN extends CanBase {
             if (busInitStatus[i]) {
               const event = vBusCountEvent[i]
               if (i != this.info.handle) {
-                event.emit('bus', msg)
+                event.emit('bus', cloneDeep(msg))
               }
 
 

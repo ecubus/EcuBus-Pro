@@ -49,6 +49,7 @@ export class ZLG_CAN extends CanBase {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
+      extra?:{database?:string,name?:string}
     }[]
   >()
   
@@ -72,7 +73,7 @@ export class ZLG_CAN extends CanBase {
       throw new Error('Invalid handle')
     }
     this.event = new EventEmitter()
-    this.log = new CanLOG('ZLG', target.label,this.event)
+    this.log = new CanLOG('ZLG', info.name,this.event)
    
 
     this.deviceType = parseInt(info.handle.split('_')[0])
@@ -192,7 +193,9 @@ export class ZLG_CAN extends CanBase {
           id: frame.canId,
           data: frame.data,
           ts: ts,
-          msgType: frame.msgType
+          msgType: frame.msgType,
+          database:item.extra?.database,
+          name:item.extra?.name
         }
         this.log.canBase(message)
         this.event.emit(this.getReadBaseId(frame.canId,message.msgType), message)
@@ -374,7 +377,7 @@ export class ZLG_CAN extends CanBase {
     }
   }
 
-  writeBase(id: number, msgType: CanMsgType, data: Buffer) {
+  writeBase(id: number, msgType: CanMsgType, data: Buffer,extra?:{database?:string,name?:string}) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
       throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
@@ -406,16 +409,16 @@ export class ZLG_CAN extends CanBase {
    
     const cmdId = this.getReadBaseId(id, msgType)
     //queue
-    return this._writeBase(id, msgType, cmdId, data)
+    return this._writeBase(id, msgType, cmdId, data,extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer) {
+  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          item.push({ resolve, reject, data, msgType })
+          item.push({ resolve, reject, data, msgType,extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType }])
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType,extra }])
         }
 
         if (msgType.canfd) {

@@ -93,7 +93,6 @@ export interface Signal {
 export interface Message {
     id: number;
     name: string;
-    canfd?: boolean;
     length: number;
     sender: string;
     signals: Record<string, Signal>;

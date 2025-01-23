@@ -1,13 +1,13 @@
 {
   "data": {
     "devices": {
-      "c37b699c-2fda-41e5-979f-0e8ac0e8a5ce": {
+      "30dc0575-1555-40e4-802a-150e76338671": {
         "type": "can",
         "canDevice": {
-          "id": "c37b699c-2fda-41e5-979f-0e8ac0e8a5ce",
-          "name": "PEAK_0",
-          "handle": 81,
-          "vendor": "peak",
+          "id": "30dc0575-1555-40e4-802a-150e76338671",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
           "canfd": false,
           "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
           "bitrate": {
@@ -17,7 +17,27 @@
             "preScaler": 10,
             "freq": 500000,
             "clock": "80",
-            "_X_ROW_KEY": "row_68"
+            "_X_ROW_KEY": "row_71"
+          }
+        }
+      },
+      "f30c735b-f257-4d73-a0c2-433aebe2d3e8": {
+        "type": "can",
+        "canDevice": {
+          "id": "f30c735b-f257-4d73-a0c2-433aebe2d3e8",
+          "name": "SIMULATE_1",
+          "handle": 1,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_11821"
           }
         }
       }
@@ -27,8 +47,33 @@
         "name": "Can IA",
         "type": "can",
         "id": "a6773bbd-db04-405f-9a23-af32b1c12e70",
-        "devices": [],
-        "action": []
+        "devices": [
+          "30dc0575-1555-40e4-802a-150e76338671"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "database": "Model3CAN",
+            "name": "ID00CUI_status",
+            "id": "c",
+            "channel": "30dc0575-1555-40e4-802a-150e76338671",
+            "type": "can",
+            "dlc": 8,
+            "data": [
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00",
+              "00"
+            ],
+            "_X_ROW_KEY": "row_2973"
+          }
+        ]
       }
     },
     "tester": {},
@@ -68405,22 +68450,10 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "hardware": {
-        "pos": {
-          "x": 713,
-          "y": 191,
-          "w": 600,
-          "h": 552
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
       "network": {
         "pos": {
-          "x": 980,
-          "y": 316.5,
+          "x": 56,
+          "y": 0,
           "w": 600,
           "h": 400
         },
@@ -68431,8 +68464,8 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 1685,
-          "y": 343.5,
+          "x": 924,
+          "y": 31.5,
           "w": 700,
           "h": 400
         },
@@ -68445,6 +68478,18 @@
           },
           "name": "Can IA"
         }
+      },
+      "trace": {
+        "pos": {
+          "x": 498,
+          "y": 38,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
       }
     }
   }

@@ -741,7 +741,8 @@
           },
           "name": "lin"
         }
-      }
+      },
+      "can": {}
     },
     "graphs": {
       "lin.lin.signals.MotorDirection": {
@@ -818,8 +819,8 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 31,
-          "y": 31,
+          "x": 314,
+          "y": 198,
           "w": 700,
           "h": 400
         },
@@ -832,7 +833,7 @@
           },
           "name": "Lin IA"
         },
-        "hide": true
+        "hide": false
       },
       "5459ce47-1751-4a82-94a0-9bd33ae289ab_sequence": {
         "pos": {
@@ -863,23 +864,6 @@
         "label": "Trace",
         "id": "trace",
         "options": {}
-      },
-      "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
-        "pos": {
-          "x": 918,
-          "y": 167,
-          "w": 700,
-          "h": 400
-        },
-        "title": "linPanel",
-        "label": "Panel",
-        "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
-        "options": {
-          "params": {
-            "editIndex": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba"
-          },
-          "name": "Node 1"
-        }
       },
       "graph": {
         "pos": {

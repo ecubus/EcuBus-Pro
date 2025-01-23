@@ -145,7 +145,7 @@
                 <el-form :model="formData" label-width="80" size="small" class="formH"
                     :disabled="periodTimer[popoverIndex] == true">
                     <el-form-item label="Name">
-                        <el-input v-model="formData.name" :disabled="formData.database!=undefined"/>
+                        <el-input v-model="formData.name" :disabled="formData.database != undefined" />
                     </el-form-item>
                     <el-form-item label="ID">
                         <el-input v-model="formData.id" @input="idChange" />
@@ -202,20 +202,10 @@
                 <span class="key-text">{{ pressedKey }}</span>
             </div>
         </Transition>
-        <el-dialog 
-            v-model="selectFrameVisible" 
-            title="Select Frame from Database" 
-            :append-to="`#win${editIndex}_ia`"
-            width="600"
-            align-center
-        >
-            <Signal 
-                :height="h*2/3" 
-                :width="480"
-                protocol-filter="can"
-                selectable-level="frame"
-                @add-frame="handleFrameSelect"
-            />
+        <el-dialog v-model="selectFrameVisible" title="Select Frame from Database" :append-to="`#win${editIndex}_ia`"
+            width="600" align-center>
+            <Signal :height="h * 2 / 3" :width="480" protocol-filter="can" selectable-level="frame" :speical-db="speicalDb"
+                @add-frame="handleFrameSelect" />
         </el-dialog>
     </div>
 </template>
@@ -262,7 +252,17 @@ const ppRef = computed(() => buttonRef.value[popoverIndex.value])
 const globalStart = toRef(window, 'globalStart')
 const periodTimer = ref<Record<number, boolean>>({})
 const selectFrameVisible = ref(false)
-
+const speicalDb = computed(() => {
+    //connected device db
+    const list: string[] = []
+    for (const d of dataBase.ia[editIndex.value].devices) {
+        const db = dataBase.devices[d].canDevice?.database
+        if (db) {
+            list.push(db)
+        }
+    }
+    return list
+})
 function addFrame() {
     const channel = Object.keys(devices.value)[0] || ''
     dataBase.ia[editIndex.value].action.push({
@@ -487,8 +487,11 @@ const gridOptions = computed(() => {
             trigger: 'click',
             mode: 'cell',
             showIcon: false,
-            beforeEditMethod({ rowIndex,row}) {
-                if (periodTimer.value[rowIndex] == true||row.database!=undefined) {
+            beforeEditMethod({ rowIndex, column, row }) {
+                if (periodTimer.value[rowIndex] == true) {
+                    return false
+                }
+                if (column.field == 'name' && row.database != undefined) {
                     return false
                 }
                 return true
@@ -534,9 +537,9 @@ onMounted(async () => {
     for (const [key, period] of Object.entries(periods)) {
         console.log(key)
         const a = key.split('-')
-        const item=a.slice(0,-1).join('-')
-        const index=Number(a[a.length-1])
-        
+        const item = a.slice(0, -1).join('-')
+        const index = Number(a[a.length - 1])
+
         if (item === editIndex.value) {
             periodTimer.value[index] = true
         }
@@ -549,17 +552,28 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
 
         const channel = Object.keys(devices.value)[0] || ''
         const frameInfo = frame.bindValue.frameInfo as Message
-        
+        let type: "can" | "canfd" | "ecan" | "ecanfd" = 'can'
+        if (frameInfo.length > 8) {
+            if (frameInfo.id > 0x7FF) {
+                type = 'ecanfd'
+            } else {
+                type = 'canfd'
+            }
+        } else {
+            if (frameInfo.id > 0x7FF) {
+                type = 'ecan'
+            }
+        }
         // 创建新的 frame action
         dataBase.ia[editIndex.value].action.push({
             trigger: {
                 type: 'manual',
             },
-            database:frame.bindValue.dbName,
+            database: frame.bindValue.dbName,
             name: frameInfo.name,
             id: frameInfo.id.toString(16), // 转换为16进制字符串
             channel: channel,
-            type: frameInfo.canfd ? 'canfd' : frameInfo.id > 0x7FF ? 'ecan' : 'can',
+            type: type,
             dlc: frameInfo.length,
             data: new Array(frameInfo.length).fill('00') // 初始化数据为全0
         })

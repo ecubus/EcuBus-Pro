@@ -237,12 +237,21 @@ const updateTime = () => {
     }
     // 更新x轴范围
     let maxX = 5
+    let minX = 0
     Object.values(chartDataCache).forEach((v) => {
         const lastOne = v[v.length - 1]
         if(lastOne){
-            const val=lastOne[0] as number
+            const val = lastOne[0] as number
             if (val > maxX) {
                 maxX = val
+            }
+        }
+        // 获取每个图表数据的最小x值
+        const firstOne = v[0]
+        if(firstOne){
+            const val = firstOne[0] as number
+            if (val < minX || minX === 0) {
+                minX = val
             }
         }
     })
@@ -250,12 +259,15 @@ const updateTime = () => {
     if(ts>maxX){
         maxX=ts
     }
-    time.value=maxX
+   
+    time.value = maxX
     maxX = Math.ceil(maxX) + 5
+    minX = Math.floor(minX)
+  
     enabledCharts.value.forEach(c => {
         chartInstances[c.id].setOption({
             xAxis: {
-               
+                min: minX,
                 max: maxX
             }
         })

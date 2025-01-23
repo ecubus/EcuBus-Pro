@@ -79,6 +79,7 @@ const props = defineProps<{
     width: number
     protocolFilter?: ProtocolFilter  // 协议过滤
     selectableLevel?: SelectableLevel  // 可选择的层级
+    speicalDb?:string[]
 }>()
 
 // 修改默认值
@@ -139,6 +140,9 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
 function getLinSignals() {
     const signals: TreeItem[] = []
     for (const [key, ldf] of Object.entries(database.lin)) {
+        if(props.speicalDb&&!props.speicalDb.includes(key)){
+            continue
+        }
         const db: TreeItem = {
             id: key,
             name: `LIN.${ldf.name}`,
@@ -187,6 +191,9 @@ function getLinSignals() {
 function getCanSignals() {
     const signals: TreeItem[] = []
     for (const [key, dbc] of Object.entries(database.can)) {
+        if(props.speicalDb&&!props.speicalDb.includes(key)){
+            continue
+        }
         const db: TreeItem = {
             id: key,
             name: `CAN.${dbc.name}`,

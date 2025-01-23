@@ -209,13 +209,13 @@ function logDisplay(vals: LogItem[]) {
    for (const val of vals) {
       if (val.message.method == 'canBase') {
         
-         let name=''
-         if(val.message.data.msgType.uuid){
-            const node=database.nodes[val.message.data.msgType.uuid]
-            if(node){
-               name=node.name
-            }
-         }
+         // let name=
+         // if(val.message.data.msgType.uuid){
+         //    const node=database.nodes[val.message.data.msgType.uuid]
+         //    if(node){
+         //       name=node.name
+         //    }
+         // }
          insertData({
             method: val.message.method,
             dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
@@ -227,7 +227,7 @@ function logDisplay(vals: LogItem[]) {
             device: val.label,
             channel: val.instance,
             msgType: CanMsgType2Str(val.message.data.msgType),
-            name: name
+            name: val.message.data.name
 
          })
       } 

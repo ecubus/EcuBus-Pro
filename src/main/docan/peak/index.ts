@@ -356,7 +356,8 @@ export class PEAK_TP extends CanBase implements CanTp {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-      msg: any
+      msg: any,
+      extra?:{database?:string,name?:string}
     }[]
   >()
   writeQueueMap = new Map<string, QueueObject<{ addr: CanAddr, data: Buffer, resolve: (ts: number) => void, reject: (err: TpError) => void }>>()
@@ -430,7 +431,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     if (targetDevice == undefined) {
       throw new Error('device not found')
     }
-    this.log = new CanLOG('PEAK', targetDevice.label, this.event)
+    this.log = new CanLOG('PEAK', this.info.name, this.event)
     peak.CreateTSFN(this.handle, this.id, this.callback.bind(this))
 
     const buf = Buffer.alloc(1)
@@ -736,6 +737,8 @@ export class PEAK_TP extends CanBase implements CanTp {
                   id: msg.canInfo.canId,
                   data: frame.data,
                   ts: ts,
+                  database:item.extra?.database,
+                  name:item.extra?.name,
                   msgType: {
                     canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
                     brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
@@ -1048,7 +1051,8 @@ export class PEAK_TP extends CanBase implements CanTp {
   writeBase(
     id: number,
     msgType: CanMsgType,
-    data: Buffer
+    data: Buffer,
+    extra?:{database?:string,name?:string}
   ) {
     let msgTypeNum = 0
     if (msgType.idType === 'STANDARD') {
@@ -1095,9 +1099,9 @@ export class PEAK_TP extends CanBase implements CanTp {
 
 
     }
-    return this._writeBase(id, msgType, msgTypeNum, cmdId, data)
+    return this._writeBase(id, msgType, msgTypeNum, cmdId, data,extra)
   }
-  _writeBase(id: number, msgTypeE: CanMsgType, msgType: number, cmdId: string, data: Buffer) {
+  _writeBase(id: number, msgTypeE: CanMsgType, msgType: number, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
         let res = 0
@@ -1123,9 +1127,9 @@ export class PEAK_TP extends CanBase implements CanTp {
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
 
-          item.push({ resolve, reject, msg, data, msgType: msgTypeE })
+          item.push({ resolve, reject, msg, data, msgType: msgTypeE,extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, msg, data, msgType: msgTypeE }])
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, msg, data, msgType: msgTypeE,extra }])
         }
         res = peak.CANTP_Write_2016(this.handle, msg)
         if (!statusIsOk(res, false)) {

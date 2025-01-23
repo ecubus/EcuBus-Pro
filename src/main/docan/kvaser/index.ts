@@ -46,7 +46,7 @@ export class KVASER_CAN extends CanBase {
       reject: (reason: CanError) => void
       msgType: CanMsgType
       data: Buffer
-
+      extra?:{database?:string,name?:string}
     }[]
   >()
   
@@ -79,7 +79,7 @@ export class KVASER_CAN extends CanBase {
       throw new Error('device not found')
     }
     this.event = new EventEmitter()
-    this.log = new CanLOG('KVASER', `${targetDevice.label}-${info.handle}`, this.event)
+    this.log = new CanLOG('KVASER', info.name, this.event)
 
 
     KV.canBusOff(this.handle)
@@ -187,7 +187,9 @@ export class KVASER_CAN extends CanBase {
               data: buf,
               ts: ts,
               msgType: msgType,
-              device: this.info.name
+              device: this.info.name,
+              database:item.extra?.database,
+              name:item.extra?.name
             }
             this.log.canBase(message)
             this.event.emit(this.getReadBaseId(message.id,message.msgType), message)
@@ -312,7 +314,7 @@ export class KVASER_CAN extends CanBase {
       this.event.emit('close', msg)
     }
   }
-  writeBase(id: number, msgType: CanMsgType, data: Buffer) {
+  writeBase(id: number, msgType: CanMsgType, data: Buffer,extra?:{database?:string,name?:string}) {
     let maxLen = msgType.canfd ? 64 : 8
     if (data.length > maxLen) {
       throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
@@ -343,17 +345,17 @@ export class KVASER_CAN extends CanBase {
 
 
     }
-    return this._writeBase(id, msgType, cmdId, data)
+    return this._writeBase(id, msgType, cmdId, data,extra)
   }
-  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer) {
+  _writeBase(id: number, msgType: CanMsgType, cmdId: string, data: Buffer,extra?:{database?:string,name?:string}) {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
 
         const item = this.pendingBaseCmds.get(cmdId)
         if (item) {
-          item.push({ resolve, reject, data, msgType })
+          item.push({ resolve, reject, data, msgType,extra })
         } else {
-          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType }])
+          this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType,extra}])
         }
         let flag = 0
         if (msgType.idType == CAN_ID_TYPE.EXTENDED) {

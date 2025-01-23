@@ -33,6 +33,10 @@ export interface CanBaseInfo {
  */
 export interface CanMessage {
   /**
+   * The name of the CAN message.
+   */
+  name?:string
+  /**
    * The device associated with the CAN message.
    */
   device?: string;
@@ -336,6 +340,7 @@ export abstract class CanBase{
     id: number,
     msgType: CanMsgType,
     data: Buffer,
+    extra?:{database?:string,name?:string}
   ): Promise<number>
   abstract getReadBaseId(id:number,msgType:CanMsgType):string
   abstract setOption(cmd:string,val:any):void
@@ -369,7 +374,7 @@ export class CAN_SOCKET {
   recvTimer:NodeJS.Timeout|null=null
   cb:any
   pendingRecv: {resolve: (value: { data: Buffer, ts: number }) => void, reject: (reason: CanError) => void}|null=null
-  constructor(inst:CanBase,id:number,msgType:CanMsgType){
+  constructor(inst:CanBase,id:number,msgType:CanMsgType,private extra?:{database?:string,name?:string}){
     this.inst=inst
     this.msgType=msgType
     this.id=id
@@ -447,7 +452,7 @@ export class CAN_SOCKET {
           throw this.error(CAN_ERROR_ID.CAN_PARAM_ERROR)
         }
       }
-    const ts=await this.inst.writeBase(this.id,this.msgType,data)
+    const ts=await this.inst.writeBase(this.id,this.msgType,data,this.extra)
     // const systemTs=this.getSystemTs()
     // if(this.tsOffset==null){
     //   this.tsOffset=systemTs-ts

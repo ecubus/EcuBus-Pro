@@ -22,7 +22,15 @@
         }
       }
     },
-    "ia": {},
+    "ia": {
+      "a6773bbd-db04-405f-9a23-af32b1c12e70": {
+        "name": "Can IA",
+        "type": "can",
+        "id": "a6773bbd-db04-405f-9a23-af32b1c12e70",
+        "devices": [],
+        "action": []
+      }
+    },
     "tester": {},
     "subFunction": {},
     "nodes": {},
@@ -68400,7 +68408,7 @@
       "hardware": {
         "pos": {
           "x": 713,
-          "y": 258.5,
+          "y": 191,
           "w": 600,
           "h": 552
         },
@@ -68408,6 +68416,35 @@
         "label": "Devices",
         "id": "hardware",
         "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 980,
+          "y": 316.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
+        "pos": {
+          "x": 1685,
+          "y": 343.5,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "a6773bbd-db04-405f-9a23-af32b1c12e70_ia",
+        "options": {
+          "params": {
+            "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
+          },
+          "name": "Can IA"
+        }
       }
     }
   }

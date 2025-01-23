@@ -61,22 +61,27 @@
             <template #toolbar>
                 <div style="justify-content: flex-start;display: flex;align-items: center;gap:2px;margin-left: 5px;">
                     <el-button-group>
-                        <el-tooltip effect="light" content="Edit Connect" placement="bottom" >
+                        <el-tooltip effect="light" content="Edit Connect" placement="bottom">
                             <el-button type="primary" link @click="editConnect">
                                 <Icon :icon="linkIcon" style="rotate: -45deg;font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Add Frame" placement="bottom" >
+                        <el-tooltip effect="light" content="Add Frame" placement="bottom">
                             <el-button link @click="addFrame">
                                 <Icon :icon="fileOpenOutline" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Edit Frame" placement="bottom" >
+                        <el-tooltip effect="light" content="Select Frame from Database" placement="bottom">
+                            <el-button link @click="openFrameSelect">
+                                <Icon :icon="databaseIcon" style="font-size: 18px;" />
+                            </el-button>
+                        </el-tooltip>
+                        <el-tooltip effect="light" content="Edit Frame" placement="bottom">
                             <el-button link type="success" @click="editFrame" :disabled="popoverIndex < 0">
                                 <Icon :icon="editIcon" style="font-size: 18px;" />
                             </el-button>
                         </el-tooltip>
-                        <el-tooltip effect="light" content="Delete Frame" placement="bottom" >
+                        <el-tooltip effect="light" content="Delete Frame" placement="bottom">
                             <el-button link type="danger" @click="deleteFrame"
                                 :disabled="popoverIndex < 0 || periodTimer[popoverIndex] == true">
                                 <Icon :icon="deleteIcon" style="font-size: 18px;" />
@@ -140,7 +145,7 @@
                 <el-form :model="formData" label-width="80" size="small" class="formH"
                     :disabled="periodTimer[popoverIndex] == true">
                     <el-form-item label="Name">
-                        <el-input v-model="formData.name" />
+                        <el-input v-model="formData.name" :disabled="formData.database!=undefined"/>
                     </el-form-item>
                     <el-form-item label="ID">
                         <el-input v-model="formData.id" @input="idChange" />
@@ -197,6 +202,21 @@
                 <span class="key-text">{{ pressedKey }}</span>
             </div>
         </Transition>
+        <el-dialog 
+            v-model="selectFrameVisible" 
+            title="Select Frame from Database" 
+            :append-to="`#win${editIndex}_ia`"
+            width="600"
+            align-center
+        >
+            <Signal 
+                :height="h*2/3" 
+                :width="480"
+                protocol-filter="can"
+                selectable-level="frame"
+                @add-frame="handleFrameSelect"
+            />
+        </el-dialog>
     </div>
 </template>
 <script lang="ts" setup>
@@ -221,6 +241,10 @@ import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
 import { cloneDeep } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
+import Signal from './components/signal.vue'
+import databaseIcon from '@iconify/icons-material-symbols/database'
+import { GraphBindFrameValue, GraphNode } from 'src/preload/data';
+import { Message } from '@r/database/dbc/dbcVisitor';
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -237,6 +261,8 @@ const popoverIndex = ref(-1)
 const ppRef = computed(() => buttonRef.value[popoverIndex.value])
 const globalStart = toRef(window, 'globalStart')
 const periodTimer = ref<Record<number, boolean>>({})
+const selectFrameVisible = ref(false)
+
 function addFrame() {
     const channel = Object.keys(devices.value)[0] || ''
     dataBase.ia[editIndex.value].action.push({
@@ -461,8 +487,8 @@ const gridOptions = computed(() => {
             trigger: 'click',
             mode: 'cell',
             showIcon: false,
-            beforeEditMethod({ rowIndex }) {
-                if (periodTimer.value[rowIndex] == true) {
+            beforeEditMethod({ rowIndex,row}) {
+                if (periodTimer.value[rowIndex] == true||row.database!=undefined) {
                     return false
                 }
                 return true
@@ -517,6 +543,33 @@ onMounted(async () => {
     }
 })
 
+function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
+    console.log(frame)
+    if (frame.bindValue.frameInfo) {
+
+        const channel = Object.keys(devices.value)[0] || ''
+        const frameInfo = frame.bindValue.frameInfo as Message
+        
+        // 创建新的 frame action
+        dataBase.ia[editIndex.value].action.push({
+            trigger: {
+                type: 'manual',
+            },
+            database:frame.bindValue.dbName,
+            name: frameInfo.name,
+            id: frameInfo.id.toString(16), // 转换为16进制字符串
+            channel: channel,
+            type: frameInfo.canfd ? 'canfd' : frameInfo.id > 0x7FF ? 'ecan' : 'can',
+            dlc: frameInfo.length,
+            data: new Array(frameInfo.length).fill('00') // 初始化数据为全0
+        })
+    }
+    selectFrameVisible.value = false
+}
+
+function openFrameSelect() {
+    selectFrameVisible.value = true
+}
 
 </script>
 <style lang="scss">

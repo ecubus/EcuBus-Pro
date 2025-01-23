@@ -64,7 +64,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, computed, toRef, watch, watchEffect } from 'vue'
 
-import { CAN_ID_TYPE, CanMsgType, getDlcByLen } from 'nodeCan/can';
+import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can';
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -117,7 +117,7 @@ const checkList = ref<string[]>([
 ])
 interface CanBaseLog {
    method: 'canBase',
-   data: { dir: 'OUT' | 'IN'; data: Uint8Array; ts: number; id: number; msgType: CanMsgType }
+   data: CanMessage & {ts:number}
 }
 interface IpBaseLog {
    method: 'ipBase',

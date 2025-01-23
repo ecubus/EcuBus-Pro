@@ -40,7 +40,15 @@ export type GraphBindSignalValue = {
 }
 export type GraphBindVariableValue = {
 }
-export type GraphNode = {
+
+export type GraphBindFrameValue = {
+    frameInfo:any
+    dbName:string
+    dbKey:string
+}
+
+
+export type GraphNode<T> = {
     enable: boolean,
     id: string,
     name: string,
@@ -52,9 +60,8 @@ export type GraphNode = {
     yAxis?:YAXisOption,
     xAxis?:XAXisOption,
     series?:SeriesOption,
-    type:'signal' | 'variable',
-    bindValue: 'signal' extends typeof type ? GraphBindSignalValue : GraphBindVariableValue
-  
+    type:'signal' | 'variable' | 'frame',
+    bindValue: T
 }
 export interface DataSet {
     devices: Record<string, UdsDevice>

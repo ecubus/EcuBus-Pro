@@ -84,15 +84,15 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { GraphNode } from 'src/preload/data'
+import { GraphBindSignalValue, GraphNode } from 'src/preload/data'
 
 const props = defineProps<{
-    node: GraphNode
+    node: GraphNode<GraphBindSignalValue>
     height: number
 }>()
 
 const emit = defineEmits<{
-    save: [value: GraphNode]
+    save: [value: GraphNode<GraphBindSignalValue>]
     cancel: []
 }>()
 
@@ -127,7 +127,7 @@ const form = ref({
 })
 
 const handleSubmit = () => {
-    const node: GraphNode = {
+    const node: GraphNode<GraphBindSignalValue> = {
         ...props.node,
         name: form.value.name,
         color: form.value.color,

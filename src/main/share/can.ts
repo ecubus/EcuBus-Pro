@@ -67,6 +67,11 @@ export interface CanMessage {
    * This property is optional.
    */
   isSimulate?: boolean;
+  /**
+   * The database name of the CAN message.
+   */
+  database?:string
+ 
 }
 
 /**
@@ -174,6 +179,7 @@ export interface CanInterAction{
     onKey?:string
   }
   name:string
+  database?:string
   id:string
   channel:string
   type:'canfd'|'can'|'ecan'|'ecanfd'

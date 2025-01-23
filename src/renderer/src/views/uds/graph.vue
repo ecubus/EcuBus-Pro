@@ -113,7 +113,7 @@ import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data';
-import { GraphNode } from 'src/preload/data';
+import { GraphBindSignalValue, GraphNode } from 'src/preload/data';
 import { use } from 'echarts/core'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, DataZoomComponent } from 'echarts/components'
@@ -139,7 +139,7 @@ const appendId = computed(() => props.editIndex ? `#win${props.editIndex}` : '#w
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => height.value * 2 / 3)
 // 修改测试数据
-const filteredTreeData = ref<GraphNode[]>([])
+const filteredTreeData = ref<GraphNode<GraphBindSignalValue>[]>([])
 const treeRef = ref()
 const time=ref(0)
 
@@ -158,7 +158,7 @@ function treeHide() {
     // 如果需要在隐藏/显示时保存之前的宽度，可以添加相关逻辑
 }
 
-function handleCheckChange(data: GraphNode, checked: boolean) {
+function handleCheckChange(data: GraphNode<GraphBindSignalValue>, checked: boolean) {
     graphs[data.id].enable = checked
     filteredTreeData.value.forEach(node => {
         if (node.id === data.id) {
@@ -179,13 +179,13 @@ const canvasWidth = computed(() => {
 
 
 
-const handleEdit = (data: GraphNode, event: Event) => {
+const handleEdit = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
     popoverRefs.value[data.id]?.hide()
     editingNode.value = { ...data }
     editDialogVisible.value = true
 }
 
-const handleEditSave = (updatedNode: GraphNode) => {
+const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue>) => {
     const index = filteredTreeData.value.findIndex(v => v.id === updatedNode.id)
     if (index !== -1) {
         filteredTreeData.value[index] = updatedNode
@@ -552,7 +552,7 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
 
 })
 
-const getChartOption = (chart: GraphNode, index: number): ECBasicOption => {
+const getChartOption = (chart: GraphNode<GraphBindSignalValue>, index: number): ECBasicOption => {
     const isLast = index === enabledCharts.value.length - 1
     const isFirst = index === 0
     const option: ECBasicOption = {
@@ -774,13 +774,13 @@ onUnmounted(() => {
 
 const signalDialogVisible = ref(false)
 const editDialogVisible = ref(false)
-const editingNode = ref<GraphNode | null>(null)
+const editingNode = ref<GraphNode<GraphBindSignalValue> | null>(null)
 
 const addSignal = () => {
     signalDialogVisible.value = true
 }
 
-const handleAddSignal = (node: GraphNode) => {
+const handleAddSignal = (node: GraphNode<GraphBindSignalValue>) => {
     signalDialogVisible.value = false
 
     //check existing graph
@@ -812,7 +812,7 @@ const handleAddSignal = (node: GraphNode) => {
 }
 
 // 在删除图表时也要清理对应的缓存
-const handleDelete = (data: GraphNode, event: Event) => {
+const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
     popoverRefs.value[data.id]?.hide()
     const index = filteredTreeData.value.findIndex(v => v.id == data.id)
     // 删除图表实例

@@ -62,14 +62,14 @@
             "type": "can",
             "dlc": 8,
             "data": [
-              "00",
-              "00",
-              "00",
-              "00",
-              "00",
-              "00",
-              "00",
-              "00"
+              "80",
+              "0",
+              "0",
+              "0",
+              "0",
+              "38",
+              "a3",
+              "23"
             ],
             "_X_ROW_KEY": "row_2973"
           }
@@ -124,7 +124,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3131",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_autopilotTrial": {
                   "messageName": "ID00CUI_status",
@@ -159,7 +162,10 @@
                       "label": "STOP",
                       "value": 2
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3132",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_bluetoothActive": {
                   "messageName": "ID00CUI_status",
@@ -176,7 +182,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3133",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_cameraActive": {
                   "messageName": "ID00CUI_status",
@@ -193,7 +202,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3134",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_cellActive": {
                   "messageName": "ID00CUI_status",
@@ -210,7 +222,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3135",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_cellConnected": {
                   "messageName": "ID00CUI_status",
@@ -227,7 +242,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3136",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_cellNetworkTechnology": {
                   "messageName": "ID00CUI_status",
@@ -294,7 +312,10 @@
                       "label": "CELL_NETWORK_WCDMA",
                       "value": 10
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3137",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_cellReceiverPower": {
                   "messageName": "ID00CUI_status",
@@ -311,7 +332,10 @@
                   ],
                   "unit": "dB",
                   "minimum": -128,
-                  "maximum": 127
+                  "maximum": 127,
+                  "_X_ROW_KEY": "row_3138",
+                  "value": 0,
+                  "physValue": -128
                 },
                 "UI_cellSignalBars": {
                   "messageName": "ID00CUI_status",
@@ -358,7 +382,10 @@
                       "label": "ZERO",
                       "value": 0
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3139",
+                  "value": 7,
+                  "physValue": 7
                 },
                 "UI_cpuTemperature": {
                   "messageName": "ID00CUI_status",
@@ -375,7 +402,10 @@
                   ],
                   "unit": "C",
                   "minimum": -20,
-                  "maximum": 100
+                  "maximum": 100,
+                  "_X_ROW_KEY": "row_3140",
+                  "value": 196,
+                  "physValue": -20
                 },
                 "UI_developmentCar": {
                   "messageName": "ID00CUI_status",
@@ -392,7 +422,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3141",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_displayOn": {
                   "messageName": "ID00CUI_status",
@@ -409,7 +442,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3142",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_displayReady": {
                   "messageName": "ID00CUI_status",
@@ -426,7 +462,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3143",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_factoryReset": {
                   "messageName": "ID00CUI_status",
@@ -461,7 +500,10 @@
                       "label": "NONE_SNA",
                       "value": 0
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3144",
+                  "physValue": 0,
+                  "value": 0
                 },
                 "UI_falseTouchCounter": {
                   "messageName": "ID00CUI_status",
@@ -478,7 +520,10 @@
                   ],
                   "unit": "1",
                   "minimum": 0,
-                  "maximum": 255
+                  "maximum": 255,
+                  "_X_ROW_KEY": "row_3145",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_gpsActive": {
                   "messageName": "ID00CUI_status",
@@ -495,7 +540,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3146",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_pcbTemperature": {
                   "messageName": "ID00CUI_status",
@@ -512,7 +560,10 @@
                   ],
                   "unit": "C",
                   "minimum": -20,
-                  "maximum": 100
+                  "maximum": 100,
+                  "_X_ROW_KEY": "row_3147",
+                  "physValue": -19,
+                  "value": 197
                 },
                 "UI_radioActive": {
                   "messageName": "ID00CUI_status",
@@ -529,7 +580,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3148",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_readyForDrive": {
                   "messageName": "ID00CUI_status",
@@ -546,7 +600,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3149",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_screenshotActive": {
                   "messageName": "ID00CUI_status",
@@ -563,7 +620,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3150",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_systemActive": {
                   "messageName": "ID00CUI_status",
@@ -580,7 +640,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3151",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_touchActive": {
                   "messageName": "ID00CUI_status",
@@ -597,7 +660,11 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3152",
+                  "value": 1,
+                  "valueStep": 1,
+                  "physValue": 1
                 },
                 "UI_vpnActive": {
                   "messageName": "ID00CUI_status",
@@ -614,7 +681,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3153",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_wifiActive": {
                   "messageName": "ID00CUI_status",
@@ -631,7 +701,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3154",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "UI_wifiConnected": {
                   "messageName": "ID00CUI_status",
@@ -648,7 +721,10 @@
                   ],
                   "unit": "",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3155",
+                  "value": 0,
+                  "physValue": 0
                 }
               },
               "attributes": {}
@@ -68462,11 +68538,23 @@
         "id": "network",
         "options": {}
       },
+      "trace": {
+        "pos": {
+          "x": 1277,
+          "y": 270,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 924,
-          "y": 31.5,
-          "w": 700,
+          "x": 1461,
+          "y": 425,
+          "w": 987,
           "h": 400
         },
         "title": "cani",
@@ -68478,18 +68566,6 @@
           },
           "name": "Can IA"
         }
-      },
-      "trace": {
-        "pos": {
-          "x": 498,
-          "y": 38,
-          "w": 700,
-          "h": 400
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {}
       }
     }
   }

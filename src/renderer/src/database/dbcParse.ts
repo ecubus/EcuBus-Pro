@@ -104,6 +104,83 @@ export function isCanFd(message:Message):boolean{
     }
     return val
 }
+
+
+
+export function getMessageData(message: Message): Buffer {
+    const data = Buffer.alloc(message.length)
+    
+    // Process each signal
+    Object.values(message.signals).forEach(signal => {
+        if (signal.value === undefined) return
+        
+        let rawValue = signal.value
+        const maxValue = Math.pow(2, signal.length) - 1
+        
+        // Ensure value doesn't exceed the signal's bit length
+        rawValue = Math.min(rawValue, maxValue)
+        
+        if (signal.isLittleEndian) {
+            // Intel format (Little Endian)
+            let startByte = Math.floor(signal.startBit / 8)
+            let startBitInByte = signal.startBit % 8
+            let remainingBits = signal.length
+            let valueIndex = 0
+            
+            while (remainingBits > 0) {
+                if (startByte >= data.length) break
+                
+                // Calculate how many bits we can write in this byte
+                const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
+                
+                // Extract the bits we want to write
+                const mask = (1 << bitsInThisByte) - 1
+                const value = (rawValue >> valueIndex) & mask
+                
+                // Write the bits to the byte
+                data[startByte] &= ~(mask << startBitInByte) // Clear the bits
+                data[startByte] |= (value << startBitInByte) // Set the new bits
+                
+                // Move to next byte
+                remainingBits -= bitsInThisByte
+                valueIndex += bitsInThisByte
+                startByte += 1
+                startBitInByte = 0
+            }
+        } else {
+            // Motorola format (Big Endian)
+            let startByte = Math.floor(signal.startBit / 8)
+            let startBitInByte = 7 - (signal.startBit % 8)
+            let remainingBits = signal.length
+            let valueIndex = signal.length - 1
+            
+            while (remainingBits > 0) {
+                if (startByte >= data.length) break
+                
+                // Calculate how many bits we can write in this byte
+                const bitsInThisByte = Math.min(startBitInByte + 1, remainingBits)
+                
+                // Extract the bits we want to write
+                const mask = (1 << bitsInThisByte) - 1
+                const value = (rawValue >> (signal.length - remainingBits)) & mask
+                
+                // Calculate position in byte
+                const position = startBitInByte - bitsInThisByte + 1
+                
+                // Write the bits to the byte
+                data[startByte] &= ~(mask << position) // Clear the bits
+                data[startByte] |= (value << position) // Set the new bits
+                
+                // Move to next byte
+                remainingBits -= bitsInThisByte
+                startByte -= 1
+                startBitInByte = 7
+            }
+        }
+    })
+    
+    return data
+}
 // Update the parse function with improved error handling
 export default function parse(text: string): DBC {
     const originalText = text;

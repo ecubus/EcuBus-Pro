@@ -44,7 +44,6 @@ import {
     MultiplexedValueClauseCstChildren
 } from "./dbc_cst";
 import { cloneDeep } from "lodash";
-import { CAN_ID_TYPE } from "src/main/share/can";
 import { isCanFd } from "../dbcParse";
 
 export interface NodeItem {
@@ -90,6 +89,9 @@ export interface Signal {
         name: string;
         range: number[]
     };
+    value?: number;
+    physValue?: number|string;
+    generatorType?: string;
 }
 
 export interface Message {
@@ -98,7 +100,7 @@ export interface Message {
     length: number;
     sender: string;
     canfd: boolean;
-    canIdType: CAN_ID_TYPE;
+    extId: boolean;
     signals: Record<string, Signal>;
     comment?: string;
     attributes: Record<string, Attribute>;
@@ -327,14 +329,14 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     }
     messageClause(ctx: MessageClauseCstChildren): Message {
         let id = parseInt(ctx.Number[0].image, 10)
-        const type = id & 0x80000000 ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD
+       
 
         const message: Message = {
             id: id & 0x1FFFFFFF,
             name: this.visit(ctx.identifierOrString[0]),
             length: parseInt(ctx.Number[1].image, 10),
             sender: this.visit(ctx.identifierOrString[1]),
-            canIdType: type,
+            extId: id & 0x80000000 ? true : false,
             canfd: false,
             signals: {},
             attributes: {}

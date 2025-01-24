@@ -133,10 +133,9 @@
             </div>
         </el-dialog>
         <el-dialog v-if="editV && formData" v-model="editV"
-            :title="`Edit Frame ${dataBase.ia[editIndex].action[popoverIndex].name}`" width="465" align-center
+            :title="`Edit Frame ${dataBase.ia[editIndex].action[popoverIndex].name}`" width="90%" align-center
             :append-to="`#win${editIndex}_ia`">
             <div :style="{
-                width: '420px',
                 padding: '10px',
                 height: fh,
                 overflowY: 'auto',
@@ -181,16 +180,25 @@
                             <el-option v-for="i in 16" :value="i - 1" :key="i"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-divider content-position="left">DATA</el-divider>
-                    <el-form-item label-width="0" prop="data">
-                        <div style="margin-left: 10px;"> <el-input class="dataI" v-for="index in dlcToLen" :key="index"
-                                v-model="formData.data[index - 1]" :maxlength="2" placeholder="00"
-                                style="width: 45px;margin-right: 5px;margin-bottom: 5px"
-                                @input="dataChange(index - 1, $event)"><template #prepend>{{ index - 1
-                                    }}</template></el-input>
-                        </div>
+                    
+                        <el-tabs v-model="activeName">
+                            <el-tab-pane label="Signal" name="signal" v-if="formData.database">
+                                <CanISignal :messageName="formData.name" :database="formData.database" @change="handleDataChange"/>
+                            </el-tab-pane>
+                            <el-tab-pane label="Raw Data" name="raw">
+                                <div style="margin-left: 10px;"> <el-input class="dataI" v-for="index in dlcToLen"
+                                        :key="index" v-model="formData.data[index - 1]" :maxlength="2" placeholder="00"
+                                        style="width: 45px;margin-right: 5px;margin-bottom: 5px"
+                                        @input="dataChange(index - 1, $event)"><template #prepend>{{ index - 1
+                                            }}</template></el-input>
+                                </div>
+                            </el-tab-pane>
+                            
 
-                    </el-form-item>
+                        </el-tabs>
+
+
+
                 </el-form>
 
             </div>
@@ -204,8 +212,8 @@
         </Transition>
         <el-dialog v-model="selectFrameVisible" title="Select Frame from Database" :append-to="`#win${editIndex}_ia`"
             width="600" align-center>
-            <Signal :height="h * 2 / 3" :width="480" protocol-filter="can" selectable-level="frame" :speical-db="speicalDb"
-                @add-frame="handleFrameSelect" />
+            <Signal :height="h * 2 / 3" :width="480" protocol-filter="can" selectable-level="frame"
+                :speical-db="speicalDb" @add-frame="handleFrameSelect" />
         </el-dialog>
     </div>
 </template>
@@ -216,6 +224,7 @@ import { CAN_ID_TYPE, CanBaseInfo, CanDevice, CanInterAction, CanMsgType, getDlc
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
+import CanISignal from './canisignale.vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import infoIcon from '@iconify/icons-material-symbols/info-outline'
 import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
@@ -244,6 +253,7 @@ const typeMap = {
     'ecan': 'Extended CAN',
     'ecanfd': 'Extended CAN FD'
 }
+const activeName=ref('signal')
 const connectV = ref(false)
 const editV = ref(false)
 const buttonRef = ref({})
@@ -263,6 +273,7 @@ const speicalDb = computed(() => {
     }
     return list
 })
+
 function addFrame() {
     const channel = Object.keys(devices.value)[0] || ''
     dataBase.ia[editIndex.value].action.push({
@@ -351,6 +362,14 @@ function dataChange(index: number, v: string) {
         }
     }
 }
+function handleDataChange(data:Buffer){
+    if(formData.value){
+        for(let i=0;i<data.length;i++){
+            formData.value.data[i]=data[i].toString(16)
+        }
+    }
+    console.log(formData.value?.data)
+}
 
 function deleteFrame() {
     if (popoverIndex.value >= 0) {
@@ -434,6 +453,9 @@ function editConnect() {
 const formData = ref<CanInterAction>()
 function editFrame() {
     formData.value = cloneDeep(dataBase.ia[editIndex.value].action[popoverIndex.value])
+    if(formData.value?.database==undefined){
+        activeName.value="raw"
+    }
     nextTick(() => {
         editV.value = true
     })
@@ -554,13 +576,13 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
         const frameInfo = frame.bindValue.frameInfo as Message
         let type: "can" | "canfd" | "ecan" | "ecanfd" = 'can'
         if (frameInfo.canfd) {
-            if (frameInfo.canIdType==CAN_ID_TYPE.EXTENDED) {
+            if (frameInfo.extId) {
                 type = 'ecanfd'
             } else {
                 type = 'canfd'
             }
         } else {
-            if (frameInfo.canIdType==CAN_ID_TYPE.EXTENDED) {
+            if (frameInfo.extId) {
                 type = 'ecan'
             }
         }

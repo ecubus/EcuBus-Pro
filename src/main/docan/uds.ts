@@ -181,6 +181,13 @@ export function updateUdsDts(data:DataSet) {
       signals.push(`${ldf.name}.${sig.signalName}`)
     }
   }
+  for(const dbc of Object.values(data.database.can)){
+    for(const msg of Object.values(dbc.messages)){
+       for(const sig of Object.values(msg.signals)){
+        signals.push(`${dbc.name}.${sig.name}`)
+       }
+    }
+  }
   //lib
 
   const libTmpl = Handlebars.compile(udsHeaderStr)

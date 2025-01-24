@@ -62,14 +62,14 @@
             "type": "can",
             "dlc": 8,
             "data": [
-              "80",
+              "1",
               "0",
               "0",
               "0",
               "0",
-              "38",
-              "a3",
-              "23"
+              "1c",
+              "c5",
+              "c4"
             ],
             "_X_ROW_KEY": "row_2973"
           }
@@ -68565,6 +68565,23 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
+        }
+      },
+      "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13": {
+        "pos": {
+          "x": 421,
+          "y": 191,
+          "w": 1040,
+          "h": 400
+        },
+        "title": "dbc",
+        "label": "DBC",
+        "id": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+        "options": {
+          "params": {
+            "edit-index": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13"
+          },
+          "name": "Model3CAN"
         }
       }
     }

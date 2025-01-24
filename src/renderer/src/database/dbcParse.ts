@@ -1,5 +1,6 @@
 import {  JsonLexer, parser } from "./dbc/parse";
-import { DBC, DBCVisitor } from "./dbc/dbcVisitor";
+import { DBC, DBCVisitor, Message } from "./dbc/dbcVisitor";
+import { CAN_ID_TYPE } from "src/main/share/can";
 
 // 添加一个函数来创建行号映射
 function createLineMapping(originalText: string, processedText: string): number[] {
@@ -91,6 +92,18 @@ Expected one of: ${(error.expectedTokens || []).join(', ')}`;
     return message;
 }
 
+
+
+export function isCanFd(message:Message):boolean{
+    let val=false
+    if(message.attributes["VFrameFormat"]&&message.attributes["VFrameFormat"].enumList&&message.attributes["VFrameFormat"].currentValue!=undefined){
+        let vval=message.attributes["VFrameFormat"].enumList[message.attributes["VFrameFormat"].currentValue]
+        if(vval){
+            val=vval.toLowerCase().includes('fd')
+        }
+    }
+    return val
+}
 // Update the parse function with improved error handling
 export default function parse(text: string): DBC {
     const originalText = text;

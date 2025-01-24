@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, test } from 'vitest';
-import parse from 'src/renderer/src/database/dbcParse';
+import parse, { isCanFd } from 'src/renderer/src/database/dbcParse';
 import fs from 'fs';
 import path from 'path';
+import { CAN_ID_TYPE } from 'src/main/share/can';
 
 describe('DBC Parser Tests', () => {
     let dbcContentModel3: string;
@@ -18,6 +19,8 @@ describe('DBC Parser Tests', () => {
         const result = parse(dbcContentModel3);
         // Add assertions to verify the parsed values for Model3CAN.dbc
         expect(result).toBeDefined();
+        expect(isCanFd(result.messages[0x113])).toBe(false)
+        expect(result.messages[0x113].canIdType).toBe(CAN_ID_TYPE.EXTENDED)
         // Add more specific assertions based on the expected structure of Model3CAN.dbc
     });
 
@@ -34,25 +37,18 @@ describe('DBC Parser Tests', () => {
         expect(result).toBeDefined();
         expect(result.version).toBe("");
         expect(result.nodes).toEqual({});
-        expect(result.messages[2550005883].name).toBe("Battery");
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].multiplexerRange).toEqual({
+        const id=2550005883&0x1fffffff
+        expect(result.messages[id].name).toBe("Battery");
+        expect(result.messages[id].signals["StateOfChargeBMS"].multiplexerRange).toEqual({
             name: "R",
             range: [652]
         });
-        expect(result.messages[2550005883].signals["R"].multiplexerRange).toEqual({
+        expect(result.messages[id].signals["R"].multiplexerRange).toEqual({
             name: "S",
             range: [98]
         });
-        expect(result.messages[2550005945].name).toBe("VoltageCurrent");
-        expect(result.messages[2550005945].signals["Voltage"].multiplexerRange).toEqual({
-            name: "R",
-            range: [18013]
-        });
-        expect(result.messages[2550005878].name).toBe("Odometer");
-        expect(result.messages[2550005878].signals["Odometer"].multiplexerRange).toEqual({
-            name: "R",
-            range: [10586]
-        });
+       
+       
         expect(result.messages[1968].name).toBe("Temperature");
         expect(result.messages[1968].signals["OutdoorTemp"].multiplexerRange).toEqual({
             name: "R",
@@ -60,23 +56,34 @@ describe('DBC Parser Tests', () => {
         });
 
         // Add assertions for signal values
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].factor).toBe(0.4);
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].offset).toBe(0);
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].minimum).toBe(0);
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].maximum).toBe(100);
-        expect(result.messages[2550005883].signals["StateOfChargeBMS"].unit).toBe("%");
+        expect(result.messages[id].signals["StateOfChargeBMS"].factor).toBe(0.4);
+        expect(result.messages[id].signals["StateOfChargeBMS"].offset).toBe(0);
+        expect(result.messages[id].signals["StateOfChargeBMS"].minimum).toBe(0);
+        expect(result.messages[id].signals["StateOfChargeBMS"].maximum).toBe(100);
+        expect(result.messages[id].signals["StateOfChargeBMS"].unit).toBe("%");
 
-        expect(result.messages[2550005945].signals["Voltage"].factor).toBe(0.001953125);
-        expect(result.messages[2550005945].signals["Voltage"].offset).toBe(0);
-        expect(result.messages[2550005945].signals["Voltage"].minimum).toBe(0);
-        expect(result.messages[2550005945].signals["Voltage"].maximum).toBe(0);
-        expect(result.messages[2550005945].signals["Voltage"].unit).toBe("V");
-
-        expect(result.messages[2550005878].signals["Odometer"].factor).toBe(1);
-        expect(result.messages[2550005878].signals["Odometer"].offset).toBe(0);
-        expect(result.messages[2550005878].signals["Odometer"].minimum).toBe(0);
-        expect(result.messages[2550005878].signals["Odometer"].maximum).toBe(0);
-        expect(result.messages[2550005878].signals["Odometer"].unit).toBe("km");
+        const id2=2550005945&0x1fffffff
+        expect(result.messages[id2].signals["Voltage"].factor).toBe(0.001953125);
+        expect(result.messages[id2].signals["Voltage"].offset).toBe(0);
+        expect(result.messages[id2].signals["Voltage"].minimum).toBe(0);
+        expect(result.messages[id2].signals["Voltage"].maximum).toBe(0);
+        expect(result.messages[id2].signals["Voltage"].unit).toBe("V");
+        expect(result.messages[id2].name).toBe("VoltageCurrent");
+        expect(result.messages[id2].signals["Voltage"].multiplexerRange).toEqual({
+            name: "R",
+            range: [18013]
+        });
+        const id3=2550005878&0x1fffffff 
+        expect(result.messages[id3].name).toBe("Odometer");
+        expect(result.messages[id3].signals["Odometer"].multiplexerRange).toEqual({
+            name: "R",
+            range: [10586]
+        });
+        expect(result.messages[id3].signals["Odometer"].factor).toBe(1);
+        expect(result.messages[id3].signals["Odometer"].offset).toBe(0);
+        expect(result.messages[id3].signals["Odometer"].minimum).toBe(0);
+        expect(result.messages[id3].signals["Odometer"].maximum).toBe(0);
+        expect(result.messages[id3].signals["Odometer"].unit).toBe("km");
 
         expect(result.messages[1968].signals["OutdoorTemp"].factor).toBe(0.5);
         expect(result.messages[1968].signals["OutdoorTemp"].offset).toBe(-50);
@@ -123,6 +130,16 @@ describe('DBC Parser Tests', () => {
         expect(result.attributes["DatabaseCompiler"]).toBeDefined();
         expect(result.attributes["DatabaseCompiler"].type).toBe("STRING");
         expect(result.attributes["DatabaseCompiler"].defaultValue).toBe("CSS Electronics (wwww.csselectronics.com)");
+
+
+        expect(result.messages[0x17FE007B].signals['S'].startBit).toBe(0);
+        expect(result.messages[0x17FE007B].signals['R'].startBit).toBe(16);
+        expect(result.messages[0x17FE007B].signals['BattTempMain'].startBit).toBe(24);
+        expect(result.messages[0x17FE007B].signals['Speed'].startBit).toBe(24);
+        expect(result.messages[0x17FE007B].signals['BatteryCurrentHV'].startBit).toBe(48);
+        expect(result.messages[0x17FE007B].signals['BatteryVoltageHV'].startBit).toBe(32);
+        expect(result.messages[0x17FE007B].signals['BatteryTotalChargeHV'].startBit).toBe(88);
+        expect(result.messages[0x17FE007B].signals['BatteryTotalDischargeHV'].startBit).toBe(120);
     });
 });
 

@@ -178,7 +178,7 @@ BO_ 259 ID103VCRIGHT_doorStatus: 8 VehicleBus
  SG_ VCRIGHT_reservedForBackCompat : 28|2@1+ (1,0) [0|3] ""  Receiver
  SG_ VCRIGHT_trunkLatchStatus : 56|4@1+ (1,0) [0|8] ""  Receiver
 
-BO_ 275 ID113GTW_bmpDebug: 3 VehicleBus
+BO_ 2147483923 ID113GTW_bmpDebug: 3 VehicleBus
  SG_ GTW_BMP_AWAKE_PIN : 8|1@1+ (1,0) [0|1] ""  Receiver
  SG_ GTW_BMP_GTW_PMIC_ERROR : 13|1@1+ (1,0) [0|1] ""  Receiver
  SG_ GTW_BMP_GTW_PMIC_ON : 16|1@1+ (1,0) [0|1] ""  Receiver
@@ -3311,18 +3311,18 @@ BA_DEF_DEF_  "matchingcriteria" 0;
 BA_DEF_DEF_  "filterlabeling" 0;
 BA_DEF_DEF_  "SystemMessageLongSymbol" "";
 BA_ "BusType" "CAN";
-BA_ "GenMsgSendType" BO_ 530 0;
 BA_ "GenMsgCycleTime" BO_ 530 100;
+BA_ "GenMsgSendType" BO_ 530 0;
 BA_ "GenMsgCycleTime" BO_ 819 500;
 BA_ "GenMsgCycleTime" BO_ 577 100;
-BA_ "GenMsgSendType" BO_ 468 0;
 BA_ "GenMsgCycleTime" BO_ 468 10;
+BA_ "GenMsgSendType" BO_ 468 0;
 BA_ "GenMsgCycleTime" BO_ 962 50;
 BA_ "GenMsgCycleTime" BO_ 822 1000;
 BA_ "GenMsgCycleTime" BO_ 659 500;
 BA_ "GenMsgCycleTime" BO_ 616 100;
-BA_ "GenMsgCycleTime" BO_ 79 1000;
 BA_ "GenMsgSendType" BO_ 79 0;
+BA_ "GenMsgCycleTime" BO_ 79 1000;
 BA_ "GenMsgCycleTime" BO_ 978 1000;
 BA_ "GenMsgCycleTime" BO_ 722 100;
 BA_ "GenMsgCycleTime" BO_ 1345 100;
@@ -3334,12 +3334,12 @@ BA_ "GenMsgCycleTime" BO_ 801 1000;
 BA_ "SystemMessageLongSymbol" BO_ 513 "ID201VCFRONT_loggingAndVitals10Hz";
 BA_ "GenMsgCycleTime" BO_ 984 1000;
 BA_ "GenMsgCycleTime" BO_ 609 100;
-BA_ "GenMsgCycleTime" BO_ 297 10;
 BA_ "GenMsgSendType" BO_ 297 0;
+BA_ "GenMsgCycleTime" BO_ 297 10;
 BA_ "GenMsgCycleTime" BO_ 612 100;
 BA_ "GenMsgCycleTime" BO_ 548 100;
-BA_ "GenMsgCycleTime" BO_ 280 10;
 BA_ "GenMsgSendType" BO_ 280 0;
+BA_ "GenMsgCycleTime" BO_ 280 10;
 BA_ "GenMsgCycleTime" BO_ 850 1000;
 BA_ "GenMsgCycleTime" BO_ 594 100;
 BA_ "GenMsgCycleTime" BO_ 786 1000;
@@ -3347,17 +3347,17 @@ BA_ "GenMsgCycleTime" BO_ 658 100;
 BA_ "GenMsgCycleTime" BO_ 599 20;
 BA_ "GenMsgCycleTime" BO_ 1029 205;
 BA_ "GenMsgCycleTime" BO_ 886 1000;
-BA_ "GenMsgSendType" BO_ 340 0;
 BA_ "GenMsgCycleTime" BO_ 340 10;
+BA_ "GenMsgSendType" BO_ 340 0;
 BA_ "GenMsgCycleTime" BO_ 950 1000;
 BA_ "GenMsgCycleTime" BO_ 614 10;
 BA_ "GenMsgCycleTime" BO_ 741 1000;
-BA_ "GenMsgCycleTime" BO_ 264 10;
 BA_ "GenMsgSendType" BO_ 264 0;
-BA_ "GenMsgSendType" BO_ 306 0;
+BA_ "GenMsgCycleTime" BO_ 264 10;
 BA_ "GenMsgCycleTime" BO_ 306 10;
-BA_ "GenMsgCycleTime" BO_ 294 100;
+BA_ "GenMsgSendType" BO_ 306 0;
 BA_ "GenMsgSendType" BO_ 294 0;
+BA_ "GenMsgCycleTime" BO_ 294 100;
 BA_ "GenMsgCycleTime" BO_ 799 1000;
 BA_ "GenMsgCycleTime" BO_ 1022 1000;
 BA_ "GenMsgCycleTime" BO_ 2047 100;
@@ -3393,7 +3393,7 @@ VAL_ 259 VCRIGHT_mirrorRecallState 0 "MIRROR_RECALL_STATE_INIT" 1 "MIRROR_RECALL
 VAL_ 259 VCRIGHT_mirrorState 3 "MIRROR_STATE_FOLD_UNFOLD" 0 "MIRROR_STATE_IDLE" 4 "MIRROR_STATE_RECALL" 1 "MIRROR_STATE_TILT_X" 2 "MIRROR_STATE_TILT_Y" ;
 VAL_ 259 VCRIGHT_rearLatchStatus 5 "LATCH_AJAR" 2 "LATCH_CLOSED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 8 "LATCH_FAULT" 1 "LATCH_OPENED" 4 "LATCH_OPENING" 0 "LATCH_SNA" 6 "LATCH_TIMEOUT" ;
 VAL_ 259 VCRIGHT_trunkLatchStatus 5 "LATCH_AJAR" 2 "LATCH_CLOSED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 8 "LATCH_FAULT" 1 "LATCH_OPENED" 4 "LATCH_OPENING" 0 "LATCH_SNA" 6 "LATCH_TIMEOUT" ;
-VAL_ 275 GTW_bmpState 2 "BMP_STATE_ASLEEP" 3 "BMP_STATE_MIA" 0 "BMP_STATE_OFF" 1 "BMP_STATE_ON" 5 "BMP_STATE_POWER_CYCLE" 4 "BMP_STATE_RESET" 255 "DUMMY" ;
+VAL_ 2147483923 GTW_bmpState 2 "BMP_STATE_ASLEEP" 3 "BMP_STATE_MIA" 0 "BMP_STATE_OFF" 1 "BMP_STATE_ON" 5 "BMP_STATE_POWER_CYCLE" 4 "BMP_STATE_RESET" 255 "DUMMY" ;
 VAL_ 281 VCSEC_windowRequestPercent 127 "SNA" ;
 VAL_ 281 VCSEC_windowRequestType 3 "WINDOW_REQUEST_GOTO_CLOSED" 2 "WINDOW_REQUEST_GOTO_CRACKED" 1 "WINDOW_REQUEST_GOTO_PERCENT" 0 "WINDOW_REQUEST_IDLE" ;
 VAL_ 290 VCLEFT_frontDoorState 1 "DOOR_STATE_CLOSED" 4 "DOOR_STATE_OPEN_OR_AJAR" 3 "DOOR_STATE_RELEASING_LATCH" 0 "DOOR_STATE_UNKNOWN" 2 "DOOR_STATE_WAIT_FOR_SHORT_DROP" ;

@@ -553,14 +553,14 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
         const channel = Object.keys(devices.value)[0] || ''
         const frameInfo = frame.bindValue.frameInfo as Message
         let type: "can" | "canfd" | "ecan" | "ecanfd" = 'can'
-        if (frameInfo.length > 8) {
-            if (frameInfo.id > 0x7FF) {
+        if (frameInfo.canfd) {
+            if (frameInfo.canIdType==CAN_ID_TYPE.EXTENDED) {
                 type = 'ecanfd'
             } else {
                 type = 'canfd'
             }
         } else {
-            if (frameInfo.id > 0x7FF) {
+            if (frameInfo.canIdType==CAN_ID_TYPE.EXTENDED) {
                 type = 'ecan'
             }
         }

@@ -95,7 +95,7 @@
         </VxeGrid>
 
         <el-popover width="250" :virtual-ref="ppRef" trigger="click" virtual-triggering>
-            <el-row v-if="dataBase.ia[editIndex]?.action[popoverIndex]">
+            <el-row v-if="dataBase.ia[editIndex]?.action[popoverIndex]" style="padding: 10px;">
                 <el-col :span="24">
                     <el-radio-group v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.type"
                         :disabled="periodTimer[popoverIndex]">
@@ -180,27 +180,29 @@
                             <el-option v-for="i in 16" :value="i - 1" :key="i"></el-option>
                         </el-select>
                     </el-form-item>
-                    
-                        <el-tabs v-model="activeName">
-                            <el-tab-pane label="Signal" name="signal" v-if="formData.database">
-                                <CanISignal :messageName="formData.name" :database="formData.database" @change="handleDataChange"/>
-                            </el-tab-pane>
-                            <el-tab-pane label="Raw Data" name="raw">
-                                <div style="margin-left: 10px;"> <el-input class="dataI" v-for="index in dlcToLen"
-                                        :key="index" v-model="formData.data[index - 1]" :maxlength="2" placeholder="00"
-                                        style="width: 45px;margin-right: 5px;margin-bottom: 5px"
-                                        @input="dataChange(index - 1, $event)"><template #prepend>{{ index - 1
-                                            }}</template></el-input>
-                                </div>
-                            </el-tab-pane>
-                            
 
-                        </el-tabs>
+
 
 
 
                 </el-form>
+                <el-tabs v-model="activeName">
+                    <el-tab-pane label="Signal" name="signal" v-if="formData.database">
+                        <CanISignal :message-id="formData.id" :database="formData.database"
+                            @change="handleDataChange" />
+                    </el-tab-pane>
+                    <el-tab-pane label="Raw Data" name="raw">
+                        <div style="margin-left: 10px;"> <el-input class="dataI" v-for="index in dlcToLen" :key="index"
+                                v-model="formData.data[index - 1]" :maxlength="2" placeholder="00"
+                                style="width: 65px;margin-right: 5px;margin-bottom: 5px"
+                                @input="dataChange(index - 1, $event)" @change="dataChangeDone"><template #prepend>{{
+                                    index - 1
+                                    }}</template></el-input>
+                        </div>
+                    </el-tab-pane>
 
+
+                </el-tabs>
             </div>
 
 
@@ -238,12 +240,13 @@ import deleteIcon from '@iconify/icons-material-symbols/delete';
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline';
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds';
 import { useDataStore } from '@r/stores/data';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { onKeyStroke, onKeyUp } from '@vueuse/core';
 import Signal from './components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data';
 import { Message } from '@r/database/dbc/dbcVisitor';
+import { writeMessageData } from '@r/database/dbc/calc';
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -253,7 +256,7 @@ const typeMap = {
     'ecan': 'Extended CAN',
     'ecanfd': 'Extended CAN FD'
 }
-const activeName=ref('signal')
+const activeName = ref('signal')
 const connectV = ref(false)
 const editV = ref(false)
 const buttonRef = ref({})
@@ -355,20 +358,32 @@ function idChange(v: string) {
         }
     }
 }
+function dataChangeDone() {
+    if (formData.value && formData.value.database) {
+        const db = Object.values(dataBase.database.can).find(db => db.name == formData.value!.database)
+        if (db) {
+            const message = db.messages[parseInt(formData.value.id, 16)]
+            if (message) {
+                const data = Buffer.from(formData.value.data.map(v => parseInt(v, 16)))
+                writeMessageData(message, data, db)
+            }
+        }
+    }
+}
 function dataChange(index: number, v: string) {
     if (v.length > 0 && formData.value) {
         if (v[v.length - 1].match(/[0-9a-fA-F]/) == null) {
             formData.value.data[index] = v.slice(0, -1)
         }
+
     }
 }
-function handleDataChange(data:Buffer){
-    if(formData.value){
-        for(let i=0;i<data.length;i++){
-            formData.value.data[i]=data[i].toString(16)
+function handleDataChange(data: Buffer) {
+    if (formData.value) {
+        for (let i = 0; i < data.length; i++) {
+            formData.value.data[i] = data[i].toString(16)
         }
     }
-    console.log(formData.value?.data)
 }
 
 function deleteFrame() {
@@ -453,8 +468,8 @@ function editConnect() {
 const formData = ref<CanInterAction>()
 function editFrame() {
     formData.value = cloneDeep(dataBase.ia[editIndex.value].action[popoverIndex.value])
-    if(formData.value?.database==undefined){
-        activeName.value="raw"
+    if (formData.value?.database == undefined) {
+        activeName.value = "raw"
     }
     nextTick(() => {
         editV.value = true
@@ -478,9 +493,14 @@ const props = defineProps<{
 // const start = toRef(props, 'start')
 const h = toRef(props, 'height')
 watch(formData, (v) => {
-
+    v=cloneDeep(v)
     if (v && popoverIndex.value != -1) {
-        Object.assign(dataBase.ia[editIndex.value].action[popoverIndex.value], v)
+        if (!isEqual(dataBase.ia[editIndex.value].action[popoverIndex.value], v)) {
+            Object.assign(dataBase.ia[editIndex.value].action[popoverIndex.value], v)
+            if (window.globalStart.value) {
+                window.electron.ipcRenderer.send('ipc-update-can-period', `${editIndex.value}-${popoverIndex.value}`, v)
+            }
+        }
 
     }
 }, {
@@ -557,7 +577,6 @@ onMounted(async () => {
     // Get initial period status
     const periods = await window.electron.ipcRenderer.invoke('ipc-get-can-period')
     for (const [key, period] of Object.entries(periods)) {
-        console.log(key)
         const a = key.split('-')
         const item = a.slice(0, -1).join('-')
         const index = Number(a[a.length - 1])
@@ -569,7 +588,6 @@ onMounted(async () => {
 })
 
 function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
-    console.log(frame)
     if (frame.bindValue.frameInfo) {
 
         const channel = Object.keys(devices.value)[0] || ''

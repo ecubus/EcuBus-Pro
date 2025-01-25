@@ -117,7 +117,7 @@ const checkList = ref<string[]>([
 ])
 interface CanBaseLog {
    method: 'canBase',
-   data: CanMessage & {ts:number}
+   data: CanMessage
 }
 interface IpBaseLog {
    method: 'ipBase',
@@ -220,7 +220,7 @@ function logDisplay(vals: LogItem[]) {
             method: val.message.method,
             dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
             data: data2str(val.message.data.data),
-            ts: (val.message.data.ts / 1000000).toFixed(3),
+            ts: ((val.message.data.ts || 0) / 1000000).toFixed(3),
             id: '0x' + (val.message.data.id.toString(16)),
             dlc: getDlcByLen(val.message.data.data.length, val.message.data.msgType.canfd),
             len: val.message.data.data.length,

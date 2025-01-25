@@ -1212,7 +1212,7 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
  * await setSignal('lin.xxxx', [1, 2, 3, 4]);
  * ```
  */
-export async function setSignal(signal: SignalName, value: number|number[]): Promise<void> {
+export async function setSignal(signal: SignalName, value: number|number[]|string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
       id: id, 

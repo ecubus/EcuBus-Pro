@@ -8,6 +8,8 @@ import { UdsLOG } from "../log";
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem } from "../share/uds";
 import { findService } from "./uds";
 import { cloneDeep } from "lodash";
+import type { Signal } from "src/renderer/src/database/dbc/dbcVisitor";
+import { updateSignalPhys, updateSignalRaw } from "src/renderer/src/database/dbc/calc";
 
 
 
@@ -41,6 +43,7 @@ export class NodeItem {
         }, jsPath, this.log, this.tester)
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
+        this.pool.registerHandler('setSignal', this.setSignal.bind(this))
         //find tester
         for (const c of nodeItem.channel) {
           const baseItem = this.canBaseMap.get(c)
@@ -113,6 +116,53 @@ export class NodeItem {
     }
 
   }
+  setSignal(pool: UdsTester, data: {
+    signal: string,
+    value: number|string|number[]
+}) {
+
+    if(Array.isArray(data.value)){
+      throw new Error('can not set array value')
+    }
+    const s=data.signal.split('.')
+    // 验证数据库是否存在
+    const db=Object.values(global.database.can).find(db=>db.name==s[0])
+    if(!db){
+      throw new Error(`CAN database ${s[0]} not found`)
+    }
+    const signalName=s[1]
+    
+    let ss:Signal|undefined
+    for(const msg of Object.values(db.messages)){
+      for(const signal of Object.values(msg.signals)){
+        if(signal.name==signalName){
+          ss=signal
+          break
+        }
+      }
+      if(ss){
+        break
+      }
+    }
+    if (!ss) {
+        throw new Error(`Signal ${signalName} not found`)
+    }
+    ss.physValue=data.value
+    if(typeof data.value==='string'&&(ss.values||ss.valueTable)){
+      const value:{
+        label: string;
+        value: number;
+    }[]=ss.values?ss.values:db.valueTables[ss.valueTable!].values
+      if(value){
+        const v=value.find(v=>v.label===data.value)
+        if(v){
+          ss.physValue=v.value
+        }
+      }
+    }
+    updateSignalPhys(ss)
+    
+}
   async sendFrame(pool: UdsTester, frame: CanMessage): Promise<number> {
     frame.msgType.uuid = this.nodeItem.id
     if (this.nodeItem.channel.length == 1) {

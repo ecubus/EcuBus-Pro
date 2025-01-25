@@ -21,7 +21,9 @@ import LinBase from '../dolin/base'
 import { DataSet, LinInter } from 'src/preload/data'
 import { LinMode, LinNode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
-import {TpError as LinTpError} from '../dolin/lintp'
+import { TpError as LinTpError } from '../dolin/lintp'
+import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -46,7 +48,7 @@ ipcMain.handle('ipc-create-project', async (event, ...arg) => {
     const projectPath = arg[0] as string
     const projectName = arg[1] as string
     const data = arg[2] as DataSet
-    
+
     await createProject(projectPath, projectName, data, 'ECB')
     await refreshProject(projectPath, projectName, data, 'ECB')
     await shell.openPath(path.join(projectPath, `${projectName}.code-workspace`))
@@ -56,7 +58,7 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     const projectPath = arg[0] as string
     const projectName = arg[1] as string
     const data = arg[2] as DataSet
-    const entry=arg[3] as string
+    const entry = arg[3] as string
 
     const result = await compileTsc(projectPath, projectName, data, entry, esbuildWin, path.join(libPath, 'js'), 'ECB')
     if (result.length > 0) {
@@ -134,7 +136,7 @@ let cantps: {
 let doips: DOIP[] = []
 
 
-async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode| LinNode>, projectInfo: { path: string, name: string }) {
+async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode | LinNode>, projectInfo: { path: string, name: string }) {
     let activeKey = ''
     try {
         for (const key in devices) {
@@ -247,16 +249,16 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
 
 
             }
-        }else if(tester.type == 'lin') {
-            for(const val of linBaseMap.values()){
-                const lintp=new LIN_TP(val)
-                for(const addr of tester.address){
-                    if(addr.type=='lin'&&addr.linAddr){
-                        const id=lintp.getReadId(LinMode.MASTER,addr.linAddr)
+        } else if (tester.type == 'lin') {
+            for (const val of linBaseMap.values()) {
+                const lintp = new LIN_TP(val)
+                for (const addr of tester.address) {
+                    if (addr.type == 'lin' && addr.linAddr) {
+                        const id = lintp.getReadId(LinMode.MASTER, addr.linAddr)
                         lintp.event.on(id, (data) => {
                             if (!(data instanceof LinTpError)) {
                                 const log = new UdsLOG(tester.name, tester.id)
-                               
+
                                 const item = findService(tester, data.data, true)
                                 if (item) {
                                     log.sent(item, data.ts, data.data)
@@ -265,11 +267,11 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                                 log.close()
                             }
                         })
-                        const idR = lintp.getReadId(LinMode.SLAVE,addr.linAddr)
+                        const idR = lintp.getReadId(LinMode.SLAVE, addr.linAddr)
                         lintp.event.on(idR, (data) => {
                             if (!(data instanceof LinTpError)) {
                                 const log = new UdsLOG(tester.name, tester.id)
-                            
+
                                 const item = findService(tester, data.data, false)
                                 if (item) {
                                     log.recv(item, data.ts, data.data)
@@ -280,7 +282,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                         })
                     }
                 }
-                if(lintp.rxBaseHandleExist.size>0){
+                if (lintp.rxBaseHandleExist.size > 0) {
                     cantps.push(lintp)
                 }
             }
@@ -311,7 +313,7 @@ async function globalStart(devices: Record<string, UdsDevice>, testers: Record<s
                 nodeItem.log?.systemMsg(formatError(err), 0, 'error')
                 nodeItem.close()
             }
-        }else if (node.type == 'lin') {
+        } else if (node.type == 'lin') {
             const nodeItem = new NodeLinItem(node, linBaseMap, projectInfo.path, projectInfo.name, testers)
 
             try {
@@ -370,7 +372,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 interface timerType {
     timer: NodeJS.Timeout,
     socket: CAN_SOCKET,
-    period: number
+    period: number,
+    ia:CanInterAction
 }
 const timerMap = new Map<string, timerType>()
 
@@ -438,20 +441,20 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     const schName: string = arg[1] as string
     const active = arg[2]
     //find linBase by linia devices
-   
-       
-        linIa.devices.forEach((d) => {
-            const base = linBaseMap.get(d)
-           
-            if (base&&base.info.database) {
-                const db = global.database.lin[base.info.database]
-                base.startSch(db, schName, active,0)
-                schMap.set(base.info.id, { schName })   
-            }
-        })
-    
- 
-    
+
+
+    linIa.devices.forEach((d) => {
+        const base = linBaseMap.get(d)
+
+        if (base && base.info.database) {
+            const db = global.database.lin[base.info.database]
+            base.startSch(db, schName, active, 0)
+            schMap.set(base.info.id, { schName })
+        }
+    })
+
+
+
 
 })
 ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
@@ -465,7 +468,7 @@ ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
 
         if (base) {
             base.stopSch()
-           
+
         }
 
 
@@ -475,7 +478,7 @@ ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
 })
 
 ipcMain.handle('ipc-get-schedule', async (event, ...arg) => {
-    const id=arg[0] as string
+    const id = arg[0] as string
     return schMap.get(id)
 })
 
@@ -511,7 +514,7 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
             } else {
                 throw new Error(`eth device ${device.ethDevice.vendor}-${device.ethDevice.device.handle} not found`)
             }
-        } else if(device.type=='lin'&&device.linDevice){
+        } else if (device.type == 'lin' && device.linDevice) {
             const id = device.linDevice.id
             const linBase = linBaseMap.get(id)
             if (linBase) {
@@ -606,14 +609,27 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
             canfd: fd,
             remote: ia.remote || false
 
-        },{
-            database:ia.database,
-            name:ia.name
+        }, {
+            database: ia.database,
+            name: ia.name
         })
-        const b = Buffer.alloc(len)
-        for (const [index, d] of ia.data.entries()) {
-            b[index] = parseInt(d, 16)
+        let b: Buffer = Buffer.alloc(len)
+        let db: DBC | undefined
+        let message: Message | undefined
+        if (ia.database) {
+            db = Object.values(global.database.can).find(d => d.name == ia.database)
+            if (db) {
+                message = db.messages[parseInt(ia.id, 16)]
+                if (message) {
+                    b = getMessageData(message)
+                }
+            }
+        } else {
+            for (const [index, d] of ia.data.entries()) {
+                b[index] = parseInt(d, 16)
+            }
         }
+
         socket.write(b).catch(null).finally(() => {
             socket.close()
         })
@@ -630,6 +646,61 @@ ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
     })
     return info
 })
+
+
+
+
+function send(id:string) {
+    const item = timerMap.get(id)
+    if (!item) return
+    let db: DBC | undefined
+    let message: Message | undefined
+    if (item.ia.database) {
+        db = Object.values(global.database.can).find(d => d.name == item.ia.database)
+        if (db) {
+            message = db.messages[parseInt(item.ia.id, 16)]
+        }
+    }
+    if (message) {
+        const data = getMessageData(message)
+        item.socket.write(data).catch(null)
+    } else {
+        const b = Buffer.alloc(item.ia.dlc)
+        for (const [index, d] of item.ia.data.entries()) {
+            b[index] = parseInt(d, 16)
+        }
+        item.socket.write(b).catch(null)
+    }
+
+}
+ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
+    const dbName = arg[0] as string
+    const id=arg[1] as number
+    const signalName = arg[2] as string
+    const signal = arg[3] as Signal
+ 
+    const db=Object.values(global.database.can).find(d=>d.name==dbName)
+    if(db){
+        const message=db.messages[id]
+        if(message){
+            const rawsignal=message.signals[signalName]
+            if(rawsignal){
+                Object.assign(rawsignal,signal)
+            }
+        }
+    }
+})
+
+
+ipcMain.on('ipc-update-can-period', (event, ...arg) => {
+    const id = arg[0] as string
+    const ia = arg[1] as CanInterAction
+
+    const item = timerMap.get(id)
+    if (item) {
+        item.ia=ia
+    }
+})
 ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     const id = arg[0] as string
     const ia = arg[1] as CanInterAction
@@ -637,42 +708,37 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     const canBase = canBaseMap.get(ia.channel)
     if (canBase) {
         const fd = ia.type.includes('fd')
-
-        const len = getLenByDlc(ia.dlc, fd)
+        if (fd) {
+            if (canBase.info.canfd == false) {
+                sysLog.error(`can device ${canBase.info.vendor}-${canBase.info.handle} not enable canfd`)
+                return
+            }
+        }
         const socket = new CAN_SOCKET(canBase, parseInt(ia.id, 16), {
             idType: ia.type.includes('e') ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
             brs: ia.brs || false,
             canfd: fd,
             remote: ia.remote || false
-
-        },{
-            database:ia.database,
-            name:ia.name
+        }, {
+            database: ia.database,
+            name: ia.name
         })
-        const b = Buffer.alloc(len)
-        for (const [index, d] of ia.data.entries()) {
-            b[index] = parseInt(d, 16)
-        }
         //if timer exist, clear it
         const timer = timerMap.get(id)
         if (timer) {
             clearInterval(timer.timer)
             timer.socket.close()
         }
+        
         //create new timer
-        const t = setInterval(() => {
-            if (fd) {
-                if (canBase.info.canfd == false) {
-                    sysLog.error(`can device ${canBase.info.vendor}-${canBase.info.handle} not enable canfd`)
-                    return
-                }
-            }
-            socket.write(b).catch(null)
+        const t = setInterval(()=>{
+            send(id)
         }, ia.trigger.period || 10)
         timerMap.set(id, {
             timer: t,
             socket: socket,
-            period: ia.trigger.period || 10
+            period: ia.trigger.period || 10,
+            ia: ia
         })
 
     } else {

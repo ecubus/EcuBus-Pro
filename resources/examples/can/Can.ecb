@@ -20,26 +20,6 @@
             "_X_ROW_KEY": "row_71"
           }
         }
-      },
-      "f30c735b-f257-4d73-a0c2-433aebe2d3e8": {
-        "type": "can",
-        "canDevice": {
-          "id": "f30c735b-f257-4d73-a0c2-433aebe2d3e8",
-          "name": "SIMULATE_1",
-          "handle": 1,
-          "vendor": "simulate",
-          "canfd": false,
-          "database": "",
-          "bitrate": {
-            "sjw": 1,
-            "timeSeg1": 13,
-            "timeSeg2": 2,
-            "preScaler": 10,
-            "freq": 500000,
-            "clock": "80",
-            "_X_ROW_KEY": "row_11821"
-          }
-        }
       }
     },
     "ia": {
@@ -53,32 +33,43 @@
         "action": [
           {
             "trigger": {
-              "type": "manual"
+              "type": "periodic"
             },
             "database": "Model3CAN",
-            "name": "ID00CUI_status",
-            "id": "c",
+            "name": "ID142VCLEFT_liftgateStatus",
+            "id": "142",
             "channel": "30dc0575-1555-40e4-802a-150e76338671",
             "type": "can",
             "dlc": 8,
             "data": [
-              "1",
+              "0",
+              "0",
+              "4",
               "0",
               "0",
               "0",
               "0",
-              "1c",
-              "c5",
-              "c4"
+              "0"
             ],
-            "_X_ROW_KEY": "row_2973"
+            "_X_ROW_KEY": "row_9162"
           }
         ]
       }
     },
     "tester": {},
     "subFunction": {},
-    "nodes": {},
+    "nodes": {
+      "a033fc39-90a2-4982-8f59-cbd28c10b638": {
+        "name": "Node 1",
+        "type": "can",
+        "id": "a033fc39-90a2-4982-8f59-cbd28c10b638",
+        "channel": [
+          "30dc0575-1555-40e4-802a-150e76338671"
+        ],
+        "workNode": "",
+        "script": "node.ts"
+      }
+    },
     "database": {
       "lin": {},
       "can": {
@@ -5941,7 +5932,10 @@
                       "label": "LIFTGATE_STATUS_INDEX_INVALID",
                       "value": 2
                     }
-                  ]
+                  ],
+                  "value": 0,
+                  "physValue": 0,
+                  "_X_ROW_KEY": "row_3008"
                 },
                 "VCLEFT_liftgateLatchRequest": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -5981,7 +5975,10 @@
                       "label": "LATCH_REQUEST_RESET",
                       "value": 4
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3009",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateMvmntNotAllowedCo": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6025,7 +6022,10 @@
                       "label": "PLG_MVMT_NOT_ALLOWED_VEHICLE_AT_SPEED",
                       "value": 2
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3010",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgatePhysicalChimeRequ": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6065,7 +6065,10 @@
                       "label": "LIFTGATE_CHIME_REQUEST_TWO_SHORT",
                       "value": 2
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3011",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgatePosition": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6083,7 +6086,10 @@
                   "unit": "deg",
                   "multiplexerIndicator": "m1",
                   "minimum": -5,
-                  "maximum": 95
+                  "maximum": 95,
+                  "_X_ROW_KEY": "row_3031",
+                  "value": 0,
+                  "physValue": 46
                 },
                 "VCLEFT_liftgatePositionCalibrate": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6101,7 +6107,10 @@
                   "unit": "",
                   "multiplexerIndicator": "m0",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "_X_ROW_KEY": "row_3012",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateRequestSource": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6153,7 +6162,10 @@
                       "label": "PLG_REQUEST_SOURCE_UDS",
                       "value": 7
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3013",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateSpeed": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6171,7 +6183,10 @@
                   "unit": "deg/s",
                   "multiplexerIndicator": "m1",
                   "minimum": -30,
-                  "maximum": 30
+                  "maximum": 30,
+                  "_X_ROW_KEY": "row_3032",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateState": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6243,7 +6258,10 @@
                       "label": "PLG_STATE_UNKNOWN",
                       "value": 9
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3014",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateStoppingCondition": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6311,7 +6329,10 @@
                       "label": "PLG_STOPPING_CONDITION_VEHICLE_AT_SPEED",
                       "value": 5
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3015",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateStrutCurrent": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6329,7 +6350,10 @@
                   "unit": "A",
                   "multiplexerIndicator": "m1",
                   "minimum": -30,
-                  "maximum": 30
+                  "maximum": 30,
+                  "_X_ROW_KEY": "row_3033",
+                  "value": 0,
+                  "physValue": 0
                 },
                 "VCLEFT_liftgateStrutDutyCycle": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6347,7 +6371,10 @@
                   "unit": "%",
                   "multiplexerIndicator": "m1",
                   "minimum": -100,
-                  "maximum": 100
+                  "maximum": 100,
+                  "_X_ROW_KEY": "row_3034",
+                  "value": 2,
+                  "physValue": 2
                 },
                 "VCLEFT_liftgateUIChimeRequest": {
                   "messageName": "ID142VCLEFT_liftgateStatus",
@@ -6387,7 +6414,10 @@
                       "label": "LIFTGATE_CHIME_REQUEST_TWO_SHORT",
                       "value": 2
                     }
-                  ]
+                  ],
+                  "_X_ROW_KEY": "row_3016",
+                  "value": 1,
+                  "physValue": 1
                 }
               },
               "attributes": {}
@@ -68507,7 +68537,27 @@
         }
       }
     },
-    "graphs": {}
+    "graphs": {
+      "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest": {
+        "type": "signal",
+        "enable": true,
+        "id": "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest",
+        "name": "VCLEFT_liftgateLatchRequest",
+        "color": "#7a9641",
+        "yAxis": {
+          "min": -0.3300000000000004,
+          "max": 6.670000000000001
+        },
+        "bindValue": {
+          "signalName": "VCLEFT_liftgateLatchRequest",
+          "startBit": 61,
+          "bitLength": 3,
+          "dbKey": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+          "dbName": "Model3CAN",
+          "frameId": 322
+        }
+      }
+    }
   },
   "project": {
     "wins": {
@@ -68528,10 +68578,10 @@
       },
       "network": {
         "pos": {
-          "x": 56,
-          "y": 0,
+          "x": -4,
+          "y": -1,
           "w": 600,
-          "h": 400
+          "h": 407
         },
         "title": "network",
         "label": "Network",
@@ -68540,9 +68590,9 @@
       },
       "trace": {
         "pos": {
-          "x": 1277,
-          "y": 270,
-          "w": 700,
+          "x": -2.5,
+          "y": 406,
+          "w": 1353,
           "h": 400
         },
         "title": "trace",
@@ -68552,10 +68602,10 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 1461,
-          "y": 425,
-          "w": 987,
-          "h": 400
+          "x": 596,
+          "y": 0,
+          "w": 1358,
+          "h": 406
         },
         "title": "cani",
         "label": "IA",
@@ -68567,22 +68617,17 @@
           "name": "Can IA"
         }
       },
-      "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13": {
+      "graph": {
         "pos": {
-          "x": 421,
-          "y": 191,
-          "w": 1040,
+          "x": 1350.5,
+          "y": 406,
+          "w": 600,
           "h": 400
         },
-        "title": "dbc",
-        "label": "DBC",
-        "id": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
-        "options": {
-          "params": {
-            "edit-index": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13"
-          },
-          "name": "Model3CAN"
-        }
+        "title": "graph",
+        "label": "Graph",
+        "id": "graph",
+        "options": {}
       }
     }
   }

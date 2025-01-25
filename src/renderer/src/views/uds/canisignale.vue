@@ -1,7 +1,7 @@
 <template>
     <div>
         <VxeGrid ref="xGrid" v-bind="gridOptions" class="signalTable">
-            <template #default_generator_control="{ row }">
+            <!-- <template #default_generator_control="{ row }">
                 <el-button-group>
                     <el-button link size="small" :type="row.generatorType ? 'success' : 'default'"
                         @click="toggleGenerator(row)">
@@ -11,7 +11,7 @@
                         <Icon icon="material-symbols:edit" />
                     </el-button>
                 </el-button-group>
-            </template>
+            </template> -->
             <template #default_raw_control="{ row }">
                 <div class="value-control">
                     <el-input-number v-model="row.value" size="small" :min="0" :max="getMaxRawValue(row.length)"
@@ -34,9 +34,23 @@
                     </el-select>
                 </template>
                 <template v-else>
-                    <el-input-number :min="row.minimum" :max="row.maximum" style="width: 178px;" v-model="row.physValue"
+                    <el-input-number :min="row.minimum!=row.maximum?row.minimum:undefined" :max="row.maximum!=row.minimum?row.maximum:undefined" style="width: 100%;" v-model="row.physValue"
                         size="small" controls-position="right" @change="handlePhysValueChange(row)" />
                 </template>
+            </template>
+            <template #default_name="{ row }">
+                <div class="name-cell">
+                    <span>{{ row.name }}</span>
+                    <el-button
+                        link
+                        size="small"
+                        @click="copySignalName(row.name)"
+                        type="primary"
+                        class="copy-button"
+                    >
+                        <Icon :icon="copyIcon" />
+                    </el-button>
+                </div>
             </template>
         </VxeGrid>
 
@@ -61,11 +75,12 @@ import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import { Message, Signal } from '@r/database/dbc/dbcVisitor'
 import { useDataStore } from '@r/stores/data'
-import { getMessageData } from '@r/database/dbcParse'
-
+import {getMessageData, getMaxRawValue, rawToPhys, updateSignalPhys, updateSignalRaw } from '@r/database/dbc/calc'
+import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
+import { cloneDeep } from 'lodash'
 const props = defineProps<{
     database: string
-    messageName: string
+    messageId: string
 }>()
 
 const dataStore = useDataStore()
@@ -75,7 +90,7 @@ const currentSignal = ref<Signal | null>(null)
 const message = computed<Message | undefined>(() => {
     const db = Object.values(dataStore.database.can).find(db => db.name === props.database)
     if (db) {
-        const msg = Object.values(db.messages).find(msg => msg.name === props.messageName)
+        const msg = db.messages[parseInt(props.messageId,16)]
         return msg
     }
     return undefined
@@ -83,13 +98,44 @@ const message = computed<Message | undefined>(() => {
 // Get signals data from store
 const signals = computed(() => {
     const data: Signal[] = []
-
+    let multiplexer:Signal|undefined
     if (message.value) {
         Object.values(message.value.signals).forEach(signal => {
-            data.push(signal)
+            if(signal.multiplexerIndicator){
+                if(signal.multiplexerIndicator=='M'){
+                    data.push(signal)
+                    multiplexer=signal
+                }
+            }else{
+                data.push(signal)
+            }
+           
         })
-
+        if(multiplexer){
+            Object.values(message.value.signals).forEach(signal => {
+                if(signal.multiplexerIndicator){
+                    if(signal.multiplexerIndicator=='M'){
+                    //skip
+                    }else if(signal.multiplexerRange){
+                        const target=message.value!.signals[signal.multiplexerRange.name]
+                        for(let i=0;i<=signal.multiplexerRange.range.length;i++){
+                            if(target.value==signal.multiplexerRange.range[i]){
+                                data.push(signal)
+                                break
+                            }
+                        }
+                    }else{
+                        const val=Number(signal.multiplexerIndicator.slice(1))
+                        if(val==multiplexer!.value){
+                            data.push(signal)
+                        }
+                    }
+                }
+            
+            })
+        }
     }
+   
     return data
 })
 
@@ -127,13 +173,21 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
             mode: 'wheel'
         },
         columns: [
-            { field: 'name', title: 'Name', minWidth: 120},
-            {
-                field: 'generatorControl',
-                title: 'Generator',
-                width: 100,
-                slots: { default: 'default_generator_control' }
+            { 
+                field: 'name', 
+                title: 'Name', 
+                width: 300,
+                minWidth: 100,
+                slots: { 
+                    default: 'default_name'
+                }
             },
+            // {
+            //     field: 'generatorControl',
+            //     title: 'Generator',
+            //     width: 100,
+            //     slots: { default: 'default_generator_control' }
+            // },
 
             {
                 field: 'value',
@@ -146,7 +200,7 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
             {
                 field: 'physValue',
                 title: 'Phys Value',
-                width: 200,
+                minWidth: 150,
                 resizable: false,
                 slots: { default: 'default_phys_value' }
             },
@@ -172,125 +226,22 @@ function editGenerator(row: Signal) {
     editDialogVisible.value = true
 }
 
-// Convert signed value to two's complement
-function toTwosComplement(value: number, bits: number): number {
-    if (value >= 0) return value
-    const mask = (1 << bits) - 1
-    return (~(-value) + 1) & mask
-}
 
-// Convert two's complement to signed value
-function fromTwosComplement(value: number, bits: number): number {
-    if (value & (1 << (bits - 1))) {
-        return -(((~value + 1) & ((1 << bits) - 1)))
-    }
-    return value
-}
-
-// Calculate max raw value based on signal length
-function getMaxRawValue(length: number): number {
-    return Math.pow(2, length) - 1
-}
-
-// Convert physical value to raw value
-function physToRaw(phys: number, row: Signal): number {
-    let rawValue = Math.round((phys - (row.offset || 0)) / (row.factor || 1))
-
-    // Get max value based on length
-    const maxRaw = getMaxRawValue(row.length)
-
-    if (row.isSigned) {
-        // For signed values, handle negative numbers with two's complement
-        if (rawValue < 0) {
-            rawValue = toTwosComplement(rawValue, row.length)
-        } else if (rawValue > maxRaw / 2) {
-            // Limit positive values to max signed value
-            rawValue = Math.floor(maxRaw / 2)
-        }
-    } else {
-        // For unsigned values, simply clamp between 0 and max
-        rawValue = Math.min(Math.max(rawValue, 0), maxRaw)
-    }
-
-    return rawValue
-}
-
-// Convert raw value to physical value
-function rawToPhys(raw: number, row: Signal): number {
-    let actualValue = raw
-
-    if (row.isSigned) {
-        // Only convert from two's complement if it's a signed value
-        const maxRaw = getMaxRawValue(row.length)
-        if (raw > maxRaw / 2) {
-            // If the value is in the negative range of two's complement
-            actualValue = fromTwosComplement(raw, row.length)
-        }
-    }
-
-    return actualValue * (row.factor || 1) + (row.offset || 0)
-}
 
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
-    if (row.value === undefined) return
-
-    // Ensure raw value is within bounds
-    const maxRaw = getMaxRawValue(row.length)
-    row.value = Math.min(Math.max(0, row.value), maxRaw)
-
-    if (row.values || row.valueTable) {
-        // For enum values, directly set the raw value as phys value
-        row.physValue = row.value
-    } else {
-        // Calculate new physical value
-        const newPhysValue = rawToPhys(row.value, row)
-
-        // Check if this physical value would exceed limits
-        if (row.minimum !== undefined && newPhysValue < row.minimum) {
-            // Adjust raw value based on minimum physical value
-            row.value = physToRaw(row.minimum, row)
-            row.physValue = row.minimum
-        } else if (row.maximum !== undefined && newPhysValue > row.maximum) {
-            // Adjust raw value based on maximum physical value
-            row.value = physToRaw(row.maximum, row)
-            row.physValue = row.maximum
-        } else {
-            row.physValue = newPhysValue
-        }
-    }
+    updateSignalRaw(row)
     if(message.value){
+        window.electron.ipcRenderer.send('ipc-update-can-signal', props.database, parseInt(props.messageId,16), row.name, cloneDeep(row))
         emits('change', getMessageData(message.value))
     }
 }
 
 // Physical value change handler
 function handlePhysValueChange(row: Signal) {
-    if (row.physValue === undefined) return
-
-    if (row.values || row.valueTable) {
-        // For enum values, directly set the phys value as raw value
-        row.value = typeof row.physValue === 'number' ? row.physValue : 0
-    } else {
-        const physValue = typeof row.physValue === 'number' ? row.physValue : 0
-
-        // Clamp physical value to min/max if defined
-        let clampedPhysValue = physValue
-        if (row.minimum !== undefined && physValue < row.minimum) {
-            clampedPhysValue = row.minimum
-        } else if (row.maximum !== undefined && physValue > row.maximum) {
-            clampedPhysValue = row.maximum
-        }
-
-        // Update physical value if it was clamped
-        if (clampedPhysValue !== physValue) {
-            row.physValue = clampedPhysValue
-        }
-
-        // Calculate and set raw value
-        row.value = physToRaw(clampedPhysValue, row)
-    }
+    updateSignalPhys(row)
     if(message.value){
+        window.electron.ipcRenderer.send('ipc-update-can-signal', props.database, parseInt(props.messageId,16), row.name, cloneDeep(row))
         emits('change', getMessageData(message.value))
     }
 }
@@ -324,10 +275,10 @@ function initializeSignal(signal: Signal) {
 
 onMounted(() => {
     // Initialize all signals
-    signals.value.forEach(signal => {
-        initializeSignal(signal)
-    })
     if(message.value){
+        Object.values(message.value.signals).forEach(signal => {
+            initializeSignal(signal)
+        })
         emits('change',getMessageData(message.value))
     }
 })
@@ -335,6 +286,11 @@ onMounted(() => {
 //
 
 const xGrid = ref()
+
+// 添加复制函数
+function copySignalName(name: string) {
+    navigator.clipboard.writeText(name)
+}
 </script>
 
 <style scoped>
@@ -358,5 +314,23 @@ const xGrid = ref()
 .arrows .el-button {
     padding: 0;
     height: 12px;
+}
+
+.name-cell {
+    position: relative;
+    padding-right: 24px; /* 为复制按钮留出空间 */
+}
+
+.copy-button {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.name-cell:hover .copy-button {
+    opacity: 1;
 }
 </style>

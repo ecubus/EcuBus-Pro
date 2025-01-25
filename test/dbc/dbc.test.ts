@@ -20,7 +20,7 @@ describe('DBC Parser Tests', () => {
         // Add assertions to verify the parsed values for Model3CAN.dbc
         expect(result).toBeDefined();
         expect(isCanFd(result.messages[0x113])).toBe(false)
-        expect(result.messages[0x113].canIdType).toBe(CAN_ID_TYPE.EXTENDED)
+        expect(result.messages[0x113].extId).toBe(true)
         // Add more specific assertions based on the expected structure of Model3CAN.dbc
     });
 

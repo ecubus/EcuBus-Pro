@@ -1,3 +1,5 @@
+import { writeMessageData } from "../database/dbc/calc"
+import { CanMessage } from "nodeCan/can"
 import { LinMsg } from "nodeCan/lin"
 import { DataSet } from "src/preload/data"
 
@@ -139,6 +141,42 @@ function parseLinData(data: LinMsg[]) {
     return result
 }
 
+
+
+function parseCanData(data:CanMessage[]){
+    const result: Record<string, (number|string)[][]> = {}
+    const findDb = (name?: string) => {
+        if (!name) return null
+        for (const db of Object.values(database.can)) {
+            if (db.name === name) {
+                return db
+            }
+        }
+        return null
+    }
+    for(const msg of data){
+       
+        const db=findDb(msg.database)
+        if(db){
+           
+            const frame=db.messages[msg.id]
+            if(frame){
+                writeMessageData(frame,msg.data,db)
+                for(const signal of Object.values(frame.signals)){
+                  const signalKey=`can.${db.name}.signals.${signal.name}`
+                  if(!result[signalKey]){
+                    result[signalKey]=[]
+                  }
+                  const ts=parseFloat(((msg.ts || 0)/1000000).toFixed(3))
+                  const value=signal.physValue
+                  result[signalKey].push([ts,value!])
+                }
+            }
+        }
+    }
+    return result
+
+}
 // Initialize database reference
 function initDataBase(db: DataSet['database']) {
     database = db
@@ -147,7 +185,8 @@ function initDataBase(db: DataSet['database']) {
 // Export functions for both testing and worker usage
 export {
     parseLinData,
-    initDataBase
+    initDataBase,
+    parseCanData
 }
 
 // Check if we're in a worker context
@@ -165,12 +204,21 @@ if (isWorker) {
                     initDataBase(data)
                     break
                 }
-
+            case 'canBase':
+                {
+                    const result = parseCanData(data.map((item: any) => item.message.data))
+                    if(result){
+                        self.postMessage(result)
+                    }
+                    break
+                }
 
             case 'linBase':
                 {
                     const result = parseLinData(data.map((item: any) => item.message.data));
-                    self.postMessage(result)
+                    if(result){
+                        self.postMessage(result)
+                    }
                     break
                 }
 

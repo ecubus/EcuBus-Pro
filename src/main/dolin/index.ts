@@ -228,13 +228,13 @@ export class NodeLinItem {
     }
     setSignal(pool: UdsTester, data: {
         signal: string,
-        value: number|number[]
+        value: number|number[]|string
     }) {
 
         const s=data.signal.split('.')
         // 验证数据库是否存在
         if (!this.db||s[0]!=this.db.name) {
-            throw new Error('LIN database not found')
+            throw new Error(`LIN database ${s[0]} not found`)
         }
         
         const signalName=s[1]
@@ -331,7 +331,7 @@ export class NodeLinItem {
 }
 
 
-export function updateSignalVal(db: LDF, signalName: string, value: number | number[]) {
+export function updateSignalVal(db: LDF, signalName: string, value: number | number[] | string) {
     const signal = db.signals[signalName]
     if (signal) {
         //compare value
@@ -339,6 +339,12 @@ export function updateSignalVal(db: LDF, signalName: string, value: number | num
         if (!isEqual(lastValue, value)) {
             signal.update = true
         }
-        signal.value = value
+        if(typeof value==='string'){
+            //find in encode
+            //TODO:
+        }else{
+            signal.value = value
+        }
+        
     }
 }

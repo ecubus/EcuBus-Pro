@@ -5,6 +5,10 @@
  */
 interface CanMessage {
     /**
+     * The name of the CAN message.
+     */
+    name?: string;
+    /**
      * The device associated with the CAN message.
      */
     device?: string;
@@ -33,6 +37,10 @@ interface CanMessage {
      * This property is optional.
      */
     isSimulate?: boolean;
+    /**
+     * The database name of the CAN message.
+     */
+    database?: string;
 }
 /**
  * Enumeration representing different CAN (Controller Area Network) ID types.
@@ -1066,7 +1074,7 @@ declare function output(msg: LinMsg): Promise<number>;
  * await setSignal('lin.xxxx', [1, 2, 3, 4]);
  * ```
  */
-declare function setSignal(signal: SignalName, value: number | number[]): Promise<void>;
+declare function setSignal(signal: SignalName, value: number | number[] | string): Promise<void>;
 /**
  * Register a virtual entity
  *

@@ -292,7 +292,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
 
 
         Object.keys(dbc.messages).forEach((key) => {
-            dbc.messages[key].canfd = isCanFd(dbc.messages[key])
+            dbc.messages[Number(key)].canfd = isCanFd(dbc.messages[Number(key)])
         })
         return dbc;
     }

@@ -19,7 +19,7 @@ type HandlerMap = {
   }) => Promise<number>
   setSignal: (pool: UdsTester, data: {
     signal: string,
-    value: number|number[]
+    value: number|number[]|string
   }) => void
   registerEthVirtualEntity: (pool: UdsTester, data: {
     entity:VinInfo,

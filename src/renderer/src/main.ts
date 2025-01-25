@@ -29,7 +29,6 @@ window.logBus = new EventBus()
 window.dataParseWorker=dataParseWorker  
 dataParseWorker.onmessage = (event) => {
   for(const key of Object.keys(event.data)){
- 
     window.logBus.emit(key, undefined, key,event.data[key])
   }
 }

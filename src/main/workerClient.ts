@@ -9,6 +9,8 @@ import { CanMessage, formatError } from './share/can'
 import { ServiceId } from './share/service'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
+import reportPath from '../../../resources/lib/js/report.js?asset&asarUnpack'
+import { pathToFileURL } from 'node:url'
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
@@ -52,6 +54,7 @@ export default class UdsTester {
     jsFilePath: string,
     log: UdsLOG,
     private tester?: TesterInfo,
+    private isTest?:boolean
   ) {
     if (tester) {
       for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
@@ -61,6 +64,11 @@ export default class UdsTester {
       }
     }
     this.log = log
+    const execArgv=['--enable-source-maps']
+    if(this.isTest){
+     
+      execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
+    }
     this.pool = workerpool.pool(jsFilePath, {
       minWorkers: 1,
       maxWorkers: 1,

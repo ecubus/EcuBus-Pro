@@ -8,7 +8,7 @@ const path = require('node:path');
 const worker = new Worker(path.resolve(__dirname, 'test.js'), {
     execArgv: [
         '--test-reporter=file://D:/code/ecubus-pro/resources/lib/js/report.js',
-        './test.js'
+        
     ]
 });
 worker.on('message', (message) => {

@@ -285,7 +285,7 @@ export class UDSTesterMain {
           PROJECT_NAME: this.project.projectName,
           MODE: 'sequence',
           NAME: this.tester.name,
-        }, jsPath, log, this.tester)
+        }, scriptPath,jsPath, log, this.tester)
         this.pool?.updateTs(0)
         try {
           await this.pool.start(this.project.projectPath)

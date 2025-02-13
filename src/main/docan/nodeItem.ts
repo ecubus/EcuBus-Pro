@@ -40,7 +40,7 @@ export class NodeItem {
           PROJECT_NAME: this.projectName,
           MODE: 'node',
           NAME: nodeItem.name,
-        }, jsPath, this.log, this.tester)
+        }, nodeItem.script,jsPath, this.log, this.tester)
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         this.pool.registerHandler('setSignal', this.setSignal.bind(this))

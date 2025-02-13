@@ -26,6 +26,7 @@
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "worker": "cd src/main/worker/secureAccess && npx node-gyp rebuild &&  cd ../../../.. && npx webpack --config webpack.config.js --mode production",
+    "worker:js": "npx webpack --config webpack.config.js --mode production",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "test": "vitest --config vitest.config.ts",

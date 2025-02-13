@@ -22,6 +22,10 @@ export type {CanMessage}
 export type {EntityAddr}
 export type {LinMsg}
 export type {CanMsgType} from '../share/can'
+import {dot} from 'node:test/reporters'
+import assert from 'node:assert'
+export {assert}
+export {test,suite,skip,todo,beforeEach,afterEach,before,after} from 'node:test'
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
@@ -1278,3 +1282,23 @@ export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string,) {
     throw err
   }
 }
+
+
+
+
+
+//get dot input param type
+type TestEventGenerator = Parameters<typeof dot>[0]
+
+export  async function * reporter(source:TestEventGenerator) {
+    for await (const event of source) {
+      if(event.type=='test:complete'||event.type=='test:fail'||event.type=='test:pass'||event.type=='test:start'||event.type=='test:stderr'||event.type=='test:stdout'){
+        workerpool.workerEmit({
+          event: 'test',
+          id:id,
+          data: event
+      })
+      id++
+      }
+    }
+  };

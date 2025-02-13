@@ -6,7 +6,7 @@ let cnt=0
 
     test('synchronous passing test #0', (t) => {
         // This test passes because it does not throw an exception.
-        console.log('aaa passing test',cnt++)
+        console.log('aaa passing test',cnt++,global.cnt)
         assert.strictEqual(1, 1);
     });
 

@@ -45,7 +45,7 @@ export class NodeEthItem {
           PROJECT_NAME: this.projectName,
           MODE: 'node',
           NAME: nodeItem.name,
-        }, jsPath, this.log, this.tester)
+        }, nodeItem.script,jsPath, this.log, this.tester)
         this.pool.registerHandler('registerEthVirtualEntity', this.registerEthVirtualEntity.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         if (this.tester && this.tester.address.length > 0) {

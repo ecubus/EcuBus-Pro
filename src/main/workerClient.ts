@@ -11,6 +11,8 @@ import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
 import reportPath from '../../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
+import { TestEvent } from 'node:test/reporters'
+import fsP from 'node:fs/promises'
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
   sendDiag: (pool: UdsTester, data: {
@@ -51,6 +53,7 @@ export default class UdsTester {
       MODE:'node'|'sequence',
       NAME:string
     },
+    private tsFilePath:string,
     jsFilePath: string,
     log: UdsLOG,
     private tester?: TesterInfo,
@@ -157,7 +160,11 @@ export default class UdsTester {
         assign(this.serviceMap[`${name}.${service.name}`], service)
       }
       this.worker.exec('__eventDone', [id]).catch(reject)
-    } else {
+    }else if(event=='test'&&this.isTest){
+      const testEvent=data as TestEvent
+      console.log('test',testEvent)
+    }
+    else {
       const eventKey = event as keyof EventHandlerMap
       const handler = this.eventHandlerMap[eventKey]
       if (handler) {
@@ -190,6 +197,10 @@ export default class UdsTester {
         }]).catch(reject)
       }
     }
+  }
+  async parseTestInfo(){
+    //read the file and parse the test info TestLocationInfo
+    const content=await fsP.readFile(this.tsFilePath,'utf-8')
   }
   registerHandler<T extends keyof HandlerMap>(id: T, handler: HandlerMap[T]): void {
     this.eventHandlerMap[id] = handler

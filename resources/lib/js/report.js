@@ -1,15 +1,6 @@
 
 const {
-    parentPort
-  } = require('node:worker_threads');
+  reporter
+} = require('./uds');
 
-
-
-
-
-
-module.exports = async function * customReporter(source) {
-    for await (const event of source) {
-        parentPort.postMessage(event)
-    }
-  };
+module.exports = reporter

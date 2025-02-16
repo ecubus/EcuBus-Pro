@@ -63,6 +63,12 @@ export type GraphNode<T> = {
     type:'signal' | 'variable' | 'frame',
     bindValue: T
 }
+export type TestConfig={
+    id:string,
+    name:string,
+    script:string,
+    attachTester?:string
+}
 export interface DataSet {
     devices: Record<string, UdsDevice>
     tester: Record<string, TesterInfo>
@@ -74,4 +80,5 @@ export interface DataSet {
         can:Record<string,DBC>
     },
     graphs: Record<string, GraphNode>
+    tests:Record<string,TestConfig>
 }

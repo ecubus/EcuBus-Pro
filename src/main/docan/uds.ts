@@ -102,6 +102,7 @@ import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet } from 'src/preload/data'
+import { getJsPath } from '../util'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -274,18 +275,15 @@ export class UDSTesterMain {
         }
 
 
-        const outDir = path.join(this.project.projectPath, '.ScriptBuild')
-
-        //change ts to outdir/*js
-        const scriptNameNoExt = path.basename(scriptPath, '.ts')
-        const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+     
+        const jsPath = getJsPath(scriptPath,this.project.projectPath)
 
         this.pool = new UdsTester({
           PROJECT_ROOT: this.project.projectPath,
           PROJECT_NAME: this.project.projectName,
           MODE: 'sequence',
           NAME: this.tester.name,
-        }, scriptPath,jsPath, log, this.tester)
+        }, jsPath, log, this.tester)
         this.pool?.updateTs(0)
         try {
           await this.pool.start(this.project.projectPath)
@@ -497,7 +495,7 @@ export class UDSTesterMain {
         }
         if (service.enable && addrItem && targetService) {
 
-          const serviceRun = async function(tester:UDSTesterMain, s: ServiceItem){
+          const serviceRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (tester.ac.signal.aborted) {
               throw new Error('aborted')
             }
@@ -592,8 +590,8 @@ export class UDSTesterMain {
                 socket.close()
                 break
               } catch (e: any) {
-                
-              
+
+
                 service.retryNum--
                 if (service.retryNum < 0) {
                   if (service.failBehavior == 'stop') {
@@ -617,7 +615,7 @@ export class UDSTesterMain {
 
             return true
           }
-          const jobRun = async function(tester:UDSTesterMain, s: ServiceItem){
+          const jobRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (tester.pool) {
               const params: (string | number)[] = []
               for (const p of s.params) {
@@ -635,15 +633,15 @@ export class UDSTesterMain {
                   params.push(Number(p.phyValue))
                 }
               }
-             
+
               const services = await tester.execJob(s.name, params)
-           
+
               if (services) {
                 let percent = 0
                 const step = (100 / services.length)
                 for (const ser of services) {
                   await baseRun(tester, ser)
-                  
+
                   percent += step
                   log.udsIndex(serviceIndex, ser.name, 'progress', percent)
                 }
@@ -654,31 +652,31 @@ export class UDSTesterMain {
               throw new Error('the pool has been terminated')
             }
           }
-          const baseRun= async function(tester:UDSTesterMain, s: ServiceItem){
+          const baseRun = async function (tester: UDSTesterMain, s: ServiceItem) {
             if (s.serviceId === 'Job') {
               await jobRun(tester, s)
             } else {
-              
+
               // eslint-disable-next-line no-constant-condition
               while (true) {
-  
+
                 const r = await serviceRun(tester, s)
-  
+
                 if (r) {
                   break
                 }
                 await tester.delay(service.delay)
               }
-            
-  
+
+
             }
             await tester.delay(service.delay)
           }
           log.udsIndex(serviceIndex, targetService.name, 'start')
           await baseRun(this, targetService)
           log.udsIndex(serviceIndex, targetService.name, 'finished')
-         
-         
+
+
         }
       }
     }
@@ -854,8 +852,7 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
   if (path.isAbsolute(script) === false) {
     script = path.join(projectPath, script)
   }
-  const outputDir = path.join(projectPath, '.ScriptBuild')
-  const outFile = path.join(outputDir, path.basename(script, '.ts') + '.js')
+  const outFile = getJsPath(script, projectPath)
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'
@@ -1095,7 +1092,7 @@ export async function refreshProject(projectPath: string, projectName: string, d
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
 }
 
-export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, vendor = 'YT') {
+export async function compileTsc(projectPath: string, projectName: string, data: DataSet, entry: string, esbuildPath: string, libPath: string, isTest: boolean) {
 
   await createProject(projectPath, projectName, data)
   if (entry) {
@@ -1155,7 +1152,7 @@ export async function compileTsc(projectPath: string, projectName: string, data:
 
     try {
 
-      await compileTscEntry(script, outputDir, esbuildPath, libPath, vendor)
+      await compileTscEntry(script, outputDir, esbuildPath, libPath, isTest)
     } catch (e: any) {
       return [{ code: -1, message: e.message, file: entry, start: 0, line: 0 }]
     }
@@ -1170,24 +1167,28 @@ async function compileTscEntry(
   outputDir: string,
   esbuildPath: string,
   libPath: string,
-  vendor = 'YT'
+  isTest: boolean,
+
 ) {
   //delete last build 
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
+  const cmaArray = [entry,
+    '--sourcemap',
+    '--bundle',
+    '--platform=node',
+    '--format=cjs',
+    `--alias:ECB=${libPath}`,
+    `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
+    `--outdir=${outputDir}`,
+    `--inject:${path.join(libPath, 'uds.js')}`,
+  ]
+  if (isTest) {
+    cmaArray.push(`--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___('____ecubus_pro_test___',()=>{})`)
+  }
   const v = await exec(
     esbuildPath,
-    [
-      entry,
-      '--sourcemap',
-      '--bundle',
-      '--platform=node',
-      '--format=cjs',
-      `--alias:${vendor}=${libPath}`,
-      `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
-      `--outdir=${outputDir}`,
-      `--inject:${path.join(libPath, 'uds.js')}`,
-    ],
+    cmaArray,
   )
   if (v.stderr) {
     if (!v.stderr.includes('Done')) {

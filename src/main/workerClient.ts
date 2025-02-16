@@ -9,7 +9,7 @@ import { CanMessage, formatError } from './share/can'
 import { ServiceId } from './share/service'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
-import reportPath from '../../../resources/lib/js/report.js?asset&asarUnpack'
+import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import fsP from 'node:fs/promises'
@@ -42,22 +42,24 @@ export default class UdsTester {
   worker: any
   selfStop = false
   log: UdsLOG
+  testEvents:TestEvent[]=[]
+  getInfoPromise?:{resolve:(v:any[])=>void,reject:(e:any)=>void}
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
   cb:any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
-    env: {
+    private env: {
       PROJECT_ROOT:string,
       PROJECT_NAME:string,
-      MODE:'node'|'sequence',
+      MODE:'node'|'sequence'|'test',
       NAME:string
     },
-    private tsFilePath:string,
     jsFilePath: string,
     log: UdsLOG,
     private tester?: TesterInfo,
-    private isTest?:boolean
+    
+    testOnly?:boolean
   ) {
     if (tester) {
       for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
@@ -68,9 +70,11 @@ export default class UdsTester {
     }
     this.log = log
     const execArgv=['--enable-source-maps']
-    if(this.isTest){
-     
+    if(this.env.MODE=='test'){
       execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
+      if(testOnly){
+        execArgv.push('--test-only')
+      }
     }
     this.pool = workerpool.pool(jsFilePath, {
       minWorkers: 1,
@@ -89,6 +93,9 @@ export default class UdsTester {
         if (!this.selfStop) {
 
           this.log.systemMsg('worker terminated', this.ts, 'error')
+        }
+        if(this.getInfoPromise){
+          this.getInfoPromise.reject(new Error('worker terminated'))
         }
         this.stop()
       },
@@ -113,6 +120,21 @@ export default class UdsTester {
     })
     this.cb=this.keyHandle.bind(this)
     globalThis.keyEvent.on('keydown',this.cb)
+  }
+  async getTestInfo(){
+    return new Promise<TestEvent[]>((resolve,reject)=>{
+      if(this.env.MODE!='test'){
+        reject(new Error('not in test mode'))
+        return
+      }
+      for(const testEvent of this.testEvents){
+        if(testEvent.type=='test:pass'&&testEvent.data.name=='____ecubus_pro_test___'){
+          resolve(this.testEvents)
+          return
+        }
+      }
+      this.getInfoPromise={resolve,reject}
+    })
   }
   updateTs(ts: number) {
     this.ts = ts
@@ -160,9 +182,15 @@ export default class UdsTester {
         assign(this.serviceMap[`${name}.${service.name}`], service)
       }
       this.worker.exec('__eventDone', [id]).catch(reject)
-    }else if(event=='test'&&this.isTest){
+    }else if(event=='test'&&this.env.MODE=='test'){
       const testEvent=data as TestEvent
-      console.log('test',testEvent)
+      this.testEvents.push(testEvent)
+      if(this.getInfoPromise){
+        if(testEvent.type=='test:pass'&&testEvent.data.name=='____ecubus_pro_test___'){
+          this.getInfoPromise.resolve(this.testEvents)
+          this.getInfoPromise=undefined
+        }
+      }
     }
     else {
       const eventKey = event as keyof EventHandlerMap
@@ -197,10 +225,6 @@ export default class UdsTester {
         }]).catch(reject)
       }
     }
-  }
-  async parseTestInfo(){
-    //read the file and parse the test info TestLocationInfo
-    const content=await fsP.readFile(this.tsFilePath,'utf-8')
   }
   registerHandler<T extends keyof HandlerMap>(id: T, handler: HandlerMap[T]): void {
     this.eventHandlerMap[id] = handler
@@ -278,5 +302,8 @@ export default class UdsTester {
     this.pool.terminate(true).catch(null)
     this.worker.worker.terminate()
     globalThis.keyEvent.off('keydown',this.cb)
+    if(this.getInfoPromise){
+      this.getInfoPromise.reject(new Error('worker terminated'))
+    }
   }
 }

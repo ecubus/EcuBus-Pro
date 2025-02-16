@@ -55,7 +55,7 @@
             </span>
           </template>
           <div style="display:flex;gap:5px;padding:15px">
-           
+
             <div class="grid girdenable" @click="handleSelect(['hardware'])">
               <Icon :icon="deviceIcon" style="font-size: 24px; " />
               <span>Devices</span>
@@ -142,6 +142,46 @@
               </el-dropdown>
 
             </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane name="test">
+          <template #label>
+            <span class="lr">
+              <Icon :icon="testConfig" style="font-size: 16px; " />
+              <span>Test</span>
+            </span>
+          </template>
+          <div style="display:flex;gap:5px;padding:15px">
+            <div class="grid girdenable" @click="handleSelect(['test'])">
+              <Icon :icon="testConfig" style="font-size: 18px;height: 24px; " />
+              <span>Test Setup</span>
+            </div>
+            <div class="grid girdenable">
+              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
+              <el-dropdown @command="openDatabase">
+                <span class="lr">
+                  Test Config
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
+                      </el-dropdown-item> -->
+                  
+                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
+                     >
+                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
+
+                    </el-dropdown-item>
+                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
+
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+
           </div>
         </el-tab-pane>
         <!-- <el-tab-pane label="">
@@ -271,13 +311,14 @@
       <div class="right2" v-if="layoutMaster.right2.value"></div>
       <div v-for="item in project.project.wins" :key="item.id" style="position: absolute; padding: 1px">
 
-        <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`" class="uds-window" :style="{
-          transform: 'translate(0px, 0px)',
-          top: `${item.pos.y}px`,
-          left: `${item.pos.x}px`,
-          width: `${item.pos.w}px`,
-          height: `${item.pos.h}px`,
-        }">
+        <div v-show="!item.hide" v-if="layoutMaster.getLayoutType(item.id) == undefined" :id="`win${item.id}`"
+          class="uds-window" :style="{
+            transform: 'translate(0px, 0px)',
+            top: `${item.pos.y}px`,
+            left: `${item.pos.x}px`,
+            width: `${item.pos.w}px`,
+            height: `${item.pos.h}px`,
+          }">
           <div class="titleBar" :style="{
             width: `${item.pos.w - 2}px`,
             height: '25px',
@@ -449,6 +490,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
+import testConfig from '@iconify/icons-grommet-icons/test'
+import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -485,7 +528,7 @@ function openIA(testerIndex: string) {
         'edit-index': testerIndex,
       }
     })
-  }else if (item.type == 'lin') {
+  } else if (item.type == 'lin') {
     layoutMaster.addWin('lini', `${testerIndex}_ia`, {
       name: dataBase.ia[testerIndex].name,
       params: {
@@ -550,7 +593,7 @@ async function openDatabase(testerIndex: string) {
     if (file == undefined) {
       return
     }
-    
+
 
     if (type == 'lin') {
 
@@ -564,7 +607,7 @@ async function openDatabase(testerIndex: string) {
       })
 
 
-    }else if(type == 'can'){
+    } else if (type == 'can') {
       const id = v4()
       layoutMaster.addWin('dbc', `${id}`, {
         params: {
@@ -587,7 +630,7 @@ async function openDatabase(testerIndex: string) {
           name: dataBase.database.lin[key].name,
           params: {
             'edit-index': key,
-            
+
           }
         })
         break
@@ -603,7 +646,7 @@ async function openDatabase(testerIndex: string) {
           name: dataBase.database.can[key].name,
           params: {
             'edit-index': key,
-           
+
           }
         })
       }
@@ -884,7 +927,7 @@ watch([contentH, contentW], (val) => {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  width: 80px;
+  width: 90px;
   height: 46px;
   padding: 4px;
   color: var(--el-color-info-dark-2);

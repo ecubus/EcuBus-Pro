@@ -10,7 +10,7 @@ import { findService } from "./uds";
 import { cloneDeep } from "lodash";
 import type { Signal } from "src/renderer/src/database/dbc/dbcVisitor";
 import { updateSignalPhys, updateSignalRaw } from "src/renderer/src/database/dbc/calc";
-
+import { getJsPath } from "../util";
 
 
 
@@ -29,9 +29,8 @@ export class NodeItem {
   ) {
 
     if (nodeItem.script) {
-      const outDir = path.join(this.projectPath, '.ScriptBuild')
-      const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
-      const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+    
+      const jsPath = getJsPath(nodeItem.script,this.projectPath)
       if (fs.existsSync(jsPath)) {
         this.tester = cloneDeep(nodeItem.attachTester ? testers[nodeItem.attachTester] : undefined)
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`, this.tester?.id)
@@ -40,7 +39,7 @@ export class NodeItem {
           PROJECT_NAME: this.projectName,
           MODE: 'node',
           NAME: nodeItem.name,
-        }, nodeItem.script,jsPath, this.log, this.tester)
+        },jsPath, this.log, this.tester)
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         this.pool.registerHandler('setSignal', this.setSignal.bind(this))

@@ -18,12 +18,13 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, NodeLinItem, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter } from 'src/preload/data'
+import { DataSet, LinInter, TestConfig } from 'src/preload/data'
 import { LinMode, LinNode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
 import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
+import UdsTester from '../workerClient'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -59,14 +60,38 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     const projectName = arg[1] as string
     const data = arg[2] as DataSet
     const entry = arg[3] as string
+    const isTest = arg[4]||false
 
-    const result = await compileTsc(projectPath, projectName, data, entry, esbuildWin, path.join(libPath, 'js'), 'ECB')
+    const result = await compileTsc(projectPath, projectName, data, entry, esbuildWin, path.join(libPath, 'js'), isTest)
     if (result.length > 0) {
         for (const err of result) {
             sysLog.error(`${err.file}:${err.line} build error: ${err.message}`)
         }
     }
     return result
+})
+
+
+
+ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
+    const projectPath = arg[0] as string
+    const projectName = arg[1] as string
+    const test = arg[2] as TestConfig
+    const tester=arg[3] as TesterInfo
+    
+    const log=new UdsLOG(test.name,tester.id)
+    const worker=new UdsTester({
+        PROJECT_ROOT:projectPath,
+        PROJECT_NAME:projectName,
+        MODE:'test',
+        NAME:test.name
+    },test.script,log,tester,true)
+    await worker.start(projectPath)
+    const testInfo=await worker.getTestInfo()
+    worker.stop()
+    log.close()
+    return testInfo
+    
 })
 
 ipcMain.handle('ipc-delete-node', async (event, ...arg) => {

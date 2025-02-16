@@ -12,7 +12,7 @@ const worker = new Worker(path.resolve(__dirname, 'test.js'), {
     ]
 });
 worker.on('message', (message) => {
-    console.log('message', message)
+    console.log('message', message.payload)
 });
 worker.on('error', (error) => {
     console.error('error', error)

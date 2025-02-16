@@ -4,8 +4,8 @@
 import Emittery from 'emittery'
 import { getRxPdu, getTxPdu, Param, paramSetVal, paramSetSize, paramSetValRaw, Sequence, ServiceItem, applyBuffer, } from '../share/uds'
 export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
-export type {ServiceItem}
-export type {ServiceId}
+export type { ServiceItem }
+export type { ServiceId }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import workerpool, { worker } from 'workerpool'
@@ -16,16 +16,16 @@ import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
 import { LinMsg } from '../share/lin'
-export { LinDirection,LinChecksumType,LinMode} from '../share/lin'
+export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
 export { SecureAccessDll }
-export type {CanMessage}
-export type {EntityAddr}
-export type {LinMsg}
-export type {CanMsgType} from '../share/can'
-import {dot} from 'node:test/reporters'
+export type { CanMessage }
+export type { EntityAddr }
+export type { LinMsg }
+export type { CanMsgType } from '../share/can'
+import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
-export {assert}
-export {test,suite,skip,todo,beforeEach,afterEach,before,after} from 'node:test'
+export { assert }
+export { test, suite, skip, todo, beforeEach, afterEach, before, after } from 'node:test'
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
@@ -882,7 +882,7 @@ export class UtilClass {
    * @param id - The identifier of the LIN message to unsubscribe from. If `true`, unsubscribes from all LIN messages.
    * @param fc - The callback function to remove from the event listeners.
    */
-  OffLin(id: number |string | true, fc: (msg: LinMsg) => void | Promise<void>) {
+  OffLin(id: number | string | true, fc: (msg: LinMsg) => void | Promise<void>) {
     if (id === true) {
       this.event.off('lin' as any, fc)
     } else {
@@ -1023,7 +1023,7 @@ export class UtilClass {
   }
   private async linMsg(msg: LinMsg) {
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
-    if(msg.database&&msg.name){
+    if (msg.database && msg.name) {
       await this.event.emit(`lin.${msg.database}.${msg.name}` as any, msg)
     }
     await this.event.emit('lin' as any, msg)
@@ -1217,10 +1217,10 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
  * await setSignal('lin.xxxx', [1, 2, 3, 4]);
  * ```
  */
-export async function setSignal(signal: SignalName, value: number|number[]|string): Promise<void> {
+export async function setSignal(signal: SignalName, value: number | number[] | string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
-      id: id, 
+      id: id,
       event: 'setSignal',
       data: {
         signal,
@@ -1290,15 +1290,15 @@ export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string,) {
 //get dot input param type
 type TestEventGenerator = Parameters<typeof dot>[0]
 
-export  async function * reporter(source:TestEventGenerator) {
-    for await (const event of source) {
-      if(event.type=='test:complete'||event.type=='test:fail'||event.type=='test:pass'||event.type=='test:start'||event.type=='test:stderr'||event.type=='test:stdout'){
-        workerpool.workerEmit({
-          event: 'test',
-          id:id,
-          data: event
-      })
-      id++
-      }
-    }
-  };
+export async function* reporter(source: TestEventGenerator) {
+  for await (const event of source) {
+
+    workerpool.workerEmit({
+      event: 'test',
+      id: id,
+      data: event
+    })
+    id++
+
+  }
+};

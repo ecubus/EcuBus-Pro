@@ -1,0 +1,90 @@
+{
+  "data": {
+    "devices": {},
+    "ia": {},
+    "tester": {
+      "56060a31-9d6f-4b6e-a386-99e460bc55ba": {
+        "id": "56060a31-9d6f-4b6e-a386-99e460bc55ba",
+        "name": "Tester_can_1",
+        "type": "can",
+        "script": "",
+        "targetDeviceId": "",
+        "seqList": [],
+        "address": [],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {}
+      },
+      "2a21ea15-6945-4466-a719-e72eccc4efed": {
+        "id": "2a21ea15-6945-4466-a719-e72eccc4efed",
+        "name": "T",
+        "type": "can",
+        "script": "",
+        "targetDeviceId": "",
+        "seqList": [],
+        "address": [],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {}
+      }
+    },
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "tester": {
+        "pos": {
+          "x": 1098,
+          "y": 294.5,
+          "w": 858,
+          "h": 400
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 326,
+          "y": 198.5,
+          "w": 836,
+          "h": 400
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      }
+    }
+  }
+}

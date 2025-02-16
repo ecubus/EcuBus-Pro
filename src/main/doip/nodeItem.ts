@@ -10,6 +10,7 @@ import { findService } from "../docan/uds";
 import { cloneDeep } from "lodash";
 import { DOIP, DOIP_SOCKET, DoipError } from "../doip";
 import { EthAddr, EthBaseInfo, EthNode, VinInfo } from "../share/doip";
+import { getJsPath } from "../util";
 
 
 
@@ -34,9 +35,8 @@ export class NodeEthItem {
   ) {
 
     if (nodeItem.script) {
-      const outDir = path.join(this.projectPath, '.ScriptBuild')
-      const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
-      const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+     
+      const jsPath = getJsPath(nodeItem.script,this.projectPath)
       if (fs.existsSync(jsPath)) {
         this.tester = cloneDeep(nodeItem.attachTester ? testers[nodeItem.attachTester] : undefined)
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`, this.tester?.id)
@@ -45,7 +45,7 @@ export class NodeEthItem {
           PROJECT_NAME: this.projectName,
           MODE: 'node',
           NAME: nodeItem.name,
-        }, nodeItem.script,jsPath, this.log, this.tester)
+        },jsPath, this.log, this.tester)
         this.pool.registerHandler('registerEthVirtualEntity', this.registerEthVirtualEntity.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         if (this.tester && this.tester.address.length > 0) {

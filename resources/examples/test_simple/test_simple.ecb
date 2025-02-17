@@ -42,7 +42,8 @@
       "lin": {},
       "can": {}
     },
-    "graphs": {}
+    "graphs": {},
+    "tests": {}
   },
   "project": {
     "wins": {

@@ -156,7 +156,7 @@
               <Icon :icon="testConfig" style="font-size: 18px;height: 24px; " />
               <span>Test Setup</span>
             </div>
-            <div class="grid girdenable">
+            <!-- <div class="grid girdenable">
               <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
               <el-dropdown @command="openDatabase">
                 <span class="lr">
@@ -167,8 +167,6 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu size="small">
-                    <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
-                      </el-dropdown-item> -->
                   
                     <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
                      >
@@ -180,7 +178,7 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-            </div>
+            </div> -->
 
           </div>
         </el-tab-pane>

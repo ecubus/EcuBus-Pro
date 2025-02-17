@@ -1,93 +1,94 @@
 <template>
-    <div class="main" v-loading="loading">
-        <div class="left" v-show="!hideTree">
-            <el-scrollbar :height="h + 'px'">
-                <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
-                    :expand-on-click-node="false" @node-click="nodeClick">
-                    <template #default="{ node, data }">
-                        <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="100"
-                            trigger="contextmenu" popper-class="node-menu" v-if="data.type === 'config'">
-                            <template #reference>
-                                <div class="tree-node">
-                                    <span :class="{
-                                        isTop: node.level === 1,
-                                        treeLabel: true
-                                    }">{{ node.label }}</span>
-                                    <el-button link type="warning" @click.stop="handleRefresh(data)">
-                                        <Icon :icon="refreshIcon" />
-                                    </el-button>
+    <div>
+        <div class="main" v-loading="loading">
+            <div class="left" v-show="!hideTree">
+                <el-scrollbar :height="h + 'px'">
+                    <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
+                        :expand-on-click-node="false" @node-click="nodeClick">
+                        <template #default="{ node, data }">
+                            <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="100"
+                                trigger="contextmenu" popper-class="node-menu" v-if="data.type === 'config'">
+                                <template #reference>
+                                    <div class="tree-node">
+                                        <span :class="{
+                                            isTop: node.level === 1,
+                                            treeLabel: true
+                                        }">{{ node.label }}</span>
+                                        <el-button link type="warning" @click.stop="handleRefresh(data)">
+                                            <Icon :icon="refreshIcon" />
+                                        </el-button>
+                                    </div>
+                                </template>
+                                <div class="menu-items">
+                                    <div class="menu-item warning" @click="handleEdit(data)">
+                                        <Icon :icon="editIcon" />
+                                        <span>Edit</span>
+                                    </div>
+                                    <div class="menu-item danger" @click="handleDelete(data)">
+                                        <Icon :icon="deleteIcon" />
+                                        <span>Delete</span>
+                                    </div>
                                 </div>
-                            </template>
-                            <div class="menu-items">
-                                <div class="menu-item warning" @click="handleEdit(data)">
-                                    <Icon :icon="editIcon" />
-                                    <span>Edit</span>
-                                </div>
-                                <div class="menu-item danger" @click="handleDelete(data)">
-                                    <Icon :icon="deleteIcon" />
-                                    <span>Delete</span>
-                                </div>
+                            </el-popover>
+                            <div v-else class="tree-node">
+                                <span :class="{
+                                    isTop: node.level === 1,
+                                    treeLabel: true
+                                }">{{ node.label }}</span>
+                                <el-button :disabled="globalStart" link v-if="data.canAdd" type="primary"
+                                    @click.stop="addNewConfig()">
+                                    <Icon :icon="circlePlusFilled" />
+                                </el-button>
                             </div>
-                        </el-popover>
-                        <div v-else class="tree-node">
-                            <span :class="{
-                                isTop: node.level === 1,
-                                treeLabel: true
-                            }">{{ node.label }}</span>
-                            <el-button :disabled="globalStart" link v-if="data.canAdd" type="primary"
-                                @click.stop="addNewConfig()">
-                                <Icon :icon="circlePlusFilled" />
-                            </el-button>
-                        </div>
-                    </template>
-                </el-tree>
-            </el-scrollbar>
-        </div>
-        <div class="shift" id="testerServiceShift" v-show="!hideTree" />
-        <div class="right" :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px' }">
-            <!-- Right side content removed -->
-        </div>
-    </div>
-
-    <!-- Configuration Dialog -->
-    <el-dialog v-model="editDialogVisible" v-if="editDialogVisible && editingConfig" 
-        title="Edit Configuration" width="500px" align-center>
-        <el-form :model="editingConfig" label-width="100px" size="small" 
-            ref="ruleFormRef" :rules="rules" hide-required-asterisk>
-            <el-form-item label="Name" prop="name" required>
-                <el-input v-model="editingConfig.name" @change="onConfigChange" />
-            </el-form-item>
-            <el-form-item label="Test Script File" prop="script">
-                <el-input v-model="editingConfig.script" clearable />
-                <div class="lr">
-                    <el-button-group style="margin-top: 5px;" v-loading="buildLoading">
-                        <el-button size="small" plain @click="editScript('open')">
-                            <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
-                        </el-button>
-                        <el-button size="small" plain @click="editScript('build')">
-                            <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
-                        </el-button>
-                        <el-button size="small" plain @click="editScript('edit')">
-                            <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh / Edit
-                        </el-button>
-                    </el-button-group>
-                    <el-divider direction="vertical" style="height:24px;margin-top:5px;" v-if="buildStatus" />
-                    <span v-if="buildStatus" class="buildStatus" :style="{ color: getBuildStatusColor() }">
-                        <Icon :icon="getBuildStatusIcon()" />{{ getBuildStatusText() }}
-                    </span>
-                    <el-button v-if="buildStatus" link style="margin-top: 5px;" :type="buildStatus">
-                        <Icon :icon="refreshIcon" @click="refreshBuildStatus" class="icon" style="margin-right: 5px" />
-                    </el-button>
-                </div>
-            </el-form-item>
-        </el-form>
-        <template #footer>
-            <div class="dialog-footer">
-                <el-button @click="handleEditCancel" size="small">Cancel</el-button>
-                <el-button type="primary" @click="handleEditSave" size="small">Save</el-button>
+                        </template>
+                    </el-tree>
+                </el-scrollbar>
             </div>
-        </template>
-    </el-dialog>
+            <div class="shift" id="testerServiceShift" v-show="!hideTree" />
+            <div class="right" :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px' }">
+                <!-- Right side content removed -->
+            </div>
+        </div>
+
+        <!-- Configuration Dialog -->
+        <el-dialog v-model="editDialogVisible" v-if="editDialogVisible && activeConfig" title="Edit Configuration"
+            width="500px" align-center :append-to="`#wintest`">
+            <el-form :model="model" label-width="100px" size="small" ref="ruleFormRef" :rules="rules"
+                hide-required-asterisk>
+                <el-form-item label="Name" prop="name" required>
+                    <el-input v-model="model.name" @change="onConfigChange" />
+                </el-form-item>
+                <el-form-item label="Test Script File" prop="script">
+                    <el-input v-model="model.script" clearable />
+                    <div class="lr">
+                        <el-button-group v-loading="buildLoading">
+                            <el-button size="small" plain @click="editScript('open')">
+                                <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
+                            </el-button>
+                            <el-button size="small" plain @click="editScript('build')">
+                                <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
+                            </el-button>
+                            <el-button size="small" plain @click="editScript('edit')">
+                                <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh / Edit
+                            </el-button>
+                        </el-button-group>
+                        <div class="build-status-container" v-if="buildStatus">
+                            <span class="buildStatus" :style="{ color: getBuildStatusColor() }">
+                                <Icon :icon="getBuildStatusIcon()" />{{ getBuildStatusText() }}
+                            </span>
+                            
+                        </div>
+                    </div>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-button @click="handleEditCancel" size="small">Cancel</el-button>
+                    <el-button type="primary" @click="handleEditSave" size="small">Save</el-button>
+                </div>
+            </template>
+        </el-dialog>
+    </div>
 </template>
 
 <script lang="tsx" setup>
@@ -115,9 +116,9 @@ import { useProjectStore } from "@r/stores/project"
 import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 
-const dialogVisible = ref(false)
+
 const loading = ref(false)
-const activeService = ref('')
+
 const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
     width: number,
@@ -232,7 +233,8 @@ function removeConfig(id: string) {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning',
-        buttonSize: 'small'
+        buttonSize: 'small',
+        appendTo: '#wintest'
     }).then(() => {
         delete dataBase.tests[id]
         const index = tData.value[0].children?.findIndex(item => item.id === id)
@@ -305,29 +307,31 @@ const buildLoading = ref(false)
 function refreshBuildStatus() {
     if (model.value.script) {
         window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, model.value.script).then((val) => {
+            console.log(val)
             buildStatus.value = val
         })
     }
 }
 
 function editScript(action: 'open' | 'edit' | 'build') {
-    if (!editingConfig.value) return
-    
+    if (!activeConfig.value) return
+
     if (action == 'edit' || action == 'build') {
-        if (editingConfig.value.script) {
+        if (model.value.script) {
             if (project.projectInfo.path) {
                 if (action == 'edit') {
                     window.electron.ipcRenderer.invoke('ipc-create-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData())).catch((e: any) => {
                         ElMessageBox.alert(e.message, 'Error', {
                             confirmButtonText: 'OK',
                             type: 'error',
-                            buttonSize: 'small'
+                            buttonSize: 'small',
+                            appendTo: '#wintest'
                         })
                     })
                 } else {
                     buildStatus.value = ''
                     buildLoading.value = true
-                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), editingConfig.value.script)
+                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script)
                         .then((val) => {
                             if (val.length > 0) {
                                 buildStatus.value = 'danger'
@@ -339,7 +343,8 @@ function editScript(action: 'open' | 'edit' | 'build') {
                             ElMessageBox.alert(e.message, 'Error', {
                                 confirmButtonText: 'OK',
                                 type: 'error',
-                                buttonSize: 'small'
+                                buttonSize: 'small',
+                                appendTo: '#wintest'
                             })
                         }).finally(() => {
                             buildLoading.value = false
@@ -349,20 +354,22 @@ function editScript(action: 'open' | 'edit' | 'build') {
                 ElMessageBox.alert('Please save the project first', 'Warning', {
                     confirmButtonText: 'OK',
                     type: 'warning',
-                    buttonSize: 'small'
+                    buttonSize: 'small',
+                    appendTo: '#wintest'
                 })
             }
         } else {
             ElMessageBox.alert('Please select the script file first', 'Warning', {
                 confirmButtonText: 'OK',
                 type: 'warning',
-                buttonSize: 'small'
+                buttonSize: 'small',
+                appendTo: '#wintest'
             })
         }
     } else {
         openTs().then(file => {
-            if (file && editingConfig.value) {
-                editingConfig.value.script = file
+            if (file) {
+                model.value.script = file
             }
         })
     }
@@ -397,41 +404,45 @@ onMounted(() => {
         maxWidth: 400,
         minWidth: 200,
     })
-
+    
     buildTree()
 })
 
 // Add new refs
 const editDialogVisible = ref(false)
-const editingConfig = ref<TestConfig | null>(null)
+// const editingConfig = ref<TestConfig | null>(null)
 const popoverRefs = ref<Record<string, any>>({})
 const hideTree = ref(false)
 
 // Add handlers for edit/delete
 function handleEdit(data: tree) {
+    
     popoverRefs.value[data.id]?.hide()
-    editingConfig.value = cloneDeep(dataBase.tests[data.id])
+    model.value = cloneDeep(dataBase.tests[data.id])
+    activeConfig.value = data.id
     editDialogVisible.value = true
+    refreshBuildStatus()
 }
 
 function handleDelete(data: tree) {
     popoverRefs.value[data.id]?.hide()
     removeConfig(data.id)
+    activeConfig.value = ''
 }
 
 async function handleEditSave() {
-    if (!editingConfig.value) return
-    
+    if (!activeConfig.value) return
+
     try {
         await ruleFormRef.value?.validate()
-        dataBase.tests[editingConfig.value.id] = cloneDeep(editingConfig.value)
+        dataBase.tests[activeConfig.value] = cloneDeep(model.value)
         // Update tree node label
-        const node = tData.value[0].children?.find(item => item.id === editingConfig.value?.id)
+        const node = tData.value[0].children?.find(item => item.id === activeConfig.value)
         if (node) {
-            node.label = editingConfig.value.name
+            node.label = model.value.name
         }
         editDialogVisible.value = false
-        editingConfig.value = null
+        activeConfig.value = ''
     } catch (error) {
         // Validation failed
         return false
@@ -440,7 +451,7 @@ async function handleEditSave() {
 
 function handleEditCancel() {
     editDialogVisible.value = false
-    editingConfig.value = null
+    activeConfig.value = ''
 }
 
 // Helper functions for build status
@@ -475,9 +486,24 @@ function getBuildStatusText() {
 }
 
 // Add refresh handler
-function handleRefresh(data: tree) {
-    // TODO: Implement refresh functionality
-    console.log('Refresh clicked for:', data.id)
+async function handleRefresh(data: tree) {
+    //build first 
+    if (model.value.script) {
+        const v = await window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, model.value.script)
+        if (v != 'success') {
+            await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script)
+        }
+        //get test info
+        const testInfo = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(model.value))
+        console.log(testInfo)
+    } else {
+        ElMessageBox.alert('Please select the script file first', 'Warning', {
+            confirmButtonText: 'OK',
+            type: 'warning',
+            buttonSize: 'small',
+            appendTo: '#wintest'
+        })
+    }
 }
 </script>
 <style>
@@ -641,10 +667,21 @@ function handleRefresh(data: tree) {
 }
 
 .lr {
-    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    margin-top: 5px;
+   
+}
+
+.build-status-container {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    height: 32px;
+    gap: 8px;
+   
+ 
+    border-radius: 4px;
 }
 
 .buildStatus {
@@ -652,7 +689,12 @@ function handleRefresh(data: tree) {
     justify-content: center;
     align-items: center;
     gap: 5px;
-    margin-top: 5px;
+    font-size: 12px;
+}
+
+.buildStatus .iconify {
+    font-size: 16px;
+    margin-right: 2px;
 }
 
 .desc {
@@ -702,6 +744,10 @@ function handleRefresh(data: tree) {
 
 .tree-node .el-button:hover {
     background-color: var(--el-color-primary-light-9);
+}
+
+.el-button-group {
+    margin-bottom: 4px;
 }
 </style>
 

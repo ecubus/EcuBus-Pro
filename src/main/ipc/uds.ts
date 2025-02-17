@@ -79,7 +79,7 @@ ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
     const test = arg[2] as TestConfig
     const tester=arg[3] as TesterInfo
     
-    const log=new UdsLOG(test.name,tester.id)
+    const log=new UdsLOG(test.name,tester?.id)
     const worker=new UdsTester({
         PROJECT_ROOT:projectPath,
         PROJECT_NAME:projectName,

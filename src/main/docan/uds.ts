@@ -853,6 +853,7 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
     script = path.join(projectPath, script)
   }
   const outFile = getJsPath(script, projectPath)
+  console.log(outFile)
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'
@@ -1012,6 +1013,16 @@ export * from './utli'
         }
       }
     }
+    for(const test of Object.values(data.tests)){
+      if(test.script){
+        if(path.isAbsolute(test.script)===false){
+          ((tsconfig as any).files as string[]).push(test.script)
+        }else{
+          const relativePath = path.relative(projectPath, test.script);
+          ((tsconfig as any).files as string[]).push(relativePath)
+        }
+      }
+    }
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
 
@@ -1048,6 +1059,20 @@ export * from './utli'
             (tsconfig.files as string[]).push(relativePath)
           }
 
+        }
+      }
+    }
+    for(const test of Object.values(data.tests)){
+      if(test.script){
+        if(path.isAbsolute(test.script)===false){
+          if ((tsconfig.files as string[]).indexOf(test.script) == -1) {
+            (tsconfig.files as string[]).push(test.script)
+          }
+        } else {
+          const relativePath = path.relative(projectPath, test.script);
+          if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
+            (tsconfig.files as string[]).push(relativePath)
+          }
         }
       }
     }

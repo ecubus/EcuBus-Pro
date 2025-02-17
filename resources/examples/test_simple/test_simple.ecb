@@ -43,7 +43,13 @@
       "can": {}
     },
     "graphs": {},
-    "tests": {}
+    "tests": {
+      "8e639030-23ea-45f1-a906-82c4bb4fb192": {
+        "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
+        "name": "Test Config 01",
+        "script": "test.ts"
+      }
+    }
   },
   "project": {
     "wins": {
@@ -51,8 +57,8 @@
         "pos": {
           "x": 383,
           "y": 219,
-          "w": 1280,
-          "h": 200
+          "w": 2562,
+          "h": 356
         },
         "options": {
           "params": {}

@@ -25,6 +25,7 @@ import { TpError as LinTpError } from '../dolin/lintp'
 import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import UdsTester from '../workerClient'
+import { getJsPath } from '../util'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -80,12 +81,13 @@ ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
     const tester=arg[3] as TesterInfo
     
     const log=new UdsLOG(test.name,tester?.id)
+    const jsPath=getJsPath(test.script,projectPath)
     const worker=new UdsTester({
         PROJECT_ROOT:projectPath,
         PROJECT_NAME:projectName,
         MODE:'test',
         NAME:test.name
-    },test.script,log,tester,true)
+    },jsPath,log,tester,true)
     await worker.start(projectPath)
     const testInfo=await worker.getTestInfo()
     worker.stop()

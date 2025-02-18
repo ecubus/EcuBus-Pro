@@ -25,14 +25,18 @@ export type { CanMsgType } from '../share/can'
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
 export { assert }
-export { test, suite, skip, todo, beforeEach, afterEach, before, after } from 'node:test'
+export { test,beforeEach, afterEach, before, after } from 'node:test'
+import {describe} from 'node:test'
+
+
+const selfDescribe = process.env.ONLY?describe.only:describe
+export {selfDescribe as describe}
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
 const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 const allSignal = ['{{{signalName}}}'] as const
-
 interface Jobs { string: (data: Buffer) => string }
 /**
  * All services name config in Diagnostic Service.

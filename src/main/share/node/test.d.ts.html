@@ -62,7 +62,6 @@ declare module 'node:test' {
             test,
             skip,
             todo,
-            only
         };
     }
     /**
@@ -89,14 +88,7 @@ declare module 'node:test' {
         function todo(options?: TestOptions, fn?: SuiteFn): void;
         function todo(fn?: SuiteFn): void;
 
-        /**
-         * Shorthand for marking a suite as `only`, same as `describe([name], { only: true }[, fn])`.
-         * @since v18.15.0
-         */
-        function only(name?: string, options?: TestOptions, fn?: SuiteFn): void;
-        function only(name?: string, fn?: SuiteFn): void;
-        function only(options?: TestOptions, fn?: SuiteFn): void;
-        function only(fn?: SuiteFn): void;
+       
     }
 
     /**
@@ -123,15 +115,6 @@ declare module 'node:test' {
         function todo(name?: string, fn?: TestFn): void;
         function todo(options?: TestOptions, fn?: TestFn): void;
         function todo(fn?: TestFn): void;
-
-        /**
-         * Shorthand for marking a test as `only`, same as `it([name], { only: true }[, fn])`.
-         * @since v18.15.0
-         */
-        function only(name?: string, options?: TestOptions, fn?: TestFn): void;
-        function only(name?: string, fn?: TestFn): void;
-        function only(options?: TestOptions, fn?: TestFn): void;
-        function only(fn?: TestFn): void;
     }
     /**
      * Shorthand for skipping a test, same as `test([name], { skip: true }[, fn])`.
@@ -149,14 +132,7 @@ declare module 'node:test' {
     function todo(name?: string, fn?: TestFn): Promise<void>;
     function todo(options?: TestOptions, fn?: TestFn): Promise<void>;
     function todo(fn?: TestFn): Promise<void>;
-    /**
-     * Shorthand for marking a test as `only`, same as `test([name], { only: true }[, fn])`.
-     * @since v18.17.0
-     */
-    function only(name?: string, options?: TestOptions, fn?: TestFn): Promise<void>;
-    function only(name?: string, fn?: TestFn): Promise<void>;
-    function only(options?: TestOptions, fn?: TestFn): Promise<void>;
-    function only(fn?: TestFn): Promise<void>;
+
 
     /**
      * The type of a function under test. The first argument to this function is a
@@ -396,13 +372,6 @@ declare module 'node:test' {
          * @default false
          */
         concurrency?: number | boolean | undefined;
-
-        /**
-         * If truthy, and the test context is configured to run `only` tests, then this test will be
-         * run. Otherwise, the test is skipped.
-         * @default false
-         */
-        only?: boolean | undefined;
 
         /**
          * Allows aborting an in-progress test.

@@ -1,6 +1,7 @@
 import { dot } from 'node:test/reporters';
 export { default as assert } from 'node:assert';
-export { after, afterEach, before, beforeEach, skip, suite, test, todo } from 'node:test';
+import { describe } from 'node:test';
+export { after, afterEach, before, beforeEach, test } from 'node:test';
 
 /**
  * Represents a CAN (Controller Area Network) message.
@@ -263,6 +264,8 @@ declare class SecureAccessDll {
     GenerateKeyEx(ipSeedArray: Buffer, iSecurityLevel: number, ipVariant: Buffer, key: Buffer): Buffer;
     private loadDll;
 }
+
+declare const selfDescribe: typeof describe.only;
 
 declare const testerList: readonly [
                 {{#each this.testers}}
@@ -1115,4 +1118,4 @@ declare function RegisterEthVirtualEntity(entity: VinInfo, ip?: string): Promise
 type TestEventGenerator = Parameters<typeof dot>[0];
 declare function reporter(source: TestEventGenerator): AsyncGenerator<never, void, unknown>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, output, reporter, setSignal };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, selfDescribe as describe, output, reporter, setSignal };

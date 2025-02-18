@@ -53,7 +53,8 @@ export default class UdsTester {
       PROJECT_ROOT:string,
       PROJECT_NAME:string,
       MODE:'node'|'sequence'|'test',
-      NAME:string
+      NAME:string,
+      ONLY?:boolean
     },
     jsFilePath: string,
     log: UdsLOG,
@@ -74,6 +75,7 @@ export default class UdsTester {
       execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
       if(testOnly){
         execArgv.push('--test-only')
+        this.env.ONLY=true
       }
     }
     this.pool = workerpool.pool(jsFilePath, {
@@ -86,7 +88,7 @@ export default class UdsTester {
         stderr: true,
         stdout: true,
         env: env,
-        execArgv:['--enable-source-maps']
+        execArgv:execArgv
       },
 
       onTerminateWorker: (v:any) => {

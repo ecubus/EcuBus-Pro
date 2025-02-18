@@ -14,9 +14,11 @@
                                             isTop: node.level === 1,
                                             treeLabel: true
                                         }">{{ node.label }}</span>
-                                        <el-button link type="warning" @click.stop="handleRefresh(data)">
-                                            <Icon :icon="refreshIcon" />
-                                        </el-button>
+                                        <el-tooltip effect="light" content="Refresh Test Case" placement="bottom">
+                                            <el-button link type="primary" @click.stop="handleRefresh(data)" :disabled="refreshLoading[data.id]">
+                                                <Icon :icon="refreshLoading[data.id]?loadingIcon:refreshIcon" />
+                                            </el-button>
+                                        </el-tooltip>
                                     </div>
                                 </template>
                                 <div class="menu-items">
@@ -30,6 +32,19 @@
                                     </div>
                                 </div>
                             </el-popover>
+                            <div v-else-if="data.type === 'case'" class="tree-node">
+                                <span :class="{
+                                    treeLabel: true,
+                                    'test-pass': data.status === 'pass',
+                                    'test-fail': data.status === 'fail',
+                                    'test-skip': data.status === 'skip'
+                                }">
+                                    {{ node.label }}
+                                    <span class="test-duration" v-if="data.duration">
+                                        ({{ data.duration.toFixed(2) }}ms)
+                                    </span>
+                                </span>
+                            </div>
                             <div v-else class="tree-node">
                                 <span :class="{
                                     isTop: node.level === 1,
@@ -110,6 +125,7 @@ import { TestConfig } from 'src/preload/data'
 import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-sharp'
 import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
 import refreshIcon from '@iconify/icons-material-symbols/refresh'
+import loadingIcon from '@iconify/icons-ep/loading'
 import newIcon from '@iconify/icons-material-symbols/new-window'
 import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounded'
 import { useProjectStore } from "@r/stores/project"
@@ -154,8 +170,10 @@ interface tree {
     label: string
     canAdd: boolean
     id: string
-    type: 'test' | 'config'
+    type: 'test' | 'config' | 'suite' | 'case'
     children?: tree[]
+    duration?: number
+    status?: 'pass' | 'fail' | 'skip'
 }
 const tData = ref<tree[]>([])
 
@@ -307,7 +325,6 @@ const buildLoading = ref(false)
 function refreshBuildStatus() {
     if (model.value.script) {
         window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, model.value.script).then((val) => {
-            console.log(val)
             buildStatus.value = val
         })
     }
@@ -331,7 +348,7 @@ function editScript(action: 'open' | 'edit' | 'build') {
                 } else {
                     buildStatus.value = ''
                     buildLoading.value = true
-                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script)
+                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script,true)
                         .then((val) => {
                             if (val.length > 0) {
                                 buildStatus.value = 'danger'
@@ -414,6 +431,9 @@ const editDialogVisible = ref(false)
 const popoverRefs = ref<Record<string, any>>({})
 const hideTree = ref(false)
 
+// Add new ref for refresh loading state
+const refreshLoading = ref<Record<string, boolean>>({})
+
 // Add handlers for edit/delete
 function handleEdit(data: tree) {
     
@@ -485,24 +505,81 @@ function getBuildStatusText() {
     return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
 
-// Add refresh handler
+// Update the handleRefresh function
 async function handleRefresh(data: tree) {
-    //build first 
-    if (model.value.script) {
-        const v = await window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, model.value.script)
-        if (v != 'success') {
-            await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script)
+    if (refreshLoading.value[data.id]) return
+    refreshLoading.value[data.id] = true
+    
+    try {
+        const val = dataBase.tests[data.id]
+        //build first 
+        if (val && val.script) {
+            const v = await window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, val.script)
+            if (v != 'success') {
+                await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), val.script, true)
+            }
+            //get test info
+            const testInfo = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val))
+            
+            // Process test info into tree structure
+            const suites = new Map<string, tree>()
+            const node = tData.value[0].children?.find(n => n.id === data.id)
+            if (!node) return
+
+            // Clear existing children
+            node.children = []
+
+            testInfo.forEach(info => {
+                if (info.type === 'test:complete' && info.data.details?.type !== 'suite' && 
+                    info.data.name !== '____ecubus_pro_test___') {
+                    const suiteName = testInfo.find(t => 
+                        t.type === 'test:start' && 
+                        t.data.nesting === 0 && 
+                        t.data.name !== '____ecubus_pro_test___'
+                    )?.data.name || 'Default Suite'
+
+                    // Create or get suite
+                    if (!suites.has(suiteName)) {
+                        const suite: tree = {
+                            label: suiteName,
+                            canAdd: false,
+                            id: v4(),
+                            type: 'suite',
+                            children: []
+                        }
+                        suites.set(suiteName, suite)
+                        node.children?.push(suite)
+                    }
+
+                    // Add test case to suite
+                    const suite = suites.get(suiteName)
+                    if (suite && suite.children) {
+                        suite.children.push({
+                            label: info.data.name,
+                            canAdd: false,
+                            id: v4(),
+                            type: 'case',
+                            duration: info.data.details.duration_ms,
+                            status: info.data.details.passed ? 'pass' : 'fail'
+                        })
+                    }
+                }
+            })
+
+            // Force tree to update
+            tData.value = [...tData.value]
+        } else {
+            ElMessageBox.alert('Please select the script file first', 'Warning', {
+                confirmButtonText: 'OK',
+                type: 'warning',
+                buttonSize: 'small',
+                appendTo: '#wintest'
+            })
         }
-        //get test info
-        const testInfo = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(model.value))
-        console.log(testInfo)
-    } else {
-        ElMessageBox.alert('Please select the script file first', 'Warning', {
-            confirmButtonText: 'OK',
-            type: 'warning',
-            buttonSize: 'small',
-            appendTo: '#wintest'
-        })
+    } catch (error) {
+        console.error(error)
+    } finally {
+        refreshLoading.value[data.id] = false
     }
 }
 </script>
@@ -748,6 +825,24 @@ async function handleRefresh(data: tree) {
 
 .el-button-group {
     margin-bottom: 4px;
+}
+
+.test-pass {
+    color: var(--el-color-success);
+}
+
+.test-fail {
+    color: var(--el-color-danger);
+}
+
+.test-skip {
+    color: var(--el-color-info);
+}
+
+.test-duration {
+    font-size: 0.8em;
+    color: var(--el-text-color-secondary);
+    margin-left: 4px;
 }
 </style>
 

@@ -853,7 +853,6 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
     script = path.join(projectPath, script)
   }
   const outFile = getJsPath(script, projectPath)
-  console.log(outFile)
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'

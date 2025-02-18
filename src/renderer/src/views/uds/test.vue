@@ -15,8 +15,9 @@
                                             treeLabel: true
                                         }">{{ node.label }}</span>
                                         <el-tooltip effect="light" content="Refresh Test Case" placement="bottom">
-                                            <el-button link type="primary" @click.stop="handleRefresh(data)" :disabled="refreshLoading[data.id]">
-                                                <Icon :icon="refreshLoading[data.id]?loadingIcon:refreshIcon" />
+                                            <el-button link type="primary" @click.stop="handleRefresh(data)"
+                                                :disabled="refreshLoading[data.id]">
+                                                <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
                                             </el-button>
                                         </el-tooltip>
                                     </div>
@@ -91,7 +92,7 @@
                             <span class="buildStatus" :style="{ color: getBuildStatusColor() }">
                                 <Icon :icon="getBuildStatusIcon()" />{{ getBuildStatusText() }}
                             </span>
-                            
+
                         </div>
                     </div>
                 </el-form-item>
@@ -131,6 +132,7 @@ import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounde
 import { useProjectStore } from "@r/stores/project"
 import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
+import type { TestEvent } from 'node:test/reporters'
 
 
 const loading = ref(false)
@@ -170,10 +172,15 @@ interface tree {
     label: string
     canAdd: boolean
     id: string
-    type: 'test' | 'config' | 'suite' | 'case'
-    children?: tree[]
-    duration?: number
-    status?: 'pass' | 'fail' | 'skip'
+    type: 'test' | 'config'
+    children: tree[]
+    attrs?: {
+        time?: string
+        status?: 'pass' | 'fail' | 'skip'
+    }
+    nesting?: number
+    parent?: tree
+   
 }
 const tData = ref<tree[]>([])
 
@@ -198,7 +205,8 @@ function buildTree() {
             label: config.name,
             canAdd: false,
             id: config.id,
-            type: 'config'
+            type: 'config',
+            children: []
         })
     }
 
@@ -237,7 +245,8 @@ function addNewConfig() {
         label: defaultName,
         canAdd: false,
         id: newConfig.id,
-        type: 'config'
+        type: 'config',
+        children: []
     })
 
     // 选中新建的配置
@@ -348,7 +357,7 @@ function editScript(action: 'open' | 'edit' | 'build') {
                 } else {
                     buildStatus.value = ''
                     buildLoading.value = true
-                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script,true)
+                    window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), model.value.script, true)
                         .then((val) => {
                             if (val.length > 0) {
                                 buildStatus.value = 'danger'
@@ -421,7 +430,7 @@ onMounted(() => {
         maxWidth: 400,
         minWidth: 200,
     })
-    
+
     buildTree()
 })
 
@@ -436,7 +445,7 @@ const refreshLoading = ref<Record<string, boolean>>({})
 
 // Add handlers for edit/delete
 function handleEdit(data: tree) {
-    
+
     popoverRefs.value[data.id]?.hide()
     model.value = cloneDeep(dataBase.tests[data.id])
     activeConfig.value = data.id
@@ -505,71 +514,143 @@ function getBuildStatusText() {
     return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
 
+
+function buildSubTree(infos: TestEvent[], detail: boolean = false) {
+   
+
+    let currentSuite: tree | undefined;
+    const roots: tree[] = [];
+    function startTest(event: any) {
+        const originalSuite = currentSuite;
+        currentSuite = {
+            id:v4(),
+            type: 'test',
+            canAdd: false,
+            label: event.name,
+            nesting: event.nesting,
+            parent: currentSuite,
+            children: [],
+        };
+        if (originalSuite?.children) {
+            originalSuite.children.push(currentSuite);
+        }
+        if (!currentSuite.parent) {
+            roots.push(currentSuite);
+        }
+    }
+    function isFailure(node) {
+        return (node?.children && node.children.some((c) => c.tag === 'failure')) || node?.attrs?.failures;
+    }
+    function isSkipped(node) {
+        return (node?.children && node.children.some((c) => c.tag === 'skipped')) || node?.attrs?.skipped;
+    }
+    for (const event of infos) {
+        switch (event.type) {
+            case 'test:start': {
+                startTest(event.data);
+                break;
+            }
+            case 'test:pass':
+            case 'test:fail': {
+                if (!currentSuite) {
+                    startTest({ name: 'root', nesting: 0 });
+                }
+                if (currentSuite!.label !== event.data.name ||
+                    currentSuite!.nesting !== event.data.nesting) {
+                    startTest(event.data);
+                }
+                const currentTest:tree = currentSuite!;
+                if (currentSuite?.nesting === event.data.nesting) {
+                    currentSuite = currentSuite.parent;
+                }
+                if(detail){
+                    currentTest.attrs={
+                        time: Number(event.data.details.duration_ms / 1000).toFixed(6),
+                        status: event.type == 'test:pass'?'pass':event.type == 'test:fail'?'fail':'skip'
+                    }
+                    
+
+                }
+                // currentTest.time = Number(event.data.details.duration_ms / 1000).toFixed(6);
+                const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
+                if (nonCommentChildren.length > 0) {
+
+                    if(detail){
+                        // currentTest.attrs.tests = nonCommentChildren.length;
+                        // currentTest.attrs.failures = currentTest.children.filter(isFailure).length;
+                        // currentTest.attrs.skipped = currentTest.children.filter(isSkipped).length;
+                    }
+
+                } else {
+
+
+                    // if (event.data.skip) {
+                    //     currentTest.children.push({
+                    //         : event.data.name, nesting: event.data.nesting + 1,
+                    //     });
+                    // }
+                    // if (event.data.todo) {
+                    //     currentTest.children.push({
+                    //         name: event.data.name, nesting: event.data.nesting + 1,
+                    //     });
+                    // }
+                    // if (event.type === 'test:fail') {
+
+                    //     currentTest.children.push({
+                    //         name: event.data.name, nesting: event.data.nesting + 1,
+                    //     });
+                    // }
+                }
+                break;
+            }
+        }
+    }
+    return roots
+}
 // Update the handleRefresh function
 async function handleRefresh(data: tree) {
     if (refreshLoading.value[data.id]) return
     refreshLoading.value[data.id] = true
-    
+
     try {
         const val = dataBase.tests[data.id]
-        //build first 
         if (val && val.script) {
             const v = await window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, val.script)
             if (v != 'success') {
                 await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), val.script, true)
             }
-            //get test info
-            const testInfo = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val))
+
+            const testInfo: TestEvent[] = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val))
+            const target = tData.value[0].children?.find(item => item.id == data.id)
+            if (!target) return []
             
-            // Process test info into tree structure
-            const suites = new Map<string, tree>()
-            const node = tData.value[0].children?.find(n => n.id === data.id)
-            if (!node) return
+            const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
 
-            // Clear existing children
-            node.children = []
+            const roots = buildSubTree(newtestInfo)
+            console.log(roots)
+            target.children = []
 
-            testInfo.forEach(info => {
-                if (info.type === 'test:complete' && info.data.details?.type !== 'suite' && 
-                    info.data.name !== '____ecubus_pro_test___') {
-                    const suiteName = testInfo.find(t => 
-                        t.type === 'test:start' && 
-                        t.data.nesting === 0 && 
-                        t.data.name !== '____ecubus_pro_test___'
-                    )?.data.name || 'Default Suite'
-
-                    // Create or get suite
-                    if (!suites.has(suiteName)) {
-                        const suite: tree = {
-                            label: suiteName,
-                            canAdd: false,
-                            id: v4(),
-                            type: 'suite',
-                            children: []
-                        }
-                        suites.set(suiteName, suite)
-                        node.children?.push(suite)
-                    }
-
-                    // Add test case to suite
-                    const suite = suites.get(suiteName)
-                    if (suite && suite.children) {
-                        suite.children.push({
-                            label: info.data.name,
-                            canAdd: false,
-                            id: v4(),
-                            type: 'case',
-                            duration: info.data.details.duration_ms,
-                            status: info.data.details.passed ? 'pass' : 'fail'
-                        })
-                    }
+            const root2tree = (parent:tree,root:tree)=>{
+                parent.children=parent.children||[]
+             
+                parent.children.push(root)
+                for(const r of root.children){
+                    root2tree(root,r)
                 }
-            })
+            }
+            for(const root of roots){
+                root2tree(target,root)
+            }
+            
 
-            // Force tree to update
-            tData.value = [...tData.value]
+
+
+
+            // data.children = []
+            // 强制树更新
+            // tData.value = [...tData.value]
         } else {
-            ElMessageBox.alert('Please select the script file first', 'Warning', {
+            ElMessageBox.alert('请先选择测试脚本文件', 'Warning', {
                 confirmButtonText: 'OK',
                 type: 'warning',
                 buttonSize: 'small',
@@ -577,7 +658,7 @@ async function handleRefresh(data: tree) {
             })
         }
     } catch (error) {
-        console.error(error)
+        console.error('Error in handleRefresh:', error)
     } finally {
         refreshLoading.value[data.id] = false
     }
@@ -749,15 +830,15 @@ async function handleRefresh(data: tree) {
     align-items: flex-start;
     height: auto;
     margin-top: 5px;
-   
+
 }
 
 .build-status-container {
     display: flex;
     align-items: center;
     gap: 8px;
-   
- 
+
+
     border-radius: 4px;
 }
 

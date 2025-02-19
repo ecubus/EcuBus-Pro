@@ -72,7 +72,7 @@ class LogQueue {
   constructor(private win: BrowserWindow, private period = 100) {
     this.timer = setInterval(() => {
       if (this.list.length) {
-       
+
         this.win.webContents.send('ipc-log', this.list)
         this.list = []
       }
@@ -89,13 +89,13 @@ class ElectronLog extends Transport {
   }
 
   log(info: any, callback: () => void) {
-   
+
     if (info.message?.method) {
       this.q.list.push(info)
-    }else{
+    } else {
       this.win.webContents.send('ipc-log-main', info)
     }
-    
+
     callback()
   }
 }
@@ -103,10 +103,31 @@ class ElectronLog extends Transport {
 
 
 function createWindow(): void {
+  // Get stored window bounds and state
+  const windowBounds = store.get('windowBounds', {
+    width: 1000,
+    height: 600,
+    x: undefined,
+    y: undefined
+  }) as Electron.Rectangle;
+  const isMaximized = store.get('windowMaximized', false);
+
+
+
+  function getBounds() {
+    const bounds = mainWindow.getBounds()
+    // bounds.x += 5
+    // bounds.y += 5
+    return bounds
+  }
   // Create the browser window.
   mainWindow = new BrowserWindow({
     minWidth: 1000,
     minHeight: 600,
+    width: windowBounds.width,
+    height: windowBounds.height,
+    x: windowBounds.x,
+    y: windowBounds.y,
     frame: false,
     show: false,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -116,8 +137,8 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
-  const logQ= new LogQueue(mainWindow)
-  createLogs([() => new ElectronLog(logQ,mainWindow, {
+  const logQ = new LogQueue(mainWindow)
+  createLogs([() => new ElectronLog(logQ, mainWindow, {
     level: 'debug'
   })], [])
   ipcMain.on('minimize', () => {
@@ -127,17 +148,30 @@ function createWindow(): void {
   ipcMain.on('maximize', () => {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize()
+      store.set('windowMaximized', false);
     } else {
+      // Save current bounds before maximizing
+      store.set('windowBounds', getBounds());
       mainWindow.maximize()
+      store.set('windowMaximized', true);
     }
   })
 
   ipcMain.on('close', () => {
     globalStop()
+    // Only save bounds if window is not maximized
+    if (!mainWindow.isMaximized()) {
+      store.set('windowBounds', getBounds());
+    }
+    store.set('windowMaximized', mainWindow.isMaximized());
     mainWindow.close()
   })
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    // Restore maximized state
+    if (isMaximized) {
+      mainWindow.maximize();
+    }
     if (isDev) {
       mainWindow.webContents.openDevTools()
     }

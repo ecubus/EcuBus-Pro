@@ -1296,12 +1296,14 @@ type TestEventGenerator = Parameters<typeof dot>[0]
 
 export async function* reporter(source: TestEventGenerator) {
   for await (const event of source) {
-    workerpool.workerEmit({
-      event: 'test',
-      id: id,
-      data: event
-    })
-    id++
+    if(event.type==='test:start'||event.type==='test:pass'||event.type==='test:fail'||event.type==='test:diagnostic'){
+      workerpool.workerEmit({
+        event: 'test',
+        id: id,
+        data: event
+      })
+      id++
+    }
 
   }
 };

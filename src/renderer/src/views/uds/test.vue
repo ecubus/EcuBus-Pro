@@ -545,7 +545,9 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
         return (node?.children && node.children.some((c) => c.tag === 'skipped')) || node?.attrs?.skipped;
     }
     for (const event of infos) {
+        console.log(event)
         switch (event.type) {
+           
             case 'test:start': {
                 startTest(event.data);
                 break;
@@ -607,7 +609,27 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
     }
     return roots
 }
-// Update the handleRefresh function
+// Update the root2tree function and handleRefresh implementation
+const root2tree = (parent: tree, root: tree) => {
+    const newNode: tree = {
+        id: root.id,
+        type: 'test',
+        canAdd: false,
+        label: root.label,
+        children: [],
+        
+    }
+    
+    parent.children.push(newNode)
+    
+    // Recursively process children
+    if (root.children && root.children.length > 0) {
+        for (const child of root.children) {
+            root2tree(newNode, child)
+        }
+    }
+}
+
 async function handleRefresh(data: tree) {
     if (refreshLoading.value[data.id]) return
     refreshLoading.value[data.id] = true
@@ -622,33 +644,18 @@ async function handleRefresh(data: tree) {
 
             const testInfo: TestEvent[] = await window.electron.ipcRenderer.invoke('ipc-get-test-info', project.projectInfo.path, project.projectInfo.name, cloneDeep(val))
             const target = tData.value[0].children?.find(item => item.id == data.id)
-            if (!target) return []
-            
+            if (!target) return
+
             const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
-
-            const roots = buildSubTree(newtestInfo)
-            console.log(roots)
-            target.children = []
-
-            const root2tree = (parent:tree,root:tree)=>{
-                parent.children=parent.children||[]
-             
-                parent.children.push(root)
-                for(const r of root.children){
-                    root2tree(root,r)
-                }
-            }
-            for(const root of roots){
-                root2tree(target,root)
-            }
+            const roots = buildSubTree(newtestInfo, true)
             
-
-
-
-
-            // data.children = []
-            // 强制树更新
-            // tData.value = [...tData.value]
+            // Clear existing children
+            target.children = []
+            
+            // Add new test cases
+            for (const root of roots) {
+                root2tree(target, root)
+            }
         } else {
             ElMessageBox.alert('请先选择测试脚本文件', 'Warning', {
                 confirmButtonText: 'OK',

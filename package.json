@@ -118,7 +118,7 @@
     "dotenv": "^16.4.5",
     "electron": "^32.2.3",
     "electron-builder": "24.13.3",
-    "electron-vite": "^2.3.0",
+    "electron-vite": "^3.0.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",
     "mermaid": "^11.4.1",

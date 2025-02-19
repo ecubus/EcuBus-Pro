@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="main" v-loading="loading">
-            <div class="left" v-show="!hideTree">
+            <div class="left" >
                 <el-scrollbar :height="h + 'px'">
                     <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
                         :expand-on-click-node="false" @node-click="nodeClick">
@@ -23,7 +23,7 @@
                                             </el-tooltip>
                                             <el-tooltip effect="light" content="Run Test Config" placement="bottom" v-if="!isRunning[data.id]">
                                                 <el-button link type="success"
-                                                :disabled="globalStart">
+                                                :disabled="!globalStart">
                                                     <Icon :icon="lightIcon" />
                                                 </el-button>
                                             </el-tooltip>
@@ -74,8 +74,8 @@
                     </el-tree>
                 </el-scrollbar>
             </div>
-            <div class="shift" id="testerServiceShift" v-show="!hideTree" />
-            <div class="right" :style="{ left: hideTree ? '0px' : leftWidth + 5 + 'px' }">
+            <div class="shift" id="testerServiceShift" />
+            <div class="right" :style="{ left:  leftWidth + 5 + 'px' }">
                 <!-- Right side content removed -->
             </div>
         </div>
@@ -149,9 +149,34 @@ import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
+import { useRuntimeStore } from '@r/stores/runtime'
 
 const loading = ref(false)
-const isRunning = ref<Record<string, boolean>>({})
+
+const runtime = useRuntimeStore()
+
+const isRunning = computed({
+    get: () => runtime.testStates.isRunning,
+    set: (val) => {
+        runtime.testStates.isRunning = val
+    }
+})
+
+const tData = computed({
+    get: () => runtime.testStates.tData,
+    set: (val) => {
+        runtime.testStates.tData = val
+    }
+})
+
+const leftWidth = computed({
+    get: () => runtime.testStates.leftWidth,
+    set: (val) => {
+        runtime.testStates.leftWidth = val
+    }
+})
+
+
 const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
     width: number,
@@ -159,21 +184,11 @@ const props = defineProps<{
 }>()
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
-const leftWidth = ref(300)
-
-const dataBase = useDataStore();
 
 const treeRef = ref()
-const ecuList = ref<string[]>([])
-const variants = ref<string[]>([])
-const odxForm = ref({
-    ecuName: '',
-    variant: ''
-})
-const repParamRef = ref()
-const respParamRef = ref()
+
 const globalStart = toRef(window, 'globalStart')
-const layout = inject('layout') as Layout
+const dataBase = useDataStore()
 
 const project = useProjectStore()
 
@@ -197,7 +212,6 @@ interface tree {
     parent?: tree
 
 }
-const tData = ref<tree[]>([])
 
 const model = ref<TestConfig>({
     id: v4(),
@@ -206,6 +220,10 @@ const model = ref<TestConfig>({
 })
 
 function buildTree() {
+    if (tData.value && tData.value.length > 0) {
+        return
+    }
+
     const t: tree = {
         label: 'Test Config',
         canAdd: true,
@@ -214,7 +232,6 @@ function buildTree() {
         children: []
     }
 
-    // 添加已有的测试配置到树中
     for (const [key, config] of Object.entries(dataBase.tests)) {
         t.children?.push({
             label: config.name,
@@ -228,12 +245,10 @@ function buildTree() {
     tData.value = [t]
 }
 
-// 添加一个生成唯一名称的辅助函数
 function generateUniqueName(baseName: string): string {
     let index = 0;
     let name = `${baseName} ${index}`;
 
-    // 检查是否存在同名配置
     while (Object.values(dataBase.tests).some(config => config.name === name)) {
         index++;
         name = `${baseName} ${index}`;
@@ -242,7 +257,6 @@ function generateUniqueName(baseName: string): string {
     return name;
 }
 
-// 修改 addNewConfig 方法
 function addNewConfig() {
     const defaultName = generateUniqueName('Test Config');
 
@@ -252,10 +266,8 @@ function addNewConfig() {
         script: ''
     }
 
-    // 添加到数据库
     dataBase.tests[newConfig.id] = newConfig
 
-    // 更新树
     tData.value[0].children?.push({
         label: defaultName,
         canAdd: false,
@@ -264,12 +276,10 @@ function addNewConfig() {
         children: []
     })
 
-    // 选中新建的配置
     activeConfig.value = newConfig.id
     model.value = cloneDeep(newConfig)
 }
 
-// 删除测试配置
 function removeConfig(id: string) {
     ElMessageBox.confirm('Are you sure to delete this config?', 'Warning', {
         confirmButtonText: 'OK',
@@ -287,14 +297,11 @@ function removeConfig(id: string) {
     })
 }
 
-// 添加状态变量
 const activeConfig = ref('')
 const nameCheck = (rule: any, value: any, callback: any) => {
     if (value) {
-        // 检查所有测试配置中是否有重名
         for (const [key, config] of Object.entries(dataBase.tests)) {
             if (config.name === value && key !== activeConfig.value) {
-                // 恢复为数据库中的名称
                 nextTick(() => {
                     model.value.name = dataBase.tests[activeConfig.value].name
                 })
@@ -315,14 +322,11 @@ const rules = {
 
 }
 
-// 配置改变时的处理方法
 function onConfigChange() {
     if (activeConfig.value) {
-        // 如果名称为空或重复，恢复数据库中的名称
         if (!model.value.name.trim()) {
             model.value.name = dataBase.tests[activeConfig.value].name
         } else {
-            // 检查名称是否重复
             const isDuplicate = Object.entries(dataBase.tests).some(([key, config]) =>
                 config.name === model.value.name && key !== activeConfig.value
             )
@@ -330,22 +334,30 @@ function onConfigChange() {
             if (isDuplicate) {
                 model.value.name = dataBase.tests[activeConfig.value].name
             } else {
+                // 检查script是否发生变化
+                const oldConfig = dataBase.tests[activeConfig.value]
+                const scriptChanged = oldConfig.script !== model.value.script
+                
+                // 保存新配置
                 dataBase.tests[activeConfig.value] = cloneDeep(model.value)
-                // 更新树节点标签
+                
+                // 更新树节点
                 const node = tData.value[0].children?.find(item => item.id === activeConfig.value)
                 if (node) {
                     node.label = model.value.name
+                    // 如果script变化了，清空子节点
+                    if (scriptChanged) {
+                        node.children = []
+                    }
                 }
             }
         }
     }
 }
 
-// 添加新的状态变量
 const buildStatus = ref<string | undefined>()
 const buildLoading = ref(false)
 
-// 添加编辑脚本相关方法
 function refreshBuildStatus() {
     if (model.value.script) {
         window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, model.value.script).then((val) => {
@@ -449,18 +461,14 @@ onMounted(() => {
     buildTree()
 })
 
-// Add new refs
-const editDialogVisible = ref(false)
-// const editingConfig = ref<TestConfig | null>(null)
-const popoverRefs = ref<Record<string, any>>({})
-const hideTree = ref(false)
 
-// Add new ref for refresh loading state
+
+const editDialogVisible = ref(false)
+const popoverRefs = ref<Record<string, any>>({})
+
 const refreshLoading = ref<Record<string, boolean>>({})
 
-// Add handlers for edit/delete
 function handleEdit(data: tree) {
-
     popoverRefs.value[data.id]?.hide()
     model.value = cloneDeep(dataBase.tests[data.id])
     activeConfig.value = data.id
@@ -479,16 +487,27 @@ async function handleEditSave() {
 
     try {
         await ruleFormRef.value?.validate()
+        
+        // 检查script是否发生变化
+        const oldConfig = dataBase.tests[activeConfig.value]
+        const scriptChanged = oldConfig.script !== model.value.script
+        
+        // 保存新配置
         dataBase.tests[activeConfig.value] = cloneDeep(model.value)
-        // Update tree node label
+        
+        // 更新树节点
         const node = tData.value[0].children?.find(item => item.id === activeConfig.value)
         if (node) {
             node.label = model.value.name
+            // 如果script变化了，清空子节点
+            if (scriptChanged) {
+                node.children = []
+            }
         }
+        
         editDialogVisible.value = false
         activeConfig.value = ''
     } catch (error) {
-        // Validation failed
         return false
     }
 }
@@ -498,7 +517,6 @@ function handleEditCancel() {
     activeConfig.value = ''
 }
 
-// Helper functions for build status
 function getBuildStatusColor() {
     const statusColors = {
         danger: 'var(--el-color-danger)',
@@ -529,10 +547,7 @@ function getBuildStatusText() {
     return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
 
-
 function buildSubTree(infos: TestEvent[], detail: boolean = false) {
-
-
     let currentSuite: tree | undefined;
     const roots: tree[] = [];
     function startTest(event: any) {
@@ -562,7 +577,6 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
     for (const event of infos) {
         console.log(event)
         switch (event.type) {
-
             case 'test:start': {
                 startTest(event.data);
                 break;
@@ -585,38 +599,12 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
                         time: Number(event.data.details.duration_ms / 1000).toFixed(6),
                         status: event.type == 'test:pass' ? 'pass' : event.type == 'test:fail' ? 'fail' : 'skip'
                     }
-
-
                 }
-                // currentTest.time = Number(event.data.details.duration_ms / 1000).toFixed(6);
                 const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
                 if (nonCommentChildren.length > 0) {
 
-                    if (detail) {
-                        // currentTest.attrs.tests = nonCommentChildren.length;
-                        // currentTest.attrs.failures = currentTest.children.filter(isFailure).length;
-                        // currentTest.attrs.skipped = currentTest.children.filter(isSkipped).length;
-                    }
-
                 } else {
 
-
-                    // if (event.data.skip) {
-                    //     currentTest.children.push({
-                    //         : event.data.name, nesting: event.data.nesting + 1,
-                    //     });
-                    // }
-                    // if (event.data.todo) {
-                    //     currentTest.children.push({
-                    //         name: event.data.name, nesting: event.data.nesting + 1,
-                    //     });
-                    // }
-                    // if (event.type === 'test:fail') {
-
-                    //     currentTest.children.push({
-                    //         name: event.data.name, nesting: event.data.nesting + 1,
-                    //     });
-                    // }
                 }
                 break;
             }
@@ -624,7 +612,7 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
     }
     return roots
 }
-// Update the root2tree function and handleRefresh implementation
+
 const root2tree = (parent: tree, root: tree) => {
     const newNode: tree = {
         id: root.id,
@@ -637,7 +625,6 @@ const root2tree = (parent: tree, root: tree) => {
 
     parent.children.push(newNode)
 
-    // Recursively process children
     if (root.children && root.children.length > 0) {
         for (const child of root.children) {
             root2tree(newNode, child)
@@ -664,10 +651,8 @@ async function handleRefresh(data: tree) {
             const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
             const roots = buildSubTree(newtestInfo, true)
 
-            // Clear existing children
             target.children = []
 
-            // Add new test cases
             for (const root of roots) {
                 root2tree(target, root)
             }

@@ -39,6 +39,7 @@ export default abstract class LinBase {
         lastActiveIndex?: number
         diag?: DiagItem
     }
+    schName?:string
     abstract info: LinBaseInfo
     abstract log: LinLOG
     nodeList: {
@@ -208,7 +209,7 @@ export default abstract class LinBase {
     stopSch() {
         clearTimeout(this.schTimer)
         if (this.sch) {
-        
+
             this.sch = undefined
         }
     }
@@ -222,16 +223,19 @@ export default abstract class LinBase {
         }
     }
 
-
+    getActiveSchName() {
+       return this.schName
+    }
     startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, rIndex: number) {
         if (this.info.mode == LinMode.SLAVE) {
             return
         }
+        this.schName = schName
         const backUpSchName = schName
         const backUpIndex = rIndex
         clearTimeout(this.schTimer)
         if (this.sch) {
-         
+
             if (this.sch.activeSchName != schName) {
                 this.log.sendEvent(`schChanged, changed from ${this.sch.activeSchName} to ${schName} at slot ${rIndex}`, getTsUs() - this.startTs)
                 //判断this.sch.activeSchName是否为diag sch
@@ -359,7 +363,7 @@ export default abstract class LinBase {
                     }
                     const lastDiag = this.sch?.diag
                     this.write({
-                        database:db.name,
+                        database: db.name,
                         frameId: frameId,
                         data: this.sch?.diag?.msg.data || data,
                         direction: this.sch?.diag?.msg.direction || LinDirection.SEND,
@@ -513,7 +517,7 @@ export default abstract class LinBase {
 
             // 设置下一个调度
             let nextIndex = (rIndex + 1) % sch.entries.length
-           
+
             const checkNext = () => {
                 let diag: DiagItem | undefined = undefined
                 //sch end, check whether switch to diag sch to back to normal sch
@@ -633,7 +637,7 @@ export default abstract class LinBase {
                 }
                 this.sch = {
 
-                    
+
                     activeSchName: backUpSchName,
                     activeIndex: backUpIndex,
                     lastActiveSchName: this.sch?.lastActiveSchName,
@@ -642,7 +646,7 @@ export default abstract class LinBase {
                 }
             }
 
-            this.schTimer=setTimeout(() => {
+            this.schTimer = setTimeout(() => {
                 if (this.queue.idle()) {
                     checkNext()
                     this.startSch(db, schName, activeMap, nextIndex)
@@ -655,7 +659,7 @@ export default abstract class LinBase {
 
                 }
             }, nextDelay)
-          
+
 
 
 

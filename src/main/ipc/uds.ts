@@ -459,10 +459,8 @@ ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
 
 
 
-interface schType {
-    schName: string
-}
-const schMap = new Map<string, schType>()
+
+const schMap = new Map<string, LinBase>()
 ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     const linIa: LinInter = arg[0] as LinInter
     const schName: string = arg[1] as string
@@ -476,7 +474,7 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
         if (base && base.info.database) {
             const db = global.database.lin[base.info.database]
             base.startSch(db, schName, active, 0)
-            schMap.set(base.info.id, { schName })
+            schMap.set(base.info.id, base)
         }
     })
 
@@ -506,7 +504,8 @@ ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
 
 ipcMain.handle('ipc-get-schedule', async (event, ...arg) => {
     const id = arg[0] as string
-    return schMap.get(id)
+    const val=schMap.get(id)
+    return val?.getActiveSchName()
 })
 
 ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
@@ -666,13 +665,13 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
     }
 })
 
-ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
-    const info: Record<string, number> = {}
-    timerMap.forEach((value, key) => {
-        info[key] = value.period
-    })
-    return info
-})
+// ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
+//     const info: Record<string, number> = {}
+//     timerMap.forEach((value, key) => {
+//         info[key] = value.period
+//     })
+//     return info
+// })
 
 
 

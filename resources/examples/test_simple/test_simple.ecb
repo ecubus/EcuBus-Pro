@@ -67,18 +67,6 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "test": {
-        "pos": {
-          "x": 1097,
-          "y": 167.5,
-          "w": 836,
-          "h": 400
-        },
-        "title": "test",
-        "label": "Test",
-        "id": "test",
-        "options": {}
-      },
       "hardware": {
         "pos": {
           "x": 236,
@@ -93,14 +81,26 @@
       },
       "network": {
         "pos": {
-          "x": 256,
-          "y": 224.5,
+          "x": 55,
+          "y": 30.5,
           "w": 600,
           "h": 400
         },
         "title": "network",
         "label": "Network",
         "id": "network",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 683.5,
+          "y": 32,
+          "w": 600,
+          "h": 400
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
         "options": {}
       }
     }

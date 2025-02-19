@@ -193,6 +193,7 @@ export interface CanInterAction{
   data:string[]
 } 
 export function formatError(error: Error) {
+  console.log('x',error)
     // Get error stack
     const stack = error.stack || '';
     
@@ -208,6 +209,16 @@ export function formatError(error: Error) {
         //
         // Convert webpack path to GitHub URL，#L${line}C${column}-L${line}C${column}
         location = `https://github.com/ecubus/EcuBus-Pro/blob/master/${file}#L${line}C${column}`;
+    }else{
+      // at listener (D:\code\ecubus-pro\resources\examples\test_simple\node.ts:5:11)
+        const newMatch=locationLine.match(/\((.*):(\d+):(\d+)\)/)
+        if(newMatch){
+          const [, file, line, column] = newMatch;
+          location = `file://${file}:${line}:${column}`;
+        }else{
+          location = locationLine
+        }
+
     }
     
     // Return simplified error message

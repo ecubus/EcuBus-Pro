@@ -14,12 +14,26 @@
                                             isTop: node.level === 1,
                                             treeLabel: true
                                         }">{{ node.label }}</span>
-                                        <el-tooltip effect="light" content="Refresh Test Case" placement="bottom">
-                                            <el-button link type="primary" @click.stop="handleRefresh(data)"
-                                                :disabled="refreshLoading[data.id]">
-                                                <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
-                                            </el-button>
-                                        </el-tooltip>
+                                        <el-button-group class="node-actions">
+                                            <el-tooltip effect="light" content="Refresh Test Config" placement="bottom">
+                                                <el-button link type="primary" @click.stop="handleRefresh(data)"
+                                                    :disabled="refreshLoading[data.id]">
+                                                    <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
+                                                </el-button>
+                                            </el-tooltip>
+                                            <el-tooltip effect="light" content="Run Test Config" placement="bottom" v-if="!isRunning[data.id]">
+                                                <el-button link type="success"
+                                                :disabled="globalStart">
+                                                    <Icon :icon="lightIcon" />
+                                                </el-button>
+                                            </el-tooltip>
+                                            <el-tooltip effect="light" content="Stop Test Config" placement="bottom" v-else>
+                                                <el-button link type="danger" :disabled="!isRunning[data.id]">
+                                                    <Icon :icon="stopIcon" />
+                                                </el-button>
+                                            </el-tooltip>
+                                           
+                                        </el-button-group>
                                     </div>
                                 </template>
                                 <div class="menu-items">
@@ -133,10 +147,11 @@ import { useProjectStore } from "@r/stores/project"
 import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
-
+import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
+import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 
 const loading = ref(false)
-
+const isRunning = ref<Record<string, boolean>>({})
 const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
     width: number,
@@ -180,7 +195,7 @@ interface tree {
     }
     nesting?: number
     parent?: tree
-   
+
 }
 const tData = ref<tree[]>([])
 
@@ -516,14 +531,14 @@ function getBuildStatusText() {
 
 
 function buildSubTree(infos: TestEvent[], detail: boolean = false) {
-   
+
 
     let currentSuite: tree | undefined;
     const roots: tree[] = [];
     function startTest(event: any) {
         const originalSuite = currentSuite;
         currentSuite = {
-            id:v4(),
+            id: v4(),
             type: 'test',
             canAdd: false,
             label: event.name,
@@ -547,7 +562,7 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
     for (const event of infos) {
         console.log(event)
         switch (event.type) {
-           
+
             case 'test:start': {
                 startTest(event.data);
                 break;
@@ -561,23 +576,23 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
                     currentSuite!.nesting !== event.data.nesting) {
                     startTest(event.data);
                 }
-                const currentTest:tree = currentSuite!;
+                const currentTest: tree = currentSuite!;
                 if (currentSuite?.nesting === event.data.nesting) {
                     currentSuite = currentSuite.parent;
                 }
-                if(detail){
-                    currentTest.attrs={
+                if (detail) {
+                    currentTest.attrs = {
                         time: Number(event.data.details.duration_ms / 1000).toFixed(6),
-                        status: event.type == 'test:pass'?'pass':event.type == 'test:fail'?'fail':'skip'
+                        status: event.type == 'test:pass' ? 'pass' : event.type == 'test:fail' ? 'fail' : 'skip'
                     }
-                    
+
 
                 }
                 // currentTest.time = Number(event.data.details.duration_ms / 1000).toFixed(6);
                 const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
                 if (nonCommentChildren.length > 0) {
 
-                    if(detail){
+                    if (detail) {
                         // currentTest.attrs.tests = nonCommentChildren.length;
                         // currentTest.attrs.failures = currentTest.children.filter(isFailure).length;
                         // currentTest.attrs.skipped = currentTest.children.filter(isSkipped).length;
@@ -617,11 +632,11 @@ const root2tree = (parent: tree, root: tree) => {
         canAdd: false,
         label: root.label,
         children: [],
-        
+
     }
-    
+
     parent.children.push(newNode)
-    
+
     // Recursively process children
     if (root.children && root.children.length > 0) {
         for (const child of root.children) {
@@ -648,16 +663,16 @@ async function handleRefresh(data: tree) {
 
             const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
             const roots = buildSubTree(newtestInfo, true)
-            
+
             // Clear existing children
             target.children = []
-            
+
             // Add new test cases
             for (const root of roots) {
                 root2tree(target, root)
             }
         } else {
-            ElMessageBox.alert('请先选择测试脚本文件', 'Warning', {
+            ElMessageBox.alert('Please select the script file first', 'Warning', {
                 confirmButtonText: 'OK',
                 type: 'warning',
                 buttonSize: 'small',
@@ -759,6 +774,7 @@ async function handleRefresh(data: tree) {
     justify-content: space-between;
     font-size: 12px;
     padding-right: 5px;
+    min-width: 0;
 }
 
 .right {
@@ -823,12 +839,11 @@ async function handleRefresh(data: tree) {
 .treeLabel {
     display: inline-block;
     white-space: nowrap;
-    /* 保证内容不会换行 */
     overflow: hidden;
-    /* 超出容器部分隐藏 */
     text-overflow: ellipsis;
-    /* 使用省略号表示超出部分 */
-    width: v-bind(leftWidth - 80 + 'px') !important;
+    flex: 1;
+    min-width: 0;
+    margin-right: 4px;
 }
 
 .lr {
@@ -931,6 +946,23 @@ async function handleRefresh(data: tree) {
     font-size: 0.8em;
     color: var(--el-text-color-secondary);
     margin-left: 4px;
+}
+
+.node-actions {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.node-actions .el-button {
+    padding: 2px;
+    height: 20px;
+    width: 20px;
+}
+
+.node-actions .el-button + .el-button {
+    margin-left: 0;
 }
 </style>
 

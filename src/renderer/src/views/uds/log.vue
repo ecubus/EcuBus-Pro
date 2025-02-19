@@ -47,6 +47,7 @@ import infoIcon from '@iconify/icons-material-symbols/info-outline'
 import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
 import warnIcon from '@iconify/icons-material-symbols/warning-outline-rounded'
 import saveIcon from '@iconify/icons-material-symbols/save'
+import { useProjectStore } from '@r/stores/project'
 interface LogData {
     time: string,
     label: string,
@@ -85,11 +86,19 @@ watch(window.globalStart, (val) => {
     }
 })
 const tableHeight = toRef(props, 'height')
-
+const project=useProjectStore()
 // Add new function to convert message text to HTML with clickable links
 function convertMessageToHtml(message: string) {
-    // Match URLs starting with http:// or https:// or file://
-    return message.replace(/(https?:\/\/[^\s]+|file:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+    return message.replace(/(https?:\/\/[^\s]+|file:\/\/[^\s]+)/g, (match) => {
+        if (match.startsWith('file://')) {
+            // Remove 'file://' prefix and convert to relative path
+            const absolutePath = match.substring(7)
+            const relativePath = window.path.relative(project.projectInfo.path, absolutePath)
+            return `<strong>${relativePath}</strong>`
+        }
+        // Handle regular http/https URLs as before
+        return `<a href="${match}" target="_blank">${match}</a>`
+    })
 }
 
 const gridOptions = computed(() => {

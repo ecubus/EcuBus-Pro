@@ -30,6 +30,9 @@
                     </el-dropdown>
                 </div>
             </template>
+            <template #message_content="{ row }">
+                <span v-html="convertMessageToHtml(row.message)"></span>
+            </template>
         </VxeGrid>
     </div>
 </template>
@@ -83,6 +86,12 @@ watch(window.globalStart, (val) => {
 })
 const tableHeight = toRef(props, 'height')
 
+// Add new function to convert message text to HTML with clickable links
+function convertMessageToHtml(message: string) {
+    // Match URLs starting with http:// or https:// or file://
+    return message.replace(/(https?:\/\/[^\s]+|file:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
+}
+
 const gridOptions = computed(() => {
     const v: VxeGridProps<LogData> = {
         border: false,
@@ -111,8 +120,12 @@ const gridOptions = computed(() => {
             { field: 'level', title: '', width: 36, resizable: false, editRender: {}, slots: { default: 'default_type' } },
             { field: 'time', title: 'Time', width: 150, },
             { field: 'label', title: 'Source', width: 200, },
-            { field: 'message', title: 'Message', align: 'left' },
-
+            { 
+                field: 'message', 
+                title: 'Message', 
+                align: 'left',
+                slots: { default: 'message_content' }  // Add custom slot for message
+            },
         ],
         rowClassName: ({ row }) => {
             return row.level
@@ -159,7 +172,7 @@ function udsLog(datas) {
         label: string,
         level: string,
         message: string,
-        id:number
+        id: number
     }[] = []
     datas.forEach(data => {
         logData.push({
@@ -167,7 +180,7 @@ function udsLog(datas) {
             label: data.label,
             level: data.level,
             message: data.message.data.msg,
-            id:cnt++
+            id: cnt++
         })
     })
     xGrid.value.insertAt(logData, -1).then((v: any) => {
@@ -231,5 +244,16 @@ onUnmounted(() => {
 
 .warn {
     color: var(--el-color-warning);
+}
+
+/* Add styles for links in messages */
+.sequenceTable a {
+    color: var(--el-color-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sequenceTable a:hover {
+    text-decoration: underline;
 }
 </style>

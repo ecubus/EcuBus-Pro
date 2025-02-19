@@ -25,12 +25,12 @@ export type { CanMsgType } from '../share/can'
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
 export { assert }
-export { test,beforeEach, afterEach, before, after } from 'node:test'
-import {describe} from 'node:test'
+export { test, beforeEach, afterEach, before, after } from 'node:test'
+import { describe } from 'node:test'
 
 
-const selfDescribe = process.env.ONLY?describe.only:describe
-export {selfDescribe as describe}
+const selfDescribe = process.env.ONLY ? describe.only : describe
+export { selfDescribe as describe }
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
@@ -544,22 +544,14 @@ class Service {
    * @returns The diagnostic output timestamp.
    */
   async outputDiag(deviceName?: string, addressName?: string): Promise<number> {
-    try {
-      const ts = await this.asyncEmit('sendDiag', {
-        device: deviceName,
-        address: addressName,
-        service: this.service,
-        isReq: this.isRequest
-      })
-      return ts
-    } catch (e: any) {
-      const err = new Error('outputDiag error:' + e.toString())
-      //pop stack
-      //just got 0,2,3
-      const stack = err.stack?.split('\n') || []
-      err.stack = [stack[0], stack[2], stack[3]].join('\n')
-      throw err
-    }
+    const ts = await this.asyncEmit('sendDiag', {
+      device: deviceName,
+      address: addressName,
+      service: this.service,
+      isReq: this.isRequest
+    })
+    return ts
+
   }
 
 
@@ -1188,16 +1180,8 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('output error:' + e.toString())
-    //pop stack
-    //just got 0,2,3
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
+  return await p
+
 }
 
 
@@ -1234,14 +1218,9 @@ export async function setSignal(signal: SignalName, value: number | number[] | s
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('setSignal error: ' + e.toString())
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
+ 
+  return await p
+  
 }
 
 let rightEntity: EntityAddr | undefined
@@ -1275,16 +1254,9 @@ export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string,) {
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('RegisterEthVirtualEntity error:' + e.toString())
-    //pop stack
-    //just got 0,2,3
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
+
+  return await p
+
 }
 
 
@@ -1296,7 +1268,7 @@ type TestEventGenerator = Parameters<typeof dot>[0]
 
 export async function* reporter(source: TestEventGenerator) {
   for await (const event of source) {
-    if(event.type==='test:start'||event.type==='test:pass'||event.type==='test:fail'||event.type==='test:diagnostic'){
+    if (event.type === 'test:start' || event.type === 'test:pass' || event.type === 'test:fail' || event.type === 'test:diagnostic') {
       workerpool.workerEmit({
         event: 'test',
         id: id,

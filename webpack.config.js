@@ -41,12 +41,13 @@ class MyCustomPlugin {
       // 当Webpack完成构建过程后执行
       compiler.hooks.done.tap('MyCustomPlugin',async  (stats) => {
        
+        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map']
+        for(const js of jsList){
+            fs.copyFileSync(path.resolve(__dirname,'dist',js),path.resolve(__dirname,'resources','lib','js',js))
+        }
         // 在这里加入你的自定义代码
-        fs.copyFileSync(path.resolve(__dirname,'dist','uds.js'),path.resolve(__dirname,'resources','lib','js','uds.js'))
         fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
-        fs.copyFileSync(path.resolve(__dirname,'dist','crc.js'),path.resolve(__dirname,'resources','lib','js','crc.js'))
-        fs.copyFileSync(path.resolve(__dirname,'dist','cryptoExt.js'),path.resolve(__dirname,'resources','lib','js','cryptoExt.js'))
-        fs.copyFileSync(path.resolve(__dirname,'dist','utli.js'),path.resolve(__dirname,'resources','lib','js','utli.js'))
+
         //copy uds.d.ts
         const udsDTs=path.resolve(__dirname,'dist','src/main/worker','uds.d.ts')
         await bundleDts(udsDTs,udsDTs)
@@ -142,6 +143,7 @@ module.exports = {
         library: {
             type: 'commonjs',
         },
+        sourceMapFilename: '[name].js.map'
     },
     target: 'node',
     plugins: [
@@ -164,8 +166,9 @@ module.exports = {
                     loader: 'ts-loader',
                     options: {
                         configFile: "tsconfig.worker.json",
-                        
-                       
+                        compilerOptions: {
+                            sourceMap: true
+                        }
                     }
                 }],
                 exclude: /node_modules/,
@@ -176,5 +179,5 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.ts'],
     },
-    devtool: false
+    devtool: 'source-map'
 };

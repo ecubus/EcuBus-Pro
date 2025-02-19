@@ -192,24 +192,26 @@ export interface CanInterAction{
   remote?:boolean
   data:string[]
 } 
-export function formatError(error:Error) {
-  // 获取错误堆栈
-  const stack = error.stack || '';
-  
-  // 获取第一个堆栈行（通常包含错误位置）
-  const locationLine = stack.split('\n')[1] || '';
-  
-  // 提取文件位置信息
-  const locationMatch = locationLine.match(/\((.*):(\d+):(\d+)\)$/);
-  
-  let location = '';
-  if (locationMatch) {
-      const [, file, line, column] = locationMatch;
-      location = `${file}:${line}:${column}`;
-  }
-  
-  // 返回简化的错误信息
-  return `Error: ${error.message}, Pos: ${location}`;
+export function formatError(error: Error) {
+    // Get error stack
+    const stack = error.stack || '';
+    
+    // Get first stack line (usually contains error location)
+    const locationLine = stack.split('\n')[1] || '';
+    
+    // Extract file location info
+    const locationMatch = locationLine.match(/webpack:\\ecubuspro\\(.*):(\d+):(\d+)\)$/);
+    
+    let location = '';
+    if (locationMatch) {
+        const [, file, line, column] = locationMatch;
+        //
+        // Convert webpack path to GitHub URL，#L${line}C${column}-L${line}C${column}
+        location = `https://github.com/ecubus/EcuBus-Pro/blob/master/${file}#L${line}C${column}`;
+    }
+    
+    // Return simplified error message
+    return `Error: ${error.message}, Pos: ${location}`;
 }
 export interface CanNode{
   type:'can'

@@ -1,43 +1,42 @@
 {
   "data": {
-    "devices": {},
-    "ia": {},
-    "tester": {
-      "56060a31-9d6f-4b6e-a386-99e460bc55ba": {
-        "id": "56060a31-9d6f-4b6e-a386-99e460bc55ba",
-        "name": "Tester_can_1",
+    "devices": {
+      "b283da7b-1165-4e62-a609-b0eac40cb8a8": {
         "type": "can",
-        "script": "",
-        "targetDeviceId": "",
-        "seqList": [],
-        "address": [],
-        "udsTime": {
-          "pTime": 2000,
-          "pExtTime": 5000,
-          "s3Time": 5000,
-          "testerPresentEnable": false
-        },
-        "allServiceList": {}
-      },
-      "2a21ea15-6945-4466-a719-e72eccc4efed": {
-        "id": "2a21ea15-6945-4466-a719-e72eccc4efed",
-        "name": "T",
-        "type": "can",
-        "script": "",
-        "targetDeviceId": "",
-        "seqList": [],
-        "address": [],
-        "udsTime": {
-          "pTime": 2000,
-          "pExtTime": 5000,
-          "s3Time": 5000,
-          "testerPresentEnable": false
-        },
-        "allServiceList": {}
+        "canDevice": {
+          "id": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_16"
+          }
+        }
       }
     },
+    "ia": {},
+    "tester": {},
     "subFunction": {},
-    "nodes": {},
+    "nodes": {
+      "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018": {
+        "name": "Node 1",
+        "type": "can",
+        "id": "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018",
+        "channel": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ],
+        "workNode": "",
+        "script": "node.ts"
+      }
+    },
     "database": {
       "lin": {},
       "can": {}
@@ -68,28 +67,40 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "tester": {
-        "pos": {
-          "x": 1098,
-          "y": 294.5,
-          "w": 858,
-          "h": 400
-        },
-        "title": "tester",
-        "label": "UDS Tester",
-        "id": "tester",
-        "options": {}
-      },
       "test": {
         "pos": {
-          "x": 811,
-          "y": 149.5,
+          "x": 1097,
+          "y": 167.5,
           "w": 836,
           "h": 400
         },
         "title": "test",
         "label": "Test",
         "id": "test",
+        "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 236,
+          "y": 204.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 256,
+          "y": 224.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
         "options": {}
       }
     }

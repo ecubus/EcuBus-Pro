@@ -2,12 +2,27 @@
 import { defineStore } from 'pinia'
 
 
+export type TestTree={
 
+  label: string
+  canAdd: boolean
+  id: string
+  type: 'test' | 'config'
+  children: TestTree[]
+  attrs?: {
+      time?: string
+      status?: 'pass' | 'fail' | 'skip'
+  }
+  nesting?: number
+  parent?: TestTree
+
+}
 export type RunTimeStatus={
   testStates: {
-    tData: any[],
+    tData: TestTree[],
+    activeTest?:TestTree,
+    realActiveId?:string,
     isRunning: Record<string, boolean>,
-  
     leftWidth: number
   },
   canPeriods: Record<string, boolean>
@@ -17,8 +32,8 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
   state: (): RunTimeStatus => ({
    
     testStates: {
-      tData: [] as any[],
-      isRunning: {} as Record<string, boolean>,
+      tData: [],
+      isRunning: {},
       leftWidth: 300
     },
     canPeriods: {}

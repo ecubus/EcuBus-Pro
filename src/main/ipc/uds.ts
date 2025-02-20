@@ -87,14 +87,53 @@ ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
         PROJECT_NAME:projectName,
         MODE:'test',
         NAME:test.name
-    },jsPath,log,tester,true)
+    },jsPath,log,tester,{testOnly:true})
     await worker.start(projectPath)
     const testInfo=await worker.getTestInfo()
     worker.stop()
-    log.close()
+  
     return testInfo
-    
 })
+
+const testMap=new Map<string,UdsTester>()
+ipcMain.handle('ipc-run-test', async (event, ...arg) => {
+    const projectPath = arg[0] as string
+    const projectName = arg[1] as string
+    const test = arg[2] as TestConfig
+    const tester=arg[3] as TesterInfo
+    
+    const log=new UdsLOG(test.name,tester?.id)
+    const jsPath=getJsPath(test.script,projectPath)
+    const worker=new UdsTester({
+        PROJECT_ROOT:projectPath,
+        PROJECT_NAME:projectName,
+        MODE:'test',
+        NAME:test.name
+    },jsPath,log,tester,{id:test.id})
+    await worker.start(projectPath)
+    testMap.set(test.id,worker)
+    try{
+        await worker.getTestInfo()
+    }catch(err:any){
+        null 
+    }
+    worker.stop()
+})
+
+ipcMain.handle('ipc-stop-test', async (event, ...arg) => {
+    const testId = arg[0] as string
+    const worker = testMap.get(testId)
+    if (worker) {
+        worker.stop()
+        testMap.delete(testId)
+    }
+})
+
+ipcMain.handle('ipc-get-test', async (event, ...arg) => {
+    
+    return testMap.keys()
+})
+
 
 ipcMain.handle('ipc-delete-node', async (event, ...arg) => {
     const projectPath = arg[0] as string
@@ -165,6 +204,10 @@ let doips: DOIP[] = []
 
 async function globalStart(devices: Record<string, UdsDevice>, testers: Record<string, TesterInfo>, nodes: Record<string, CanNode | EthNode | LinNode>, projectInfo: { path: string, name: string }) {
     let activeKey = ''
+    testMap.forEach((value) => {
+        value.stop()
+    })
+    testMap.clear()
     try {
         for (const key in devices) {
             const device = devices[key]
@@ -442,7 +485,6 @@ export function globalStop(emit = false) {
         value.close()
     })
     doips = []
-
 
 
 

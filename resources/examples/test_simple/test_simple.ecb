@@ -47,6 +47,11 @@
         "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
         "name": "Test Config 01",
         "script": "test.ts"
+      },
+      "e284033a-c906-4bab-9912-dd08d533bd0f": {
+        "id": "e284033a-c906-4bab-9912-dd08d533bd0f",
+        "name": "Test Config 0",
+        "script": ""
       }
     }
   },

@@ -59,8 +59,10 @@ export default class UdsTester {
     jsFilePath: string,
     log: UdsLOG,
     private tester?: TesterInfo,
-    
-    testOnly?:boolean
+    private testOptions?:{
+      testOnly?:boolean
+      id?:string
+    }
   ) {
     if (tester) {
       for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
@@ -73,7 +75,7 @@ export default class UdsTester {
     const execArgv=['--enable-source-maps']
     if(this.env.MODE=='test'){
       execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
-      if(testOnly){
+      if(this.testOptions?.testOnly){
         execArgv.push('--test-only')
         this.env.ONLY=true
       }
@@ -186,6 +188,10 @@ export default class UdsTester {
       this.worker.exec('__eventDone', [id]).catch(reject)
     }else if(event=='test'&&this.env.MODE=='test'){
       const testEvent=data as TestEvent
+      
+      if(!this.testOptions?.testOnly){
+        this.log.testInfo(this.testOptions?.id,testEvent)
+      }
       this.testEvents.push(testEvent)
       if(this.getInfoPromise){
         if(testEvent.type=='test:pass'&&testEvent.data.name=='____ecubus_pro_test___'){
@@ -193,6 +199,7 @@ export default class UdsTester {
           this.getInfoPromise=undefined
         }
       }
+      
     }
     else {
       const eventKey = event as keyof EventHandlerMap
@@ -300,12 +307,14 @@ export default class UdsTester {
     })
   }
   stop() {
+    if(this.getInfoPromise){
+      this.getInfoPromise.reject(new Error('worker terminated'))
+    }
+    this.log.close()
     this.selfStop = true
     this.pool.terminate(true).catch(null)
     this.worker.worker.terminate()
     globalThis.keyEvent.off('keydown',this.cb)
-    if(this.getInfoPromise){
-      this.getInfoPromise.reject(new Error('worker terminated'))
-    }
+    
   }
 }

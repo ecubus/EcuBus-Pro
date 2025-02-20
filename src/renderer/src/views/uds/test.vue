@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="main" v-loading="loading">
-            <div class="left" >
+            <div class="left">
                 <el-scrollbar :height="h + 'px'">
                     <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
                         :expand-on-click-node="false" @node-click="nodeClick">
@@ -21,18 +21,21 @@
                                                     <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
                                                 </el-button>
                                             </el-tooltip>
-                                            <el-tooltip effect="light" content="Run Test Config" placement="bottom" v-if="!isRunning[data.id]">
-                                                <el-button link type="success"
-                                                :disabled="!globalStart">
+                                            <el-tooltip effect="light" content="Run Test Config" placement="bottom"
+                                                v-if="!isRunning[data.id]">
+                                                <el-button link type="success" @click="handleRun(data)"
+                                                    :disabled="!globalStart || runtime.testStates.activeTest!=undefined">
                                                     <Icon :icon="lightIcon" />
                                                 </el-button>
                                             </el-tooltip>
-                                            <el-tooltip effect="light" content="Stop Test Config" placement="bottom" v-else>
-                                                <el-button link type="danger" :disabled="!isRunning[data.id]">
+                                            <el-tooltip effect="light" content="Stop Test Config" placement="bottom"
+                                                v-else>
+                                                <el-button link type="danger" :disabled="!isRunning[data.id]"
+                                                    @click="handleStop(data)">
                                                     <Icon :icon="stopIcon" />
                                                 </el-button>
                                             </el-tooltip>
-                                           
+
                                         </el-button-group>
                                     </div>
                                 </template>
@@ -75,7 +78,7 @@
                 </el-scrollbar>
             </div>
             <div class="shift" id="testerServiceShift" />
-            <div class="right" :style="{ left:  leftWidth + 5 + 'px' }">
+            <div class="right" :style="{ left: leftWidth + 5 + 'px' }">
                 <!-- Right side content removed -->
             </div>
         </div>
@@ -149,7 +152,7 @@ import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
-import { useRuntimeStore } from '@r/stores/runtime'
+import { TestTree, useRuntimeStore } from '@r/stores/runtime'
 
 const loading = ref(false)
 
@@ -192,26 +195,12 @@ const dataBase = useDataStore()
 
 const project = useProjectStore()
 
-function nodeClick(data: tree) {
+function nodeClick(data: TestTree) {
     // if (data.type === 'config') {
     //     handleEdit(data)
     // }
 }
 
-interface tree {
-    label: string
-    canAdd: boolean
-    id: string
-    type: 'test' | 'config'
-    children: tree[]
-    attrs?: {
-        time?: string
-        status?: 'pass' | 'fail' | 'skip'
-    }
-    nesting?: number
-    parent?: tree
-
-}
 
 const model = ref<TestConfig>({
     id: v4(),
@@ -219,12 +208,44 @@ const model = ref<TestConfig>({
     script: ''
 })
 
+
+function handleRun(data: TestTree) {
+    handleRefresh(data).then(()=>{
+        runtime.testStates.isRunning[data.id] = true
+        runtime.testStates.activeTest = data
+        window.electron.ipcRenderer.invoke('ipc-run-test', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tests[data.id]), null)
+            .catch((e: any) => {
+                ElMessageBox.alert(e.message, 'Error', {
+                    confirmButtonText: 'OK',
+                    type: 'error',
+                    buttonSize: 'small',
+                    appendTo: '#wintest'
+                })
+            }).finally(() => {
+                runtime.testStates.isRunning[data.id] = false
+                runtime.testStates.activeTest = undefined
+            })
+    }).catch((e: any) => {
+        ElMessageBox.alert(e.message, 'Error', {
+            confirmButtonText: 'OK',
+            type: 'error',
+            buttonSize: 'small',
+            appendTo: '#wintest'
+        })
+    })
+}
+function handleStop(data: TestTree) {
+    window.electron.ipcRenderer.invoke('ipc-stop-test', data.id).finally(() => {
+        runtime.testStates.isRunning[data.id] = false
+        runtime.testStates.activeTest = undefined
+    })
+}
 function buildTree() {
     if (tData.value && tData.value.length > 0) {
         return
     }
 
-    const t: tree = {
+    const t: TestTree = {
         label: 'Test Config',
         canAdd: true,
         id: 'root',
@@ -337,10 +358,10 @@ function onConfigChange() {
                 // 检查script是否发生变化
                 const oldConfig = dataBase.tests[activeConfig.value]
                 const scriptChanged = oldConfig.script !== model.value.script
-                
+
                 // 保存新配置
                 dataBase.tests[activeConfig.value] = cloneDeep(model.value)
-                
+
                 // 更新树节点
                 const node = tData.value[0].children?.find(item => item.id === activeConfig.value)
                 if (node) {
@@ -448,6 +469,27 @@ async function openTs() {
     return file
 }
 
+function testLog(data: {
+    message: {
+        id: string,
+        data: TestEvent,
+        method: string
+    },
+    level: string,
+    label: string,
+}[]) {
+    console.log(data)
+    for(const item of data){
+        if(item.message.id!=runtime.testStates.activeTest?.id){
+            continue
+        }
+        if(item.message.data.type=='test:start'){
+
+            
+        }
+    }
+    
+}
 onMounted(() => {
     window.jQuery('#testerServiceShift').resizable({
         handles: 'e',
@@ -458,7 +500,18 @@ onMounted(() => {
         minWidth: 200,
     })
 
+    window.logBus.on('testInfo', testLog)
     buildTree()
+    window.electron.ipcRenderer.on('ipc-get-test', (event, data) => {
+        const id=data[0]
+        if(id){
+            runtime.testStates.activeTest=tData.value[0].children?.find(item=>item.id==id)
+        }
+       
+    })
+})
+onUnmounted(() => {
+    window.logBus.detach('testInfo', testLog)
 })
 
 
@@ -468,7 +521,7 @@ const popoverRefs = ref<Record<string, any>>({})
 
 const refreshLoading = ref<Record<string, boolean>>({})
 
-function handleEdit(data: tree) {
+function handleEdit(data: TestTree) {
     popoverRefs.value[data.id]?.hide()
     model.value = cloneDeep(dataBase.tests[data.id])
     activeConfig.value = data.id
@@ -476,7 +529,7 @@ function handleEdit(data: tree) {
     refreshBuildStatus()
 }
 
-function handleDelete(data: tree) {
+function handleDelete(data: TestTree) {
     popoverRefs.value[data.id]?.hide()
     removeConfig(data.id)
     activeConfig.value = ''
@@ -487,14 +540,14 @@ async function handleEditSave() {
 
     try {
         await ruleFormRef.value?.validate()
-        
+
         // 检查script是否发生变化
         const oldConfig = dataBase.tests[activeConfig.value]
         const scriptChanged = oldConfig.script !== model.value.script
-        
+
         // 保存新配置
         dataBase.tests[activeConfig.value] = cloneDeep(model.value)
-        
+
         // 更新树节点
         const node = tData.value[0].children?.find(item => item.id === activeConfig.value)
         if (node) {
@@ -504,7 +557,7 @@ async function handleEditSave() {
                 node.children = []
             }
         }
-        
+
         editDialogVisible.value = false
         activeConfig.value = ''
     } catch (error) {
@@ -548,12 +601,15 @@ function getBuildStatusText() {
 }
 
 function buildSubTree(infos: TestEvent[], detail: boolean = false) {
-    let currentSuite: tree | undefined;
-    const roots: tree[] = [];
+    let currentSuite: TestTree | undefined;
+    const roots: TestTree[] = [];
     function startTest(event: any) {
         const originalSuite = currentSuite;
+     
+        const testId = `${event.name}:${event.line || 0}:${event.column || 0}`;
+        
         currentSuite = {
-            id: v4(),
+            id: testId,
             type: 'test',
             canAdd: false,
             label: event.name,
@@ -584,13 +640,13 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
             case 'test:pass':
             case 'test:fail': {
                 if (!currentSuite) {
-                    startTest({ name: 'root', nesting: 0 });
+                    startTest({ name: 'root', nesting: 0, line: 0, column: 0 });
                 }
                 if (currentSuite!.label !== event.data.name ||
                     currentSuite!.nesting !== event.data.nesting) {
                     startTest(event.data);
                 }
-                const currentTest: tree = currentSuite!;
+                const currentTest: TestTree = currentSuite!;
                 if (currentSuite?.nesting === event.data.nesting) {
                     currentSuite = currentSuite.parent;
                 }
@@ -613,8 +669,8 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
     return roots
 }
 
-const root2tree = (parent: tree, root: tree) => {
-    const newNode: tree = {
+const root2tree = (parent: TestTree, root: TestTree) => {
+    const newNode: TestTree = {
         id: root.id,
         type: 'test',
         canAdd: false,
@@ -632,7 +688,7 @@ const root2tree = (parent: tree, root: tree) => {
     }
 }
 
-async function handleRefresh(data: tree) {
+async function handleRefresh(data: TestTree) {
     if (refreshLoading.value[data.id]) return
     refreshLoading.value[data.id] = true
 
@@ -665,7 +721,7 @@ async function handleRefresh(data: tree) {
             })
         }
     } catch (error) {
-        console.error('Error in handleRefresh:', error)
+        throw error
     } finally {
         refreshLoading.value[data.id] = false
     }
@@ -946,7 +1002,7 @@ async function handleRefresh(data: tree) {
     width: 20px;
 }
 
-.node-actions .el-button + .el-button {
+.node-actions .el-button+.el-button {
     margin-left: 0;
 }
 </style>

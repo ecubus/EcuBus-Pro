@@ -1,9 +1,18 @@
 import {describe,test,assert} from 'ECB'
 
 
+const delay=async (ms:number)=>{
+    return new Promise((resolve)=>{
+        setTimeout(()=>{
+            resolve(true)
+        },ms)
+    })
+}
+
 describe('Test Suite',() => {
     describe('Test subSuite',() => {
-        test('Test xxx', () => {
+        test('Test xxx', async () => {
+            await delay(3000)
             assert(true)
         })
     })
@@ -11,6 +20,7 @@ describe('Test Suite',() => {
         assert(true)
     })
     test.todo('Test 2', async () => {
+        await delay(3000)
         assert(false)
     })
     test.skip('Test 3', async () => {

@@ -9,10 +9,10 @@ export type TestTree={
   id: string
   type: 'test' | 'config'
   children: TestTree[]
-  attrs?: {
-      time?: string
-      status?: 'pass' | 'fail' | 'skip'
-  }
+  
+time?: string
+status?: 'pass' | 'fail' | 'skip'|'running'
+  
   nesting?: number
   parent?: TestTree
 

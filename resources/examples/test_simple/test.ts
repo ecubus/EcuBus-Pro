@@ -19,7 +19,7 @@ describe('Test Suite',() => {
     test('Test 1', () => {
         assert(true)
     })
-    test.todo('Test 2', async () => {
+    test('Test 2', async () => {
         await delay(3000)
         assert(false)
     })

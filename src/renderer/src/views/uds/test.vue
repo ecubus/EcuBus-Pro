@@ -6,7 +6,7 @@
                     <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
                         :expand-on-click-node="false" @node-click="nodeClick">
                         <template #default="{ node, data }">
-                            <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="100"
+                            <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom" :width="160"
                                 trigger="contextmenu" popper-class="node-menu" v-if="data.type === 'config'">
                                 <template #reference>
                                     <div class="tree-node">
@@ -14,23 +14,23 @@
                                             isTop: node.level === 1,
                                             treeLabel: true
                                         }">{{ node.label }}</span>
-                                        <el-button-group class="node-actions">
-                                            <el-tooltip effect="light" content="Refresh Test Config" placement="bottom">
-                                                <el-button link type="primary" @click.stop="handleRefresh(data)"
-                                                    :disabled="refreshLoading[data.id]">
+                                        <el-button-group class="node-actions" style="margin-top: 5px;">
+                                            <el-tooltip effect="light" content="Refresh Test Config" placement="bottom" :show-after="1000">
+                                                <el-button plain type="primary" @click.stop="handleRefresh(data)"
+                                                    :disabled="refreshLoading[data.id]||runtime.testStates.activeTest!=undefined">
                                                     <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
                                                 </el-button>
                                             </el-tooltip>
                                             <el-tooltip effect="light" content="Run Test Config" placement="bottom"
-                                                v-if="!isRunning[data.id]">
-                                                <el-button link type="success" @click="handleRun(data)"
+                                                v-if="!isRunning[data.id]" :show-after="1000">
+                                                <el-button plain type="success" @click="handleRun(data)"
                                                     :disabled="!globalStart || runtime.testStates.activeTest!=undefined">
                                                     <Icon :icon="lightIcon" />
                                                 </el-button>
                                             </el-tooltip>
                                             <el-tooltip effect="light" content="Stop Test Config" placement="bottom"
-                                                v-else>
-                                                <el-button link type="danger" :disabled="!isRunning[data.id]"
+                                                v-else :show-after="1000">
+                                                <el-button plain type="danger" :disabled="!isRunning[data.id]"
                                                     @click="handleStop(data)">
                                                     <Icon :icon="stopIcon" />
                                                 </el-button>
@@ -44,24 +44,36 @@
                                         <Icon :icon="editIcon" />
                                         <span>Edit</span>
                                     </div>
+                                    <div class="menu-item info" @click="handleExport(data)">
+                                        <Icon :icon="exportIcon" />
+                                        <span>Export Report (HTML)</span>
+                                    </div>
                                     <div class="menu-item danger" @click="handleDelete(data)">
                                         <Icon :icon="deleteIcon" />
                                         <span>Delete</span>
                                     </div>
                                 </div>
                             </el-popover>
-                            <div v-else-if="data.type === 'case'" class="tree-node">
+                            <div v-else-if="data.type === 'test'" class="tree-node">
                                 <span :class="{
                                     treeLabel: true,
                                     'test-pass': data.status === 'pass',
                                     'test-fail': data.status === 'fail',
-                                    'test-skip': data.status === 'skip'
+                                    'test-skip': data.status === 'skip',
+                                    'test-todo': data.status === 'todo'
                                 }">
                                     {{ node.label }}
-                                    <span class="test-duration" v-if="data.duration">
-                                        ({{ data.duration.toFixed(2) }}ms)
+                                    <span class="test-duration" v-if="data.time">
+                                        ({{ data.time }}s)
                                     </span>
                                 </span>
+                                <div class="status-icon">
+                                    <Icon v-if="data.status === 'pass'" :icon="checkIcon" class="icon-pass"/>
+                                    <Icon v-else-if="data.status === 'fail'" :icon="closeIcon" class="icon-fail"/>
+                                    <Icon v-else-if="data.status === 'skip'" :icon="skipIcon" class="icon-skip"/>
+                                    <Icon v-else-if="data.status === 'todo'" :icon="todoIcon" class="icon-todo"/>
+                                    <Icon v-else-if="data.status === 'running'" :icon="runningIcon" class="icon-running"/>
+                                </div>
                             </div>
                             <div v-else class="tree-node">
                                 <span :class="{
@@ -153,6 +165,11 @@ import type { TestEvent } from 'node:test/reporters'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { TestTree, useRuntimeStore } from '@r/stores/runtime'
+import checkIcon from '@iconify/icons-material-symbols/check-circle-outline'
+import skipIcon from '@iconify/icons-material-symbols/skip-next'
+import runningIcon from '@iconify/icons-material-symbols/pending-outline'
+import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
+import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 
 const loading = ref(false)
 
@@ -478,14 +495,46 @@ function testLog(data: {
     level: string,
     label: string,
 }[]) {
-    console.log(data)
+   
     for(const item of data){
-        if(item.message.id!=runtime.testStates.activeTest?.id){
-            continue
-        }
+       
+        
+        
         if(item.message.data.type=='test:start'){
-
+            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
+            const node=treeRef.value.getNode(key)
+            if(node){
+            //    console.log(node.data)
+                
+                node.data.status='running'
+            }
             
+        }else if(item.message.data.type=='test:pass'){
+            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
+            const node=treeRef.value.getNode(key)
+            if(node){
+                
+                node.data.status='pass'
+                if(item.message.data.data.skip){
+                    node.data.status='skip'
+                }
+                // if(item.message.data.data.todo){
+                //     node.data.status='todo'
+                // }
+               
+                node.data.time=Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
+            }
+        }else if(item.message.data.type=='test:fail'){
+            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
+            const node=treeRef.value.getNode(key)
+            if(node){
+              
+                node.data.status='fail'
+                // if(item.message.data.data.todo){
+                //     node.data.status='todo'
+                // }
+                node.data.time=Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
+            }
         }
     }
     
@@ -600,7 +649,7 @@ function getBuildStatusText() {
     return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
 
-function buildSubTree(infos: TestEvent[], detail: boolean = false) {
+function buildSubTree(infos: TestEvent[]) {
     let currentSuite: TestTree | undefined;
     const roots: TestTree[] = [];
     function startTest(event: any) {
@@ -624,14 +673,7 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
             roots.push(currentSuite);
         }
     }
-    function isFailure(node) {
-        return (node?.children && node.children.some((c) => c.tag === 'failure')) || node?.attrs?.failures;
-    }
-    function isSkipped(node) {
-        return (node?.children && node.children.some((c) => c.tag === 'skipped')) || node?.attrs?.skipped;
-    }
     for (const event of infos) {
-        console.log(event)
         switch (event.type) {
             case 'test:start': {
                 startTest(event.data);
@@ -650,12 +692,7 @@ function buildSubTree(infos: TestEvent[], detail: boolean = false) {
                 if (currentSuite?.nesting === event.data.nesting) {
                     currentSuite = currentSuite.parent;
                 }
-                if (detail) {
-                    currentTest.attrs = {
-                        time: Number(event.data.details.duration_ms / 1000).toFixed(6),
-                        status: event.type == 'test:pass' ? 'pass' : event.type == 'test:fail' ? 'fail' : 'skip'
-                    }
-                }
+               
                 const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
                 if (nonCommentChildren.length > 0) {
 
@@ -695,6 +732,7 @@ async function handleRefresh(data: TestTree) {
     try {
         const val = dataBase.tests[data.id]
         if (val && val.script) {
+            await nextTick()
             const v = await window.electron.ipcRenderer.invoke('ipc-get-build-status', project.projectInfo.path, project.projectInfo.name, val.script)
             if (v != 'success') {
                 await window.electron.ipcRenderer.invoke('ipc-build-project', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.getData()), val.script, true)
@@ -705,13 +743,14 @@ async function handleRefresh(data: TestTree) {
             if (!target) return
 
             const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
-            const roots = buildSubTree(newtestInfo, true)
+            const roots = buildSubTree(newtestInfo)
 
             target.children = []
 
             for (const root of roots) {
                 root2tree(target, root)
             }
+            console.log(target)
         } else {
             ElMessageBox.alert('Please select the script file first', 'Warning', {
                 confirmButtonText: 'OK',
@@ -725,6 +764,156 @@ async function handleRefresh(data: TestTree) {
     } finally {
         refreshLoading.value[data.id] = false
     }
+}
+
+function generateHtml(data: TestTree): string {
+    const statusIcons = {
+        pass: '✅',
+        fail: '❌',
+        skip: '⏭️',
+        todo: '📝',
+        running: '🔄'
+    }
+
+    const statusColors = {
+        pass: '#67C23A',
+        fail: '#F56C6C',
+        skip: '#909399',
+        todo: '#E6A23C',
+        running: '#409EFF'
+    }
+
+    function generateTestCaseHtml(node: TestTree): string {
+        const status = node.status || 'unknown'
+        const icon = statusIcons[status as keyof typeof statusIcons] || '❓'
+        const color = statusColors[status as keyof typeof statusColors] || '#909399'
+        const time = node.time ? `(${node.time}s)` : ''
+        
+        let html = `
+            <div class="test-case" style="margin-left: ${(node.nesting || 0) * 20}px">
+                <div class="test-header" style="color: ${color}">
+                    <span class="icon">${icon}</span>
+                    <span class="name">${node.label}</span>
+                    <span class="time">${time}</span>
+                </div>
+            </div>
+        `
+        
+        if (node.children && node.children.length > 0) {
+            html += `<div class="children">
+                ${node.children.map(child => generateTestCaseHtml(child)).join('')}
+            </div>`
+        }
+        
+        return html
+    }
+
+    const timestamp = new Date().toLocaleString()
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Test Report - ${data.label}</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background: #f5f7fa;
+                }
+                .container {
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+                    padding: 20px;
+                }
+                .header {
+                    border-bottom: 1px solid #ebeef5;
+                    padding-bottom: 20px;
+                    margin-bottom: 20px;
+                }
+                .title {
+                    font-size: 24px;
+                    color: #303133;
+                    margin: 0;
+                }
+                .timestamp {
+                    color: #909399;
+                    font-size: 14px;
+                    margin-top: 8px;
+                }
+                .test-case {
+                    margin: 8px 0;
+                }
+                .test-header {
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                    padding: 8px;
+                    border-radius: 4px;
+                    background: #f8f9fb;
+                }
+                .icon {
+                    margin-right: 8px;
+                }
+                .name {
+                    flex: 1;
+                }
+                .time {
+                    color: #909399;
+                    font-size: 12px;
+                    margin-left: 8px;
+                }
+                .children {
+                    margin-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 class="title">Test Report - ${data.label}</h1>
+                    <div class="timestamp">Generated at: ${timestamp}</div>
+                </div>
+                <div class="test-cases">
+                    ${data.children?.map(child => generateTestCaseHtml(child)).join('') || ''}
+                </div>
+            </div>
+        </body>
+        </html>
+    `
+    return html
+}
+
+async function handleExport(data: TestTree,type:'html'|'pdf'='html') {
+    popoverRefs.value[data.id]?.hide()
+    
+    if(type=='html'){
+        const html = generateHtml(data)
+        console.log(html)
+    }else{
+        // const pdf = generatePdf(data)
+    }
+    
+    // try {
+    //     const result = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
+    //         title: 'Save Test Report',
+    //         defaultPath: `${data.label}_test_report.html`,
+    //         filters: [
+    //             { name: 'HTML', extensions: ['html'] }
+    //         ]
+    //     })
+        
+    //     if (result.filePath) {
+    //         await window.electron.ipcRenderer.invoke('ipc-write-file', result.filePath, html)
+    //         ElMessage.success('Test report exported successfully')
+    //     }
+    // } catch (error) {
+    //     ElMessage.error('Failed to export test report')
+    //     console.error(error)
+    // }
 }
 </script>
 <style>
@@ -814,7 +1003,7 @@ async function handleRefresh(data: TestTree) {
     align-items: center;
     justify-content: space-between;
     font-size: 12px;
-    padding-right: 5px;
+    padding-right: 8px;
     min-width: 0;
 }
 
@@ -953,6 +1142,11 @@ async function handleRefresh(data: TestTree) {
     color: var(--el-color-danger-dark-2);
 }
 
+.menu-item.info:hover {
+    background-color: var(--el-color-primary-light-9);
+    color: var(--el-color-primary-dark-2);
+}
+
 .dialog-footer {
     display: flex;
     justify-content: flex-end;
@@ -994,16 +1188,73 @@ async function handleRefresh(data: TestTree) {
     align-items: center;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-left: 4px;
+    height: 20px;
 }
 
 .node-actions .el-button {
     padding: 2px;
     height: 20px;
     width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    vertical-align: middle;
 }
 
-.node-actions .el-button+.el-button {
-    margin-left: 0;
+.node-actions .el-tooltip__trigger {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    min-width: 20px;
+    height: 20px;
+    line-height: 1;
+}
+
+.status-icon .iconify {
+    vertical-align: middle;
+}
+
+.icon-pass {
+    color: var(--el-color-success);
+}
+
+.icon-fail {
+    color: var(--el-color-danger);
+}
+
+.icon-skip {
+    color: var(--el-color-info);
+}
+
+.icon-running {
+    color: var(--el-color-warning);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.test-todo {
+    color: var(--el-color-warning);
+}
+
+.icon-todo {
+    color: var(--el-color-warning);
 }
 </style>
 

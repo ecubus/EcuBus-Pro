@@ -23,11 +23,11 @@ type HandlerMap = {
   }) => Promise<number>
   setSignal: (pool: UdsTester, data: {
     signal: string,
-    value: number|number[]|string
+    value: number | number[] | string
   }) => void
   registerEthVirtualEntity: (pool: UdsTester, data: {
-    entity:VinInfo,
-    ip?:string,
+    entity: VinInfo,
+    ip?: string,
   }) => Promise<void>
 };
 
@@ -42,26 +42,26 @@ export default class UdsTester {
   worker: any
   selfStop = false
   log: UdsLOG
-  testEvents:TestEvent[]=[]
-  getInfoPromise?:{resolve:(v:any[])=>void,reject:(e:any)=>void}
+  testEvents: TestEvent[] = []
+  getInfoPromise?: { resolve: (v: any[]) => void, reject: (e: any) => void }
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
-  cb:any
+  cb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
     private env: {
-      PROJECT_ROOT:string,
-      PROJECT_NAME:string,
-      MODE:'node'|'sequence'|'test',
-      NAME:string,
-      ONLY?:boolean
+      PROJECT_ROOT: string,
+      PROJECT_NAME: string,
+      MODE: 'node' | 'sequence' | 'test',
+      NAME: string,
+      ONLY?: boolean
     },
     jsFilePath: string,
     log: UdsLOG,
     private tester?: TesterInfo,
-    private testOptions?:{
-      testOnly?:boolean
-      id?:string
+    private testOptions?: {
+      testOnly?: boolean
+      id?: string
     }
   ) {
     if (tester) {
@@ -72,12 +72,12 @@ export default class UdsTester {
       }
     }
     this.log = log
-    const execArgv=['--enable-source-maps']
-    if(this.env.MODE=='test'){
+    const execArgv = ['--enable-source-maps']
+    if (this.env.MODE == 'test') {
       execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
-      if(this.testOptions?.testOnly){
+      if (this.testOptions?.testOnly) {
         execArgv.push('--test-only')
-        this.env.ONLY=true
+        this.env.ONLY = true
       }
     }
     this.pool = workerpool.pool(jsFilePath, {
@@ -85,20 +85,20 @@ export default class UdsTester {
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
-      workerTerminateTimeout:0,
+      workerTerminateTimeout: 0,
       workerThreadOpts: {
         stderr: true,
         stdout: true,
         env: env,
-        execArgv:execArgv
+        execArgv: execArgv
       },
 
-      onTerminateWorker: (v:any) => {
+      onTerminateWorker: (v: any) => {
         if (!this.selfStop) {
 
           this.log.systemMsg('worker terminated', this.ts, 'error')
         }
-        if(this.getInfoPromise){
+        if (this.getInfoPromise) {
           this.getInfoPromise.reject(new Error('worker terminated'))
         }
         this.stop()
@@ -107,8 +107,8 @@ export default class UdsTester {
     })
     const d = (this.pool as any)._getWorker()
     this.worker = d
-    d.worker.globalOn=(payload:any)=>{
-      this.eventHandler(payload,()=>{},()=>{})
+    d.worker.globalOn = (payload: any) => {
+      this.eventHandler(payload, () => { }, () => { })
     }
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
@@ -122,30 +122,30 @@ export default class UdsTester {
         this.log.systemMsg(str, this.ts, 'error')
       }
     })
-    this.cb=this.keyHandle.bind(this)
-    globalThis.keyEvent.on('keydown',this.cb)
+    this.cb = this.keyHandle.bind(this)
+    globalThis.keyEvent.on('keydown', this.cb)
   }
-  async getTestInfo(){
-    return new Promise<TestEvent[]>((resolve,reject)=>{
-      if(this.env.MODE!='test'){
+  async getTestInfo() {
+    return new Promise<TestEvent[]>((resolve, reject) => {
+      if (this.env.MODE != 'test') {
         reject(new Error('not in test mode'))
         return
       }
-      for(const testEvent of this.testEvents){
-        if(testEvent.type=='test:pass'&&testEvent.data.name=='____ecubus_pro_test___'){
+      for (const testEvent of this.testEvents) {
+        if (testEvent.type == 'test:pass' && testEvent.data.name == '____ecubus_pro_test___') {
           resolve(this.testEvents)
           return
         }
       }
-      this.getInfoPromise={resolve,reject}
+      this.getInfoPromise = { resolve, reject }
     })
   }
   updateTs(ts: number) {
     this.ts = ts
   }
   keyHandle(key: string) {
-    if(!this.selfStop){
-      this.workerEmit('__keyDown', key).catch((e:any) => {
+    if (!this.selfStop) {
+      this.workerEmit('__keyDown', key).catch((e: any) => {
         this.log.systemMsg(e.toString(), this.ts, 'error')
       })
     }
@@ -169,15 +169,15 @@ export default class UdsTester {
 
     if (event == 'set' && this.tester) {
       const service = data.service as ServiceItem
-      const isReq= data.isRequest as boolean
+      const isReq = data.isRequest as boolean
       const name = this.tester.name
       if (this.serviceMap[`${name}.${service.name}`]) {
-        if(isReq){
+        if (isReq) {
           service.params = service.params.map((p: any) => {
             p.value = Buffer.from(p.value)
             return p
           })
-        }else{
+        } else {
           service.respParams = service.respParams.map((p: any) => {
             p.value = Buffer.from(p.value)
             return p
@@ -186,20 +186,20 @@ export default class UdsTester {
         assign(this.serviceMap[`${name}.${service.name}`], service)
       }
       this.worker.exec('__eventDone', [id]).catch(reject)
-    }else if(event=='test'&&this.env.MODE=='test'){
-      const testEvent=data as TestEvent
-      
-      if(!this.testOptions?.testOnly){
-        this.log.testInfo(this.testOptions?.id,testEvent)
+    } else if (event == 'test' && this.env.MODE == 'test') {
+      const testEvent = data as TestEvent
+
+      if (!this.testOptions?.testOnly) {
+        this.log.testInfo(this.testOptions?.id, testEvent)
       }
       this.testEvents.push(testEvent)
-      if(this.getInfoPromise){
-        if(testEvent.type=='test:pass'&&testEvent.data.name=='____ecubus_pro_test___'){
+      if (this.getInfoPromise) {
+        if (testEvent.type == 'test:pass' && testEvent.data.name == '____ecubus_pro_test___') {
           this.getInfoPromise.resolve(this.testEvents)
-          this.getInfoPromise=undefined
+          this.getInfoPromise = undefined
         }
       }
-      
+
     }
     else {
       const eventKey = event as keyof EventHandlerMap
@@ -247,36 +247,36 @@ export default class UdsTester {
   async triggerSend(service: ServiceItem, ts: number) {
     this.updateTs(ts)
     if (this.tester) {
-      try{
+      try {
         await this.workerEmit(`${this.tester.name}.${service.name}.send`, service)
-      }catch(e:any){
-         throw formatError(e)
+      } catch (e: any) {
+        throw formatError(e)
       }
     }
   }
   async triggerRecv(service: ServiceItem, ts: number) {
     this.updateTs(ts)
     if (this.tester) {
-      try{
+      try {
         await this.workerEmit(`${this.tester.name}.${service.name}.recv`, service)
-      }catch(e:any){
-         throw  formatError(e)
+      } catch (e: any) {
+        throw formatError(e)
       }
     }
   }
   async triggerCanFrame(msg: CanMessage) {
-    try{
-      const r=await this.workerEmit('__canMsg', msg)
+    try {
+      const r = await this.workerEmit('__canMsg', msg)
       return r
-    }catch(e:any){
+    } catch (e: any) {
       throw formatError(e)
     }
   }
   async triggerLinFrame(msg: LinMsg) {
-    try{
-      const r=await this.workerEmit('__linMsg', msg)
+    try {
+      const r = await this.workerEmit('__linMsg', msg)
       return r
-    }catch(e:any){
+    } catch (e: any) {
       throw formatError(e)
     }
   }
@@ -301,20 +301,23 @@ export default class UdsTester {
         .then((value: any) => {
           resolve(value)
         })
-        .catch((e:any) => {
+        .catch((e: any) => {
           reject(formatError(e))
         })
     })
   }
   stop() {
-    if(this.getInfoPromise){
+    
+    if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }
     this.log.close()
     this.selfStop = true
-    this.pool.terminate(true).catch(null)
-    this.worker.worker.terminate()
-    globalThis.keyEvent.off('keydown',this.cb)
+    this.pool?.terminate(true).catch(null)
+    this.worker?.worker?.terminate()
+    globalThis.keyEvent.off('keydown', this.cb)
     
+
+
   }
 }

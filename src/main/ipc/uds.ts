@@ -101,7 +101,11 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     const projectName = arg[1] as string
     const test = arg[2] as TestConfig
     const tester=arg[3] as TesterInfo
-    
+    const last=testMap.get(test.id)
+    if(last){
+        last.stop()
+        testMap.delete(test.id)
+    }
     const log=new UdsLOG(test.name,tester?.id)
     const jsPath=getJsPath(test.script,projectPath)
     const worker=new UdsTester({

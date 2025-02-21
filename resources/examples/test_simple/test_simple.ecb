@@ -22,7 +22,30 @@
         }
       }
     },
-    "ia": {},
+    "ia": {
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e": {
+        "name": "Can IA",
+        "type": "can",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e",
+        "devices": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "periodic"
+            },
+            "name": "",
+            "id": "1",
+            "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_24"
+          }
+        ]
+      }
+    },
     "tester": {},
     "subFunction": {},
     "nodes": {
@@ -48,11 +71,6 @@
         "name": "Test Config 01",
         "script": "test.ts",
         "reportPath": "./report"
-      },
-      "e284033a-c906-4bab-9912-dd08d533bd0f": {
-        "id": "e284033a-c906-4bab-9912-dd08d533bd0f",
-        "name": "Test Config 0",
-        "script": ""
       }
     }
   },
@@ -75,8 +93,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 236,
-          "y": 204.5,
+          "x": 329,
+          "y": 158.5,
           "w": 600,
           "h": 400
         },
@@ -107,6 +125,35 @@
         "title": "test",
         "label": "Test",
         "id": "test",
+        "options": {}
+      },
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia": {
+        "pos": {
+          "x": 503.5,
+          "y": 52,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia",
+        "options": {
+          "params": {
+            "edit-index": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e"
+          },
+          "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 503.5,
+          "y": 52,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
         "options": {}
       }
     }

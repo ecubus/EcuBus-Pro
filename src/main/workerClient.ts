@@ -46,7 +46,7 @@ export default class UdsTester {
   getInfoPromise?: { resolve: (v: any[]) => void, reject: (e: any) => void }
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
-  cb: any
+  private cb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
     private env: {

@@ -847,6 +847,19 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for CAN messages that will be invoked once.
+   * 
+   * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+   * @param fc - The callback function to be invoked when a CAN message is received.
+   */
+  OnCanOnce(id: number | true, fc: (msg: CanMessage) => void | Promise<void>) {
+    if (id === true) {
+      this.event.once('can' as any).then(fc)
+    } else {
+      this.event.once(`can.${id}` as any).then(fc)
+    }
+  }
+  /**
    * Unsubscribes from CAN messages.
    * 
    * @param id - The identifier of the CAN message to unsubscribe from. If `true`, unsubscribes from all CAN messages.
@@ -857,6 +870,19 @@ export class UtilClass {
       this.event.off('can' as any, fc)
     } else {
       this.event.off(`can.${id}` as any, fc)
+    }
+  }
+  /**
+   * Registers an event listener for LIN messages that will be invoked once.
+   *
+   * @param id - The LIN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all LIN messages.
+   * @param fc - The callback function to be invoked when a LIN message is received.
+   */
+  OnLinOnce(id: number | string | true, fc: (msg: LinMsg) => void | Promise<void>) {
+    if (id === true) {
+      this.event.once('lin' as any).then(fc)
+    } else {
+      this.event.once(`lin.${id}` as any).then(fc)
     }
   }
   /**
@@ -899,6 +925,19 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for a specific key that will be invoked once.
+   *
+   * @param key - The key to listen for. Only the first character of the key is used, * is a wildcard.
+   * @param fc - The callback function to be executed when the event is triggered. 
+   *             This can be a synchronous function or a function returning a Promise.
+   */
+  OnKeyOnce(key: string, fc: (key: string) => void | Promise<void>) {
+    key = key.slice(0, 1)
+    if (key) {
+      this.event.once(`keyDown${key}` as any).then(fc)
+    }
+  }
+  /**
    * Unsubscribes from an event listener for a specific key.
    *
    * @param key - The key to unsubscribe from. Only the first character of the key is used, * is a wildcard.
@@ -908,6 +947,43 @@ export class UtilClass {
     key = key.slice(0, 1)
     if (key) {
       this.event.off(`keyDown${key}` as any, fc)
+    }
+  }
+  /**
+ * Subscribe to an event once, invoking the registered function when the event is emitted.
+ * @param eventName 
+ * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+ * 
+ * @param listener 
+ * Function to be called when the event is emitted
+ * 
+ * @example
+ * 
+ * ```ts
+ * Util.OnOnce('Can.testService.send', async (req) => {
+ *    // The req is a `DiagRequest`
+ *    console.log(req.getServiceName(), ': send once');
+ * });
+ * ```
+ */
+  OnOnce<Name extends keyof EventMap>(
+    eventName: Name,
+    listener: (eventData: EventMap[Name]) => void | Promise<void>
+  ) {
+    if (eventName.endsWith('.send')) {
+      const warpFunc = async (v: any) => {
+        const req = new DiagRequest(v as any)
+        await listener(req as any)
+      }
+      this.event.once(eventName).then(warpFunc)
+    } else if (eventName.endsWith('.recv')) {
+      const warpFunc = async (v: any) => {
+        const resp = new DiagResponse(v)
+        await listener(resp as any)
+      }
+      this.event.once(eventName).then(warpFunc)
+    } else {
+      throw new Error(`event ${eventName} not support`)
     }
   }
   /**
@@ -1218,9 +1294,9 @@ export async function setSignal(signal: SignalName, value: number | number[] | s
     emitMap.set(id, { resolve, reject })
     id++
   })
- 
+
   return await p
-  
+
 }
 
 let rightEntity: EntityAddr | undefined

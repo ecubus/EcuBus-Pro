@@ -68,6 +68,7 @@ export type TestConfig={
     name:string,
     script:string,
     attachTester?:string
+    reportPath?:string
 }
 export interface DataSet {
     devices: Record<string, UdsDevice>

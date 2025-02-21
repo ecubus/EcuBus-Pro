@@ -6,7 +6,7 @@
                     <el-tree ref="treeRef" node-key="id" default-expand-all :data="tData" highlight-current
                         :expand-on-click-node="false" @node-click="nodeClick">
                         <template #default="{ node, data }">
-                            <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom" :width="160"
+                            <el-popover :ref="e => popoverRefs[data.id] = e" placement="bottom-start" :width="160"
                                 trigger="contextmenu" popper-class="node-menu" v-if="data.type === 'config'">
                                 <template #reference>
                                     <div class="tree-node">
@@ -15,16 +15,17 @@
                                             treeLabel: true
                                         }">{{ node.label }}</span>
                                         <el-button-group class="node-actions" style="margin-top: 5px;">
-                                            <el-tooltip effect="light" content="Refresh Test Config" placement="bottom" :show-after="1000">
+                                            <el-tooltip effect="light" content="Refresh Test Config" placement="bottom"
+                                                :show-after="1000">
                                                 <el-button plain type="primary" @click.stop="handleRefresh(data)"
-                                                    :disabled="refreshLoading[data.id]||runtime.testStates.activeTest!=undefined">
+                                                    :disabled="refreshLoading[data.id] || runtime.testStates.activeTest != undefined">
                                                     <Icon :icon="refreshLoading[data.id] ? loadingIcon : refreshIcon" />
                                                 </el-button>
                                             </el-tooltip>
                                             <el-tooltip effect="light" content="Run Test Config" placement="bottom"
                                                 v-if="!isRunning[data.id]" :show-after="1000">
                                                 <el-button plain type="success" @click="handleRun(data)"
-                                                    :disabled="!globalStart || runtime.testStates.activeTest!=undefined">
+                                                    :disabled="!globalStart || runtime.testStates.activeTest != undefined">
                                                     <Icon :icon="lightIcon" />
                                                 </el-button>
                                             </el-tooltip>
@@ -40,17 +41,31 @@
                                     </div>
                                 </template>
                                 <div class="menu-items">
-                                    <div class="menu-item warning" @click="handleEdit(data)">
-                                        <Icon :icon="editIcon" />
-                                        <span>Edit</span>
+                                    <div>
+                                        <el-button class="menu-button" @click="handleEdit(data)" text block>
+                                            <Icon :icon="editIcon" style="margin-right: 5px" />
+                                            <span>Edit</span>
+                                        </el-button>
                                     </div>
-                                    <div class="menu-item info" @click="handleExport(data)">
-                                        <Icon :icon="exportIcon" />
-                                        <span>Export Report (HTML)</span>
+                                    <div>
+                                        <el-button class="menu-button" @click="handleExport(data)" text block
+                                            :disabled="!dataBase.tests[data.id]?.script">
+                                            <Icon :icon="exportIcon" style="margin-right: 5px" />
+                                            <span>Export Report (HTML)</span>
+                                        </el-button>
                                     </div>
-                                    <div class="menu-item danger" @click="handleDelete(data)">
-                                        <Icon :icon="deleteIcon" />
-                                        <span>Delete</span>
+                                    <div>
+                                        <el-button class="menu-button" @click="handleExport(data, 'pdf')" text block
+                                            :disabled="!dataBase.tests[data.id]?.script || true">
+                                            <Icon :icon="exportIcon" style="margin-right: 5px" />
+                                            <span>Export Report (PDF)</span>
+                                        </el-button>
+                                    </div>
+                                    <div>
+                                        <el-button class="menu-button" @click="handleDelete(data)" text block>
+                                            <Icon :icon="deleteIcon" style="margin-right: 5px" />
+                                            <span>Delete</span>
+                                        </el-button>
                                     </div>
                                 </div>
                             </el-popover>
@@ -68,11 +83,12 @@
                                     </span>
                                 </span>
                                 <div class="status-icon">
-                                    <Icon v-if="data.status === 'pass'" :icon="checkIcon" class="icon-pass"/>
-                                    <Icon v-else-if="data.status === 'fail'" :icon="closeIcon" class="icon-fail"/>
-                                    <Icon v-else-if="data.status === 'skip'" :icon="skipIcon" class="icon-skip"/>
-                                    <Icon v-else-if="data.status === 'todo'" :icon="todoIcon" class="icon-todo"/>
-                                    <Icon v-else-if="data.status === 'running'" :icon="runningIcon" class="icon-running"/>
+                                    <Icon v-if="data.status === 'pass'" :icon="checkIcon" class="icon-pass" />
+                                    <Icon v-else-if="data.status === 'fail'" :icon="closeIcon" class="icon-fail" />
+                                    <Icon v-else-if="data.status === 'skip'" :icon="skipIcon" class="icon-skip" />
+                                    <Icon v-else-if="data.status === 'todo'" :icon="todoIcon" class="icon-todo" />
+                                    <Icon v-else-if="data.status === 'running'" :icon="runningIcon"
+                                        class="icon-running" />
                                 </div>
                             </div>
                             <div v-else class="tree-node">
@@ -98,34 +114,49 @@
         <!-- Configuration Dialog -->
         <el-dialog v-model="editDialogVisible" v-if="editDialogVisible && activeConfig" title="Edit Configuration"
             width="500px" align-center :append-to="`#wintest`">
-            <el-form :model="model" label-width="100px" size="small" ref="ruleFormRef" :rules="rules"
-                hide-required-asterisk>
-                <el-form-item label="Name" prop="name" required>
-                    <el-input v-model="model.name" @change="onConfigChange" />
-                </el-form-item>
-                <el-form-item label="Test Script File" prop="script">
-                    <el-input v-model="model.script" clearable />
-                    <div class="lr">
-                        <el-button-group v-loading="buildLoading">
-                            <el-button size="small" plain @click="editScript('open')">
-                                <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
-                            </el-button>
-                            <el-button size="small" plain @click="editScript('build')">
-                                <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
-                            </el-button>
-                            <el-button size="small" plain @click="editScript('edit')">
-                                <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh / Edit
-                            </el-button>
-                        </el-button-group>
-                        <div class="build-status-container" v-if="buildStatus">
-                            <span class="buildStatus" :style="{ color: getBuildStatusColor() }">
-                                <Icon :icon="getBuildStatusIcon()" />{{ getBuildStatusText() }}
-                            </span>
+            <el-scrollbar :height="h * 0.85 - 108 + 'px'">
+                <el-form :model="model" label-width="100px" size="small" ref="ruleFormRef" :rules="rules"
+                    hide-required-asterisk>
+                    <el-form-item label="Name" prop="name" required>
+                        <el-input v-model="model.name" @change="onConfigChange" />
+                    </el-form-item>
+                    <el-form-item label="Test Script File" prop="script">
+                        <el-input v-model="model.script" clearable />
+                        <div class="lr">
+                            <el-button-group v-loading="buildLoading">
+                                <el-button size="small" plain @click="editScript('open')">
+                                    <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
+                                </el-button>
+                                <el-button size="small" plain @click="editScript('build')">
+                                    <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
+                                </el-button>
+                                <el-button size="small" plain @click="editScript('edit')">
+                                    <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh / Edit
+                                </el-button>
+                            </el-button-group>
+                            <div class="build-status-container" v-if="buildStatus">
+                                <span class="buildStatus" :style="{ color: getBuildStatusColor() }">
+                                    <Icon :icon="getBuildStatusIcon()" />{{ getBuildStatusText() }}
+                                </span>
 
+                            </div>
                         </div>
-                    </div>
-                </el-form-item>
-            </el-form>
+                    </el-form-item>
+                    <el-divider content-position="left">
+                        Report
+                    </el-divider>
+                    <el-form-item label="Report Path" prop="reportPath">
+                        <el-input v-model="model.reportPath" clearable>
+                            <template #append>
+                                <el-button @click="chooseReportPath">
+                                    <Icon :icon="newIcon" class="icon" />
+                                </el-button>
+                            </template>
+                        </el-input>
+                        <div class="form-tip">Leave empty to use project root path</div>
+                    </el-form-item>
+                </el-form>
+            </el-scrollbar>
             <template #footer>
                 <div class="dialog-footer">
                     <el-button @click="handleEditCancel" size="small">Cancel</el-button>
@@ -170,7 +201,8 @@ import skipIcon from '@iconify/icons-material-symbols/skip-next'
 import runningIcon from '@iconify/icons-material-symbols/pending-outline'
 import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
-
+import logo from './logo.html?raw'
+import errorParse from '@r/util/ipcError'
 const loading = ref(false)
 
 const runtime = useRuntimeStore()
@@ -222,12 +254,13 @@ function nodeClick(data: TestTree) {
 const model = ref<TestConfig>({
     id: v4(),
     name: 'Test Config',
-    script: ''
+    script: '',
+    reportPath: ''
 })
 
 
 function handleRun(data: TestTree) {
-    handleRefresh(data).then(()=>{
+    handleRefresh(data).then(() => {
         runtime.testStates.isRunning[data.id] = true
         runtime.testStates.activeTest = data
         window.electron.ipcRenderer.invoke('ipc-run-test', project.projectInfo.path, project.projectInfo.name, cloneDeep(dataBase.tests[data.id]), null)
@@ -301,7 +334,8 @@ function addNewConfig() {
     const newConfig: TestConfig = {
         id: v4(),
         name: defaultName,
-        script: ''
+        script: '',
+        reportPath: ''
     }
 
     dataBase.tests[newConfig.id] = newConfig
@@ -495,49 +529,47 @@ function testLog(data: {
     level: string,
     label: string,
 }[]) {
-   
-    for(const item of data){
-       
-        
-        
-        if(item.message.data.type=='test:start'){
-            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
-            const node=treeRef.value.getNode(key)
-            if(node){
-            //    console.log(node.data)
-                
-                node.data.status='running'
+
+    for (const item of data) {
+
+
+
+        if (item.message.data.type == 'test:start') {
+            const key = item.message.data.data.name + ":" + item.message.data.data.line + ":" + item.message.data.data.column
+            const node = treeRef.value.getNode(key)
+            if (node) {
+                node.data.status = 'running'
             }
-            
-        }else if(item.message.data.type=='test:pass'){
-            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
-            const node=treeRef.value.getNode(key)
-            if(node){
-                
-                node.data.status='pass'
-                if(item.message.data.data.skip){
-                    node.data.status='skip'
+
+        } else if (item.message.data.type == 'test:pass') {
+            const key = item.message.data.data.name + ":" + item.message.data.data.line + ":" + item.message.data.data.column
+            const node = treeRef.value.getNode(key)
+            if (node) {
+
+                node.data.status = 'pass'
+                if (item.message.data.data.skip) {
+                    node.data.status = 'skip'
                 }
                 // if(item.message.data.data.todo){
                 //     node.data.status='todo'
                 // }
-               
-                node.data.time=Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
+
+                node.data.time = Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
             }
-        }else if(item.message.data.type=='test:fail'){
-            const key=item.message.data.data.name+":"+item.message.data.data.line+":"+item.message.data.data.column
-            const node=treeRef.value.getNode(key)
-            if(node){
-              
-                node.data.status='fail'
+        } else if (item.message.data.type == 'test:fail') {
+            const key = item.message.data.data.name + ":" + item.message.data.data.line + ":" + item.message.data.data.column
+            const node = treeRef.value.getNode(key)
+            if (node) {
+
+                node.data.status = 'fail'
                 // if(item.message.data.data.todo){
                 //     node.data.status='todo'
                 // }
-                node.data.time=Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
+                node.data.time = Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
             }
         }
     }
-    
+
 }
 onMounted(() => {
     window.jQuery('#testerServiceShift').resizable({
@@ -552,11 +584,11 @@ onMounted(() => {
     window.logBus.on('testInfo', testLog)
     buildTree()
     window.electron.ipcRenderer.on('ipc-get-test', (event, data) => {
-        const id=data[0]
-        if(id){
-            runtime.testStates.activeTest=tData.value[0].children?.find(item=>item.id==id)
+        const id = data[0]
+        if (id) {
+            runtime.testStates.activeTest = tData.value[0].children?.find(item => item.id == id)
         }
-       
+
     })
 })
 onUnmounted(() => {
@@ -654,9 +686,9 @@ function buildSubTree(infos: TestEvent[]) {
     const roots: TestTree[] = [];
     function startTest(event: any) {
         const originalSuite = currentSuite;
-     
+
         const testId = `${event.name}:${event.line || 0}:${event.column || 0}`;
-        
+
         currentSuite = {
             id: testId,
             type: 'test',
@@ -692,7 +724,7 @@ function buildSubTree(infos: TestEvent[]) {
                 if (currentSuite?.nesting === event.data.nesting) {
                     currentSuite = currentSuite.parent;
                 }
-               
+
                 const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null);
                 if (nonCommentChildren.length > 0) {
 
@@ -750,7 +782,7 @@ async function handleRefresh(data: TestTree) {
             for (const root of roots) {
                 root2tree(target, root)
             }
-            console.log(target)
+
         } else {
             ElMessageBox.alert('Please select the script file first', 'Warning', {
                 confirmButtonText: 'OK',
@@ -788,7 +820,7 @@ function generateHtml(data: TestTree): string {
         const icon = statusIcons[status as keyof typeof statusIcons] || '❓'
         const color = statusColors[status as keyof typeof statusColors] || '#909399'
         const time = node.time ? `(${node.time}s)` : ''
-        
+
         let html = `
             <div class="test-case" style="margin-left: ${(node.nesting || 0) * 20}px">
                 <div class="test-header" style="color: ${color}">
@@ -798,23 +830,26 @@ function generateHtml(data: TestTree): string {
                 </div>
             </div>
         `
-        
+
         if (node.children && node.children.length > 0) {
             html += `<div class="children">
                 ${node.children.map(child => generateTestCaseHtml(child)).join('')}
             </div>`
         }
-        
+
         return html
     }
 
     const timestamp = new Date().toLocaleString()
+    const testConfig = dataBase.tests[data.id]
+    const scriptPath = testConfig?.script || 'No script specified'
+
     const html = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Test Report - ${data.label}</title>
+            <title>ECUBus-Pro - Test Report</title>
             <style>
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -829,20 +864,45 @@ function generateHtml(data: TestTree): string {
                     box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
                     padding: 20px;
                 }
-                .header {
-                    border-bottom: 1px solid #ebeef5;
-                    padding-bottom: 20px;
+                .report-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
                     margin-bottom: 20px;
+                    padding-bottom: 20px;
+                    border-bottom: 1px solid #ebeef5;
                 }
-                .title {
+                .logo-container {
+                    display: flex;
+                    align-items: center;
+                }
+                .logo {
+                    width: 64px;
+                    height: 64px;
+                    margin-right: 16px;
+                }
+                .software-info {
+                    flex: 1;
+                    padding-top: 0;
+                }
+                .software-name {
                     font-size: 24px;
                     color: #303133;
                     margin: 0;
                 }
+                .report-title {
+                    font-size: 18px;
+                    color: #606266;
+                    margin: 4px 0;
+                }
+                .script-info {
+                    color: #606266;
+                    font-size: 14px;
+                    margin-top: 4px;
+                }
                 .timestamp {
                     color: #909399;
                     font-size: 14px;
-                    margin-top: 8px;
                 }
                 .test-case {
                     margin: 8px 0;
@@ -869,16 +929,53 @@ function generateHtml(data: TestTree): string {
                 .children {
                     margin-left: 20px;
                 }
+                .footer {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 1px solid #ebeef5;
+                    color: #909399;
+                    font-size: 14px;
+                    text-align: center;
+                }
+                
+                .footer a {
+                    color: var(--el-color-primary);
+                    text-decoration: none;
+                }
+                
+                .footer a:hover {
+                    text-decoration: underline;
+                }
+                
+                .footer-links {
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
+                }
             </style>
         </head>
         <body>
             <div class="container">
-                <div class="header">
-                    <h1 class="title">Test Report - ${data.label}</h1>
-                    <div class="timestamp">Generated at: ${timestamp}</div>
+                <div class="report-header">
+                    <div class="logo-container">
+                        <img src="data:image/png;base64,${logo}" class="logo" alt="ECUBus Pro Logo">
+                        <div class="software-info">
+                            <h1 class="software-name">ECUBus-Pro</h1>
+                            <div class="report-title">Test Report - ${data.label}</div>
+                            <div class="script-info">Script: ${scriptPath}</div>
+                            <div class="timestamp">Generated at: ${timestamp}</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="test-cases">
                     ${data.children?.map(child => generateTestCaseHtml(child)).join('') || ''}
+                </div>
+                
+                <div class="footer">
+                    <div class="footer-links">
+                        <a href="https://app.whyengineer.com/" target="_blank">Project Homepage</a>
+                        <a href="https://github.com/ecubus/EcuBus-Pro" target="_blank">GitHub Repository</a>
+                    </div>
                 </div>
             </div>
         </body>
@@ -887,33 +984,68 @@ function generateHtml(data: TestTree): string {
     return html
 }
 
-async function handleExport(data: TestTree,type:'html'|'pdf'='html') {
+async function handleExport(data: TestTree, type: 'html' | 'pdf' = 'html') {
     popoverRefs.value[data.id]?.hide()
-    
-    if(type=='html'){
-        const html = generateHtml(data)
-        console.log(html)
-    }else{
-        // const pdf = generatePdf(data)
+
+    if (type == 'html') {
+        const html = await generateHtml(data)
+
+        try {
+            const d = dataBase.tests[data.id]
+            let path = window.path.join(project.projectInfo.path, `${data.label}.html`)
+            if (d.reportPath) {
+                path = window.path.join(d.reportPath, `${data.label}.html`)
+                if (!window.path.isAbsolute(path)) {
+                    path = window.path.join(project.projectInfo.path, path)
+                    //check if the directory exists
+                    const dir = window.path.dirname(path)
+                    const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', dir)
+                    if (!exists) {
+                        await window.electron.ipcRenderer.invoke('ipc-fs-mkdir', dir)
+                    }
+                }
+            }
+
+            await window.electron.ipcRenderer.invoke('ipc-fs-writeFile', path, html)
+            // ElMessage.success('Test report exported successfully')
+            ElMessageBox.confirm('Test report exported successfully, open it?', 'Success', {
+                confirmButtonText: 'OK',
+                type: 'success',
+                buttonSize: 'small',
+                appendTo: '#wintest'
+            }).then(() => {
+                window.electron.ipcRenderer.send('ipc-open-link', path)
+            }).catch(() => {
+                null
+            })
+
+        } catch (error: any) {
+            const msg = errorParse(error)
+            ElMessageBox.alert(`Failed to export test report: ${msg}`, 'Error', {
+                confirmButtonText: 'OK',
+                type: 'error',
+                buttonSize: 'small',
+                appendTo: '#wintest'
+            })
+        }
     }
-    
-    // try {
-    //     const result = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
-    //         title: 'Save Test Report',
-    //         defaultPath: `${data.label}_test_report.html`,
-    //         filters: [
-    //             { name: 'HTML', extensions: ['html'] }
-    //         ]
-    //     })
-        
-    //     if (result.filePath) {
-    //         await window.electron.ipcRenderer.invoke('ipc-write-file', result.filePath, html)
-    //         ElMessage.success('Test report exported successfully')
-    //     }
-    // } catch (error) {
-    //     ElMessage.error('Failed to export test report')
-    //     console.error(error)
-    // }
+}
+
+async function chooseReportPath() {
+    const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+        defaultPath: project.projectInfo.path,
+        title: 'Report Path',
+        properties: ['openDirectory'],
+    })
+
+    if (r.filePaths[0]) {
+        let path = r.filePaths[0]
+        // 如果选择的路径是项目路径的子目录，则使用相对路径
+        if (project.projectInfo.path && path.startsWith(project.projectInfo.path)) {
+            path = window.path.relative(project.projectInfo.path, path)
+        }
+        model.value.reportPath = path
+    }
 }
 </script>
 <style>
@@ -1132,20 +1264,7 @@ async function handleExport(data: TestTree,type:'html'|'pdf'='html') {
     line-height: 20px;
 }
 
-.menu-item.warning:hover {
-    background-color: var(--el-color-warning-light-9);
-    color: var(--el-color-warning-dark-2);
-}
 
-.menu-item.danger:hover {
-    background-color: var(--el-color-danger-light-9);
-    color: var(--el-color-danger-dark-2);
-}
-
-.menu-item.info:hover {
-    background-color: var(--el-color-primary-light-9);
-    color: var(--el-color-primary-dark-2);
-}
 
 .dialog-footer {
     display: flex;
@@ -1244,6 +1363,7 @@ async function handleExport(data: TestTree,type:'html'|'pdf'='html') {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -1255,6 +1375,56 @@ async function handleExport(data: TestTree,type:'html'|'pdf'='html') {
 
 .icon-todo {
     color: var(--el-color-warning);
+}
+
+.menu-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 8px;
+    height: auto;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.menu-button.warning:hover {
+    color: var(--el-color-warning-dark-2);
+    background-color: var(--el-color-warning-light-9);
+}
+
+.menu-button.danger:hover {
+    color: var(--el-color-danger-dark-2);
+    background-color: var(--el-color-danger-light-9);
+}
+
+.menu-button.info:hover {
+    color: var(--el-color-primary-dark-2);
+    background-color: var(--el-color-primary-light-9);
+}
+
+.menu-button :deep(.iconify) {
+    margin-right: 4px;
+    font-size: 16px;
+}
+
+.form-tip {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-top: 4px;
+    line-height: 1.2;
+}
+
+:deep(.el-dialog__body) {
+    padding: 10px 20px;
+    /* Remove default max-height if any */
+    max-height: none;
+}
+
+:deep(.el-form-item:last-child) {
+    margin-bottom: 0;
+}
+
+:deep(.el-scrollbar__wrap) {
+    padding-right: 10px;
 }
 </style>
 

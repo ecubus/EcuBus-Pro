@@ -46,7 +46,8 @@
       "8e639030-23ea-45f1-a906-82c4bb4fb192": {
         "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
         "name": "Test Config 01",
-        "script": "test.ts"
+        "script": "test.ts",
+        "reportPath": "./report"
       },
       "e284033a-c906-4bab-9912-dd08d533bd0f": {
         "id": "e284033a-c906-4bab-9912-dd08d533bd0f",
@@ -98,8 +99,8 @@
       },
       "test": {
         "pos": {
-          "x": 683.5,
-          "y": 32,
+          "x": 961.5,
+          "y": 26,
           "w": 600,
           "h": 400
         },

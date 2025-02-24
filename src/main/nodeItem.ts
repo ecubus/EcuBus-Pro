@@ -38,7 +38,13 @@ export class NodeClass {
     private ethBaseMap: Map<string, EthBaseInfo>,
     private projectPath: string,
     private projectName: string,
-    private testers: Record<string, TesterInfo>
+    private testers: Record<string, TesterInfo>,
+    testOptions?:
+      | {
+          testOnly?: boolean
+          id?: string
+        }
+      | undefined
   ) {
     for (const c of nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
@@ -74,12 +80,13 @@ export class NodeClass {
           {
             PROJECT_ROOT: this.projectPath,
             PROJECT_NAME: this.projectName,
-            MODE: 'node',
+            MODE: testOptions ? 'test' : 'node',
             NAME: nodeItem.name
           },
           jsPath,
           this.log,
-          this.testers
+          this.testers,
+          testOptions
         )
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
@@ -250,6 +257,9 @@ export class NodeClass {
         }
       }
     }
+  }
+  getTestInfo() {
+    return this.pool?.getTestInfo()
   }
   setSignal(
     pool: UdsTester,

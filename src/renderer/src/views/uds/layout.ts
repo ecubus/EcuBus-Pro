@@ -18,6 +18,7 @@ import interIcon from '@iconify/icons-material-symbols/interactive-space-outline
 import panelIcon from '@iconify/icons-material-symbols/pan-tool'
 import log from 'electron-log'
 import graphIcon from '@iconify/icons-ep/histogram'
+import testIcon from '@iconify/icons-grommet-icons/test'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -37,6 +38,17 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
+  test: {
+    i: 'Test',
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 400,
+    label: 'Test',
+    key: 'test',
+    component: defineAsyncComponent(() => import('./test.vue')),
+    icon: testIcon
+  },
   graph: {
     i: 'Graph',
     x: 0,

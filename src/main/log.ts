@@ -7,6 +7,7 @@ import EventEmitter from 'events'
 import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
+import { TestEvent } from 'node:test/reporters'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -240,6 +241,13 @@ export class UdsLOG {
   }
   close() {
     this.log.close()
+  }
+  testInfo(id: string | undefined, event: TestEvent) {
+    this.log.info({
+      method: 'testInfo',
+      id,
+      data: event
+    })
   }
 }
 

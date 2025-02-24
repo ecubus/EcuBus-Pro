@@ -34,13 +34,15 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem } from 'src/preload/data'
+import { DataSet, LinInter, NodeItem, TestConfig } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
 import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
+import { getJsPath } from '../util'
+import UdsTester from '../workerClient'
 
 const libPath = path.dirname(dllLib)
 log.info('dll lib path:', libPath)
@@ -71,6 +73,7 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
   const projectName = arg[1] as string
   const data = arg[2] as DataSet
   const entry = arg[3] as string
+  const isTest = arg[4] || false
 
   const result = await compileTsc(
     projectPath,
@@ -79,7 +82,7 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     entry,
     esbuildWin,
     path.join(libPath, 'js'),
-    'ECB'
+    isTest
   )
   if (result.length > 0) {
     for (const err of result) {
@@ -87,6 +90,87 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     }
   }
   return result
+})
+
+ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
+  const projectPath = arg[0] as string
+  const projectName = arg[1] as string
+  const test = arg[2] as TestConfig
+  const testers = arg[3] as Record<string, TesterInfo>
+
+  const log = new UdsLOG(test.name)
+  const jsPath = getJsPath(test.script, projectPath)
+  const worker = new UdsTester(
+    {
+      PROJECT_ROOT: projectPath,
+      PROJECT_NAME: projectName,
+      MODE: 'test',
+      NAME: test.name
+    },
+    jsPath,
+    log,
+    testers,
+    { testOnly: true }
+  )
+  await worker.start(projectPath)
+  const testInfo = await worker.getTestInfo()
+  worker.stop()
+
+  return testInfo
+})
+
+const testMap = new Map<string, NodeClass>()
+ipcMain.handle('ipc-run-test', async (event, ...arg) => {
+  const projectPath = arg[0] as string
+  const projectName = arg[1] as string
+  const test = arg[2] as TestConfig
+  const testers = arg[3] as Record<string, TesterInfo>
+  const last = testMap.get(test.id)
+  if (last) {
+    last.close()
+    testMap.delete(test.id)
+  }
+  const nodeItem: NodeItem = {
+    id: test.id,
+    name: test.name,
+    channel: test.channel,
+    script: test.script
+  }
+  const node = new NodeClass(
+    nodeItem,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    projectPath,
+    projectName,
+    testers,
+    {
+      id: test.id
+    }
+  )
+
+  await node.start()
+  testMap.set(test.id, node)
+  try {
+    await node.getTestInfo()
+  } catch (err: any) {
+    null
+  }
+  node.close()
+})
+
+ipcMain.handle('ipc-stop-test', async (event, ...arg) => {
+  const testId = arg[0] as string
+  const worker = testMap.get(testId)
+  if (worker) {
+    worker.close()
+    testMap.delete(testId)
+  }
+})
+
+ipcMain.handle('ipc-get-test', async (event, ...arg) => {
+  return testMap.keys()
 })
 
 ipcMain.handle('ipc-delete-node', async (event, ...arg) => {
@@ -155,6 +239,10 @@ async function globalStart(
   projectInfo: { path: string; name: string }
 ) {
   let activeKey = ''
+  testMap.forEach((value) => {
+    value.close()
+  })
+  testMap.clear()
   try {
     for (const key in devices) {
       const device = devices[key]
@@ -403,10 +491,7 @@ ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
   globalStop()
 })
 
-interface schType {
-  schName: string
-}
-const schMap = new Map<string, schType>()
+const schMap = new Map<string, LinBase>()
 ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
   const linIa: LinInter = arg[0] as LinInter
   const schName: string = arg[1] as string
@@ -419,7 +504,7 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     if (base && base.info.database) {
       const db = global.database.lin[base.info.database]
       base.startSch(db, schName, active, 0)
-      schMap.set(base.info.id, { schName })
+      schMap.set(base.info.id, base)
     }
   })
 })
@@ -440,7 +525,8 @@ ipcMain.handle('ipc-stop-schedule', async (event, ...arg) => {
 
 ipcMain.handle('ipc-get-schedule', async (event, ...arg) => {
   const id = arg[0] as string
-  return schMap.get(id)
+  const val = schMap.get(id)
+  return val?.getActiveSchName()
 })
 
 ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
@@ -610,13 +696,13 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
   }
 })
 
-ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
-  const info: Record<string, number> = {}
-  timerMap.forEach((value, key) => {
-    info[key] = value.period
-  })
-  return info
-})
+// ipcMain.handle('ipc-get-can-period', (event, ...arg) => {
+//     const info: Record<string, number> = {}
+//     timerMap.forEach((value, key) => {
+//         info[key] = value.period
+//     })
+//     return info
+// })
 
 function send(id: string) {
   const item = timerMap.get(id)

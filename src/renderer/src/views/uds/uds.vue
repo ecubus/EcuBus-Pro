@@ -158,6 +158,43 @@
             </div>
           </div>
         </el-tab-pane>
+        <el-tab-pane name="test">
+          <template #label>
+            <span class="lr">
+              <Icon :icon="testConfig" style="font-size: 16px" />
+              <span>Test</span>
+            </span>
+          </template>
+          <div style="display: flex; gap: 5px; padding: 15px">
+            <div class="grid girdenable" @click="handleSelect(['test'])">
+              <Icon :icon="testConfig" style="font-size: 18px; height: 24px" />
+              <span>Test Setup</span>
+            </div>
+            <!-- <div class="grid girdenable">
+              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
+              <el-dropdown @command="openDatabase">
+                <span class="lr">
+                  Test Config
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                  
+                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
+                     >
+                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
+
+                    </el-dropdown-item>
+                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
+
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div> -->
+          </div>
+        </el-tab-pane>
         <!-- <el-tab-pane label="">
         <template #label>
           <span class="lr">
@@ -529,6 +566,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
+import testConfig from '@iconify/icons-grommet-icons/test'
+import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -936,7 +975,7 @@ watch([contentH, contentW], (val) => {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  width: 80px;
+  width: 90px;
   height: 46px;
   padding: 4px;
   color: var(--el-color-info-dark-2);

@@ -52,6 +52,7 @@ export default abstract class LinBase {
     lastActiveIndex?: number
     diag?: DiagItem
   }
+  schName?: string
   abstract info: LinBaseInfo
   abstract log: LinLOG
   nodeList: {
@@ -233,10 +234,14 @@ export default abstract class LinBase {
     }
   }
 
+  getActiveSchName() {
+    return this.schName
+  }
   startSch(db: LDF, schName: string, activeMap: Record<string, boolean>, rIndex: number) {
     if (this.info.mode == LinMode.SLAVE) {
       return
     }
+    this.schName = schName
     const backUpSchName = schName
     const backUpIndex = rIndex
     clearTimeout(this.schTimer)

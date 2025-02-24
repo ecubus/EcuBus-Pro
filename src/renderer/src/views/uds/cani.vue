@@ -66,10 +66,10 @@
       <template #edit_channel="{ row }">
         <el-select v-model="row.channel" size="small" style="width: 100%" clearable>
           <el-option
-            v-for="(item, key) in devices"
+            v-for="key in dataBase.ia[editIndex].devices"
             :key="key"
             :value="key"
-            :label="item.name"
+            :label="devices[key].name"
           ></el-option>
         </el-select>
       </template>
@@ -341,6 +341,7 @@ import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
 import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
+import { useRuntimeStore } from '@r/stores/runtime'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -357,7 +358,33 @@ const buttonRef = ref({})
 const popoverIndex = ref(-1)
 const ppRef = computed(() => buttonRef.value[popoverIndex.value])
 const globalStart = toRef(window, 'globalStart')
-const periodTimer = ref<Record<number, boolean>>({})
+const runtime = useRuntimeStore()
+const periodTimer = computed({
+  get: () => {
+    const result: Record<number, boolean> = {}
+    for (const [key, value] of Object.entries(runtime.canPeriods)) {
+      const a = key.split('-')
+      const item = a.slice(0, -1).join('-')
+      const index = Number(a[a.length - 1])
+
+      if (item === editIndex.value) {
+        result[index] = value
+      }
+    }
+    return result
+  },
+  set: (val) => {
+    // 当 periodTimer 被设置时，更新 runtime store
+    for (const [index, value] of Object.entries(val)) {
+      const key = `${editIndex.value}-${index}`
+      if (value) {
+        runtime.setCanPeriod(key, true)
+      } else {
+        runtime.removeCanPeriod(key)
+      }
+    }
+  }
+})
 const selectFrameVisible = ref(false)
 const speicalDb = computed(() => {
   //connected device db
@@ -418,7 +445,7 @@ const gridOptions = computed(() => {
       {
         type: 'seq',
         width: 50,
-        title: '',
+        title: '#',
         align: 'center',
         fixed: 'left',
         resizable: false
@@ -481,7 +508,12 @@ function addFrame() {
 }
 watch(globalStart, (v) => {
   if (v == false) {
-    periodTimer.value = {}
+    // 当全局停止时，清除所有周期发送状态
+    for (const key of Object.keys(runtime.canPeriods)) {
+      if (key.startsWith(editIndex.value + '-')) {
+        runtime.removeCanPeriod(key)
+      }
+    }
   }
 })
 function getLenByDlc(dlc: number, canFd: boolean) {
@@ -612,16 +644,13 @@ function sendFrame(index: number) {
     if (frame.trigger.type == 'manual') {
       window.electron.ipcRenderer.send('ipc-send-can', cloneDeep(frame))
     } else {
-      if (periodTimer.value[index] == true) {
-        periodTimer.value[index] = false
-        window.electron.ipcRenderer.send('ipc-stop-can-period', `${editIndex.value}-${index}`)
+      const key = `${editIndex.value}-${index}`
+      if (runtime.canPeriods[key]) {
+        runtime.removeCanPeriod(key)
+        window.electron.ipcRenderer.send('ipc-stop-can-period', key)
       } else {
-        periodTimer.value[index] = true
-        window.electron.ipcRenderer.send(
-          'ipc-send-can-period',
-          `${editIndex.value}-${index}`,
-          cloneDeep(frame)
-        )
+        runtime.setCanPeriod(key, true)
+        window.electron.ipcRenderer.send('ipc-send-can-period', key, cloneDeep(frame))
       }
     }
   }
@@ -631,9 +660,7 @@ const devices = computed(() => {
   const dd: Record<string, CanBaseInfo> = {}
   for (const d in dataBase.devices) {
     if (dataBase.devices[d] && dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
-      if (dataBase.ia[editIndex.value].devices.includes(d)) {
-        dd[d] = dataBase.devices[d].canDevice
-      }
+      dd[d] = dataBase.devices[d].canDevice
     }
   }
   return dd
@@ -709,17 +736,7 @@ watch(
 const fh = computed(() => Math.ceil((h.value * 2) / 3) + 'px')
 
 onMounted(async () => {
-  // Get initial period status
-  const periods = await window.electron.ipcRenderer.invoke('ipc-get-can-period')
-  for (const [key, period] of Object.entries(periods)) {
-    const a = key.split('-')
-    const item = a.slice(0, -1).join('-')
-    const index = Number(a[a.length - 1])
-
-    if (item === editIndex.value) {
-      periodTimer.value[index] = true
-    }
-  }
+  // 不再需要从 IPC 获取状态
 })
 
 function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {

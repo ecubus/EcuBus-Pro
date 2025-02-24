@@ -32,13 +32,20 @@ export type { CanMessage }
 export type { EntityAddr }
 export type { LinMsg }
 export type { CanMsgType } from '../share/can'
+import { dot } from 'node:test/reporters'
+import assert from 'node:assert'
+export { assert }
+export { test, beforeEach, afterEach, before, after } from 'node:test'
+import { describe } from 'node:test'
+
+const selfDescribe = process.env.ONLY ? describe.only : describe
+export { selfDescribe as describe }
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
 const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 const allSignal = ['{{{signalName}}}'] as const
-
 interface Jobs {
   string: (data: Buffer) => string
 }
@@ -551,23 +558,14 @@ class Service {
    * @returns The diagnostic output timestamp.
    */
   async outputDiag(deviceName?: string, addressName?: string): Promise<number> {
-    try {
-      const ts = await this.asyncEmit('sendDiag', {
-        device: deviceName,
-        address: addressName,
-        service: this.service,
-        isReq: this.isRequest,
-        testerName: this.testerName
-      })
-      return ts
-    } catch (e: any) {
-      const err = new Error('outputDiag error:' + e.toString())
-      //pop stack
-      //just got 0,2,3
-      const stack = err.stack?.split('\n') || []
-      err.stack = [stack[0], stack[2], stack[3]].join('\n')
-      throw err
-    }
+    const ts = await this.asyncEmit('sendDiag', {
+      device: deviceName,
+      address: addressName,
+      service: this.service,
+      isReq: this.isRequest,
+      testerName: this.testerName
+    })
+    return ts
   }
 
   /**
@@ -855,6 +853,19 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for CAN messages that will be invoked once.
+   *
+   * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+   * @param fc - The callback function to be invoked when a CAN message is received.
+   */
+  OnCanOnce(id: number | true, fc: (msg: CanMessage) => void | Promise<void>) {
+    if (id === true) {
+      this.event.once('can' as any).then(fc)
+    } else {
+      this.event.once(`can.${id}` as any).then(fc)
+    }
+  }
+  /**
    * Unsubscribes from CAN messages.
    *
    * @param id - The identifier of the CAN message to unsubscribe from. If `true`, unsubscribes from all CAN messages.
@@ -865,6 +876,19 @@ export class UtilClass {
       this.event.off('can' as any, fc)
     } else {
       this.event.off(`can.${id}` as any, fc)
+    }
+  }
+  /**
+   * Registers an event listener for LIN messages that will be invoked once.
+   *
+   * @param id - The LIN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all LIN messages.
+   * @param fc - The callback function to be invoked when a LIN message is received.
+   */
+  OnLinOnce(id: number | string | true, fc: (msg: LinMsg) => void | Promise<void>) {
+    if (id === true) {
+      this.event.once('lin' as any).then(fc)
+    } else {
+      this.event.once(`lin.${id}` as any).then(fc)
     }
   }
   /**
@@ -907,6 +931,19 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for a specific key that will be invoked once.
+   *
+   * @param key - The key to listen for. Only the first character of the key is used, * is a wildcard.
+   * @param fc - The callback function to be executed when the event is triggered.
+   *             This can be a synchronous function or a function returning a Promise.
+   */
+  OnKeyOnce(key: string, fc: (key: string) => void | Promise<void>) {
+    key = key.slice(0, 1)
+    if (key) {
+      this.event.once(`keyDown${key}` as any).then(fc)
+    }
+  }
+  /**
    * Unsubscribes from an event listener for a specific key.
    *
    * @param key - The key to unsubscribe from. Only the first character of the key is used, * is a wildcard.
@@ -916,6 +953,45 @@ export class UtilClass {
     key = key.slice(0, 1)
     if (key) {
       this.event.off(`keyDown${key}` as any, fc)
+    }
+  }
+  /**
+   * Subscribe to an event once, invoking the registered function when the event is emitted.
+   * @param eventName
+   * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+   *
+   * @param listener
+   * Function to be called when the event is emitted
+   *
+   * @example
+   *
+   * ```ts
+   * Util.OnOnce('Can.testService.send', async (req) => {
+   *    // The req is a `DiagRequest`
+   *    console.log(req.getServiceName(), ': send once');
+   * });
+   * ```
+   */
+  OnOnce<Name extends keyof EventMap>(
+    eventName: Name,
+    listener: (eventData: EventMap[Name]) => void | Promise<void>
+  ) {
+    if (eventName.endsWith('.send')) {
+      const warpFunc = async (v: any) => {
+        const testerName = eventName.split('.')[0]
+        const req = new DiagRequest(testerName, v as any)
+        await listener(req as any)
+      }
+      this.event.once(eventName).then(warpFunc)
+    } else if (eventName.endsWith('.recv')) {
+      const warpFunc = async (v: any) => {
+        const testerName = eventName.split('.')[0]
+        const resp = new DiagResponse(testerName, v)
+        await listener(resp as any)
+      }
+      this.event.once(eventName).then(warpFunc)
+    } else {
+      throw new Error(`event ${eventName} not support`)
     }
   }
   /**
@@ -1187,16 +1263,7 @@ export async function output(msg: CanMessage | LinMsg): Promise<number> {
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('output error:' + e.toString())
-    //pop stack
-    //just got 0,2,3
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
+  return await p
 }
 
 /**
@@ -1233,14 +1300,8 @@ export async function setSignal(
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('setSignal error: ' + e.toString())
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
-  }
+
+  return await p
 }
 
 let rightEntity: EntityAddr | undefined
@@ -1271,14 +1332,28 @@ export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string) {
     emitMap.set(id, { resolve, reject })
     id++
   })
-  try {
-    return await p
-  } catch (e: any) {
-    const err = new Error('RegisterEthVirtualEntity error:' + e.toString())
-    //pop stack
-    //just got 0,2,3
-    const stack = err.stack?.split('\n') || []
-    err.stack = [stack[0], stack[2], stack[3]].join('\n')
-    throw err
+
+  return await p
+}
+
+//get dot input param type
+type TestEventGenerator = Parameters<typeof dot>[0]
+
+// eslint-disable-next-line require-yield
+export async function* reporter(source: TestEventGenerator) {
+  for await (const event of source) {
+    if (
+      event.type === 'test:start' ||
+      event.type === 'test:pass' ||
+      event.type === 'test:fail' ||
+      event.type === 'test:diagnostic'
+    ) {
+      workerpool.workerEmit({
+        event: 'test',
+        id: id,
+        data: event
+      })
+      id++
+    }
   }
 }

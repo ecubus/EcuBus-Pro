@@ -148,22 +148,35 @@ function removeDevice(id: string) {
       null
     })
 }
+function generateUniqueName(type: HardwareType): string {
+  let index = 0
+  let name = `Tester_${type}_${index}`
+
+  // 检查是否存在同名配置
+  while (Object.values(globalData.tester).some((tester) => tester.name === name)) {
+    index++
+    name = `Tester_${type}_${index}`
+  }
+
+  return name
+}
 function addNewDevice(node: tree) {
   activeTree.value = undefined
   const id = v4()
-  //create uniq name for tester
-  let maxNumber = 0
-  // 遍历所有tester找出当前最大的编号
-  for (const item of Object.values(globalData.tester)) {
-    const match = item.name.match(/Tester_(\d+)/)
-    if (match) {
-      const number = parseInt(match[1])
-      maxNumber = Math.max(maxNumber, number)
-    }
-  }
-  // 新的name使用最大编号+1
-  const name = `Tester_${node.type}_${maxNumber + 1}`
-  treeRef.value?.append({ label: name, append: false, id: id, type: node.type }, node.id)
+
+  // 使用新的生成唯一名称的函数
+  const name = generateUniqueName(node.type)
+
+  treeRef.value?.append(
+    {
+      label: name,
+      append: false,
+      id: id,
+      type: node.type
+    },
+    node.id
+  )
+
   globalData.tester[id] = {
     id: id,
     name: name,
@@ -180,6 +193,7 @@ function addNewDevice(node: tree) {
     },
     allServiceList: {}
   }
+
   nextTick(() => {
     activeTree.value = treeRef.value?.getNode(id).data
     treeRef.value.setCurrentKey(id)

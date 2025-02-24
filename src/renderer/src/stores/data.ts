@@ -17,7 +17,8 @@ export const useDataStore = defineStore('useDataStore', {
       lin: {},
       can: {}
     },
-    graphs: {}
+    graphs: {},
+    tests: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -61,7 +62,8 @@ export const useDataStore = defineStore('useDataStore', {
         subFunction: this.subFunction,
         nodes: this.nodes,
         database: this.database,
-        graphs: this.graphs
+        graphs: this.graphs,
+        tests: this.tests
       }
     }
   }

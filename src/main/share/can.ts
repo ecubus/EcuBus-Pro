@@ -187,22 +187,34 @@ export interface CanInterAction {
   data: string[]
 }
 export function formatError(error: Error) {
-  // 获取错误堆栈
+  console.log('x', error)
+  // Get error stack
   const stack = error.stack || ''
 
-  // 获取第一个堆栈行（通常包含错误位置）
+  // Get first stack line (usually contains error location)
   const locationLine = stack.split('\n')[1] || ''
 
-  // 提取文件位置信息
-  const locationMatch = locationLine.match(/\((.*):(\d+):(\d+)\)$/)
+  // Extract file location info
+  const locationMatch = locationLine.match(/webpack:\\ecubuspro\\(.*):(\d+):(\d+)\)$/)
 
   let location = ''
   if (locationMatch) {
     const [, file, line, column] = locationMatch
-    location = `${file}:${line}:${column}`
+    //
+    // Convert webpack path to GitHub URL，#L${line}C${column}-L${line}C${column}
+    location = `https://github.com/ecubus/EcuBus-Pro/blob/master/${file}#L${line}C${column}`
+  } else {
+    // at listener (D:\code\ecubus-pro\resources\examples\test_simple\node.ts:5:11)
+    const newMatch = locationLine.match(/\((.*):(\d+):(\d+)\)/)
+    if (newMatch) {
+      const [, file, line, column] = newMatch
+      location = `file://${file}:${line}:${column}`
+    } else {
+      location = locationLine
+    }
   }
 
-  // 返回简化的错误信息
+  // Return simplified error message
   return `Error: ${error.message}, Pos: ${location}`
 }
 

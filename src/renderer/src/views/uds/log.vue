@@ -56,6 +56,9 @@
           </el-dropdown>
         </div>
       </template>
+      <template #message_content="{ row }">
+        <span v-html="convertMessageToHtml(row.message)"></span>
+      </template>
     </VxeGrid>
   </div>
 </template>
@@ -70,6 +73,7 @@ import infoIcon from '@iconify/icons-material-symbols/info-outline'
 import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
 import warnIcon from '@iconify/icons-material-symbols/warning-outline-rounded'
 import saveIcon from '@iconify/icons-material-symbols/save'
+import { useProjectStore } from '@r/stores/project'
 interface LogData {
   time: string
   label: string
@@ -100,6 +104,20 @@ watch(window.globalStart, (val) => {
   }
 })
 const tableHeight = toRef(props, 'height')
+const project = useProjectStore()
+// Add new function to convert message text to HTML with clickable links
+function convertMessageToHtml(message: string) {
+  return message.replace(/(https?:\/\/[^\s]+|file:\/\/[^\s]+)/g, (match) => {
+    if (match.startsWith('file://')) {
+      // Remove 'file://' prefix and convert to relative path
+      const absolutePath = match.substring(7)
+      const relativePath = window.path.relative(project.projectInfo.path, absolutePath)
+      return `<strong>${relativePath}</strong>`
+    }
+    // Handle regular http/https URLs as before
+    return `<a href="${match}" target="_blank">${match}</a>`
+  })
+}
 
 const gridOptions = computed(() => {
   const v: VxeGridProps<LogData> = {
@@ -136,7 +154,12 @@ const gridOptions = computed(() => {
       },
       { field: 'time', title: 'Time', width: 150 },
       { field: 'label', title: 'Source', width: 200 },
-      { field: 'message', title: 'Message', align: 'left' }
+      {
+        field: 'message',
+        title: 'Message',
+        align: 'left',
+        slots: { default: 'message_content' } // Add custom slot for message
+      }
     ],
     rowClassName: ({ row }) => {
       return row.level
@@ -242,5 +265,16 @@ onUnmounted(() => {
 
 .warn {
   color: var(--el-color-warning);
+}
+
+/* Add styles for links in messages */
+.sequenceTable a {
+  color: var(--el-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sequenceTable a:hover {
+  text-decoration: underline;
 }
 </style>

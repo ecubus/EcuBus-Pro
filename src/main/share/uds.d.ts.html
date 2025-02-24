@@ -1,3 +1,8 @@
+import { dot } from 'node:test/reporters';
+export { default as assert } from 'node:assert';
+import { describe } from 'node:test';
+export { after, afterEach, before, beforeEach, test } from 'node:test';
+
 /**
  * Represents a CAN (Controller Area Network) message.
  *
@@ -259,6 +264,8 @@ declare class SecureAccessDll {
     GenerateKeyEx(ipSeedArray: Buffer, iSecurityLevel: number, ipVariant: Buffer, key: Buffer): Buffer;
     private loadDll;
 }
+
+declare const selfDescribe: typeof describe.only;
 
 declare const testerList: readonly [
                 {{#each this.testers}}
@@ -879,12 +886,26 @@ declare class UtilClass {
      */
     OnCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
     /**
+     * Registers an event listener for CAN messages that will be invoked once.
+     *
+     * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+     * @param fc - The callback function to be invoked when a CAN message is received.
+     */
+    OnCanOnce(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
+    /**
      * Unsubscribes from CAN messages.
      *
      * @param id - The identifier of the CAN message to unsubscribe from. If `true`, unsubscribes from all CAN messages.
      * @param fc - The callback function to remove from the event listeners.
      */
     OffCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
+    /**
+     * Registers an event listener for LIN messages that will be invoked once.
+     *
+     * @param id - The LIN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all LIN messages.
+     * @param fc - The callback function to be invoked when a LIN message is received.
+     */
+    OnLinOnce(id: number | string | true, fc: (msg: LinMsg) => void | Promise<void>): void;
     /**
      * Registers an event listener for LIN messages.
      *
@@ -908,12 +929,38 @@ declare class UtilClass {
      */
     OnKey(key: string, fc: (key: string) => void | Promise<void>): void;
     /**
+     * Registers an event listener for a specific key that will be invoked once.
+     *
+     * @param key - The key to listen for. Only the first character of the key is used, * is a wildcard.
+     * @param fc - The callback function to be executed when the event is triggered.
+     *             This can be a synchronous function or a function returning a Promise.
+     */
+    OnKeyOnce(key: string, fc: (key: string) => void | Promise<void>): void;
+    /**
      * Unsubscribes from an event listener for a specific key.
      *
      * @param key - The key to unsubscribe from. Only the first character of the key is used, * is a wildcard.
      * @param fc - The callback function to remove from the event listeners.
      */
     OffKey(key: string, fc: (key: string) => void | Promise<void>): void;
+    /**
+     * Subscribe to an event once, invoking the registered function when the event is emitted.
+     * @param eventName
+     * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
+     *
+     * @param listener
+     * Function to be called when the event is emitted
+     *
+     * @example
+     *
+     * ```ts
+     * Util.OnOnce('Can.testService.send', async (req) => {
+     *    // The req is a `DiagRequest`
+     *    console.log(req.getServiceName(), ': send once');
+     * });
+     * ```
+     */
+    OnOnce<Name extends keyof EventMap>(eventName: Name, listener: (eventData: EventMap[Name]) => void | Promise<void>): void;
     /**
      * Subscribe to an event, invoking the registered function when the event is emitted.
      * @param eventName
@@ -1109,5 +1156,7 @@ declare function setSignal(signal: SignalName, value: number | number[] | string
  * @returns {Promise<void>} - Returns a promise that resolves when the entity is registered.
  */
 declare function RegisterEthVirtualEntity(entity: VinInfo, ip?: string): Promise<void>;
+type TestEventGenerator = Parameters<typeof dot>[0];
+declare function reporter(source: TestEventGenerator): AsyncGenerator<never, void, unknown>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, output, setSignal };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, selfDescribe as describe, output, reporter, setSignal };

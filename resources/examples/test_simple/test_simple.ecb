@@ -1,0 +1,164 @@
+{
+  "data": {
+    "devices": {
+      "b283da7b-1165-4e62-a609-b0eac40cb8a8": {
+        "type": "can",
+        "canDevice": {
+          "id": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_16"
+          }
+        }
+      }
+    },
+    "ia": {
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e": {
+        "name": "Can IA",
+        "type": "can",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e",
+        "devices": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "periodic"
+            },
+            "name": "",
+            "id": "1",
+            "channel": "b283da7b-1165-4e62-a609-b0eac40cb8a8",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_24"
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018": {
+        "name": "Node 1",
+        "type": "can",
+        "id": "b6e943fd-f8f4-44b0-aa6b-f5d4fd7a3018",
+        "channel": [
+          "b283da7b-1165-4e62-a609-b0eac40cb8a8"
+        ],
+        "workNode": "",
+        "script": "node.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "tests": {
+      "8e639030-23ea-45f1-a906-82c4bb4fb192": {
+        "id": "8e639030-23ea-45f1-a906-82c4bb4fb192",
+        "name": "Test Config 01",
+        "script": "test.ts",
+        "reportPath": "./report",
+        "channel": [
+          "SIMULATE_0"
+        ]
+      }
+    }
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2562,
+          "h": 356
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 329,
+          "y": 158.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 55,
+          "y": 30.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 769.5,
+          "y": 32,
+          "w": 600,
+          "h": 400
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      },
+      "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia": {
+        "pos": {
+          "x": 503.5,
+          "y": 52,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e_ia",
+        "options": {
+          "params": {
+            "edit-index": "1e1f0b3f-a46b-45e9-848f-ed899671cd5e"
+          },
+          "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 686.5,
+          "y": 163,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      }
+    }
+  }
+}

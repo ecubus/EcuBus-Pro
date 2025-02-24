@@ -23,6 +23,7 @@ import fs from 'fs'
 import { LIN_TP, TpError } from './lintp'
 import { findService } from '../docan/uds'
 import { NodeItem } from 'src/preload/data'
+import { getJsPath } from '../util'
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)

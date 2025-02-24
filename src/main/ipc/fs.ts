@@ -30,6 +30,10 @@ ipcMain.handle('ipc-fs-writeFile', async (event, ...args) => {
 ipcMain.handle('ipc-fs-readdir', async (event, ...args) => {
   return fsP.readdir(args[0], { withFileTypes: true })
 })
+ipcMain.handle('ipc-fs-mkdir', async (event, ...args) => {
+  const dir = args[0]
+  return fsP.mkdir(dir, { recursive: true })
+})
 
 ipcMain.handle('ipc-fs-exist', async (event, ...args) => {
   return fs.existsSync(args[0])

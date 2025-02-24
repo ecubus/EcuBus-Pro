@@ -102,6 +102,7 @@ import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
 import { LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
+import { getJsPath } from '../util'
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
   0x11: 'Service Not Supported',
@@ -274,11 +275,7 @@ export class UDSTesterMain {
           throw new Error('script file should be a typescript file')
         }
 
-        const outDir = path.join(this.project.projectPath, '.ScriptBuild')
-
-        //change ts to outdir/*js
-        const scriptNameNoExt = path.basename(scriptPath, '.ts')
-        const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+        const jsPath = getJsPath(scriptPath, this.project.projectPath)
 
         this.pool = new UdsTester(
           {
@@ -899,8 +896,7 @@ export async function getBuildStatus(projectPath: string, projectName: string, s
   if (path.isAbsolute(script) === false) {
     script = path.join(projectPath, script)
   }
-  const outputDir = path.join(projectPath, '.ScriptBuild')
-  const outFile = path.join(outputDir, path.basename(script, '.ts') + '.js')
+  const outFile = getJsPath(script, projectPath)
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'
@@ -1067,6 +1063,16 @@ export * from './utli'
         }
       }
     }
+    for (const test of Object.values(data.tests)) {
+      if (test.script) {
+        if (path.isAbsolute(test.script) === false) {
+          ;((tsconfig as any).files as string[]).push(test.script)
+        } else {
+          const relativePath = path.relative(projectPath, test.script)
+          ;((tsconfig as any).files as string[]).push(relativePath)
+        }
+      }
+    }
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
@@ -1094,6 +1100,20 @@ export * from './utli'
           }
         } else {
           const relativePath = path.relative(projectPath, node.script)
+          if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
+            ;(tsconfig.files as string[]).push(relativePath)
+          }
+        }
+      }
+    }
+    for (const test of Object.values(data.tests)) {
+      if (test.script) {
+        if (path.isAbsolute(test.script) === false) {
+          if ((tsconfig.files as string[]).indexOf(test.script) == -1) {
+            ;(tsconfig.files as string[]).push(test.script)
+          }
+        } else {
+          const relativePath = path.relative(projectPath, test.script)
           if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
             ;(tsconfig.files as string[]).push(relativePath)
           }
@@ -1156,10 +1176,10 @@ export async function compileTsc(
   entry: string,
   esbuildPath: string,
   libPath: string,
-  vendor = 'YT'
+  isTest: boolean
 ) {
-  await createProject(projectPath, projectName, data, vendor)
-  await refreshProject(projectPath, projectName, data, vendor)
+  await createProject(projectPath, projectName, data, 'ECB')
+  await refreshProject(projectPath, projectName, data, 'ECB')
   if (entry) {
     let script = entry
     if (path.isAbsolute(script) === false) {
@@ -1216,7 +1236,7 @@ export async function compileTsc(
     const outputDir = path.join(projectPath, '.ScriptBuild')
 
     try {
-      await compileTscEntry(script, outputDir, esbuildPath, libPath, vendor)
+      await compileTscEntry(script, outputDir, esbuildPath, libPath, isTest)
     } catch (e: any) {
       return [{ code: -1, message: e.message, file: entry, start: 0, line: 0 }]
     }
@@ -1229,22 +1249,28 @@ async function compileTscEntry(
   outputDir: string,
   esbuildPath: string,
   libPath: string,
-  vendor = 'YT'
+  isTest: boolean
 ) {
   //delete last build
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
-  const v = await exec(esbuildPath, [
+  const cmaArray = [
     entry,
     '--sourcemap',
     '--bundle',
     '--platform=node',
     '--format=cjs',
-    `--alias:${vendor}=${libPath}`,
+    `--alias:ECB=${libPath}`,
     `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
     `--outdir=${outputDir}`,
     `--inject:${path.join(libPath, 'uds.js')}`
-  ])
+  ]
+  if (isTest) {
+    cmaArray.push(
+      `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___('____ecubus_pro_test___',()=>{})`
+    )
+  }
+  const v = await exec(esbuildPath, cmaArray)
   if (v.stderr) {
     if (!v.stderr.includes('Done')) {
       throw new Error(v.stderr)

@@ -8,7 +8,9 @@ export function loadDllPath(dllPath: string) {
 
 export class VSomeIP_Client {
   private rtm: any
-  constructor() {
+  constructor(name: string, configFilePath: string) {
     this.rtm = vsomeip.runtime.get()
+    console.log(this.rtm)
+    this.rtm.create_application(name, configFilePath)
   }
 }

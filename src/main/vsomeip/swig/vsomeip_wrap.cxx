@@ -1269,23 +1269,23 @@ Napi::Value SWIG_NAPI_AppendOutput(Napi::Env env, Napi::Value result, Napi::Valu
 #define SWIGTYPE_p_std__arrayT_unsigned_char_4_t swig_types[14]
 #define SWIGTYPE_p_std__chrono__milliseconds swig_types[15]
 #define SWIGTYPE_p_std__chrono__seconds swig_types[16]
-#define SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t swig_types[17]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t swig_types[18]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t swig_types[19]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t swig_types[20]
-#define SWIGTYPE_p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t swig_types[21]
-#define SWIGTYPE_p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t swig_types[22]
+#define SWIGTYPE_p_std__functionT_bool_fmessage_acceptance_t_const_RF_t swig_types[17]
+#define SWIGTYPE_p_std__functionT_bool_fremote_info_t_const_RF_t swig_types[18]
+#define SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t swig_types[19]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t swig_types[20]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t swig_types[21]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t swig_types[22]
 #define SWIGTYPE_p_std__functionT_void_fF_t swig_types[23]
-#define SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t swig_types[24]
-#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[25]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[26]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[27]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[28]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[29]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[30]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[31]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[32]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t swig_types[33]
+#define SWIGTYPE_p_std__functionT_void_fip_address_t_const_RF_t swig_types[24]
+#define SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t swig_types[25]
+#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[26]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[27]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[28]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[29]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[30]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[31]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[32]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[33]
 #define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t swig_types[34]
 #define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t swig_types[35]
 #define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__state_type_eF_t swig_types[36]
@@ -1394,133 +1394,6 @@ template <typename T> T SwigValueInit() {
 
 
 #include <stdint.h>		// Use the C99 official header
-
-
-namespace vsomeip_v3 {
- typedef uint32_t message_t;
-typedef uint16_t service_t;
-typedef uint16_t method_t;
-typedef uint16_t event_t;
-
-typedef uint16_t instance_t;
-typedef uint16_t eventgroup_t;
-
-typedef uint8_t major_version_t;
-typedef uint32_t minor_version_t;
-
-typedef uint32_t ttl_t;
-
-typedef uint32_t request_t;
-typedef uint16_t client_t;
-typedef uint16_t session_t;
-
-typedef uint32_t length_t;
-
-typedef uint8_t protocol_version_t;
-typedef uint8_t interface_version_t;
-
-typedef uint8_t byte_t;
-typedef uint16_t diagnosis_t;
-
-// Addresses
-typedef std::array<byte_t, 4> ipv4_address_t;
-typedef std::array<byte_t, 16> ipv6_address_t;
-typedef std::uint16_t port_t;
-
-typedef std::string trace_channel_t;
-
-typedef std::string trace_filter_type_t;
-
-typedef std::uint32_t pending_remote_offer_id_t;
-
-typedef std::uint32_t pending_security_update_id_t;
-
-#if defined(_WIN32)
-    typedef std::uint32_t uid_t;
-    typedef std::uint32_t gid_t;
-#else
-    typedef ::uid_t uid_t;
-    typedef ::uid_t gid_t;
-#endif
-
-
- enum class state_type_e  : uint8_t ;
-
-// SIP_RPC_684
-enum class message_type_e : uint8_t ;
-
-// SIP_RPC_371
-enum class return_code_e : uint8_t;
-
-enum class routing_state_e : uint8_t;
-
-enum class offer_type_e : uint8_t;
-enum class event_type_e : uint8_t;
-
-enum class security_mode_e : uint8_t;
-
-enum class security_update_state_e : uint8_t;
-
-enum class reliability_type_e : uint8_t;
-
-enum class availability_state_e : uint8_t;
-
-enum class handler_registration_type_e : uint8_t;
-
-enum class endianess_e; // Forward declarations of classes used in vsomeip
-  class application;
-  class message;
-  class payload;
-  class runtime;
-  class constants;
-  typedef std::function< void (state_type_e) > state_handler_t;
-  typedef std::function< void (const std::shared_ptr< message > &) > message_handler_t;
-typedef std::function< void (service_t, instance_t, bool) > availability_handler_t;
-typedef std::function< void (service_t, instance_t, availability_state_e) > availability_state_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< bool (client_t, uid_t, gid_t, bool) > subscription_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< bool (client_t, uid_t, gid_t, const std::string &, bool) > subscription_handler_ext_t;
-typedef std::function< void (const uint16_t) > error_handler_t;
-typedef std::function< void (const service_t, const instance_t, const eventgroup_t,
-                             const event_t, const uint16_t) > subscription_status_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< void (client_t, uid_t, gid_t, bool,
-            std::function< void (const bool) > )> async_subscription_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< void (client_t, uid_t, gid_t, const std::string &, bool,
-            std::function< void (const bool) > )> async_subscription_handler_ext_t;
-
-typedef std::function< void (const std::vector<std::pair<service_t, instance_t>> &_services) > offered_services_handler_t;
-typedef std::function< void () > watchdog_handler_t;
-/*
- * vsomeip_sec_client_t-aware subscription handlers
- */
-using subscription_handler_sec_t       = std::function<bool(client_t, const vsomeip_sec_client_t*, const std::string&, bool)>;
-using async_subscription_handler_sec_t = std::function<void(client_t, const vsomeip_sec_client_t*, const std::string&, bool, std::function<void(bool)>)>;
-
-struct ip_address_t;
-
-struct remote_info_t;
-
-struct message_acceptance_t;
-
-typedef std::function<bool(const remote_info_t&)> sd_acceptance_handler_t;
-typedef std::function<void(const ip_address_t&)> reboot_notification_handler_t;
-typedef std::function<void()> routing_ready_handler_t;
-typedef std::function<void(routing_state_e)> routing_state_handler_t;
-typedef std::function<void(security_update_state_e)> security_update_handler_t;
-typedef std::function<bool(const message_acceptance_t&)> message_acceptance_handler_t;
-
-
-typedef std::function<
-    bool (const std::shared_ptr<payload> &,
-          const std::shared_ptr<payload> &) > epsilon_change_func_t;
-
-
-  struct debounce_filter_t;
-
-}
-
-
-// Define the namespace alias that's in vsomeip.hpp
-namespace vsomeip = vsomeip_v3;
 
 
 SWIGINTERNINLINE Napi::Value
@@ -9002,7 +8875,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_offer_e
   if (!SWIG_IsOK(ecode9)) {
     SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "application_offer_event" "', argument " "9"" of type '" "bool""'");
   } 
-  arg9 = static_cast< bool >(val9);res10 = SWIG_ConvertPtr(info[8], &argp10, SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t,  0 );
+  arg9 = static_cast< bool >(val9);res10 = SWIG_ConvertPtr(info[8], &argp10, SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res10)) {
     SWIG_exception_fail(SWIG_ArgError(res10), "in method '" "application_offer_event" "', argument " "10"" of type '" "vsomeip_v3::epsilon_change_func_t const &""'"); 
   }
@@ -9118,7 +8991,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_offer_e
   if (!SWIG_IsOK(ecode9)) {
     SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "application_offer_event" "', argument " "9"" of type '" "bool""'");
   } 
-  arg9 = static_cast< bool >(val9);res10 = SWIG_ConvertPtr(info[8], &argp10, SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t,  0 );
+  arg9 = static_cast< bool >(val9);res10 = SWIG_ConvertPtr(info[8], &argp10, SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res10)) {
     SWIG_exception_fail(SWIG_ArgError(res10), "in method '" "application_offer_event" "', argument " "10"" of type '" "vsomeip_v3::epsilon_change_func_t const &""'"); 
   }
@@ -12261,7 +12134,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_registe
   if (!SWIG_IsOK(ecode4)) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "application_register_message_handler" "', argument " "4"" of type '" "vsomeip_v3::method_t""'");
   } 
-  arg4 = static_cast< vsomeip_v3::method_t >(val4);res5 = SWIG_ConvertPtr(info[3], &argp5, SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t,  0 );
+  arg4 = static_cast< vsomeip_v3::method_t >(val4);res5 = SWIG_ConvertPtr(info[3], &argp5, SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "application_register_message_handler" "', argument " "5"" of type '" "vsomeip_v3::message_handler_t const &""'"); 
   }
@@ -13842,7 +13715,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_registe
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "application_register_sd_acceptance_handler" "', argument " "1"" of type '" "vsomeip_v3::application *""'"); 
   }
-  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t,  0 );
+  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_bool_fremote_info_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "application_register_sd_acceptance_handler" "', argument " "2"" of type '" "vsomeip_v3::sd_acceptance_handler_t const &""'"); 
   }
@@ -13882,7 +13755,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_registe
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "application_register_reboot_notification_handler" "', argument " "1"" of type '" "vsomeip_v3::application *""'"); 
   }
-  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t,  0 );
+  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_void_fip_address_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "application_register_reboot_notification_handler" "', argument " "2"" of type '" "vsomeip_v3::reboot_notification_handler_t const &""'"); 
   }
@@ -14424,7 +14297,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_registe
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "application_register_message_acceptance_handler" "', argument " "1"" of type '" "vsomeip_v3::application *""'"); 
   }
-  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t,  0 );
+  arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_bool_fmessage_acceptance_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "application_register_message_acceptance_handler" "', argument " "2"" of type '" "vsomeip_v3::message_acceptance_handler_t const &""'"); 
   }
@@ -15311,7 +15184,7 @@ Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_registe
   if (!SWIG_IsOK(ecode4)) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "application_register_message_handler_ext" "', argument " "4"" of type '" "vsomeip_v3::method_t""'");
   } 
-  arg4 = static_cast< vsomeip_v3::method_t >(val4);res5 = SWIG_ConvertPtr(info[3], &argp5, SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t,  0 );
+  arg4 = static_cast< vsomeip_v3::method_t >(val4);res5 = SWIG_ConvertPtr(info[3], &argp5, SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,  0 );
   if (!SWIG_IsOK(res5)) {
     SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "application_register_message_handler_ext" "', argument " "5"" of type '" "vsomeip_v3::message_handler_t const &""'"); 
   }
@@ -17084,14 +16957,15 @@ static swig_type_info _swigt__p_std__arrayT_unsigned_char_16_t = {"_p_std__array
 static swig_type_info _swigt__p_std__arrayT_unsigned_char_4_t = {"_p_std__arrayT_unsigned_char_4_t", "vsomeip_v3::ipv4_address_t *|std::array< unsigned char,4 > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__chrono__milliseconds = {"_p_std__chrono__milliseconds", "std::chrono::milliseconds *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__chrono__seconds = {"_p_std__chrono__seconds", "std::chrono::seconds *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t = {"_p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t", "vsomeip_v3::epsilon_change_func_t *|std::function< bool (std::shared_ptr< vsomeip_v3::payload > const &,std::shared_ptr< vsomeip_v3::payload > const &) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_bool_fmessage_acceptance_t_const_RF_t = {"_p_std__functionT_bool_fmessage_acceptance_t_const_RF_t", "vsomeip_v3::message_acceptance_handler_t *|std::function< bool (message_acceptance_t const &) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_bool_fremote_info_t_const_RF_t = {"_p_std__functionT_bool_fremote_info_t_const_RF_t", "vsomeip_v3::sd_acceptance_handler_t *|std::function< bool (remote_info_t const &) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t = {"_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t", "vsomeip_v3::epsilon_change_func_t *|std::function< bool (std::shared_ptr< payload > const &,std::shared_ptr< payload > const &) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t = {"_p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t", "vsomeip_v3::subscription_handler_t *|std::function< bool (unsigned short,::uid_t,::uid_t,bool) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t = {"_p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t", "vsomeip_v3::subscription_handler_ext_t *|std::function< bool (unsigned short,::uid_t,::uid_t,std::string const &,bool) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t = {"_p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t", "vsomeip_v3::subscription_handler_sec_t *|std::function< bool (unsigned short,vsomeip_sec_client_t const *,std::string const &,bool) > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t = {"_p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t", "vsomeip_v3::message_acceptance_handler_t *|std::function< bool (vsomeip_v3::message_acceptance_t const &) > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t = {"_p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t", "vsomeip_v3::sd_acceptance_handler_t *|std::function< bool (vsomeip_v3::remote_info_t const &) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fF_t = {"_p_std__functionT_void_fF_t", "vsomeip_v3::routing_ready_handler_t *|vsomeip_v3::watchdog_handler_t *|std::function< void () > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t = {"_p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t", "vsomeip_v3::message_handler_t *|std::function< void (std::shared_ptr< vsomeip_v3::message > const &) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_void_fip_address_t_const_RF_t = {"_p_std__functionT_void_fip_address_t_const_RF_t", "vsomeip_v3::reboot_notification_handler_t *|std::function< void (ip_address_t const &) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t = {"_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t", "vsomeip_v3::message_handler_t *|std::function< void (std::shared_ptr< message > const &) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t = {"_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t", "vsomeip_v3::offered_services_handler_t *|std::function< void (std::vector< std::pair< unsigned short,unsigned short > > const &) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t = {"_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t", "vsomeip_v3::async_subscription_handler_t *|std::function< void (unsigned short,::uid_t,::uid_t,bool,std::function< void (bool const) >) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t = {"_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t", "vsomeip_v3::async_subscription_handler_ext_t *|std::function< void (unsigned short,::uid_t,::uid_t,std::string const &,bool,std::function< void (bool const) >) > *", 0, 0, (void*)0, 0};
@@ -17100,7 +16974,6 @@ static swig_type_info _swigt__p_std__functionT_void_funsigned_short_const_unsign
 static swig_type_info _swigt__p_std__functionT_void_funsigned_short_unsigned_short_boolF_t = {"_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t", "vsomeip_v3::availability_handler_t *|std::function< void (unsigned short,unsigned short,bool) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t = {"_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t", "vsomeip_v3::availability_state_handler_t *|std::function< void (unsigned short,unsigned short,enum vsomeip_v3::availability_state_e) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t = {"_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t", "vsomeip_v3::async_subscription_handler_sec_t *|std::function< void (unsigned short,vsomeip_sec_client_t const *,std::string const &,bool,std::function< void (bool) >) > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t = {"_p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t", "vsomeip_v3::reboot_notification_handler_t *|std::function< void (vsomeip_v3::ip_address_t const &) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fvsomeip_v3__routing_state_eF_t = {"_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t", "vsomeip_v3::routing_state_handler_t *|std::function< void (enum vsomeip_v3::routing_state_e) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t = {"_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t", "vsomeip_v3::security_update_handler_t *|std::function< void (enum vsomeip_v3::security_update_state_e) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fvsomeip_v3__state_type_eF_t = {"_p_std__functionT_void_fvsomeip_v3__state_type_eF_t", "vsomeip_v3::state_handler_t *|std::function< void (enum vsomeip_v3::state_type_e) > *", 0, 0, (void*)0, 0};
@@ -17154,14 +17027,15 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__arrayT_unsigned_char_4_t,
   &_swigt__p_std__chrono__milliseconds,
   &_swigt__p_std__chrono__seconds,
-  &_swigt__p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t,
+  &_swigt__p_std__functionT_bool_fmessage_acceptance_t_const_RF_t,
+  &_swigt__p_std__functionT_bool_fremote_info_t_const_RF_t,
+  &_swigt__p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t,
   &_swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t,
   &_swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t,
   &_swigt__p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t,
-  &_swigt__p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t,
-  &_swigt__p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t,
   &_swigt__p_std__functionT_void_fF_t,
-  &_swigt__p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t,
+  &_swigt__p_std__functionT_void_fip_address_t_const_RF_t,
+  &_swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,
   &_swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t,
   &_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t,
   &_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t,
@@ -17170,7 +17044,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__functionT_void_funsigned_short_unsigned_short_boolF_t,
   &_swigt__p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t,
   &_swigt__p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t,
-  &_swigt__p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t,
   &_swigt__p_std__functionT_void_fvsomeip_v3__routing_state_eF_t,
   &_swigt__p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t,
   &_swigt__p_std__functionT_void_fvsomeip_v3__state_type_eF_t,
@@ -17224,14 +17097,15 @@ static swig_cast_info _swigc__p_std__arrayT_unsigned_char_16_t[] = {  {&_swigt__
 static swig_cast_info _swigc__p_std__arrayT_unsigned_char_4_t[] = {  {&_swigt__p_std__arrayT_unsigned_char_4_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__chrono__milliseconds[] = {  {&_swigt__p_std__chrono__milliseconds, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__chrono__seconds[] = {  {&_swigt__p_std__chrono__seconds, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_bool_fmessage_acceptance_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fmessage_acceptance_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_bool_fremote_info_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fremote_info_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t[] = {  {&_swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t[] = {  {&_swigt__p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t[] = {  {&_swigt__p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t[] = {  {&_swigt__p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fF_t[] = {  {&_swigt__p_std__functionT_void_fF_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_void_fip_address_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fip_address_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -17240,7 +17114,6 @@ static swig_cast_info _swigc__p_std__functionT_void_funsigned_short_const_unsign
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_short_unsigned_short_boolF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short_unsigned_short_boolF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fvsomeip_v3__routing_state_eF_t[] = {  {&_swigt__p_std__functionT_void_fvsomeip_v3__routing_state_eF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t[] = {  {&_swigt__p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fvsomeip_v3__state_type_eF_t[] = {  {&_swigt__p_std__functionT_void_fvsomeip_v3__state_type_eF_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -17294,14 +17167,15 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__arrayT_unsigned_char_4_t,
   _swigc__p_std__chrono__milliseconds,
   _swigc__p_std__chrono__seconds,
-  _swigc__p_std__functionT_bool_fstd__shared_ptrT_vsomeip_v3__payload_t_const_R_std__shared_ptrT_vsomeip_v3__payload_t_const_RF_t,
+  _swigc__p_std__functionT_bool_fmessage_acceptance_t_const_RF_t,
+  _swigc__p_std__functionT_bool_fremote_info_t_const_RF_t,
+  _swigc__p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t,
   _swigc__p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t,
   _swigc__p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t,
   _swigc__p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t,
-  _swigc__p_std__functionT_bool_fvsomeip_v3__message_acceptance_t_const_RF_t,
-  _swigc__p_std__functionT_bool_fvsomeip_v3__remote_info_t_const_RF_t,
   _swigc__p_std__functionT_void_fF_t,
-  _swigc__p_std__functionT_void_fstd__shared_ptrT_vsomeip_v3__message_t_const_RF_t,
+  _swigc__p_std__functionT_void_fip_address_t_const_RF_t,
+  _swigc__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,
   _swigc__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t,
   _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t,
   _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t,
@@ -17310,7 +17184,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__functionT_void_funsigned_short_unsigned_short_boolF_t,
   _swigc__p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t,
   _swigc__p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t,
-  _swigc__p_std__functionT_void_fvsomeip_v3__ip_address_t_const_RF_t,
   _swigc__p_std__functionT_void_fvsomeip_v3__routing_state_eF_t,
   _swigc__p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t,
   _swigc__p_std__functionT_void_fvsomeip_v3__state_type_eF_t,

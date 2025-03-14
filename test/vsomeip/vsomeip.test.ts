@@ -6,7 +6,7 @@ const dllPath = path.join(__dirname, '../../resources/lib')
 loadDllPath(dllPath)
 
 test('client', () => {
-  const client = new VSomeIP_Client()
+  const client = new VSomeIP_Client('test', path.join(__dirname, 'config.json'))
 
   expect(client).toBeDefined()
 })

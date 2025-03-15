@@ -14,12 +14,12 @@
 
 %include <stdint.i>
 %include <windows.i>
-
+%include <std_string.i>
+%include <std_except.i>
+%include <std_shared_ptr.i>
 
 // Add namespace handling for vsomeip_v3
-class runtime{
-  
-}
+
 
 namespace vsomeip_v3 {
 
@@ -134,6 +134,8 @@ struct debounce_filter_t;
 }
 
 
+%shared_ptr(vsomeip_v3::runtime)
+%shared_ptr(vsomeip_v3::application)
 
 %include <vsomeip/deprecated.hpp>
 // Include the necessary headers

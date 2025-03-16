@@ -15,8 +15,19 @@ export class VSomeIP_Client {
     this.app = this.rtm.create_application(name, configFilePath)
   }
 
-  init(): boolean {
+  init() {
     const result = this.app.init()
-    return result
+    if (result) {
+      this.app.register_state_handler(this.onStateChange)
+    } else {
+      throw new Error('Failed to initialize application')
+    }
+  }
+
+  onStateChange(state: any) {
+    console.log('State changed:', state)
+  }
+  stop() {
+    this.app.stop()
   }
 }

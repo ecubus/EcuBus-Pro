@@ -1,100 +1,70 @@
 <template>
   <div>
-    <VxeGrid
-      ref="xGrid"
-      v-bind="gridOptions"
-      class="sequenceTable"
-      :height="tableHeight"
-      @menu-click="menuClick"
-      @scroll="scrollHandle"
+    <div
+      style="
+        justify-content: flex-start;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: 5px;
+      "
     >
-      <template #default_type="{ row }">
-        <Icon
-          v-if="row.method == 'canBase' || row.method == 'ipBase'"
-          :icon="email"
-          style="font-size: 14px"
-        />
-        <Icon
-          v-else-if="
-            row.method == 'udsSent' || row.method == 'udsRecv' || row.method == 'udsNegRecv'
-          "
-          :icon="emailFill"
-          style="font-size: 14px"
-        />
-        <Icon v-else-if="row.method == 'udsSystem'" :icon="systemIcon" style="font-size: 14px" />
-        <Icon v-else :icon="errorIcon" style="font-size: 14px" />
-      </template>
-      <template #toolbar>
-        <div
-          style="
-            justify-content: flex-start;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-left: 5px;
-          "
-        >
-          <el-button-group>
-            <el-tooltip effect="light" content="Clear Log" placement="bottom">
-              <el-button type="danger" link @click="clearLog">
-                <Icon :icon="circlePlusFilled" />
-              </el-button>
-            </el-tooltip>
+      <el-button-group>
+        <el-tooltip effect="light" content="Clear Log" placement="bottom">
+          <el-button type="danger" link @click="clearLog">
+            <Icon :icon="circlePlusFilled" />
+          </el-button>
+        </el-tooltip>
 
-            <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
+        <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
                      <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
                         <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
                      </el-button>
                   </el-tooltip> -->
-          </el-button-group>
-          <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
-            <el-button
-              :type="isPaused ? 'success' : 'warning'"
-              link
-              :class="{ 'pause-active': isPaused }"
-              @click="togglePause"
-            >
-              <Icon :icon="isPaused ? playIcon : pauseIcon" />
-            </el-button>
-          </el-tooltip>
-          <el-divider v-if="showFilter" direction="vertical" />
-          <el-dropdown v-if="showFilter">
-            <span class="el-dropdown-link">
-              <Icon :icon="filterIcon" />
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-checkbox-group
-                  v-model="checkList"
-                  size="small"
-                  style="width: 200px; margin: 10px"
-                >
-                  <el-checkbox
-                    v-for="item of LogFilter"
-                    :key="item.v"
-                    :label="item.label"
-                    :value="item.v"
-                    @change="filterChange(item.v, $event)"
-                  />
-                </el-checkbox-group>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-divider direction="vertical" />
-          <el-dropdown size="small">
-            <el-button type="info" link @click="saveAll">
-              <Icon :icon="saveIcon" />
-            </el-button>
+      </el-button-group>
+      <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+        <el-button
+          :type="isPaused ? 'success' : 'warning'"
+          link
+          :class="{ 'pause-active': isPaused }"
+          @click="togglePause"
+        >
+          <Icon :icon="isPaused ? playIcon : pauseIcon" />
+        </el-button>
+      </el-tooltip>
+      <el-divider v-if="showFilter" direction="vertical" />
+      <el-dropdown v-if="showFilter">
+        <span class="el-dropdown-link">
+          <Icon :icon="filterIcon" />
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-checkbox-group v-model="checkList" size="small" style="width: 200px; margin: 10px">
+              <el-checkbox
+                v-for="item of LogFilter"
+                :key="item.v"
+                :label="item.label"
+                :value="item.v"
+                @change="filterChange(item.v, $event)"
+              />
+            </el-checkbox-group>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <el-divider direction="vertical" />
+      <el-dropdown size="small">
+        <el-button type="info" link @click="saveAll">
+          <Icon :icon="saveIcon" />
+        </el-button>
 
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>Save as raw</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </template>
-    </VxeGrid>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>Save as raw</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+    <div :id="`traceTable-${props.editIndex}`" class="realLog"></div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -119,25 +89,11 @@ import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
-
+import konva from 'konva'
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
-
-interface LogData {
-  dir?: 'Tx' | 'Rx' | '--'
-  data: string
-  ts: string
-  id?: string
-  dlc?: number
-  len?: number
-  device: string
-  channel: string
-  msgType: string
-  method: string
-  name?: string
-  seqIndex?: number
-}
+import { CTable, CTableColumns, LogData } from './trace'
 
 const database = useDataStore()
 const xGrid = ref()
@@ -227,7 +183,9 @@ function insertData1(data: LogData[]) {
     }
   })
 }
-
+function insertData2(data: LogData[]) {
+  cTable.addRows(data)
+}
 function logDisplay(vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
@@ -413,10 +371,18 @@ function logDisplay(vals: LogItem[]) {
       })
     }
   }
-  insertData1(logData)
+  insertData2(logData)
 }
 
 const props = defineProps({
+  editIndex: {
+    type: String,
+    default: ''
+  },
+  width: {
+    type: Number,
+    required: true
+  },
   height: {
     type: Number,
     required: true
@@ -446,7 +412,12 @@ function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boo
   }
 }
 
-const tableHeight = toRef(props, 'height')
+const tableHeight = computed(() => {
+  return props.height - 20
+})
+const tableWidth = computed(() => {
+  return props.width
+})
 
 const gridOptions = computed(() => {
   const v: VxeGridProps<LogData> = {
@@ -594,6 +565,8 @@ const LogFilter = ref<
   }
 ])
 
+let stage: konva.Stage
+let cTable: CTable
 onMounted(() => {
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
@@ -603,6 +576,18 @@ onMounted(() => {
       }
     }
   }
+  stage = new konva.Stage({
+    container: `traceTable-${props.editIndex}`, // id of container <div>
+    width: tableWidth.value,
+    height: tableHeight.value
+  })
+  const layer = new konva.Layer()
+  stage.add(layer)
+  cTable = new CTable(layer)
+})
+watch([tableWidth, tableHeight], () => {
+  stage.setSize({ width: tableWidth.value, height: tableHeight.value })
+  cTable.resize(tableWidth.value, tableHeight.value)
 })
 
 onUnmounted(() => {
@@ -611,6 +596,8 @@ onUnmounted(() => {
       window.logBus.detach(val, logDisplay)
     }
   })
+  cTable.close()
+  stage.destroy()
 })
 </script>
 

@@ -1,5 +1,6 @@
 import konva from 'konva'
-import { VxeGridPropTypes } from 'vxe-table'
+import emailSvg from '@r/assets/email.svg'
+
 export interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
   data: string
@@ -14,7 +15,14 @@ export interface LogData {
   name?: string
   seqIndex?: number
 }
-export type CTableColumns = VxeGridPropTypes.Columns<LogData>
+
+export type CTableColumns = Array<{
+  field: string // 域变量
+  title: string // 标题
+  width: number // 宽度
+  minWidth?: number // 最小宽度
+  resizable?: boolean // 是否可resize，默认为true
+}>
 
 export class CTable {
   private headerGroup: konva.Group
@@ -48,30 +56,21 @@ export class CTable {
   private scrolling: boolean = false
   private containerHeight: number = 0
   private stage: konva.Stage
-  private data: any[] = [] // 存储表格数据
+  private data: LogData[] = [] // 存储表格数据
   private maxCacheRows: number = 10000 // 最大缓存行数
   private visibleRowsCount: number = 0 // 可见行数
   private startRowIndex: number = 0 // 当前可见的起始行索引
   private totalHeight: number = 0 // 所有数据行的总高度
+  private email: konva.Image | null = null
 
   constructor(private layer: konva.Layer) {
     this.columns = [
-      {
-        field: 'type',
-        title: '',
-        width: 36,
-        resizable: false,
-        editRender: {},
-        slots: { default: 'default_type' }
-      },
+      { field: 'type', title: '', width: 36, resizable: false },
       { field: 'ts', title: 'Time', width: 100 },
       { field: 'name', title: 'Name', width: 200 },
-      { field: 'data', title: 'Data', minWidth: 300 },
+      { field: 'data', title: 'Data', width: 300, minWidth: 300 },
       { field: 'dir', title: 'Dir', width: 50 },
-      // { field: 'seqIndex', title: 'Num', width: 50 },
-
       { field: 'id', title: 'ID', width: 100 },
-
       { field: 'dlc', title: 'DLC', width: 100 },
       { field: 'len', title: 'Len', width: 100 },
       { field: 'msgType', title: 'Type', width: 100 },
@@ -97,8 +96,10 @@ export class CTable {
       )
     }
 
+    this.initEmailSvg()
     this.initHeader()
     this.initBody()
+    this.setupWheelEvents()
     this.initHScrollbar()
     this.initVScrollbar()
   }
@@ -106,7 +107,7 @@ export class CTable {
   private calculateTotalWidth(): number {
     // 计算所有列宽的总和
     const columnsWidth = this.columns.reduce((total, column) => {
-      return total + (typeof column.width === 'number' ? column.width : 100)
+      return total + column.width
     }, 0)
 
     // 如果列宽总和小于stage宽度，则返回stage宽度减去滚动条宽度
@@ -121,10 +122,7 @@ export class CTable {
   private addResizeHandlers(handle: konva.Rect, columnIndex: number) {
     handle.on('mousedown touchstart', (e) => {
       const startX = this.stage.getPointerPosition()?.x || 0
-      const initialWidth =
-        typeof this.columns[columnIndex].width === 'number'
-          ? (this.columns[columnIndex].width as number)
-          : 100
+      const initialWidth = this.columns[columnIndex].width
 
       // 添加鼠标移动事件
       const mouseMoveHandler = (moveEvent: any) => {
@@ -233,22 +231,17 @@ export class CTable {
   public initHeader() {
     // 计算列宽总和
     const columnsWidth = this.columns.reduce((total, column) => {
-      return total + (typeof column.width === 'number' ? column.width : 100)
+      return total + column.width
     }, 0)
 
     // 如果列宽总和小于stage宽度，增加data列的宽度
-    let dataColumnExtraWidth = 0
     if (this.stage && columnsWidth < this.stage.width() - this.scrollbarHeight) {
       // 查找data列的索引
       const dataColumnIndex = this.columns.findIndex((col) => col.field === 'data')
       if (dataColumnIndex !== -1) {
-        dataColumnExtraWidth = this.stage.width() - this.scrollbarHeight - columnsWidth
         // 更新data列的宽度
-        const currentWidth =
-          typeof this.columns[dataColumnIndex].width === 'number'
-            ? (this.columns[dataColumnIndex].width as number)
-            : 100
-        this.columns[dataColumnIndex].width = currentWidth + dataColumnExtraWidth
+        this.columns[dataColumnIndex].width +=
+          this.stage.width() - this.scrollbarHeight - columnsWidth
       }
     }
 
@@ -269,12 +262,11 @@ export class CTable {
 
     // 绘制每个列标题
     let currentX = 0
-    for (let i = 0; i < this.columns.length; i++) {
-      const column = this.columns[i]
-      const width = typeof column.width === 'number' ? column.width : 100
+    this.columns.forEach((column, index) => {
+      const { width, title, resizable = true } = column
 
       // 列分隔线
-      if (i > 0) {
+      if (index > 0) {
         const line = new konva.Line({
           points: [currentX, 0, currentX, this.headerHeight],
           stroke: this.borderColor,
@@ -283,43 +275,21 @@ export class CTable {
         this.headerGroup.add(line)
       }
 
-      // 获取列的对齐方式，默认为居中
-      const align = column.align || 'center'
-
       // 列标题文本
       const text = new konva.Text({
-        text: (column.title as string) || '',
+        text: title,
         fontSize: this.fontSize,
         fontStyle: 'bold',
         fontFamily: this.fontFamily,
         fill: this.textColor
       })
-
-      // 根据对齐方式设置文本位置
-      let textX = 0
-      switch (align) {
-        case 'left':
-          textX = currentX + this.cellPadding
-          break
-        case 'right':
-          textX = currentX + width - text.width() - this.cellPadding
-          break
-        case 'center':
-        default:
-          textX = currentX + (width - text.width()) / 2
-          break
-      }
-
-      text.x(textX)
+      text.x(currentX + (width - text.width()) / 2)
       text.y((this.headerHeight - this.fontSize) / 2)
 
       this.headerGroup.add(text)
 
-      // 检查列是否可调整大小
-      const isResizable = column.resizable !== false // 默认为true，除非明确设置为false
-
       // 只有当列可调整大小时才添加调整列宽的控制柄
-      if (isResizable) {
+      if (resizable) {
         // 添加调整列宽的控制柄
         const resizeHandle = new konva.Rect({
           x: currentX + width - 3,
@@ -330,14 +300,14 @@ export class CTable {
         })
 
         // 添加拖动调整列宽的功能
-        this.addResizeHandlers(resizeHandle, i)
+        this.addResizeHandlers(resizeHandle, index)
 
         this.headerGroup.add(resizeHandle)
         this.resizeHandles.push(resizeHandle)
       }
 
       currentX += width
-    }
+    })
 
     // 应用滚动位置
     this.headerGroup.x(-this.hScrollPosition)
@@ -363,80 +333,67 @@ export class CTable {
     // 计算实际要绘制的行数（确保填满可视区域）
     const rowsToDraw = Math.max(this.visibleRowsCount + 1, endRowIndex - this.startRowIndex)
 
+    const emailWidth = this.email?.width() as number
+    const emailHeight = this.email?.height() as number
     // 绘制可见行
     for (let i = 0; i < rowsToDraw; i++) {
       const rowIndex = this.startRowIndex + i
       const rowY = i * this.rowHeight
       const rowData = rowIndex < this.data.length ? this.data[rowIndex] : null
 
-      // 创建行背景 (交替行颜色)
-      const rowBg = new konva.Rect({
-        x: 0,
-        y: rowY,
-        width: this.width,
-        height: this.rowHeight,
-        fill: rowIndex % 2 === 0 ? this.rowBgColor : this.rowAltBgColor,
-        stroke: this.borderColor,
-        strokeWidth: 1
-      })
+      if (rowData !== null) {
+        // 创建行背景 (交替行颜色)
+        const rowBg = new konva.Rect({
+          x: 0,
+          y: rowY,
+          width: this.width,
+          height: this.rowHeight,
+          fill: rowIndex % 2 === 0 ? this.rowBgColor : this.rowAltBgColor,
+          stroke: this.borderColor,
+          strokeWidth: 1
+        })
+        this.bodyGroup.add(rowBg)
 
-      this.bodyGroup.add(rowBg)
+        // 绘制单元格
+        let currentX = 0
+        this.columns.forEach((column, colIndex) => {
+          const { width, field } = column
 
-      // 绘制单元格
-      let currentX = 0
-      for (let colIndex = 0; colIndex < this.columns.length; colIndex++) {
-        const column = this.columns[colIndex]
-        const width = typeof column.width === 'number' ? column.width : 100
-
-        // 列分隔线
-        if (colIndex > 0) {
-          const line = new konva.Line({
-            points: [currentX, rowY, currentX, rowY + this.rowHeight],
-            stroke: this.borderColor,
-            strokeWidth: 1
-          })
-          this.bodyGroup.add(line)
-        }
-
-        // 只有当有数据时才绘制单元格内容
-        if (rowData) {
-          const field = column.field as string
-
-          // 获取单元格数据
-          const cellValue = rowData && rowData[field] !== undefined ? String(rowData[field]) : ''
-
-          // 获取列的对齐方式，默认为居中
-          const align = column.align || 'center'
-
-          // 创建单元格文本
-          const cellText = new konva.Text({
-            text: cellValue,
-            fontSize: this.fontSize,
-            fontFamily: this.fontFamily,
-            fill: this.textColor,
-            y: rowY + (this.rowHeight - this.fontSize) / 2
-          })
-
-          // 根据对齐方式设置文本位置
-          let textX = 0
-          switch (align) {
-            case 'left':
-              textX = currentX + this.cellPadding
-              break
-            case 'right':
-              textX = currentX + width - cellText.width() - this.cellPadding
-              break
-            case 'center':
-            default:
-              textX = currentX + (width - cellText.width()) / 2
-              break
+          // 列分隔线
+          if (colIndex > 0) {
+            const line = new konva.Line({
+              points: [currentX, rowY, currentX, rowY + this.rowHeight],
+              stroke: this.borderColor,
+              strokeWidth: 1
+            })
+            this.bodyGroup.add(line)
           }
 
-          cellText.x(textX)
-          this.bodyGroup.add(cellText)
-        }
+          // 绘制单元格内容
+          if (field === 'type') {
+            // 图标
+            const newEmail = this.email?.clone({
+              x: (width - emailWidth) / 2,
+              y: rowY + (this.rowHeight - emailHeight) / 2
+            })
+            this.bodyGroup.add(newEmail)
+          } else {
+            // 单元格内容
+            const cellText = new konva.Text({
+              text: rowData[field] !== undefined ? String(rowData[field]) : '',
+              fontSize: this.fontSize,
+              fontFamily: this.fontFamily,
+              fill: this.textColor,
+              x: currentX,
+              y: rowY + (this.rowHeight - this.fontSize) / 2,
+              width: width,
+              align: 'center'
+            })
+            this.bodyGroup.add(cellText)
+          }
 
-        currentX += width
+          currentX += width
+        })
       }
     }
 
@@ -763,14 +720,11 @@ export class CTable {
     this.layer.draw()
   }
 
-  // 初始化表格
-  init() {
-    this.initHeader()
-    this.initBody()
-    this.initHScrollbar()
-    this.initVScrollbar()
-    this.setupWheelEvents()
-    this.layer.draw()
+  initEmailSvg() {
+    konva.Image.fromURL(emailSvg, (image) => {
+      this.email = image
+      this.email.cache()
+    })
   }
 
   close() {

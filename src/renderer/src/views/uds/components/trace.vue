@@ -149,7 +149,8 @@ watch(window.globalStart, (val) => {
 })
 function clearLog() {
   // logData.value = []
-  xGrid.value?.remove()
+  // xGrid.value?.remove()
+  cTable.clearData()
 }
 function data2str(data: Uint8Array) {
   return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
@@ -599,6 +600,21 @@ onUnmounted(() => {
   cTable.close()
   stage.destroy()
 })
+
+const colorMap = {
+  canBase: '#409eff',
+  linEvent: '#67c23a',
+  ipBase: 'rgb(51.2,126.4,204)',
+  udsSent: '#909399',
+  udsRecv: '#909399',
+  canError: '#f56c6c',
+  linError: '#f56c6c',
+  linWarning: '#e6a23c',
+  ipError: '#f56c6c',
+  udsSystem: '#409eff',
+  udsWarning: '#f56c6c',
+  udsNegRecv: '#f56c6c'
+}
 </script>
 
 <style>

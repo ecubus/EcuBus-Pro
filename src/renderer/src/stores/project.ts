@@ -293,6 +293,8 @@ export const useProjectStore = defineStore('project', {
             .catch((action: Action) => {
               if (action == 'cancel') {
                 this.$reset()
+                const data = useDataStore()
+                data.$reset()
                 resolve(true)
               } else {
                 resolve(false)
@@ -300,6 +302,8 @@ export const useProjectStore = defineStore('project', {
             })
         } else {
           this.$reset()
+          const data = useDataStore()
+          data.$reset()
           resolve(true)
         }
       })

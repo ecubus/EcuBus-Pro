@@ -1,5 +1,6 @@
 import konva from 'konva'
 import emailSvg from '@r/assets/email.svg'
+import { Vector2d } from 'konva/lib/types'
 
 export interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
@@ -27,6 +28,7 @@ export type CTableColumns = Array<{
 export class CTable {
   private headerGroup: konva.Group
   private bodyGroup: konva.Group // 新增数据区域组
+  private menuGroup: konva.Group // 下拉菜单组
   private headerHeight: number = 30
   private rowHeight: number = 30 // 行高
   private cellPadding: number = 10
@@ -53,7 +55,6 @@ export class CTable {
   private vScrollbarBg: konva.Rect | null = null // 垂直滚动条背景
   private hScrollPosition: number = 0 // 水平滚动位置
   private vScrollPosition: number = 0 // 垂直滚动位置
-  private scrolling: boolean = false
   private containerHeight: number = 0
   private stage: konva.Stage
   private data: LogData[] = [] // 存储表格数据
@@ -79,10 +80,12 @@ export class CTable {
     ]
     this.headerGroup = new konva.Group()
     this.bodyGroup = new konva.Group()
+    this.menuGroup = this.getMenuGroup()
     this.hScrollbarGroup = new konva.Group()
     this.vScrollbarGroup = new konva.Group()
     this.layer.add(this.headerGroup)
     this.layer.add(this.bodyGroup)
+    this.layer.add(this.menuGroup)
     this.layer.add(this.hScrollbarGroup)
     this.layer.add(this.vScrollbarGroup)
     this.stage = this.layer.getStage()
@@ -372,10 +375,23 @@ export class CTable {
           // 绘制单元格内容
           if (field === 'type') {
             // 图标
-            const newEmail = this.email?.clone({
+            const newEmail: konva.Image = this.email?.clone({
               x: (width - emailWidth) / 2,
               y: rowY + (this.rowHeight - emailHeight) / 2
             })
+
+            newEmail.on('mouseenter', (e) => {
+              this.renderMenuGroup(rowData)
+            })
+            // newEmail.on('mouseleave', (e) => {
+            //   setTimeout(() => {
+            //     if (!this.isInMenuGroup()) {
+            //       this.menuGroup.visible(false)
+            //       this.menuGroup.draw()
+            //     }
+            //   }, 1000)
+            // })
+
             this.bodyGroup.add(newEmail)
           } else {
             // 单元格内容
@@ -725,6 +741,101 @@ export class CTable {
       this.email = image
       this.email.cache()
     })
+  }
+
+  getMenuGroup() {
+    const menuGroup = new konva.Group({ x: 0, y: 0, visible: false })
+
+    menuGroup.on('mouseleave', (e) => {
+      menuGroup.visible(false)
+      menuGroup.draw()
+    })
+
+    return menuGroup
+  }
+
+  renderMenuGroup(row: LogData) {
+    this.menuGroup.visible(true)
+    const position = this.stage.getPointerPosition() as Vector2d
+
+    this.menuGroup.x(position.x)
+    this.menuGroup.y(position.y)
+    this.menuGroup.destroyChildren()
+
+    const options = ['copyRaw', 'copyArray', 'copyRow']
+    options.forEach((option, index) => {
+      const group = new konva.Group({
+        x: 0,
+        y: this.rowHeight * index
+      })
+      const rect = new konva.Rect({
+        width: 100,
+        height: this.rowHeight,
+        fill: 'white',
+        stroke: 'black',
+        strokeWidth: 1,
+        name: 'option'
+      })
+      const text = new konva.Text({
+        x: this.cellPadding,
+        y: this.cellPadding / 2,
+        text: option,
+        fontSize: 16,
+        fill: 'black',
+        align: 'left'
+      })
+
+      group.add(rect)
+      group.add(text)
+
+      group.on('mouseover', () => {
+        rect.fill('lightgray')
+        this.menuGroup.draw()
+      })
+
+      group.on('mouseout', () => {
+        rect.fill('white')
+        this.menuGroup.draw()
+      })
+
+      group.on('click', () => {
+        switch (option) {
+          case 'copyRaw': {
+            navigator.clipboard.writeText(row.data)
+            break
+          }
+          case 'copyArray': {
+            const data1 = row.data
+              .split(' ')
+              .map((v: any) => `0x${v}`)
+              .join(',')
+            navigator.clipboard.writeText(data1)
+            break
+          }
+          case 'copyRow': {
+            navigator.clipboard.writeText(JSON.stringify(row, null, 2))
+            break
+          }
+        }
+        this.menuGroup.visible(false)
+        this.menuGroup.draw()
+      })
+
+      this.menuGroup.add(group)
+    })
+
+    this.menuGroup.draw()
+  }
+
+  isInMenuGroup() {
+    const position = this.menuGroup.getAbsolutePosition()
+    const size = this.menuGroup.getSize()
+    const pointer = this.stage.getPointerPosition() as Vector2d
+
+    const isInWidth = pointer.x <= position.x + size.width && pointer.x >= position.x
+    const isInHeight = pointer.y <= position.y + size.height && pointer.y >= position.y
+
+    return isInWidth && isInHeight
   }
 
   close() {

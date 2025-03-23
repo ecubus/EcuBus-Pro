@@ -362,7 +362,8 @@
       "lin": {},
       "can": {}
     },
-    "graphs": {}
+    "graphs": {},
+    "tests": {}
   },
   "project": {
     "wins": {
@@ -383,9 +384,9 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
         "pos": {
-          "x": 202,
-          "y": 74,
-          "w": 1658,
+          "x": -19,
+          "y": 0,
+          "w": 852,
           "h": 404
         },
         "title": "testerService",
@@ -400,9 +401,9 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 670,
-          "y": 335,
-          "w": 1590,
+          "x": 357,
+          "y": 0,
+          "w": 888,
           "h": 400
         },
         "title": "testerSequence",
@@ -417,10 +418,10 @@
       },
       "trace": {
         "pos": {
-          "x": 686,
-          "y": 281,
-          "w": 1619,
-          "h": 566
+          "x": 211,
+          "y": 0,
+          "w": 1228,
+          "h": 467
         },
         "title": "trace",
         "label": "Trace",
@@ -439,6 +440,18 @@
         "id": "tester",
         "options": {},
         "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": 550,
+          "y": 64,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
       }
     },
     "example": {

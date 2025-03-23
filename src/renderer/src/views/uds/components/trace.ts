@@ -1,6 +1,8 @@
 import konva from 'konva'
 import emailSvg from '@r/assets/email.svg'
-import { Vector2d } from 'konva/lib/types'
+import emailFillSvg from '@r/assets/emailFill.svg'
+import systemIconSvg from '@r/assets/system.svg'
+import errorIconSvg from '@r/assets/error.svg'
 
 export interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
@@ -28,7 +30,7 @@ export type CTableColumns = Array<{
 export class CTable {
   private headerGroup: konva.Group
   private bodyGroup: konva.Group // 新增数据区域组
-  private menuGroup: konva.Group // 下拉菜单组
+  // private menuGroup: konva.Group // 下拉菜单组
   private headerHeight: number = 30
   private rowHeight: number = 30 // 行高
   private cellPadding: number = 10
@@ -63,6 +65,9 @@ export class CTable {
   private startRowIndex: number = 0 // 当前可见的起始行索引
   private totalHeight: number = 0 // 所有数据行的总高度
   private email: konva.Image | null = null
+  private emailFill: konva.Image | null = null
+  private systemIcon: konva.Image | null = null
+  private errorIcon: konva.Image | null = null
 
   constructor(private layer: konva.Layer) {
     this.columns = [
@@ -80,12 +85,12 @@ export class CTable {
     ]
     this.headerGroup = new konva.Group()
     this.bodyGroup = new konva.Group()
-    this.menuGroup = this.getMenuGroup()
+    // this.menuGroup = this.getMenuGroup()
     this.hScrollbarGroup = new konva.Group()
     this.vScrollbarGroup = new konva.Group()
     this.layer.add(this.headerGroup)
     this.layer.add(this.bodyGroup)
-    this.layer.add(this.menuGroup)
+    // this.layer.add(this.menuGroup)
     this.layer.add(this.hScrollbarGroup)
     this.layer.add(this.vScrollbarGroup)
     this.stage = this.layer.getStage()
@@ -338,6 +343,25 @@ export class CTable {
 
     const emailWidth = this.email?.width() as number
     const emailHeight = this.email?.height() as number
+
+    // 颜色映射表，用于根据 method 设置不同颜色
+    const colorMap = {
+      canBase: '#409eff',
+      linEvent: '#67c23a',
+      ipBase: 'rgb(51.2,126.4,204)',
+      udsSent: '#909399',
+      udsRecv: '#909399',
+      canError: '#f56c6c',
+      linError: '#f56c6c',
+      linWarning: '#e6a23c',
+      ipError: '#f56c6c',
+      udsSystem: '#409eff',
+      udsWarning: '#f56c6c',
+      udsNegRecv: '#f56c6c',
+      linBase: '#409eff',
+      udsScript: '#909399'
+    }
+
     // 绘制可见行
     for (let i = 0; i < rowsToDraw; i++) {
       const rowIndex = this.startRowIndex + i
@@ -345,17 +369,28 @@ export class CTable {
       const rowData = rowIndex < this.data.length ? this.data[rowIndex] : null
 
       if (rowData !== null) {
+        // 创建行组，包含整行内容
+        const rowGroup = new konva.Group({
+          x: 0,
+          y: rowY,
+          height: this.rowHeight,
+          width: this.width
+        })
+
+        // 获取行的颜色（根据method）
+        const rowColor = colorMap[rowData.method] || this.textColor
+
         // 创建行背景 (交替行颜色)
         const rowBg = new konva.Rect({
           x: 0,
-          y: rowY,
+          y: 0,
           width: this.width,
           height: this.rowHeight,
           fill: rowIndex % 2 === 0 ? this.rowBgColor : this.rowAltBgColor,
           stroke: this.borderColor,
           strokeWidth: 1
         })
-        this.bodyGroup.add(rowBg)
+        rowGroup.add(rowBg)
 
         // 绘制单元格
         let currentX = 0
@@ -365,51 +400,65 @@ export class CTable {
           // 列分隔线
           if (colIndex > 0) {
             const line = new konva.Line({
-              points: [currentX, rowY, currentX, rowY + this.rowHeight],
+              points: [currentX, 0, currentX, this.rowHeight],
               stroke: this.borderColor,
               strokeWidth: 1
             })
-            this.bodyGroup.add(line)
+            rowGroup.add(line)
           }
 
           // 绘制单元格内容
           if (field === 'type') {
-            // 图标
-            const newEmail: konva.Image = this.email?.clone({
-              x: (width - emailWidth) / 2,
-              y: rowY + (this.rowHeight - emailHeight) / 2
-            })
+            // 根据不同的method选择不同的图标
+            let icon: konva.Image | null = null
 
-            newEmail.on('mouseenter', (e) => {
-              this.renderMenuGroup(rowData)
-            })
-            // newEmail.on('mouseleave', (e) => {
-            //   setTimeout(() => {
-            //     if (!this.isInMenuGroup()) {
-            //       this.menuGroup.visible(false)
-            //       this.menuGroup.draw()
-            //     }
-            //   }, 1000)
-            // })
+            if (
+              rowData.method === 'canBase' ||
+              rowData.method === 'ipBase' ||
+              rowData.method === 'linBase'
+            ) {
+              icon = this.email?.clone()
+            } else if (
+              rowData.method === 'udsSent' ||
+              rowData.method === 'udsRecv' ||
+              rowData.method === 'udsNegRecv'
+            ) {
+              icon = this.emailFill?.clone()
+            } else if (rowData.method === 'udsSystem' || rowData.method === 'udsScript') {
+              icon = this.systemIcon?.clone()
+            } else {
+              // canError, linError, ipError, udsWarning等错误类型
+              icon = this.errorIcon?.clone()
+            }
 
-            this.bodyGroup.add(newEmail)
+            if (icon) {
+              // 设置图标位置
+              icon.x((width - icon.width()) / 2)
+              icon.y((this.rowHeight - icon.height()) / 2)
+
+              console.log(icon)
+
+              rowGroup.add(icon)
+            }
           } else {
             // 单元格内容
             const cellText = new konva.Text({
               text: rowData[field] !== undefined ? String(rowData[field]) : '',
               fontSize: this.fontSize,
               fontFamily: this.fontFamily,
-              fill: this.textColor,
+              fill: rowColor, // 所有字段都使用同样的颜色
               x: currentX,
-              y: rowY + (this.rowHeight - this.fontSize) / 2,
+              y: (this.rowHeight - this.fontSize) / 2,
               width: width,
               align: 'center'
             })
-            this.bodyGroup.add(cellText)
+            rowGroup.add(cellText)
           }
 
           currentX += width
         })
+
+        this.bodyGroup.add(rowGroup)
       }
     }
 
@@ -741,6 +790,18 @@ export class CTable {
       this.email = image
       this.email.cache()
     })
+    konva.Image.fromURL(emailFillSvg, (image) => {
+      this.emailFill = image
+      this.emailFill.cache()
+    })
+    konva.Image.fromURL(systemIconSvg, (image) => {
+      this.systemIcon = image
+      this.systemIcon.cache()
+    })
+    konva.Image.fromURL(errorIconSvg, (image) => {
+      this.errorIcon = image
+      this.errorIcon.cache()
+    })
   }
 
   getMenuGroup() {
@@ -754,89 +815,89 @@ export class CTable {
     return menuGroup
   }
 
-  renderMenuGroup(row: LogData) {
-    this.menuGroup.visible(true)
-    const position = this.stage.getPointerPosition() as Vector2d
+  // renderMenuGroup(row: LogData) {
+  //   this.menuGroup.visible(true)
+  //   const position = this.stage.getPointerPosition() as Vector2d
 
-    this.menuGroup.x(position.x)
-    this.menuGroup.y(position.y)
-    this.menuGroup.destroyChildren()
+  //   this.menuGroup.x(position.x)
+  //   this.menuGroup.y(position.y)
+  //   this.menuGroup.destroyChildren()
 
-    const options = ['copyRaw', 'copyArray', 'copyRow']
-    options.forEach((option, index) => {
-      const group = new konva.Group({
-        x: 0,
-        y: this.rowHeight * index
-      })
-      const rect = new konva.Rect({
-        width: 100,
-        height: this.rowHeight,
-        fill: 'white',
-        stroke: 'black',
-        strokeWidth: 1,
-        name: 'option'
-      })
-      const text = new konva.Text({
-        x: this.cellPadding,
-        y: this.cellPadding / 2,
-        text: option,
-        fontSize: 16,
-        fill: 'black',
-        align: 'left'
-      })
+  //   const options = ['copyRaw', 'copyArray', 'copyRow']
+  //   options.forEach((option, index) => {
+  //     const group = new konva.Group({
+  //       x: 0,
+  //       y: this.rowHeight * index
+  //     })
+  //     const rect = new konva.Rect({
+  //       width: 100,
+  //       height: this.rowHeight,
+  //       fill: 'white',
+  //       stroke: 'black',
+  //       strokeWidth: 1,
+  //       name: 'option'
+  //     })
+  //     const text = new konva.Text({
+  //       x: this.cellPadding,
+  //       y: this.cellPadding / 2,
+  //       text: option,
+  //       fontSize: 16,
+  //       fill: 'black',
+  //       align: 'left'
+  //     })
 
-      group.add(rect)
-      group.add(text)
+  //     group.add(rect)
+  //     group.add(text)
 
-      group.on('mouseover', () => {
-        rect.fill('lightgray')
-        this.menuGroup.draw()
-      })
+  //     group.on('mouseover', () => {
+  //       rect.fill('lightgray')
+  //       this.menuGroup.draw()
+  //     })
 
-      group.on('mouseout', () => {
-        rect.fill('white')
-        this.menuGroup.draw()
-      })
+  //     group.on('mouseout', () => {
+  //       rect.fill('white')
+  //       this.menuGroup.draw()
+  //     })
 
-      group.on('click', () => {
-        switch (option) {
-          case 'copyRaw': {
-            navigator.clipboard.writeText(row.data)
-            break
-          }
-          case 'copyArray': {
-            const data1 = row.data
-              .split(' ')
-              .map((v: any) => `0x${v}`)
-              .join(',')
-            navigator.clipboard.writeText(data1)
-            break
-          }
-          case 'copyRow': {
-            navigator.clipboard.writeText(JSON.stringify(row, null, 2))
-            break
-          }
-        }
-        this.menuGroup.visible(false)
-        this.menuGroup.draw()
-      })
+  //     group.on('click', () => {
+  //       switch (option) {
+  //         case 'copyRaw': {
+  //           navigator.clipboard.writeText(row.data)
+  //           break
+  //         }
+  //         case 'copyArray': {
+  //           const data1 = row.data
+  //             .split(' ')
+  //             .map((v: any) => `0x${v}`)
+  //             .join(',')
+  //           navigator.clipboard.writeText(data1)
+  //           break
+  //         }
+  //         case 'copyRow': {
+  //           navigator.clipboard.writeText(JSON.stringify(row, null, 2))
+  //           break
+  //         }
+  //       }
+  //       this.menuGroup.visible(false)
+  //       this.menuGroup.draw()
+  //     })
 
-      this.menuGroup.add(group)
-    })
+  //     this.menuGroup.add(group)
+  //   })
 
-    this.menuGroup.draw()
-  }
+  //   this.menuGroup.draw()
+  // }
 
-  isInMenuGroup() {
-    const position = this.menuGroup.getAbsolutePosition()
-    const size = this.menuGroup.getSize()
-    const pointer = this.stage.getPointerPosition() as Vector2d
+  // isInMenuGroup() {
+  //   const position = this.menuGroup.getAbsolutePosition()
+  //   const size = this.menuGroup.getSize()
+  //   const pointer = this.stage.getPointerPosition() as Vector2d
 
-    const isInWidth = pointer.x <= position.x + size.width && pointer.x >= position.x
-    const isInHeight = pointer.y <= position.y + size.height && pointer.y >= position.y
+  //   const isInWidth = pointer.x <= position.x + size.width && pointer.x >= position.x
+  //   const isInHeight = pointer.y <= position.y + size.height && pointer.y >= position.y
 
-    return isInWidth && isInHeight
-  }
+  //   return isInWidth && isInHeight
+  // }
 
   close() {
     this.stage.off('wheel.tableScroll')

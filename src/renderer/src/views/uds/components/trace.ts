@@ -1,8 +1,4 @@
 import konva from 'konva'
-import emailSvg from '@r/assets/email.svg'
-import emailFillSvg from '@r/assets/emailFill.svg'
-import systemIconSvg from '@r/assets/system.svg'
-import errorIconSvg from '@r/assets/error.svg'
 
 export interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
@@ -40,7 +36,8 @@ export class CTable {
   private borderColor: string = '#e8eaec'
   private textColor: string = '#515a6e'
   private fontSize: number = 12
-  private fontFamily: string = 'Arial'
+  private fontFamily: string =
+    "Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif"
   private columns: CTableColumns
   private width: number = 0
   private resizeHandles: konva.Rect[] = []
@@ -64,14 +61,9 @@ export class CTable {
   private visibleRowsCount: number = 0 // 可见行数
   private startRowIndex: number = 0 // 当前可见的起始行索引
   private totalHeight: number = 0 // 所有数据行的总高度
-  private email: konva.Image | null = null
-  private emailFill: konva.Image | null = null
-  private systemIcon: konva.Image | null = null
-  private errorIcon: konva.Image | null = null
 
   constructor(private layer: konva.Layer) {
     this.columns = [
-      { field: 'type', title: '', width: 36, resizable: false },
       { field: 'ts', title: 'Time', width: 100 },
       { field: 'name', title: 'Name', width: 200 },
       { field: 'data', title: 'Data', width: 300, minWidth: 300 },
@@ -99,12 +91,12 @@ export class CTable {
     if (this.stage) {
       this.containerWidth = this.stage.width()
       this.containerHeight = this.stage.height()
+
       this.visibleRowsCount = Math.floor(
         (this.containerHeight - this.headerHeight - this.scrollbarHeight) / this.rowHeight
       )
     }
 
-    this.initEmailSvg()
     this.initHeader()
     this.initBody()
     this.setupWheelEvents()
@@ -132,6 +124,9 @@ export class CTable {
       const startX = this.stage.getPointerPosition()?.x || 0
       const initialWidth = this.columns[columnIndex].width
 
+      // 设置光标为col-resize，表示正在调整列宽
+      this.stage.container().style.cursor = 'col-resize'
+
       // 添加鼠标移动事件
       const mouseMoveHandler = (moveEvent: any) => {
         const currentX = this.stage.getPointerPosition()?.x || 0
@@ -151,12 +146,18 @@ export class CTable {
         // 重新初始化滚动条
         this.initHScrollbar()
         this.initVScrollbar()
+
+        // 保持光标为col-resize状态
+        this.stage.container().style.cursor = 'col-resize'
       }
 
       // 添加鼠标释放事件
       const mouseUpHandler = () => {
         this.stage.off('mousemove touchmove', mouseMoveHandler)
         this.stage.off('mouseup touchend', mouseUpHandler)
+
+        // 恢复默认光标
+        this.stage.container().style.cursor = 'default'
       }
 
       this.stage.on('mousemove touchmove', mouseMoveHandler)
@@ -171,7 +172,10 @@ export class CTable {
     })
 
     handle.on('mouseout', () => {
-      this.stage.container().style.cursor = 'default'
+      // 只有在非拖动状态下才恢复默认光标
+      if (!this.stage.isDragging()) {
+        this.stage.container().style.cursor = 'default'
+      }
       this.layer.draw()
     })
   }
@@ -218,6 +222,13 @@ export class CTable {
 
         // 计算当前应该显示的起始行索引
         this.startRowIndex = Math.floor(this.vScrollPosition / this.rowHeight)
+
+        // 确保当滚动到最底部时，最后一行数据完全可见
+        const maxStartRow = Math.max(0, this.data.length - this.visibleRowsCount)
+        if (this.startRowIndex > maxStartRow) {
+          this.startRowIndex = maxStartRow
+          this.vScrollPosition = this.startRowIndex * this.rowHeight
+        }
 
         // 更新垂直滑块位置
         if (this.vScrollbarThumb) {
@@ -335,31 +346,48 @@ export class CTable {
     // 计算总高度
     this.totalHeight = this.data.length * this.rowHeight
 
+    // 边界检查：确保startRowIndex不会超出有效范围
+    if (this.data.length > 0) {
+      // 确保起始索引不会为负
+      this.startRowIndex = Math.max(0, this.startRowIndex)
+
+      // 确保不会超出数据范围
+      const maxStartRow = Math.max(0, this.data.length - this.visibleRowsCount)
+      if (this.startRowIndex > maxStartRow) {
+        this.startRowIndex = maxStartRow
+      }
+    } else {
+      // 如果没有数据，重置起始索引
+      this.startRowIndex = 0
+    }
+
     // 计算可见行范围
-    const endRowIndex = Math.min(this.startRowIndex + this.visibleRowsCount + 1, this.data.length)
+    const endRowIndex = Math.min(this.startRowIndex + this.visibleRowsCount + 2, this.data.length) // 多渲染两行确保填满
 
-    // 计算实际要绘制的行数（确保填满可视区域）
-    const rowsToDraw = Math.max(this.visibleRowsCount + 1, endRowIndex - this.startRowIndex)
+    // 需要绘制的行数
+    const rowsToDraw = Math.max(0, endRowIndex - this.startRowIndex)
 
-    const emailWidth = this.email?.width() as number
-    const emailHeight = this.email?.height() as number
+    // 从CSS变量获取颜色
+    const getCssVar = (name: string) => {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+    }
 
-    // 颜色映射表，用于根据 method 设置不同颜色
+    // 颜色映射表，从CSS变量中获取颜色值
     const colorMap = {
-      canBase: '#409eff',
-      linEvent: '#67c23a',
-      ipBase: 'rgb(51.2,126.4,204)',
-      udsSent: '#909399',
-      udsRecv: '#909399',
-      canError: '#f56c6c',
-      linError: '#f56c6c',
-      linWarning: '#e6a23c',
-      ipError: '#f56c6c',
-      udsSystem: '#409eff',
-      udsWarning: '#f56c6c',
-      udsNegRecv: '#f56c6c',
-      linBase: '#409eff',
-      udsScript: '#909399'
+      canBase: getCssVar('--el-color-primary'),
+      linEvent: getCssVar('--el-color-success'),
+      ipBase: getCssVar('--el-color-primary-dark-2'),
+      udsSent: getCssVar('--el-color-info'),
+      udsRecv: getCssVar('--el-color-info'),
+      canError: getCssVar('--el-color-danger'),
+      linError: getCssVar('--el-color-danger'),
+      linWarning: getCssVar('--el-color-warning'),
+      ipError: getCssVar('--el-color-danger'),
+      udsSystem: getCssVar('--el-color-primary'),
+      udsWarning: getCssVar('--el-color-warning'),
+      udsNegRecv: getCssVar('--el-color-warning'),
+      linBase: getCssVar('--el-color-primary'),
+      udsScript: getCssVar('--el-color-info')
     }
 
     // 绘制可见行
@@ -407,53 +435,20 @@ export class CTable {
             rowGroup.add(line)
           }
 
-          // 绘制单元格内容
-          if (field === 'type') {
-            // 根据不同的method选择不同的图标
-            let icon: konva.Image | null = null
-
-            if (
-              rowData.method === 'canBase' ||
-              rowData.method === 'ipBase' ||
-              rowData.method === 'linBase'
-            ) {
-              icon = this.email?.clone()
-            } else if (
-              rowData.method === 'udsSent' ||
-              rowData.method === 'udsRecv' ||
-              rowData.method === 'udsNegRecv'
-            ) {
-              icon = this.emailFill?.clone()
-            } else if (rowData.method === 'udsSystem' || rowData.method === 'udsScript') {
-              icon = this.systemIcon?.clone()
-            } else {
-              // canError, linError, ipError, udsWarning等错误类型
-              icon = this.errorIcon?.clone()
-            }
-
-            if (icon) {
-              // 设置图标位置
-              icon.x((width - icon.width()) / 2)
-              icon.y((this.rowHeight - icon.height()) / 2)
-
-              console.log(icon)
-
-              rowGroup.add(icon)
-            }
-          } else {
-            // 单元格内容
-            const cellText = new konva.Text({
-              text: rowData[field] !== undefined ? String(rowData[field]) : '',
-              fontSize: this.fontSize,
-              fontFamily: this.fontFamily,
-              fill: rowColor, // 所有字段都使用同样的颜色
-              x: currentX,
-              y: (this.rowHeight - this.fontSize) / 2,
-              width: width,
-              align: 'center'
-            })
-            rowGroup.add(cellText)
-          }
+          // 单元格内容
+          const cellText = new konva.Text({
+            text: rowData[field] !== undefined ? String(rowData[field]) : '',
+            fontSize: this.fontSize,
+            fontFamily: this.fontFamily,
+            fill: rowColor, // 所有字段都使用同样的颜色
+            x: currentX + 5,
+            y: (this.rowHeight - this.fontSize) / 2 + 1,
+            width: width - 10,
+            align: 'center',
+            ellipsis: true,
+            wrap: 'none' // 防止文本换行
+          })
+          rowGroup.add(cellText)
 
           currentX += width
         })
@@ -611,7 +606,8 @@ export class CTable {
     this.vScrollbarThumb.on('dragmove', () => {
       if (!this.vScrollbarThumb) return
 
-      const maxScroll = this.totalHeight - visibleHeight
+      const visibleHeight = this.containerHeight - this.headerHeight - this.scrollbarHeight
+      const maxScroll = Math.max(0, this.totalHeight - visibleHeight)
       const scrollableHeight = visibleHeight - thumbHeight
       const scrollRatio = (this.vScrollbarThumb.y() - this.headerHeight) / scrollableHeight
 
@@ -619,6 +615,18 @@ export class CTable {
 
       // 计算当前应该显示的起始行索引
       this.startRowIndex = Math.floor(this.vScrollPosition / this.rowHeight)
+
+      // 确保当滚动到最底部时，最后一行数据完全可见
+      const maxStartRow = Math.max(0, this.data.length - this.visibleRowsCount)
+      if (this.startRowIndex > maxStartRow) {
+        this.startRowIndex = maxStartRow
+        this.vScrollPosition = this.startRowIndex * this.rowHeight
+
+        // 更新滑块位置以匹配实际的滚动位置
+        const newScrollRatio = this.vScrollPosition / maxScroll
+        const newThumbY = this.headerHeight + newScrollRatio * scrollableHeight
+        this.vScrollbarThumb.y(newThumbY)
+      }
 
       // 重新绘制数据区域
       this.initBody()
@@ -643,7 +651,8 @@ export class CTable {
 
         this.vScrollbarThumb.y(newThumbY)
 
-        const maxScroll = this.totalHeight - visibleHeight
+        const visibleHeight = this.containerHeight - this.headerHeight - this.scrollbarHeight
+        const maxScroll = Math.max(0, this.totalHeight - visibleHeight)
         const scrollableHeight = visibleHeight - thumbHeight
         const scrollRatio = (newThumbY - this.headerHeight) / scrollableHeight
 
@@ -651,6 +660,18 @@ export class CTable {
 
         // 计算当前应该显示的起始行索引
         this.startRowIndex = Math.floor(this.vScrollPosition / this.rowHeight)
+
+        // 确保当滚动到最底部时，最后一行数据完全可见
+        const maxStartRow = Math.max(0, this.data.length - this.visibleRowsCount)
+        if (this.startRowIndex > maxStartRow) {
+          this.startRowIndex = maxStartRow
+          this.vScrollPosition = this.startRowIndex * this.rowHeight
+
+          // 更新滑块位置以匹配实际的滚动位置
+          const newScrollRatio = this.vScrollPosition / maxScroll
+          const newThumbY = this.headerHeight + newScrollRatio * scrollableHeight
+          this.vScrollbarThumb.y(newThumbY)
+        }
 
         // 重新绘制数据区域
         this.initBody()
@@ -662,16 +683,40 @@ export class CTable {
 
     this.layer.draw()
   }
-
   // 更新表格大小
   resize(width: number, height: number) {
     this.stage.width(width)
     this.stage.height(height)
     this.containerWidth = width
     this.containerHeight = height
+
     this.visibleRowsCount = Math.floor(
       (this.containerHeight - this.headerHeight - this.scrollbarHeight) / this.rowHeight
     )
+
+    // 计算所有列宽的总和
+    const columnsWidth = this.columns.reduce((total, column) => {
+      return total + column.width
+    }, 0)
+
+    // 如果列宽总和小于stage宽度，增加data列的宽度
+    if (columnsWidth < this.containerWidth - this.scrollbarHeight) {
+      // 查找data列的索引
+      const dataColumnIndex = this.columns.findIndex((col) => col.field === 'data')
+      if (dataColumnIndex !== -1) {
+        // 更新data列的宽度
+        this.columns[dataColumnIndex].width +=
+          this.containerWidth - this.scrollbarHeight - columnsWidth
+      }
+    }
+
+    // 重新计算总宽度
+    this.width = this.calculateTotalWidth()
+
+    // 重新绘制表头
+    this.headerGroup.destroyChildren()
+    this.resizeHandles = []
+    this.initHeader()
 
     this.initBody()
     this.initHScrollbar()
@@ -693,6 +738,10 @@ export class CTable {
 
   // 添加多行数据
   addRows(rows: any[]) {
+    // 记录添加前的数据长度
+    const oldDataLength = this.data.length
+    const wasAtBottom = this.isScrolledToBottom()
+
     // 添加到数据数组
     this.data = this.data.concat(rows)
 
@@ -710,39 +759,56 @@ export class CTable {
     // 更新总高度
     this.totalHeight = this.data.length * this.rowHeight
 
-    // 自动滚动到底部显示最新数据
-    this.scrollToBottom()
+    // 只有当之前是在底部或者是初始状态时，才自动滚动到底部
+    if (wasAtBottom || oldDataLength === 0) {
+      this.scrollToBottom()
+    } else {
+      // 否则仅重新绘制，保持当前滚动位置
+      this.initBody()
+      this.initVScrollbar()
+    }
+  }
 
-    // 重新绘制数据区域
-    this.initBody()
+  // 判断是否已经滚动到底部
+  private isScrolledToBottom(): boolean {
+    if (this.data.length <= this.visibleRowsCount) {
+      return true // 数据不足一页，认为是在底部
+    }
 
-    // 更新垂直滚动条
-    this.initVScrollbar()
+    // 判断当前的起始行索引是否已经到达数据末尾
+    // 精确判断是否滚动到底部，确保最后一行完全可见
+    return this.startRowIndex + this.visibleRowsCount >= this.data.length
   }
 
   // 滚动到底部显示最新数据
   scrollToBottom() {
-    const visibleHeight = this.containerHeight - this.headerHeight - this.scrollbarHeight
+    // 如果没有数据，则不需要滚动
+    if (this.data.length === 0) return
 
-    // 如果数据总高度大于可视区域高度，则滚动到底部
-    if (this.totalHeight > visibleHeight) {
-      // 计算应该显示的起始行索引，使最后一页数据可见
-      this.startRowIndex = Math.max(0, this.data.length - this.visibleRowsCount)
+    // 计算最后一行完全可见所需的起始行索引
+    this.startRowIndex = Math.max(0, this.data.length - this.visibleRowsCount)
 
-      // 更新垂直滚动位置
-      this.vScrollPosition = this.startRowIndex * this.rowHeight
+    // 防止可能的小数误差，确保索引为整数
+    this.startRowIndex = Math.floor(this.startRowIndex)
 
-      // 更新垂直滑块位置
-      if (this.vScrollbarThumb) {
-        const maxScroll = this.totalHeight - visibleHeight
-        if (maxScroll > 0) {
-          const scrollableHeight = visibleHeight - this.vScrollbarThumbHeight
-          const scrollRatio = this.vScrollPosition / maxScroll
-          const newThumbY = this.headerHeight + scrollRatio * scrollableHeight
-          this.vScrollbarThumb.y(newThumbY)
-        }
+    // 计算对应的精确滚动位置
+    this.vScrollPosition = this.startRowIndex * this.rowHeight
+
+    // 更新垂直滑块位置
+    if (this.vScrollbarThumb) {
+      const visibleHeight = this.containerHeight - this.headerHeight - this.scrollbarHeight
+      const maxScroll = Math.max(0, this.totalHeight - visibleHeight)
+
+      if (maxScroll > 0) {
+        const scrollableHeight = visibleHeight - this.vScrollbarThumbHeight
+        const scrollRatio = this.vScrollPosition / maxScroll
+        const newThumbY = this.headerHeight + scrollRatio * scrollableHeight
+        this.vScrollbarThumb.y(newThumbY)
       }
     }
+
+    // 强制重绘数据区域
+    this.initBody()
   }
 
   // 清空数据
@@ -784,120 +850,6 @@ export class CTable {
     this.initBody()
     this.layer.draw()
   }
-
-  initEmailSvg() {
-    konva.Image.fromURL(emailSvg, (image) => {
-      this.email = image
-      this.email.cache()
-    })
-    konva.Image.fromURL(emailFillSvg, (image) => {
-      this.emailFill = image
-      this.emailFill.cache()
-    })
-    konva.Image.fromURL(systemIconSvg, (image) => {
-      this.systemIcon = image
-      this.systemIcon.cache()
-    })
-    konva.Image.fromURL(errorIconSvg, (image) => {
-      this.errorIcon = image
-      this.errorIcon.cache()
-    })
-  }
-
-  getMenuGroup() {
-    const menuGroup = new konva.Group({ x: 0, y: 0, visible: false })
-
-    menuGroup.on('mouseleave', (e) => {
-      menuGroup.visible(false)
-      menuGroup.draw()
-    })
-
-    return menuGroup
-  }
-
-  // renderMenuGroup(row: LogData) {
-  //   this.menuGroup.visible(true)
-  //   const position = this.stage.getPointerPosition() as Vector2d
-
-  //   this.menuGroup.x(position.x)
-  //   this.menuGroup.y(position.y)
-  //   this.menuGroup.destroyChildren()
-
-  //   const options = ['copyRaw', 'copyArray', 'copyRow']
-  //   options.forEach((option, index) => {
-  //     const group = new konva.Group({
-  //       x: 0,
-  //       y: this.rowHeight * index
-  //     })
-  //     const rect = new konva.Rect({
-  //       width: 100,
-  //       height: this.rowHeight,
-  //       fill: 'white',
-  //       stroke: 'black',
-  //       strokeWidth: 1,
-  //       name: 'option'
-  //     })
-  //     const text = new konva.Text({
-  //       x: this.cellPadding,
-  //       y: this.cellPadding / 2,
-  //       text: option,
-  //       fontSize: 16,
-  //       fill: 'black',
-  //       align: 'left'
-  //     })
-
-  //     group.add(rect)
-  //     group.add(text)
-
-  //     group.on('mouseover', () => {
-  //       rect.fill('lightgray')
-  //       this.menuGroup.draw()
-  //     })
-
-  //     group.on('mouseout', () => {
-  //       rect.fill('white')
-  //       this.menuGroup.draw()
-  //     })
-
-  //     group.on('click', () => {
-  //       switch (option) {
-  //         case 'copyRaw': {
-  //           navigator.clipboard.writeText(row.data)
-  //           break
-  //         }
-  //         case 'copyArray': {
-  //           const data1 = row.data
-  //             .split(' ')
-  //             .map((v: any) => `0x${v}`)
-  //             .join(',')
-  //           navigator.clipboard.writeText(data1)
-  //           break
-  //         }
-  //         case 'copyRow': {
-  //           navigator.clipboard.writeText(JSON.stringify(row, null, 2))
-  //           break
-  //         }
-  //       }
-  //       this.menuGroup.visible(false)
-  //       this.menuGroup.draw()
-  //     })
-
-  //     this.menuGroup.add(group)
-  //   })
-
-  //   this.menuGroup.draw()
-  // }
-
-  // isInMenuGroup() {
-  //   const position = this.menuGroup.getAbsolutePosition()
-  //   const size = this.menuGroup.getSize()
-  //   const pointer = this.stage.getPointerPosition() as Vector2d
-
-  //   const isInWidth = pointer.x <= position.x + size.width && pointer.x >= position.x
-  //   const isInHeight = pointer.y <= position.y + size.height && pointer.y >= position.y
-
-  //   return isInWidth && isInHeight
-  // }
 
   close() {
     this.stage.off('wheel.tableScroll')

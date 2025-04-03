@@ -22,6 +22,7 @@ import testIcon from '@iconify/icons-grommet-icons/test'
 import lineIcon from '@iconify/icons-mdi/chart-line'
 import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
+import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -41,6 +42,18 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
+  panel: {
+    i: 'Panel',
+    x: 0,
+    y: 0,
+    w: 800,
+    h: 400,
+    minW: 800,
+    label: 'Panel',
+    key: 'panel',
+    component: defineAsyncComponent(() => import('./panel.vue')),
+    icon: panelIcon1
+  },
   package: {
     i: 'Package',
     x: 0,

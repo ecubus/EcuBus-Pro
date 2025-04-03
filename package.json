@@ -59,6 +59,8 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "@element-plus/icons-vue": "^2.3.1",
+    "@form-create/designer": "^3.2.11",
+    "@form-create/element-ui": "^3.2.20",
     "@iconify/icons-grommet-icons": "^1.2.5",
     "@iconify/icons-mdi": "^1.2.48",
     "@joint/core": "^4.0.4",

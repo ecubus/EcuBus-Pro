@@ -46,7 +46,7 @@
               <span>Trace</span>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click="handleSelect(['graph'])">
+            <div class="grid girdenable">
               <Icon :icon="graphIcon" style="font-size: 24px" />
               <el-dropdown @command="openGraph">
                 <span class="lr">
@@ -69,7 +69,7 @@
                 </template>
               </el-dropdown>
             </div>
-            <div class="grid girdenable" @click="handleSelect(['graph'])">
+            <div class="grid girdenable">
               <Icon :icon="panelIcon1" style="font-size: 24px" />
               <el-dropdown @command="openPanel">
                 <span class="lr">
@@ -645,7 +645,11 @@ function openGraph(command: string) {
 }
 function openPanel(command: string) {
   if (command == 'panel') {
-    layoutMaster.addWin('panel', 'panel', {})
+    layoutMaster.addWin('panel', 'panel', {
+      params: {
+        'edit-index': command
+      }
+    })
   } else {
     layoutMaster.addWin('panel', 'panel', {
       params: {

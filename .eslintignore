@@ -9,3 +9,4 @@ resources/bin
 resources/lib
 resources/docs/scriptApi
 resources/buildInScript
+src/renderer/src/views/uds/panel-designer

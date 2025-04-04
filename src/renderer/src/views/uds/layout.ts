@@ -47,9 +47,10 @@ const layoutMap: Record<string, LayoutItem> = {
     x: 0,
     y: 0,
     w: 800,
-    h: 400,
+    h: 550,
     minW: 800,
     label: 'Panel',
+    minH: 550,
     key: 'panel',
     component: defineAsyncComponent(() => import('./panel.vue')),
     icon: panelIcon1

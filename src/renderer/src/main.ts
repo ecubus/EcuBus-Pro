@@ -21,9 +21,8 @@ window.jQuery = jQuery
 await import('jquery-ui/dist/jquery-ui.js')
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
 import EventBus from './event'
-import formCreate from '@form-create/element-ui' // 引入 FormCreate
+import formCreate from '@form-create/element-ui'
 import DataParseWorker from './worker/dataParse.ts?worker'
-import formDesigner from '@form-create/designer'
 
 const dataParseWorker = new DataParseWorker()
 window.logBus = new EventBus()
@@ -95,5 +94,5 @@ app.use(router)
 app.use(VxeTooltip)
 app.use(VxeLoading)
 app.use(formCreate)
-app.use(formDesigner)
+
 app.mount('#app')

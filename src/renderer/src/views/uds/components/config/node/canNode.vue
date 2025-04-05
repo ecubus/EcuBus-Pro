@@ -326,6 +326,7 @@ const gridOptions = computed(() => {
 const clockList = computed(() => {
   if (props.vendor == 'peak') {
     return [
+      { clock: '8', name: '8' },
       { clock: '20', name: '20' },
       { clock: '24', name: '24' },
       { clock: '30', name: '30' },

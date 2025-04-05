@@ -400,6 +400,11 @@ export class PEAK_TP extends CanBase implements CanTp {
     let ret = peak.CANTP_InitializeFD_2016(this.handle, str)
     if (ret != 0) {
       if (ret == -2013265920) {
+        //calcuate real freq
+        this.info.bitrate.freq =
+          (Number(this.info.bitrate.clock || 40) * 1000000) /
+          (this.info.bitrate.preScaler *
+            (this.info.bitrate.timeSeg1 + this.info.bitrate.timeSeg2 + 1))
         //try init with normal
         let baud = peak.PCANTP_BAUDRATE_500K
         switch (this.info.bitrate.freq) {

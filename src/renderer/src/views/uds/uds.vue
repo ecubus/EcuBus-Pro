@@ -266,10 +266,11 @@
                 </template>
               </el-dropdown>
             </div>
-            <!-- <div class="grid girdenable" @click="handleSelect(['script'])">
-              <Icon :icon="codeIcon" style="font-size: 24px; " />
-              <span>Edit Script</span>
-            </div> -->
+            <div class="grid girdenable" @click="handleSelect(['variable'])">
+              <Icon :icon="varIcon" style="font-size: 24px" />
+              <span>Variables</span>
+            </div>
+            <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="openApi()">
               <Icon :icon="apiIcon" style="font-size: 24px" />
               <span>Script Api</span>
@@ -594,6 +595,7 @@ import testConfigIcon from '@iconify/icons-grommet-icons/test-desktop'
 import lineIcon from '@iconify/icons-mdi/chart-line'
 import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
+import varIcon from '@iconify/icons-mdi/application-variable-outline'
 
 const activeMenu = ref('')
 const pined = ref(true)

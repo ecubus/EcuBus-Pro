@@ -14,6 +14,46 @@ export interface CanInter {
   action: CanInterAction[]
 }
 
+export interface VarValueNumber {
+  type: 'number'
+  value?: number
+  initValue?: number
+  min?: number
+  max?: number
+  unit?: string
+  enum?: { name: string; value: number }[]
+}
+export interface VarValueString {
+  type: 'string'
+  value?: string
+  initValue?: string
+  enum?: { name: string; value: string }[]
+}
+
+export interface VarValueArray {
+  type: 'array'
+  value?: number[]
+  initValue?: number[]
+}
+
+export interface VarItem {
+  type: 'variable'
+  id: string
+  name: string
+  desc?: string
+  value: VarValueNumber | VarValueString | VarValueArray
+}
+
+export interface VarGroup {
+  type: 'group'
+  id: string
+  name: string
+  desc?: string
+  items: VarItem[]
+}
+
+export type VarType = VarItem | VarGroup
+
 export interface LinInter {
   id: string
   name: string
@@ -84,4 +124,5 @@ export interface DataSet {
   graphs: Record<string, GraphNode<GraphBindSignalValue, LineSeriesOption>>
   guages: Record<string, GraphNode<GraphBindSignalValue, GaugeSeriesOption>>
   tests: Record<string, TestConfig>
+  vars: Record<string, VarType>
 }

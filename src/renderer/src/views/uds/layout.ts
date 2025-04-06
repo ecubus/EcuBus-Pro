@@ -22,6 +22,7 @@ import testIcon from '@iconify/icons-grommet-icons/test'
 import lineIcon from '@iconify/icons-mdi/chart-line'
 import gaugeIcon from '@iconify/icons-mdi/gauge'
 import packageIcon from '@iconify/icons-mdi/package-variant'
+import varIcon from '@iconify/icons-mdi/application-variable-outline'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -41,6 +42,17 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
+  variable: {
+    i: 'Variable',
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 400,
+    label: 'Variable',
+    key: 'variable',
+    component: defineAsyncComponent(() => import('./variable.vue')),
+    icon: varIcon
+  },
   package: {
     i: 'Package',
     x: 0,

@@ -19,7 +19,8 @@ export const useDataStore = defineStore('useDataStore', {
     },
     graphs: {},
     guages: {},
-    tests: {}
+    tests: {},
+    vars: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {

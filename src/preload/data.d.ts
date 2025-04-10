@@ -37,22 +37,13 @@ export interface VarValueArray {
 }
 
 export interface VarItem {
-  type: 'variable'
+  type: 'user' | 'system'
   id: string
   name: string
   desc?: string
   value: VarValueNumber | VarValueString | VarValueArray
+  parentId?: string
 }
-
-export interface VarGroup {
-  type: 'group'
-  id: string
-  name: string
-  desc?: string
-  items: VarItem[]
-}
-
-export type VarType = VarItem | VarGroup
 
 export interface LinInter {
   id: string
@@ -124,5 +115,5 @@ export interface DataSet {
   graphs: Record<string, GraphNode<GraphBindSignalValue, LineSeriesOption>>
   guages: Record<string, GraphNode<GraphBindSignalValue, GaugeSeriesOption>>
   tests: Record<string, TestConfig>
-  vars: Record<string, VarType>
+  vars: Record<string, VarItem>
 }

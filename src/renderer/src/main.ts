@@ -21,7 +21,7 @@ window.jQuery = jQuery
 await import('jquery-ui/dist/jquery-ui.js')
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
 import EventBus from './event'
-
+import '@vxe-ui/plugin-render-element/dist/style.css'
 import DataParseWorker from './worker/dataParse.ts?worker'
 
 const dataParseWorker = new DataParseWorker()

@@ -64,7 +64,7 @@
     "@joint/core": "^4.0.4",
     "@vitejs/plugin-vue-jsx": "^3.1.0",
     "@vueuse/core": "^10.7.2",
-    "@vxe-ui/plugin-render-element": "^4.0.5",
+    "@vxe-ui/plugin-render-element": "^4.0.10",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "animate.css": "^4.1.1",

@@ -66,7 +66,8 @@ export const useDataStore = defineStore('useDataStore', {
         database: this.database,
         graphs: this.graphs,
         tests: this.tests,
-        guages: this.guages
+        guages: this.guages,
+        vars: this.vars
       }
     }
   }

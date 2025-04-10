@@ -22,6 +22,7 @@ import Transport from 'winston-transport'
 import logo from './logo.html?raw'
 import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
+import { setVar as setVarGlobal } from './var'
 
 type TestTree = {
   label: string
@@ -162,6 +163,7 @@ export class NodeClass {
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         this.pool.registerHandler('setSignal', this.setSignal.bind(this))
+        this.pool.registerHandler('setVar', this.setVar.bind(this))
         if (this.ethBaseId.length > 0) {
           this.pool.registerHandler(
             'registerEthVirtualEntity',
@@ -720,6 +722,15 @@ export class NodeClass {
       )
     }
     return info
+  }
+  setVar(
+    pool: UdsTester,
+    data: {
+      name: string
+      value: number | string | number[]
+    }
+  ) {
+    setVarGlobal(data.name, data.value)
   }
   setSignal(
     pool: UdsTester,

@@ -41,7 +41,7 @@ export interface VarItem {
   id: string
   name: string
   desc?: string
-  value: VarValueNumber | VarValueString | VarValueArray
+  value?: VarValueNumber | VarValueString | VarValueArray
   parentId?: string
 }
 

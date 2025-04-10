@@ -462,6 +462,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const nodes = arg[i++] as Record<string, NodeItem>
 
   global.database = arg[i++]
+  global.vars = arg[i++]
 
   try {
     await globalStart(devices, testers, nodes, projectInfo)

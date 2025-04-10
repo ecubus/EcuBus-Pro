@@ -38,6 +38,13 @@ type HandlerMap = {
       ip?: string
     }
   ) => Promise<void>
+  setVar: (
+    pool: UdsTester,
+    data: {
+      name: string
+      value: number | number[] | string
+    }
+  ) => void
 }
 
 type EventHandlerMap = {

@@ -253,17 +253,12 @@ const userGridOptions = computed<VxeGridProps>(() => ({
   },
   align: 'center',
   columns: [
-    {
-      width: 30,
-      title: '#',
-      align: 'center',
-      fixed: 'left',
-      resizable: false,
-      treeNode: true
-    },
+    { type: 'seq', width: 70, title: '#' },
+
     {
       field: 'name',
       title: 'Variable',
+      treeNode: true,
       minWidth: 150,
       editRender: {},
       slots: { default: 'default_name' }
@@ -536,13 +531,18 @@ function createOrUpdateVariable() {
 function refreshSystemTable() {
   systemTableData.value = []
   //can statistics
-
+  systemTableData.value.push({
+    type: 'system',
+    id: `Statistics`,
+    name: `Statistics`
+  })
   for (const device of Object.values(dataStore.devices)) {
     if (device.type === 'can' && device.canDevice) {
       systemTableData.value.push({
         type: 'system',
-        id: `CanStatistics ${device.canDevice.id}`,
-        name: `Can Statistics: ${device.canDevice.name}`
+        id: `${device.canDevice.id}`,
+        name: `${device.canDevice.name}`,
+        parentId: `Statistics`
       })
 
       const list = ['BusLoad', 'BusLoadMin', 'BusLoadMax', 'BusLoadAvg']
@@ -551,7 +551,7 @@ function refreshSystemTable() {
           type: 'system',
           id: `${device.canDevice.id}.${item}`,
           name: `${item}`,
-          parentId: `CanStatistics ${device.canDevice.id}`,
+          parentId: `${device.canDevice.id}`,
           value: {
             type: 'number',
             initValue: 0,

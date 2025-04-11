@@ -72,6 +72,7 @@ export default class UdsTester {
   serviceMap: Record<string, ServiceItem> = {}
   ts = 0
   private cb: any
+  private varCb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
     private env: {
@@ -160,6 +161,8 @@ export default class UdsTester {
 
     this.cb = this.keyHandle.bind(this)
     globalThis.keyEvent?.on('keydown', this.cb)
+    this.varCb = this.varHandle.bind(this)
+    globalThis.varEvent?.on('update', this.varCb)
   }
   async getTestInfo() {
     return new Promise<(TestEvent | string)[]>((resolve, reject) => {
@@ -185,6 +188,11 @@ export default class UdsTester {
         this.log.systemMsg(e.toString(), this.ts, 'error')
       })
     }
+  }
+  varHandle(data: { name: string; value: number | string | number[]; id: string }) {
+    this.workerEmit('__varUpdate', data).catch((e: any) => {
+      this.log.systemMsg(e.toString(), this.ts, 'error')
+    })
   }
   private async workerEmit(method: string, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -371,6 +379,7 @@ export default class UdsTester {
   }
   async stop() {
     globalThis.keyEvent?.off('keydown', this.cb)
+    globalThis.varEvent?.off('update', this.varCb)
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }

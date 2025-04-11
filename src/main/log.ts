@@ -8,6 +8,7 @@ import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
+import { setVar, setVarByKey } from './var'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -443,5 +444,52 @@ export class LinLOG {
         data
       }
     })
+  }
+}
+
+export class VarLOG {
+  log: Logger
+  id: string
+  constructor(id: string) {
+    this.id = id
+
+    const et1 = externalTransport.map((t) => t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(format.json(), ...externalFormat)
+    })
+  }
+  setVarByKey(key: string, value: number | string | number[]) {
+    const found = setVarByKey(key, value)
+    if (found) {
+      this.log.info({
+        method: 'setVarByKey',
+        data: { key, value, id: this.id }
+      })
+      globalThis.varEvent?.emit('update', {
+        name: found.target.name,
+        value,
+        id: found.target.id,
+        uuid: this.id
+      })
+    }
+  }
+  setVar(name: string, value: number | string | number[]) {
+    const { found, target } = setVar(name, value)
+    if (found && target) {
+      this.log.info({
+        method: 'setVar',
+        data: { name: target.name, value, id: target.id, uuid: this.id }
+      })
+      globalThis.varEvent?.emit('update', {
+        name: target.name,
+        value,
+        id: target.id,
+        uuid: this.id
+      })
+    }
+  }
+  close() {
+    this.log.close()
   }
 }

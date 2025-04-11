@@ -191,6 +191,35 @@ export function updateUdsDts(data: DataSet) {
       }
     }
   }
+  //const variables
+  const variables: { name: string; type: 'number' | 'string' | 'number[]' }[] = []
+  for (const varItem of Object.values(data.vars)) {
+    if (varItem.value) {
+      const parentName: string[] = []
+      if (varItem.parentId) {
+        const parent = data.vars[varItem.parentId]
+        if (parent) {
+          parentName.push(parent.name)
+        }
+      }
+      parentName.push(varItem.name)
+      let typex: 'number' | 'string' | 'number[]' = 'number'
+      switch (varItem.value.type) {
+        case 'number':
+          typex = 'number'
+          break
+        case 'string':
+          typex = 'string'
+          break
+        case 'array':
+          typex = 'number[]'
+          break
+        default:
+          break
+      }
+      variables.push({ name: parentName.join('.'), type: typex })
+    }
+  }
   //lib
 
   const libTmpl = Handlebars.compile(udsHeaderStr)
@@ -198,7 +227,8 @@ export function updateUdsDts(data: DataSet) {
     testers: Object.values(data.tester).map((item) => item.name),
     services: [...new Set(nameString)],
     jobs: jobs,
-    signals: signals
+    signals: signals,
+    variables: variables
   })
   return libResult
 }

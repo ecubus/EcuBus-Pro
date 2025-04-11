@@ -77,6 +77,7 @@ const serviceList = ['{{{serviceName}}}'] as const
 const allServicesSend = ['{{{serviceName}}}.send'] as const
 const allServicesRecv = ['{{{serviceName}}}.recv'] as const
 const allSignal = ['{{{signalName}}}'] as const
+
 interface Jobs {
   string: (data: Buffer) => string
 }
@@ -107,6 +108,14 @@ export type ServiceNameRecv = (typeof allServicesRecv)[number]
  * @category CAN
  */
 export type SignalName = (typeof allSignal)[number]
+
+/**
+ * All variables name config in Diagnostic Service.
+ * @category UDS
+ */
+export type VariableMap = {
+  stub: number
+}
 
 /**
  * All jobs name config in Diagnostic Service.
@@ -1007,6 +1016,52 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for a variable update.
+   *
+   * @param name - The name of the variable to listen for, * is a wildcard.
+   * @param fc - The callback function to be executed when the variable is updated.
+   *             This can be a synchronous function or a function returning a Promise.
+   *             The callback receives an object with name and value properties.
+   */
+  OnVar<Name extends keyof VariableMap>(
+    name: Name,
+    fc: ({ name, value }: { name: Name; value: VariableMap[Name] }) => void | Promise<void>
+  ) {
+    if (name) {
+      this.event.on(`varUpdate${name}` as any, fc)
+    }
+  }
+  /**
+   * Registers an event listener for a variable update that will be invoked once.
+   *
+   * @param name - The name of the variable to listen for, * is a wildcard.
+   * @param fc - The callback function to be executed when the variable is updated.
+   *             This can be a synchronous function or a function returning a Promise.
+   *             The callback receives an object with name and value properties.
+   */
+  OnVarOnce<Name extends keyof VariableMap>(
+    name: Name,
+    fc: ({ name, value }: { name: Name; value: VariableMap[Name] }) => void | Promise<void>
+  ) {
+    if (name) {
+      this.event.once(`varUpdate${name}` as any).then(fc)
+    }
+  }
+  /**
+   * Unsubscribes from an event listener for a variable update.
+   *
+   * @param name - The name of the variable to unsubscribe from, * is a wildcard.
+   * @param fc - The callback function to remove from the event listeners.
+   */
+  OffVar<Name extends keyof VariableMap>(
+    name: Name,
+    fc: ({ name, value }: { name: Name; value: VariableMap[Name] }) => void | Promise<void>
+  ) {
+    if (name) {
+      this.event.off(`varUpdate${name}` as any, fc)
+    }
+  }
+  /**
    * Subscribe to an event once, invoking the registered function when the event is emitted.
    * @param eventName
    * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
@@ -1161,6 +1216,15 @@ export class UtilClass {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
   }
+  private async varUpdate(data: {
+    name: string
+    value: number | string | number[]
+    id: string
+    uuid?: string
+  }) {
+    await this.event.emit(`varUpdate${data.name}` as any, data)
+    await this.event.emit(`varUpdate*` as any, data)
+  }
   private evnetDone(
     id: number,
     resp?: {
@@ -1192,6 +1256,7 @@ export class UtilClass {
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
       this.event.on('__linMsg' as any, this.linMsg.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
+      this.event.on('__varUpdate' as any, this.varUpdate.bind(this))
     }
   }
 
@@ -1358,6 +1423,43 @@ export async function setSignal(
       event: 'setSignal',
       data: {
         signal,
+        value
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+
+  return await p
+}
+
+/**
+ * Set a variable value
+ *
+ * @category Util
+ * @param {keyof VariableMap} name - The variable name
+ * @param {number|number[]|string} value - The value to set, can be single number or array
+ * @returns {Promise<void>} - Returns a promise that resolves when value is set
+ *
+ * @example
+ * ```ts
+ * // Set single value signal
+ * await setVar('var2', 123);
+ *
+ * // Set array value signal
+ * await setVar('namespace.var1', [1, 2, 3, 4]);
+ * ```
+ */
+export async function setVar<T extends keyof VariableMap>(
+  name: T,
+  value: VariableMap[T]
+): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'setVar',
+      data: {
+        name,
         value
       }
     })

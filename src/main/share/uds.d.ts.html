@@ -46,6 +46,14 @@ interface CanMessage {
      * The database name of the CAN message.
      */
     database?: string;
+    /**
+     * The children signals of the CAN message.
+     * internal use
+     */
+    children?: {
+        name: string;
+        data: string;
+    }[];
 }
 /**
  * Enumeration representing different CAN (Controller Area Network) ID types.
@@ -174,6 +182,14 @@ interface LinMsg {
     isEvent?: boolean;
     uuid?: string;
     ts?: number;
+    /**
+     * The children signals of the CAN message.
+     * internal use
+     */
+    children?: {
+        name: string;
+        data: string;
+    }[];
 }
 
 type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE';
@@ -322,6 +338,16 @@ type ServiceNameRecv = (typeof allServicesRecv)[number];
  * @category CAN
  */
 type SignalName = (typeof allSignal)[number];
+/**
+ * All variables name config in Diagnostic Service.
+ * @category UDS
+ */
+type VariableMap = {
+    "*":number|string|number[],
+    {{#each this.variables}}
+        "{{this.name}}":{{this.type}},
+    {{/each}}
+};
 /**
  * All jobs name config in Diagnostic Service.
  * @category UDS
@@ -956,6 +982,40 @@ declare class UtilClass {
      */
     OffKey(key: string, fc: (key: string) => void | Promise<void>): void;
     /**
+     * Registers an event listener for a variable update.
+     *
+     * @param name - The name of the variable to listen for, * is a wildcard.
+     * @param fc - The callback function to be executed when the variable is updated.
+     *             This can be a synchronous function or a function returning a Promise.
+     *             The callback receives an object with name and value properties.
+     */
+    OnVar<Name extends keyof VariableMap>(name: Name, fc: ({ name, value }: {
+        name: Name;
+        value: VariableMap[Name];
+    }) => void | Promise<void>): void;
+    /**
+     * Registers an event listener for a variable update that will be invoked once.
+     *
+     * @param name - The name of the variable to listen for, * is a wildcard.
+     * @param fc - The callback function to be executed when the variable is updated.
+     *             This can be a synchronous function or a function returning a Promise.
+     *             The callback receives an object with name and value properties.
+     */
+    OnVarOnce<Name extends keyof VariableMap>(name: Name, fc: ({ name, value }: {
+        name: Name;
+        value: VariableMap[Name];
+    }) => void | Promise<void>): void;
+    /**
+     * Unsubscribes from an event listener for a variable update.
+     *
+     * @param name - The name of the variable to unsubscribe from, * is a wildcard.
+     * @param fc - The callback function to remove from the event listeners.
+     */
+    OffVar<Name extends keyof VariableMap>(name: Name, fc: ({ name, value }: {
+        name: Name;
+        value: VariableMap[Name];
+    }) => void | Promise<void>): void;
+    /**
      * Subscribe to an event once, invoking the registered function when the event is emitted.
      * @param eventName
      * Service name, formatted as \<tester name\>.\<service name\>.\<send|recv\>
@@ -1034,6 +1094,7 @@ declare class UtilClass {
     private canMsg;
     private linMsg;
     private keyDown;
+    private varUpdate;
     private evnetDone;
     constructor();
     /**
@@ -1169,6 +1230,24 @@ declare function output(msg: LinMsg): Promise<number>;
  */
 declare function setSignal(signal: SignalName, value: number | number[] | string): Promise<void>;
 /**
+ * Set a variable value
+ *
+ * @category Util
+ * @param {keyof VariableMap} name - The variable name
+ * @param {number|number[]|string} value - The value to set, can be single number or array
+ * @returns {Promise<void>} - Returns a promise that resolves when value is set
+ *
+ * @example
+ * ```ts
+ * // Set single value signal
+ * await setVar('var2', 123);
+ *
+ * // Set array value signal
+ * await setVar('namespace.var1', [1, 2, 3, 4]);
+ * ```
+ */
+declare function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]): Promise<void>;
+/**
  * Register a virtual entity
  *
  * @category DOIP
@@ -1180,4 +1259,4 @@ declare function RegisterEthVirtualEntity(entity: VinInfo, ip?: string): Promise
 type TestEventGenerator = Parameters<typeof dot>[0];
 declare function reporter(source: TestEventGenerator): AsyncGenerator<never, void, unknown>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, selfDescribe as describe, output, reporter, setSignal };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterName, Util, UtilClass, type VariableMap, selfDescribe as describe, output, reporter, setSignal, setVar };

@@ -4,7 +4,7 @@ import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
-import { UdsLOG } from './log'
+import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem } from './share/uds'
 import { findService } from './docan/uds'
 import { cloneDeep } from 'lodash'
@@ -22,7 +22,6 @@ import Transport from 'winston-transport'
 import logo from './logo.html?raw'
 import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
-import { setVar as setVarGlobal } from './var'
 
 type TestTree = {
   label: string
@@ -74,6 +73,7 @@ export class NodeClass {
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
   private startTs = 0
+  private boundCb: (frame: CanMessage | LinMsg) => void
 
   freeEvent: {
     doip: DOIP
@@ -81,6 +81,7 @@ export class NodeClass {
     cb: (data: { data: Buffer; ts: number } | DoipError) => void
   }[] = []
   log?: UdsLOG
+  varLog: VarLOG
   logs: TestLog[] = []
   constructor(
     public nodeItem: NodeItem,
@@ -98,16 +99,19 @@ export class NodeClass {
         }
       | undefined
   ) {
+    this.varLog = new VarLOG(nodeItem.id)
+    this.boundCb = this.cb.bind(this)
+
     for (const c of nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {
         this.canBaseId.push(c)
-        baseItem.attachCanMessage(this.cb.bind(this))
+        baseItem.attachCanMessage(this.boundCb)
         continue
       }
       const linBaseItem = this.linBaseMap.get(c)
       if (linBaseItem) {
-        linBaseItem.attachLinMessage(this.cb.bind(this))
+        linBaseItem.attachLinMessage(this.boundCb)
         this.linBaseId.push(c)
         if (nodeItem.workNode) {
           const db = linBaseItem.setupEntry(nodeItem.workNode)
@@ -730,7 +734,7 @@ export class NodeClass {
       value: number | string | number[]
     }
   ) {
-    setVarGlobal(data.name, data.value)
+    this.varLog.setVar(data.name, data.value)
   }
   setSignal(
     pool: UdsTester,
@@ -1081,11 +1085,11 @@ export class NodeClass {
     for (const c of this.nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {
-        baseItem.detachCanMessage(this.cb.bind(this))
+        baseItem.detachCanMessage(this.boundCb)
       }
       const linBaseItem = this.linBaseMap.get(c)
       if (linBaseItem) {
-        linBaseItem.detachLinMessage(this.cb.bind(this))
+        linBaseItem.detachLinMessage(this.boundCb)
       }
     }
     for (const e of this.freeEvent) {
@@ -1100,6 +1104,7 @@ export class NodeClass {
     })
     this.pool?.stop()
     this.log?.close()
+    this.varLog?.close()
   }
   async start() {
     this.pool?.updateTs(0)

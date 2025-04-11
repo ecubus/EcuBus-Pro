@@ -107,6 +107,18 @@ class MyCustomPlugin {
     {{/each}}
 ];`)
 
+
+    content=content.replace(
+`type VariableMap = {
+    stub: number;
+};`,
+`type VariableMap = {
+    "*":number|string|number[],
+    {{#each this.variables}}
+        "{{this.name}}":{{this.type}},
+    {{/each}}
+};`)
+
         //write 
         fs.writeFileSync(path.resolve(__dirname,'src','main','share','uds.d.ts.html'),content)
         //bundle cryptoExt.d.ts

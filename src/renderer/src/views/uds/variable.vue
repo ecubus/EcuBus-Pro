@@ -190,7 +190,11 @@ const dialogHeight = computed(() => {
 })
 const userVariableGrid = ref()
 const userTableData = computed(() => {
-  return Object.values(dataStore.vars)
+  const list: VarItem[] = []
+  for (const item of Object.values(dataStore.vars)) {
+    list.push(cloneDeep(item))
+  }
+  return list
 })
 const systemTableData = ref<VarItem[]>([])
 // Define popoverIndex to track the selected variable

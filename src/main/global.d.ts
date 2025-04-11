@@ -5,11 +5,23 @@ import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { VarItem } from 'src/preload/data'
 import { BrowserWindow } from 'electron'
+
+type VarEvent = {
+  update: [
+    {
+      name: string
+      value: number | string | number[]
+      id: string
+      uuid?: string
+    }
+  ]
+}
+
 declare global {
   var sysLog: Logger
   var scriptLog: Logger
-  var keyEvent: EventEmitter
-  var varEvent: EventEmitter
+  var keyEvent: EventEmitter | undefined
+  var varEvent: EventEmitter<VarEvent> | undefined
   var database: {
     lin: Record<string, LDF>
     can: Record<string, DBC>

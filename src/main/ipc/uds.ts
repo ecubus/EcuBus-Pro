@@ -28,7 +28,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, TestConfig } from 'src/preload/data'
+import { DataSet, LinInter, NodeItem, TestConfig, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -462,8 +462,23 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const nodes = arg[i++] as Record<string, NodeItem>
 
   global.database = arg[i++]
-  global.vars = arg[i++]
-
+  global.vars = {}
+  const vars: Record<string, VarItem> = arg[i++]
+  for (const key in vars) {
+    const v = vars[key]
+    if (v.value) {
+      const parentName: string[] = []
+      if (v.parentId) {
+        const parent = vars[v.parentId]
+        if (parent) {
+          parentName.push(parent.name)
+        }
+      }
+      parentName.push(v.name)
+      v.name = parentName.join('.')
+    }
+    global.vars[key] = v
+  }
   try {
     await globalStart(devices, testers, nodes, projectInfo)
   } catch (err: any) {

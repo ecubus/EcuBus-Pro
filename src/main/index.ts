@@ -10,6 +10,8 @@ import './update'
 import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
 import { monitorEventLoopDelay } from 'perf_hooks'
+import './multiWin'
+import { closeAllWindows, closeWindow, maximizeWindow, minimizeWindow } from './multiWin'
 
 log.initialize()
 
@@ -139,30 +141,43 @@ function createWindow(): void {
     ],
     []
   )
-  ipcMain.on('minimize', () => {
-    mainWindow?.minimize()
-  })
-
-  ipcMain.on('maximize', () => {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize()
-      store.set('windowMaximized', false)
+  ipcMain.on('minimize', (event, id) => {
+    if (id) {
+      minimizeWindow(id)
     } else {
-      // Save current bounds before maximizing
-      store.set('windowBounds', getBounds())
-      mainWindow.maximize()
-      store.set('windowMaximized', true)
+      mainWindow?.minimize()
     }
   })
 
-  ipcMain.on('close', () => {
-    globalStop()
-    // Only save bounds if window is not maximized
-    if (!mainWindow.isMaximized()) {
-      store.set('windowBounds', getBounds())
+  ipcMain.on('maximize', (event, id) => {
+    if (id) {
+      maximizeWindow(id)
+    } else {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize()
+        store.set('windowMaximized', false)
+      } else {
+        // Save current bounds before maximizing
+        store.set('windowBounds', getBounds())
+        mainWindow.maximize()
+        store.set('windowMaximized', true)
+      }
     }
-    store.set('windowMaximized', mainWindow.isMaximized())
-    mainWindow.close()
+  })
+
+  ipcMain.on('close', (event, id) => {
+    if (id) {
+      closeWindow(id)
+    } else {
+      globalStop()
+      // Only save bounds if window is not maximized
+      if (!mainWindow.isMaximized()) {
+        store.set('windowBounds', getBounds())
+      }
+      store.set('windowMaximized', mainWindow.isMaximized())
+      closeAllWindows()
+      mainWindow.close()
+    }
   })
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

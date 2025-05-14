@@ -115,13 +115,13 @@ async function closeHandle() {
       return
     }
   }
-  window.electron.ipcRenderer.send('close')
+  window.electron.ipcRenderer.send('close', window.params.id)
 }
 function winHandle(action: string) {
   if (action == 'min') {
-    window.electron.ipcRenderer.send('minimize')
+    window.electron.ipcRenderer.send('minimize', window.params.id)
   } else if (action == 'max') {
-    window.electron.ipcRenderer.send('maximize')
+    window.electron.ipcRenderer.send('maximize', window.params.id)
   } else if (action == 'close') {
     if (window.globalStart.value) {
       //TODO:add force close

@@ -27,6 +27,14 @@ data.$subscribe(() => {
   }
 })
 
+window.electron.ipcRenderer.send('ipc-open-window', {
+  id: 'test',
+  params: {
+    name: 'test',
+    age: 18
+  }
+})
+
 window.electron.ipcRenderer.on('ipc-global-stop', () => {
   window.globalStart.value = false
 })

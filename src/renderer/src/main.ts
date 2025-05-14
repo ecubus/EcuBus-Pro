@@ -99,4 +99,11 @@ app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
 
+// 直接解析URL参数并赋值给window.params
+const urlParams = new URLSearchParams(window.location.search)
+window.params = {}
+urlParams.forEach((value, key) => {
+  window.params[key] = value
+})
+
 app.mount('#app')

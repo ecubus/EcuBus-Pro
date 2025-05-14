@@ -39,5 +39,6 @@ declare global {
     path: typeof path
     MonacoEnvironment: any
     readmePath: string
+    params: Record<string, string>
   }
 }

@@ -30,6 +30,7 @@ data.$subscribe(() => {
 window.electron.ipcRenderer.send('ipc-open-window', {
   id: 'test',
   params: {
+    id: 'trace',
     name: 'test',
     age: 18
   }

@@ -41,9 +41,10 @@ export interface LayoutItem {
   minW?: number
   minH?: number
   label: string
+  allowExt?: boolean
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
-const layoutMap: Record<string, LayoutItem> = {
+export const layoutMap: Record<string, LayoutItem> = {
   variable: {
     i: 'Variable',
     x: 0,
@@ -221,6 +222,7 @@ const layoutMap: Record<string, LayoutItem> = {
     h: 400,
     label: 'Trace',
     key: 'trace',
+    allowExt: true,
     component: defineAsyncComponent(() => import('./components/trace.vue')),
     icon: logIcon
   },

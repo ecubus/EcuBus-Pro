@@ -107,3 +107,8 @@ urlParams.forEach((value, key) => {
 })
 
 app.mount('#app')
+
+if (window.params.id) {
+  //switch to the window
+  router.push(window.params.id)
+}

@@ -3,6 +3,31 @@ import { app, shell, BrowserWindow, ipcMain, dialog, protocol as eProtocol, net 
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
+class LogQueue {
+  list: any[] = []
+  timer: any
+  constructor(
+    public win: BrowserWindow[],
+    private period = 100
+  ) {
+    this.timer = setInterval(() => {
+      if (this.list.length) {
+        this.win.forEach((win) => {
+          win.webContents.send('ipc-log', this.list)
+        })
+        this.list = []
+      }
+    }, this.period)
+  }
+  addWin(win: BrowserWindow) {
+    this.win.push(win)
+  }
+  removeWin(win: BrowserWindow) {
+    this.win = this.win.filter((w) => w !== win)
+  }
+}
+export const logQ = new LogQueue([])
+
 const winMap = new Map<string, BrowserWindow>()
 
 ipcMain.on('ipc-open-window', (event, arg) => {
@@ -22,8 +47,10 @@ ipcMain.on('ipc-open-window', (event, arg) => {
       show: false
     })
     winMap.set(arg.id, win)
+    logQ.addWin(win)
     win.on('closed', () => {
       winMap.delete(arg.id)
+      logQ.removeWin(win)
     })
     win.on('ready-to-show', () => {
       win.show()

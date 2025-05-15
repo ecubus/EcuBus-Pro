@@ -9,9 +9,8 @@ import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
-import { monitorEventLoopDelay } from 'perf_hooks'
-import './multiWin'
-import { closeAllWindows, closeWindow, maximizeWindow, minimizeWindow } from './multiWin'
+
+import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
 
 log.initialize()
 
@@ -59,40 +58,22 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
   store.set(key, val)
 })
 
-class LogQueue {
-  list: any[] = []
-  timer: any
-  constructor(
-    private win: BrowserWindow,
-    private period = 100
-  ) {
-    this.timer = setInterval(() => {
-      if (this.list.length) {
-        this.win.webContents.send('ipc-log', this.list)
-        this.list = []
-      }
-    }, this.period)
-  }
-}
-
 class ElectronLog extends Transport {
-  win: BrowserWindow
   constructor(
-    private q: LogQueue,
-    win: BrowserWindow,
+    private q: typeof logQ,
     opts?: Transport.TransportStreamOptions
   ) {
     super(opts)
-    this.win = win
   }
 
   log(info: any, callback: () => void) {
     if (info.message?.method) {
       this.q.list.push(info)
     } else {
-      this.win.webContents.send('ipc-log-main', info)
+      this.q.win.forEach((win) => {
+        win.webContents.send('ipc-log-main', info)
+      })
     }
-
     callback()
   }
 }
@@ -131,11 +112,11 @@ function createWindow(): void {
     }
   })
   global.mainWindow = mainWindow
-  const logQ = new LogQueue(mainWindow)
+  logQ.addWin(mainWindow)
   createLogs(
     [
       () =>
-        new ElectronLog(logQ, mainWindow, {
+        new ElectronLog(logQ, {
           level: 'debug'
         })
     ],

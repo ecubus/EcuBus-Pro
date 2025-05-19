@@ -189,5 +189,68 @@
                 ]
             ],
         },
+        {
+            'target_name': 'vectorLin',
+           
+            'configurations': {
+
+            },
+            'defines': [
+                '__EXCEPTIONS'
+            ],
+           
+            'conditions': [
+                ['OS=="win"', {
+                    'cflags': [
+
+                    ],
+                    'cflags_cc': [
+
+                    ],
+                     'include_dirs': [
+                        '<(module_root_dir)/../docan/vector/inc',
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                     'sources': [
+                        './vector/swig/lin_wrap.cxx', './vector/swig/lifn.cxx',
+                    ],
+                    'libraries': ['<(module_root_dir)/../docan/vector/lib/vxlapi64.lib'],
+                    'defines': ['DELAYLOAD_HOOK',],
+                    'msvs_settings': {
+                        'VCCLCompilerTool': {
+                            'AdditionalOptions': [ '/DELAYLOAD:vxlapi64.dll'],
+                            'ExceptionHandling':1
+                        }
+                    },
+                    'link_settings': {
+                        'libraries': [ '-DELAYLOAD:vxlapi64.dll']
+                    }
+                },
+                'OS=="linux"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_linux.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                },
+                'OS=="mac"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_mac.cxx' ],
+                    'xcode_settings': {
+                        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+                    }
+                }
+                ]
+            ],
+        },
     ]
 }

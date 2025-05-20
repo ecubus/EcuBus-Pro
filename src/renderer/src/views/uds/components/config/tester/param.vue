@@ -431,7 +431,6 @@ function saveParam(index: number, justValid: boolean) {
         if (item && item.deletable == false) {
           if (Buffer.compare(d.value, Buffer.from(item.value)) == 0) {
             paramError.value['value'] = 'The id already exists in other service, please change it'
-            error = true
             break
           }
         }

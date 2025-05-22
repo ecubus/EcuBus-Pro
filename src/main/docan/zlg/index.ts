@@ -253,6 +253,9 @@ export class ZLG_CAN extends CanBase {
     const ret = ZLG.ZCAN_Receive(this.channel, frames.cast(), num, 0)
     if (ret > 0) {
       for (let i = 0; i < ret; i++) {
+        if (this.closed) {
+          return
+        }
         const frame = frames.getitem(i)
         const id = frame.frame.can_id
         const data = Buffer.alloc(frame.frame.can_dlc)
@@ -291,6 +294,9 @@ export class ZLG_CAN extends CanBase {
     const ret = ZLG.ZCAN_ReceiveFD(this.channel, frames.cast(), num, 0)
     if (ret > 0) {
       for (let i = 0; i < ret; i++) {
+        if (this.closed) {
+          return
+        }
         const frame = frames.getitem(i)
         const id = frame.frame.can_id
         const data = Buffer.alloc(frame.frame.len)
@@ -409,8 +415,9 @@ export class ZLG_CAN extends CanBase {
     }
     this.pendingBaseCmds.clear()
 
+    ZLG.ZCAN_ClearBuffer(this.channel)
+    ZLG.ZCAN_ResetCAN(this.channel)
     if (isReset) {
-      ZLG.ZCAN_ResetCAN(this.channel)
       ZLG.ZCAN_StartCAN(this.channel)
       //this._close(CAN_ERROR_ID.CAN_BUS_CLOSED, msg)
     } else {

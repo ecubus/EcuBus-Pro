@@ -151,6 +151,21 @@
           </el-form-item>
         </el-col>
       </el-form-item>
+      <template v-if="props.type == 'eth'">
+        <el-divider content-position="left"> DOIP Settings </el-divider>
+        <el-col :span="12">
+          <el-form-item label="DOIP Version" prop="doipVersion">
+            <el-select
+              v-model.number="data.doipVersion"
+              :disabled="globalStart"
+              placeholder="DOIP V2"
+            >
+              <el-option label="DOIP V2" :value="2" />
+              <el-option label="DOIP V3" :value="3" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </template>
       <el-divider content-position="left">
         <el-button icon="Plus" link type="primary" :disabled="globalStart" @click="addCanAddress">
           Add

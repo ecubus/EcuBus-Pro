@@ -1,7 +1,13 @@
 # Setup
 
+
 If you are not familiar with JavaScript/Typescript,
 you can get some learning resources from [JavaScript/Typescript Learning Resources](./jslearn.md)
+
+
+## Detail Windows Setup Guide
+
+You can get detail setup steps from [Detail Windows Setup Guide](./detialSetup.md)
 
 ## Prerequisites
 

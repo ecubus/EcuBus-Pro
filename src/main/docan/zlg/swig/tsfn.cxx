@@ -49,7 +49,7 @@ void CreateTSFN(const Napi::CallbackInfo &info) {
       env,                          // Environment
       info[4].As<Napi::Function>(), // JS function from caller
       name.Utf8Value().data(),      // Resource name
-      1,                            // Max queue size (0 = unlimited).
+      0,                            // Max queue size (0 = unlimited).
       1,                            // Initial thread count
       testData                     // Context,
     
@@ -58,7 +58,7 @@ void CreateTSFN(const Napi::CallbackInfo &info) {
       env,                          // Environment
       info[5].As<Napi::Function>(), // JS function from caller
       nameFd.Utf8Value().data(),      // Resource name
-      1,                            // Max queue size (0 = unlimited).
+      0,                            // Max queue size (0 = unlimited).
       1,                            // Initial thread count
       testData                     // Context
   );
@@ -67,7 +67,7 @@ void CreateTSFN(const Napi::CallbackInfo &info) {
       env,                          // Environment
       info[7].As<Napi::Function>(), // JS function from caller
       nameError.Utf8Value().data(),      // Resource name
-      1,                            // Max queue size (0 = unlimited).
+      0,                            // Max queue size (0 = unlimited).
       1,                            // Initial thread count
       testData                     // Context
   );
@@ -115,14 +115,14 @@ void threadEntry(TsfnContext *context) {
     if(numCan>0){
       UINT* numCanPtr = new UINT;
       *numCanPtr=numCan;
-      context->tsfn.BlockingCall(numCanPtr,callback);
+      context->tsfn.NonBlockingCall(numCanPtr,callback);
     }
    
     numCanFd=ZCAN_GetReceiveNum(context->channel,TYPE_CANFD);
     if(numCanFd>0){
       UINT* numCanFdPtr = new UINT;
       *numCanFdPtr=numCanFd;
-      context->tsfnfd.BlockingCall(numCanFdPtr,callback);
+      context->tsfnfd.NonBlockingCall(numCanFdPtr,callback);
     }
     // ZCAN_CHANNEL_ERR_INFO err;
     ret=0;
@@ -140,7 +140,7 @@ void threadEntry(TsfnContext *context) {
     if(ret!=0){
       UINT* retPtr = new UINT;
       *retPtr=ret;
-      context->tserror.BlockingCall(retPtr,callback);
+      context->tserror.NonBlockingCall(retPtr,callback);
     }
       
       // ZCAN_StartCAN(context->channel);

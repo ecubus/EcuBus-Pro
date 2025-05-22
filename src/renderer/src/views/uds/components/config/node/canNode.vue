@@ -736,7 +736,7 @@ function canFdChange() {
 }
 
 onMounted(() => {
-  if (vendorConfigLimit.value.bitrate) {
+  if (editIndex.value == '' && vendorConfigLimit.value.bitrate) {
     data.value.bitrate = cloneDeep(vendorConfigLimit.value.bitrate)
   }
   // ruleFormRef.value?.validate()
@@ -832,20 +832,47 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       callback(new Error('normal sjw must be less than tseg2'))
     }
     //brp from 1-1024
-    if (data.value.bitrate.preScaler < 1 || data.value.bitrate.preScaler > 1024) {
-      error0.value = true
-      callback(new Error('normal prescale must be between 1-1024'))
+    if (vendorConfigLimit.value.preScaler) {
+      if (
+        data.value.bitrate.preScaler < vendorConfigLimit.value.preScaler.min ||
+        data.value.bitrate.preScaler > vendorConfigLimit.value.preScaler.max
+      ) {
+        error0.value = true
+        callback(
+          new Error(
+            `normal prescale must be between ${vendorConfigLimit.value.preScaler.min}-${vendorConfigLimit.value.preScaler.max}`
+          )
+        )
+      }
     }
-    //tseg1 from 1-256
-    if (data.value.bitrate.timeSeg1 < 1 || data.value.bitrate.timeSeg1 > 256) {
-      error0.value = true
-      callback(new Error('normal tseg1 must be between 1-256'))
+
+    if (vendorConfigLimit.value.tsg1) {
+      if (
+        data.value.bitrate.timeSeg1 < vendorConfigLimit.value.tsg1.min ||
+        data.value.bitrate.timeSeg1 > vendorConfigLimit.value.tsg1.max
+      ) {
+        error0.value = true
+        callback(
+          new Error(
+            `normal tseg1 must be between ${vendorConfigLimit.value.tsg1.min}-${vendorConfigLimit.value.tsg1.max}`
+          )
+        )
+      }
     }
-    //tseg2 from 1-128
-    if (data.value.bitrate.timeSeg2 < 1 || data.value.bitrate.timeSeg2 > 128) {
-      error0.value = true
-      callback(new Error('normal tseg2 must be between 1-128'))
+    if (vendorConfigLimit.value.tsg2) {
+      if (
+        data.value.bitrate.timeSeg2 < vendorConfigLimit.value.tsg2.min ||
+        data.value.bitrate.timeSeg2 > vendorConfigLimit.value.tsg2.max
+      ) {
+        error0.value = true
+        callback(
+          new Error(
+            `normal tseg2 must be between ${vendorConfigLimit.value.tsg2.min}-${vendorConfigLimit.value.tsg2.max}`
+          )
+        )
+      }
     }
+
     if (data.value.canfd && data.value.bitratefd) {
       if (data.value.bitratefd.timeSeg1 + 1 <= data.value.bitratefd.timeSeg2) {
         error1.value = true
@@ -855,20 +882,44 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         error1.value = true
         callback(new Error('data sjw must be less than tseg2'))
       }
-      //brp from 1-1024
-      if (data.value.bitratefd.preScaler < 1 || data.value.bitratefd.preScaler > 1024) {
-        error1.value = true
-        callback(new Error('data prescale must be between 1-1024'))
+      if (vendorConfigLimit.value.preScaler) {
+        if (
+          data.value.bitratefd.preScaler < vendorConfigLimit.value.preScaler.min ||
+          data.value.bitratefd.preScaler > vendorConfigLimit.value.preScaler.max
+        ) {
+          error1.value = true
+          callback(
+            new Error(
+              `data prescale must be between ${vendorConfigLimit.value.preScaler.min}-${vendorConfigLimit.value.preScaler.max}`
+            )
+          )
+        }
       }
-      //tseg1 from 1-32
-      if (data.value.bitratefd.timeSeg1 < 1 || data.value.bitratefd.timeSeg1 > 32) {
-        error1.value = true
-        callback(new Error('data tseg1 must be between 1-32'))
+      if (vendorConfigLimit.value.tsg1) {
+        if (
+          data.value.bitratefd.timeSeg1 < vendorConfigLimit.value.tsg1.min ||
+          data.value.bitratefd.timeSeg1 > vendorConfigLimit.value.tsg1.max
+        ) {
+          error1.value = true
+          callback(
+            new Error(
+              `data tseg1 must be between ${vendorConfigLimit.value.tsg1.min}-${vendorConfigLimit.value.tsg1.max}`
+            )
+          )
+        }
       }
-      //tseg2 from 1-128
-      if (data.value.bitratefd.timeSeg2 < 1 || data.value.bitratefd.timeSeg2 > 16) {
-        error1.value = true
-        callback(new Error('data tseg2 must be between 1-16'))
+      if (vendorConfigLimit.value.tsg2) {
+        if (
+          data.value.bitratefd.timeSeg2 < vendorConfigLimit.value.tsg2.min ||
+          data.value.bitratefd.timeSeg2 > vendorConfigLimit.value.tsg2.max
+        ) {
+          error1.value = true
+          callback(
+            new Error(
+              `data tseg2 must be between ${vendorConfigLimit.value.tsg2.min}-${vendorConfigLimit.value.tsg2.max}`
+            )
+          )
+        }
       }
     }
     if (props.vendor == 'kvaser' || props.vendor == 'toomoss' || props.vendor == 'peak') {
@@ -963,7 +1014,7 @@ const onSubmit = () => {
         emits('change', id, data.value.name)
       } else {
         data.value.id = editIndex.value
-        assign(devices.devices[editIndex.value].canDevice, data.value)
+        devices.devices[editIndex.value].canDevice = cloneDeep(data.value)
         emits('change', editIndex.value, data.value.name)
       }
       dataModify.value = false
@@ -1012,14 +1063,25 @@ const currentRow = ref<CanBitrate | null>(null)
 
 const handleCalculatorResult = (result: any) => {
   if (currentRow.value) {
-    currentRow.value.timeSeg1 = result.t1
-    currentRow.value.timeSeg2 = result.t2
-    currentRow.value.sjw = result.sjw
-    currentRow.value.preScaler = result.presc
-    ruleFormRef.value?.validateField('bitrate')
-    if (data.value.canfd && data.value.bitratefd) {
-      ruleFormRef.value?.validateField('bitratefd')
+    const index = tableList.value.indexOf(currentRow.value)
+
+    if (index == 0) {
+      data.value.bitrate.timeSeg1 = result.t1
+      data.value.bitrate.timeSeg2 = result.t2
+      data.value.bitrate.sjw = result.sjw
+      data.value.bitrate.preScaler = result.presc
+    } else if (index == 1 && data.value.bitratefd) {
+      data.value.bitratefd.timeSeg1 = result.t1
+      data.value.bitratefd.timeSeg2 = result.t2
+      data.value.bitratefd.sjw = result.sjw
+      data.value.bitratefd.preScaler = result.presc
     }
+    nextTick(() => {
+      ruleFormRef.value?.validateField('bitrate')
+      if (data.value.canfd && data.value.bitratefd) {
+        ruleFormRef.value?.validateField('bitratefd')
+      }
+    })
   }
 }
 </script>

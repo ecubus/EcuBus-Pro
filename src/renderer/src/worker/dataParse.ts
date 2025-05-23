@@ -3,6 +3,7 @@ import { writeMessageData as writeLinMessageData } from '../database/ldf/calc'
 
 import { CanMessage } from 'nodeCan/can'
 import { LinMsg } from 'nodeCan/lin'
+import { ServiceItem } from 'nodeCan/uds'
 import { DataSet } from 'src/preload/data'
 
 // Database reference
@@ -127,6 +128,40 @@ function initDataBase(db: DataSet['database']) {
   database = db
 }
 
+function parseUdsData(raw: any, method: string) {
+  const result: Record<string, any> = {}
+  const findDb = (db?: string) => {
+    if (!db) return null
+    return database.can[db]
+  }
+  const list: any[] = []
+
+  for (const sraw of raw) {
+    const msg = sraw.message.data as {
+      service: ServiceItem
+      ts: number
+      recvData?: Uint8Array
+      msg?: string
+    }
+
+    const params = method == 'udsSent' ? msg.service.params : msg.service.respParams
+
+    ;(msg as any).children = []
+
+    for (const param of params) {
+      ;(msg as any).children.push({
+        name: param.name,
+        data: param.phyValue
+      })
+    }
+
+    list.push(sraw)
+  }
+
+  result[method] = list
+  return result
+}
+
 function parseSetVar(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
@@ -169,6 +204,14 @@ if (isWorker) {
       }
       case 'canBase': {
         const result = parseCanData(data)
+        if (result) {
+          self.postMessage(result)
+        }
+        break
+      }
+      case 'udsSent':
+      case 'udsRecv': {
+        const result = parseUdsData(data, method)
         if (result) {
           self.postMessage(result)
         }

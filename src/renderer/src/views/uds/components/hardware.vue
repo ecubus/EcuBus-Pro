@@ -20,13 +20,14 @@
                   treeLabel: true
                 }"
               >
-                <img
+                <!-- <img
                   v-if="data.vendor == 'kvaser' && node.level == 1"
                   class="logo"
                   src="@r/assets/kvaser.svg"
                 />
-                <span v-else>{{ node.label }}</span>
-                <!-- {{ node.label }} -->
+                <span v-else>{{ node.label }}</span> -->
+                <!-- If you need this advertising space, please contact me: frankie.zengfu@gmail.com -->
+                {{ node.label }}
               </span>
               <el-button
                 v-if="data.append"

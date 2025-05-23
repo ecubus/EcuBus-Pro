@@ -318,7 +318,8 @@ function logDisplay(method: string, vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'UDS Req' + (val.message.data.msg || '')
+        msgType: 'UDS Req' + (val.message.data.msg || ''),
+        children: (val.message.data as any).children
       })
     } else if (val.message.method == 'udsRecv') {
       let testerName = val.message.data.service.name
@@ -343,7 +344,8 @@ function logDisplay(method: string, vals: LogItem[]) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: msgType
+        msgType: msgType,
+        children: (val.message.data as any).children
       })
     } else if (val.message.method == 'canError') {
       //find last udsSent or udsPreSend

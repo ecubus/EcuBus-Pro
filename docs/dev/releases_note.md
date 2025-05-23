@@ -1,5 +1,23 @@
 # EcuBus-Pro Release Notes
 
+
+## v0.8.37
+Changes from v0.8.36 to v0.8.37:
+
+* [bug]:fix LDF parse with space by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/145
+* [opt]:allow UDS service with same sub-function, ex: 0x31 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/146
+* [bug]:ZLG device can't close by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/144
+* [bug]:fix the baudrate check and overwrite by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/148
+* [feat]:add doip version choose by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/150
+* [bug]:fix kvaser multi device
+* [feat]:add uds param parse in trace 
+
+
+**Full Changelog**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.36...v0.8.37
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.36
 Changes from v0.8.35 to v0.8.36:
 

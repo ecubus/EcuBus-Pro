@@ -196,9 +196,15 @@ export class DOIP {
   /* version| inverseVersion| payloadType(2)| len(4)| content */
   constructor(
     public base: EthBaseInfo,
-    private tester?: TesterInfo
+    private tester: TesterInfo
   ) {
     this.eth = base.device
+
+    if (this.tester.doipVersion == 3) {
+      this.version = 3
+      this.inverseVersion = 0xfc
+    }
+
     //create tcp server bind to eth port 13400
     this.startTs = getTsUs()
     this.log = new DoipLOG(base.vendor, this.eth.label, this.event, this.startTs)

@@ -12,4 +12,6 @@ export interface TesterInfo {
   address: UdsAddress[]
   simulateBy?: string
   allServiceList: Partial<Record<ServiceId, ServiceItem[]>>
+  //speical for doip
+  doipVersion?: number
 }

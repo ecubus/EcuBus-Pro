@@ -14,6 +14,5 @@
   "favicon": "./resources/icon.png",
   "navigation": {
     "includeCategories": true
-  },
-  "plugin": [".vitepress/typedocPlugin.js"]
+  }
 }

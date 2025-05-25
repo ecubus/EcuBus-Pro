@@ -220,7 +220,7 @@
 <script lang="ts" setup>
 import { v4 } from 'uuid'
 import { Param, param2len, param2str, paramSetVal, DataType, ServiceItem } from 'nodeCan/uds'
-import { watch, ref, nextTick, computed, toRef } from 'vue'
+import { watch, ref, nextTick, computed, toRef, onMounted } from 'vue'
 import Sortable from 'sortablejs'
 import { cloneDeep } from 'lodash'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
@@ -228,6 +228,7 @@ import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { Folder } from '@element-plus/icons-vue'
 import { useProjectStore } from '@r/stores/project'
+import { error } from 'winston'
 
 const serviceDetail = window.serviceDetail
 const paramError = ref<Record<string, string>>({})
@@ -260,6 +261,7 @@ watch(
   () => props.sid,
   () => {
     editIndex.value = -1
+    paramError.value = {}
   }
 )
 
@@ -437,12 +439,12 @@ function saveParam(index: number, justValid: boolean) {
         let oldBuffer = Buffer.alloc(0)
         for (const [index, item] of params.entries()) {
           if (item.deletable == false) {
-            oldBuffer = Buffer.concat([oldBuffer, item.value])
+            oldBuffer = Buffer.concat([oldBuffer, Buffer.from(item.value)])
 
             if (index == editIndex.value) {
-              newBuffer = Buffer.concat([newBuffer, d.value])
+              newBuffer = Buffer.concat([newBuffer, Buffer.from(d.value)])
             } else {
-              newBuffer = Buffer.concat([newBuffer, editParam[index].value])
+              newBuffer = Buffer.concat([newBuffer, Buffer.from(editParam[index].value)])
             }
           }
         }

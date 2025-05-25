@@ -3,7 +3,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ESNext",
+    "target": "es2022",
     "skipLibCheck": true,
     "noImplicitAny": true,
     "moduleResolution": "node",

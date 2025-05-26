@@ -3,7 +3,7 @@
 CAN/CAN-FD is an industry-standard vehicle bus protocol designed for reliable ECU communication in automotive applications.
 
 > [!IMPORTANT]
-> All features described in this section require a CAN DBC file. For more information about DBC files, please refer to our [database documentation](../dbc).
+> Some features described in this section may require a CAN DBC file. For more information about DBC files, please refer to our [database documentation](../dbc).
 
 > [!NOTE]
 > Supported Hardware:

@@ -219,6 +219,10 @@ export default withMermaid({
               {
                 text: 'Tester Present',
                 link: '/docs/um/uds/testerPresent.md'
+              },
+              {
+                text: 'UDS Bootloader Implementation Guide',
+                link: '/docs/um/uds/example/example.md'
               }
             ]
           },

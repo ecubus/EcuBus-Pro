@@ -1,5 +1,15 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.38
+Changes from v0.8.37 to v0.8.38:
+
+ 
+* [bug]:fix uds service param can't save
+* [bug]:fix tsconfig nodejs target version
+---
+
+# EcuBus-Pro Release Notes
+
 
 ## v0.8.37
 Changes from v0.8.36 to v0.8.37:

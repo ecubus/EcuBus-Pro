@@ -179,7 +179,7 @@ export class VectorLin extends LinBase {
         checksumType == LinChecksumType.ENHANCED ? 0x200 : 0x100
       )
       if (xlStatus !== 0) {
-        throw new Error(this.getError(xlStatus))
+        // throw new Error(this.getError(xlStatus))
       }
     }
   }

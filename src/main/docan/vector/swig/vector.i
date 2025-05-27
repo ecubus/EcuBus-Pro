@@ -20,6 +20,7 @@
 %include <vxlapi.h>
 
 %pointer_class(unsigned int, UINT32)
+%pointer_class(unsigned short, UINT16)
 %pointer_class(XLportHandle, XLPORTHANDLE)
 %pointer_class(XLaccess, XLACCESS)
 

@@ -1030,6 +1030,19 @@ export class UtilClass {
    * @param fc - The callback function to be executed when the variable is updated.
    *             This can be a synchronous function or a function returning a Promise.
    *             The callback receives an object with name and value properties.
+   *
+   * @example
+   * ```ts
+   * // Listen for updates to a specific variable
+   * Util.OnVar('temperature', ({name, value}) => {
+   *   console.log(`${name} changed to ${value}`);
+   * });
+   *
+   * // Listen for all variable updates using wildcard
+   * Util.OnVar('*', ({name, value}) => {
+   *   console.log(`Variable ${name} updated to ${value}`);
+   * });
+   * ```
    */
   OnVar<Name extends keyof VariableMap>(
     name: Name,

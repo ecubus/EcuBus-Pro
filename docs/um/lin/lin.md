@@ -3,23 +3,17 @@
 LIN is a cost-effective and deterministic communication protocol designed for connecting Electronic Control Units (ECUs) with smart sensors, actuators, and controls. EcuBus-Pro's LIN module provides comprehensive features for developing, analyzing, and testing LIN networks in compliance with LIN 2.x specifications.
 
 > [!IMPORTANT]
-> All features described below require importing a LIN Description File (LDF). For more information about LDF, see the [database documentation](./../ldf).
+> Some features described below may require importing a LIN Description File (LDF). For more information about LDF, see the [database documentation](./../ldf).
 
-> [!NOTE]
+> [!INFO]
 > Supported Hardware:
-> | Manufacturer | Protocols |
-> |--------|-------------------|
-> | PEAK | LIN |
-> | KVASER | LIN |
-> | Toomoss | LIN|
-
-## Device Support
-- PEAK
-- TOOMOSS
-  - Support 12v voltage output
-  - Support 5v voltage output
-  - Support 12v voltage input
-  
+> | Manufacturer | Protocols | Abilities |
+> |--------|-------------------| -- |
+> | PEAK | LIN | |
+> | KVASER | LIN | |
+> | Toomoss | LIN| Support 12v voltage output/input, 5v voltage output   |
+> | VECTOR | LIN | |
+ 
 
 ## Schedule Table Management
 

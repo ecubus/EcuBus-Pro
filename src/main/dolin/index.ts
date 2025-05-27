@@ -26,6 +26,7 @@ import { NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
 import { ToomossLin } from './toomoss'
 import { KvaserLin } from './kvaser'
+import { VectorLin } from './vector'
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)
@@ -41,6 +42,8 @@ export function openLinDevice(device: LinBaseInfo) {
     linBase = new ToomossLin(device)
   } else if (device.vendor == 'kvaser') {
     linBase = new KvaserLin(device)
+  } else if (device.vendor == 'vector') {
+    linBase = new VectorLin(device)
   }
 
   return linBase
@@ -55,6 +58,8 @@ export function getLinVersion(vendor: string) {
     return ToomossLin.getLibVersion()
   } else if (vendor === 'KVASER') {
     return KvaserLin.getLibVersion()
+  } else if (vendor === 'VECTOR') {
+    return VectorLin.getLibVersion()
   }
   // #v-endif
   else {
@@ -71,6 +76,8 @@ export function getLinDevices(vendor: string) {
     return ToomossLin.getValidDevices()
   } else if (vendor === 'KVASER') {
     return KvaserLin.getValidDevices()
+  } else if (vendor === 'VECTOR') {
+    return VectorLin.getValidDevices()
   }
   // #v-endif
   else {

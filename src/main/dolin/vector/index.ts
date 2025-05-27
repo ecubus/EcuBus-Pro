@@ -10,7 +10,7 @@ import {
   LinMode,
   LinMsg
 } from '../../share/lin'
-import VECTOR from '../build/Release/vectorLin.node'
+import { VECTOR, VECTOR_CAN } from '../../docan/vector'
 import { v4 } from 'uuid'
 import { queue, QueueObject } from 'async'
 import { LinLOG } from 'src/main/log'
@@ -36,17 +36,11 @@ export class VectorLin extends LinBase {
   }
 
   static loadDllPath(dllPath: string) {
-    if (process.platform == 'win32') {
-      VECTOR.LoadDll(dllPath)
-    }
+    VECTOR_CAN.loadDllPath(dllPath)
   }
 
   static getLibVersion() {
-    if (process.platform == 'win32') {
-      return '11.0.14.0'
-    } else {
-      return 'only support windows'
-    }
+    return VECTOR_CAN.getLibVersion()
   }
 
   startTs: number
@@ -97,7 +91,7 @@ export class VectorLin extends LinBase {
       this.PermissionMask.assign(this.channelMask)
       xlStatus = VECTOR.xlOpenPort(
         this.PortHandle.cast(),
-        'xlCANdemo',
+        'EcuBus-Pro',
         this.channelMask,
         this.PermissionMask.cast(),
         256,
@@ -116,34 +110,21 @@ export class VectorLin extends LinBase {
       LinStatPar.LINMode = info.mode == LinMode.MASTER ? 1 : 2
       LinStatPar.baudrate = info.baudRate
       LinStatPar.LINVersion = 3
-      xlStatus = VECTOR.xlLinSetChannelParams(
-        this.PortHandle.value(),
-        this.channelMask,
-        LinStatPar
-      )
+      xlStatus = VECTOR.xlLinSetChannelParams(this.PortHandle.value(), this.channelMask, LinStatPar)
       if (xlStatus !== 0) {
         throw new Error(this.getError(xlStatus))
       }
 
       const LinDLC = new VECTOR.UINT8ARRAY(64)
       for (let j = 0; j < 64; j++) {
-        LinDLC[j] = 8
+        LinDLC.setitem(j, 8)
       }
-      xlStatus = VECTOR.xlLinSetDLC(
-        this.PortHandle.value(),
-        this.channelMask,
-        LinDLC
-      )
+      xlStatus = VECTOR.xlLinSetDLC(this.PortHandle.value(), this.channelMask, LinDLC)
       if (xlStatus !== 0) {
         throw new Error(this.getError(xlStatus))
       }
 
-      xlStatus = VECTOR.xlActivateChannel(
-        this.PortHandle.value(),
-        this.channelMask,
-        2,
-        8
-      )
+      xlStatus = VECTOR.xlActivateChannel(this.PortHandle.value(), this.channelMask, 2, 8)
       if (xlStatus !== 0) {
         throw new Error(this.getError(xlStatus))
       }
@@ -154,11 +135,7 @@ export class VectorLin extends LinBase {
       }
     }
 
-    VECTOR.CreateTSFN(
-      this.handle,
-      this.info.id,
-      this.callback.bind(this)
-    )
+    VECTOR.CreateTSFN(this.PortHandle.value(), this.info.id, this.callback.bind(this))
 
     this.log = new LinLOG('VECTOR', info.name, this.event)
     this.startTs = getTsUs()
@@ -193,7 +170,14 @@ export class VectorLin extends LinBase {
       for (let i = 0; i < length; i++) {
         b.setitem(i, initData[i])
       }
-      xlStatus = VECTOR.xlLinSetSlave(this.PortHandle.value(), this.channelMask, framedata.id, framedata.data, framedata.dlc, 256)
+      xlStatus = VECTOR.xlLinSetSlave(
+        this.PortHandle.value(),
+        this.channelMask,
+        framedata.id,
+        framedata.data,
+        framedata.dlc,
+        checksumType == LinChecksumType.ENHANCED ? 0x200 : 0x100
+      )
       if (xlStatus !== 0) {
         throw new Error(this.getError(xlStatus))
       }
@@ -201,128 +185,176 @@ export class VectorLin extends LinBase {
   }
 
   async callback() {
-    const num = 1
+    let num = 100
     let xlStatus = 0
-    const recvxlevents = new VECTOR.XLEVENT(num)
-    const pEventCountSend = new VECTOR.UINT32()
-    const checksum = new VECTOR.UINT16()
-    checksum.assign(0x100)
-    xlStatus = VECTOR.xlLinSendRequest(this.PortHandle.value(), this.channelMask, 0x3d, checksum.value())
-    if (xlStatus !== 0) {
-      throw new Error(this.getError(xlStatus))
+    const len = new VECTOR.UINT32()
+    len.assign(num)
+    const frames = new VECTOR.XLEVENT(num)
+
+    xlStatus = VECTOR.xlReceive(this.PortHandle.value(), len, frames.cast())
+    if (xlStatus === 10) {
+      return
     }
-
-    setTimeout(() => {
-      console.log('10ms')
-    }, 10)
-
-    pEventCountSend.assign(num)
-    xlStatus = VECTOR.xlReceive(this.PortHandle.value(), pEventCountSend.cast(), recvxlevents.cast())
-    if (xlStatus !== 0) {
-      // throw new Error(this.getError(xlStatus))
+    num = len.value()
+    if (xlStatus === 10) {
+      return
     }
-
-    let ts = recvxlevents.timeStamp
-    if (!this.offsetInit) {
-      this.offsetTs = ts - (getTsUs() - this.startTs)
-      this.offsetInit = true
-    }
-    ts -= this.offsetTs
-
-    if (recvxlevents.tag == 20) {
-      //mstStandard
-      const recvxlevent = recvxlevents.getitem(0)
-      const recvMsg = recvxlevent.tagData.linMsgApi
-      const id = recvMsg.linMsg.id
-      const data = Buffer.alloc(recvMsg.linMsg.dlc)
-      const b = VECTOR.UINT8ARRAY.frompointer(recvMsg.linMsg.data)
-      for (let j = 0; j < recvMsg.linMsg.dlc; j++) {
-        data[j] = b.getitem(j)
+    for (let i = 0; i < num; i++) {
+      const recvxlevent = frames.getitem(i)
+      let ts = recvxlevent.timeStamp
+      if (!this.offsetInit) {
+        this.offsetTs = ts - (getTsUs() - this.startTs)
+        this.offsetInit = true
       }
+      ts -= this.offsetTs
 
-      const msg: LinMsg = {
-        frameId: recvMsg.linMsg.id & 0x3f,
-        data: data,
-        direction: recvMsg.linMsg.flags == 0x40 ? LinDirection.SEND : LinDirection.RECV,
-        checksumType:
-          recvMsg.linCRCinfo.flags == 0x00 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
-        checksum: recvMsg.linCRCinfo.id,
-        database: this.info.database
-      }
+      if (recvxlevent.tag == 20) {
+        const recvMsg = recvxlevent.tagData.linMsgApi
+        const data = Buffer.alloc(recvMsg.linMsg.dlc)
+        const b = VECTOR.UINT8ARRAY.frompointer(recvMsg.linMsg.data)
+        for (let j = 0; j < recvMsg.linMsg.dlc; j++) {
+          data[j] = b.getitem(j)
+        }
+        const frameId = recvMsg.linMsg.id & 0x3f
+        const msg: LinMsg = {
+          frameId: frameId,
+          data: data,
+          direction: recvMsg.linMsg.flags == 0x40 ? LinDirection.SEND : LinDirection.RECV,
+          checksumType:
+            this.pendingPromise?.sendMsg.checksumType ||
+            (frameId == 0x3c || frameId == 0x3d
+              ? LinChecksumType.CLASSIC
+              : LinChecksumType.ENHANCED),
+          checksum: recvMsg.linMsg.crc,
+          database: this.info.database
+        }
 
-      this.lastFrame.set(msg.frameId, msg)
+        let error = false
+        if ((recvMsg.linMsg.flags & 0x81) == 0) {
+          this.lastFrame.set(msg.frameId, msg)
+        } else {
+          error = true
+        }
 
-      let isEvent = false
-      if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
-        this.pendingPromise.sendMsg.data = msg.data
-        this.pendingPromise.sendMsg.ts = ts
-        this.log.linBase(this.pendingPromise.sendMsg)
-        this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
-        this.pendingPromise.resolve(this.pendingPromise.sendMsg)
-        this.pendingPromise = undefined
-      } else {
-        //slave
-        msg.ts = ts
-        if (this.db) {
-          // Find matching frame or event frame
-          let frameName: string | undefined
+        let isEvent = false
+        if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
+          this.pendingPromise.sendMsg.data = msg.data
+          this.pendingPromise.sendMsg.ts = ts
 
-          let publish: string | undefined
-
-          // Check regular frames
-          for (const fname in this.db.frames) {
-            if (this.db.frames[fname].id === msg.frameId) {
-              frameName = fname
-              publish = this.db.frames[fname].publishedBy
-              break
-            }
+          if (error) {
+            this.log.error(ts, 'checksum error', this.pendingPromise.sendMsg)
+            this.pendingPromise.reject(
+              new LinError(
+                LIN_ERROR_ID.LIN_BUS_ERROR,
+                this.pendingPromise.sendMsg,
+                'checksum error'
+              )
+            )
+          } else {
+            this.log.linBase(this.pendingPromise.sendMsg)
+            this.event.emit(`${msg.frameId}`, this.pendingPromise.sendMsg)
+            this.pendingPromise.resolve(this.pendingPromise.sendMsg)
           }
+          this.pendingPromise = undefined
+        } else {
+          //slave
+          msg.ts = ts
+          if (this.db) {
+            // Find matching frame or event frame
+            let frameName: string | undefined
 
-          // Check event triggered frames
-          if (!frameName) {
-            for (const ename in this.db.eventTriggeredFrames) {
-              const eventFrame = this.db.eventTriggeredFrames[ename]
-              if (eventFrame.frameId === msg.frameId) {
-                frameName = ename
-                isEvent = true
+            let publish: string | undefined
+
+            // Check regular frames
+            for (const fname in this.db.frames) {
+              if (this.db.frames[fname].id === msg.frameId) {
+                frameName = fname
+                publish = this.db.frames[fname].publishedBy
                 break
               }
             }
-          }
 
-          // Enrich message with database info if frame found
-          if (frameName) {
-            msg.name = frameName
-            msg.workNode = publish
-            msg.isEvent = isEvent
-          }
-        }
-        if (isEvent && this.db) {
-          const pid = msg.data[0] & 0x3f
-          for (const fname in this.db.frames) {
-            if (this.db.frames[fname].id === pid) {
-              msg.workNode = this.db.frames[fname].publishedBy
-              break
+            // Check event triggered frames
+            if (!frameName) {
+              for (const ename in this.db.eventTriggeredFrames) {
+                const eventFrame = this.db.eventTriggeredFrames[ename]
+                if (eventFrame.frameId === msg.frameId) {
+                  frameName = ename
+                  isEvent = true
+                  break
+                }
+              }
+            }
+
+            // Enrich message with database info if frame found
+            if (frameName) {
+              msg.name = frameName
+              msg.workNode = publish
+              msg.isEvent = isEvent
             }
           }
+          if (error) {
+            this.log.error(ts, 'checksum error', msg)
+          } else {
+            if (isEvent && this.db) {
+              const pid = msg.data[0] & 0x3f
+              for (const fname in this.db.frames) {
+                if (this.db.frames[fname].id === pid) {
+                  msg.workNode = this.db.frames[fname].publishedBy
+                  break
+                }
+              }
+            }
+            this.log.linBase(msg)
+            this.event.emit(`${msg.frameId}`, msg)
+          }
         }
-        this.log.linBase(msg)
-        this.event.emit(`${msg.frameId}`, msg)
-      }
-    } else if (recvxlevents.tag == 25) {
-      this.log.sendEvent('busSleep', ts)
-    } else if (recvxlevents.tag == 24) {
-      this.log.sendEvent('busWakeUp', ts)
-    } else {
-      this.log.error(ts, 'internal error')
-    }
+      } else if (recvxlevent.tag == 25) {
+        this.log.sendEvent('busSleep', ts)
+      } else if (recvxlevent.tag == 24) {
+        this.log.sendEvent('busWakeUp', ts)
+      } else if (recvxlevent.tag == 21 || recvxlevent.tag == 22 || recvxlevent.tag == 23) {
+        //error msg
+        const msg =
+          recvxlevent.tag == 21
+            ? 'message error'
+            : recvxlevent.tag == 22
+              ? 'sync error'
+              : 'no answer'
 
-    await new Promise((resolve) => {
-      setImmediate(() => {
-        resolve(null)
+        if (this.pendingPromise) {
+          this.pendingPromise.sendMsg.ts = ts
+
+          this.log.error(ts, msg, this.pendingPromise.sendMsg)
+          this.pendingPromise.reject(
+            new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, this.pendingPromise.sendMsg, msg)
+          )
+
+          this.pendingPromise = undefined
+        }
+      } else if (recvxlevent.tag == 26) {
+        const recvMsg = recvxlevent.tagData.linMsgApi
+        if (
+          this.pendingPromise &&
+          this.pendingPromise.sendMsg.frameId == (recvMsg.linCRCinfo.id & 0x3f)
+        ) {
+          if (recvMsg.linCRCinfo.flags == 0) {
+            this.pendingPromise.sendMsg.checksumType = LinChecksumType.CLASSIC
+          } else if (recvMsg.linCRCinfo.flags == 1) {
+            this.pendingPromise.sendMsg.checksumType = LinChecksumType.ENHANCED
+          }
+        }
+        //do nothing XL_LIN_CRCINFO
+      } else {
+        this.log.error(ts, 'internal error')
+      }
+
+      await new Promise((resolve) => {
+        setImmediate(() => {
+          resolve(null)
+        })
       })
-    })
-    await this.callback()
+    }
   }
 
   close() {
@@ -351,15 +383,48 @@ export class VectorLin extends LinBase {
         }
         if (m.direction == LinDirection.SEND) {
           //发送
-          xlStatus = VECTOR.xlLinSetSlave(this.PortHandle.value(), this.channelMask, framedata.id, framedata.data, framedata.dlc, checksum.value())
+          xlStatus = VECTOR.xlLinSetSlave(
+            this.PortHandle.value(),
+            this.channelMask,
+            framedata.id,
+            framedata.data,
+            framedata.dlc,
+            checksum.value()
+          )
+
           if (xlStatus !== 0) {
             throw new Error(this.getError(xlStatus))
           }
-          xlStatus = VECTOR.xlLinSendRequest(this.PortHandle.value(), this.channelMask, framedata.id, 0)
+
+          xlStatus = VECTOR.xlLinSwitchSlave(
+            this.PortHandle.value(),
+            this.channelMask,
+            framedata.id,
+            0xff
+          )
           if (xlStatus !== 0) {
-            reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, this.getError(xlStatus)))
-            return
+            throw new Error(this.getError(xlStatus))
           }
+        } else {
+          xlStatus = VECTOR.xlLinSwitchSlave(
+            this.PortHandle.value(),
+            this.channelMask,
+            framedata.id,
+            0x00
+          )
+          if (xlStatus !== 0) {
+            throw new Error(this.getError(xlStatus))
+          }
+        }
+        xlStatus = VECTOR.xlLinSendRequest(
+          this.PortHandle.value(),
+          this.channelMask,
+          framedata.id,
+          0
+        )
+        if (xlStatus !== 0) {
+          reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, this.getError(xlStatus)))
+          return
         }
 
         this.pendingPromise = {
@@ -369,7 +434,14 @@ export class VectorLin extends LinBase {
         }
       } else {
         //从机模式
-        xlStatus = VECTOR.xlLinSetSlave(this.PortHandle.value(), this.channelMask, framedata.id, framedata.data, framedata.dlc, checksum.value())
+        xlStatus = VECTOR.xlLinSetSlave(
+          this.PortHandle.value(),
+          this.channelMask,
+          framedata.id,
+          framedata.data,
+          framedata.dlc,
+          checksum.value()
+        )
         if (xlStatus !== 0) {
           reject(new LinError(LIN_ERROR_ID.LIN_PARAM_ERROR, m, this.getError(xlStatus)))
           return
@@ -402,7 +474,7 @@ export class VectorLin extends LinBase {
     if (process.platform == 'win32') {
       const deviceHandle = new VECTOR.XL_DRIVER_CONFIG()
       const ret = VECTOR.xlGetDriverConfig(deviceHandle) //获取/打印硬件配置g_xlDrvConfig
-      console.log('valid channle count', deviceHandle.channelCount)
+
       if (ret === 0) {
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(deviceHandle.channel) //通道配置
         for (let num = 0; num < deviceHandle.channelCount; num++) {

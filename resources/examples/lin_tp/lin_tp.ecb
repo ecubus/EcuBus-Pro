@@ -872,7 +872,8 @@
       }
     },
     "vars": {},
-    "datas": {}
+    "datas": {},
+    "panels": {}
   },
   "project": {
     "wins": {
@@ -956,8 +957,8 @@
       },
       "tester": {
         "pos": {
-          "x": 404,
-          "y": 166,
+          "x": 381,
+          "y": 337,
           "w": 1095,
           "h": 400
         },
@@ -980,28 +981,10 @@
         "options": {},
         "hide": true
       },
-      "9505c05a-4fe5-42e1-a45d-b1cbc14854ba": {
-        "pos": {
-          "x": 352,
-          "y": 18,
-          "w": 765,
-          "h": 400
-        },
-        "title": "linPanel",
-        "label": "Panel",
-        "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
-        "options": {
-          "params": {
-            "editIndex": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba"
-          },
-          "name": "Node 1"
-        },
-        "hide": false
-      },
       "trace": {
         "pos": {
-          "x": 898.5,
-          "y": 46,
+          "x": 1238.5,
+          "y": 25,
           "w": 700,
           "h": 400
         },
@@ -1030,8 +1013,8 @@
       },
       "gauge": {
         "pos": {
-          "x": 22.5,
-          "y": 49,
+          "x": 1134.5,
+          "y": 325,
           "w": 924,
           "h": 400
         },

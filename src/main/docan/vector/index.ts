@@ -25,8 +25,6 @@ interface CANFrame {
   isEcho: boolean
 }
 
-let driverLoad = false
-
 //export导出类ZLG_CAN，extends继承类CanBase
 export class VECTOR_CAN extends CanBase {
   //新建ZLG_CAN类，继承于CanBase，新建属性和方法
@@ -230,14 +228,18 @@ export class VECTOR_CAN extends CanBase {
     )
     this.attachCanMessage(this.busloadCb)
   }
-
+  static dllLoaded = false
+  static driverLoad = false
   static loadDllPath(dllPath: string) {
     if (process.platform == 'win32') {
-      VECTOR.LoadDll(dllPath) //加载设备DLL
-      if (driverLoad == false) {
+      if (VECTOR.dllLoaded == false) {
+        VECTOR.LoadDll(dllPath) //加载设备DLL
+        VECTOR.dllLoaded = true
+      }
+      if (VECTOR.driverLoad == false) {
         const xlStatus = VECTOR.xlOpenDriver()
         if (xlStatus == 0) {
-          driverLoad = true
+          VECTOR.driverLoad = true
         } else {
           throw new Error('xl open driver failed')
         }
@@ -734,3 +736,5 @@ export class VECTOR_CAN extends CanBase {
     )
   }
 }
+
+export { VECTOR }

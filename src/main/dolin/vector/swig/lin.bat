@@ -1,1 +1,0 @@
-swig -I"./../../../docan/vector/inc" -c++ -javascript -napi -v ./lin.i 

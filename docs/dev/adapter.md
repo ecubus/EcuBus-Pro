@@ -8,6 +8,11 @@ You may be able to get some reference from these PRs:
 -  [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can 
 
 
+## Step by Step Guide
+
+You can get detail steps from [Step by Step Guide](./adapter/detail.md)
+
+
 ## Prerequisites
 
 - [node-gyp](https://github.com/nodejs/node-gyp) - For building native modules

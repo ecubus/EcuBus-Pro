@@ -229,6 +229,7 @@
             </div>
           </div>
         </el-tab-pane>
+
         <el-tab-pane name="test">
           <template #label>
             <span class="lr">
@@ -304,6 +305,9 @@
                       </el-dropdown-item> -->
                     <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF) </el-dropdown-item>
                     <el-dropdown-item icon="Plus" command="addCan">Add CAN (DBC) </el-dropdown-item>
+                    <el-dropdown-item icon="Plus" command="addvbs"
+                      >Add VBS (IDL XML)
+                    </el-dropdown-item>
                     <el-dropdown-item
                       v-for="(item, index) in dataBaseList"
                       :key="item.url"
@@ -602,7 +606,8 @@ import {
   ref,
   toRef,
   watch,
-  watchEffect
+  watchEffect,
+  h
 } from 'vue'
 import type { Component, Ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
@@ -638,7 +643,8 @@ import { cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import * as joint from '@joint/core'
 import { UDSView } from './components/udsView'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElInput, ElButton, ElForm, ElFormItem } from 'element-plus'
+import { Folder } from '@element-plus/icons-vue'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
@@ -651,6 +657,7 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import data from '@iconify/icons-ep/full-screen'
+import soaIcon from '@iconify/icons-material-symbols/linked-services'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -662,7 +669,35 @@ const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
 const globalStart = toRef(window, 'globalStart')
 
+// VBS 表单数据
+const vbsFormData = ref({
+  configFilePath: '',
+  idlFilePath: ''
+})
+
+const vbsFormRules = {
+  configFilePath: [{ required: true, message: 'Config File is required', trigger: 'blur' }],
+  idlFilePath: [{ required: true, message: 'IDL File is required', trigger: 'blur' }]
+}
+
 provide('udsView', udsView)
+
+// 选择配置文件
+const selectConfigFile = async (filed: string, title: string, type: string) => {
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    title: title,
+    properties: ['openFile'],
+    filters: [{ name: 'Config Files', extensions: [type] }]
+  })
+  if (r.filePaths[0]) {
+    //relatvie convert
+    if (project.projectInfo.path) {
+      vbsFormData.value[filed] = window.path.relative(project.projectInfo.path, r.filePaths[0])
+    } else {
+      vbsFormData.value[filed] = r.filePaths[0]
+    }
+  }
+}
 
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -793,32 +828,139 @@ async function openDatabase(testerIndex: string) {
   }
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
-    const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: 'Open Database File',
-      properties: ['openFile '],
-      filters: [{ name: `Database File`, extensions: [fileExtMap[type]] }]
-    })
-    const file = r.filePaths[0]
-    if (file == undefined) {
-      return
-    }
+    if (type == 'lin' || type == 'can') {
+      const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+        title: 'Open Database File',
+        properties: ['openFile '],
+        filters: [{ name: `Database File`, extensions: [fileExtMap[type]] }]
+      })
+      const file = r.filePaths[0]
+      if (file == undefined) {
+        return
+      }
 
-    if (type == 'lin') {
-      const id = v4()
-      layoutMaster.addWin('ldf', `${id}`, {
-        params: {
-          'edit-index': id,
-          ldfFile: file
+      if (type == 'lin') {
+        const id = v4()
+        layoutMaster.addWin('ldf', `${id}`, {
+          params: {
+            'edit-index': id,
+            ldfFile: file
+          }
+        })
+      } else if (type == 'can') {
+        const id = v4()
+        layoutMaster.addWin('dbc', `${id}`, {
+          params: {
+            'edit-index': id,
+            dbcFile: file
+          }
+        })
+      }
+    } else if (type == 'vbs') {
+      // 重置表单数据
+      vbsFormData.value = {
+        configFilePath: '',
+        idlFilePath: ''
+      }
+      const v = h(
+        ElForm,
+        {
+          id: 'vbs-form',
+          model: vbsFormData.value,
+          rules: vbsFormRules,
+          labelWidth: '120px',
+          labelPosition: 'top',
+          size: 'small'
+        },
+        () => [
+          h(
+            ElFormItem,
+            {
+              label: 'Config File Path:',
+              prop: 'configFilePath'
+            },
+            () => [
+              h(
+                ElInput,
+                {
+                  modelValue: vbsFormData.value.configFilePath,
+                  'onUpdate:modelValue': (val: string) => (vbsFormData.value.configFilePath = val),
+                  disabled: true,
+                  placeholder: 'Select config file path',
+                  style: 'width: 400px;'
+                },
+                {
+                  append: () =>
+                    h(ElButton, {
+                      icon: h(Folder),
+                      onClick: () => selectConfigFile('configFilePath', 'Select Config File', 'xml')
+                    })
+                }
+              )
+            ]
+          ),
+          h(
+            ElFormItem,
+            {
+              label: 'IDL File Path:',
+              prop: 'idlFilePath'
+            },
+            () => [
+              h(
+                ElInput,
+                {
+                  modelValue: vbsFormData.value.idlFilePath,
+                  'onUpdate:modelValue': (val: string) => (vbsFormData.value.idlFilePath = val),
+                  disabled: true,
+                  placeholder: 'Select IDL file path',
+                  style: 'width: 400px;'
+                },
+                {
+                  append: () =>
+                    h(ElButton, {
+                      icon: h(Folder),
+                      onClick: () => selectConfigFile('idlFilePath', 'Select IDL File', 'idl')
+                    })
+                }
+              )
+            ]
+          )
+        ]
+      )
+      ElMessageBox.confirm(v, 'Choose VBS Database Files', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        customClass: 'vbs-dialog',
+
+        buttonSize: 'small',
+
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            v.component?.exposed?.validate((valid: boolean) => {
+              if (valid) {
+                done()
+              } else {
+                return
+              }
+            })
+          } else {
+            done()
+          }
         }
       })
-    } else if (type == 'can') {
-      const id = v4()
-      layoutMaster.addWin('dbc', `${id}`, {
-        params: {
-          'edit-index': id,
-          dbcFile: file
-        }
-      })
+        .then(() => {
+          const id = v4()
+          layoutMaster.addWin('vbs', `${id}`, {
+            params: {
+              'edit-index': id,
+              configFilePath: vbsFormData.value.configFilePath,
+              idlFilePath: vbsFormData.value.idlFilePath
+            }
+          })
+        })
+        .catch(() => {
+          // 用户取消操作
+        })
     }
   } else if (testerIndex.startsWith('LIN.')) {
     const name = testerIndex.split('.')[1]
@@ -1235,5 +1377,25 @@ watch([contentH, contentW], (val) => {
   display: flex;
   align-items: center;
   color: var(--el-color-primary);
+}
+
+/* VBS 对话框样式 */
+:deep(.vbs-dialog) {
+  .el-message-box__content {
+    padding: 20px 20px 10px 20px;
+  }
+
+  .el-form-item {
+    margin-bottom: 18px;
+  }
+
+  .el-form-item__label {
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+  }
+
+  .el-input-group__append {
+    padding: 0 8px;
+  }
 }
 </style>

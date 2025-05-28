@@ -88,6 +88,7 @@
     "emittery": "^1.0.3",
     "events": "^3.3.0",
     "exceljs": "^4.4.0",
+    "fast-xml-parser": "^5.2.3",
     "glob": "^11.0.0",
     "handlebars": "^4.7.8",
     "jquery": "^3.7.1",

@@ -115,6 +115,15 @@ export type PanelItem = {
   options: Object
 }
 
+export type VBS = {
+  id: string
+  name: string
+  configFilePath: string
+  idlFilePath: string
+  execFilePath?: string
+  port?: number
+}
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -124,6 +133,7 @@ export interface DataSet {
   database: {
     lin: Record<string, LDF>
     can: Record<string, DBC>
+    vbs: Record<string, VBS>
   }
   graphs: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>>
   guages: Record<

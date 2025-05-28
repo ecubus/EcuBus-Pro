@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<dds>
+	<idl>HelloWorld.idl</idl>
+	<network>
+		<master>
+			<!-- 替换成本地ip -->
+			<address>127.0.0.1</address>
+			<netmask>255.255.255.0</netmask>
+		</master>
+	</network>
+	<discovery>
+		<announce>
+			<times>50</times>
+			<period>3 0</period>
+		</announce>
+		<heartbeat>
+			<per_samples>5</per_samples>
+			<period>5 0</period>
+		</heartbeat>
+		<liveliness>
+			<lease_duration>20 0</lease_duration>
+			<period>5 0</period>
+		</liveliness>
+	</discovery>
+	<qos>
+		<writer>
+			<key>writer0_qos</key>
+			<durability>
+				<kind>DDS_VOLATILE_DURABILITY_QOS</kind>
+			</durability>
+			<reliability>
+				<kind>DDS_BEST_EFFORT_RELIABILITY_QOS</kind>
+			</reliability>
+			<ownership>
+				<kind>DDS_SHARED_OWNERSHIP_QOS</kind>
+			</ownership>
+			<ownership_strength>
+				<value>0</value>
+			</ownership_strength>
+			<liveliness>
+				<kind>DDS_AUTOMATIC_LIVELINESS_QOS</kind>
+				<lease_duration>20 0</lease_duration>
+			</liveliness>
+			<history>
+				<kind>DDS_KEEP_LAST_HISTORY_QOS</kind>
+				<depth>5</depth>
+				<max_samples>5</max_samples>
+				<max_instances>1</max_instances>
+				<max_samples_per_instance>5</max_samples_per_instance>
+			</history>
+			<e2e_policy>
+				<enable>false</enable>
+				<e2e_p04_min_data_length>0</e2e_p04_min_data_length>
+				<e2e_p04_max_data_length>4090</e2e_p04_max_data_length>
+				<e2e_p04_max_delta_counter>10</e2e_p04_max_delta_counter>
+			</e2e_policy>
+		</writer>
+	</qos>
+	<participant>
+		<name>app1</name>
+		<domain_id>0</domain_id>
+		<discovery>DPDE</discovery>
+		<max_remote_participants>20</max_remote_participants>
+		<writer>
+			<key>w0</key>
+			<topic>domain_0_topic_0Topic</topic>
+			<type>MVBS::HelloWorld</type>
+			<qos>writer0_qos</qos>
+			<object_id>100</object_id>
+			<max_remote_peers>5</max_remote_peers>
+		</writer>
+	</participant>
+</dds>

@@ -1,0 +1,90 @@
+module MVBS {
+	struct HelloWorld {
+		long                 id;
+		string<64>           msg;
+	};
+
+	struct HelloWorld1 {
+		short                short_data;
+		unsigned short       ushort_data;
+	};
+
+	struct HelloWorld2 {
+		float                float_data;
+		double               double_data;
+	};
+
+	struct HelloWorld3 {
+		HelloWorld           struct_data;
+		double               double_data;
+	};
+
+	struct HelloWorld4 {
+		HelloWorld           struct_data;
+		double               double1_data;
+		double               double2_data;
+	};
+
+	struct HelloWorld5 {
+		HelloWorld           struct1_data;
+		HelloWorld           struct2_data;
+		double               double_data;
+	};
+
+	struct BasicTypeStruct {
+		long                 id;
+		string<64>           msg;
+		char                 tag;
+		octet                u8_data;
+		short                short_data;
+		unsigned short       ushort_data;
+		unsigned long        ulong_data;
+		long long            llong_data;
+		unsigned long long   ullong_data;
+		float                float_data;
+		double               double_data;
+		boolean              bool_data;
+	};
+
+	struct sdatatype {
+		long 			data1;
+		long 			data2;
+		long 			data3;
+	};
+
+	enum edatatype {
+		ZERO = 0,
+		ONE = 1,
+		TWO = 2,
+		THREE = 3
+	};
+
+	typedef long 			arrayType[100];
+	typedef sdatatype 		arrayType1[20];
+
+
+	struct ComplexDataType {
+		sdatatype     	struct_data;
+		edatatype     	enum_data;
+		arrayType     	array_data;
+		arrayType1      arrayType1_data;
+	};
+};
+
+struct StructSize50
+{
+	unsigned long 	id;
+	long 		data1;
+	long 		data2;
+	long 		data3;
+	long 		data4;
+	long 		data5;
+	long 		data6;
+	long 		data7;
+	long 		data8;
+	long 		data9;
+	long 		data10;
+	short 		data11;
+	short 		data12;
+	short 		data13;
+};

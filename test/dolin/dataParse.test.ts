@@ -15,7 +15,8 @@ describe('LIN Signal Parse', () => {
       lin: {
         'test.ldf': ldf
       },
-      can: {}
+      can: {},
+      vbs: {}
     })
   })
 

@@ -11,7 +11,8 @@ class IDLStructureVisitor extends IDL_GrammarVisitor {
             modules: [],
             structs: [],
             enums: [],
-            typedefs: []
+            typedefs: [],
+            interfaces: []
         }
     }
 
@@ -29,7 +30,8 @@ class IDLStructureVisitor extends IDL_GrammarVisitor {
             name: moduleName,
             structs: [],
             enums: [],
-            typedefs: []
+            typedefs: [],
+            interfaces: []
         }
         
         // 保存当前模块上下文
@@ -283,9 +285,108 @@ class IDLStructureVisitor extends IDL_GrammarVisitor {
         }
         return null
     }
+
+    visitInterface_dcl(ctx) {
+        // interface_dcl 可以是 interface_def 或 interface_forward_dcl
+        if (ctx.interface_def()) {
+            return this.visit(ctx.interface_def())
+        } else if (ctx.interface_forward_dcl()) {
+            // 对于前向声明，我们暂时不处理
+            return null
+        }
+        return null
+    }
+
+    visitInterface_def(ctx) {
+        const interfaceHeader = ctx.interface_header()
+        let interfaceName = 'unknown'
+        
+        // 从 interface_header 中获取接口名称
+        if (interfaceHeader) {
+            if (interfaceHeader.interface_kind() && interfaceHeader.identifier()) {
+                interfaceName = interfaceHeader.identifier().getText()
+            }
+        }
+        
+        const interfaceDef = {
+            name: interfaceName,
+            methods: []
+        }
+        
+        // 访问接口体
+        if (ctx.interface_body()) {
+            const interfaceBody = ctx.interface_body()
+            if (interfaceBody.export_dcl) {
+                interfaceBody.export_dcl().forEach(exportDecl => {
+                    const method = this.visit(exportDecl)
+                    if (method) {
+                        interfaceDef.methods.push(...method)
+                    }
+                })
+            }
+        }
+        
+        this.result.interfaces.push(interfaceDef)
+        return interfaceDef
+    }
+
+    visitExport_dcl(ctx) {
+        // export_dcl 可以包含 type_dcl, const_dcl, 或 op_dcl
+        if (ctx.op_dcl()) {
+            return this.visit(ctx.op_dcl())
+        }
+        // 对于其他类型的声明，我们暂时不处理
+        return null
+    }
+
+    visitOp_dcl(ctx) {
+        const returnType = ctx.operation_type_spec() ? this.visit(ctx.operation_type_spec()) : 'void'
+        const methodName = ctx.identifier().getText()
+        const method = {
+            name: methodName,
+            returnType: returnType,
+            parameters: []
+        }
+        
+        // 访问参数列表
+        if (ctx.parameter_dcls()) {
+            const parameterDcls = ctx.parameter_dcls()
+            if (parameterDcls.param_dcl) {
+                parameterDcls.param_dcl().forEach(paramDecl => {
+                    const parameter = this.visit(paramDecl)
+                    if (parameter) {
+                        method.parameters.push(parameter)
+                    }
+                })
+            }
+        }
+        
+        return [method]
+    }
+
+    visitParam_dcl(ctx) {
+        const direction = ctx.param_attribute() ? ctx.param_attribute().getText() : 'in'
+        const type = ctx.type_spec() ? this.visit(ctx.type_spec()) : 'unknown'
+        const name = ctx.simple_declarator() ? ctx.simple_declarator().identifier().getText() : 'unknown'
+        
+        return {
+            name: name,
+            type: type,
+            direction: direction
+        }
+    }
+
+    visitOperation_type_spec(ctx) {
+        if (ctx.type_spec()) {
+            return this.visit(ctx.type_spec())
+        } else if (ctx.KW_VOID()) {
+            return 'void'
+        }
+        return 'unknown'
+    }
 }
 
-export default function parse(content) {
+export default function parseIdl(content) {
     const chars = new antlr4.InputStream(content)
     const lexer = new IDL_GrammarLexer(chars)
     const tokens = new antlr4.CommonTokenStream(lexer)

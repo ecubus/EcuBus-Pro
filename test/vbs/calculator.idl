@@ -1,0 +1,5 @@
+module MVBS {
+    interface calculator {
+        long add(long a, long b, out long ret);
+    };
+};

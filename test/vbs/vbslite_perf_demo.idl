@@ -1,0 +1,1796 @@
+struct HelloWorld1
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld2
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld3
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld4
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld5
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld6
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld7
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld8
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld9
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld10
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld11
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld12
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld13
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld14
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld15
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld16
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld17
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld18
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld19
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld20
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld21
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld22
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld23
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld24
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld25
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld26
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld27
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld28
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld29
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld30
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld31
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld32
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld33
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld34
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld35
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld36
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld37
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld38
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld39
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld40
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld41
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld42
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld43
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld44
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld45
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld46
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld47
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld48
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld49
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld50
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld51
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld52
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld53
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld54
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld55
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld56
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld57
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld58
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld59
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld60
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld61
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld62
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld63
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld64
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld65
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld66
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld67
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld68
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld69
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld70
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld71
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld72
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld73
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld74
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld75
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld76
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld77
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld78
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld79
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld80
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld81
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld82
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld83
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld84
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld85
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld86
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld87
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld88
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld89
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld90
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld91
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld92
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld93
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld94
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld95
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld96
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld97
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld98
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld99
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld100
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld101
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld102
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld103
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld104
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld105
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld106
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld107
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld108
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld109
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld110
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld111
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld112
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld113
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld114
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld115
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld116
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld117
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld118
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld119
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld120
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld121
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld122
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld123
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld124
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld125
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld126
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld127
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld128
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld129
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld130
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld131
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld132
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld133
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld134
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld135
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld136
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld137
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld138
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld139
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld140
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld141
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld142
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld143
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld144
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld145
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld146
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld147
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld148
+{
+	unsigned long index;
+	long message;
+	string<500> str_msg;
+};
+
+struct HelloWorld149
+{
+	unsigned long index;
+	long message;
+	string<1000> str_msg;
+};
+
+struct HelloWorld151
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld152
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld153
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld154
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld155
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld156
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld157
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld158
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld159
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld160
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld161
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld162
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld163
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld164
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld165
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld166
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld167
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld168
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld169
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld170
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld171
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld172
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld173
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld174
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld175
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld176
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld177
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld178
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld179
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld180
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld181
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld182
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld183
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld184
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld185
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld186
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld187
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld188
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld189
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld190
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld191
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld192
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld193
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld194
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld195
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld196
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld197
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld198
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld199
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld200
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld201
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld202
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld203
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld204
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld205
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld206
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld207
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld208
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld209
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld210
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld211
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld212
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld213
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld214
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld215
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld216
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld217
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld218
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld219
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld220
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld221
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld222
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld223
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld224
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld225
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld226
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld227
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld228
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld229
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld230
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld231
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld232
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld233
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld234
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld235
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld236
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld237
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld238
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld239
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld240
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld241
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld242
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld243
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld244
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld245
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld246
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld247
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld248
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld249
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld250
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld251
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld252
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld253
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld254
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld255
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld256
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld257
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld258
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld259
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld260
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld261
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld262
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld263
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld264
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld265
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld266
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld267
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld268
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld269
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld270
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld271
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld272
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld273
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld274
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld275
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld276
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld277
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld278
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld279
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld280
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld281
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld282
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld283
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld284
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld285
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld286
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld287
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld288
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld289
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld290
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld291
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld292
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld293
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld294
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld295
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld296
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld297
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld298
+{
+	unsigned long index;
+	long message;
+};
+
+struct HelloWorld299
+{
+	unsigned long index;
+	long message;
+};
+
+struct AgentHelloWorld
+{
+	unsigned long long index;
+	unsigned long long sn;
+};
+

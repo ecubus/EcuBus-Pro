@@ -29,6 +29,8 @@ export interface EthAddr {
     | 'forceWithVin'
     | 'forceWithEid'
   taType: 'physical' | 'functional'
+  udpClientPort?: number
+  tcpClientPort?: number
 }
 
 export interface TesterAddr {

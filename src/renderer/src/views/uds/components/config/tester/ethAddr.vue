@@ -110,6 +110,29 @@
         </el-form-item>
       </el-col>
     </el-form-item>
+    <el-divider content-position="left">Tester Speical Control</el-divider>
+    <el-form-item label-width="0">
+      <el-col :span="12">
+        <el-form-item label="UDP Client Port" prop="udpClientPort">
+          <el-input-number
+            v-model="data.udpClientPort"
+            :min="0"
+            :max="65535"
+            controls-position="right"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="TCP Client Port" prop="tcpClientPort">
+          <el-input-number
+            v-model="data.tcpClientPort"
+            :min="0"
+            :max="65535"
+            controls-position="right"
+          />
+        </el-form-item>
+      </el-col>
+    </el-form-item>
   </el-form>
 </template>
 

@@ -386,7 +386,7 @@ class IDLStructureVisitor extends IDL_GrammarVisitor {
     }
 }
 
-export default function parseIdl(content) {
+export default function parse(content) {
     const chars = new antlr4.InputStream(content)
     const lexer = new IDL_GrammarLexer(chars)
     const tokens = new antlr4.CommonTokenStream(lexer)

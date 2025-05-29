@@ -1,8 +1,4 @@
-import fsP from 'fs/promises'
-import fs from 'fs'
-import path from 'path'
 import { XMLParser } from 'fast-xml-parser'
-import antlr4 from 'antlr4'
 import parse from './g4/parseIdl'
 
 // 时间周期类型定义
@@ -166,26 +162,16 @@ export interface VBSXml {
   participant: ParticipantConfig | ParticipantConfig[]
 }
 
-export async function parseXml(filePath: string): Promise<VBSXml> {
-  if (fs.existsSync(filePath)) {
-    const content = await fsP.readFile(filePath, 'utf-8')
-    const parser = new XMLParser()
-    const vbs = parser.parse(content).dds
-    if (vbs) {
-      return vbs as VBSXml
-    } else {
-      throw new Error(`dds root doesn't exist`)
-    }
+export async function parseXml(content: string): Promise<VBSXml> {
+  const parser = new XMLParser()
+  const vbs = parser.parse(content).dds
+  if (vbs) {
+    return vbs as VBSXml
   } else {
-    throw new Error(`${filePath} doesn't exits`)
+    throw new Error(`dds root doesn't exist`)
   }
 }
 
-export async function parseIdl(filePath: string) {
-  if (fs.existsSync(filePath)) {
-    const content = await fsP.readFile(filePath, 'utf-8')
-    return parse(content)
-  } else {
-    throw new Error(`${filePath} doesn't exits`)
-  }
+export async function parseIdl(content: string) {
+  return parse(content)
 }

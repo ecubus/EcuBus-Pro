@@ -1,4 +1,4 @@
-import { parseXml, parseIdl } from '../../src/main/vbs/parse'
+import { parseXml, parseIdl } from '../../src/renderer/src/database/vbsParse'
 import { test, expect } from 'vitest'
 import path from 'path'
 

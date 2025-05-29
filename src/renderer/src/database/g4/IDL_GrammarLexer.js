@@ -1,6 +1,6 @@
 // Generated from IDL_Grammar.g4 by ANTLR 4.13.2
 // jshint ignore: start
-import antlr4 from 'antlr4';
+import antlr4 from 'antlr4'
 
 
 const serializedATN = [4,0,74,588,6,-1,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,

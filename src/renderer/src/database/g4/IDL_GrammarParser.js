@@ -1,6 +1,6 @@
 // Generated from IDL_Grammar.g4 by ANTLR 4.13.2
 // jshint ignore: start
-import antlr4 from 'antlr4';
+import antlr4 from 'antlr4'
 import IDL_GrammarListener from './IDL_GrammarListener.js';
 import IDL_GrammarVisitor from './IDL_GrammarVisitor.js';
 

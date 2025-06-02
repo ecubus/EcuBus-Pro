@@ -200,6 +200,7 @@ export default withMermaid({
             items: [
               {
                 text: 'DoIP',
+                link: '/docs/um/doip/doip.md',
                 items: [
                   {
                     text: 'VIN Request Behavior',

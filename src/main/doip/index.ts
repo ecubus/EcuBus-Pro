@@ -491,7 +491,8 @@ export class DOIP {
 
       const socket = net.createConnection({
         host: ip,
-        port: 13400
+        port: 13400,
+        localPort: addr.tcpClientPort
       })
       const item: clientTcp = {
         addr: addr,
@@ -796,7 +797,7 @@ export class DOIP {
           }
         }
       })
-      socket.bind(0, this.eth.handle, () => {
+      socket.bind(addr.udpClientPort || 0, this.eth.handle, () => {
         udpData.localPort = socket.address().port
         // if (this.ethAddr) {
         //     this.ethAddr.udpLocalPort = udpData.localPort

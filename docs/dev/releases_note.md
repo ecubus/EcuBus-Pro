@@ -1,5 +1,18 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.39
+Changes from v0.8.38 to v0.8.39:
+
+ 
+* [feat]:add doip client ip control [Detail](https://app.whyengineer.com/docs/um/doip/doip.html#tcp-udp-source-port-control)
+* [feat]:vector lin adapter support. by @hmf1235789 in #153
+
+
+**Full Changelog**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.38...v0.8.39
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.38
 Changes from v0.8.37 to v0.8.38:
 

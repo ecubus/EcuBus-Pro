@@ -286,7 +286,8 @@ export default withMermaid({
             text: 'DOIP',
             items: [
               { text: 'DoIP Tester', link: '/examples/doip/readme' },
-              { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' }
+              { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
+              { text: 'DoIP Gateway', link: '/examples/doip_gateway/readme' }
             ],
             collapsed: true
           },

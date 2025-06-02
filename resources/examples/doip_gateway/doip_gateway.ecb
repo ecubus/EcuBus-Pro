@@ -1,0 +1,250 @@
+{
+  "data": {
+    "devices": {
+      "9a159bbd-c196-4a83-b866-45fa1ac1aed4": {
+        "type": "eth",
+        "ethDevice": {
+          "device": {
+            "label": "",
+            "handle": "127.0.0.1",
+            "id": "",
+            "detail": {
+              "address": "127.0.0.1",
+              "netmask": "255.0.0.0",
+              "family": "IPv4",
+              "mac": "00:00:00:00:00:00",
+              "internal": true,
+              "cidr": "127.0.0.1/8"
+            }
+          },
+          "name": "SIMULATE_0",
+          "id": "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
+          "vendor": "simulate"
+        }
+      },
+      "14695ee0-10d7-4afa-93d9-6ed44a462ba3": {
+        "type": "can",
+        "canDevice": {
+          "id": "14695ee0-10d7-4afa-93d9-6ed44a462ba3",
+          "name": "PEAK_1",
+          "handle": 81,
+          "vendor": "peak",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_31"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {
+      "4c92bfff-29ef-424c-93f0-f8d2224668f3": {
+        "id": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
+        "name": "Tester_eth_1",
+        "type": "eth",
+        "script": "",
+        "targetDeviceId": "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
+        "seqList": [],
+        "address": [
+          {
+            "type": "eth",
+            "ethAddr": {
+              "name": "Addr0",
+              "entity": {
+                "vin": "ecubus-pro eth000",
+                "eid": "00-00-00-00-00-00",
+                "gid": "00-00-00-00-00-00",
+                "logicalAddr": 100,
+                "taType": "physical",
+                "virReqType": "broadcast",
+                "virReqAddr": "",
+                "entityNotFoundBehavior": "normal",
+                "nodeType": "node"
+              },
+              "tester": {
+                "testerLogicalAddr": 200,
+                "routeActiveTime": 0,
+                "createConnectDelay": "1000"
+              },
+              "virReqType": "broadcast",
+              "entityNotFoundBehavior": "normal",
+              "taType": "physical"
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "0x10": []
+        },
+        "simulateBy": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be"
+      },
+      "08ba893e-4598-4fca-95fa-99aa37daa997": {
+        "id": "08ba893e-4598-4fca-95fa-99aa37daa997",
+        "name": "Tester_can_0",
+        "type": "can",
+        "script": "",
+        "targetDeviceId": "",
+        "seqList": [],
+        "address": [
+          {
+            "type": "can",
+            "canAddr": {
+              "name": "Addr0",
+              "addrFormat": "NORMAL",
+              "addrType": "PHYSICAL",
+              "SA": "0x1",
+              "TA": "0x2",
+              "AE": "",
+              "canIdTx": "0x784",
+              "canIdRx": "0x7f0",
+              "nAs": 1000,
+              "nAr": 1000,
+              "nBs": 1000,
+              "nCr": 1000,
+              "nBr": 0,
+              "nCs": 0,
+              "idType": "STANDARD",
+              "brs": false,
+              "canfd": false,
+              "remote": false,
+              "stMin": 10,
+              "bs": 10,
+              "maxWTF": 0,
+              "dlc": 8,
+              "padding": false,
+              "paddingValue": "0x00"
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "0x10": []
+        },
+        "simulateBy": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be"
+      }
+    },
+    "subFunction": {},
+    "nodes": {
+      "aacaa592-6ccf-48cd-a8dc-a591bc89a7be": {
+        "name": "sim_entity",
+        "type": "eth",
+        "id": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
+        "channel": [
+          "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
+          "14695ee0-10d7-4afa-93d9-6ed44a462ba3"
+        ],
+        "attachTester": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
+        "script": "node.ts",
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "tests": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 191,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": true
+      },
+      "trace": {
+        "pos": {
+          "x": 845,
+          "y": 400,
+          "w": 1339,
+          "h": 514
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {},
+        "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": 1,
+          "y": 0,
+          "w": 888,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {},
+        "hide": false
+      },
+      "tester": {
+        "pos": {
+          "x": 889,
+          "y": 0,
+          "w": 1069,
+          "h": 401
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {},
+        "hide": false,
+        "backupPos": {
+          "x": 1180,
+          "y": 440,
+          "w": 600,
+          "h": 400
+        },
+        "isMax": false
+      },
+      "hardware": {
+        "pos": {
+          "x": 0,
+          "y": 400,
+          "w": 845,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      }
+    },
+    "example": {
+      "catalog": "Ethernet"
+    }
+  }
+}

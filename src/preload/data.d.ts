@@ -3,8 +3,9 @@ import type { UdsDevice } from 'src/main/share/uds'
 import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
-
+import type { IDLParseResult } from 'src/renderer/src/database/g4/parseIdl'
 import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
+import type { VBSXml } from 'src/renderer/src/database/vbsParse'
 
 export interface CanInter {
   type: 'can'
@@ -119,9 +120,11 @@ export type VBS = {
   id: string
   name: string
   configFilePath: string
-  idlFilePath: string
+  idlFilePath: string | string[]
   execFilePath?: string
   port?: number
+  idlObj: Record<string, IDLParseResult>
+  xmlObj?: VBSXml
 }
 
 export interface DataSet {

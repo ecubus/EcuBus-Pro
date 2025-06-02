@@ -51,6 +51,8 @@ export interface Module {
 }
 
 export interface IDLParseResult {
+  id: string
+  name: string
   modules: Module[]
   structs: Struct[]
   enums: Enum[]

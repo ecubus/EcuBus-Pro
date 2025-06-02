@@ -162,7 +162,7 @@ export interface VBSXml {
   participant: ParticipantConfig | ParticipantConfig[]
 }
 
-export async function parseXml(content: string): Promise<VBSXml> {
+export function parseXml(content: string): VBSXml {
   const parser = new XMLParser()
   const vbs = parser.parse(content).dds
   if (vbs) {
@@ -172,6 +172,6 @@ export async function parseXml(content: string): Promise<VBSXml> {
   }
 }
 
-export async function parseIdl(content: string) {
+export function parseIdl(content: string) {
   return parse(content)
 }

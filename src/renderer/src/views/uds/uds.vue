@@ -830,7 +830,7 @@ async function openDatabase(testerIndex: string) {
         })
       }
     } else if (type == 'vbs') {
-      vbsForm(project.projectInfo.path)
+      vbsForm(layoutMaster, project.projectInfo.path)
     }
   } else if (testerIndex.startsWith('LIN.')) {
     const name = testerIndex.split('.')[1]

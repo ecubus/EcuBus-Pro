@@ -1,8 +1,10 @@
 import { ElMessage, ElMessageBox, ElInput, ElButton, ElForm, ElFormItem } from 'element-plus'
 import { ref, h } from 'vue'
 import { Folder } from '@element-plus/icons-vue'
+import { Layout } from '../layout'
+import { v4 } from 'uuid'
 
-export function vbsForm(projectPath?: string) {
+export function vbsForm(layoutMaster: Layout, projectPath?: string) {
   const vbsFormData = ref({
     configFilePath: '',
     idlFilePath: ''
@@ -114,14 +116,14 @@ export function vbsForm(projectPath?: string) {
     }
   })
     .then(() => {
-      //   const id = v4()
-      //   layoutMaster.addWin('vbs', `${id}`, {
-      //     params: {
-      //       'edit-index': id,
-      //       configFilePath: vbsFormData.value.configFilePath,
-      //       idlFilePath: vbsFormData.value.idlFilePath
-      //     }
-      //   })
+      const id = v4()
+      layoutMaster.addWin('vbs', `${id}`, {
+        params: {
+          'edit-index': id,
+          configFilePath: vbsFormData.value.configFilePath,
+          idlFilePath: vbsFormData.value.idlFilePath
+        }
+      })
     })
     .catch(() => {
       // 用户取消操作

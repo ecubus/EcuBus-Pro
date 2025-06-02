@@ -25,6 +25,7 @@ import packageIcon from '@iconify/icons-mdi/package-variant'
 import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
+import soaIcon from '@iconify/icons-material-symbols/linked-services'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -44,6 +45,17 @@ export interface LayoutItem {
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
 const layoutMap: Record<string, LayoutItem> = {
+  vbs: {
+    i: 'VBS',
+    x: 0,
+    y: 0,
+    w: 600,
+    h: 400,
+    label: 'VBS',
+    key: 'vbs',
+    component: defineAsyncComponent(() => import('../../database/vbs/index.vue')),
+    icon: soaIcon
+  },
   variable: {
     i: 'Variable',
     x: 0,

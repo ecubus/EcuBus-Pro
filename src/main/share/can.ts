@@ -428,7 +428,9 @@ export function addrToId(addr: CanAddr): number {
   return id
 }
 export function addrToStr(addr: CanAddr): string {
-  const jsonString = JSON.stringify(addr, Object.keys(addr).sort())
+  const cAddr = cloneDeep(addr)
+  delete cAddr.uuid
+  const jsonString = JSON.stringify(cAddr, Object.keys(cAddr).sort())
   return jsonString
 }
 

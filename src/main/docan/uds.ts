@@ -926,6 +926,7 @@ export function findService(
     }
   }
   if (SupportServiceId.includes(serviceId)) {
+    const leftData = data.subarray(1)
     if (isReq) {
       return {
         id: v4(),
@@ -936,9 +937,9 @@ export function findService(
             id: v4(),
             name: 'param0',
             type: 'ARRAY',
-            value: data,
-            phyValue: data,
-            bitLen: data.length * 8
+            value: leftData,
+            phyValue: leftData,
+            bitLen: leftData.length * 8
           }
         ],
         respParams: []
@@ -954,9 +955,9 @@ export function findService(
             id: v4(),
             name: 'param0',
             type: 'ARRAY',
-            value: data,
-            phyValue: data,
-            bitLen: data.length * 8
+            value: leftData,
+            phyValue: leftData,
+            bitLen: leftData.length * 8
           }
         ]
       }

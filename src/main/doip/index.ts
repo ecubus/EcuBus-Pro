@@ -354,6 +354,20 @@ export class DOIP {
           //TODO:
           // this.event.emit(`server-${item.testerAddr}-${entity.logicalAddr}`,new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
           this.closeSocket(socket)
+          //remove from connectTable
+          const index = this.connectTable.findIndex((item) => item.socket == socket)
+          if (index >= 0) {
+            this.connectTable.splice(index, 1)
+          }
+        })
+        socket.on('close', () => {
+          uLog?.systemMsg(`tcp client close`, getTsUs() - this.startTs, 'error')
+          //remove from connectTable
+          const index = this.connectTable.findIndex((item) => item.socket == socket)
+
+          if (index >= 0) {
+            this.connectTable.splice(index, 1)
+          }
         })
       })
       this.server.listen(13400, this.eth.handle)
@@ -1039,10 +1053,10 @@ is in the state “Registered [Routing Active]”.*/
                 if (this.tester) {
                   const service = findService(this.tester, buffer.subarray(4), true)
                   if (service) {
-                    this.udsLog.recv(this.tester.id, service, ts, buffer.subarray(4))
+                    this.udsLog.sent(this.tester.id, service, ts, buffer.subarray(4))
                   }
                 }
-                this.event.emit(`server-${testerAddr}-${this.ethAddr?.logicalAddr}`, {
+                this.event.emit(`client-${testerAddr}-${this.ethAddr?.logicalAddr}`, {
                   ts: getTsUs() - this.startTs,
                   data: buffer.subarray(4)
                 })
@@ -1688,7 +1702,7 @@ is in the state “Registered [Routing Active]”.*/
   aliveCheck(startSocket: net.Socket, sa?: number) {
     const doCheck = (ta: number) => {
       const item = this.connectTable.find((item) => item.testerAddr == ta && item.state != 'init')
-      if (item) {
+      if (item && !item.socket.closed) {
         const val = this.getAliveCheckRequest()
         this.log.ipBase(
           'tcp',

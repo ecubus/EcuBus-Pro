@@ -896,6 +896,15 @@ export class UtilClass {
         await this.event.emit(eventArray.join('.') as any, data)
       }
       return true
+    } else if (event.endsWith('.send') || event.endsWith('.recv')) {
+      const eventArray = event.split('.')
+      eventArray[1] = '*'
+      if (this.event.listenerCount(eventArray.join('.') as any) > 0) {
+        await this.event.emit(eventArray.join('.') as any, data)
+        return true
+      } else {
+        return false
+      }
     } else {
       return false
     }

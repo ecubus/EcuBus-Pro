@@ -17,7 +17,7 @@ The example simulates a DoIP gateway that:
 ### Device Configuration
 
 Configure the network topology with:
-- **Lin**: Ethernet connection for DoIP communication
+- **Eth**: Ethernet connection for DoIP communication
 - **Can**: CAN bus connection for ECU communication
 - **Devices**: 
   - `SIMULATE_0`: Simulates the DoIP interface

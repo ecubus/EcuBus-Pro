@@ -1,5 +1,14 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.40
+Changes from v0.8.39 to v0.8.40:
+
+* [example]:add doip gateway example 
+* [bug]:fix doip self entiry log issue 
+* [bug]:fix findService unmatch contains service id issue 
+---
+
+# EcuBus-Pro Release Notes
 ## v0.8.39
 Changes from v0.8.38 to v0.8.39:
 

@@ -73,7 +73,6 @@
     "async": "^3.2.6",
     "async-validator": "^4.2.5",
     "axios": "^1.8.2",
-    "broadcast-channel": "^7.0.0",
     "chevrotain": "^11.0.3",
     "codemirror": "^6.65.7",
     "colors": "^1.4.0",

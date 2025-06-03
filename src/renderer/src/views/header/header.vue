@@ -136,7 +136,10 @@ function winHandle(action: string) {
 }
 
 watchEffect(() => {
-  title.value = ''
+  if (window.params.id) {
+    title.value = window.params.name
+    return
+  }
   if (project.open) {
     if (project.projectInfo.name == '') {
       title.value += 'Untitled'

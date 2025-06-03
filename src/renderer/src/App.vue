@@ -4,7 +4,7 @@
       <HeaderView />
     </el-header>
     <div>
-      <router-view />
+      <router-view :width="width" :height="height - 35" :edit-index="params.id" />
     </div>
   </el-container>
 </template>
@@ -15,24 +15,19 @@ import { onMounted, ref } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
+import { useWindowSize } from '@vueuse/core'
 
 const data = useDataStore()
 const project = useProjectStore()
-
+const { width, height } = useWindowSize()
 window.globalStart = ref(false)
-
+const params = ref<any>({})
+if (window.params.id) {
+  params.value = window.params
+}
 data.$subscribe(() => {
   if (project.open) {
     project.projectDirty = true
-  }
-})
-
-window.electron.ipcRenderer.send('ipc-open-window', {
-  id: 'test',
-  params: {
-    id: 'trace',
-    name: 'test',
-    age: 18
   }
 })
 

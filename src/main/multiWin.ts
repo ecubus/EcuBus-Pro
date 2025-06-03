@@ -6,21 +6,23 @@ import icon from '../../resources/icon.png?asset'
 class LogQueue {
   list: any[] = []
   timer: any
+  mainWin: BrowserWindow | undefined
   constructor(
     public win: BrowserWindow[],
     private period = 100
   ) {
     this.timer = setInterval(() => {
       if (this.list.length) {
-        this.win.forEach((win) => {
-          win.webContents.send('ipc-log', this.list)
-        })
+        this.mainWin!.webContents.send('ipc-log', this.list)
         this.list = []
       }
     }, this.period)
   }
-  addWin(win: BrowserWindow) {
+  addWin(win: BrowserWindow, isMain: boolean) {
     this.win.push(win)
+    if (isMain) {
+      this.mainWin = win
+    }
   }
   removeWin(win: BrowserWindow) {
     this.win = this.win.filter((w) => w !== win)
@@ -47,7 +49,7 @@ ipcMain.on('ipc-open-window', (event, arg) => {
       show: false
     })
     winMap.set(arg.id, win)
-    logQ.addWin(win)
+    logQ.addWin(win, false)
     win.on('closed', () => {
       winMap.delete(arg.id)
       logQ.removeWin(win)
@@ -58,18 +60,18 @@ ipcMain.on('ipc-open-window', (event, arg) => {
         win.webContents.openDevTools()
       }
     })
+
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
       const url = new URL(process.env['ELECTRON_RENDERER_URL'])
-      // params是一个对象,包含key和value
-      Object.entries(arg.params).forEach(([key, value]) => {
-        url.searchParams.set(key, JSON.stringify(value))
+      Object.entries(arg).forEach(([key, value]) => {
+        url.searchParams.set(key, String(value))
       })
       win.loadURL(url.toString())
     } else {
       const filePath = join(__dirname, '../renderer/index.html')
       const searchParams = new URLSearchParams()
-      Object.entries(arg.params).forEach(([key, value]) => {
-        searchParams.set(key, JSON.stringify(value))
+      Object.entries(arg).forEach(([key, value]) => {
+        searchParams.set(key, String(value))
       })
       win.loadFile(filePath, {
         search: searchParams.toString()

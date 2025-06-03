@@ -112,7 +112,7 @@ function createWindow(): void {
     }
   })
   global.mainWindow = mainWindow
-  logQ.addWin(mainWindow)
+  logQ.addWin(mainWindow, true)
   createLogs(
     [
       () =>

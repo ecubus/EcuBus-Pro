@@ -26,15 +26,29 @@ import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
 import fcDesigner from './views/uds/panel-designer/index.js'
 
+import { useDataStore } from './stores/data'
+import { assign } from 'lodash'
+import { cloneDeep } from 'lodash'
+import { useProjectStore } from './stores/project'
+import { useRuntimeStore } from './stores/runtime'
+const channel = new BroadcastChannel('ipc-log')
+const dataChannel = new BroadcastChannel('ipc-data')
+const projectChannel = new BroadcastChannel('ipc-project')
+const runtimeChannel = new BroadcastChannel('ipc-runtime')
 const dataParseWorker = new DataParseWorker()
 
 window.logBus = new EventBus()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
+  //main tab
+  if (window.params.id == undefined) {
+    channel.postMessage(event.data)
+  }
   for (const key of Object.keys(event.data)) {
     window.logBus.emit(key, undefined, key, event.data[key])
   }
 }
+
 window.serviceDetail = window.electron.ipcRenderer.sendSync('ipc-service-detail')
 window.electron.ipcRenderer.on('ipc-log', (event, data) => {
   const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
@@ -107,8 +121,39 @@ urlParams.forEach((value, key) => {
 })
 
 app.mount('#app')
-
+const database = useDataStore()
+const project = useProjectStore()
+const runtime = useRuntimeStore()
 if (window.params.id) {
-  //switch to the window
-  router.push(window.params.id)
+  router.push(`/${window.params.path}`)
+  channel.onmessage = (data) => {
+    for (const key of Object.keys(data)) {
+      window.logBus.emit(key, undefined, key, data[key])
+    }
+  }
 }
+//bi-directional communication
+dataChannel.onmessage = (val) => {
+  database.$patch((ss) => {
+    Object.assign(ss, val.data)
+  })
+}
+projectChannel.onmessage = (val) => {
+  project.$patch((ss) => {
+    Object.assign(ss, val.data)
+  })
+}
+runtimeChannel.onmessage = (val) => {
+  runtime.$patch((ss) => {
+    Object.assign(ss, val.data)
+  })
+}
+database.$subscribe((mutation, state) => {
+  dataChannel.postMessage(cloneDeep(state))
+})
+project.$subscribe((mutation, state) => {
+  projectChannel.postMessage(cloneDeep(state))
+})
+runtime.$subscribe((mutation, state) => {
+  runtimeChannel.postMessage(cloneDeep(state))
+})

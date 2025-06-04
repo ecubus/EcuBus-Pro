@@ -118,6 +118,7 @@ import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading } from 'element-plus'
+import { useGlobalStart } from '@r/stores/runtime'
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -194,8 +195,8 @@ interface LogItem {
   instance: string
   label: string
 }
-
-watch(window.globalStart, (val) => {
+const globalStart = useGlobalStart()
+watch(globalStart, (val) => {
   if (val) {
     clearLog('Start Trace')
     isPaused.value = false

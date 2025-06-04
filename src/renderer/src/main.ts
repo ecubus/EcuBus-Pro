@@ -25,16 +25,28 @@ import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
 import fcDesigner from './views/uds/panel-designer/index.js'
+import { BroadcastChannel } from 'broadcast-channel'
+import { useDataStore } from './stores/data'
+import { PiniaSharedState } from 'pinia-shared-state'
 
+const channel = new BroadcastChannel('ipc-log', {
+  type: 'native',
+  webWorkerSupport: false
+})
 const dataParseWorker = new DataParseWorker()
 
 window.logBus = new EventBus()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
+  //main tab
+  if (window.params.id == undefined) {
+    channel.postMessage(event.data)
+  }
   for (const key of Object.keys(event.data)) {
     window.logBus.emit(key, undefined, key, event.data[key])
   }
 }
+
 window.serviceDetail = window.electron.ipcRenderer.sendSync('ipc-service-detail')
 window.electron.ipcRenderer.on('ipc-log', (event, data) => {
   const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
@@ -86,6 +98,16 @@ declare module 'pinia' {
 pinia.use(({ store }) => {
   store.router = markRaw(router)
 })
+pinia.use(
+  PiniaSharedState({
+    // Enables the plugin for all stores. Defaults to true.
+    enable: true,
+    // If set to true this tab tries to immediately recover the shared state from another tab. Defaults to true.
+    initialize: true,
+    // Enforce a type. One of native, idb, localstorage or node. Defaults to native.
+    type: 'native'
+  })
+)
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -99,4 +121,19 @@ app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
 
+// 直接解析URL参数并赋值给window.params
+const urlParams = new URLSearchParams(window.location.search)
+window.params = {}
+urlParams.forEach((value, key) => {
+  window.params[key] = value
+})
+
 app.mount('#app')
+if (window.params.id) {
+  router.push(`/${window.params.path}`)
+  channel.onmessage = (data) => {
+    for (const key of Object.keys(data)) {
+      window.logBus.emit(key, undefined, key, data[key])
+    }
+  }
+}

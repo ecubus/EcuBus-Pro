@@ -81,6 +81,7 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
 import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
+import { useGlobalStart } from '@r/stores/runtime'
 interface LogData {
   time: string
   label: string
@@ -89,6 +90,7 @@ interface LogData {
 }
 
 const xGrid = ref()
+const globalStart = useGlobalStart()
 // const logData = ref<LogData[]>([])
 
 function clearLog() {
@@ -122,7 +124,7 @@ defineExpose({
   getData
 })
 
-watch(window.globalStart, (val) => {
+watch(globalStart, (val) => {
   if (val) {
     clearLog()
   }

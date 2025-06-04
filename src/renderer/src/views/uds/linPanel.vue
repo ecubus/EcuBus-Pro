@@ -86,6 +86,7 @@ import { LinInter } from 'src/preload/data'
 import { getFrameData } from 'nodeCan/lin'
 import { isEqual } from 'lodash'
 import { getPhysicalValue, getRawValue } from '@r/database/ldf/calc'
+import { useGlobalStart } from '@r/stores/runtime'
 
 interface SignalRow {
   name: string
@@ -102,7 +103,7 @@ const props = defineProps<{
   height: number
   editIndex: string
 }>()
-
+const globalStart = useGlobalStart()
 const h = toRef(props, 'height')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
@@ -439,7 +440,7 @@ const updateSignalValue = (frameName: string, signalName: string, value: number 
   if (db.value.signals[signalName]) {
     db.value.signals[signalName].value = value
   }
-  if (window.globalStart.value) {
+  if (globalStart.value) {
     window.electron.ipcRenderer.send('ipc-update-lin-signals', dbKey.value, signalName, value)
   }
 }

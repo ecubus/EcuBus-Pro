@@ -423,7 +423,7 @@
       >
         <div
           v-show="!item.hide"
-          v-if="layoutMaster.getLayoutType(item.id) == undefined"
+          v-if="layoutMaster.getLayoutType(item.id) == undefined && !item.isExternal"
           :id="`win${item.id}`"
           class="uds-window"
           :style="{
@@ -476,7 +476,10 @@
                   >
                 </span>
               </span>
-              <div style="width: 75px" class="uds-no-drag">
+              <div
+                style="display: flex; align-items: center; justify-content: flex-end"
+                class="uds-no-drag"
+              >
                 <span class="menu-right" @click="layoutMaster.minWin(item.id)">
                   <Icon :icon="checkIndeterminateSmall" />
                 </span>
@@ -484,7 +487,11 @@
                 <span class="menu-right" @click="layoutMaster.maxWin(item.id)">
                   <Icon :icon="resizeIcon" />
                 </span>
-
+                <template v-if="layoutMaster.validLayout[item.title]?.allowExt">
+                  <span class="menu-right" @click="layoutMaster.externalWin(item.id)">
+                    <Icon :icon="externalLinkIcon" />
+                  </span>
+                </template>
                 <span class="menu-right" @click="layoutMaster.removeWin(item.id)">
                   <Icon :icon="closeIcon" />
                 </span>
@@ -613,6 +620,7 @@ import resizeIcon from '@iconify/icons-material-symbols/resize'
 import networkNode from '@iconify/icons-material-symbols/network-node'
 import textFields from '@iconify/icons-material-symbols/text-fields'
 import checkIndeterminateSmall from '@iconify/icons-material-symbols/check-indeterminate-small'
+import externalLinkIcon from '@iconify/icons-mdi/external-link'
 import hardware from '@iconify/icons-material-symbols/hardware-outline'
 import diagIcon from '@iconify/icons-material-symbols/diagnosis'
 import diagServiceIcon from '@iconify/icons-material-symbols/home-repair-service-outline'
@@ -651,6 +659,7 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import data from '@iconify/icons-ep/full-screen'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -660,7 +669,7 @@ const dataBase = useDataStore()
 const project = useProjectStore()
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 
 provide('udsView', udsView)
 

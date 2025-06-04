@@ -289,9 +289,10 @@ import { v4 } from 'uuid'
 import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { UdsAddress } from 'nodeCan/uds'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const ruleFormRef = ref<FormInstance>()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const data = defineModel<CanAddr>({
   required: true
 })

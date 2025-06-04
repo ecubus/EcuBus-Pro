@@ -106,6 +106,7 @@ import ethNodeVue from './config/node/ethNode.vue'
 import { CanVendor } from 'nodeCan/can'
 import { Layout } from '../layout'
 import LinNodeVue from './config/node/linNode.vue'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -121,7 +122,7 @@ const leftWidth = ref(200)
 const dataModify = ref(false)
 const treeRef = ref()
 const devices = useDataStore()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 function nodeClick(data: tree, node: any) {
   if (activeTree.value?.id == data.id) {
     return

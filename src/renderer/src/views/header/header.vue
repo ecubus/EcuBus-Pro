@@ -11,7 +11,7 @@
           -webkit-app-region: drag;
         "
       />
-      <el-button-group v-if="project.open">
+      <el-button-group v-if="project.open && !isExternal">
         <el-button link>
           <Icon class="menuIcon" :icon="home" @click="backHomeHandler" />
         </el-button>
@@ -27,7 +27,7 @@
         </el-button>
       </el-button-group>
       <el-divider direction="vertical" />
-      <el-button-group v-if="project.open">
+      <el-button-group v-if="project.open && !isExternal">
         <el-button
           link
           :disabled="globalStart"
@@ -97,16 +97,17 @@ import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { onKeyStroke, onKeyDown } from '@vueuse/core'
 import { useDataStore } from '@r/stores/data'
 import { ElLoading } from 'element-plus'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const project = useProjectStore()
 const router = useRouter()
 function backHomeHandler() {
   void router.push('/')
 }
-const title = ref('')
-const globalStart = toRef(window, 'globalStart')
+const title = ref(window.params.name || '')
+const globalStart = useGlobalStart()
 const dataBase = useDataStore()
-
+const isExternal = ref(window.params.id ? true : false)
 async function closeHandle() {
   if (project.projectDirty) {
     //save project
@@ -115,29 +116,33 @@ async function closeHandle() {
       return
     }
   }
-  window.electron.ipcRenderer.send('close')
+  window.electron.ipcRenderer.send('close', window.params.id)
 }
 function winHandle(action: string) {
   if (action == 'min') {
-    window.electron.ipcRenderer.send('minimize')
+    window.electron.ipcRenderer.send('minimize', window.params.id)
   } else if (action == 'max') {
-    window.electron.ipcRenderer.send('maximize')
+    window.electron.ipcRenderer.send('maximize', window.params.id)
   } else if (action == 'close') {
-    if (window.globalStart.value) {
-      //TODO:add force close
-      ElLoading.service()
-      window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
-        closeHandle()
-      })
+    if (window.params.id) {
+      window.electron.ipcRenderer.send('close', window.params.id)
     } else {
-      closeHandle()
+      if (globalStart.value) {
+        //TODO:add force close
+        ElLoading.service()
+        window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
+          closeHandle()
+        })
+      } else {
+        closeHandle()
+      }
     }
   }
 }
 
 watchEffect(() => {
-  title.value = ''
-  if (project.open) {
+  if (project.open && !isExternal.value) {
+    title.value = ''
     if (project.projectInfo.name == '') {
       title.value += 'Untitled'
     } else {
@@ -160,7 +165,7 @@ onKeyStroke('s', (e) => {
 })
 
 onKeyDown(true, (e) => {
-  if (window.globalStart.value) {
+  if (globalStart.value) {
     if (e.key == 's' && e.ctrlKey) {
       return
     }

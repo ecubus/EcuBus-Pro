@@ -184,6 +184,7 @@ import signal from './components/signal.vue'
 import editSignal from './components/editSignal.vue'
 import { GaugeSeriesOption } from 'echarts'
 import addVar from './components/addVar.vue'
+import { useGlobalStart } from '@r/stores/runtime'
 
 use([
   LineChart,
@@ -209,7 +210,7 @@ const graphs = useDataStore().guages
 const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#wingraph'))
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => (height.value * 2) / 3)
-// 修改测试数据
+const globalStart = useGlobalStart()
 const filteredTreeData = ref<
   GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>[]
 >([])
@@ -321,32 +322,29 @@ const updateTime = () => {
 }
 
 // 确保定时器时间间隔与graph.vue保持一致
-watch(
-  () => window.globalStart.value,
-  (val) => {
-    if (val) {
-      //clear all charts data and set start to 0
-      enabledCharts.value.forEach((c) => {
-        chartInstances[c.id].setOption({
-          series: {
-            data: [
-              {
-                name: c.name
-              }
-            ]
-          }
-        })
+watch(globalStart, (val) => {
+  if (val) {
+    //clear all charts data and set start to 0
+    enabledCharts.value.forEach((c) => {
+      chartInstances[c.id].setOption({
+        series: {
+          data: [
+            {
+              name: c.name
+            }
+          ]
+        }
       })
+    })
 
-      // 启动定时器更新时间，使用500ms间隔
-      if (timer) clearInterval(timer)
-      timer = setInterval(updateTime, 500)
-    } else if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
+    // 启动定时器更新时间，使用500ms间隔
+    if (timer) clearInterval(timer)
+    timer = setInterval(updateTime, 500)
+  } else if (timer) {
+    clearInterval(timer)
+    timer = null
   }
-)
+})
 
 // 监听暂停/恢复状态
 watch(
@@ -355,7 +353,7 @@ watch(
     if (paused && timer) {
       clearInterval(timer)
       timer = null
-    } else if (!paused && window.globalStart.value) {
+    } else if (!paused && globalStart.value) {
       if (timer) clearInterval(timer)
       timer = setInterval(updateTime, 500)
     }
@@ -565,7 +563,7 @@ onMounted(() => {
     })
 
     // 如果全局启动标志为true，则启动定时器
-    if (window.globalStart.value && !isPaused.value) {
+    if (globalStart.value && !isPaused.value) {
       if (timer) clearInterval(timer)
       timer = setInterval(updateTime, 500)
     }

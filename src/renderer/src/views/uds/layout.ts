@@ -41,9 +41,10 @@ export interface LayoutItem {
   minW?: number
   minH?: number
   label: string
+  allowExt?: boolean
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
-const layoutMap: Record<string, LayoutItem> = {
+export const layoutMap: Record<string, LayoutItem> = {
   variable: {
     i: 'Variable',
     x: 0,
@@ -88,6 +89,7 @@ const layoutMap: Record<string, LayoutItem> = {
     minW: 600,
     label: 'PanelPreview',
     minH: 400,
+    allowExt: true,
     key: 'panelPreview',
     component: defineAsyncComponent(() => import('./panelView.vue')),
     icon: panelIcon1
@@ -221,6 +223,7 @@ const layoutMap: Record<string, LayoutItem> = {
     h: 400,
     label: 'Trace',
     key: 'trace',
+    allowExt: true,
     component: defineAsyncComponent(() => import('./components/trace.vue')),
     icon: logIcon
   },
@@ -232,6 +235,7 @@ const layoutMap: Record<string, LayoutItem> = {
     h: 400,
     label: 'IA',
     key: 'IA',
+    allowExt: true,
     component: defineAsyncComponent(() => import('./cani.vue')),
     icon: interIcon
   },
@@ -319,6 +323,17 @@ export class Layout {
       this.grid = grid
     }
     this.data = useProjectStore()
+    window.electron.ipcRenderer.on('ipc-close-window', (event, key) => {
+      const item = this.data.project.wins[key]
+      const layoutType = this.getLayoutType(key)
+      if (item) {
+        item.isExternal = false
+
+        nextTick(() => {
+          this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, true, layoutType)
+        })
+      }
+    })
   }
   setWinSize(h: number, w: number) {
     this.width = w
@@ -423,7 +438,6 @@ export class Layout {
       if (layoutType == 'bottom') {
         v = 'n'
       }
-
       this.winEl[id].resizable({
         containment: layoutType == 'bottom' ? false : this.parentElement,
         handles: v,
@@ -728,6 +742,10 @@ export class Layout {
     const layoutType = this.validLayout[title].layoutType
     const item = this.data.project.wins[id]
     if (item) {
+      if (item.isExternal) {
+        this.externalWin(id)
+        return
+      }
       /* the same win is already exist*/
 
       /* update sp*/
@@ -889,5 +907,20 @@ export class Layout {
     this.winEl[key].css('z-index', '-1')
     item.hide = true
     this.event.emit('min', item)
+  }
+  externalWin(key: string) {
+    const item = this.data.project.wins[key]
+    if (item) {
+      item.isExternal = true
+      delete this.winEl[key]
+      window.electron.ipcRenderer.send('ipc-open-window', {
+        ...item.options.params,
+        id: key,
+        path: item.title,
+        w: item.pos.w,
+        h: item.pos.h,
+        name: item.label + (item.options.name ? `-${item.options.name}` : '')
+      })
+    }
   }
 }

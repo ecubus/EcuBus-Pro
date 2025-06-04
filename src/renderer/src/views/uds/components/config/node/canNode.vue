@@ -270,6 +270,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import tableIcon from '@iconify/icons-mdi/table'
 import BitTimingCalculator from '@r/components/BitTimingCalculator.vue'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const props = defineProps<{
   index: string
@@ -280,7 +281,7 @@ const height = toRef(props, 'height')
 const ruleFormRef = ref<FormInstance>()
 
 const devices = useDataStore()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 
 const data = ref<CanBaseInfo>({
   id: '',

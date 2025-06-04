@@ -89,6 +89,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     minW: 600,
     label: 'PanelPreview',
     minH: 400,
+    allowExt: true,
     key: 'panelPreview',
     component: defineAsyncComponent(() => import('./panelView.vue')),
     icon: panelIcon1
@@ -741,6 +742,10 @@ export class Layout {
     const layoutType = this.validLayout[title].layoutType
     const item = this.data.project.wins[id]
     if (item) {
+      if (item.isExternal) {
+        this.externalWin(id)
+        return
+      }
       /* the same win is already exist*/
 
       /* update sp*/

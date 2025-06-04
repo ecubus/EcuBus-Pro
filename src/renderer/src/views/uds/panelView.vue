@@ -126,10 +126,8 @@ function init() {
       recursion(panel.value.rule[i])
     }
 
-    nextTick(() => {
-      rule.value = cloneDeep(panel.value.rule)
-      options.value = cloneDeep(panel.value.options)
-    })
+    rule.value = cloneDeep(panel.value.rule)
+    options.value = cloneDeep(panel.value.options)
     for (const key of Object.keys(filedBackMap)) {
       window.logBus.on(key, dataUpdate)
     }

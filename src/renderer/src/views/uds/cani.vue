@@ -490,8 +490,6 @@ const gridOptions = computed(() => {
     ],
     data: dataBase.ia[props.editIndex]?.action || []
   }
-  console.log(props.editIndex)
-  console.log(dataBase.ia, dataBase.ia[props.editIndex]?.action)
   return v
 })
 function addFrame() {

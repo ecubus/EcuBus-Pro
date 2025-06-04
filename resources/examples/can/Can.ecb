@@ -68559,7 +68559,109 @@
         }
       }
     },
-    "tests": {}
+    "tests": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {
+      "c10776a8-fc8c-45a3-8787-d5467bdcd26a": {
+        "name": "test",
+        "id": "c10776a8-fc8c-45a3-8787-d5467bdcd26a",
+        "rule": [
+          {
+            "type": "LocalImage",
+            "title": "",
+            "style": {
+              "width": "100px",
+              "height": "100px"
+            },
+            "props": {
+              "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
+            },
+            "_fc_id": "id_F4q5mbhpxhxxaec",
+            "name": "ref_Fzvmmbhpxhxxafc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "LocalImage"
+          },
+          {
+            "type": "TText",
+            "title": "",
+            "field": "Fcwcmbhpn68iabc",
+            "style": {
+              "whiteSpace": "pre-line",
+              "width": "100%"
+            },
+            "_fc_id": "id_F26jmbhpn68iacc",
+            "name": "ref_F5hgmbhpn68iadc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "text",
+            "props": {
+              "signal": {
+                "type": "signal",
+                "enable": true,
+                "id": "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest",
+                "name": "VCLEFT_liftgateLatchRequest",
+                "color": "#0b75b0",
+                "yAxis": {
+                  "min": 0,
+                  "max": 7,
+                  "enums": [
+                    {
+                      "label": "LATCH_REQUEST_CINCH",
+                      "value": 1
+                    },
+                    {
+                      "label": "LATCH_REQUEST_FORCE_RELEASE",
+                      "value": 3
+                    },
+                    {
+                      "label": "LATCH_REQUEST_NONE",
+                      "value": 0
+                    },
+                    {
+                      "label": "LATCH_REQUEST_RELEASE",
+                      "value": 2
+                    },
+                    {
+                      "label": "LATCH_REQUEST_RESET",
+                      "value": 4
+                    }
+                  ]
+                },
+                "bindValue": {
+                  "signalName": "VCLEFT_liftgateLatchRequest",
+                  "startBit": 61,
+                  "bitLength": 3,
+                  "dbKey": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+                  "dbName": "Model3CAN",
+                  "frameId": 322
+                }
+              }
+            }
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "test"
+        }
+      }
+    }
   },
   "project": {
     "wins": {
@@ -68576,7 +68678,8 @@
         "title": "message",
         "label": "Message",
         "id": "message",
-        "layoutType": "bottom"
+        "layoutType": "bottom",
+        "hide": true
       },
       "network": {
         "pos": {
@@ -68588,25 +68691,27 @@
         "title": "network",
         "label": "Network",
         "id": "network",
-        "options": {}
+        "options": {},
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 49.5,
-          "y": 467,
+          "x": 1.5,
+          "y": 407,
           "w": 1353,
           "h": 490
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {}
+        "options": {},
+        "hide": false
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 1105,
-          "y": 554,
-          "w": 1358,
+          "x": 1354.5,
+          "y": 406,
+          "w": 653,
           "h": 406
         },
         "title": "cani",
@@ -68617,19 +68722,40 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
-        }
+        },
+        "hide": false
       },
       "graph": {
         "pos": {
-          "x": 1011.5,
-          "y": 47,
+          "x": 606.5,
+          "y": 0,
           "w": 903,
           "h": 406
         },
         "title": "graph",
         "label": "Graph",
         "id": "graph",
-        "options": {}
+        "options": {},
+        "hide": false
+      },
+      "pc10776a8-fc8c-45a3-8787-d5467bdcd26a": {
+        "pos": {
+          "x": 1509.5,
+          "y": 0,
+          "w": 600,
+          "h": 406
+        },
+        "title": "panelPreview",
+        "label": "PanelPreview",
+        "id": "pc10776a8-fc8c-45a3-8787-d5467bdcd26a",
+        "options": {
+          "params": {
+            "edit-index": "pc10776a8-fc8c-45a3-8787-d5467bdcd26a"
+          },
+          "name": "test"
+        },
+        "isExternal": false,
+        "hide": false
       }
     },
     "example": {

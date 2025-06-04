@@ -4,7 +4,12 @@
       <HeaderView />
     </el-header>
     <div>
-      <router-view :width="width" :height="height - 35" :edit-index="params['edit-index']" />
+      <router-view
+        :id="`win${params.id}`"
+        :width="width"
+        :height="height - 35"
+        :edit-index="params['edit-index']"
+      />
     </div>
   </el-container>
 </template>

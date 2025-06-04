@@ -124,20 +124,25 @@ function winHandle(action: string) {
   } else if (action == 'max') {
     window.electron.ipcRenderer.send('maximize', window.params.id)
   } else if (action == 'close') {
-    if (globalStart.value) {
-      //TODO:add force close
-      ElLoading.service()
-      window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
-        closeHandle()
-      })
+    if (window.params.id) {
+      window.electron.ipcRenderer.send('close', window.params.id)
     } else {
-      closeHandle()
+      if (globalStart.value) {
+        //TODO:add force close
+        ElLoading.service()
+        window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
+          closeHandle()
+        })
+      } else {
+        closeHandle()
+      }
     }
   }
 }
 
 watchEffect(() => {
   if (project.open && !isExternal.value) {
+    title.value = ''
     if (project.projectInfo.name == '') {
       title.value += 'Untitled'
     } else {

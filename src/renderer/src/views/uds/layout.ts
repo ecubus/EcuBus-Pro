@@ -234,6 +234,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     h: 400,
     label: 'IA',
     key: 'IA',
+    allowExt: true,
     component: defineAsyncComponent(() => import('./cani.vue')),
     icon: interIcon
   },

@@ -108,6 +108,7 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { DBC } from './dbcVisitor'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const layout = inject('layout') as Layout
 
@@ -128,7 +129,7 @@ const database = useDataStore()
 
 const dbcObj = ref<DBC>() as Ref<DBC>
 
-const globalStart = computed(() => window.globalStart)
+const globalStart = useGlobalStart()
 
 const existed = computed(() => {
   let existed = false

@@ -81,6 +81,11 @@ ipcMain.on('ipc-open-window', (event, arg) => {
   }
 })
 
+ipcMain.on('ipc-close-others-windows', (event, arg) => {
+  winMap.forEach((item) => {
+    item.close()
+  })
+})
 export function closeAllWindows() {
   winMap.forEach((win) => {
     win.close()

@@ -659,6 +659,7 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import data from '@iconify/icons-ep/full-screen'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -668,7 +669,7 @@ const dataBase = useDataStore()
 const project = useProjectStore()
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 
 provide('udsView', udsView)
 

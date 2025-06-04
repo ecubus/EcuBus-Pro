@@ -115,6 +115,7 @@ import {
 } from '@r/database/dbc/calc'
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
 import { cloneDeep } from 'lodash'
+import { useGlobalStart } from '@r/stores/runtime'
 const props = defineProps<{
   database: string
   messageId: string
@@ -261,11 +262,12 @@ function editGenerator(row: Signal) {
   editDialogVisible.value = true
 }
 
+const globalStart = useGlobalStart()
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
   updateSignalRaw(row)
   if (message.value) {
-    if (window.globalStart.value) {
+    if (globalStart.value) {
       window.electron.ipcRenderer.send(
         'ipc-update-can-signal',
         props.database,
@@ -283,7 +285,7 @@ function handleRawValueChange(row: Signal) {
 function handlePhysValueChange(row: Signal) {
   updateSignalPhys(row)
   if (message.value) {
-    if (window.globalStart.value) {
+    if (globalStart.value) {
       window.electron.ipcRenderer.send(
         'ipc-update-can-signal',
         props.database,

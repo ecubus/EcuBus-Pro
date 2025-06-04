@@ -4,7 +4,7 @@
       <HeaderView />
     </el-header>
     <div>
-      <router-view :width="width" :height="height - 35" :edit-index="params.id" />
+      <router-view :width="width" :height="height - 35" :edit-index="params['edit-index']" />
     </div>
   </el-container>
 </template>
@@ -16,14 +16,18 @@ import { ElMessage, ElNotification } from 'element-plus'
 import { useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
 import { useWindowSize } from '@vueuse/core'
+import { useGlobalStart } from './stores/runtime'
 
 const data = useDataStore()
 const project = useProjectStore()
 const { width, height } = useWindowSize()
-window.globalStart = ref(false)
+const globalStart = useGlobalStart()
 const params = ref<any>({})
 if (window.params.id) {
   params.value = window.params
+  if (params.value['edit-index']) {
+    params.value['edit-index'] = params.value['edit-index'].split('_')[0]
+  }
 }
 data.$subscribe(() => {
   if (project.open) {
@@ -32,7 +36,7 @@ data.$subscribe(() => {
 })
 
 window.electron.ipcRenderer.on('ipc-global-stop', () => {
-  window.globalStart.value = false
+  globalStart.value = false
 })
 </script>
 <style lang="scss">

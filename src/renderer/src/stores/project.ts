@@ -285,7 +285,7 @@ export const useProjectStore = defineStore('project', {
       }
     },
     async closeProject(filePath?: string): Promise<boolean> {
-      return new Promise((resolve, reject) => {
+      const p = new Promise<boolean>((resolve, reject) => {
         if (filePath && this.open && this.projectDirty && window.params.id == undefined) {
           if (
             window.path.normalize(window.path.join(this.projectInfo.path, this.projectInfo.name)) ==
@@ -337,6 +337,12 @@ export const useProjectStore = defineStore('project', {
           resolve(true)
         }
       })
+      const result = await p
+      if (result) {
+        window.electron.ipcRenderer.send('ipc-close-others-windows')
+      }
+
+      return result
     }
   }
 })

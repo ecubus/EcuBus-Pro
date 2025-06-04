@@ -259,6 +259,7 @@ import loadIcon from '@iconify/icons-material-symbols/upload'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const serviceDetail = window.serviceDetail
 const dialogVisible = ref(false)
@@ -288,7 +289,7 @@ const odxForm = ref({
 })
 const repParamRef = ref()
 const respParamRef = ref()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const layout = inject('layout') as Layout
 
 function nodeClick(data: any) {

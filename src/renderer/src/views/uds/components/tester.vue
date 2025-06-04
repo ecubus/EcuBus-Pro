@@ -85,6 +85,7 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { HardwareType } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -218,7 +219,7 @@ interface tree {
   disabled?: boolean
 }
 const tData = ref<tree[]>([])
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 
 function buildTree() {
   const t: tree[] = []

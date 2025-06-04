@@ -141,6 +141,7 @@ import { clone, cloneDeep } from 'lodash'
 import deviceIcon from '@iconify/icons-material-symbols/important-devices-outline'
 import presentIcon from '@iconify/icons-mdi/presentation-play'
 import { TesterInfo } from 'nodeCan/tester'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const seqCycle = ref(1)
 const dataBase = useDataStore()
@@ -154,6 +155,7 @@ const props = defineProps<{
 const tester = toRef(dataBase.tester, props.editIndex)
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
+const globalStart = useGlobalStart()
 const devices = computed(() => {
   const devicesList: Record<string, UdsDevice> = {}
   for (const key of Object.keys(dataBase.devices)) {
@@ -228,7 +230,7 @@ function startSeq() {
     for (const v of Object.values(subSeqRef.value)) {
       v?.clear()
     }
-    if (window.globalStart.value == false) {
+    if (globalStart.value == false) {
       ElMessageBox.alert('Sequence can only be start during a running measurement', 'Warning', {
         confirmButtonText: 'OK',
         type: 'warning',
@@ -282,8 +284,9 @@ function presentChange(medhotd: string, present: any[]) {
     }
   }
 }
+
 async function switchTesterPresent() {
-  if (window.globalStart.value == false) {
+  if (globalStart.value == false) {
     ElMessageBox.alert('Sequence can only be start during a running measurement', 'Warning', {
       confirmButtonText: 'OK',
       type: 'warning',

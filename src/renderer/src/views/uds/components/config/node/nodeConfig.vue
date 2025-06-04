@@ -164,13 +164,14 @@ import { ElMessageBox, FormInstance, FormRules, TransferKey } from 'element-plus
 import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
 import { udsCeil } from '../../udsView'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const activeName = ref('general')
 const props = defineProps<{
   editIndex: string
   ceil: udsCeil
 }>()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 const buildStatus = ref<string | undefined>()

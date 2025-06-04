@@ -97,6 +97,7 @@ import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { onKeyStroke, onKeyDown } from '@vueuse/core'
 import { useDataStore } from '@r/stores/data'
 import { ElLoading } from 'element-plus'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const project = useProjectStore()
 const router = useRouter()
@@ -104,7 +105,7 @@ function backHomeHandler() {
   void router.push('/')
 }
 const title = ref(window.params.name || '')
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const dataBase = useDataStore()
 const isExternal = ref(window.params.id ? true : false)
 async function closeHandle() {
@@ -123,7 +124,7 @@ function winHandle(action: string) {
   } else if (action == 'max') {
     window.electron.ipcRenderer.send('maximize', window.params.id)
   } else if (action == 'close') {
-    if (window.globalStart.value) {
+    if (globalStart.value) {
       //TODO:add force close
       ElLoading.service()
       window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
@@ -159,7 +160,7 @@ onKeyStroke('s', (e) => {
 })
 
 onKeyDown(true, (e) => {
-  if (window.globalStart.value) {
+  if (globalStart.value) {
     if (e.key == 's' && e.ctrlKey) {
       return
     }

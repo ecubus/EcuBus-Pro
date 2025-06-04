@@ -4,6 +4,7 @@ import { cloneDeep } from 'lodash'
 import { ElMessageBox } from 'element-plus'
 import { useProjectStore } from './project'
 import { DataSet } from 'src/preload/data'
+import { useGlobalStart } from './runtime'
 export type { DataSet }
 
 export const useDataStore = defineStore('useDataStore', {
@@ -26,8 +27,9 @@ export const useDataStore = defineStore('useDataStore', {
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
-      if (type == 'start' && window.globalStart.value == false) {
-        window.globalStart.value = true
+      const globalStart = useGlobalStart()
+      if (type == 'start' && globalStart.value == false) {
+        globalStart.value = true
 
         const project = useProjectStore()
         window.dataParseWorker.postMessage({
@@ -48,13 +50,13 @@ export const useDataStore = defineStore('useDataStore', {
             window.startTime = Date.now()
           })
           .catch((e: any) => {
-            window.globalStart.value = false
+            globalStart.value = false
             window.startTime = Date.now()
           })
       }
-      if (type == 'stop' && window.globalStart.value == true) {
+      if (type == 'stop' && globalStart.value == true) {
         window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {
-          window.globalStart.value = false
+          globalStart.value = false
         })
         // globalStart.value = false
       }

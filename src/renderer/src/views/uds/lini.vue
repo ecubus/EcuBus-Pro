@@ -142,6 +142,7 @@ import { onKeyStroke, onKeyUp } from '@vueuse/core'
 import { LinBaseInfo, LinMode } from 'nodeCan/lin'
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
 import { TransferKey } from 'element-plus'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -149,7 +150,7 @@ const xGrid = ref()
 const connectV = ref(false)
 
 const popoverIndex = ref(-1)
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 
 const activeSch = ref<string | undefined>(undefined)
 

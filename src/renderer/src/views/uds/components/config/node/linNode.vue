@@ -141,10 +141,11 @@ import { useDataStore } from '@r/stores/data'
 import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { CanVendor } from 'nodeCan/can'
 import { LinBaseInfo, LinDevice, LinMode } from 'nodeCan/lin'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const props = defineProps<{
   index: string
   vendor: CanVendor

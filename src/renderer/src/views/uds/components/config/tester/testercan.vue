@@ -303,8 +303,9 @@ import EthAddr from './ethAddr.vue'
 import LinAddr from './linAddr.vue'
 import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from 'nodeCan/lin'
 import dbchoose from './dbchoose.vue'
+import { useGlobalStart } from '@r/stores/runtime'
 
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()
 const dataBase = useDataStore()
 const nodesName = computed(() => {

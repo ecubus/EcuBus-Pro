@@ -34,7 +34,6 @@ declare global {
       get: (key: string) => unknown
     }
     serviceDetail: ServiceDetial
-    globalStart: Ref<boolean>
     startTime: number
     path: typeof path
     MonacoEnvironment: any

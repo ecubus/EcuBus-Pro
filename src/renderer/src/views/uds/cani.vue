@@ -341,7 +341,7 @@ import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
 import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
-import { useRuntimeStore } from '@r/stores/runtime'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -357,7 +357,7 @@ const editV = ref(false)
 const buttonRef = ref({})
 const popoverIndex = ref(-1)
 const ppRef = computed(() => buttonRef.value[popoverIndex.value])
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const runtime = useRuntimeStore()
 const periodTimer = computed({
   get: () => {
@@ -490,6 +490,8 @@ const gridOptions = computed(() => {
     ],
     data: dataBase.ia[props.editIndex]?.action || []
   }
+  console.log(props.editIndex)
+  console.log(dataBase.ia, dataBase.ia[props.editIndex]?.action)
   return v
 })
 function addFrame() {
@@ -718,7 +720,7 @@ watch(
     if (v && popoverIndex.value != -1) {
       if (!isEqual(dataBase.ia[editIndex.value].action[popoverIndex.value], v)) {
         Object.assign(dataBase.ia[editIndex.value].action[popoverIndex.value], v)
-        if (window.globalStart.value) {
+        if (globalStart.value) {
           window.electron.ipcRenderer.send(
             'ipc-update-can-period',
             `${editIndex.value}-${popoverIndex.value}`,

@@ -127,6 +127,7 @@ import { ElNotification, ElMessageBox, formatter } from 'element-plus'
 import signal from './components/signal.vue'
 import addVar from './components/addVar.vue'
 import { VxeGrid, VxeGridProps, VxeTableEvents } from 'vxe-table'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const isPaused = ref(false)
 
@@ -257,21 +258,19 @@ const updateTime = () => {
   maxX = Math.ceil(maxX) + 5
   minX = Math.floor(minX)
 }
+const globalStart = useGlobalStart()
 
 // 确保定时器时间间隔与graph.vue保持一致
-watch(
-  () => window.globalStart.value,
-  (val) => {
-    if (val) {
-      // 启动定时器更新时间，使用500ms间隔
-      if (timer) clearInterval(timer)
-      timer = setInterval(updateTime, 500)
-    } else if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
+watch(globalStart, (val) => {
+  if (val) {
+    // 启动定时器更新时间，使用500ms间隔
+    if (timer) clearInterval(timer)
+    timer = setInterval(updateTime, 500)
+  } else if (timer) {
+    clearInterval(timer)
+    timer = null
   }
-)
+})
 
 // 监听暂停/恢复状态
 watch(
@@ -280,7 +279,7 @@ watch(
     if (paused && timer) {
       clearInterval(timer)
       timer = null
-    } else if (!paused && window.globalStart.value) {
+    } else if (!paused && globalStart.value) {
       if (timer) clearInterval(timer)
       timer = setInterval(updateTime, 500)
     }
@@ -388,7 +387,7 @@ onMounted(() => {
     })
 
     // 如果全局启动标志为true，则启动定时器
-    if (window.globalStart.value && !isPaused.value) {
+    if (globalStart.value && !isPaused.value) {
       if (timer) clearInterval(timer)
       timer = setInterval(updateTime, 500)
     }

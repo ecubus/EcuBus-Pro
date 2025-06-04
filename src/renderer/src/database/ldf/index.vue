@@ -100,6 +100,7 @@ import Sch from './sch.vue'
 import Encode from './encode.vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import File from './file.vue'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const layout = inject('layout') as Layout
 
@@ -118,7 +119,7 @@ const database = useDataStore()
 
 const ldfObj = ref<LDF>() as Ref<LDF>
 
-const globalStart = computed(() => window.globalStart)
+const globalStart = useGlobalStart()
 
 const existed = computed(() => {
   let existed = false

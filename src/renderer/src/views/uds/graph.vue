@@ -190,6 +190,7 @@ import signal from './components/signal.vue'
 import addVar from './components/addVar.vue'
 import editSignal from './components/editSignal.vue'
 import { LineSeriesOption } from 'echarts'
+import { useGlobalStart } from '@r/stores/runtime'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 
@@ -304,6 +305,7 @@ const handleEditCancel = () => {
   editDialogVisible.value = false
   editingNode.value = null
 }
+const globalStart = useGlobalStart()
 const updateTime = () => {
   if (isPaused.value) {
     return
@@ -346,35 +348,32 @@ const updateTime = () => {
     })
   })
 }
-watch(
-  () => window.globalStart.value,
-  (val) => {
-    if (val) {
-      //clear cache
-      Object.keys(chartDataCache).forEach((key) => {
-        chartDataCache[key] = []
+watch(globalStart, (val) => {
+  if (val) {
+    //clear cache
+    Object.keys(chartDataCache).forEach((key) => {
+      chartDataCache[key] = []
+    })
+    //clear all charts data and set start to 0
+    enabledCharts.value.forEach((c) => {
+      chartInstances[c.id].setOption({
+        series: {
+          data: []
+        },
+        xAxis: {
+          min: 0,
+          max: 10
+        }
       })
-      //clear all charts data and set start to 0
-      enabledCharts.value.forEach((c) => {
-        chartInstances[c.id].setOption({
-          series: {
-            data: []
-          },
-          xAxis: {
-            min: 0,
-            max: 10
-          }
-        })
-      })
-      if (timer) {
-        clearInterval(timer)
-      }
-      timer = setInterval(updateTime, 500)
-    } else {
+    })
+    if (timer) {
       clearInterval(timer)
     }
+    timer = setInterval(updateTime, 500)
+  } else {
+    clearInterval(timer)
   }
-)
+})
 
 // 添加数据缓存
 const chartDataCache: Record<string, (number | string)[][]> = {}
@@ -782,7 +781,7 @@ onMounted(() => {
       window.logBus.on(chart.id, dataUpdate)
     })
   })
-  if (window.globalStart.value) {
+  if (globalStart.value) {
     timer = setInterval(updateTime, 500)
   }
 })

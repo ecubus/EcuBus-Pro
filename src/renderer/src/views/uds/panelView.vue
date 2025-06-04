@@ -27,6 +27,7 @@ import {
 import { useDataStore } from '@r/stores/data'
 import { cloneDeep } from 'lodash'
 import { GraphBindSignalValue, GraphBindVariableValue, GraphNode, VarItem } from 'src/preload/data'
+import { useGlobalStart } from '@r/stores/runtime'
 
 const panels = useDataStore().panels
 // formCreate.component('Grid', Grid)
@@ -40,6 +41,7 @@ const fApi = ref<any>({})
 // const formData = ref({})
 const rule = ref<any[]>([])
 const options = ref<any>({})
+const globalStart = useGlobalStart()
 
 let ruleBackMap: Record<string, any> = {}
 let filedBackMap: Record<string, string[]> = {}
@@ -47,7 +49,7 @@ let dataStroe: Record<string, any> = {}
 
 function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
   // console.log('data', field, value, rule, api, setFlag)
-  if (window.globalStart.value) {
+  if (globalStart.value) {
     //check update here, 如果不相等，发送ipc
 
     if (dataStroe[field] !== value) {
@@ -137,14 +139,11 @@ watch(panel, (val) => {
   init()
 })
 
-watch(
-  () => window.globalStart,
-  (val) => {
-    if (val) {
-      init()
-    }
+watch(globalStart, (val) => {
+  if (val) {
+    init()
   }
-)
+})
 let timer: any
 onMounted(() => {
   init()

@@ -1,5 +1,6 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
+import { toRef } from 'vue'
 
 export type TestTree = {
   label: string
@@ -7,7 +8,6 @@ export type TestTree = {
   id: string
   type: 'test' | 'config' | 'root'
   children: TestTree[]
-
   time?: string
   status?: 'pass' | 'fail' | 'skip' | 'running'
 
@@ -22,6 +22,7 @@ export type RunTimeStatus = {
     isRunning: Record<string, boolean>
     leftWidth: number
   }
+  globalStart: boolean
   canPeriods: Record<string, boolean>
 }
 
@@ -32,8 +33,10 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
       isRunning: {},
       leftWidth: 300
     },
-    canPeriods: {}
+    canPeriods: {},
+    globalStart: false
   }),
+
   actions: {
     setCanPeriod(key: string, value: boolean) {
       this.canPeriods[key] = value
@@ -43,3 +46,8 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     }
   }
 })
+
+export function useGlobalStart() {
+  const runtime = useRuntimeStore()
+  return toRef(runtime, 'globalStart')
+}

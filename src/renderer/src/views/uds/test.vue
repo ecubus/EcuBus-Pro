@@ -315,7 +315,7 @@ import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
-import { TestTree, useRuntimeStore } from '@r/stores/runtime'
+import { TestTree, useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import checkIcon from '@iconify/icons-material-symbols/check-circle-outline'
 import skipIcon from '@iconify/icons-material-symbols/skip-next'
 import runningIcon from '@iconify/icons-material-symbols/pending-outline'
@@ -359,7 +359,7 @@ const w = toRef(props, 'width')
 
 const treeRef = ref()
 
-const globalStart = toRef(window, 'globalStart')
+const globalStart = useGlobalStart()
 const dataBase = useDataStore()
 
 const project = useProjectStore()

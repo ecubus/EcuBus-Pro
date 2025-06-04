@@ -28,6 +28,7 @@ export interface Project {
       }
       isMax?: boolean
       hide?: boolean
+      isExternal?: boolean
     }
   >
   example?: {
@@ -285,7 +286,7 @@ export const useProjectStore = defineStore('project', {
     },
     async closeProject(filePath?: string): Promise<boolean> {
       return new Promise((resolve, reject) => {
-        if (filePath && this.open && this.projectDirty) {
+        if (filePath && this.open && this.projectDirty && window.params.id == undefined) {
           if (
             window.path.normalize(window.path.join(this.projectInfo.path, this.projectInfo.name)) ==
             window.path.normalize(filePath)

@@ -423,7 +423,7 @@
       >
         <div
           v-show="!item.hide"
-          v-if="layoutMaster.getLayoutType(item.id) == undefined"
+          v-if="layoutMaster.getLayoutType(item.id) == undefined && !item.isExternal"
           :id="`win${item.id}`"
           class="uds-window"
           :style="{
@@ -476,12 +476,10 @@
                   >
                 </span>
               </span>
-              <div style="width: 100px" class="uds-no-drag">
-                <template v-if="layoutMaster.validLayout[item.title]?.allowExt">
-                  <span class="menu-right" @click="layoutMaster.minWin(item.id)">
-                    <Icon :icon="externalLinkIcon" />
-                  </span>
-                </template>
+              <div
+                style="display: flex; align-items: center; justify-content: flex-end"
+                class="uds-no-drag"
+              >
                 <span class="menu-right" @click="layoutMaster.minWin(item.id)">
                   <Icon :icon="checkIndeterminateSmall" />
                 </span>
@@ -489,7 +487,11 @@
                 <span class="menu-right" @click="layoutMaster.maxWin(item.id)">
                   <Icon :icon="resizeIcon" />
                 </span>
-
+                <template v-if="layoutMaster.validLayout[item.title]?.allowExt">
+                  <span class="menu-right" @click="layoutMaster.externalWin(item.id)">
+                    <Icon :icon="externalLinkIcon" />
+                  </span>
+                </template>
                 <span class="menu-right" @click="layoutMaster.removeWin(item.id)">
                   <Icon :icon="closeIcon" />
                 </span>

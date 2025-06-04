@@ -25,16 +25,14 @@ import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
 import fcDesigner from './views/uds/panel-designer/index.js'
-
+import { BroadcastChannel } from 'broadcast-channel'
 import { useDataStore } from './stores/data'
-import { assign } from 'lodash'
-import { cloneDeep } from 'lodash'
-import { useProjectStore } from './stores/project'
-import { useRuntimeStore } from './stores/runtime'
-const channel = new BroadcastChannel('ipc-log')
-const dataChannel = new BroadcastChannel('ipc-data')
-const projectChannel = new BroadcastChannel('ipc-project')
-const runtimeChannel = new BroadcastChannel('ipc-runtime')
+import { PiniaSharedState } from 'pinia-shared-state'
+
+const channel = new BroadcastChannel('ipc-log', {
+  type: 'native',
+  webWorkerSupport: false
+})
 const dataParseWorker = new DataParseWorker()
 
 window.logBus = new EventBus()
@@ -100,6 +98,16 @@ declare module 'pinia' {
 pinia.use(({ store }) => {
   store.router = markRaw(router)
 })
+pinia.use(
+  PiniaSharedState({
+    // Enables the plugin for all stores. Defaults to true.
+    enable: true,
+    // If set to true this tab tries to immediately recover the shared state from another tab. Defaults to true.
+    initialize: true,
+    // Enforce a type. One of native, idb, localstorage or node. Defaults to native.
+    type: 'native'
+  })
+)
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -121,9 +129,6 @@ urlParams.forEach((value, key) => {
 })
 
 app.mount('#app')
-const database = useDataStore()
-const project = useProjectStore()
-const runtime = useRuntimeStore()
 if (window.params.id) {
   router.push(`/${window.params.path}`)
   channel.onmessage = (data) => {
@@ -132,28 +137,3 @@ if (window.params.id) {
     }
   }
 }
-//bi-directional communication
-dataChannel.onmessage = (val) => {
-  database.$patch((ss) => {
-    Object.assign(ss, val.data)
-  })
-}
-projectChannel.onmessage = (val) => {
-  project.$patch((ss) => {
-    Object.assign(ss, val.data)
-  })
-}
-runtimeChannel.onmessage = (val) => {
-  runtime.$patch((ss) => {
-    Object.assign(ss, val.data)
-  })
-}
-database.$subscribe((mutation, state) => {
-  dataChannel.postMessage(cloneDeep(state))
-})
-project.$subscribe((mutation, state) => {
-  projectChannel.postMessage(cloneDeep(state))
-})
-runtime.$subscribe((mutation, state) => {
-  runtimeChannel.postMessage(cloneDeep(state))
-})

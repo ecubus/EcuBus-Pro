@@ -37,8 +37,8 @@ ipcMain.on('ipc-open-window', (event, arg) => {
     winMap.get(arg.id)?.show()
   } else {
     const win = new BrowserWindow({
-      width: 800,
-      height: 600,
+      width: arg.w || 800,
+      height: arg.h || 600,
       ...(process.platform === 'linux' ? { icon } : {}),
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
@@ -52,6 +52,7 @@ ipcMain.on('ipc-open-window', (event, arg) => {
     logQ.addWin(win, false)
     win.on('closed', () => {
       winMap.delete(arg.id)
+      logQ.mainWin?.webContents.send('ipc-close-window', arg.id)
       logQ.removeWin(win)
     })
     win.on('ready-to-show', () => {

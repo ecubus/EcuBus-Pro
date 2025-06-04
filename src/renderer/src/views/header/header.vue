@@ -11,7 +11,7 @@
           -webkit-app-region: drag;
         "
       />
-      <el-button-group v-if="project.open">
+      <el-button-group v-if="project.open && !isExternal">
         <el-button link>
           <Icon class="menuIcon" :icon="home" @click="backHomeHandler" />
         </el-button>
@@ -27,7 +27,7 @@
         </el-button>
       </el-button-group>
       <el-divider direction="vertical" />
-      <el-button-group v-if="project.open">
+      <el-button-group v-if="project.open && !isExternal">
         <el-button
           link
           :disabled="globalStart"
@@ -103,10 +103,10 @@ const router = useRouter()
 function backHomeHandler() {
   void router.push('/')
 }
-const title = ref('')
+const title = ref(window.params.name || '')
 const globalStart = toRef(window, 'globalStart')
 const dataBase = useDataStore()
-
+const isExternal = ref(window.params.id ? true : false)
 async function closeHandle() {
   if (project.projectDirty) {
     //save project
@@ -136,11 +136,7 @@ function winHandle(action: string) {
 }
 
 watchEffect(() => {
-  if (window.params.id) {
-    title.value = window.params.name
-    return
-  }
-  if (project.open) {
+  if (project.open && !isExternal.value) {
     if (project.projectInfo.name == '') {
       title.value += 'Untitled'
     } else {

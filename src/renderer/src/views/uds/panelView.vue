@@ -29,7 +29,7 @@ import { cloneDeep } from 'lodash'
 import { GraphBindSignalValue, GraphBindVariableValue, GraphNode, VarItem } from 'src/preload/data'
 import { useGlobalStart } from '@r/stores/runtime'
 
-const panels = useDataStore().panels
+const dataBase = useDataStore()
 // formCreate.component('Grid', Grid)
 // formCreate.component('LocalImage', LocalImage)
 
@@ -84,7 +84,7 @@ function dataUpdate(key: string, values: [number, { value: number | string; rawV
 
 const panel = computed(() => {
   const index = props.editIndex.slice(1)
-  return panels[index]
+  return dataBase.panels[index]
 })
 
 function init() {

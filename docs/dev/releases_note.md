@@ -1,5 +1,16 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.41
+Changes from v0.8.40 to v0.8.41:
+
+ 
+* [feat]:add parse S19 file api 
+* [bug]:fix doip tcp log stream error 
+* [feat]:multi windows ok
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.40
 Changes from v0.8.39 to v0.8.40:
 

@@ -119,6 +119,7 @@ interface GenericHeaderAction {
   payloadType: PayloadType
   value?: NackCode
   payloadLength: number
+  data: Buffer
 }
 
 interface tcpData {
@@ -319,26 +320,7 @@ export class DOIP {
           'info'
         )
         socket.on('data', (val) => {
-          const inputInfo = `${socket.remoteAddress}:${socket.remotePort}`
-          const serveInfos = []
-          for (const item of this.tcpClientMap.values()) {
-            serveInfos.push(`${item.socket.localAddress}:${item.socket.localPort}`)
-          }
-
-          if (serveInfos.indexOf(inputInfo) == -1) {
-            this.log.ipBase(
-              'tcp',
-              'IN',
-              { address: socket.localAddress, port: socket.localPort },
-              {
-                address: socket.remoteAddress,
-                port: socket.remotePort
-              },
-              val
-            )
-          }
           item.generalTimer.refresh()
-
           this.parseData(socket, item, val)
         })
         // socket.on('end', () => {
@@ -549,20 +531,6 @@ export class DOIP {
         // this.event.emit(`client-${addr.tester.testerLogicalAddr}-${addr.entity.logicalAddr}`, 'error')
       })
       socket.on('data', (val) => {
-        const inputInfo = `${socket.remoteAddress}:${socket.remotePort}`
-        const selfInfo = `${this.ethAddr ? this.eth.handle : ''}:13400`
-        if (inputInfo != selfInfo) {
-          this.log.ipBase(
-            'tcp',
-            'IN',
-            { address: socket.localAddress, port: socket.localPort },
-            {
-              address: socket.remoteAddress,
-              port: socket.remotePort
-            },
-            val
-          )
-        }
         this.parseDataClient(socket, item, val)
       })
     })
@@ -866,6 +834,13 @@ export class DOIP {
       item.pendingBuffer = Buffer.concat([item.pendingBuffer, data])
       return
     }
+
+    const inputInfo = `${socket.remoteAddress}:${socket.remotePort}`
+    const serveInfos = []
+    for (const item of this.tcpClientMap.values()) {
+      serveInfos.push(`${item.socket.localAddress}:${item.socket.localPort}`)
+    }
+    const sendLog = serveInfos.indexOf(inputInfo) == -1
     let buffer = Buffer.concat([item.pendingBuffer, data])
     if (item.recvState == 'header') {
       //header
@@ -876,6 +851,19 @@ export class DOIP {
         (action.value == NackCode.DoIP_IncorrectPatternFormatCode ||
           action.value == NackCode.DoIP_InvalidPayloadLength)
       ) {
+        if (sendLog) {
+          this.log.ipBase(
+            'tcp',
+            'IN',
+            { address: socket.localAddress, port: socket.localPort },
+            {
+              address: socket.remoteAddress,
+              port: socket.remotePort
+            },
+            buffer
+          )
+        }
+
         const val = this.getHeaderNegativeAcknowledge(action.value)
         socket.write(val, (err) => {
           this.log.ipBase(
@@ -908,6 +896,13 @@ export class DOIP {
         let sentData: Buffer | undefined
         item.pendingBuffer = buffer.subarray(item.payloadLen)
         buffer = buffer.subarray(0, item.payloadLen)
+
+        const inputInfo = `${socket.remoteAddress}:${socket.remotePort}`
+        const serveInfos = []
+        for (const item of this.tcpClientMap.values()) {
+          serveInfos.push(`${item.socket.localAddress}:${item.socket.localPort}`)
+        }
+
         let testerAddr: number | undefined = undefined
         //has enough data
         if (item.lastAction == undefined || item.lastAction.value != undefined) {
@@ -918,6 +913,18 @@ export class DOIP {
           //     item.generalTimer.refresh()
           // })
         } else {
+          if (sendLog) {
+            this.log.ipBase(
+              'tcp',
+              'IN',
+              { address: socket.localAddress, port: socket.localPort },
+              {
+                address: socket.remoteAddress,
+                port: socket.remotePort
+              },
+              Buffer.concat([item.lastAction.data, buffer])
+            )
+          }
           if (item.lastAction.payloadType == PayloadType.DoIP_RouteActivationRequest) {
             const sa = buffer.readUInt16BE(0)
             if (item.state == 'init') {
@@ -1085,6 +1092,9 @@ is in the state “Registered [Routing Active]”.*/
       return
     }
     let buffer = Buffer.concat([item.pendingBuffer, data])
+    const inputInfo = `${socket.remoteAddress}:${socket.remotePort}`
+    const selfInfo = `${this.ethAddr ? this.eth.handle : ''}:13400`
+    const sendLog = inputInfo != selfInfo
     if (item.recvState == 'header') {
       //header
       const action = this.headerHandler(buffer, true)
@@ -1094,6 +1104,18 @@ is in the state “Registered [Routing Active]”.*/
         (action.value == NackCode.DoIP_IncorrectPatternFormatCode ||
           action.value == NackCode.DoIP_InvalidPayloadLength)
       ) {
+        if (sendLog) {
+          this.log.ipBase(
+            'tcp',
+            'IN',
+            { address: socket.localAddress, port: socket.localPort },
+            {
+              address: socket.remoteAddress,
+              port: socket.remotePort
+            },
+            buffer
+          )
+        }
         socket.destroy()
         if (item.pendingPromise) {
           item.pendingPromise.reject(new DoipError(DOIP_ERROR_ID.DOIP_HEADER_ERR))
@@ -1117,9 +1139,22 @@ is in the state “Registered [Routing Active]”.*/
 
         item.pendingBuffer = buffer.subarray(item.payloadLen)
         buffer = buffer.subarray(0, item.payloadLen)
+
         if (item.lastAction == undefined || item.lastAction.value != undefined) {
           //do nothing
         } else {
+          if (sendLog) {
+            this.log.ipBase(
+              'tcp',
+              'IN',
+              { address: socket.localAddress, port: socket.localPort },
+              {
+                address: socket.remoteAddress,
+                port: socket.remotePort
+              },
+              Buffer.concat([item.lastAction.data, buffer])
+            )
+          }
           if (item.lastAction.payloadType == PayloadType.DoIP_HeaderNegativeAcknowledge) {
             item.pendingPromise?.reject(
               new DoipError(
@@ -1442,7 +1477,8 @@ is in the state “Registered [Routing Active]”.*/
   headerHandler(data: Buffer, isTcp = true): GenericHeaderAction {
     const action: GenericHeaderAction = {
       payloadType: data.readUInt16BE(2),
-      payloadLength: 0
+      payloadLength: 0,
+      data: data
     }
     //Check Generic DoIP synchronization pattern
     if (((data[1] ^ 0xff) & 0xff) != data[0]) {

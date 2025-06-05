@@ -314,6 +314,12 @@ export class DoipLOG {
     remote: { address?: string; port?: number },
     data: Buffer
   ) {
+    const ts = getTsUs() - this.ts
+    if (data.length < 2) {
+      this.error(ts, `error data lenght, data: ${data.toString('hex')}`)
+      return ts
+    }
+
     const payloadType = data.readUint16BE(2)
     let name = ''
     switch (payloadType) {
@@ -366,7 +372,7 @@ export class DoipLOG {
         name = 'Diagnostic message negative acknowledgement'
         break
     }
-    const ts = getTsUs() - this.ts
+
     const val = {
       dir,
       type,

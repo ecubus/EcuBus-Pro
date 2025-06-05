@@ -28,7 +28,7 @@ import fcDesigner from './views/uds/panel-designer/index.js'
 import { BroadcastChannel } from 'broadcast-channel'
 import { useDataStore } from './stores/data'
 import { PiniaSharedState } from 'pinia-shared-state'
-
+import { Layout } from './views/uds/layout'
 const channel = new BroadcastChannel('ipc-log', {
   type: 'native',
   webWorkerSupport: false
@@ -39,7 +39,7 @@ window.logBus = new EventBus()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
   //main tab
-  if (window.params.id == undefined) {
+  if (window.params.id == undefined && Layout.externWinNum > 0) {
     channel.postMessage(event.data)
   }
   for (const key of Object.keys(event.data)) {

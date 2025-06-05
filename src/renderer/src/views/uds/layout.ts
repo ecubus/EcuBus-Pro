@@ -317,6 +317,7 @@ export class Layout {
   right2 = ref(false)
   leftThret = 80
   data: ProjectState
+  static externWinNum = 0
   constructor(grid?: number) {
     this.validLayout = layoutMap
     if (grid) {
@@ -328,7 +329,7 @@ export class Layout {
       const layoutType = this.getLayoutType(key)
       if (item) {
         item.isExternal = false
-
+        Layout.externWinNum--
         nextTick(() => {
           this.layoutInit(key, `#win${key} .uds-draggable`, `#win${key}`, true, layoutType)
         })
@@ -473,12 +474,13 @@ export class Layout {
           containment: [200 - data.pos.w, topGap, this.width - 100, topGap + this.height - 50],
           snap: '.uds-window',
           snapMode: 'outer',
-          drag: (e, ui) => {
-            if (data.isMax) {
-              e.preventDefault()
-            }
-          },
+          // drag: (e, ui) => {
+          //   if (data.isMax) {
+          //     e.preventDefault()
+          //   }
+          // },
           stop: (e, ui) => {
+            const data = this.data.project.wins[id]
             data.pos.x = ui.position.left
             data.pos.y = ui.position.top
           }
@@ -911,6 +913,7 @@ export class Layout {
   externalWin(key: string) {
     const item = this.data.project.wins[key]
     if (item) {
+      Layout.externWinNum++
       item.isExternal = true
       delete this.winEl[key]
       window.electron.ipcRenderer.send('ipc-open-window', {

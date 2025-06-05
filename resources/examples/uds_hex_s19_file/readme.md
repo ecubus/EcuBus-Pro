@@ -1,6 +1,6 @@
-# UDS Hex File Programming Example
+# UDS File Programming Example
 
-This example demonstrates how to program a hex file into an ECU using UDS (Unified Diagnostic Services) protocol. The project shows how to use `HexMemoryMap` to parse a hex file and program it into an ECU using block transfer.
+This example demonstrates how to program hex and S-record files into an ECU using UDS (Unified Diagnostic Services) protocol. The project shows how to use `HexMemoryMap` and `S19MemoryMap` to parse Intel HEX and Motorola S-record files and program them into an ECU using block transfer.
 
 ## Overview
 
@@ -30,9 +30,11 @@ The example implements a programming sequence using the following UDS services:
 
 ## `tester.ts` Implementation Details
 
-### HexMemoryMap Usage
+### File Format Support
 
-The project uses `HexMemoryMap` to parse an Intel HEX file:
+The project supports both Intel HEX and Motorola S-record formats using `HexMemoryMap` and `S19MemoryMap`:
+
+#### Intel HEX Files (.hex)
 
 ```typescript
 const hexFile = path.join(process.env.PROJECT_ROOT, 'Hello_World.hex')
@@ -44,7 +46,52 @@ for (const [addr, data] of map) {
 }
 ```
 
-More details about `HexMemoryMap` can be found in the [API documentation](https://app.whyengineer.com/scriptApi/scriptApi/classes/HexMemoryMap.html).
+#### Motorola S-record Files (.s19, .srec)
+
+```typescript
+const s19File = path.join(process.env.PROJECT_ROOT, 'Hello_World.s19')
+const s19Str = await fsP.readFile(s19File, 'utf8')
+const map = S19MemoryMap.fromS19(s19Str)
+// Convert S-record data into memory blocks
+for (const [addr, data] of map) {
+  pendingBlocks.push({ addr, data })
+}
+```
+
+#### Auto-Detection Example
+
+```typescript
+const filePath = process.env.FIRMWARE_FILE // Could be .hex or .s19
+const fileContent = await fsP.readFile(filePath, 'utf8')
+const fileExt = path.extname(filePath).toLowerCase()
+
+let map
+if (fileExt === '.hex') {
+  map = HexMemoryMap.fromHex(fileContent)
+} else if (fileExt === '.s19' || fileExt === '.srec') {
+  map = S19MemoryMap.fromS19(fileContent)
+} else {
+  throw new Error(`Unsupported file format: ${fileExt}`)
+}
+
+// Both formats use the same interface
+for (const [addr, data] of map) {
+  pendingBlocks.push({ addr, data })
+}
+```
+
+#### Supported File Formats
+
+| Format | File Extensions | Record Types | Address Range |
+|--------|----------------|--------------|---------------|
+| Intel HEX | `.hex` | :00-:05 | 16-bit with extensions |
+| Motorola S-record | `.s19`, `.srec`, `.s28`, `.s37` | S0-S9 | 16-bit (S1), 24-bit (S2), 32-bit (S3) |
+
+Both `HexMemoryMap` and `S19MemoryMap` provide identical interfaces, making it easy to switch between formats or support both in the same application.
+
+More details can be found in the API documentation:
+- [HexMemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/HexMemoryMap.html)
+- [S19MemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/S19MemoryMap.html)
 
 ### Programming Flow
 
@@ -73,7 +120,14 @@ r34.diagSetParameter('memorySize', currentBlock.data.length)
 
 ### Key Features
 
-1. **Dynamic Block Size Adjustment**
+1. **Multi-Format Support**
+
+   - Intel HEX format support (:00-:05 records)
+   - Motorola S-record format support (S0-S9 records with S1/S2/S3 data)
+   - Unified interface for both formats
+   - Automatic format detection based on file extension
+
+2. **Dynamic Block Size Adjustment**
 
    - Adjusts block size based on ECU capabilities
    - Aligns to 8-byte boundaries for optimal transfer
@@ -85,7 +139,7 @@ r34.diagSetParameter('memorySize', currentBlock.data.length)
    }
    ```
 
-2. **Block Sequence Counter**
+3. **Block Sequence Counter**
 
    - Implements 1-255 rolling counter for block tracking
 
@@ -94,10 +148,11 @@ r34.diagSetParameter('memorySize', currentBlock.data.length)
    blockSequenceCounter.writeUInt8((i + 1) & 0xff)
    ```
 
-3. **Automatic Block Management**
+4. **Automatic Block Management**
    - Queues multiple memory blocks
    - Handles transitions between blocks automatically
    - Restarts programming sequence for each block
+   - Works seamlessly with both HEX and S-record formats
 
 ## Flow Diagram
 
@@ -175,7 +230,7 @@ Util.On('Tester.RequestTransferExit550.send', async (req) => {
 - Confirms completion of transfer with positive response (0x77)
 - Simulates successful programming completion
 
-The ECU simulation provides a complete test environment for the programming sequence, allowing developers to test their programming implementation without actual hardware.
+The ECU simulation provides a complete test environment for the programming sequence, allowing developers to test their programming implementation without actual hardware. The simulation works identically regardless of whether the source file is in Intel HEX or Motorola S-record format.
 
 ## Demo
 

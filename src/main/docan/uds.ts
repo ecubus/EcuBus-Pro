@@ -1216,16 +1216,7 @@ export * from './utli'
         }
       }
     }
-    for (const test of Object.values(data.tests)) {
-      if (test.script) {
-        if (path.isAbsolute(test.script) === false) {
-          ;((tsconfig as any).files as string[]).push(test.script)
-        } else {
-          const relativePath = path.relative(projectPath, test.script)
-          ;((tsconfig as any).files as string[]).push(relativePath)
-        }
-      }
-    }
+
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
@@ -1259,20 +1250,7 @@ export * from './utli'
         }
       }
     }
-    for (const test of Object.values(data.tests)) {
-      if (test.script) {
-        if (path.isAbsolute(test.script) === false) {
-          if ((tsconfig.files as string[]).indexOf(test.script) == -1) {
-            ;(tsconfig.files as string[]).push(test.script)
-          }
-        } else {
-          const relativePath = path.relative(projectPath, test.script)
-          if ((tsconfig.files as string[]).indexOf(relativePath) == -1) {
-            ;(tsconfig.files as string[]).push(relativePath)
-          }
-        }
-      }
-    }
+
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   }
   //code-workspace

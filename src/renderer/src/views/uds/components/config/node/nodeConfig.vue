@@ -106,6 +106,9 @@
                 inactive-text="Enabled"
               />
             </el-form-item>
+            <el-form-item v-if="formData.isTest">
+              <el-tag type="success">Test Node</el-tag>
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>

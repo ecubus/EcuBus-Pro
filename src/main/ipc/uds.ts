@@ -28,7 +28,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, TestConfig, VarItem } from 'src/preload/data'
+import { DataSet, LinInter, NodeItem, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -103,9 +103,12 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
 ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
-  const test = arg[2] as TestConfig
+  const test = arg[2] as NodeItem
   const testers = arg[3] as Record<string, TesterInfo>
 
+  if (test.script == undefined) {
+    throw new Error('Script is required')
+  }
   const log = new UdsLOG(test.name)
   const jsPath = getJsPath(test.script, projectPath)
   const worker = new UdsTester(
@@ -131,7 +134,7 @@ const testMap = new Map<string, NodeClass>()
 ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
-  const test = arg[2] as TestConfig
+  const test = arg[2] as NodeItem
   const testers = arg[3] as Record<string, TesterInfo>
   const last = testMap.get(test.id)
   if (last) {
@@ -445,6 +448,9 @@ async function globalStart(
   //nodes
   for (const key in nodes) {
     const node = nodes[key]
+    if (node.isTest) {
+      continue
+    }
     const nodeItem = new NodeClass(
       node,
       canBaseMap,

@@ -20,7 +20,6 @@ export const useDataStore = defineStore('useDataStore', {
     },
     graphs: {},
     guages: {},
-    tests: {},
     vars: {},
     datas: {},
     panels: {}
@@ -70,7 +69,6 @@ export const useDataStore = defineStore('useDataStore', {
         nodes: this.nodes,
         database: this.database,
         graphs: this.graphs,
-        tests: this.tests,
         guages: this.guages,
         vars: this.vars,
         datas: this.datas,

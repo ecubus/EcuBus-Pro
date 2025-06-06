@@ -60,6 +60,8 @@ export interface NodeItem {
   channel: string[]
   script?: string
   workNode?: string
+  isTest?: boolean
+  reportPath?: string
 }
 
 export type GraphBindSignalValue = {
@@ -100,14 +102,6 @@ export type GraphNode<T, S = any> = {
   bindValue: T
 }
 
-export type TestConfig = {
-  id: string
-  name: string
-  script: string
-  channel: string[]
-  reportPath?: string
-}
-
 export type PanelItem = {
   id: string
   name: string
@@ -131,7 +125,6 @@ export interface DataSet {
     GraphNode<GraphBindSignalValue | GraphBindVariableValue, GaugeSeriesOption>
   >
   datas: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue>>
-  tests: Record<string, TestConfig>
   vars: Record<string, VarItem>
   panels: Record<string, PanelItem>
 }

@@ -14,6 +14,7 @@ import { useProjectStore } from '@r/stores/project'
 import { cloneDeep, get } from 'lodash'
 import { Inter, NodeItem } from 'src/preload/data'
 import { nextTick } from 'vue'
+import testConfig from '@iconify/icons-grommet-icons/test'
 
 export interface udsBase {
   name: string
@@ -127,6 +128,10 @@ class Region extends joint.dia.Element {
     {
       tagName: 'text',
       selector: 'cornerText1'
+    },
+    {
+      tagName: 'path',
+      selector: 'testIcon'
     }
   ]
 }
@@ -487,6 +492,28 @@ export class Node extends udsCeil {
     )
     const t = this.getNodeBottomName()
     this.changeNameBottom(t)
+
+    // Add test icon if isTest is true
+    if (this.ig.isTest) {
+      this.addTestIcon()
+    }
+  }
+
+  addTestIcon() {
+    // Extract path data from SVG string
+    const svgContent = testConfig.body
+    const pathMatch = svgContent.match(/d="([^"]*)"/)
+    const pathData = pathMatch ? pathMatch[1] : 'M0,0'
+
+    // Add SVG test icon to the bottom-right corner
+    this.rect.attr('testIcon', {
+      d: pathData,
+      fill: '#00C853',
+      stroke: '#FFFFFF',
+      'stroke-width': 1,
+      transform: 'translate(125, 75) scale(0.8)',
+      'pointer-events': 'none'
+    })
   }
   getNodeBottomName() {
     this.rect.attr('labelBottom/text', '')

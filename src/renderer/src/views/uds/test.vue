@@ -102,7 +102,7 @@
                       text
                       block
                       :disabled="
-                        !dataBase.tests[data.id]?.script ||
+                        !dataBase.nodes[data.id]?.script ||
                         isRunning[data.id] ||
                         runtime.testStates.activeTest !== undefined
                       "
@@ -118,7 +118,7 @@
                       text
                       block
                       :disabled="
-                        !dataBase.tests[data.id]?.script ||
+                        !dataBase.nodes[data.id]?.script ||
                         isRunning[data.id] ||
                         runtime.testStates.activeTest !== undefined ||
                         true
@@ -302,7 +302,7 @@ import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
-import { TestConfig } from 'src/preload/data'
+import { NodeItem } from 'src/preload/data'
 import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-sharp'
 import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
 import refreshIcon from '@iconify/icons-material-symbols/refresh'
@@ -342,12 +342,7 @@ const tData = computed({
   }
 })
 
-const leftWidth = computed({
-  get: () => runtime.testStates.leftWidth,
-  set: (val) => {
-    runtime.testStates.leftWidth = val
-  }
-})
+const leftWidth = ref(300)
 
 const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
@@ -370,7 +365,7 @@ function nodeClick(data: TestTree) {
   // }
 }
 
-const model = ref<TestConfig>({
+const model = ref<NodeItem>({
   id: v4(),
   name: 'Test Config',
   script: '',
@@ -389,7 +384,7 @@ function handleRun(data: TestTree) {
           'ipc-run-test',
           project.projectInfo.path,
           project.projectInfo.name,
-          cloneDeep(dataBase.tests[data.id]),
+          cloneDeep(dataBase.nodes[data.id]),
           cloneDeep(dataBase.tester)
         )
         .catch((e: any) => {
@@ -433,14 +428,16 @@ function buildTree() {
     children: []
   }
 
-  for (const [key, config] of Object.entries(dataBase.tests)) {
-    t.children?.push({
-      label: config.name,
-      canAdd: false,
-      id: config.id,
-      type: 'config',
-      children: []
-    })
+  for (const [key, config] of Object.entries(dataBase.nodes)) {
+    if (config.isTest) {
+      t.children?.push({
+        label: config.name,
+        canAdd: false,
+        id: config.id,
+        type: 'config',
+        children: []
+      })
+    }
   }
 
   tData.value = [t]
@@ -475,7 +472,7 @@ function generateUniqueName(baseName: string): string {
   let index = 0
   let name = `${baseName} ${index}`
 
-  while (Object.values(dataBase.tests).some((config) => config.name === name)) {
+  while (Object.values(dataBase.nodes).some((config) => config.name === name)) {
     index++
     name = `${baseName} ${index}`
   }
@@ -486,15 +483,16 @@ function generateUniqueName(baseName: string): string {
 function addNewConfig() {
   const defaultName = generateUniqueName('Test Config')
 
-  const newConfig: TestConfig = {
+  const newConfig: NodeItem = {
     id: v4(),
     name: defaultName,
     script: '',
     reportPath: '',
-    channel: []
+    channel: [],
+    isTest: true
   }
 
-  dataBase.tests[newConfig.id] = newConfig
+  dataBase.nodes[newConfig.id] = newConfig
 
   tData.value[0].children?.push({
     label: defaultName,
@@ -516,7 +514,7 @@ function removeConfig(id: string) {
     buttonSize: 'small',
     appendTo: '#wintest'
   }).then(() => {
-    delete dataBase.tests[id]
+    delete dataBase.nodes[id]
     const index = tData.value[0].children?.findIndex((item) => item.id === id)
     if (index !== undefined && index > -1) {
       tData.value[0].children?.splice(index, 1)
@@ -528,10 +526,10 @@ function removeConfig(id: string) {
 const activeConfig = ref('')
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
-    for (const [key, config] of Object.entries(dataBase.tests)) {
+    for (const [key, config] of Object.entries(dataBase.nodes)) {
       if (config.name === value && key !== activeConfig.value) {
         nextTick(() => {
-          model.value.name = dataBase.tests[activeConfig.value].name
+          model.value.name = dataBase.nodes[activeConfig.value].name
         })
         callback(new Error('The test config name already exists'))
         return
@@ -550,21 +548,21 @@ const rules = {
 function onConfigChange() {
   if (activeConfig.value) {
     if (!model.value.name.trim()) {
-      model.value.name = dataBase.tests[activeConfig.value].name
+      model.value.name = dataBase.nodes[activeConfig.value].name
     } else {
-      const isDuplicate = Object.entries(dataBase.tests).some(
+      const isDuplicate = Object.entries(dataBase.nodes).some(
         ([key, config]) => config.name === model.value.name && key !== activeConfig.value
       )
 
       if (isDuplicate) {
-        model.value.name = dataBase.tests[activeConfig.value].name
+        model.value.name = dataBase.nodes[activeConfig.value].name
       } else {
         // 检查script是否发生变化
-        const oldConfig = dataBase.tests[activeConfig.value]
+        const oldConfig = dataBase.nodes[activeConfig.value]
         const scriptChanged = oldConfig.script !== model.value.script
 
         // 保存新配置
-        dataBase.tests[activeConfig.value] = cloneDeep(model.value)
+        dataBase.nodes[activeConfig.value] = cloneDeep(model.value)
 
         // 更新树节点
         const node = tData.value[0].children?.find((item) => item.id === activeConfig.value)
@@ -786,7 +784,7 @@ const refreshLoading = ref<Record<string, boolean>>({})
 
 function handleEdit(data: TestTree) {
   popoverRefs.value[data.id]?.hide()
-  model.value = cloneDeep(dataBase.tests[data.id])
+  model.value = cloneDeep(dataBase.nodes[data.id])
   activeConfig.value = data.id
   editDialogVisible.value = true
   refreshBuildStatus()
@@ -805,11 +803,11 @@ async function handleEditSave() {
     await ruleFormRef.value?.validate()
 
     // 检查script是否发生变化
-    const oldConfig = dataBase.tests[activeConfig.value]
+    const oldConfig = dataBase.nodes[activeConfig.value]
     const scriptChanged = oldConfig.script !== model.value.script
 
     // 保存新配置
-    dataBase.tests[activeConfig.value] = cloneDeep(model.value)
+    dataBase.nodes[activeConfig.value] = cloneDeep(model.value)
 
     // 更新树节点
     const node = tData.value[0].children?.find((item) => item.id === activeConfig.value)
@@ -945,7 +943,7 @@ async function handleRefresh(data: TestTree) {
   refreshLoading.value[data.id] = true
 
   try {
-    const val = dataBase.tests[data.id]
+    const val = dataBase.nodes[data.id]
     if (val && val.script) {
       await nextTick()
       const v = await window.electron.ipcRenderer.invoke(
@@ -1009,7 +1007,7 @@ async function handleExport(data: TestTree, type: 'html' | 'pdf' = 'html') {
       const p = await window.electron.ipcRenderer.invoke(
         'ipc-get-test-report',
         data.id,
-        dataBase.tests[data.id].reportPath
+        dataBase.nodes[data.id].reportPath
       )
       if (p) {
         ElMessageBox.confirm('Test report exported successfully, open it?', 'Success', {

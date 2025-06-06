@@ -20,7 +20,6 @@ export type RunTimeStatus = {
     activeTest?: TestTree
     realActiveId?: string
     isRunning: Record<string, boolean>
-    leftWidth: number
   }
   globalStart: boolean
   canPeriods: Record<string, boolean>
@@ -30,8 +29,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
   state: (): RunTimeStatus => ({
     testStates: {
       tData: [],
-      isRunning: {},
-      leftWidth: 300
+      isRunning: {}
     },
     canPeriods: {},
     globalStart: false

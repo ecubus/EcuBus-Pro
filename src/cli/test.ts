@@ -3,7 +3,7 @@ import { exit } from 'process'
 import { UdsLOG } from 'src/main/log'
 import { NodeClass } from 'src/main/nodeItem'
 import { getJsPath } from 'src/main/util'
-import { DataSet, NodeItem, TestConfig } from 'src/preload/data'
+import { DataSet, NodeItem } from 'src/preload/data'
 import deviceMain from './device'
 import { DOIP } from 'src/main/doip'
 import path from 'path'
@@ -19,9 +19,13 @@ export default async function main(
   forceBuild?: boolean
 ) {
   //find tester by name
-  const testItem = Object.values(data.tests).find((t) => t.name == testName)
+  const testItem = Object.values(data.nodes).find((t) => t.name == testName && t.isTest)
   if (!testItem) {
     sysLog.error(`test config ${testName} not found`)
+    exit(-1)
+  }
+  if (testItem.script == undefined) {
+    sysLog.error(`test config ${testName} script is required`)
     exit(-1)
   }
   const status = await getBuild(projectPath, projectName, testItem.script)

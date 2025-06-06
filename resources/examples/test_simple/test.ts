@@ -1,4 +1,4 @@
-import { describe, test, assert, CanMessage } from 'ECB'
+import { describe, test, assert, CanMessage, DiagResponse, DiagRequest } from 'ECB'
 
 /**
  * Utility function to wait for a specific CAN message
@@ -22,9 +22,22 @@ const TestWaitForMessage = async (id: number | true, timeout: number = 1000) => 
     })
   })
 }
-
+const TestWaitForUDSRespMessage = async (timeout: number = 1000) => {
+  return new Promise<DiagResponse>((resolve, reject) => {
+    // Set timeout to reject the promise if no message is received
+    const timer = setTimeout(() => {
+      reject(new Error('timeout'))
+    }, timeout)
+    // Register one-time handler for the specified CAN message ID
+    Util.OnOnce('Tester_can_0.*.recv', (msg) => {
+      clearTimeout(timer)
+      console.log(`Receive UDS Message: ${msg.diagGetRaw().toString('hex').toUpperCase()}`)
+      resolve(msg)
+    })
+  })
+}
 // Main test suite
-describe('Test Suite', () => {
+describe('CAN Test', () => {
   test('Wait for a specific CAN message with ID 0x1', async () => {
     await TestWaitForMessage(0x1, 3000)
     assert(true)
@@ -43,9 +56,16 @@ describe('Test Suite', () => {
 })
 
 // Second test suite
-describe('Test Suite 2', () => {
+describe('UDS Test', () => {
   // Simple test case that passes immediately
-  test('Fail test example', () => {
-    assert(false)
+  test('DiagnosticSessionControl160 test', async () => {
+    const diagReq = DiagRequest.from('Tester_can_0.DiagnosticSessionControl160')
+    await diagReq.outputDiag()
+    console.log('DiagnosticSessionControl160 send out')
+    const msg = await TestWaitForUDSRespMessage(3000)
+    //compare with hoped
+    const recvData = msg.diagGetRaw()
+    const hoped = Buffer.from([0x50, 0x01, 0x0])
+    assert(recvData.equals(hoped))
   })
 })

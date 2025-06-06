@@ -786,7 +786,10 @@ function addAddrFromDb() {
 }
 
 function handleExternalClick() {
-  window.electron.ipcRenderer.send('ipc-open-link', 'https://app.whyengineer.com')
+  window.electron.ipcRenderer.send(
+    'ipc-open-link',
+    'https://app.whyengineer.com/docs/um/uds/udscode.html'
+  )
 }
 
 function addTemplateConfig() {

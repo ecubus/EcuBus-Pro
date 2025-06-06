@@ -1,16 +1,11 @@
-import { isObject, isNumber } from 'lodash'
+import { isObject, isNumber, get as _get } from 'lodash'
 
 export function isOptions(val) {
   return isObject(val) && isObject(val.hash)
 }
 
 export function get(val, prop) {
-  const keys = prop.split('.')
-  let ret = val
-  for (const key of keys) {
-    ret = ret[key]
-  }
-  return ret
+  return _get(val, prop)
 }
 
 export function resultFn(val) {

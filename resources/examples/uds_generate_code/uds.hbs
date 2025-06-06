@@ -76,13 +76,13 @@ DcmConfig_t Dcm[]={
 };
 
 DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
-{{#each (get '0x31' tester.allServiceList )}}
+{{#each (get tester.allServiceList '0x31')}}
     /* {{name}} */   
     {
-        .routineControlType={{get 'phyValue' (first (filter params 'routineControlType' property='name'))}},
-        .routineIdentifier=[{{get 'data' (get 'value' (first (filter params 'routineIdentifier' property='name')))}}],
-        .session={{#if generateConfigs}}{{get 'session' generateConfigs}}{{else}}DCM_DEFAULT_SESSION_EN{{/if}},
-        .security={{#if generateConfigs}}{{get 'security' generateConfigs}}{{else}}DCM_SECURITY_LEVEL_NULL{{/if}},
+        .routineControlType={{get (first (filter params 'routineControlType' property='name')) 'phyValue' }},
+        .routineIdentifier=[{{get (first (filter params 'routineIdentifier' property='name')) 'value.data'}}],
+        .session={{#if generateConfigs}}{{get generateConfigs 'session'}}{{else}}DCM_DEFAULT_SESSION_EN{{/if}},
+        .security={{#if generateConfigs}}{{get generateConfigs 'security'}}{{else}}DCM_SECURITY_LEVEL_NULL{{/if}},
     },
 {{/each}}
 };

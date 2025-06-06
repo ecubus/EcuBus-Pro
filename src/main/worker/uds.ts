@@ -15,6 +15,7 @@ import {
 } from '../share/uds'
 export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
 export type { ServiceItem }
+export type { TesterInfo } from '../share/tester'
 export type { ServiceId }
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore

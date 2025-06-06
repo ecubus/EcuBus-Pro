@@ -222,6 +222,10 @@ export default withMermaid({
                 link: '/docs/um/uds/testerPresent.md'
               },
               {
+                text: 'UDS -> C Code',
+                link: '/docs/um/uds/udscode.md'
+              },
+              {
                 text: 'UDS Bootloader Implementation Guide',
                 link: '/docs/um/uds/example/example.md'
               }
@@ -295,9 +299,10 @@ export default withMermaid({
           {
             text: 'UDS',
             items: [
-              { text: 'UDS Hex File', link: '/examples/uds_hex_file/readme' },
+              { text: 'UDS Hex/S19 File', link: '/examples/uds_hex_s19_file/readme' },
               { text: 'UDS Binary File', link: '/examples/uds_bin_file/readme' },
-              { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' }
+              { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
+              { text: 'UDS Code Generate', link: '/examples/uds_generate_code/readme' }
             ],
             collapsed: true
           },

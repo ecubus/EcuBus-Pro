@@ -1,216 +1,251 @@
-# NXP Bootloader Example
+# UDS Generate Code Example
 
-- Interface: `CAN`
-- Vendor Device: `PEAK`
-- Test Board: [S32K344/324/314大开发板EVB评估板](https://item.taobao.com/item.htm?abbucket=19&id=740622398903&ns=1&pisk=foBIpV2TH20CwzFUG0Ew5MELoK95FawqR0tRmgHE2pppy1scPerutp56PNQ6Jvr3tQL5-pdlTU8ePLslllz43-ShxLvTury2-9WlzK0KvX3yXVKWtPrZ7-ShxUmIyo5T34GtHzkKwUQJBCKDALnpvBE6BnxXevd-pf39SFLJeUL-6VK2qYhpya39X3x223LK9ce9q3vJyap-wku64WtRAlu6g--gKeSp5xsGCHLstMTseY611BTA3FM-eOtdjWT25xNyksYegEbTQv95X3_6g6ajdasRm_d1F2EFkgQhCpvbakAf6152O1aKFFWeVIpJ10HRfdTGlTpYHVtG6M5RKwiSeHXF3QTD1uHkadB2MsQIqoj9p3QkiTzmKeIRmtf2hJgDA1IXCg-o3ENK9bi6iYt6ulZsZbX7XcDfljopZBKMv-r_fVGk9hxtlTrsOXRpjhP8flgLf&priceTId=213e363a17316432955378124eef04&skuId=5466402150063&spm=a21n57.1.item.3.3173523c0cLCx7&utparam=%7B%22aplus_abtest%22%3A%22b157c0e4b60c27af3bd36a542bb06f7a%22%7D&xxc=taobaoSearch), or NXP S32K344EVB.
-  ![S32K344大开发板EVB评估板](doc/board.png)
-- Ecu Code: [NXP Bootloader](https://community.nxp.com/t5/S32K-Knowledge-Base/Unified-bootloader-Demo/ta-p/1423099)
+This example demonstrates how to use EcuBus-Pro's [UDS code generation](https://app.whyengineer.com/docs/um/uds/udscode.html) system with Handlebars templates.The `uds.hbs` template generates C code for DCM (Diagnostic Communication Manager) configuration based on your UDS service definitions.
 
-## Description
+## Template File Analysis: `uds.hbs`
 
-This example demonstrates how to use the EcuBus-Pro to upgrade Application firmware through UDS CAN protocol. This example use PEAK as USB-CAN adapter.
+### Template Structure Overview
 
-## CAN Configuration
+The template generates C code with two main configuration arrays:
+1. `Dcm[]` - Main service configuration array
+2. `DcmRoutineControlConfig[]` - Routine control specific configuration
 
-- CAN
-- Baudrate: 500Kbps
-- TX ID: 0x784
-- RX ID: 0x7f0
+### Detailed Code Analysis
 
-## Connection
+#### 1. License Header
+```handlebars
+/**
+* Open Source License
+* ... (license text)
+*/
+```
+Static license header that will be included in all generated files.
 
-| PEAK | S32K344大开发板EVB评估板 |
-| ---- | ------------------------ |
-| CANH | CAN0 H23-1               |
-| CANL | CAN0 H23-2               |
+#### 2. Include Statement
+```handlebars
+#include "Dcm.h"
+```
+Standard C include for DCM functionality.
 
-## Usage
-
-1. Download the [NXP Bootloader](https://community.nxp.com/t5/S32K-Knowledge-Base/Unified-bootloader-Demo/ta-p/1423099).
-   1. The download demo is based on old EcuBus tool, which is deprecated. The new EcuBus-Pro tool has more features and better performance.
-2. If you use the `NXP S32K344EVB`, you can directly download the firmware. If you use the `S32K344大开发板EVB评估板`, you need to modify the LPUART pins and LED pins.
-3. Connect the PEAK USB-CAN adapter to the computer, and connect the PEAK USB-CAN adapter to the S32K344 board.
-4. Run the Sequence-Tester_1.
-
----
-
-## Diagnostic Steps
-
-![Diagnostic Steps](./image.png)
-
-This example implements firmware upgrade through UDS diagnostic protocol. The main steps are as follows:
-
-1. Session Control and Communication Control
-
-   - DiagnosticSessionControl (0x10) switch to programming session (0x03)
-   - CommunicationControl (0x28) disable normal communication (controlType=0x03)
-   - DiagnosticSessionControl (0x10) switch to extended session (0x02)
-
-2. Security Access
-
-   - SecurityAccess (0x27, subfunction=0x01) request seed
-   - SecurityAccess (0x27, subfunction=0x02) send key
-   - Key calculation uses AES-128-CBC algorithm, key is [0-15], IV is all zeros
-
-3. Write Identifier
-
-   - WriteDataByIdentifier (0x2E, DID=0xF15A) write specific identifier
-
-4. Download Program
-   For each firmware file:
-
-   1. RequestDownload (0x34) request download, specify memory address and size
-   2. RoutineControl (0x31, routineId=0x0202) verify CRC
-   3. TransferData (0x36) transfer data in blocks
-   4. RequestTransferExit (0x37) end transfer
-
-5. Firmware Verification and Reset
-   - RoutineControl (0x31, routineId=0xFF00) verify firmware
-   - RoutineControl (0x31, routineId=0xFF01) verification complete
-   - ECUReset (0x11) reset ECU
-
-## Firmware Files
-
-The example includes two firmware files:
-
-1. S32K344_FlsDrvRTD100.bin
-
-   - Download Address: 0x20000010
-   - Driver firmware
-
-2. S32K344_CAN_App_RTD200.bin
-   - Download Address: 0x00440200
-   - Application firmware
-
-## Notes
-
-1. Ensure firmware files are placed in the project's bin directory
-2. Do not disconnect or power off during download
-3. If download fails, you can retry the entire process
-4. Each firmware file needs CRC verification
-
----
-
-**[Demo Video](https://www.bilibili.com/video/BV1KcmfYNEkQ)**
-
-## Script Implementation Details
-
-The bootloader.ts script implements the diagnostic sequence. Here's a detailed explanation of each part:
-
-### Initialization and Imports
-
-```typescript
-import crypto from 'crypto'
-import { CRC, DiagRequest, DiagResponse } from 'ECB'
-import path from 'path'
-import fs from 'fs/promises'
+#### 3. Service Count Calculation
+```handlebars
+{{logFile 'Calculate active service type except JobFunction'~}}
+{{setVar 'serviceNum' 0~}}
+{{#each tester.allServiceList~}}
+{{#if (not (eq @key 'Job'))}}
+{{setVar 'serviceNum' (add @root.serviceNum 1)~}}
+{{/if~}}
+{{/each~}}
+#define SUPPORTED_SERVICE_NUM {{@root.serviceNum}}
 ```
 
-- Imports required modules for cryptography, CRC calculation, and file operations
-- `ECB` provides UDS diagnostic communication utilities
+**Line-by-line explanation:**
+- <span v-pre>`{{logFile 'Calculate active service type except JobFunction'~}}`</span> - Debug output to log file
+- <span v-pre>`{{setVar 'serviceNum' 0~}}`</span> - Initialize counter variable to 0
+- <span v-pre>`{{#each tester.allServiceList~}}`</span> - Iterate through all services in the tester
+- <span v-pre>`{{#if (not (eq @key 'Job'))}}`</span> - Check if current service key is NOT 'Job'
+- <span v-pre>`{{setVar 'serviceNum' (add @root.serviceNum 1)~}}`</span> - Increment counter for non-Job services
+- <span v-pre>`{{/if~}}`</span> - End if statement
+- <span v-pre>`{{/each~}}`</span> - End each loop
+- <span v-pre>`#define SUPPORTED_SERVICE_NUM {{@root.serviceNum}}`</span> - Generate C macro with total count
 
-### Configuration
-
-```typescript
-const crc = new CRC('self', 16, 0x3d65, 0, 0xffff, true, true)
-let maxChunkSize: number | undefined = undefined
-let content: undefined | Buffer = undefined
+#### 4. Main DCM Configuration Array
+```handlebars
+DcmConfig_t Dcm[]={
+{{#each tester.allServiceList}}
 ```
 
-- Configures CRC-16 calculator for firmware verification
-- Variables to store transfer block size and firmware content
+**Explanation:**
+- `DcmConfig_t Dcm[]={` - Start C array declaration
+- <span v-pre>`{{#each tester.allServiceList}}`</span> - Loop through all UDS services
 
-### Firmware Files Configuration
-
-```typescript
-const fileList = [
-  {
-    addr: 0x20000010,
-    file: path.join(process.env.PROJECT_ROOT, 'bin', 'S32K344_FlsDrvRTD100.bin')
-  },
-  {
-    addr: 0x00440200,
-    file: path.join(process.env.PROJECT_ROOT, 'bin', 'S32K344_CAN_App_RTD200.bin')
-  }
-]
+##### 4.1 Session Control Service (0x10)
+```handlebars
+{{#if (eq @key '0x10')}}
+    /* Diagnostic Session Control (0x10) */
+    {
+        DCM_DIAGNOSTIC_SESSION_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_SessionControlCallback,
+    },
+{{/if}}
 ```
 
-- Defines firmware files to be downloaded with their target addresses
+**Explanation:**
+- <span v-pre>`{{#if (eq @key '0x10')}}`</span> - Check if current service ID equals 0x10 (Session Control)
+- Generates DCM configuration for Session Control service
+- Enables multiple session types using bitwise OR
+- Sets security level to NULL (no security required)
+- Assigns callback function
 
-### Initialization Handler
-
-```typescript
-Util.Init(async () => {
-  const req = DiagRequest.from('Tester_1.RoutineControl491')
-  req.diagSetParameter('routineControlType', 1)
-  await req.changeService()
-  const resp = DiagResponse.from('Tester_1.RoutineControl491')
-  resp.diagSetParameter('routineControlType', 1)
-  await resp.changeService()
-})
+##### 4.2 Read Data by Identifier Service (0x22)
+```handlebars
+{{#if (eq @key '0x22')}}
+    /* Read Data by Identifier (0x22) */
+    {
+        DCM_READ_DATA_BY_IDENTIFIER,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_ReadDataByIdentifierCallback,
+    },
+{{/if}}
 ```
 
-- Modifies RoutineControl491 service to use type 1 (start routine)
-- Updates both request and response parameters
+**Explanation:**
+- <span v-pre>`{{#if (eq @key '0x22')}}`</span> - Check for service ID 0x22 (Read Data by Identifier)
+- Similar structure to Session Control but with different callback function
 
-### Security Access Handler
-
-```typescript
-Util.On('Tester_1.SecurityAccess390.recv', async (v) => {
-  const data = v.diagGetParameterRaw('securitySeed')
-  const cipher = crypto.createCipheriv(
-    'aes-128-cbc',
-    Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]),
-    Buffer.alloc(16, 0)
-  )
-  let encrypted = cipher.update(data)
-  cipher.final()
-  const req = DiagRequest.from('Tester_1.SecurityAccess391')
-  req.diagSetParameterSize('data', 128)
-  req.diagSetParameterRaw('data', encrypted)
-  await req.changeService()
-})
+##### 4.3 Routine Control Service (0x31)
+```handlebars
+{{#if (eq @key '0x31')}}
+    /* RoutineControl (0x31) */
+    {
+        DCM_ROUNTINE_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_RoutineControlCallback,
+    },
+{{/if}}
 ```
 
-- Handles security access seed-key exchange
-- Uses AES-128-CBC to calculate key from received seed
-- Sends calculated key back to ECU
+**Explanation:**
+- <span v-pre>`{{#if (eq @key '0x31')}}`</span> - Check for service ID 0x31 (Routine Control)
+- Configures Routine Control service with appropriate callback
 
-### Download Process Handlers
-
-```typescript
-Util.Register('Tester_1.JobFunction0', async () => {
-  // Prepare next firmware file for download
-  const item = fileList.shift()
-  if (item) {
-    // Request download and verify CRC
-    // Returns array of requests to be sent
-  }
-  return []
-})
-
-Util.Register('Tester_1.JobFunction1', () => {
-  // Handle actual data transfer
-  // Splits firmware into chunks and sends them
-  // Ends with transfer exit request
-  // Returns array of requests to be sent
-})
+#### 5. Routine Control Specific Configuration
+```handlebars
+DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
+{{#each (get tester.allServiceList '0x31')}}
+    /* {{name}} */   
+    {
+        .routineControlType={{get (first (filter params 'routineControlType' property='name')) 'phyValue' }},
+        .routineIdentifier=[{{get (first (filter params 'routineIdentifier' property='name')) 'value.data'}}],
+        .session={{#if generateConfigs}}{{get generateConfigs 'session'}}{{else}}DCM_DEFAULT_SESSION_EN{{/if}},
+        .security={{#if generateConfigs}}{{get generateConfigs 'security'}}{{else}}DCM_SECURITY_LEVEL_NULL{{/if}},
+    },
+{{/each}}
+};
 ```
 
-- JobFunction0: Prepares download by:
-  1. Getting next firmware file
-  2. Setting up download request with correct address
-  3. Calculating and verifying CRC
-- JobFunction1: Handles data transfer by:
-  1. Splitting firmware into appropriate chunk sizes
-  2. Creating TransferData requests for each chunk
-  3. Adding RequestTransferExit at the end
-  4. Triggering firmware verification after last file
+**Line-by-line explanation:**
+- `DcmRoutineControlConfig_t DcmRoutineControlConfig[]={` - Start routine control config array
+- <span v-pre>`{{#each (get tester.allServiceList '0x31')}}`</span> - Loop through all 0x31 (Routine Control) services
+- <span v-pre>`/* {{name}} */`</span> - Generate comment with service name
+- `{` - Start configuration structure
+- <span v-pre>`.routineControlType={{get (first (filter params 'routineControlType' property='name')) 'phyValue' }},`</span> - Extract routine control type from parameters
+- <span v-pre>`.routineIdentifier=[{{get (first (filter params 'routineIdentifier' property='name')) 'value.data'}}],`</span> - Extract routine identifier
+- <span v-pre>`.session={{#if generateConfigs}}{{get generateConfigs 'session'}}{{else}}DCM_DEFAULT_SESSION_EN{{/if}},`</span> - Set session type (custom or default)
+- <span v-pre>`.security={{#if generateConfigs}}{{get generateConfigs 'security'}}{{else}}DCM_SECURITY_LEVEL_NULL{{/if}},`</span> - Set security level (custom or default)
+- `},` - End configuration structure
+- <span v-pre>`{{/each}}`</span> - End loop
+- `};` - Close array
 
-The script works in conjunction with the sequence defined in the ECB file, which executes:
+## Helper Methods Used
 
-1. Session and communication control services
-2. Security access sequence
-3. JobFunction0 to prepare download
-4. JobFunction1 to transfer data
-5. Final verification and reset
+### Data Access Helpers
+- <span v-pre>`{{get object property}}`</span> - Access object property safely
+- <span v-pre>`{{first array}}`</span> - Get first element of array
+- <span v-pre>`{{filter array value property='name'}}`</span> - Filter array by property value
+
+### Logic Helpers
+- <span v-pre>`{{#if condition}}...{{else}}...{{/if}}`</span> - Conditional logic
+- <span v-pre>`{{eq a b}}`</span> - Equality comparison
+- <span v-pre>`{{not condition}}`</span> - Logical NOT
+
+### Utility Helpers
+- <span v-pre>`{{setVar name value}}`</span> - Set template variable
+- <span v-pre>`{{add a b}}`</span> - Mathematical addition
+- <span v-pre>`{{logFile message}}`</span> - Debug logging
+
+### Iteration Helpers
+- <span v-pre>`{{#each array}}...{{/each}}`</span> - Loop through array elements
+- <span v-pre>`{{@key}}`</span> - Current key in iteration
+- <span v-pre>`{{@root}}`</span> - Access root context
+
+## Usage Instructions
+
+1. **Configure UDS Services**: Set up your UDS services in EcuBus-Pro tester
+2. **Add Template**: Select the `uds.hbs` template file
+3. **Set Generation Path**: Specify output directory for generated C code
+4. **Generate Code**: Run the code generation process
+5. **Integration**: Include generated files in your DCM implementation
+
+## Generated Output Example
+
+The template will generate C code similar to:
+
+```c
+/**
+* Open Source License
+* 
+* EcuBus-Pro is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
+* 
+* 1. EcuBus-Pro may be utilized commercially, including as a diagnostic tool or as a development platform for enterprises. Should the conditions below be met, a commercial license must be obtained from the producer:
+* 
+* a. Device support and licensing: 
+*     - The EcuBus-Pro source code includes support for a set of standard usb devices.
+*     - If you want to add support for your proprietary devices without open-sourcing the implementation, you must obtain a commercial license from EcuBus-Pro.
+* 
+* b. LOGO and copyright information: In the process of using EcuBus-Pro's frontend, you may not remove or modify the LOGO or copyright information in the EcuBus-Pro console or applications. This restriction is inapplicable to uses of EcuBus-Pro that do not involve its frontend.
+*     - Frontend Definition: For the purposes of this license, the "frontend" of EcuBus-Pro includes all components located in the `src/renderer/` directory when running EcuBus-Pro from the raw source code, or the "renderer" components when running EcuBus-Pro with Electron.
+* 
+* 2. As a contributor, you should agree that:
+* 
+* a. The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
+* b. Your contributed code may be used for commercial purposes, including but not limited to its diagnostic business operations.
+* 
+* 
+* Apart from the specific conditions mentioned above, all other rights and restrictions follow the Apache License 2.0. Detailed information about the Apache License 2.0 can be found at http://www.apache.org/licenses/LICENSE-2.0.
+* 
+* The interactive design and hardware interface of this product are protected by patents.
+* EcuBus-Pro and its logo are registered trademarks of Whyengineer, Inc.
+* 
+* © 2025 Whyengineer, Inc.
+* 
+* For commercial licensing inquiries, please contact: frankie.zengfu@gmail.com
+*/
+
+
+
+#include "Dcm.h"
+
+
+#define SUPPORTED_SERVICE_NUM 9
+
+DcmConfig_t Dcm[]={
+    /* Diagnostic Session Control (0x10) */
+    {
+        DCM_DIAGNOSTIC_SESSION_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_SessionControlCallback,
+    },
+    /* RoutineControl (0x31) */
+    {
+        DCM_ROUNTINE_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_RoutineControlCallback,
+    },
+    
+};
+
+DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
+    /* RoutineControl490 */   
+    {
+        .routineControlType=1,
+        .routineIdentifier=[2,2],
+        .session=DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        .security=DCM_SECURITY_LEVEL_1 | DCM_SECURITY_LEVEL_2,
+    },
+    /* RoutineControl491 */   
+    {
+        .routineControlType=2,
+        .routineIdentifier=[255,0],
+        .session=DCM_DEFAULT_SESSION_EN,
+        .security=DCM_SECURITY_LEVEL_NULL,
+    },
+};
+```
+

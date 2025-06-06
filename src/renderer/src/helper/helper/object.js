@@ -4,7 +4,7 @@ import { set } from 'lodash'
 const helpers = {}
 
 helpers.get = function (prop, context, options) {
-  const val = get(context, prop)
+  const val = get( prop,context)
   if (options && options.fn) {
     return val ? options.fn(val) : options.inverse(context)
   }

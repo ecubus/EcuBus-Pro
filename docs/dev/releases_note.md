@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## v0.8.42
+Changes from v0.8.41 to v0.8.42:
+
+
+* [feat]:add UDS code generate ability 
+* [bug]:fix doip tcp client fix port TIME_WAIT state 
+* [opt]:opt HIL test 
+* [opt]:opt multi-windows
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.41
 Changes from v0.8.40 to v0.8.41:
 

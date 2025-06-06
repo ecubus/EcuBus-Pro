@@ -21,6 +21,7 @@ export interface ServiceItem {
   desc?: string
   params: Param[]
   respParams: Param[]
+  generateConfigs?: Record<string, string>
 }
 // 使用泛型简化定义
 

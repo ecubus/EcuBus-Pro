@@ -96,7 +96,105 @@
 
         <!-- stop -->
       </el-form-item>
-
+      <el-divider content-position="left">
+        UDS Code Generate
+        <el-button link type="primary" size="small" @click="handleExternalClick">
+          <Icon :icon="externalIcon" style="font-size: 16px" />
+        </el-button>
+      </el-divider>
+      <el-form-item label="Enable Code Generate" prop="enableCodeGen">
+        <el-switch v-model="data.enableCodeGen" :disabled="globalStart" />
+      </el-form-item>
+      <el-form-item v-if="data.enableCodeGen" label="Template List" prop="generateConfigs">
+        <div style="width: 100%">
+          <div style="display: flex; margin-bottom: 10px">
+            <el-button
+              size="small"
+              type="primary"
+              icon="Plus"
+              plain
+              :disabled="globalStart"
+              @click="addTemplateConfig"
+            >
+              Add Template
+            </el-button>
+            <el-button
+              size="small"
+              type="success"
+              icon="Setting"
+              plain
+              :disabled="globalStart || !hasValidTemplates"
+              @click="generateAllCode"
+            >
+              Generate
+            </el-button>
+          </div>
+          <el-table
+            v-if="data.generateConfigs && data.generateConfigs.length > 0"
+            :data="data.generateConfigs"
+            border
+            size="small"
+          >
+            <el-table-column label="Template Path" min-width="200">
+              <template #default="{ row, $index }">
+                <div style="display: flex; gap: 8px">
+                  <el-input
+                    v-model="row.tempaltePath"
+                    :disabled="globalStart"
+                    placeholder="Template file path"
+                    size="small"
+                  />
+                  <el-button
+                    size="small"
+                    icon="FolderOpened"
+                    :disabled="globalStart"
+                    @click="selectTemplatePath($index)"
+                  />
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Output Path" min-width="200">
+              <template #default="{ row, $index }">
+                <div style="display: flex; gap: 8px">
+                  <el-input
+                    v-model="row.generatePath"
+                    :disabled="globalStart"
+                    placeholder="Generated file path"
+                    size="small"
+                  />
+                  <el-button
+                    size="small"
+                    icon="FolderOpened"
+                    :disabled="globalStart"
+                    @click="selectOutputPath($index)"
+                  />
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="Actions" width="150" align="center">
+              <template #default="{ $index }">
+                <el-button
+                  size="small"
+                  type="success"
+                  plain
+                  :disabled="!data.generateConfigs?.[$index]?.tempaltePath"
+                  @click="previewTemplate($index)"
+                >
+                  Preview
+                </el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  icon="Delete"
+                  plain
+                  :disabled="globalStart"
+                  @click="removeTemplateConfig($index)"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-form-item>
       <el-divider content-position="left"> UDS Timing </el-divider>
       <el-form-item label-width="0">
         <el-col :span="12">
@@ -266,6 +364,44 @@
       </el-tabs>
     </div>
     <el-divider />
+
+    <!-- 预览对话框 -->
+    <el-dialog
+      v-if="previewDialogVisible"
+      v-model="previewDialogVisible"
+      :title="`Preview Generated Code By: ${currentPreviewTemplate}`"
+      width="80%"
+      align-center
+      append-to="#tester"
+    >
+      <div v-loading="previewLoading" style="position: relative">
+        <!-- 复制按钮 -->
+        <el-button
+          class="copy-btn"
+          type="primary"
+          link
+          size="small"
+          @click="copyPreviewToClipboard"
+        >
+          <Icon :icon="copyIcon" style="font-size: 18px" />
+        </el-button>
+
+        <!-- 预览内容 -->
+        <pre
+          style="
+            margin: 20px;
+            overflow: auto;
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 4px;
+          "
+          :style="{
+            maxHeight: `${height - 200}px`
+          }"
+          >{{ previewContent }}</pre
+        >
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -297,13 +433,17 @@ import buildIcon from '@iconify/icons-material-symbols/build-circle-outline-shar
 import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
 import refreshIcon from '@iconify/icons-material-symbols/refresh'
 import newIcon from '@iconify/icons-material-symbols/new-window'
+import externalIcon from '@iconify/icons-mdi/external-link'
 import buildError from './buildError.vue'
 import dangerIcon from '@iconify/icons-material-symbols/dangerous-outline-rounded'
+import Handlebars from 'handlebars'
+import copyIcon from '@iconify/icons-material-symbols/content-copy'
 import EthAddr from './ethAddr.vue'
 import LinAddr from './linAddr.vue'
 import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from 'nodeCan/lin'
 import dbchoose from './dbchoose.vue'
 import { useGlobalStart } from '@r/stores/runtime'
+import { useClipboard } from '@vueuse/core'
 
 const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()
@@ -342,7 +482,9 @@ const data = ref<TesterInfo>({
     s3Time: 5000,
     testerPresentEnable: false
   },
-  allServiceList: {}
+  allServiceList: {},
+  enableCodeGen: false,
+  generateConfigs: []
 })
 
 function getAddrName(item: UdsAddress, index: number) {
@@ -385,6 +527,13 @@ const all3EServices = computed(() => {
     }
   }
   return services
+})
+
+const hasValidTemplates = computed(() => {
+  return (
+    data.value.generateConfigs?.some((config) => config.tempaltePath && config.generatePath) ||
+    false
+  )
 })
 const rules = computed<FormRules>(() => {
   return {
@@ -635,6 +784,259 @@ function addAddrFromDb() {
     showConfirmButton: false
   })
 }
+
+function handleExternalClick() {
+  window.electron.ipcRenderer.send('ipc-open-link', 'https://app.whyengineer.com')
+}
+
+function addTemplateConfig() {
+  if (!data.value.generateConfigs) {
+    data.value.generateConfigs = []
+  }
+  data.value.generateConfigs.push({
+    tempaltePath: '',
+    generatePath: ''
+  })
+}
+
+function removeTemplateConfig(index: number) {
+  if (data.value.generateConfigs) {
+    data.value.generateConfigs.splice(index, 1)
+  }
+}
+
+async function selectTemplatePath(index: number) {
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Select Template File',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Template Files', extensions: ['hbs', 'template', 'txt'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePaths[0]
+  if (file && data.value.generateConfigs) {
+    if (project.projectInfo.path) {
+      data.value.generateConfigs[index].tempaltePath = window.path.relative(
+        project.projectInfo.path,
+        file
+      )
+    } else {
+      data.value.generateConfigs[index].tempaltePath = file
+    }
+  }
+}
+
+async function selectOutputPath(index: number) {
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Select Output File',
+    filters: [
+      { name: 'Code Files', extensions: ['c', 'cpp', 'h', 'hpp', 'ts', 'js'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePath
+  if (file && data.value.generateConfigs) {
+    if (project.projectInfo.path) {
+      data.value.generateConfigs[index].generatePath = window.path.relative(
+        project.projectInfo.path,
+        file
+      )
+    } else {
+      data.value.generateConfigs[index].generatePath = file
+    }
+  }
+}
+
+async function previewTemplate(index: number) {
+  if (!data.value.generateConfigs) return
+
+  const config = data.value.generateConfigs[index]
+  let templatePath = config.tempaltePath
+  try {
+    previewLoading.value = true
+    currentPreviewTemplate.value = config.tempaltePath
+
+    // 通过 IPC 读取模板文件内容
+
+    if (project.projectInfo.path && !window.path.isAbsolute(templatePath)) {
+      templatePath = window.path.join(project.projectInfo.path, templatePath)
+    }
+
+    const templateContent = await window.electron.ipcRenderer.invoke(
+      'ipc-fs-readFile',
+      templatePath
+    )
+
+    // 编译 Handlebars 模板
+    const template = Handlebars.compile(templateContent)
+
+    // 准备渲染数据（使用当前的 tester 数据）
+    const renderData = {
+      tester: data.value,
+      project: project.projectInfo
+      // 可以添加更多需要的数据
+    }
+
+    // 渲染模板
+    previewContent.value = template(renderData)
+    previewDialogVisible.value = true
+  } catch (error: any) {
+    const formattedError = await formatHandlebarsError(error, templatePath)
+    ElMessageBox({
+      title: 'Preview Failed',
+      message: h(
+        'div',
+        {
+          style:
+            'font-family: monospace; white-space: pre-wrap; text-align: left; max-width: 600px;'
+        },
+        formattedError
+      ),
+      confirmButtonText: 'OK',
+      buttonSize: 'small',
+      appendTo: '#tester'
+    })
+    console.error('Preview error:', error)
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+async function generateAllCode() {
+  if (!data.value.generateConfigs) return
+
+  const validConfigs = data.value.generateConfigs.filter(
+    (config) => config.tempaltePath && config.generatePath
+  )
+
+  if (validConfigs.length === 0) {
+    ElMessageBox.alert('No valid template configurations found', 'Warning', {
+      confirmButtonText: 'OK',
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: '#tester'
+    })
+    return
+  }
+
+  try {
+    buildLoading.value = true
+
+    // 准备渲染数据
+    const renderData = {
+      tester: data.value,
+      project: project.projectInfo
+      // 可以添加更多需要的数据
+    }
+
+    let successCount = 0
+
+    // 依次处理每个模板配置，遇到错误就停止
+    for (let i = 0; i < validConfigs.length; i++) {
+      const config = validConfigs[i]
+
+      // 处理模板文件路径
+      let templatePath = config.tempaltePath
+      if (project.projectInfo.path && !window.path.isAbsolute(templatePath)) {
+        templatePath = window.path.join(project.projectInfo.path, templatePath)
+      }
+
+      try {
+        // 处理输出文件路径
+        let outputPath = config.generatePath
+        if (project.projectInfo.path && !window.path.isAbsolute(outputPath)) {
+          outputPath = window.path.join(project.projectInfo.path, outputPath)
+        }
+
+        // 读取模板文件
+        const templateContent = await window.electron.ipcRenderer.invoke(
+          'ipc-fs-readFile',
+          templatePath
+        )
+
+        // 编译 Handlebars 模板
+        const template = Handlebars.compile(templateContent)
+
+        // 渲染模板
+        const renderedContent = template(renderData)
+
+        // 确保输出目录存在
+        const outputDir = window.path.dirname(outputPath)
+        const dirExists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', outputDir)
+        if (!dirExists) {
+          await window.electron.ipcRenderer.invoke('ipc-fs-mkdir', outputDir)
+        }
+
+        // 写入文件
+        await window.electron.ipcRenderer.invoke('ipc-fs-writeFile', outputPath, renderedContent)
+
+        successCount++
+        console.log(`Generated: ${config.tempaltePath} -> ${config.generatePath}`)
+      } catch (error: any) {
+        // 遇到错误立即停止并显示错误信息
+        let formattedError: string
+        try {
+          formattedError = await formatHandlebarsError(error, templatePath)
+        } catch {
+          formattedError = getCleanErrorMessage(error)
+        }
+        const errorMsg = `Failed to generate ${config.tempaltePath}:\n\n${formattedError}`
+        ElMessageBox({
+          title: 'Generation Failed',
+          message: h(
+            'div',
+            {
+              style:
+                'font-family: monospace; white-space: pre-wrap; text-align: left; max-width: 600px;'
+            },
+            errorMsg
+          ),
+          confirmButtonText: 'OK',
+          type: 'error',
+          buttonSize: 'small',
+          appendTo: '#tester'
+        })
+        return // 立即返回，停止处理后续模板
+      }
+    }
+
+    // 所有模板处理成功
+    ElMessage({
+      message: `Successfully generated ${successCount} file(s)`,
+      type: 'success',
+      appendTo: '#tester'
+    })
+  } catch (error: any) {
+    ElMessageBox.alert(getCleanErrorMessage(error), 'Code Generation Failed', {
+      confirmButtonText: 'OK',
+      type: 'error',
+      buttonSize: 'small',
+      appendTo: '#tester'
+    })
+  } finally {
+    buildLoading.value = false
+  }
+}
+
+async function copyPreviewToClipboard() {
+  try {
+    await copy()
+    ElMessage({
+      message: 'Copied to clipboard!',
+      type: 'success',
+      appendTo: '#tester'
+    })
+  } catch (err) {
+    ElMessage({
+      message: 'Failed to copy to clipboard',
+      type: 'error',
+      appendTo: '#tester'
+    })
+  }
+}
 const errors = ref<Record<number, any>>({})
 const onSubmit = async () => {
   try {
@@ -653,11 +1055,12 @@ const onSubmit = async () => {
     dataBase.tester[editIndex.value].script = data.value.script
     dataBase.tester[editIndex.value].udsTime = cloneDeep(data.value.udsTime)
     dataBase.tester[editIndex.value].simulateBy = data.value.simulateBy
+    dataBase.tester[editIndex.value].enableCodeGen = data.value.enableCodeGen
+    dataBase.tester[editIndex.value].generateConfigs = cloneDeep(data.value.generateConfigs)
 
     emits('change', editIndex.value, data.value.name)
     return true
   } catch (e) {
-    console.error(e)
     return false
   }
 }
@@ -665,6 +1068,73 @@ const onSubmit = async () => {
 let watcher: any
 
 const buildStatus = ref<string | undefined>()
+
+// 预览相关状态
+const previewDialogVisible = ref(false)
+const previewContent = ref('')
+const previewLoading = ref(false)
+const currentPreviewTemplate = ref('')
+const { copy } = useClipboard({ source: previewContent })
+
+// 提取清晰的错误信息
+function getCleanErrorMessage(error: any): string {
+  let errorMsg = error.message || error.toString()
+
+  // 处理 IPC 调用错误，提取实际的错误信息
+  if (errorMsg.startsWith('Error invoking remote method')) {
+    const match = errorMsg.match(/Error: ([^:]+: .+)$/)
+    if (match) {
+      errorMsg = match[1]
+    }
+  }
+
+  return errorMsg
+}
+
+// 格式化Handlebars解析错误，显示代码上下文
+async function formatHandlebarsError(error: any, templatePath: string): Promise<string> {
+  const errorMsg = error.message || error.toString()
+
+  // 检查是否是Handlebars解析错误
+  const lineMatch = errorMsg.match(/Parse error on line (\d+):/)
+  if (!lineMatch) {
+    return getCleanErrorMessage(error)
+  }
+
+  const errorLine = parseInt(lineMatch[1])
+
+  try {
+    // 读取模板文件内容
+    const templateContent = await window.electron.ipcRenderer.invoke(
+      'ipc-fs-readFile',
+      templatePath
+    )
+    const lines = templateContent.split('\n')
+
+    // 确定显示范围（出错行的前后3行）
+    const contextLines = 3
+    const startLine = Math.max(0, errorLine - contextLines - 1)
+    const endLine = Math.min(lines.length - 1, errorLine + contextLines - 1)
+
+    // 构建代码上下文
+    let codeContext = ''
+    for (let i = startLine; i <= endLine; i++) {
+      const lineNum = i + 1
+      const isErrorLine = lineNum === errorLine
+      const prefix = isErrorLine ? '>>> ' : '    '
+      const lineContent = lines[i] || ''
+      codeContext += `${prefix}${lineNum.toString().padStart(3, ' ')}: ${lineContent}\n`
+    }
+
+    return `🚫 Template Parse Error on Line ${errorLine}
+📝 Code Context:
+${codeContext}
+💾 File: ${templatePath}`
+  } catch (fileError) {
+    // 如果无法读取文件，返回原始错误
+    return getCleanErrorMessage(error)
+  }
+}
 onBeforeMount(() => {
   if (editIndex.value) {
     const editData = dataBase.tester[editIndex.value]
@@ -739,5 +1209,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 5px;
   margin-top: 5px;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0px;
+  right: -5px;
+  z-index: 1;
 }
 </style>

@@ -152,6 +152,8 @@ watchEffect(() => {
       title.value += '*'
     }
     // title.value += ` : ${project.type.toUpperCase()}${project.projectDirty?'*':''}`
+  } else if (!project.open) {
+    title.value = ''
   }
 })
 

@@ -14,7 +14,6 @@ Handlebars.registerHelper('logFile', function (msg) {
   log.log(msg)
 })
 
-let globalVar = {}
 
 Handlebars.registerHelper('isUndefined', function (val, options) {
   return valueFn(isUndefined(val), this, options)
@@ -25,18 +24,6 @@ Handlebars.registerHelper('isDefined', function (val, options) {
 })
 
 Handlebars.registerHelper('setVar', function (varName, varValue, options) {
-  if (!options.data.root) {
-    options.data.root = {}
-  }
-  try {
-    const v = JSON.parse(varValue)
-    set(options.data.root, varName, v)
-  } catch (e) {
-    set(options.data.root, varName, varValue)
-  }
-})
-
-Handlebars.registerHelper('setVar2', function (varName, varValue, options) {
   if (!options.data.root) {
     options.data.root = {}
   }
@@ -68,32 +55,6 @@ Handlebars.registerHelper('error', function (val) {
   throw new Error(`Generate Code Error:${val}`)
 })
 
-Handlebars.registerHelper('setGlobalVar', function (url, val) {
-  set(globalVar, url, val)
-})
-
-Handlebars.registerHelper('getGlobalVar', function (url) {
-  return get(globalVar, url)
-})
-
-Handlebars.registerHelper('deleteGlobalVar', function (url) {
-  unset(globalVar, url)
-})
-
-Handlebars.registerHelper('clearGlobalVar', function () {
-  /* keep meta */
-  try {
-    if (globalVar.meta != undefined) {
-      const meta = JSON.parse(JSON.stringify(globalVar.meta))
-      globalVar = {}
-      globalVar.meta = meta
-    } else {
-      globalVar = {}
-    }
-  } catch (e) {
-    globalVar = {}
-  }
-})
 
 Handlebars.registerHelper('times', function (n, block) {
   // eslint-disable-next-line no-var

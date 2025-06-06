@@ -130,9 +130,9 @@ urlParams.forEach((value, key) => {
 //单向的
 if (window.params.id) {
   router.push(`/${window.params.path}`)
-  channel.onmessage = (data) => {
-    for (const key of Object.keys(data)) {
-      window.logBus.emit(key, undefined, key, data[key])
+  channel.onmessage = (event) => {
+    for (const key of Object.keys(event.data)) {
+      window.logBus.emit(key, undefined, key, event.data[key])
     }
   }
   dataChannel.onmessage = (event) => {

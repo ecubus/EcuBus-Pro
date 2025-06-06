@@ -141,7 +141,14 @@
             }
           ]
         },
-        "simulateBy": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be"
+        "simulateBy": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
+        "enableCodeGen": true,
+        "generateConfigs": [
+          {
+            "tempaltePath": "qqq",
+            "generatePath": ""
+          }
+        ]
       }
     },
     "subFunction": {},
@@ -162,10 +169,10 @@
       "can": {}
     },
     "graphs": {},
-    "tests": {},
     "guages": {},
     "vars": {},
-    "datas": {}
+    "datas": {},
+    "panels": {}
   },
   "project": {
     "wins": {
@@ -213,8 +220,8 @@
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
-          "x": 541,
-          "y": 51,
+          "x": -63,
+          "y": 0,
           "w": 700,
           "h": 400
         },
@@ -231,8 +238,8 @@
       },
       "tester": {
         "pos": {
-          "x": 215,
-          "y": 177,
+          "x": 337,
+          "y": 130,
           "w": 1069,
           "h": 400
         },

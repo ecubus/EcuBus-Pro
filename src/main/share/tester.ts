@@ -14,4 +14,10 @@ export interface TesterInfo {
   allServiceList: Partial<Record<ServiceId, ServiceItem[]>>
   //speical for doip
   doipVersion?: number
+  // code generate
+  enableCodeGen?: boolean
+  generateConfigs?: {
+    tempaltePath: string
+    generatePath: string
+  }[]
 }

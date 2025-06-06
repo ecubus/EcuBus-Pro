@@ -183,6 +183,20 @@
                   @change="reqParamChange"
                 />
               </el-tab-pane>
+              <el-tab-pane
+                v-if="dataBase.tester[editIndex].enableCodeGen"
+                label="CodeGenerate"
+                name="CodeGenerate"
+              >
+                <configVue
+                  :id="'config'"
+                  ref="configRef"
+                  v-model="generateConfigList"
+                  :parent-id="editIndex"
+                  :disabled="globalStart"
+                  @change="updateGenerateConfigs"
+                />
+              </el-tab-pane>
             </el-tabs>
           </div>
         </el-form-item>
@@ -250,6 +264,7 @@ import { cloneDeep } from 'lodash'
 import { v4, validate } from 'uuid'
 import { Ref, computed, inject, nextTick, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import paramVue from './param.vue'
+import configVue from './config.vue'
 import closeIcon from '@iconify/icons-material-symbols/close'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
@@ -289,6 +304,7 @@ const odxForm = ref({
 })
 const repParamRef = ref()
 const respParamRef = ref()
+const configRef = ref()
 const globalStart = useGlobalStart()
 const layout = inject('layout') as Layout
 
@@ -655,6 +671,25 @@ const model = ref<ServiceItem>({
   autoSubfunc: true
 })
 
+// 生成配置列表（用于表格显示）
+const generateConfigList = ref<Array<{ key: string; value: string }>>([])
+
+// 监听 model 变化，同步 generateConfigs
+watch(
+  () => model.value,
+  (newVal) => {
+    if (newVal.generateConfigs) {
+      generateConfigList.value = Object.entries(newVal.generateConfigs).map(([key, value]) => ({
+        key,
+        value
+      }))
+    } else {
+      generateConfigList.value = []
+    }
+  },
+  { deep: true, immediate: true }
+)
+
 function suppressChange(val) {
   const lastVal = model.value.params[0].value[0]
   if (val) {
@@ -663,6 +698,24 @@ function suppressChange(val) {
     paramSetVal(model.value.params[0], lastVal & 0x7f)
   }
   reqParamChange()
+}
+
+// 更新 model 中的 generateConfigs
+function updateGenerateConfigs() {
+  if (!model.value.generateConfigs) {
+    model.value.generateConfigs = {}
+  }
+
+  // 清空原有配置
+  model.value.generateConfigs = {}
+
+  // 从列表重建配置对象
+  for (const item of generateConfigList.value) {
+    if (item.key.trim()) {
+      model.value.generateConfigs[item.key.trim()] = item.value
+    }
+  }
+  onSubmit()
 }
 
 const paramCheck = (rule: any, value: any, callback: any) => {
@@ -739,6 +792,12 @@ function onSubmit() {
           return
         }
 
+        r = configRef.value?.valid()
+
+        if (r == false) {
+          return
+        }
+
         const serviceId = model.value.serviceId
         if (serviceList.value[serviceId] == undefined) {
           serviceList.value[serviceId] = []
@@ -781,7 +840,6 @@ onMounted(() => {
     maxWidth: 400,
     minWidth: 200
   })
-
   nextTick(() => {
     buildTree()
     if (props.serviceId) {

@@ -45,7 +45,7 @@
               <div style="text-align: center">
                 <div class="doc" @click="openUm">
                   <span class="card-text">User Manual</span>
-                  <div class="external-icon"></div>
+                  <Icon :icon="externalIcon" style="font-size: 20px" />
                 </div>
               </div>
               <el-divider content-position="left"><strong>System Information</strong></el-divider>
@@ -390,6 +390,7 @@ import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
+import externalIcon from '@iconify/icons-mdi/external-link'
 
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
@@ -546,13 +547,6 @@ onMounted(() => {
 .card-text {
   font-family: Arial, sans-serif;
   font-size: 18px;
-}
-
-.external-icon {
-  width: 24px;
-  height: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
-  background-size: cover;
 }
 
 .main {

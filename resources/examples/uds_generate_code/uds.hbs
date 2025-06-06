@@ -1,0 +1,88 @@
+/**
+* Open Source License
+* 
+* EcuBus-Pro is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
+* 
+* 1. EcuBus-Pro may be utilized commercially, including as a diagnostic tool or as a development platform for enterprises. Should the conditions below be met, a commercial license must be obtained from the producer:
+* 
+* a. Device support and licensing: 
+*     - The EcuBus-Pro source code includes support for a set of standard usb devices.
+*     - If you want to add support for your proprietary devices without open-sourcing the implementation, you must obtain a commercial license from EcuBus-Pro.
+* 
+* b. LOGO and copyright information: In the process of using EcuBus-Pro's frontend, you may not remove or modify the LOGO or copyright information in the EcuBus-Pro console or applications. This restriction is inapplicable to uses of EcuBus-Pro that do not involve its frontend.
+*     - Frontend Definition: For the purposes of this license, the "frontend" of EcuBus-Pro includes all components located in the `src/renderer/` directory when running EcuBus-Pro from the raw source code, or the "renderer" components when running EcuBus-Pro with Electron.
+* 
+* 2. As a contributor, you should agree that:
+* 
+* a. The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
+* b. Your contributed code may be used for commercial purposes, including but not limited to its diagnostic business operations.
+* 
+* 
+* Apart from the specific conditions mentioned above, all other rights and restrictions follow the Apache License 2.0. Detailed information about the Apache License 2.0 can be found at http://www.apache.org/licenses/LICENSE-2.0.
+* 
+* The interactive design and hardware interface of this product are protected by patents.
+* EcuBus-Pro and its logo are registered trademarks of Whyengineer, Inc.
+* 
+* © 2025 Whyengineer, Inc.
+* 
+* For commercial licensing inquiries, please contact: frankie.zengfu@gmail.com
+*/
+
+
+
+#include "Dcm.h"
+
+
+{{logFile 'Calculate active service type except JobFunction'~}}
+{{setVar 'serviceNum' 0~}}
+{{#each tester.allServiceList~}}
+{{#if (not (eq @key 'Job'))}}
+{{setVar 'serviceNum' (add @root.serviceNum 1)~}}
+{{/if~}}
+{{/each~}}
+#define SUPPORTED_SERVICE_NUM {{@root.serviceNum}}
+
+DcmConfig_t Dcm[]={
+{{#each tester.allServiceList}}
+{{#if (eq @key '0x10')}}
+    /* Diagnostic Session Control (0x10) */
+    {
+        DCM_DIAGNOSTIC_SESSION_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_SessionControlCallback,
+    },
+{{/if}}
+{{#if (eq @key '0x22')}}
+    /* Read Data by Identifier (0x22) */
+    {
+        DCM_READ_DATA_BY_IDENTIFIER,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_ReadDataByIdentifierCallback,
+    },
+{{/if}} 
+{{#if (eq @key '0x31')}}
+    /* RoutineControl (0x31) */
+    {
+        DCM_ROUNTINE_CONTROL,
+        DCM_DEFAULT_SESSION_EN | DCM_PROGRAMMING_SESSION_EN | DCM_EXTENDED_DIAGNOSTIC_SESSION_EN,
+        DCM_SECURITY_LEVEL_NULL,
+        Dcm_RoutineControlCallback,
+    },
+{{/if}} 
+{{/each}}
+    {{logFile 'Add your service here'}}
+};
+
+DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
+{{#each (get '0x31' tester.allServiceList )}}
+    /* {{name}} */   
+    {
+        .routineControlType={{get 'phyValue' (first (filter params 'routineControlType' property='name'))}},
+        .routineIdentifier=[{{get 'data' (get 'value' (first (filter params 'routineIdentifier' property='name')))}}],
+        .session={{#if generateConfigs}}{{get 'session' generateConfigs}}{{else}}DCM_DEFAULT_SESSION_EN{{/if}},
+        .security={{#if generateConfigs}}{{get 'security' generateConfigs}}{{else}}DCM_SECURITY_LEVEL_NULL{{/if}},
+    },
+{{/each}}
+};

@@ -68,4 +68,15 @@ describe('UDS Test', () => {
     const hoped = Buffer.from([0x50, 0x01, 0x0])
     assert(recvData.equals(hoped))
   })
+  test('DiagnosticSessionControl160 test', async () => {
+    const diagReq = DiagRequest.from('Tester_can_0.DiagnosticSessionControl160')
+    diagReq.diagSetParameter('diagnosticSessionType', 2)
+    await diagReq.outputDiag()
+    console.log('DiagnosticSessionControl160 send out')
+    const msg = await TestWaitForUDSRespMessage(3000)
+    //compare with hoped
+    const recvData = msg.diagGetRaw()
+    const hoped = Buffer.from([0x50, 0x01, 0x0])
+    assert(recvData.equals(hoped))
+  })
 })

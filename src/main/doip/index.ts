@@ -332,24 +332,14 @@ export class DOIP {
         // })
         socket.on('error', (err) => {
           reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
-          uLog?.systemMsg(`tcp server : ${err.toString()}`, getTsUs() - this.startTs, 'error')
+          uLog?.systemMsg(`tcp server : ${err.toString()}`, getTsUs() - this.startTs, 'warn')
           //TODO:
           // this.event.emit(`server-${item.testerAddr}-${entity.logicalAddr}`,new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
           this.closeSocket(socket)
-          //remove from connectTable
-          const index = this.connectTable.findIndex((item) => item.socket == socket)
-          if (index >= 0) {
-            this.connectTable.splice(index, 1)
-          }
         })
         socket.on('close', () => {
-          uLog?.systemMsg(`tcp client close`, getTsUs() - this.startTs, 'error')
-          //remove from connectTable
-          const index = this.connectTable.findIndex((item) => item.socket == socket)
-
-          if (index >= 0) {
-            this.connectTable.splice(index, 1)
-          }
+          uLog?.systemMsg(`tcp client close`, getTsUs() - this.startTs, 'warn')
+          this.closeSocket(socket)
         })
       })
       this.server.listen(13400, this.eth.handle)
@@ -408,12 +398,29 @@ export class DOIP {
       const item = this.connectTable[index]
       clearTimeout(item.inactiveTimer)
       clearTimeout(item.generalTimer)
+      // 清理 aliveTimer
+      if (item.aliveTimer) {
+        clearTimeout(item.aliveTimer.timer)
+        item.aliveTimer = undefined
+      }
       socket.destroy(err ? new Error(err) : undefined)
       this.connectTable.splice(index, 1)
     }
   }
   closeClientTcp(client: clientTcp) {
-    client.socket.destroy()
+    // 清理 timeout
+    if (client.timeout) {
+      clearTimeout(client.timeout)
+      client.timeout = undefined
+    }
+    // 清理 pendingPromise
+    if (client.pendingPromise) {
+      client.pendingPromise.reject(
+        new DoipError(DOIP_ERROR_ID.DOIP_CLOSE, undefined, 'client closed')
+      )
+      client.pendingPromise = undefined
+    }
+    client.socket.resetAndDestroy()
     const key = `${client.addr.tester.testerLogicalAddr}_${client.addr.entity.logicalAddr}`
     this.tcpClientMap.delete(key)
   }
@@ -471,11 +478,18 @@ export class DOIP {
         return
       }
 
-      const socket = net.createConnection({
+      // 创建TCP连接，使用指定的本地端口
+      const connectOptions: net.NetConnectOpts = {
         host: ip,
-        port: 13400,
-        localPort: addr.tcpClientPort
-      })
+        port: 13400
+      }
+
+      if (addr.tcpClientPort) {
+        connectOptions.localPort = addr.tcpClientPort
+        connectOptions.localAddress = this.eth.handle
+      }
+
+      const socket = net.createConnection(connectOptions)
       const item: clientTcp = {
         addr: addr,
         socket,
@@ -490,8 +504,12 @@ export class DOIP {
         socket.destroy()
         this.udsLog.systemMsg(`client tcp connect timeout`, getTsUs() - this.startTs, 'error')
       }, 2000)
+
       socket.on('connect', () => {
         clearTimeout(timeout)
+        // 设置socket选项
+        socket.setNoDelay(true)
+        socket.setKeepAlive(true, 0)
         this.tcpClientMap.set(key, item)
         setTimeout(() => {
           this.routeActiveRequest(item)
@@ -504,12 +522,20 @@ export class DOIP {
         }, addr.tester.routeActiveTime)
         // resolve(item)
       })
-      socket.on('error', (err) => {
-        reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
+      socket.on('error', (err: any) => {
+        clearTimeout(timeout)
+        let errorMsg = err.toString()
+        if (err.code === 'EADDRINUSE' && addr.tcpClientPort) {
+          errorMsg = `TCP client port ${addr.tcpClientPort} is already in use. Please try a different port or ensure no other process is using this port.`
+        }
+        reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, errorMsg))
         socket.destroy()
-        this.tcpClientMap.delete(key)
+        const client = this.tcpClientMap.get(key)
+        if (client) {
+          this.closeClientTcp(client)
+        }
         this.udsLog.systemMsg(
-          `client tcp connect error:${err.toString()}`,
+          `client tcp connect error: ${errorMsg}`,
           getTsUs() - this.startTs,
           'error'
         )
@@ -520,7 +546,10 @@ export class DOIP {
         const msg = `Server (${item.addr.entity.logicalAddr}) close the connection`
         reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, msg))
         socket.destroy()
-        this.tcpClientMap.delete(key)
+        const client = this.tcpClientMap.get(key)
+        if (client) {
+          this.closeClientTcp(client)
+        }
 
         if (item.pendingPromise) {
           item.pendingPromise.reject(new DoipError(DOIP_ERROR_ID.DOIP_CLOSE, undefined, msg))
@@ -967,7 +996,7 @@ export class DOIP {
             if (item.state != 'register-active') {
               /*Incoming DoIP messages, except the DoIP routing activation message or messages required
 for authentication or confirmation, shall not be processed nor be routed before the connection
-is in the state “Registered [Routing Active]”.*/
+is in the state "Registered [Routing Active]".*/
             } else {
               //normal
               if (item.lastAction.payloadType == PayloadType.DoIP_AliveResponse) {
@@ -1457,12 +1486,38 @@ is in the state “Registered [Routing Active]”.*/
     })
   }
   close() {
-    this.udp4Server?.close()
-    this.server?.close()
-    //close tcp client
-    this.tcpClientMap.forEach((item) => {
+    // 关闭UDP服务器
+    if (this.udp4Server) {
+      this.udp4Server.close()
+      this.udp4Server = undefined
+    }
+
+    // 关闭TCP服务器
+    if (this.server) {
+      this.server.close()
+      this.server = undefined
+    }
+
+    // 清理 connectTable 中的所有连接
+    this.connectTable.forEach((item) => {
+      clearTimeout(item.inactiveTimer)
+      clearTimeout(item.generalTimer)
+      if (item.aliveTimer) {
+        clearTimeout(item.aliveTimer.timer)
+      }
       item.socket.destroy()
     })
+    this.connectTable.splice(0, this.connectTable.length)
+
+    // 关闭所有 TCP 客户端连接
+    this.tcpClientMap.forEach((item) => {
+      this.closeClientTcp(item)
+    })
+    this.tcpClientMap.clear()
+
+    // 清理其他资源
+    this.entityMap.clear()
+    this.selfSentUdpInfo.length = 0
   }
   buildMessage(payloadType: PayloadType, data: Buffer): Buffer {
     const len = data.length
@@ -1885,7 +1940,24 @@ export class DOIP_SOCKET {
     //handle pending
     if (this.pendingRecv) {
       this.pendingRecv.reject(new DoipError(DOIP_ERROR_ID.DOIP_CLOSE))
+      this.pendingRecv = null
     }
+
+    // 清理 recvTimer
+    if (this.recvTimer) {
+      clearTimeout(this.recvTimer)
+      this.recvTimer = undefined
+    }
+
+    // 清理接收缓冲区
+    this.recvBuffer.length = 0
+
+    // 如果是客户端模式，清理客户端连接
+    if (this.client) {
+      this.doip.closeClientTcp(this.client)
+      this.client = undefined
+    }
+
     this.doip.event.off(this.eventId, this.cb)
     this.abortController.abort()
     this.closed = true

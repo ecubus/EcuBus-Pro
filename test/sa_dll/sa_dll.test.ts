@@ -21,12 +21,12 @@ test('SecureAccessDll', () => {
   const sa = new SecureAccessDll(dllPath)
 
   const seed = sa.GenerateKeyEx(
-    Buffer.from([1, 2, 3, 4, 5]),
+    Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]),
     1,
-    Buffer.from([1, 2, 3, 4, 5]),
-    Buffer.from([1, 2, 3, 4, 5])
+    Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]),
+    Buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
   )
-  expect(seed).toEqual(Buffer.from('fefdfcfbfa', 'hex'))
+  expect(seed).toEqual(Buffer.from('fefdfcfbfaf9f8f7', 'hex'))
 })
 
 test('SecureAccessDll empty function in dll', () => {

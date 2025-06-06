@@ -25,14 +25,18 @@ import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
 import fcDesigner from './views/uds/panel-designer/index.js'
-import { BroadcastChannel } from 'broadcast-channel'
+
 import { useDataStore } from './stores/data'
-import { PiniaSharedState } from 'pinia-shared-state'
+
 import { Layout } from './views/uds/layout'
-const channel = new BroadcastChannel('ipc-log', {
-  type: 'native',
-  webWorkerSupport: false
-})
+import { useProjectStore } from './stores/project'
+import { useRuntimeStore } from './stores/runtime'
+import { assign, cloneDeep } from 'lodash'
+const channel = new BroadcastChannel('ipc-log')
+const dataChannel = new BroadcastChannel('ipc-data')
+const projectChannel = new BroadcastChannel('ipc-project')
+const runtimeChannel = new BroadcastChannel('ipc-runtime')
+
 const dataParseWorker = new DataParseWorker()
 
 window.logBus = new EventBus()
@@ -98,16 +102,7 @@ declare module 'pinia' {
 pinia.use(({ store }) => {
   store.router = markRaw(router)
 })
-pinia.use(
-  PiniaSharedState({
-    // Enables the plugin for all stores. Defaults to true.
-    enable: true,
-    // If set to true this tab tries to immediately recover the shared state from another tab. Defaults to true.
-    initialize: true,
-    // Enforce a type. One of native, idb, localstorage or node. Defaults to native.
-    type: 'native'
-  })
-)
+
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -121,6 +116,10 @@ app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
 
+const dataStore = useDataStore()
+const projectStore = useProjectStore()
+const runtimeStore = useRuntimeStore()
+
 // 直接解析URL参数并赋值给window.params
 const urlParams = new URLSearchParams(window.location.search)
 window.params = {}
@@ -128,7 +127,7 @@ urlParams.forEach((value, key) => {
   window.params[key] = value
 })
 
-app.mount('#app')
+//单向的
 if (window.params.id) {
   router.push(`/${window.params.path}`)
   channel.onmessage = (data) => {
@@ -136,4 +135,48 @@ if (window.params.id) {
       window.logBus.emit(key, undefined, key, data[key])
     }
   }
+  dataChannel.onmessage = (event) => {
+    dataStore.$patch((state) => {
+      assign(state, event.data)
+    })
+  }
+  dataChannel.postMessage(undefined)
+  projectChannel.onmessage = (event) => {
+    projectStore.$patch((state) => {
+      assign(state, event.data)
+    })
+  }
+  projectChannel.postMessage(undefined)
+  runtimeChannel.onmessage = (event) => {
+    runtimeStore.$patch((state) => {
+      assign(state, event.data)
+    })
+  }
+  runtimeChannel.postMessage(undefined)
+} else {
+  dataChannel.onmessage = (event) => {
+    if (event.data == undefined) {
+      dataChannel.postMessage(cloneDeep(dataStore.$state))
+    }
+  }
+  projectChannel.onmessage = (event) => {
+    if (event.data == undefined) {
+      projectChannel.postMessage(cloneDeep(projectStore.$state))
+    }
+  }
+  runtimeChannel.onmessage = (event) => {
+    if (event.data == undefined) {
+      runtimeChannel.postMessage(cloneDeep(runtimeStore.$state))
+    }
+  }
+  dataStore.$subscribe((mutation, state) => {
+    dataChannel.postMessage(cloneDeep(state))
+  })
+  projectStore.$subscribe((mutation, state) => {
+    projectChannel.postMessage(cloneDeep(state))
+  })
+  runtimeStore.$subscribe((mutation, state) => {
+    runtimeChannel.postMessage(cloneDeep(state))
+  })
 }
+app.mount('#app')

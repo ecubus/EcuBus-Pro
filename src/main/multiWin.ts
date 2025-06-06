@@ -10,7 +10,14 @@ class LogQueue {
   constructor(
     public win: BrowserWindow[],
     private period = 100
-  ) {
+  ) {}
+  addWin(win: BrowserWindow, isMain: boolean) {
+    this.win.push(win)
+    if (isMain) {
+      this.mainWin = win
+    }
+  }
+  startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
         this.mainWin!.webContents.send('ipc-log', this.list)
@@ -18,11 +25,9 @@ class LogQueue {
       }
     }, this.period)
   }
-  addWin(win: BrowserWindow, isMain: boolean) {
-    this.win.push(win)
-    if (isMain) {
-      this.mainWin = win
-    }
+  stopTimer() {
+    clearInterval(this.timer)
+    this.list = []
   }
   removeWin(win: BrowserWindow) {
     this.win = this.win.filter((w) => w !== win)
@@ -31,14 +36,18 @@ class LogQueue {
 export const logQ = new LogQueue([])
 
 const winMap = new Map<string, BrowserWindow>()
+const winPosMap = new Map<string, { x: number; y: number; width: number; height: number }>()
 
 ipcMain.on('ipc-open-window', (event, arg) => {
   if (winMap.has(arg.id)) {
     winMap.get(arg.id)?.show()
   } else {
+    const pos = winPosMap.get(arg.id)
     const win = new BrowserWindow({
-      width: arg.w || 800,
-      height: arg.h || 600,
+      width: pos?.width || arg.w || 800,
+      height: pos?.height || arg.h || 600,
+      x: pos?.x || undefined,
+      y: pos?.y || undefined,
       ...(process.platform === 'linux' ? { icon } : {}),
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
@@ -82,18 +91,35 @@ ipcMain.on('ipc-open-window', (event, arg) => {
 })
 
 ipcMain.on('ipc-close-others-windows', (event, arg) => {
-  winMap.forEach((item) => {
-    item.close()
-  })
+  closeAllWindows()
 })
 export function closeAllWindows() {
-  winMap.forEach((win) => {
+  winMap.forEach((win, key) => {
+    //store pos
+    const pos = win.getBounds()
+    winPosMap.set(key, {
+      x: pos?.x,
+      y: pos?.y,
+      width: pos?.width,
+      height: pos?.height
+    })
     win.close()
   })
 }
 
 export function closeWindow(id: string) {
-  winMap.get(id)?.close()
+  const win = winMap.get(id)
+  if (win) {
+    //store pos
+    const pos = win.getBounds()
+    winPosMap.set(id, {
+      x: pos?.x,
+      y: pos?.y,
+      width: pos?.width,
+      height: pos?.height
+    })
+    win.close()
+  }
 }
 export function minimizeWindow(id: string) {
   winMap.get(id)?.minimize()

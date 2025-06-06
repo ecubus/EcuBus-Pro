@@ -41,6 +41,7 @@ import { serviceDetail } from '../uds/service'
 import { getAllSysVar } from '../share/sysVar'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 import { cloneDeep } from 'lodash'
+import { logQ } from '../multiWin'
 
 const libPath = path.dirname(dllLib)
 
@@ -510,6 +511,7 @@ async function globalStart(
       })
       lastTs = now
     }, 200)
+    logQ.startTimer()
   }
 }
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
@@ -592,6 +594,8 @@ const timerMap = new Map<string, timerType>()
 
 export function globalStop(emit = false) {
   //clear all timer
+  logQ.stopTimer()
+  clearTimeout(timer)
   timerMap.forEach((value) => {
     clearInterval(value.timer)
     value.socket.close()
@@ -630,7 +634,7 @@ export function globalStop(emit = false) {
       win.webContents.send('ipc-global-stop')
     })
   }
-  clearTimeout(timer)
+
   monitor?.disable()
 }
 

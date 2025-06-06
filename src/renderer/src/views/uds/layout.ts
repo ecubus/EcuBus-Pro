@@ -480,7 +480,6 @@ export class Layout {
           //   }
           // },
           stop: (e, ui) => {
-            const data = this.data.project.wins[id]
             data.pos.x = ui.position.left
             data.pos.y = ui.position.top
           }

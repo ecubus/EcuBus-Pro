@@ -1,6 +1,9 @@
 import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo, ServiceId } from './uds'
 import { EntityAddr } from './doip'
 
+/**
+ * @category UDS
+ */
 export interface TesterInfo {
   script?: string
   id: string

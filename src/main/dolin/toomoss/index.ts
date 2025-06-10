@@ -274,8 +274,9 @@ export class ToomossLin extends LinBase {
     }
   }
   close() {
-    LIN.FreeTSFN(this.info.id)
     LIN.LIN_EX_Stop(this.handle, this.deviceIndex)
+    LIN.FreeTSFN(this.info.id)
+
     const deviceInfo = global.toomossDeviceHandles?.get(this.handle)
     if (deviceInfo) {
       deviceInfo.channels.delete(this.deviceIndex)

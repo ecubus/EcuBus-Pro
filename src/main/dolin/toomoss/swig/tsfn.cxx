@@ -199,6 +199,9 @@ void txThreadEntry(TsfnContext *context) {
         if(context->isMaster) {
             // 使用带超时的等待，每100ms检查一次closed标志
             if (context->txQueue.wait_dequeue_timed(msg, std::chrono::milliseconds(100))) {
+                if(context->closed){
+                    break;
+                }
                 TxResult* result = new TxResult();
                 int ret = LIN_EX_MasterSync(context->DevHandle, context->linIndex, &msg.linMsg, (LIN_EX_MSG *)linOutMsg, 1);
                 result->result = ret;
@@ -217,7 +220,9 @@ void txThreadEntry(TsfnContext *context) {
             }
         }else{
             int ret = LIN_EX_SlaveGetData(context->DevHandle, context->linIndex, (LIN_EX_MSG *)linOutMsg);
-           
+            if(context->closed){
+                break;
+            }
             if(ret > 0) {
                 for(int i = 0; i < ret; i++) {
                     TxResult* result = new TxResult();

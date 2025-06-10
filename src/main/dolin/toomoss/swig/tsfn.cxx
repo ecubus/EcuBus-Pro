@@ -8,6 +8,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <vector>
 #include "concurrentqueue.h"
 #include "blockconcurrentqueue.h"
 // Data structure representing our thread-safe function context.
@@ -41,7 +42,6 @@ struct TsfnContext {
 
     // 发送线程相关
     std::thread txThread;
-    HANDLE txThreadHandle;  // 添加Windows线程句柄
     Napi::ThreadSafeFunction txtsfn;
 
 
@@ -116,7 +116,6 @@ void CreateTSFN(const Napi::CallbackInfo &info) {
     // Start thread after all ThreadSafeFunctions are initialized
     
     testData->txThread = std::thread(txThreadEntry, testData);
-    testData->txThreadHandle = testData->txThread.native_handle();
     
     //store by name
     tsfnContextMap[name.Utf8Value()] = testData;
@@ -130,15 +129,7 @@ void FreeTSFN(const Napi::CallbackInfo &info) {
     TsfnContext *context = it->second;
     context->closed=true;
   
-    // 直接强制终止线程
-    if (context->txThreadHandle != nullptr) {
-        TerminateThread(context->txThreadHandle, 0);
-        CloseHandle(context->txThreadHandle);
-    }
-    
-    if (context->txThread.joinable()) {
-        context->txThread.detach();
-    }
+    context->txThread.join();
 
    
     context->txtsfn.Release();
@@ -209,30 +200,55 @@ void txThreadEntry(TsfnContext *context) {
         if(context->isMaster) {
             // 使用带超时的等待，每100ms检查一次closed标志
             if (context->txQueue.wait_dequeue_timed(msg, std::chrono::milliseconds(100))) {
-                if(context->closed){
-                    break;
+                // 收集要发送的消息，先添加第一个消息
+                std::vector<TxMessage> msgsToSend;
+                msgsToSend.push_back(msg);
+                
+                // 检查队列中是否还有更多消息，最多收集512个（基于linOutMsg数组大小）
+                TxMessage additionalMsg;
+                while (msgsToSend.size() < 100 && context->txQueue.try_dequeue(additionalMsg)) {
+                    msgsToSend.push_back(additionalMsg);
                 }
-                TxResult* result = new TxResult();
-                int ret = LIN_EX_MasterSync(context->DevHandle, context->linIndex, &msg.linMsg, (LIN_EX_MSG *)linOutMsg, 1);
-                result->result = ret;
-                result->id = msg.cnt;
+                
+                // 准备发送消息数组
+                std::vector<LIN_EX_MSG> linMsgs;
+                for (const auto& txMsg : msgsToSend) {
+                    linMsgs.push_back(txMsg.linMsg);
+                }
+                
+                // 一次性发送所有消息
+                int ret = LIN_EX_MasterSync(context->DevHandle, context->linIndex, linMsgs.data(), (LIN_EX_MSG *)linOutMsg, msgsToSend.size());
+                
+                // 处理返回结果
                 if(ret > 0) {
                     for(int i = 0; i < ret; i++) {
+                        TxResult* result = new TxResult();
+                        result->result = ret;
+                        // 使用对应消息的计数ID
+                        result->id = (i < msgsToSend.size()) ? msgsToSend[i].cnt : 0;
                         memcpy(&result->linMsg, &linOutMsg[i], sizeof(LIN_EX_MSG));
                         context->txtsfn.NonBlockingCall(result, txCallback);
                         if(context->closed) {
                             break;
                         }
                     }
-                }else{
-                    context->txtsfn.NonBlockingCall(result, txCallback);
+                } else {
+                    // 发送失败，为每个消息创建错误结果
+                    for(size_t i = 0; i < msgsToSend.size(); i++) {
+                        TxResult* result = new TxResult();
+                        result->result = ret;
+                        result->id = msgsToSend[i].cnt;
+                        memcpy(&result->linMsg, &msgsToSend[i].linMsg, sizeof(LIN_EX_MSG));
+                        context->txtsfn.NonBlockingCall(result, txCallback);
+                        if(context->closed) {
+                            break;
+                        }
+                    }
                 }
             }
         }else{
             int ret = LIN_EX_SlaveGetData(context->DevHandle, context->linIndex, (LIN_EX_MSG *)linOutMsg);
-            if(context->closed){
-                break;
-            }
+           
             if(ret > 0) {
                 for(int i = 0; i < ret; i++) {
                     TxResult* result = new TxResult();

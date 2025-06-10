@@ -59,8 +59,20 @@ type HandlerMap = {
       device?: string
     }
   ) => void
+  linApi: (pool: UdsTester, data: linApiStartSch | linApiStopSch) => void
 }
 
+export type linApiStartSch = {
+  method: 'startSch'
+  device?: string
+  schName: string
+  activeCtrl?: boolean[]
+  slot?: number
+}
+export type linApiStopSch = {
+  method: 'stopSch'
+  device?: string
+}
 type EventHandlerMap = {
   [K in keyof HandlerMap]: HandlerMap[K]
 }

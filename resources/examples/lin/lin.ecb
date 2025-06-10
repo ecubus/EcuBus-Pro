@@ -50,7 +50,8 @@
         "channel": [
           "e4179991-1b87-4889-b365-25b1fd93d97e"
         ],
-        "workNode": "lin:SeatECU"
+        "workNode": "lin:SeatECU",
+        "script": "node.ts"
       }
     },
     "database": {
@@ -623,12 +624,17 @@
               "_X_ROW_KEY": "row_96"
             }
           },
-          "name": "lin"
+          "name": "lin",
+          "id": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
         }
       },
       "can": {}
     },
-    "graphs": {}
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
   },
   "project": {
     "wins": {

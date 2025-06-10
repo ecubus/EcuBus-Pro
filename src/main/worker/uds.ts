@@ -1624,3 +1624,124 @@ export async function* reporter(source: TestEventGenerator) {
     }
   }
 }
+
+/**
+ * Start a LIN scheduler
+ *
+ * @category LIN
+ * @param {string} schName - The name of the scheduler to start
+ * @returns {Promise<void>} - Returns a promise that resolves when scheduler is started
+ *
+ * @example
+ * ```ts
+ * // Start scheduler with default settings
+ * await linStartScheduler('MyScheduler');
+ * ```
+ */
+export async function linStartScheduler(schName: string): Promise<void>
+/**
+ * Start a LIN scheduler
+ *
+ * @category LIN
+ * @param {string} schName - The name of the scheduler to start
+ * @param {number} slot - The slot number for the scheduler
+ * @returns {Promise<void>} - Returns a promise that resolves when scheduler is started
+ *
+ * @example
+ * ```ts
+ * // Start scheduler with specific slot
+ * await linStartScheduler('MyScheduler', 0);
+ * ```
+ */
+export async function linStartScheduler(schName: string, slot: number): Promise<void>
+/**
+ * Start a LIN scheduler
+ *
+ * @category LIN
+ * @param {string} schName - The name of the scheduler to start
+ * @param {number} slot - The slot number for the scheduler
+ * @param {string} device - The device name to start the scheduler on
+ * @returns {Promise<void>} - Returns a promise that resolves when scheduler is started
+ *
+ * @example
+ * ```ts
+ * // Start scheduler with slot and device
+ * await linStartScheduler('MyScheduler', 0, 'LinDevice1');
+ * ```
+ */
+export async function linStartScheduler(
+  schName: string,
+  slot: number,
+  device: string
+): Promise<void>
+/**
+ * Start a LIN scheduler
+ *
+ * @category LIN
+ * @param {string} schName - The name of the scheduler to start
+ * @param {number} slot - The slot number for the scheduler
+ * @param {string} device - The device name to start the scheduler on
+ * @param {boolean[]} activeCtrl - The active control array for the scheduler
+ * @returns {Promise<void>} - Returns a promise that resolves when scheduler is started
+ *
+ * @example
+ * ```ts
+ * // Start scheduler with all parameters
+ * await linStartScheduler('MyScheduler', 0, 'LinDevice1', [true, false, true, false]);
+ * ```
+ */
+export async function linStartScheduler(
+  schName: string,
+  slot?: number,
+  device?: string,
+  activeCtrl?: boolean[]
+): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'linApi',
+      data: {
+        method: 'startSch',
+        device,
+        schName,
+        activeCtrl,
+        slot
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}
+
+/**
+ * Stop a LIN scheduler
+ *
+ * @category LIN
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when scheduler is stopped
+ *
+ * @example
+ * ```ts
+ * // Stop LIN scheduler
+ * await linStopScheduler();
+ *
+ * // Stop scheduler on specific device
+ * await linStopScheduler('Device1');
+ * ```
+ */
+export async function linStopScheduler(device?: string): Promise<void> {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'linApi',
+      data: {
+        method: 'stopSch',
+        device
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}

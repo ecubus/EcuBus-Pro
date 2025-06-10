@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
-import UdsTester from './workerClient'
+import UdsTester, { linApiStartSch, linApiStopSch } from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem, UdsDevice } from './share/uds'
@@ -169,6 +169,7 @@ export class NodeClass {
         this.pool.registerHandler('setSignal', NodeClass.setSignal)
         this.pool.registerHandler('setVar', this.setVar.bind(this))
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
+        this.pool.registerHandler('linApi', this.linApi.bind(this))
         this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
         if (this.ethBaseId.length > 0) {
           this.pool.registerHandler(
@@ -811,6 +812,53 @@ export class NodeClass {
     const baseItem = this.doips.find((d) => d.base.device.handle == target)
     if (baseItem) {
       await baseItem.registerEntity(data.entity, true, this.log)
+    }
+  }
+  async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch) {
+    const findLinBase = (name?: string) => {
+      let ret: LinBase | undefined
+      if (name != undefined) {
+        // 只在当前节点的channel对应的linBase中查找
+        for (const channelId of this.linBaseId) {
+          const item = this.linBaseMap.get(channelId)
+          if (item && item.info.name == name) {
+            ret = item
+            break
+          }
+        }
+      } else {
+        // 返回第一个当前节点channel对应的linBase
+        if (this.linBaseId.length > 0) {
+          ret = this.linBaseMap.get(this.linBaseId[0])
+        }
+      }
+      if (ret == undefined) {
+        throw new Error(`device ${name} not found`)
+      }
+      return ret
+    }
+    if (data.method == 'startSch') {
+      const device = findLinBase(data.device)
+      const db = global.database.lin[device.info.database || '']
+      if (db == undefined) {
+        throw new Error(`database is necessary`)
+      }
+      const lastSch = device.getActiveSchName()
+      device.stopSch()
+      const atviceMap: Record<string, boolean> = {}
+      if (data.activeCtrl) {
+        for (const [index, val] of data.activeCtrl.entries()) {
+          atviceMap[`${data.schName}-${index}`] = val
+        }
+      }
+      device.startSch(db, data.schName, atviceMap, data.slot || 0)
+      device.log.sendEvent(
+        `schChanged, changed from ${lastSch || 'idle'} to ${data.schName} at slot ${data.slot || 0}`,
+        getTsUs() - this.startTs
+      )
+    } else if (data.method == 'stopSch') {
+      const device = findLinBase(data.device)
+      device.stopSch()
     }
   }
   async sendFrame(pool: UdsTester, frame: CanMessage | LinMsg): Promise<number> {

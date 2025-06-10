@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.43
+Changes from v0.8.42 to v0.8.43:
+
+ 
+* [feat]:add windows rearrange feature 
+* [bug]:fix toomoss lin can't stop 
+* [bug]:fix dbc parse global comment error 
+* [api]: add linStartScheduler/linStopScheduler api
+---
+
+# EcuBus-Pro Release Notes
+
 ## v0.8.42
 Changes from v0.8.41 to v0.8.42:
 

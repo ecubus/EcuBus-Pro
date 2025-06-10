@@ -69,7 +69,7 @@ const NS_DESC = createToken({ name: 'NS_DESC', pattern: /NS_DESC_/ })
 
 // 基本tokens
 const StringLiteral = createToken({ name: 'StringLiteral', pattern: /"([^"\\]|\\.)*"/ })
-const Identifier = createToken({ name: 'Identifier', pattern: /[a-zA-Z_][a-zA-Z0-9_]*/ })
+const Identifier = createToken({ name: 'Identifier', pattern: /"[^"]*"|[a-zA-Z_][a-zA-Z0-9_]*/ })
 // 修改 Number token 以支持科学记数法
 const Number = createToken({
   name: 'Number',
@@ -155,7 +155,6 @@ const allTokens = [
   Plus,
   Minus,
   Identifier,
-
   Comma
 ]
 
@@ -439,13 +438,16 @@ class DBCParser extends CstParser {
   // Modified comment rule using subrules
   private comment = this.RULE('commentClause', () => {
     this.CONSUME1(CM)
-    this.OR([
-      { ALT: () => this.SUBRULE(this.signalComment) },
-      { ALT: () => this.SUBRULE(this.messageComment) },
-      { ALT: () => this.SUBRULE(this.nodeComment) }
-    ])
+    // Optional specific comment target (signal, message, or node)
+    this.OPTION(() => {
+      this.OR([
+        { ALT: () => this.SUBRULE(this.signalComment) },
+        { ALT: () => this.SUBRULE(this.messageComment) },
+        { ALT: () => this.SUBRULE(this.nodeComment) }
+      ])
+    })
     this.CONSUME1(StringLiteral) // DescriptionText
-    this.OPTION(() => this.CONSUME1(Semicolon))
+    this.OPTION1(() => this.CONSUME1(Semicolon))
   })
 
   private nsSection = this.RULE('nsSection', () => {

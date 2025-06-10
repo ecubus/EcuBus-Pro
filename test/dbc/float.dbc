@@ -58,8 +58,9 @@ BO_ 780 FOOBAR: 8 FIE
  SG_ ACC_02_CRC : 0|12@1- (1,0) [0|1] ""  BAR
 
 
-
+CM_ "global comment/全局注释"
 CM_ BU_ BAR "fam \"1\"";
+CM_ BU_ BAR "dsdsd - qweqweqw";
 CM_ BO_ 2147558192 "Foo.";
 CM_ SG_ 2147558192 Bar "Bar.";
 BA_DEF_  "DBName" STRING ;

@@ -45,6 +45,14 @@
           <Icon style="font-size: 18px" :icon="stopIcon" />
         </el-button>
       </el-button-group>
+      <template v-if="project.open && !isExternal">
+        <el-divider direction="vertical" />
+        <el-tooltip content="Rearrange Windows" placement="bottom" effect="light">
+          <el-button link @click="runtime.rearrangeWindows = !runtime.rearrangeWindows">
+            <Icon :icon="addBox" />
+          </el-button>
+        </el-tooltip>
+      </template>
     </div>
     <div class="toolbar-item project-name" :class="{ 'project-name-dirty': project.projectDirty }">
       <span>{{ title }} </span>
@@ -87,7 +95,7 @@ import Min from '@iconify/icons-ep/minus'
 import Close from '@iconify/icons-ep/close'
 import circleCloseFilled from '@iconify/icons-ep/circle-close-filled'
 import successFilled from '@iconify/icons-ep/success-filled'
-import addBox from '@iconify/icons-material-symbols/add-box'
+import addBox from '@iconify/icons-mdi/car-manual-transmission'
 import saveIcon from '@iconify/icons-material-symbols/save-outline'
 import saveAs from '@iconify/icons-material-symbols/save-as'
 import close from '@iconify/icons-material-symbols/close'
@@ -97,7 +105,7 @@ import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { onKeyStroke, onKeyDown } from '@vueuse/core'
 import { useDataStore } from '@r/stores/data'
 import { ElLoading } from 'element-plus'
-import { useGlobalStart } from '@r/stores/runtime'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 
 const project = useProjectStore()
 const router = useRouter()
@@ -107,6 +115,7 @@ function backHomeHandler() {
 const title = ref(window.params.name || '')
 const globalStart = useGlobalStart()
 const dataBase = useDataStore()
+const runtime = useRuntimeStore()
 const isExternal = ref(window.params.id ? true : false)
 async function closeHandle() {
   if (project.projectDirty) {

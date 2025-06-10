@@ -659,7 +659,7 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import data from '@iconify/icons-ep/full-screen'
-import { useGlobalStart } from '@r/stores/runtime'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -670,6 +670,7 @@ const project = useProjectStore()
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
 const globalStart = useGlobalStart()
+const runtime = useRuntimeStore()
 
 provide('udsView', udsView)
 
@@ -861,6 +862,54 @@ async function openDatabase(testerIndex: string) {
 const maxWinId = toRef(layoutMaster, 'maxWinId')
 const modify = computed(() => layoutMaster.modify.value)
 provide('layout', layoutMaster)
+
+// 监听窗口重新排列
+watch(
+  () => runtime.rearrangeWindows,
+  (shouldRearrange) => {
+    if (shouldRearrange) {
+      // 获取所有hide为false的窗口
+      const visibleWindows = Object.values(project.project.wins).filter(
+        (win) => !win.hide && win.layoutType === undefined && !win.isExternal
+      )
+
+      if (visibleWindows.length > 0) {
+        rearrangeWindows(visibleWindows)
+      }
+
+      // 重置标志
+      runtime.rearrangeWindows = false
+    }
+  }
+)
+
+// 窗口重新排列函数 - 优化版算法
+function rearrangeWindows(windows: any[]) {
+  const windowCount = windows.length
+  if (windowCount === 0) return
+
+  const padding = 0 // 窗口间距
+  const availableWidth = contentW.value - padding * 2
+  const availableHeight = contentH.value - padding * 2
+
+  // 计算最优的行列布局
+  const rows = Math.ceil(Math.sqrt(windowCount))
+  const cols = Math.ceil(windowCount / rows)
+
+  // 计算每个窗口的尺寸
+  const winWidth = (availableWidth - (cols - 1) * padding) / cols
+  const winHeight = (availableHeight - (rows - 1) * padding) / rows
+
+  // 排列窗口
+  windows.forEach((win, index) => {
+    const row = Math.floor(index / cols)
+    const col = index % cols
+    win.pos.x = padding + col * (winWidth + padding)
+    win.pos.y = padding + row * (winHeight + padding)
+    win.pos.w = winWidth
+    win.pos.h = winHeight
+  })
+}
 
 function openApi() {
   window.electron.ipcRenderer.send('ipc-open-script-api')

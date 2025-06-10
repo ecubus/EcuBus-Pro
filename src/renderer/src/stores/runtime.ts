@@ -23,6 +23,7 @@ export type RunTimeStatus = {
   }
   globalStart: boolean
   canPeriods: Record<string, boolean>
+  rearrangeWindows: boolean
 }
 
 export const useRuntimeStore = defineStore('useRuntimeStore', {
@@ -32,7 +33,8 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
       isRunning: {}
     },
     canPeriods: {},
-    globalStart: false
+    globalStart: false,
+    rearrangeWindows: false
   }),
 
   actions: {

@@ -41,6 +41,7 @@ struct TsfnContext {
 
     // 发送线程相关
     std::thread txThread;
+    HANDLE txThreadHandle;  // 添加Windows线程句柄
     Napi::ThreadSafeFunction txtsfn;
 
 
@@ -115,6 +116,7 @@ void CreateTSFN(const Napi::CallbackInfo &info) {
     // Start thread after all ThreadSafeFunctions are initialized
     
     testData->txThread = std::thread(txThreadEntry, testData);
+    testData->txThreadHandle = testData->txThread.native_handle();
     
     //store by name
     tsfnContextMap[name.Utf8Value()] = testData;
@@ -128,7 +130,15 @@ void FreeTSFN(const Napi::CallbackInfo &info) {
     TsfnContext *context = it->second;
     context->closed=true;
   
-    context->txThread.join();
+    // 直接强制终止线程
+    if (context->txThreadHandle != nullptr) {
+        TerminateThread(context->txThreadHandle, 0);
+        CloseHandle(context->txThreadHandle);
+    }
+    
+    if (context->txThread.joinable()) {
+        context->txThread.detach();
+    }
 
    
     context->txtsfn.Release();

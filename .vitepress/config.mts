@@ -302,7 +302,8 @@ export default withMermaid({
               { text: 'UDS Hex/S19 File', link: '/examples/uds_hex_s19_file/readme' },
               { text: 'UDS Binary File', link: '/examples/uds_bin_file/readme' },
               { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
-              { text: 'UDS Code Generate', link: '/examples/uds_generate_code/readme' }
+              { text: 'UDS Code Generate', link: '/examples/uds_generate_code/readme' },
+              { text: 'UDS Authentication Service(0x29)', link: '/examples/uds_0x29/readme' }
             ],
             collapsed: true
           },

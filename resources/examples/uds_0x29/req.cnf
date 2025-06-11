@@ -1,0 +1,17 @@
+[ req ]               # Main settings
+default_bits = 4096       # Default key size in bits.
+prompt = no               # Disables prompting for certificate values so the configuration file values are used.
+default_md = sha256       # Specifies the digest algorithm.
+distinguished_name = dn   # Specifies the section that includes the distinguished name information.
+x509_extensions = v3_ca   # The extentions to add to the self signed cert
+
+[ dn ]               # Distinguished name settings
+C = CN                    # Country
+ST = ChongQing             # State or province
+L = ChongQing             # Locality
+O = EcuBus-pro     # Organization
+OU = EcuBus-pro Development Team        # Organizational unit
+CN = app.whyengineer.com  # Common name.
+
+[ v3_ca ]          # x509v3 extensions
+basicConstraints=critical,CA:TRUE # Indicates whether the certificate is a CA certificate during the certificate chain verification process.

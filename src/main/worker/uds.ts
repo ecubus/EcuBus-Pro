@@ -1229,6 +1229,9 @@ export class UtilClass {
       for (const param of service.params) {
         param.value = Buffer.from(param.value)
       }
+      for (const param of service.respParams) {
+        param.value = Buffer.from(param.value)
+      }
       serviceMap.set(key, service)
     }
   }

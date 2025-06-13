@@ -101,6 +101,7 @@ export default class UdsTester {
   private varCb: any
   eventHandlerMap: Partial<EventHandlerMap> = {}
   constructor(
+    private id: string,
     private env: {
       PROJECT_ROOT: string
       PROJECT_NAME: string
@@ -215,8 +216,8 @@ export default class UdsTester {
       })
     }
   }
-  varHandle(data: { name: string; value: number | string | number[]; id: string }) {
-    if (!this.selfStop) {
+  varHandle(data: { name: string; value: number | string | number[]; id: string; uuid: string }) {
+    if (!this.selfStop && data.uuid != this.id) {
       this.workerEmit('__varUpdate', data).catch((e: any) => {
         this.log.systemMsg(e.toString(), this.ts, 'error')
       })

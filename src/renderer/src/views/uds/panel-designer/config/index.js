@@ -42,9 +42,10 @@ import image from './rule/image';
 import gird from './rule/grid'
 import progress from './rule/progress'
 import message from './rule/message'
+import led from './rule/led'
 
 const ruleList = [
-    input,select,number,radio,_switch,
+    input,select,number,radio,_switch,led,
     subForm,
     alert, button, text, html, divider, tag, image,
     gird,tabs,tabPane,progress,slider,message

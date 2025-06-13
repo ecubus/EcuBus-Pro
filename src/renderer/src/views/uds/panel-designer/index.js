@@ -37,6 +37,7 @@ import GridView from './components/grid/GridView.vue';
 import BButton from './components/BButton.vue';
 import TText from './components/TText.vue';
 import Message from './../log.vue'
+import Led from './components/BLed.vue'
 import {
     compareVersion,
     copyTextToClipboard,
@@ -63,6 +64,7 @@ const addComponent = (id, component, previewComponent) => {
 addComponent('xProgress',PProgress)
 addComponent('TText',TText)
 addComponent('Message',Message)
+addComponent('Led',Led)
 designerForm.component('draggable', draggable);
 designerForm.component('DragTool', DragTool);
 designerForm.component('DragBox', DragBox);

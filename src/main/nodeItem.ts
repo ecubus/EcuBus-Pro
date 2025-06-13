@@ -149,6 +149,7 @@ export class NodeClass {
           this.log.addTransport(testTransport)
         }
         this.pool = new UdsTester(
+          nodeItem.id,
           {
             PROJECT_ROOT: this.projectPath,
             PROJECT_NAME: this.projectName,

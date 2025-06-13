@@ -1,22 +1,23 @@
 {
   "data": {
     "devices": {
-      "33793bbe-170d-4569-96a7-37466ee4b533": {
+      "134d3685-2e6b-4840-b01c-707dcfad8962": {
         "type": "can",
         "canDevice": {
-          "id": "33793bbe-170d-4569-96a7-37466ee4b533",
-          "name": "PEAK_0",
-          "handle": 81,
-          "vendor": "peak",
+          "id": "134d3685-2e6b-4840-b01c-707dcfad8962",
+          "name": "KVASER_0",
+          "handle": 0,
+          "vendor": "kvaser",
           "canfd": false,
+          "database": "",
           "bitrate": {
             "sjw": 1,
             "timeSeg1": 13,
             "timeSeg2": 2,
-            "preScaler": 10,
+            "preScaler": 2,
             "freq": 500000,
-            "clock": "80",
-            "_X_ROW_KEY": "row_16"
+            "clock": "16",
+            "_X_ROW_KEY": "row_31"
           }
         }
       }
@@ -28,7 +29,7 @@
         "name": "Tester_1",
         "type": "can",
         "script": "bootloader.ts",
-        "targetDeviceId": "33793bbe-170d-4569-96a7-37466ee4b533",
+        "targetDeviceId": "134d3685-2e6b-4840-b01c-707dcfad8962",
         "seqList": [
           {
             "name": "Seq0",
@@ -1116,7 +1117,16 @@
       }
     },
     "subFunction": {},
-    "nodes": {}
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
   },
   "project": {
     "wins": {
@@ -1151,8 +1161,8 @@
       },
       "tester": {
         "pos": {
-          "x": 80,
-          "y": 280,
+          "x": 624,
+          "y": 151,
           "w": 1000,
           "h": 400
         },
@@ -1189,8 +1199,8 @@
       },
       "f6382924-1e8a-4cda-9d1a-c83aba366322_sequence": {
         "pos": {
-          "x": 140,
-          "y": 60,
+          "x": 1226,
+          "y": 79,
           "w": 1040,
           "h": 540
         },
@@ -1211,10 +1221,22 @@
           "h": 400
         },
         "isMax": false
+      },
+      "network": {
+        "pos": {
+          "x": 980,
+          "y": 296.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
       }
     },
-    "example":{
-      "catalog":"CAN"
+    "example": {
+      "catalog": "CAN"
     }
   }
 }

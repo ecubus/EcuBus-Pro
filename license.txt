@@ -1,27 +1,38 @@
-Open Source License
+EcuBus-Pro Community License v1.0
+(Based on Apache 2.0, with additional commercial and redistribution conditions)
 
-EcuBus-Pro is licensed under a modified version of the Apache License 2.0, with the following additional conditions:
+1. Grant of Use
+You may use, reproduce, and distribute EcuBus-Pro under the terms of the Apache License 2.0, except as modified by the additional conditions below.
 
-1. EcuBus-Pro may be utilized commercially, including as a diagnostic tool or as a development platform for enterprises. Should the conditions below be met, a commercial license must be obtained from the producer:
+2. Commercial Use Restrictions
+2.1. If you:
 
-a. Device support and licensing: 
-    - The EcuBus-Pro source code includes support for a set of standard usb devices.
-    - If you want to add support for your proprietary devices without open-sourcing the implementation, you must obtain a commercial license from EcuBus-Pro.
+Integrate proprietary device support without open-sourcing it; or
 
-b. LOGO and copyright information: In the process of using EcuBus-Pro's frontend, you may not remove or modify the LOGO or copyright information in the EcuBus-Pro console or applications. This restriction is inapplicable to uses of EcuBus-Pro that do not involve its frontend.
-    - Frontend Definition: For the purposes of this license, the "frontend" of EcuBus-Pro includes all components located in the `src/renderer/` directory when running EcuBus-Pro from the raw source code, or the "renderer" components when running EcuBus-Pro with Electron.
+Use EcuBus-Pro or derivatives in internal closed-source deployments (including SaaS or diagnostic tooling),
 
-2. As a contributor, you should agree that:
+You must obtain a commercial license from Whyengineer, Inc.
 
-a. The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
-b. Your contributed code may be used for commercial purposes, including but not limited to its diagnostic business operations.
+2.2. “Internal closed-source use” means usage within an organization without public release of modifications or source code.
 
+3. Copyleft Clause
+If you distribute or use modified versions of EcuBus-Pro, you must:
 
-Apart from the specific conditions mentioned above, all other rights and restrictions follow the Apache License 2.0. Detailed information about the Apache License 2.0 can be found at http://www.apache.org/licenses/LICENSE-2.0.
+Release all source code modifications under this same license,
 
-The interactive design and hardware interface of this product are protected by patents.
-EcuBus-Pro and its logo are registered trademarks of Whyengineer, Inc.
+Host the code in a public repository,
 
-© 2025 Whyengineer, Inc.
+Unless you obtain a commercial license.
 
-For commercial licensing inquiries, please contact: frankie.zengfu@gmail.com
+4. Branding and UI Restrictions
+You may not remove or alter the EcuBus-Pro name, logo, or trademarks in the frontend (defined as the src/renderer directory or corresponding UI in binary builds).
+
+5. Contribution Terms
+By contributing code, you:
+
+Agree that your contributions may be used under commercial licenses,
+
+Grant Whyengineer, Inc. the right to update this license in future versions.
+
+6. Legal Enforcement
+Violation of the above terms may result in termination of your license and legal action to recover damages.

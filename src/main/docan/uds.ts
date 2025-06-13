@@ -258,7 +258,7 @@ export class UDSTesterMain {
     private device: UdsDevice
   ) {
     this.project = project
-    this.tester = cloneDeep(tester)
+    this.tester = tester
     for (const s of Object.values(this.tester.allServiceList)) {
       for (const item of s) {
         this.services[item.id] = item

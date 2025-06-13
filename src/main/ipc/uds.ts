@@ -532,6 +532,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   global.database = arg[i++]
   global.vars = {}
+  global.tester = testers
+
   const vars: Record<string, VarItem> = arg[i++] || {}
   const sysVars = getAllSysVar(devices, testers)
 
@@ -689,7 +691,7 @@ ipcMain.handle('ipc-get-schedule', async (event, ...arg) => {
 ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
-  const tester = arg[2] as TesterInfo
+  const tester = global.tester[arg[2] as string]
   const device = arg[3] as UdsDevice
   const seqIndex = arg[4] as number
   const cycle = arg[5] as number

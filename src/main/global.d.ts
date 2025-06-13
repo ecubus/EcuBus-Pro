@@ -6,6 +6,7 @@ import { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { VarItem } from 'src/preload/data'
 import { BrowserWindow } from 'electron'
 import { IntervalHistogram } from 'node:perf_hooks'
+import type { DataSet } from 'src/preload/data'
 
 type VarUpdateItem = {
   name: string
@@ -22,10 +23,8 @@ declare global {
   var scriptLog: Logger
   var keyEvent: EventEmitter | undefined
   var varEvent: EventEmitter<VarEvent> | undefined
-  var database: {
-    lin: Record<string, LDF>
-    can: Record<string, DBC>
-  }
+  var database: DataSet['database']
+  var tester: DataSet['tester']
   var startTs: number
   var vars: Record<string, VarItem>
   var mainWindow: BrowserWindow

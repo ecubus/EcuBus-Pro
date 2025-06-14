@@ -467,7 +467,6 @@ const newVariableForm = ref<FromVarItem>({
 
 function createOrUpdateVariable() {
   variableForm.value?.validate((valid: boolean) => {
-    console.log(valid)
     if (valid) {
       const clone = cloneDeep(newVariableForm.value)
       const namespace = clone.namespace

@@ -101,7 +101,6 @@ function init() {
       if (rule.props && (rule.props.variable || rule.props.signal)) {
         const v: GraphNode<GraphBindSignalValue | GraphBindVariableValue> =
           rule.props.variable || rule.props.signal
-
         if (rule.field) {
           if (filedBackMap[v.id]) {
             filedBackMap[v.id].push(rule.field)

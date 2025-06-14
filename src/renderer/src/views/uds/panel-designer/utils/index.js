@@ -4,6 +4,7 @@ import toCase from '@form-create/utils/lib/tocase';
 import {computed, isRef, ref, unref} from 'vue';
 import ZhCn from '../locale/zh-cn';
 import {message} from './message';
+import { error } from 'electron-log';
 
 export {formTemplate, formTemplateV3, htmlTemplate} from './template';
 
@@ -399,7 +400,7 @@ export function copyTextToClipboard(text, id) {
     try {
         document.execCommand('copy');
     } catch (err) {
-        console.log('Oops, unable to copy');
+        error('Oops, unable to copy');
     }
 
     message('Copied', 'success', id);

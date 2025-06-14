@@ -50,4 +50,7 @@ After configuring your components, users can view and interact with them in the 
 ![Display Mode](./base1.gif)
 
 
+## Panel Example
+
+[Led Control Panel Example](../../../examples/panel/readme.md)
 

@@ -311,6 +311,10 @@ export default withMermaid({
             text: 'Test',
             items: [{ text: 'Test Simple', link: '/examples/test_simple/readme' }],
             collapsed: true
+          },
+          {
+            text: 'Panel',
+            link: '/examples/panel/readme'
           }
         ]
       },

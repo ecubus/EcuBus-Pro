@@ -399,7 +399,6 @@ const getNodeIcon = (data: any) => {
 }
 
 const onTreeQueryChanged = () => {
-  console.log(treeQuery.value)
   treeRef.value?.filter(treeQuery.value)
 }
 

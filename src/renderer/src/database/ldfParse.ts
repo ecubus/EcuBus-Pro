@@ -1709,7 +1709,6 @@ function formatLexerError(
   const lines = text.split('\n')
   const originalLines = originalText.split('\n')
   const lineNumber = error.line - 1
-  console.log(lineNumber, lineMapping)
   const originalLineNumber = lineMapping[lineNumber]
 
   // Get context from original text

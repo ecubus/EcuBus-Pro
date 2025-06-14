@@ -977,7 +977,6 @@ async function generateAllCode() {
         await window.electron.ipcRenderer.invoke('ipc-fs-writeFile', outputPath, renderedContent)
 
         successCount++
-        console.log(`Generated: ${config.tempaltePath} -> ${config.generatePath}`)
       } catch (error: any) {
         // 遇到错误立即停止并显示错误信息
         let formattedError: string

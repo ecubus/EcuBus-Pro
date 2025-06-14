@@ -142,6 +142,7 @@ import deviceIcon from '@iconify/icons-material-symbols/important-devices-outlin
 import presentIcon from '@iconify/icons-mdi/presentation-play'
 import { TesterInfo } from 'nodeCan/tester'
 import { useGlobalStart } from '@r/stores/runtime'
+import { error } from 'electron-log'
 
 const seqCycle = ref(1)
 const dataBase = useDataStore()
@@ -252,7 +253,7 @@ function startSeq() {
         seqCycle.value
       )
       .catch((e) => {
-        console.log(e)
+        error(e)
       })
       .finally(() => {
         start.value = false

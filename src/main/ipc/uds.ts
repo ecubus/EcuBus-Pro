@@ -112,6 +112,7 @@ ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
   const log = new UdsLOG(test.name)
   const jsPath = getJsPath(test.script, projectPath)
   const worker = new UdsTester(
+    test.id,
     {
       PROJECT_ROOT: projectPath,
       PROJECT_NAME: projectName,

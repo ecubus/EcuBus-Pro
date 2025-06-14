@@ -327,6 +327,7 @@ export class UDSTesterMain {
         const jsPath = getJsPath(scriptPath, this.project.projectPath)
 
         this.pool = new UdsTester(
+          this.tester.id,
           {
             PROJECT_ROOT: this.project.projectPath,
             PROJECT_NAME: this.project.projectName,
@@ -795,6 +796,7 @@ export class UDSTesterMain {
                   let tmpPool: UdsTester | undefined
                   try {
                     tmpPool = new UdsTester(
+                      tester.tester.id,
                       {
                         PROJECT_ROOT: tester.project.projectPath,
                         PROJECT_NAME: tester.project.projectName,

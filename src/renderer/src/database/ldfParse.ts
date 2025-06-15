@@ -1782,7 +1782,6 @@ export default function parseInput(text: string) {
 
   const lexingResult = LdfLexer.tokenize(text)
   if (lexingResult.errors.length > 0) {
-    console.log(lexingResult.errors)
     const formattedErrors = lexingResult.errors.map((err) =>
       formatLexerError(err, text, originalText, lineMapping)
     )

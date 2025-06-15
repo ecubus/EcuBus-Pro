@@ -530,11 +530,12 @@ onMounted(() => {
 }
 
 .info {
-  border: 1px solid #ccc;
+  border: 1px solid var(--el-border-color);
   border-radius: 8px;
   padding: 10px;
   margin: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--el-bg-color-overlay);
 }
 
 .doc:hover {

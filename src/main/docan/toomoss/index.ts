@@ -72,9 +72,11 @@ export class TOOMOSS_CAN extends CanBase {
     if (!target) {
       throw new Error('Invalid handle')
     }
-
+    if (this.info.bitrate.clock == undefined) {
+      throw new Error('Clock frequency is not set')
+    }
     // 检查波特率配置
-    const CLOCK = 40_000_000 // 40MHz时钟
+    const CLOCK = Number(this.info.bitrate.clock) * 1000000
 
     // 检查普通CAN波特率
     if (info.bitrate.freq) {

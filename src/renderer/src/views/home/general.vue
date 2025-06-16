@@ -4,6 +4,27 @@
       <el-form-item>
         <template #label>
           <div class="label-container">
+            <span>Theme</span>
+            <el-tooltip
+              content="Choose between light and dark theme"
+              placement="bottom"
+              effect="light"
+            >
+              <el-icon class="question-icon"><QuestionFilled /></el-icon>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-switch
+          v-model="isDark"
+          inline-prompt
+          :active-icon="Moon"
+          :inactive-icon="Sunny"
+          @change="handleThemeChange"
+        />
+      </el-form-item>
+      <el-form-item>
+        <template #label>
+          <div class="label-container">
             <span>UI Zoom</span>
             <el-tooltip
               content="Adjust the overall UI scaling of the application"
@@ -32,9 +53,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { QuestionFilled } from '@element-plus/icons-vue'
+import { QuestionFilled, Moon, Sunny } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
+import { useDark } from '@vueuse/core'
 
+const isDark = useDark()
 const form = ref({
   zoom: 100
 })
@@ -55,9 +78,11 @@ const handleZoomChange = (value: number) => {
   window.electron.webFrame.setZoomFactor(value / 100)
 }
 
-onMounted(() => {
-  // TODO: Load initial zoom value from config
+const handleThemeChange = (value: boolean) => {
+  isDark.value = value
+}
 
+onMounted(() => {
   if (OldVal) {
     assign(form.value, OldVal)
   }

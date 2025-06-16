@@ -16,22 +16,18 @@
           </el-button>
         </el-tooltip>
 
-        <!-- <el-tooltip effect="light" :content="autoScroll ? 'Disable Auto-Scroll' : 'Enable Auto-Scroll'" placement="bottom" >
-                     <el-button :type="autoScroll ? 'success' : 'warning'" link @click="toggleAutoScroll">
-                        <Icon :icon="autoScroll ? scrollIcon2 : scrollIcon1" />
-                     </el-button>
-                  </el-tooltip> -->
+        <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+          <el-button
+            :type="isPaused ? 'success' : 'warning'"
+            link
+            :class="{ 'pause-active': isPaused }"
+            @click="togglePause"
+          >
+            <Icon :icon="isPaused ? playIcon : pauseIcon" />
+          </el-button>
+        </el-tooltip>
       </el-button-group>
-      <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
-        <el-button
-          :type="isPaused ? 'success' : 'warning'"
-          link
-          :class="{ 'pause-active': isPaused }"
-          @click="togglePause"
-        >
-          <Icon :icon="isPaused ? playIcon : pauseIcon" />
-        </el-button>
-      </el-tooltip>
+
       <el-divider v-if="showFilter" direction="vertical" />
       <el-dropdown v-if="showFilter" trigger="click">
         <span class="el-dropdown-link">
@@ -762,7 +758,9 @@ onMounted(() => {
       EMPTY_TEXT: 'No data',
       BODY_CELL_STYLE_METHOD: ({ row }) => {
         const method = row.method
-        let color = ''
+        let color = getComputedStyle(document.documentElement)
+          .getPropertyValue('--el-color-info')
+          .trim()
         switch (method) {
           case 'canBase':
           case 'linBase':

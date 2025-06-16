@@ -15,6 +15,7 @@ import { cloneDeep, get } from 'lodash'
 import { Inter, NodeItem } from 'src/preload/data'
 import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
+import { useDark } from '@vueuse/core'
 
 export interface udsBase {
   name: string
@@ -545,6 +546,8 @@ export class UDSView {
   graph: joint.dia.Graph
   paper?: joint.dia.Paper
   ceilMap: Map<string, udsCeil> = new Map()
+  private isDark = useDark()
+
   constructor(
     graph: joint.dia.Graph,
     private layout: Layout
@@ -723,13 +726,24 @@ export class UDSView {
     })
     link.target({
       id: to,
-
       anchor: {
         name: 'left'
       }
     })
     link.router('rightAngle')
-    // link.connector('rounded')
+    // Add styling for better visibility based on theme
+    const linkColor = this.isDark.value ? '#FFFFFF' : '#000000'
+    link.attr({
+      line: {
+        stroke: linkColor,
+        strokeWidth: 2,
+        targetMarker: {
+          type: 'path',
+          d: 'M 10 -5 0 0 10 5 Z',
+          fill: linkColor
+        }
+      }
+    })
     this.graph.addCell(link)
   }
   getLink(from: string, to: string) {

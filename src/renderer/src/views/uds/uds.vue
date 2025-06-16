@@ -504,7 +504,7 @@
             style="overflow: auto"
             :style="{
               height: item.pos.h - 28 + 'px',
-              backgroundColor: 'white'
+              backgroundColor: 'var(--el-bg-color)'
             }"
           >
             <component
@@ -577,7 +577,7 @@
             style="overflow: auto"
             :style="{
               height: item.pos.h - 26 + 'px',
-              backgroundColor: 'white'
+              backgroundColor: 'var(--el-bg-color)'
             }"
           >
             <component
@@ -992,6 +992,7 @@ watch([contentH, contentW], (val) => {
 
 .demo-tabs .el-tabs__content {
   padding: 0px !important;
+  background-color: var(--el-bg-color) !important;
 }
 
 .demo-tabs {
@@ -1010,7 +1011,6 @@ watch([contentH, contentW], (val) => {
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
-  // border-bottom: solid 1px var(--el-color-info-light-5);
 }
 
 .tablePin .el-tabs__content {
@@ -1114,7 +1114,7 @@ watch([contentH, contentW], (val) => {
   overflow-y: hidden;
   overflow-x: hidden;
   position: relative;
-  background-color: #fafafa;
+  background-color: var(--el-bg-color);
 }
 
 .lr {

@@ -696,7 +696,7 @@ onMounted(() => {
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
-  color: #303133;
+  color: var(--el-text-color-primary);
   transition: background-color 0.3s;
 }
 

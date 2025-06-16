@@ -16,18 +16,34 @@
 
 <script setup lang="ts">
 import HeaderView from '@r/views/header/header.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
 import { useWindowSize } from '@vueuse/core'
 import { useGlobalStart } from './stores/runtime'
+import { useDark } from '@vueuse/core'
+import { VxeUI } from 'vxe-table'
 
 const data = useDataStore()
 const project = useProjectStore()
 const { width, height } = useWindowSize()
 const globalStart = useGlobalStart()
+const isDark = useDark()
 const params = ref<any>({})
+
+// Watch for dark theme changes
+watch(isDark, (value) => {
+  VxeUI.setTheme(value ? 'dark' : 'default')
+})
+
+onMounted(() => {
+  // Set initial theme
+  if (isDark.value) {
+    VxeUI.setTheme('dark')
+  }
+})
+
 if (window.params.id) {
   params.value = window.params
   if (params.value['edit-index']) {
@@ -69,6 +85,21 @@ body {
   }
 }
 
+/* Add global style for el-button-group divider */
+.el-button-group {
+  .el-button {
+    &:not(:last-child):not(:only-child) {
+      border-right: 1px solid var(--el-bg-color) !important;
+    }
+    &:not(:first-child):not(:only-child) {
+      border-left: 1px solid var(--el-bg-color) !important;
+    }
+    &:only-child {
+      border: none !important;
+    }
+  }
+}
+
 ::-webkit-scrollbar {
   width: 7px;
   height: 5px;
@@ -77,21 +108,21 @@ body {
 }
 
 ::-webkit-scrollbar-track-piece {
-  background-color: var(--el-color-white);
+  background-color: var(--el-bg-color);
   border-radius: 15px;
   -webkit-border-radius: 15px;
 }
 
 ::-webkit-scrollbar-thumb:vertical {
   height: 5px;
-  background-color: var(--el-color-info-light-7);
+  background-color: var(--el-border-color-darker);
   border-radius: 15px;
   -webkit-border-radius: 15px;
 }
 
 ::-webkit-scrollbar-thumb:horizontal {
   width: 7px;
-  background-color: var(--el-color-info-light-7);
+  background-color: var(--el-border-color-darker);
   border-radius: 15px;
   -webkit-border-radius: 15px;
 }

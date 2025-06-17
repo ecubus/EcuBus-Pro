@@ -388,6 +388,19 @@ export type NsSectionCstChildren = {
   SG_MUL_VAL?: IToken[]
 }
 
+export interface SignalGroupClauseCstNode extends CstNode {
+  name: 'signalGroupClause'
+  children: SignalGroupClauseCstChildren
+}
+
+export type SignalGroupClauseCstChildren = {
+  SIG_GROUP: IToken[]
+  Number: IToken[]
+  Identifier: IToken[]
+  Colon: IToken[]
+  Semicolon: IToken[]
+}
+
 export interface DbcFileCstNode extends CstNode {
   name: 'dbcFile'
   children: DbcFileCstChildren
@@ -408,6 +421,7 @@ export type DbcFileCstChildren = {
   valueDefinitionClause?: ValueDefinitionClauseCstNode[]
   signalValueTypeClause?: SignalValueTypeClauseCstNode[]
   environmentVariableClause?: EnvironmentVariableClauseCstNode[]
+  signalGroupClause?: SignalGroupClauseCstNode[]
 }
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -440,5 +454,6 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   nodeComment(children: NodeCommentCstChildren, param?: IN): OUT
   commentClause(children: CommentClauseCstChildren, param?: IN): OUT
   nsSection(children: NsSectionCstChildren, param?: IN): OUT
+  signalGroupClause(children: SignalGroupClauseCstChildren, param?: IN): OUT
   dbcFile(children: DbcFileCstChildren, param?: IN): OUT
 }

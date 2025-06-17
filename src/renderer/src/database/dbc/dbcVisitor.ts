@@ -46,7 +46,8 @@ import {
   MultiplexedValueClauseCstChildren,
   SignalValueTypeClauseCstChildren,
   EnvironmentVariableClauseCstNode,
-  EnvironmentVariableClauseCstChildren
+  EnvironmentVariableClauseCstChildren,
+  SignalGroupClauseCstChildren
 } from './dbc_cst'
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
@@ -339,6 +340,13 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
       ctx.environmentVariableClause.forEach((envVarNode: EnvironmentVariableClauseCstNode) => {
         const parsedEnvVar = this.environmentVariableClause(envVarNode.children)
         dbc.environmentVariables[parsedEnvVar.name] = parsedEnvVar
+      })
+    }
+
+    if (ctx.signalGroupClause) {
+      ctx.signalGroupClause.forEach((sgNode) => {
+        const group = this.signalGroupClause(sgNode.children)
+        // dbc.signalGroups!.push(group)
       })
     }
 
@@ -741,5 +749,9 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     // 由于 nsSection 主要是描述符号表，不需要返回特定值
     // 可以在这里添加任何需要的处理逻辑
     // if(ctx.SGTYPE)
+  }
+
+  signalGroupClause(ctx: SignalGroupClauseCstChildren): void {
+    //
   }
 }

@@ -16,6 +16,7 @@ describe('DBC Parser Tests', () => {
   let dbcContentTest: string
   let floatDbc: string
   let evDbc: string
+  let sgDbc: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -29,6 +30,7 @@ describe('DBC Parser Tests', () => {
     dbcContentTest = fs.readFileSync(path.join(__dirname, 'testdbc.dbc'), 'utf-8')
     floatDbc = fs.readFileSync(path.join(__dirname, 'float.dbc'), 'utf-8')
     evDbc = fs.readFileSync(path.join(__dirname, 'ev.dbc'), 'utf-8')
+    sgDbc = fs.readFileSync(path.join(__dirname, 'sig_group.dbc'), 'utf-8')
   })
 
   test('dbc model3', () => {
@@ -37,6 +39,13 @@ describe('DBC Parser Tests', () => {
     expect(result).toBeDefined()
     expect(isCanFd(result.messages[0x113])).toBe(false)
     expect(result.messages[0x113].extId).toBe(true)
+    // Add more specific assertions based on the expected structure of Model3CAN.dbc
+  })
+  test('dbc sig_group', () => {
+    const result = parse(sgDbc)
+    // Add assertions to verify the parsed values for Model3CAN.dbc
+    expect(result).toBeDefined()
+
     // Add more specific assertions based on the expected structure of Model3CAN.dbc
   })
 

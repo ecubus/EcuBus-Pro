@@ -518,6 +518,19 @@ class DBCParser extends CstParser {
     // this.CONSUME1(Semicolon);
   })
 
+  // Add rule for signal group (SIG_GROUP_)
+  private signalGroupClause = this.RULE('signalGroupClause', () => {
+    this.CONSUME(SIG_GROUP)
+    this.CONSUME1(Number) // Message ID
+    this.CONSUME1(Identifier) // Group name
+    this.CONSUME2(Number) // Repetitions
+    this.CONSUME1(Colon)
+    this.AT_LEAST_ONE(() => {
+      this.CONSUME2(Identifier) // Signal names
+    })
+    this.CONSUME1(Semicolon)
+  })
+
   public dbcFile = this.RULE('dbcFile', () => {
     // Version section is optional
     this.OPTION(() => {
@@ -545,7 +558,8 @@ class DBCParser extends CstParser {
         { ALT: () => this.SUBRULE2(this.comment) },
         { ALT: () => this.SUBRULE2(this.valueDefinition) },
         { ALT: () => this.SUBRULE2(this.signalValueType) },
-        { ALT: () => this.SUBRULE2(this.environmentVariable) }
+        { ALT: () => this.SUBRULE2(this.environmentVariable) },
+        { ALT: () => this.SUBRULE2(this.signalGroupClause) } // Add signal group parsing
       ])
     })
   })

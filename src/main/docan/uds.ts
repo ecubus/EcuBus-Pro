@@ -887,10 +887,14 @@ export function findService(
 ): ServiceItem | undefined {
   let sid = data[0]
   let isNeg = false
+  let ncr: number | undefined
   if (!isReq) {
     if (sid == 0x7f) {
       isNeg = true
-      sid = data[1]
+      if (data.length > 2) {
+        sid = data[1]
+        ncr = data[2]
+      }
     } else {
       sid -= 0x40
     }
@@ -951,17 +955,21 @@ export function findService(
         id: v4(),
         name: serviceId,
         serviceId: serviceId,
+        isNegativeResponse: isNeg,
+        nrc: ncr,
         params: [],
-        respParams: [
-          {
-            id: v4(),
-            name: 'param0',
-            type: 'ARRAY',
-            value: leftData,
-            phyValue: leftData,
-            bitLen: leftData.length * 8
-          }
-        ]
+        respParams: isNeg
+          ? []
+          : [
+              {
+                id: v4(),
+                name: 'param0',
+                type: 'ARRAY',
+                value: leftData,
+                phyValue: leftData,
+                bitLen: leftData.length * 8
+              }
+            ]
       }
     }
   }

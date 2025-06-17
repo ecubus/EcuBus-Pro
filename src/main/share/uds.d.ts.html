@@ -264,6 +264,8 @@ interface ServiceItem {
     desc?: string;
     params: Param[];
     respParams: Param[];
+    isNegativeResponse?: boolean;
+    nrc?: number;
     generateConfigs?: Record<string, string>;
 }
 interface Param {
@@ -974,7 +976,7 @@ declare class DiagResponse extends Service {
      * })
      *
      */
-    diagGetResponseCode(): number;
+    diagGetResponseCode(): number | undefined;
 }
 /**
  * @category UDS

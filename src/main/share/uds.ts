@@ -21,6 +21,8 @@ export interface ServiceItem {
   desc?: string
   params: Param[]
   respParams: Param[]
+  isNegativeResponse?: boolean
+  nrc?: number
   generateConfigs?: Record<string, string>
 }
 // 使用泛型简化定义
@@ -135,8 +137,17 @@ export function getTxPdu(service: ServiceItem, paddingVal = 0) {
 
 export function getRxPdu(service: ServiceItem, paddingVal = 0) {
   const buffer = Buffer.alloc(4096, paddingVal)
-  buffer[0] = Number(service.serviceId) + 0x40
+
+  if (service.isNegativeResponse) {
+    buffer[0] = 0x7f
+    buffer[1] = Number(service.serviceId)
+    buffer[2] = service.nrc || 0x00
+    return buffer.subarray(0, 3)
+  }
+
   let allLen = 1
+  buffer[0] = Number(service.serviceId) + 0x40
+
   for (const p of service.respParams) {
     const t = param2raw(p)
     const len = Math.ceil(p.bitLen / 8)
@@ -150,6 +161,16 @@ export function applyBuffer(service: ServiceItem, data: Buffer, isReq: boolean) 
     return
   }
   if (data[0] == 0x7f) {
+    if (!isReq) {
+      //Negative response
+      if (data[1] != Number(service.serviceId)) {
+        throw new Error(
+          `serviceId not match, expect ${service.serviceId} but got 0x${data[1].toString(16)}`
+        )
+      }
+      service.isNegativeResponse = true
+      service.nrc = data[2]
+    }
     return
   }
   let sid = data[0]

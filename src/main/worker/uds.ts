@@ -773,13 +773,7 @@ export class DiagResponse extends Service {
    *
    */
   diagIsPositiveResponse() {
-    const rxBuffer = getRxPdu(this.service)
-    const serviceId = Number(this.service.serviceId)
-    if (serviceId + 0x40 == rxBuffer[0]) {
-      return true
-    } else {
-      return false
-    }
+    return !this.service.isNegativeResponse
   }
   /**
    * This function will return the response code of one response.
@@ -798,10 +792,9 @@ export class DiagResponse extends Service {
    */
   diagGetResponseCode() {
     if (!this.diagIsPositiveResponse()) {
-      const rxBuffer = getRxPdu(this.service)
-      return rxBuffer.readUInt8(0)
+      return this.service.nrc
     } else {
-      throw new Error('DiagResponse is positive response')
+      return undefined
     }
   }
 }

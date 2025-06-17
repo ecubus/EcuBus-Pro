@@ -1,5 +1,21 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.44
+Changes from v0.8.43 to v0.8.44:
+
+ 
+* [bug]:fix toomoss can clock freq issue 
+* [feat]:add dark theme [Detail](https://app.whyengineer.com/docs/um/setting/general.html#theme)
+* [example]:add panel example [Detail](https://app.whyengineer.com/examples/panel/readme.html)
+* [feat]:add panel led component 
+* [bug]:fix var trigger 
+* [feat]:opt changeServiceApi 
+* [example]:add uds 0x29 example [Detail](https://app.whyengineer.com/examples/uds_0x29/readme.html)
+* [bug]:fix worker resp param is not buffer
+---
+
+# EcuBus-Pro Release Notes
+
 ## 0.8.43
 Changes from v0.8.42 to v0.8.43:
 

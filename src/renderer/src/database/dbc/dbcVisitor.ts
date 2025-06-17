@@ -44,7 +44,9 @@ import {
   MessageAttributeAssignmentCstChildren,
   SignalAttributeAssignmentCstChildren,
   MultiplexedValueClauseCstChildren,
-  SignalValueTypeClauseCstChildren
+  SignalValueTypeClauseCstChildren,
+  EnvironmentVariableClauseCstNode,
+  EnvironmentVariableClauseCstChildren
 } from './dbc_cst'
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
@@ -65,6 +67,7 @@ export interface DBC {
   messages: Record<number, Message>
   valueTables: Record<string, ValueTable>
   attributes: Record<string, Attribute>
+  environmentVariables: Record<string, EnvironmentVariable>
   comments: string[] // global comment
 }
 
@@ -132,6 +135,20 @@ export interface Attribute {
   currentValue?: number | string
 }
 
+export interface EnvironmentVariable {
+  name: string
+  initialValue: number
+  min: number
+  max: number
+  unit: string
+  defaultValue: number
+  evId: number
+  accessNode: 'unrestricted' | 'Read' | 'Write' | 'Read/Write'
+  nodes: string[]
+  comment?: string
+  attributes: Record<string, Attribute>
+}
+
 export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
   constructor() {
     super()
@@ -169,6 +186,7 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
       messages: {},
       valueTables: {},
       attributes: {},
+      environmentVariables: {},
       comments: []
     }
 
@@ -314,6 +332,13 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
             signal.valueType = signalValueType.valueType
           }
         }
+      })
+    }
+
+    if (ctx.environmentVariableClause) {
+      ctx.environmentVariableClause.forEach((envVarNode: EnvironmentVariableClauseCstNode) => {
+        const parsedEnvVar = this.environmentVariableClause(envVarNode.children)
+        dbc.environmentVariables[parsedEnvVar.name] = parsedEnvVar
       })
     }
 
@@ -687,6 +712,28 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     }
     //ok
     return v
+  }
+
+  environmentVariableClause(ctx: EnvironmentVariableClauseCstChildren): EnvironmentVariable {
+    const accessNodeMap: Record<string, 'unrestricted' | 'Read' | 'Write' | 'Read/Write'> = {
+      DUMMY_NODE_VECTOR0: 'unrestricted',
+      DUMMY_NODE_VECTOR1: 'Read',
+      DUMMY_NODE_VECTOR2: 'Write',
+      DUMMY_NODE_VECTOR3: 'Read/Write'
+    }
+    return {
+      name: ctx.Identifier[0].image,
+      initialValue: parseInt(ctx.Number[0].image, 10),
+      min: parseInt(ctx.Number[1].image, 10),
+      max: parseInt(ctx.Number[2].image, 10),
+      unit: ctx.StringLiteral[0].image.replace(/"/g, ''),
+      defaultValue: parseInt(ctx.Number[3].image, 10),
+      evId: parseInt(ctx.Number[4].image, 10),
+      accessNode:
+        accessNodeMap[ctx.Identifier[1].image as keyof typeof accessNodeMap] || 'unrestricted',
+      nodes: ctx.Identifier.slice(2).map((token: IToken) => token.image),
+      attributes: {}
+    }
   }
 
   nsSection(ctx: NsSectionCstChildren): void {

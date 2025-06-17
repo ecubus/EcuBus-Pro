@@ -418,6 +418,30 @@ class DBCParser extends CstParser {
     this.OPTION(() => this.CONSUME(Semicolon))
   })
 
+  // Add new rule for Environment Variable (EV_)
+  private environmentVariable = this.RULE('environmentVariableClause', () => {
+    this.CONSUME1(EV)
+    this.CONSUME1(Identifier) // Variable name
+    this.CONSUME1(Colon)
+    this.CONSUME1(Number) // Initial value
+    this.CONSUME1(OpenBracket)
+    this.CONSUME2(Number) // Min value
+    this.CONSUME1(Pipe)
+    this.CONSUME3(Number) // Max value
+    this.CONSUME1(CloseBracket)
+    this.CONSUME1(StringLiteral) // Unit
+    this.CONSUME4(Number) // Default value
+    this.CONSUME5(Number) // Access type
+    this.CONSUME2(Identifier) // Access node
+    this.AT_LEAST_ONE_SEP({
+      SEP: Comma,
+      DEF: () => {
+        this.CONSUME3(Identifier) // Node list
+      }
+    })
+    this.OPTION(() => this.CONSUME1(Semicolon))
+  })
+
   // Add new subrules for comment alternatives
   private signalComment = this.RULE('signalComment', () => {
     this.CONSUME1(SG)
@@ -520,7 +544,8 @@ class DBCParser extends CstParser {
         { ALT: () => this.SUBRULE2(this.multiplexedValue) },
         { ALT: () => this.SUBRULE2(this.comment) },
         { ALT: () => this.SUBRULE2(this.valueDefinition) },
-        { ALT: () => this.SUBRULE2(this.signalValueType) }
+        { ALT: () => this.SUBRULE2(this.signalValueType) },
+        { ALT: () => this.SUBRULE2(this.environmentVariable) }
       ])
     })
   })

@@ -287,6 +287,24 @@ export type SignalValueTypeClauseCstChildren = {
   Semicolon?: IToken[]
 }
 
+export interface EnvironmentVariableClauseCstNode extends CstNode {
+  name: 'environmentVariableClause'
+  children: EnvironmentVariableClauseCstChildren
+}
+
+export type EnvironmentVariableClauseCstChildren = {
+  EV: IToken[]
+  Identifier: IToken[]
+  Colon: IToken[]
+  Number: IToken[]
+  OpenBracket: IToken[]
+  Pipe: IToken[]
+  CloseBracket: IToken[]
+  StringLiteral: IToken[]
+  Comma?: IToken[]
+  Semicolon?: IToken[]
+}
+
 export interface SignalCommentCstNode extends CstNode {
   name: 'signalComment'
   children: SignalCommentCstChildren
@@ -389,6 +407,7 @@ export type DbcFileCstChildren = {
   commentClause?: CommentClauseCstNode[]
   valueDefinitionClause?: ValueDefinitionClauseCstNode[]
   signalValueTypeClause?: SignalValueTypeClauseCstNode[]
+  environmentVariableClause?: EnvironmentVariableClauseCstNode[]
 }
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -415,6 +434,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   multiplexedValueClause(children: MultiplexedValueClauseCstChildren, param?: IN): OUT
   valueDefinitionClause(children: ValueDefinitionClauseCstChildren, param?: IN): OUT
   signalValueTypeClause(children: SignalValueTypeClauseCstChildren, param?: IN): OUT
+  environmentVariableClause(children: EnvironmentVariableClauseCstChildren, param?: IN): OUT
   signalComment(children: SignalCommentCstChildren, param?: IN): OUT
   messageComment(children: MessageCommentCstChildren, param?: IN): OUT
   nodeComment(children: NodeCommentCstChildren, param?: IN): OUT

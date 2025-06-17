@@ -15,6 +15,7 @@ describe('DBC Parser Tests', () => {
   let dbcContentVwSkodaAudi: string
   let dbcContentTest: string
   let floatDbc: string
+  let evDbc: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -27,6 +28,7 @@ describe('DBC Parser Tests', () => {
     )
     dbcContentTest = fs.readFileSync(path.join(__dirname, 'testdbc.dbc'), 'utf-8')
     floatDbc = fs.readFileSync(path.join(__dirname, 'float.dbc'), 'utf-8')
+    evDbc = fs.readFileSync(path.join(__dirname, 'ev.dbc'), 'utf-8')
   })
 
   test('dbc model3', () => {
@@ -48,6 +50,14 @@ describe('DBC Parser Tests', () => {
     const result = parse(dbcContentTest)
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
+    // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
+  })
+  test('dbc ev', () => {
+    const result = parse(evDbc)
+    // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
+    expect(result).toBeDefined()
+    expect(result.environmentVariables['V2CTxTime'].name).toBe('V2CTxTime')
+    console.log(result.environmentVariables['V2CTxTime'])
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
   test('float', () => {

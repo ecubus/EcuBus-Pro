@@ -1,0 +1,91 @@
+VERSION "0.1"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Receiver ChassisBus VehicleBus V2C
+
+
+BO_ 2 GPSLatLong: 8 ChassisBus
+ SG_ GPSAccuracy : 57|7@1+ (0.2,0) [0|25] "m"  Receiver
+ SG_ GPSLongitude : 28|28@1- (1E-006,0) [-134.22|134.22] "Deg"  Receiver
+ SG_ GPSLatitude : 0|28@1- (1E-006,0) [-134.22|134.22] "Deg"  Receiver
+
+BO_ 3 GPSAltitude: 2 VehicleBus
+ SG_ GPSAltitude : 0|14@1- (1,0) [-1000|7000] "M"  Receiver
+
+BO_ 4 SOC: 8 VehicleBus
+ SG_ SOCavg : 30|10@1+ (0.1,0) [0|100] "%"  Receiver
+
+BO_ 5 GPSSpeed: 8 VehicleBus
+ SG_ GPSSpeed : 12|12@1+ (0.2,-10) [-50|300] "kph"  Receiver
+
+BO_ 6 BatteryCurrent: 8 VehicleBus
+ SG_ RawBattCurrent : 32|16@1- (0.05,-800) [-1000|1000] "A"  Receiver
+ SG_ SmoothBattCurrent : 16|16@1- (-0.5,0) [-1000|1000] "A"  Receiver
+ SG_ BattVoltage : 0|16@1+ (0.1,0) [0|1000] "V"  Receiver
+
+BO_ 7 PowerState: 2 VehicleBus
+ SG_ PowerState : 14|2@1+ (1,0) [0|3] ""  Receiver
+
+
+
+EV_ V2CTxTime: 0 [0|60000] "ms" 2000 1 DUMMY_NODE_VECTOR1  V2C,VehicleBus;
+
+EV_ GPSGroupTxFreq: 0 [0|60000] "ms" 600 2 DUMMY_NODE_VECTOR1  V2C;
+
+EV_ EnergyGroupTxFreq: 0 [0|60000] "ms" 500 3 DUMMY_NODE_VECTOR0  V2C;
+
+BA_DEF_ BO_  "TxGroupFreq" STRING ;
+BA_DEF_ SG_  "AggType" STRING ;
+BA_DEF_ EV_  "V2CTxTime1" STRING ;
+BA_DEF_DEF_  "TxGroupFreq" "";
+BA_DEF_DEF_  "AggType" "";
+BA_DEF_DEF_  "V2CTxTime1" "";
+BA_ "TxGroupFreq" BO_ 2 "GPSGroupTxFreq";
+BA_ "TxGroupFreq" BO_ 3 "GPSGroupTxFreq";
+BA_ "TxGroupFreq" BO_ 4 "EnergyGroupTxFreq";
+BA_ "TxGroupFreq" BO_ 5 "GPSGroupTxFreq";
+BA_ "TxGroupFreq" BO_ 6 "EnergyGroupTxFreq";
+BA_ "TxGroupFreq" BO_ 7 "GPSGroupTxFreq";
+BA_ "AggType" SG_ 2 GPSAccuracy "LAST";
+BA_ "AggType" SG_ 2 GPSLongitude "LAST";
+BA_ "AggType" SG_ 2 GPSLatitude "LAST";
+BA_ "AggType" SG_ 3 GPSAltitude "LAST";
+BA_ "AggType" SG_ 4 SOCavg "LAST";
+BA_ "AggType" SG_ 5 GPSSpeed "LAST";
+BA_ "AggType" SG_ 6 RawBattCurrent "AVG";
+BA_ "AggType" SG_ 6 SmoothBattCurrent "AVG";
+BA_ "AggType" SG_ 6 BattVoltage "AVG";
+BA_ "AggType" SG_ 7 PowerState "LAST";
+

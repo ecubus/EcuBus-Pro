@@ -7,6 +7,18 @@ The Trace window provides an interface for viewing and exporting data. Users can
 >[!INFO]
 > Currently, Trace has a maximum storage capacity of 50,000 entries. When this limit is exceeded, the oldest data will be automatically deleted.
 
+## Overwrite Mode
+
+Use below button to switch between overwrite mode and scroll mode.
+![alt text](image-5.png)
+
+In overwrite mode, the Trace window will overwrite the oldest data when the maximum storage capacity is exceeded.
+![ow](ow.gif)
+
+
+
+
+
 ## Filter
 
 ### Filter By Device

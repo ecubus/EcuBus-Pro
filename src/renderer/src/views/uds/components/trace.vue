@@ -26,6 +26,16 @@
             <Icon :icon="isPaused ? playIcon : pauseIcon" />
           </el-button>
         </el-tooltip>
+        <el-tooltip effect="light" content="Swtich Overwrite/Scroll" placement="bottom">
+          <el-button
+            :type="isOverwrite ? 'success' : 'primary'"
+            link
+            :class="{ 'pause-active': isOverwrite }"
+            @click="toggleOverwrite"
+          >
+            <Icon :icon="switchIcon" />
+          </el-button>
+        </el-tooltip>
       </el-button-group>
 
       <el-divider v-if="showFilter" direction="vertical" />
@@ -105,6 +115,7 @@ import filterIcon from '@iconify/icons-material-symbols/filter-alt-off-outline'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
+import switchIcon from '@iconify/icons-material-symbols/cameraswitch-outline-rounded'
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
 import ExcelJS from 'exceljs'
@@ -121,7 +132,8 @@ interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
   data: string
   ts: string
-  id?: string
+  id: string
+  key?: string
   dlc?: number
   len?: number
   device: string
@@ -132,7 +144,19 @@ interface LogData {
   seqIndex?: number
   children?: LogData[] | { name: string; data: string }[]
 }
-
+const isOverwrite = ref(false)
+function toggleOverwrite() {
+  isOverwrite.value = !isOverwrite.value
+  if (isOverwrite.value) {
+    // clearLog('Switch Overwrite Mode')
+    // remove duplicate data
+    const uniqueData = allLogData.filter(
+      (item, index, self) => index === self.findIndex((t) => t.key === item.key)
+    )
+    allLogData = uniqueData
+    grid.loadData(allLogData)
+  }
+}
 const database = useDataStore()
 const instanceList = ref<string[]>([])
 const allInstanceList = computed(() => {
@@ -199,10 +223,12 @@ watch(globalStart, (val) => {
   }
 })
 
+let expandskey: string[] = []
 function clearLog(msg = 'Clear Trace') {
   allLogData = []
 
   scrollY = -1
+  expandskey = []
   //TODO:
   grid.loadData([])
   grid.scrollYTo(0)
@@ -233,7 +259,24 @@ const maxLogCount = 50000
 const showLogCount = 500
 
 function insertData2(data: LogData[]) {
-  allLogData.push(...data)
+  if (isOverwrite.value) {
+    for (const item of data) {
+      if (item.id) {
+        // Find index of existing log with same id
+        const idx = allLogData.findIndex((log) => log.key === item.key)
+        if (idx !== -1) {
+          // Overwrite the existing log entry
+          allLogData[idx] = item
+        } else {
+          allLogData.push(item)
+        }
+      } else {
+        allLogData.push(item)
+      }
+    }
+  } else {
+    allLogData.push(...data)
+  }
   if (allLogData.length > maxLogCount) {
     const excessRows = allLogData.length - maxLogCount
     allLogData.splice(0, excessRows)
@@ -241,7 +284,11 @@ function insertData2(data: LogData[]) {
 
   // 根据暂停状态决定加载多少数据
   const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
+
   grid.loadData(displayData)
+  if (isOverwrite.value) {
+    grid.setExpandRowKeys(expandskey)
+  }
   grid.scrollYTo(99999999999)
 }
 function logDisplay(method: string, vals: LogItem[]) {
@@ -250,6 +297,7 @@ function logDisplay(method: string, vals: LogItem[]) {
 
   const logData: LogData[] = []
   const insertData = (data: LogData) => {
+    data.key = `${data.channel}-${data.device}-${data.id}`
     logData.push(data)
   }
   for (const val of vals) {
@@ -268,7 +316,8 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
         name: val.message.data.name,
-        children: val.message.data.children
+        children: val.message.data.children,
+        key: `${val.instance}-${val.message.data.id}`
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
@@ -311,7 +360,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: testerName,
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
@@ -337,7 +386,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: testerName,
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
@@ -352,7 +401,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: '',
         data: val.message.data.msg,
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: 'canError',
         len: 0,
         device: val.label,
         channel: val.instance,
@@ -383,7 +432,7 @@ function logDisplay(method: string, vals: LogItem[]) {
           name: '',
           data: val.message.data.msg,
           ts: (val.message.data.ts / 1000000).toFixed(3),
-          id: '',
+          id: 'linError',
           len: 0,
           device: val.label,
           channel: val.instance,
@@ -396,7 +445,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: '',
         data: val.message.data.msg,
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: 'linEvent',
         len: 0,
         device: val.label,
         channel: val.instance,
@@ -408,7 +457,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: '',
         data: val.message.data.msg,
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: 'udsScript',
         len: 0,
         device: val.label,
         channel: val.instance,
@@ -420,7 +469,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: '',
         data: val.message.data.msg,
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: '',
+        id: 'udsSystem',
         len: 0,
         device: val.label,
         channel: val.instance,
@@ -721,11 +770,16 @@ watch(
   },
   { deep: true }
 )
-watch(isPaused, (v) => {
-  if (v) {
+watch([isPaused, isOverwrite], (v) => {
+  if (v[1]) {
     columes.value[0].type = 'tree'
   } else {
-    columes.value[0].type = undefined
+    if (v[0]) {
+      columes.value[0].type = 'tree'
+    } else {
+      columes.value[0].type = undefined
+      scrollY = -1
+    }
   }
 })
 
@@ -749,6 +803,7 @@ onMounted(() => {
       DISABLED: true,
       HEADER_HEIGHT: 28,
       CELL_HEIGHT: 28,
+      ROW_KEY: 'key',
       ENABLE_SELECTOR: false,
       ENABLE_HISTORY: false,
       ENABLE_COPY: false,
@@ -813,10 +868,15 @@ onMounted(() => {
 
   grid.on('onScrollY', (v) => {
     if (!isPaused.value && scrollY !== -1 && v < scrollY) {
-      isPaused.value = true
+      if (!isOverwrite.value) {
+        isPaused.value = true
+      }
     } else {
       scrollY = v
     }
+  })
+  grid.on('expandChange', (v) => {
+    expandskey = v
   })
 })
 watch([tableWidth, tableHeight], () => {
@@ -824,6 +884,7 @@ watch([tableWidth, tableHeight], () => {
     WIDTH: tableWidth.value,
     HEIGHT: tableHeight.value
   })
+  grid.setExpandRowKeys(expandskey)
 })
 
 onUnmounted(() => {

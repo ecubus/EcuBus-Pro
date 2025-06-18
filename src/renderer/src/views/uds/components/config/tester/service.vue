@@ -93,10 +93,11 @@
                 v-for="(item, index) in reqArrayStr"
                 :key="index"
                 :style="{
+                  padding: '1px',
                   backgroundColor:
                     index % 2 == 0
-                      ? 'var(--el-color-info-light-9)'
-                      : 'var(--el-color-primary-light-9)'
+                      ? 'var(--el-color-info-light-7)'
+                      : 'var(--el-color-primary-light-7)'
                 }"
                 class="param"
                 >{{ item }}</span
@@ -109,10 +110,11 @@
                 v-for="(item, index) in respArrayStr"
                 :key="index"
                 :style="{
+                  padding: '1px',
                   backgroundColor:
                     index % 2 == 0
-                      ? 'var(--el-color-info-light-9)'
-                      : 'var(--el-color-primary-light-9)'
+                      ? 'var(--el-color-info-light-7)'
+                      : 'var(--el-color-primary-light-7)'
                 }"
                 class="param"
                 >{{ item }}</span

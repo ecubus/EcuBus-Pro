@@ -106,6 +106,7 @@ function createWindow(): void {
     show: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
+      backgroundThrottling: false,
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true

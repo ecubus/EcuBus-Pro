@@ -52,7 +52,8 @@ ipcMain.on('ipc-open-window', (event, arg) => {
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         sandbox: false,
-        contextIsolation: true
+        contextIsolation: true,
+        backgroundThrottling: false
       },
       frame: false,
       show: false

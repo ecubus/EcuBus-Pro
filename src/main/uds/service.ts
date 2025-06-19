@@ -1893,7 +1893,7 @@ export const serviceDetail: ServiceDetial = {
         param: {
           name: 'dtcSettingControlOptionRecord',
           bitLen: 8,
-          deletable: false,
+          deletable: true,
           editable: true,
           type: 'ARRAY',
           value: Buffer.from([0x0]),

@@ -1403,6 +1403,22 @@ global.Util = Util
  * @category CAN
  * @param {CanMessage} msg - The CAN message to be sent
  * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
+ * @example
+ * ```ts
+ * // Send a standard CAN message with 8 bytes of data
+ *  const canMsg: CanMessage = {
+      id: 0x111, // CAN ID in hex
+      data: Buffer.from([0,1,2,3,4,5,6,7]), // 8 bytes of data
+      dir: 'OUT', // Output direction
+      msgType: {
+        idType: CAN_ID_TYPE.STANDARD, // Standard CAN frame
+        remote: false, // Not a remote frame
+        brs: false, // No bit rate switching
+        canfd: false // Not a CAN FD frame
+      }
+    }
+   const timestamp = await output(canMsg) // Send and get timestamp
+ * ```
  */
 export async function output(msg: CanMessage): Promise<number>
 /**

@@ -1,14 +1,14 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import parse, { isCanFd } from 'src/renderer/src/database/dbcParse'
-import { updateSignalPhys } from 'src/renderer/src/database/dbc/calc'
+import {
+  getMessageData,
+  getSignal,
+  setSignal,
+  writeMessageData
+} from 'src/renderer/src/database/dbc/calc'
 import fs from 'fs'
 import path from 'path'
 import { CAN_ID_TYPE } from 'src/main/share/can'
-import {
-  getMessageData,
-  updateSignalRaw,
-  writeMessageData
-} from 'src/renderer/src/database/dbc/calc'
 
 describe('DBC Parser Tests', () => {
   let dbcContentModel3: string
@@ -42,10 +42,8 @@ describe('DBC Parser Tests', () => {
     const s = result.messages[0x200].signals['HhBmIO']
     const s1 = result.messages[0x200].signals['LwBmIO']
 
-    s.physValue = 1
-    s1.physValue = 1
-    updateSignalPhys(s)
-    updateSignalPhys(s1)
+    setSignal(s, 1, result)
+    setSignal(s1, 1, result)
 
     const buf = getMessageData(result.messages[0x200])
     expect(buf).toEqual(Buffer.from([0x81, 0, 0, 0, 0, 0, 0, 0]))
@@ -53,10 +51,8 @@ describe('DBC Parser Tests', () => {
     const ns = result.messages[12].signals['UI_audioActive']
     const ns1 = result.messages[12].signals['UI_cellVector__XXXPower']
 
-    ns.physValue = 1
-    ns1.physValue = -116
-    updateSignalPhys(ns)
-    updateSignalPhys(ns1)
+    setSignal(ns, 1, result)
+    setSignal(ns1, '-116', result)
 
     const buf1 = getMessageData(result.messages[12])
     expect(buf1).toEqual(Buffer.from([0x2, 0, 0, 0xc, 0, 0, 0, 0]))
@@ -67,6 +63,28 @@ describe('DBC Parser Tests', () => {
     expect(result).toBeDefined()
     expect(isCanFd(result.messages[0x113])).toBe(false)
     expect(result.messages[0x113].extId).toBe(true)
+
+    const msg = result.messages[0x142]
+    writeMessageData(msg, Buffer.from([0, 0, 0, 0xd0, 0x3c, 0, 0, 0]), result)
+    const s1 = getSignal(msg.signals['VCLEFT_liftgateStatusIndex'], result)
+    expect(s1.phy).toBe('LIFTGATE_STATUS_INDEX_0')
+    /*Name	Generator Control	Generator Type	Raw Value	Raw Step	Phys Value	Phys Step	Unit	Start Bit	Length
+VCLEFT_liftgateStoppingCondition		None	0	1	PLG_STOPPING_CONDITION_NONE	1		10	4*/
+    const s2 = getSignal(msg.signals['VCLEFT_liftgateStoppingCondition'], result)
+    expect(s2.phy).toBe('PLG_STOPPING_CONDITION_NONE')
+
+    writeMessageData(msg, Buffer.from([0x9, 0x68, 0xde, 0xd0, 0x3c, 0, 0, 0]), result)
+    /*Name	Generator Control	Generator Type	Raw Value	Raw Step	Phys Value	Phys Step	Unit	Start Bit	Length
+VCLEFT_liftgateSpeed		None	3CD	33	-5.1	3.0	deg/s	28	10*/
+    const s3 = getSignal(msg.signals['VCLEFT_liftgateSpeed'], result)
+    expect(s3.phy).toBe('-5.1')
+    expect(s3.raw).toBe(0x3cd)
+
+    setSignal(msg.signals['VCLEFT_liftgateSpeed'], '-2.1', result)
+    expect(msg.signals['VCLEFT_liftgateSpeed'].value).toBe(0x3eb)
+    console.log(msg)
+    const buf = getMessageData(msg)
+    expect(buf).toBe(Buffer.from([0x9, 0x58, 0xdf, 0xb0, 0x3e, 0, 0, 0]))
     // Add more specific assertions based on the expected structure of Model3CAN.dbc
   })
   test('dbc sig_group', () => {
@@ -105,9 +123,10 @@ describe('DBC Parser Tests', () => {
     expect(result.messages[Number(id)].signals['Binary32'].valueType).toEqual(1)
 
     writeMessageData(result.messages[Number(id)], Buffer.from([0, 0, 0x80, 0x3f]), result)
-    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
-    updateSignalRaw(result.messages[Number(id)].signals['Binary32'])
-    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
+    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual('1')
+
+    setSignal(result.messages[Number(id)].signals['Binary32'], '1', result)
+    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual('1')
     expect(getMessageData(result.messages[Number(id)])).toEqual(Buffer.from([0, 0, 0x80, 0x3f]))
   })
   test('dbc can1-vw-skoda-audi-uds-v2.5', () => {

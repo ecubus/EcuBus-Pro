@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import parse, { isCanFd } from 'src/renderer/src/database/dbcParse'
+import { updateSignalPhys } from 'src/renderer/src/database/dbc/calc'
 import fs from 'fs'
 import path from 'path'
 import { CAN_ID_TYPE } from 'src/main/share/can'
@@ -17,6 +18,7 @@ describe('DBC Parser Tests', () => {
   let floatDbc: string
   let evDbc: string
   let sgDbc: string
+  let id200Dbc: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -31,8 +33,34 @@ describe('DBC Parser Tests', () => {
     floatDbc = fs.readFileSync(path.join(__dirname, 'float.dbc'), 'utf-8')
     evDbc = fs.readFileSync(path.join(__dirname, 'ev.dbc'), 'utf-8')
     sgDbc = fs.readFileSync(path.join(__dirname, 'sig_group.dbc'), 'utf-8')
+    id200Dbc = fs.readFileSync(path.join(__dirname, 'ID200.dbc'), 'utf-8')
   })
+  test('id200', () => {
+    const result = parse(id200Dbc)
+    expect(result).toBeDefined()
+    expect(result.messages[0x200].name).toBe('Message_200')
+    const s = result.messages[0x200].signals['HhBmIO']
+    const s1 = result.messages[0x200].signals['LwBmIO']
 
+    s.physValue = 1
+    s1.physValue = 1
+    updateSignalPhys(s)
+    updateSignalPhys(s1)
+
+    const buf = getMessageData(result.messages[0x200])
+    expect(buf).toEqual(Buffer.from([0x81, 0, 0, 0, 0, 0, 0, 0]))
+
+    const ns = result.messages[12].signals['UI_audioActive']
+    const ns1 = result.messages[12].signals['UI_cellVector__XXXPower']
+
+    ns.physValue = 1
+    ns1.physValue = -116
+    updateSignalPhys(ns)
+    updateSignalPhys(ns1)
+
+    const buf1 = getMessageData(result.messages[12])
+    expect(buf1).toEqual(Buffer.from([0x2, 0, 0, 0xc, 0, 0, 0, 0]))
+  })
   test('dbc model3', () => {
     const result = parse(dbcContentModel3)
     // Add assertions to verify the parsed values for Model3CAN.dbc
@@ -66,7 +94,7 @@ describe('DBC Parser Tests', () => {
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
     expect(result.environmentVariables['V2CTxTime'].name).toBe('V2CTxTime')
-    console.log(result.environmentVariables['V2CTxTime'])
+
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
   test('float', () => {

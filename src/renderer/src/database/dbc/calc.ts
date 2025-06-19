@@ -215,12 +215,14 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
   } else {
     // Motorola格式 (Big Endian)
     let startByte = Math.floor(signal.startBit / 8)
-    let startBitInByte = 7 - (signal.startBit % 8)
+    let startBitInByte = signal.startBit % 8
     let remainingBits = signal.length
 
-    while (remainingBits > 0 && startByte >= 0 && startByte < data.length) {
-      const bitsInThisByte = Math.min(startBitInByte + 1, remainingBits)
-      const position = startBitInByte - bitsInThisByte + 1
+    while (remainingBits > 0) {
+      if (startByte < 0 || startByte >= data.length) break
+
+      const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
+      const position = startBitInByte
       const mask = (1 << bitsInThisByte) - 1
       const value = (data[startByte] >> position) & mask
 
@@ -391,24 +393,23 @@ function writeSignalToBuffer(signal: Signal, data: Buffer) {
   } else {
     // Motorola格式 (Big Endian)
     let startByte = Math.floor(signal.startBit / 8)
-    let startBitInByte = 7 - (signal.startBit % 8)
+    let startBitInByte = signal.startBit % 8
     let remainingBits = signal.length
-    const valueIndex = signal.length - 1
 
     while (remainingBits > 0) {
-      if (startByte >= data.length) break
+      if (startByte < 0 || startByte >= data.length) break
 
-      const bitsInThisByte = Math.min(startBitInByte + 1, remainingBits)
+      const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
+      const position = startBitInByte
       const mask = (1 << bitsInThisByte) - 1
       const value = (rawValue >> (signal.length - remainingBits)) & mask
-      const position = startBitInByte - bitsInThisByte + 1
 
       data[startByte] &= ~(mask << position)
       data[startByte] |= value << position
 
       remainingBits -= bitsInThisByte
-      startByte -= 1
-      startBitInByte = 7
+      startByte += 1
+      startBitInByte = 0
     }
   }
 }

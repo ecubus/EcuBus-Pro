@@ -99,8 +99,7 @@ export interface Signal {
     range: number[]
   }
   value?: number
-  physValue?: number | string
-  physValueEnum?: string
+  physValue?: string
   generatorType?: string
   valueType?: number // 0=signed, 1=float, 2=float
 }

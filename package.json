@@ -157,7 +157,7 @@
     "vite-plugin-node-polyfills": "^0.21.0",
     "vitepress": "^1.6.3",
     "vitepress-plugin-mermaid": "^2.0.17",
-    "vitest": "^3.0.9",
+    "vitest": "^3.2.4",
     "vue": "^3.5.13",
     "vue-tsc": "^2.1.6",
     "webpack": "^5.96.1",

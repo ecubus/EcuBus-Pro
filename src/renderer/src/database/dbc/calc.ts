@@ -1,3 +1,4 @@
+import { buffer } from 'stream/consumers'
 import type { DBC, Message, Signal } from './dbcVisitor'
 
 // Format float value with smart decimal places
@@ -127,11 +128,9 @@ function validateSignalValue(value: number, signal: Signal, db: DBC): boolean {
     }
   } else {
     // Check physical value limits
-    let physValue = value
+    let physValue: number
     if (signal.valueType === 1 || signal.valueType === 2) {
       physValue = handleFloatConversion(value, signal, true)
-    } else if (signal.isSigned) {
-      physValue = rawToPhys(value, signal)
     } else {
       physValue = rawToPhys(value, signal)
     }
@@ -157,6 +156,79 @@ function getEnumLabel(value: number, signal: Signal, db: DBC): string | undefine
     return vt?.values.find((v) => v.value === value)?.label
   }
   return undefined
+}
+
+// Calculate physical value for signal
+function calculatePhysicalValue(rawValue: number, signal: Signal, db: DBC): string {
+  if (signal.values || signal.valueTable) {
+    const label = getEnumLabel(rawValue, signal, db)
+    return label || rawValue.toString()
+  } else {
+    let physValue: number
+    if (signal.valueType === 1 || signal.valueType === 2) {
+      physValue = handleFloatConversion(rawValue, signal, true)
+    } else {
+      physValue = rawToPhys(rawValue, signal)
+    }
+    return formatFloat(physValue)
+  }
+}
+
+// Find multiplexer signal and its value
+function findMultiplexer(signals: Signal[]): {
+  multiplexer: Signal | undefined
+  multiplexerValue: number | undefined
+} {
+  let multiplexer: Signal | undefined
+  let multiplexerValue: number | undefined
+
+  for (const signal of signals) {
+    if (signal.multiplexerIndicator === 'M') {
+      multiplexer = signal
+      multiplexerValue = signal.value
+      break
+    }
+  }
+
+  return { multiplexer, multiplexerValue }
+}
+
+// Check if a signal should be processed based on multiplexer conditions
+function shouldProcessSignal(
+  signal: Signal,
+  multiplexer: Signal | undefined,
+  multiplexerValue: number | undefined,
+  signals: Signal[]
+): boolean {
+  // Skip signals without values
+  if (signal.value === undefined) return false
+
+  // Non-multiplexed signals should always be processed
+  if (!signal.multiplexerIndicator) return true
+
+  // Multiplexer itself should always be processed
+  if (signal.multiplexerIndicator === 'M') return true
+
+  // For multiplexed signals, check conditions
+  if (multiplexer && multiplexerValue !== undefined) {
+    if (signal.multiplexerRange) {
+      // Handle range multiplexing
+      const targetSignalName = signal.multiplexerRange.name
+      const targetSignal = signals.find((s) => s.name === targetSignalName)
+      if (targetSignal && targetSignal.value !== undefined) {
+        return signal.multiplexerRange.range.some((val) => val === targetSignal.value)
+      }
+    } else {
+      // Handle value-based multiplexing
+      const indicatorMatch = signal.multiplexerIndicator.match(/^m(\d+)([MR])?$/)
+      if (indicatorMatch) {
+        const expectedValue = Number(indicatorMatch[1])
+        return expectedValue === multiplexerValue
+      }
+    }
+  }
+
+  return false
 }
 
 // Read signal from buffer
@@ -186,19 +258,19 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC): number | u
     let startByte = Math.floor(signal.startBit / 8)
     let startBitInByte = signal.startBit % 8
     let remainingBits = signal.length
+    let valueIndex = 0
 
-    while (remainingBits > 0) {
-      if (startByte < 0 || startByte >= data.length) break
-
+    while (remainingBits > 0 && startByte >= 0) {
       const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
-      const position = startBitInByte
       const mask = (1 << bitsInThisByte) - 1
-      const value = (data[startByte] >> position) & mask
-      rawValue = (rawValue << bitsInThisByte) | value
+      const value = (data[startByte] >> startBitInByte) & mask
+
+      rawValue |= value << valueIndex
 
       remainingBits -= bitsInThisByte
+      valueIndex += bitsInThisByte
       startByte -= 1
-      startBitInByte = 7
+      startBitInByte = 0
     }
   }
 
@@ -219,19 +291,6 @@ function writeSignalToBuffer(signal: Signal, data: Buffer): void {
   let rawValue = signal.value
   if (rawValue === undefined) return
 
-  console.log(
-    'Writing signal to buffer:',
-    signal.name,
-    'rawValue:',
-    rawValue,
-    'startBit:',
-    signal.startBit,
-    'length:',
-    signal.length,
-    'isSigned:',
-    signal.isSigned
-  )
-
   const maxValue = getMaxRawValue(signal.length)
   rawValue = Math.min(rawValue, maxValue)
 
@@ -242,15 +301,6 @@ function writeSignalToBuffer(signal: Signal, data: Buffer): void {
     let remainingBits = signal.length
     let valueIndex = 0
 
-    console.log(
-      'Little endian - startByte:',
-      startByte,
-      'startBitInByte:',
-      startBitInByte,
-      'remainingBits:',
-      remainingBits
-    )
-
     while (remainingBits > 0) {
       if (startByte >= data.length) break
 
@@ -258,23 +308,8 @@ function writeSignalToBuffer(signal: Signal, data: Buffer): void {
       const mask = (1 << bitsInThisByte) - 1
       const value = (rawValue >> valueIndex) & mask
 
-      console.log(
-        'Byte',
-        startByte,
-        'bitsInThisByte:',
-        bitsInThisByte,
-        'mask:',
-        mask.toString(16),
-        'value:',
-        value.toString(16),
-        'valueIndex:',
-        valueIndex
-      )
-
       data[startByte] &= ~(mask << startBitInByte)
       data[startByte] |= value << startBitInByte
-
-      console.log('Updated byte', startByte, ':', data[startByte].toString(16))
 
       remainingBits -= bitsInThisByte
       valueIndex += bitsInThisByte
@@ -286,23 +321,37 @@ function writeSignalToBuffer(signal: Signal, data: Buffer): void {
     let startByte = Math.floor(signal.startBit / 8)
     let startBitInByte = signal.startBit % 8
     let remainingBits = signal.length
+    let valueIndex = 0
 
-    while (remainingBits > 0) {
-      if (startByte < 0 || startByte >= data.length) break
-
+    while (remainingBits > 0 && startByte >= 0) {
       const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
-      const position = startBitInByte
       const mask = (1 << bitsInThisByte) - 1
-      const value = (rawValue >> (signal.length - remainingBits)) & mask
+      const value = (rawValue >> valueIndex) & mask
 
-      data[startByte] &= ~(mask << position)
-      data[startByte] |= value << position
+      data[startByte] &= ~(mask << startBitInByte)
+      data[startByte] |= value << startBitInByte
 
       remainingBits -= bitsInThisByte
-      startByte += 1
+      valueIndex += bitsInThisByte
+      startByte -= 1
       startBitInByte = 0
     }
   }
+}
+
+// Get enum value by label
+function getEnumValueByLabel(label: string, signal: Signal, db: DBC): number | undefined {
+  if (signal.values) {
+    const enumValue = signal.values.find((v) => v.label === label)
+    return enumValue?.value
+  } else if (signal.valueTable) {
+    const vt = Object.values(db.valueTables).find((vt) => vt.name === signal.valueTable)
+    if (vt) {
+      const enumValue = vt.values.find((v) => v.label === label)
+      return enumValue?.value
+    }
+  }
+  return undefined
 }
 
 // Main API Functions
@@ -321,25 +370,10 @@ export function setSignal(signal: Signal, val: string | number, db: DBC): void {
     // Physical value (string)
     if (signal.values || signal.valueTable) {
       // For enum values, find by label
-      const enumLabel = val
-      if (signal.values) {
-        const enumValue = signal.values.find((v) => v.label === enumLabel)
-        if (!enumValue) return
-        rawValue = enumValue.value
-        physValue = enumLabel
-      } else if (signal.valueTable) {
-        const vt = Object.values(db.valueTables).find((vt) => vt.name === signal.valueTable)
-        if (vt) {
-          const enumValue = vt.values.find((v) => v.label === enumLabel)
-          if (!enumValue) return
-          rawValue = enumValue.value
-          physValue = enumLabel
-        } else {
-          return
-        }
-      } else {
-        return
-      }
+      const enumValue = getEnumValueByLabel(val, signal, db)
+      if (enumValue === undefined) return
+      rawValue = enumValue
+      physValue = val
     } else {
       // Numeric physical value
       const numVal = parseFloat(val)
@@ -358,16 +392,7 @@ export function setSignal(signal: Signal, val: string | number, db: DBC): void {
   } else {
     // Raw value (number)
     rawValue = val
-    if (signal.values || signal.valueTable) {
-      const label = getEnumLabel(rawValue, signal, db)
-      physValue = label || rawValue.toString()
-    } else if (signal.valueType === 1 || signal.valueType === 2) {
-      const floatValue = handleFloatConversion(rawValue, signal, true)
-      physValue = formatFloat(floatValue)
-    } else {
-      const physNumValue = rawToPhys(rawValue, signal)
-      physValue = formatFloat(physNumValue)
-    }
+    physValue = calculatePhysicalValue(rawValue, signal, db)
   }
 
   // Validate the value
@@ -378,29 +403,6 @@ export function setSignal(signal: Signal, val: string | number, db: DBC): void {
   // Set the values
   signal.value = rawValue
   signal.physValue = physValue
-
-  // If this is a multiplexed signal, ensure the multiplexer is set correctly
-  if (signal.multiplexerIndicator && signal.multiplexerIndicator !== 'M') {
-    // Find the message containing this signal
-    const message = Object.values(db.messages).find((msg) =>
-      Object.values(msg.signals).some((s) => s === signal)
-    )
-    if (message) {
-      // Find the multiplexer signal
-      const multiplexer = Object.values(message.signals).find((s) => s.multiplexerIndicator === 'M')
-      if (multiplexer) {
-        // Set the multiplexer value based on the signal's multiplexer indicator
-        if (signal.multiplexerRange) {
-          // For range-based multiplexing, use the first value in the range
-          multiplexer.value = signal.multiplexerRange.range[0]
-        } else {
-          // For simple multiplexing, extract the value from the indicator
-          const multiplexerValue = Number(signal.multiplexerIndicator.slice(1))
-          multiplexer.value = multiplexerValue
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -411,23 +413,7 @@ export function setSignal(signal: Signal, val: string | number, db: DBC): void {
  */
 export function getSignal(signal: Signal, db: DBC): { raw: number; phy: string } {
   const raw = signal.value || 0
-  let phy: string
-
-  if (signal.values || signal.valueTable) {
-    // For enum values, return the label
-    const label = getEnumLabel(raw, signal, db)
-    phy = label || raw.toString()
-  } else {
-    // For numeric values, return the physical value as string
-    let physValue: number
-    if (signal.valueType === 1 || signal.valueType === 2) {
-      physValue = handleFloatConversion(raw, signal, true)
-    } else {
-      physValue = rawToPhys(raw, signal)
-    }
-    phy = formatFloat(physValue)
-  }
-
+  const phy = calculatePhysicalValue(raw, signal, db)
   return { raw, phy }
 }
 
@@ -438,97 +424,11 @@ export function getSignal(signal: Signal, db: DBC): { raw: number; phy: string }
  * @param db - DBC database for validation
  */
 export function writeMessageData(message: Message, data: Buffer, db: DBC): void {
-  // Find multiplexer signal if exists
-  let multiplexer: Signal | undefined
-  let multiplexerValue: number | undefined
-
   Object.values(message.signals).forEach((signal) => {
-    if (signal.multiplexerIndicator === 'M') {
-      multiplexer = signal
-      const rawValue = readSignalFromBuffer(signal, data, db)
-      if (rawValue !== undefined) {
-        signal.value = rawValue
-        // Update physical value for multiplexer signal
-        if (signal.values || signal.valueTable) {
-          const label = getEnumLabel(rawValue, signal, db)
-          signal.physValue = label || rawValue.toString()
-        } else if (signal.valueType === 1 || signal.valueType === 2) {
-          const floatValue = handleFloatConversion(rawValue, signal, true)
-          signal.physValue = formatFloat(floatValue)
-        } else {
-          const physNumValue = rawToPhys(rawValue, signal)
-          signal.physValue = formatFloat(physNumValue)
-        }
-        multiplexerValue = rawValue
-      }
-    }
-  })
-
-  // Process all signals
-  Object.values(message.signals).forEach((signal) => {
-    if (signal.multiplexerIndicator) {
-      if (signal.multiplexerIndicator === 'M') {
-        return // Already processed
-      }
-      // Check multiplexing conditions
-      if (multiplexer && multiplexerValue !== undefined) {
-        if (signal.multiplexerRange) {
-          const isInRange = signal.multiplexerRange.range.some((val) => val === multiplexerValue)
-          if (isInRange) {
-            const rawValue = readSignalFromBuffer(signal, data, db)
-            if (rawValue !== undefined) {
-              signal.value = rawValue
-              // Update physical value for multiplexed signal
-              if (signal.values || signal.valueTable) {
-                const label = getEnumLabel(rawValue, signal, db)
-                signal.physValue = label || rawValue.toString()
-              } else if (signal.valueType === 1 || signal.valueType === 2) {
-                const floatValue = handleFloatConversion(rawValue, signal, true)
-                signal.physValue = formatFloat(floatValue)
-              } else {
-                const physNumValue = rawToPhys(rawValue, signal)
-                signal.physValue = formatFloat(physNumValue)
-              }
-            }
-          }
-        } else {
-          const val = Number(signal.multiplexerIndicator.slice(1))
-          if (val === multiplexerValue) {
-            const rawValue = readSignalFromBuffer(signal, data, db)
-            if (rawValue !== undefined) {
-              signal.value = rawValue
-              // Update physical value for multiplexed signal
-              if (signal.values || signal.valueTable) {
-                const label = getEnumLabel(rawValue, signal, db)
-                signal.physValue = label || rawValue.toString()
-              } else if (signal.valueType === 1 || signal.valueType === 2) {
-                const floatValue = handleFloatConversion(rawValue, signal, true)
-                signal.physValue = formatFloat(floatValue)
-              } else {
-                const physNumValue = rawToPhys(rawValue, signal)
-                signal.physValue = formatFloat(physNumValue)
-              }
-            }
-          }
-        }
-      }
-    } else {
-      // Non-multiplexed signal
-      const rawValue = readSignalFromBuffer(signal, data, db)
-      if (rawValue !== undefined) {
-        signal.value = rawValue
-        // Update physical value for non-multiplexed signal
-        if (signal.values || signal.valueTable) {
-          const label = getEnumLabel(rawValue, signal, db)
-          signal.physValue = label || rawValue.toString()
-        } else if (signal.valueType === 1 || signal.valueType === 2) {
-          const floatValue = handleFloatConversion(rawValue, signal, true)
-          signal.physValue = formatFloat(floatValue)
-        } else {
-          const physNumValue = rawToPhys(rawValue, signal)
-          signal.physValue = formatFloat(physNumValue)
-        }
-      }
+    const rawValue = readSignalFromBuffer(signal, data, db)
+    if (rawValue !== undefined) {
+      signal.value = rawValue
+      signal.physValue = calculatePhysicalValue(rawValue, signal, db)
     }
   })
 }
@@ -540,73 +440,36 @@ export function writeMessageData(message: Message, data: Buffer, db: DBC): void 
  */
 export function getMessageData(message: Message): Buffer {
   const data = Buffer.alloc(message.length).fill(0)
+  const signals = Object.values(message.signals)
+  const { multiplexer, multiplexerValue } = findMultiplexer(signals)
 
-  // 首先找到多路复用器信号(如果存在)
-  let multiplexer: Signal | undefined
-  let multiplexerValue: number | undefined
-
-  Object.values(message.signals).forEach((signal) => {
-    if (signal.multiplexerIndicator === 'M') {
-      multiplexer = signal
-      multiplexerValue = signal.value
-      console.log('Found multiplexer:', signal.name, 'value:', signal.value)
-    }
-  })
-
-  // 处理所有信号
-  Object.values(message.signals).forEach((signal) => {
-    // 跳过未定义值的信号
-    if (signal.value === undefined) return
-
-    console.log(
-      'Processing signal:',
-      signal.name,
-      'value:',
-      signal.value,
-      'multiplexerIndicator:',
-      signal.multiplexerIndicator
-    )
-
-    // 处理多路复用信号的逻辑
-    if (signal.multiplexerIndicator) {
-      // 如果是多路复用器本身，正常处理
-      if (signal.multiplexerIndicator === 'M') {
-        console.log('Writing multiplexer signal:', signal.name)
-        writeSignalToBuffer(signal, data)
-      }
-      // 如果是被多路复用的信号，需要检查条件
-      else if (multiplexer && multiplexerValue !== undefined) {
-        if (signal.multiplexerRange) {
-          // 处理范围多路复用
-          const isInRange = signal.multiplexerRange.range.some((val) => val === multiplexerValue)
-          if (isInRange) {
-            console.log('Writing range multiplexed signal:', signal.name)
-            writeSignalToBuffer(signal, data)
-          }
-        } else {
-          // 处理单值多路复用
-          const val = Number(signal.multiplexerIndicator.slice(1))
-          console.log(
-            'Checking multiplexed signal:',
-            signal.name,
-            'expected val:',
-            val,
-            'multiplexerValue:',
-            multiplexerValue
-          )
-          if (val === multiplexerValue) {
-            console.log('Writing multiplexed signal:', signal.name)
-            writeSignalToBuffer(signal, data)
-          }
-        }
-      }
-    } else {
-      // 非多路复用信号，直接处理
-      console.log('Writing non-multiplexed signal:', signal.name)
+  // Process all signals
+  signals.forEach((signal) => {
+    if (shouldProcessSignal(signal, multiplexer, multiplexerValue, signals)) {
       writeSignalToBuffer(signal, data)
     }
   })
 
-  console.log('Final buffer:', data)
   return data
+}
+
+/**
+ * Get active signals for a message
+ * @param message - The message containing signals
+ * @returns Array of active signals sorted by startBit
+ */
+export function getActiveSignals(message: Message): Signal[] {
+  const activeSignals: Signal[] = []
+  const signals = Object.values(message.signals)
+  const { multiplexer, multiplexerValue } = findMultiplexer(signals)
+
+  // Process all signals
+  signals.forEach((signal) => {
+    if (shouldProcessSignal(signal, multiplexer, multiplexerValue, signals)) {
+      activeSignals.push(signal)
+    }
+  })
+
+  // Sort by startBit
+  return activeSignals.sort((a, b) => a.startBit - b.startBit)
 }

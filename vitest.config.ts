@@ -48,8 +48,13 @@ export const nodejsPolarsDirnamePlugin = () => {
 
 //export default mergeConfig(config.main as any, defineConfig({
 export default defineConfig({
-  test: {
-    // ...
+  plugins: [nodejsPolarsDirnamePlugin()],
+  resolve: {
+    alias: {
+      src: path.resolve(__dirname, './src')
+    }
   },
-  plugins: [nodejsPolarsDirnamePlugin()]
+  ssr: {
+    noExternal: [/src/]
+  }
 })

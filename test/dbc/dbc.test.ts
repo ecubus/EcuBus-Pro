@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import parse, { isCanFd } from 'src/renderer/src/database/dbcParse'
 import {
+  getActiveSignals,
   getMessageData,
   getSignal,
   setSignal,
@@ -80,12 +81,23 @@ VCLEFT_liftgateSpeed		None	3CD	33	-5.1	3.0	deg/s	28	10*/
     expect(s3.phy).toBe('-5.1')
     expect(s3.raw).toBe(0x3cd)
 
+    setSignal(msg.signals['VCLEFT_liftgateStatusIndex'], 1, result)
+    setSignal(msg.signals['VCLEFT_liftgatePosition'], 6, result)
+    setSignal(msg.signals['VCLEFT_liftgateStrutDutyCycle'], 1, result)
     setSignal(msg.signals['VCLEFT_liftgateSpeed'], '-2.1', result)
+    setSignal(msg.signals['VCLEFT_liftgateStrutCurrent'], '-2.1', result)
     expect(msg.signals['VCLEFT_liftgateSpeed'].value).toBe(0x3eb)
-    console.log(msg)
+    // console.log(msg)
     const buf = getMessageData(msg)
-    expect(buf).toBe(Buffer.from([0x9, 0x58, 0xdf, 0xb0, 0x3e, 0, 0, 0]))
+    expect(buf.toString('hex')).toBe(
+      Buffer.from([0x9, 0x58, 0xdf, 0xb0, 0x3e, 0, 0, 0]).toString('hex')
+    )
     // Add more specific assertions based on the expected structure of Model3CAN.dbc
+
+    writeMessageData(msg, Buffer.from([0x9, 0x58, 0xdf, 0xb0, 0x3d, 0, 0, 0]), result)
+
+    expect(msg.signals['VCLEFT_liftgateSpeed'].value).toBe(0x3db)
+    expect(msg.signals['VCLEFT_liftgateSpeed'].physValue).toBe('-3.7')
   })
   test('dbc sig_group', () => {
     const result = parse(sgDbc)
@@ -132,6 +144,7 @@ VCLEFT_liftgateSpeed		None	3CD	33	-5.1	3.0	deg/s	28	10*/
   test('dbc can1-vw-skoda-audi-uds-v2.5', () => {
     const result = parse(dbcContentVwSkodaAudi)
     // Add assertions to verify the parsed values for can1-vw-skoda-audi-uds-v2.5.dbc
+
     expect(result).toBeDefined()
     expect(result.version).toBe('')
     expect(result.nodes).toEqual({})
@@ -160,6 +173,25 @@ VCLEFT_liftgateSpeed		None	3CD	33	-5.1	3.0	deg/s	28	10*/
     expect(result.messages[id].signals['StateOfChargeBMS'].unit).toBe('%')
 
     const id2 = 2550005945 & 0x1fffffff
+    const msg = result.messages[id2]
+    expect(msg.signals['Voltage'].isLittleEndian).toBe(false)
+    writeMessageData(msg, Buffer.from([0x62, 0x46, 0x5d, 0x62, 0x11]), result)
+    expect(msg.signals['Voltage'].value).toBe(0x6211)
+    let buf = getMessageData(msg)
+    expect(buf).toEqual(Buffer.from([0x62, 0x46, 0x5d, 0x62, 0x11]))
+    setSignal(msg.signals['Voltage'], '6', result)
+    buf = getMessageData(msg)
+    expect(buf).toEqual(Buffer.from([0x62, 0x46, 0x5d, 0xc, 0x0]))
+
+    expect(getActiveSignals(msg).map((v) => v.name)).toEqual(['S', 'R', 'Voltage'])
+
+    setSignal(msg.signals['R'], 0x465b, result)
+    setSignal(msg.signals['S'], 0x62, result)
+    setSignal(msg.signals['Current'], 0x199a, result)
+
+    expect(getMessageData(msg)).toEqual(Buffer.from([0x62, 0x46, 0x5b, 0x19, 0x9a]))
+    expect(getActiveSignals(msg).map((v) => v.name)).toEqual(['S', 'R', 'Current'])
+
     expect(result.messages[id2].signals['Voltage'].factor).toBe(0.001953125)
     expect(result.messages[id2].signals['Voltage'].offset).toBe(0)
     expect(result.messages[id2].signals['Voltage'].minimum).toBe(0)

@@ -133,7 +133,7 @@ interface LogData {
   data: string
   ts: string
   id: string
-  key?: string
+  key?: string | number
   dlc?: number
   len?: number
   device: string
@@ -223,14 +223,14 @@ watch(globalStart, (val) => {
   }
 })
 
-let expandskey: string[] = []
 function clearLog(msg = 'Clear Trace') {
   allLogData = []
 
   scrollY = -1
-  expandskey = []
+
   //TODO:
   grid.loadData([])
+  grid.setExpandRowKeys([])
   grid.scrollYTo(0)
 }
 function data2str(data: Uint8Array) {
@@ -286,18 +286,23 @@ function insertData2(data: LogData[]) {
   const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
 
   grid.loadData(displayData)
-  if (isOverwrite.value) {
-    grid.setExpandRowKeys(expandskey)
+  if (!isOverwrite.value) {
+    grid.scrollYTo(99999999999)
   }
-  grid.scrollYTo(99999999999)
 }
+
+let uid = 0
 function logDisplay(method: string, vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
 
   const logData: LogData[] = []
   const insertData = (data: LogData) => {
-    data.key = `${data.channel}-${data.device}-${data.id}`
+    if (isOverwrite.value) {
+      data.key = `${data.channel}-${data.device}-${data.id}`
+    } else {
+      data.key = uid++
+    }
     logData.push(data)
   }
   for (const val of vals) {
@@ -316,8 +321,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
         name: val.message.data.name,
-        children: val.message.data.children,
-        key: `${val.instance}-${val.message.data.id}`
+        children: val.message.data.children
       })
     } else if (val.message.method == 'ipBase') {
       insertData({
@@ -875,16 +879,12 @@ onMounted(() => {
       scrollY = v
     }
   })
-  grid.on('expandChange', (v) => {
-    expandskey = v
-  })
 })
 watch([tableWidth, tableHeight], () => {
   grid.loadConfig({
     WIDTH: tableWidth.value,
     HEIGHT: tableHeight.value
   })
-  grid.setExpandRowKeys(expandskey)
 })
 
 onUnmounted(() => {

@@ -764,8 +764,10 @@ function addCanAddress() {
 function removeTab(targetName: string) {
   const index = parseInt(targetName.replace('index', ''))
   data.value.address.splice(index, 1)
+  activeTabName.value = `index${data.value.address.length - 1}`
   nextTick(() => {
     delete addrRef.value[index]
+    ruleFormRef.value?.validate()
   })
 }
 
@@ -1179,7 +1181,7 @@ onUnmounted(() => {
 }
 
 .custom-tabs-label {
-  width: 60px;
+  width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;

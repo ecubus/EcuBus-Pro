@@ -243,6 +243,9 @@ export class CanError extends Error {
   }
 }
 
+/**
+ * @category CAN
+ */
 export interface CanAddr extends CanMsgType {
   name: string
   addrFormat: CAN_ADDR_FORMAT

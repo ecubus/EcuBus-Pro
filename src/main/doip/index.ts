@@ -258,10 +258,15 @@ export class DOIP {
     })
     this.udp4Server = udp4Server
   }
-  async registerEntity(entity: EntityAddr, announce = true, uLog?: UdsLOG) {
+  async registerEntity(announce = true, uLog?: UdsLOG) {
     return new Promise<void>((resolve, reject) => {
       if (this.ethAddr != undefined) {
         reject(new DoipError(DOIP_ERROR_ID.DOIP_ENTITY_EXIST))
+        return
+      }
+      const entity = this.tester.address[0]?.ethAddr?.entity
+      if (!entity) {
+        reject(new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, 'eth addr not found'))
         return
       }
       this.ethAddr = entity
@@ -421,24 +426,31 @@ export class DOIP {
       client.pendingPromise = undefined
     }
     client.socket.resetAndDestroy()
-    const key = `${client.addr.tester.testerLogicalAddr}_${client.addr.entity.logicalAddr}`
+    const key = `${client.addr.tester.testerLogicalAddr}`
     this.tcpClientMap.delete(key)
   }
   async createClient(addr: EthAddr): Promise<clientTcp> {
-    const key = `${addr.tester.testerLogicalAddr}_${addr.entity.logicalAddr}`
+    const key = `${addr.tester.testerLogicalAddr}`
     if (this.tcpClientMap.has(key)) {
       return this.tcpClientMap.get(key)!
     }
     const allowRequest = addr.entityNotFoundBehavior || 'no'
     let ip: string | undefined
+
     if (addr.virReqType == 'omit') {
       this.udsLog.systemMsg('omit vin find, connect special ip', getTsUs() - this.startTs, 'info')
       ip = addr.virReqAddr
     } else {
       //find in entityMap,
       for (const ee of this.entityMap.values()) {
-        if (addr.entity.logicalAddr == ee.logicalAddr) {
-          ip = ee.ip
+        for (const xe of this.tester.address) {
+          if (addr.entity.logicalAddr == xe.ethAddr?.entity?.logicalAddr) {
+            ip = ee.ip
+
+            break
+          }
+        }
+        if (ip) {
           break
         }
       }
@@ -933,6 +945,7 @@ export class DOIP {
         }
 
         let testerAddr: number | undefined = undefined
+        let logicalAddr: number | undefined = undefined
         //has enough data
         if (item.lastAction == undefined || item.lastAction.value != undefined) {
           const code = item.lastAction?.value || NackCode.DoIP_InvalidPayloadTypeFormatCode
@@ -1030,8 +1043,9 @@ is in the state "Registered [Routing Active]".*/
                 const repl = Buffer.alloc(5)
                 repl.writeUInt16BE(ta, 0)
                 repl.writeUInt16BE(sa, 2)
+                const taList = this.tester.address.map((x) => x.ethAddr?.entity?.logicalAddr)
                 // buffer.subarray(4).copy(repl, 5)
-                if (ta != this.ethAddr?.logicalAddr) {
+                if (!taList.includes(ta)) {
                   //Unknown target address
                   repl.writeUInt8(3, 4)
                   sentData = this.buildMessage(
@@ -1050,6 +1064,7 @@ is in the state "Registered [Routing Active]".*/
                     repl
                   )
                   testerAddr = sa
+                  logicalAddr = ta
                 }
               } else {
                 //unknown payload type
@@ -1075,7 +1090,7 @@ is in the state "Registered [Routing Active]".*/
               },
               sentData
             )
-            if (testerAddr != undefined) {
+            if (testerAddr != undefined && logicalAddr != undefined) {
               //is self?
               let isSelf = false
               this.tcpClientMap.forEach((client) => {
@@ -1093,7 +1108,7 @@ is in the state "Registered [Routing Active]".*/
                     this.udsLog.sent(this.tester.id, service, ts, buffer.subarray(4))
                   }
                 }
-                this.event.emit(`client-${testerAddr}-${this.ethAddr?.logicalAddr}`, {
+                this.event.emit(`client-${testerAddr}-${logicalAddr}`, {
                   ts: getTsUs() - this.startTs,
                   data: buffer.subarray(4)
                 })
@@ -1208,7 +1223,7 @@ is in the state "Registered [Routing Active]".*/
               item.socket.destroy()
               this.tcpClientMap.delete(key)
             } else {
-              item.addr.entity.logicalAddr = buffer.readUInt16BE(2)
+              // item.addr.entity.logicalAddr = buffer.readUInt16BE(2)
               if (buffer.length > 5) {
                 item.oemSpec = buffer.subarray(5)
               }

@@ -11,7 +11,11 @@ udsoncan.setup_logging()
 
 ecu_ip = '127.0.0.1'
 ecu_logical_address = 100
+ecu_functional_address = 101
 doip_client = DoIPClient(ecu_ip, ecu_logical_address,client_logical_address=200)
+
+# send a functional request to the ECU
+doip_client.send_diagnostic_to_address(ecu_functional_address,bytearray([0x10,0x05]))
 conn = DoIPClientUDSConnector(doip_client)
 with Client(conn, request_timeout=2) as client:
    try:

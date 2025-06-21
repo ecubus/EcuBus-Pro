@@ -118,6 +118,9 @@ interface CanMsgType {
      */
     uuid?: string;
 }
+/**
+ * @category CAN
+ */
 interface CanAddr extends CanMsgType {
     name: string;
     addrFormat: CAN_ADDR_FORMAT;
@@ -143,6 +146,9 @@ interface CanAddr extends CanMsgType {
     paddingValue: string;
 }
 
+/**
+ * @category DOIP
+ */
 interface EthAddr {
     name: string;
     entity: EntityAddr;
@@ -239,6 +245,9 @@ declare enum LIN_SCH_TYPE {
     DIAG_ONLY = "DIAG_ONLY",
     DIAG_INTERLEAVED = "DIAG_INTERLEAVED"
 }
+/**
+ * @category LIN
+ */
 interface LinAddr {
     name: string;
     addrType: LIN_ADDR_TYPE;
@@ -309,6 +318,9 @@ interface UdsInfo {
     testerPresentSpecialService?: string;
     testerPresentAddrIndex?: number;
 }
+/**
+ * @category UDS
+ */
 interface UdsAddress {
     type: HardwareType;
     canAddr?: CanAddr;
@@ -913,7 +925,13 @@ declare class DiagJob extends Service {
  * @category UDS
  */
 declare class DiagResponse extends Service {
-    constructor(testerName: string, service: ServiceItem);
+    private addr?;
+    constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
+    /**
+     * Get the UDS address of the response.
+     * @returns UdsAddress
+     */
+    getUdsAddress(): UdsAddress | undefined;
     /**
      * @param {string} serviceName
      *
@@ -982,7 +1000,13 @@ declare class DiagResponse extends Service {
  * @category UDS
  */
 declare class DiagRequest extends Service {
-    constructor(testerName: string, service: ServiceItem);
+    private addr?;
+    constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
+    /**
+     * Get the UDS address of the request.
+     * @returns UdsAddress
+     */
+    getUdsAddress(): UdsAddress | undefined;
     /**
      * @param {string} serviceName
      *
@@ -1333,6 +1357,22 @@ declare const Util: UtilClass;
  * @category CAN
  * @param {CanMessage} msg - The CAN message to be sent
  * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
+ * @example
+ * ```ts
+ * // Send a standard CAN message with 8 bytes of data
+ *  const canMsg: CanMessage = {
+      id: 0x111, // CAN ID in hex
+      data: Buffer.from([0,1,2,3,4,5,6,7]), // 8 bytes of data
+      dir: 'OUT', // Output direction
+      msgType: {
+        idType: CAN_ID_TYPE.STANDARD, // Standard CAN frame
+        remote: false, // Not a remote frame
+        brs: false, // No bit rate switching
+        canfd: false // Not a CAN FD frame
+      }
+    }
+   const timestamp = await output(canMsg) // Send and get timestamp
+ * ```
  */
 declare function output(msg: CanMessage): Promise<number>;
 /**
@@ -1416,6 +1456,9 @@ declare function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void>
 /**
  * Register a virtual entity
  *
+ * @deprecated This API is deprecated and will be removed in a future version.
+ * Please see {@link https://example.com} for the new API documentation.
+ *
  * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.
  * @param {string} ip - The IP address of the entity, if node connected to multiple devices.
@@ -1487,4 +1530,4 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linStopScheduler(device?: string): Promise<void>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type JobName, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq };

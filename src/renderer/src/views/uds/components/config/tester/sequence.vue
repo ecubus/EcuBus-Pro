@@ -247,7 +247,7 @@ function startSeq() {
         'ipc-run-sequence',
         project.projectInfo.path,
         project.projectInfo.name,
-        tester.value.id,
+        cloneDeep(tester.value),
         cloneDeep(dataBase.devices[tester.value.targetDeviceId]),
         seqIndex,
         seqCycle.value

@@ -1,5 +1,46 @@
 /**
+ * CRC (Cyclic Redundancy Check) class for computing various CRC algorithms.
+ *
+ * This class provides a comprehensive implementation of CRC calculation algorithms
+ * commonly used in automotive diagnostics, communication protocols, and data integrity
+ * verification. It supports 8-bit, 16-bit, and 32-bit CRC calculations with configurable
+ * parameters including polynomial, initial value, final XOR value, and reflection settings.
+ *
+ * The class includes a comprehensive set of predefined CRC algorithms and allows
+ * custom CRC configurations for specific use cases.
+ *
  * @category Util
+ *
+ * @example
+ * ```typescript
+ * // Using predefined CRC algorithms
+ * const crc16Modbus = CRC.default('CRC16_MODBUS')
+ * if (crc16Modbus) {
+ *   const data = Buffer.from([0x01, 0x02, 0x03, 0x04])
+ *   const crcValue = crc16Modbus.compute(data)
+ *   console.log(`CRC16-MODBUS: 0x${crcValue.toString(16).padStart(4, '0')}`)
+ * }
+ *
+ * // Creating custom CRC configuration (like in bootloader.ts)
+ * const customCrc = new CRC('self', 16, 0x3d65, 0, 0xffff, true, true)
+ * const fileContent = await fs.readFile('firmware.bin')
+ * const crcResult = customCrc.compute(fileContent)
+ *
+ * // Computing CRC for different data types
+ * const crc32 = CRC.default('CRC32')
+ * if (crc32) {
+ *   // From number array
+ *   const arrayData = [0x48, 0x65, 0x6c, 0x6c, 0x6f] // "Hello"
+ *   const crcFromArray = crc32.compute(arrayData)
+ *
+ *   // From Buffer
+ *   const bufferData = Buffer.from('Hello', 'utf8')
+ *   const crcFromBuffer = crc32.compute(bufferData)
+ *
+ *   // Get CRC as Buffer (useful for network protocols)
+ *   const crcBuffer = crc32.computeBuffer(bufferData)
+ * }
+ * ```
  */
 declare class CRC {
     private _width;

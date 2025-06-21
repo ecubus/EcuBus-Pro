@@ -460,6 +460,9 @@ export interface UdsInfo {
   testerPresentAddrIndex?: number
 }
 
+/**
+ * @category UDS
+ */
 export interface UdsAddress {
   type: HardwareType
   canAddr?: CanAddr

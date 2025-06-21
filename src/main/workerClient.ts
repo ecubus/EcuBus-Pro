@@ -11,6 +11,7 @@ import { LinMsg } from './share/lin'
 import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
+import { UdsAddress } from './share/uds'
 
 type HandlerMap = {
   output: (pool: UdsTester, data: any) => Promise<number>
@@ -31,13 +32,6 @@ type HandlerMap = {
       value: number | number[]
     }
   ) => void
-  registerEthVirtualEntity: (
-    pool: UdsTester,
-    data: {
-      entity: VinInfo
-      ip?: string
-    }
-  ) => Promise<void>
   setVar: (
     pool: UdsTester,
     data: {
@@ -345,21 +339,21 @@ export default class UdsTester {
   //   }
 
   // }
-  async triggerSend(testerName: string, service: ServiceItem, ts: number) {
+  async triggerSend(testerName: string, service: ServiceItem, addr: UdsAddress, ts: number) {
     this.updateTs(ts)
     if (this.testers) {
       try {
-        await this.workerEmit(`${testerName}.${service.name}.send`, service)
+        await this.workerEmit(`${testerName}.${service.name}.send`, { service, addr })
       } catch (e: any) {
         throw formatError(e)
       }
     }
   }
-  async triggerRecv(testerName: string, service: ServiceItem, ts: number) {
+  async triggerRecv(testerName: string, service: ServiceItem, addr: UdsAddress, ts: number) {
     this.updateTs(ts)
     if (this.testers) {
       try {
-        await this.workerEmit(`${testerName}.${service.name}.recv`, service)
+        await this.workerEmit(`${testerName}.${service.name}.recv`, { service, addr })
       } catch (e: any) {
         throw formatError(e)
       }

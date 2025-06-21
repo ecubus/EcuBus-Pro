@@ -333,10 +333,23 @@ const idCheck = (rule: any, value: any, callback: any) => {
         if (Number(value) == Number(data.value.canIdRx)) {
           callback(new Error("CAN-ID TX can't be equal to CAN-ID RX"))
         }
+        //all canidtx must be unique
+        for (let i = 0; i < addrs.value.length; i++) {
+          if (Number(value) == Number(addrs.value[i].canAddr?.canIdTx) && i != editIndex.value) {
+            callback(new Error('CAN-ID TX must be unique'))
+          }
+        }
       }
       if (rule.field == 'canIdRx') {
         if (Number(value) == Number(data.value.canIdTx)) {
           callback(new Error("CAN-ID RX can't be equal to CAN-ID TX"))
+        }
+
+        //all canidrx must be same，except self
+        for (let i = 0; i < addrs.value.length; i++) {
+          if (Number(value) != Number(addrs.value[i].canAddr?.canIdRx) && i != editIndex.value) {
+            callback(new Error('CAN-ID RX must be same'))
+          }
         }
       }
     } else {
@@ -354,12 +367,25 @@ const addrCheck = (rule: any, value: any, callback: any) => {
       if (Number(value) == Number(data.value.TA)) {
         callback(new Error("SA can't be equal to TA"))
       }
+      //all sa must equal addrs[0].canAddr.SA, 排除自己
+      for (let i = 0; i < addrs.value.length; i++) {
+        if (Number(value) != Number(addrs.value[i].canAddr?.SA) && i != editIndex.value) {
+          callback(new Error('SA must same'))
+        }
+      }
     }
     if (rule.field == 'TA') {
       if (Number(value) == Number(data.value.SA)) {
         callback(new Error("TA can't be equal to SA"))
       }
+      //all TA must be unique, 排除自己
+      for (let i = 0; i < addrs.value.length; i++) {
+        if (Number(value) == Number(addrs.value[i].canAddr?.TA) && i != editIndex.value) {
+          callback(new Error('TA must unique'))
+        }
+      }
     }
+
     callback()
   } else {
     callback(new Error(`value is need`))

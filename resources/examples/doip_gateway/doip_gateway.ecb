@@ -22,13 +22,13 @@
           "vendor": "simulate"
         }
       },
-      "14695ee0-10d7-4afa-93d9-6ed44a462ba3": {
+      "976560c1-5af7-40d7-a85b-1602f3d9afd1": {
         "type": "can",
         "canDevice": {
-          "id": "14695ee0-10d7-4afa-93d9-6ed44a462ba3",
-          "name": "PEAK_1",
-          "handle": 81,
-          "vendor": "peak",
+          "id": "976560c1-5af7-40d7-a85b-1602f3d9afd1",
+          "name": "SIMULATE_1",
+          "handle": 0,
+          "vendor": "simulate",
           "canfd": false,
           "database": "",
           "bitrate": {
@@ -38,7 +38,7 @@
             "preScaler": 10,
             "freq": 500000,
             "clock": "80",
-            "_X_ROW_KEY": "row_31"
+            "_X_ROW_KEY": "row_52"
           }
         }
       }
@@ -56,7 +56,7 @@
           {
             "type": "eth",
             "ethAddr": {
-              "name": "Addr0",
+              "name": "PHYSICAL",
               "entity": {
                 "vin": "ecubus-pro eth000",
                 "eid": "00-00-00-00-00-00",
@@ -76,6 +76,28 @@
               "virReqType": "broadcast",
               "entityNotFoundBehavior": "normal",
               "taType": "physical"
+            }
+          },
+          {
+            "type": "eth",
+            "ethAddr": {
+              "name": "FUNC",
+              "taType": "functional",
+              "virReqType": "broadcast",
+              "virReqAddr": "",
+              "entityNotFoundBehavior": "normal",
+              "entity": {
+                "vin": "ecubus-pro eth000",
+                "eid": "00-00-00-00-00-00",
+                "gid": "00-00-00-00-00-00",
+                "nodeType": "node",
+                "logicalAddr": 101
+              },
+              "tester": {
+                "testerLogicalAddr": 200,
+                "routeActiveTime": 0,
+                "createConnectDelay": 1000
+              }
             }
           }
         ],
@@ -101,14 +123,43 @@
           {
             "type": "can",
             "canAddr": {
-              "name": "Addr0",
+              "name": "PHYSICAL",
               "addrFormat": "NORMAL",
               "addrType": "PHYSICAL",
               "SA": "0x1",
-              "TA": "0x2",
+              "TA": "0x3",
               "AE": "",
               "canIdTx": "0x784",
-              "canIdRx": "0x7f0",
+              "canIdRx": "0x7f1",
+              "nAs": 1000,
+              "nAr": 1000,
+              "nBs": 1000,
+              "nCr": 1000,
+              "nBr": 0,
+              "nCs": 0,
+              "idType": "STANDARD",
+              "brs": false,
+              "canfd": false,
+              "remote": false,
+              "stMin": 10,
+              "bs": 10,
+              "maxWTF": 0,
+              "dlc": 8,
+              "padding": false,
+              "paddingValue": "0x00"
+            }
+          },
+          {
+            "type": "can",
+            "canAddr": {
+              "name": "FUNC",
+              "addrFormat": "NORMAL",
+              "addrType": "FUNCTIONAL",
+              "SA": "0x1",
+              "TA": "0x2",
+              "AE": "",
+              "canIdTx": "0x55",
+              "canIdRx": "0x7f1",
               "nAs": 1000,
               "nAr": 1000,
               "nBs": 1000,
@@ -148,7 +199,7 @@
         "id": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
         "channel": [
           "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
-          "14695ee0-10d7-4afa-93d9-6ed44a462ba3"
+          "976560c1-5af7-40d7-a85b-1602f3d9afd1"
         ],
         "attachTester": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
         "script": "node.ts",
@@ -160,7 +211,6 @@
       "can": {}
     },
     "graphs": {},
-    "tests": {},
     "guages": {},
     "vars": {},
     "datas": {},
@@ -172,8 +222,8 @@
         "pos": {
           "x": 383,
           "y": 191,
-          "w": 1280,
-          "h": 200
+          "w": 2562,
+          "h": 264
         },
         "options": {
           "params": {}
@@ -183,19 +233,6 @@
         "id": "message",
         "layoutType": "bottom",
         "hide": true
-      },
-      "trace": {
-        "pos": {
-          "x": 845,
-          "y": 400,
-          "w": 1339,
-          "h": 514
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {},
-        "hide": false
       },
       "network": {
         "pos": {
@@ -210,36 +247,28 @@
         "options": {},
         "hide": false
       },
-      "tester": {
-        "pos": {
-          "x": 889,
-          "y": 0,
-          "w": 1069,
-          "h": 401
-        },
-        "title": "tester",
-        "label": "UDS Tester",
-        "id": "tester",
-        "options": {},
-        "hide": false,
-        "backupPos": {
-          "x": 1180,
-          "y": 440,
-          "w": 600,
-          "h": 400
-        },
-        "isMax": false
-      },
       "hardware": {
         "pos": {
           "x": 0,
           "y": 400,
-          "w": 845,
+          "w": 503,
           "h": 400
         },
         "title": "hardware",
         "label": "Devices",
         "id": "hardware",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 927,
+          "y": 180.5,
+          "w": 1420,
+          "h": 487
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
         "options": {}
       }
     },

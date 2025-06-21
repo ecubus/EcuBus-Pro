@@ -14,6 +14,9 @@ export interface EthBaseInfo {
   id: string
 }
 
+/**
+ * @category DOIP
+ */
 export interface EthAddr {
   name: string
   entity: EntityAddr

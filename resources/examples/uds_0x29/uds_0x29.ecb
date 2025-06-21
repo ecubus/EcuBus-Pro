@@ -35,7 +35,7 @@
             "name": "Seq0",
             "services": [
               {
-                "enable": true,
+                "enable": false,
                 "checkResp": true,
                 "retryNum": 0,
                 "addressIndex": 0,
@@ -55,7 +55,7 @@
                 "_X_ROW_KEY": "row_41"
               },
               {
-                "enable": true,
+                "enable": false,
                 "checkResp": false,
                 "retryNum": 0,
                 "addressIndex": 0,
@@ -630,7 +630,7 @@
       "message": {
         "pos": {
           "x": 383,
-          "y": 219,
+          "y": 162,
           "w": 2562,
           "h": 229
         },
@@ -642,42 +642,12 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "tester": {
-        "pos": {
-          "x": 0,
-          "y": 0,
-          "w": 1280,
-          "h": 344.3333333333333
-        },
-        "title": "tester",
-        "label": "UDS Tester",
-        "id": "tester",
-        "options": {},
-        "hide": false
-      },
-      "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_services": {
-        "pos": {
-          "x": 1280,
-          "y": 0,
-          "w": 1280,
-          "h": 344.3333333333333
-        },
-        "title": "testerService",
-        "label": "Service",
-        "id": "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_services",
-        "options": {
-          "params": {
-            "edit-index": "848318f9-264b-4eaa-b9a0-7ccd831d8f8f"
-          },
-          "name": "Tester_can_0"
-        }
-      },
       "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_sequence": {
         "pos": {
           "x": 0,
-          "y": 344.3333333333333,
-          "w": 1280,
-          "h": 344.3333333333333
+          "y": 0,
+          "w": 1707,
+          "h": 315.5
         },
         "title": "testerSequence",
         "label": "Sequence",
@@ -689,30 +659,42 @@
           "name": "Tester_can_0"
         }
       },
-      "network": {
-        "pos": {
-          "x": 1280,
-          "y": 344.3333333333333,
-          "w": 1280,
-          "h": 344.3333333333333
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {}
-      },
       "trace": {
         "pos": {
-          "x": 0,
-          "y": 688.6666666666666,
-          "w": 1280,
-          "h": 344.3333333333333
+          "x": 553,
+          "y": 162,
+          "w": 1652,
+          "h": 693.5
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
         "options": {},
         "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": 553.5,
+          "y": 115.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "tester": {
+        "pos": {
+          "x": 516,
+          "y": 144,
+          "w": 828,
+          "h": 400
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {}
       }
     },
     "example": {

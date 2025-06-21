@@ -562,153 +562,192 @@ export class UDSTesterMain {
   ) {
     const values = this.buildObj()
     const targetSeq = this.tester.seqList[seqIndex]
-    for (let i = 0; i < cycleCount; i++) {
-      if (this.ac.signal.aborted) {
-        break
+
+    // Socket pool to manage multiple addresses
+    const socketPool = new Map<
+      string,
+      {
+        write: (data: Buffer) => Promise<number>
+        read: (timeout: number) => Promise<{ ts: number; data: Buffer }>
+        close: () => void
       }
-      if (i > 0) {
-        log.systemMsg(`====== Running cycle #${i}, delay 1000ms ======`, this.lastActiveTs)
-        await this.delay(1000)
-      }
-      const processStep = 100 / targetSeq.services.length
-      for (const [serviceIndex, service] of targetSeq.services.entries()) {
+    >()
+
+    try {
+      for (let i = 0; i < cycleCount; i++) {
         if (this.ac.signal.aborted) {
           break
         }
-
-        const addrItem = this.tester.address[service.addressIndex]
-        if (addrItem == undefined) {
-          throw new Error('address not found')
+        if (i > 0) {
+          log.systemMsg(`====== Running cycle #${i}, delay 1000ms ======`, this.lastActiveTs)
+          await this.delay(1000)
         }
-        const targetService = this.services[service.serviceId]
-        this.ac.signal.onabort = () => {
-          // log.systemMsg('aborted',this.lastActiveTs)
-          canTp.close(this.closeBase)
-        }
-        const curProcess = Number((processStep * serviceIndex).toFixed(2))
+        const processStep = 100 / targetSeq.services.length
+        for (const [serviceIndex, service] of targetSeq.services.entries()) {
+          if (this.ac.signal.aborted) {
+            break
+          }
 
-        if (service.enable && addrItem && targetService) {
-          const serviceRun = async function (tester: UDSTesterMain, s: ServiceItem) {
-            if (tester.ac.signal.aborted) {
-              throw new Error('aborted')
-            }
-            // await this.pool?.triggerPreSend(s.name)
-            const txBuffer = getTxPdu(s)
-            if (txBuffer.length == 0) {
-              // throw new Error(`serivce ${s.name} tx length is 0`)
-              await tester.delay(service.delay)
-              return true
-            }
-            const socket = await canTp.createSocket(addrItem)
-            tester.activeId = s.id
-            const sentTs = await socket.write(txBuffer)
-            tester.lastActiveTs = sentTs
+          const addrItem = this.tester.address[service.addressIndex]
+          if (addrItem == undefined) {
+            throw new Error('address not found')
+          }
+          const targetService = this.services[service.serviceId]
+          this.ac.signal.onabort = () => {
+            // log.systemMsg('aborted',this.lastActiveTs)
+            canTp.close(this.closeBase)
+          }
+          const curProcess = Number((processStep * serviceIndex).toFixed(2))
 
-            // log.sent(s, sentTs)
-            await tester.pool?.triggerSend(tester.tester.name, s, tester.lastActiveTs)
-
-            const hasSub = serviceDetail[s.serviceId].hasSubFunction
-            if (hasSub) {
-              if (txBuffer.length < 2) {
-                throw new Error(`service ${s.name} tx length ${txBuffer.length} is invalid`)
+          if (service.enable && addrItem && targetService) {
+            const serviceRun = async function (tester: UDSTesterMain, s: ServiceItem) {
+              if (tester.ac.signal.aborted) {
+                throw new Error('aborted')
               }
-
-              const subFunction = s.params[0].value[0]
-              let needResponse = true
-              if ((subFunction & 0x80) == 0x80) {
-                needResponse = false
-              } else if (
-                addrItem.type == 'can' &&
-                addrItem.canAddr?.addrType == CAN_ADDR_TYPE.FUNCTIONAL
-              ) {
-                needResponse = false
-              } else if (
-                addrItem.type == 'lin' &&
-                addrItem.linAddr?.addrType == LIN_ADDR_TYPE.FUNCTIONAL
-              ) {
-                needResponse = false
-              } else if (addrItem.type == 'eth' && addrItem.ethAddr?.taType == 'functional') {
-                needResponse = false
-              }
-              if (!needResponse) {
+              // await this.pool?.triggerPreSend(s.name)
+              const txBuffer = getTxPdu(s)
+              if (txBuffer.length == 0) {
+                // throw new Error(`serivce ${s.name} tx length is 0`)
                 await tester.delay(service.delay)
-                socket.close()
                 return true
               }
-            }
-            let timeout = tester.tester.udsTime.pTime
-            do {
-              let rxData = undefined
 
-              try {
-                const curUs = getTsUs()
-                if (tester.ac.signal.aborted) {
-                  throw new Error('aborted')
+              // Get or create socket from pool using address name as key
+              const addrKey = getUdsAddrName(addrItem) || `addr_${service.addressIndex}`
+              let socket = socketPool.get(addrKey)
+              if (!socket) {
+                socket = await canTp.createSocket(addrItem)
+                socketPool.set(addrKey, socket)
+              }
+
+              tester.activeId = s.id
+              const sentTs = await socket.write(txBuffer)
+              tester.lastActiveTs = sentTs
+
+              // log.sent(s, sentTs)
+              await tester.pool?.triggerSend(tester.tester.name, s, addrItem, tester.lastActiveTs)
+
+              const hasSub = serviceDetail[s.serviceId].hasSubFunction
+              if (hasSub) {
+                if (txBuffer.length < 2) {
+                  throw new Error(`service ${s.name} tx length ${txBuffer.length} is invalid`)
                 }
-                rxData = await socket.read(timeout).catch((e) => {
-                  tester.lastActiveTs += getTsUs() - curUs
-                  throw e
-                })
 
-                tester.lastActiveTs = rxData.ts
-                //node handle the response
-                const cs = cloneDeep(s)
-                // log.recv(s,rxData.ts, rxData.data)
-                applyBuffer(cs, rxData.data, false)
-                await tester.pool?.triggerRecv(tester.tester.name, cs, tester.lastActiveTs)
-
-                const rxBuffer = getRxPdu(s)
-
-                if (rxData.data.length == 0) {
-                  throw new Error('rxBuffer length is 0')
+                const subFunction = s.params[0].value[0]
+                let needResponse = true
+                if ((subFunction & 0x80) == 0x80) {
+                  needResponse = false
+                } else if (
+                  addrItem.type == 'can' &&
+                  addrItem.canAddr?.addrType == CAN_ADDR_TYPE.FUNCTIONAL
+                ) {
+                  needResponse = false
+                } else if (
+                  addrItem.type == 'lin' &&
+                  addrItem.linAddr?.addrType == LIN_ADDR_TYPE.FUNCTIONAL
+                ) {
+                  needResponse = false
+                } else if (addrItem.type == 'eth' && addrItem.ethAddr?.taType == 'functional') {
+                  needResponse = false
                 }
-                if (rxData.data[0] == 0x7f) {
-                  if (rxData.data.length >= 3) {
-                    if (rxData.data[1] != Number(s.serviceId)) {
+                if (!needResponse) {
+                  await tester.delay(service.delay)
+                  // Don't close socket from pool for no-response services
+                  return true
+                }
+              }
+              let timeout = tester.tester.udsTime.pTime
+              do {
+                let rxData = undefined
+
+                try {
+                  const curUs = getTsUs()
+                  if (tester.ac.signal.aborted) {
+                    throw new Error('aborted')
+                  }
+                  rxData = await socket.read(timeout).catch((e) => {
+                    tester.lastActiveTs += getTsUs() - curUs
+                    throw e
+                  })
+
+                  tester.lastActiveTs = rxData.ts
+                  //node handle the response
+                  const cs = cloneDeep(s)
+                  // log.recv(s,rxData.ts, rxData.data)
+                  applyBuffer(cs, rxData.data, false)
+                  await tester.pool?.triggerRecv(
+                    tester.tester.name,
+                    cs,
+                    addrItem,
+                    tester.lastActiveTs
+                  )
+
+                  const rxBuffer = getRxPdu(s)
+
+                  if (rxData.data.length == 0) {
+                    throw new Error('rxBuffer length is 0')
+                  }
+                  if (rxData.data[0] == 0x7f) {
+                    if (rxData.data.length >= 3) {
+                      if (rxData.data[1] != Number(s.serviceId)) {
+                        throw new Error(
+                          `negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`
+                        )
+                      }
+                      if (rxData.data[2] == 0x78) {
+                        timeout = tester.tester.udsTime.pExtTime
+                        continue
+                      }
+                      const nrcMsg = NRCMsg[rxData.data[2]]
+                      if (nrcMsg) {
+                        throw new Error(`negative response: ${nrcMsg}`)
+                      } else {
+                        throw new Error(`negative response: NRC:${rxData.data[2].toString(16)}`)
+                      }
+                    } else {
                       throw new Error(
-                        `negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`
+                        `negative response, received length ${rxData.data.length} is invalid`
                       )
                     }
-                    if (rxData.data[2] == 0x78) {
-                      timeout = tester.tester.udsTime.pExtTime
-                      continue
-                    }
-                    const nrcMsg = NRCMsg[rxData.data[2]]
-                    if (nrcMsg) {
-                      throw new Error(`negative response: ${nrcMsg}`)
-                    } else {
-                      throw new Error(`negative response: NRC:${rxData.data[2].toString(16)}`)
-                    }
-                  } else {
-                    throw new Error(
-                      `negative response, received length ${rxData.data.length} is invalid`
-                    )
                   }
-                }
-                //compare
-                const minLen = Math.min(rxBuffer.length, rxData.data.length)
-                const ret = Buffer.compare(
-                  rxBuffer.subarray(0, minLen),
-                  rxData.data.subarray(0, minLen)
-                )
+                  //compare
+                  const minLen = Math.min(rxBuffer.length, rxData.data.length)
+                  const ret = Buffer.compare(
+                    rxBuffer.subarray(0, minLen),
+                    rxData.data.subarray(0, minLen)
+                  )
 
-                if (ret != 0) {
-                  if (service.checkResp) {
-                    throw new Error(
-                      `response not match, expect ${rxBuffer.toString(
-                        'hex'
-                      )}, got ${rxData.data.toString('hex')}`
-                    )
+                  if (ret != 0) {
+                    if (service.checkResp) {
+                      throw new Error(
+                        `response not match, expect ${rxBuffer.toString(
+                          'hex'
+                        )}, got ${rxData.data.toString('hex')}`
+                      )
+                    }
                   }
-                }
-                socket.close()
-                break
-              } catch (e: any) {
-                service.retryNum--
-                if (service.retryNum < 0) {
-                  if (service.failBehavior == 'stop') {
-                    socket.close()
-                    throw e
+                  // Don't close socket from pool, it will be reused
+                  break
+                } catch (e: any) {
+                  service.retryNum--
+                  if (service.retryNum < 0) {
+                    if (service.failBehavior == 'stop') {
+                      // Don't close socket from pool on failure
+                      throw e
+                    } else {
+                      log.warning(
+                        tester.tester.id,
+                        s,
+                        targetSeq,
+                        seqIndex,
+                        serviceIndex,
+                        tester.lastActiveTs,
+                        rxData?.data,
+                        `Failed and continue: ${e.message}`
+                      )
+                      // Don't close socket from pool on failure
+                      return true
+                    }
                   } else {
                     log.warning(
                       tester.tester.id,
@@ -718,163 +757,159 @@ export class UDSTesterMain {
                       serviceIndex,
                       tester.lastActiveTs,
                       rxData?.data,
-                      `Failed and continue: ${e.message}`
+                      `Failed and retry #${service.retryNum}: ${e.message}`
                     )
-                    socket.close()
-                    return true
+                    // Don't close socket from pool on retry
+                    return false
+                  }
+                }
+
+                // eslint-disable-next-line no-constant-condition
+              } while (true)
+
+              return true
+            }
+            const jobRun = async function (tester: UDSTesterMain, s: ServiceItem) {
+              const params: (string | number | Buffer)[] = []
+              for (const p of s.params) {
+                if (p.type == 'ASCII' || p.type == 'UNICODE') {
+                  let str = p.phyValue as string
+                  str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
+                    // p1 是括号中匹配的内容，即'xx'。返回实际值或原始匹配（如果找不到）
+                    return get(values, p1) || match
+                  })
+                  if (typeof str == 'object') {
+                    str = JSON.stringify(str)
+                  }
+                  params.push(str)
+                } else if (p.type == 'FILE') {
+                  //read file content
+                  let filePath = p.phyValue as string
+                  if (!filePath) {
+                    throw new Error(`file parameter ${p.name} is empty`)
+                  }
+                  if (!path.isAbsolute(filePath)) {
+                    filePath = path.join(tester.project.projectPath, filePath)
+                  }
+                  if (!fs.existsSync(filePath)) {
+                    throw new Error(`file parameter ${p.name} file not found`)
+                  }
+
+                  const fileContent = await fsP.readFile(filePath)
+                  params.push(fileContent)
+                } else {
+                  params.push(Number(p.phyValue))
+                }
+              }
+              let services: ServiceItem[] | undefined
+
+              const cb = (parentPercent: number, percent: number) => {
+                const p = Number((parentPercent + (percent / 100) * processStep).toFixed(2))
+                tester.varLog.setVarByKey(
+                  `Statistics.${tester.tester.id}.${seqIndex}`,
+                  p,
+                  tester.lastActiveTs
+                )
+              }
+              // eslint-disable-next-line no-useless-catch
+              try {
+                services = await tester.execJob(s.name, params)
+              } catch (e: any) {
+                if (typeof e == 'string' && e.includes('Unknown method')) {
+                  const buildScript = serviceDetail[s.serviceId].buildInScript
+                  if (buildScript) {
+                    let tmpPool: UdsTester | undefined
+                    try {
+                      tmpPool = new UdsTester(
+                        tester.tester.id,
+                        {
+                          PROJECT_ROOT: tester.project.projectPath,
+                          PROJECT_NAME: tester.project.projectName,
+                          MODE: 'sequence',
+                          NAME: tester.tester.name
+                        },
+                        buildScript,
+                        log,
+                        { [tester.tester.id]: tester.tester }
+                      )
+                      tmpPool.updateTs(tester.lastActiveTs)
+
+                      await tmpPool.start(tester.project.projectPath, tester.tester.name)
+
+                      services = await tmpPool.exec(
+                        tester.tester.name,
+                        serviceDetail[s.serviceId].name,
+                        params
+                      )
+                      tester.switchPool = tester.pool
+                      tester.pool = tmpPool
+                    } catch (e: any) {
+                      tmpPool?.stop()
+                      throw e
+                    }
+                  } else {
+                    throw new Error(
+                      `Unknown method "${s.name}", check: https://app.whyengineer.com/scriptApi/classes/UtilClass.html#register`
+                    )
                   }
                 } else {
-                  log.warning(
-                    tester.tester.id,
-                    s,
-                    targetSeq,
-                    seqIndex,
-                    serviceIndex,
-                    tester.lastActiveTs,
-                    rxData?.data,
-                    `Failed and retry #${service.retryNum}: ${e.message}`
-                  )
-                  socket.close()
-                  return false
+                  throw e
                 }
               }
 
-              // eslint-disable-next-line no-constant-condition
-            } while (true)
+              if (services) {
+                let percent = 0
+                const step = 100 / services.length
+                for (const ser of services) {
+                  await baseRun(tester, ser)
 
-            return true
-          }
-          const jobRun = async function (tester: UDSTesterMain, s: ServiceItem) {
-            const params: (string | number | Buffer)[] = []
-            for (const p of s.params) {
-              if (p.type == 'ASCII' || p.type == 'UNICODE') {
-                let str = p.phyValue as string
-                str = str.replace(/\$\{(\w+)\}/g, (match, p1) => {
-                  // p1 是括号中匹配的内容，即'xx'。返回实际值或原始匹配（如果找不到）
-                  return get(values, p1) || match
-                })
-                if (typeof str == 'object') {
-                  str = JSON.stringify(str)
+                  percent += step
+                  log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
+                  cb(curProcess, percent)
                 }
-                params.push(str)
-              } else if (p.type == 'FILE') {
-                //read file content
-                let filePath = p.phyValue as string
-                if (!filePath) {
-                  throw new Error(`file parameter ${p.name} is empty`)
-                }
-                if (!path.isAbsolute(filePath)) {
-                  filePath = path.join(tester.project.projectPath, filePath)
-                }
-                if (!fs.existsSync(filePath)) {
-                  throw new Error(`file parameter ${p.name} file not found`)
-                }
-
-                const fileContent = await fsP.readFile(filePath)
-                params.push(fileContent)
+              }
+              if (tester.switchPool) {
+                tester.pool?.stop()
+                tester.pool = tester.switchPool
+                tester.switchPool = undefined
+              }
+              log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
+            }
+            const baseRun = async function (tester: UDSTesterMain, s: ServiceItem) {
+              if (checkServiceId(s.serviceId, ['job'])) {
+                await jobRun(tester, s)
               } else {
-                params.push(Number(p.phyValue))
-              }
-            }
-            let services: ServiceItem[] | undefined
-
-            const cb = (parentPercent: number, percent: number) => {
-              const p = Number((parentPercent + (percent / 100) * processStep).toFixed(2))
-              tester.varLog.setVarByKey(
-                `Statistics.${tester.tester.id}.${seqIndex}`,
-                p,
-                tester.lastActiveTs
-              )
-            }
-            // eslint-disable-next-line no-useless-catch
-            try {
-              services = await tester.execJob(s.name, params)
-            } catch (e: any) {
-              if (typeof e == 'string' && e.includes('Unknown method')) {
-                const buildScript = serviceDetail[s.serviceId].buildInScript
-                if (buildScript) {
-                  let tmpPool: UdsTester | undefined
-                  try {
-                    tmpPool = new UdsTester(
-                      tester.tester.id,
-                      {
-                        PROJECT_ROOT: tester.project.projectPath,
-                        PROJECT_NAME: tester.project.projectName,
-                        MODE: 'sequence',
-                        NAME: tester.tester.name
-                      },
-                      buildScript,
-                      log,
-                      { [tester.tester.id]: tester.tester }
-                    )
-                    tmpPool.updateTs(tester.lastActiveTs)
-
-                    await tmpPool.start(tester.project.projectPath, tester.tester.name)
-
-                    services = await tmpPool.exec(
-                      tester.tester.name,
-                      serviceDetail[s.serviceId].name,
-                      params
-                    )
-                    tester.switchPool = tester.pool
-                    tester.pool = tmpPool
-                  } catch (e: any) {
-                    tmpPool?.stop()
-                    throw e
+                // eslint-disable-next-line no-constant-condition
+                while (true) {
+                  const r = await serviceRun(tester, s)
+                  if (r) {
+                    break
                   }
-                } else {
-                  throw new Error(
-                    `Unknown method "${s.name}", check: https://app.whyengineer.com/scriptApi/classes/UtilClass.html#register`
-                  )
+                  await tester.delay(service.delay)
                 }
-              } else {
-                throw e
               }
+              await tester.delay(service.delay)
             }
-
-            if (services) {
-              let percent = 0
-              const step = 100 / services.length
-              for (const ser of services) {
-                await baseRun(tester, ser)
-
-                percent += step
-                log.udsIndex(tester.tester.id, serviceIndex, ser.name, 'progress', percent)
-                cb(curProcess, percent)
-              }
-            }
-            if (tester.switchPool) {
-              tester.pool?.stop()
-              tester.pool = tester.switchPool
-              tester.switchPool = undefined
-            }
-            log.udsIndex(tester.tester.id, serviceIndex, s.name, 'finished')
+            log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'start')
+            this.varLog.setVarByKey(
+              `Statistics.${this.tester.id}.${seqIndex}`,
+              curProcess,
+              this.lastActiveTs
+            )
+            await baseRun(this, targetService)
+            log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'finished')
           }
-          const baseRun = async function (tester: UDSTesterMain, s: ServiceItem) {
-            if (checkServiceId(s.serviceId, ['job'])) {
-              await jobRun(tester, s)
-            } else {
-              // eslint-disable-next-line no-constant-condition
-              while (true) {
-                const r = await serviceRun(tester, s)
-                if (r) {
-                  break
-                }
-                await tester.delay(service.delay)
-              }
-            }
-            await tester.delay(service.delay)
-          }
-          log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'start')
           this.varLog.setVarByKey(
             `Statistics.${this.tester.id}.${seqIndex}`,
-            curProcess,
+            100,
             this.lastActiveTs
           )
-          await baseRun(this, targetService)
-          log.udsIndex(this.tester.id, serviceIndex, targetService.name, 'finished')
         }
-        this.varLog.setVarByKey(`Statistics.${this.tester.id}.${seqIndex}`, 100, this.lastActiveTs)
+      }
+    } finally {
+      // Clean up all sockets in the pool
+      for (const socket of socketPool.values()) {
+        socket.close()
       }
     }
   }

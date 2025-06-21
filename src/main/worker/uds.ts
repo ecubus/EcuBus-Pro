@@ -11,7 +11,8 @@ import {
   paramSetValRaw,
   Sequence,
   ServiceItem,
-  applyBuffer
+  applyBuffer,
+  UdsAddress
 } from '../share/uds'
 export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
 export type { ServiceItem }
@@ -32,7 +33,11 @@ export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
 export type { LinMsg }
+export type { CanAddr } from '../share/can'
+export type { EthAddr } from '../share/doip'
+export type { LinAddr } from '../share/lin'
 export type { CanMsgType } from '../share/can'
+export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
 /**
@@ -713,8 +718,17 @@ export class DiagJob extends Service {
  * @category UDS
  */
 export class DiagResponse extends Service {
-  constructor(testerName: string, service: ServiceItem) {
+  private addr?: UdsAddress
+  constructor(testerName: string, service: ServiceItem, addr?: UdsAddress) {
     super(testerName, cloneDeep(service), false)
+    this.addr = addr
+  }
+  /**
+   * Get the UDS address of the response.
+   * @returns UdsAddress
+   */
+  getUdsAddress() {
+    return this.addr
   }
   /**
    * @param {string} serviceName
@@ -803,8 +817,17 @@ export class DiagResponse extends Service {
  * @category UDS
  */
 export class DiagRequest extends Service {
-  constructor(testerName: string, service: ServiceItem) {
+  private addr?: UdsAddress
+  constructor(testerName: string, service: ServiceItem, addr?: UdsAddress) {
     super(testerName, cloneDeep(service), true)
+    this.addr = addr
+  }
+  /**
+   * Get the UDS address of the request.
+   * @returns UdsAddress
+   */
+  getUdsAddress() {
+    return this.addr
   }
   /**
    * @param {string} serviceName
@@ -1109,14 +1132,14 @@ export class UtilClass {
     if (eventName.endsWith('.send')) {
       const warpFunc = async (v: any) => {
         const testerName = eventName.split('.')[0]
-        const req = new DiagRequest(testerName, v as any)
+        const req = new DiagRequest(testerName, v.service, v.addr)
         await listener(req as any)
       }
       this.event.once(eventName).then(warpFunc)
     } else if (eventName.endsWith('.recv')) {
       const warpFunc = async (v: any) => {
         const testerName = eventName.split('.')[0]
-        const resp = new DiagResponse(testerName, v)
+        const resp = new DiagResponse(testerName, v.service, v.addr)
         await listener(resp as any)
       }
       this.event.once(eventName).then(warpFunc)
@@ -1161,7 +1184,7 @@ export class UtilClass {
     if (eventName.endsWith('.send')) {
       const warpFunc = async (v: any) => {
         const testerName = eventName.split('.')[0]
-        const req = new DiagRequest(testerName, v as any)
+        const req = new DiagRequest(testerName, v.service, v.addr)
         await listener(req as any)
       }
       this.event.on(eventName, warpFunc)
@@ -1169,7 +1192,7 @@ export class UtilClass {
     } else if (eventName.endsWith('.recv')) {
       const warpFunc = async (v: any) => {
         const testerName = eventName.split('.')[0]
-        const resp = new DiagResponse(testerName, v)
+        const resp = new DiagResponse(testerName, v.service, v.addr)
         await listener(resp as any)
       }
       this.event.on(eventName, warpFunc)
@@ -1587,31 +1610,16 @@ let rightEntity: EntityAddr | undefined
 /**
  * Register a virtual entity
  *
+ * @deprecated This API is deprecated and will be removed in a future version.
+ * Please see {@link https://example.com} for the new API documentation.
+ *
  * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.
  * @param {string} ip - The IP address of the entity, if node connected to multiple devices.
  * @returns {Promise<void>} - Returns a promise that resolves when the entity is registered.
  */
 export async function RegisterEthVirtualEntity(entity: VinInfo, ip?: string) {
-  if (rightEntity) {
-    throw new Error('only one entity can be registered')
-  } else {
-    rightEntity = entity
-  }
-  const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
-      id: id,
-      event: 'registerEthVirtualEntity',
-      data: {
-        entity,
-        ip
-      }
-    })
-    emitMap.set(id, { resolve, reject })
-    id++
-  })
-
-  return await p
+  //Don't do anything
 }
 
 //get dot input param type

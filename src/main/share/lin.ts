@@ -110,6 +110,10 @@ export enum LIN_SCH_TYPE {
   DIAG_ONLY = 'DIAG_ONLY',
   DIAG_INTERLEAVED = 'DIAG_INTERLEAVED'
 }
+
+/**
+ * @category LIN
+ */
 export interface LinAddr {
   name: string
   addrType: LIN_ADDR_TYPE

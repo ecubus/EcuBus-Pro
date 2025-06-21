@@ -100,7 +100,20 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     callback(new Error('Please input node name'))
   }
 }
-
+const nadCheck = (rule: any, value: any, callback: any) => {
+  if (value) {
+    if (value < 0 || value > 255) {
+      callback(new Error('NAD must be 0~255'))
+    }
+  }
+  //validate nad must be unique
+  for (let i = 0; i < addrs.value.length; i++) {
+    if (Number(value) == Number(addrs.value[i].linAddr?.nad) && i != editIndex.value) {
+      callback(new Error('NAD must be unique'))
+    }
+  }
+  callback()
+}
 const rules: FormRules<LinAddr> = {
   name: [
     {
@@ -108,6 +121,17 @@ const rules: FormRules<LinAddr> = {
       message: 'Please input addr name',
       trigger: 'blur',
       validator: nameCheck
+    }
+  ],
+  nad: [
+    {
+      required: true,
+      message: 'Please input NAD',
+      trigger: 'blur',
+      type: 'number',
+      validator: nadCheck,
+      min: 0,
+      max: 255
     }
   ]
 }

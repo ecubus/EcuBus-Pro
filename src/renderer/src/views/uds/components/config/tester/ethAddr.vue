@@ -19,7 +19,7 @@
       </el-select>
     </el-form-item>
     <el-divider content-position="left"> Tester </el-divider>
-    <el-form-item label="logical address" required prop="tester.testerLogicalAddr">
+    <el-form-item label="tester address" required prop="tester.testerLogicalAddr">
       <el-input v-model.number="data.tester.testerLogicalAddr" placeholder="0" />
     </el-form-item>
     <el-form-item label-width="0">
@@ -39,7 +39,7 @@
     <el-divider content-position="left"> ECU </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="logical address" required prop="entity.logicalAddr">
+        <el-form-item label="ECU address" required prop="entity.logicalAddr">
           <el-input v-model.number="data.entity.logicalAddr" placeholder="0" />
         </el-form-item>
       </el-col>
@@ -212,17 +212,20 @@ const addrCheck = (rule: any, value: any, callback: any) => {
 }
 const taddrCheck = (rule: any, value: any, callback: any) => {
   if (value.toString().length > 0) {
-    for (let i = 0; i < addrs.value.length; i++) {
-      const hasName = addrs.value[i].ethAddr?.tester.testerLogicalAddr
-      if (hasName == value && i != editIndex.value) {
-        callback(new Error('The address already exists'))
-      }
-    }
     if (value < 0 || value > 0xffff) {
       callback(new Error('0 ~ 0xFFFF'))
     }
     if (value == data.value.entity.logicalAddr) {
       callback(new Error("Tester address can't be the same as ECU address"))
+    }
+    // Check that all tester logical addresses match
+    for (let i = 0; i < addrs.value.length; i++) {
+      if (
+        i !== editIndex.value &&
+        data.value.tester.testerLogicalAddr !== addrs.value[i].ethAddr?.tester.testerLogicalAddr
+      ) {
+        callback(new Error('All tester logical addresses must be the same'))
+      }
     }
     callback()
   } else {

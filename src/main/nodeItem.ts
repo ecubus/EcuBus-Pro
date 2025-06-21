@@ -172,23 +172,17 @@ export class NodeClass {
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
         this.pool.registerHandler('linApi', this.linApi.bind(this))
         this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
-        if (this.ethBaseId.length > 0) {
-          this.pool.registerHandler(
-            'registerEthVirtualEntity',
-            this.registerEthVirtualEntity.bind(this)
-          )
-        }
 
         //cantp
         for (const tester of Object.values(this.testers)) {
-          if (tester.simulateBy == nodeItem.id && tester.address.length > 0) {
+          if (tester.address.length > 0) {
             for (const c of nodeItem.channel) {
               const canBaseItem = this.canBaseMap.get(c)
               if (canBaseItem && tester.type == 'can') {
                 const tp = new CAN_TP(canBaseItem)
                 for (const addr of tester.address) {
                   if (addr.type == 'can' && addr.canAddr) {
-                    const idT = tp.getReadId(addr.canAddr)
+                    const idT = tp.getReadId(addr.canAddr, tester.simulateBy != nodeItem.id)
                     tp.event.on(idT, (data) => {
                       if (data instanceof CanTpError) {
                         //TODO:
@@ -198,9 +192,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, true)
-                              this.pool?.triggerSend(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerSend(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -218,9 +214,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerRecv(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -234,7 +232,7 @@ export class NodeClass {
               }
               const linBaseItem = this.linBaseMap.get(c)
               if (linBaseItem && tester.type == 'lin') {
-                const tp = new LIN_TP(linBaseItem)
+                const tp = new LIN_TP(linBaseItem, tester.simulateBy != nodeItem.id)
                 for (const addr of tester.address) {
                   if (addr.type == 'lin' && addr.linAddr) {
                     const idT = tp.getReadId(LinMode.MASTER, addr.linAddr)
@@ -247,9 +245,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, true)
-                              this.pool?.triggerSend(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerSend(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -267,9 +267,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerRecv(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -285,6 +287,9 @@ export class NodeClass {
               if (ethBaseItem && tester.type == 'eth') {
                 const baseItem = this.doips.find((d) => d.base.id == ethBaseItem.id)
                 if (baseItem) {
+                  if (tester.simulateBy == nodeItem.id) {
+                    baseItem.registerEntity(true, this.log)
+                  }
                   for (const addr of tester.address) {
                     if (addr.type == 'eth' && addr.ethAddr) {
                       const idT = baseItem.getId(addr.ethAddr, 'client')
@@ -297,9 +302,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, true)
-                              this.pool?.triggerSend(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerSend(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -318,9 +325,11 @@ export class NodeClass {
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
-                              this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
-                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              })
+                              this.pool
+                                ?.triggerRecv(tester.name, item, addr, data.ts)
+                                .catch((e) => {
+                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                                })
                             } catch (e: any) {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
@@ -799,22 +808,7 @@ export class NodeClass {
       }
     }
   }
-  async registerEthVirtualEntity(
-    pool: UdsTester,
-    data: {
-      ip?: string
-      entity: VinInfo
-    }
-  ) {
-    let target = this.nodeItem.channel[0]
-    if (data.ip) {
-      target = data.ip
-    }
-    const baseItem = this.doips.find((d) => d.base.device.handle == target)
-    if (baseItem) {
-      await baseItem.registerEntity(data.entity, true, this.log)
-    }
-  }
+
   async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch) {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined

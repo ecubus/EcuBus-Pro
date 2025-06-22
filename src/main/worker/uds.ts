@@ -1610,8 +1610,7 @@ let rightEntity: EntityAddr | undefined
 /**
  * Register a virtual entity
  *
- * @deprecated This API is deprecated and will be removed in a future version.
- * Please see {@link https://example.com} for the new API documentation.
+ * @deprecated This API is deprecated and not working, enable it through the simulate_by field in the tester config
  *
  * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.

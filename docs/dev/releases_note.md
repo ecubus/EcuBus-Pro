@@ -1,5 +1,22 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.45
+Changes from v0.8.44 to v0.8.45:
+
+ 
+* [opt]:opt tester logical&func address 
+* [api]:remove RegisterEthVirtualEntity api, control by simulate_by config in UI 
+* [bug]:fix uds 0x85 param can't be delete 
+* [bug]:fix dbc calc unmatch 
+* [opt]:enable backgroundThrottling 
+* [feat]:add trace overwrite mode [Detail](https://app.whyengineer.com/docs/um/trace/trace.html#overwrite-mode)
+* [bug]:fix can dbc SIG_GROUP_ can't parse issue 
+* [bug]:fix uds negativeResponse issue 
+* [bug]:fix can dbc EV_ can't parse issue
+---
+
+# EcuBus-Pro Release Notes
+
 ## 0.8.44
 Changes from v0.8.43 to v0.8.44:
 

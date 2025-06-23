@@ -98,6 +98,22 @@ VCLEFT_liftgateSpeed		None	3CD	33	-5.1	3.0	deg/s	28	10*/
 
     expect(msg.signals['VCLEFT_liftgateSpeed'].value).toBe(0x3db)
     expect(msg.signals['VCLEFT_liftgateSpeed'].physValue).toBe('-3.7')
+
+    const m142 = result.messages[0x142]
+    writeMessageData(m142, Buffer.from([0xd1, 0x87, 0x46, 0xe1, 1, 0, 0, 0]), result)
+    expect(getActiveSignals(m142).map((v) => v.name)).toEqual([
+      'VCLEFT_liftgateStatusIndex',
+      'VCLEFT_liftgateStrutDutyCycle',
+      'VCLEFT_liftgateStrutCurrent',
+      'VCLEFT_liftgatePosition',
+      'VCLEFT_liftgateSpeed'
+    ])
+    expect(m142.signals['VCLEFT_liftgateSpeed'].value).toBe(0x1e)
+    expect(m142.signals['VCLEFT_liftgateSpeed'].physValue).toBe('3')
+    expect(m142.signals['VCLEFT_liftgateStatusIndex'].value).toBe(1)
+    expect(m142.signals['VCLEFT_liftgateStatusIndex'].physValue).toBe('LIFTGATE_STATUS_INDEX_1')
+    expect(m142.signals['VCLEFT_liftgateStrutDutyCycle'].value).toBe(0xfa)
+    expect(m142.signals['VCLEFT_liftgateStrutDutyCycle'].physValue).toBe('-6')
   })
   test('dbc sig_group', () => {
     const result = parse(sgDbc)

@@ -9,7 +9,7 @@ import { applyBuffer, getRxPdu, getTxPdu, ServiceItem, UdsDevice } from './share
 import { findService, UDSTesterMain } from './docan/uds'
 import { cloneDeep } from 'lodash'
 import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
-import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
+import { setSignal } from 'src/renderer/src/database/dbc/calc'
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
 import { EthAddr, EthBaseInfo, VinInfo } from './share/doip'
@@ -754,7 +754,7 @@ export class NodeClass {
     pool: UdsTester,
     data: {
       signal: string
-      value: number | number[]
+      value: number | number[] | string
     }
   ) {
     if (Array.isArray(data.value)) {
@@ -780,20 +780,9 @@ export class NodeClass {
       if (!ss) {
         throw new Error(`Signal ${signalName} not found`)
       }
-      ss.physValue = data.value
-      // if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
-      //   const value: {
-      //     label: string
-      //     value: number
-      //   }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
-      //   if (value) {
-      //     const v = value.find((v) => v.label === data.value)
-      //     if (v) {
-      //       ss.physValue = v.value
-      //     }
-      //   }
-      // }
-      updateSignalPhys(ss)
+      if (!Array.isArray(data.value)) {
+        setSignal(ss, data.value, db)
+      }
     } else {
       const linDb = Object.values(global.database.lin).find((db) => db.name == s[0])
       if (linDb) {

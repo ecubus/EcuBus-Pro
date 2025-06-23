@@ -100,19 +100,17 @@ function parseCanData(raw: any) {
             result[signalKey] = []
           }
           const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
-          const value = signal.physValue
+
           result[signalKey].push([
             ts,
             {
-              value: value,
+              value: signal.physValue,
               rawValue: signal.value
             }
           ])
           msg.children.push({
             name: signal.name,
-            data: `${signal.physValueEnum ? signal.physValueEnum : signal.physValue}  ${
-              signal.value
-            }`
+            data: `${signal.physValue}  ${signal.value}`
           })
         }
       }

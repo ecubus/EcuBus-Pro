@@ -18,7 +18,7 @@
             v-model="row.value"
             size="small"
             :min="0"
-            :max="getMaxRawValue(row.length)"
+            :max="Math.pow(2, row.length) - 1"
             :step="1"
             step-strictly
             controls-position="right"
@@ -53,7 +53,7 @@
               v-for="item in getValues(row.valueTable)"
               :key="item.value"
               :label="item.label"
-              :value="item.value"
+              :value="item.label"
             />
           </el-select>
         </template>
@@ -104,18 +104,13 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
-import { Message, Signal } from '@r/database/dbc/dbcVisitor'
+import { DBC, Message, Signal } from '@r/database/dbc/dbcVisitor'
 import { useDataStore } from '@r/stores/data'
-import {
-  getMessageData,
-  getMaxRawValue,
-  rawToPhys,
-  updateSignalPhys,
-  updateSignalRaw
-} from '@r/database/dbc/calc'
+import { getMessageData, setSignal } from '@r/database/dbc/calc'
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
 import { cloneDeep } from 'lodash'
 import { useGlobalStart } from '@r/stores/runtime'
+import Dbchoose from './components/config/tester/dbchoose.vue'
 const props = defineProps<{
   database: string
   messageId: string
@@ -124,15 +119,17 @@ const props = defineProps<{
 const dataStore = useDataStore()
 const editDialogVisible = ref(false)
 const currentSignal = ref<Signal | null>(null)
-
+const db = computed<DBC | undefined>(() => {
+  return dataStore.database.can[props.database]
+})
 const message = computed<Message | undefined>(() => {
-  const db = dataStore.database.can[props.database]
-  if (db) {
-    const msg = db.messages[parseInt(props.messageId, 16)]
+  if (db.value) {
+    const msg = db.value.messages[parseInt(props.messageId, 16)]
     return msg
   }
   return undefined
 })
+
 // Get signals data from store
 const signals = computed(() => {
   const data: Signal[] = []
@@ -265,25 +262,29 @@ function editGenerator(row: Signal) {
 const globalStart = useGlobalStart()
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
-  updateSignalRaw(row)
-  if (message.value) {
-    if (globalStart.value) {
-      window.electron.ipcRenderer.send(
-        'ipc-update-can-signal',
-        props.database,
-        parseInt(props.messageId, 16),
-        row.name,
-        cloneDeep(row)
-      )
-    }
+  if (db.value && row.value != undefined) {
+    setSignal(row, row.value!, db.value)
+    if (message.value) {
+      if (globalStart.value) {
+        window.electron.ipcRenderer.send(
+          'ipc-update-can-signal',
+          props.database,
+          parseInt(props.messageId, 16),
+          row.name,
+          cloneDeep(row)
+        )
+      }
 
-    emits('change', getMessageData(message.value))
+      emits('change', getMessageData(message.value))
+    }
   }
 }
 
 // Physical value change handler
 function handlePhysValueChange(row: Signal) {
-  updateSignalPhys(row)
+  if (db.value && row.physValue != undefined) {
+    setSignal(row, row.physValue!, db.value)
+  }
   if (message.value) {
     if (globalStart.value) {
       window.electron.ipcRenderer.send(
@@ -304,23 +305,8 @@ const emits = defineEmits<{
 
 // Initialize signal values
 function initializeSignal(signal: Signal) {
-  if (signal.value === undefined) {
-    signal.value = 0
-
-    if (signal.values || signal.valueTable) {
-      // For enum values
-      signal.physValue = 0
-    } else {
-      // For numeric values, calculate initial phys value
-      signal.physValue = rawToPhys(0, signal)
-    }
-  } else if (signal.physValue === undefined) {
-    // If raw value exists but phys value doesn't, calculate it
-    if (signal.values || signal.valueTable) {
-      signal.physValue = signal.value
-    } else {
-      signal.physValue = rawToPhys(signal.value, signal)
-    }
+  if (db.value) {
+    setSignal(signal, 0, db.value)
   }
 }
 

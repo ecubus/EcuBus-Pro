@@ -349,7 +349,7 @@ export default class UdsTester {
       }
     }
   }
-  async triggerRecv(testerName: string, service: ServiceItem, addr: UdsAddress, ts: number) {
+  async triggerRecv(testerName: string, service: ServiceItem, ts: number, addr?: UdsAddress) {
     this.updateTs(ts)
     if (this.testers) {
       try {

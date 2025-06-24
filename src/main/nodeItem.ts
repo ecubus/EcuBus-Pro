@@ -180,7 +180,7 @@ export class NodeClass {
               const canBaseItem = this.canBaseMap.get(c)
               if (canBaseItem && tester.type == 'can') {
                 const tp = new CAN_TP(canBaseItem)
-                for (const addr of tester.address) {
+                for (const [index, addr] of tester.address.entries()) {
                   if (addr.type == 'can' && addr.canAddr) {
                     const idT = tp.getReadId(addr.canAddr, tester.simulateBy != nodeItem.id)
                     tp.event.on(idT, (data) => {
@@ -204,28 +204,28 @@ export class NodeClass {
                         }
                       }
                     })
-                    const idR = tp.getReadId(swapAddr(addr.canAddr), true)
-                    tp.event.on(idR, (data) => {
-                      if (data instanceof CanTpError) {
-                        //TODO:
-                      } else {
-                        if (data.addr.uuid != this.nodeItem.id) {
-                          const item = findService(tester, data.data, false)
-                          if (item) {
-                            try {
-                              applyBuffer(item, data.data, false)
-                              this.pool
-                                ?.triggerRecv(tester.name, item, addr, data.ts)
-                                .catch((e) => {
+                    if (index == 0) {
+                      const idR = tp.getReadId(swapAddr(addr.canAddr), true)
+                      tp.event.on(idR, (data) => {
+                        if (data instanceof CanTpError) {
+                          //TODO:
+                        } else {
+                          if (data.addr.uuid != this.nodeItem.id) {
+                            const item = findService(tester, data.data, false)
+                            if (item) {
+                              try {
+                                applyBuffer(item, data.data, false)
+                                this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
                                   this.log?.scriptMsg(e.toString(), data.ts, 'error')
                                 })
-                            } catch (e: any) {
-                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                              } catch (e: any) {
+                                this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                              }
                             }
                           }
                         }
-                      }
-                    })
+                      })
+                    }
                   }
                 }
                 this.cantp.push(tp)
@@ -268,7 +268,7 @@ export class NodeClass {
                             try {
                               applyBuffer(item, data.data, false)
                               this.pool
-                                ?.triggerRecv(tester.name, item, addr, data.ts)
+                                ?.triggerRecv(tester.name, item, data.ts, addr)
                                 .catch((e) => {
                                   this.log?.scriptMsg(e.toString(), data.ts, 'error')
                                 })
@@ -326,7 +326,7 @@ export class NodeClass {
                             try {
                               applyBuffer(item, data.data, false)
                               this.pool
-                                ?.triggerRecv(tester.name, item, addr, data.ts)
+                                ?.triggerRecv(tester.name, item, data.ts, addr)
                                 .catch((e) => {
                                   this.log?.scriptMsg(e.toString(), data.ts, 'error')
                                 })

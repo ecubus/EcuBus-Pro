@@ -334,7 +334,7 @@ async function globalStart(
     if (tester.type == 'can') {
       for (const val of canBaseMap.values()) {
         const cantp = new CAN_TP(val)
-        for (const addr of tester.address) {
+        for (const [index, addr] of tester.address.entries()) {
           if (addr.type == 'can' && addr.canAddr) {
             const id = cantp.getReadId(addr.canAddr, true)
             cantp.event.on(id, (data) => {
@@ -348,17 +348,19 @@ async function globalStart(
                 log.close()
               }
             })
-            const idR = cantp.getReadId(swapAddr(addr.canAddr), true)
-            cantp.event.on(idR, (data) => {
-              if (!(data instanceof TpError)) {
-                const log = new UdsLOG(tester.name)
-                const item = findService(tester, data.data, false)
-                if (item) {
-                  log.recv(tester.id, item, data.ts, data.data)
+            if (index == 0) {
+              const idR = cantp.getReadId(swapAddr(addr.canAddr), true)
+              cantp.event.on(idR, (data) => {
+                if (!(data instanceof TpError)) {
+                  const log = new UdsLOG(tester.name)
+                  const item = findService(tester, data.data, false)
+                  if (item) {
+                    log.recv(tester.id, item, data.ts, data.data)
+                  }
+                  log.close()
                 }
-                log.close()
-              }
-            })
+              })
+            }
           }
         }
         if (cantp.rxBaseHandleExist.size > 0) {

@@ -35,7 +35,7 @@
             "name": "Seq0",
             "services": [
               {
-                "enable": false,
+                "enable": true,
                 "checkResp": true,
                 "retryNum": 0,
                 "addressIndex": 0,
@@ -55,7 +55,7 @@
                 "_X_ROW_KEY": "row_41"
               },
               {
-                "enable": false,
+                "enable": true,
                 "checkResp": false,
                 "retryNum": 0,
                 "addressIndex": 0,
@@ -63,6 +63,36 @@
                 "serviceId": "7e578cf9-366c-416e-9f9a-6777edc241ce",
                 "delay": 50,
                 "_X_ROW_KEY": "row_42"
+              },
+              {
+                "enable": true,
+                "checkResp": false,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "e9285bba-d9c2-4c9c-95fc-7961cda731a2",
+                "delay": 50,
+                "_X_ROW_KEY": "row_36"
+              },
+              {
+                "enable": true,
+                "checkResp": false,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "caea9931-fae7-47b0-a6a9-80450ab000c8",
+                "delay": 50,
+                "_X_ROW_KEY": "row_37"
+              },
+              {
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "531efa34-c225-4b03-b7fb-070cbd73711f",
+                "delay": 50,
+                "_X_ROW_KEY": "row_38"
               }
             ]
           }
@@ -368,7 +398,7 @@
                       0
                     ]
                   },
-                  "bitLen": 32,
+                  "bitLen": 520,
                   "type": "ARRAY",
                   "deletable": true,
                   "editable": true
@@ -441,10 +471,11 @@
                   "value": {
                     "type": "Buffer",
                     "data": [
+                      0,
                       0
                     ]
                   },
-                  "bitLen": 8,
+                  "bitLen": 16,
                   "type": "NUM",
                   "deletable": true,
                   "editable": true
@@ -598,6 +629,286 @@
               "suppress": false,
               "autoSubfunc": false
             }
+          ],
+          "RequestDownloadBin": [],
+          "0x34": [
+            {
+              "id": "e9285bba-d9c2-4c9c-95fc-7961cda731a2",
+              "name": "RequestDownload520",
+              "serviceId": "0x34",
+              "params": [
+                {
+                  "id": "a62d8c39-a089-4ce4-a322-faaa2b7a1fe1",
+                  "name": "dataFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "59e52a98-5c4b-4b7d-ab13-770f91757e09",
+                  "name": "addressAndLengthFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      44
+                    ]
+                  },
+                  "phyValue": 44
+                },
+                {
+                  "id": "e2cacac4-9792-4bc1-8428-26163e5bd9f4",
+                  "name": "memoryAddress",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "dd6a964b-0319-49f7-8af4-12e03d64840a",
+                  "name": "memorySize",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "e17fc918-a975-4d3d-8e21-2b79630b1059",
+                  "name": "lengthFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "36d88870-db65-41a6-a634-ef284720174d",
+                  "name": "maxNumberOfBlockLength",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "Job": [
+            {
+              "id": "caea9931-fae7-47b0-a6a9-80450ab000c8",
+              "name": "SecureDownload",
+              "serviceId": "Job",
+              "params": [
+                {
+                  "id": "b01561d1-144f-4c20-8eea-b4aee654ae81",
+                  "name": "file",
+                  "desc": "",
+                  "phyValue": "test.txt",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      116,
+                      101,
+                      115,
+                      116,
+                      46,
+                      116,
+                      120,
+                      116
+                    ]
+                  },
+                  "bitLen": 64,
+                  "type": "FILE",
+                  "deletable": true,
+                  "editable": true
+                }
+              ],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x37": [
+            {
+              "id": "531efa34-c225-4b03-b7fb-070cbd73711f",
+              "name": "RequestTransferExit550",
+              "serviceId": "0x37",
+              "params": [
+                {
+                  "id": "fe8ee9e4-7167-41c8-9fa0-50fc2e487a0a",
+                  "name": "transferRequestParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "efbec641-d991-41f2-8264-1befcb4e8b10",
+                  "name": "auth",
+                  "desc": "",
+                  "phyValue": "00 00 00 00",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "bitLen": 32,
+                  "type": "ARRAY",
+                  "deletable": true,
+                  "editable": true
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "6516ff77-2343-44fd-b510-97a2fee5d1a0",
+                  "name": "transferResponseParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x36": [
+            {
+              "id": "1b2315e7-2d9a-4a70-9ab6-5470927903cc",
+              "name": "TransferData540",
+              "serviceId": "0x36",
+              "params": [
+                {
+                  "id": "07e0197f-8ece-404c-bbb7-0f34c7232169",
+                  "name": "blockSequenceCounter",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "910103c8-c3a2-492e-9e87-a41bf9da6ad9",
+                  "name": "transferRequestParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "6d2efa6a-09ad-4e73-a4c8-dc52504211ad",
+                  "name": "blockSequenceCounter",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "ba13abd7-cef9-4233-a869-56fa39c06030",
+                  "name": "transferResponseParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
           ]
         },
         "simulateBy": "ce3a92ca-e5e1-49d9-a551-b58e18c4b5b2"
@@ -632,7 +943,7 @@
           "x": 383,
           "y": 162,
           "w": 2562,
-          "h": 229
+          "h": 992
         },
         "options": {
           "params": {}
@@ -640,14 +951,15 @@
         "title": "message",
         "label": "Message",
         "id": "message",
-        "layoutType": "bottom"
+        "layoutType": "bottom",
+        "hide": true
       },
       "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_sequence": {
         "pos": {
-          "x": 0,
+          "x": 763,
           "y": 0,
-          "w": 1707,
-          "h": 315.5
+          "w": 1375,
+          "h": 358.5
         },
         "title": "testerSequence",
         "label": "Sequence",
@@ -657,12 +969,20 @@
             "edit-index": "848318f9-264b-4eaa-b9a0-7ccd831d8f8f"
           },
           "name": "Tester_can_0"
-        }
+        },
+        "hide": false,
+        "backupPos": {
+          "x": 0,
+          "y": 0,
+          "w": 1707,
+          "h": 315.5
+        },
+        "isMax": false
       },
       "trace": {
         "pos": {
-          "x": 553,
-          "y": 162,
+          "x": 758,
+          "y": 21,
           "w": 1652,
           "h": 693.5
         },
@@ -674,21 +994,40 @@
       },
       "network": {
         "pos": {
-          "x": 553.5,
-          "y": 115.5,
+          "x": 103,
+          "y": 191,
           "w": 600,
           "h": 400
         },
         "title": "network",
         "label": "Network",
         "id": "network",
-        "options": {}
+        "options": {},
+        "hide": false
+      },
+      "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_services": {
+        "pos": {
+          "x": 1163,
+          "y": 191,
+          "w": 1071,
+          "h": 400
+        },
+        "title": "testerService",
+        "label": "Service",
+        "id": "848318f9-264b-4eaa-b9a0-7ccd831d8f8f_services",
+        "options": {
+          "params": {
+            "edit-index": "848318f9-264b-4eaa-b9a0-7ccd831d8f8f"
+          },
+          "name": "Tester_can_0"
+        },
+        "hide": false
       },
       "tester": {
         "pos": {
-          "x": 516,
-          "y": 144,
-          "w": 828,
+          "x": -4,
+          "y": 0,
+          "w": 720,
           "h": 400
         },
         "title": "tester",

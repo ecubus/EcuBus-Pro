@@ -724,8 +724,8 @@ export class DiagResponse extends Service {
     this.addr = addr
   }
   /**
-   * Get the UDS address of the response.
-   * @returns UdsAddress
+   * Get the UDS address of the response. The address may be undefined if not set.
+   * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
    */
   getUdsAddress() {
     return this.addr
@@ -824,7 +824,7 @@ export class DiagRequest extends Service {
   }
   /**
    * Get the UDS address of the request.
-   * @returns UdsAddress
+   * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
    */
   getUdsAddress() {
     return this.addr

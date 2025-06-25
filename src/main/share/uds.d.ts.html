@@ -928,8 +928,8 @@ declare class DiagResponse extends Service {
     private addr?;
     constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
     /**
-     * Get the UDS address of the response.
-     * @returns UdsAddress
+     * Get the UDS address of the response. The address may be undefined if not set.
+     * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
      */
     getUdsAddress(): UdsAddress | undefined;
     /**
@@ -1004,7 +1004,7 @@ declare class DiagRequest extends Service {
     constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
     /**
      * Get the UDS address of the request.
-     * @returns UdsAddress
+     * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
      */
     getUdsAddress(): UdsAddress | undefined;
     /**
@@ -1456,8 +1456,7 @@ declare function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void>
 /**
  * Register a virtual entity
  *
- * @deprecated This API is deprecated and will be removed in a future version.
- * Please see {@link https://example.com} for the new API documentation.
+ * @deprecated This API is deprecated and not working, enable it through the simulate_by field in the tester config
  *
  * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.

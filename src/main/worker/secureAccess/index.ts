@@ -1,7 +1,52 @@
-import saNode from './build/Release/sa.node'
-// import { createRequire } from 'node:module'
-// const require = createRequire(import.meta.url)
-// const saNode = require('./build/Release/sa.node')
+// 条件导入sa.node，只在Windows平台导入
+let saNode: any
+if (process.platform == 'win32') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  saNode = require('./build/Release/sa.node')
+} else {
+  // 非Windows平台提供空实现
+  saNode = {
+    SeedKey: class {
+      constructor() {}
+      IsLoaded() {
+        return false
+      }
+      LoadDLL() {
+        throw new Error('SecureAccessDll is only available on Windows platform')
+      }
+      GenerateKeyExOpt() {
+        throw new Error('SecureAccessDll is only available on Windows platform')
+      }
+      GenerateKeyEx() {
+        throw new Error('SecureAccessDll is only available on Windows platform')
+      }
+    },
+    UINT8_ARRAY: class {
+      constructor() {}
+      setitem() {}
+      cast() {
+        return this
+      }
+    },
+    INT8_ARRAY: class {
+      constructor() {}
+      setitem() {}
+      cast() {
+        return this
+      }
+    },
+    UINT32_PTR: class {
+      constructor() {}
+      assign() {}
+      value() {
+        return 0
+      }
+      cast() {
+        return this
+      }
+    }
+  }
+}
 
 /**
  * @category UDS

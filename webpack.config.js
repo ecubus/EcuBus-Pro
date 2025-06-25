@@ -6,7 +6,6 @@ const nodeResolve = require('@rollup/plugin-node-resolve');
 const dts = require('rollup-plugin-dts').default;
 // const {generateDtsBundle}=require('dts-bundle-generator');
 
-
 async function bundleDts(
     input,
     output
@@ -170,7 +169,11 @@ module.exports = {
     },
     target: 'node',
     plugins: [
-       new MyCustomPlugin()
+       new MyCustomPlugin(),
+       // 添加条件编译插件
+       new webpack.DefinePlugin({
+           'process.platform': JSON.stringify(process.platform),
+       })
     ],
     module: {
         rules: [

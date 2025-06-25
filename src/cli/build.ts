@@ -4,9 +4,9 @@ let esbuild_executable: any
 
 const loadEsbuild = async () => {
   if (process.platform === 'win32') {
-    esbuild_executable = await import('../../../resources/bin/esbuild.exe?asset&asarUnpack')
+    esbuild_executable = await import('../../resources/bin/esbuild.exe?asset&asarUnpack')
   } else {
-    esbuild_executable = await import('../../../resources/bin/esbuild?asset&asarUnpack')
+    esbuild_executable = await import('../../resources/bin/esbuild?asset&asarUnpack')
     //<-- May change fetch from node_modules esbuild_executable = await import('esbuild/bin/esbuild?asset&asarUnpack')
   }
 }

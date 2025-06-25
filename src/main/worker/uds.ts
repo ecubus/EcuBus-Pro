@@ -40,6 +40,116 @@ export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
+
+/**
+ * Test mode functionality for enhanced logging and test tracking.
+ * When process.env.MODE === 'test', this module provides:
+ * - Automatic test ID generation and tracking
+ * - Enhanced console logging with test ID prefixes
+ * - Test start/end logging
+ * - Context management for test functions
+ */
+// Test mode functionality
+let idCounter = 0
+let currentTestId: string | null = null
+
+// Override console.log for test mode
+const originalLog = console.log
+const originalError = console.error
+const originalWarn = console.warn
+const originalInfo = console.info
+
+if (process.env.MODE === 'test') {
+  console.log = (...args: any[]) => {
+    if (currentTestId) {
+      originalLog(`[${currentTestId}]`, ...args)
+    } else {
+      originalLog(...args)
+    }
+  }
+
+  console.error = (...args: any[]) => {
+    if (currentTestId) {
+      originalError(`[${currentTestId}]`, ...args)
+    } else {
+      originalError(...args)
+    }
+  }
+
+  console.warn = (...args: any[]) => {
+    if (currentTestId) {
+      originalWarn(`[${currentTestId}]`, ...args)
+    } else {
+      originalWarn(...args)
+    }
+  }
+
+  console.info = (...args: any[]) => {
+    if (currentTestId) {
+      originalInfo(`[${currentTestId}]`, ...args)
+    } else {
+      originalInfo(...args)
+    }
+  }
+}
+
+/**
+ * Creates a wrapper for test functions that adds test mode functionality.
+ * When not in test mode, returns the original function unchanged.
+ */
+// Test mode wrapper functions
+const createTestModeWrapper = <T extends (...args: any[]) => any>(originalFn: T): T => {
+  if (process.env.MODE !== 'test') {
+    return originalFn
+  }
+
+  return ((...args: any[]) => {
+    return originalFn(...args)
+  }) as T
+}
+
+/**
+ * Creates a wrapper for beforeEach that adds test ID tracking and logging.
+ * Sets up test context with unique ID and adds teardown for cleanup.
+ */
+// Special wrapper for beforeEach to handle test context
+const createBeforeEachWrapper = (originalBeforeEach: any) => {
+  if (process.env.MODE !== 'test') {
+    return originalBeforeEach
+  }
+
+  return (t: any) => {
+    const id = `T${++idCounter}`
+    currentTestId = id
+  }
+}
+
+/**
+ * Creates a wrapper for test function that adds test ID tracking and logging.
+ * Handles different function signatures and sets up test context with unique ID.
+ */
+// Special wrapper for test function to handle test context
+const createTestWrapper = (originalTest: any) => {
+  if (process.env.MODE !== 'test') {
+    return originalTest
+  }
+
+  return (name: string, options: any, fn?: any) => {
+    // Handle different function signatures
+    if (typeof options === 'function') {
+      fn = options
+      options = {}
+    }
+
+    return originalTest(name, options, (t: any) => {
+      const id = `T${++idCounter}`
+      currentTestId = id
+
+      return fn(t)
+    })
+  }
+}
+
 /**
  * @category TEST
  */
@@ -48,27 +158,32 @@ export { assert }
 /**
  * @category TEST
  */
-export { test } from 'node:test'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export const test = createTestWrapper(require('node:test').test)
 
 /**
  * @category TEST
  */
-export { beforeEach } from 'node:test'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export const beforeEach = createBeforeEachWrapper(require('node:test').beforeEach)
 
 /**
  * @category TEST
  */
-export { afterEach } from 'node:test'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export const afterEach = createTestModeWrapper(require('node:test').afterEach)
 
 /**
  * @category TEST
  */
-export { before } from 'node:test'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export const before = createTestModeWrapper(require('node:test').before)
 
 /**
  * @category TEST
  */
-export { after } from 'node:test'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+export const after = createTestModeWrapper(require('node:test').after)
 
 /**
  * @category TEST

@@ -191,7 +191,7 @@
           </el-tree>
         </el-scrollbar>
       </div>
-      <div id="testerServiceShift" class="shift" />
+      <div id="tttShift" class="shift" />
       <div class="right" :style="{ left: leftWidth + 5 + 'px' }">
         <trace-component
           ref="traceRef"
@@ -755,7 +755,7 @@ function testLog(
   }
 }
 onMounted(() => {
-  window.jQuery('#testerServiceShift').resizable({
+  window.jQuery('#tttShift').resizable({
     handles: 'e',
     resize: (e, ui) => {
       leftWidth.value = ui.size.width

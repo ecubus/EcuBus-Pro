@@ -142,14 +142,9 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     last.close()
     testMap.delete(test.id)
   }
-  const nodeItem: NodeItem = {
-    id: test.id,
-    name: test.name,
-    channel: test.channel,
-    script: test.script
-  }
+
   const node = new NodeClass(
-    nodeItem,
+    test,
     canBaseMap,
     linBaseMap,
     doips,

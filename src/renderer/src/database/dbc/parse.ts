@@ -87,10 +87,10 @@ const Comma = createToken({ name: 'Comma', pattern: /,/ })
 const Plus = createToken({ name: 'Plus', pattern: /\+/ })
 const Minus = createToken({ name: 'Minus', pattern: /-/ })
 
-const ENUM = createToken({ name: 'ENUM', pattern: /ENUM/ })
-const INT = createToken({ name: 'INT', pattern: /INT/ })
-const HEX = createToken({ name: 'HEX', pattern: /HEX/ })
-const FLOAT = createToken({ name: 'FLOAT', pattern: /FLOAT/ })
+const ENUM = createToken({ name: 'ENUM', pattern: /ENUM\s/ })
+const INT = createToken({ name: 'INT', pattern: /INT\s/ })
+const HEX = createToken({ name: 'HEX', pattern: /HEX\s/ })
+const FLOAT = createToken({ name: 'FLOAT', pattern: /FLOAT\s/ })
 
 const RangeList = createToken({
   name: 'RangeList',

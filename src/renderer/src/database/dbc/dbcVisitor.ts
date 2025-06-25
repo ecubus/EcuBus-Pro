@@ -155,6 +155,9 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     super()
     this.validateVisitor()
   }
+  messageTransmitterClause() {
+    //do nothing
+  }
   intType(ctx: IntTypeCstChildren) {
     return {
       min: parseInt(ctx.Number[0].image, 10),
@@ -222,6 +225,15 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     if (ctx.attributeDefaultClause) {
       ctx.attributeDefaultClause.forEach((attributeDefaultNode: AttributeDefaultClauseCstNode) => {
         const attribute = this.visit(attributeDefaultNode)
+        const attr = dbc.attributes[attribute.name]
+        if (attr) {
+          attr.defaultValue = attribute.value
+        }
+      })
+    }
+    if (ctx.attributeDefDefRelClause) {
+      ctx.attributeDefDefRelClause.forEach((attributeDefDefRelNode: any) => {
+        const attribute = this.visit(attributeDefDefRelNode)
         const attr = dbc.attributes[attribute.name]
         if (attr) {
           attr.defaultValue = attribute.value
@@ -614,13 +626,57 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
   }
 
   attributeDefaultClause(ctx: AttributeDefaultClauseCstChildren) {
+    const name = ctx.StringLiteral[0].image.replace(/"/g, '')
+    let value: string | number | any = ''
+
+    // 处理不同类型的值
+    if (ctx.Number && ctx.Number.length > 0) {
+      // 数字值
+      value = parseInt(ctx.Number[0].image, 10)
+    } else if (ctx.StringLiteral && ctx.StringLiteral.length > 1) {
+      // 字符串值
+      value = ctx.StringLiteral[1].image.replace(/"/g, '')
+    } else if (ctx.enumType) {
+      // ENUM类型
+      value = this.visit(ctx.enumType)
+    } else if (ctx.intType) {
+      // INT类型
+      value = this.visit(ctx.intType)
+    } else if (ctx.hexType) {
+      // HEX类型
+      value = this.visit(ctx.hexType)
+    } else if (ctx.floatType) {
+      // FLOAT类型
+      value = this.visit(ctx.floatType)
+    } else if (ctx.otherType) {
+      // 其他类型（包括Identifier）
+      value = this.visit(ctx.otherType)
+    }
+
     return {
-      name: ctx.StringLiteral[0].image.replace(/"/g, ''),
-      value: ctx.Number
-        ? parseInt(ctx.Number[0].image, 10)
-        : ctx.StringLiteral[1].image.replace(/"/g, '')
+      name,
+      value
     }
   }
+
+  attributeDefDefRelClause(ctx: any) {
+    const name = ctx.StringLiteral[0].image.replace(/"/g, '')
+    let value: string | number = ''
+
+    if (ctx.Number && ctx.Number.length > 0) {
+      // 数字值
+      value = parseInt(ctx.Number[0].image, 10)
+    } else if (ctx.StringLiteral && ctx.StringLiteral.length > 1) {
+      // 字符串值
+      value = ctx.StringLiteral[1].image.replace(/"/g, '')
+    }
+
+    return {
+      name,
+      value
+    }
+  }
+
   signalAttributeAssignment(ctx: SignalAttributeAssignmentCstChildren) {
     return {
       id: parseInt(ctx.Number[0].image, 10),

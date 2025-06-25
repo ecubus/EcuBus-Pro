@@ -335,16 +335,37 @@ class DBCParser extends CstParser {
 
   // 添加新的规则处理属性默认值
   private attributeDefault = this.RULE('attributeDefaultClause', () => {
-    this.CONSUME(BA_DEF_DEF)
+    this.OR([{ ALT: () => this.CONSUME(BA_DEF_DEF) }, { ALT: () => this.CONSUME(BA_DEF_REL) }])
+
+    // 如果是 BA_DEF_REL，可能有可选的关系类型
+    this.OPTION(() => {
+      this.OR1([{ ALT: () => this.CONSUME(BU_SG_REL) }, { ALT: () => this.CONSUME(BU_BO_REL) }])
+    })
+
     this.CONSUME(StringLiteral) // 属性名称
 
-    // 默认值可以是数字、字符串或标识符
-    this.OR([
+    // 默认值可以是数字、字符串、标识符，或者是类型定义
+    this.OR2([
       { ALT: () => this.CONSUME(Number) }, // 数字值
       { ALT: () => this.CONSUME1(StringLiteral) }, // 字符串值
-      { ALT: () => this.CONSUME(Identifier) } // 标识符值
+      { ALT: () => this.SUBRULE(this.enumType) }, // ENUM类型
+      { ALT: () => this.SUBRULE(this.intType) }, // INT类型
+      { ALT: () => this.SUBRULE(this.hexType) }, // HEX类型
+      { ALT: () => this.SUBRULE(this.floatType) }, // FLOAT类型
+      { ALT: () => this.SUBRULE(this.otherType) } // 其他类型（包括Identifier）
     ])
 
+    this.OPTION1(() => this.CONSUME(Semicolon))
+  })
+
+  // 添加新的规则处理 BA_DEF_DEF_REL_ (Attribute Definition Default for Relations)
+  private attributeDefDefRel = this.RULE('attributeDefDefRelClause', () => {
+    this.CONSUME(BA_DEF_DEF_REL)
+    this.CONSUME(StringLiteral) // 属性名称
+    this.OR([
+      { ALT: () => this.CONSUME(Number) }, // 数字值
+      { ALT: () => this.CONSUME1(StringLiteral) } // 字符串值
+    ])
     this.OPTION(() => this.CONSUME(Semicolon))
   })
 
@@ -531,6 +552,20 @@ class DBCParser extends CstParser {
     this.CONSUME1(Semicolon)
   })
 
+  // Add rule for BO_TX_BU_ (Message Transmitter)
+  private messageTransmitter = this.RULE('messageTransmitterClause', () => {
+    this.CONSUME(BO_TX_BU)
+    this.CONSUME1(Number) // Message ID
+    this.CONSUME1(Colon)
+    this.AT_LEAST_ONE_SEP({
+      SEP: Comma,
+      DEF: () => {
+        this.CONSUME1(Identifier) // Node name
+      }
+    })
+    this.OPTION(() => this.CONSUME1(Semicolon))
+  })
+
   public dbcFile = this.RULE('dbcFile', () => {
     // Version section is optional
     this.OPTION(() => {
@@ -553,13 +588,15 @@ class DBCParser extends CstParser {
         { ALT: () => this.SUBRULE2(this.valueTable) },
         { ALT: () => this.SUBRULE2(this.attribute) },
         { ALT: () => this.SUBRULE2(this.attributeDefault) },
+        { ALT: () => this.SUBRULE2(this.attributeDefDefRel) },
         { ALT: () => this.SUBRULE2(this.attributeAssignment) },
         { ALT: () => this.SUBRULE2(this.multiplexedValue) },
         { ALT: () => this.SUBRULE2(this.comment) },
         { ALT: () => this.SUBRULE2(this.valueDefinition) },
         { ALT: () => this.SUBRULE2(this.signalValueType) },
         { ALT: () => this.SUBRULE2(this.environmentVariable) },
-        { ALT: () => this.SUBRULE2(this.signalGroupClause) } // Add signal group parsing
+        { ALT: () => this.SUBRULE2(this.signalGroupClause) },
+        { ALT: () => this.SUBRULE2(this.messageTransmitter) }
       ])
     })
   })

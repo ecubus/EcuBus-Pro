@@ -38,3 +38,9 @@ BO_ 655 InternalReader1_Flt_D_Stat: 8 NFCR_INT_1
 SG_ INT1_VoltageFault : 5|2@0+ (1,0) [0|3] "" RFA_BUNSG
 SG_ INT1_FaultStatus : 3|2@0+( 1,0) [0|3] "" RFA_BUN
 SG_ INT1_AntennaFault : 7|2@0+ (1,0) [0|3] "" RFA_BUN
+
+BO_TX_BU_ 1638 : RFA_BUN,TSTR;
+
+BA_DEF_REL_ BU_SG_REL_  "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_DEF_  "ReleaseVersionNumber" "V0.30.0";
+BA_DEF_DEF_REL_ "AFloat2" 0;

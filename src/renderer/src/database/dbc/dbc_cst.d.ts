@@ -181,10 +181,29 @@ export interface AttributeDefaultClauseCstNode extends CstNode {
 }
 
 export type AttributeDefaultClauseCstChildren = {
-  BA_DEF_DEF: IToken[]
+  BA_DEF_DEF?: IToken[]
+  BA_DEF_REL?: IToken[]
+  BU_SG_REL?: IToken[]
+  BU_BO_REL?: IToken[]
   StringLiteral: IToken[]
   Number?: IToken[]
-  Identifier?: IToken[]
+  enumType?: EnumTypeCstNode[]
+  intType?: IntTypeCstNode[]
+  hexType?: HexTypeCstNode[]
+  floatType?: FloatTypeCstNode[]
+  otherType?: OtherTypeCstNode[]
+  Semicolon?: IToken[]
+}
+
+export interface AttributeDefDefRelClauseCstNode extends CstNode {
+  name: 'attributeDefDefRelClause'
+  children: AttributeDefDefRelClauseCstChildren
+}
+
+export type AttributeDefDefRelClauseCstChildren = {
+  BA_DEF_DEF_REL: IToken[]
+  StringLiteral: IToken[]
+  Number?: IToken[]
   Semicolon?: IToken[]
 }
 
@@ -401,6 +420,20 @@ export type SignalGroupClauseCstChildren = {
   Semicolon: IToken[]
 }
 
+export interface MessageTransmitterClauseCstNode extends CstNode {
+  name: 'messageTransmitterClause'
+  children: MessageTransmitterClauseCstChildren
+}
+
+export type MessageTransmitterClauseCstChildren = {
+  BO_TX_BU: IToken[]
+  Number: IToken[]
+  Colon: IToken[]
+  Identifier: IToken[]
+  Comma?: IToken[]
+  Semicolon?: IToken[]
+}
+
 export interface DbcFileCstNode extends CstNode {
   name: 'dbcFile'
   children: DbcFileCstChildren
@@ -415,6 +448,7 @@ export type DbcFileCstChildren = {
   valueTableClause?: ValueTableClauseCstNode[]
   attributeClause?: AttributeClauseCstNode[]
   attributeDefaultClause?: AttributeDefaultClauseCstNode[]
+  attributeDefDefRelClause?: AttributeDefDefRelClauseCstNode[]
   attributeAssignmentClause?: AttributeAssignmentClauseCstNode[]
   multiplexedValueClause?: MultiplexedValueClauseCstNode[]
   commentClause?: CommentClauseCstNode[]
@@ -422,6 +456,7 @@ export type DbcFileCstChildren = {
   signalValueTypeClause?: SignalValueTypeClauseCstNode[]
   environmentVariableClause?: EnvironmentVariableClauseCstNode[]
   signalGroupClause?: SignalGroupClauseCstNode[]
+  messageTransmitterClause?: MessageTransmitterClauseCstNode[]
 }
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
@@ -440,6 +475,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   otherType(children: OtherTypeCstChildren, param?: IN): OUT
   attributeClause(children: AttributeClauseCstChildren, param?: IN): OUT
   attributeDefaultClause(children: AttributeDefaultClauseCstChildren, param?: IN): OUT
+  attributeDefDefRelClause(children: AttributeDefDefRelClauseCstChildren, param?: IN): OUT
   globalAttributeAssignment(children: GlobalAttributeAssignmentCstChildren, param?: IN): OUT
   nodeAttributeAssignment(children: NodeAttributeAssignmentCstChildren, param?: IN): OUT
   messageAttributeAssignment(children: MessageAttributeAssignmentCstChildren, param?: IN): OUT
@@ -455,5 +491,6 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   commentClause(children: CommentClauseCstChildren, param?: IN): OUT
   nsSection(children: NsSectionCstChildren, param?: IN): OUT
   signalGroupClause(children: SignalGroupClauseCstChildren, param?: IN): OUT
+  messageTransmitterClause(children: MessageTransmitterClauseCstChildren, param?: IN): OUT
   dbcFile(children: DbcFileCstChildren, param?: IN): OUT
 }

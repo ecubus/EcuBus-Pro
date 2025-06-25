@@ -1,6 +1,17 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
-import esbuildWin from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
+
+let esbuild_executable: any
+
+const loadEsbuild = async () => {
+  if (process.platform === 'win32') {
+    esbuild_executable = await import('../../../resources/bin/esbuild.exe?asset&asarUnpack')
+  } else {
+    esbuild_executable = await import('../../../resources/bin/esbuild?asset&asarUnpack')
+    //<-- May change fetch from node_modules esbuild_executable = await import('esbuild/bin/esbuild?asset&asarUnpack')
+  }
+}
+
 import path from 'path'
 import {
   compileTsc,
@@ -88,7 +99,7 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
     projectName,
     data,
     entry,
-    esbuildWin,
+    esbuild_executable,
     path.join(libPath, 'js'),
     isTest
   )

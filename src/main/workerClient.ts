@@ -164,19 +164,29 @@ export default class UdsTester {
 
     d.worker.stdout.on('data', (data: any) => {
       if (!this.selfStop) {
-        const str = data.toString().trim()
-        if (str) {
-          this.log.scriptMsg(str, this.ts)
+        if (this.env.MODE == 'test') {
+          const testStartRegex = /^<<< TEST START .+>>>$/
+          const testEndRegex = /^<<< TEST END .+>>>$/
+          const str = data.toString().trim()
+          if (testStartRegex.test(str) || testEndRegex.test(str)) {
+            return
+          }
         }
+        this.log.scriptMsg(data.toString(), this.ts)
       }
     })
 
     d.worker.stderr.on('data', (data: any) => {
       if (!this.selfStop) {
-        const str = data.toString().trim()
-        if (str) {
-          this.log.systemMsg(str, this.ts, 'error')
+        if (this.env.MODE == 'test') {
+          const testStartRegex = /^<<< TEST START .+>>>$/
+          const testEndRegex = /^<<< TEST END .+>>>$/
+          const str = data.toString().trim()
+          if (testStartRegex.test(str) || testEndRegex.test(str)) {
+            return
+          }
         }
+        this.log.systemMsg(data.toString(), this.ts, 'error')
       }
     })
 

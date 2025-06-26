@@ -1,7 +1,7 @@
 import { dot } from 'node:test/reporters';
 export { default as assert } from 'node:assert';
-import { describe } from 'node:test';
-export { after, afterEach, before, beforeEach, test } from 'node:test';
+import { test as test$1 } from 'node:test';
+export { after, afterEach, before, beforeEach } from 'node:test';
 
 /**
  * Represents a CAN (Controller Area Network) message.
@@ -402,7 +402,30 @@ declare class SecureAccessDll {
     private loadDll;
 }
 
-declare const selfDescribe: typeof describe;
+/**
+ * Test function for writing test cases. Provides test context and logging.
+ *
+ * @category TEST
+ * @param {string} name - The name of the test case
+ * @param {Function} fn - The test function to execute
+ *
+ * @example
+ * ```ts
+ * // Basic test case
+ * test('should add numbers correctly', () => {
+ *   assert.equal(1 + 1, 2);
+ * });
+ *
+ * // Async test case
+ * test('should handle async operations', async () => {
+ *   const result = await someAsyncFunction();
+ *   assert.equal(result, expectedValue);
+ * });
+ * ```
+ */
+declare function test(name: string, fn: () => void | Promise<void>): void;
+
+declare const selfDescribe: typeof test$1.describe.only;
 
 declare const testerList: readonly [
                 {{#each this.testers}}
@@ -1529,4 +1552,4 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linStopScheduler(device?: string): Promise<void>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq, test };

@@ -40,35 +40,50 @@ export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert from 'node:assert'
+
 /**
  * @category TEST
  */
 export { assert }
 
+import { test as nodeTest } from 'node:test'
 /**
+ * Test function for writing test cases. Provides test context and logging.
+ *
  * @category TEST
+ * @param {string} name - The name of the test case
+ * @param {Function} fn - The test function to execute
+ *
+ * @example
+ * ```ts
+ * // Basic test case
+ * test('should add numbers correctly', () => {
+ *   assert.equal(1 + 1, 2);
+ * });
+ *
+ * // Async test case
+ * test('should handle async operations', async () => {
+ *   const result = await someAsyncFunction();
+ *   assert.equal(result, expectedValue);
+ * });
+ * ```
  */
-export { test } from 'node:test'
+export function test(name: string, fn: () => void | Promise<void>) {
+  nodeTest(name, (t) => {
+    t.before(() => {
+      console.log(`<<< TEST START ${name}>>>`)
+    })
+    t.after(() => {
+      console.log(`<<< TEST END ${name}>>>`)
+    })
+    return fn()
+  })
+}
 
 /**
  * @category TEST
  */
-export { beforeEach } from 'node:test'
-
-/**
- * @category TEST
- */
-export { afterEach } from 'node:test'
-
-/**
- * @category TEST
- */
-export { before } from 'node:test'
-
-/**
- * @category TEST
- */
-export { after } from 'node:test'
+export { beforeEach, afterEach, before, after } from 'node:test'
 
 /**
  * @category TEST

@@ -28,6 +28,11 @@
           :icon="successIcon"
           style="font-size: 14px; margin-top: 8px"
         />
+        <Icon
+          v-else-if="row.level == 'primary'"
+          :icon="primaryIcon"
+          style="font-size: 14px; margin-top: 8px"
+        />
       </template>
       <template #toolbar>
         <div
@@ -79,6 +84,7 @@ import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
 import warnIcon from '@iconify/icons-material-symbols/warning-outline-rounded'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
+import primaryIcon from '@iconify/icons-material-symbols/line-start-square-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -283,8 +289,9 @@ function testLog(
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
-        level: 'info',
+        level: 'primary',
         message: `Test ${item.message.data.data.name} starting...`,
+
         id: cnt++
       })
     } else if (item.message.data.type == 'test:pass') {
@@ -360,7 +367,9 @@ onUnmounted(() => {
 .info {
   color: var(--el-color-info-dark-5);
 }
-
+.primary {
+  color: var(--el-color-primary);
+}
 .debug {
   color: var(--el-color-info);
 }

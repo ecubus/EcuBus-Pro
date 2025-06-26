@@ -8,7 +8,8 @@ import {
   CanMessage,
   CanMsgType,
   CAN_ID_TYPE,
-  getTsUs
+  getTsUs,
+  getDlcByLen
 } from '../../share/can'
 import { EventEmitter } from 'events'
 import { queue, QueueObject } from 'async'
@@ -51,31 +52,7 @@ export class SLCAN_CAN extends CanBase {
   private serialPort: SerialPort
 
   private readAbort = new AbortController()
-  private pendingCmds = new Map<
-    string,
-    {
-      resolve: (value: number) => void
-      reject: (reason: TpError) => void
-      addr: CanAddr
-      data: Buffer
-    }
-  >()
-  private writeQueueMap = new Map<
-    string,
-    QueueObject<{
-      addr: CanAddr
-      data: Buffer
-      resolve: (ts: number) => void
-      reject: (err: TpError) => void
-    }>
-  >()
-  private rejectMap = new Map<
-    number,
-    {
-      reject: (reason: TpError) => void
-      addr: CanAddr
-    }
-  >()
+
   private rejectBaseMap = new Map<
     number,
     {
@@ -122,8 +99,13 @@ export class SLCAN_CAN extends CanBase {
     if (bitrateCmd) {
       this.serialPort.write(bitrateCmd + '\r')
     } else {
-      // Default to 10k
-      this.serialPort.write('S0\r')
+      // Throw error for unsupported bitrate
+      throw new CanError(
+        CAN_ERROR_ID.CAN_PARAM_ERROR,
+        { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false },
+        undefined,
+        `Unsupported CAN bitrate: ${this.info.bitrate.freq} Hz`
+      )
     }
 
     // Set CANFD bitrate if supported
@@ -131,6 +113,14 @@ export class SLCAN_CAN extends CanBase {
       const canfdBitrateCmd = SLCAN_CANFD_BITRATE_COMMANDS[this.info.bitratefd.freq]
       if (canfdBitrateCmd) {
         this.serialPort.write(canfdBitrateCmd + '\r')
+      } else {
+        // Throw error for unsupported CANFD bitrate
+        throw new CanError(
+          CAN_ERROR_ID.CAN_PARAM_ERROR,
+          { idType: CAN_ID_TYPE.STANDARD, canfd: true, brs: false, remote: false },
+          undefined,
+          `Unsupported CANFD bitrate: ${this.info.bitratefd.freq} Hz`
+        )
       }
     }
 
@@ -225,6 +215,7 @@ export class SLCAN_CAN extends CanBase {
     if (!this.serialPort) return
 
     this.serialPort.on('data', (data: Buffer) => {
+      console.log('xxxx', data)
       this.rxBuffer = Buffer.concat([this.rxBuffer, data])
       this.processRxBuffer()
     })
@@ -447,47 +438,6 @@ export class SLCAN_CAN extends CanBase {
     try {
       this.readAbort.abort()
 
-      // Reject all pending commands
-      for (const [key, value] of this.pendingCmds) {
-        value.reject(
-          new TpError(
-            isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
-            value.addr,
-            value.data,
-            msg
-          )
-        )
-      }
-      this.pendingCmds.clear()
-
-      for (const [key, value] of this.rejectMap) {
-        value.reject(
-          new TpError(
-            isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
-            value.addr,
-            undefined,
-            msg
-          )
-        )
-      }
-      this.rejectMap.clear()
-
-      // Handle write queue
-      for (const [key, value] of this.writeQueueMap) {
-        const list = value.workersList()
-        for (const item of list) {
-          item.data.reject(
-            new TpError(
-              isReset ? TP_ERROR_ID.TP_BUS_ERROR : TP_ERROR_ID.TP_BUS_CLOSED,
-              item.data.addr,
-              undefined,
-              msg
-            )
-          )
-        }
-      }
-      this.writeQueueMap.clear()
-
       for (const [key, value] of this.rejectBaseMap) {
         value.reject(
           new CanError(
@@ -505,6 +455,7 @@ export class SLCAN_CAN extends CanBase {
         this.log.close()
 
         this.serialPort.write('C\r') // Close CAN port
+        this.serialPort.flush()
         this.serialPort.close()
 
         this.event.emit('close', msg)
@@ -519,101 +470,8 @@ export class SLCAN_CAN extends CanBase {
     return this._setOption(option, value)
   }
 
-  writeTp(addr: CanAddr, data: Buffer): Promise<number> {
-    const id = `${addr.canIdTx}-${addr.canIdRx}-${addr.addrFormat}-${addr.addrType}`
-
-    let q = this.writeQueueMap.get(id)
-    if (!q) {
-      q = queue<any>((task: { resolve: any; reject: any; data: Buffer }, cb) => {
-        this._writeTp(addr, task.data).then(task.resolve).catch(task.reject).finally(cb)
-      }, 1)
-
-      this.writeQueueMap.set(id, q)
-
-      q.drain(() => {
-        this.writeQueueMap.delete(id)
-      })
-    }
-
-    return new Promise<number>((resolve, reject) => {
-      q?.push({
-        data,
-        addr,
-        resolve,
-        reject
-      })
-    })
-  }
-
-  private async _writeTp(addr: CanAddr, data: Buffer): Promise<number> {
-    // For SLCAN, we'll implement a simple transport protocol
-    // This is a basic implementation - you might want to enhance it
-    const ts = getTsUs()
-
-    // Send data as CAN messages
-    const chunkSize = this.info.canfd ? 64 : 8
-    let offset = 0
-
-    while (offset < data.length) {
-      const chunk = data.subarray(offset, offset + chunkSize)
-      const msgType: CanMsgType = {
-        idType: addr.idType,
-        canfd: addr.canfd,
-        brs: addr.brs,
-        remote: false
-      }
-
-      await this.writeBase(parseInt(addr.canIdTx), msgType, chunk)
-      offset += chunkSize
-    }
-
-    return ts
-  }
-
   getReadId(addr: CanAddr): string {
     return `read-${addr.canIdTx}-${addr.canIdRx}-${addr.addrFormat}-${addr.addrType}`
-  }
-
-  readTp(addr: CanAddr, timeout = 1000): Promise<{ data: Buffer; ts: number }> {
-    return new Promise<{ data: Buffer; ts: number }>(
-      (
-        resolve: (value: { data: Buffer; ts: number }) => void,
-        reject: (reason: TpError) => void
-      ) => {
-        const cnt = this.cnt
-        this.cnt++
-        this.rejectMap.set(cnt, { reject, addr })
-        const cmdId = this.getReadId(addr)
-        const timer = setTimeout(() => {
-          if (this.rejectMap.has(cnt)) {
-            this.rejectMap.delete(cnt)
-            reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_UPPER_READ, addr))
-          }
-          this.event.off(cmdId, cb)
-        }, timeout)
-
-        this.readAbort.signal.addEventListener('abort', () => {
-          if (this.rejectMap.has(cnt)) {
-            this.rejectMap.delete(cnt)
-            reject(new TpError(TP_ERROR_ID.TP_BUS_CLOSED, addr))
-          }
-          this.event.off(cmdId, cb)
-        })
-
-        const cb = (val: any) => {
-          clearTimeout(timer)
-          if (this.rejectMap.has(cnt)) {
-            if (val instanceof TpError) {
-              reject(val)
-            } else {
-              resolve({ data: val.data, ts: val.ts })
-            }
-            this.rejectMap.delete(cnt)
-          }
-        }
-        this.event.once(cmdId, cb)
-      }
-    )
   }
 
   readBase(
@@ -696,7 +554,14 @@ export class SLCAN_CAN extends CanBase {
           if (err) {
             reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message))
           } else {
-            resolve(getTsUs())
+            this.serialPort.drain((err) => {
+              if (err)
+                return reject(
+                  new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message)
+                )
+
+              resolve(getTsUs())
+            })
           }
         })
       }
@@ -725,35 +590,30 @@ export class SLCAN_CAN extends CanBase {
         : id.toString(16).padStart(3, '0')
 
     // Format DLC
-    let dlc = data.length
+
     if (msgType.canfd && data.length > 8) {
-      switch (data.length) {
-        case 12:
-          dlc = 0x9
-          break
-        case 16:
-          dlc = 0xa
-          break
-        case 20:
-          dlc = 0xb
-          break
-        case 24:
-          dlc = 0xc
-          break
-        case 32:
-          dlc = 0xd
-          break
-        case 48:
-          dlc = 0xe
-          break
-        case 64:
-          dlc = 0xf
-          break
-        default:
-          dlc = data.length
-          break
+      let maxLen = 64
+      if (data.length > 8 && data.length <= 12) {
+        maxLen = 12
+      } else if (data.length > 12 && data.length <= 16) {
+        maxLen = 16
+      } else if (data.length > 16 && data.length <= 20) {
+        maxLen = 20
+      } else if (data.length > 20 && data.length <= 24) {
+        maxLen = 24
+      } else if (data.length > 24 && data.length <= 32) {
+        maxLen = 32
+      } else if (data.length > 32 && data.length <= 48) {
+        maxLen = 48
+      } else if (data.length > 48) {
+        maxLen = 64
+      } else {
+        maxLen = data.length
       }
+      data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
     }
+    const dlc = getDlcByLen(data.length, msgType.canfd)
+
     const dlcHex = dlc.toString(16)
 
     // Format data

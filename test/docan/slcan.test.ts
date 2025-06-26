@@ -27,9 +27,9 @@ describe('vector test', () => {
   let client!: SLCAN_CAN
   beforeAll(async () => {
     client = new SLCAN_CAN({
-      handle: 'COM4',
+      handle: 'COM8',
       name: 'test',
-      id: 'COM4',
+      id: 'COM8',
       vendor: 'slcan',
       canfd: true,
       bitrate: {
@@ -37,7 +37,7 @@ describe('vector test', () => {
         timeSeg1: 13,
         timeSeg2: 2,
         preScaler: 10,
-        freq: 500000,
+        freq: 250000,
         clock: '80'
       },
       bitratefd: {
@@ -55,10 +55,10 @@ describe('vector test', () => {
 
   test('write multi frame', async () => {
     const list = []
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       list.push(
         client.writeBase(
-          3 + 1,
+          i + 1,
           {
             idType: CAN_ID_TYPE.STANDARD,
             brs: false,
@@ -111,6 +111,47 @@ describe('vector test', () => {
   test('write frame can-fd', async () => {
     await client.writeBase(
       31,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(8, 31)
+    )
+
+    await client.writeBase(
+      32,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(8, 32)
+    )
+    await client.writeBase(
+      33,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(63, 1)
+    )
+    await client.writeBase(
+      34,
+      {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: true, //false true
+        remote: false
+      },
+      Buffer.alloc(63, 1)
+    )
+    await client.writeBase(
+      35,
       {
         idType: CAN_ID_TYPE.STANDARD,
         brs: false,

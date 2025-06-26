@@ -1,7 +1,7 @@
 import { dot } from 'node:test/reporters';
 export { default as assert } from 'node:assert';
-import { describe } from 'node:test';
-export { after, afterEach, before, beforeEach, test } from 'node:test';
+import { test as test$1 } from 'node:test';
+export { after, afterEach, before, beforeEach } from 'node:test';
 
 /**
  * Represents a CAN (Controller Area Network) message.
@@ -402,7 +402,30 @@ declare class SecureAccessDll {
     private loadDll;
 }
 
-declare const selfDescribe: typeof describe;
+/**
+ * Test function for writing test cases. Provides test context and logging.
+ *
+ * @category TEST
+ * @param {string} name - The name of the test case
+ * @param {Function} fn - The test function to execute
+ *
+ * @example
+ * ```ts
+ * // Basic test case
+ * test('should add numbers correctly', () => {
+ *   assert.equal(1 + 1, 2);
+ * });
+ *
+ * // Async test case
+ * test('should handle async operations', async () => {
+ *   const result = await someAsyncFunction();
+ *   assert.equal(result, expectedValue);
+ * });
+ * ```
+ */
+declare function test(name: string, fn: () => void | Promise<void>): void;
+
+declare const selfDescribe: typeof test$1.describe.only;
 
 declare const testerList: readonly [
                 {{#each this.testers}}
@@ -928,8 +951,8 @@ declare class DiagResponse extends Service {
     private addr?;
     constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
     /**
-     * Get the UDS address of the response.
-     * @returns UdsAddress
+     * Get the UDS address of the response. The address may be undefined if not set.
+     * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
      */
     getUdsAddress(): UdsAddress | undefined;
     /**
@@ -1004,7 +1027,7 @@ declare class DiagRequest extends Service {
     constructor(testerName: string, service: ServiceItem, addr?: UdsAddress);
     /**
      * Get the UDS address of the request.
-     * @returns UdsAddress
+     * @returns {UdsAddress | undefined} The UDS address if set, undefined otherwise
      */
     getUdsAddress(): UdsAddress | undefined;
     /**
@@ -1456,8 +1479,7 @@ declare function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void>
 /**
  * Register a virtual entity
  *
- * @deprecated This API is deprecated and will be removed in a future version.
- * Please see {@link https://example.com} for the new API documentation.
+ * @deprecated This API is deprecated and not working, enable it through the simulate_by field in the tester config
  *
  * @category DOIP
  * @param {EntityAddr} entity - The entity to be registered.
@@ -1530,4 +1552,4 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linStopScheduler(device?: string): Promise<void>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, selfDescribe as describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq, test };

@@ -6,7 +6,6 @@ const nodeResolve = require('@rollup/plugin-node-resolve');
 const dts = require('rollup-plugin-dts').default;
 // const {generateDtsBundle}=require('dts-bundle-generator');
 
-
 async function bundleDts(
     input,
     output
@@ -45,8 +44,11 @@ class MyCustomPlugin {
         for(const js of jsList){
             fs.copyFileSync(path.resolve(__dirname,'dist',js),path.resolve(__dirname,'resources','lib','js',js))
         }
-        // 在这里加入你的自定义代码
-        fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+
+       
+        if(process.platform=='win32'){
+            fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+        }
 
         //copy uds.d.ts
         const udsDTs=path.resolve(__dirname,'dist','src/main/worker','uds.d.ts')
@@ -170,7 +172,11 @@ module.exports = {
     },
     target: 'node',
     plugins: [
-       new MyCustomPlugin()
+       new MyCustomPlugin(),
+       // 添加条件编译插件
+       new webpack.DefinePlugin({
+           'process.platform': JSON.stringify(process.platform),
+       })
     ],
     module: {
         rules: [

@@ -211,7 +211,7 @@ export class SLCAN_CAN extends CanBase {
   }
 
   static getLibVersion(): string {
-    return 'SLCAN v0.9'
+    return '0.9'
   }
   private startReading(): void {
     if (!this.serialPort) return

@@ -62,7 +62,7 @@ export abstract class CanBase {
   abstract setOption(cmd: string, val: any): any
 
   abstract event: EventEmitter
-  static getValidDevices(): CanDevice[] {
+  static getValidDevices(): CanDevice[] | Promise<CanDevice[]> {
     throw new Error('Method not implemented.')
   }
   static getLibVersion(): string {

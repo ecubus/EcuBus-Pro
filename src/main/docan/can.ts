@@ -9,6 +9,7 @@ import { TOOMOSS_CAN } from './toomoss'
 import { VECTOR_CAN } from './vector'
 import { CanBaseInfo } from '../share/can'
 import { CanBase } from './base'
+import { SLCAN_CAN } from './slcan'
 
 const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)
@@ -32,6 +33,8 @@ export function openCanDevice(canDevice: CanBaseInfo) {
     canBase = new TOOMOSS_CAN(canDevice)
   } else if (canDevice.vendor == 'vector') {
     canBase = new VECTOR_CAN(canDevice)
+  } else if (canDevice.vendor == 'slcan') {
+    canBase = new SLCAN_CAN(canDevice)
   }
 
   return canBase
@@ -51,6 +54,8 @@ export function getCanVersion(vendor: string) {
     return TOOMOSS_CAN.getLibVersion()
   } else if (vendor === 'VECTOR') {
     return VECTOR_CAN.getLibVersion()
+  } else if (vendor === 'SLCAN') {
+    return SLCAN_CAN.getLibVersion()
   } else {
     return 'unknown'
   }
@@ -71,6 +76,8 @@ export function getCanDevices(vendor: string) {
     return TOOMOSS_CAN.getValidDevices()
   } else if (vendor === 'VECTOR') {
     return VECTOR_CAN.getValidDevices()
+  } else if (vendor === 'SLCAN') {
+    return SLCAN_CAN.getValidDevices()
   }
   // #v-endif
   else {

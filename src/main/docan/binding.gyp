@@ -1,5 +1,67 @@
 {
     'targets': [   
+        {
+            'target_name': 'candle',
+            'conditions': [
+                ['OS=="win"', {
+                    'include_dirs': [
+                        './candle/api',
+                        './toomoss/inc',
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'configurations': { },
+                    'defines': [
+                        '__EXCEPTIONS'
+                    ],
+                    'sources': [
+                        './candle/swig/candle_wrap.cxx',
+                        './candle/swig/tsfn.cxx',
+                        './candle/api/candle.c',
+                        './candle/api/candle_ctrl_req.c'
+                    ],
+                    'cflags': [ ],
+                    'cflags_cc': [ ],
+                    'libraries': [
+                        'winusb.lib',
+                        'setupapi.lib'
+                    ],
+                    'defines': [ 'DELAYLOAD_HOOK' ],
+                    'msvs_settings': {
+                        'VCCLCompilerTool': {
+                            'AdditionalOptions': [ ],
+                            'ExceptionHandling':1
+                        }
+                    },
+                    'link_settings': {
+                        'libraries': [
+                            'winusb.lib',
+                            'setupapi.lib'
+                        ]
+                    }
+                },'OS=="linux"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_linux.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                },'OS=="mac"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_mac.cxx' ],
+                    'xcode_settings': {
+                        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+                    }
+                }]
+            ]
+        },
         {   
             'target_name': 'peak',
             'conditions': [

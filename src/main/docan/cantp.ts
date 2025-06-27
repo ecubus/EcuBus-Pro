@@ -14,6 +14,8 @@ import {
 } from '../share/can'
 import { queue, QueueObject } from 'async'
 import { CAN_SOCKET, CanBase } from './base'
+import { v4 } from 'uuid'
+import { i } from 'vite/dist/node/types.d-aGj9QkWt'
 export interface CanTp {
   close: () => void
   writeTp(addr: CanAddr, data: Buffer): Promise<number>
@@ -151,6 +153,7 @@ export class CAN_TP_SOCKET {
 }
 
 export class CAN_TP implements CanTp {
+  uuid: string
   base: CanBase
   cnt = 0
   event = new EventEmitter()
@@ -172,8 +175,9 @@ export class CAN_TP implements CanTp {
     }
   > = {}
   lastWriteError?: TpError
-  constructor(base: CanBase) {
+  constructor(base: CanBase, uuid?: string) {
     this.base = base
+    this.uuid = uuid || v4()
     //close peak tp default handle
 
     this.tpStatus = {}
@@ -265,7 +269,14 @@ export class CAN_TP implements CanTp {
         reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_A, addr, data))
       }, addr.nAs)
       this.base
-        .writeBase(addrToId(addr), addr, data)
+        .writeBase(
+          addrToId(addr),
+          {
+            ...addr,
+            uuid: this.uuid
+          },
+          data
+        )
         .then((ts) => {
           clearTimeout(timer)
           resolve({ ts })
@@ -623,7 +634,12 @@ function baseHandle(val: CanMessage) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   const _this = this as { addr: CanAddr; id: number; inst: CAN_TP; listenOnly: boolean }
+
+  if (val.msgType.uuid == _this.inst.uuid) {
+    return
+  }
   const tpCmdId = _this.inst.getReadId(_this.addr)
+
   const status = _this.inst.tpStatus[tpCmdId] || 0
   let index = 0
   if (

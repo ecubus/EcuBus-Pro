@@ -179,13 +179,10 @@ export class NodeClass {
             for (const c of nodeItem.channel) {
               const canBaseItem = this.canBaseMap.get(c)
               if (canBaseItem && tester.type == 'can') {
-                const tp = new CAN_TP(canBaseItem)
+                const tp = new CAN_TP(canBaseItem, nodeItem.id)
                 for (const [index, addr] of tester.address.entries()) {
                   if (addr.type == 'can' && addr.canAddr) {
-                    const idT = tp.getReadId(
-                      addr.canAddr,
-                      nodeItem.isTest ? true : tester.simulateBy != nodeItem.id
-                    )
+                    const idT = tp.getReadId(addr.canAddr, tester.simulateBy != nodeItem.id)
                     tp.event.on(idT, (data) => {
                       if (data instanceof CanTpError) {
                         //TODO:
@@ -210,7 +207,7 @@ export class NodeClass {
                     if (index == 0) {
                       const idR = tp.getReadId(
                         swapAddr(addr.canAddr),
-                        nodeItem.isTest ? tester.simulateBy != nodeItem.id : true
+                        tester.simulateBy != nodeItem.id
                       )
                       tp.event.on(idR, (data) => {
                         if (data instanceof CanTpError) {
@@ -293,7 +290,7 @@ export class NodeClass {
               if (ethBaseItem && tester.type == 'eth') {
                 const baseItem = this.doips.find((d) => d.base.id == ethBaseItem.id)
                 if (baseItem) {
-                  if (tester.simulateBy == nodeItem.id && !nodeItem.isTest) {
+                  if (tester.simulateBy == nodeItem.id) {
                     baseItem.registerEntity(true, this.log)
                   }
                   for (const addr of tester.address) {

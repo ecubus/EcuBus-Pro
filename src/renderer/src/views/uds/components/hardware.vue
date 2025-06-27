@@ -366,6 +366,16 @@ function buildTree() {
   t.push(vector)
   addSubTree('vector', vector)
 
+  const slcan: tree = {
+    label: 'SLCAN',
+    vendor: 'slcan',
+    append: false,
+    id: 'SLCAN',
+    children: []
+  }
+  t.push(slcan)
+  addSubTree('slcan', slcan)
+
   tData.value = t
 }
 

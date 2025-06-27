@@ -44,6 +44,16 @@ const SLCAN_CANFD_BITRATE_COMMANDS: Record<number, string> = {
   5000000: 'Y5'
 }
 
+// Write operation interface
+interface WriteOperation {
+  id: number
+  msgType: CanMsgType
+  data: Buffer
+  extra?: { database?: string; name?: string }
+  resolve: (value: number) => void
+  reject: (reason: CanError) => void
+}
+
 export class SLCAN_CAN extends CanBase {
   id: string
   info: CanBaseInfo
@@ -67,6 +77,10 @@ export class SLCAN_CAN extends CanBase {
   private rxBuffer = Buffer.alloc(0)
   private msgQueue: string[] = []
 
+  // Write queue to serialize write operations
+  private writeQueue: QueueObject<WriteOperation>
+  private isWriting = false
+
   constructor(baseInfo: CanBaseInfo) {
     super()
     this.info = baseInfo
@@ -81,6 +95,11 @@ export class SLCAN_CAN extends CanBase {
     this.id = this.info.id
     this.log = new CanLOG('SLCAN', this.info.name, this.event)
     this.attachCanMessage(this.busloadCb)
+
+    // Initialize write queue
+    this.writeQueue = queue(async (operation: WriteOperation) => {
+      await this.processWriteOperation(operation)
+    }, 1) // Concurrency of 1 ensures serialized writes
 
     // Create and open serial port directly
     this.serialPort = new SerialPort({
@@ -192,30 +211,12 @@ export class SLCAN_CAN extends CanBase {
   }
 
   static getLibVersion(): string {
-    return 'SLCAN v1.0'
+    return 'SLCAN v0.9'
   }
-
-  static getDefaultBitrate(canfd: boolean): any[] {
-    return [
-      { freq: 10000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 20000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 50000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 100000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 125000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 250000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 500000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 750000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 800000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 83333, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 },
-      { freq: 1000000, timeSeg1: 0, timeSeg2: 0, sjw: 0, preScaler: 0 }
-    ]
-  }
-
   private startReading(): void {
     if (!this.serialPort) return
 
     this.serialPort.on('data', (data: Buffer) => {
-      console.log('xxxx', data)
       this.rxBuffer = Buffer.concat([this.rxBuffer, data])
       this.processRxBuffer()
     })
@@ -237,10 +238,8 @@ export class SLCAN_CAN extends CanBase {
 
   private parseMessage(line: string): void {
     if (line.length < 4) return
-
-    console.log('read', line)
     const command = line[0]
-    const data = line.slice(1)
+    // const data = line.slice(1)
 
     switch (command) {
       case 'T': // Standard CAN data frame
@@ -438,6 +437,9 @@ export class SLCAN_CAN extends CanBase {
     try {
       this.readAbort.abort()
 
+      // Clear write queue
+      this.writeQueue.kill()
+
       for (const [key, value] of this.rejectBaseMap) {
         value.reject(
           new CanError(
@@ -458,8 +460,8 @@ export class SLCAN_CAN extends CanBase {
         this.serialPort.flush()
         this.serialPort.close()
 
-        this.event.emit('close', msg)
         this._close()
+        this.event.emit('close', msg)
       }
     } catch (e) {
       // Ignore errors during close
@@ -548,24 +550,75 @@ export class SLCAN_CAN extends CanBase {
   ): Promise<number> {
     return new Promise<number>(
       (resolve: (value: number) => void, reject: (reason: CanError) => void) => {
-        const slcanMessage = this.formatSlcanMessage(id, msgType, data)
-
-        this.serialPort.write(slcanMessage + '\r', (err) => {
-          if (err) {
-            reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message))
-          } else {
-            this.serialPort.drain((err) => {
-              if (err)
-                return reject(
-                  new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message)
-                )
-
-              resolve(getTsUs())
-            })
-          }
+        // Add write operation to queue for serialized execution
+        this.writeQueue.push({
+          id,
+          msgType,
+          data,
+          extra,
+          resolve,
+          reject
         })
       }
     )
+  }
+
+  private async processWriteOperation(operation: WriteOperation): Promise<void> {
+    const { id, msgType, data, extra, resolve, reject } = operation
+
+    try {
+      const slcanMessage = this.formatSlcanMessage(id, msgType, data)
+
+      // Write to serial port
+      await new Promise<void>((writeResolve, writeReject) => {
+        this.serialPort.write(slcanMessage + '\r', (err) => {
+          if (err) {
+            writeReject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message))
+          } else {
+            writeResolve()
+          }
+        })
+      })
+
+      // Wait for drain to complete
+      await new Promise<void>((drainResolve, drainReject) => {
+        this.serialPort.drain((err) => {
+          if (err) {
+            drainReject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err.message))
+          } else {
+            drainResolve()
+          }
+        })
+      })
+
+      if (this.info.slcanDelay) {
+        await new Promise((resolve) => setTimeout(resolve, this.info.slcanDelay))
+      }
+      let ts = getTsUs()
+      if (this.tsOffset == undefined) {
+        this.tsOffset = ts - this.startTime
+      }
+      // Log and emit the message
+      ts = ts - this.tsOffset
+      const message: CanMessage = {
+        dir: 'OUT',
+        id: id,
+        data: data,
+        ts: ts,
+        msgType: msgType
+      }
+      this.log.canBase(message)
+      this.event.emit(this.getReadBaseId(id, message.msgType), message)
+
+      resolve(ts)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      reject(
+        error instanceof CanError
+          ? error
+          : new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, errorMessage)
+      )
+    }
   }
 
   private formatSlcanMessage(id: number, msgType: CanMsgType, data: Buffer): string {

@@ -33,6 +33,8 @@ export function openCanDevice(canDevice: CanBaseInfo) {
     canBase = new TOOMOSS_CAN(canDevice)
   } else if (canDevice.vendor == 'vector') {
     canBase = new VECTOR_CAN(canDevice)
+  } else if (canDevice.vendor == 'slcan') {
+    canBase = new SLCAN_CAN(canDevice)
   }
 
   return canBase

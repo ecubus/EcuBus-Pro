@@ -25,6 +25,7 @@ export interface CanBaseInfo {
   database?: string
   toomossRes?: boolean
   zlgRes?: boolean
+  slcanDelay?: number
 }
 
 /**

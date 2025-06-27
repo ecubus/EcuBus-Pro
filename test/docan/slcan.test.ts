@@ -27,9 +27,9 @@ describe('vector test', () => {
   let client!: SLCAN_CAN
   beforeAll(async () => {
     client = new SLCAN_CAN({
-      handle: 'COM8',
+      handle: 'COM4',
       name: 'test',
-      id: 'COM8',
+      id: 'COM4',
       vendor: 'slcan',
       canfd: true,
       bitrate: {
@@ -37,7 +37,7 @@ describe('vector test', () => {
         timeSeg1: 13,
         timeSeg2: 2,
         preScaler: 10,
-        freq: 250000,
+        freq: 500000,
         clock: '80'
       },
       bitratefd: {

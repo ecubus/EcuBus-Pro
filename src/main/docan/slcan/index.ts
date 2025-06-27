@@ -72,7 +72,7 @@ export class SLCAN_CAN extends CanBase {
   >()
   private cnt = 0
   private startTime = getTsUs()
-  private tsOffset: number | undefined
+
   private closed = false
   private rxBuffer = Buffer.alloc(0)
   private msgQueue: string[] = []
@@ -151,14 +151,14 @@ export class SLCAN_CAN extends CanBase {
 
     this.serialPort.on('error', (err) => {
       if (!this.close) {
-        this.log.error(getTsUs(), `Serial port error: ${err.message}`)
+        this.log.error(this.getTs(), `Serial port error: ${err.message}`)
         this.close(true, err.message)
       }
     })
 
     this.serialPort.on('close', () => {
       if (!this.close) {
-        this.log.error(getTsUs(), 'Serial port closed')
+        this.log.error(this.getTs(), 'Serial port closed')
         this.close(true, 'Serial port closed')
       }
     })
@@ -257,7 +257,7 @@ export class SLCAN_CAN extends CanBase {
         this.parseCanFdMessage(line)
         break
       case '7': // Error frame
-        this.log.error(getTsUs(), 'CAN error frame received')
+        this.log.error(this.getTs(), 'CAN error frame received')
         break
       case 'A': // Acknowledgement
         // Handle ACK if needed
@@ -296,7 +296,7 @@ export class SLCAN_CAN extends CanBase {
     }
 
     if (data.length < idLength + 1) {
-      this.log.error(getTsUs(), `Data too short: ${data.length} expected: ${idLength + 1}`)
+      this.log.error(this.getTs(), `Data too short: ${data.length} expected: ${idLength + 1}`)
       return
     }
 
@@ -306,17 +306,17 @@ export class SLCAN_CAN extends CanBase {
 
     // Validate hex strings
     if (!/^[0-9A-Fa-f]+$/.test(idHex)) {
-      this.log.error(getTsUs(), `Invalid ID hex: ${idHex}`)
+      this.log.error(this.getTs(), `Invalid ID hex: ${idHex}`)
       return
     }
 
     if (!/^[0-9A-Fa-f]+$/.test(dlcHex)) {
-      this.log.error(getTsUs(), `Invalid DLC hex: ${dlcHex}`)
+      this.log.error(this.getTs(), `Invalid DLC hex: ${dlcHex}`)
       return
     }
 
     if (!/^[0-9A-Fa-f]*$/.test(dataHex)) {
-      this.log.error(getTsUs(), `Invalid data hex: ${dataHex}`)
+      this.log.error(this.getTs(), `Invalid data hex: ${dataHex}`)
       return
     }
 
@@ -325,23 +325,23 @@ export class SLCAN_CAN extends CanBase {
 
     // Validate parsed values
     if (isNaN(canId)) {
-      this.log.error(getTsUs(), `Failed to parse CAN ID: ${idHex}`)
+      this.log.error(this.getTs(), `Failed to parse CAN ID: ${idHex}`)
       return
     }
 
     if (isNaN(dlc)) {
-      this.log.error(getTsUs(), `Failed to parse DLC: ${dlcHex}`)
+      this.log.error(this.getTs(), `Failed to parse DLC: ${dlcHex}`)
       return
     }
 
     // Validate DLC range
     if (dlc > 0xf) {
-      this.log.error(getTsUs(), `DLC out of range: ${dlc} (max 15)`)
+      this.log.error(this.getTs(), `DLC out of range: ${dlc} (max 15)`)
       return
     }
 
     if (!isCanFd && dlc > 8) {
-      this.log.error(getTsUs(), `Standard CAN DLC out of range: ${dlc} (max 8)`)
+      this.log.error(this.getTs(), `Standard CAN DLC out of range: ${dlc} (max 8)`)
       return
     }
 
@@ -371,7 +371,7 @@ export class SLCAN_CAN extends CanBase {
           dataLength = 64
           break
         default:
-          this.log.error(getTsUs(), `Invalid CANFD DLC: ${dlc}`)
+          this.log.error(this.getTs(), `Invalid CANFD DLC: ${dlc}`)
           return
       }
     }
@@ -379,7 +379,7 @@ export class SLCAN_CAN extends CanBase {
     // Validate data length
     if (dataHex.length < dataLength * 2) {
       this.log.error(
-        getTsUs(),
+        this.getTs(),
         `Data hex too short: ${dataHex.length} expected: ${dataLength * 2} for ${dataLength} bytes`
       )
       return
@@ -392,27 +392,23 @@ export class SLCAN_CAN extends CanBase {
       if (byteHex.length === 2) {
         const byteValue = parseInt(byteHex, 16)
         if (isNaN(byteValue)) {
-          this.log.error(getTsUs(), `Failed to parse data byte ${i}: ${byteHex}`)
+          this.log.error(this.getTs(), `Failed to parse data byte ${i}: ${byteHex}`)
           return
         }
         messageData[i] = byteValue
       } else {
-        this.log.error(getTsUs(), `Incomplete data byte ${i}: ${byteHex}`)
+        this.log.error(this.getTs(), `Incomplete data byte ${i}: ${byteHex}`)
         return
       }
     }
 
-    const ts = getTsUs()
-    if (this.tsOffset === undefined) {
-      this.tsOffset = ts - (getTsUs() - this.startTime)
-    }
-    const adjustedTs = ts - this.tsOffset
+    const ts = this.getTs()
 
     const message: CanMessage = {
       dir: 'IN',
       id: canId,
       data: messageData,
-      ts: adjustedTs,
+      ts: ts,
       msgType: {
         idType: isExtended ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
         canfd: isCanFd,
@@ -562,7 +558,9 @@ export class SLCAN_CAN extends CanBase {
       }
     )
   }
-
+  getTs(): number {
+    return getTsUs() - this.startTime
+  }
   private async processWriteOperation(operation: WriteOperation): Promise<void> {
     const { id, msgType, data, extra, resolve, reject } = operation
 
@@ -594,12 +592,8 @@ export class SLCAN_CAN extends CanBase {
       if (this.info.slcanDelay) {
         await new Promise((resolve) => setTimeout(resolve, this.info.slcanDelay))
       }
-      let ts = getTsUs()
-      if (this.tsOffset == undefined) {
-        this.tsOffset = ts - this.startTime
-      }
-      // Log and emit the message
-      ts = ts - this.tsOffset
+      const ts = this.getTs()
+
       const message: CanMessage = {
         dir: 'OUT',
         id: id,

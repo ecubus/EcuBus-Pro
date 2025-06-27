@@ -85,13 +85,6 @@ export class SLCAN_CAN extends CanBase {
     super()
     this.info = baseInfo
 
-    // Detect CANFD support from device name
-    if (this.info.name.includes('CANable 2.0')) {
-      this.info.canfd = true
-    } else {
-      this.info.canfd = false
-    }
-
     this.id = this.info.id
     this.log = new CanLOG('SLCAN', this.info.name, this.event)
     this.attachCanMessage(this.busloadCb)

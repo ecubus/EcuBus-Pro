@@ -5,15 +5,23 @@ CAN/CAN-FD is an industry-standard vehicle bus protocol designed for reliable EC
 > [!IMPORTANT]
 > Some features described in this section may require a CAN DBC file. For more information about DBC files, please refer to our [database documentation](../dbc).
 
+Supported Hardware:
+
+| Manufacturer | Protocols |
+|--------|-------------------|
+| PEAK | CAN, CAN-FD |
+| KVASER | CAN, CAN-FD |
+| ZLG | CAN, CAN-FD |
+| Toomoss | CAN, CAN-FD |
+| VECTOR | CAN, CAN-FD |
+| SLCAN | CAN, CAN-FD |
+
+## SLCAN Special
+
+SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw](https://github.com/normaldotcom/canable-fw), and communication based on USB-ACM. 
 > [!NOTE]
-> Supported Hardware:
-> | Manufacturer | Protocols |
-> |--------|-------------------|
-> | PEAK | CAN, CAN-FD |
-> | KVASER | CAN, CAN-FD |
-> | ZLG | CAN, CAN-FD |
-> | Toomoss | CAN, CAN-FD |
-> | VECTOR | CAN, CAN-FD |
+> This firmware currently does not provide any ACK/NACK feedback for serial commands.
+
 
 ## Device Configuration
 

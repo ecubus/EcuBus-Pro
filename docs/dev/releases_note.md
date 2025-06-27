@@ -1,5 +1,19 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.46
+Changes from v0.8.45 to v0.8.46:
+
+* [bug]:fix fc send multi times issue
+* [feat]:add slcan can can-fd @frankie-zeng in https://github.com/ecubus/EcuBus/pull/165
+* [bug]:fix dbc parse signal name has int str 
+* [bug]:fix test log overlap 
+* [bug]:fix nodeitem flow control by isTest 
+* [opt]:make secureAccess work in windows only @frankie-zeng in https://github.com/ecubus/EcuBus/pull/161
+* [opt]:esbuild executable bin handling to OS by @sengulhamza in https://github.com/ecubus/EcuBus/pull/163
+---
+
+# EcuBus-Pro Release Notes
+
 ## 0.8.45
 Changes from v0.8.44 to v0.8.45:
 

@@ -39,6 +39,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
   - **ZLG**: CAN, CAN-FD
   - **Toomoss**: CAN, CAN-FD, LIN
   - **VECTOR**: CAN, CAN-FD, LIN
+  - **SLCAN**: CAN, CAN-FD [Detail](https://app.whyengineer.com/docs/um/can/can.html#l#slcan-special)
 - 🛠️ Comprehensive diagnostic capabilities
   - **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
 - 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)

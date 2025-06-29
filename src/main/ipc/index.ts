@@ -10,6 +10,7 @@ import { ipcMain, shell } from 'electron'
 import { getCanVersion } from '../docan/can'
 import { getLinVersion } from '../dolin'
 import { error } from 'electron-log'
+import { platform } from 'process'
 interface EcuBusPro {
   support: string[]
   vendor: Record<string, string[]>
@@ -29,39 +30,51 @@ ipcMain.handle('ipc-get-version', async (event, arg) => {
     name: 'Chrome',
     version: process.versions.chrome
   })
-  for (const v of input.support) {
-    for (const vendor of input.vendor[v]) {
-      try {
-        list.push({
-          name: `${vendor} can`,
-          version: getCanVersion(vendor)
-        })
-      } catch (e: any) {
-        error(e)
-        list.push({
-          name: `${vendor} can`,
-          version: 'Failed to get version'
-        })
-      }
-    }
-    for (const vendor of input.vendor[v]) {
-      try {
-        list.push({
-          name: `${vendor} lin`,
-          version: getLinVersion(vendor)
-        })
-      } catch (e: any) {
-        error(e)
-        list.push({
-          name: `${vendor} lin`,
-          version: 'Failed to get version'
-        })
-      }
+  const vendors = input.vendor[platform] || []
+  for (const vendor of vendors) {
+    try {
+      list.push({
+        name: `${vendor} can`,
+        version: getCanVersion(vendor)
+      })
+    } catch (e: any) {
+      error(e)
+      list.push({
+        name: `${vendor} can`,
+        version: 'Failed to get version'
+      })
     }
   }
+  for (const vendor of vendors) {
+    try {
+      list.push({
+        name: `${vendor} lin`,
+        version: getLinVersion(vendor)
+      })
+    } catch (e: any) {
+      error(e)
+      list.push({
+        name: `${vendor} lin`,
+        version: 'Failed to get version'
+      })
+    }
+  }
+
   return list
 })
 
 ipcMain.on('ipc-open-um', (event, arg) => {
   shell.openExternal('https://app.whyengineer.com')
+})
+
+ipcMain.handle('ipc-get-vendor', (event, arg) => {
+  const input = arg as EcuBusPro
+  const vendors = input.vendor[platform] || []
+  return vendors.map((vendor) => {
+    return {
+      name: vendor,
+      can: getCanVersion(vendor),
+      lin: getLinVersion(vendor)
+    }
+  })
 })

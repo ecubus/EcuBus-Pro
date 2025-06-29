@@ -63,7 +63,6 @@ export function getCanVersion(vendor: string) {
 
 export function getCanDevices(vendor: string) {
   vendor = vendor.toUpperCase()
-  // #v-ifdef IGNORE_NODE!='1'
   if (vendor === 'PEAK') {
     return PEAK_TP.getValidDevices()
   } else if (vendor === 'ZLG') {
@@ -78,9 +77,7 @@ export function getCanDevices(vendor: string) {
     return VECTOR_CAN.getValidDevices()
   } else if (vendor === 'SLCAN') {
     return SLCAN_CAN.getValidDevices()
-  }
-  // #v-endif
-  else {
+  } else {
     return []
   }
 }

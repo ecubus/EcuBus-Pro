@@ -107,6 +107,7 @@ import { CanVendor } from 'nodeCan/can'
 import { Layout } from '../layout'
 import LinNodeVue from './config/node/linNode.vue'
 import { useGlobalStart } from '@r/stores/runtime'
+import { ecubusPro } from './../../../../../../package.json'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -307,74 +308,93 @@ function addSubTree(vendor: CanVendor, node: tree) {
   //     children:[]
   // }
 }
-function buildTree() {
+async function buildTree() {
   const t: tree[] = []
-  const zlg: tree = {
-    label: 'ZLG',
-    vendor: 'zlg',
-    append: false,
-    id: 'ZLG',
-    children: []
-  }
-  t.push(zlg)
-  addSubTree('zlg', zlg)
-  const peak: tree = {
-    label: 'PEAK',
-    append: false,
-    id: 'PEAK',
-    vendor: 'peak',
-    children: []
-  }
-  t.push(peak)
-  addSubTree('peak', peak)
-  const kvaser: tree = {
-    label: 'KVASER',
-    vendor: 'kvaser',
-    append: false,
-    id: 'KVASER',
+  const vendors: CanVendor[] = (
+    await window.electron.ipcRenderer.invoke('ipc-get-vendor', ecubusPro)
+  ).map((v: any) => v.name)
 
-    children: []
+  console.log('vendors', vendors)
+  if (vendors.includes('zlg')) {
+    const zlg: tree = {
+      label: 'ZLG',
+      vendor: 'zlg',
+      append: false,
+      id: 'ZLG',
+      children: []
+    }
+    t.push(zlg)
+    addSubTree('zlg', zlg)
   }
-  t.push(kvaser)
-  addSubTree('kvaser', kvaser)
-  const simulate: tree = {
-    label: 'Simulate',
-    vendor: 'simulate',
-    append: false,
-    id: 'Simulate',
+  if (vendors.includes('peak')) {
+    const peak: tree = {
+      label: 'PEAK',
+      append: false,
+      id: 'PEAK',
+      vendor: 'peak',
+      children: []
+    }
+    t.push(peak)
+    addSubTree('peak', peak)
+  }
+  if (vendors.includes('kvaser')) {
+    const kvaser: tree = {
+      label: 'KVASER',
+      vendor: 'kvaser',
+      append: false,
+      id: 'KVASER',
 
-    children: []
+      children: []
+    }
+    t.push(kvaser)
+    addSubTree('kvaser', kvaser)
   }
-  t.push(simulate)
-  addSubTree('simulate', simulate)
-  const toomoss: tree = {
-    label: 'TOOMOSS',
-    vendor: 'toomoss',
-    append: false,
-    id: 'TOOMOSS',
-    children: []
-  }
-  t.push(toomoss)
-  addSubTree('toomoss', toomoss)
-  const vector: tree = {
-    label: 'VECTOR',
-    vendor: 'vector',
-    append: false,
-    id: 'VECTOR',
-    children: []
-  }
-  t.push(vector)
-  addSubTree('vector', vector)
+  if (vendors.includes('simulate')) {
+    const simulate: tree = {
+      label: 'Simulate',
+      vendor: 'simulate',
+      append: false,
+      id: 'Simulate',
 
-  const slcan: tree = {
-    label: 'SLCAN',
-    vendor: 'slcan',
-    append: false,
-    id: 'SLCAN',
-    children: []
+      children: []
+    }
+    t.push(simulate)
+    addSubTree('simulate', simulate)
   }
-  t.push(slcan)
-  addSubTree('slcan', slcan)
+  if (vendors.includes('toomoss')) {
+    const toomoss: tree = {
+      label: 'TOOMOSS',
+      vendor: 'toomoss',
+      append: false,
+      id: 'TOOMOSS',
+      children: []
+    }
+    t.push(toomoss)
+    addSubTree('toomoss', toomoss)
+  }
+  if (vendors.includes('vector')) {
+    const vector: tree = {
+      label: 'VECTOR',
+      vendor: 'vector',
+      append: false,
+      id: 'VECTOR',
+      children: []
+    }
+    t.push(vector)
+    addSubTree('vector', vector)
+  }
+
+  if (vendors.includes('slcan')) {
+    const slcan: tree = {
+      label: 'SLCAN',
+      vendor: 'slcan',
+      append: false,
+      id: 'SLCAN',
+      children: []
+    }
+    t.push(slcan)
+    addSubTree('slcan', slcan)
+  }
 
   tData.value = t
 }

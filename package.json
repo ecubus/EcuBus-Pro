@@ -7,16 +7,22 @@
   "homepage": "https://app.whyengineer.com",
   "license": "license.txt",
   "ecubusPro": {
-    "support": [
-      "can"
-    ],
     "vendor": {
-      "can": [
+      "win32": [
+        "simulate",
         "kvaser",
         "peak",
         "zlg",
         "toomoss",
         "vector",
+        "slcan"
+      ],
+      "linux": [
+        "simulate",
+        "slcan"
+      ],
+      "darwin": [
+        "simulate",
         "slcan"
       ]
     }

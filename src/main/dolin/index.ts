@@ -34,8 +34,6 @@ ToomossLin.loadDllPath(libPath)
 
 export function openLinDevice(device: LinBaseInfo) {
   let linBase: LinBase | undefined
-
-  // #v-ifdef IGNORE_NODE!='1'
   if (device.vendor == 'peak') {
     linBase = new PeakLin(device)
   } else if (device.vendor == 'toomoss') {
@@ -50,7 +48,6 @@ export function openLinDevice(device: LinBaseInfo) {
 }
 
 export function getLinVersion(vendor: string) {
-  // #v-ifdef IGNORE_NODE!='1'
   vendor = vendor.toUpperCase()
   if (vendor === 'PEAK') {
     return PeakLin.getLibVersion()
@@ -60,16 +57,13 @@ export function getLinVersion(vendor: string) {
     return KvaserLin.getLibVersion()
   } else if (vendor === 'VECTOR') {
     return VectorLin.getLibVersion()
-  }
-  // #v-endif
-  else {
+  } else {
     return 'unknown'
   }
 }
 
 export function getLinDevices(vendor: string) {
   vendor = vendor.toUpperCase()
-  // #v-ifdef IGNORE_NODE!='1'
   if (vendor === 'PEAK') {
     return PeakLin.getValidDevices()
   } else if (vendor === 'TOOMOSS') {
@@ -78,9 +72,7 @@ export function getLinDevices(vendor: string) {
     return KvaserLin.getValidDevices()
   } else if (vendor === 'VECTOR') {
     return VectorLin.getValidDevices()
-  }
-  // #v-endif
-  else {
+  } else {
     return []
   }
 }

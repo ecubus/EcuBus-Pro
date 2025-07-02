@@ -571,6 +571,18 @@ export class SLCAN_CAN extends CanBase {
         })
       })
 
+      const ts = this.getTs()
+
+      const message: CanMessage = {
+        dir: 'OUT',
+        id: id,
+        data: data,
+        ts: ts,
+        msgType: msgType
+      }
+      this.log.canBase(message)
+      this.event.emit(this.getReadBaseId(id, message.msgType), message)
+
       // Wait for drain to complete
       await new Promise<void>((drainResolve, drainReject) => {
         this.serialPort.drain((err) => {
@@ -585,17 +597,6 @@ export class SLCAN_CAN extends CanBase {
       if (this.info.slcanDelay) {
         await new Promise((resolve) => setTimeout(resolve, this.info.slcanDelay))
       }
-      const ts = this.getTs()
-
-      const message: CanMessage = {
-        dir: 'OUT',
-        id: id,
-        data: data,
-        ts: ts,
-        msgType: msgType
-      }
-      this.log.canBase(message)
-      this.event.emit(this.getReadBaseId(id, message.msgType), message)
 
       resolve(ts)
     } catch (error) {

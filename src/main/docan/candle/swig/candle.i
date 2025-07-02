@@ -17,6 +17,7 @@
 
 
 
+
 %include <cpointer.i>
 
 // %pointer_class(unsigned long,JSUINT64)
@@ -34,6 +35,7 @@
 
 //candle_device_t
 %array_class(candle_device_t, DeviceArray);
+%array_class(uint16_t, CharArray);
 
 // %array_class(BYTE, ByteArray);
 // %array_class(ZCAN_Receive_Data, ReceiveDataArray);

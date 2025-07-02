@@ -337,32 +337,28 @@ export class Candle_CAN extends CanBase {
       const readList = new Candle.candle_list_t()
 
       const ret = Candle.candle_list_scan(readList)
-      console.log('Candle scan result:', ret)
-      console.log('Number of devices found:', readList.num_devices)
-      console.log('Last error:', readList.last_error)
 
       if (ret && readList.num_devices > 0) {
+        const devicesx = Candle.DeviceArray.frompointer(readList.dev)
         // Build device list
         for (let i = 0; i < readList.num_devices; i++) {
-          const device = Candle.candle_dev_get(readList, i)
-          if (device) {
-            const path = Candle.candle_dev_get_path(device)
-            const state = Candle.candle_dev_get_state(device)
-
-            console.log(`Device ${i}: path=${path}, state=${state}`)
-
-            if (state === Candle.CANDLE_DEVSTATE_AVAIL) {
-              // For Candle devices, typically there's only one channel
-              devices.push({
-                label: `Candle Device ${i}`,
-                id: `Candle_${i}`,
-                handle: `${i}:0`
-              })
+          const device = devicesx.getitem(i)
+          const path = Candle.CharArray.frompointer(device.path)
+          const buf = Buffer.alloc(256 * 2)
+          for (let j = 0; j < 256 * 2; j++) {
+            const val = path.getitem(j)
+            if (val == 0) {
+              break
             }
-
-            // Free the device handle
-            Candle.candle_dev_free(device)
+            buf[j] = val
           }
+          const pathStr = buf.toString('ascii').replace(/\0/g, '')
+          devices.push({
+            label: `Candle Device ${i}`,
+            id: `Candle_${i}`,
+            handle: `${i}:0`,
+            serialNumber: pathStr
+          })
         }
       }
     }

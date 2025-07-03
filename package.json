@@ -16,7 +16,8 @@
         "toomoss",
         "vector",
         "slcan",
-        "ecubus"
+        "ecubus",
+        "candle"
       ],
       "linux": [
         "simulate",

@@ -145,7 +145,7 @@ bool __stdcall DLL candle_list_length(candle_list_handle list, uint8_t *len)
     return true;
 }
 
-bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle *hdev)
+bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle hdev)
 {
     candle_list_t *l = (candle_list_t *)list;
     if (l==NULL) {
@@ -157,16 +157,9 @@ bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, cand
         return false;
     }
 
-    candle_device_t *dev = calloc(1, sizeof(candle_device_t));
-    *hdev = dev;
-    if (dev==NULL) {
-        l->last_error = CANDLE_ERR_MALLOC;
-        return false;
-    }
-
-    memcpy(dev, &l->dev[dev_num], sizeof(candle_device_t));
+    memcpy(hdev, &l->dev[dev_num], sizeof(candle_device_t));
     l->last_error = CANDLE_ERR_OK;
-    dev->last_error = CANDLE_ERR_OK;
+    ((candle_device_t*)hdev)->last_error = CANDLE_ERR_OK;
     return true;
 }
 
@@ -532,7 +525,7 @@ bool __stdcall DLL candle_frame_send(candle_handle hdev, uint8_t ch, candle_fram
         &bytes_sent,
         0
     );
-
+     
     dev->last_error = rc ? CANDLE_ERR_OK : CANDLE_ERR_SEND_FRAME;
     return rc;
 
@@ -546,7 +539,7 @@ bool __stdcall DLL candle_frame_read(candle_handle hdev, candle_frame_t *frame, 
 
     DWORD wait_result = WaitForMultipleObjects(CANDLE_URB_COUNT, dev->rxevents, false, timeout_ms);
     if (wait_result == WAIT_TIMEOUT) {
-        dev->last_error = CANDLE_ERR_READ_TIMEOUT;
+        // dev->last_error = CANDLE_ERR_READ_TIMEOUT;
         return false;
     }
 

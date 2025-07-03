@@ -34,6 +34,7 @@ export interface CanBaseInfo {
   database?: string
   toomossRes?: boolean
   zlgRes?: boolean
+  canbleRes?: boolean
   slcanDelay?: number
 }
 

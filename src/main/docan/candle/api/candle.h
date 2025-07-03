@@ -39,7 +39,7 @@ typedef enum {
 } candle_devstate_t;
 
 typedef enum {
-    CANDLE_FRAMETYPE_UNKNOWN,
+    CANDLE_FRAMETYPE_UNKNOWN=0,
     CANDLE_FRAMETYPE_RECEIVE,
     CANDLE_FRAMETYPE_ECHO,
     CANDLE_FRAMETYPE_ERROR,
@@ -194,7 +194,7 @@ bool __stdcall DLL candle_list_scan(candle_list_handle list);
 // bool __stdcall DLL candle_list_free(candle_list_handle list);
 bool __stdcall DLL candle_list_length(candle_list_handle list, uint8_t *len);
 
-bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle *hdev);
+bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle hdev);
 bool __stdcall DLL candle_dev_get_state(candle_handle hdev, candle_devstate_t *state);
 wchar_t* __stdcall DLL candle_dev_get_path(candle_handle hdev);
 bool __stdcall DLL candle_dev_open(candle_handle hdev);

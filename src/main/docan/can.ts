@@ -10,6 +10,7 @@ import { VECTOR_CAN } from './vector'
 import { CanBaseInfo } from '../share/can'
 import { CanBase } from './base'
 import { SLCAN_CAN } from './slcan'
+import { Candle_CAN } from './candle'
 
 const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)
@@ -35,6 +36,8 @@ export function openCanDevice(canDevice: CanBaseInfo) {
     canBase = new VECTOR_CAN(canDevice)
   } else if (canDevice.vendor == 'slcan') {
     canBase = new SLCAN_CAN(canDevice)
+  } else if (canDevice.vendor == 'candle') {
+    canBase = new Candle_CAN(canDevice)
   }
 
   return canBase
@@ -56,6 +59,8 @@ export function getCanVersion(vendor: string) {
     return VECTOR_CAN.getLibVersion()
   } else if (vendor === 'SLCAN') {
     return SLCAN_CAN.getLibVersion()
+  } else if (vendor === 'CANDLE') {
+    return Candle_CAN.getLibVersion()
   } else {
     return 'unknown'
   }
@@ -77,6 +82,8 @@ export function getCanDevices(vendor: string) {
     return VECTOR_CAN.getValidDevices()
   } else if (vendor === 'SLCAN') {
     return SLCAN_CAN.getValidDevices()
+  } else if (vendor === 'CANDLE') {
+    return Candle_CAN.getValidDevices()
   } else {
     return []
   }

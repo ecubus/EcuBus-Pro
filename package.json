@@ -15,7 +15,8 @@
         "zlg",
         "toomoss",
         "vector",
-        "slcan"
+        "slcan",
+        "candle"
       ],
       "linux": [
         "simulate",

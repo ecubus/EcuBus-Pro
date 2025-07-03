@@ -67,6 +67,17 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-else-if="props.vendor == 'candle'"
+      label="120R Res Enable"
+      prop="candleRes"
+      placeholder="Disable"
+    >
+      <el-select v-model="data.canbleRes" :loading="deviceLoading" style="width: 300px">
+        <el-option label="Enable" :value="true" />
+        <el-option label="Disable" :value="false" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
       v-else-if="props.vendor == 'zlg'"
       label="120R Res Enable"
       prop="zlgRes"
@@ -341,6 +352,84 @@ const configInfo: Record<CanVendor, any> = {
     canFd: {}
   },
   peak: {
+    clock: true,
+    timeSeg1: true,
+    timeSeg2: true,
+    sjw: true,
+    preScaler: true,
+    freq: true,
+    zlgSpec: false,
+    can: {
+      clock: [
+        { clock: '8', name: '8' },
+        { clock: '20', name: '20' },
+        { clock: '24', name: '24' },
+        { clock: '30', name: '30' },
+        { clock: '40', name: '40' },
+        { clock: '60', name: '60' },
+        { clock: '80', name: '80' }
+      ],
+      preScaler: {
+        min: 1,
+        max: 32
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      }
+    },
+    canFd: {
+      clock: [
+        { clock: '20', name: '20' },
+        { clock: '24', name: '24' },
+        { clock: '30', name: '30' },
+        { clock: '40', name: '40' },
+        { clock: '60', name: '60' },
+        { clock: '80', name: '80' }
+      ],
+      preScaler: {
+        min: 1,
+        max: 256
+      },
+      tsg1: {
+        min: 2,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      }
+    }
+  },
+  candle: {
     clock: true,
     timeSeg1: true,
     timeSeg2: true,

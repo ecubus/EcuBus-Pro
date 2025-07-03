@@ -1368,8 +1368,14 @@ template <typename T> T SwigValueInit() {
 #include "candle_defs.h"
 #include "candle.h"
 
+extern void __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
+extern bool __stdcall DLL SendCANMsg(std::string name,candle_device_t* hdev, uint8_t ch,candle_frame_t *frame);
+
 
 #include <stdint.h>		// Use the C99 official header
+
+
+#include <string>
 
 
 typedef candle_device_t DevicePointer;
@@ -1711,6 +1717,90 @@ SWIGINTERN
 Napi::Value SWIG_From_bool(Napi::Env env, bool val)
 {
   return Napi::Boolean::New(env, val);
+}
+
+
+SWIGINTERN swig_type_info*
+SWIG_pchar_descriptor(void)
+{
+  static int init = 0;
+  static swig_type_info* info = 0;
+  if (!init) {
+    info = SWIG_TypeQuery("_p_char");
+    init = 1;
+  }
+  return info;
+}
+
+
+SWIGINTERN int
+SWIG_AsCharPtrAndSize(Napi::Value valRef, char** cptr, size_t* psize, int *alloc)
+{
+  if(valRef.IsString()) {
+    Napi::String js_str;
+    NAPI_CHECK_RESULT(valRef.ToString(), js_str);
+
+    std::string str = js_str.Utf8Value();
+    size_t len = str.size() + 1;
+    char* cstr = (char*) (new char[len]());
+    memcpy(cstr, str.data(), len);
+    
+    if(alloc) *alloc = SWIG_NEWOBJ;
+    if(psize) *psize = len;
+    if(cptr) *cptr = cstr;
+    
+    return SWIG_OK;
+  } else {
+    if(valRef.IsObject()) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      Napi::Object obj;
+      NAPI_CHECK_RESULT(valRef.ToObject(), obj);
+      // try if the object is a wrapped char[]
+      if (pchar_descriptor) {
+        void* vptr = 0;
+        if (SWIG_ConvertPtr(obj, &vptr, pchar_descriptor, 0) == SWIG_OK) {
+          if (cptr) *cptr = (char *) vptr;
+          if (psize) *psize = vptr ? (strlen((char *)vptr) + 1) : 0;
+          if (alloc) *alloc = SWIG_OLDOBJ;
+          return SWIG_OK;
+        }
+      }
+    }
+  }
+  goto fail;
+fail:
+  return SWIG_TypeError;
+}
+
+
+SWIGINTERN int
+SWIG_AsPtr_std_string (Napi::Value obj, std::string **val) 
+{
+  char* buf = 0 ; size_t size = 0; int alloc = SWIG_OLDOBJ;
+  if (SWIG_IsOK((SWIG_AsCharPtrAndSize(obj, &buf, &size, &alloc)))) {
+    if (buf) {
+      if (val) *val = new std::string(buf, size - 1);
+      if (alloc == SWIG_NEWOBJ) delete[] buf;
+      return SWIG_NEWOBJ;
+    } else {
+      if (val) *val = 0;
+      return SWIG_OLDOBJ;
+    }
+  } else {
+    static int init = 0;
+    static swig_type_info* descriptor = 0;
+    if (!init) {
+      descriptor = SWIG_TypeQuery("std::string" " *");
+      init = 1;
+    }
+    if (descriptor) {
+      std::string *vptr;
+      int res = SWIG_ConvertPtr(obj, (void**)&vptr, descriptor, 0);
+      if (SWIG_IsOK(res) && val) *val = vptr;
+      return res;
+    }
+  }
+  return SWIG_ERROR;
 }
 
 
@@ -12010,6 +12100,105 @@ fail:
 }
 
 
+// js_global_function
+Napi::Value _wrap_SetContextDevice(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  std::string arg1 ;
+  candle_device_t *arg2 = (candle_device_t *) 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_SetContextDevice.");
+  }
+  
+  {
+    {
+      std::string *ptr = (std::string *)0;
+      int res = SWIG_AsPtr_std_string(info[0], &ptr);
+      if (!SWIG_IsOK(res) || !ptr) {
+        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "SetContextDevice" "', argument " "1"" of type '" "std::string""'"); 
+      }
+      arg1 = *ptr;
+      if (SWIG_IsNewObj(res)) delete ptr;
+    }
+  }
+  res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SetContextDevice" "', argument " "2"" of type '" "candle_device_t *""'"); 
+  }
+  arg2 = reinterpret_cast< candle_device_t * >(argp2);SetContextDevice(SWIG_STD_MOVE(arg1),arg2);
+  jsresult = env.Undefined();
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_SendCANMsg(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  std::string arg1 ;
+  candle_device_t *arg2 = (candle_device_t *) 0 ;
+  uint8_t arg3 ;
+  candle_frame_t *arg4 = (candle_frame_t *) 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned char val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  bool result;
+  
+  if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_SendCANMsg.");
+  }
+  
+  {
+    {
+      std::string *ptr = (std::string *)0;
+      int res = SWIG_AsPtr_std_string(info[0], &ptr);
+      if (!SWIG_IsOK(res) || !ptr) {
+        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "SendCANMsg" "', argument " "1"" of type '" "std::string""'"); 
+      }
+      arg1 = *ptr;
+      if (SWIG_IsNewObj(res)) delete ptr;
+    }
+  }
+  res2 = SWIG_ConvertPtr(info[1], &argp2,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SendCANMsg" "', argument " "2"" of type '" "candle_device_t *""'"); 
+  }
+  arg2 = reinterpret_cast< candle_device_t * >(argp2);ecode3 = SWIG_AsVal_unsigned_SS_char(info[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "SendCANMsg" "', argument " "3"" of type '" "uint8_t""'");
+  } 
+  arg3 = static_cast< uint8_t >(val3);res4 = SWIG_ConvertPtr(info[3], &argp4,SWIGTYPE_p_candle_frame_t, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "SendCANMsg" "', argument " "4"" of type '" "candle_frame_t *""'"); 
+  }
+  arg4 = reinterpret_cast< candle_frame_t * >(argp4);result = (bool)SendCANMsg(SWIG_STD_MOVE(arg1),arg2,arg3,arg4);
+  jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
+  
+  
+  
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
 static void *_p_DeviceArrayTo_p_candle_device_t(void *x, int *SWIGUNUSEDPARM(newmemory)) {
@@ -12486,7 +12675,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
-extern void SendCANMsg(const Napi::CallbackInfo& info);
 
 
 do {
@@ -12502,12 +12690,7 @@ do {
 	pd
   }));
 } while (0);
-do{
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SendCANMsg", SendCANMsg);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
+
 
 
 
@@ -13600,6 +13783,20 @@ do {
 // jsnapi_register_global_function
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_channel_set_interfacenumber_endpoints", _wrap_candle_channel_set_interfacenumber_endpoints);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SetContextDevice", _wrap_SetContextDevice);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SendCANMsg", _wrap_SendCANMsg);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));

@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include "candle_defs.h"
 #include "candle.h"
+
+extern void __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
+extern bool __stdcall DLL SendCANMsg(std::string name,candle_device_t* hdev, uint8_t ch,candle_frame_t *frame);
 %}
 
 
@@ -13,6 +16,7 @@
 %}
 
 %include <stdint.i>
+%include <std_string.i>
 %include <windows.i>
 
 
@@ -47,8 +51,8 @@
 %include "candle.h"
 
 
-
-
+void __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
+bool __stdcall DLL SendCANMsg(std::string name,candle_device_t* hdev, uint8_t ch,candle_frame_t *frame);
 
 
 
@@ -63,7 +67,6 @@
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
-extern void SendCANMsg(const Napi::CallbackInfo& info);
 
 
 do {
@@ -79,11 +82,6 @@ do {
 	pd
   }));
 } while (0);
-do{
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SendCANMsg", SendCANMsg);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
+
 
 %}

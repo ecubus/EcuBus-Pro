@@ -40,8 +40,8 @@ const pendingBaseCmds = new Map<
 export class Candle_CAN extends CanBase {
   event: EventEmitter
   info: CanBaseInfo
-  handle: number
-  deviceIndex: number
+  target: any
+  channel = 0
   closed = false
   cnt = 0
 
@@ -67,14 +67,16 @@ export class Candle_CAN extends CanBase {
     this.id = info.id
     this.info = info
 
-    const devices = Candle_CAN.getValidDevices()
-    const target = devices.find((item) => item.handle == info.handle)
+    const devices = Candle_CAN.getRawDeviceList()
+    const target = devices.find((item) => item.interfaceNumber == info.handle)
     if (!target) {
       throw new Error('Invalid handle')
     }
+    this.target = target
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
     }
+
     // 检查波特率配置
     const CLOCK = Number(this.info.bitrate.clock) * 1000000
 
@@ -94,178 +96,116 @@ export class Candle_CAN extends CanBase {
       }
     }
 
-    // // 检查CANFD波特率
-    // if (info.canfd && info.bitratefd?.freq) {
-    //   // 检查仲裁域波特率
-    //   const calcNbtFreq = Math.floor(
-    //     CLOCK / (info.bitrate.preScaler * (1 + info.bitrate.timeSeg1 + info.bitrate.timeSeg2))
-    //   )
-    //   if (Math.abs(calcNbtFreq - info.bitrate.freq) / info.bitrate.freq > 0.01) {
-    //     throw new Error(
-    //       `Invalid CANFD NBT config: expected ${info.bitrate.freq}, got ${calcNbtFreq}. ` +
-    //         `preScaler=${info.bitrate.preScaler}, ` +
-    //         `timeSeg1=${info.bitrate.timeSeg1}, ` +
-    //         `timeSeg2=${info.bitrate.timeSeg2}`
-    //     )
-    //   }
-
-    //   // 检查数据域波特率
-    //   const calcDbtFreq = Math.floor(
-    //     CLOCK / (info.bitratefd.preScaler * (1 + info.bitratefd.timeSeg1 + info.bitratefd.timeSeg2))
-    //   )
-    //   if (Math.abs(calcDbtFreq - info.bitratefd.freq) / info.bitratefd.freq > 0.01) {
-    //     throw new Error(
-    //       `Invalid CANFD DBT config: expected ${info.bitratefd.freq}, got ${calcDbtFreq}. ` +
-    //         `preScaler=${info.bitratefd.preScaler}, ` +
-    //         `timeSeg1=${info.bitratefd.timeSeg1}, ` +
-    //         `timeSeg2=${info.bitratefd.timeSeg2}`
-    //     )
-    //   }
-    // }
-
     this.event = new EventEmitter()
 
-    this.log = new CanLOG('CABDLE', info.name, this.event)
+    this.log = new CanLOG('CANABLE', info.name, this.event)
 
-    this.handle = parseInt(info.handle.split(':')[0])
-    this.deviceIndex = parseInt(info.handle.split(':')[1])
-
-    // let ret = 0
-    // // 检查设备是否已经打开
-    // if (global.toomossDeviceHandles == undefined) {
-    //   global.toomossDeviceHandles = new Map<
-    //     number,
-    //     {
-    //       refCount: number // 引用计数
-    //       channels: Set<number> // 当前使用的通道
-    //     }
-    //   >()
-    // }
-    // let deviceInfo = global.toomossDeviceHandles.get(this.handle)
-    // if (!deviceInfo) {
-    //   // 首次打开设备
-    //   ret = TOOMOSS.USB_OpenDevice(this.handle)
-    //   if (ret != 1) {
-    //     throw new Error('Open device failed')
-    //   }
-    //   deviceInfo = {
-    //     refCount: 1,
-    //     channels: new Set([this.deviceIndex])
-    //   }
-    //   global.toomossDeviceHandles.set(this.handle, deviceInfo)
-    // } else {
-    //   // 设备已打开，检查通道是否已被使用
-    //   if (deviceInfo.channels.has(this.deviceIndex)) {
-    //     throw new Error(`Channel ${this.deviceIndex} is already in use`)
-    //   }
-    //   deviceInfo.refCount++
-    //   deviceInfo.channels.add(this.deviceIndex)
-    // }
-    // TOOMOSS.DEV_ResetTimestamp(this.handle)
-    // // 初始化CAN配置
-    // if (info.canfd && info.bitratefd) {
-    //   // CANFD配置
-
-    //   this.canfdConfig = new TOOMOSS.CANFD_INIT_CONFIG()
-    //   this.canfdConfig.Mode = 0 // 正常模式
-    //   this.canfdConfig.ISOCRCEnable = 1
-    //   this.canfdConfig.RetrySend = 0
-    //   this.canfdConfig.ResEnable = info.toomossRes ? 1 : 0
-    //   // 仲裁域波特率配置
-    //   this.canfdConfig.NBT_BRP = info.bitrate.preScaler
-    //   this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
-    //   this.canfdConfig.NBT_SEG2 = info.bitrate.timeSeg2
-    //   this.canfdConfig.NBT_SJW = info.bitrate.sjw
-    //   // 数据域波特率配置
-    //   this.canfdConfig.DBT_BRP = info.bitratefd.preScaler
-    //   this.canfdConfig.DBT_SEG1 = info.bitratefd.timeSeg1
-    //   this.canfdConfig.DBT_SEG2 = info.bitratefd.timeSeg2
-    //   this.canfdConfig.DBT_SJW = info.bitratefd.sjw
-    //   this.canfdConfig.TDC = 0
-
-    //   ret = TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
-    //   if (ret != 0) {
-    //     throw new Error('Init CANFD failed')
-    //   }
-    //   TOOMOSS.CANFD_ResetStartTime(this.handle, this.deviceIndex)
-
-    //   // 启动CANFD
-    //   ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-    //   if (ret != 0) {
-    //     throw new Error('Start CANFD failed')
-    //   }
-    // } else {
-    //   // 普通CAN配置
-    //   this.canConfig = new TOOMOSS.CAN_INIT_CONFIG()
-    //   this.canConfig.CAN_BRP = info.bitrate.preScaler
-    //   this.canConfig.CAN_SJW = info.bitrate.sjw
-    //   this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
-    //   this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-    //   this.canConfig.CAN_Mode = info.toomossRes ? 0x80 : 0 // 正常模式
-    //   this.canConfig.CAN_ABOM = 0 // 自动离线恢复
-    //   this.canConfig.CAN_NART = 1 // 自动重传
-    //   this.canConfig.CAN_RFLM = 0 // 接收FIFO锁定模式
-
-    //   this.canConfig.CAN_TXFP = 0 // 发送FIFO优先级
-
-    //   ret = TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
-    //   if (ret != 0) {
-    //     throw new Error('Init CAN failed')
-    //   }
-
-    //   // 启动CAN
-    //   ret = TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-    //   if (ret != 0) {
-    //     throw new Error('Start CAN failed')
-    //   }
-    //   TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
-    // }
-    // this.attachCanMessage(this.busloadCb)
-    // // 初始化 TSFN
-    // TOOMOSS.CreateTSFN(
-    //   this.handle,
-    //   this.deviceIndex,
-    //   this.info.canfd,
-    //   this.id,
-    //   this.callback.bind(this),
-    //   'error-' + this.id,
-    //   this.callbackError.bind(this),
-    //   'tx-' + this.id,
-    //   this.txCallback.bind(this)
-    // )
-  }
-  txCallback(obj: any) {
-    const { id, timestamp, result } = obj
-
-    // 更新时间戳偏移
-    if (this.tsOffset == undefined) {
-      this.tsOffset = timestamp * 10 - (getTsUs() - this.startTime)
+    if (!Candle.candle_dev_open(this.target)) {
+      throw new Error('Open device failed')
     }
-    const ts = timestamp * 10 - this.tsOffset
 
-    // 从待发送队列中找到对应的消息
-    const cmdId = Number(id)
+    // Check baud rate parameters against device capabilities
+    const cap = this.target.bt_const
 
-    const pendingCmds = pendingBaseCmds.get(cmdId)
+    if (CLOCK != cap.fclk_can) {
+      throw new Error(`Clock frequency mismatch: expected ${CLOCK}, got ${cap.fclk_can}`)
+    }
+    // Check time segments
+    if (info.bitrate.timeSeg1 < cap.tseg1_min || info.bitrate.timeSeg1 > cap.tseg1_max) {
+      throw new Error(
+        `Time segment 1 (${info.bitrate.timeSeg1}) out of valid range [${cap.tseg1_min}-${cap.tseg1_max}]`
+      )
+    }
 
-    if (pendingCmds) {
-      const message: CanMessage = {
-        device: this.info.name,
-        dir: 'OUT',
-        id: pendingCmds.id,
-        data: pendingCmds.data,
-        ts: ts,
-        msgType: pendingCmds.msgType,
-        database: pendingCmds.extra?.database,
-        name: pendingCmds.extra?.name
+    if (info.bitrate.timeSeg2 < cap.tseg2_min || info.bitrate.timeSeg2 > cap.tseg2_max) {
+      throw new Error(
+        `Time segment 2 (${info.bitrate.timeSeg2}) out of valid range [${cap.tseg2_min}-${cap.tseg2_max}]`
+      )
+    }
+
+    // Check prescaler (BRP)
+    if (info.bitrate.preScaler < cap.brp_min || info.bitrate.preScaler > cap.brp_max) {
+      throw new Error(
+        `Prescaler (${info.bitrate.preScaler}) out of valid range [${cap.brp_min}-${cap.brp_max}]`
+      )
+    }
+    //sjw
+    if (info.bitrate.sjw > cap.sjw_max) {
+      throw new Error(`SJW (${info.bitrate.sjw}) out of valid range [0-${cap.sjw_max}]`)
+    }
+    const bittiming = new Candle.candle_bittiming_t()
+    bittiming.prop_seg = 1
+    bittiming.phase_seg1 = info.bitrate.timeSeg1
+    bittiming.phase_seg2 = info.bitrate.timeSeg2
+    bittiming.sjw = info.bitrate.sjw
+    bittiming.brp = info.bitrate.preScaler
+
+    if (!Candle.candle_channel_set_timing(this.target, this.channel, bittiming)) {
+      throw new Error('Set timing failed')
+    }
+    let flag = 0
+    //canfd config
+    if (info.canfd && info.bitratefd) {
+      //check
+      const canfd_cap = this.target.data_bt_const
+      if (
+        info.bitratefd.timeSeg1 < canfd_cap.tseg1_min ||
+        info.bitratefd.timeSeg1 > canfd_cap.tseg1_max
+      ) {
+        throw new Error(
+          `Time segment 1 (${info.bitratefd.timeSeg1}) out of valid range [${canfd_cap.tseg1_min}-${canfd_cap.tseg1_max}]`
+        )
       }
-      this.log.canBase(message)
-      this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
-      pendingCmds.resolve(ts)
-      pendingBaseCmds.delete(cmdId)
+      if (
+        info.bitratefd.timeSeg2 < canfd_cap.tseg2_min ||
+        info.bitratefd.timeSeg2 > canfd_cap.tseg2_max
+      ) {
+        throw new Error(
+          `Time segment 2 (${info.bitratefd.timeSeg2}) out of valid range [${canfd_cap.tseg2_min}-${canfd_cap.tseg2_max}]`
+        )
+      }
+      if (
+        info.bitratefd.preScaler < canfd_cap.brp_min ||
+        info.bitratefd.preScaler > canfd_cap.brp_max
+      ) {
+        throw new Error(
+          `Prescaler (${info.bitratefd.preScaler}) out of valid range [${canfd_cap.brp_min}-${canfd_cap.brp_max}]`
+        )
+      }
+      if (info.bitratefd.sjw > canfd_cap.sjw_max) {
+        throw new Error(`SJW (${info.bitratefd.sjw}) out of valid range [0-${canfd_cap.sjw_max}]`)
+      }
+      const bittimingfd = new Candle.candle_bittiming_t()
+      bittimingfd.prop_seg = 1
+      bittimingfd.phase_seg1 = info.bitratefd.timeSeg1
+      bittimingfd.phase_seg2 = info.bitratefd.timeSeg2
+      bittimingfd.sjw = info.bitratefd.sjw
+      bittimingfd.brp = info.bitratefd.preScaler
+      if (!Candle.candle_channel_set_data_timing(this.target, this.channel, bittimingfd)) {
+        throw new Error('Set data timing failed')
+      }
+      //can-fd flag
+      flag |= 0x100
     }
+    //error report flag
+    flag |= 1 << 12
+
+    if (!Candle.candle_channel_start(this.target, this.channel, flag)) {
+      throw new Error('Start channel failed')
+    }
+
+    if (!Candle.candle_channel_set_interfacenumber_endpoints(this.target, this.channel)) {
+      throw new Error('Set interface number endpoints failed')
+    }
+
+    Candle.CreateTSFN(this.channel, this.id, this.callback.bind(this))
+    Candle.SetContextDevice(this.id, this.target)
+
+    this.attachCanMessage(this.busloadCb)
   }
+
   callback(msg: any) {
+    console.log('xxx', msg)
     if (msg.id == 0xffffffff) {
       return
     }
@@ -284,8 +224,8 @@ export class Candle_CAN extends CanBase {
 
     if (this.info.canfd) {
       // CANFD消息处理
-      frame.msgType.brs = msg.Flags & 0x01 ? true : false
-      frame.msgType.canfd = msg.Flags & 0x04 ? true : false
+      frame.msgType.brs = msg.Flags & 0x04 ? true : false // CANDLE_FLAG_BRS = 0x04
+      frame.msgType.canfd = msg.Flags & 0x02 ? true : false // CANDLE_FLAG_FD = 0x02
     } else {
       // 普通CAN消息处理
       frame.msgType.brs = false
@@ -298,11 +238,6 @@ export class Candle_CAN extends CanBase {
     }
 
     this._read(frame)
-  }
-
-  callbackError(err: any) {
-    this.log.error(getTsUs() - this.startTime, 'bus error')
-    this.close(true)
   }
 
   setOption(cmd: string, val: any): any {
@@ -331,8 +266,8 @@ export class Candle_CAN extends CanBase {
 
   static loadDllPath(dllPath: string) {}
 
-  static override getValidDevices(): CanDevice[] {
-    const devices: CanDevice[] = []
+  static getRawDeviceList() {
+    const list: any[] = []
     if (process.platform == 'win32') {
       const readList = new Candle.candle_list_t()
 
@@ -343,23 +278,38 @@ export class Candle_CAN extends CanBase {
         // Build device list
         for (let i = 0; i < readList.num_devices; i++) {
           const device = devicesx.getitem(i)
-          const path = Candle.CharArray.frompointer(device.path)
-          const buf = Buffer.alloc(256 * 2)
-          for (let j = 0; j < 256 * 2; j++) {
-            const val = path.getitem(j)
-            if (val == 0) {
-              break
-            }
-            buf[j] = val
-          }
-          const pathStr = buf.toString('ascii').replace(/\0/g, '')
-          devices.push({
-            label: `Candle Device ${i}`,
-            id: `Candle_${i}`,
-            handle: `${i}:0`,
-            serialNumber: pathStr
-          })
+          list.push(device)
         }
+      }
+
+      return list
+    }
+    return []
+  }
+  static override getValidDevices(): CanDevice[] {
+    const devices: CanDevice[] = []
+    if (process.platform == 'win32') {
+      const rawList = this.getRawDeviceList()
+      for (const device of rawList) {
+        const path = Candle.CharArray.frompointer(device.path)
+        const buf = Buffer.alloc(256 * 2)
+        for (let j = 0; j < 256 * 2; j++) {
+          const val = path.getitem(j)
+          if (val == 0) {
+            break
+          }
+          buf[j] = val
+        }
+        let pathStr = buf.toString('ascii').replace(/\0/g, '')
+        //remove {xxxx} guid info, maybe {xxx no }
+        pathStr = pathStr.replace(/\{.*\}/g, '')
+        pathStr = pathStr.replace(/\{.*/g, '')
+        devices.push({
+          label: `Candle Device ${device.interfaceNumber}`,
+          id: `Candle_${device.interfaceNumber}`,
+          handle: device.interfaceNumber,
+          serialNumber: pathStr
+        })
       }
     }
     return devices
@@ -367,7 +317,11 @@ export class Candle_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      return '1.8.6.0'
+      const v = Candle_CAN.getRawDeviceList()[0]
+      if (v) {
+        return `SW:${v.dconf.sw_version}/HW:${v.dconf.hw_version}`
+      }
+      return '1.0.0'
     } else {
       return 'only support windows'
     }
@@ -438,27 +392,32 @@ export class Candle_CAN extends CanBase {
       const cmdId = txCnt++
 
       try {
-        pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
-        Candle.SendCANMsg(
-          this.handle,
-          this.deviceIndex,
-          this.info.canfd,
-          this.id,
-
-          cmdId,
-          {
-            ID:
-              id |
-              (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) |
-              (msgType.remote ? 0x40000000 : 0),
-            RemoteFlag: msgType.remote ? 1 : 0,
-            ExternFlag: msgType.idType == CAN_ID_TYPE.EXTENDED ? 1 : 0,
-            DataLen: data.length,
-            Data: data,
-            DLC: data.length,
-            Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
+        // 处理 CANFD buffer，类似 SLCAN 的逻辑
+        let processedData = data
+        if (msgType.canfd && data.length > 8) {
+          let maxLen = 64
+          if (data.length > 8 && data.length <= 12) {
+            maxLen = 12
+          } else if (data.length > 12 && data.length <= 16) {
+            maxLen = 16
+          } else if (data.length > 16 && data.length <= 20) {
+            maxLen = 20
+          } else if (data.length > 20 && data.length <= 24) {
+            maxLen = 24
+          } else if (data.length > 24 && data.length <= 32) {
+            maxLen = 32
+          } else if (data.length > 32 && data.length <= 48) {
+            maxLen = 48
+          } else if (data.length > 48) {
+            maxLen = 64
+          } else {
+            maxLen = data.length
           }
-        )
+          processedData = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)])
+        }
+        const frame = new Candle.candle_frame_t()
+        pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
+        Candle.SendCANMsg(this.id, this.target, this.channel, frame)
       } catch (err: any) {
         pendingBaseCmds.delete(cmdId)
         reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))

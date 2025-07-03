@@ -10,13 +10,13 @@
 #include <condition_variable>
 #include "concurrentqueue.h"
 #include "blockconcurrentqueue.h"
+#include "candle_defs.h"
 
 // 发送消息结构
 struct TxMessage {
     candle_handle hdev;
     uint8_t channel;
-    bool isCanFd;
-    uint32_t cnt;  // 发送计数
+
     candle_frame_t frame;
 };
 
@@ -31,7 +31,7 @@ struct TxResult {
 struct TsfnContext {
     // 基本配置
     bool closed;
-    bool isCanFd;
+   
     candle_handle hdev;
     uint8_t channel;
     
@@ -42,13 +42,15 @@ struct TsfnContext {
 
     // 发送相关
     std::thread txThread;
-    Napi::ThreadSafeFunction txTsfn;
     moodycamel::BlockingConcurrentQueue<TxMessage> txQueue{10000};
 };
 
 // 全局上下文映射
 std::map<std::string, TsfnContext *> tsfnContextMap;
 std::mutex contextMapMutex;
+
+
+
 
 // 接收回调函数
 auto rxCallback = [](Napi::Env env, Napi::Function jsCallback, void* value) {
@@ -79,76 +81,73 @@ auto rxCallback = [](Napi::Env env, Napi::Function jsCallback, void* value) {
     
     msgObj.Set("ID", Napi::Number::New(env, id));
     msgObj.Set("TimeStamp", Napi::Number::New(env, timestamp));
+    msgObj.Set("TimeStampHigh", Napi::Number::New(env, 0)); // High 32 bits are 0 for microsecond timestamps
     msgObj.Set("DLC", Napi::Number::New(env, dlc));
     msgObj.Set("Flags", Napi::Number::New(env, context->rxFrame.flags));
     msgObj.Set("FrameType", Napi::Number::New(env, frameType));
     
-    // 创建数据Buffer
-    Napi::Buffer<unsigned char> dataBuffer = Napi::Buffer<unsigned char>::Copy(env, data, dlc);
+    // 创建数据Buffer - 使用实际数据长度而不是DLC
+    uint8_t actualDataLength = dlc;
+    if (context->rxFrame.flags & CANDLE_FLAG_FD) {
+        // CANFD帧的实际数据长度可能大于8字节
+        if (dlc > 8) {
+            actualDataLength = dlc; // CANFD DLC直接对应数据长度
+        }
+    } else {
+        // 普通CAN帧最大8字节
+        if (dlc > 8) {
+            actualDataLength = 8;
+        }
+    }
+    Napi::Buffer<unsigned char> dataBuffer = Napi::Buffer<unsigned char>::Copy(env, data, actualDataLength);
     msgObj.Set("Data", dataBuffer);
 
     jsCallback.Call({msgObj});
-};
-
-// 发送回调函数
-auto txCallback = [](Napi::Env env, Napi::Function jsCallback, TxResult* result) {
-    if (!result) {
-        jsCallback.Call({env.Null()});
-        return;
-    }
-
-    Napi::Object resultObj = Napi::Object::New(env);
-    resultObj.Set("id", Napi::Number::New(env, (double)result->id));
-    resultObj.Set("timestamp", Napi::Number::New(env, (double)result->timestamp));
-    resultObj.Set("result", Napi::Number::New(env, result->result));
-
-    jsCallback.Call({resultObj});
-    delete result;
 };
 
 // 线程入口函数声明
 void rxThreadEntry(TsfnContext* context);
 void txThreadEntry(TsfnContext* context);
 
+
+
+void __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev){
+    std::lock_guard<std::mutex> lock(contextMapMutex);
+    auto it = tsfnContextMap.find(name);
+    if (it != tsfnContextMap.end()) {
+        it->second->hdev = hdev;
+    }
+}
+
 // 创建TSFN
 void CreateTSFN(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     
-    if (info.Length() < 6) {
-        throw Napi::Error::New(env, "Insufficient arguments. Expected: hdev, channel, isCanFd, name, rxCallback, txCallback");
+    if (info.Length() < 3) {
+        throw Napi::Error::New(env, "Insufficient arguments. Expected: channel, name");
     }
+   
+    uint8_t channel = info[0].As<Napi::Number>().Uint32Value();
+    Napi::String name = info[1].As<Napi::String>();
 
-    candle_handle hdev = (candle_handle)info[0].As<Napi::Number>().Int32Value();
-    uint8_t channel = info[1].As<Napi::Number>().Uint32Value();
-    bool isCanFd = info[2].As<Napi::Boolean>().Value();
-    Napi::String name = info[3].As<Napi::String>();
+    
     
     // 创建上下文
     auto context = new TsfnContext();
     context->closed = false;
-    context->hdev = hdev;
     context->channel = channel;
-    context->isCanFd = isCanFd;
+
 
     // 创建接收ThreadSafeFunction
     context->rxTsfn = Napi::ThreadSafeFunction::New(
         env,
-        info[4].As<Napi::Function>(),
+        info[2].As<Napi::Function>(),
         (name.Utf8Value() + "_rx").data(),
         0,  // 无限制队列大小
         1,  // 初始线程数
         context
     );
 
-    // 创建发送ThreadSafeFunction
-    context->txTsfn = Napi::ThreadSafeFunction::New(
-        env,
-        info[5].As<Napi::Function>(),
-        (name.Utf8Value() + "_tx").data(),
-        0,
-        1,
-        context
-    );
     
     // 启动线程
     context->rxThread = std::thread(rxThreadEntry, context);
@@ -165,11 +164,13 @@ void CreateTSFN(const Napi::CallbackInfo& info) {
 void FreeTSFN(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     
-    if (info.Length() < 1) {
-        throw Napi::Error::New(env, "Missing context name");
+    if (info.Length() < 2) {
+        throw Napi::Error::New(env, "Insufficient arguments. Expected: name, deviceIndex");
     }
 
     Napi::String name = info[0].As<Napi::String>();
+  
+    
     TsfnContext* context = nullptr;
     
     {
@@ -195,109 +196,60 @@ void FreeTSFN(const Napi::CallbackInfo& info) {
 
         // 释放ThreadSafeFunction
         context->rxTsfn.Release();
-        context->txTsfn.Release();
+   
+       
 
         delete context;
     }
 }
 
 // 发送CAN消息
-void SendCANMsg(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-
-    if (info.Length() < 6) {
-        throw Napi::Error::New(env, "Insufficient arguments for SendCANMsg");
-    }
-
-    std::string contextName = info[3].As<Napi::String>().Utf8Value();
+bool __stdcall DLL SendCANMsg(std::string name,candle_device_t* hdev, uint8_t ch,candle_frame_t *frame) {
+   
     TsfnContext* context = nullptr;
     
     {
         std::lock_guard<std::mutex> lock(contextMapMutex);
-        auto it = tsfnContextMap.find(contextName);
+        auto it = tsfnContextMap.find(name);
         if (it == tsfnContextMap.end()) {
-            throw Napi::Error::New(env, "Context not found: " + contextName);
+            return false;
         }
         context = it->second;
     }
 
     // 创建发送消息
     TxMessage msg;
-    msg.hdev = (candle_handle)info[0].As<Napi::Number>().Int32Value();
-    msg.channel = info[1].As<Napi::Number>().Uint32Value();
-    msg.isCanFd = info[2].As<Napi::Boolean>().Value();
-    msg.cnt = info[4].As<Napi::Number>().Uint32Value();
+    msg.hdev = hdev;
+    msg.channel = ch;
 
-    auto msgObj = info[5].As<Napi::Object>();
     
+    
+
     // 初始化candle_frame_t结构
-    memset(&msg.frame, 0, sizeof(candle_frame_t));
+    memcpy(&msg.frame, frame, sizeof(candle_frame_t));
     
-    // 设置基本字段
-    msg.frame.can_id = msgObj.Get("ID").As<Napi::Number>().Uint32Value();
-    msg.frame.can_dlc = msgObj.Get("DLC").As<Napi::Number>().Uint32Value();
-    msg.frame.channel = msg.channel;
-    msg.frame.flags = 0;
-    
-    // 处理扩展ID和RTR标志
-    if (msg.frame.can_id & CANDLE_ID_EXTENDED) {
-        msg.frame.can_id &= ~CANDLE_ID_EXTENDED;
-        msg.frame.flags |= CANDLE_ID_EXTENDED;
-    }
-    if (msg.frame.can_id & CANDLE_ID_RTR) {
-        msg.frame.can_id &= ~CANDLE_ID_RTR;
-        msg.frame.flags |= CANDLE_ID_RTR;
-    }
-    
-    // 处理CANFD标志
-    if (msg.isCanFd) {
-        msg.frame.flags |= CANDLE_FLAG_FD;
-        if (msgObj.Has("BRS")) {
-            if (msgObj.Get("BRS").As<Napi::Boolean>().Value()) {
-                msg.frame.flags |= CANDLE_FLAG_BRS;
-            }
-        }
-        if (msgObj.Has("ESI")) {
-            if (msgObj.Get("ESI").As<Napi::Boolean>().Value()) {
-                msg.frame.flags |= CANDLE_FLAG_ESI;
-            }
-        }
-    }
-    
-    // 复制数据到正确的联合体字段
-    auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
-    if (msg.isCanFd) {
-        // CANFD数据
-        memcpy(msg.frame.msg.canfd.data, dataBuffer.Data(), dataBuffer.Length());
-    } else {
-        // 普通CAN数据
-        memcpy(msg.frame.msg.classic_can.data, dataBuffer.Data(),dataBuffer.Length());
-    }
-
     // 入队发送
     if (!context->txQueue.enqueue(msg)) {
-        throw Napi::Error::New(env, "Failed to enqueue message - queue is full");
+       return false;
     }
+    return true;
 }
 
 // 接收线程入口函数
 void rxThreadEntry(TsfnContext* context) {
     while (!context->closed) {
+        if(context->hdev==nullptr){
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+        }
         bool ret = candle_frame_read(context->hdev, &context->rxFrame, 100); // 100ms timeout
         
         if (ret) {
             // 只处理接收帧，忽略其他类型
-            candle_frametype_t frameType = candle_frame_type(&context->rxFrame);
-            if (frameType == CANDLE_FRAMETYPE_RECEIVE) {
-                context->rxTsfn.NonBlockingCall(context, rxCallback);
-            }
-        }
         
-        // 优化：根据接收频率调整睡眠时间
-        if (ret) {
-            std::this_thread::sleep_for(std::chrono::microseconds(50));  // 有数据时快速响应
-        } else {
-            std::this_thread::sleep_for(std::chrono::microseconds(200)); // 无数据时稍慢
+           
+            context->rxTsfn.NonBlockingCall(context, rxCallback);
+            
         }
     }
 }
@@ -309,15 +261,18 @@ void txThreadEntry(TsfnContext* context) {
     while (!context->closed) {
         // 使用带超时的等待，每50ms检查一次closed标志
         if (context->txQueue.wait_dequeue_timed(msg, std::chrono::milliseconds(50))) {
-            TxResult* result = new TxResult();
-            bool ret = candle_frame_send(msg.hdev, msg.channel, &msg.frame);
-
-            result->result = ret ? 0 : -1; // candle API返回bool，转换为int
-            result->id = msg.cnt;
-            result->timestamp = candle_frame_timestamp_us(&msg.frame);
             
-            // 异步回调发送结果
-            context->txTsfn.NonBlockingCall(result, txCallback);
+            if(!candle_frame_send(msg.hdev, msg.channel, &msg.frame)){
+                printf("send frame %d failed\n", msg.frame.can_id);
+                  context->rxTsfn.NonBlockingCall(context, rxCallback);
+            }else{
+                printf("send frame %d success\n", msg.frame.can_id);
+              
+            }
+            // context->rxTsfn.NonBlockingCall(context, rxCallback);
+
+
+          
         }
     }
-} 
+}

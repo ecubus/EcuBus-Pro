@@ -188,7 +188,6 @@ bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev){
         }
     }
     return false;
-    
 }
 
 // 创建TSFN
@@ -274,6 +273,12 @@ void FreeTSFN(const Napi::CallbackInfo& info) {
         }
         if (context->txThread.joinable()) {
             context->txThread.join();
+        }
+
+        // 清理发送队列中的剩余消息
+        TxMessage msg;
+        while (context->txQueue.try_dequeue(msg)) {
+            // 队列中的消息会被自动清理，因为TxMessage不包含动态分配的内存
         }
 
         // 释放ThreadSafeFunction

@@ -856,7 +856,8 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     props.vendor == 'peak' ||
     props.vendor == 'kvaser' ||
     props.vendor == 'toomoss' ||
-    props.vendor == 'vector'
+    props.vendor == 'vector' ||
+    props.vendor == 'candle'
   ) {
     let f_clock = Number(speed.clock || 80) * 1000000
     if (index == 1) {

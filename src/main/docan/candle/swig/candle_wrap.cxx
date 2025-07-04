@@ -1370,6 +1370,8 @@ template <typename T> T SwigValueInit() {
 
 extern bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
 extern bool __stdcall DLL SendCANMsg(std::string name,uint8_t ch,candle_frame_t *frame);
+extern std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev);
+extern std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
 
 
 #include <stdint.h>		// Use the C99 official header
@@ -1694,39 +1696,6 @@ Napi::Value SWIG_From_int(Napi::Env env, int val)
 }
 
 
-SWIGINTERN
-int SWIG_AsVal_int (Napi::Value valRef, int* val)
-{
-  if (!valRef.IsNumber()) {
-    return SWIG_TypeError;
-  }
-  if (val) {
-    Napi::Number num;
-    NAPI_CHECK_RESULT(valRef.ToNumber(), num);
-    *val = static_cast<int>(num.Int32Value());
-  }
-
-  return SWIG_OK;
-  goto fail;
-fail:
-  return SWIG_ERROR;
-}
-
-
-SWIGINTERN
-Napi::Value SWIG_From_unsigned_SS_long(Napi::Env env, unsigned long val)
-{
-  return Napi::Number::New(env, val);
-}
-
-
-SWIGINTERN
-Napi::Value SWIG_From_bool(Napi::Env env, bool val)
-{
-  return Napi::Boolean::New(env, val);
-}
-
-
 SWIGINTERN swig_type_info*
 SWIG_pchar_descriptor(void)
 {
@@ -1781,6 +1750,89 @@ fail:
 
 
 SWIGINTERN int
+SWIG_AsCharArray(Napi::Value obj, char *val, size_t size)
+{ 
+  char* cptr = 0; size_t csize = 0; int alloc = SWIG_OLDOBJ;
+  int res = SWIG_AsCharPtrAndSize(obj, &cptr, &csize, &alloc);
+  if (SWIG_IsOK(res)) {
+    /* special case of single char conversion when we don't need space for NUL */
+    if (size == 1 && csize == 2 && cptr && !cptr[1]) --csize;
+    if (csize <= size) {
+      if (val) {
+	if (csize) memcpy(val, cptr, csize*sizeof(char));
+	if (csize < size) memset(val + csize, 0, (size - csize)*sizeof(char));
+      }
+      if (alloc == SWIG_NEWOBJ) {
+	delete[] cptr;
+	res = SWIG_DelNewMask(res);
+      }      
+      return res;
+    }
+    if (alloc == SWIG_NEWOBJ) delete[] cptr;
+  }
+  return SWIG_TypeError;
+}
+
+
+SWIGINTERNINLINE Napi::Value
+SWIG_Env_FromCharPtrAndSize(Napi::Env env, const char* carray, size_t size)
+{
+  if (carray) {
+    Napi::String js_str = Napi::String::New(env, carray, size);
+    return js_str;
+  } else {
+    return env.Undefined();
+  }
+}
+
+
+SWIGINTERN size_t
+SWIG_strnlen(const char* s, size_t maxlen)
+{
+  const char *p;
+  for (p = s; maxlen-- && *p; p++)
+    ;
+  return p - s;
+}
+
+
+SWIGINTERN
+int SWIG_AsVal_int (Napi::Value valRef, int* val)
+{
+  if (!valRef.IsNumber()) {
+    return SWIG_TypeError;
+  }
+  if (val) {
+    Napi::Number num;
+    NAPI_CHECK_RESULT(valRef.ToNumber(), num);
+    *val = static_cast<int>(num.Int32Value());
+  }
+
+  return SWIG_OK;
+  goto fail;
+fail:
+  return SWIG_ERROR;
+}
+
+
+SWIGINTERN
+Napi::Value SWIG_From_unsigned_SS_long(Napi::Env env, unsigned long val)
+{
+  return Napi::Number::New(env, val);
+}
+
+
+SWIGINTERN
+Napi::Value SWIG_From_bool(Napi::Env env, bool val)
+{
+  return Napi::Boolean::New(env, val);
+}
+
+
+// Override the default one with an empty one
+
+
+SWIGINTERN int
 SWIG_AsPtr_std_string (Napi::Value obj, std::string **val) 
 {
   char* buf = 0 ; size_t size = 0; int alloc = SWIG_OLDOBJ;
@@ -1808,6 +1860,13 @@ SWIG_AsPtr_std_string (Napi::Value obj, std::string **val)
     }
   }
   return SWIG_ERROR;
+}
+
+
+SWIGINTERNINLINE Napi::Value
+SWIG_From_std_string  SWIG_NAPI_FROM_DECL_ARGS(const std::string& s)
+{
+  return SWIG_FromCharPtrAndSize(s.data(), s.size());
 }
 
 
@@ -2775,6 +2834,10 @@ Napi::Value _wrap_candle_device_t_path_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
 void _wrap_candle_device_t_path_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
+Napi::Value _wrap_candle_device_t_friendly_name_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_candle_device_t_friendly_name_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
 Napi::Value _wrap_candle_device_t_state_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
 void _wrap_candle_device_t_state_set(const Napi::CallbackInfo &, const Napi::Value &);
@@ -2890,6 +2953,15 @@ void _exports_candle_device_t_inst::GetMembers(
       _exports_candle_device_t_templ::InstanceAccessor("path",
         &_exports_candle_device_t_templ::_wrap_candle_device_t_path_get,
         &_exports_candle_device_t_templ::_wrap_candle_device_t_path_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("friendly_name");
+  members.insert({
+    "friendly_name",
+      _exports_candle_device_t_templ::InstanceAccessor("friendly_name",
+        &_exports_candle_device_t_templ::_wrap_candle_device_t_friendly_name_get,
+        &_exports_candle_device_t_templ::_wrap_candle_device_t_friendly_name_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
@@ -6112,7 +6184,7 @@ void _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_path_s
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   candle_device_t *arg1 = (candle_device_t *) 0 ;
-  uint16_t *arg2 = (uint16_t *) (uint16_t *)0 ;
+  wchar_t *arg2 = (wchar_t *) (wchar_t *)0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -6122,16 +6194,16 @@ void _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_path_s
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_path_set" "', argument " "1"" of type '" "candle_device_t *""'"); 
   }
-  arg1 = reinterpret_cast< candle_device_t * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_unsigned_short, 0 |  0 );
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);res2 = SWIG_ConvertPtr(value, &argp2,SWIGTYPE_p_wchar_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "candle_device_t_path_set" "', argument " "2"" of type '" "uint16_t [256]""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "candle_device_t_path_set" "', argument " "2"" of type '" "wchar_t [256]""'"); 
   } 
-  arg2 = reinterpret_cast< uint16_t * >(argp2);{
+  arg2 = reinterpret_cast< wchar_t * >(argp2);{
     if (arg2) {
       size_t ii = 0;
-      for (; ii < (size_t)256; ++ii) *(uint16_t *)&arg1->path[ii] = *((uint16_t *)arg2 + ii);
+      for (; ii < (size_t)256; ++ii) *(wchar_t *)&arg1->path[ii] = *((wchar_t *)arg2 + ii);
     } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""path""' of type '""uint16_t [256]""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""path""' of type '""wchar_t [256]""'");
     }
   }
   
@@ -6153,14 +6225,79 @@ Napi::Value _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t
   candle_device_t *arg1 = (candle_device_t *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  uint16_t *result = 0 ;
+  wchar_t *result = 0 ;
   
   res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_path_get" "', argument " "1"" of type '" "candle_device_t *""'"); 
   }
-  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = (uint16_t *)(uint16_t *) ((arg1)->path);
-  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_short, 0 |  0 );
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = (wchar_t *)(wchar_t *) ((arg1)->path);
+  jsresult = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_wchar_t, 0 |  0 );
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_friendly_name_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char temp2[256] ;
+  int res2 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_friendly_name_set" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);res2 = SWIG_AsCharArray(value, temp2, 256);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "candle_device_t_friendly_name_set" "', argument " "2"" of type '" "char [256]""'");
+  }
+  arg2 = reinterpret_cast< char * >(temp2);if (arg2) memcpy(arg1->friendly_name,arg2,256*sizeof(char));
+  else memset(arg1->friendly_name,0,256*sizeof(char));
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_friendly_name_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char *result = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_friendly_name_get" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = (char *)(char *) ((arg1)->friendly_name);
+  {
+    size_t size = SWIG_strnlen(result, 256);
+    
+    
+    
+    jsresult = SWIG_FromCharPtrAndSize(result, size);
+  }
   
   
   return jsresult;
@@ -11314,6 +11451,33 @@ fail:
 
 
 // js_global_function
+Napi::Value _wrap_candle_dev_get_friendly_name(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_handle arg1 = (candle_handle) 0 ;
+  int res1 ;
+  char *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_candle_dev_get_friendly_name.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0],SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_dev_get_friendly_name" "', argument " "1"" of type '" "candle_handle""'"); 
+  }result = (char *)candle_dev_get_friendly_name(arg1);
+  jsresult = SWIG_FromCharPtr((const char *)result);
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
 Napi::Value _wrap_candle_dev_open(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
@@ -12276,6 +12440,64 @@ Napi::Value _wrap_SendCANMsg(const Napi::CallbackInfo &info) {
   jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
   
   
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_GetDeviceFriendlyName(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_GetDeviceFriendlyName.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetDeviceFriendlyName" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = GetDeviceFriendlyName(arg1);
+  jsresult = SWIG_From_std_string  SWIG_NAPI_FROM_CALL_ARGS(static_cast< std::string >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_GetDevicePath(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_GetDevicePath.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetDevicePath" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = GetDevicePath(arg1);
+  jsresult = SWIG_From_std_string  SWIG_NAPI_FROM_CALL_ARGS(static_cast< std::string >(result));
   
   
   return jsresult;
@@ -13698,6 +13920,13 @@ do {
 } while (0);
 // jsnapi_register_global_function
 do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_dev_get_friendly_name", _wrap_candle_dev_get_friendly_name);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_dev_open", _wrap_candle_dev_open);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
@@ -13881,6 +14110,20 @@ do {
 // jsnapi_register_global_function
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SendCANMsg", _wrap_SendCANMsg);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("GetDeviceFriendlyName", _wrap_GetDeviceFriendlyName);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("GetDevicePath", _wrap_GetDevicePath);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
   }));

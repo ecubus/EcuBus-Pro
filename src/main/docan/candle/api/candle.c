@@ -49,7 +49,9 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
 
     bool retval = true;
     ULONG length = requiredLength;
-    if (!SetupDiGetDeviceInterfaceDetail(hdi, &interfaceData, detail_data, length, &requiredLength, NULL) ) {
+    SP_DEVINFO_DATA deviceInfoData;
+    deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+    if (!SetupDiGetDeviceInterfaceDetail(hdi, &interfaceData, detail_data, length, &requiredLength, &deviceInfoData) ) {
         dev->last_error = CANDLE_ERR_SETUPDI_IF_DETAILS2;
         retval = false;
     } else if (FAILED(StringCchCopy(dev->path, sizeof(dev->path), detail_data->DevicePath))) {
@@ -62,6 +64,32 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
     if (!retval) {
         return false;
     }
+
+    /* Get friendly name */
+    // Initialize friendly name with default value
+    strcpy_s(dev->friendly_name, sizeof(dev->friendly_name), "CandleLight Device");
+    
+    DWORD dataType = 0;
+    DWORD friendlyNameSize = 0;
+    
+    if (!SetupDiGetDeviceRegistryProperty(
+        hdi,
+        &deviceInfoData,
+        SPDRP_FRIENDLYNAME,
+        &dataType,
+        dev->friendly_name,
+        sizeof(dev->friendly_name),
+        &friendlyNameSize)) {
+    /* Fallback to device description */
+    SetupDiGetDeviceRegistryProperty(
+        hdi,
+        &deviceInfoData,
+        SPDRP_DEVICEDESC,
+        &dataType,
+        (PBYTE)dev->friendly_name,
+        sizeof(dev->friendly_name),
+        &friendlyNameSize);
+}
 
     /* try to open to read device infos and see if it is avail */
     if (candle_dev_interal_open(dev)) {
@@ -182,6 +210,16 @@ wchar_t* __stdcall DLL candle_dev_get_path(candle_handle hdev)
     } else {
         candle_device_t *dev = (candle_device_t*)hdev;
         return dev->path;
+    }
+}
+
+char* __stdcall DLL candle_dev_get_friendly_name(candle_handle hdev)
+{
+    if (hdev==NULL) {
+        return NULL;
+    } else {
+        candle_device_t *dev = (candle_device_t*)hdev;
+        return dev->friendly_name;
     }
 }
 

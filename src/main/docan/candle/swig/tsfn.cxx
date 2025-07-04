@@ -8,6 +8,9 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <setupapi.h>
+#include <devguid.h>
+#include <string>
 #include "concurrentqueue.h"
 #include "blockconcurrentqueue.h"
 #include "candle_defs.h"
@@ -175,6 +178,32 @@ auto errorCallback = [](Napi::Env env, Napi::Function jsCallback, void* value) {
 // 线程入口函数声明
 void rxThreadEntry(TsfnContext* context);
 void txThreadEntry(TsfnContext* context);
+
+
+
+std::string __stdcall DLL GetDevicePath(candle_device_t* hdev) {
+    if (!hdev) {
+        return "";
+    }
+    
+   
+    // Create wstring with proper length
+    std::wstring wDevicePath(hdev->path);
+    
+    //convert wstring to string
+    std::string devicePath(wDevicePath.begin(), wDevicePath.end());
+   
+    
+    return devicePath;
+}
+
+// 获取设备友好名称的函数
+std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev) {
+    if (!hdev) {
+        return "";
+    }
+    return std::string(hdev->friendly_name);
+}
 
 
 

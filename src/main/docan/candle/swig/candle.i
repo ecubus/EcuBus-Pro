@@ -8,6 +8,8 @@
 
 extern bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
 extern bool __stdcall DLL SendCANMsg(std::string name,uint8_t ch,candle_frame_t *frame);
+extern std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev);
+extern std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
 %}
 
 
@@ -56,6 +58,9 @@ extern bool __stdcall DLL SendCANMsg(std::string name,uint8_t ch,candle_frame_t 
 
 bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
 bool __stdcall DLL SendCANMsg(std::string name, uint8_t ch,candle_frame_t *frame);
+std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev); 
+std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
+
 
 
 

@@ -70,7 +70,8 @@ typedef struct {
 } canlde_rx_urb;
 
 typedef struct {
-    uint16_t path[256];
+    wchar_t path[256];
+    char friendly_name[256];  // Add friendly name field as char array
     candle_devstate_t state;
     candle_err_t last_error;
     DWORD error;

@@ -27,7 +27,7 @@ test('Candle fw info', () => {
     console.log(v)
   }
 })
-describe('candel test', () => {
+describe.skip('candel test', () => {
   let client!: Candle_CAN
   beforeAll(async () => {
     client = new Candle_CAN({

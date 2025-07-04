@@ -340,24 +340,28 @@ export class Candle_CAN extends CanBase {
     if (process.platform == 'win32') {
       const rawList = this.getRawDeviceList()
       for (const device of rawList) {
-        const path = Candle.CharArray.frompointer(device.path)
-        const buf = Buffer.alloc(256 * 2)
-        for (let j = 0; j < 256 * 2; j++) {
-          const val = path.getitem(j)
-          if (val == 0) {
-            break
-          }
-          buf[j] = val
-        }
-        let pathStr = buf.toString('ascii').replace(/\0/g, '')
-        //remove {xxxx} guid info, maybe {xxx no }
-        pathStr = pathStr.replace(/\{.*\}/g, '')
-        pathStr = pathStr.replace(/\{.*/g, '')
+        // const path = Candle.CharArray.frompointer(device.path)
+        // const buf = Buffer.alloc(256 * 2)
+        // for (let j = 0; j < 256 * 2; j++) {
+        //   const val = path.getitem(j)
+        //   if (val == 0) {
+        //     break
+        //   }
+        //   buf[j] = val
+        // }
+        // let pathStr = buf.toString('ascii').replace(/\0/g, '')
+        // //remove {xxxx} guid info, maybe {xxx no }
+        // pathStr = pathStr.replace(/\{.*\}/g, '')
+        // pathStr = pathStr.replace(/\{.*/g, '')
+        // 直接使用设备对象获取友好名称
+        const pathStr = Candle.GetDevicePath(device)
+        const friendlyNameStr = Candle.GetDeviceFriendlyName(device)
         devices.push({
-          label: `Candle Device ${device.interfaceNumber}`,
+          label: friendlyNameStr,
           id: `Candle_${device.interfaceNumber}`,
           handle: device.interfaceNumber,
           serialNumber: pathStr
+          // serialNumber: pathStr
         })
       }
     }

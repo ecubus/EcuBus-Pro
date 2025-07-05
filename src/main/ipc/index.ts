@@ -71,10 +71,22 @@ ipcMain.handle('ipc-get-vendor', (event, arg) => {
   const input = arg as EcuBusPro
   const vendors = input.vendor[platform] || []
   return vendors.map((vendor) => {
+    let linVersion = 'unknown'
+    try {
+      linVersion = getLinVersion(vendor)
+    } catch (e: any) {
+      //null
+    }
+    let canVersion = 'unknown'
+    try {
+      canVersion = getCanVersion(vendor)
+    } catch (e: any) {
+      //null
+    }
     return {
       name: vendor,
-      can: getCanVersion(vendor),
-      lin: getLinVersion(vendor)
+      can: canVersion,
+      lin: linVersion
     }
   })
 })

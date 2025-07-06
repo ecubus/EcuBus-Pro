@@ -831,7 +831,7 @@ async function openDatabase(testerIndex: string) {
       })
     }
   } else if (testerIndex.startsWith('LIN.')) {
-    const name = testerIndex.split('.')[1]
+    const name = testerIndex.split('.').slice(1).join('.')
     //findDb
     for (const key of Object.keys(dataBase.database.lin)) {
       if (dataBase.database.lin[key].name == name) {
@@ -845,7 +845,7 @@ async function openDatabase(testerIndex: string) {
       }
     }
   } else if (testerIndex.startsWith('CAN.')) {
-    const name = testerIndex.split('.')[1]
+    const name = testerIndex.split('.').slice(1).join('.')
     //for can
     for (const key of Object.keys(dataBase.database.can)) {
       if (dataBase.database.can[key].name == name) {

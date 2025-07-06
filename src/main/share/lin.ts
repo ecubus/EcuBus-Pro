@@ -90,6 +90,12 @@ export interface LinMsg {
     name: string
     data: string
   }[]
+  /* advanced for ecubus lincable */
+  lincable?: {
+    breakLength: number
+    syncVal: number
+    pid: number
+  }
 }
 
 export class LinError extends Error {
@@ -133,6 +139,30 @@ const LinPidTable = [
 
 export function getPID(frameId: number) {
   return LinPidTable[frameId]
+}
+
+export function getCheckSum(data: Buffer, checksumType: LinChecksumType, pid?: number) {
+  let checksum = 0
+
+  if (checksumType === LinChecksumType.CLASSIC) {
+    // Classic checksum (LIN 1.x): sum all bytes with carry, then NOT
+    for (let i = 0; i < data.length; i++) {
+      checksum += data[i]
+      checksum = (checksum & 0xff) + (checksum >> 8)
+    }
+    checksum = ~checksum & 0xff
+  } else {
+    // Enhanced checksum (LIN 2.x): PID + data, sum with carry handling, then subtract from 0xFF
+    if (pid === undefined) throw new Error('pid required for enhanced checksum')
+    checksum = pid
+    for (let i = 0; i < data.length; i++) {
+      checksum += data[i]
+      checksum = (checksum & 0xff) + (checksum >> 8)
+    }
+    checksum = 0xff - checksum
+  }
+
+  return checksum
 }
 
 export function getFrameData(db: LDF, frame: Frame): Buffer {

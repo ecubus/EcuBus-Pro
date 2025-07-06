@@ -65,7 +65,7 @@ export default abstract class LinBase {
   abstract queue: QueueObject<QueueItem>
   abstract startTs: number
   abstract event: EventEmitter
-  static getValidDevices(): LinDevice[] {
+  static getValidDevices(): LinDevice[] | Promise<LinDevice[]> {
     throw new Error('Method not implemented.')
   }
   attachLinMessage(cb: (msg: LinMsg) => void) {

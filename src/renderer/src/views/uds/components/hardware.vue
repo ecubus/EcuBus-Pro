@@ -20,14 +20,12 @@
                   treeLabel: true
                 }"
               >
-                <!-- <img
-                  v-if="data.vendor == 'kvaser' && node.level == 1"
-                  class="logo"
-                  src="@r/assets/kvaser.svg"
-                />
-                <span v-else>{{ node.label }}</span> -->
-                <!-- If you need this advertising space, please contact me: frankie.zengfu@gmail.com -->
-                {{ node.label }}
+                <span v-if="data.vendor == 'ecubus' && node.level == 1" class="ecubus-logo">
+                  <img src="@r/assets/logo64.png" />
+                  <span>{{ node.label }}</span>
+                </span>
+
+                <span v-else>{{ node.label }}</span>
               </span>
               <el-button
                 v-if="data.append"
@@ -244,7 +242,9 @@ function addSubTree(vendor: CanVendor, node: tree) {
     type: 'can',
     children: []
   }
-  node.children?.push(canTree)
+  if (vendor != 'ecubus') {
+    node.children?.push(canTree)
+  }
   for (const [key, value] of Object.entries(devices.devices)) {
     if (value.type == 'can' && value.canDevice && value.canDevice.vendor == vendor) {
       canTree.children?.push({
@@ -286,7 +286,13 @@ function addSubTree(vendor: CanVendor, node: tree) {
     type: 'lin',
     children: []
   }
-  if (vendor == 'peak' || vendor == 'toomoss' || vendor == 'kvaser' || vendor == 'vector') {
+  if (
+    vendor == 'peak' ||
+    vendor == 'toomoss' ||
+    vendor == 'kvaser' ||
+    vendor == 'vector' ||
+    vendor == 'ecubus'
+  ) {
     node.children?.push(linTree)
   }
   for (const [key, value] of Object.entries(devices.devices)) {
@@ -315,6 +321,19 @@ async function buildTree() {
   ).map((v: any) => v.name)
 
   console.log('vendors', vendors)
+
+  if (vendors.includes('ecubus')) {
+    const ecubus: tree = {
+      label: 'ECUBUS',
+      vendor: 'ecubus',
+      append: false,
+      id: 'ECUBUS',
+      children: []
+    }
+    t.push(ecubus)
+    addSubTree('ecubus', ecubus)
+  }
+
   if (vendors.includes('zlg')) {
     const zlg: tree = {
       label: 'ZLG',
@@ -602,5 +621,21 @@ onMounted(() => {
 .vm {
   display: flex;
   align-items: center;
+}
+
+.ecubus-logo {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ecubus-logo img {
+  width: 16px;
+  /* width: 100px; */
+}
+
+.ecubus-logo span {
+  line-height: 14px;
 }
 </style>

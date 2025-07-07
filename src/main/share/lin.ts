@@ -95,6 +95,14 @@ export interface LinMsg {
     breakLength: number
     syncVal: number
     pid: number
+    errorInject1?: {
+      bit: number
+      value: number
+    }
+    errorInject2?: {
+      bit: number
+      value: number
+    }
   }
 }
 

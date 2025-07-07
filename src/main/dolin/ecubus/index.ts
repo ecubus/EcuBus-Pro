@@ -51,6 +51,7 @@ export class LinCable extends LinBase {
   log: LinLOG
   db?: LDF
   private serialPort: SerialPort
+  private slaveEntry: Map<number, LinMsg> = new Map()
 
   constructor(public info: LinBaseInfo) {
     super(info)
@@ -71,10 +72,10 @@ export class LinCable extends LinBase {
       this.db = global.database.lin[info.database]
     }
 
-    for (let i = 0; i <= 0x3f; i++) {
-      const checksum = i == 0x3c || i == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
-      this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0)
-    }
+    // for (let i = 0; i <= 0x3f; i++) {
+    //   const checksum = i == 0x3c || i == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+    //   this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0)
+    // }
 
     const baudMap: Record<number, string> = {
       2400: '00',
@@ -123,28 +124,35 @@ export class LinCable extends LinBase {
     initData: Buffer,
     flag: number
   ) {
-    //   if (this.info.mode == LinMode.SLAVE) {
-    //     //从机模式，仅回复数据
-    //     let xlStatus = 0
-    //     const framedata = new VECTOR.s_xl_lin_msg()
-    //     framedata.id = frameId
-    //     framedata.dlc = length
-    //     const b = VECTOR.UINT8ARRAY.frompointer(framedata.data)
-    //     for (let i = 0; i < length; i++) {
-    //       b.setitem(i, initData[i])
-    //     }
-    //     xlStatus = VECTOR.xlLinSetSlave(
-    //       this.PortHandle.value(),
-    //       this.channelMask,
-    //       framedata.id,
-    //       framedata.data,
-    //       framedata.dlc,
-    //       checksumType == LinChecksumType.ENHANCED ? 0x200 : 0x100
-    //     )
-    //     if (xlStatus !== 0) {
-    //       // throw new Error(this.getError(xlStatus))
-    //     }
-    //   }
+    if (this.info.mode == LinMode.SLAVE) {
+      this.slaveEntry.set(frameId, {
+        frameId,
+        data: initData,
+        direction: dir,
+        checksumType
+      })
+      //从机模式，仅回复数据
+      let flag = 0x80
+      if (dir == LinDirection.SEND) {
+        flag |= 0x40
+      }
+      if (checksumType == LinChecksumType.ENHANCED) {
+        flag |= 0x20
+      }
+      flag += length + 1
+      let str = 'S'
+      str += `${frameId.toString(16).padStart(2, '0')}`
+      str += `${flag.toString(16).padStart(2, '0')}`
+      //data
+      str += initData.toString('hex').padStart(2 * length, '0')
+      //checksum
+      const checksum = getCheckSum(initData, checksumType, frameId)
+      str += checksum.toString(16).padStart(2, '0')
+      //end
+      str += '\r'
+      this.serialPort.write(str)
+      this.serialPort.drain()
+    }
   }
   getTs(): number {
     return getTsUs() - this.startTs
@@ -183,6 +191,7 @@ export class LinCable extends LinBase {
           const data = Buffer.from(line.slice(1), 'hex')
           const ret = data[0]
           const msg = {
+            ts: ts,
             ...this.pendingPromise.sendMsg
           }
 
@@ -200,7 +209,7 @@ export class LinCable extends LinBase {
             }
             msg.data = val.subarray(0, val.length - 1)
             if (breakLength < 13) {
-              this.log.error(ts, 'break length is too short')
+              this.log.error(ts, 'break length is too short', msg)
 
               this.pendingPromise.reject(
                 new LinError(
@@ -214,7 +223,7 @@ export class LinCable extends LinBase {
               return
             }
             if (syncVal != 0x55) {
-              this.log.error(ts, 'sync val is not 0x55')
+              this.log.error(ts, 'sync val is not 0x55', msg)
 
               this.pendingPromise.reject(
                 new LinError(
@@ -229,7 +238,7 @@ export class LinCable extends LinBase {
             }
             const rPid = getPID(id)
             if (rPid != pid) {
-              this.log.error(ts, 'pid is not valid')
+              this.log.error(ts, 'parity of id is not valid', msg)
 
               this.pendingPromise.reject(
                 new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'parity of id is not valid')
@@ -238,17 +247,19 @@ export class LinCable extends LinBase {
 
               return
             }
-            if (val.length == 0) {
+            if (val.length - 1 < this.pendingPromise.sendMsg.data.length) {
               if (this.pendingPromise.sendMsg.direction == LinDirection.RECV) {
+                const msgStr = `no response, got ${val.length - 1 < 0 ? 0 : val.length - 1}, expected ${this.pendingPromise.sendMsg.data.length}`
+                this.log.error(ts, msgStr, msg)
                 this.pendingPromise.reject(
-                  new LinError(
-                    LIN_ERROR_ID.LIN_READ_TIMEOUT,
-                    this.pendingPromise.sendMsg,
-                    'no response'
-                  )
+                  new LinError(LIN_ERROR_ID.LIN_READ_TIMEOUT, this.pendingPromise.sendMsg, msgStr)
                 )
               } else {
-                this.pendingPromise.resolve(msg)
+                const msgStr = `error echo, got ${val.length - 1 < 0 ? 0 : val.length - 1}, expected ${this.pendingPromise.sendMsg.data.length}`
+                this.log.error(ts, msgStr, msg)
+                this.pendingPromise.reject(
+                  new LinError(LIN_ERROR_ID.LIN_READ_TIMEOUT, this.pendingPromise.sendMsg, msgStr)
+                )
               }
               this.pendingPromise = undefined
 
@@ -262,7 +273,7 @@ export class LinCable extends LinBase {
             const checksum = getCheckSum(val.subarray(0, val.length - 1), checksumType, pid)
             if (checksum != val[val.length - 1]) {
               const errorMsg = `checksum error, got ${val[val.length - 1]}, expected ${checksum}`
-              this.log.error(ts, errorMsg)
+              this.log.error(ts, errorMsg, msg)
 
               this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, errorMsg))
               this.pendingPromise = undefined
@@ -280,7 +291,7 @@ export class LinCable extends LinBase {
             return
           } else if (ret == 1) {
             //no break
-            this.log.error(ts, 'no break')
+            this.log.error(ts, 'no break', msg)
 
             this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'no break'))
             this.pendingPromise = undefined
@@ -288,7 +299,7 @@ export class LinCable extends LinBase {
             return
           } else if (ret == 2) {
             //no sync
-            this.log.error(ts, 'no sync')
+            this.log.error(ts, 'no sync', msg)
 
             this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'no sync'))
             this.pendingPromise = undefined
@@ -297,7 +308,7 @@ export class LinCable extends LinBase {
           } else if (ret == 3) {
             //data format is not valid
             const errorMsg = `data format is not valid, error stop bit occur in ${data.length - 2} byte (start form sync phase,0:means sync phase,1:means PID phase)`
-            this.log.error(ts, errorMsg)
+            this.log.error(ts, errorMsg, msg)
 
             this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, errorMsg))
             this.pendingPromise = undefined
@@ -306,7 +317,7 @@ export class LinCable extends LinBase {
           } else {
             //unknown error
             const errorMsg = `unknown error, ret:${ret}`
-            this.log.error(ts, errorMsg)
+            this.log.error(ts, errorMsg, msg)
 
             this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_INTERNAL_ERROR, msg, errorMsg))
             this.pendingPromise = undefined
@@ -317,7 +328,94 @@ export class LinCable extends LinBase {
         break
       case 'S': // slave echo
         {
-          const data1 = Buffer.from(line.slice(1), 'hex')
+          const data = Buffer.from(line.slice(1), 'hex')
+
+          if (data[0] == 0) {
+            const id = data[1]
+            const msg = this.slaveEntry.get(id)
+            const val = data.subarray(2, data.length - 1)
+            if (msg) {
+              msg.data = val
+              msg.checksum = data[data.length - 1]
+              msg.ts = ts
+              let isEvent = false
+              if (this.db) {
+                // Find matching frame or event frame
+                let frameName: string | undefined
+
+                let publish: string | undefined
+
+                // Check regular frames
+                for (const fname in this.db.frames) {
+                  if (this.db.frames[fname].id === msg.frameId) {
+                    frameName = fname
+                    publish = this.db.frames[fname].publishedBy
+                    break
+                  }
+                }
+
+                // Check event triggered frames
+                if (!frameName) {
+                  for (const ename in this.db.eventTriggeredFrames) {
+                    const eventFrame = this.db.eventTriggeredFrames[ename]
+                    if (eventFrame.frameId === msg.frameId) {
+                      frameName = ename
+                      isEvent = true
+                      break
+                    }
+                  }
+                }
+
+                // Enrich message with database info if frame found
+                if (frameName) {
+                  msg.name = frameName
+                  msg.workNode = publish
+                  msg.isEvent = isEvent
+                }
+              }
+              //check checksum
+              const checksum = getCheckSum(val, msg.checksumType, id)
+              if (checksum != data[data.length - 1]) {
+                const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}`
+                this.log.error(ts, msg)
+              } else {
+                this.lastFrame.set(id, msg)
+                if (isEvent && this.db) {
+                  const pid = msg.data[0] & 0x3f
+                  for (const fname in this.db.frames) {
+                    if (this.db.frames[fname].id === pid) {
+                      msg.workNode = this.db.frames[fname].publishedBy
+                      break
+                    }
+                  }
+                }
+                this.log.linBase(msg)
+                this.event.emit(`${msg.frameId}`, msg)
+              }
+            }
+          } else if (data[0] == 0x81) {
+            //error sync
+            const msg = `Sync error, got ${data[2]}, expected 0x55`
+            this.log.error(ts, msg)
+          } else if (data[0] == 2) {
+            this.log.error(ts, 'data too short')
+          } else if (data[0] == 3) {
+            //data format is not valid
+            const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte (start form sync phase,0:means sync phase,1:means PID phase)`
+            this.log.error(ts, msg)
+          } else if (data[0] == 0x82) {
+            //no enough data
+            const id = data[1]
+            const msg = this.slaveEntry.get(id)
+            if (msg) {
+              const msgStr = `No enough data, got ${data.length - 3}, expected ${msg.data.length}`
+              this.log.error(ts, msgStr)
+            }
+          } else {
+            //unknown error
+            const msg = `Unknown error, ret:${data[1]}`
+            this.log.error(ts, msg)
+          }
         }
         break
       default:
@@ -327,6 +425,14 @@ export class LinCable extends LinBase {
   }
 
   close() {
+    //clear all pending promise and queue
+    if (this.pendingPromise) {
+      this.pendingPromise.reject(
+        new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, this.pendingPromise.sendMsg, 'close')
+      )
+      this.pendingPromise = undefined
+    }
+
     this.serialPort.write('C\r')
     this.serialPort.flush()
     this.serialPort.close()
@@ -339,9 +445,9 @@ export class LinCable extends LinBase {
         let str = 'M'
         str += `${getPID(m.frameId).toString(16).padStart(2, '0')}`
         //break length
-        str += (13).toString(16).padStart(2, '0')
+        str += (m.lincable?.breakLength || 13).toString(16).padStart(2, '0')
         //sync val
-        str += '55'
+        str += (m.lincable?.syncVal || 0x55).toString(16).padStart(2, '0')
         // data len
         str += (m.data.length + 1).toString(16).padStart(2, '0')
         // data
@@ -351,31 +457,47 @@ export class LinCable extends LinBase {
 
         str += checksum.toString(16).padStart(2, '0')
         // error inject
-        const errorInject = Buffer.alloc(2, 0)
+        const errorInject = Buffer.alloc(2, m.lincable?.errorInject1?.bit || 0)
         str += errorInject.toString('hex').padStart(4, '0')
         // error inject1
-        const errorInject1 = Buffer.alloc(2, 0)
+        const errorInject1 = Buffer.alloc(2, m.lincable?.errorInject2?.bit || 0)
         str += errorInject1.toString('hex').padStart(4, '0')
         // flag
-        str += (m.direction == LinDirection.SEND ? 0x80 : 0x00).toString(16).padStart(2, '0')
+        let flag = 0
+        if (m.direction == LinDirection.SEND) {
+          flag |= 0x80
+        }
+        if (m.lincable?.errorInject1) {
+          if (m.lincable.errorInject1.value) {
+            flag |= 0x1
+          }
+        }
+        if (m.lincable?.errorInject2) {
+          if (m.lincable.errorInject2.value) {
+            flag |= 0x2
+          }
+        }
+        flag = flag & 0xff
+        str += flag.toString(16).padStart(2, '0')
         // end
         str += '\r'
+        this.pendingPromise = {
+          resolve: (msg) => resolve(msg.ts || 0),
+          reject,
+          sendMsg: m
+        }
         this.serialPort.write(str, (err) => {
           if (err) {
             this.pendingPromise = undefined
             reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, m, 'write error, ' + err.message))
-          } else {
-            this.pendingPromise = {
-              resolve: (msg) => resolve(msg.ts || 0),
-              reject,
-              sendMsg: m
-            }
           }
         })
 
         this.serialPort.drain()
       } else {
-        reject('unsupported')
+        //entry
+        this.setEntry(m.frameId, m.data.length, m.direction, m.checksumType, m.data, 0)
+        resolve(0)
       }
 
       // let xlStatus = 0

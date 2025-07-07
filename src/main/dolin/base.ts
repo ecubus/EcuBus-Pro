@@ -19,6 +19,7 @@ import { getTsUs } from '../share/can'
 import { v4 } from 'uuid'
 import { QueueObject } from 'async'
 import { cloneDeep } from 'lodash'
+import { trace } from 'console'
 
 export interface LinWriteOpt {
   fromSch?: boolean

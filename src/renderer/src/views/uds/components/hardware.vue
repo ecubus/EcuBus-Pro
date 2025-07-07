@@ -21,8 +21,7 @@
                 }"
               >
                 <span v-if="data.vendor == 'ecubus' && node.level == 1" class="ecubus-logo">
-                  <img src="@r/assets/logo64.png" />
-                  <span>{{ node.label }}</span>
+                  <img src="@r/assets/logo1.svg" />
                 </span>
 
                 <span v-else>{{ node.label }}</span>
@@ -631,7 +630,7 @@ onMounted(() => {
 }
 
 .ecubus-logo img {
-  width: 16px;
+  height: 16px;
   /* width: 100px; */
 }
 

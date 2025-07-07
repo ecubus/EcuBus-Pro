@@ -434,9 +434,10 @@ export class LinCable extends LinBase {
     }
 
     this.serialPort.write('C\r')
-    this.serialPort.flush()
-    this.serialPort.close()
-    this.event.emit('close')
+    this.serialPort.drain(() => {
+      this.serialPort.close()
+      this.event.emit('close')
+    })
   }
 
   async _write(m: LinMsg): Promise<number> {

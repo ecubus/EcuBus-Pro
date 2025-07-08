@@ -208,48 +208,48 @@ export class LinCable extends LinBase {
               pid
             }
             msg.data = val.subarray(0, val.length - 1)
-            if (breakLength < 13) {
-              this.log.error(ts, 'break length is too short', msg)
+            // if (breakLength < 13) {
+            //   this.log.error(ts, 'break length is too short', msg)
 
-              this.pendingPromise.reject(
-                new LinError(
-                  LIN_ERROR_ID.LIN_BUS_ERROR,
-                  msg,
-                  `break length is too short, got ${breakLength}, expected at least 13`
-                )
-              )
-              this.pendingPromise = undefined
+            //   this.pendingPromise.reject(
+            //     new LinError(
+            //       LIN_ERROR_ID.LIN_BUS_ERROR,
+            //       msg,
+            //       `break length is too short, got ${breakLength}, expected at least 13`
+            //     )
+            //   )
+            //   this.pendingPromise = undefined
 
-              return
-            }
-            if (syncVal != 0x55) {
-              this.log.error(ts, 'sync val is not 0x55', msg)
+            //   return
+            // }
+            // if (syncVal != 0x55) {
+            //   this.log.error(ts, 'sync val is not 0x55', msg)
 
-              this.pendingPromise.reject(
-                new LinError(
-                  LIN_ERROR_ID.LIN_BUS_ERROR,
-                  msg,
-                  `sync val is not 0x55, got ${syncVal}`
-                )
-              )
-              this.pendingPromise = undefined
+            //   this.pendingPromise.reject(
+            //     new LinError(
+            //       LIN_ERROR_ID.LIN_BUS_ERROR,
+            //       msg,
+            //       `sync val is not 0x55, got ${syncVal}`
+            //     )
+            //   )
+            //   this.pendingPromise = undefined
 
-              return
-            }
-            const rPid = getPID(id)
-            if (rPid != pid) {
-              this.log.error(ts, 'parity of id is not valid', msg)
+            //   return
+            // }
+            // const rPid = getPID(id)
+            // if (rPid != pid) {
+            //   this.log.error(ts, 'parity of id is not valid', msg)
 
-              this.pendingPromise.reject(
-                new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'parity of id is not valid')
-              )
-              this.pendingPromise = undefined
+            //   this.pendingPromise.reject(
+            //     new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'parity of id is not valid')
+            //   )
+            //   this.pendingPromise = undefined
 
-              return
-            }
+            //   return
+            // }
             if (val.length - 1 < this.pendingPromise.sendMsg.data.length) {
               if (this.pendingPromise.sendMsg.direction == LinDirection.RECV) {
-                const msgStr = `no response, got ${val.length - 1 < 0 ? 0 : val.length - 1}, expected ${this.pendingPromise.sendMsg.data.length}`
+                const msgStr = `no response, got ${val.length - 1 < 0 ? 0 : val.length - 1}, expected ${this.pendingPromise.sendMsg.data.length}, break length:${breakLength}, sync val:0x${syncVal.toString(16)}, pid: 0x${pid.toString(16)} ${pid != getPID(id) ? 'with parity error' : ''}`
                 this.log.error(ts, msgStr, msg)
                 this.pendingPromise.reject(
                   new LinError(LIN_ERROR_ID.LIN_READ_TIMEOUT, this.pendingPromise.sendMsg, msgStr)
@@ -444,17 +444,30 @@ export class LinCable extends LinBase {
     return new Promise<number>((resolve, reject) => {
       if (this.info.mode == LinMode.MASTER) {
         let str = 'M'
-        str += `${getPID(m.frameId).toString(16).padStart(2, '0')}`
+
+        const pid =
+          m.lincable?.pid !== undefined && m.lincable.pid !== false
+            ? m.lincable.pid
+            : getPID(m.frameId)
+        str += `${pid.toString(16).padStart(2, '0')}`
         //break length
-        str += (m.lincable?.breakLength || 13).toString(16).padStart(2, '0')
+        str += (m.lincable?.breakLength !== undefined ? m.lincable.breakLength : 13)
+          .toString(16)
+          .padStart(2, '0')
         //sync val
-        str += (m.lincable?.syncVal || 0x55).toString(16).padStart(2, '0')
+        str += (
+          m.lincable?.syncVal !== undefined && m.lincable.syncVal !== false
+            ? m.lincable.syncVal
+            : 0x55
+        )
+          .toString(16)
+          .padStart(2, '0')
         // data len
         str += (m.data.length + 1).toString(16).padStart(2, '0')
         // data
         str += m.data.toString('hex').padStart(2 * m.data.length, '0')
         // checksum
-        const checksum = getCheckSum(m.data, m.checksumType, getPID(m.frameId))
+        const checksum = getCheckSum(m.data, m.checksumType, pid)
 
         str += checksum.toString(16).padStart(2, '0')
         // error inject
@@ -467,6 +480,16 @@ export class LinCable extends LinBase {
         let flag = 0
         if (m.direction == LinDirection.SEND) {
           flag |= 0x80
+        }
+        if (m.lincable?.syncVal === false) {
+          //do nothing
+        } else {
+          flag |= 0x40
+        }
+        if (m.lincable?.pid === false) {
+          //do nothing
+        } else {
+          flag |= 0x20
         }
         if (m.lincable?.errorInject1) {
           if (m.lincable.errorInject1.value) {

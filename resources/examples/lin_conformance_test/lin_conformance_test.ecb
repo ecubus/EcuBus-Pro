@@ -1,0 +1,113 @@
+{
+  "data": {
+    "devices": {
+      "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "COM8",
+            "id": ""
+          },
+          "name": "ECUBUS_0",
+          "id": "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc",
+          "vendor": "ecubus",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "d8ce7ad4-0ce0-49aa-994b-bdb441ff5b35": {
+        "id": "d8ce7ad4-0ce0-49aa-994b-bdb441ff5b35",
+        "name": "lin conformance test",
+        "script": "test.ts",
+        "reportPath": "",
+        "channel": [
+          "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc"
+        ],
+        "isTest": true,
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 301,
+          "y": 242,
+          "w": 712,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 625,
+          "y": 322,
+          "w": 1765,
+          "h": 534
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 774,
+          "y": 0,
+          "w": 1413,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 321,
+          "y": 262,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      }
+    }
+  }
+}

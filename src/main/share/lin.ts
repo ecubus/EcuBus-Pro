@@ -69,6 +69,26 @@ const linErrorMap: Record<LIN_ERROR_ID, string> = {
 /**
  * @category LIN
  */
+export interface LinCableErrorInject {
+  breakLength?: number /* speical break length, default 13 */
+  syncVal?:
+    | number
+    | false /* speical sync val, default 0x55, false means master do not send sync val*/
+  pid?:
+    | number
+    | false /* speical pid, default is getPID(frameId), false means master do not send pid*/
+  errorInject1?: {
+    bit: number /* fault inject bit, start from break first bit */
+    value: 1 | 0 /* 1 means high, 0 means low */
+  }
+  errorInject2?: {
+    bit: number /* fault inject bit, start from break first bit */
+    value: 1 | 0 /* 1 means high, 0 means low */
+  }
+}
+/**
+ * @category LIN
+ */
 export interface LinMsg {
   frameId: number
   data: Buffer
@@ -91,19 +111,7 @@ export interface LinMsg {
     data: string
   }[]
   /* advanced for ecubus lincable */
-  lincable?: {
-    breakLength: number
-    syncVal: number
-    pid: number
-    errorInject1?: {
-      bit: number
-      value: number
-    }
-    errorInject2?: {
-      bit: number
-      value: number
-    }
-  }
+  lincable?: LinCableErrorInject
 }
 
 export class LinError extends Error {

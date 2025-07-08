@@ -14,7 +14,7 @@ import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
 import { EthAddr, EthBaseInfo, VinInfo } from './share/doip'
 import { LIN_TP, TpError as LinTpError } from './dolin/lintp'
-import { LinMode, LinMsg } from './share/lin'
+import { LinDirection, LinMode, LinMsg } from './share/lin'
 import { updateSignalVal } from './dolin'
 import { DOIP, DoipError } from './doip'
 import { CanBase } from './docan/base'
@@ -1268,7 +1268,7 @@ export class NodeClass {
         this.pool?.triggerCanFrame(frame)
       }
     } else {
-      if (frame.uuid != this.nodeItem.id) {
+      if (frame.uuid != this.nodeItem.id || frame.direction == LinDirection.RECV) {
         this.pool?.triggerLinFrame(frame)
       }
     }

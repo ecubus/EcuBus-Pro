@@ -92,7 +92,7 @@
     "electron-store": "^8.1.0",
     "electron-updater": "^6.3.9",
     "element-plus": "^2.9.3",
-    "emittery": "^1.0.3",
+    "emittery": "^1.2.0",
     "events": "^3.3.0",
     "exceljs": "^4.4.0",
     "glob": "^11.0.0",

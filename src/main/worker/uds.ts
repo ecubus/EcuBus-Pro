@@ -27,12 +27,12 @@ import { checkServiceId, ServiceId } from './../share/uds'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
-import { LinMsg } from '../share/lin'
+import { LinMsg, LinCableErrorInject } from '../share/lin'
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
 export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
-export type { LinMsg }
+export type { LinMsg, LinCableErrorInject }
 export type { CanAddr } from '../share/can'
 export type { EthAddr } from '../share/doip'
 export type { LinAddr } from '../share/lin'
@@ -53,6 +53,7 @@ import { test as nodeTest } from 'node:test'
  * @category TEST
  * @param {string} name - The name of the test case
  * @param {Function} fn - The test function to execute
+ * @property {Function} skip - Skip a test case, marking it as pending. The test will be reported as skipped and not executed.
  *
  * @example
  * ```ts
@@ -66,10 +67,27 @@ import { test as nodeTest } from 'node:test'
  *   const result = await someAsyncFunction();
  *   assert.equal(result, expectedValue);
  * });
+ *
+ * // Skip a test case
+ * test.skip('feature not implemented', () => {
+ *   // Test code that will be skipped
+ * });
  * ```
  */
 export function test(name: string, fn: () => void | Promise<void>) {
   nodeTest(name, (t) => {
+    t.before(() => {
+      console.log(`<<< TEST START ${name}>>>`)
+    })
+    t.after(() => {
+      console.log(`<<< TEST END ${name}>>>`)
+    })
+    return fn()
+  })
+}
+
+test.skip = function (name: string, fn: () => void | Promise<void>) {
+  nodeTest.skip(name, (t) => {
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })

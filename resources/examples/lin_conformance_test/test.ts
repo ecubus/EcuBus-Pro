@@ -121,6 +121,19 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
   })
 }
 
+const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<boolean> => {
+  return new Promise<boolean>((resolve, reject) => {
+    msg.lincable = inject
+
+    output(msg)
+      .then(() => {
+        resolve(true) //resolve true if output was successful
+      })
+      .catch((err) => {
+        resolve(false) //resolve false if output failed
+      })
+  })
+}
 describe('8 Timing parameters', () => {
   test('PT-CT 5', async () => {
     //Variation of length of break field low phase
@@ -149,5 +162,17 @@ describe('8 Timing parameters', () => {
     //[PT-CT 11].2 The test system as master sends only the break field and the sync byte field
     const result1 = await sendLinWithRecv(msg, { pid: false })
     assert(result1, 'Sending with only break field should fail')
+    //[PT-CT 11].3 The test system as master sends just the header of TST_FRAME_4_Rx
+    const msg2 = FrameMap['TST_FRAME_4_Rx']
+    const msg2Clone = { ...msg2 }
+    msg2Clone.data = Buffer.alloc(0) //no data
+    const result2 = await sendLinWithSend(msg2Clone, {})
+    assert(result2, 'Sending with only break field should fail')
+    //[PT-CT 11].4 The test system as master sends just the header of TST_FRAME_4_Rx and the first data byte
+    const msg3 = FrameMap['TST_FRAME_4_Rx']
+    const msg3Clone = { ...msg3 }
+    msg3Clone.data = Buffer.alloc(1) //no data
+    const result3 = await sendLinWithSend(msg3Clone, {})
+    assert(result3, 'Sending with only break field should fail')
   })
 })

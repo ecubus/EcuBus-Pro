@@ -70,7 +70,10 @@ const linErrorMap: Record<LIN_ERROR_ID, string> = {
  * @category LIN
  */
 export interface LinCableErrorInject {
-  breakLength?: number /* speical break length, default 13 */
+  breakLength?: number /*  break field length, default 13, min:13,max:26 */
+  breakDelLength?: number /* break delimiter length, default 1: min:0, max:14.6 */
+  hInterLength?: number /*  inter-byte space between sync byte filed and identifier, default 0, min:0,max 14 */
+  dInterLength?: number[] /* each inter-byte space between data field, length should same as data length, default 0, min:0,max 4, */
   syncVal?:
     | number
     | false /* speical sync val, default 0x55, false means master do not send sync val*/

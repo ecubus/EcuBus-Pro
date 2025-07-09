@@ -70,14 +70,23 @@ export class Candle_CAN extends CanBase {
 
     Candle.candle_list_scan(readList)
 
-    const target = new Candle.candle_device_t()
-    if (!Candle.candle_dev_get(readList, this.info.handle, target)) {
-      throw new Error('Get device failed')
+    const devicesx = Candle.DeviceArray.frompointer(readList.dev);
+    const devicesArray: any[] = [];
+    for (let i = 0; i < readList.num_devices; i++) {
+      devicesArray.push(devicesx.getitem(i));
     }
+    const targetDevice = devicesArray.find(device => device.interfaceNumber === this.info.handle);
+    if (!targetDevice) {
+      throw new Error(`未找到 interfaceNumber 为 ${this.info.handle} 的设备`);
+    }
+    const target = new Candle.candle_device_t();
 
-    this.channel = target.interfaceNumber
+    this.target = targetDevice
+    this.channel = targetDevice.interfaceNumber
+    /*
+    console.log(`device id ${this.id}: ${this.target.interfaceNumber}`);
+    console.log('info: ', this.info); */
 
-    this.target = target
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
     }
@@ -316,24 +325,35 @@ export class Candle_CAN extends CanBase {
   static loadDllPath(dllPath: string) {}
 
   static getRawDeviceList() {
-    const list: any[] = []
+    const list: any[] = [];
     if (process.platform == 'win32') {
-      const readList = new Candle.candle_list_t()
-
-      const ret = Candle.candle_list_scan(readList)
-
+      const readList = new Candle.candle_list_t();
+      const ret = Candle.candle_list_scan(readList);
+  
       if (ret && readList.num_devices > 0) {
-        const devicesx = Candle.DeviceArray.frompointer(readList.dev)
-        // Build device list
+        const devicesx = Candle.DeviceArray.frompointer(readList.dev);
+        // Convert device array to plain JS array
+        const devicesArray: any[] = [];
         for (let i = 0; i < readList.num_devices; i++) {
-          const device = devicesx.getitem(i)
-          list.push(device)
+          devicesArray.push(devicesx.getitem(i));
+        }
+        // Sort by interfaceNumber in ascending order
+          devicesArray.sort((a, b) => a.interfaceNumber - b.interfaceNumber);
+          /*
+          console.log('List of interfaceNumbers from scanned devices：');
+          devicesArray.forEach((device, index) => {
+                console.log(`device ${index + 1}: ${device.interfaceNumber}`);
+          });*/
+    
+        // 按排序后的顺序添加到列表
+        for (const device of devicesArray) {
+          list.push(device);
         }
       }
-
-      return list
+  
+      return list;
     }
-    return []
+    return [];
   }
   static override getValidDevices(): CanDevice[] {
     const devices: CanDevice[] = []

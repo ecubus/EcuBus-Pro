@@ -157,6 +157,28 @@
                   <span v-if="data.time" class="test-duration"> ({{ data.time }}s) </span>
                 </span>
                 <div class="status-icon">
+                  <div class="node-actions">
+                    <el-button
+                      v-if="!isRunning[getParentConfigId(node)]"
+                      link
+                      type="primary"
+                      :disabled="!globalStart || runtime.testStates.activeTest != undefined"
+                      @click="handleRun({ ...data, id: getParentConfigId(node) }, false)"
+                    >
+                      <Icon :icon="lightIcon" />
+                    </el-button>
+
+                    <el-button
+                      v-else
+                      link
+                      type="danger"
+                      :disabled="!isRunning[getParentConfigId(node)]"
+                      @click="handleStop({ ...data, id: getParentConfigId(node) })"
+                    >
+                      <Icon :icon="stopIcon" />
+                    </el-button>
+                  </div>
+
                   <Icon v-if="data.status === 'pass'" :icon="checkIcon" class="icon-pass" />
                   <Icon v-else-if="data.status === 'fail'" :icon="closeIcon" class="icon-fail" />
                   <Icon v-else-if="data.status === 'skip'" :icon="skipIcon" class="icon-skip" />
@@ -359,6 +381,15 @@ const dataBase = useDataStore()
 
 const project = useProjectStore()
 
+function getParentConfigId(node: any): string {
+  // 向上查找父级 config 节点
+  let currentNode = node
+  while (currentNode && currentNode.data && currentNode.data.type !== 'config') {
+    currentNode = currentNode.parent
+  }
+  return currentNode?.data?.id || ''
+}
+
 function nodeClick(data: TestTree) {
   // if (data.type === 'config') {
   //     handleEdit(data)
@@ -373,12 +404,14 @@ const model = ref<NodeItem>({
   channel: []
 })
 
-function handleRun(data: TestTree) {
+function handleRun(data: TestTree, clearLog: boolean = true) {
   handleRefresh(data)
     .then(() => {
       runtime.testStates.isRunning[data.id] = true
       runtime.testStates.activeTest = data
-      traceRef.value.clearLog()
+      if (clearLog) {
+        traceRef.value.clearLog()
+      }
       window.electron.ipcRenderer
         .invoke(
           'ipc-run-test',
@@ -415,6 +448,7 @@ function handleStop(data: TestTree) {
     runtime.testStates.activeTest = undefined
   })
 }
+
 function buildTree() {
   if (tData.value && tData.value.length > 0) {
     return
@@ -425,6 +459,7 @@ function buildTree() {
     canAdd: true,
     id: 'root',
     type: 'root',
+    disabled: true,
     children: []
   }
 
@@ -434,6 +469,7 @@ function buildTree() {
         label: config.name,
         canAdd: false,
         id: config.id,
+        disabled: true,
         type: 'config',
         children: []
       })
@@ -482,9 +518,9 @@ function generateUniqueName(baseName: string): string {
 
 function addNewConfig() {
   const defaultName = generateUniqueName('Test Config')
-
+  const id = v4()
   const newConfig: NodeItem = {
-    id: v4(),
+    id,
     name: defaultName,
     script: '',
     reportPath: '',
@@ -499,7 +535,8 @@ function addNewConfig() {
     canAdd: false,
     id: newConfig.id,
     type: 'config',
-    children: []
+    children: [],
+    disabled: true
   })
 
   activeConfig.value = newConfig.id
@@ -920,22 +957,24 @@ function buildSubTree(infos: TestEvent[]) {
   return roots
 }
 
-const root2tree = (parent: TestTree, root: TestTree) => {
+const root2tree = (cnt: number, parent: TestTree, root: TestTree) => {
   const newNode: TestTree = {
+    testCnt: cnt,
     id: root.id,
     type: 'test',
     canAdd: false,
     label: root.label,
     children: []
   }
-
+  cnt++
   parent.children.push(newNode)
 
   if (root.children && root.children.length > 0) {
     for (const child of root.children) {
-      root2tree(newNode, child)
+      cnt = root2tree(cnt, newNode, child)
     }
   }
+  return cnt
 }
 
 async function handleRefresh(data: TestTree) {
@@ -980,9 +1019,9 @@ async function handleRefresh(data: TestTree) {
       const roots = buildSubTree(newtestInfo)
 
       target.children = []
-
+      let cnt = 0
       for (const root of roots) {
-        root2tree(target, root)
+        cnt = root2tree(cnt, target, root)
       }
     } else {
       ElMessageBox.alert('Please select the script file first', 'Warning', {
@@ -1303,7 +1342,7 @@ async function chooseReportPath() {
 }
 
 .node-actions {
-  display: inline-flex;
+  display: none;
   align-items: center;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1328,6 +1367,15 @@ async function chooseReportPath() {
   height: 100%;
 }
 
+.tree-node:hover .node-actions {
+  display: inline-flex;
+}
+
+/* 配置类型的按钮组永久显示 */
+.el-button-group.node-actions {
+  display: inline-flex !important;
+}
+
 .status-icon {
   display: flex;
   align-items: center;
@@ -1335,6 +1383,7 @@ async function chooseReportPath() {
   margin-left: 4px;
   min-width: 20px;
   height: 20px;
+  gap: 4px;
   line-height: 1;
 }
 

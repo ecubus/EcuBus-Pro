@@ -385,8 +385,8 @@ export default class UdsTester {
       throw formatError(e)
     }
   }
-  async start(projectPath: string, testerName?: string) {
-    await this.pool.exec('__start', [this.serviceMap, testerName])
+  async start(projectPath: string, testerName?: string, testControl?: Record<number, boolean>) {
+    await this.pool.exec('__start', [this.serviceMap, testerName, testControl])
     await this.workerEmit('__varFc', null)
   }
 

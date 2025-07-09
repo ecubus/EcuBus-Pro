@@ -176,3 +176,7 @@ describe('8 Timing parameters', () => {
     assert(result3, 'Sending with only break field should fail')
   })
 })
+
+describe('9 Timing parameters', () => {
+  test.skip('xxxx', async () => {})
+})

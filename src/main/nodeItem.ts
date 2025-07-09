@@ -1258,9 +1258,9 @@ export class NodeClass {
     this.log?.close()
     this.varLog?.close()
   }
-  async start() {
+  async start(testControl?: Record<number, boolean>) {
     this.pool?.updateTs(0)
-    await this.pool?.start(this.projectPath)
+    await this.pool?.start(this.projectPath, this.nodeItem.name, testControl)
   }
   cb(frame: CanMessage | LinMsg) {
     if ('msgType' in frame) {

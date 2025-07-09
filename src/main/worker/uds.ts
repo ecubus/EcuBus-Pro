@@ -46,7 +46,12 @@ import assert from 'node:assert'
  */
 export { assert }
 
-import { test as nodeTest } from 'node:test'
+import { test as nodeTest, TestContext } from 'node:test'
+
+let testCnt = 0
+const testEnableControl: Record<number, boolean> = {}
+
+export type TestFn = (t: TestContext, done: (result?: any) => void) => void | Promise<void>
 /**
  * Test function for writing test cases. Provides test context and logging.
  *
@@ -74,15 +79,20 @@ import { test as nodeTest } from 'node:test'
  * });
  * ```
  */
-export function test(name: string, fn: () => void | Promise<void>) {
-  nodeTest(name, (t) => {
+
+export function test(name: string, fn: TestFn) {
+  nodeTest(name, (t, done) => {
+    if (testEnableControl[testCnt] == false) {
+      t.skip()
+    }
+    testCnt++
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
       console.log(`<<< TEST END ${name}>>>`)
     })
-    return fn()
+    return fn(t, done)
   })
 }
 
@@ -1269,7 +1279,11 @@ export class UtilClass {
       this.event.off(eventName, func)
     }
   }
-  private start(val: Record<string, ServiceItem>, testerName?: string) {
+  private start(
+    val: Record<string, ServiceItem>,
+    testerName?: string,
+    testControl?: Record<number, boolean>
+  ) {
     // process.chdir(projectPath)
     this.testerName = testerName
     for (const key of Object.keys(val)) {
@@ -1282,6 +1296,9 @@ export class UtilClass {
         param.value = Buffer.from(param.value)
       }
       serviceMap.set(key, service)
+    }
+    if (testControl) {
+      Object.assign(testEnableControl, testControl)
     }
   }
   private async canMsg(msg: CanMessage) {

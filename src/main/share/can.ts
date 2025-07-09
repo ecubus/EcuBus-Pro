@@ -34,7 +34,7 @@ export interface CanBaseInfo {
   database?: string
   toomossRes?: boolean
   zlgRes?: boolean
-  canbleRes?: boolean
+  candleRes?: boolean
   slcanDelay?: number
 }
 
@@ -288,6 +288,7 @@ export interface CanDevice {
   handle: any
   serialNumber?: string
   busy?: boolean
+  candleRes?: boolean
 }
 
 export interface CanEventMap {

@@ -70,22 +70,22 @@ export class Candle_CAN extends CanBase {
 
     Candle.candle_list_scan(readList)
 
-    const devicesx = Candle.DeviceArray.frompointer(readList.dev);
-    const devicesArray: any[] = [];
+    const devicesx = Candle.DeviceArray.frompointer(readList.dev)
+    const devicesArray: any[] = []
     for (let i = 0; i < readList.num_devices; i++) {
-      devicesArray.push(devicesx.getitem(i));
+      devicesArray.push(devicesx.getitem(i))
     }
-    const targetDevice = devicesArray.find(device => device.interfaceNumber === this.info.handle);
+    const targetDevice = devicesArray.find((device) => device.interfaceNumber === this.info.handle)
     if (!targetDevice) {
-      throw new Error(`未找到 interfaceNumber 为 ${this.info.handle} 的设备`);
+      throw new Error(`Device with interfaceNumber ${this.info.handle} not found`)
     }
-    const target = new Candle.candle_device_t();
+    const target = new Candle.candle_device_t()
 
     this.target = targetDevice
     this.channel = targetDevice.interfaceNumber
-    /*
-    console.log(`device id ${this.id}: ${this.target.interfaceNumber}`);
-    console.log('info: ', this.info); */
+
+    console.log(`device id ${this.id}: ${this.target.interfaceNumber}`)
+    console.log('info: ', this.info)
 
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
@@ -159,15 +159,40 @@ export class Candle_CAN extends CanBase {
     }
     const ra = new Candle.Uint8Array(1)
 
-    if (info.canbleRes) {
+    if (info.candleRes) {
       ra.setitem(0, 1)
     } else {
       ra.setitem(0, 0)
     }
-    if (
-      !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
-    ) {
-      throw new Error('Set can resister enable state failed')
+    const currentRes = new Candle.Uint8Array(1)
+    const getSuccess = Candle.candle_channel_get_can_resister_enable_state(
+      this.target,
+      this.channel,
+      currentRes.cast()
+    )
+
+    if (getSuccess) {
+      const currentResState = currentRes[0] === 1
+      const configResState = info.candleRes
+
+      // Only perform the set operation when the configuration value is inconsistent with the hardware state
+      if (currentResState !== configResState) {
+        if (
+          !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
+        ) {
+          throw new Error('Set can resister enable state failed')
+        }
+      } else {
+        console.log('Terminal resistor state matches configuration, no need to set')
+      }
+    } else {
+      // Attempt to set even if fetching status fails (to avoid unknown hardware state).
+      console.warn('Failed to get current terminal resistor state, attempting to set...')
+      if (
+        !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
+      ) {
+        throw new Error('Set can resister enable state failed')
+      }
     }
 
     let flag = 0
@@ -325,35 +350,34 @@ export class Candle_CAN extends CanBase {
   static loadDllPath(dllPath: string) {}
 
   static getRawDeviceList() {
-    const list: any[] = [];
+    const list: any[] = []
     if (process.platform == 'win32') {
-      const readList = new Candle.candle_list_t();
-      const ret = Candle.candle_list_scan(readList);
-  
+      const readList = new Candle.candle_list_t()
+      const ret = Candle.candle_list_scan(readList)
+
       if (ret && readList.num_devices > 0) {
-        const devicesx = Candle.DeviceArray.frompointer(readList.dev);
+        const devicesx = Candle.DeviceArray.frompointer(readList.dev)
         // Convert device array to plain JS array
-        const devicesArray: any[] = [];
+        const devicesArray: any[] = []
         for (let i = 0; i < readList.num_devices; i++) {
-          devicesArray.push(devicesx.getitem(i));
+          devicesArray.push(devicesx.getitem(i))
         }
         // Sort by interfaceNumber in ascending order
-          devicesArray.sort((a, b) => a.interfaceNumber - b.interfaceNumber);
-          /*
-          console.log('List of interfaceNumbers from scanned devices：');
-          devicesArray.forEach((device, index) => {
-                console.log(`device ${index + 1}: ${device.interfaceNumber}`);
-          });*/
-    
+        devicesArray.sort((a, b) => a.interfaceNumber - b.interfaceNumber)
+        console.log('List of interfaceNumbers from scanned devices：')
+        devicesArray.forEach((device, index) => {
+          console.log(`device ${index + 1}: ${device.interfaceNumber}`)
+        })
+
         // 按排序后的顺序添加到列表
         for (const device of devicesArray) {
-          list.push(device);
+          list.push(device)
         }
       }
-  
-      return list;
+
+      return list
     }
-    return [];
+    return []
   }
   static override getValidDevices(): CanDevice[] {
     const devices: CanDevice[] = []

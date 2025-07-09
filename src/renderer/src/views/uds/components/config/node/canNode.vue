@@ -72,7 +72,7 @@
       prop="candleRes"
       placeholder="Disable"
     >
-      <el-select v-model="data.canbleRes" :loading="deviceLoading" style="width: 300px">
+      <el-select v-model="data.candleRes" :loading="deviceLoading" style="width: 300px">
         <el-option label="Enable" :value="true" />
         <el-option label="Disable" :value="false" />
       </el-select>

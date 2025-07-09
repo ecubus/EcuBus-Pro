@@ -52,7 +52,7 @@ describe.skip('candel test', () => {
         freq: 2000000,
         clock: '80'
       },
-      canbleRes: true
+      candleRes: true
     })
 
     ///print cap

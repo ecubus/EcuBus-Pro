@@ -209,7 +209,7 @@ bool candle_ctrl_set_can_resister_enable_state(candle_device_t *dev, uint8_t cha
     dev->last_error = rc ? CANDLE_ERR_OK : CANDLE_ERR_SET_BITTIMING;
     return rc;
 }
-bool candle_ctrl_get_can_interfacenumber_endpoint(candle_device_t *dev, uint8_t channel)
+bool candle_ctrl_set_can_interfacenumber_endpoint(candle_device_t *dev, uint8_t channel)
 {
     bool rc = usb_control_msg(
         dev->winUSBHandle,

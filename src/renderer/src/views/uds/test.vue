@@ -163,19 +163,9 @@
                       link
                       type="primary"
                       :disabled="!globalStart || runtime.testStates.activeTest != undefined"
-                      @click="handleRun({ ...data, id: getParentConfigId(node) }, false)"
+                      @click="handleRun({ ...data, id: getParentConfigId(node) }, false, data.id)"
                     >
-                      <Icon :icon="lightIcon" />
-                    </el-button>
-
-                    <el-button
-                      v-else
-                      link
-                      type="danger"
-                      :disabled="!isRunning[getParentConfigId(node)]"
-                      @click="handleStop({ ...data, id: getParentConfigId(node) })"
-                    >
-                      <Icon :icon="stopIcon" />
+                      <Icon :icon="playIcon" />
                     </el-button>
                   </div>
 
@@ -336,6 +326,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
+import playIcon from '@iconify/icons-material-symbols/play-arrow'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
 import { TestTree, useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import checkIcon from '@iconify/icons-material-symbols/check-circle-outline'
@@ -404,21 +395,67 @@ const model = ref<NodeItem>({
   channel: []
 })
 
-function handleRun(data: TestTree, clearLog: boolean = true) {
+let isSingleRun: boolean = false
+function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) {
   handleRefresh(data)
     .then(() => {
       runtime.testStates.isRunning[data.id] = true
       runtime.testStates.activeTest = data
+      const id = singleId || data.id
       if (clearLog) {
         traceRef.value.clearLog()
       }
+      const cnt: number[] = []
+      const getChildren = (val: TestTree) => {
+        for (const item of val.children) {
+          if (item.testCnt != undefined) {
+            cnt.push(item.testCnt)
+          }
+          if (item.children) {
+            getChildren(item)
+          }
+        }
+      }
+      if (data.type == 'config') {
+        isSingleRun = false
+        //get node from the tree
+
+        getChildren(data)
+      } else {
+        isSingleRun = true
+        const node = treeRef.value.getNode(id)
+        if (data.testCnt != undefined) {
+          cnt.push(data.testCnt)
+        }
+        getChildren(data)
+        if (node) {
+          const getParent = (val: any) => {
+            if (val.parent && val.parent.data && val.parent.data.type == 'test') {
+              if (val.parent.data.testCnt != undefined) {
+                cnt.push(val.parent.data.testCnt)
+              }
+              getParent(val.parent)
+            }
+          }
+          getParent(node)
+        }
+      }
+
+      const EnableObj: Record<number, boolean> = {}
+      for (let i = 0; i < cnt.length; i++) {
+        EnableObj[cnt[i]] = true
+      }
+
+      console.log('EnableObj', EnableObj)
+
       window.electron.ipcRenderer
         .invoke(
           'ipc-run-test',
           project.projectInfo.path,
           project.projectInfo.name,
           cloneDeep(dataBase.nodes[data.id]),
-          cloneDeep(dataBase.tester)
+          cloneDeep(dataBase.tester),
+          EnableObj
         )
         .catch((e: any) => {
           ElMessageBox.alert(e.message, 'Error', {
@@ -446,6 +483,16 @@ function handleStop(data: TestTree) {
   window.electron.ipcRenderer.invoke('ipc-stop-test', data.id).finally(() => {
     runtime.testStates.isRunning[data.id] = false
     runtime.testStates.activeTest = undefined
+    //clear all status
+    const clear = (val: TestTree) => {
+      for (const item of val.children) {
+        item.status = undefined
+        if (item.children) {
+          clear(item)
+        }
+      }
+    }
+    clear(data)
   })
 }
 
@@ -1342,7 +1389,6 @@ async function chooseReportPath() {
 }
 
 .node-actions {
-  display: none;
   align-items: center;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1365,15 +1411,6 @@ async function chooseReportPath() {
   display: flex;
   align-items: center;
   height: 100%;
-}
-
-.tree-node:hover .node-actions {
-  display: inline-flex;
-}
-
-/* 配置类型的按钮组永久显示 */
-.el-button-group.node-actions {
-  display: inline-flex !important;
 }
 
 .status-icon {

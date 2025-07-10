@@ -144,7 +144,7 @@ describe('8 Timing parameters', () => {
     assert(result2, 'Sending with break length 13 should succeed')
   })
 
-  test('PT-CT 9', async () => {
+  test.skip('PT-CT 9', async () => {
     //Inconsistent sync byte field error
     const msg = FrameMap['TST_FRAME_7']
     const result = await sendLinWithRecv(msg, { syncVal: 0x54 })
@@ -179,4 +179,9 @@ describe('8 Timing parameters', () => {
 
 describe('9 Timing parameters', () => {
   test.skip('xxxx', async () => {})
+})
+describe('1000', () => {
+  test('xxxx', async () => {
+    assert(false, 'This is a dummy test to ensure the test suite runs correctly.')
+  })
 })

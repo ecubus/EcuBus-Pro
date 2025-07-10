@@ -154,6 +154,7 @@ export class LIN_TP implements LinTp {
     this.tpDataFc = {}
   }
   close(closeBase = true) {
+    this.event.removeAllListeners()
     if (closeBase) {
       this.base.close()
     }

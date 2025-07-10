@@ -146,7 +146,11 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   const testControl = arg[4] as Record<number, boolean>
   const last = testMap.get(test.id)
   if (last) {
-    last.close()
+    try {
+      last.close()
+    } catch (err) {
+      null
+    }
     testMap.delete(test.id)
   }
 
@@ -163,7 +167,6 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
       id: test.id
     }
   )
-
   await node.start(testControl)
   testMap.set(test.id, node)
   try {

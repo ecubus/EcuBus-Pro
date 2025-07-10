@@ -185,6 +185,7 @@ export class CAN_TP implements CanTp {
     this.tpDataFc = {}
   }
   close(closeBase = true) {
+    this.event.removeAllListeners()
     if (closeBase) {
       this.base.close()
     }

@@ -46,12 +46,11 @@ import assert from 'node:assert'
  */
 export { assert }
 
-import { test as nodeTest, TestContext } from 'node:test'
+import { before, test as nodeTest, TestContext } from 'node:test'
 
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
 
-export type TestFn = (t: TestContext, done: (result?: any) => void) => void | Promise<void>
 /**
  * Test function for writing test cases. Provides test context and logging.
  *
@@ -80,31 +79,34 @@ export type TestFn = (t: TestContext, done: (result?: any) => void) => void | Pr
  * ```
  */
 
-export function test(name: string, fn: TestFn) {
-  nodeTest(name, (t, done) => {
-    if (testEnableControl[testCnt] == false) {
-      t.skip()
-    }
-    testCnt++
+export function test(name: string, fn: () => void | Promise<void>) {
+  nodeTest(name, (t) => {
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
       console.log(`<<< TEST END ${name}>>>`)
+      testCnt++
     })
-    return fn(t, done)
+
+    if (testEnableControl[testCnt] != true) {
+      t.skip()
+    } else {
+      return fn()
+    }
   })
 }
 
 test.skip = function (name: string, fn: () => void | Promise<void>) {
-  nodeTest.skip(name, (t) => {
+  nodeTest(name, (t) => {
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
       console.log(`<<< TEST END ${name}>>>`)
+      testCnt++
     })
-    return fn()
+    t.skip()
   })
 }
 
@@ -116,11 +118,41 @@ export { beforeEach, afterEach, before, after } from 'node:test'
 /**
  * @category TEST
  */
-import { describe } from 'node:test'
+import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
 
-const selfDescribe = process.env.ONLY ? describe.only : describe
-export { selfDescribe as describe }
+const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
+// export { selfDescribe as describe }
+
+/**
+ * Create a test group.
+ *
+ * @param name Test group name
+ * @param fn Test group function
+ *
+ * @example
+ * ```ts
+ * describe('Test Group 1', () => {
+ *   test('Test case 1', () => {
+ *     // test code
+ *   })
+ *
+ *   test('Test case 2', () => {
+ *     // test code
+ *   })
+ * })
+ * ```
+ * @category TEST
+ */
+export function describe(name: string, fn: () => void | Promise<void>) {
+  selfDescribe(name, (t) => {
+    before(() => {
+      testCnt++
+    })
+
+    return fn()
+  })
+}
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const

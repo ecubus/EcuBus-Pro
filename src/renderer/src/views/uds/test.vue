@@ -209,6 +209,7 @@
           ref="traceRef"
           :height="h - 2"
           :capture-test="true"
+          :test-id="isSingleRun"
           prefix="test-"
           :capture-system="false"
           :fields="['time', 'message']"
@@ -395,7 +396,7 @@ const model = ref<NodeItem>({
   channel: []
 })
 
-let isSingleRun: boolean = false
+const isSingleRun = ref<string[] | undefined>(undefined)
 function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) {
   handleRefresh(data)
     .then(() => {
@@ -406,28 +407,32 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
         traceRef.value.clearLog()
       }
       const cnt: number[] = []
-      const getChildren = (val: TestTree) => {
+      const getChildren = (val: TestTree, ids?: string[]) => {
         for (const item of val.children) {
           if (item.testCnt != undefined) {
             cnt.push(item.testCnt)
+            if (ids) {
+              ids.push(item.id)
+            }
           }
           if (item.children) {
-            getChildren(item)
+            getChildren(item, ids)
           }
         }
       }
       if (data.type == 'config') {
-        isSingleRun = false
+        isSingleRun.value = undefined
         //get node from the tree
 
         getChildren(data)
       } else {
-        isSingleRun = true
+        isSingleRun.value = [id]
+
         const node = treeRef.value.getNode(id)
         if (data.testCnt != undefined) {
           cnt.push(data.testCnt)
         }
-        getChildren(data)
+        getChildren(data, isSingleRun.value)
         if (node) {
           const getParent = (val: any) => {
             if (val.parent && val.parent.data && val.parent.data.type == 'test') {
@@ -445,30 +450,30 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
       for (let i = 0; i < cnt.length; i++) {
         EnableObj[cnt[i]] = true
       }
-
-      console.log('EnableObj', EnableObj)
-
-      window.electron.ipcRenderer
-        .invoke(
-          'ipc-run-test',
-          project.projectInfo.path,
-          project.projectInfo.name,
-          cloneDeep(dataBase.nodes[data.id]),
-          cloneDeep(dataBase.tester),
-          EnableObj
-        )
-        .catch((e: any) => {
-          ElMessageBox.alert(e.message, 'Error', {
-            confirmButtonText: 'OK',
-            type: 'error',
-            buttonSize: 'small',
-            appendTo: '#wintest'
+      //make sure isSingleRun updated
+      nextTick(() => {
+        window.electron.ipcRenderer
+          .invoke(
+            'ipc-run-test',
+            project.projectInfo.path,
+            project.projectInfo.name,
+            cloneDeep(dataBase.nodes[data.id]),
+            cloneDeep(dataBase.tester),
+            EnableObj
+          )
+          .catch((e: any) => {
+            ElMessageBox.alert(e.message, 'Error', {
+              confirmButtonText: 'OK',
+              type: 'error',
+              buttonSize: 'small',
+              appendTo: '#wintest'
+            })
           })
-        })
-        .finally(() => {
-          runtime.testStates.isRunning[data.id] = false
-          runtime.testStates.activeTest = undefined
-        })
+          .finally(() => {
+            runtime.testStates.isRunning[data.id] = false
+            runtime.testStates.activeTest = undefined
+          })
+      })
     })
     .catch((e: any) => {
       ElMessageBox.alert(e.message, 'Error', {
@@ -797,6 +802,10 @@ function testLog(
         item.message.data.data.line +
         ':' +
         item.message.data.data.column
+
+      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
+        continue
+      }
       const node = treeRef.value.getNode(key)
       if (node) {
         node.data.status = 'running'
@@ -808,6 +817,9 @@ function testLog(
         item.message.data.data.line +
         ':' +
         item.message.data.data.column
+      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
+        continue
+      }
       const node = treeRef.value.getNode(key)
       if (node) {
         node.data.status = 'pass'
@@ -827,6 +839,9 @@ function testLog(
         item.message.data.data.line +
         ':' +
         item.message.data.data.column
+      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
+        continue
+      }
       const node = treeRef.value.getNode(key)
       if (node) {
         node.data.status = 'fail'

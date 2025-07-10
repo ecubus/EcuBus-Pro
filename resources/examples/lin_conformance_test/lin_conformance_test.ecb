@@ -6,7 +6,7 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM8",
+            "handle": "COM12",
             "id": ""
           },
           "name": "ECUBUS_0",
@@ -62,9 +62,9 @@
       },
       "hardware": {
         "pos": {
-          "x": 220,
-          "y": 232,
-          "w": 712,
+          "x": 138,
+          "y": 0,
+          "w": 636,
           "h": 400
         },
         "title": "hardware",
@@ -98,8 +98,8 @@
       },
       "network": {
         "pos": {
-          "x": 755,
-          "y": 234,
+          "x": 828,
+          "y": 24,
           "w": 600,
           "h": 400
         },

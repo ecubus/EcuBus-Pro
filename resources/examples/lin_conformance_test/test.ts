@@ -8,10 +8,17 @@ import {
   assert,
   LinCableErrorInject
 } from 'ECB'
-
+//TODO:get from ldf
 const FrameMap: Record<string, LinMsg> = {
+  /*ReadByIdentifier (Identifier = 0 ) All other parameters has to be filled with default values
+according to the IUT specification and according to the test case specification.*/
+  TST_FRAME_2: {
+    direction: LinDirection.SEND,
+    frameId: 0x3c,
+    data: Buffer.from([0, 0x6, 0xb2, 0, 0, 0, 0, 0]),
+    checksumType: LinChecksumType.CLASSIC
+  },
   //device specific transmit frame (IUT is publisher)
-  //TODO:get from ldf
   TST_FRAME_4_Tx: {
     direction: LinDirection.RECV,
     frameId: 0x34,
@@ -19,12 +26,18 @@ const FrameMap: Record<string, LinMsg> = {
     checksumType: LinChecksumType.ENHANCED
   },
   //device specific receive frame (IUT is subscriber)
-  //TODO:get from ldf
   TST_FRAME_4_Rx: {
     direction: LinDirection.SEND,
     frameId: 0x33,
     data: Buffer.from([1, 2, 3, 4, 5]),
     checksumType: LinChecksumType.ENHANCED
+  },
+  //slave response command frame, Identifier = 0x3D
+  TST_FRAME_6: {
+    direction: LinDirection.RECV,
+    frameId: 0x3d,
+    data: Buffer.alloc(8),
+    checksumType: LinChecksumType.CLASSIC
   },
   TST_FRAME_7: {
     direction: LinDirection.RECV,
@@ -56,6 +69,28 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
             `Break length ${inject.breakLength} is too short, but output was successful.`
           )
           resolve(false)
+        }
+      }
+      if (inject.breakDelLength != undefined) {
+        //<1 >14 allow fail
+        if (inject.breakDelLength < 1 || inject.breakDelLength > 14) {
+          console.error(
+            `Break delimiter length ${inject.breakDelLength} is out of range, but output was successful.`
+          )
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      }
+      if (inject.hInterLength != undefined) {
+        //0-14 is o
+        if (inject.hInterLength > 14) {
+          console.error(
+            `Header inter byte length ${inject.hInterLength} is out of range, but output was successful.`
+          )
+          resolve(false)
+        } else {
+          resolve(true)
         }
       }
       if (inject.syncVal != undefined && inject.syncVal !== false) {
@@ -101,6 +136,38 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
             resolve(false)
           }
         }
+        if (inject.breakDelLength != undefined) {
+          //<1 >14 allow fail
+          if (inject.breakDelLength < 1 || inject.breakDelLength > 14) {
+            console.log(
+              `Break delimiter length ${inject.breakDelLength} is out of range, as expected.`,
+              err
+            )
+            resolve(true)
+          } else {
+            console.error(
+              `Break delimiter length ${inject.breakDelLength} is in range, but output failed:`,
+              err
+            )
+            resolve(false)
+          }
+        }
+        if (inject.hInterLength != undefined) {
+          //0-14 is ok
+          if (inject.hInterLength > 14) {
+            console.log(
+              `Header inter byte length ${inject.hInterLength} is out of range, as expected.`,
+              err
+            )
+            resolve(true)
+          } else {
+            console.log(
+              `Header inter byte length ${inject.hInterLength} is in range, but output failed:`,
+              err
+            )
+            resolve(false)
+          }
+        }
         if (inject.syncVal != undefined && inject.syncVal !== false) {
           if (inject.syncVal == 0x55) {
             console.error(`Sync value ${inject.syncVal} is 0x55, but output failed:`, err)
@@ -112,7 +179,7 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
         }
         if (inject.pid == false || inject.syncVal == false) {
           console.log(
-            `Sending break | ${inject.syncVal == false ? 'sync' : 'without sync'} |  ${inject.pid == false ? 'pid' : 'without pid'}, as expected.`,
+            `Sending break | ${inject.syncVal == false ? 'without sync' : 'sync'} |  ${inject.pid == false ? 'without pid' : 'pid'}, as expected.`,
             err
           )
           resolve(true)
@@ -144,7 +211,18 @@ describe('8 Timing parameters', () => {
     assert(result2, 'Sending with break length 13 should succeed')
   })
 
-  test.skip('PT-CT 9', async () => {
+  test('PT-CT 7', async () => {
+    //Variation of length of break delimiter
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithRecv(msg, { breakDelLength: 1 })
+    assert(result, 'Sending with break delimiter length 1 should succeed')
+    const result2 = await sendLinWithRecv(msg, { breakDelLength: 14 })
+    assert(result2, 'Sending with break delimiter length 14 should succeed')
+    const result3 = await sendLinWithRecv(msg, { breakDelLength: 10 })
+    assert(result3, 'Sending with break delimiter length 10 should succeed')
+  })
+
+  test('PT-CT 9', async () => {
     //Inconsistent sync byte field error
     const msg = FrameMap['TST_FRAME_7']
     const result = await sendLinWithRecv(msg, { syncVal: 0x54 })
@@ -175,13 +253,72 @@ describe('8 Timing parameters', () => {
     const result3 = await sendLinWithSend(msg3Clone, {})
     assert(result3, 'Sending with only break field should fail')
   })
-})
 
-describe('9 Timing parameters', () => {
-  test.skip('xxxx', async () => {})
-})
-describe('1000', () => {
-  test('xxxx', async () => {
-    assert(false, 'This is a dummy test to ensure the test suite runs correctly.')
+  test('PT-CT 14', async () => {
+    //Variation of length of header
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    //[PT-CT 14].1
+    const result = await sendLinWithRecv(msg, {
+      breakLength: 13,
+      breakDelLength: 1,
+      hInterLength: 0
+    })
+    assert(
+      result,
+      'Sending with break length 13, break delimiter length 1 and header inter byte length 0 should succeed'
+    )
+    //[PT-CT 14].2
+    const result2 = await sendLinWithRecv(msg, {
+      breakLength: 19,
+      breakDelLength: 2,
+      hInterLength: 6
+    })
+    assert(
+      result2,
+      'Sending with break length 19, break delimiter length 2 and header inter byte length 6 should succeed'
+    )
+    //[PT-CT 14].3
+    const result3 = await sendLinWithRecv(msg, {
+      breakLength: 15,
+      breakDelLength: 3,
+      hInterLength: 2
+    })
+    assert(
+      result3,
+      'Sending with break length 15, break delimiter length 3 and header inter byte length 2 should succeed'
+    )
+    //[PT-CT 14].4
+    const result4 = await sendLinWithRecv(msg, {
+      breakLength: 13,
+      breakDelLength: 1,
+      hInterLength: 13
+    })
+    assert(
+      result4,
+      'Sending with break length 13, break delimiter length 1 and header inter byte length 13 should succeed'
+    )
+  })
+
+  test('PT-CT 20', async () => {
+    //Acceptance of response field, IUT as slave
+    const txMsg = FrameMap['TST_FRAME_2']
+    const rxMsg = FrameMap['TST_FRAME_6']
+    //[PT-CT 20].2
+    txMsg.lincable = {
+      dInterLength: [4, 4, 4, 4, 4, 4, 4, 4, 4]
+    }
+    await output(txMsg)
+
+    //[PT-CT 20].3
+    txMsg.lincable = {
+      dInterLength: [0, 0, 0, 0, 0, 0, 0, 36, 0]
+    }
+    await output(txMsg)
+
+    //[PT-CT 20].4
+    txMsg.lincable = {
+      dInterLength: [36, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+    await output(txMsg)
   })
 })

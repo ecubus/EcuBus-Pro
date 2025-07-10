@@ -110,6 +110,7 @@ const props = withDefaults(
     prefix?: string
     captureTest?: boolean
     captureSystem?: boolean
+    testId?: string[]
     fields?: string[]
   }>(),
   {
@@ -123,6 +124,8 @@ const props = withDefaults(
 function getData() {
   return xGrid.value.getTableData()
 }
+
+const testId = toRef(props, 'testId')
 // const start = toRef(props, 'start')
 
 defineExpose({
@@ -286,6 +289,15 @@ function testLog(
       continue
     }
     if (item.message.data.type == 'test:dequeue') {
+      const key =
+        item.message.data.data.name +
+        ':' +
+        item.message.data.data.line +
+        ':' +
+        item.message.data.data.column
+      if (testId.value != undefined && !testId.value.includes(key)) {
+        continue
+      }
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
@@ -295,6 +307,15 @@ function testLog(
         id: cnt++
       })
     } else if (item.message.data.type == 'test:pass') {
+      const key =
+        item.message.data.data.name +
+        ':' +
+        item.message.data.data.line +
+        ':' +
+        item.message.data.data.column
+      if (testId.value != undefined && !testId.value.includes(key)) {
+        continue
+      }
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
@@ -303,6 +324,15 @@ function testLog(
         id: cnt++
       })
     } else if (item.message.data.type == 'test:fail') {
+      const key =
+        item.message.data.data.name +
+        ':' +
+        item.message.data.data.line +
+        ':' +
+        item.message.data.data.column
+      if (testId.value != undefined && !testId.value.includes(key)) {
+        continue
+      }
       let file = item.message.data.data.file
       if (file) {
         file = window.path.relative(project.projectInfo.path, file)

@@ -193,6 +193,11 @@ export default withMermaid({
         text: 'User Manual',
 
         items: [
+          {
+            text: 'EcuBus Hardware',
+            link: '/docs/um/hardware/index.md',
+            items: [{ text: 'LinCable', link: '/docs/um/hardware/lincable.md' }]
+          },
           { text: 'CAN', link: '/docs/um/can/can.md' },
           { text: 'LIN', link: '/docs/um/lin/lin.md' },
           {

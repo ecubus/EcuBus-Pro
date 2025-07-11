@@ -6,7 +6,7 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM12",
+            "handle": "COM8",
             "id": ""
           },
           "name": "ECUBUS_0",

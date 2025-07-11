@@ -322,3 +322,18 @@ describe('8 Timing parameters', () => {
     await output(txMsg)
   })
 })
+
+describe('[PT-CT 38] Bit error, IUT as slave', () => {
+  const headerBitLength = 13 + 1 + 10 + 10
+  test('[PT-CT 38].1', async () => {
+    //Bit error in the response field in data byte 1, stop bit
+    const rxMsg = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithRecv(rxMsg, {
+      errorInject1: {
+        bit: headerBitLength + 9, //byte1,stop bit
+        value: 0 //invert stop bit
+      }
+    })
+    assert(result, 'Sending with bit error in response field should succeed')
+  })
+})

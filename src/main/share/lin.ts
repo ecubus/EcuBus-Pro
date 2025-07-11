@@ -80,11 +80,7 @@ export interface LinCableErrorInject {
   pid?:
     | number
     | false /* speical pid, default is getPID(frameId), false means master do not send pid*/
-  errorInject1?: {
-    bit: number /* fault inject bit, start from break first bit */
-    value: 1 | 0 /* 1 means high, 0 means low */
-  }
-  errorInject2?: {
+  errorInject?: {
     bit: number /* fault inject bit, start from break first bit */
     value: 1 | 0 /* 1 means high, 0 means low */
   }

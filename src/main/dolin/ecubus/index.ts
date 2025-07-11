@@ -493,11 +493,8 @@ export class LinCable extends LinBase {
         str += buf.toString('hex').padStart(2 * m.data.length, '0')
 
         // error inject
-        const errorInject = Buffer.alloc(2, m.lincable?.errorInject1?.bit || 0)
-        str += errorInject.toString('hex').padStart(4, '0')
-        // error inject1
-        const errorInject1 = Buffer.alloc(2, m.lincable?.errorInject2?.bit || 0)
-        str += errorInject1.toString('hex').padStart(4, '0')
+        const errorInject = Buffer.alloc(2, m.lincable?.errorInject?.bit || 0)
+        str += errorInject.toString('hex').padStart(2, '0')
         // flag
         let flag = 0
         if (m.direction == LinDirection.SEND) {
@@ -513,14 +510,9 @@ export class LinCable extends LinBase {
         } else {
           flag |= 0x20
         }
-        if (m.lincable?.errorInject1) {
-          if (m.lincable.errorInject1.value) {
+        if (m.lincable?.errorInject) {
+          if (m.lincable.errorInject.value) {
             flag |= 0x1
-          }
-        }
-        if (m.lincable?.errorInject2) {
-          if (m.lincable.errorInject2.value) {
-            flag |= 0x2
           }
         }
         flag = flag & 0xff

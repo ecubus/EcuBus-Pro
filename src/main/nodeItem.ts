@@ -14,7 +14,7 @@ import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
 import { EthAddr, EthBaseInfo, VinInfo } from './share/doip'
 import { LIN_TP, TpError as LinTpError } from './dolin/lintp'
-import { LinMode, LinMsg } from './share/lin'
+import { LinDirection, LinMode, LinMsg } from './share/lin'
 import { updateSignalVal } from './dolin'
 import { DOIP, DoipError } from './doip'
 import { CanBase } from './docan/base'
@@ -1254,13 +1254,33 @@ export class NodeClass {
     this.lintp.forEach((tp) => {
       tp.close(false)
     })
-    this.pool?.stop()
+    this.lintp.length = 0 // 清空数组
+
+    // 清理 UdsTester 事件处理器
+    if (this.pool) {
+      // UdsTester 没有 unregisterHandler 方法，直接停止即可
+      this.pool.stop()
+    }
+
     this.log?.close()
+
+    // 清理变量日志
     this.varLog?.close()
+
+    // 清理 UDS 测试器映射
+    for (const [name, uds] of this.udsTesterMap) {
+      uds.cancel()
+    }
+    this.udsTesterMap.clear()
+
+    // 清理数组引用
+    this.linBaseId.length = 0
+    this.canBaseId.length = 0
+    this.ethBaseId.length = 0
   }
-  async start() {
+  async start(testControl?: Record<number, boolean>) {
     this.pool?.updateTs(0)
-    await this.pool?.start(this.projectPath)
+    await this.pool?.start(this.projectPath, this.nodeItem.name, testControl)
   }
   cb(frame: CanMessage | LinMsg) {
     if ('msgType' in frame) {
@@ -1268,7 +1288,7 @@ export class NodeClass {
         this.pool?.triggerCanFrame(frame)
       }
     } else {
-      if (frame.uuid != this.nodeItem.id) {
+      if (frame.uuid != this.nodeItem.id || frame.direction == LinDirection.RECV) {
         this.pool?.triggerLinFrame(frame)
       }
     }

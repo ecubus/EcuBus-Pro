@@ -1,0 +1,116 @@
+{
+  "data": {
+    "devices": {
+      "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "COM12",
+            "id": ""
+          },
+          "name": "ECUBUS_0",
+          "id": "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc",
+          "vendor": "ecubus",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "d8ce7ad4-0ce0-49aa-994b-bdb441ff5b35": {
+        "id": "d8ce7ad4-0ce0-49aa-994b-bdb441ff5b35",
+        "name": "lin conformance test",
+        "script": "test.ts",
+        "reportPath": "",
+        "channel": [
+          "cbf958ba-a1d7-4b49-88a5-c36b3198c9dc"
+        ],
+        "isTest": true,
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 191,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "test": {
+        "pos": {
+          "x": 372,
+          "y": 183,
+          "w": 957,
+          "h": 418
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 139,
+          "y": 40,
+          "w": 1583,
+          "h": 438
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 170,
+          "y": 193,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 343.5,
+          "y": 120,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      }
+    },
+    "example": {
+      "catalog": "LIN"
+    }
+  }
+}

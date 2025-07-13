@@ -69,6 +69,26 @@ const linErrorMap: Record<LIN_ERROR_ID, string> = {
 /**
  * @category LIN
  */
+export interface LinCableErrorInject {
+  breakLength?: number /*  break field length, default 13, min:13,max:26 */
+  breakDelLength?: number /* break delimiter length, default 1: min:0, max:14.6 */
+  hInterLength?: number /*  inter-byte space between sync byte filed and identifier, default 0, min:0,max 14 */
+  dInterLength?: number[] /* each inter-byte space between data field, length should same as data length, default 0, min:0,max 4, */
+  syncVal?:
+    | number
+    | false /* speical sync val, default 0x55, false means master do not send sync val*/
+  pid?:
+    | number
+    | false /* speical pid, default is getPID(frameId), false means master do not send pid*/
+  errorInject?: {
+    bit: number /* fault inject bit, start from break first bit */
+    value: 1 | 0 /* 1 means high, 0 means low */
+  }
+  checkSum?: number /* override the checksum */
+}
+/**
+ * @category LIN
+ */
 export interface LinMsg {
   frameId: number
   data: Buffer
@@ -90,6 +110,8 @@ export interface LinMsg {
     name: string
     data: string
   }[]
+  /* advanced for ecubus lincable */
+  lincable?: LinCableErrorInject
 }
 
 export class LinError extends Error {
@@ -133,6 +155,30 @@ const LinPidTable = [
 
 export function getPID(frameId: number) {
   return LinPidTable[frameId]
+}
+
+export function getCheckSum(data: Buffer, checksumType: LinChecksumType, pid?: number) {
+  let checksum = 0
+
+  if (checksumType === LinChecksumType.CLASSIC) {
+    // Classic checksum (LIN 1.x): sum all bytes with carry, then NOT
+    for (let i = 0; i < data.length; i++) {
+      checksum += data[i]
+      checksum = (checksum & 0xff) + (checksum >> 8)
+    }
+    checksum = ~checksum & 0xff
+  } else {
+    // Enhanced checksum (LIN 2.x): PID + data, sum with carry handling, then subtract from 0xFF
+    if (pid === undefined) throw new Error('pid required for enhanced checksum')
+    checksum = pid
+    for (let i = 0; i < data.length; i++) {
+      checksum += data[i]
+      checksum = (checksum & 0xff) + (checksum >> 8)
+    }
+    checksum = 0xff - checksum
+  }
+
+  return checksum
 }
 
 export function getFrameData(db: LDF, frame: Frame): Buffer {

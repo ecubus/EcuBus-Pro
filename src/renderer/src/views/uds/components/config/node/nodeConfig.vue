@@ -238,7 +238,8 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
               project.projectInfo.path,
               project.projectInfo.name,
               cloneDeep(dataBase.getData()),
-              formData.value.script
+              formData.value.script,
+              formData.value.isTest
             )
             .then((val) => {
               if (val.length > 0) {

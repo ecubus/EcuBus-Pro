@@ -134,7 +134,7 @@ export default class UdsTester {
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
-      workerTerminateTimeout: 1000,
+      workerTerminateTimeout: 5000, // 增加到10秒，给worker更多时间完成操作
       workerThreadOpts: {
         stderr: true,
         stdout: true,
@@ -144,12 +144,14 @@ export default class UdsTester {
 
       onTerminateWorker: (v: any) => {
         if (!this.selfStop) {
-          this.log.systemMsg('worker terminated', this.ts, 'error')
+          this.log.systemMsg('worker terminated unexpectedly', this.ts, 'error')
         }
         if (this.getInfoPromise) {
           this.getInfoPromise.reject(new Error('worker terminated'))
         }
-        this.stop()
+        // 避免在已经停止的情况下重复调用stop
+
+        this.stop(true)
       }
     })
     const d = (this.pool as any)._getWorker()
@@ -385,8 +387,8 @@ export default class UdsTester {
       throw formatError(e)
     }
   }
-  async start(projectPath: string, testerName?: string) {
-    await this.pool.exec('__start', [this.serviceMap, testerName])
+  async start(projectPath: string, testerName?: string, testControl?: Record<number, boolean>) {
+    await this.pool.exec('__start', [this.serviceMap, testerName, testControl])
     await this.workerEmit('__varFc', null)
   }
 
@@ -419,19 +421,57 @@ export default class UdsTester {
         })
     })
   }
-  async stop() {
+  async stop(error = false) {
+    if (this.selfStop) {
+      return // 避免重复调用
+    }
+
+    this.selfStop = true
+
     globalThis.keyEvent?.off('keydown', this.cb)
     globalThis.varEvent?.off('update', this.varCb)
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }
-    this.selfStop = true
-    await this.workerEmit('__end', [])
+
+    if (!error) {
+      // 尝试优雅地结束worker
+      try {
+        await this.workerEmit('__end', [])
+      } catch (e) {
+        // worker可能已经终止，忽略错误
+        null
+      }
+    }
+
+    // 等待一小段时间让worker完成清理
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
     try {
-      await this.pool?.terminate()
-    } catch {
+      await this.pool.terminate()
+    } catch (e) {
       null
     }
-    this.worker?.worker?.terminate()
+
+    try {
+      this.worker?.worker?.terminate()
+    } catch (e) {
+      null
+    }
+  }
+
+  // 检查worker是否健康
+  isHealthy(): boolean {
+    return !this.selfStop && this.pool && this.worker
+  }
+
+  // 获取worker状态信息
+  getWorkerStatus(): { healthy: boolean; selfStop: boolean; hasPool: boolean; hasWorker: boolean } {
+    return {
+      healthy: this.isHealthy(),
+      selfStop: this.selfStop,
+      hasPool: !!this.pool,
+      hasWorker: !!this.worker
+    }
   }
 }

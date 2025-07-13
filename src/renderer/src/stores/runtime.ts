@@ -10,7 +10,8 @@ export type TestTree = {
   children: TestTree[]
   time?: string
   status?: 'pass' | 'fail' | 'skip' | 'running'
-
+  disabled?: boolean
+  testCnt?: number
   nesting?: number
   parent?: TestTree
 }

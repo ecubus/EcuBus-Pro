@@ -19,6 +19,7 @@ import { getTsUs } from '../share/can'
 import { v4 } from 'uuid'
 import { QueueObject } from 'async'
 import { cloneDeep } from 'lodash'
+import { trace } from 'console'
 
 export interface LinWriteOpt {
   fromSch?: boolean
@@ -65,7 +66,7 @@ export default abstract class LinBase {
   abstract queue: QueueObject<QueueItem>
   abstract startTs: number
   abstract event: EventEmitter
-  static getValidDevices(): LinDevice[] {
+  static getValidDevices(): LinDevice[] | Promise<LinDevice[]> {
     throw new Error('Method not implemented.')
   }
   attachLinMessage(cb: (msg: LinMsg) => void) {

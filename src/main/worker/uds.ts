@@ -27,12 +27,12 @@ import { checkServiceId, ServiceId } from './../share/uds'
 import { CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
-import { LinMsg } from '../share/lin'
+import { LinMsg, LinCableErrorInject } from '../share/lin'
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
 export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
-export type { LinMsg }
+export type { LinMsg, LinCableErrorInject }
 export type { CanAddr } from '../share/can'
 export type { EthAddr } from '../share/doip'
 export type { LinAddr } from '../share/lin'
@@ -46,13 +46,18 @@ import assert from 'node:assert'
  */
 export { assert }
 
-import { test as nodeTest } from 'node:test'
+import { before, test as nodeTest, TestContext } from 'node:test'
+
+let testCnt = 0
+const testEnableControl: Record<number, boolean> = {}
+
 /**
  * Test function for writing test cases. Provides test context and logging.
  *
  * @category TEST
  * @param {string} name - The name of the test case
  * @param {Function} fn - The test function to execute
+ * @property {Function} skip - Skip a test case, marking it as pending. The test will be reported as skipped and not executed.
  *
  * @example
  * ```ts
@@ -66,8 +71,14 @@ import { test as nodeTest } from 'node:test'
  *   const result = await someAsyncFunction();
  *   assert.equal(result, expectedValue);
  * });
+ *
+ * // Skip a test case
+ * test.skip('feature not implemented', () => {
+ *   // Test code that will be skipped
+ * });
  * ```
  */
+
 export function test(name: string, fn: () => void | Promise<void>) {
   nodeTest(name, (t) => {
     t.before(() => {
@@ -75,8 +86,27 @@ export function test(name: string, fn: () => void | Promise<void>) {
     })
     t.after(() => {
       console.log(`<<< TEST END ${name}>>>`)
+      testCnt++
     })
-    return fn()
+
+    if (testEnableControl[testCnt] != true) {
+      t.skip()
+    } else {
+      return fn()
+    }
+  })
+}
+
+test.skip = function (name: string, fn: () => void | Promise<void>) {
+  nodeTest(name, (t) => {
+    t.before(() => {
+      console.log(`<<< TEST START ${name}>>>`)
+    })
+    t.after(() => {
+      console.log(`<<< TEST END ${name}>>>`)
+      testCnt++
+    })
+    t.skip()
   })
 }
 
@@ -88,11 +118,41 @@ export { beforeEach, afterEach, before, after } from 'node:test'
 /**
  * @category TEST
  */
-import { describe } from 'node:test'
+import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
 
-const selfDescribe = process.env.ONLY ? describe.only : describe
-export { selfDescribe as describe }
+const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
+// export { selfDescribe as describe }
+
+/**
+ * Create a test group.
+ *
+ * @param name Test group name
+ * @param fn Test group function
+ *
+ * @example
+ * ```ts
+ * describe('Test Group 1', () => {
+ *   test('Test case 1', () => {
+ *     // test code
+ *   })
+ *
+ *   test('Test case 2', () => {
+ *     // test code
+ *   })
+ * })
+ * ```
+ * @category TEST
+ */
+export function describe(name: string, fn: () => void | Promise<void>) {
+  selfDescribe(name, (t) => {
+    before(() => {
+      testCnt++
+    })
+
+    return fn()
+  })
+}
 
 const testerList = ['{{{testerName}}}'] as const
 const serviceList = ['{{{serviceName}}}'] as const
@@ -1251,7 +1311,11 @@ export class UtilClass {
       this.event.off(eventName, func)
     }
   }
-  private start(val: Record<string, ServiceItem>, testerName?: string) {
+  private start(
+    val: Record<string, ServiceItem>,
+    testerName?: string,
+    testControl?: Record<number, boolean>
+  ) {
     // process.chdir(projectPath)
     this.testerName = testerName
     for (const key of Object.keys(val)) {
@@ -1264,6 +1328,9 @@ export class UtilClass {
         param.value = Buffer.from(param.value)
       }
       serviceMap.set(key, service)
+    }
+    if (testControl) {
+      Object.assign(testEnableControl, testControl)
     }
   }
   private async canMsg(msg: CanMessage) {

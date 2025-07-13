@@ -143,9 +143,14 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
   const projectName = arg[1] as string
   const test = arg[2] as NodeItem
   const testers = arg[3] as Record<string, TesterInfo>
+  const testControl = arg[4] as Record<number, boolean>
   const last = testMap.get(test.id)
   if (last) {
-    last.close()
+    try {
+      last.close()
+    } catch (err) {
+      null
+    }
     testMap.delete(test.id)
   }
 
@@ -162,8 +167,7 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
       id: test.id
     }
   )
-
-  await node.start()
+  await node.start(testControl)
   testMap.set(test.id, node)
   try {
     await node.getTestInfo()
@@ -613,6 +617,11 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
+  //testMap
+  testMap.forEach((value) => {
+    value.close()
+  })
+  testMap.clear()
   canBaseMap.forEach((value) => {
     value.close()
     sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)

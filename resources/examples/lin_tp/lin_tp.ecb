@@ -1,17 +1,17 @@
 {
   "data": {
     "devices": {
-      "07ab9e32-4503-4d74-8362-92f6c785a82a": {
+      "3b806ef1-b434-4c50-9cb5-5e41969452d2": {
         "type": "lin",
         "linDevice": {
           "device": {
             "label": "",
-            "handle": 1,
+            "handle": "COM12",
             "id": ""
           },
-          "name": "PEAK_0",
-          "id": "07ab9e32-4503-4d74-8362-92f6c785a82a",
-          "vendor": "peak",
+          "name": "ECUBUS_0",
+          "id": "3b806ef1-b434-4c50-9cb5-5e41969452d2",
+          "vendor": "ecubus",
           "baudRate": 19200,
           "mode": "MASTER",
           "database": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
@@ -24,7 +24,7 @@
         "type": "lin",
         "id": "25cec12a-572d-4221-b85e-2728628134f7",
         "devices": [
-          "07ab9e32-4503-4d74-8362-92f6c785a82a"
+          "3b806ef1-b434-4c50-9cb5-5e41969452d2"
         ],
         "action": []
       }
@@ -162,7 +162,7 @@
         "type": "lin",
         "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
         "channel": [
-          "07ab9e32-4503-4d74-8362-92f6c785a82a"
+          "3b806ef1-b434-4c50-9cb5-5e41969452d2"
         ],
         "workNode": "lin:Motor1",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
@@ -813,7 +813,6 @@
         }
       }
     },
-    "tests": {},
     "guages": {
       "lin.lin.signals.Motor1Temp": {
         "type": "signal",
@@ -895,8 +894,8 @@
       },
       "network": {
         "pos": {
-          "x": 607,
-          "y": 29,
+          "x": 950,
+          "y": 66,
           "w": 600,
           "h": 400
         },
@@ -908,8 +907,8 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 546,
-          "y": 101,
+          "x": 109,
+          "y": 0,
           "w": 931,
           "h": 400
         },
@@ -957,8 +956,8 @@
       },
       "tester": {
         "pos": {
-          "x": 381,
-          "y": 337,
+          "x": -68,
+          "y": 262,
           "w": 1095,
           "h": 400
         },
@@ -968,23 +967,10 @@
         "options": {},
         "hide": false
       },
-      "hardware": {
-        "pos": {
-          "x": 950,
-          "y": 81,
-          "w": 600,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {},
-        "hide": true
-      },
       "trace": {
         "pos": {
-          "x": 1238.5,
-          "y": 25,
+          "x": 1380,
+          "y": 0,
           "w": 700,
           "h": 400
         },
@@ -1013,8 +999,8 @@
       },
       "gauge": {
         "pos": {
-          "x": 1134.5,
-          "y": 325,
+          "x": 950,
+          "y": 171,
           "w": 924,
           "h": 400
         },

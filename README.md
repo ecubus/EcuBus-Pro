@@ -34,6 +34,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 🚀 Modern, intuitive user interface
 - 💻 Cross-platform support (Windows, Linux, MacOS) - [Install](./docs/about/install.md)
 - 🔌 Multi-hardware support
+  - **[EcuBus-LinCable](./docs/um/hardware/lincable.md)**: LIN (Support Lin conformance test)
   - **PEAK**: CAN, CAN-FD, LIN
   - **KVASER**: CAN, CAN-FD, LIN
   - **ZLG**: CAN, CAN-FD

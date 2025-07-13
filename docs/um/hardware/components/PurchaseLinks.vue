@@ -136,6 +136,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .platform-icon {
@@ -162,12 +163,14 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 4px 0;
+  word-break: break-word;
 }
 
 .platform-details p {
   font-size: 14px;
   color: #64748b;
   margin: 0 0 8px 0;
+  word-break: break-word;
 }
 
 .price-info {
@@ -201,6 +204,9 @@
   border: none;
   cursor: pointer;
   color: white;
+  white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .taobao-button {
@@ -276,6 +282,98 @@
 
   .purchase-links {
     padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .purchase-links {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .purchase-title {
+    font-size: 20px;
+    margin: 0 0 6px 0;
+  }
+
+  .purchase-subtitle {
+    font-size: 14px;
+    margin: 0 0 24px 0;
+  }
+
+  .purchase-options {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .purchase-option {
+    padding: 16px;
+  }
+
+  .platform-info {
+    margin-bottom: 16px;
+  }
+
+  .platform-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+
+  .platform-details h4 {
+    font-size: 16px;
+  }
+
+  .platform-details p {
+    font-size: 13px;
+  }
+
+  .purchase-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .intl-note {
+    font-size: 12px;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .purchase-links {
+    padding: 12px;
+  }
+
+  .purchase-title {
+    font-size: 18px;
+  }
+
+  .purchase-subtitle {
+    font-size: 13px;
+  }
+
+  .purchase-option {
+    padding: 12px;
+  }
+
+  .platform-icon {
+    width: 36px;
+    height: 36px;
+    margin-right: 10px;
+  }
+
+  .platform-details h4 {
+    font-size: 15px;
+  }
+
+  .platform-details p {
+    font-size: 12px;
+  }
+
+  .purchase-button {
+    padding: 8px 12px;
+    font-size: 13px;
   }
 }
 

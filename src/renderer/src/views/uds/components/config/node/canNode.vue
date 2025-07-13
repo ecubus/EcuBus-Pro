@@ -318,6 +318,17 @@ const clockChange = (value: string) => {
 }
 
 const configInfo: Record<CanVendor, any> = {
+  ecubus: {
+    clock: false,
+    timeSeg1: false,
+    timeSeg2: false,
+    sjw: false,
+    preScaler: false,
+    freq: true,
+    zlgSpec: false,
+    can: {},
+    canFd: {}
+  },
   zlg: {
     clock: false,
     timeSeg1: false,

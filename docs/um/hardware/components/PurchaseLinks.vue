@@ -1,6 +1,6 @@
 <template>
   <div class="purchase-links">
-    <h3 class="purchase-title">Purchase LinCable</h3>
+    <h3 class="purchase-title">Purchase EcuBus LinCable</h3>
     <p class="purchase-subtitle">Choose your preferred platform to purchase LinCable</p>
 
     <div class="purchase-options">
@@ -8,20 +8,18 @@
         <div class="platform-info">
           <div class="platform-icon taobao">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+              />
             </svg>
           </div>
           <div class="platform-details">
-            <h4>Taobao</h4>
-            <p>China's largest e-commerce platform</p>
-            <div class="price-info">
-              <span class="price">¥299</span>
-              <span class="currency">CNY</span>
-            </div>
+            <h4>淘宝</h4>
+            <p>中国最大的电商平台</p>
           </div>
         </div>
         <a
-          href="https://item.taobao.com/item.htm?id=123456789"
+          href="https://item.taobao.com/item.htm?id=952734340915"
           target="_blank"
           rel="noopener noreferrer"
           class="purchase-button taobao-button"
@@ -29,41 +27,37 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
           </svg>
-          Buy on Taobao
+          在淘宝购买
         </a>
       </div>
-
       <div class="purchase-option">
         <div class="platform-info">
           <div class="platform-icon aliexpress">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+              />
             </svg>
           </div>
           <div class="platform-details">
             <h4>AliExpress</h4>
             <p>Global shipping available</p>
-            <div class="price-info">
-              <span class="price">$42</span>
-              <span class="currency">USD</span>
-            </div>
           </div>
         </div>
-        <a
-          href="https://www.aliexpress.com/item/123456789.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="purchase-button aliexpress-button"
-        >
+        <button class="purchase-button aliexpress-button disabled" disabled>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
           </svg>
           Buy on AliExpress
-        </a>
+        </button>
+        <div class="intl-note">
+          Coming soon. For inquiries, please
+          <a href="/docs/about/contact.html" target="_blank">contact EcuBus</a>.
+        </div>
       </div>
     </div>
 
-    <div class="purchase-features">
+    <!-- <div class="purchase-features">
       <div class="feature">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -82,7 +76,7 @@
         </svg>
         <span>1-year warranty</span>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -229,6 +223,15 @@
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  border: none !important;
+}
+
 .purchase-features {
   display: flex;
   justify-content: center;
@@ -248,6 +251,18 @@
   color: #059669;
 }
 
+.intl-note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #f59e42;
+  text-align: center;
+}
+.intl-note a {
+  color: #3b82f6;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .purchase-options {
     grid-template-columns: 1fr;
@@ -262,5 +277,77 @@
   .purchase-links {
     padding: 24px;
   }
+}
+
+@media (prefers-color-scheme: dark) {
+  .purchase-links {
+    background: #23272f !important;
+    border: 1px solid #2d3748 !important;
+  }
+  .purchase-title,
+  .purchase-subtitle {
+    color: #f1f5f9 !important;
+  }
+  .purchase-option {
+    background: #181a20 !important;
+    border: 2px solid #2d3748 !important;
+  }
+  .purchase-option:hover {
+    border-color: #60a5fa !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.1) !important;
+  }
+  .platform-details h4 {
+    color: #f1f5f9 !important;
+  }
+  .platform-details p {
+    color: #a0aec0 !important;
+  }
+  .purchase-button {
+    color: #fff !important;
+    background: linear-gradient(135deg, #ff9800 0%, #ff6b35 100%) !important;
+    border: none !important;
+  }
+  .purchase-button:hover {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff9800 100%) !important;
+    color: #fff !important;
+  }
+  .platform-icon {
+    background: #23272f !important;
+  }
+}
+
+.dark .purchase-links {
+  background: #23272f !important;
+  border: 1px solid #2d3748 !important;
+}
+.dark .purchase-title,
+.dark .purchase-subtitle {
+  color: #f1f5f9 !important;
+}
+.dark .purchase-option {
+  background: #181a20 !important;
+  border: 2px solid #2d3748 !important;
+}
+.dark .purchase-option:hover {
+  border-color: #60a5fa !important;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.1) !important;
+}
+.dark .platform-details h4 {
+  color: #f1f5f9 !important;
+}
+.dark .platform-details p {
+  color: #a0aec0 !important;
+}
+.dark .purchase-button {
+  color: #fff !important;
+  background: linear-gradient(135deg, #ff9800 0%, #ff6b35 100%) !important;
+  border: none !important;
+}
+.dark .purchase-button:hover {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff9800 100%) !important;
+  color: #fff !important;
+}
+.dark .platform-icon {
+  background: #23272f !important;
 }
 </style>

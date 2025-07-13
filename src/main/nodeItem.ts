@@ -1273,9 +1273,6 @@ export class NodeClass {
     }
     this.udsTesterMap.clear()
 
-    // 清理日志数组
-    this.logs.length = 0
-
     // 清理数组引用
     this.linBaseId.length = 0
     this.canBaseId.length = 0

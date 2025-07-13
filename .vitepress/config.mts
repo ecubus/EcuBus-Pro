@@ -288,7 +288,8 @@ export default withMermaid({
             text: 'LIN',
             items: [
               { text: 'LIN General', link: '/examples/lin/readme' },
-              { text: 'LIN TP', link: '/examples/lin_tp/readme' }
+              { text: 'LIN TP', link: '/examples/lin_tp/readme' },
+              { text: 'LIN Conformance Test', link: '/examples/lin_conformance_test/readme' }
             ],
             collapsed: true
           },

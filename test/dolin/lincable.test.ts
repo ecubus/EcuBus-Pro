@@ -84,7 +84,7 @@ describe('lincable lin slave', () => {
   beforeAll(async () => {
     client = new LinCable({
       device: {
-        handle: 'COM8',
+        handle: 'COM12',
         label: 'lin1',
         id: 'lin1'
       },
@@ -96,34 +96,8 @@ describe('lincable lin slave', () => {
     })
     await delay(2000)
   })
-  test.skip('write frame', async () => {
-    const t1 = Date.now()
-    const w1 = await client.write({
-      frameId: 0x2,
-      data: Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
-      direction: LinDirection.SEND,
-      checksumType: LinChecksumType.CLASSIC
-    })
-    await client.write({
-      frameId: 0x3,
-      data: Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
-      direction: LinDirection.SEND,
-      checksumType: LinChecksumType.CLASSIC
-    })
-    const t2 = Date.now()
-    console.log(`write frame time: ${t2 - t1}ms`)
-  })
   test('read frame', async () => {
-    const t1 = Date.now()
-
-    client.setEntry(
-      2,
-      8,
-      LinDirection.RECV,
-      LinChecksumType.CLASSIC,
-      Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
-      0
-    )
+    console.log('read frame')
     client.setEntry(
       3,
       4,
@@ -133,24 +107,9 @@ describe('lincable lin slave', () => {
       0
     )
 
-    await delay(3000)
+    // await delay(3000)
   })
-  test.skip('write frames', async () => {
-    const w1 = client.write({
-      frameId: 0x2,
-      data: Buffer.from([0x01, 0x11, 0x03, 0x04]),
-      direction: LinDirection.SEND,
-      checksumType: LinChecksumType.CLASSIC
-    })
-    const w2 = client.write({
-      frameId: 0x3,
-      data: Buffer.from([0x01, 0x11, 0x03, 0x04]),
-      direction: LinDirection.SEND,
-      checksumType: LinChecksumType.CLASSIC
-    })
-    await Promise.all([w1, w2])
-    console.log(client.read(3))
-  })
+
   afterAll(() => {
     // client.close()
   })

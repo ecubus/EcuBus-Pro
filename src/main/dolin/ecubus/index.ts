@@ -333,73 +333,85 @@ export class LinCable extends LinBase {
 
           if (data[0] == 0) {
             const id = data[1]
-            const msg = this.slaveEntry.get(id)
+
+            const msg = this.slaveEntry.get(id) || {
+              frameId: id,
+              data: Buffer.alloc(0),
+              checksum: 0,
+              ts: ts,
+              direction: LinDirection.RECV,
+              checksumType:
+                id == 0x3c || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+            }
+            const originalLen = msg.data.length
             const val = data.subarray(2, data.length - 1)
-            if (msg) {
-              msg.data = val
-              msg.checksum = data[data.length - 1]
-              msg.ts = ts
-              let isEvent = false
-              if (this.db) {
-                // Find matching frame or event frame
-                let frameName: string | undefined
 
-                let publish: string | undefined
+            msg.data = val
+            msg.checksum = data[data.length - 1]
+            msg.ts = ts
+            let isEvent = false
+            if (this.db) {
+              // Find matching frame or event frame
+              let frameName: string | undefined
 
-                // Check regular frames
-                for (const fname in this.db.frames) {
-                  if (this.db.frames[fname].id === msg.frameId) {
-                    frameName = fname
-                    publish = this.db.frames[fname].publishedBy
+              let publish: string | undefined
+
+              // Check regular frames
+              for (const fname in this.db.frames) {
+                if (this.db.frames[fname].id === msg.frameId) {
+                  frameName = fname
+                  publish = this.db.frames[fname].publishedBy
+                  break
+                }
+              }
+
+              // Check event triggered frames
+              if (!frameName) {
+                for (const ename in this.db.eventTriggeredFrames) {
+                  const eventFrame = this.db.eventTriggeredFrames[ename]
+                  if (eventFrame.frameId === msg.frameId) {
+                    frameName = ename
+                    isEvent = true
                     break
                   }
                 }
+              }
 
-                // Check event triggered frames
-                if (!frameName) {
-                  for (const ename in this.db.eventTriggeredFrames) {
-                    const eventFrame = this.db.eventTriggeredFrames[ename]
-                    if (eventFrame.frameId === msg.frameId) {
-                      frameName = ename
-                      isEvent = true
-                      break
-                    }
+              // Enrich message with database info if frame found
+              if (frameName) {
+                msg.name = frameName
+                msg.workNode = publish
+                msg.isEvent = isEvent
+              }
+            }
+            //check checksum
+            const checksum = getCheckSum(val, msg.checksumType, getPID(id))
+            if (checksum != data[data.length - 1]) {
+              const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}`
+              this.log.error(ts, msg)
+            } else if (val.length < originalLen) {
+              const msgStr = `No enough data, got ${val.length}, expected ${originalLen}`
+              this.log.error(ts, msgStr)
+            } else {
+              this.lastFrame.set(id, msg)
+              if (isEvent && this.db) {
+                const pid = msg.data[0] & 0x3f
+                for (const fname in this.db.frames) {
+                  if (this.db.frames[fname].id === pid) {
+                    msg.workNode = this.db.frames[fname].publishedBy
+                    break
                   }
                 }
-
-                // Enrich message with database info if frame found
-                if (frameName) {
-                  msg.name = frameName
-                  msg.workNode = publish
-                  msg.isEvent = isEvent
-                }
               }
-              //check checksum
-              const checksum = getCheckSum(val, msg.checksumType, id)
-              if (checksum != data[data.length - 1]) {
-                const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}`
-                this.log.error(ts, msg)
-              } else {
-                this.lastFrame.set(id, msg)
-                if (isEvent && this.db) {
-                  const pid = msg.data[0] & 0x3f
-                  for (const fname in this.db.frames) {
-                    if (this.db.frames[fname].id === pid) {
-                      msg.workNode = this.db.frames[fname].publishedBy
-                      break
-                    }
-                  }
-                }
-                this.log.linBase(msg)
-                this.event.emit(`${msg.frameId}`, msg)
-              }
+              this.log.linBase(msg)
+              this.event.emit(`${msg.frameId}`, msg)
             }
           } else if (data[0] == 0x81) {
             //error sync
             const msg = `Sync error, got ${data[2]}, expected 0x55`
             this.log.error(ts, msg)
           } else if (data[0] == 2) {
-            this.log.error(ts, 'data too short')
+            this.log.error(ts, 'slave no response')
           } else if (data[0] == 3) {
             //data format is not valid
             const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte (start form sync phase,0:means sync phase,1:means PID phase)`
@@ -480,7 +492,7 @@ export class LinCable extends LinBase {
         str += m.data.toString('hex').padStart(2 * m.data.length, '0')
 
         // checksum
-        const checksum = getCheckSum(m.data, m.checksumType, pid)
+        const checksum = m.lincable?.checkSum || getCheckSum(m.data, m.checksumType, pid)
         str += checksum.toString(16).padStart(2, '0')
 
         //dinter length
@@ -493,8 +505,8 @@ export class LinCable extends LinBase {
         str += buf.toString('hex').padStart(2 * m.data.length, '0')
 
         // error inject
-        const errorInject = Buffer.alloc(2, m.lincable?.errorInject?.bit || 0)
-        str += errorInject.toString('hex').padStart(2, '0')
+        const errorInject = m.lincable?.errorInject?.bit || 0
+        str += errorInject.toString(16).padStart(2, '0')
         // flag
         let flag = 0
         if (m.direction == LinDirection.SEND) {

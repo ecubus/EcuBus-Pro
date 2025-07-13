@@ -6,7 +6,7 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM8",
+            "handle": "COM12",
             "id": ""
           },
           "name": "ECUBUS_0",
@@ -48,7 +48,7 @@
       "message": {
         "pos": {
           "x": 383,
-          "y": 219,
+          "y": 191,
           "w": 1280,
           "h": 200
         },
@@ -60,24 +60,12 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "hardware": {
-        "pos": {
-          "x": 138,
-          "y": 0,
-          "w": 636,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
       "test": {
         "pos": {
-          "x": 154,
-          "y": 264,
-          "w": 1765,
-          "h": 534
+          "x": 372,
+          "y": 183,
+          "w": 957,
+          "h": 418
         },
         "title": "test",
         "label": "Test",
@@ -86,9 +74,9 @@
       },
       "trace": {
         "pos": {
-          "x": 774,
-          "y": 0,
-          "w": 1413,
+          "x": 139,
+          "y": 40,
+          "w": 1583,
           "h": 438
         },
         "title": "trace",
@@ -98,8 +86,8 @@
       },
       "network": {
         "pos": {
-          "x": 828,
-          "y": 24,
+          "x": 170,
+          "y": 193,
           "w": 600,
           "h": 400
         },
@@ -107,7 +95,22 @@
         "label": "Network",
         "id": "network",
         "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 343.5,
+          "y": 120,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
       }
+    },
+    "example": {
+      "catalog": "LIN"
     }
   }
 }

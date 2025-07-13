@@ -44,6 +44,12 @@ according to the IUT specification and according to the test case specification.
     frameId: 0x34,
     data: Buffer.alloc(5),
     checksumType: LinChecksumType.ENHANCED
+  },
+  TST_FRAME_14: {
+    direction: LinDirection.SEND,
+    frameId: 0x3c,
+    data: Buffer.alloc(8),
+    checksumType: LinChecksumType.CLASSIC
   }
 }
 
@@ -110,6 +116,13 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
         //error here
         console.error(
           `Sending break | ${inject.syncVal == false ? 'without sync' : ' sync'} |  ${inject.pid == false ? 'without pid' : ' pid'}, but output was successful.`
+        )
+        resolve(false)
+      }
+
+      if (inject.errorInject != undefined) {
+        console.error(
+          `Error inject: ${inject.errorInject.bit} ${inject.errorInject.value}, but output was successful.`
         )
         resolve(false)
       }
@@ -184,6 +197,13 @@ const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
           )
           resolve(true)
         }
+        if (inject.errorInject != undefined) {
+          console.log(
+            `Error inject: ${inject.errorInject.bit} ${inject.errorInject.value}, as expected.`,
+            err
+          )
+          resolve(true)
+        }
       })
   })
 }
@@ -197,7 +217,18 @@ const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
         resolve(true) //resolve true if output was successful
       })
       .catch((err) => {
-        resolve(false) //resolve false if output failed
+        if (inject.errorInject != undefined) {
+          console.log(
+            `Error inject: ${inject.errorInject.bit} ${inject.errorInject.value}, as expected.`,
+            err
+          )
+          resolve(true)
+        } else if (inject.checkSum != undefined) {
+          console.log(`Checksum: ${inject.checkSum}, as expected.`, err)
+          resolve(true)
+        } else {
+          resolve(false)
+        }
       })
   })
 }
@@ -329,11 +360,44 @@ describe('[PT-CT 38] Bit error, IUT as slave', () => {
     //Bit error in the response field in data byte 1, stop bit
     const rxMsg = FrameMap['TST_FRAME_6']
     const result = await sendLinWithRecv(rxMsg, {
-      errorInject1: {
+      errorInject: {
         bit: headerBitLength + 9, //byte1,stop bit
         value: 0 //invert stop bit
       }
     })
-    assert(result, 'Sending with bit error in response field should succeed')
+    assert(result, 'Sending with bit error in response field should fail')
   })
+})
+test('[PT-CT 39] Framing error in header of published frame', async () => {
+  //Bit error in the response field in data byte 1, stop bit
+  const msg = FrameMap['TST_FRAME_4_Tx']
+  const result = await sendLinWithRecv(msg, {
+    errorInject: {
+      bit: 13 + 1 + 10 + 9, //PID,stop bit
+      value: 0 //invert stop bit
+    }
+  })
+  assert(result, 'Sending with bit error in response field should fail')
+})
+test('[PT-CT 40] Framing error in response field of subscribed frame', async () => {
+  const headerBitLength = 13 + 1 + 10 + 10
+  //Bit error in the response field in data byte 1, stop bit
+  const msg = FrameMap['TST_FRAME_4_Rx']
+  const result = await sendLinWithSend(msg, {
+    errorInject: {
+      bit: headerBitLength + 9, //byte1,stop bit
+      value: 0 //invert stop bit
+    }
+  })
+  assert(result, 'Sending with bit error in response field should fail')
+})
+test('[PT-CT 42] Checksum error by carry', async () => {
+  const headerBitLength = 13 + 1 + 10 + 10
+  //Bit error in the response field in data byte 1, stop bit
+  const msg = FrameMap['TST_FRAME_14']
+  msg.data = Buffer.from([0xff, 0, 0, 0, 0, 0, 0, 0])
+  const result = await sendLinWithSend(msg, {
+    checkSum: 0xff //checksum error by carry
+  })
+  assert(result, 'Sending with checksum error should fail')
 })

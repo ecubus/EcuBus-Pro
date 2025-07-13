@@ -221,14 +221,11 @@ interface LinCableErrorInject {
     dInterLength?: number[];
     syncVal?: number | false;
     pid?: number | false;
-    errorInject1?: {
+    errorInject?: {
         bit: number;
         value: 1 | 0;
     };
-    errorInject2?: {
-        bit: number;
-        value: 1 | 0;
-    };
+    checkSum?: number;
 }
 /**
  * @category LIN
@@ -453,6 +450,26 @@ declare namespace test {
     var skip: (name: string, fn: () => void | Promise<void>) => void;
 }
 
+/**
+ * Create a test group.
+ *
+ * @param name Test group name
+ * @param fn Test group function
+ *
+ * @example
+ * ```ts
+ * describe('Test Group 1', () => {
+ *   test('Test case 1', () => {
+ *     // test code
+ *   })
+ *
+ *   test('Test case 2', () => {
+ *     // test code
+ *   })
+ * })
+ * ```
+ * @category TEST
+ */
 declare function describe(name: string, fn: () => void | Promise<void>): void;
 declare const testerList: readonly [
                 {{#each this.testers}}

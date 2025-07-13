@@ -617,6 +617,11 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
+  //testMap
+  testMap.forEach((value) => {
+    value.close()
+  })
+  testMap.clear()
   canBaseMap.forEach((value) => {
     value.close()
     sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)

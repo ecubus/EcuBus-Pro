@@ -84,6 +84,7 @@ export interface LinCableErrorInject {
     bit: number /* fault inject bit, start from break first bit */
     value: 1 | 0 /* 1 means high, 0 means low */
   }
+  checkSum?: number /* override the checksum */
 }
 /**
  * @category LIN

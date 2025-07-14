@@ -22,6 +22,13 @@
               >
                 <span v-if="data.vendor == 'ecubus' && node.level == 1" class="ecubus-logo">
                   <img src="@r/assets/logo1.svg" />
+                  <Icon
+                    :icon="hoveredEcuBus ? questionIcon1 : questionIcon"
+                    style="width: 16px; height: 16px; color: var(--el-color-primary)"
+                    @click.stop="openEcuBusHardware"
+                    @mouseenter="hoveredEcuBus = true"
+                    @mouseleave="hoveredEcuBus = false"
+                  />
                 </span>
 
                 <span v-else>{{ node.label }}</span>
@@ -105,9 +112,12 @@ import { Layout } from '../layout'
 import LinNodeVue from './config/node/linNode.vue'
 import { useGlobalStart } from '@r/stores/runtime'
 import { ecubusPro } from './../../../../../../package.json'
+import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
+import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
+const hoveredEcuBus = ref(false)
 const props = defineProps<{
   height: number
   width: number
@@ -116,11 +126,16 @@ const props = defineProps<{
 const winKey = 'hardware'
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
-const leftWidth = ref(200)
+const leftWidth = ref(220)
 const dataModify = ref(false)
 const treeRef = ref()
 const devices = useDataStore()
 const globalStart = useGlobalStart()
+
+function openEcuBusHardware() {
+  window.electron.ipcRenderer.send('ipc-open-link', 'https://app.whyengineer.com/docs/um/hardware/')
+}
+
 function nodeClick(data: tree, node: any) {
   if (activeTree.value?.id == data.id) {
     return
@@ -442,7 +457,7 @@ onMounted(() => {
       leftWidth.value = ui.size.width
     },
     maxWidth: 400,
-    minWidth: 150
+    minWidth: 220
   })
 
   if (deviceId.value) {

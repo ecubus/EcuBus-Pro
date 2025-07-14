@@ -448,6 +448,12 @@ watchEffect(() => {
         udsView.changeName(key, dataBase.devices[key].linDevice.name)
       }
     }
+    // test nodes
+    for (const key of Object.keys(dataBase.nodes)) {
+      if (dataBase.nodes[key].isTest) {
+        udsView.changeName(key, dataBase.nodes[key].name)
+      }
+    }
     //check link
     for (const from of Object.keys(dataBase.ia)) {
       for (const to of Object.keys(dataBase.devices)) {

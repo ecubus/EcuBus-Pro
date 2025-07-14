@@ -23,8 +23,10 @@ async function make_release_note_all() {
     // 读取现有文件内容
     const releaseNotePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
     let existingContent = ''
+    let fileExists = false
     try {
       existingContent = await fsP.readFile(releaseNotePath, 'utf-8')
+      fileExists = true
     } catch (error) {
       console.log('No existing release note file found, creating new one')
     }
@@ -33,7 +35,7 @@ async function make_release_note_all() {
     const { stdout: currentTag } = await exec('"git" tag --points-at HEAD')
     const hasCurrentTag = currentTag.trim() !== ''
 
-    let newContent = '# EcuBus-Pro Release Notes\n\n'
+    let newContent = ''
 
     if (!hasCurrentTag) {
       // 如果当前commit没有tag，添加Unreleased部分
@@ -63,7 +65,21 @@ async function make_release_note_all() {
     }
 
     // 合并新内容和现有内容
-    const finalContent = newContent + existingContent.replace('# EcuBus-Pro Release Notes\n\n', '')
+    let finalContent
+    if (fileExists) {
+      // 如果文件存在，保留标题，只替换内容部分
+      const titleMatch = existingContent.match(/^# EcuBus-Pro Release Notes\n\n/)
+      if (titleMatch) {
+        // 保留标题，移除现有内容，添加新内容
+        finalContent = titleMatch[0] + newContent + existingContent.replace(/^# EcuBus-Pro Release Notes\n\n/, '')
+      } else {
+        // 如果没有找到标题，添加标题
+        finalContent = '# EcuBus-Pro Release Notes\n\n' + newContent + existingContent
+      }
+    } else {
+      // 如果文件不存在，创建新文件并添加标题
+      finalContent = '# EcuBus-Pro Release Notes\n\n' + newContent + existingContent
+    }
 
     // 写入Markdown文件
     await fsP.writeFile(releaseNotePath, finalContent)

@@ -1,6 +1,6 @@
 {
   "name": "ecubuspro",
-  "version": "0.8.46",
+  "version": "0.8.47",
   "description": "EcuBus-Pro",
   "main": "./out/main/index.js",
   "author": "frankie.zengfu@gmail.com",

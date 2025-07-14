@@ -1,5 +1,30 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.47
+Changes from v0.8.46 to v0.8.47:
+
+### Highlighted
+
+**[EcuBus LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)** – USB to LIN Adapter for Automotive Development **Launched**!
+
+Features:
+
+* Fault Injection and Conformance Testing
+* Advanced LIN Protocol Support
+* Cross-Platform and Software Integration
+* Open Communication Protocol for Secondary Development
+* DFU Firmware Update Support
+
+### Other Changes
+ 
+* [bug]:fix vector lin master can't receive by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/169
+* [feat]:run single test case ok 
+* [bug]:fix get vendor failed 
+* [opt]:opt diff platform vendor 
+* [opt]:opt slcan timestamp and canfd 
+---
+
+
 ## 0.8.46
 Changes from v0.8.45 to v0.8.46:
 
@@ -12,7 +37,7 @@ Changes from v0.8.45 to v0.8.46:
 * [opt]:esbuild executable bin handling to OS by @sengulhamza in https://github.com/ecubus/EcuBus/pull/163
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## 0.8.45
 Changes from v0.8.44 to v0.8.45:
@@ -29,7 +54,7 @@ Changes from v0.8.44 to v0.8.45:
 * [bug]:fix can dbc EV_ can't parse issue
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## 0.8.44
 Changes from v0.8.43 to v0.8.44:
@@ -45,7 +70,7 @@ Changes from v0.8.43 to v0.8.44:
 * [bug]:fix worker resp param is not buffer
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## 0.8.43
 Changes from v0.8.42 to v0.8.43:
@@ -57,7 +82,7 @@ Changes from v0.8.42 to v0.8.43:
 * [api]: add linStartScheduler/linStopScheduler api
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.42
 Changes from v0.8.41 to v0.8.42:
@@ -69,7 +94,7 @@ Changes from v0.8.41 to v0.8.42:
 * [opt]:opt multi-windows
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.41
 Changes from v0.8.40 to v0.8.41:
@@ -80,7 +105,7 @@ Changes from v0.8.40 to v0.8.41:
 * [feat]:multi windows ok
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.40
 Changes from v0.8.39 to v0.8.40:
@@ -90,7 +115,7 @@ Changes from v0.8.39 to v0.8.40:
 * [bug]:fix findService unmatch contains service id issue 
 ---
 
-# EcuBus-Pro Release Notes
+
 ## v0.8.39
 Changes from v0.8.38 to v0.8.39:
 
@@ -102,7 +127,7 @@ Changes from v0.8.38 to v0.8.39:
 **Full Changelog**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.38...v0.8.39
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.38
 Changes from v0.8.37 to v0.8.38:
@@ -112,7 +137,7 @@ Changes from v0.8.37 to v0.8.38:
 * [bug]:fix tsconfig nodejs target version
 ---
 
-# EcuBus-Pro Release Notes
+
 
 
 ## v0.8.37
@@ -130,7 +155,7 @@ Changes from v0.8.36 to v0.8.37:
 **Full Changelog**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.36...v0.8.37
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.36
 Changes from v0.8.35 to v0.8.36:
@@ -144,7 +169,7 @@ Changes from v0.8.35 to v0.8.36:
 * [feat]:add kvaser lin feature
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.35
 Changes from v0.8.34 to v0.8.35:
@@ -155,7 +180,7 @@ Changes from v0.8.34 to v0.8.35:
 * [bug]:fix can dbc parse error 
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.34
 Changes from v0.8.33 to v0.8.34:
@@ -165,7 +190,7 @@ Changes from v0.8.33 to v0.8.34:
 * [bug]:fix ipc get version bug, it will failed when driver not installed
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.33
 Changes from v0.8.32 to v0.8.33:
@@ -174,7 +199,7 @@ Changes from v0.8.32 to v0.8.33:
 * [feat]:add dbc float type support
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.32
 Changes from v0.8.31 to v0.8.32:
@@ -184,7 +209,7 @@ Changes from v0.8.31 to v0.8.32:
 * [bug]:fix lin diag slave resp ID error
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.31
 Changes from v0.8.30 to v0.8.31:
@@ -193,7 +218,7 @@ Changes from v0.8.30 to v0.8.31:
 * [bug]:fix freq isn't number type
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.30
 Changes from v0.8.29 to v0.8.30:
@@ -206,7 +231,7 @@ Changes from v0.8.29 to v0.8.30:
 * [feat]:add toomoss/zlg can 120res control
 ---
 
-# EcuBus-Pro Release Notes
+
 
 ## v0.8.29
 Changes from v0.8.28 to v0.8.29:

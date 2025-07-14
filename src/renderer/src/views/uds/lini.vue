@@ -519,20 +519,16 @@ watchEffect(() => {
   getUsedDb()
 })
 // 修改 watch,数据库切换时清空激活状态
-watch(
-  () => dbName,
-  () => {
-    activeStates.value = {}
-    nextTick(() => {
-      //set activeStates all true
-      for (const table of tableData.value) {
-        for (const entry of table.childList) {
-          activeStates.value[`${table.Table}-${entry.index}`] = true
-        }
-      }
-    })
+watch([() => tableData.value], () => {
+  activeStates.value = {}
+
+  //set activeStates all true
+  for (const table of tableData.value) {
+    for (const entry of table.childList) {
+      activeStates.value[`${table.Table}-${entry.index}`] = true
+    }
   }
-)
+})
 
 function schChanged(
   method: string,

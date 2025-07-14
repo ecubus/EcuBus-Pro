@@ -406,6 +406,18 @@ export class VectorLin extends LinBase {
             throw new Error(this.getError(xlStatus))
           }
         } else {
+          xlStatus = VECTOR.xlLinSetSlave(
+            this.PortHandle.value(),
+            this.channelMask,
+            framedata.id,
+            framedata.data,
+            framedata.dlc,
+            checksum.value()
+          )
+
+          if (xlStatus !== 0) {
+            throw new Error(this.getError(xlStatus))
+          }
           xlStatus = VECTOR.xlLinSwitchSlave(
             this.PortHandle.value(),
             this.channelMask,

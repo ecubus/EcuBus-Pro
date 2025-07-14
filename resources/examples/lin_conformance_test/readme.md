@@ -8,7 +8,7 @@ The LIN conformance test example provides a complete testing framework for valid
 
 ## Used Devices
 
-- **[EcuBus-LinCable](../../../docs/um/hardware/lincable.md)**: USB to LIN adapter with advanced fault injection capabilities (required for error injection testing)
+- **[EcuBus-LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)**: USB to LIN adapter with advanced fault injection capabilities (required for error injection testing)
 
 > [!NOTE]
 > Fault injection testing requires EcuBus-LinCable as it is the only device capable of performing error injection operations. Standard LIN adapters cannot perform these advanced testing functions.

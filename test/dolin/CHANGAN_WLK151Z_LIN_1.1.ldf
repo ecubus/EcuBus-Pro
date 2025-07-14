@@ -1,0 +1,165 @@
+LIN_description_file ;
+LIN_protocol_version = "2.1" ;
+LIN_language_version = "2.1" ;
+LIN_speed = 19.200 kbps ;
+Nodes {
+    Master:VCU_ECU,1.0000 ms,0.0000 ms ;
+    Slaves:FAN;
+}
+Signals {
+    TMS_EF_SpeedSet:8,0x00,VCU_ECU,FAN;
+    EF_RPMTarget:8,0x00,FAN,VCU_ECU;
+    EF_ActSpeed:8,0x00,FAN,VCU_ECU;
+    EF_voltage:8,0x00,FAN,VCU_ECU;
+    EF_temperature:8,0x00,FAN,VCU_ECU;
+    EF_current:8,0x00,FAN,VCU_ECU;
+    EF_OverTempError:2,0x0,FAN,VCU_ECU;
+    EF_OvercurrentError:2,0x0,FAN,VCU_ECU;
+    EF_OvervoltageError:2,0x0,FAN,VCU_ECU;
+    EF_undervoltageError:2,0x0,FAN,VCU_ECU;
+    EF_BlockError:2,0x0,FAN,VCU_ECU;
+    EF_RsErr:1,0x0,FAN,VCU_ECU;
+}
+Diagnostic_signals {
+    MasterReqB0:8,0;
+    MasterReqB1:8,0;
+    MasterReqB2:8,0;
+    MasterReqB3:8,0;
+    MasterReqB4:8,0;
+    MasterReqB5:8,0;
+    MasterReqB6:8,0;
+    MasterReqB7:8,0;
+    SlaveRespB0:8,0;
+    SlaveRespB1:8,0;
+    SlaveRespB2:8,0;
+    SlaveRespB3:8,0;
+    SlaveRespB4:8,0;
+    SlaveRespB5:8,0;
+    SlaveRespB6:8,0;
+    SlaveRespB7:8,0;
+}
+Frames {
+    EF_PCmd:0x2E,VCU_ECU,8{
+        TMS_EF_SpeedSet,0;
+    }
+    EF_PRsp:0x2F,FAN,8{
+        EF_RPMTarget,0;
+        EF_ActSpeed,8;
+        EF_voltage,16;
+        EF_temperature,24;
+        EF_current,32;
+        EF_OverTempError,40;
+        EF_OvercurrentError,42;
+        EF_OvervoltageError,44;
+        EF_undervoltageError,46;
+        EF_BlockError,48;
+        EF_RsErr,50;
+    }
+}
+Diagnostic_frames {
+    MasterReq : 60 {
+        MasterReqB0,0;
+        MasterReqB1,8;
+        MasterReqB2,16;
+        MasterReqB3,24;
+        MasterReqB4,32;
+        MasterReqB5,40;
+        MasterReqB6,48;
+        MasterReqB7,56;
+    }
+    SlaveResp : 61 {
+        SlaveRespB0,0;
+        SlaveRespB1,8;
+        SlaveRespB2,16;
+        SlaveRespB3,24;
+        SlaveRespB4,32;
+        SlaveRespB5,40;
+        SlaveRespB6,48;
+        SlaveRespB7,56;
+    }
+}
+Node_attributes {
+    FAN {
+        LIN_protocol = 2.1 ;
+        configured_NAD = 0x7f ;
+        initial_NAD = 0x7f ;
+        product_id = 0x0000, 0x0000, 255 ;
+        response_error = EF_RsErr ;
+        P2_min = 50.0000 ms ;
+        N_As_timeout = 1000.0000 ms ;
+        N_Cr_timeout = 1000.0000 ms ;
+        configurable_frames {
+            EF_PCmd;
+            EF_PRsp;
+        }
+    }
+}
+Schedule_tables {
+    CFC1885_LIN {
+        EF_PRsp delay 10.0000 ms ;
+        EF_PCmd delay 10.0000 ms ;
+    }
+}
+Signal_encoding_types {
+    EF_ActSpeed_Encoding {
+        physical_value,0,2800,11.2000,0.0000,"Rpm" ;
+    }
+    EF_BlockError_Encoding {
+        logical_value,0x00,"NO ERROR" ;
+        logical_value,0x01,"ERROR" ;
+        logical_value,0x02,"SNA" ;
+    }
+    EF_OverTempError_Encoding {
+        logical_value,0x00,"NO ERROR" ;
+        logical_value,0x01,"ERROR" ;
+        logical_value,0x02,"SNA" ;
+    }
+    EF_OvercurrentError_Encoding {
+        logical_value,0x00,"NO ERROR " ;
+        logical_value,0x01,"ERROR " ;
+        logical_value,0x02,"SNA" ;
+    }
+    EF_OvervoltageError_Encoding {
+        logical_value,0x00,"NO ERROR" ;
+        logical_value,0x01,"ERROR" ;
+        logical_value,0x02,"SNA" ;
+    }
+    EF_RPMTarget_Encoding {
+        physical_value,0,2800,11.2000,0.0000,"Rpm" ;
+    }
+    EF_RsErr_Encoding {
+        logical_value,0x00,"NO ERROR" ;
+        logical_value,0x01,"ERROR" ;
+    }
+    EF_current_Encoding {
+        physical_value,0,254,0.2000,0.0000,"A" ;
+    }
+    EF_temperature_Encoding {
+        physical_value,0,254,1.0000,-50.0000,"T" ;
+    }
+    EF_undervoltageError_Encoding {
+        logical_value,0x00,"NO ERROR" ;
+        logical_value,0x01,"ERROR" ;
+        logical_value,0x02,"SNA" ;
+    }
+    EF_voltage_Encoding {
+        physical_value,0,254,0.1000,0.0000,"V" ;
+    }
+    TMS_EF_SpeedSet_Encoding {
+        physical_value,0,2800,11.2000,0.0000,"Rpm" ;
+    }
+}
+Signal_representation {
+    EF_ActSpeed_Encoding:EF_ActSpeed;
+    EF_BlockError_Encoding:EF_BlockError;
+    EF_OverTempError_Encoding:EF_OverTempError;
+    EF_OvercurrentError_Encoding:EF_OvercurrentError;
+    EF_OvervoltageError_Encoding:EF_OvervoltageError;
+    EF_RPMTarget_Encoding:EF_RPMTarget;
+    EF_RsErr_Encoding:EF_RsErr;
+    EF_current_Encoding:EF_current;
+    EF_temperature_Encoding:EF_temperature;
+    EF_undervoltageError_Encoding:EF_undervoltageError;
+    EF_voltage_Encoding:EF_voltage;
+    TMS_EF_SpeedSet_Encoding:TMS_EF_SpeedSet;
+}

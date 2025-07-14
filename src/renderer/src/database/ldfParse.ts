@@ -327,8 +327,8 @@ const Signal_encoding_types = createToken({
   name: 'Signal_encoding_types',
   pattern: /Signal_encoding_types\s+/
 })
-const logical_value = createToken({ name: 'logical_value', pattern: /logical_value,\s+/ })
-const physical_value = createToken({ name: 'physical_value', pattern: /physical_value,\s+/ })
+const logical_value = createToken({ name: 'logical_value', pattern: /logical_value,\s*/ })
+const physical_value = createToken({ name: 'physical_value', pattern: /physical_value,\s*/ })
 const bcd_value = createToken({ name: 'bcd_value', pattern: /bcd_value\s+/ })
 const ascii_value = createToken({ name: 'ascii_value', pattern: /ascii_value\s+/ })
 const Signal_representation = createToken({

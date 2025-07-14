@@ -25,6 +25,59 @@ test('ldf door', () => {
   // console.log(r)
 })
 
+test('ldf CHANGAN_WLK151Z_LIN_1.1', () => {
+  const ldf = fs.readFileSync(path.join(__dirname, 'CHANGAN_WLK151Z_LIN_1.1.ldf'), 'utf-8')
+  const r = parse(ldf)
+  expect(r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].type).toEqual(
+    'physicalValue'
+  )
+  expect(
+    r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].physicalValue?.minValue
+  ).toEqual(0)
+  expect(
+    r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].physicalValue?.maxValue
+  ).toEqual(254)
+  expect(
+    r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].physicalValue?.scale
+  ).toEqual(1)
+  expect(
+    r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].physicalValue?.offset
+  ).toEqual(-50)
+  expect(
+    r.signalEncodeTypes['EF_temperature_Encoding'].encodingTypes[0].physicalValue?.textInfo
+  ).toEqual('T')
+
+  expect(r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[0].type).toEqual(
+    'logicalValue'
+  )
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[0].logicalValue?.signalValue
+  ).toEqual(0)
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[0].logicalValue?.textInfo
+  ).toEqual('NO ERROR')
+
+  expect(r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[1].type).toEqual(
+    'logicalValue'
+  )
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[1].logicalValue?.signalValue
+  ).toEqual(1)
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[1].logicalValue?.textInfo
+  ).toEqual('ERROR')
+
+  expect(r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[2].type).toEqual(
+    'logicalValue'
+  )
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[2].logicalValue?.signalValue
+  ).toEqual(2)
+  expect(
+    r.signalEncodeTypes['EF_undervoltageError_Encoding'].encodingTypes[2].logicalValue?.textInfo
+  ).toEqual('SNA')
+})
+
 test('ldf t1', () => {
   test
   const ldf = fs.readFileSync(path.join(__dirname, 't1.ldf'), 'utf-8')

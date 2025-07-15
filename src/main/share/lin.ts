@@ -67,24 +67,68 @@ const linErrorMap: Record<LIN_ERROR_ID, string> = {
 }
 
 /**
+ * LinCable Error Inject Control. See {@link https://app.whyengineer.com/docs/um/hardware/lincable.html} for details.
  * @category LIN
  */
 export interface LinCableErrorInject {
-  breakLength?: number /*  break field length, default 13, min:13,max:26 */
-  breakDelLength?: number /* break delimiter length, default 1: min:0, max:14.6 */
-  hInterLength?: number /*  inter-byte space between sync byte filed and identifier, default 0, min:0,max 14 */
-  dInterLength?: number[] /* each inter-byte space between data field, length should same as data length, default 0, min:0,max 4, */
-  syncVal?:
-    | number
-    | false /* speical sync val, default 0x55, false means master do not send sync val*/
-  pid?:
-    | number
-    | false /* speical pid, default is getPID(frameId), false means master do not send pid*/
+  /**
+   * Break field length in bits
+   * @default 13
+   * @minimum 13
+   * @maximum 26
+   */
+  breakLength?: number
+
+  /**
+   * Break delimiter length in bits
+   * @default 1
+   * @minimum 0
+   * @maximum 14.6
+   */
+  breakDelLength?: number
+
+  /**
+   * Inter-byte space between sync byte field and identifier in bits
+   * @default 0
+   * @minimum 0
+   * @maximum 14
+   */
+  hInterLength?: number
+
+  /**
+   * Inter-byte spaces between data fields in bits. Array length must match data length.
+   * @default 0
+   * @minimum 0
+   * @maximum 4
+   */
+  dInterLength?: number[]
+
+  /**
+   * Custom sync byte value. Set to false to prevent master from sending sync.
+   * @default 0x55
+   */
+  syncVal?: number | false
+
+  /**
+   * Custom PID value. Set to false to prevent master from sending PID.
+   * @default getPID(frameId)
+   */
+  pid?: number | false
+
+  /**
+   * Fault injection configuration
+   */
   errorInject?: {
-    bit: number /* fault inject bit, start from break first bit */
-    value: 1 | 0 /* 1 means high, 0 means low */
+    /** Bit position to inject fault, starting from first break bit */
+    bit: number
+    /** Fault value: 1 for high, 0 for low */
+    value: 1 | 0
   }
-  checkSum?: number /* override the checksum */
+
+  /**
+   * Override the checksum value
+   */
+  checkSum?: number
 }
 /**
  * @category LIN

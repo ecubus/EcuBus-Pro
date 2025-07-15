@@ -68,7 +68,7 @@ import {
   onUnmounted,
   watchEffect
 } from 'vue'
-import { UDSView, udsCeil, udsHardware } from './udsView'
+import { UDSView, udsCeil, udsHardware, Node as UdsNode } from './udsView'
 import fullscreenIcon from '@iconify/icons-material-symbols/fullscreen'
 import zoomInRounded from '@iconify/icons-material-symbols/zoom-in-rounded'
 import zoomOutRounded from '@iconify/icons-material-symbols/zoom-out-rounded'
@@ -424,7 +424,11 @@ watchEffect(() => {
   if (initDone.value) {
     //device dynamic update
     for (const el of udsView.ceilMap.values()) {
-      if (el instanceof udsHardware) {
+      if (el instanceof UdsNode) {
+        if (dataBase.nodes[el.getId()] == undefined) {
+          udsView.removeElement(el.getId())
+        }
+      } else if (el instanceof udsHardware) {
         if (dataBase.devices[el.getId()] == undefined) {
           udsView.removeElement(el.getId())
           //remove device in ia
@@ -433,6 +437,14 @@ watchEffect(() => {
             const index = item.devices.indexOf(el.getId())
             if (index != -1) {
               item.devices.splice(index, 1)
+            }
+          }
+          //remove device in node
+          for (const key of Object.keys(dataBase.nodes)) {
+            const item = dataBase.nodes[key]
+            const index = item.channel.indexOf(el.getId())
+            if (index != -1) {
+              item.channel.splice(index, 1)
             }
           }
         }
@@ -450,6 +462,7 @@ watchEffect(() => {
     }
     // test nodes
     for (const key of Object.keys(dataBase.nodes)) {
+      udsView.addNode(key, dataBase.nodes[key])
       if (dataBase.nodes[key].isTest) {
         udsView.changeName(key, dataBase.nodes[key].name)
       }

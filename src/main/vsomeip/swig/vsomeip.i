@@ -131,6 +131,9 @@ typedef std::function<
 
 
 struct debounce_filter_t;
+
+
+class VsomeipCallbackWrapper;
 }
 
 
@@ -154,6 +157,10 @@ struct debounce_filter_t;
 // %include <vsomeip/trace.hpp>
 %include <vsomeip/vsomeip.hpp>
 
+class VsomeipCallbackWrapper;
+
+
+
 %inline %{
 void LoadDll(const char* path) {
   SetDllDirectory(path);
@@ -164,6 +171,26 @@ void LoadDll(const char* path) {
 
 
 %init %{
+
+
+extern Napi::Value RegisterCallback(const Napi::CallbackInfo &info);
+extern Napi::Value UnregisterCallback(const Napi::CallbackInfo &info);
+
+
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("RegisterCallback", RegisterCallback);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("UnregisterCallback", UnregisterCallback);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
 
 
 %}

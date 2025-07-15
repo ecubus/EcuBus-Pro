@@ -25,6 +25,7 @@
                     ],
                      'sources': [
                         './swig/vsomeip_wrap.cxx',
+                        './swig/b.cxx',
                     ],
                     'libraries': ['<(module_root_dir)/lib/vsomeip3.lib','<(module_root_dir)/lib/vsomeip3-sd.lib','<(module_root_dir)/lib/vsomeip3-cfg.lib','<(module_root_dir)/lib/vsomeip3-e2e.lib'],
                     'defines': ['DELAYLOAD_HOOK'],

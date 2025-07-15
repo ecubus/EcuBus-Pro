@@ -22466,6 +22466,26 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
 
 
+extern Napi::Value RegisterCallback(const Napi::CallbackInfo &info);
+extern Napi::Value UnregisterCallback(const Napi::CallbackInfo &info);
+
+
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("RegisterCallback", RegisterCallback);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("UnregisterCallback", UnregisterCallback);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+
 
 
   /* initialize the base SWIG object class */

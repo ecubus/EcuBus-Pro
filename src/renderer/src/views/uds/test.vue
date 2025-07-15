@@ -514,7 +514,6 @@ function buildTree() {
     disabled: true,
     children: []
   }
-
   for (const [key, config] of Object.entries(dataBase.nodes)) {
     if (config.isTest) {
       t.children?.push({

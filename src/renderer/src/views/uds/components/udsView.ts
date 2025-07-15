@@ -484,9 +484,9 @@ export class Node extends udsCeil {
       x,
       y,
       {
-        panel: true,
+        panel: ig.isTest ? false : true,
         edit: true,
-        remove: true,
+        remove: ig.isTest ? false : true,
         lockX: false,
         lockY: true
       }

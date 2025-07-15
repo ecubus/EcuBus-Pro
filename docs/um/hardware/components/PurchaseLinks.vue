@@ -89,8 +89,9 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-radius: 16px;
   padding: 32px;
-  margin: 32px 0;
+  margin: 32px auto;
   border: 1px solid #e2e8f0;
+  max-width: 1200px;
 }
 
 .purchase-title {
@@ -113,6 +114,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .purchase-option {
@@ -123,6 +127,7 @@
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  min-height: 200px;
   justify-content: space-between;
 }
 
@@ -137,6 +142,7 @@
   align-items: center;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .platform-icon {
@@ -204,9 +210,9 @@
   border: none;
   cursor: pointer;
   color: white;
-  white-space: nowrap;
-  min-width: 0;
-  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: auto;
 }
 
 .taobao-button {
@@ -269,9 +275,36 @@
   font-weight: 600;
 }
 
+@media (min-width: 1200px) {
+  .purchase-options {
+    max-width: 900px;
+    gap: 32px;
+  }
+
+  .purchase-option {
+    padding: 32px;
+    min-height: 220px;
+  }
+
+  .purchase-title {
+    font-size: 28px;
+  }
+
+  .purchase-subtitle {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .purchase-options {
+    max-width: 600px;
+  }
+}
+
 @media (max-width: 768px) {
   .purchase-options {
     grid-template-columns: 1fr;
+    max-width: 400px;
   }
 
   .purchase-features {
@@ -331,7 +364,6 @@
   .purchase-button {
     padding: 10px 16px;
     font-size: 14px;
-    white-space: nowrap;
   }
 
   .intl-note {

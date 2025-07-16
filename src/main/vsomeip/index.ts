@@ -65,15 +65,21 @@ export class VSomeIP_Client {
   init() {
     const result = this.app.init()
     if (result) {
-      this.app.start()
       this.cb.registerStateHandler(this.cbId)
       // this.app.register_state_handler(this.onStateChange)
+
+      this.cb.start()
     } else {
       throw new Error('Failed to initialize application')
     }
   }
   stop() {
-    this.app.stop()
+    this.app.clear_all_handler()
+
+    // First stop the callback wrapper to ensure proper thread cleanup
+    if (this.cb) {
+      this.cb.stop()
+    }
     vsomeip.UnregisterCallback(this.cbId)
   }
 }

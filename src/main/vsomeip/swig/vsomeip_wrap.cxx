@@ -2038,6 +2038,12 @@ Napi::Value _wrap_VsomeipCallbackWrapper_getApplication(const Napi::CallbackInfo
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_hasApplication(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
+Napi::Value _wrap_VsomeipCallbackWrapper_start(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_VsomeipCallbackWrapper_isRunning(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_VsomeipCallbackWrapper_stop(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_registerStateHandler(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_registerMessageHandler(const Napi::CallbackInfo &);
@@ -17029,6 +17035,151 @@ fail:
 
 // js_function
 template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_start(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_VsomeipCallbackWrapper_start.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VsomeipCallbackWrapper_start" "', argument " "1"" of type '" "VsomeipCallbackWrapper *""'"); 
+    }
+    arg1 = reinterpret_cast< VsomeipCallbackWrapper * >(argp1);
+    
+    
+    
+    
+    (arg1)->start();
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_isRunning(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_VsomeipCallbackWrapper_isRunning.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VsomeipCallbackWrapper_isRunning" "', argument " "1"" of type '" "VsomeipCallbackWrapper const *""'"); 
+    }
+    arg1 = reinterpret_cast< VsomeipCallbackWrapper * >(argp1);
+    
+    
+    
+    
+    result = (bool)((VsomeipCallbackWrapper const *)arg1)->isRunning();
+    
+    
+    
+    jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_stop(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_VsomeipCallbackWrapper_stop.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VsomeipCallbackWrapper_stop" "', argument " "1"" of type '" "VsomeipCallbackWrapper *""'"); 
+    }
+    arg1 = reinterpret_cast< VsomeipCallbackWrapper * >(argp1);
+    
+    
+    
+    
+    (arg1)->stop();
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
 Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_registerStateHandler(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
@@ -20734,6 +20885,30 @@ void _exports_VsomeipCallbackWrapper_inst::GetMembers(
     "hasApplication",
       _exports_VsomeipCallbackWrapper_templ::InstanceMethod("hasApplication",
         &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_hasApplication,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("start");
+  members.insert({
+    "start",
+      _exports_VsomeipCallbackWrapper_templ::InstanceMethod("start",
+        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_start,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("isRunning");
+  members.insert({
+    "isRunning",
+      _exports_VsomeipCallbackWrapper_templ::InstanceMethod("isRunning",
+        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_isRunning,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("stop");
+  members.insert({
+    "stop",
+      _exports_VsomeipCallbackWrapper_templ::InstanceMethod("stop",
+        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_stop,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_register_member_function

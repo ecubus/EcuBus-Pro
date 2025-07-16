@@ -5,6 +5,7 @@
 
 #define VSOMEIP_INTERNAL_SUPPRESS_DEPRECATED
 #include <vsomeip/vsomeip.hpp>
+#include "vsomeip_callback_wrapper.hpp"
 %}
 
 
@@ -156,8 +157,7 @@ class VsomeipCallbackWrapper;
 %include <vsomeip/handler.hpp>
 // %include <vsomeip/trace.hpp>
 %include <vsomeip/vsomeip.hpp>
-
-class VsomeipCallbackWrapper;
+%include "vsomeip_callback_wrapper.hpp"
 
 
 

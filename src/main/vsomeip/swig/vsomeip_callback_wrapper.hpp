@@ -16,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <chrono>
+#include <thread>
 
 namespace vsomeip_v3 {
     class application;
@@ -33,6 +34,8 @@ namespace vsomeip_v3 {
 class VsomeipCallbackWrapper {
 private:
     std::shared_ptr<vsomeip_v3::application> app_;
+    std::thread app_thread_;
+    bool is_running_;
 
 public:
     /**
@@ -67,6 +70,29 @@ public:
      * \return true if application is set, false otherwise
      */
     bool hasApplication() const;
+    
+    /**
+     * \brief Start the vSomeIP application in a separate thread
+     * 
+     * This method starts a new thread that calls the app's start() method.
+     * The thread will run until the application is stopped.
+     */
+    void start();
+    
+    /**
+     * \brief Check if the application is currently running
+     * 
+     * \return true if the application is running, false otherwise
+     */
+    bool isRunning() const;
+    
+    /**
+     * \brief Stop the vSomeIP application and wait for the thread to complete
+     * 
+     * This method stops the application and waits for the running thread
+     * to complete, ensuring proper cleanup of resources including lock files.
+     */
+    void stop();
     
     /**
      * \brief Register a state handler callback

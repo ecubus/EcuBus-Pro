@@ -42,9 +42,14 @@ void CallJsCallback(CallbackContext* context, const std::function<void(Napi::Env
 }
 
 // VsomeipCallbackWrapper implementation
-VsomeipCallbackWrapper::VsomeipCallbackWrapper(std::shared_ptr<application> app) : app_(app) {}
+VsomeipCallbackWrapper::VsomeipCallbackWrapper(std::shared_ptr<application> app) : app_(app), is_running_(false) {}
 
-VsomeipCallbackWrapper::~VsomeipCallbackWrapper() {}
+VsomeipCallbackWrapper::~VsomeipCallbackWrapper() {
+    // If the thread is still running, we should join it
+    if (app_thread_.joinable()) {
+        app_thread_.join();
+    }
+}
 
 void VsomeipCallbackWrapper::setApplication(std::shared_ptr<application> app) {
     app_ = app;
@@ -56,6 +61,46 @@ std::shared_ptr<application> VsomeipCallbackWrapper::getApplication() const {
 
 bool VsomeipCallbackWrapper::hasApplication() const {
     return app_ != nullptr;
+}
+
+void VsomeipCallbackWrapper::start() {
+    if (!app_) {
+        return;
+    }
+    
+    if (is_running_) {
+        return; // Already running
+    }
+    
+    is_running_ = true;
+    
+    // Start the application in a separate thread
+    app_thread_ = std::thread([this]() {
+        if (app_) {
+            app_->start();
+        }
+        is_running_ = false;
+    });
+}
+
+bool VsomeipCallbackWrapper::isRunning() const {
+    return is_running_;
+}
+
+void VsomeipCallbackWrapper::stop() {
+    if (!app_ || !is_running_) {
+        return;
+    }
+    
+    // Stop the vSomeIP application
+    app_->stop();
+    
+    // Wait for the thread to complete
+    if (app_thread_.joinable()) {
+        app_thread_.join();
+    }
+    
+    is_running_ = false;
 }
 
 // State handler wrapper

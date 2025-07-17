@@ -5,12 +5,118 @@ The Built-In Script system provides pre-configured diagnostic services for commo
 ## Supported Built-In Script
 
 
+### [SecureAccessGenerateKeyEx](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyEx)
+
+This script is used to generate a key for the security access process. see [GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
+
+```c
+VKeyGenResultEx GenerateKeyEx (
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize, 
+  unsigned int& oActualKeyArraySize 
+);
+```
+
+![GenerateKeyEx](image2.png)
+
+
+#### Parameters
+
+- **dllFile**
+  - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyEx function.
+```c
+VKeyGenResultEx GenerateKeyEx (
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize, 
+  unsigned int& oActualKeyArraySize 
+);
+```
+- **requestSeed**
+  - The request seed sub-function, 1,3,5,7,9,11,13,15
+  - Default: 0x01
+
+- **sendKey**
+  - The send key sub-function, 2,4,6,8,10,12,14,16
+  - Default: 0x02
+
+- **securityLevel**
+  - The security level to be change to
+
+- **variant**
+  - The variant of the security access process
+
+- **maxKeyArraySize**
+  - The max key array size
+
+- **securityAccessDataRecord**
+  - The security access data record in request seed DiagRequest, the data will be sent to the ECU in the request seed sub-function.
+
+
+### [SecureAccessGenerateKeyExOpt](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyExOpt)
+
+This script is used to generate a key for the security access process. see [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
+
+
+![GenerateKeyExOpt](image1.png)
+
+
+#### Parameters
+
+- **dllFile**
+  - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyExOpt function.
+```c
+VKeyGenResultExOpt GenerateKeyExOpt ( 
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant,  
+  const char* ipOptions, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize,  
+  unsigned int& oActualKeyArraySize 
+);
+```
+
+- **requestSeed**
+  - The request seed sub-function, 1,3,5,7,9,11,13,15
+  - Default: 0x01
+
+- **sendKey**
+  - The send key sub-function, 2,4,6,8,10,12,14,16
+  - Default: 0x02
+
+- **securityLevel**
+  - The security level to be change to
+
+- **variant**
+  - The variant of the security access process
+
+- **options**
+  - The options of the security access process
+
+- **maxKeyArraySize**
+  - The max key array size
+
+- **securityAccessDataRecord**
+  - The security access data record in request seed DiagRequest, the data will be sent to the ECU in the request seed sub-function.
+
+
+
+
 ### [RequestDownloadBin](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/RequestDownloadBin)
 
 
 A combined service that handles the complete binary download process by orchestrating UDS services 0x34 (RequestDownload), 0x36 (TransferData), and 0x37 (TransferExit).
 
-![alt text](image.png)
+![RequestDownloadBin](image.png)
 
 #### Description
 This script automates the process of downloading binary files to an ECU by:

@@ -1,0 +1,694 @@
+{
+  "data": {
+    "devices": {
+      "8e79b126-cf28-4ee7-97a8-c1ab51ebb27f": {
+        "type": "can",
+        "canDevice": {
+          "id": "8e79b126-cf28-4ee7-97a8-c1ab51ebb27f",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_58"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {
+      "f304259b-dc7d-460b-9729-4eee2d1156de": {
+        "id": "f304259b-dc7d-460b-9729-4eee2d1156de",
+        "name": "Tester",
+        "type": "can",
+        "script": "",
+        "targetDeviceId": "8e79b126-cf28-4ee7-97a8-c1ab51ebb27f",
+        "seqList": [
+          {
+            "name": "Seq0",
+            "services": [
+              {
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "939519b4-6ac2-443f-b1fa-3f0c917c339e",
+                "delay": 50,
+                "_X_ROW_KEY": "row_50"
+              },
+              {
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "2b905461-c3e6-4c60-9dba-fc023b5ae97b",
+                "delay": 50,
+                "_X_ROW_KEY": "row_26"
+              }
+            ]
+          }
+        ],
+        "address": [
+          {
+            "type": "can",
+            "canAddr": {
+              "name": "Addr0",
+              "addrFormat": "NORMAL",
+              "addrType": "PHYSICAL",
+              "SA": "0x1",
+              "TA": "0x2",
+              "AE": "",
+              "canIdTx": "0x55",
+              "canIdRx": "0x56",
+              "nAs": 1000,
+              "nAr": 1000,
+              "nBs": 1000,
+              "nCr": 1000,
+              "nBr": 0,
+              "nCs": 0,
+              "idType": "STANDARD",
+              "brs": false,
+              "canfd": false,
+              "remote": false,
+              "stMin": 10,
+              "bs": 10,
+              "maxWTF": 0,
+              "dlc": 8,
+              "padding": false,
+              "paddingValue": "0x00"
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "0x10": [],
+          "Job": [],
+          "0x34": [],
+          "0x36": [],
+          "0x37": [],
+          "RequestDownloadBin": [],
+          "SecureAccessGenerateKeyEx": [
+            {
+              "id": "939519b4-6ac2-443f-b1fa-3f0c917c339e",
+              "name": "SecureAccessGenerateKeyEx0",
+              "serviceId": "SecureAccessGenerateKeyEx",
+              "params": [
+                {
+                  "id": "dad7134a-1f08-4ed1-8700-e2af8ed05462",
+                  "name": "dllFile",
+                  "bitLen": 136,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "FILE",
+                  "phyValue": "GenerateKeyEx.dll",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      71,
+                      101,
+                      110,
+                      101,
+                      114,
+                      97,
+                      116,
+                      101,
+                      75,
+                      101,
+                      121,
+                      69,
+                      120,
+                      46,
+                      100,
+                      108,
+                      108
+                    ]
+                  }
+                },
+                {
+                  "id": "36b0090a-41a3-46ac-b987-bf00161fd860",
+                  "name": "requestSeed",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "01",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  }
+                },
+                {
+                  "id": "1e01f62e-c170-490a-9794-6f803beb44b7",
+                  "name": "sendKey",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "02",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  }
+                },
+                {
+                  "id": "6ec9f38e-d4bc-4fb9-b361-9926ce64d2a0",
+                  "name": "securityLevel",
+                  "desc": "the security level to be change to",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": 1,
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  }
+                },
+                {
+                  "id": "75c53292-bd92-402e-80b6-a5317d2b6fa3",
+                  "name": "variant",
+                  "bitLen": 32,
+                  "deletable": false,
+                  "editable": true,
+                  "desc": "the ECU variant's qualifier",
+                  "type": "ARRAY",
+                  "phyValue": "11 22 33 44",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      17,
+                      34,
+                      51,
+                      68
+                    ]
+                  }
+                },
+                {
+                  "id": "2d83a9f9-8498-4689-bca4-ba99371887a6",
+                  "name": "maxKeyArraySize",
+                  "desc": "maximum number of key bytes available",
+                  "bitLen": 32,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": 8,
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      8
+                    ]
+                  }
+                },
+                {
+                  "id": "6ac78eaf-2ac8-4cb5-99f9-a898cec9f0f6",
+                  "name": "securityAccessDataRecord",
+                  "bitLen": 0,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "phyValue": "",
+                  "value": {
+                    "type": "Buffer",
+                    "data": []
+                  }
+                }
+              ],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x27": [
+            {
+              "id": "0d6f8157-8eed-44d0-afd2-19afb1a50af9",
+              "name": "SecurityAccess390",
+              "serviceId": "0x27",
+              "params": [
+                {
+                  "id": "dbba2dcb-1214-4fc8-810b-d27f23a0b835",
+                  "name": "securityAccessType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                },
+                {
+                  "id": "78729087-8060-47dd-b03e-886e7f07eed0",
+                  "name": "data",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "6d1d8ee9-b03e-4136-90fc-d3e9dc5c3f97",
+                  "name": "securityAccessType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                },
+                {
+                  "id": "d938eb60-731f-4407-a0ba-926cb31e184e",
+                  "name": "securitySeed",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            },
+            {
+              "id": "15200c7d-d4fa-4652-b117-5dfb34d77b3e",
+              "name": "SecurityAccess391",
+              "serviceId": "0x27",
+              "params": [
+                {
+                  "id": "a833bcbb-0806-41fa-a1fe-4898bde9e825",
+                  "name": "securityAccessType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      2
+                    ]
+                  },
+                  "phyValue": 2
+                },
+                {
+                  "id": "1c0a56d7-057f-48ee-b4a0-6b1001574949",
+                  "name": "data",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "e3400d6f-f5af-47f8-beeb-ceae2c30df0f",
+                  "name": "securityAccessType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      2
+                    ]
+                  },
+                  "phyValue": 2
+                },
+                {
+                  "id": "38f41b6f-1385-4fdd-a861-5ecd68c9ab4d",
+                  "name": "securitySeed",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "SecureAccessGenerateKeyExOpt": [
+            {
+              "id": "2b905461-c3e6-4c60-9dba-fc023b5ae97b",
+              "name": "SecureAccessGenerateKeyExOpt0",
+              "serviceId": "SecureAccessGenerateKeyExOpt",
+              "params": [
+                {
+                  "id": "3504a6a3-6dc3-4c2d-b07f-721ec2891d1f",
+                  "name": "dllFile",
+                  "bitLen": 160,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "FILE",
+                  "phyValue": "GenerateKeyExOpt.dll",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      71,
+                      101,
+                      110,
+                      101,
+                      114,
+                      97,
+                      116,
+                      101,
+                      75,
+                      101,
+                      121,
+                      69,
+                      120,
+                      79,
+                      112,
+                      116,
+                      46,
+                      100,
+                      108,
+                      108
+                    ]
+                  }
+                },
+                {
+                  "id": "e0ca442f-0846-46d7-b299-a2a0c08d0ce3",
+                  "name": "requestSeed",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "01",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  }
+                },
+                {
+                  "id": "06a2f425-50d7-4ff6-a6e4-3a9197472bb5",
+                  "name": "sendKey",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "02",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  }
+                },
+                {
+                  "id": "84b224bd-2a94-424d-b426-4984349851f2",
+                  "name": "securityLevel",
+                  "desc": "the security level to be change to",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": 1,
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  }
+                },
+                {
+                  "id": "c54bc395-95a5-45da-8e14-a40ed23b5761",
+                  "name": "variant",
+                  "bitLen": 32,
+                  "deletable": false,
+                  "editable": true,
+                  "desc": "the ECU variant's qualifier",
+                  "type": "ARRAY",
+                  "phyValue": "11 22 33 44",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      17,
+                      34,
+                      51,
+                      68
+                    ]
+                  }
+                },
+                {
+                  "id": "fcc34eff-edf4-4c1d-9c36-c9690f7285ab",
+                  "name": "options",
+                  "bitLen": 64,
+                  "deletable": false,
+                  "editable": true,
+                  "desc": "the option string",
+                  "type": "ARRAY",
+                  "phyValue": "11 22 33 44 55 66 77 88",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      17,
+                      34,
+                      51,
+                      68,
+                      85,
+                      102,
+                      119,
+                      136
+                    ]
+                  }
+                },
+                {
+                  "id": "9d450259-19db-494a-a867-23033c2b48bf",
+                  "name": "maxKeyArraySize",
+                  "desc": "maximum number of key bytes available",
+                  "bitLen": 32,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": 8,
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      8
+                    ]
+                  }
+                },
+                {
+                  "id": "d588b752-a824-4f1d-abdb-0c0c80122964",
+                  "name": "securityAccessDataRecord",
+                  "bitLen": 0,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "phyValue": "",
+                  "value": {
+                    "type": "Buffer",
+                    "data": []
+                  }
+                }
+              ],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ]
+        },
+        "simulateBy": "5c043bd6-ddca-449a-b535-1ae865085123"
+      }
+    },
+    "subFunction": {},
+    "nodes": {
+      "5c043bd6-ddca-449a-b535-1ae865085123": {
+        "name": "Node 1",
+        "type": "can",
+        "id": "5c043bd6-ddca-449a-b535-1ae865085123",
+        "channel": [
+          "8e79b126-cf28-4ee7-97a8-c1ab51ebb27f"
+        ],
+        "workNode": "",
+        "attachTester": "f304259b-dc7d-460b-9729-4eee2d1156de",
+        "script": "ecu.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {
+      "af7af829-5aea-4f27-93c7-1f2e34a35ada": {
+        "type": "user",
+        "id": "af7af829-5aea-4f27-93c7-1f2e34a35ada",
+        "name": "UDS"
+      },
+      "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c": {
+        "name": "start",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
+        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada"
+      }
+    },
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 105,
+          "w": 2562,
+          "h": 261
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "trace": {
+        "pos": {
+          "x": 1141,
+          "y": 506,
+          "w": 1195,
+          "h": 448
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
+      "tester": {
+        "pos": {
+          "x": 401.5,
+          "y": 88,
+          "w": 1067,
+          "h": 444
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {},
+        "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": 673.5,
+          "y": 232,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
+        "pos": {
+          "x": 1479.5,
+          "y": 45,
+          "w": 700,
+          "h": 400
+        },
+        "title": "testerSequence",
+        "label": "Sequence",
+        "id": "f304259b-dc7d-460b-9729-4eee2d1156de_sequence",
+        "options": {
+          "params": {
+            "edit-index": "f304259b-dc7d-460b-9729-4eee2d1156de"
+          },
+          "name": "Tester"
+        }
+      },
+      "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
+        "pos": {
+          "x": 194,
+          "y": 35,
+          "w": 1348,
+          "h": 400
+        },
+        "title": "testerService",
+        "label": "Service",
+        "id": "f304259b-dc7d-460b-9729-4eee2d1156de_services",
+        "options": {
+          "params": {
+            "edit-index": "f304259b-dc7d-460b-9729-4eee2d1156de"
+          },
+          "name": "Tester"
+        }
+      }
+    },
+    "example": {
+      "catalog": "UDS"
+    }
+  }
+}

@@ -212,19 +212,60 @@ declare enum LinChecksumType {
     ENHANCED = "ENHANCED"
 }
 /**
+ * LinCable Error Inject Control. See {@link https://app.whyengineer.com/docs/um/hardware/lincable.html} for details.
  * @category LIN
  */
 interface LinCableErrorInject {
+    /**
+     * Break field length in bits
+     * @default 13
+     * @minimum 13
+     * @maximum 26
+     */
     breakLength?: number;
+    /**
+     * Break delimiter length in bits
+     * @default 1
+     * @minimum 0
+     * @maximum 14.6
+     */
     breakDelLength?: number;
+    /**
+     * Inter-byte space between sync byte field and identifier in bits
+     * @default 0
+     * @minimum 0
+     * @maximum 14
+     */
     hInterLength?: number;
+    /**
+     * Inter-byte spaces between data fields in bits. Array length must match data length.
+     * @default 0
+     * @minimum 0
+     * @maximum 4
+     */
     dInterLength?: number[];
+    /**
+     * Custom sync byte value. Set to false to prevent master from sending sync.
+     * @default 0x55
+     */
     syncVal?: number | false;
+    /**
+     * Custom PID value. Set to false to prevent master from sending PID.
+     * @default getPID(frameId)
+     */
     pid?: number | false;
+    /**
+     * Fault injection configuration
+     */
     errorInject?: {
+        /** Bit position to inject fault, starting from first break bit */
         bit: number;
+        /** Fault value: 1 for high, 0 for low */
         value: 1 | 0;
     };
+    /**
+     * Override the checksum value
+     */
     checkSum?: number;
 }
 /**

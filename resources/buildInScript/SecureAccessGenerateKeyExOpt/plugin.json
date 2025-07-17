@@ -4,7 +4,7 @@
     "fixedParam": true,
     "buildInScript": "index.js",
     "hasSubFunction": false,
-    "desc": "Security access service that uses a DLL file for seed/key calculation. Requires DLL file path, request seed (0x01) and send key (0x02) parameters, with optional security access data record, follow Vecotr GenerateKeyEx Api definiton",
+    "desc": "Security access service that uses a DLL file for seed/key calculation. Requires DLL file path, request seed (0x01) and send key (0x02) parameters, with optional security access data record, follow Vecotr GenerateKeyExOpt Api definiton",
     "defaultParams": [
       {
         "param": {

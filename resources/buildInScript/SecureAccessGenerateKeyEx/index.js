@@ -17,7 +17,7 @@ Util.Init(() => {
     // Create request for service 0x27 (SecurityAccess)
     const r27Request = new ECB.DiagRequest(testerName, {
       id: "",
-      name: "",
+      name: "requstSeed",
       serviceId: "0x27",
       params: [],
       respParams: []
@@ -58,7 +58,7 @@ Util.Init(() => {
     }
     const r27Request = new ECB.DiagRequest(testerName, {
       id: "",
-      name: "",
+      name: "sendKey",
       serviceId: "0x27",
       params: [],
       respParams: []

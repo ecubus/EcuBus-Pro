@@ -285,11 +285,18 @@ export function paramSetVal(param: Param, str: string | number) {
       break
     case 'ARRAY':
       {
+        const byte = Math.floor(param.bitLen / 8)
+
+        if (!str) {
+          param.phyValue = ''
+          param.value = Buffer.alloc(0)
+          break
+        }
+
         //regex check hex string like '00 F4 33 5a' 中间必须要有空格，每个最大2个字符串
         if (!/^[0-9a-fA-F]{2}( [0-9a-fA-F]{2})*$/.test(str.toString())) {
           throw new Error('value should be a 00 F4 33 5a')
         }
-        const byte = Math.floor(param.bitLen / 8)
 
         const s = str.toString().split(' ')
         if (s.length > byte) {

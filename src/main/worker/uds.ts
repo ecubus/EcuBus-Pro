@@ -964,7 +964,14 @@ export class UtilClass {
     if (!this.isMain) {
       workerpool.worker({
         [jobs]: async (...args: any[]) => {
-          const v = await (func as any)(...args)
+          const cargs = args.map((item) => {
+            if (typeof item === 'object' && 'type' in item && item.type === 'Buffer') {
+              return Buffer.from(item)
+            } else {
+              return item
+            }
+          })
+          const v = await (func as any)(...cargs)
           if (Array.isArray(v)) {
             //each item must be DiagRequest
             if (v.every((item) => item instanceof DiagRequest || item instanceof DiagJob)) {

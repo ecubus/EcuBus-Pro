@@ -1,0 +1,101 @@
+{
+  "service": {
+    "name": "SecureAccessGenerateKeyEx",
+    "fixedParam": true,
+    "buildInScript": "index.js",
+    "hasSubFunction": false,
+    "desc": "Security access service that uses a DLL file for seed/key calculation. Requires DLL file path, request seed (0x01) and send key (0x02) parameters, with optional security access data record, follow Vecotr GenerateKeyEx Api definiton",
+    "defaultParams": [
+      {
+        "param": {
+          "id": "dllFile",
+          "name": "dllFile",
+          "bitLen": 0,
+          "deletable": false,
+          "editable": true,
+          "type": "FILE",
+          "phyValue": ""
+        }
+      },
+      {
+        "param": {
+          "id": "requestSeed",
+          "name": "requestSeed",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "01"
+        }
+      },
+      {
+        "param": {
+          "id": "sendKey",
+          "name": "sendKey",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "02"
+        }
+      },
+      {
+        "param": {
+          "id": "securityLevel",
+          "name": "securityLevel",
+          "desc": "the security level to be change to",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "00"
+        }
+      },
+      {
+        "param": {
+          "id": "variant",
+          "name": "variant",
+          "bitLen": 0,
+          "deletable": false,
+          "editable": true,
+          "desc": "the ECU variant's qualifier",
+          "type": "ARRAY",
+          "phyValue": "",
+          "value": {
+            "type":"Buffer",
+            "data":[]
+          }
+        }
+      },
+      {
+        "param": {
+          "id": "maxKeyArraySize",
+          "name": "maxKeyArraySize",
+          "desc": "maximum number of key bytes available",
+          "bitLen": 32,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "00"
+        }
+      },
+      {
+        "param": {
+          "id": "securityAccessDataRecord",
+          "name": "securityAccessDataRecord",
+          "bitLen": 0,
+          "deletable": false,
+          "editable": true,
+          "type": "ARRAY",
+          "phyValue": "",
+          "value": {
+            "type":"Buffer",
+            "data":[]
+          }
+        }
+      }
+      
+    ],
+    "defaultRespParams": []
+  }
+}

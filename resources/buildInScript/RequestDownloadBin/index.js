@@ -1,5 +1,6 @@
 // Import ECB library
 const ECB=require('../../lib/js')
+const fsP = require('fs/promises')
 
 // Global variables to track current block and max chunk size
 var currentBlock = void 0;
@@ -10,7 +11,7 @@ Util.Init(() => {
   const testerName = Util.getTesterName();
 
   // Register main RequestDownloadBin function
-  Util.Register(`${testerName}.RequestDownloadBin`, async function(dataFormatIdentifier, addressAndLengthFormatIdentifier, memoryAddress, binFile) {
+  Util.Register(`${testerName}.RequestDownloadBin`, async function(dataFormatIdentifier, addressAndLengthFormatIdentifier, memoryAddress, binFilePath) {
     // Create request for service 0x34 (RequestDownload)
     const r34 = new ECB.DiagRequest(testerName, {
       id: "",
@@ -31,6 +32,7 @@ Util.Init(() => {
 
     // Create buffer for memory size based on format identifier
     const memorySizeBuffer = Buffer.alloc((addressAndLengthFormatIdentifier & 240) >> 4);
+    const binFile = await fsP.readFile(binFilePath)
     for (let i = 0; i < memorySizeBuffer.length; i++) {
       memorySizeBuffer[i] = binFile.length >> 8 * (memorySizeBuffer.length - 1 - i) & 255;
     }

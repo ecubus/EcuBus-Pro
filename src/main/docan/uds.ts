@@ -167,6 +167,8 @@ export function updateUdsDts(data: DataSet) {
               if (item.type == 'ASCII' || item.type == 'UNICODE') {
                 ty = 'string'
               } else if (item.type == 'FILE') {
+                ty = 'string'
+              } else if (item.type == 'ARRAY') {
                 ty = 'Buffer'
               }
               return `${item.name}:${ty}`
@@ -794,9 +796,10 @@ export class UDSTesterMain {
                   if (!fs.existsSync(filePath)) {
                     throw new Error(`file parameter ${p.name} file not found`)
                   }
-
-                  const fileContent = await fsP.readFile(filePath)
-                  params.push(fileContent)
+                  // const fileContent = await fsP.readFile(filePath)
+                  params.push(filePath)
+                } else if (p.type == 'ARRAY') {
+                  params.push(p.value)
                 } else {
                   params.push(Number(p.phyValue))
                 }

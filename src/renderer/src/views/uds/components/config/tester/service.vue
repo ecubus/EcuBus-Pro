@@ -142,12 +142,15 @@
           />
           <el-alert
             v-if="serviceDetail[model.serviceId].desc"
-            :title="serviceDetail[model.serviceId].desc"
             style="margin-bottom: 5px"
             effect="light"
-            type="info"
+            type="primary"
             :closable="false"
-          />
+          >
+            <template #default>
+              <div @click="handleDescClick" v-html="serviceDetail[model.serviceId].desc"></div>
+            </template>
+          </el-alert>
         </template>
         <el-form-item label-width="0px" style="margin-bottom: 0px" prop="params">
           <div style="width: 100%">
@@ -700,6 +703,15 @@ function suppressChange(val) {
     paramSetVal(model.value.params[0], lastVal & 0x7f)
   }
   reqParamChange()
+}
+
+function handleDescClick(e: Event) {
+  if ((e.target as HTMLElement).tagName == 'A') {
+    e.preventDefault()
+    //get href
+    const href = (e.target as HTMLElement).getAttribute('href')
+    window.electron.ipcRenderer.send('ipc-open-link', href)
+  }
 }
 
 // 更新 model 中的 generateConfigs

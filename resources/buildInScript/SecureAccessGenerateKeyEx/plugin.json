@@ -4,7 +4,7 @@
     "fixedParam": true,
     "buildInScript": "index.js",
     "hasSubFunction": false,
-    "desc": "Security access service that uses a DLL file for seed/key calculation. Requires DLL file path, request seed (0x01) and send key (0x02) parameters, with optional security access data record, follow Vecotr GenerateKeyEx Api definiton",
+    "desc": "Generate security access key using external DLL. For detailed documentation, please visit <a href='https://app.whyengineer.com/docs/um/uds/buildInScript.html#secureaccessgeneratekeyex'>here</a>",
     "defaultParams": [
       {
         "param": {

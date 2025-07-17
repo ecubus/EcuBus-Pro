@@ -429,6 +429,16 @@ class DBCParser extends CstParser {
     this.OPTION(() => this.CONSUME1(Semicolon))
   })
 
+  private valueDefinitionEnv = this.RULE('valueDefinitionClauseEnv', () => {
+    this.CONSUME1(VAL)
+    this.CONSUME1(Identifier) // Environment Variable Name
+    this.MANY(() => {
+      this.CONSUME2(Number) // Value
+      this.CONSUME2(StringLiteral) // Value description
+    })
+    this.OPTION(() => this.CONSUME1(Semicolon))
+  })
+
   // Add signal value type rule for SIG_VALTYPE
   private signalValueType = this.RULE('signalValueTypeClause', () => {
     this.CONSUME(SIG_VALTYPE)
@@ -593,6 +603,7 @@ class DBCParser extends CstParser {
         { ALT: () => this.SUBRULE2(this.multiplexedValue) },
         { ALT: () => this.SUBRULE2(this.comment) },
         { ALT: () => this.SUBRULE2(this.valueDefinition) },
+        { ALT: () => this.SUBRULE2(this.valueDefinitionEnv) },
         { ALT: () => this.SUBRULE2(this.signalValueType) },
         { ALT: () => this.SUBRULE2(this.environmentVariable) },
         { ALT: () => this.SUBRULE2(this.signalGroupClause) },

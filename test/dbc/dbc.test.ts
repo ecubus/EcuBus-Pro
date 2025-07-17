@@ -20,6 +20,7 @@ describe('DBC Parser Tests', () => {
   let sgDbc: string
   let id200Dbc: string
   let test1Dbc: string
+  let scuDbc: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -36,6 +37,14 @@ describe('DBC Parser Tests', () => {
     sgDbc = fs.readFileSync(path.join(__dirname, 'sig_group.dbc'), 'utf-8')
     id200Dbc = fs.readFileSync(path.join(__dirname, 'ID200.dbc'), 'utf-8')
     test1Dbc = fs.readFileSync(path.join(__dirname, 'test1.dbc'), 'utf-8')
+    scuDbc = fs.readFileSync(path.join(__dirname, 'SCU.dbc'), 'utf-8')
+  })
+  test('scu', () => {
+    const result = parse(scuDbc)
+    expect(result).toBeDefined()
+    expect(result.messages[119].name).toBe('EOL_Check_77')
+    expect(result.messages[119].signals['Eol_KL30_ADC'].name).toBe('Eol_KL30_ADC')
+    expect(result.messages[119].signals['Eol_KL15_ADC'].name).toBe('Eol_KL15_ADC')
   })
   test('test1', () => {
     const result = parse(test1Dbc)

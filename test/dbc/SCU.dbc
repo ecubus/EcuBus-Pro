@@ -1,0 +1,850 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: SCU Vector_XXX
+VAL_TABLE_ NtrlPushImpmntSts 1 "SCU_N_push_implemented" 0 "SCU_N_push_not_implement" ;
+VAL_TABLE_ FAULT_FLAG 1 "fault_confirmed" 0 "no_fault" ;
+
+
+BO_ 119 EOL_Check_77: 4 Vector__XXX
+ SG_ Eol_KL30_ADC : 23|16@0+ (1,0) [0|4095] "" Vector__XXX
+ SG_ Eol_KL15_ADC : 7|16@0+ (1,0) [0|4095] "" Vector__XXX
+
+BO_ 102 EOL_Check_66: 8 Vector__XXX
+ SG_ Eol_Hall_Beta : 55|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ Eol_Pkey2_ADC : 11|12@0+ (1,0) [0|4095] "" Vector__XXX
+ SG_ Eol_Pkey1_ADC : 7|12@0+ (1,0) [0|4095] "" Vector__XXX
+
+BO_ 1794 DIAG_PTEXTCAN_DTCInfo_SCU: 7 SCU
+ SG_ DTCInfomationSCU : 7|56@0+ (1,0) [0|7.20575940379279E+016] ""  Vector_XXX
+
+BO_ 1913 Diag_PTEXTCAN_PhyResp_SCU: 8 SCU
+ SG_ Diag_PTEXTCAN_PhyResp_SCU : 7|64@0+ (1,0) [0|0] ""  Vector_XXX
+
+BO_ 157 SCU_PTEXCAN_FrP00: 8 SCU
+ SG_ NtrlPushImpmntSts : 51|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ SCU_010ms_PDU00_CRC : 7|8@0+ (1,0) [0|255] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_RC : 11|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_Reserve01 : 15|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_Reserve02 : 17|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_Reserve03 : 47|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_Reserve04 : 53|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCU_010ms_PDU00_Reserve05 : 63|8@0+ (1,0) [0|255] ""  Vector_XXX
+ SG_ SCUActrMvmntSts : 43|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCUExtdShifterFlr : 23|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCUFltLvlWrnng : 19|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCUParkLckReq : 41|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCUParkLckReqEPMCU : 49|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCUParkLckReqV : 55|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ SCUParkLckReqVEPMCU : 50|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ SCUShftLvrPosIncnstntFlag : 54|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ SCUShftLvrPosTrgt : 31|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCUShifterLvrPos : 27|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCUShifterOpngRmndr : 39|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ SCUShifterPosInvsn : 35|4@0+ (1,0) [0|15] ""  Vector_XXX
+
+BO_ 1573 SCU_PTEXCAN_FrS04: 8 SCU
+ SG_ EvtPotclSigSCU : 7|64@0+ (1,0) [0|0] ""  Vector_XXX
+
+BO_ 216 SCU_PTEXTCAN_FrP02: 7 SCU
+ SG_ plmlxspi_hall1_beta_angle_final : 55|16@0+ (0.02197265625,0) [0|1439.97802734375] "" Vector__XXX
+ SG_ plmlxspi_hall1_alpha_angle_final : 39|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ adc_test : 7|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ DrvrReqParkBtn : 19|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ SCUShifterLvrRawPos : 31|3@0+ (1,0) [0|7] ""  Vector_XXX
+
+BO_ 789 CCP_PTEXTCAN_CCU_FrP00: 8 Vector_XXX
+ SG_ CCUOnbdChrgrPlugOn : 43|4@0+ (1,0) [0|15] ""  SCU
+
+BO_ 791 CCP_PTEXTCAN_CCU_FrP01: 8 Vector_XXX
+ SG_ CCUOffBdChrgrPlugOn : 50|2@0+ (1,0) [0|3] ""  SCU
+ SG_ CCUOffBdChrgrPlugOnV : 48|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 361 CCP_PTEXTCAN_FrP00: 8 Vector_XXX
+ SG_ ACAvlbly : 29|1@0+ (1,0) [0|1] ""  SCU
+ SG_ ADASAvlbly : 21|1@0+ (1,0) [0|1] ""  SCU
+ SG_ BCMAvlbly : 31|1@0+ (1,0) [0|1] ""  SCU
+ SG_ BMSAvlbly : 22|1@0+ (1,0) [0|1] ""  SCU
+ SG_ CCUAvlbly : 55|1@0+ (1,0) [0|1] ""  SCU
+ SG_ DMSAvlbly : 18|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPBAvlbly : 0|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPSAvlbly : 1|1@0+ (1,0) [0|1] ""  SCU
+ SG_ ESCLAvlbly : 54|1@0+ (1,0) [0|1] ""  SCU
+ SG_ ESSPTCAvlbly : 14|1@0+ (1,0) [0|1] ""  SCU
+ SG_ FICMAvlbly : 25|1@0+ (1,0) [0|1] ""  SCU
+ SG_ FLSMAvlbly : 16|1@0+ (1,0) [0|1] ""  SCU
+ SG_ IPKAvlbly : 30|1@0+ (1,0) [0|1] ""  SCU
+ SG_ PLCMAvlbly : 9|1@0+ (1,0) [0|1] ""  SCU
+ SG_ RDAAvlbly : 35|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SACAvlbly : 19|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SASAvlbly : 15|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SCSAvlbly : 4|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SCUAvlbly : 3|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SDMAvlbly : 5|1@0+ (1,0) [0|1] ""  SCU
+ SG_ TBOXAvlbly : 26|1@0+ (1,0) [0|1] ""  SCU
+ SG_ TDMAvlbly : 32|1@0+ (1,0) [0|1] ""  SCU
+ SG_ TPMSAvlbly : 36|1@0+ (1,0) [0|1] ""  SCU
+ SG_ VCUAvlbly : 12|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 497 CCP_PTEXTCAN_FrP02: 8 Vector_XXX
+ SG_ BPwrMdMstrstrAvlbly : 27|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SysOpnlMd : 15|3@0+ (1,0) [0|7] ""  SCU
+ SG_ SysPwrMd : 31|2@0+ (1,0) [0|3] ""  SCU
+ SG_ SysPwrMdV : 26|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SysVol : 23|8@0+ (0.1,3) [3|28.5] "V"  SCU
+ SG_ SysVolMd : 29|2@0+ (1,0) [0|3] ""  SCU
+ SG_ SysVolMdV : 12|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SysVolV : 25|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 872 CCP_PTEXTCAN_FrP06: 6 Vector_XXX
+ SG_ CCP_100ms_PDU06_CRC : 7|8@0+ (1,0) [0|255] ""  SCU
+ SG_ CCP_100ms_PDU06_RC : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ CCP_100ms_PDU06_Reserve02 : 21|30@0+ (1,0) [0|1073741823] ""  SCU
+ SG_ PwrMdMstrAccryWkupA : 12|1@0+ (1,0) [0|1] ""  SCU
+ SG_ VehDrvngMd : 15|3@0+ (1,0) [0|7] ""  SCU
+ SG_ VehDrvngMdRmndr : 23|2@0+ (1,0) [0|3] ""  SCU
+
+BO_ 1344 CCP_PTEXTCAN_FrP14: 8 Vector_XXX
+ SG_ VehOdo : 23|24@0+ (1,0) [0|16777200] ""  SCU
+ SG_ VehOdoV : 60|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 243 CCP_PTEXTCAN_IBS_FrP17: 8 Vector_XXX
+ SG_ ActuOtptRodTrvl : 55|12@0+ (0.015625,-5) [-5|58.984375] ""  SCU
+ SG_ ActuOtptRodTrvlSts : 59|2@0+ (1,0) [0|3] ""  SCU
+ SG_ BrkPdlPos_IBS : 47|8@0+ (0.392157,0) [0|100.000035] "%"  SCU
+ SG_ BrkPdlPosV_IBS : 33|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 138 CCP_PTEXTCAN_IMCU_FrP00: 8 Vector_XXX
+ SG_ EPTRdy : 38|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPTStCmdOn : 35|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 1345 CCP_PTEXTCAN_IPK_FrP06: 8 Vector_XXX
+ SG_ CalendarDay : 20|5@0+ (1,0) [0|31] "days"  SCU
+ SG_ CalendarMonth : 15|4@0+ (1,0) [0|15] ""  SCU
+ SG_ CalendarYear : 31|8@0+ (1,2000) [2000|2255] "year"  SCU
+ SG_ HourOfDay : 52|5@0+ (1,0) [0|23] ""  SCU
+ SG_ MinuteOfHour : 37|6@0+ (1,0) [0|59] ""  SCU
+ SG_ SecsOfMinute : 45|6@0+ (1,0) [0|59] ""  SCU
+ SG_ TimeDspFmt : 46|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 342 CCP_PTEXTCAN_SCS_FrP04: 8 Vector_XXX
+ SG_ EPBAppcnSts : 15|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPBAppcnSts_M : 38|3@0+ (1,0) [0|7] ""  SCU
+ SG_ EPBAvlblySts : 23|3@0+ (1,0) [0|7] ""  SCU
+ SG_ EPBCCCanclReqd : 16|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPBFlrSts : 39|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPBSts : 13|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPBSwSts : 20|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPBSwStsV : 26|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPBSysAudWrnngReq : 25|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPBSysDspMsgReq : 31|3@0+ (1,0) [0|7] ""  SCU
+ SG_ EPBSysStsIndReq : 18|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPBSysWrnngIndReq : 28|2@0+ (1,0) [0|3] ""  SCU
+ SG_ SCS_020ms_PDU04_CRC : 7|8@0+ (1,0) [0|255] ""  SCU
+ SG_ SCS_020ms_PDU04_RC : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ SCS_020ms_PDU04_Reserve01 : 35|28@0+ (1,0) [0|268435455] ""  SCU
+
+BO_ 381 CCP_PTEXTCAN_SCS_FrP06: 8 Vector_XXX
+ SG_ EPBLAppcnSts_S : 23|3@0+ (1,0) [0|7] ""  SCU
+ SG_ SCS_020ms_PDU43_CRC : 7|8@0+ (1,0) [0|255] ""  SCU
+ SG_ SCS_020ms_PDU43_RC : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ SCS_020ms_PDU43_Reserve01 : 15|4@0+ (1,0) [0|15] ""  SCU
+ SG_ SCS_020ms_PDU43_Reserve02 : 20|21@0+ (1,0) [0|2097151] ""  SCU
+ SG_ SCS_020ms_PDU43_Reserve03 : 47|24@0+ (1,0) [0|16777215] ""  SCU
+
+BO_ 425 CCP_PTEXTCAN_SCS_FrP15: 8 Vector_XXX
+ SG_ SCS_020ms_PDU15_CRC : 7|8@0+ (1,0) [0|255] ""  SCU
+ SG_ SCS_020ms_PDU15_RC : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ SCS_020ms_PDU15_Reserve01 : 14|3@0+ (1,0) [0|7] ""  SCU
+ SG_ VehSpdAvg : 22|15@0+ (0.015625,0) [0|511.984375] "km/h"  SCU
+ SG_ VehSpdAvgDrvn : 39|15@0+ (0.015625,0) [0|511.984375] "km/h"  SCU
+ SG_ VehSpdAvgDrvnSrc : 55|1@0+ (1,0) [0|1] ""  SCU
+ SG_ VehSpdAvgDrvnV : 40|1@0+ (1,0) [0|1] ""  SCU
+ SG_ VehSpdAvgNonDrvn : 54|15@0+ (0.015625,0) [0|511.984375] "km/h"  SCU
+ SG_ VehSpdAvgNonDrvnV : 15|1@0+ (1,0) [0|1] ""  SCU
+ SG_ VehSpdAvgV : 23|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 355 CCP_PTEXTCAN_SDM_FrP00: 8 Vector_XXX
+ SG_ DrvrSbltAtc : 23|1@0+ (1,0) [0|1] ""  SCU
+ SG_ DrvrSbltAtcV : 22|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 694 CCP_PTEXTCAN_SigGW_FrP15: 8 Vector_XXX
+ SG_ ScurtKeyInvd : 28|1@0+ (1,0) [0|1] ""  SCU
+ SG_ SysBPM : 17|2@0+ (1,0) [0|3] ""  SCU
+ SG_ SysBPMEnbd : 8|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 854 CCP_PTEXTCAN_SigGW_FrP21: 8 Vector_XXX
+ SG_ DrvrDoorOpenSts : 23|2@0+ (1,0) [0|3] ""  SCU
+ SG_ NtrlPushASts : 28|2@0+ (1,0) [0|3] ""  SCU
+ SG_ VehSideLghtSts : 21|2@0+ (1,0) [0|3] ""  SCU
+
+BO_ 819 CCP_PTEXTCAN_TBOX_FrP01: 8 Vector_XXX
+ SG_ FOTASts : 15|1@0+ (1,0) [0|1] ""  SCU
+ SG_ FOTAStsV : 23|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 2015 Diag_PTEXTCAN_FuncReq: 8 Vector_XXX
+ SG_ Diag_PTEXTCAN_FuncReq : 7|64@0+ (1,0) [0|0] ""  SCU
+
+BO_ 1905 Diag_PTEXTCAN_PhyReq_SCU: 8 Vector_XXX
+ SG_ Diag_PTEXTCAN_PhyReq_SCU : 7|64@0+ (1,0) [0|0] ""  SCU
+
+BO_ 246 EPMCU_PTEXTCAN_FrP01: 8 Vector_XXX
+ SG_ EPMCU_010_PDU01_CRC : 7|8@0+ (1,0) [0|255] ""  SCU
+ SG_ EPMCU_010_PDU01_RC : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ EPMCU_010_PDU01_Reserve01 : 16|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPMCU_010_PDU01_Reserve02 : 31|8@0+ (1,0) [0|255] ""  SCU
+ SG_ EPMCU_010_PDU01_Reserve03 : 39|16@0+ (1,0) [0|65535] ""  SCU
+ SG_ EPMCU_010_PDU01_Reserve04 : 55|16@0+ (1,0) [0|65535] ""  SCU
+ SG_ EPMCUIMCUParkReqResp : 15|3@0+ (1,0) [0|7] ""  SCU
+ SG_ EPMCUMotFltIO : 12|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPMCUParkngSts : 18|2@0+ (1,0) [0|3] ""  SCU
+ SG_ EPMCUSCUParkReqResp : 23|3@0+ (1,0) [0|7] ""  SCU
+ SG_ EPMCUZeroPstnSelfLrnSts : 20|2@0+ (1,0) [0|3] ""  SCU
+
+BO_ 71 IMCU_PTEXTCAN_FrP16: 8 Vector_XXX
+ SG_ EPTBrkPdlDscrtInptStsBkup : 56|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPTBrkPdlDscrtInptStsVBkup : 13|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPTStCmdOnBkup : 14|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EPTTrInptShaftSpdBkup : 39|16@0+ (1,-32767) [-32767|32768] "rpm"  SCU
+ SG_ EPTTrInptShaftSpdVBkup : 15|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 298 IMCU_PTEXTCAN_FrP45: 8 Vector_XXX
+ SG_ EPTRdyBkup : 60|1@0+ (1,0) [0|1] ""  SCU
+ SG_ TrShftLvrPosBkup : 59|4@0+ (1,0) [0|15] ""  SCU
+ SG_ TrShftLvrPosVBkup : 61|1@0+ (1,0) [0|1] ""  SCU
+
+
+
+EV_ v_AutoShiftDisable: 0 [0|1] "" 0 1 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_AutoShiftEnable: 0 [0|1] "" 0 2 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_047_EPTBrkPdlDscrtInptStsBkup: 0 [0|1] "" 0 3 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_12A_TrShftLvrPosBkup: 0 [0|15] "" 0 4 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_12A_EPTRdyBkup: 0 [0|1] "" 1 5 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_12A_TrShftLvrPosVBkup: 0 [0|1] "" 0 6 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_047_EPTTrInptShaftSpdBkup: 1 [0|65535] "rpm" 0 7 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_047_EPTBrkPdlDscrtInptStsVBkup: 0 [0|1] "" 0 8 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_047_EPTStCmdOnBkup: 0 [0|1] "" 0 9 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_047_EPTTrInptShaftSpdVBkup: 0 [0|1] "" 0 10 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_0F6_EPMCUParkngSts: 0 [0|3] "" 0 11 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_356_VehSideLghtSts: 0 [0|3] "" 0 12 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_356_DrvrDoorOpenSts: 0 [0|3] "" 0 13 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_2B6_ScurtKeyInvd: 0 [0|1] "" 0 14 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_163_DrvrSbltAtcV: 0 [0|1] "" 0 15 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_163_DrvrSbltAtc: 0 [0|1] "" 1 16 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_1A9_VehSpdAvgDrvn: 1 [0|65535] "km/h" 0 17 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_1A9_VehSpdAvgDrvnV: 0 [0|1] "" 0 18 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_156_EPBAppcnSts: 0 [0|3] "" 0 19 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_08A_EPTStCmdOn: 0 [0|1] "" 1 20 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_08A_EPTRdy: 0 [0|1] "" 1 21 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_1F1_SysPwrMdV: 0 [0|1] "" 0 22 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_1F1_SysPwrMd: 0 [0|3] "" 2 23 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_1F1_SysOpnlMd: 0 [0|6] "" 0 24 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_317_CCUOffBdChrgrPlugOnV: 0 [0|1] "" 0 25 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ v_317_CCUOffBdChrgrPlugOn: 0 [0|2] "" 0 26 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+CM_ SG_ 157 SCU_010ms_PDU00_CRC "Wheel Ground Velocity Non Driven Checksum
+Regarding high integrity requirement, a checksum signal is used for the bit field in same frame. The signal XOR operation is recommended for the calculation.";
+CM_ SG_ 157 SCUParkLckReqEPMCU "Shifter Control Unit Park Lock Request For Epmcu";
+CM_ SG_ 157 SCUParkLckReqVEPMCU "Shifter Control Unit Park Lock Request Validity For Epmcu";
+CM_ SG_ 157 SCUShifterLvrPos "Shifter Control Unit Shifter Lever Position
+";
+CM_ SG_ 157 SCUShifterPosInvsn "Shifter Control Unit Shifter Position Inversion
+Checksum for Shifter position signal sending by SCU";
+CM_ SG_ 1573 EvtPotclSigSCU "Event Protocol Signal Scu";
+CM_ SG_ 216 plmlxspi_hall1_beta_angle_final "HALL1 beta 角度值";
+CM_ SG_ 216 plmlxspi_hall1_alpha_angle_final "HALL1 alpha 角度值";
+CM_ SG_ 216 adc_test "KL15 电压原始值";
+CM_ SG_ 216 DrvrReqParkBtn "Driver Request Park Button";
+CM_ SG_ 216 SCUShifterLvrRawPos "Shifter Control Unit Shifter Lever Raw Position";
+CM_ SG_ 791 CCUOffBdChrgrPlugOn "Combined Charging Unit Off Board Charger Plug On";
+CM_ SG_ 791 CCUOffBdChrgrPlugOnV "Combined Charging Unit Off Board Charger Plug On Validity";
+CM_ SG_ 361 ACAvlbly "AC Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 ADASAvlbly "FVCM Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 BCMAvlbly "BCM Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+";
+CM_ SG_ 361 BMSAvlbly "BMS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 EPBAvlbly "SCS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 EPSAvlbly "EPS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 ESCLAvlbly "ESCL Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 FICMAvlbly "BCM Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+";
+CM_ SG_ 361 FLSMAvlbly "SCS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 PLCMAvlbly "AC Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 RDAAvlbly "FVCM Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 SACAvlbly "SCS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 SASAvlbly "SCS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 SCSAvlbly "SCS Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 SCUAvlbly "SCU Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 SDMAvlbly "SDM Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 TBOXAvlbly "TBOX Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 TPMSAvlbly "AC Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 361 VCUAvlbly "AC Available
+
+Detect if specific ECU is available according to node missing strategy by gateway ECU.
+
+";
+CM_ SG_ 497 SysOpnlMd "System Operational Mode";
+CM_ SG_ 497 SysPwrMd "System Power Mode";
+CM_ SG_ 497 SysPwrMdV "System Power Mode Validity ";
+CM_ SG_ 497 SysVol "Battery Voltage";
+CM_ SG_ 497 SysVolMd "System Voltage Mode ";
+CM_ SG_ 497 SysVolMdV "System Voltage Mode Validity ";
+CM_ SG_ 497 SysVolV "Battery Voltage Validity";
+CM_ SG_ 872 CCP_100ms_PDU06_CRC "Wheel Ground Velocity Non Driven Checksum
+Regarding high integrity requirement, a checksum signal is used for the bit field in same frame. The signal XOR operation is recommended for the calculation.";
+CM_ SG_ 872 PwrMdMstrAccryWkupA "Power Mode Master Accessory Wakeup Active";
+CM_ SG_ 1344 VehOdo "Vehicle Odometer";
+CM_ SG_ 1344 VehOdoV "Vehicle Odometer Validity";
+CM_ SG_ 243 ActuOtptRodTrvl "Actual Output Rod Travel";
+CM_ SG_ 243 ActuOtptRodTrvlSts "Actual Output Rod Travel Status";
+CM_ SG_ 243 BrkPdlPos_IBS "Brake Pedal Position";
+CM_ SG_ 243 BrkPdlPosV_IBS "Brake Pedal Position Validity";
+CM_ SG_ 138 EPTRdy "Electric Powertrain Ready";
+CM_ SG_ 138 EPTStCmdOn "Electric Powertrain Start Command On";
+CM_ SG_ 1345 CalendarDay "current day info.";
+CM_ SG_ 1345 CalendarMonth "current month info.";
+CM_ SG_ 1345 CalendarYear "current year info";
+CM_ SG_ 1345 HourOfDay "Hour Of Day.
+current Hour info.";
+CM_ SG_ 1345 MinuteOfHour "Minute Of Hour.
+current Minute info.";
+CM_ SG_ 1345 SecsOfMinute "Seconds Of Minute
+current Second info.";
+CM_ SG_ 1345 TimeDspFmt "Time Display Format
+current Time format.";
+CM_ SG_ 342 EPBAppcnSts "Electric Park Brake Application Status";
+CM_ SG_ 342 EPBAppcnSts_M "Epb Applicationstatus_m";
+CM_ SG_ 342 EPBAvlblySts "Electric Park Brake Availability Status";
+CM_ SG_ 342 EPBCCCanclReqd "Electric Park Brake Cruise Control Cancel Request";
+CM_ SG_ 342 EPBFlrSts "Electric Park Brake Failure Status";
+CM_ SG_ 342 EPBSts "Electric Park Brake Status";
+CM_ SG_ 342 EPBSwSts "Electric Park Brake Switch Status";
+CM_ SG_ 342 EPBSwStsV "Electric Park Brake Switch Status Validity";
+CM_ SG_ 342 EPBSysAudWrnngReq "Electric Park Brake System Audible Warning Request";
+CM_ SG_ 342 EPBSysDspMsgReq "Electric Park Brake System Display Message Request";
+CM_ SG_ 342 EPBSysStsIndReq "Electric Park Brake System Status Indication Request";
+CM_ SG_ 342 EPBSysWrnngIndReq "Electric Park Brake System Warning Indication Request";
+CM_ SG_ 342 SCS_020ms_PDU04_CRC "Wheel Ground Velocity Non Driven Checksum
+Regarding high integrity requirement, a checksum signal is used for the bit field in same frame. The signal XOR operation is recommended for the calculation.";
+CM_ SG_ 381 EPBLAppcnSts_S "Epb Applicationstatus_s";
+CM_ SG_ 425 SCS_020ms_PDU15_CRC "Wheel Ground Velocity Non Driven Checksum
+Regarding high integrity requirement, a checksum signal is used for the bit field in same frame. The signal XOR operation is recommended for the calculation.";
+CM_ SG_ 425 VehSpdAvg "Vehicle Speed Average";
+CM_ SG_ 425 VehSpdAvgDrvn "Vehicle Speed Average Driven";
+CM_ SG_ 425 VehSpdAvgDrvnSrc "Vehicle Speed Average Driven Source";
+CM_ SG_ 425 VehSpdAvgDrvnV "Vehicle Speed Average Driven Validity";
+CM_ SG_ 425 VehSpdAvgNonDrvn "Vehicle Speed Average Non Driven";
+CM_ SG_ 425 VehSpdAvgNonDrvnV "Vehicle Speed Average Non Driven Validity";
+CM_ SG_ 425 VehSpdAvgV "Vehicle Speed Average Validity";
+CM_ SG_ 355 DrvrSbltAtc "Driver Seatbelt Attached
+indicate the driver has fasten seatbelt";
+CM_ SG_ 355 DrvrSbltAtcV "Driver Seatbelt Attached Validity";
+CM_ SG_ 694 ScurtKeyInvd "Security Key Invalid";
+CM_ SG_ 694 SysBPM "System Backup Power Mode";
+CM_ SG_ 694 SysBPMEnbd "System Backup Power Mode Enabled";
+CM_ SG_ 854 DrvrDoorOpenSts "Driver Door Open Status";
+CM_ SG_ 854 NtrlPushASts "Netual Push Active Status";
+CM_ SG_ 854 VehSideLghtSts "Vehicle Side Light Status";
+CM_ SG_ 819 FOTASts "Firmware Over The Air Status";
+CM_ SG_ 819 FOTAStsV "Firmware Over The Air Status Validity";
+CM_ SG_ 246 EPMCU_010_PDU01_CRC "Wheel Ground Velocity Non Driven Checksum
+Regarding high integrity requirement, a checksum signal is used for the bit field in same frame. The signal XOR operation is recommended for the calculation.";
+CM_ SG_ 246 EPMCUIMCUParkReqResp "Electric Park Motor Controller IMCU Park Rrequest Response";
+CM_ SG_ 246 EPMCUMotFltIO "Electric Park Motor Controller Fault Indication On";
+CM_ SG_ 246 EPMCUParkngSts "Electric Park Motor Controller Parking Status";
+CM_ SG_ 246 EPMCUSCUParkReqResp "Electric_Park_Motor_Controller_SCU_Park_Rrequest_Response";
+CM_ SG_ 246 EPMCUZeroPstnSelfLrnSts "Park Motor Controller Zero Position Self Learning Status";
+CM_ SG_ 71 EPTBrkPdlDscrtInptStsBkup "Electric Powertrain Brake Pedal Discrete Input Status";
+CM_ SG_ 71 EPTBrkPdlDscrtInptStsVBkup "Electric Powertrain Brake Pedal Discrete Input Status Validity";
+CM_ SG_ 71 EPTStCmdOnBkup "Electric Powertrain Start Command On";
+CM_ SG_ 71 EPTTrInptShaftSpdBkup "Electric Powertrain Transmission Input Shaft Speed";
+CM_ SG_ 71 EPTTrInptShaftSpdVBkup "Electric Powertrain Transmission Input Shaft Speed Validity Back Up";
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigStartValue" FLOAT -1.79769313486232E+308 1.84467440737096E+019;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","spontaneous","cyclicIfActive","spontaneousWithDelay","cyclicAndSpontaneous","cyclicAndSpontaneousWithDelay","IfActive","NoMsgSendType";
+BA_DEF_ BO_  "GenMsgCycleTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgStartDelayTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgDelayTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 100000;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" FLOAT 0 300000;
+BA_DEF_ BU_  "NmAsrNodeIdentifier" INT 0 255;
+BA_DEF_ BU_  "NmAsrNode" ENUM  "No","Yes";
+BA_DEF_  "Baudrate" FLOAT 1000 1000000;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "ProtocolType" STRING ;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenMsgSendType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "NmAsrNodeIdentifier" 0;
+BA_DEF_DEF_  "NmAsrNode" "No";
+BA_DEF_DEF_  "Baudrate" 1000;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "ProtocolType" "";
+BA_ "ProtocolType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "Baudrate" 500000;
+BA_ "DBName" "SCU";
+BA_ "GenMsgDelayTime" BO_ 1794 95;
+BA_ "GenMsgSendType" BO_ 1794 1;
+BA_ "GenMsgDelayTime" BO_ 1913 5;
+BA_ "GenMsgSendType" BO_ 1913 1;
+BA_ "GenMsgStartDelayTime" BO_ 157 0;
+BA_ "GenMsgCycleTime" BO_ 157 10;
+BA_ "GenMsgSendType" BO_ 157 0;
+BA_ "GenMsgDelayTime" BO_ 1573 5;
+BA_ "GenMsgSendType" BO_ 1573 1;
+BA_ "GenMsgStartDelayTime" BO_ 216 0;
+BA_ "GenMsgCycleTime" BO_ 216 10;
+BA_ "GenMsgSendType" BO_ 216 0;
+BA_ "GenMsgDelayTime" BO_ 789 10;
+BA_ "GenMsgSendType" BO_ 789 1;
+BA_ "GenMsgDelayTime" BO_ 791 10;
+BA_ "GenMsgSendType" BO_ 791 1;
+BA_ "GenMsgStartDelayTime" BO_ 361 10;
+BA_ "GenMsgCycleTime" BO_ 361 20;
+BA_ "GenMsgSendType" BO_ 361 0;
+BA_ "GenMsgStartDelayTime" BO_ 497 5;
+BA_ "GenMsgCycleTime" BO_ 497 20;
+BA_ "GenMsgSendType" BO_ 497 0;
+BA_ "GenMsgStartDelayTime" BO_ 872 5;
+BA_ "GenMsgCycleTime" BO_ 872 100;
+BA_ "GenMsgSendType" BO_ 872 0;
+BA_ "GenMsgStartDelayTime" BO_ 1344 10;
+BA_ "GenMsgCycleTime" BO_ 1344 1000;
+BA_ "GenMsgSendType" BO_ 1344 0;
+BA_ "GenMsgDelayTime" BO_ 243 10;
+BA_ "GenMsgSendType" BO_ 243 1;
+BA_ "GenMsgDelayTime" BO_ 138 10;
+BA_ "GenMsgSendType" BO_ 138 1;
+BA_ "GenMsgDelayTime" BO_ 1345 200;
+BA_ "GenMsgSendType" BO_ 1345 1;
+BA_ "GenMsgDelayTime" BO_ 342 20;
+BA_ "GenMsgSendType" BO_ 342 1;
+BA_ "GenMsgDelayTime" BO_ 381 20;
+BA_ "GenMsgSendType" BO_ 381 1;
+BA_ "GenMsgDelayTime" BO_ 425 20;
+BA_ "GenMsgSendType" BO_ 425 1;
+BA_ "GenMsgDelayTime" BO_ 355 20;
+BA_ "GenMsgSendType" BO_ 355 1;
+BA_ "GenMsgStartDelayTime" BO_ 694 10;
+BA_ "GenMsgCycleTime" BO_ 694 50;
+BA_ "GenMsgSendType" BO_ 694 0;
+BA_ "GenMsgStartDelayTime" BO_ 854 20;
+BA_ "GenMsgCycleTime" BO_ 854 100;
+BA_ "GenMsgSendType" BO_ 854 0;
+BA_ "GenMsgDelayTime" BO_ 819 10;
+BA_ "GenMsgSendType" BO_ 819 1;
+BA_ "GenMsgDelayTime" BO_ 2015 20;
+BA_ "GenMsgSendType" BO_ 2015 1;
+BA_ "GenMsgDelayTime" BO_ 1905 20;
+BA_ "GenMsgSendType" BO_ 1905 1;
+BA_ "GenMsgStartDelayTime" BO_ 246 5;
+BA_ "GenMsgCycleTime" BO_ 246 10;
+BA_ "GenMsgSendType" BO_ 246 0;
+BA_ "GenMsgStartDelayTime" BO_ 71 0;
+BA_ "GenMsgCycleTime" BO_ 71 10;
+BA_ "GenMsgSendType" BO_ 71 0;
+BA_ "GenMsgStartDelayTime" BO_ 298 0;
+BA_ "GenMsgCycleTime" BO_ 298 20;
+BA_ "GenMsgSendType" BO_ 298 0;
+BA_ "GenSigStartValue" SG_ 1794 DTCInfomationSCU 0;
+BA_ "GenSigSendType" SG_ 1794 DTCInfomationSCU 1;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_CRC 0;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_RC 0;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_Reserve01 15;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_Reserve02 3;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_Reserve03 15;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_Reserve04 3;
+BA_ "GenSigStartValue" SG_ 157 SCU_010ms_PDU00_Reserve05 255;
+BA_ "GenSigStartValue" SG_ 157 SCUActrMvmntSts 0;
+BA_ "GenSigStartValue" SG_ 157 SCUExtdShifterFlr 0;
+BA_ "GenSigStartValue" SG_ 157 SCUFltLvlWrnng 0;
+BA_ "GenSigStartValue" SG_ 157 SCUParkLckReq 0;
+BA_ "GenSigStartValue" SG_ 157 SCUParkLckReqEPMCU 0;
+BA_ "GenSigStartValue" SG_ 157 SCUParkLckReqV 1;
+BA_ "GenSigStartValue" SG_ 157 SCUParkLckReqVEPMCU 1;
+BA_ "GenSigStartValue" SG_ 157 SCUShftLvrPosIncnstntFlag 0;
+BA_ "GenSigStartValue" SG_ 157 SCUShftLvrPosTrgt 0;
+BA_ "GenSigStartValue" SG_ 157 SCUShifterLvrPos 0;
+BA_ "GenSigStartValue" SG_ 157 SCUShifterOpngRmndr 0;
+BA_ "GenSigStartValue" SG_ 157 SCUShifterPosInvsn 15;
+BA_ "GenSigStartValue" SG_ 1573 EvtPotclSigSCU 0;
+BA_ "GenSigSendType" SG_ 1573 EvtPotclSigSCU 1;
+BA_ "GenSigStartValue" SG_ 216 DrvrReqParkBtn 0;
+BA_ "GenSigStartValue" SG_ 216 SCUShifterLvrRawPos 2;
+BA_ "GenSigStartValue" SG_ 789 CCUOnbdChrgrPlugOn 0;
+BA_ "GenSigStartValue" SG_ 791 CCUOffBdChrgrPlugOn 0;
+BA_ "GenSigStartValue" SG_ 791 CCUOffBdChrgrPlugOnV 1;
+BA_ "GenSigStartValue" SG_ 361 ACAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 ADASAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 BCMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 BMSAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 CCUAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 DMSAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 EPBAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 EPSAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 ESCLAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 ESSPTCAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 FICMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 FLSMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 IPKAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 PLCMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 RDAAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 SACAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 SASAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 SCSAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 SCUAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 SDMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 TBOXAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 TDMAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 TPMSAvlbly 0;
+BA_ "GenSigStartValue" SG_ 361 VCUAvlbly 0;
+BA_ "GenSigStartValue" SG_ 497 BPwrMdMstrstrAvlbly 0;
+BA_ "GenSigStartValue" SG_ 497 SysOpnlMd 0;
+BA_ "GenSigStartValue" SG_ 497 SysPwrMd 0;
+BA_ "GenSigStartValue" SG_ 497 SysPwrMdV 0;
+BA_ "GenSigStartValue" SG_ 497 SysVol 0;
+BA_ "GenSigStartValue" SG_ 497 SysVolMd 0;
+BA_ "GenSigStartValue" SG_ 497 SysVolMdV 0;
+BA_ "GenSigStartValue" SG_ 497 SysVolV 0;
+BA_ "GenSigStartValue" SG_ 872 CCP_100ms_PDU06_CRC 0;
+BA_ "GenSigStartValue" SG_ 872 CCP_100ms_PDU06_RC 0;
+BA_ "GenSigStartValue" SG_ 872 CCP_100ms_PDU06_Reserve02 1073741823;
+BA_ "GenSigStartValue" SG_ 872 PwrMdMstrAccryWkupA 0;
+BA_ "GenSigStartValue" SG_ 872 VehDrvngMd 0;
+BA_ "GenSigStartValue" SG_ 872 VehDrvngMdRmndr 0;
+BA_ "GenSigStartValue" SG_ 1344 VehOdo 0;
+BA_ "GenSigStartValue" SG_ 1344 VehOdoV 0;
+BA_ "GenSigStartValue" SG_ 243 ActuOtptRodTrvl 0;
+BA_ "GenSigStartValue" SG_ 243 ActuOtptRodTrvlSts 0;
+BA_ "GenSigStartValue" SG_ 243 BrkPdlPos_IBS 0;
+BA_ "GenSigStartValue" SG_ 243 BrkPdlPosV_IBS 0;
+BA_ "GenSigStartValue" SG_ 138 EPTRdy 0;
+BA_ "GenSigStartValue" SG_ 138 EPTStCmdOn 0;
+BA_ "GenSigStartValue" SG_ 1345 CalendarDay 0;
+BA_ "GenSigStartValue" SG_ 1345 CalendarMonth 0;
+BA_ "GenSigStartValue" SG_ 1345 CalendarYear 0;
+BA_ "GenSigStartValue" SG_ 1345 HourOfDay 0;
+BA_ "GenSigStartValue" SG_ 1345 MinuteOfHour 0;
+BA_ "GenSigStartValue" SG_ 1345 SecsOfMinute 0;
+BA_ "GenSigStartValue" SG_ 1345 TimeDspFmt 0;
+BA_ "GenSigStartValue" SG_ 342 EPBAppcnSts 0;
+BA_ "GenSigStartValue" SG_ 342 EPBAppcnSts_M 2;
+BA_ "GenSigStartValue" SG_ 342 EPBAvlblySts 0;
+BA_ "GenSigStartValue" SG_ 342 EPBCCCanclReqd 0;
+BA_ "GenSigStartValue" SG_ 342 EPBFlrSts 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSts 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSwSts 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSwStsV 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSysAudWrnngReq 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSysDspMsgReq 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSysStsIndReq 0;
+BA_ "GenSigStartValue" SG_ 342 EPBSysWrnngIndReq 0;
+BA_ "GenSigStartValue" SG_ 342 SCS_020ms_PDU04_CRC 0;
+BA_ "GenSigStartValue" SG_ 342 SCS_020ms_PDU04_RC 0;
+BA_ "GenSigStartValue" SG_ 342 SCS_020ms_PDU04_Reserve01 268435455;
+BA_ "GenSigStartValue" SG_ 381 EPBLAppcnSts_S 2;
+BA_ "GenSigStartValue" SG_ 381 SCS_020ms_PDU43_CRC 0;
+BA_ "GenSigStartValue" SG_ 381 SCS_020ms_PDU43_RC 0;
+BA_ "GenSigStartValue" SG_ 381 SCS_020ms_PDU43_Reserve01 15;
+BA_ "GenSigStartValue" SG_ 381 SCS_020ms_PDU43_Reserve02 2097151;
+BA_ "GenSigStartValue" SG_ 381 SCS_020ms_PDU43_Reserve03 16777215;
+BA_ "GenSigStartValue" SG_ 425 SCS_020ms_PDU15_CRC 0;
+BA_ "GenSigStartValue" SG_ 425 SCS_020ms_PDU15_RC 0;
+BA_ "GenSigStartValue" SG_ 425 SCS_020ms_PDU15_Reserve01 7;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvg 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgDrvn 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgDrvnSrc 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgDrvnV 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgNonDrvn 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgNonDrvnV 0;
+BA_ "GenSigStartValue" SG_ 425 VehSpdAvgV 0;
+BA_ "GenSigStartValue" SG_ 355 DrvrSbltAtc 0;
+BA_ "GenSigStartValue" SG_ 355 DrvrSbltAtcV 0;
+BA_ "GenSigStartValue" SG_ 694 ScurtKeyInvd 1;
+BA_ "GenSigStartValue" SG_ 694 SysBPM 0;
+BA_ "GenSigStartValue" SG_ 694 SysBPMEnbd 0;
+BA_ "GenSigStartValue" SG_ 854 DrvrDoorOpenSts 0;
+BA_ "GenSigStartValue" SG_ 854 NtrlPushASts 0;
+BA_ "GenSigStartValue" SG_ 854 VehSideLghtSts 0;
+BA_ "GenSigStartValue" SG_ 819 FOTASts 0;
+BA_ "GenSigStartValue" SG_ 819 FOTAStsV 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_CRC 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_RC 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_Reserve01 1;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_Reserve02 255;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_Reserve03 65535;
+BA_ "GenSigStartValue" SG_ 246 EPMCU_010_PDU01_Reserve04 65535;
+BA_ "GenSigStartValue" SG_ 246 EPMCUIMCUParkReqResp 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCUMotFltIO 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCUParkngSts 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCUSCUParkReqResp 0;
+BA_ "GenSigStartValue" SG_ 246 EPMCUZeroPstnSelfLrnSts 0;
+BA_ "GenSigStartValue" SG_ 71 EPTBrkPdlDscrtInptStsBkup 0;
+BA_ "GenSigStartValue" SG_ 71 EPTBrkPdlDscrtInptStsVBkup 0;
+BA_ "GenSigStartValue" SG_ 71 EPTStCmdOnBkup 0;
+BA_ "GenSigStartValue" SG_ 71 EPTTrInptShaftSpdBkup 32767;
+BA_ "GenSigStartValue" SG_ 71 EPTTrInptShaftSpdVBkup 0;
+BA_ "GenSigStartValue" SG_ 298 EPTRdyBkup 0;
+BA_ "GenSigStartValue" SG_ 298 TrShftLvrPosBkup 0;
+BA_ "GenSigStartValue" SG_ 298 TrShftLvrPosVBkup 0;
+VAL_ 157 NtrlPushImpmntSts 1 "SCU_N_push_implemented" 0 "SCU_N_push_not_implement" ;
+VAL_ 157 SCUActrMvmntSts 0 "SCUActrMvmntSts_Actuator_Stop" 1 "SCUActrMvmntSts_ActuatorGo_out_of_P" 2 "SCUActrMvmntSts_Actuator_Go_Into_P" 3 "SCUActrMvmntSts_3_Reserved" ;
+VAL_ 157 SCUExtdShifterFlr 0 "SCUExtdShifterFlr_No_fail" 1 "SCUExtdShifterFlr_Mode_selector_sensor_fail" 2 "SCUExtdShifterFlr_Single_rotary_hall_sensor_fail" 3 "SCUExtdShifterFlr_CAN_Bus_communication_fail" 4 "SCUExtdShifterFlr_Single_P_button_sensor_fail" 5 "SCUExtdShifterFlr_All_rotary_hall_senso_fail" 6 "SCUExtdShifterFlr_All_P_button_sensor_fail" 7 "SCUExtdShifterFlr_SSU_fail" 8 "SCUExtdShifterFlr_Single_Unlock_button_fail" 9 "SCUExtdShifterFlr_All_unlock_button_fail" 10 "SCUExtdShifterFlr_Single_SENT_sensor_fail" 11 "SCUExtdShifterFlr_All_SENT_sensor_fail" 12 "SCUExtdShifterFlr_Motor_Stuck" 13 "SCUExtdShifterFlr_Motor_fail" ;
+VAL_ 157 SCUFltLvlWrnng 0 "SCUFltLvlWrnng_No_Fault" 1 "SCUFltLvlWrnng_SCU_Limited_Fault" 2 "SCUFltLvlWrnng_SCU_Critical_Fault" 3 "SCUFltLvlWrnng_Transmission_Wrong_Gear_feedback" ;
+VAL_ 157 SCUParkLckReq 0 "SCUParkLckReq_12_No_Request" 1 "SCUParkLckReq_24_Release_brake_request" 2 "SCUParkLckReq_12_Apply_brake_request" 3 "SCUParkLckReq_24_Reserved" ;
+VAL_ 157 SCUParkLckReqEPMCU 0 "SCUParkLckReqEPMCU_0_12NoRequest" 1 "SCUParkLckReqEPMCU_1_24ReleaseBrakeRequest" 2 "SCUParkLckReqEPMCU_2_12ApplyBrakeRequest" 3 "SCUParkLckReqEPMCU_3_24Reserved" ;
+VAL_ 157 SCUParkLckReqV 0 "SCUParkLckReqV_0_Valid" 1 "SCUParkLckReqV_1_Invalid" ;
+VAL_ 157 SCUParkLckReqVEPMCU 0 "SCUParkLckReqVEPMCU_0_Valid" 1 "SCUParkLckReqVEPMCU_1_Invalid" ;
+VAL_ 157 SCUShftLvrPosIncnstntFlag 0 "False" 1 "True" ;
+VAL_ 157 SCUShftLvrPosTrgt 0 "SCU_initialization" 1 "SCUShftLvrPosTrgt_S_Sport_mode" 2 "SCUShftLvrPosTrgt_W_Winter_mode" 3 "SCUShftLvrPosTrgt_M_Manual_mode" 5 "SCUShftLvrPosTrgt_D_Drive" 6 "SCUShftLvrPosTrgt_N_Neutral" 7 "SCUShftLvrPosTrgt_R_Reverse" 8 "SCUShftLvrPosTrgt_P_Park" 9 "SCUShftLvrPosTrgt_In_learn_Process" 10 "SCUShftLvrPosTrgt_Error" ;
+VAL_ 157 SCUShifterLvrPos 0 "SCUShifterLvrPos_SCU_Initialization" 1 "SCUShifterLvrPos_S_Sport_mode_" 2 "SCUShifterLvrPos_W_Winter_mode_" 3 "SCUShifterLvrPos_M_Manual_mode_" 5 "SCUShifterLvrPos_D_Drive_" 6 "SCUShifterLvrPos_N_Neutral_" 7 "SCUShifterLvrPos_R_Reverse_" 8 "SCUShifterLvrPos_P_Park_" 9 "SCUShifterLvrPos_In_Learn_Process" 10 "SCUShifterLvrPos_Error" ;
+VAL_ 157 SCUShifterOpngRmndr 0 "SCUShifterOpngRmndr_0_No_Reminder_Request" 1 "SCUShifterOpngRmndr_1_Please_Press_The_Unlock_Button" 2 "SCUShifterOpngRmndr_2_Please_Slam_On_The__Brake_Pedal" 3 "SCUShifterOpngRmndr_3_Please_Press_The__Unlock_Button_And_Slam_On_The__Brake_Pedal" 4 "SCUShifterOpngRmndr_4_Speed_Too_High,Go_Into_P_not_allowed" 5 "SCUShifterOpngRmndr_5_Speed_Too_High,Go_Into_R_not_allowed" 6 "SCUShifterOpngRmndr_6_Security_condition_not_met" ;
+VAL_ 157 SCUShifterPosInvsn 5 "SCUShifterPosInvsn_Error" 6 "SCUShifterPosInvsn_In_Learn_Process" 7 "SCUShifterPosInvsn_P_Park_" 8 "SCUShifterPosInvsn_R_Reverse_" 9 "SCUShifterPosInvsn_N_Neutral_" 10 "SCUShifterPosInvsn_D_Drive_" 11 "SCUShifterPosInvsn_11_Reserved" 12 "SCUShifterPosInvsn_M_Manual_mode_" 13 "SCUShifterPosInvsn_W_Winter_mode_" 14 "SCUShifterPosInvsn_S_Sport_mode_" 15 "SCUShifterPosInvsn_SCU_initialization" ;
+VAL_ 216 DrvrReqParkBtn 0 "DrvrReqParkBtn_0_DrvrReqParkBtn_0_no_request" 1 "DrvrReqParkBtn_1_DrvrReqParkBtn_1_driver_request_park_button" 2 "DrvrReqParkBtn_2_DrvrReqParkBtn_2_Park_button_fault" 3 "DrvrReqParkBtn_3_DrvrReqParkBtn_3_reserved" ;
+VAL_ 216 SCUShifterLvrRawPos 0 "SCUShifterLvrRawPos_0_Up2" 1 "SCUShifterLvrRawPos_1_Up1" 2 "SCUShifterLvrRawPos_2_Stable" 3 "SCUShifterLvrRawPos_3_Down1" 4 "SCUShifterLvrRawPos_4_Down2" 5 "SCUShifterLvrRawPos_5_Ptouch" 6 "SCUShifterLvrRawPos_6_Error" ;
+VAL_ 789 CCUOnbdChrgrPlugOn 0 "CCUOnbdChrgrPlugOn_0_Disconnected" 1 "CCUOnbdChrgrPlugOn_1_Connected_Gun_is_63A" 2 "CCUOnbdChrgrPlugOn_2_Connected_Gun_is_32A" 3 "CCUOnbdChrgrPlugOn_3_Connected_Gun_is_16A" 4 "CCUOnbdChrgrPlugOn_4_Connected_Gun_is_10A" 5 "CCUOnbdChrgrPlugOn_5_Semi_connected" 6 "CCUOnbdChrgrPlugOn_6_Abnormal_Connected" 7 "CCUOnbdChrgrPlugOn_7_V2L_Connected" 8 "CCUOnbdChrgrPlugOn_8_V2G_Connected" 9 "CCUOnbdChrgrPlugOn_9_Unknow_Connected" ;
+VAL_ 791 CCUOffBdChrgrPlugOn 0 "CCUOffBdChrgrPlugOn_0_Disconnected" 1 "CCUOffBdChrgrPlugOn_1_Connected" 2 "CCUOffBdChrgrPlugOn_2_Semi_connected" ;
+VAL_ 791 CCUOffBdChrgrPlugOnV 0 "CCUOffBdChrgrPlugOnV_0_Valid" 1 "CCUOffBdChrgrPlugOnV_1_Invalid" ;
+VAL_ 361 ACAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 ADASAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 BCMAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 BMSAvlbly 0 "False" 1 "True" ;
+VAL_ 361 CCUAvlbly 0 "False" 1 "True" ;
+VAL_ 361 DMSAvlbly 0 "False" 1 "True" ;
+VAL_ 361 EPBAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 EPSAvlbly 0 "False" 1 "True" ;
+VAL_ 361 ESCLAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 ESSPTCAvlbly 0 "False" 1 "True" ;
+VAL_ 361 FICMAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 FLSMAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 IPKAvlbly 0 "False" 1 "True" ;
+VAL_ 361 PLCMAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 RDAAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 SACAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 SASAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 SCSAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 SCUAvlbly 0 "False" 1 "True" ;
+VAL_ 361 SDMAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 TBOXAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 TDMAvlbly 0 "False" 1 "True" ;
+VAL_ 361 TPMSAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 361 VCUAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 497 BPwrMdMstrstrAvlbly 0 "FALSE" 1 "TRUE" ;
+VAL_ 497 SysOpnlMd 0 "SysOpnlMd_Normal_Mode" 1 "SysOpnlMd_Manufacturing_Mode" 2 "SysOpnlMd_Transit_Mode" 3 "SysOpnlMd_Show_Room" 4 "SysOpnlMd_Storage_Mode" 5 "SysOpnlMd_Diagnosic_or_Reprogramming_Reserve_" 6 "SysOpnlMd_6_Service_mode" ;
+VAL_ 497 SysPwrMd 0 "SysPwrMd_0_Off" 1 "SysPwrMd_1_ACC" 2 "SysPwrMd_2_Run" 3 "SysPwrMd_3_Crank_Request" ;
+VAL_ 497 SysPwrMdV 0 "SysPwrMdV_Valid" 1 "SysPwrMdV_Invalid" ;
+VAL_ 497 SysVolMd 0 "SysPwrMd_h5_Normal" 1 "SysVolMd_Low_System_Voltage" 2 "SysVolMd_High_System_Voltage" 3 "SysVolMd_Illegal_System_Voltage" ;
+VAL_ 497 SysVolMdV 0 "SysVolMdV_0_Valid" 1 "SysVolMdV_1_Invalid" ;
+VAL_ 497 SysVolV 0 "SysVolV_0_Valid" 1 "SysVolV_1_Invalid" ;
+VAL_ 872 PwrMdMstrAccryWkupA 0 "FALSE" 1 "TRUE" ;
+VAL_ 872 VehDrvngMd 0 "VehDrvngMdET_0_No_Driving_Mode" 1 "VehDrvngMdET_1_Super_ECO" 2 "VehDrvngMdET_2_ECO" 3 "VehDrvngMdET_3_Normal" 4 "VehDrvngMdET_4_Sport" 5 "VehDrvngMdET_5_Super_Sport" 6 "VehDrvngMdET_6_Reserved" 7 "VehDrvngMdET_7_Customization_Mode" ;
+VAL_ 872 VehDrvngMdRmndr 0 "VehDrvngMdRmndr_0_No_Reminder" 1 "VehDrvngMdRmndr_1_Inhibit_Reminder" 2 "VehDrvngMdRmndr_2_Fault_Warning" 3 "VehDrvngMdRmndr_3_Reserved" ;
+VAL_ 1344 VehOdoV 0 "Valid" 1 "Invalid" ;
+VAL_ 243 ActuOtptRodTrvlSts 0 "ActuOtptRodTrvlSts_0_Init" 1 "ActuOtptRodTrvlSts_1_Normal" 2 "ActuOtptRodTrvlSts_2_Faulty" ;
+VAL_ 243 BrkPdlPosV_IBS 0 "BrkPdlPosV_Valid" 1 "BrkPdlPosV_Invalid" ;
+VAL_ 138 EPTRdy 0 "EPTRdy_0_NotReady" 1 "EPTRdy_1_Ready" ;
+VAL_ 138 EPTStCmdOn 0 "EPTStCmdOn_0_False" 1 "EPTStCmdOn_1_True" ;
+VAL_ 1345 CalendarMonth 0 "CalendarMonth_0_Unknown" 1 "CalendarMonth_1_January" 2 "CalendarMonth_2_February" 3 "CalendarMonth_3_March" 4 "CalendarMonth_4_April" 5 "CalendarMonth_5_May" 6 "CalendarMonth_6_June" 7 "CalendarMonth_7_July" 8 "CalendarMonth_8_August" 9 "CalendarMonth_9_September" 10 "CalendarMonth_10_October" 11 "CalendarMonth_11_November" 12 "CalendarMonth_12_December" ;
+VAL_ 1345 TimeDspFmt 0 "TimeDspFmt_12_hour_mode" 1 "TimeDspFmt_24_hour_mode" ;
+VAL_ 342 EPBAppcnSts 0 "EPBAppcnSts_Unknown" 1 "EPBAppcnSts_Park_Brake_Applied" 2 "EPBAppcnSts_Park_Brake_Released" 3 "EPBAppcnSts_Park_Brake_Application_in_Progress" ;
+VAL_ 342 EPBAppcnSts_M 0 "EPBAppcnSts_M_0_ParkApplied" 1 "EPBAppcnSts_M_1_Released" 2 "EPBAppcnSts_M_2_Unknown" 3 "EPBAppcnSts_M_3_HoldApplied" 4 "EPBAppcnSts_M_4_CompletelyReleased" 5 "EPBAppcnSts_M_5_Applying" 6 "EPBAppcnSts_M_6_Releasing" ;
+VAL_ 342 EPBAvlblySts 0 "EPBAvlblySts_Unavailable_Not_Failed" 1 "EPBAvlblySts_Available_Not_Failed" 2 "EPBAvlblySts_Unavailable_Failed_Applied" 3 "EPBAvlblySts_Unavailable_Failed_Released" 4 "EPBAvlblySts_Unavailable_Failed_other" 5 "EPBAvlblySts_Unused_and_Reserved_1" 6 "EPBAvlblySts_Unused_and_Reserved_2" 7 "EPBAvlblySts_Unused_and_Reserved_3" ;
+VAL_ 342 EPBCCCanclReqd 0 "FALSE" 1 "TRUE" ;
+VAL_ 342 EPBFlrSts 0 "EPBFlrSts_No_error_in_EPB" 1 "EPBFlrSts_Error_in_EPB" ;
+VAL_ 342 EPBSts 0 "EPBSts_0_Released" 1 "EPBSts_1_Applied" 2 "EPBSts_2_Fault" ;
+VAL_ 342 EPBSwSts 0 "EPBSwSts_0_NotActive" 1 "EPBSwSts_1_Release" 2 "EPBSwSts_2_Apply" ;
+VAL_ 342 EPBSwStsV 0 "EPBSwStsV_0_Valid" 1 "EPBSwStsV_1_Invalid" ;
+VAL_ 342 EPBSysAudWrnngReq 0 "EPBSysAudWrnngReq_Off" 1 "EPBSysAudWrnngReq_Warning_1" 2 "EPBSysAudWrnngReq_Warning_2" ;
+VAL_ 342 EPBSysDspMsgReq 0 "EPBSysDspMsgReq_Off" 1 "EPBSysDspMsgReq_Message_1" 2 "EPBSysDspMsgReq_Message_2" 3 "EPBSysDspMsgReq_Message_3" 4 "EPBSysDspMsgReq_Message_4" 5 "EPBSysDspMsgReq_Message_5" 6 "EPBSysDspMsgReq_Message_6" 7 "EPBSysDspMsgReq_Message_7" ;
+VAL_ 342 EPBSysStsIndReq 0 "EPBSysStsIndReq_No_Indication" 1 "EPBSysStsIndReq_Continuous_Indication" 2 "EPBSysStsIndReq_Flash_Rate_1_Indication" 3 "EPBSysStsIndReq_Flash_Rate_2_Indication" ;
+VAL_ 342 EPBSysWrnngIndReq 0 "EPBSysWrnngIndReq_No_Indication" 1 "EPBSysWrnngIndReq_Continuous_Indication" 2 "EPBSysWrnngIndReq_Flash_Rate_1_Indication" 3 "EPBSysWrnngIndReq_Flash_Rate_2_Indication" ;
+VAL_ 381 EPBLAppcnSts_S 0 "EPBLAppcnSts_S_0_ParkApplied" 1 "EPBLAppcnSts_S_1_Released" 2 "EPBLAppcnSts_S_2_Unknown" 3 "EPBLAppcnSts_S_3_HoldApplied" 4 "EPBLAppcnSts_S_4_CompletelyReleased" 5 "EPBLAppcnSts_S_5_Applying" 6 "EPBLAppcnSts_S_6_Releasing" ;
+VAL_ 425 VehSpdAvgDrvnSrc 0 "VehSpdAvgDrvnSrc_Transmission_Output_Speed" 1 "VehSpdAvgDrvnSrc_Wheel_Speed" ;
+VAL_ 425 VehSpdAvgDrvnV 0 "Valid" 1 "Invalid" ;
+VAL_ 425 VehSpdAvgNonDrvnV 0 "Valid" 1 "Invalid" ;
+VAL_ 425 VehSpdAvgV 0 "Valid" 1 "Invalid" ;
+VAL_ 355 DrvrSbltAtc 0 "FALSE" 1 "TRUE" ;
+VAL_ 355 DrvrSbltAtcV 0 "DrvrSbltAtcV_0_Valid" 1 "DrvrSbltAtcV_1_Invalid" ;
+VAL_ 694 ScurtKeyInvd 0 "FALSE" 1 "TRUE" ;
+VAL_ 694 SysBPM 0 "SysBPM_Off" 1 "SysBPM_ACC" 2 "SysBPM_Run" 3 "SysBPM_Crank_Request" ;
+VAL_ 694 SysBPMEnbd 0 "FALSE" 1 "TRUE" ;
+VAL_ 854 DrvrDoorOpenSts 0 "DrvrDoorOpenSts_Driver_Door_Closed" 1 "DrvrDoorOpenSts_Driver_Door_Open_For_latch_switch_can_t_detect_door_ajar_status_" 2 "DrvrDoorOpenSts_Driver_Door_Ajar" 3 "DrvrDoorOpenSts_Driver_Door_Full_Open" ;
+VAL_ 854 NtrlPushASts 0 "NtrlPushASts_0_Norequest" 1 "NtrlPushASts_1_NoActive" 2 "NtrlPushASts_2_Active" ;
+VAL_ 854 VehSideLghtSts 0 "VehSideLghtSts_No_side_light_on" 1 "VehSideLghtSts_Left_side_light_on_only" 2 "VehSideLghtSts_Right_side_light_on_only" 3 "VehSideLghtSts_All_side_light_and_license_plate_light_on" ;
+VAL_ 819 FOTASts 0 "FOTASts_0_NoneFOTA" 1 "FOTASts_1_FOTA" ;
+VAL_ 819 FOTAStsV 0 "FOTAStsV_0_invalid" 1 "FOTAStsV_1_valid" ;
+VAL_ 246 EPMCUIMCUParkReqResp 0 "EPMCUIMCUParkReqResp_0_norequest" 1 "EPMCUIMCUParkReqResp_1_requesthornored" 2 "EPMCUIMCUParkReqResp_2_lostarbitration" 3 "EPMCUIMCUParkReqResp_3_controlrequestnotallowforerror" 4 "EPMCUIMCUParkReqResp_4_preconditionnotsatisfied" 5 "EPMCUIMCUParkReqResp_5_Reserved" 6 "EPMCUIMCUParkReqResp_6_Reserved" 7 "EPMCUIMCUParkReqResp_7_Reserved" ;
+VAL_ 246 EPMCUMotFltIO 0 "EPMCUMotFltIO_0_False" 1 "EPMCUMotFltIO_1_True" ;
+VAL_ 246 EPMCUParkngSts 0 "EPMCUParkngSts_0_Unknown" 1 "EPMCUParkngSts_1_ParkBrakeAppllied" 2 "EPMCUParkngSts_2_ParkBrakeRelease" 3 "EPMCUParkngSts_3_ParkBrakeAppllicationInProgress" ;
+VAL_ 246 EPMCUSCUParkReqResp 0 "EPMCUSCUParkReqResp_0_NoRequest" 1 "EPMCUSCUParkReqResp_1_RequestHornored" 2 "EPMCUSCUParkReqResp_2_LostArbitration" 3 "EPMCUSCUParkReqResp_3_ControlRequestNotAllowForError" 4 "EPMCUSCUParkReqResp_4_PreconditionNotSatisfied" ;
+VAL_ 246 EPMCUZeroPstnSelfLrnSts 0 "EPMCUZeroPstnSelfLrnSts_0_NoRequest" 1 "EPMCUZeroPstnSelfLrnSts_1_ZeropstnLearningSuccess" 2 "EPMCUZeroPstnSelfLrnSts_2_ZeropstnLearningFail" 3 "EPMCUZeroPstnSelfLrnSts_3_ZeropstnLearningInProgress" ;
+VAL_ 71 EPTBrkPdlDscrtInptStsBkup 0 "EPTBrkPdlDscrtInptStsBkup_0_BrakeNotApplied" 1 "EPTBrkPdlDscrtInptStsBkup_1_BrakeApplied" ;
+VAL_ 71 EPTBrkPdlDscrtInptStsVBkup 0 "EPTBrkPdlDscrtInptStsBkupV_0_Valid" 1 "EPTBrkPdlDscrtInptStsBkupV_1_Invalid" ;
+VAL_ 71 EPTStCmdOnBkup 0 "EPTStCmdOnBkup_0_False" 1 "EPTStCmdOnBkup_1_True" ;
+VAL_ 71 EPTTrInptShaftSpdVBkup 0 "EPTTrInptShaftSpdVBkup_0_Valid" 1 "EPTTrInptShaftSpdVBkup_1_Invalid" ;
+VAL_ 298 EPTRdyBkup 0 "EPTRdyBkup_0_NotReady" 1 "EPTRdyBkup_1_Ready" ;
+VAL_ 298 TrShftLvrPosBkup 0 "TrShftLvrPosBkup_0_BetweenRanges" 1 "TrShftLvrPosBkup_1_ParkRange" 2 "TrShftLvrPosBkup_2_ReverseRange" 3 "TrShftLvrPosBkup_3_NeutralRange" 4 "TrShftLvrPosBkup_4_ForwardRangeA" 5 "TrShftLvrPosBkup_5_ForwardRangeB" 6 "TrShftLvrPosBkup_6_ForwardRangeC" 7 "TrShftLvrPosBkup_7_ForwardRangeD" 8 "TrShftLvrPosBkup_8_ForwardRangeE" 9 "TrShftLvrPosBkup_9_ForwardRangeF" 10 "TrShftLvrPosBkup_10_ForwardRangeG" 11 "TrShftLvrPosBkup_11_ForwardRangeH" 15 "TrShftLvrPosBkup_15_LeverPositionUnknown" ;
+VAL_ 298 TrShftLvrPosVBkup 0 "TrShftLvrPosVBkup_0_Valid" 1 "TrShftLvrPosVBkup_1_Invalid" ;
+VAL_ v_047_EPTBrkPdlDscrtInptStsBkup 0 "EPTBrkPdlDscrtInptStsBkup_0_BrakeNotApplied" 1 "EPTBrkPdlDscrtInptStsBkup_1_BrakeApplied" ;
+VAL_ v_12A_TrShftLvrPosBkup 0 "TrShftLvrPosBkup_0_BetweenRanges" 1 "TrShftLvrPosBkup_1_ParkRange" 2 "TrShftLvrPosBkup_2_ReverseRange" 3 "TrShftLvrPosBkup_3_NeutralRange" 4 "TrShftLvrPosBkup_4_ForwardRangeA" 5 "TrShftLvrPosBkup_5_ForwardRangeB" 6 "TrShftLvrPosBkup_6_ForwardRangeC" 7 "TrShftLvrPosBkup_7_ForwardRangeD" 8 "TrShftLvrPosBkup_8_ForwardRangeE" 9 "TrShftLvrPosBkup_9_ForwardRangeF" 10 "TrShftLvrPosBkup_10_ForwardRangeG" 11 "TrShftLvrPosBkup_11_ForwardRangeH" 15 "TrShftLvrPosBkup_15_LeverPositionUnknown" ;
+VAL_ v_12A_EPTRdyBkup 0 "EPTRdyBkup_0_NotReady" 1 "EPTRdyBkup_1_Ready" ;
+VAL_ v_12A_TrShftLvrPosVBkup 0 "TrShftLvrPosVBkup_0_Valid" 1 "TrShftLvrPosVBkup_1_Invalid" ;
+VAL_ v_047_EPTBrkPdlDscrtInptStsVBkup 0 "EPTBrkPdlDscrtInptStsBkupV_0_Valid" 1 "EPTBrkPdlDscrtInptStsBkupV_1_Invalid" ;
+VAL_ v_047_EPTStCmdOnBkup 0 "EPTStCmdOnBkup_0_False" 1 "EPTStCmdOnBkup_1_True" ;
+VAL_ v_047_EPTTrInptShaftSpdVBkup 0 "EPTTrInptShaftSpdVBkup_0_Valid" 1 "EPTTrInptShaftSpdVBkup_1_Invalid" ;
+VAL_ v_0F6_EPMCUParkngSts 0 "EPMCUParkngSts_0_Unknown" 1 "EPMCUParkngSts_1_ParkBrakeAppllied" 2 "EPMCUParkngSts_2_ParkBrakeRelease" 3 "EPMCUParkngSts_3_ParkBrakeAppllicationInProgress" ;
+VAL_ v_356_VehSideLghtSts 0 "VehSideLghtSts_No_side_light_on" 1 "VehSideLghtSts_Left_side_light_on_only" 2 "VehSideLghtSts_Right_side_light_on_only" 3 "VehSideLghtSts_All_side_light_and_license_plate_light_on" ;
+VAL_ v_356_DrvrDoorOpenSts 0 "DrvrDoorOpenSts_Driver_Door_Closed" 1 "DrvrDoorOpenSts_Driver_Door_Open_For_latch_switch_can_t_detect_door_ajar_status_" 2 "DrvrDoorOpenSts_Driver_Door_Ajar" 3 "DrvrDoorOpenSts_Driver_Door_Full_Open" ;
+VAL_ v_2B6_ScurtKeyInvd 0 "FALSE" 1 "TRUE" ;
+VAL_ v_163_DrvrSbltAtcV 0 "DrvrSbltAtcV_0_Valid" 1 "DrvrSbltAtcV_1_Invalid" ;
+VAL_ v_163_DrvrSbltAtc 0 "FALSE" 1 "TRUE" ;
+VAL_ v_1A9_VehSpdAvgDrvnV 0 "Valid" 1 "Invalid" ;
+VAL_ v_156_EPBAppcnSts 0 "EPBAppcnSts_Unknown" 1 "EPBAppcnSts_Park_Brake_Applied" 2 "EPBAppcnSts_Park_Brake_Released" 3 "EPBAppcnSts_Park_Brake_Application_in_Progress" ;
+VAL_ v_08A_EPTStCmdOn 0 "EPTStCmdOn_0_False" 1 "EPTStCmdOn_1_True" ;
+VAL_ v_08A_EPTRdy 0 "EPTRdy_0_NotReady" 1 "EPTRdy_1_Ready" ;
+VAL_ v_1F1_SysPwrMdV 0 "SysPwrMdV_Valid" 1 "SysPwrMdV_Invalid" ;
+VAL_ v_1F1_SysPwrMd 0 "SysPwrMd_0_Off" 1 "SysPwrMd_1_ACC" 2 "SysPwrMd_2_Run" 3 "SysPwrMd_3_Crank_Request" ;
+VAL_ v_1F1_SysOpnlMd 0 "SysOpnlMd_Normal_Mode" 1 "SysOpnlMd_Manufacturing_Mode" 2 "SysOpnlMd_Transit_Mode" 3 "SysOpnlMd_Show_Room" 4 "SysOpnlMd_Storage_Mode" 5 "SysOpnlMd_Diagnosic_or_Reprogramming_Reserve_" 6 "SysOpnlMd_6_Service_mode" ;
+VAL_ v_317_CCUOffBdChrgrPlugOnV 0 "CCUOffBdChrgrPlugOnV_0_Valid" 1 "CCUOffBdChrgrPlugOnV_1_Invalid" ;
+VAL_ v_317_CCUOffBdChrgrPlugOn 0 "CCUOffBdChrgrPlugOn_0_Disconnected" 1 "CCUOffBdChrgrPlugOn_1_Connected" 2 "CCUOffBdChrgrPlugOn_2_Semi_connected" ;
+SIG_GROUP_ 157 SCU_010ms_PDU00 1 : SCU_010ms_PDU00_CRC SCU_010ms_PDU00_RC SCU_010ms_PDU00_Reserve01 SCU_010ms_PDU00_Reserve02 SCU_010ms_PDU00_Reserve03 SCU_010ms_PDU00_Reserve04 SCU_010ms_PDU00_Reserve05 SCUActrMvmntSts SCUExtdShifterFlr SCUFltLvlWrnng SCUParkLckReq SCUParkLckReqEPMCU SCUParkLckReqV SCUParkLckReqVEPMCU SCUShftLvrPosIncnstntFlag SCUShftLvrPosTrgt SCUShifterLvrPos SCUShifterOpngRmndr SCUShifterPosInvsn;
+SIG_GROUP_ 361 CCP_020ms_PDU00 1 : ACAvlbly ADASAvlbly BCMAvlbly BMSAvlbly CCUAvlbly DMSAvlbly EPBAvlbly EPSAvlbly ESCLAvlbly ESSPTCAvlbly FICMAvlbly FLSMAvlbly IPKAvlbly PLCMAvlbly RDAAvlbly SACAvlbly SASAvlbly SCSAvlbly SCUAvlbly SDMAvlbly TBOXAvlbly TDMAvlbly TPMSAvlbly VCUAvlbly;
+SIG_GROUP_ 872 CCP_100ms_PDU06 1 : CCP_100ms_PDU06_CRC CCP_100ms_PDU06_RC CCP_100ms_PDU06_Reserve02 PwrMdMstrAccryWkupA VehDrvngMd VehDrvngMdRmndr;
+SIG_GROUP_ 342 SCS_020ms_PDU04 1 : EPBAppcnSts EPBAppcnSts_M EPBAvlblySts EPBCCCanclReqd EPBFlrSts EPBSts EPBSwSts EPBSwStsV EPBSysAudWrnngReq EPBSysDspMsgReq EPBSysStsIndReq EPBSysWrnngIndReq SCS_020ms_PDU04_CRC SCS_020ms_PDU04_RC SCS_020ms_PDU04_Reserve01;
+SIG_GROUP_ 381 SCS_020ms_PDU43 1 : EPBLAppcnSts_S SCS_020ms_PDU43_CRC SCS_020ms_PDU43_RC SCS_020ms_PDU43_Reserve01 SCS_020ms_PDU43_Reserve02 SCS_020ms_PDU43_Reserve03;
+SIG_GROUP_ 425 SCS_020ms_PDU15 1 : SCS_020ms_PDU15_CRC SCS_020ms_PDU15_RC SCS_020ms_PDU15_Reserve01 VehSpdAvg VehSpdAvgDrvn VehSpdAvgDrvnSrc VehSpdAvgDrvnV VehSpdAvgNonDrvn VehSpdAvgNonDrvnV VehSpdAvgV;
+SIG_GROUP_ 246 EPMCU_010_PDU01 1 : EPMCU_010_PDU01_CRC EPMCU_010_PDU01_RC EPMCU_010_PDU01_Reserve01 EPMCU_010_PDU01_Reserve02 EPMCU_010_PDU01_Reserve03 EPMCU_010_PDU01_Reserve04 EPMCUIMCUParkReqResp EPMCUMotFltIO EPMCUParkngSts EPMCUSCUParkReqResp EPMCUZeroPstnSelfLrnSts;
+

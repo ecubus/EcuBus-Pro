@@ -1,0 +1,172 @@
+/*---------GLOBAL DEFINITIONS-----------*/
+
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: LIN4, 5 ms, 0.1 ms ;
+  Slaves: MFS, HOD ;
+}
+
+Signals {
+  MFS_Left_switch_Left_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_Right_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_Up_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_Down_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_OK_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_Left_One_signal: 2, 0, MFS, LIN4 ;
+  MFS_Left_switch_Left_Two_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Left_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Right_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Up_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Down_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_OK_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Right_One_signal: 2, 0, MFS, LIN4 ;
+  MFS_Right_switch_Right_Two_signal: 2, 0, MFS, LIN4 ;
+  MFS_DiagInfoSW: 3, 0, MFS, LIN4 ;
+  MFS_RsErr: 1, 0, MFS, LIN4 ;
+  MFS_RollingCounter: 4, 0, MFS, LIN4 ;
+  MFS_Left_switch_Down_counter: 6, 0, MFS, LIN4 ;
+  MFS_Right_switch_Down_counter: 6, 0, MFS, LIN4 ;
+  MFS_CheckSum: 8, 0, MFS, LIN4 ;
+  HOD_handsoffDetectResult: 3, 0, HOD, LIN4 ;
+  HOD_handsoffAbilityDetect: 3, 0, HOD, LIN4 ;
+  HOD_SystemStatus: 3, 0, HOD, LIN4 ;
+  HOD_SenserStatus: 1, 0, HOD, LIN4 ;
+  HOD_AppStatus: 1, 0, HOD, LIN4 ;
+  HOD_LinStatus: 1, 0, HOD, LIN4 ;
+  HOD_CalibratedStatus: 1, 1, HOD, LIN4 ;
+  HODRollingCounter: 4, 0, HOD, LIN4 ;
+  HODCheckSum: 8, 0, HOD, LIN4 ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  MFS_0x19: 25, MFS, 8 {
+    MFS_Left_switch_Left_signal, 0 ;
+    MFS_Left_switch_Right_signal, 2 ;
+    MFS_Left_switch_Up_signal, 4 ;
+    MFS_Left_switch_Down_signal, 6 ;
+    MFS_Left_switch_OK_signal, 8 ;
+    MFS_Left_switch_Left_One_signal, 10 ;
+    MFS_Left_switch_Left_Two_signal, 12 ;
+    MFS_Right_switch_Left_signal, 16 ;
+    MFS_Right_switch_Right_signal, 18 ;
+    MFS_Right_switch_Up_signal, 20 ;
+    MFS_Right_switch_Down_signal, 22 ;
+    MFS_Right_switch_OK_signal, 24 ;
+    MFS_Right_switch_Right_One_signal, 26 ;
+    MFS_Right_switch_Right_Two_signal, 28 ;
+    MFS_DiagInfoSW, 32 ;
+    MFS_RsErr, 35 ;
+    MFS_RollingCounter, 36 ;
+    MFS_Left_switch_Down_counter, 40 ;
+    MFS_Right_switch_Down_counter, 48 ;
+    MFS_CheckSum, 56 ;
+  }
+  HOD_0x1D: 29, HOD, 8 {
+    HOD_handsoffDetectResult, 2 ;
+    HOD_handsoffAbilityDetect, 5 ;
+    HOD_SystemStatus, 8 ;
+    HOD_SenserStatus, 11 ;
+    HOD_AppStatus, 12 ;
+    HOD_LinStatus, 13 ;
+    HOD_CalibratedStatus, 14 ;
+    HODRollingCounter, 52 ;
+    HODCheckSum, 56 ;
+  }
+  BDC_0x10:16,LIN4,8{
+  }
+  BDC_0x20:32,LIN4,8{
+  }
+}
+
+
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  MFS{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x13 ;
+    initial_NAD = 0x13 ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = MFS_RsErr ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      MFS_0x19 ;
+    }
+  }
+  HOD{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x11 ;
+    initial_NAD = 0x11 ;
+    product_id = 0x0, 0x0, 0 ;
+    response_error = HOD_LinStatus ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      HOD_0x1D ;
+    }
+  }
+}
+
+Schedule_tables {
+ Schedule1 {
+    BDC_0x10 delay 10 ms ;
+    BDC_0x20 delay 10 ms ;
+    MFS_0x19 delay 10 ms ;
+    HOD_0x1D delay 10 ms ;
+  }
+}
+
+
+

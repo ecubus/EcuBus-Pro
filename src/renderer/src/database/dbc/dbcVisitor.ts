@@ -777,6 +777,15 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     //ok
     return v
   }
+  valueDefinitionClauseEnv(ctx: any): {
+    envName: string
+    values: { label: string; value: number }[]
+  } {
+    return {
+      envName: ctx.Identifier[0].image,
+      values: []
+    }
+  }
 
   environmentVariableClause(ctx: EnvironmentVariableClauseCstChildren): EnvironmentVariable {
     const accessNodeMap: Record<string, 'unrestricted' | 'Read' | 'Write' | 'Read/Write'> = {

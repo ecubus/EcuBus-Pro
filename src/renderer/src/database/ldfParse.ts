@@ -1416,15 +1416,15 @@ class LdfVistor extends visitor {
         id: Number((rm.Interger[0] as IToken).image),
         publishedBy: (rm.Identifier[1] as IToken).image,
         frameSize: Number((rm.Interger[1] as IToken).image),
-        signals: [
-          ...rm.subframeSignalClause.map((identToken) => {
-            const srm = (identToken as CstNode).children
-            return {
-              name: (srm.Identifier[0] as IToken).image,
-              offset: Number((srm.Interger[0] as IToken).image)
-            }
-          })
-        ]
+        signals: rm.subframeSignalClause
+          ? rm.subframeSignalClause.map((identToken) => {
+              const srm = (identToken as CstNode).children
+              return {
+                name: (srm.Identifier[0] as IToken).image,
+                offset: Number((srm.Interger[0] as IToken).image)
+              }
+            })
+          : []
       }
     }
   }

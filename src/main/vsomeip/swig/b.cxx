@@ -12,9 +12,10 @@ using namespace vsomeip_v3;
 struct CallbackContext {
     Napi::ThreadSafeFunction tsfn;
     std::string callbackId;
+    std::string callbackType;
     
-    CallbackContext(Napi::ThreadSafeFunction tsfn, std::string id) 
-        : tsfn(tsfn), callbackId(id) {}
+    CallbackContext(Napi::ThreadSafeFunction tsfn, std::string id, std::string type) 
+        : tsfn(tsfn), callbackId(id), callbackType(type) {}
 };
 
 // Global callback registry
@@ -32,7 +33,7 @@ void FinalizerCallback(Napi::Env env, void* finalizeData, CallbackContext* conte
     delete context;
 }
 
-// Helper function to call JavaScript callback
+// Helper function to call JavaScript callback with type and data
 void CallJsCallback(CallbackContext* context, const std::function<void(Napi::Env, Napi::Function)>& callback) {
     if (context) {
         context->tsfn.BlockingCall([callback](Napi::Env env, Napi::Function jsCallback) {
@@ -116,7 +117,11 @@ void VsomeipCallbackWrapper::registerStateHandler(const std::string& callbackId)
     auto context = callbackRegistry[callbackId];
     app_->register_state_handler([context](state_type_e state) {
         CallJsCallback(context.get(), [state](Napi::Env env, Napi::Function jsCallback) {
-            jsCallback.Call({Napi::Number::New(env, static_cast<int>(state))});
+            Napi::Object result = Napi::Object::New(env);
+            result.Set("type", Napi::String::New(env, "state"));
+            result.Set("data", Napi::Number::New(env, static_cast<int>(state)));
+            
+            jsCallback.Call({result});
         });
     });
 }
@@ -156,7 +161,11 @@ void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t i
                     msgObj.Set("payload", buffer);
                 }
                 
-                jsCallback.Call({msgObj});
+                Napi::Object result = Napi::Object::New(env);
+                result.Set("type", Napi::String::New(env, "message"));
+                result.Set("data", msgObj);
+                
+                jsCallback.Call({result});
             });
         });
 }
@@ -176,10 +185,14 @@ void VsomeipCallbackWrapper::registerAvailabilityHandler(uint16_t service, uint1
     app_->register_availability_handler(service, instance, 
         [context](service_t service, instance_t instance, bool is_available) {
             CallJsCallback(context.get(), [service, instance, is_available](Napi::Env env, Napi::Function jsCallback) {
+                Napi::Object availabilityObj = Napi::Object::New(env);
+                availabilityObj.Set("service", Napi::Number::New(env, service));
+                availabilityObj.Set("instance", Napi::Number::New(env, instance));
+                availabilityObj.Set("available", Napi::Boolean::New(env, is_available));
+                
                 Napi::Object result = Napi::Object::New(env);
-                result.Set("service", Napi::Number::New(env, service));
-                result.Set("instance", Napi::Number::New(env, instance));
-                result.Set("available", Napi::Boolean::New(env, is_available));
+                result.Set("type", Napi::String::New(env, "availability"));
+                result.Set("data", availabilityObj);
                 
                 jsCallback.Call({result});
             });
@@ -201,11 +214,15 @@ void VsomeipCallbackWrapper::registerSubscriptionHandler(uint16_t service, uint1
     app_->register_subscription_handler(service, instance, eventgroup, 
         [context](client_t client, uid_t uid, gid_t gid, bool is_subscribed) -> bool {
             CallJsCallback(context.get(), [client, uid, gid, is_subscribed](Napi::Env env, Napi::Function jsCallback) {
+                Napi::Object subscriptionObj = Napi::Object::New(env);
+                subscriptionObj.Set("client", Napi::Number::New(env, client));
+                subscriptionObj.Set("uid", Napi::Number::New(env, uid));
+                subscriptionObj.Set("gid", Napi::Number::New(env, gid));
+                subscriptionObj.Set("subscribed", Napi::Boolean::New(env, is_subscribed));
+                
                 Napi::Object result = Napi::Object::New(env);
-                result.Set("client", Napi::Number::New(env, client));
-                result.Set("uid", Napi::Number::New(env, uid));
-                result.Set("gid", Napi::Number::New(env, gid));
-                result.Set("subscribed", Napi::Boolean::New(env, is_subscribed));
+                result.Set("type", Napi::String::New(env, "subscription"));
+                result.Set("data", subscriptionObj);
                 
                 jsCallback.Call({result});
             });
@@ -230,12 +247,16 @@ void VsomeipCallbackWrapper::registerSubscriptionStatusHandler(uint16_t service,
         [context](const service_t service, const instance_t instance, const eventgroup_t eventgroup,
                  const event_t event, const uint16_t status) {
             CallJsCallback(context.get(), [service, instance, eventgroup, event, status](Napi::Env env, Napi::Function jsCallback) {
+                Napi::Object statusObj = Napi::Object::New(env);
+                statusObj.Set("service", Napi::Number::New(env, service));
+                statusObj.Set("instance", Napi::Number::New(env, instance));
+                statusObj.Set("eventgroup", Napi::Number::New(env, eventgroup));
+                statusObj.Set("event", Napi::Number::New(env, event));
+                statusObj.Set("status", Napi::Number::New(env, status));
+                
                 Napi::Object result = Napi::Object::New(env);
-                result.Set("service", Napi::Number::New(env, service));
-                result.Set("instance", Napi::Number::New(env, instance));
-                result.Set("eventgroup", Napi::Number::New(env, eventgroup));
-                result.Set("event", Napi::Number::New(env, event));
-                result.Set("status", Napi::Number::New(env, status));
+                result.Set("type", Napi::String::New(env, "subscription_status"));
+                result.Set("data", statusObj);
                 
                 jsCallback.Call({result});
             });
@@ -256,7 +277,11 @@ void VsomeipCallbackWrapper::setWatchdogHandler(const std::string& callbackId, s
     app_->set_watchdog_handler(
         [context]() {
             CallJsCallback(context.get(), [](Napi::Env env, Napi::Function jsCallback) {
-                jsCallback.Call({});
+                Napi::Object result = Napi::Object::New(env);
+                result.Set("type", Napi::String::New(env, "watchdog"));
+                result.Set("data", env.Undefined());
+                
+                jsCallback.Call({result});
             });
         }, 
         interval
@@ -267,13 +292,14 @@ void VsomeipCallbackWrapper::setWatchdogHandler(const std::string& callbackId, s
 Napi::Value RegisterCallback(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
     
-    if (info.Length() < 2) {
-        Napi::Error::New(env, "Expected 2 arguments: callback type and JavaScript function").ThrowAsJavaScriptException();
+    if (info.Length() <3) {
+        Napi::Error::New(env, "Expected 3 arguments: callback type, callback name and JavaScript function").ThrowAsJavaScriptException();
         return env.Undefined();
     }
     
     std::string callbackType = info[0].As<Napi::String>().Utf8Value();
-    Napi::Function jsCallback = info[1].As<Napi::Function>();
+    std::string callbackName = info[1].As<Napi::String>().Utf8Value();
+    Napi::Function jsCallback = info[2].As<Napi::Function>();
     
     // Generate unique callback ID
     std::string callbackId = generateCallbackId(callbackType);
@@ -284,10 +310,11 @@ Napi::Value RegisterCallback(const Napi::CallbackInfo& info) {
             env,
             jsCallback,
             callbackId,
-            0,  // Unlimited queue
-            1   // Initial thread count
+          0// Unlimited queue
+        1 // Initial thread count
         ),
-        callbackId
+        callbackId,
+        callbackType
     );
     
     // Store in registry

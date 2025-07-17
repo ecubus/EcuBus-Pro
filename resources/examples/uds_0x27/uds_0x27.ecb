@@ -498,7 +498,7 @@
                   "editable": true,
                   "desc": "the option string",
                   "type": "ARRAY",
-                  "phyValue": "11 22 33 44 55 66 77 77",
+                  "phyValue": "11 22 33 44 55 66 77 88",
                   "value": {
                     "type": "Buffer",
                     "data": [
@@ -509,7 +509,7 @@
                       85,
                       102,
                       119,
-                      119
+                      136
                     ]
                   }
                 },
@@ -671,8 +671,8 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
         "pos": {
-          "x": 669,
-          "y": 117,
+          "x": 194,
+          "y": 35,
           "w": 1348,
           "h": 400
         },

@@ -12,7 +12,6 @@ Util.Init(() => {
 
   // Register main RequestDownloadBin function
   Util.Register(`${testerName}.SecureAccessGenerateKeyEx`, async function (dllFile, requestSeed, sendKey, securityLevel, variant, maxKeyArraySize, securityAccessDataRecord) {
-
     sa = new ECB.SecureAccessDll(dllFile)
     // Create request for service 0x27 (SecurityAccess)
     const r27Request = new ECB.DiagRequest(testerName, {

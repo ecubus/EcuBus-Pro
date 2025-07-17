@@ -9,6 +9,18 @@ The Built-In Script system provides pre-configured diagnostic services for commo
 
 This script is used to generate a key for the security access process. see [GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
 
+```c
+VKeyGenResultEx GenerateKeyEx (
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize, 
+  unsigned int& oActualKeyArraySize 
+);
+```
+
 ![GenerateKeyEx](image2.png)
 
 
@@ -16,7 +28,17 @@ This script is used to generate a key for the security access process. see [Gene
 
 - **dllFile**
   - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyEx function.
-
+```c
+VKeyGenResultEx GenerateKeyEx (
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize, 
+  unsigned int& oActualKeyArraySize 
+);
+```
 - **requestSeed**
   - The request seed sub-function, 1,3,5,7,9,11,13,15
   - Default: 0x01
@@ -42,6 +64,7 @@ This script is used to generate a key for the security access process. see [Gene
 
 This script is used to generate a key for the security access process. see [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
 
+
 ![GenerateKeyExOpt](image1.png)
 
 
@@ -49,6 +72,18 @@ This script is used to generate a key for the security access process. see [Gene
 
 - **dllFile**
   - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyExOpt function.
+```c
+VKeyGenResultExOpt GenerateKeyExOpt ( 
+  const unsigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  const unsigned int iSecurityLevel,  
+  const char* ipVariant,  
+  const char* ipOptions, 
+  unsigned char* iopKeyArray,  
+  unsigned int iMaxKeyArraySize,  
+  unsigned int& oActualKeyArraySize 
+);
+```
 
 - **requestSeed**
   - The request seed sub-function, 1,3,5,7,9,11,13,15

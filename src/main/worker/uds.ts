@@ -965,7 +965,7 @@ export class UtilClass {
       workerpool.worker({
         [jobs]: async (...args: any[]) => {
           const cargs = args.map((item) => {
-            if (typeof item === 'object' && 'type' in item && item.type === 'Buffer') {
+            if (item instanceof Uint8Array) {
               return Buffer.from(item)
             } else {
               return item

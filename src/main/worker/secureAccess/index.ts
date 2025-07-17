@@ -92,19 +92,19 @@ export default class SecureAccessDll {
   ): Buffer {
     const seedArray = new saNode.UINT8_ARRAY(ipSeedArray.length)
     for (let i = 0; i < ipSeedArray.length; i++) {
-      seedArray.setitem(i, ipSeedArray[i])
+      seedArray.setitem(i, ipSeedArray.readUInt8(i))
     }
     const variant = new saNode.INT8_ARRAY(ipVariant.length)
     for (let i = 0; i < ipVariant.length; i++) {
-      variant.setitem(i, ipVariant[i])
+      variant.setitem(i, ipVariant.readInt8(i))
     }
     const options = new saNode.INT8_ARRAY(ipOptions.length)
     for (let i = 0; i < ipOptions.length; i++) {
-      options.setitem(i, ipOptions[i])
+      options.setitem(i, ipOptions.readInt8(i))
     }
     const KeyArray = new saNode.UINT8_ARRAY(key.length)
     for (let i = 0; i < key.length; i++) {
-      KeyArray.setitem(i, key[i])
+      KeyArray.setitem(i, key.readUInt8(i))
     }
     const KeySize = new saNode.UINT32_PTR()
     KeySize.assign(key.length)
@@ -156,16 +156,16 @@ export default class SecureAccessDll {
   ): Buffer {
     const seedArray = new saNode.UINT8_ARRAY(ipSeedArray.length)
     for (let i = 0; i < ipSeedArray.length; i++) {
-      seedArray.setitem(i, ipSeedArray[i])
+      seedArray.setitem(i, ipSeedArray.readUInt8(i))
     }
     const variant = new saNode.INT8_ARRAY(ipVariant.length)
     for (let i = 0; i < ipVariant.length; i++) {
-      variant.setitem(i, ipVariant[i])
+      variant.setitem(i, ipVariant.readInt8(i))
     }
 
     const KeyArray = new saNode.UINT8_ARRAY(key.length)
     for (let i = 0; i < key.length; i++) {
-      KeyArray.setitem(i, key[i])
+      KeyArray.setitem(i, key.readUInt8(i))
     }
     const KeySize = new saNode.UINT32_PTR()
     KeySize.assign(key.length)

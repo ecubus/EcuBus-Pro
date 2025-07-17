@@ -799,7 +799,7 @@ export class UDSTesterMain {
                   // const fileContent = await fsP.readFile(filePath)
                   params.push(filePath)
                 } else if (p.type == 'ARRAY') {
-                  params.push(p.value)
+                  params.push(Buffer.from(p.value))
                 } else {
                   params.push(Number(p.phyValue))
                 }

@@ -166,6 +166,7 @@ const gridOptions = computed(() => {
         field: 'message',
         title: 'Message',
         minWidth: 200,
+        align: 'left',
         slots: { default: 'message_content' } // Add custom slot for message
       })
     }

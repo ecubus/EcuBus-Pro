@@ -228,7 +228,7 @@ function clearLog(msg = 'Clear Trace') {
 
   scrollY = -1
 
-  //TODO:
+  grid.clearSelection()
   grid.loadData([])
   grid.setExpandRowKeys([])
   grid.scrollYTo(0)
@@ -284,7 +284,11 @@ function insertData2(data: LogData[]) {
 
   // 根据暂停状态决定加载多少数据
   const displayData = isPaused.value ? allLogData : allLogData.slice(-showLogCount)
-
+  grid.clearSelection()
+  if (!isOverwrite.value) {
+    grid.clearSelection()
+    grid.setExpandRowKeys([])
+  }
   grid.loadData(displayData)
   if (!isOverwrite.value) {
     grid.scrollYTo(99999999999)

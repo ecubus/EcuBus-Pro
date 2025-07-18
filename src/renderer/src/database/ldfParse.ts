@@ -1266,19 +1266,23 @@ class LdfVistor extends visitor {
       const configFrames = (ctx.configurable_framesClause[index] as any)?.children?.frameDefinition
 
       const configFramesVal: string[] = []
-      for (const f of configFrames) {
-        const name = f.children.Identifier[0].image
-        if (f.children.Interger) {
-          const number = Number(f.children.Interger[0].image)
-          configFramesVal[number] = name
-        } else {
-          configFramesVal.push(name)
+      if (configFrames) {
+        for (const f of configFrames) {
+          const name = f.children.Identifier[0].image
+          if (f.children.Interger) {
+            const number = Number(f.children.Interger[0].image)
+            configFramesVal[number] = name
+          } else {
+            configFramesVal.push(name)
+          }
         }
-      }
-      //check empty in configFramesVal
-      for (let i = 0; i < configFramesVal.length; i++) {
-        if (configFramesVal[i] == undefined) {
-          throw new Error(`configurable_frames of ${t.image}  must be continuous, and start from 0`)
+        //check empty in configFramesVal
+        for (let i = 0; i < configFramesVal.length; i++) {
+          if (configFramesVal[i] == undefined) {
+            throw new Error(
+              `configurable_frames of ${t.image}  must be continuous, and start from 0`
+            )
+          }
         }
       }
 
@@ -1467,102 +1471,104 @@ class LdfVistor extends visitor {
   Schedule_tablesClause(ctx: CstChildrenDictionary) {
     this.ldf.schTables = []
 
-    for (const m of ctx.schItemClause) {
-      const qrm = (m as CstNode).children
-      const w: any = {
-        name: (qrm.Identifier[0] as IToken).image,
-        entries: []
-      }
-      for (const schItem of qrm.subSchItemClause) {
-        const schItemChildren = (schItem as CstNode).children
-        const command = (schItemChildren.commandClause[0] as CstNode).children
-        const isCommand = command.Identifier ? false : true
-        let name = ''
-        const args: any = {}
+    if (ctx.schItemClause) {
+      for (const m of ctx.schItemClause) {
+        const qrm = (m as CstNode).children
+        const w: any = {
+          name: (qrm.Identifier[0] as IToken).image,
+          entries: []
+        }
+        for (const schItem of qrm.subSchItemClause) {
+          const schItemChildren = (schItem as CstNode).children
+          const command = (schItemChildren.commandClause[0] as CstNode).children
+          const isCommand = command.Identifier ? false : true
+          let name = ''
+          const args: any = {}
 
-        if (isCommand) {
-          if (command.AssignNADClause) {
-            const rrm = (command.AssignNADClause[0] as CstNode).children
-            args.AssignNAD = {
-              AssignNAD: (rrm.Identifier[0] as IToken).image
-            }
-            name = 'AssignNAD'
-          } else if (command.ConditionalChangeNADClause) {
-            const rrm = (command.ConditionalChangeNADClause[0] as CstNode).children
-            args.ConditionalChangeNAD = {
-              nad: Number((rrm.Interger[0] as IToken).image),
-              id: Number((rrm.Interger[1] as IToken).image),
-              byte: Number((rrm.Interger[2] as IToken).image),
-              mask: Number((rrm.Interger[3] as IToken).image),
-              inv: Number((rrm.Interger[4] as IToken).image),
-              newNad: Number((rrm.Interger[5] as IToken).image)
-            }
-            name = 'ConditionalChangeNAD'
-          } else if (command.DataDumpClause) {
-            const rrm = (command.DataDumpClause[0] as CstNode).children
-            args.DataDump = {
-              nodeName: (rrm.Identifier[0] as IToken).image,
-              D1: Number((rrm.Interger[0] as IToken).image),
-              D2: Number((rrm.Interger[1] as IToken).image),
-              D3: Number((rrm.Interger[2] as IToken).image),
-              D4: Number((rrm.Interger[3] as IToken).image),
-              D5: Number((rrm.Interger[4] as IToken).image)
-            }
-            name = 'DataDump'
-          } else if (command.SaveConfigurationClause) {
-            const rrm = (command.SaveConfigurationClause[0] as CstNode).children
-            args.SaveConfiguration = {
-              nodeName: (rrm.Identifier[0] as IToken).image
-            }
-            name = 'SaveConfiguration'
-          } else if (command.AssignFrameIdRangeClause) {
-            const rrm = (command.AssignFrameIdRangeClause[0] as CstNode).children
-            args.AssignFrameIdRange = {
-              nodeName: (rrm.Identifier[0] as IToken).image,
-              frameIndex: Number((rrm.Interger[0] as IToken).image)
-            }
-            if (rrm.Interger.length > 1) {
-              args.AssignFrameIdRange.framePID = [
-                ...rrm.Interger.slice(1).map((item) => Number((item as IToken).image))
-              ]
-            }
-            name = 'AssignFrameIdRange'
-          } else if (command.FreeFormatClause) {
-            const rrm = (command.FreeFormatClause[0] as CstNode).children
-            args.FreeFormat = {
-              D: [...rrm.Interger.map((item) => Number((item as IToken).image))]
-            }
-            name = 'FreeFormat'
-          } else if (command.AssignFrameIdClause) {
-            const rrm = (command.AssignFrameIdClause[0] as CstNode).children
-            args.AssignFrameId = {
-              nodeName: (rrm.Identifier[0] as IToken).image,
-              frameName: (rrm.Identifier[1] as IToken).image
-            }
-            name = 'AssignFrameId'
-          } else if (command.MasterSlaveReqClause) {
-            const rrm = (command.MasterSlaveReqClause[0] as CstNode).children
-            name = (rrm.MasterReqSlaveResp[0] as IToken).image
-            if (name.startsWith('MasterReq')) {
-              name = 'DiagnosticMasterReq'
+          if (isCommand) {
+            if (command.AssignNADClause) {
+              const rrm = (command.AssignNADClause[0] as CstNode).children
+              args.AssignNAD = {
+                AssignNAD: (rrm.Identifier[0] as IToken).image
+              }
+              name = 'AssignNAD'
+            } else if (command.ConditionalChangeNADClause) {
+              const rrm = (command.ConditionalChangeNADClause[0] as CstNode).children
+              args.ConditionalChangeNAD = {
+                nad: Number((rrm.Interger[0] as IToken).image),
+                id: Number((rrm.Interger[1] as IToken).image),
+                byte: Number((rrm.Interger[2] as IToken).image),
+                mask: Number((rrm.Interger[3] as IToken).image),
+                inv: Number((rrm.Interger[4] as IToken).image),
+                newNad: Number((rrm.Interger[5] as IToken).image)
+              }
+              name = 'ConditionalChangeNAD'
+            } else if (command.DataDumpClause) {
+              const rrm = (command.DataDumpClause[0] as CstNode).children
+              args.DataDump = {
+                nodeName: (rrm.Identifier[0] as IToken).image,
+                D1: Number((rrm.Interger[0] as IToken).image),
+                D2: Number((rrm.Interger[1] as IToken).image),
+                D3: Number((rrm.Interger[2] as IToken).image),
+                D4: Number((rrm.Interger[3] as IToken).image),
+                D5: Number((rrm.Interger[4] as IToken).image)
+              }
+              name = 'DataDump'
+            } else if (command.SaveConfigurationClause) {
+              const rrm = (command.SaveConfigurationClause[0] as CstNode).children
+              args.SaveConfiguration = {
+                nodeName: (rrm.Identifier[0] as IToken).image
+              }
+              name = 'SaveConfiguration'
+            } else if (command.AssignFrameIdRangeClause) {
+              const rrm = (command.AssignFrameIdRangeClause[0] as CstNode).children
+              args.AssignFrameIdRange = {
+                nodeName: (rrm.Identifier[0] as IToken).image,
+                frameIndex: Number((rrm.Interger[0] as IToken).image)
+              }
+              if (rrm.Interger.length > 1) {
+                args.AssignFrameIdRange.framePID = [
+                  ...rrm.Interger.slice(1).map((item) => Number((item as IToken).image))
+                ]
+              }
+              name = 'AssignFrameIdRange'
+            } else if (command.FreeFormatClause) {
+              const rrm = (command.FreeFormatClause[0] as CstNode).children
+              args.FreeFormat = {
+                D: [...rrm.Interger.map((item) => Number((item as IToken).image))]
+              }
+              name = 'FreeFormat'
+            } else if (command.AssignFrameIdClause) {
+              const rrm = (command.AssignFrameIdClause[0] as CstNode).children
+              args.AssignFrameId = {
+                nodeName: (rrm.Identifier[0] as IToken).image,
+                frameName: (rrm.Identifier[1] as IToken).image
+              }
+              name = 'AssignFrameId'
+            } else if (command.MasterSlaveReqClause) {
+              const rrm = (command.MasterSlaveReqClause[0] as CstNode).children
+              name = (rrm.MasterReqSlaveResp[0] as IToken).image
+              if (name.startsWith('MasterReq')) {
+                name = 'DiagnosticMasterReq'
+              } else {
+                name = 'DiagnosticSlaveResp'
+              }
             } else {
-              name = 'DiagnosticSlaveResp'
+              throw new Error('unknown command')
             }
           } else {
-            throw new Error('unknown command')
+            name = (command.Identifier[0] as IToken).image
           }
-        } else {
-          name = (command.Identifier[0] as IToken).image
-        }
 
-        w.entries.push({
-          name: name,
-          delay: Number((schItemChildren.Interger[0] as IToken).image),
-          isCommand: isCommand,
-          ...args
-        })
+          w.entries.push({
+            name: name,
+            delay: Number((schItemChildren.Interger[0] as IToken).image),
+            isCommand: isCommand,
+            ...args
+          })
+        }
+        this.ldf.schTables.push(w)
       }
-      this.ldf.schTables.push(w)
     }
   }
 

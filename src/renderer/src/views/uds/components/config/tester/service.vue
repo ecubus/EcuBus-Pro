@@ -278,7 +278,6 @@ import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
-import { Layout } from '@r/views/uds/layout'
 import { useGlobalStart } from '@r/stores/runtime'
 
 const serviceDetail = window.serviceDetail
@@ -311,7 +310,6 @@ const repParamRef = ref()
 const respParamRef = ref()
 const configRef = ref()
 const globalStart = useGlobalStart()
-const layout = inject('layout') as Layout
 
 function nodeClick(data: any) {
   ruleFormRef.value?.clearValidate()

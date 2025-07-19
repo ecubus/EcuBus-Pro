@@ -1,0 +1,233 @@
+
+
+LIN_description_file;
+LIN_protocol_version = "2.2";
+LIN_language_version = "2.2";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: DDB, 1 ms, 0 ms ;
+  Slaves: DDL, TBD ;
+}
+
+Signals {
+  g01A: 1, 0, DDB, DDL ;
+  g02A: 1, 0, DDB, DDL ;
+  g03A: 1, 0, DDB, DDL ;
+  g04A: 1, 0, DDB, DDL ;
+  g05A: 1, 0, DDB, DDL ;
+  g06A: 1, 0, DDB, DDL ;
+  g07A: 1, 0, DDB, DDL ;
+  g08A: 1, 0, DDB, DDL ;
+  g09A: 1, 0, DDB, DDL ;
+  g10A: 1, 0, DDB, DDL ;
+  g11A: 1, 0, DDB, DDL ;
+  g12A: 1, 0, DDB, DDL ;
+  g13A: 1, 0, DDB, DDL ;
+  g14A: 1, 0, DDB, DDL ;
+  gB: 8, 0, DDB, DDL ;
+  gC: 8, 0, DDB, DDL ;
+  g01F: 1, 0, DDB, DDL ;
+  g02F: 1, 0, DDB, DDL ;
+  g03F: 1, 0, DDB, DDL ;
+  g04F: 1, 0, DDB, DDL ;
+  g05F: 1, 0, DDB, DDL ;
+  g06F: 1, 0, DDB, DDL ;
+  g07F: 1, 0, DDB, DDL ;
+  g08F: 1, 0, DDB, DDL ;
+  g09F: 1, 0, DDB, DDL ;
+  g10F: 1, 0, DDB, DDL ;
+  g11F: 1, 0, DDB, DDL ;
+  g12F: 1, 0, DDB, DDL ;
+  g13F: 1, 0, DDB, DDL ;
+  g14F: 1, 0, DDB, DDL ;
+  gFad: 7, 0, DDB, DDL ;
+  g12F: 1, 0, DDB, DDL ;
+  g13F: 1, 0, DDB, DDL ;
+  g14F: 1, 0, DDB, DDL ;
+  gFlngM: 3, 0, DDB, DDL ;
+  gMus: 4, 0, DDB ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  DDB_DDL: 42, DDB, 8 {
+    g01A, 0 ;
+    g02A, 1 ;
+    g03A, 2 ;
+    g04A, 3 ;
+    g05A, 4 ;
+    g06A, 5 ;
+    g07A, 6 ;
+    g08A, 7 ;
+    g09A, 8 ;
+    g10A, 9 ;
+    g11A, 10 ;
+    g12A, 11 ;
+    g13A, 12 ;
+    g14A, 13 ;
+    gB, 16 ;
+    gC, 24 ;
+    g01F, 32 ;
+    g02F, 33 ;
+    g03F, 34 ;
+    g04F, 35 ;
+    g05F, 36 ;
+    g06F, 37 ;
+    g07F, 38 ;
+    g08F, 39 ;
+    g09F, 40 ;
+    g10F, 41 ;
+    g11F, 42 ;
+    g12F, 43 ;
+    g13F, 44 ;
+    g14F, 45 ;
+    gFad, 46 ;
+    g12F, 53 ;
+    g13F, 54 ;
+    g14F, 55 ;
+    gFlngM, 56 ;
+  }
+  TBD: 2, DDB, 8 {
+  }
+}
+
+
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  DDL{
+    LIN_protocol = "2.2" ;
+    configured_NAD = 0xFF ;
+    initial_NAD = 0xFF ;
+    product_id = 0x0, 0x0, 255 ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      DDB_DDL ;
+    }
+  }
+  TBD{
+    LIN_protocol = "2.2" ;
+    configured_NAD = 0xFF ;
+    initial_NAD = 0xFF ;
+    product_id = 0x0, 0x0, 255 ;
+    P2_min = 50 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+  }
+}
+
+Schedule_tables {
+ New_ScheduleTable {
+    DDB_DDL delay 10 ms ;
+    TBD delay 10 ms ;
+    DDB_DDL delay 10 ms ;
+    TBD delay 10 ms ;
+    DDB_DDL delay 10 ms ;
+    TBD delay 10 ms ;
+    DDB_DDL delay 10 ms ;
+    TBD delay 10 ms ;
+    DDB_DDL delay 10 ms ;
+    TBD delay 10 ms ;
+  }
+}
+
+
+Signal_encoding_types {
+  gB_Encoding {
+    physical_value, 0, 100, 1, 0, "%" ;
+  }
+  gC_Encoding {
+    physical_value, 0, 255, 1, 0 ;
+  }
+  gFlngM_Encoding {
+    logical_value, 0, "Nt" ;
+    logical_value, 1, "m1" ;
+    logical_value, 2, "m2" ;
+    logical_value, 3, "m3" ;
+    logical_value, 4, "m4" ;
+    logical_value, 5, "m5" ;
+    logical_value, 6, "m6" ;
+    logical_value, 7, "m7" ;
+  }
+  gFlngM_Encoding {
+    logical_value, 0, "inactive" ;
+    logical_value, 1, "0%" ;
+    logical_value, 2, "10%" ;
+    logical_value, 3, "20%" ;
+    logical_value, 4, "30%" ;
+    logical_value, 5, "40%" ;
+    logical_value, 6, "50%" ;
+    logical_value, 7, "60%" ;
+    logical_value, 8, " 70%" ;
+    logical_value, 9, "80%" ;
+    logical_value, 10, "90%" ;
+    logical_value, 11, "100%" ;
+    logical_value, 12, "Reserved" ;
+    logical_value, 13, "Reserved" ;
+    logical_value, 14, "Reserved" ;
+    logical_value, 15, "Reserved" ;
+  }
+  YGHE {
+    physical_value, 0, 127, 1, 0 ;
+  }
+  notACTIVE {
+    logical_value, 0, "Nt" ;
+    logical_value, 1, "A" ;
+  }
+}
+
+Signal_representation {
+  gB_Encoding: gB ;
+  gC_Encoding: gC ;
+  gFlngM_Encoding: gFlngM ;
+  gMus_Encoding: gMus ;
+  YGHE: gFad ;
+  notACTIVE: g01A, g02A, g03A, g04A, g05A, g06A, g07A, g08A, g09A, g10A, g11A, g12A, g13Au, g14A, g01F, g02F, g03F, g04F, g05F, g06F, g07Fa, g08F, g09F, g10F, g11F, g12F, g13F, g14F, g12F, g13F, g14F ;
+}

@@ -24,6 +24,11 @@ test('ldf door', () => {
   const r = parse(ldf)
   // console.log(r)
 })
+test('test (2).ldf', () => {
+  const ldf = fs.readFileSync(path.join(__dirname, 'test (2).ldf'), 'utf-8')
+  const r = parse(ldf)
+  // console.log(r)
+})
 
 test('ldf OpenError', () => {
   const ldf = fs.readFileSync(path.join(__dirname, 'OpenError.ldf'), 'utf-8')

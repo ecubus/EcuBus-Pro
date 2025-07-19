@@ -2,6 +2,11 @@ import vsomeip from './build/Release/vsomeip.node'
 import routingmanager from '../../../resources/lib/routingmanagerd.exe?asset&asarUnpack'
 import { spawn, ChildProcess } from 'child_process'
 import path from 'path'
+import { ServiceConfig } from './share/service-config'
+import { EventEmitter } from 'events'
+
+// Import sysLog from global
+declare const sysLog: any
 
 // vSomeIP Callback Management System TypeScript Interface
 
@@ -45,6 +50,13 @@ export type VsomeipCallbackData =
   | { type: 'watchdog'; data: undefined }
 
 export type VsomeipCallback = (callbackData: VsomeipCallbackData) => void
+
+// Event types for the EventEmitter - automatically derived from VsomeipCallbackData
+export type VsomeipEventMap = {
+  [K in VsomeipCallbackData['type']]: K extends 'watchdog'
+    ? () => void
+    : (data: Extract<VsomeipCallbackData, { type: K }>['data']) => void
+}
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
@@ -153,9 +165,10 @@ export function isRouterCounterRunning(): boolean {
 
 export class VSomeIP_Client {
   private rtm: any
-  private app: any
+  app: any
   private cb: any = null
   private cbId: string | undefined
+  private event = new EventEmitter()
   constructor(name: string, configFilePath: string) {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
@@ -170,41 +183,66 @@ export class VSomeIP_Client {
       case 'state':
         // 这里 callbackData.data 自动是 number
         console.log('State changed:', callbackData.data)
+        this.event.emit('state', callbackData.data)
         break
       case 'message':
         // 这里 callbackData.data 自动是 VsomeipMessage
         console.log('Message received:', callbackData.data)
+        this.event.emit('message', callbackData.data)
         break
       case 'availability':
         // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
         console.log('Availability changed:', callbackData.data)
+        this.event.emit('availability', callbackData.data)
         break
       case 'subscription':
         // 这里 callbackData.data 自动是 VsomeipSubscriptionInfo
         console.log('Subscription changed:', callbackData.data)
+        this.event.emit('subscription', callbackData.data)
         break
       case 'subscription_status':
         // 这里 callbackData.data 自动是 VsomeipSubscriptionStatusInfo
         console.log('Subscription status:', callbackData.data)
+        this.event.emit('subscription_status', callbackData.data)
         break
       case 'watchdog':
         // 这里 callbackData.data 自动是 undefined
         console.log('Watchdog triggered')
+        this.event.emit('watchdog')
         break
     }
   }
   init() {
     const result = this.app.init()
-    if (result) {
-      this.cb.registerStateHandler(this.cbId)
-      // this.app.register_state_handler(this.onStateChange)
-
-      this.cb.start()
-    } else {
+    if (!result) {
       throw new Error('Failed to initialize application')
+    } else {
+      this.cb.registerStateHandler(this.cbId)
+      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId)
+      this.cb.registerAvailabilityHandler(0x1113, 0x2223, this.cbId)
     }
   }
+  start() {
+    this.cb.start()
+  }
+  on<T extends keyof VsomeipEventMap>(event: T, listener: VsomeipEventMap[T]): this {
+    this.event.on(event, listener)
+    return this
+  }
+  once<T extends keyof VsomeipEventMap>(event: T, listener: VsomeipEventMap[T]): this {
+    this.event.once(event, listener)
+    return this
+  }
+  off<T extends keyof VsomeipEventMap>(event: T, listener: VsomeipEventMap[T]): this {
+    this.event.off(event, listener)
+    return this
+  }
+  removeAllListeners<T extends keyof VsomeipEventMap>(event?: T): this {
+    this.event.removeAllListeners(event)
+    return this
+  }
   stop() {
+    this.event.removeAllListeners()
     this.app.clear_all_handler()
 
     // First stop the callback wrapper to ensure proper thread cleanup

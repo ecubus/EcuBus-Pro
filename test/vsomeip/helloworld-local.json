@@ -2,7 +2,7 @@
     "unicast": "127.0.0.1",
     "logging": {
         "level": "debug",
-        "console": "true"
+        "console": "false"
     },
     "applications": [
         {
@@ -21,7 +21,7 @@
             "unreliable": "30509"
         }
     ],
-    "routing": "hello_world_service",
+    "routing": "routingmanagerd",
     "service-discovery": {
         "enable": "false"
     }

@@ -183,11 +183,11 @@ void VsomeipCallbackWrapper::registerAvailabilityHandler(uint16_t service, uint1
     
     auto context = callbackRegistry[callbackId];
     app_->register_availability_handler(service, instance, 
-        [context](service_t service, instance_t instance, bool is_available) {
-            CallJsCallback(context.get(), [service, instance, is_available](Napi::Env env, Napi::Function jsCallback) {
+        [context](service_t xservice, instance_t xinstance, bool is_available) {
+            CallJsCallback(context.get(), [xservice, xinstance, is_available](Napi::Env env, Napi::Function jsCallback) {
                 Napi::Object availabilityObj = Napi::Object::New(env);
-                availabilityObj.Set("service", Napi::Number::New(env, service));
-                availabilityObj.Set("instance", Napi::Number::New(env, instance));
+                availabilityObj.Set("service", Napi::Number::New(env, xservice));
+                availabilityObj.Set("instance", Napi::Number::New(env, xinstance));
                 availabilityObj.Set("available", Napi::Boolean::New(env, is_available));
                 
                 Napi::Object result = Napi::Object::New(env);
@@ -310,8 +310,8 @@ Napi::Value RegisterCallback(const Napi::CallbackInfo& info) {
             env,
             jsCallback,
             callbackId,
-          0// Unlimited queue
-        1 // Initial thread count
+            0,// Unlimited queue
+            1 // Initial thread count
         ),
         callbackId,
         callbackType

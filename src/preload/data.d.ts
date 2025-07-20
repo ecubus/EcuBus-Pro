@@ -3,6 +3,7 @@ import type { UdsDevice } from 'src/main/share/uds'
 import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
+import type { SomeipInfo } from 'src/main/vsomeip/share'
 
 import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
@@ -112,6 +113,7 @@ export type PanelItem = {
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
+  someip: Record<string, SomeipInfo>
   subFunction: Record<string, { name: string; subFunction: string }[]>
   nodes: Record<string, NodeItem>
   ia: Record<string, Inter>

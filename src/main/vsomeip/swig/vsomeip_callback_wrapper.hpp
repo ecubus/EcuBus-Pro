@@ -20,6 +20,7 @@
 
 namespace vsomeip_v3 {
     class application;
+    class runtime;
 }
 
 
@@ -108,9 +109,10 @@ public:
      * \param instance Instance identifier
      * \param method Method identifier
      * \param callbackId Unique identifier for the callback
+     * \param sendInstance Pointer to Send instance for message storage
      */
     void registerMessageHandler(uint16_t service, uint16_t instance, uint16_t method, 
-                               const std::string& callbackId);
+                               const std::string& callbackId, class Send* sendInstance = nullptr);
     
     /**
      * \brief Register an availability handler callback
@@ -155,6 +157,8 @@ public:
      */
     void setWatchdogHandler(const std::string& callbackId, std::chrono::seconds interval);
 };
+
+
 
 
 #endif // VSOMEIP_CALLBACK_WRAPPER_HPP 

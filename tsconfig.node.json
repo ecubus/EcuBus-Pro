@@ -5,7 +5,7 @@
     "src/main/**/*.ts",
     "src/cli/**/*.ts",
     "src/preload/**/*",
-    "test/**/*.test.ts",
+    "test/**/*.ts",
     "src/renderer/src/database/**/*.ts",
     "src/renderer/src/worker/**/*.ts"
   ],

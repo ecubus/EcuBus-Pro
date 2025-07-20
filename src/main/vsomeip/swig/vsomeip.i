@@ -6,6 +6,9 @@
 #define VSOMEIP_INTERNAL_SUPPRESS_DEPRECATED
 #include <vsomeip/vsomeip.hpp>
 #include "vsomeip_callback_wrapper.hpp"
+#include "send.hpp"
+
+
 %}
 
 
@@ -157,7 +160,16 @@ class VsomeipCallbackWrapper;
 %include <vsomeip/handler.hpp>
 // %include <vsomeip/trace.hpp>
 %include <vsomeip/vsomeip.hpp>
+
+
+%include "./buffer1.i"
+%typemap(in)        (char *data, uint32_t length) = (const void* buffer_data, const size_t buffer_len);
+%typemap(typecheck) (char *data, uint32_t length) = (const void* buffer_data, const size_t buffer_len);
+
+
+
 %include "vsomeip_callback_wrapper.hpp"
+%include "send.hpp"
 
 
 

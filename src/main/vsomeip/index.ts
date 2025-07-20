@@ -1,9 +1,11 @@
 import vsomeip from './build/Release/vsomeip.node'
 import routingmanager from '../../../resources/lib/routingmanagerd.exe?asset&asarUnpack'
-import { spawn, ChildProcess } from 'child_process'
+import { spawn, exec, ChildProcess } from 'child_process'
 import path from 'path'
 import { ServiceConfig } from './share/service-config'
 import { EventEmitter } from 'events'
+import os from 'os'
+import fs from 'fs'
 
 // Import sysLog from global
 declare const sysLog: any
@@ -17,6 +19,7 @@ export interface VsomeipMessage {
   client: number
   session: number
   payload?: Buffer
+  _messageId?: number // Internal message ID for response handling
 }
 
 export interface VsomeipAvailabilityInfo {
@@ -70,7 +73,7 @@ export function loadDllPath(dllPath: string) {
   }
 }
 
-export function startRouterCounter(configFilePath: string): Promise<void> {
+export function startRouterCounter(configFilePath: string, quiet: boolean = true): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if routing manager is already running
     if (routingManagerProcess) {
@@ -88,10 +91,14 @@ export function startRouterCounter(configFilePath: string): Promise<void> {
     }
 
     // Spawn routing manager process
-    routingManagerProcess = spawn(routingmanager, ['-q', '-c', configFilePath], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      detached: false
-    })
+    routingManagerProcess = spawn(
+      routingmanager,
+      quiet ? ['-q', '-c', configFilePath] : ['-c', configFilePath],
+      {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        detached: false
+      }
+    )
 
     // Handle process events
     routingManagerProcess.on('error', (error) => {
@@ -107,16 +114,6 @@ export function startRouterCounter(configFilePath: string): Promise<void> {
       }
       routingManagerProcess = null
       isStoppingRouter = false
-    })
-
-    // Handle stdout
-    routingManagerProcess.stdout?.on('data', (data) => {
-      sysLog.info(`routing manager stdout: ${data.toString().trim()}`)
-    })
-
-    // Handle stderr
-    routingManagerProcess.stderr?.on('data', (data) => {
-      sysLog.error(`routing manager stderr: ${data.toString().trim()}`)
     })
 
     // Wait a bit for the process to start
@@ -144,13 +141,18 @@ export function stopRouterCounter(): Promise<void> {
     routingManagerProcess.once('exit', (code, signal) => {
       routingManagerProcess = null
       isStoppingRouter = false
+      //manull delete vsomeip.lck file in temp
+      const lockFile = path.join(os.tmpdir(), 'vsomeip.lck')
+      if (fs.existsSync(lockFile)) {
+        fs.unlinkSync(lockFile)
+      }
       resolve()
     })
 
     // Send SIGTERM for graceful shutdown
     routingManagerProcess.kill('SIGTERM')
 
-    // Force kill after 1s if still running
+    // Force kill after 3s if still running (increased timeout for Windows)
     setTimeout(() => {
       if (routingManagerProcess && !routingManagerProcess.killed) {
         routingManagerProcess.kill('SIGKILL')
@@ -166,6 +168,7 @@ export function isRouterCounterRunning(): boolean {
 export class VSomeIP_Client {
   private rtm: any
   app: any
+  sendc: any
   private cb: any = null
   private cbId: string | undefined
   private event = new EventEmitter()
@@ -173,11 +176,12 @@ export class VSomeIP_Client {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
     this.cb = new vsomeip.VsomeipCallbackWrapper(this.app)
+    this.sendc = new vsomeip.Send(this.rtm, this.app)
 
     this.cbId = vsomeip.RegisterCallback('state', name, this.callback.bind(this))
   }
   callback(callbackData: VsomeipCallbackData) {
-    console.log('vSomeIP callback:', callbackData)
+    // console.log('vSomeIP callback:', callbackData)/
 
     switch (callbackData.type) {
       case 'state':
@@ -212,14 +216,26 @@ export class VSomeIP_Client {
         break
     }
   }
+  sendRequest(service: number, instance: number, method: number, payload: Buffer) {
+    this.sendc.sendMessage(service, instance, method, payload)
+  }
+
+  sendResponse(request: VsomeipMessage, payload: Buffer) {
+    // Send a response based on the received request message using message ID
+    if (request._messageId !== undefined) {
+      this.sendc.sendResponse(request._messageId, payload)
+    } else {
+      console.warn('Cannot send response: message ID not available')
+    }
+  }
   init() {
     const result = this.app.init()
     if (!result) {
       throw new Error('Failed to initialize application')
     } else {
       this.cb.registerStateHandler(this.cbId)
-      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId)
-      this.cb.registerAvailabilityHandler(0x1113, 0x2223, this.cbId)
+      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId, this.sendc)
+      this.cb.registerAvailabilityHandler(0xffff, 0xffff, this.cbId)
     }
   }
   start() {

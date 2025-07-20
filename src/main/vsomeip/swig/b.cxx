@@ -1,5 +1,6 @@
 #include "napi.h"
 #include "vsomeip_callback_wrapper.hpp"
+#include "send.hpp"
 #include <vsomeip/vsomeip.hpp>
 #include <map>
 #include <memory>
@@ -128,7 +129,7 @@ void VsomeipCallbackWrapper::registerStateHandler(const std::string& callbackId)
 
 // Message handler wrapper
 void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t instance, uint16_t method, 
-                               const std::string& callbackId) {
+                               const std::string& callbackId, Send* sendInstance) {
     if (!app_) {
         return;
     }
@@ -139,8 +140,8 @@ void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t i
     
     auto context = callbackRegistry[callbackId];
     app_->register_message_handler(service, instance, method, 
-        [context](const std::shared_ptr<message>& msg) {
-            CallJsCallback(context.get(), [msg](Napi::Env env, Napi::Function jsCallback) {
+        [context, sendInstance](const std::shared_ptr<message>& msg) {
+            CallJsCallback(context.get(), [msg, sendInstance](Napi::Env env, Napi::Function jsCallback) {
                 // Create a JavaScript object representing the message
                 Napi::Object msgObj = Napi::Object::New(env);
                 
@@ -161,6 +162,12 @@ void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t i
                     msgObj.Set("payload", buffer);
                 }
                 
+                // Store the message and get its ID if sendInstance is available
+                if (sendInstance) {
+                    int messageId = sendInstance->storeMessage(msg);
+                    msgObj.Set("_messageId", Napi::Number::New(env, messageId));
+                }
+                
                 Napi::Object result = Napi::Object::New(env);
                 result.Set("type", Napi::String::New(env, "message"));
                 result.Set("data", msgObj);
@@ -169,6 +176,83 @@ void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t i
             });
         });
 }
+
+Send::Send(std::shared_ptr<vsomeip_v3::runtime> rtm,std::shared_ptr<vsomeip_v3::application> app):rtm_(rtm),app_(app),messageIdCounter_(0){
+
+}
+
+Send::~Send(){
+    // Clear all stored messages
+    messageStore_.clear();
+}
+
+void Send::sendMessage(uint16_t service, uint16_t instance,uint16_t method,char* data,uint32_t length){
+    // Create a new request
+    std::shared_ptr<vsomeip::message> rq = rtm_->create_request();
+    
+    // Set the service, instance, and method as target of the request
+    rq->set_service(service);
+    rq->set_instance(instance);
+    rq->set_method(method);
+
+    // Create a payload which will be sent to the service
+    std::shared_ptr<vsomeip::payload> pl = rtm_->create_payload();
+    
+    // Convert the input data to vector of bytes
+    std::vector<vsomeip::byte_t> pl_data(data, data + length);
+    
+    pl->set_data(pl_data);
+    rq->set_payload(pl);
+    
+    // Send the request to the service. Response will be delivered to the
+    // registered message handler
+    app_->send(rq);
+}
+
+void Send::sendResponse(int messageId, char* data, uint32_t length) {
+    auto request = getMessage(messageId);
+    if (!request) {
+        // Message not found, cannot create response
+        return;
+    }
+    
+    // Create a response based on the request using the proper create_response method
+    std::shared_ptr<vsomeip::message> response = rtm_->create_response(request);
+    
+    // Create a payload which will be sent with the response
+    std::shared_ptr<vsomeip::payload> pl = rtm_->create_payload();
+    
+    // Convert the input data to vector of bytes
+    std::vector<vsomeip::byte_t> pl_data(data, data + length);
+    
+    pl->set_data(pl_data);
+    response->set_payload(pl);
+    
+    // Send the response
+    app_->send(response);
+    
+    // Clean up the stored message
+    removeMessage(messageId);
+}
+
+int Send::storeMessage(std::shared_ptr<vsomeip_v3::message> msg) {
+    int messageId = ++messageIdCounter_;
+    messageStore_[messageId] = msg;
+    return messageId;
+}
+
+std::shared_ptr<vsomeip_v3::message> Send::getMessage(int messageId) {
+    auto it = messageStore_.find(messageId);
+    if (it != messageStore_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+void Send::removeMessage(int messageId) {
+    messageStore_.erase(messageId);
+}
+
 
 // Availability handler wrapper
 void VsomeipCallbackWrapper::registerAvailabilityHandler(uint16_t service, uint16_t instance, 

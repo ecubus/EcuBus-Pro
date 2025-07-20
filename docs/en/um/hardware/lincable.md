@@ -73,7 +73,7 @@ and quality assurance.
 
 ---
 
-> See [Lin Conformance Test Example](../../../resources/examples/lin_conformance_test/readme.md) for more details.   
+> See [Lin Conformance Test Example](https://app.whyengineer.com/examples/lin_conformance_test/readme.html) for more details.   
 
 ## Cross-Platform and Software Integration
 

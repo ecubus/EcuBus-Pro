@@ -617,6 +617,15 @@ export interface SomeipConfig
   suppress_missing_event_logs?: SuppressMissingEventLogConfig[]
 }
 
+export interface SomeipInfo {
+  id: string
+  name: string
+  device: string
+  services: ServiceConfig[]
+  simulateBy?: string
+  applications: ApplicationConfig[]
+}
+
 // Re-export imported sub-interfaces for convenience
 export type {
   GlobalPayloadConfig,

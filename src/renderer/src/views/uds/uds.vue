@@ -229,6 +229,20 @@
             </div>
           </div>
         </el-tab-pane>
+        <el-tab-pane name="soa">
+          <template #label>
+            <span class="lr">
+              <Icon :icon="soaIcon" style="font-size: 16px" />
+              <span>SOA</span>
+            </span>
+          </template>
+          <div style="display: flex; gap: 5px; padding: 15px">
+            <div class="grid girdenable" @click="handleSelect(['soa'])">
+              <Icon :icon="soaConfigIcon" style="font-size: 24px" />
+              <span>SOA Config</span>
+            </div>
+          </div>
+        </el-tab-pane>
         <el-tab-pane name="test">
           <template #label>
             <span class="lr">
@@ -659,6 +673,8 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import data from '@iconify/icons-ep/full-screen'
+import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
+import soaConfigIcon from '@iconify/icons-material-symbols/linked-services'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 
 const activeMenu = ref('')

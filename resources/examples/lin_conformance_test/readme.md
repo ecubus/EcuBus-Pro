@@ -32,7 +32,7 @@ The example includes several predefined test frames for different testing scenar
 
 ## Test Script
 
-Test script is in the [test.ts](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_conformance_test/test.ts) file.
+Test script is in the [test.ts](https://github.com/ecubus/ecubus-pro/blob/master/resources/examples/lin_conformance_test/test.ts) file.
 
 ![test](./image.png)
 

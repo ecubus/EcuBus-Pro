@@ -132,4 +132,4 @@ export interface ProjectInfo {
 
 ### More Complex Example
 
-See the [uds_generate_code](../../../resources/examples/uds_generate_code/readme) example.
+See the [uds_generate_code](https://app.whyengineer.com/examples/uds_generate_code/readme) example.

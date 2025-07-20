@@ -102,6 +102,7 @@ const globalStart = useGlobalStart()
 function clearLog() {
   // logData.value = []
   xGrid.value?.remove()
+  xGrid.value?.scrollTo(0, 0)
 }
 
 const props = withDefaults(

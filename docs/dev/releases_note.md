@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.48
+Changes from v0.8.47 to v0.8.48:
+
+ 
+* [opt]:opt message align to left 
+* [bug]:fix mem leak 
+* [feat]:add SecureAccessGenerateKeyEx and SecureAccessGenerateKeyExOpt buildin script 
+* [bug]:fix ldf/dbc parse issue 
+* [opt]:opt test node in network 
+* [opt]:opt lin ldf parse
+---
+
 ## 0.8.47
 Changes from v0.8.46 to v0.8.47:
 

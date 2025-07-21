@@ -1,0 +1,869 @@
+/****************************************************************************/
+/* */
+/* Description: LIN Description file */
+/* Created: 03.02.2022 */
+/* Author: NIDS System */
+/* Version: 22.03.02 */
+/* Project: LIN_BDC_OMU */
+/* */
+/****************************************************************************/
+
+
+// Global Definitions
+
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: BDC, 5 ms, 0 ms ;
+  Slaves: MRR_CTRL_LH, MRR_CTRL_RH, GlassPanel ;
+}
+
+Signals {
+  Power_Status: 2, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  Vehicle_Speed: 12, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  HSI_Command: 2, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  Right_SFE_Command: 2, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  In_Car_Temperature: 8, 0, BDC, GlassPanel ;
+  LIN_SunroofEnable: 1, 0, BDC ;
+  Operation_Glass: 3, 0, BDC ;
+  Operation_R_Blind: 2, 0, BDC ;
+  VehicleSpeed: 8, 0, BDC ;
+  LIN_SunBlindLINCMD_RR_ATS: 2, 0, BDC ;
+  LIN_SunBlindLINCMD_RR_Voice: 2, 0, BDC ;
+  ECU_Initialization_State: 1, 0, MRR_CTRL_LH, BDC ;
+  Sunblind_Current_Movement_State: 2, 0, MRR_CTRL_LH, BDC ;
+  Sunblind_Position: 2, 0, MRR_CTRL_LH, BDC ;
+  Thermal_Protection_State: 1, 0, MRR_CTRL_LH, BDC ;
+  LIN_Communication_Failure_State: 1, 0, MRR_CTRL_LH, BDC ;
+  ECU_Diagnostic_Issue: 1, 0, MRR_CTRL_LH, BDC ;
+  LIN_Position_Percent_State: 8, 0, MRR_CTRL_LH, BDC ;
+  Motor_Cycle_Number: 16, 0, MRR_CTRL_LH, BDC ;
+  RF_Learning_State: 2, 0, MRR_CTRL_LH, BDC ;
+  LIN_LH_MRROUT_STATUS: 3, 0, MRR_CTRL_LH ;
+  R_ECU_Initialization_State: 1, 0, MRR_CTRL_RH, BDC ;
+  R_Sunblind_Current_Movement_State: 2, 0, MRR_CTRL_RH, BDC ;
+  R_Sunblind_Position: 2, 0, MRR_CTRL_RH, BDC ;
+  R_Thermal_Protection_State: 1, 0, MRR_CTRL_RH, BDC ;
+  R_LIN_Communication_Failure_State: 1, 0, MRR_CTRL_RH, BDC ;
+  R_ECU_Diagnostic_Issue: 1, 0, MRR_CTRL_RH, BDC ;
+  R_LIN_Position_Percent_State: 8, 0, MRR_CTRL_RH, BDC ;
+  R_Motor_Cycle_Number: 16, 0, MRR_CTRL_RH, BDC ;
+  R_RF_Learning_State: 2, 0, MRR_CTRL_RH, BDC ;
+  LIN_RH_MRROUT_STATUS: 3, 0, MRR_CTRL_RH ;
+  ECU_Initialization_State1: 1, 0, GlassPanel, BDC ;
+  Sunblind_Current_Movement_State1: 2, 0, GlassPanel, BDC ;
+  Sunblind_Position1: 2, 0, GlassPanel, BDC ;
+  Thermal_Protection_State1: 1, 0, GlassPanel, BDC ;
+  LIN_Communication_Failure_State1: 1, 0, GlassPanel, BDC ;
+  ECU_Diagnostic_Issue1: 1, 0, GlassPanel, BDC ;
+  LIN_Position_Percent_State1: 8, 0, GlassPanel, BDC ;
+  Motor_Cycle_Number1: 16, 0, GlassPanel, BDC ;
+  RF_Learning_State1: 2, 0, GlassPanel, BDC ;
+  GlassPanel_RespSyncCounter: 4, 0, GlassPanel ;
+  GlassPanel_Result: 3, 0, GlassPanel ;
+  GlassPanel_MotionAttributes: 8, 0, GlassPanel ;
+  Command_Authorization: 1, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  HSI_KEY_Command: 2, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+  In_Car_temperature: 8, 0, BDC, MRR_CTRL_LH, MRR_CTRL_RH ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  Status_0x15: 21, BDC, 8 {
+    Power_Status, 0 ;
+    Vehicle_Speed, 8 ;
+    HSI_Command, 60 ;
+    Right_SFE_Command, 62 ;
+    Command_Authorization, 3 ;
+    HSI_KEY_Command, 30 ;
+    In_Car_temperature, 48 ;
+  }
+  BDC_Temperature_0x14: 20, BDC, 8 {
+    In_Car_Temperature, 56 ;
+  }
+  L_SunShade_0x1D: 29, MRR_CTRL_LH, 8 {
+    ECU_Initialization_State, 0 ;
+    Sunblind_Current_Movement_State, 1 ;
+    Sunblind_Position, 3 ;
+    Thermal_Protection_State, 5 ;
+    LIN_Communication_Failure_State, 6 ;
+    ECU_Diagnostic_Issue, 7 ;
+    LIN_Position_Percent_State, 8 ;
+    Motor_Cycle_Number, 16 ;
+    RF_Learning_State, 32 ;
+  }
+  R_SunShade_0x1E: 30, MRR_CTRL_RH, 8 {
+    R_ECU_Initialization_State, 0 ;
+    R_Sunblind_Current_Movement_State, 1 ;
+    R_Sunblind_Position, 3 ;
+    R_Thermal_Protection_State, 5 ;
+    R_LIN_Communication_Failure_State, 6 ;
+    R_ECU_Diagnostic_Issue, 7 ;
+    R_LIN_Position_Percent_State, 8 ;
+    R_Motor_Cycle_Number, 16 ;
+    R_RF_Learning_State, 32 ;
+  }
+  Rear_SunShade_0x1F: 31, GlassPanel, 8 {
+    ECU_Initialization_State1, 0 ;
+    Sunblind_Current_Movement_State1, 1 ;
+    Sunblind_Position1, 3 ;
+    Thermal_Protection_State1, 5 ;
+    LIN_Communication_Failure_State1, 6 ;
+    ECU_Diagnostic_Issue1, 7 ;
+    LIN_Position_Percent_State1, 8 ;
+    Motor_Cycle_Number1, 16 ;
+    RF_Learning_State1, 32 ;
+  }
+}
+
+
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  MRR_CTRL_LH{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x4 ;
+    initial_NAD = 0x4 ;
+    product_id = 0x0, 0xFFFE, 1 ;
+    response_error = Thermal_Protection_State ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      L_SunShade_0x1D ;
+      Status_0x15 ;
+    }
+  }
+  MRR_CTRL_RH{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0x6 ;
+    initial_NAD = 0x6 ;
+    product_id = 0x0, 0xFFFE, 1 ;
+    response_error = R_Thermal_Protection_State ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      R_SunShade_0x1E ;
+      Status_0x15 ;
+    }
+  }
+  GlassPanel{
+    LIN_protocol = "2.1" ;
+    configured_NAD = 0xD ;
+    initial_NAD = 0xD ;
+    product_id = 0x0, 0xFFFE, 1 ;
+    response_error = R_Thermal_Protection_State ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      Rear_SunShade_0x1F ;
+      BDC_Temperature_0x14 ;
+    }
+  }
+}
+
+Schedule_tables {
+ BDC_OMU {
+    BDC_Temperature_0x14 delay 10 ms ;
+    L_SunShade_0x1D delay 10 ms ;
+    R_SunShade_0x1E delay 10 ms ;
+    Rear_SunShade_0x1F delay 10 ms ;
+    Status_0x15 delay 10 ms ;
+  }
+ Diag_request {
+    MasterReq delay 10 ms ;
+  }
+ Diag_response {
+    SlaveResp delay 10 ms ;
+  }
+}
+
+
+Signal_encoding_types {
+  ERR_RESP_MRR_CTRL_LH_Encoding {
+    logical_value, 0, "Invalid" ;
+    logical_value, 1, "GO Up" ;
+    logical_value, 2, "Go Down" ;
+    logical_value, 3, "Reserved" ;
+  }
+  ERR_RESP_MRR_CTRL_RH_Encoding {
+    logical_value, 208, "??????" ;
+    logical_value, 216, "??????" ;
+    logical_value, 255, "??" ;
+  }
+  ECU_Initialization_State {
+    logical_value, 0, "Initialized" ;
+    logical_value, 1, "UnInitialized" ;
+  }
+  Sunblind_Current_Movement_State {
+    logical_value, 0, "Invalid" ;
+    logical_value, 1, "Go Up" ;
+    logical_value, 2, "Go Down" ;
+    logical_value, 3, "Anti-pinch Reversing" ;
+  }
+  Sunblind_Position {
+    logical_value, 0, "Invalid" ;
+    logical_value, 1, "Full Up" ;
+    logical_value, 2, "Full Down" ;
+    logical_value, 3, "Middle Position" ;
+  }
+  Thermal_Protection_State {
+    logical_value, 0, "Yes" ;
+    logical_value, 1, "No" ;
+  }
+  LIN_Communication_Failure_State {
+    logical_value, 0, "Normal" ;
+    logical_value, 1, "Issue" ;
+  }
+  LIN_Position_Percent_State {
+    logical_value, 0, "Init" ;
+    logical_value, 255, "Invalid" ;
+  }
+  RF_Learning_State {
+    physical_value, 0, 15, 1, 0, "null" ;
+    logical_value, 0, "Invalid" ;
+    logical_value, 1, "Learned" ;
+    logical_value, 2, "Not Learned" ;
+    logical_value, 3, "Reserved" ;
+  }
+  GlassPanel_RequestedMotionDirection_Encoding {
+    logical_value, 0, "MOTION_DIR_NONE" ;
+    logical_value, 1, "MOTION_DIR_CLOSE" ;
+    logical_value, 2, "MOTION_DIR_OPEN" ;
+    logical_value, 3, "MOTION_DIR_UNKNOWN" ;
+  }
+  GlassPanel_RespSyncCounter_Encoding {
+    physical_value, 0, 15, 1, 0, "null" ;
+  }
+  GlassPanel_Result_Encoding {
+    logical_value, 0, "MC_REQ_RESULT_NONE" ;
+    logical_value, 1, "MC_REQ_RESULT_SUCCESSFUL" ;
+    logical_value, 2, "MC_REQ_RESULT_RESERVAL_DURING_FORWARD_MOVEMENT" ;
+    logical_value, 3, "MC_REQ_RESULT_REVERSAL_DURING_BACKWARD_MOVEMENT" ;
+    logical_value, 4, "MC_REQ_RESULT_ABORTED" ;
+    logical_value, 5, "0x5~0x7:Reserved" ;
+    logical_value, 7, "0x5~0x7:Reserved" ;
+  }
+  GlassPanel_RoofArea_Encoding {
+    logical_value, 0, "GLASS_TILT_UP" ;
+    logical_value, 1, "GLASS_VENT_AREA" ;
+    logical_value, 2, "GLASS_ANTIPINCH_IN_VENT" ;
+    logical_value, 3, "GLASS_FULLY_CLOSE" ;
+    logical_value, 4, "GLASS_ANTIPINCH_IN_PARTLY_SLIDE" ;
+    logical_value, 5, "GLASS_PARTLY_SLIDE" ;
+    logical_value, 6, "GLASS_FULLY_OPEN" ;
+    logical_value, 7, "GLASS_UNINITIALIZED" ;
+  }
+  Glass_Error_Encoding {
+    logical_value, 0, "NoError" ;
+    logical_value, 1, "Thermal_Protection_Active" ;
+    logical_value, 2, "Initialized_Status" ;
+    logical_value, 3, "UndefinedECU_Error" ;
+    logical_value, 4, "Switch_Error" ;
+    logical_value, 5, "Voltage_Error" ;
+    logical_value, 6, "Complex_Error" ;
+    logical_value, 7, "Reserved" ;
+  }
+  LIN_BCM_DrvTyp_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "ACC" ;
+    logical_value, 2, "ON" ;
+    logical_value, 3, "Reserved" ;
+  }
+  LIN_Defog_DfgrRlySta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "ON" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_IMS_LHOSMirPlyBckSta_Encoding {
+    logical_value, 0, "STOP" ;
+    logical_value, 1, "PLAY1" ;
+    logical_value, 2, "PLAY2" ;
+    logical_value, 3, "PLAY3" ;
+    logical_value, 4, "SmartIMS" ;
+    logical_value, 5, "Profile1" ;
+    logical_value, 6, "Profile2" ;
+    logical_value, 7, "Guest" ;
+    logical_value, 8, "0x8~0xE:Reseved" ;
+    logical_value, 14, "0x8~0xE:Reseved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  LIN_IMS_RHOSMirPlyBckSta_Encoding {
+    logical_value, 0, "STOP" ;
+    logical_value, 1, "PLAY1" ;
+    logical_value, 2, "PLAY2" ;
+    logical_value, 3, "PLAY3" ;
+    logical_value, 4, "SmartIMS" ;
+    logical_value, 5, "Profile1" ;
+    logical_value, 6, "Profile2" ;
+    logical_value, 7, "Guest" ;
+    logical_value, 8, "0x8~0xE:Reseved" ;
+    logical_value, 14, "0x8~0xE:Reseved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  ECU_Diagnostic_Issue {
+    physical_value, 0, 255, 1, 0, "null" ;
+    logical_value, 0, "Normal" ;
+    logical_value, 1, "Issue" ;
+  }
+  Motor_Cycle_Number {
+    logical_value, 65535, "??????" ;
+  }
+  LIN_LH_MRROUT_STATUS_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "UP" ;
+    logical_value, 2, "DOWN" ;
+    logical_value, 3, "LEFT" ;
+    logical_value, 4, "RIGHT" ;
+    logical_value, 5, "0x5~0x7:Reserved" ;
+    logical_value, 7, "0x5~0x7:Reserved" ;
+  }
+  LIN_LH_MRR_CTRL_NOL_Encoding {
+    logical_value, 0, "SLEEP" ;
+    logical_value, 1, "NORMAL_MODE" ;
+  }
+  LIN_LH_VERTICAL_POSITION_Encoding {
+    physical_value, 0, 255, 1, 0, "null" ;
+  }
+  LIN_LH_VERT_FAIL_Encoding {
+    logical_value, 0, "No fail" ;
+    logical_value, 1, "fail" ;
+  }
+  LIN_Mirror_LHOMUOSMirFldCtrlSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "Folding" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_Mirror_LHOMUOSMirUnFldCtrlSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "Unfolding" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_Mirror_OSMirFldReq_Encoding {
+    physical_value, 0, 0, 1, 0 ;
+  }
+  LIN_Mirror_OSMirPosMnlCmd_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "UP" ;
+    logical_value, 2, "DOWN" ;
+    logical_value, 3, "LEFT" ;
+    logical_value, 4, "RIGHT" ;
+    logical_value, 5, "Reserved" ;
+    logical_value, 6, "Not Used" ;
+    logical_value, 7, "Error Indicator" ;
+  }
+  LIN_Mirror_RHOMUOSMirFldCtrlSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "Folding" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_Mirror_RHOMUOSMirUnFldCtrlSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "Unfolding" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_RH_HORIZONTAL_POSITION_Encoding {
+    physical_value, 0, 255, 1, 0, "null" ;
+  }
+  LIN_RH_HORI_FAIL_Encoding {
+    logical_value, 0, "No fail" ;
+    logical_value, 1, "fail" ;
+  }
+  LIN_RH_MRROUT_STATUS_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "UP" ;
+    logical_value, 2, "DOWN" ;
+    logical_value, 3, "LEFT" ;
+    logical_value, 4, "RIGHT" ;
+    logical_value, 5, "0x5~0x7:Reserved" ;
+    logical_value, 7, "0x5~0x7:Reserved" ;
+  }
+  LIN_RH_MRR_CNTRL_NOL_Encoding {
+    logical_value, 0, "SLEEP" ;
+    logical_value, 1, "NORMAL_MODE" ;
+  }
+  LIN_RH_VERTICAL_POSITION_Encoding {
+    physical_value, 0, 255, 1, 0, "null" ;
+  }
+  LIN_RH_VERT_FAIL_Encoding {
+    logical_value, 0, "No fail" ;
+    logical_value, 1, "fail" ;
+  }
+  LIN_SunBlindLINCMD_RR_ATS_Encoding {
+    logical_value, 0, "NoAction" ;
+    logical_value, 1, "Open" ;
+    logical_value, 2, "Close" ;
+    logical_value, 3, "Stop" ;
+  }
+  LIN_SunBlindLINCMD_RR_Voice_Encoding {
+    logical_value, 0, "NoAction" ;
+    logical_value, 1, "Open" ;
+    logical_value, 2, "Close" ;
+    logical_value, 3, "Stop" ;
+  }
+  LIN_SunroofEnable_Encoding {
+    logical_value, 0, "Off" ;
+    logical_value, 1, "On" ;
+  }
+  LIN_WindowLock_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "RR_Lock" ;
+  }
+  Operation_Glass_Encoding {
+    logical_value, 0, "No Action" ;
+    logical_value, 1, "Glass Auto Open" ;
+    logical_value, 2, "Glass Auto Close" ;
+    logical_value, 3, "Glass Auto Tilt Up" ;
+    logical_value, 4, "Stop" ;
+  }
+  Operation_R_Blind_Encoding {
+    logical_value, 0, "No Action" ;
+    logical_value, 1, "R/Blind Auto Open" ;
+    logical_value, 2, "R/Blind Auto Close" ;
+    logical_value, 3, "Stop" ;
+  }
+  VehicleSpeed_Encoding {
+    physical_value, 0, 254, 1, 0, "null" ;
+    logical_value, 255, "Error" ;
+  }
+  GlassPanel_AutoInitialCompleteStatus_Encoding {
+    logical_value, 0, "Not_Achieve" ;
+    logical_value, 1, "Completion" ;
+  }
+  GlassPanel_CmdSrc_Encoding {
+    logical_value, 0, "Reserved" ;
+    logical_value, 1, "CMD_SOURCE_LOCAL_PANEL_SWITCH" ;
+    logical_value, 2, "Reserved" ;
+    logical_value, 3, "CMD_SOURCE_REMOTE_PANEL_SWITCH" ;
+    logical_value, 4, "CMD_SOURCE_REMOTE_BLIND_SWITCH" ;
+    logical_value, 5, "Reserved" ;
+    logical_value, 6, "Reserved" ;
+    logical_value, 7, "CMD_SOURCE_DIAGNOSTIC_REQUEST_PANEL" ;
+    logical_value, 8, "CMD_SOURCE_DIAGNOSTIC_REQUEST_BLIND" ;
+    logical_value, 9, "CMD_SOURCE_COMFORT_OPERATION" ;
+    logical_value, 10, "Reserved" ;
+    logical_value, 11, "CMD_SOURCE_IN_PLANT_LEARN" ;
+    logical_value, 12, "CMD_SOURCE_UNKNOWN" ;
+    logical_value, 13, "CMD_SOURCE_MULTIPLE_SOURCES_ACTIVE" ;
+    logical_value, 14, "CMD_SOURCE_REMOTE_MOTION_CONTROLLER" ;
+    logical_value, 15, "CMD_SOURCE_NUMBER_OF_VALID_SOURCES" ;
+  }
+  GlassPanel_CtrlLogic_Encoding {
+    logical_value, 0, "CONTROL_LOGIC_NONE" ;
+    logical_value, 1, "CONTROL_LOGIC_COMMAND_HANDLER" ;
+    logical_value, 2, "CONTROL_LOGIC_REMOTE_MC" ;
+    logical_value, 3, "CONTROL_LOGIC_SWITCH" ;
+    logical_value, 4, "CONTROL_LOGIC_LIMPHOME" ;
+    logical_value, 5, "CONTROL_LOGIC_INIT_BY_SWITCH" ;
+    logical_value, 6, "CONTROL_LOGIC_INIT_BY_IPL_TRIGGER" ;
+    logical_value, 7, "CONTROL_LOGIC_DIAGNOSTICS" ;
+    logical_value, 8, "0x8~0xF:Reserved" ;
+    logical_value, 15, "0x8~0xF:Reserved" ;
+  }
+  GlassPanel_IsAntiPinchFullyInitialized_Encoding {
+    logical_value, 0, "Not_Initialized" ;
+    logical_value, 1, "Initilized" ;
+  }
+  GlassPanel_IsAutoPending_Encoding {
+    logical_value, 0, "Automatic_movement_not_pressed" ;
+    logical_value, 1, "Automatic_movement_pressed" ;
+  }
+  GlassPanel_IsCmdBusy_Encoding {
+    logical_value, 0, "Command_Empty" ;
+    logical_value, 1, "Command_Occupied" ;
+  }
+  GlassPanel_IsMechRefLearningAllowed_Encoding {
+    logical_value, 0, "RFLearning_Not_Allowed" ;
+    logical_value, 1, "RFLearning_Allowed" ;
+  }
+  GlassPanel_IsMotorCtrlHwFailure_Encoding {
+    logical_value, 0, "MotorHW_OK" ;
+    logical_value, 1, "MotorHW_Defect" ;
+  }
+  GlassPanel_LinRespError_Encoding {
+    logical_value, 0, "LIN_Ok" ;
+    logical_value, 1, "LIN_Error" ;
+  }
+  GlassPanel_SharedStatus_Encoding {
+    logical_value, 0, "ROOF_STATUS_SHARED_NO_PLAY_PROT_RESTRICTION" ;
+    logical_value, 1, "ROOF_STATUS_SHARED_PLAY_PROT_RESTRICTION_ACTIVE" ;
+    logical_value, 2, "ROOF_STATUS_SHARED_PLAY_PROT_NO_MOVE_ACTIVE" ;
+    logical_value, 3, "ROOF_STATUS_SHARED_PLAY_PROT_RESTRICTION_NO_MOVE_ACTIVE" ;
+  }
+  GlassPanel_Status_Encoding {
+    logical_value, 0, "MC_REQ_STATUS_DONE" ;
+    logical_value, 1, "MC_REQ_STATUS_PENDING" ;
+    logical_value, 2, "MC_REQ_STATUS_ONGOING" ;
+    logical_value, 3, "MC_REQ_STATUS_REVERSING" ;
+  }
+  GlassPanel_StopOrDeleteReason_Encoding {
+    logical_value, 0, "STOP_REASON_DO_NOT_STOP" ;
+    logical_value, 1, "STOP_REASON_PAUSE_MOVEMENT" ;
+    logical_value, 2, "STOP_REASON_ABORT_BY_COMMAND_HANDLER" ;
+    logical_value, 3, "STOP_REASON_INVALID_MOTION_CTRL_REQUEST" ;
+    logical_value, 4, "0x4~0xC9:Reserved" ;
+    logical_value, 201, "0x4~0xC9:Reserved" ;
+    logical_value, 202, "STOP_REASON_APMD_TARGET_REACHED" ;
+    logical_value, 203, "0xCB~0xFF:Reserved" ;
+    logical_value, 255, "0xCB~0xFF:Reserved" ;
+  }
+  LIN_BCM_AccInSta_Encoding {
+    logical_value, 0, "ACC Off" ;
+    logical_value, 1, "ACC On" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_BCM_Ign1InSta_Encoding {
+    logical_value, 0, "IGN1 Off" ;
+    logical_value, 1, "IGN1 On" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_BCM_Ign2InSta_Encoding {
+    logical_value, 0, "IGN2 Off" ;
+    logical_value, 1, "IGN2 On" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_BCM_RegionType_Encoding {
+    logical_value, 0, "Dom" ;
+    logical_value, 1, "General" ;
+    logical_value, 2, "MiddleEast" ;
+    logical_value, 3, "Europe" ;
+    logical_value, 4, "Australia" ;
+    logical_value, 5, "Canada" ;
+    logical_value, 6, "USA" ;
+    logical_value, 7, "China" ;
+    logical_value, 8, "India" ;
+    logical_value, 9, "Mexico" ;
+    logical_value, 10, "Brazil" ;
+    logical_value, 11, "Russia" ;
+    logical_value, 12, "0xC~0xE:Reserved" ;
+    logical_value, 14, "0xC~0xE:Reserved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  LIN_CF_AVN_ProfileIDRValue_Encoding {
+    logical_value, 0, "Default" ;
+    logical_value, 1, "Guest" ;
+    logical_value, 2, "Profile1" ;
+    logical_value, 3, "Profile2" ;
+    logical_value, 4, "0x04~0x0E:Reserved" ;
+    logical_value, 14, "0x04~0x0E:Reserved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  LIN_Drv_PSMIMSReq_Encoding {
+    logical_value, 0, "None" ;
+    logical_value, 1, "Replay1" ;
+    logical_value, 2, "Replay2" ;
+    logical_value, 3, "Replay3" ;
+    logical_value, 4, "Memory1" ;
+    logical_value, 5, "Memory2" ;
+    logical_value, 6, "Memory3" ;
+    logical_value, 7, "Stop" ;
+    logical_value, 8, "0x8~0xE:Reseved" ;
+    logical_value, 14, "0x8~0xE:Reseved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  LIN_IAU_ProfileIDRVal_Encoding {
+    logical_value, 0, "Default" ;
+    logical_value, 1, "Guest" ;
+    logical_value, 2, "Profile1" ;
+    logical_value, 3, "Profile2" ;
+    logical_value, 4, "0x04~0x0E:Reserved" ;
+    logical_value, 14, "0x04~0x0E:Reserved" ;
+    logical_value, 15, "Error Indicator" ;
+  }
+  LIN_IMS_GearPosRConfirmSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "ON(R position)" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_Lamp_PuddleLmpOnReq_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "ON" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  LIN_Mirror_OSMirSelSwSta_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "Left" ;
+    logical_value, 2, "Neutral" ;
+    logical_value, 3, "Right" ;
+    logical_value, 4, "0x4~0x6:Not Used" ;
+    logical_value, 6, "0x4~0x6:Not Used" ;
+    logical_value, 7, "Error Indicator" ;
+  }
+  LIN_SmrtIMS_PlyBckStpReq_Encoding {
+    logical_value, 0, "OFF" ;
+    logical_value, 1, "ON" ;
+    logical_value, 2, "Not Used" ;
+    logical_value, 3, "Error Indicator" ;
+  }
+  R_Blind_Error_Encoding {
+    logical_value, 0, "NoError" ;
+    logical_value, 1, "ThermalProtection_Active" ;
+    logical_value, 2, "InitializedStatus" ;
+    logical_value, 3, "UndefinedECU_Error" ;
+    logical_value, 4, "Switch_Error" ;
+    logical_value, 5, "Voltage_Error" ;
+    logical_value, 6, "Complex_Error" ;
+    logical_value, 7, "Reserved" ;
+  }
+  SunBlind_CmdSrc_Encoding {
+    logical_value, 0, "Enable" ;
+    logical_value, 1, "Disable" ;
+  }
+  SunBlind_CtrlLogic_Encoding {
+    logical_value, 0, "CONTROL_LOGIC_NONE" ;
+    logical_value, 1, "CONTROL_LOGIC_COMMAND_HANDLER" ;
+    logical_value, 2, "CONTROL_LOGIC_REMOTE_MC" ;
+    logical_value, 3, "CONTROL_LOGIC_SWITCH" ;
+    logical_value, 4, "CONTROL_LOGIC_LIMPHOME" ;
+    logical_value, 5, "CONTROL_LOGIC_INIT_BY_SWITCH" ;
+    logical_value, 6, "CONTROL_LOGIC_INIT_BY_IPL_TRIGGER" ;
+    logical_value, 7, "CONTROL_LOGIC_DIAGNOSTICS" ;
+    logical_value, 8, "0x8~0xF:Reserved" ;
+    logical_value, 15, "0x8~0xF:Reserved" ;
+  }
+  SunBlind_IsAntiPinchFullyInitialized_Encoding {
+    logical_value, 0, "Not_Initialized" ;
+    logical_value, 1, "Initilized" ;
+  }
+  SunBlind_IsAutoActive_Encoding {
+    logical_value, 0, "Automatic_Movement_Empty" ;
+    logical_value, 1, "Automatic_Movement_Ongoing" ;
+  }
+  SunBlind_IsAutoPending_Encoding {
+    logical_value, 0, "Automatic_Movement_Not_Pressed" ;
+    logical_value, 1, "Automatic_Movement_Pressed" ;
+  }
+  SunBlind_IsBeforeAntiBoomingPos_Encoding {
+    logical_value, 0, "After_Antibooming_Pos" ;
+    logical_value, 1, "Before_Antibooming_Pos" ;
+  }
+  SunBlind_IsCmdBusy_Encoding {
+    logical_value, 0, "Command_Empty" ;
+    logical_value, 1, "Command_Occupied" ;
+  }
+  SunBlind_IsMechRefLearningAllowed_Encoding {
+    logical_value, 0, "RFLearning_Not_Allowed" ;
+    logical_value, 1, "RFLearning_Allowed" ;
+  }
+  SunBlind_IsMotorCtrlHwFailure_Encoding {
+    logical_value, 0, "Hardware_Failure" ;
+    logical_value, 1, "Hardware_OK" ;
+  }
+  SunBlind_IsPositionMonitoringPossible_Encoding {
+    logical_value, 0, "Position_Monitoring_Not_Possible" ;
+    logical_value, 1, "Position_Monitoring_Possible" ;
+  }
+  SunBlind_LinRespError_Encoding {
+    logical_value, 0, "LIN_Ok" ;
+    logical_value, 1, "LIN_Error" ;
+  }
+  SunBlind_MotionAttributes_Encoding {
+    logical_value, 0, "MOTION_ATTRIBUTE_NONE" ;
+    logical_value, 1, "MOTION_ATTRIBUTE_SINGLE_STEP_FOR_TIME" ;
+    logical_value, 2, "Reserved" ;
+    logical_value, 3, "MOTION_ATTRIBUTE_SINGLE_STEP_FOR_POS" ;
+    logical_value, 4, "Reserved" ;
+    logical_value, 5, "MOTION_ATTRIBUTE_REPATED_STEP_FOR_TIME" ;
+    logical_value, 6, "0x6~0xFF:Reserved" ;
+    logical_value, 255, "0x6~0xFF:Reserved" ;
+  }
+  SunBlind_MotionState_Encoding {
+    logical_value, 0, "MOTION_STATE_NONE" ;
+    logical_value, 1, "MOTION_STATE_ACTIVE_MANUAL" ;
+    logical_value, 2, "MOTION_STATE_ACTIVE_AUTO" ;
+    logical_value, 3, "MOTION_STATE_ACTIVE_ANTIPINCH_REVERSE" ;
+  }
+  SunBlind_Rear_Error_Encoding {
+    logical_value, 0, "NoError" ;
+    logical_value, 1, "ThermalProtection_Active" ;
+    logical_value, 2, "InitializedStatus" ;
+    logical_value, 3, "UndefinedECU_Error" ;
+    logical_value, 4, "Switch_Error" ;
+    logical_value, 5, "Voltage_Error" ;
+    logical_value, 6, "Complex_Error" ;
+    logical_value, 7, "Reserved" ;
+  }
+  SunBlind_Rear_RoofArea_Encoding {
+    logical_value, 0, "BLIND_HALF_OPEN" ;
+    logical_value, 1, "BLIND_LESS_THEN_HALF_OPEN" ;
+    logical_value, 2, "BLIND_ANTIPINCH_LESS_THAN_HALF_OPEN" ;
+    logical_value, 3, "BLIND_FULLY_CLOSE" ;
+    logical_value, 4, "BLIND_ANTIPINCH_MORE_THAN_HALF_OPEN" ;
+    logical_value, 5, "BLIND_MORE_THAN_HALF_OPEN" ;
+    logical_value, 6, "BLIND_FULLY_OPEN" ;
+    logical_value, 7, "BLIND_UNINITIALIZED" ;
+  }
+  SunBlind_ReqId_Encoding {
+    logical_value, 0, "MC_REQ_ID_NONE" ;
+    logical_value, 1, "MC_REQ_ID_STOP" ;
+    logical_value, 2, "MC_REQ_ID_MOVE_TO_FULL_OPEN" ;
+    logical_value, 3, "MC_REQ_ID_MOVE_TO_FULL_CLOSE" ;
+    logical_value, 4, "MC_REQ_ID_MOVE_TO_FULL_TILT" ;
+    logical_value, 5, "MC_REQ_ID_MOVE_TO_HALF_OPEN" ;
+    logical_value, 6, "MC_REQ_ID_MOVE_TO_ANTIBOOM" ;
+    logical_value, 7, "MC_REQ_ID_FORWARD" ;
+    logical_value, 8, "MC_REQ_ID_BACKWARD" ;
+    logical_value, 9, "MC_REQ_ID_REVERSE_FORWARD" ;
+    logical_value, 10, "MC_REQ_ID_REVERSE_BACKWARD" ;
+    logical_value, 11, "MC_REQ_ID_DELETE_RP" ;
+    logical_value, 12, "MC_REQ_ID_DELETE_MR_FWD" ;
+    logical_value, 13, "MC_REQ_ID_DELETE_MR_BWD" ;
+    logical_value, 14, "MC_REQ_ID_DELETE_MR_ALL" ;
+    logical_value, 15, "MC_REQ_ID_DELETE_RP_AND_MR_ALL" ;
+  }
+  SunBlind_RequestedMotionDirection_Encoding {
+    logical_value, 0, "MOTION_DIR_NONE" ;
+    logical_value, 1, "MOTION_DIR_CLOSE" ;
+    logical_value, 2, "MOTION_DIR_OPEN" ;
+    logical_value, 3, "MOTION_DIR_UNKNOWN" ;
+  }
+  SunBlind_Result_Encoding {
+    logical_value, 0, "MC_REQ_RESULT_NONE" ;
+    logical_value, 1, "MC_REQ_RESULT_SUCCESSFUL" ;
+    logical_value, 2, "MC_REQ_RESULT_RESERVAL_DURING_FORWARD_MOVEMENT" ;
+    logical_value, 3, "MC_REQ_RESULT_REVERSAL_DURING_BACKWARD_MOVEMENT" ;
+    logical_value, 4, "MC_REQ_RESULT_ABORTED" ;
+    logical_value, 5, "0x5~0x7:Reserved" ;
+    logical_value, 7, "0x5~0x7:Reserved" ;
+  }
+  SunBlind_RoofArea_Encoding {
+    logical_value, 0, "BLIND_HALF_OPEN" ;
+    logical_value, 1, "BLIND_LESS_THEN_HALF_OPEN" ;
+    logical_value, 2, "BLIND_ANTIPINCH_LESS_THAN_HALF_OPEN" ;
+    logical_value, 3, "BLIND_FULLY_CLOSE" ;
+    logical_value, 4, "BLIND_ANTIPINCH_MORE_THAN_HALF_OPEN" ;
+    logical_value, 5, "BLIND_MORE_THAN_HALF_OPEN" ;
+    logical_value, 6, "BLIND_FULLY_OPEN" ;
+    logical_value, 7, "BLIND_UNINITIALIZED" ;
+  }
+  SunBlind_SharedStatus_Encoding {
+    logical_value, 0, "ROOF_STATUS_SHARED_PLAY_PROT_RESTRICTION_ACTIVE" ;
+    logical_value, 1, "ROOF_STATUS_SHARED_PLAY_PROT_NO_MOVE_ACTIVE" ;
+    logical_value, 2, "Reserved" ;
+    logical_value, 3, "Reserved" ;
+  }
+  SunBlind_Status_Encoding {
+    logical_value, 0, "MC_REQ_STATUS_DONE" ;
+    logical_value, 1, "MC_REQ_STATUS_PENDING" ;
+    logical_value, 2, "MC_REQ_STATUS_ONGOING" ;
+    logical_value, 3, "MC_REQ_STATUS_REVERSING" ;
+  }
+  SunBlind_StopOrDeleteReason_Encoding {
+    logical_value, 0, "STOP_REASON_DO_NOT_STOP" ;
+    logical_value, 1, "STOP_REASON_PAUSE_MOVEMENT" ;
+    logical_value, 2, "STOP_REASON_ABORT_BY_COMMAND_HANDLER" ;
+    logical_value, 3, "STOP_REASON_INVALID_MOTION_CTRL_REQUEST" ;
+    logical_value, 4, "0x4~0xC9:Reserved" ;
+    logical_value, 201, "0x4~0xC9:Reserved" ;
+    logical_value, 202, "STOP_REASON_APMD_TARGET_REACHED" ;
+    logical_value, 203, "0xCB~0xFF:Reserved" ;
+    logical_value, 255, "0xCB~0xFF:Reserved" ;
+  }
+  SunRoof_RearBlindOprSta_Encoding {
+    logical_value, 0, "NoAction" ;
+    logical_value, 1, "FullOpen" ;
+    logical_value, 2, "FullClose" ;
+    logical_value, 3, "PartiallyOpen" ;
+    logical_value, 4, "Opening" ;
+    logical_value, 5, "Closing" ;
+    logical_value, 6, "0x6~0xE:Reserved" ;
+    logical_value, 14, "0x6~0xE:Reserved" ;
+    logical_value, 15, "invalid" ;
+  }
+  LIN_SmrtIMS_PlyBckReq_DB_Encoding {
+    physical_value, 0, 4095, 1, 0, "null" ;
+  }
+  SunBlind_ReqSyncCounter_Encoding {
+    physical_value, 0, 15, 1, 0, "null" ;
+  }
+  SunBlind_RespSyncCounter_Encoding {
+    physical_value, 0, 15, 1, 0, "null" ;
+  }
+}
+
+Signal_representation {
+  ECU_Diagnostic_Issue: ECU_Diagnostic_Issue, R_ECU_Diagnostic_Issue, ECU_Diagnostic_Issue1 ;
+  ECU_Initialization_State: ECU_Initialization_State, R_ECU_Initialization_State, ECU_Initialization_State1 ;
+  ERR_RESP_MRR_CTRL_LH_Encoding: HSI_Command, Right_SFE_Command, HSI_KEY_Command ;
+  ERR_RESP_MRR_CTRL_RH_Encoding: In_Car_temperature, In_Car_Temperature ;
+  GlassPanel_RespSyncCounter_Encoding: GlassPanel_RespSyncCounter ;
+  GlassPanel_Result_Encoding: GlassPanel_Result ;
+  LIN_BCM_DrvTyp_Encoding: Power_Status ;
+  LIN_Communication_Failure_State: LIN_Communication_Failure_State, R_LIN_Communication_Failure_State, LIN_Communication_Failure_State1 ;
+  LIN_LH_MRROUT_STATUS_Encoding: LIN_LH_MRROUT_STATUS ;
+  LIN_Mirror_OSMirFldReq_Encoding: Vehicle_Speed ;
+  LIN_Position_Percent_State: LIN_Position_Percent_State1, LIN_Position_Percent_State, R_LIN_Position_Percent_State ;
+  LIN_RH_MRROUT_STATUS_Encoding: LIN_RH_MRROUT_STATUS ;
+  LIN_SunBlindLINCMD_RR_ATS_Encoding: LIN_SunBlindLINCMD_RR_ATS ;
+  LIN_SunBlindLINCMD_RR_Voice_Encoding: LIN_SunBlindLINCMD_RR_Voice ;
+  LIN_SunroofEnable_Encoding: LIN_SunroofEnable ;
+  Motor_Cycle_Number: Motor_Cycle_Number, R_Motor_Cycle_Number, Motor_Cycle_Number1 ;
+  Operation_Glass_Encoding: Operation_Glass ;
+  Operation_R_Blind_Encoding: Operation_R_Blind ;
+  RF_Learning_State: RF_Learning_State, R_RF_Learning_State, RF_Learning_State1 ;
+  SunBlind_CmdSrc_Encoding: Command_Authorization ;
+  Sunblind_Current_Movement_State: Sunblind_Current_Movement_State, R_Sunblind_Current_Movement_State, Sunblind_Current_Movement_State1 ;
+  Sunblind_Position: Sunblind_Position, R_Sunblind_Position, Sunblind_Position1 ;
+  Thermal_Protection_State: GlassPanel_MotionAttributes, Thermal_Protection_State, R_Thermal_Protection_State, Thermal_Protection_State1 ;
+  VehicleSpeed_Encoding: VehicleSpeed ;
+}

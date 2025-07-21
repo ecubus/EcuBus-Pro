@@ -1287,25 +1287,46 @@ class LdfVistor extends visitor {
       }
 
       this.ldf.nodeAttrs[t.image] = {
-        LIN_protocol: this.visit(ctx.LIN_protocolClause[index] as CstNode),
-        configured_NAD: Number(
-          ((ctx.configured_NADClause[index] as CstNode).children.Interger[0] as IToken).image
-        ),
-        initial_NAD: ctx.initial_NADClause[index]
-          ? Number(((ctx.initial_NADClause[index] as CstNode).children.Interger[0] as IToken).image)
-          : undefined,
-        supplier_id: Number(
-          ((ctx.product_idClause[index] as CstNode).children.Interger[0] as IToken).image
-        ),
-        function_id: Number(
-          ((ctx.product_idClause[index] as CstNode).children.Interger[1] as IToken).image
-        ),
-        variant: (ctx.product_idClause[index] as CstNode).children.Interger[2]
-          ? Number(((ctx.product_idClause[index] as CstNode).children.Interger[2] as IToken).image)
-          : undefined,
-        response_error: ctx.response_errorClause
-          ? ((ctx.response_errorClause[index] as CstNode).children.Identifier[0] as IToken).image
-          : undefined,
+        LIN_protocol:
+          ctx.LIN_protocolClause && ctx.LIN_protocolClause[index]
+            ? this.visit(ctx.LIN_protocolClause[index] as CstNode)
+            : '',
+        configured_NAD:
+          ctx.configured_NADClause && ctx.configured_NADClause[index]
+            ? Number(
+                ((ctx.configured_NADClause[index] as CstNode).children.Interger[0] as IToken).image
+              )
+            : 0,
+        initial_NAD:
+          ctx.initial_NADClause && ctx.initial_NADClause[index]
+            ? Number(
+                ((ctx.initial_NADClause[index] as CstNode).children.Interger[0] as IToken).image
+              )
+            : undefined,
+        supplier_id:
+          ctx.product_idClause && ctx.product_idClause[index]
+            ? Number(
+                ((ctx.product_idClause[index] as CstNode).children.Interger[0] as IToken).image
+              )
+            : 0,
+        function_id:
+          ctx.product_idClause && ctx.product_idClause[index]
+            ? Number(
+                ((ctx.product_idClause[index] as CstNode).children.Interger[1] as IToken).image
+              )
+            : 0,
+        variant:
+          ctx.product_idClause &&
+          ctx.product_idClause[index] &&
+          (ctx.product_idClause[index] as CstNode).children.Interger[2]
+            ? Number(
+                ((ctx.product_idClause[index] as CstNode).children.Interger[2] as IToken).image
+              )
+            : undefined,
+        response_error:
+          ctx.response_errorClause && ctx.response_errorClause[index]
+            ? ((ctx.response_errorClause[index] as CstNode).children.Identifier[0] as IToken).image
+            : undefined,
         fault_state_signals: [
           ...(ctx.fault_state_signalsClause && ctx.fault_state_signalsClause[index]
             ? (

@@ -35,6 +35,11 @@ test('ldf OpenError', () => {
   const r = parse(ldf)
   // console.log(r)
 })
+test('BYD_HT&SZ.ldf', () => {
+  const ldf = fs.readFileSync(path.join(__dirname, 'BYD_HT&SZ.ldf'), 'utf-8')
+  const r = parse(ldf)
+  // console.log(r)
+})
 
 test('ldf CHANGAN_WLK151Z_LIN_1.1', () => {
   const ldf = fs.readFileSync(path.join(__dirname, 'CHANGAN_WLK151Z_LIN_1.1.ldf'), 'utf-8')

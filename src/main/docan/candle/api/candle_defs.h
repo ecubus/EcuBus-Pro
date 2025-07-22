@@ -71,8 +71,10 @@ typedef struct {
 
 typedef struct {
     wchar_t path[256];
+    char friendly_name[256];  // Add friendly name field as char array
     candle_devstate_t state;
     candle_err_t last_error;
+    DWORD error;
 
     HANDLE deviceHandle;
     WINUSB_INTERFACE_HANDLE winUSBHandle;

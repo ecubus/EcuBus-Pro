@@ -7,7 +7,8 @@ import {
   CanBaseInfo,
   CanDevice,
   getTsUs,
-  CanMessage
+  CanMessage,
+  getDlcByLen
 } from '../../share/can'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
@@ -24,24 +25,11 @@ interface CANFrame {
   ts: number
 }
 
-let txCnt = 0
-const pendingBaseCmds = new Map<
-  number,
-  {
-    resolve: (value: number) => void
-    reject: (reason: CanError) => void
-    msgType: CanMsgType
-    id: number
-    data: Buffer
-    extra?: { database?: string; name?: string }
-  }
->()
-
 export class Candle_CAN extends CanBase {
   event: EventEmitter
   info: CanBaseInfo
-  handle: number
-  deviceIndex: number
+  target: any
+  channel = 0
   closed = false
   cnt = 0
 
@@ -62,19 +50,47 @@ export class Candle_CAN extends CanBase {
     }
   >()
 
+  // Add missing pendingBaseCmds property
+  pendingBaseCmds = new Map<
+    string,
+    {
+      resolve: (value: number) => void
+      reject: (reason: CanError) => void
+      msgType: CanMsgType
+      data: Buffer
+      extra?: { database?: string; name?: string }
+    }[]
+  >()
+
   constructor(info: CanBaseInfo) {
     super()
     this.id = info.id
     this.info = info
+    const readList = new Candle.candle_list_t()
 
-    const devices = Candle_CAN.getValidDevices()
-    const target = devices.find((item) => item.handle == info.handle)
-    if (!target) {
-      throw new Error('Invalid handle')
+    Candle.candle_list_scan(readList)
+
+    const devicesx = Candle.DeviceArray.frompointer(readList.dev)
+    const devicesArray: any[] = []
+    for (let i = 0; i < readList.num_devices; i++) {
+      devicesArray.push(devicesx.getitem(i))
     }
+    const targetDevice = devicesArray.find((device) => device.interfaceNumber === this.info.handle)
+    if (!targetDevice) {
+      throw new Error(`Device with interfaceNumber ${this.info.handle} not found`)
+    }
+    const target = new Candle.candle_device_t()
+
+    this.target = targetDevice
+    this.channel = targetDevice.interfaceNumber
+
+    console.log(`device id ${this.id}: ${this.target.interfaceNumber}`)
+    console.log('info: ', this.info)
+
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
     }
+
     // 检查波特率配置
     const CLOCK = Number(this.info.bitrate.clock) * 1000000
 
@@ -94,276 +110,303 @@ export class Candle_CAN extends CanBase {
       }
     }
 
-    // // 检查CANFD波特率
-    // if (info.canfd && info.bitratefd?.freq) {
-    //   // 检查仲裁域波特率
-    //   const calcNbtFreq = Math.floor(
-    //     CLOCK / (info.bitrate.preScaler * (1 + info.bitrate.timeSeg1 + info.bitrate.timeSeg2))
-    //   )
-    //   if (Math.abs(calcNbtFreq - info.bitrate.freq) / info.bitrate.freq > 0.01) {
-    //     throw new Error(
-    //       `Invalid CANFD NBT config: expected ${info.bitrate.freq}, got ${calcNbtFreq}. ` +
-    //         `preScaler=${info.bitrate.preScaler}, ` +
-    //         `timeSeg1=${info.bitrate.timeSeg1}, ` +
-    //         `timeSeg2=${info.bitrate.timeSeg2}`
-    //     )
-    //   }
-
-    //   // 检查数据域波特率
-    //   const calcDbtFreq = Math.floor(
-    //     CLOCK / (info.bitratefd.preScaler * (1 + info.bitratefd.timeSeg1 + info.bitratefd.timeSeg2))
-    //   )
-    //   if (Math.abs(calcDbtFreq - info.bitratefd.freq) / info.bitratefd.freq > 0.01) {
-    //     throw new Error(
-    //       `Invalid CANFD DBT config: expected ${info.bitratefd.freq}, got ${calcDbtFreq}. ` +
-    //         `preScaler=${info.bitratefd.preScaler}, ` +
-    //         `timeSeg1=${info.bitratefd.timeSeg1}, ` +
-    //         `timeSeg2=${info.bitratefd.timeSeg2}`
-    //     )
-    //   }
-    // }
-
     this.event = new EventEmitter()
 
-    this.log = new CanLOG('CABDLE', info.name, this.event)
+    this.log = new CanLOG('CANABLE', info.name, this.event)
 
-    this.handle = parseInt(info.handle.split(':')[0])
-    this.deviceIndex = parseInt(info.handle.split(':')[1])
-
-    // let ret = 0
-    // // 检查设备是否已经打开
-    // if (global.toomossDeviceHandles == undefined) {
-    //   global.toomossDeviceHandles = new Map<
-    //     number,
-    //     {
-    //       refCount: number // 引用计数
-    //       channels: Set<number> // 当前使用的通道
-    //     }
-    //   >()
-    // }
-    // let deviceInfo = global.toomossDeviceHandles.get(this.handle)
-    // if (!deviceInfo) {
-    //   // 首次打开设备
-    //   ret = TOOMOSS.USB_OpenDevice(this.handle)
-    //   if (ret != 1) {
-    //     throw new Error('Open device failed')
-    //   }
-    //   deviceInfo = {
-    //     refCount: 1,
-    //     channels: new Set([this.deviceIndex])
-    //   }
-    //   global.toomossDeviceHandles.set(this.handle, deviceInfo)
-    // } else {
-    //   // 设备已打开，检查通道是否已被使用
-    //   if (deviceInfo.channels.has(this.deviceIndex)) {
-    //     throw new Error(`Channel ${this.deviceIndex} is already in use`)
-    //   }
-    //   deviceInfo.refCount++
-    //   deviceInfo.channels.add(this.deviceIndex)
-    // }
-    // TOOMOSS.DEV_ResetTimestamp(this.handle)
-    // // 初始化CAN配置
-    // if (info.canfd && info.bitratefd) {
-    //   // CANFD配置
-
-    //   this.canfdConfig = new TOOMOSS.CANFD_INIT_CONFIG()
-    //   this.canfdConfig.Mode = 0 // 正常模式
-    //   this.canfdConfig.ISOCRCEnable = 1
-    //   this.canfdConfig.RetrySend = 0
-    //   this.canfdConfig.ResEnable = info.toomossRes ? 1 : 0
-    //   // 仲裁域波特率配置
-    //   this.canfdConfig.NBT_BRP = info.bitrate.preScaler
-    //   this.canfdConfig.NBT_SEG1 = info.bitrate.timeSeg1
-    //   this.canfdConfig.NBT_SEG2 = info.bitrate.timeSeg2
-    //   this.canfdConfig.NBT_SJW = info.bitrate.sjw
-    //   // 数据域波特率配置
-    //   this.canfdConfig.DBT_BRP = info.bitratefd.preScaler
-    //   this.canfdConfig.DBT_SEG1 = info.bitratefd.timeSeg1
-    //   this.canfdConfig.DBT_SEG2 = info.bitratefd.timeSeg2
-    //   this.canfdConfig.DBT_SJW = info.bitratefd.sjw
-    //   this.canfdConfig.TDC = 0
-
-    //   ret = TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
-    //   if (ret != 0) {
-    //     throw new Error('Init CANFD failed')
-    //   }
-    //   TOOMOSS.CANFD_ResetStartTime(this.handle, this.deviceIndex)
-
-    //   // 启动CANFD
-    //   ret = TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-    //   if (ret != 0) {
-    //     throw new Error('Start CANFD failed')
-    //   }
-    // } else {
-    //   // 普通CAN配置
-    //   this.canConfig = new TOOMOSS.CAN_INIT_CONFIG()
-    //   this.canConfig.CAN_BRP = info.bitrate.preScaler
-    //   this.canConfig.CAN_SJW = info.bitrate.sjw
-    //   this.canConfig.CAN_BS1 = info.bitrate.timeSeg1
-    //   this.canConfig.CAN_BS2 = info.bitrate.timeSeg2
-    //   this.canConfig.CAN_Mode = info.toomossRes ? 0x80 : 0 // 正常模式
-    //   this.canConfig.CAN_ABOM = 0 // 自动离线恢复
-    //   this.canConfig.CAN_NART = 1 // 自动重传
-    //   this.canConfig.CAN_RFLM = 0 // 接收FIFO锁定模式
-
-    //   this.canConfig.CAN_TXFP = 0 // 发送FIFO优先级
-
-    //   ret = TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
-    //   if (ret != 0) {
-    //     throw new Error('Init CAN failed')
-    //   }
-
-    //   // 启动CAN
-    //   ret = TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-    //   if (ret != 0) {
-    //     throw new Error('Start CAN failed')
-    //   }
-    //   TOOMOSS.CAN_ResetStartTime(this.handle, this.deviceIndex)
-    // }
-    // this.attachCanMessage(this.busloadCb)
-    // // 初始化 TSFN
-    // TOOMOSS.CreateTSFN(
-    //   this.handle,
-    //   this.deviceIndex,
-    //   this.info.canfd,
-    //   this.id,
-    //   this.callback.bind(this),
-    //   'error-' + this.id,
-    //   this.callbackError.bind(this),
-    //   'tx-' + this.id,
-    //   this.txCallback.bind(this)
-    // )
-  }
-  txCallback(obj: any) {
-    const { id, timestamp, result } = obj
-
-    // 更新时间戳偏移
-    if (this.tsOffset == undefined) {
-      this.tsOffset = timestamp * 10 - (getTsUs() - this.startTime)
-    }
-    const ts = timestamp * 10 - this.tsOffset
-
-    // 从待发送队列中找到对应的消息
-    const cmdId = Number(id)
-
-    const pendingCmds = pendingBaseCmds.get(cmdId)
-
-    if (pendingCmds) {
-      const message: CanMessage = {
-        device: this.info.name,
-        dir: 'OUT',
-        id: pendingCmds.id,
-        data: pendingCmds.data,
-        ts: ts,
-        msgType: pendingCmds.msgType,
-        database: pendingCmds.extra?.database,
-        name: pendingCmds.extra?.name
-      }
-      this.log.canBase(message)
-      this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
-      pendingCmds.resolve(ts)
-      pendingBaseCmds.delete(cmdId)
-    }
-  }
-  callback(msg: any) {
-    if (msg.id == 0xffffffff) {
-      return
+    if (!Candle.candle_dev_open(this.target)) {
+      throw new Error('Open device failed')
     }
 
-    const frame: CANFrame = {
-      canId: msg.ID & 0x1fffffff,
-      msgType: {
-        idType: msg.ID & 0x80000000 ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
-        remote: msg.ID & 0x40000000 ? true : false,
-        canfd: this.info.canfd,
-        brs: false
-      },
-      data: msg.Data,
-      ts: ((msg.TimeStampHigh << 32) | msg.TimeStamp) * 10
+    // Check baud rate parameters against device capabilities
+    const cap = this.target.bt_const
+
+    if (CLOCK != cap.fclk_can) {
+      throw new Error(`Clock frequency mismatch: expected ${CLOCK}, got ${cap.fclk_can}`)
+    }
+    // Check time segments
+    if (info.bitrate.timeSeg1 < cap.tseg1_min || info.bitrate.timeSeg1 > cap.tseg1_max) {
+      throw new Error(
+        `Time segment 1 (${info.bitrate.timeSeg1}) out of valid range [${cap.tseg1_min}-${cap.tseg1_max}]`
+      )
     }
 
-    if (this.info.canfd) {
-      // CANFD消息处理
-      frame.msgType.brs = msg.Flags & 0x01 ? true : false
-      frame.msgType.canfd = msg.Flags & 0x04 ? true : false
+    if (info.bitrate.timeSeg2 < cap.tseg2_min || info.bitrate.timeSeg2 > cap.tseg2_max) {
+      throw new Error(
+        `Time segment 2 (${info.bitrate.timeSeg2}) out of valid range [${cap.tseg2_min}-${cap.tseg2_max}]`
+      )
+    }
+
+    // Check prescaler (BRP)
+    if (info.bitrate.preScaler < cap.brp_min || info.bitrate.preScaler > cap.brp_max) {
+      throw new Error(
+        `Prescaler (${info.bitrate.preScaler}) out of valid range [${cap.brp_min}-${cap.brp_max}]`
+      )
+    }
+    //sjw
+    if (info.bitrate.sjw > cap.sjw_max) {
+      throw new Error(`SJW (${info.bitrate.sjw}) out of valid range [0-${cap.sjw_max}]`)
+    }
+    const bittiming = new Candle.candle_bittiming_t()
+    bittiming.prop_seg = 1
+    bittiming.phase_seg1 = info.bitrate.timeSeg1 - 1
+    bittiming.phase_seg2 = info.bitrate.timeSeg2
+    bittiming.sjw = info.bitrate.sjw
+    bittiming.brp = info.bitrate.preScaler
+
+    if (!Candle.candle_channel_set_timing(this.target, this.channel, bittiming)) {
+      throw new Error('Set timing failed')
+    }
+    const ra = new Candle.Uint8Array(1)
+
+    if (info.candleRes) {
+      ra.setitem(0, 1)
     } else {
-      // 普通CAN消息处理
-      frame.msgType.brs = false
-      frame.msgType.canfd = false
+      ra.setitem(0, 0)
+    }
+    const currentRes = new Candle.Uint8Array(1)
+    const getSuccess = Candle.candle_channel_get_can_resister_enable_state(
+      this.target,
+      this.channel,
+      currentRes.cast()
+    )
 
-      // 普通CAN最大8字节
-      if (frame.data.length > 8) {
-        frame.data = frame.data.subarray(0, 8)
+    if (getSuccess) {
+      const currentResState = currentRes[0] === 1
+      const configResState = info.candleRes
+
+      // Only perform the set operation when the configuration value is inconsistent with the hardware state
+      if (currentResState !== configResState) {
+        if (
+          !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
+        ) {
+          console.log('Set can resister enable state failed')
+        }
+      } else {
+        console.log('Terminal resistor state matches configuration, no need to set')
+      }
+    } else {
+      // Attempt to set even if fetching status fails (to avoid unknown hardware state).
+      console.warn('Failed to get current terminal resistor state, attempting to set...')
+      if (
+        !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
+      ) {
+        console.log('Set can resister enable state failed')
       }
     }
 
-    this._read(frame)
+    let flag = 0
+    //canfd config
+    if (info.canfd && info.bitratefd) {
+      //check
+      const canfd_cap = this.target.data_bt_const
+      if (
+        info.bitratefd.timeSeg1 < canfd_cap.tseg1_min ||
+        info.bitratefd.timeSeg1 > canfd_cap.tseg1_max
+      ) {
+        throw new Error(
+          `Time segment 1 (${info.bitratefd.timeSeg1}) out of valid range [${canfd_cap.tseg1_min}-${canfd_cap.tseg1_max}]`
+        )
+      }
+      if (
+        info.bitratefd.timeSeg2 < canfd_cap.tseg2_min ||
+        info.bitratefd.timeSeg2 > canfd_cap.tseg2_max
+      ) {
+        throw new Error(
+          `Time segment 2 (${info.bitratefd.timeSeg2}) out of valid range [${canfd_cap.tseg2_min}-${canfd_cap.tseg2_max}]`
+        )
+      }
+      if (
+        info.bitratefd.preScaler < canfd_cap.brp_min ||
+        info.bitratefd.preScaler > canfd_cap.brp_max
+      ) {
+        throw new Error(
+          `Prescaler (${info.bitratefd.preScaler}) out of valid range [${canfd_cap.brp_min}-${canfd_cap.brp_max}]`
+        )
+      }
+      if (info.bitratefd.sjw > canfd_cap.sjw_max) {
+        throw new Error(`SJW (${info.bitratefd.sjw}) out of valid range [0-${canfd_cap.sjw_max}]`)
+      }
+      const bittimingfd = new Candle.candle_bittiming_t()
+      bittimingfd.prop_seg = 1
+      bittimingfd.phase_seg1 = info.bitratefd.timeSeg1 - 1
+      bittimingfd.phase_seg2 = info.bitratefd.timeSeg2
+      bittimingfd.sjw = info.bitratefd.sjw
+      bittimingfd.brp = info.bitratefd.preScaler
+      if (!Candle.candle_channel_set_data_timing(this.target, this.channel, bittimingfd)) {
+        throw new Error('Set data timing failed')
+      }
+      //can-fd flag
+      flag |= 0x100
+    }
+    //error report flag
+
+    // flag |= (1 << 12)
+
+    const ts = new Candle.TS()
+
+    if (!Candle.candle_dev_get_timestamp_us(this.target, ts.cast())) {
+      throw new Error('Get timestamp failed')
+    }
+
+    if (!Candle.candle_channel_set_interfacenumber_endpoints(this.target, this.channel)) {
+      throw new Error('Set interface number endpoints failed')
+    }
+
+    if (!Candle.candle_channel_start(this.target, this.channel, flag)) {
+      throw new Error('Start channel failed')
+    }
+
+    Candle.CreateTSFN(
+      this.channel,
+      this.id,
+      this.callback.bind(this),
+      this.errorCallback.bind(this)
+    )
+    if (!Candle.SetContextDevice(this.id, this.target)) {
+      throw new Error('Set context device failed')
+    }
+
+    this.attachCanMessage(this.busloadCb)
   }
 
-  callbackError(err: any) {
-    this.log.error(getTsUs() - this.startTime, 'bus error')
-    this.close(true)
+  callback(msg: any) {
+    // Handle received CAN message
+    if (msg) {
+      // Extract CAN ID without flags
+      const canId = msg.ID & 0x1fffffff
+      const isEcho = msg.FrameType === 2 // CANDLE_FRAMETYPE_ECHO = 2
+      const isExtended = (msg.ID & 0x80000000) !== 0 // CANDLE_ID_EXTENDED
+      const isRtr = (msg.ID & 0x40000000) !== 0 // CANDLE_ID_RTR
+      const isCanfd = (msg.Flags & 0x02) !== 0 // CANDLE_FLAG_FD
+      const hasBrs = (msg.Flags & 0x04) !== 0 // CANDLE_FLAG_BRS
+
+      const msgType: CanMsgType = {
+        idType: isExtended ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+        brs: hasBrs,
+        canfd: isCanfd,
+        remote: isRtr
+      }
+
+      const data = msg.Data || Buffer.alloc(0)
+      const cmdId = this.getReadBaseId(canId, msgType)
+      if (isEcho) {
+        // Handle echo frame (transmission confirmation)
+
+        const items = this.pendingBaseCmds.get(cmdId)
+        if (items && items.length > 0) {
+          const item = items.shift()!
+          if (items.length == 0) {
+            this.pendingBaseCmds.delete(cmdId)
+          }
+
+          const message: CanMessage = {
+            device: this.info.name,
+            dir: 'OUT',
+            id: canId,
+            data: data,
+            ts: msg.TimeStamp,
+            msgType: msgType,
+            database: item.extra?.database,
+            name: item.extra?.name
+          }
+          this.log.canBase(message)
+          this.event.emit(cmdId, message)
+          item.resolve(msg.TimeStamp)
+        }
+      } else {
+        const message: CanMessage = {
+          device: this.info.name,
+          dir: 'IN',
+          id: canId,
+          data: data,
+          ts: msg.TimeStamp,
+          msgType: msgType,
+          database: this.info.database
+        }
+        this.log.canBase(message) //打印接收帧
+        this.event.emit(cmdId, message) //EventEmitter触发事件，接收帧触发
+      }
+    }
+  }
+
+  errorCallback(error: any) {
+    //TODO: handle error
+    console.error('Candle send error:', error)
+
+    // Handle send errors
+    for (const [key, items] of this.pendingBaseCmds) {
+      for (const item of items) {
+        item.reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, item.msgType, item.data, error))
+      }
+    }
+    this.pendingBaseCmds.clear()
   }
 
   setOption(cmd: string, val: any): any {
     return this._setOption(cmd, val)
   }
-  _read(frame: CANFrame) {
-    if (this.tsOffset == undefined) {
-      this.tsOffset = frame.ts - (getTsUs() - this.startTime)
-    }
-    const ts = frame.ts - this.tsOffset
-
-    const cmdId = this.getReadBaseId(frame.canId, frame.msgType)
-    const message: CanMessage = {
-      device: this.info.name,
-      dir: 'IN',
-      id: frame.canId,
-      data: frame.data,
-      ts: ts,
-      msgType: frame.msgType,
-      database: this.info.database
-    }
-
-    this.log.canBase(message)
-    this.event.emit(cmdId, message)
-  }
 
   static loadDllPath(dllPath: string) {}
 
+  static getRawDeviceList() {
+    const list: any[] = []
+    if (process.platform == 'win32') {
+      const readList = new Candle.candle_list_t()
+      const ret = Candle.candle_list_scan(readList)
+
+      if (ret && readList.num_devices > 0) {
+        const devicesx = Candle.DeviceArray.frompointer(readList.dev)
+        // Convert device array to plain JS array
+        const devicesArray: any[] = []
+        for (let i = 0; i < readList.num_devices; i++) {
+          devicesArray.push(devicesx.getitem(i))
+        }
+        // Sort by interfaceNumber in ascending order
+        devicesArray.sort((a, b) => a.interfaceNumber - b.interfaceNumber)
+        console.log('List of interfaceNumbers from scanned devices：')
+        devicesArray.forEach((device, index) => {
+          console.log(`device ${index + 1}: ${device.interfaceNumber}`)
+        })
+
+        // 按排序后的顺序添加到列表
+        for (const device of devicesArray) {
+          list.push(device)
+        }
+      }
+
+      return list
+    }
+    return []
+  }
   static override getValidDevices(): CanDevice[] {
     const devices: CanDevice[] = []
     if (process.platform == 'win32') {
-      const readList = new Candle.candle_list_t()
-
-      const ret = Candle.candle_list_scan(readList)
-      console.log('Candle scan result:', ret)
-      console.log('Number of devices found:', readList.num_devices)
-      console.log('Last error:', readList.last_error)
-
-      if (ret && readList.num_devices > 0) {
-        // Build device list
-        for (let i = 0; i < readList.num_devices; i++) {
-          const device = Candle.candle_dev_get(readList, i)
-          if (device) {
-            const path = Candle.candle_dev_get_path(device)
-            const state = Candle.candle_dev_get_state(device)
-
-            console.log(`Device ${i}: path=${path}, state=${state}`)
-
-            if (state === Candle.CANDLE_DEVSTATE_AVAIL) {
-              // For Candle devices, typically there's only one channel
-              devices.push({
-                label: `Candle Device ${i}`,
-                id: `Candle_${i}`,
-                handle: `${i}:0`
-              })
-            }
-
-            // Free the device handle
-            Candle.candle_dev_free(device)
-          }
-        }
+      const rawList = this.getRawDeviceList()
+      for (const device of rawList) {
+        // const path = Candle.CharArray.frompointer(device.path)
+        // const buf = Buffer.alloc(256 * 2)
+        // for (let j = 0; j < 256 * 2; j++) {
+        //   const val = path.getitem(j)
+        //   if (val == 0) {
+        //     break
+        //   }
+        //   buf[j] = val
+        // }
+        // let pathStr = buf.toString('ascii').replace(/\0/g, '')
+        // //remove {xxxx} guid info, maybe {xxx no }
+        // pathStr = pathStr.replace(/\{.*\}/g, '')
+        // pathStr = pathStr.replace(/\{.*/g, '')
+        // 直接使用设备对象获取友好名称
+        const pathStr = Candle.GetDevicePath(device)
+        const friendlyNameStr = Candle.GetDeviceFriendlyName(device)
+        devices.push({
+          label: friendlyNameStr,
+          id: `Candle_${device.interfaceNumber}`,
+          handle: device.interfaceNumber,
+          serialNumber: pathStr
+          // serialNumber: pathStr
+        })
       }
     }
     return devices
@@ -371,106 +414,157 @@ export class Candle_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      return '1.8.6.0'
+      const v = Candle_CAN.getRawDeviceList()[0]
+      if (v) {
+        return `SW:${v.dconf.sw_version}/HW:${v.dconf.hw_version}`
+      }
+      return '1.0.0'
     } else {
       return 'only support windows'
     }
   }
 
   close(isReset = false, msg?: string) {
-    // this.readAbort.abort()
+    this.readAbort.abort()
 
-    // for (const [key, value] of this.rejectBaseMap) {
-    //   value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
-    // }
+    for (const [key, value] of this.rejectBaseMap) {
+      value.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, value.msgType))
+    }
 
-    // this.rejectBaseMap.clear()
+    this.rejectBaseMap.clear()
 
-    // for (const [key, val] of pendingBaseCmds) {
-    //   val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
-    // }
-    // pendingBaseCmds.clear()
+    for (const [key, vals] of this.pendingBaseCmds) {
+      for (const val of vals) {
+        val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
+      }
+    }
+    this.pendingBaseCmds.clear()
 
-    // if (isReset) {
-    //   if (this.info.canfd) {
-    //     TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
-    //     TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
-    //     TOOMOSS.CANFD_Init(this.handle, this.deviceIndex, this.canfdConfig)
-    //     TOOMOSS.CANFD_StartGetMsg(this.handle, this.deviceIndex)
-    //   } else {
-    //     TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
-    //     TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
-    //     TOOMOSS.CAN_Init(this.handle, this.deviceIndex, this.canConfig)
-    //     TOOMOSS.CAN_StartGetMsg(this.handle, this.deviceIndex)
-    //   }
-    //   return
-    // } else {
-    //   this.closed = true
-    //   this.log.close()
-    //   TOOMOSS.FreeTSFN(this.id)
-    //   if (this.info.canfd) {
-    //     TOOMOSS.CANFD_ClearMsg(this.handle, this.deviceIndex)
-    //     TOOMOSS.CANFD_Stop(this.handle, this.deviceIndex)
-    //   } else {
-    //     TOOMOSS.CAN_ClearMsg(this.handle, this.deviceIndex)
-    //     TOOMOSS.CAN_Stop(this.handle, this.deviceIndex)
-    //   }
-    // }
+    if (isReset) {
+      // Reset logic would go here
+      return
+    } else {
+      this.closed = true
+      this.log.close()
+      Candle.FreeTSFN(this.id)
+      Candle.candle_channel_stop(this.target, this.channel)
+      Candle.candle_dev_close(this.target)
+    }
 
-    // // 更新设备引用计数
-    // const deviceInfo = global.toomossDeviceHandles?.get(this.handle)
-    // if (deviceInfo) {
-    //   deviceInfo.channels.delete(this.deviceIndex)
-    //   deviceInfo.refCount--
-
-    //   // 如果没有其他引用了，关闭设备
-    //   if (deviceInfo.refCount <= 0) {
-    //     TOOMOSS.USB_CloseDevice(this.handle)
-    //     global.toomossDeviceHandles?.delete(this.handle)
-    //   }
-    // }
     this._close()
   }
-
   writeBase(
+    //发送报文
     id: number,
     msgType: CanMsgType,
     data: Buffer,
     extra?: { database?: string; name?: string }
   ): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const cmdId = txCnt++
+    let maxLen = msgType.canfd ? 64 : 8 //最大长度
+    if (data.length > maxLen) {
+      throw new CanError(CAN_ERROR_ID.CAN_PARAM_ERROR, msgType, data)
+    }
+
+    if (msgType.canfd) {
+      //CANFD帧
+      //detect data.length range by dlc
+      if (data.length > 8 && data.length <= 12) {
+        maxLen = 12
+      } else if (data.length > 12 && data.length <= 16) {
+        maxLen = 16
+      } else if (data.length > 16 && data.length <= 20) {
+        maxLen = 20
+      } else if (data.length > 20 && data.length <= 24) {
+        maxLen = 24
+      } else if (data.length > 24 && data.length <= 32) {
+        maxLen = 32
+      } else if (data.length > 32 && data.length <= 48) {
+        maxLen = 48
+      } else if (data.length > 48) {
+        maxLen = 64
+      } else {
+        maxLen = data.length
+      }
+      data = Buffer.concat([data, Buffer.alloc(maxLen - data.length).fill(0)]) //合并数据和填充数据0
+    }
+
+    const cmdId = this.getReadBaseId(id, msgType)
+    //queue
+    return this._writeBase(id, msgType, cmdId, data, extra) //发送函数
+  }
+  _writeBase(
+    //发送函数
+    id: number,
+    msgType: CanMsgType,
+    cmdId: string,
+    data: Buffer,
+    extra?: { database?: string; name?: string }
+  ): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const item = this.pendingBaseCmds.get(cmdId)
+      if (item) {
+        item.push({ resolve, reject, data, msgType, extra })
+      } else {
+        this.pendingBaseCmds.set(cmdId, [{ resolve, reject, data, msgType, extra }])
+      }
 
       try {
-        pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
-        Candle.SendCANMsg(
-          this.handle,
-          this.deviceIndex,
-          this.info.canfd,
-          this.id,
+        const frame = new Candle.candle_frame_t()
 
-          cmdId,
-          {
-            ID:
-              id |
-              (msgType.idType == CAN_ID_TYPE.EXTENDED ? 0x80000000 : 0) |
-              (msgType.remote ? 0x40000000 : 0),
-            RemoteFlag: msgType.remote ? 1 : 0,
-            ExternFlag: msgType.idType == CAN_ID_TYPE.EXTENDED ? 1 : 0,
-            DataLen: data.length,
-            Data: data,
-            DLC: data.length,
-            Flags: (msgType.brs ? 0x01 : 0) | (msgType.canfd ? 0x04 : 0)
+        // 设置 CAN ID，根据 ID 类型添加标志位
+        let canId = id
+        if (msgType.idType === CAN_ID_TYPE.EXTENDED) {
+          canId += 0x80000000 // CANDLE_ID_EXTENDED
+        }
+        if (msgType.remote) {
+          canId += 0x40000000 // CANDLE_ID_RTR
+        }
+        frame.can_id = canId
+        frame.channel = this.channel
+        // 设置 DLC (Data Length Code)
+        if (msgType.canfd) {
+          const dataArray = Candle.Uint8Array.frompointer(frame.msg.canfd.data)
+          for (let i = 0; i < data.length; i++) {
+            dataArray.setitem(i, data[i])
           }
-        )
+          frame.can_dlc = getDlcByLen(data.length, true)
+        } else {
+          const dataArray = Candle.Uint8Array.frompointer(frame.msg.classic_can.data)
+          for (let i = 0; i < data.length; i++) {
+            dataArray.setitem(i, data[i])
+          }
+          frame.can_dlc = data.length
+        }
+
+        // 设置通道号
+        frame.channel = this.channel
+
+        // 设置标志位
+        let falg = 0
+        if (msgType.canfd) {
+          falg += 0x02 // CANDLE_FLAG_FD
+          if (msgType.brs) {
+            falg += 0x04 // CANDLE_FLAG_BRS
+          }
+        }
+        frame.flags = falg
+
+        Candle.SendCANMsg(this.id, this.channel, frame)
       } catch (err: any) {
-        pendingBaseCmds.delete(cmdId)
+        const items = this.pendingBaseCmds.get(cmdId)
+        if (items && items.length > 0) {
+          items.pop()
+        }
         reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
       }
     })
   }
 
-  readBase(id: number, msgType: CanMsgType, timeout: number) {
+  readBase(
+    id: number,
+    msgType: CanMsgType,
+    timeout: number
+  ): Promise<{ data: Buffer; ts: number }> {
     return new Promise<{ data: Buffer; ts: number }>(
       (
         resolve: (value: { data: Buffer; ts: number }) => void,

@@ -49,7 +49,9 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
 
     bool retval = true;
     ULONG length = requiredLength;
-    if (!SetupDiGetDeviceInterfaceDetail(hdi, &interfaceData, detail_data, length, &requiredLength, NULL) ) {
+    SP_DEVINFO_DATA deviceInfoData;
+    deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+    if (!SetupDiGetDeviceInterfaceDetail(hdi, &interfaceData, detail_data, length, &requiredLength, &deviceInfoData) ) {
         dev->last_error = CANDLE_ERR_SETUPDI_IF_DETAILS2;
         retval = false;
     } else if (FAILED(StringCchCopy(dev->path, sizeof(dev->path), detail_data->DevicePath))) {
@@ -62,6 +64,32 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
     if (!retval) {
         return false;
     }
+
+    /* Get friendly name */
+    // Initialize friendly name with default value
+    strcpy_s(dev->friendly_name, sizeof(dev->friendly_name), "CandleLight Device");
+    
+    DWORD dataType = 0;
+    DWORD friendlyNameSize = 0;
+    
+    if (!SetupDiGetDeviceRegistryProperty(
+        hdi,
+        &deviceInfoData,
+        SPDRP_FRIENDLYNAME,
+        &dataType,
+        dev->friendly_name,
+        sizeof(dev->friendly_name),
+        &friendlyNameSize)) {
+    /* Fallback to device description */
+    SetupDiGetDeviceRegistryProperty(
+        hdi,
+        &deviceInfoData,
+        SPDRP_DEVICEDESC,
+        &dataType,
+        (PBYTE)dev->friendly_name,
+        sizeof(dev->friendly_name),
+        &friendlyNameSize);
+}
 
     /* try to open to read device infos and see if it is avail */
     if (candle_dev_interal_open(dev)) {
@@ -145,7 +173,7 @@ bool __stdcall DLL candle_list_length(candle_list_handle list, uint8_t *len)
     return true;
 }
 
-bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle *hdev)
+bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, candle_handle hdev)
 {
     candle_list_t *l = (candle_list_t *)list;
     if (l==NULL) {
@@ -157,16 +185,9 @@ bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, cand
         return false;
     }
 
-    candle_device_t *dev = calloc(1, sizeof(candle_device_t));
-    *hdev = dev;
-    if (dev==NULL) {
-        l->last_error = CANDLE_ERR_MALLOC;
-        return false;
-    }
-
-    memcpy(dev, &l->dev[dev_num], sizeof(candle_device_t));
+    memcpy(hdev, &l->dev[dev_num], sizeof(candle_device_t));
     l->last_error = CANDLE_ERR_OK;
-    dev->last_error = CANDLE_ERR_OK;
+    ((candle_device_t*)hdev)->last_error = CANDLE_ERR_OK;
     return true;
 }
 
@@ -189,6 +210,16 @@ wchar_t* __stdcall DLL candle_dev_get_path(candle_handle hdev)
     } else {
         candle_device_t *dev = (candle_device_t*)hdev;
         return dev->path;
+    }
+}
+
+char* __stdcall DLL candle_dev_get_friendly_name(candle_handle hdev)
+{
+    if (hdev==NULL) {
+        return NULL;
+    } else {
+        candle_device_t *dev = (candle_device_t*)hdev;
+        return dev->friendly_name;
     }
 }
 
@@ -532,7 +563,7 @@ bool __stdcall DLL candle_frame_send(candle_handle hdev, uint8_t ch, candle_fram
         &bytes_sent,
         0
     );
-
+     
     dev->last_error = rc ? CANDLE_ERR_OK : CANDLE_ERR_SEND_FRAME;
     return rc;
 
@@ -546,7 +577,7 @@ bool __stdcall DLL candle_frame_read(candle_handle hdev, candle_frame_t *frame, 
 
     DWORD wait_result = WaitForMultipleObjects(CANDLE_URB_COUNT, dev->rxevents, false, timeout_ms);
     if (wait_result == WAIT_TIMEOUT) {
-        dev->last_error = CANDLE_ERR_READ_TIMEOUT;
+        // dev->last_error = CANDLE_ERR_READ_TIMEOUT;
         return false;
     }
 
@@ -678,5 +709,5 @@ bool __stdcall DLL candle_channel_set_can_resister_enable_state(candle_handle hd
 bool __stdcall DLL candle_channel_set_interfacenumber_endpoints(candle_handle hdev, uint8_t ch)
 {
     candle_device_t *dev = (candle_device_t*)hdev;
-    return candle_ctrl_get_can_interfacenumber_endpoint(dev, ch);
+    return candle_ctrl_set_can_interfacenumber_endpoint(dev, ch);
 }

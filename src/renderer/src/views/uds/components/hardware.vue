@@ -428,6 +428,17 @@ async function buildTree() {
     t.push(slcan)
     addSubTree('slcan', slcan)
   }
+  if (vendors.includes('candle')) {
+    const candle: tree = {
+      label: 'CANDLE',
+      vendor: 'candle',
+      append: false,
+      id: 'CANDLE',
+      children: []
+    }
+    t.push(candle)
+    addSubTree('candle', candle)
+  }
 
   tData.value = t
 }

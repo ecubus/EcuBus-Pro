@@ -49,7 +49,12 @@
       </template>
       <template #default_type="{ row }">
         <el-select v-model="row.type" size="small" style="width: 100%">
-          <el-option v-for="(l, v) in typeMap" :key="v" :value="v" :label="l"></el-option>
+          <el-option
+            v-for="(l, v) in row.remote ? typeMapRemote : typeMap"
+            :key="v"
+            :value="v"
+            :label="l"
+          ></el-option>
         </el-select>
       </template>
       <template #default_type1="{ row }">
@@ -234,7 +239,12 @@
           </el-form-item>
           <el-form-item label="Type">
             <el-select v-model="formData.type" size="small" style="width: 100%">
-              <el-option v-for="(l, v) in typeMap" :key="v" :value="v" :label="l"></el-option>
+              <el-option
+                v-for="(l, v) in formData.remote ? typeMapRemote : typeMap"
+                :key="v"
+                :value="v"
+                :label="l"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label-width="0">
@@ -350,6 +360,10 @@ const typeMap = {
   canfd: 'CAN FD',
   ecan: 'Extended CAN',
   ecanfd: 'Extended CAN FD'
+}
+const typeMapRemote = {
+  can: 'CAN',
+  ecan: 'Extended CAN'
 }
 const activeName = ref('signal')
 const connectV = ref(false)

@@ -23,7 +23,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-describe('vector test', () => {
+describe('slcan test', () => {
   let client!: SLCAN_CAN
   beforeAll(async () => {
     client = new SLCAN_CAN({

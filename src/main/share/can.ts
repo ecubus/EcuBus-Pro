@@ -21,6 +21,7 @@ export type CanVendor =
   | 'vector'
   | 'slcan'
   | 'ecubus'
+  | 'candle'
 export interface CanBaseInfo {
   id: string
   handle: any
@@ -33,6 +34,7 @@ export interface CanBaseInfo {
   database?: string
   toomossRes?: boolean
   zlgRes?: boolean
+  candleRes?: boolean
   slcanDelay?: number
 }
 
@@ -286,6 +288,7 @@ export interface CanDevice {
   handle: any
   serialNumber?: string
   busy?: boolean
+  candleRes?: boolean
 }
 
 export interface CanEventMap {

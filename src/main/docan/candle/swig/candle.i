@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include "candle_defs.h"
 #include "candle.h"
+
+extern bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
+extern bool __stdcall DLL SendCANMsg(std::string name,uint8_t ch,candle_frame_t *frame);
+extern std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev);
+extern std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
 %}
 
 
@@ -13,7 +18,9 @@
 %}
 
 %include <stdint.i>
+%include <std_string.i>
 %include <windows.i>
+
 
 
 
@@ -24,8 +31,10 @@
 // %pointer_class(long,JSINT64)
 // %pointer_class(unsigned int,JSUINT32)
 
-%pointer_class(candle_device_t,DevicePointer)
-%pointer_class(candle_list_handle,ListPointer)
+// %pointer_class(candle_device_t,DevicePointer)
+// %pointer_class(candle_list_handle,ListPointer)
+
+%pointer_class(uint32_t,TS)
 
 
 %include <carrays.i>
@@ -34,6 +43,8 @@
 
 //candle_device_t
 %array_class(candle_device_t, DeviceArray);
+%array_class(uint16_t, CharArray);
+%array_class(uint8_t, Uint8Array);
 
 // %array_class(BYTE, ByteArray);
 // %array_class(ZCAN_Receive_Data, ReceiveDataArray);
@@ -45,7 +56,10 @@
 %include "candle.h"
 
 
-
+bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev);
+bool __stdcall DLL SendCANMsg(std::string name, uint8_t ch,candle_frame_t *frame);
+std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev); 
+std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
 
 
 
@@ -61,7 +75,6 @@
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
-extern void SendCANMsg(const Napi::CallbackInfo& info);
 
 
 do {
@@ -77,11 +90,6 @@ do {
 	pd
   }));
 } while (0);
-do{
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SendCANMsg", SendCANMsg);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
+
 
 %}

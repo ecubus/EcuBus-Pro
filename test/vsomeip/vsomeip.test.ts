@@ -6,6 +6,7 @@ import {
   startRouterCounter,
   stopRouterCounter
 } from './../../src/main/vsomeip/index'
+import RpcServer from '../../src/main/rpc'
 
 const dllPath = path.join(__dirname, '../../resources/lib')
 loadDllPath(dllPath)
@@ -15,6 +16,7 @@ describe('hello world', async () => {
   let client: VSomeIP_Client
   let server: VSomeIP_Client
   beforeAll(async () => {
+    RpcServer.start()
     await startRouterCounter(path.join(__dirname, 'helloworld-local.json'))
     await delay(1000)
     client = new VSomeIP_Client('hello_world_client', path.join(__dirname, 'helloworld-local.json'))

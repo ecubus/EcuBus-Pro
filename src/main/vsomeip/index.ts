@@ -6,6 +6,7 @@ import { ServiceConfig } from './share/service-config'
 import { EventEmitter } from 'events'
 import os from 'os'
 import fs from 'fs'
+import RpcServer from '../rpc'
 
 // Import sysLog from global
 declare const sysLog: any
@@ -75,6 +76,10 @@ export function loadDllPath(dllPath: string) {
 
 export function startRouterCounter(configFilePath: string, quiet: boolean = true): Promise<void> {
   return new Promise((resolve, reject) => {
+    RpcServer.registerHandler('POST', '/someip', (req, res) => {
+      console.log('someip rpc request', req)
+      res.end()
+    })
     // Check if routing manager is already running
     if (routingManagerProcess) {
       resolve()

@@ -2,7 +2,19 @@
     "unicast": "127.0.0.1",
     "logging": {
         "level": "debug",
-        "console": "false"
+        "console": "true",
+        "dlt" : "true",
+        "file" : { "enable" : "true", "path" : "./vsomeip.log" }
+    },
+    "tracing" :
+    {
+        "enable" : "true",
+        "sd_enable" : "true",
+        "jsonrpc" : {
+            "enable" : "false",
+            "host" : "localhost",
+            "port" : "14901"
+        }
     },
     "applications": [
         {

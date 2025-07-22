@@ -180,7 +180,7 @@ export class Candle_CAN extends CanBase {
         if (
           !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
         ) {
-          throw new Error('Set can resister enable state failed')
+          console.log('Set can resister enable state failed')
         }
       } else {
         console.log('Terminal resistor state matches configuration, no need to set')
@@ -191,7 +191,7 @@ export class Candle_CAN extends CanBase {
       if (
         !Candle.candle_channel_set_can_resister_enable_state(this.target, this.channel, ra.cast())
       ) {
-        throw new Error('Set can resister enable state failed')
+        console.log('Set can resister enable state failed')
       }
     }
 

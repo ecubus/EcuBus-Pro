@@ -56,12 +56,16 @@ export class PeakLin extends LinBase {
   }
   static getLibVersion() {
     if (process.platform == 'win32') {
-      const v = new LIN.TLINVersion()
-      const result = LIN.LIN_GetVersion(v)
-      if (result == 0) {
-        return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
-      } else {
-        throw new Error(err2Str(result))
+      try {
+        const v = new LIN.TLINVersion()
+        const result = LIN.LIN_GetVersion(v)
+        if (result == 0) {
+          return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
+        } else {
+          return `Get version failed: ${err2Str(result)}`
+        }
+      } catch (e: any) {
+        return `Get version error: ${e.message}`
       }
     } else {
       return 'only support windows'

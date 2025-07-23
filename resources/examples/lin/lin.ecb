@@ -1,20 +1,21 @@
 {
   "data": {
     "devices": {
-      "e4179991-1b87-4889-b365-25b1fd93d97e": {
+      "b42d8e0e-aa00-4944-81de-7e1927d7846b": {
         "type": "lin",
         "linDevice": {
           "device": {
             "label": "",
-            "handle": 1,
-            "id": ""
+            "handle": "1417675180:0",
+            "id": "",
+            "toomossVolt": 1
           },
-          "name": "PEAK_0",
-          "id": "e4179991-1b87-4889-b365-25b1fd93d97e",
-          "vendor": "peak",
+          "name": "TOOMOSS_0",
+          "id": "b42d8e0e-aa00-4944-81de-7e1927d7846b",
+          "vendor": "toomoss",
           "baudRate": 19200,
           "mode": "MASTER",
-          "database": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
+          "database": "8d0116f8-c6d5-4a9d-bde9-cdb3baeef8c8"
         }
       }
     },
@@ -24,7 +25,7 @@
         "type": "lin",
         "id": "25cec12a-572d-4221-b85e-2728628134f7",
         "devices": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
+          "b42d8e0e-aa00-4944-81de-7e1927d7846b"
         ],
         "action": []
       }
@@ -37,9 +38,9 @@
         "type": "lin",
         "id": "9505c05a-4fe5-42e1-a45d-b1cbc14854ba",
         "channel": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
+          "b42d8e0e-aa00-4944-81de-7e1927d7846b"
         ],
-        "workNode": "lin:Motor2",
+        "workNode": "2.2:SeatECU",
         "attachTester": "5459ce47-1751-4a82-94a0-9bd33ae289ab",
         "script": ""
       },
@@ -48,9 +49,9 @@
         "type": "lin",
         "id": "69c0b8cc-f674-4142-99fc-9eed944cacf9",
         "channel": [
-          "e4179991-1b87-4889-b365-25b1fd93d97e"
+          "b42d8e0e-aa00-4944-81de-7e1927d7846b"
         ],
-        "workNode": "lin:SeatECU",
+        "workNode": "2.2:Motor1",
         "script": "node.ts"
       }
     },
@@ -626,6 +627,632 @@
           },
           "name": "lin",
           "id": "655bf90d-b010-49b5-9cf8-a9787319b5b4"
+        },
+        "8d0116f8-c6d5-4a9d-bde9-cdb3baeef8c8": {
+          "eventTriggeredFrames": {
+            "ETF_MotorStates": {
+              "name": "ETF_MotorStates",
+              "schTableName": "ETF_CollisionResolving",
+              "frameId": 58,
+              "frameNames": [
+                "Motor1State_Event",
+                "Motor2State_Event"
+              ]
+            }
+          },
+          "sporadicFrames": {},
+          "signalRep": {
+            "MotorSpeed": [
+              "MotorSpeed"
+            ],
+            "encTemperature": [
+              "Motor1Temp",
+              "Motor2Temp"
+            ]
+          },
+          "signalEncodeTypes": {
+            "MotorSpeed": {
+              "name": "MotorSpeed",
+              "encodingTypes": [
+                {
+                  "type": "physicalValue",
+                  "physicalValue": {
+                    "minValue": 0,
+                    "maxValue": 0,
+                    "scale": 1,
+                    "offset": 0,
+                    "textInfo": "rpm"
+                  }
+                }
+              ],
+              "_X_ROW_KEY": "row_218"
+            },
+            "encTemperature": {
+              "name": "encTemperature",
+              "encodingTypes": [
+                {
+                  "type": "physicalValue",
+                  "physicalValue": {
+                    "minValue": 0,
+                    "maxValue": 80,
+                    "scale": 0.5,
+                    "offset": -20,
+                    "textInfo": "Degree"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 0,
+                    "textInfo": "Initial"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 1,
+                    "textInfo": "LON"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 2,
+                    "textInfo": "NORMAL"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 3,
+                    "textInfo": "HIGH"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 4,
+                    "textInfo": "Reserved"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 5,
+                    "textInfo": "Reserved"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 6,
+                    "textInfo": "Reserved"
+                  }
+                },
+                {
+                  "type": "logicalValue",
+                  "logicalValue": {
+                    "signalValue": 7,
+                    "textInfo": "Invalid"
+                  }
+                }
+              ],
+              "_X_ROW_KEY": "row_219"
+            }
+          },
+          "global": {
+            "LIN_protocol_version": "2.2",
+            "LIN_language_version": "2.2",
+            "LIN_speed": 19.2
+          },
+          "node": {
+            "master": {
+              "nodeName": "SeatECU",
+              "timeBase": 5,
+              "jitter": 0.1
+            },
+            "salveNode": [
+              "Motor1",
+              "Motor2"
+            ]
+          },
+          "signals": {
+            "Motor1_Dynamic_Sig": {
+              "signalName": "Motor1_Dynamic_Sig",
+              "signalSizeBits": 8,
+              "initValue": 7,
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor1ErrorCode": {
+              "signalName": "Motor1ErrorCode",
+              "signalSizeBits": 8,
+              "initValue": 5,
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor1ErrorValue": {
+              "signalName": "Motor1ErrorValue",
+              "signalSizeBits": 8,
+              "initValue": 1,
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor1LinError": {
+              "signalName": "Motor1LinError",
+              "signalSizeBits": 1,
+              "initValue": 0,
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor1Position": {
+              "signalName": "Motor1Position",
+              "signalSizeBits": 32,
+              "initValue": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "ByteArray"
+            },
+            "Motor1Temp": {
+              "signalName": "Motor1Temp",
+              "signalSizeBits": 7,
+              "initValue": 5,
+              "punishedBy": "Motor1",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor2_Dynamic_Sig": {
+              "signalName": "Motor2_Dynamic_Sig",
+              "signalSizeBits": 8,
+              "initValue": 8,
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor2ErrorCode": {
+              "signalName": "Motor2ErrorCode",
+              "signalSizeBits": 8,
+              "initValue": 2,
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor2ErrorValue": {
+              "signalName": "Motor2ErrorValue",
+              "signalSizeBits": 8,
+              "initValue": 4,
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor2LinError": {
+              "signalName": "Motor2LinError",
+              "signalSizeBits": 1,
+              "initValue": 0,
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "Motor2Position": {
+              "signalName": "Motor2Position",
+              "signalSizeBits": 32,
+              "initValue": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "ByteArray"
+            },
+            "Motor2Temp": {
+              "signalName": "Motor2Temp",
+              "signalSizeBits": 8,
+              "initValue": 0,
+              "punishedBy": "Motor2",
+              "subscribedBy": [
+                "SeatECU"
+              ],
+              "singleType": "Scalar"
+            },
+            "MotorDirection": {
+              "signalName": "MotorDirection",
+              "signalSizeBits": 2,
+              "initValue": 0,
+              "punishedBy": "SeatECU",
+              "subscribedBy": [
+                "Motor1",
+                "Motor2"
+              ],
+              "singleType": "Scalar"
+            },
+            "MotorSelection": {
+              "signalName": "MotorSelection",
+              "signalSizeBits": 4,
+              "initValue": 0,
+              "punishedBy": "SeatECU",
+              "subscribedBy": [
+                "Motor1",
+                "Motor2"
+              ],
+              "singleType": "Scalar"
+            },
+            "MotorSpeed": {
+              "signalName": "MotorSpeed",
+              "signalSizeBits": 10,
+              "initValue": 0,
+              "punishedBy": "SeatECU",
+              "subscribedBy": [
+                "Motor1",
+                "Motor2"
+              ],
+              "singleType": "Scalar"
+            }
+          },
+          "frames": {
+            "Motor1_Dynamic": {
+              "name": "Motor1_Dynamic",
+              "id": 53,
+              "publishedBy": "Motor1",
+              "frameSize": 1,
+              "signals": [
+                {
+                  "name": "Motor1_Dynamic_Sig",
+                  "offset": 0
+                }
+              ]
+            },
+            "Motor1State_Cycl": {
+              "name": "Motor1State_Cycl",
+              "id": 51,
+              "publishedBy": "Motor1",
+              "frameSize": 6,
+              "signals": [
+                {
+                  "name": "Motor1Temp",
+                  "offset": 0
+                },
+                {
+                  "name": "Motor1Position",
+                  "offset": 7
+                },
+                {
+                  "name": "Motor1LinError",
+                  "offset": 40
+                }
+              ]
+            },
+            "Motor1State_Event": {
+              "name": "Motor1State_Event",
+              "id": 54,
+              "publishedBy": "Motor1",
+              "frameSize": 3,
+              "signals": [
+                {
+                  "name": "Motor1ErrorCode",
+                  "offset": 8
+                },
+                {
+                  "name": "Motor1ErrorValue",
+                  "offset": 16
+                }
+              ]
+            },
+            "Motor2_Dynamic": {
+              "name": "Motor2_Dynamic",
+              "id": 44,
+              "publishedBy": "Motor2",
+              "frameSize": 1,
+              "signals": [
+                {
+                  "name": "Motor2_Dynamic_Sig",
+                  "offset": 0
+                }
+              ]
+            },
+            "Motor2State_Cycl": {
+              "name": "Motor2State_Cycl",
+              "id": 52,
+              "publishedBy": "Motor2",
+              "frameSize": 6,
+              "signals": [
+                {
+                  "name": "Motor2Temp",
+                  "offset": 0
+                },
+                {
+                  "name": "Motor2Position",
+                  "offset": 8
+                },
+                {
+                  "name": "Motor2LinError",
+                  "offset": 40
+                }
+              ]
+            },
+            "Motor2State_Event": {
+              "name": "Motor2State_Event",
+              "id": 55,
+              "publishedBy": "Motor2",
+              "frameSize": 3,
+              "signals": [
+                {
+                  "name": "Motor2ErrorCode",
+                  "offset": 8
+                },
+                {
+                  "name": "Motor2ErrorValue",
+                  "offset": 16
+                }
+              ]
+            },
+            "MotorControl": {
+              "name": "MotorControl",
+              "id": 45,
+              "publishedBy": "SeatECU",
+              "frameSize": 2,
+              "signals": [
+                {
+                  "name": "MotorDirection",
+                  "offset": 0
+                },
+                {
+                  "name": "MotorSpeed",
+                  "offset": 2
+                },
+                {
+                  "name": "MotorSelection",
+                  "offset": 12
+                }
+              ]
+            }
+          },
+          "nodeAttrs": {
+            "Motor1": {
+              "LIN_protocol": "2.2",
+              "configured_NAD": 2,
+              "initial_NAD": 2,
+              "supplier_id": 30,
+              "function_id": 1,
+              "variant": 0,
+              "response_error": "Motor1LinError",
+              "fault_state_signals": [],
+              "P2_min": 100,
+              "ST_min": 20,
+              "N_As_timeout": 1000,
+              "N_Cr_timeout": 1000,
+              "configFrames": [
+                "MotorControl",
+                "Motor1State_Cycl",
+                "Motor1State_Event",
+                "ETF_MotorStates",
+                "Motor1_Dynamic"
+              ]
+            },
+            "Motor2": {
+              "LIN_protocol": "2.2",
+              "configured_NAD": 3,
+              "initial_NAD": 3,
+              "supplier_id": 30,
+              "function_id": 1,
+              "variant": 0,
+              "response_error": "Motor2LinError",
+              "fault_state_signals": [],
+              "P2_min": 100,
+              "ST_min": 20,
+              "N_As_timeout": 1000,
+              "N_Cr_timeout": 1000,
+              "configFrames": [
+                "MotorControl",
+                "Motor2State_Cycl",
+                "Motor2State_Event",
+                "ETF_MotorStates",
+                "Motor2_Dynamic"
+              ]
+            }
+          },
+          "schTables": [
+            {
+              "name": "NormalTable",
+              "entries": [
+                {
+                  "name": "MotorControl",
+                  "delay": 50,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor1State_Cycl",
+                  "delay": 50,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor2State_Cycl",
+                  "delay": 50,
+                  "isCommand": false
+                }
+              ],
+              "_X_ROW_KEY": "row_209"
+            },
+            {
+              "name": "DynamicTable",
+              "entries": [
+                {
+                  "name": "Motor1_Dynamic",
+                  "delay": 100,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor2_Dynamic",
+                  "delay": 5,
+                  "isCommand": false
+                }
+              ],
+              "_X_ROW_KEY": "row_210"
+            },
+            {
+              "name": "NormalTableEvent",
+              "entries": [
+                {
+                  "name": "MotorControl",
+                  "delay": 50,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor1State_Cycl",
+                  "delay": 50,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor2State_Cycl",
+                  "delay": 50,
+                  "isCommand": false
+                },
+                {
+                  "name": "ETF_MotorStates",
+                  "delay": 50,
+                  "isCommand": false
+                }
+              ],
+              "_X_ROW_KEY": "row_211"
+            },
+            {
+              "name": "InitTable",
+              "entries": [
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor1",
+                    "frameName": "Motor1State_Cycl"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor2",
+                    "frameName": "Motor2State_Cycl"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor1",
+                    "frameName": "Motor1State_Event"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor2",
+                    "frameName": "Motor2State_Event"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor1",
+                    "frameName": "Motor1_Dynamic"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor1",
+                    "frameName": "ETF_MotorStates"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor2",
+                    "frameName": "ETF_MotorStates"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor1",
+                    "frameName": "MotorControl"
+                  }
+                },
+                {
+                  "name": "AssignFrameId",
+                  "delay": 10,
+                  "isCommand": true,
+                  "AssignFrameId": {
+                    "nodeName": "Motor2",
+                    "frameName": "MotorControl"
+                  }
+                }
+              ],
+              "_X_ROW_KEY": "row_212"
+            },
+            {
+              "name": "ETF_CollisionResolving",
+              "entries": [
+                {
+                  "name": "Motor2State_Event",
+                  "delay": 10,
+                  "isCommand": false
+                },
+                {
+                  "name": "Motor1State_Event",
+                  "delay": 10,
+                  "isCommand": false
+                }
+              ],
+              "_X_ROW_KEY": "row_213"
+            }
+          ],
+          "name": "2.2",
+          "id": "8d0116f8-c6d5-4a9d-bde9-cdb3baeef8c8"
         }
       },
       "can": {}
@@ -656,8 +1283,8 @@
       },
       "network": {
         "pos": {
-          "x": 431,
-          "y": 148,
+          "x": 363,
+          "y": 0,
           "w": 600,
           "h": 400
         },
@@ -676,8 +1303,8 @@
       },
       "25cec12a-572d-4221-b85e-2728628134f7_ia": {
         "pos": {
-          "x": 1279,
-          "y": 150,
+          "x": 806,
+          "y": 63,
           "w": 700,
           "h": 400
         },
@@ -694,8 +1321,8 @@
       },
       "trace": {
         "pos": {
-          "x": 700,
-          "y": 0,
+          "x": 341,
+          "y": 335,
           "w": 1180,
           "h": 420
         },
@@ -703,7 +1330,7 @@
         "label": "Trace",
         "id": "trace",
         "options": {},
-        "hide": true
+        "hide": false
       }
     },
     "example": {

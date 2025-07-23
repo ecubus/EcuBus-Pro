@@ -7,6 +7,15 @@ export function getPhysicalValue(
   db: LDF
 ): { numVal?: number; strVal?: string; usedEncode?: SignalEncodeType['encodingTypes'][0] } {
   // 遍历所有编码类型
+  const result: {
+    numVal?: number
+    strVal?: string
+    usedEncode?: SignalEncodeType['encodingTypes'][0]
+  } = {
+    numVal: undefined,
+    strVal: undefined,
+    usedEncode: undefined
+  }
   for (const encodingType of encodingTypes) {
     switch (encodingType.type) {
       case 'physicalValue': {
@@ -17,36 +26,42 @@ export function getPhysicalValue(
             const tt = encodingType.physicalValue.textInfo
               ? `${physValue}${encodingType.physicalValue.textInfo}`
               : undefined
-            return { numVal: physValue, strVal: tt, usedEncode: encodingType }
+            result.numVal = physValue
+            result.strVal = tt
+            result.usedEncode = encodingType
           }
         }
         break
       }
       case 'logicalValue': {
         if (encodingType.logicalValue && encodingType.logicalValue.signalValue === rawValue) {
-          return { strVal: encodingType.logicalValue.textInfo || '', usedEncode: encodingType }
+          result.strVal = encodingType.logicalValue.textInfo || ''
+          result.usedEncode = encodingType
         }
         break
       }
       case 'bcdValue': {
         // BCD编码：每4位表示一个十进制数字
-        return {
-          numVal: rawValue
-            .toString()
-            .split('')
-            .map(Number)
-            .reduce((acc, digit) => (acc << 4) | digit, 0),
-          usedEncode: encodingType
-        }
+
+        ;(result.numVal = rawValue
+          .toString()
+          .split('')
+          .map(Number)
+          .reduce((acc, digit) => (acc << 4) | digit, 0)),
+          (result.usedEncode = encodingType)
+
+        break
       }
       case 'asciiValue': {
         // ASCII编码：直接转换为字符串
-        return { strVal: rawValue.toString(), usedEncode: encodingType }
+        result.strVal = rawValue.toString()
+        result.usedEncode = encodingType
+        break
       }
     }
   }
   // 如果没有找到匹配的编码，返回原始值
-  return {}
+  return result
 }
 
 export function getRawValue(

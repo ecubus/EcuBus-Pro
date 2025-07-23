@@ -202,6 +202,14 @@ Signal_encoding_types {
   }
   encTemperature {
     physical_value, 0, 80, 0.5, -20, "Degree" ;
+    logical_value, 0, "Initial" ;
+    logical_value, 1, "LON" ;
+    logical_value, 2, "NORMAL" ;
+    logical_value, 3, "HIGH" ;
+    logical_value, 4, "Reserved" ;
+    logical_value, 5, "Reserved" ;
+    logical_value, 6, "Reserved" ;
+    logical_value, 7, "Invalid" ;
   }
 }
 

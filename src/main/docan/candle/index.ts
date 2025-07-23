@@ -364,10 +364,6 @@ export class Candle_CAN extends CanBase {
         }
         // Sort by interfaceNumber in ascending order
         devicesArray.sort((a, b) => a.interfaceNumber - b.interfaceNumber)
-        console.log('List of interfaceNumbers from scanned devices：')
-        devicesArray.forEach((device, index) => {
-          console.log(`device ${index + 1}: ${device.interfaceNumber}`)
-        })
 
         // 按排序后的顺序添加到列表
         for (const device of devicesArray) {

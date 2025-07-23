@@ -22,6 +22,9 @@ SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw
 > [!NOTE]
 > This firmware currently does not provide any ACK/NACK feedback for serial commands.
 
+## GS_USB
+
+Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schneider USB/CAN devices and candleLight USB CAN interfaces.
 
 ## Device Configuration
 

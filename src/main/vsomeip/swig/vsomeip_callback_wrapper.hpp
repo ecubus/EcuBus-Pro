@@ -34,6 +34,7 @@ namespace vsomeip_v3 {
  */
 class VsomeipCallbackWrapper {
 private:
+    std::shared_ptr<vsomeip_v3::runtime> rtm_;
     std::shared_ptr<vsomeip_v3::application> app_;
     std::thread app_thread_;
     bool is_running_;
@@ -41,16 +42,17 @@ private:
 public:
     /**
      * \brief Constructor
-     * 
+     * \
+     * \param rtm Shared pointer to vSomeIP runtime instance
      * \param app Shared pointer to vSomeIP application instance
      */
-    VsomeipCallbackWrapper(std::shared_ptr<vsomeip_v3::application> app = nullptr);
+    VsomeipCallbackWrapper(std::shared_ptr<vsomeip_v3::runtime> rtm, std::shared_ptr<vsomeip_v3::application> app);
     
     /**
      * \brief Destructor
      */
     ~VsomeipCallbackWrapper();
-    
+
     /**
      * \brief Set the vSomeIP application instance
      * 
@@ -156,6 +158,13 @@ public:
      * \param interval Watchdog interval in seconds
      */
     void setWatchdogHandler(const std::string& callbackId, std::chrono::seconds interval);
+
+    /**
+     * \brief Register a trace handler callback
+     * 
+     * \param callbackId Unique identifier for the callback
+     */
+    bool registerTraceHandler(const std::string& callbackId);
 };
 
 

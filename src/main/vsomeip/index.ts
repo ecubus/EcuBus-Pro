@@ -6,7 +6,6 @@ import { ServiceConfig } from './share/service-config'
 import { EventEmitter } from 'events'
 import os from 'os'
 import fs from 'fs'
-import RpcServer from '../rpc'
 
 // Import sysLog from global
 declare const sysLog: any
@@ -52,6 +51,7 @@ export type VsomeipCallbackData =
   | { type: 'subscription'; data: VsomeipSubscriptionInfo }
   | { type: 'subscription_status'; data: VsomeipSubscriptionStatusInfo }
   | { type: 'watchdog'; data: undefined }
+  | { type: 'trace'; data: string }
 
 export type VsomeipCallback = (callbackData: VsomeipCallbackData) => void
 
@@ -76,10 +76,6 @@ export function loadDllPath(dllPath: string) {
 
 export function startRouterCounter(configFilePath: string, quiet: boolean = true): Promise<void> {
   return new Promise((resolve, reject) => {
-    RpcServer.registerHandler('POST', '/someip', (req, res) => {
-      console.log('someip rpc request', req)
-      res.end()
-    })
     // Check if routing manager is already running
     if (routingManagerProcess) {
       resolve()
@@ -177,10 +173,11 @@ export class VSomeIP_Client {
   private cb: any = null
   private cbId: string | undefined
   private event = new EventEmitter()
+  static traceRegister: boolean = false
   constructor(name: string, configFilePath: string) {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
-    this.cb = new vsomeip.VsomeipCallbackWrapper(this.app)
+    this.cb = new vsomeip.VsomeipCallbackWrapper(this.rtm, this.app)
     this.sendc = new vsomeip.Send(this.rtm, this.app)
 
     this.cbId = vsomeip.RegisterCallback('state', name, this.callback.bind(this))
@@ -219,6 +216,13 @@ export class VSomeIP_Client {
         console.log('Watchdog triggered')
         this.event.emit('watchdog')
         break
+      case 'trace':
+        console.log('Trace:', callbackData.data)
+        this.event.emit('trace', callbackData.data)
+        break
+      default:
+        console.log('Unknown callback:', callbackData)
+        break
     }
   }
   sendRequest(service: number, instance: number, method: number, payload: Buffer) {
@@ -234,6 +238,10 @@ export class VSomeIP_Client {
     }
   }
   init() {
+    if (!VSomeIP_Client.traceRegister) {
+      this.cb.registerTraceHandler(this.cbId)
+      VSomeIP_Client.traceRegister = true
+    }
     const result = this.app.init()
     if (!result) {
       throw new Error('Failed to initialize application')

@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <iostream>
 
 using namespace vsomeip_v3;
 
@@ -37,17 +38,17 @@ void FinalizerCallback(Napi::Env env, void* finalizeData, CallbackContext* conte
 // Helper function to call JavaScript callback with type and data
 void CallJsCallback(CallbackContext* context, const std::function<void(Napi::Env, Napi::Function)>& callback) {
     if (context) {
-        context->tsfn.BlockingCall([callback](Napi::Env env, Napi::Function jsCallback) {
+        context->tsfn.NonBlockingCall([callback](Napi::Env env, Napi::Function jsCallback) {
             callback(env, jsCallback);
         });
     }
 }
 
 // VsomeipCallbackWrapper implementation
-VsomeipCallbackWrapper::VsomeipCallbackWrapper(std::shared_ptr<application> app) : app_(app), is_running_(false) {}
+VsomeipCallbackWrapper::VsomeipCallbackWrapper(std::shared_ptr<runtime> rtm, std::shared_ptr<application> app) : rtm_(rtm), app_(app), is_running_(false) {}
 
 VsomeipCallbackWrapper::~VsomeipCallbackWrapper() {
-    // If the thread is still running, we should join it
+    // If the thread is still running, we should     join it
     if (app_thread_.joinable()) {
         app_thread_.join();
     }
@@ -126,6 +127,28 @@ void VsomeipCallbackWrapper::registerStateHandler(const std::string& callbackId)
         });
     });
 }
+
+
+bool VsomeipCallbackWrapper::registerTraceHandler(const std::string& callbackId) {
+    
+    
+    if (callbackRegistry.find(callbackId) == callbackRegistry.end()) {
+        return false;
+    }
+
+    auto context = callbackRegistry[callbackId];
+    bool result = rtm_->register_trace_handler([context](const std::string& trace) {
+        CallJsCallback(context.get(), [trace](Napi::Env env, Napi::Function jsCallback) {
+            Napi::Object result = Napi::Object::New(env);   
+            result.Set("type", Napi::String::New(env, "trace"));
+            result.Set("data", Napi::String::New(env, trace));
+            
+            jsCallback.Call({result});
+        });
+    });
+    return result;
+}   
+
 
 // Message handler wrapper
 void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t instance, uint16_t method, 

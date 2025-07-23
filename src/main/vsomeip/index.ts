@@ -179,8 +179,7 @@ export class VSomeIP_Client {
     this.app = this.rtm.create_application(name, configFilePath)
     this.cb = new vsomeip.VsomeipCallbackWrapper(this.rtm, this.app)
     this.sendc = new vsomeip.Send(this.rtm, this.app)
-
-    this.cbId = vsomeip.RegisterCallback('state', name, this.callback.bind(this))
+    this.cbId = vsomeip.RegisterCallback(name, name, this.callback.bind(this))
   }
   callback(callbackData: VsomeipCallbackData) {
     // console.log('vSomeIP callback:', callbackData)/
@@ -217,8 +216,8 @@ export class VSomeIP_Client {
         this.event.emit('watchdog')
         break
       case 'trace':
-        console.log('Trace:', callbackData.data)
-        this.event.emit('trace', callbackData.data)
+        console.log('Trace:', JSON.parse(callbackData.data))
+        this.event.emit('trace', JSON.parse(callbackData.data))
         break
       default:
         console.log('Unknown callback:', callbackData)

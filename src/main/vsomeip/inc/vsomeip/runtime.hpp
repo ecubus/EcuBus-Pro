@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <vsomeip/export.hpp>
 #include <vsomeip/primitive_types.hpp>
@@ -195,6 +196,29 @@ public:
      */
     virtual std::shared_ptr<application> get_application(
             const std::string &_name) const = 0;
+
+    /**
+     * \brief Registers a handler for tracing vsomeip messages.
+     *
+     * This method allows registering a direct handler function to receive 
+     * trace data instead of using the JSON-RPC over HTTP mechanism.
+     * The handler will be called with the message header and payload data
+     * as a JSON string when tracing is enabled.
+     *
+     * \param _handler The handler function that accepts a JSON string containing header and data
+     * \return true if the handler was successfully registered, false otherwise
+     */
+    virtual bool register_trace_handler(const std::function<void(const std::string&)> &_handler) = 0;
+
+    /**
+     * \brief Gets the currently registered trace handler.
+     *
+     * This method is used internally by the trace connector to get the
+     * registered trace handler function.
+     *
+     * \return The registered trace handler function, or nullptr if none is registered
+     */
+    virtual std::function<void(const std::string&)> get_trace_handler() const = 0;
 
     /**
      *

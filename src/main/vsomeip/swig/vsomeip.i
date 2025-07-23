@@ -120,6 +120,7 @@ typedef std::function<void()> routing_ready_handler_t;
 typedef std::function<void(routing_state_e)> routing_state_handler_t;
 typedef std::function<void(security_update_state_e)> security_update_handler_t;
 typedef std::function<bool(const message_acceptance_t&)> message_acceptance_handler_t;
+typedef std::function<void(const std::string&)> trace_handler_t;
 using subscription_handler_sec_t       = std::function<bool(client_t, const vsomeip_sec_client_t*, const std::string&, bool)>;
 using async_subscription_handler_sec_t = std::function<void(client_t, const vsomeip_sec_client_t*, const std::string&, bool, std::function<void(bool)>)>;
 

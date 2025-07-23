@@ -910,48 +910,49 @@ SWIGCLINKAGE SWIGINTERN swig_cast_info *swig_cast_initial[];
 #define SWIGTYPE_p_std__functionT_void_fF_t swig_types[25]
 #define SWIGTYPE_p_std__functionT_void_fip_address_t_const_RF_t swig_types[26]
 #define SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t swig_types[27]
-#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[28]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[29]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[30]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[31]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[32]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[33]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[34]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[35]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t swig_types[36]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t swig_types[37]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__state_type_eF_t swig_types[38]
-#define SWIGTYPE_p_std__mapT_std__size_t_unsigned_char_t swig_types[39]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[40]
-#define SWIGTYPE_p_std__mapT_unsigned_short_std__mapT_unsigned_short_std__mapT_unsigned_char_unsigned_int_t_t_t swig_types[41]
-#define SWIGTYPE_p_std__mapT_vsomeip_v3__remote_info_t_std__string_t swig_types[42]
-#define SWIGTYPE_p_std__setT_unsigned_short_t swig_types[43]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__application_t swig_types[44]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__configuration_t swig_types[45]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t swig_types[46]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__payload_t swig_types[47]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_manager_t swig_types[48]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_t swig_types[49]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__runtime_t swig_types[50]
-#define SWIGTYPE_p_std__string swig_types[51]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_t swig_types[52]
-#define SWIGTYPE_p_uid_t swig_types[53]
-#define SWIGTYPE_p_unsigned___int64 swig_types[54]
-#define SWIGTYPE_p_unsigned_char swig_types[55]
-#define SWIGTYPE_p_unsigned_int swig_types[56]
-#define SWIGTYPE_p_unsigned_long swig_types[57]
-#define SWIGTYPE_p_unsigned_long_long swig_types[58]
-#define SWIGTYPE_p_unsigned_short swig_types[59]
-#define SWIGTYPE_p_vsomeip_sec_client_t swig_types[60]
-#define SWIGTYPE_p_vsomeip_v3__application swig_types[61]
-#define SWIGTYPE_p_vsomeip_v3__debounce_filter_t swig_types[62]
-#define SWIGTYPE_p_vsomeip_v3__ip_address_t swig_types[63]
-#define SWIGTYPE_p_vsomeip_v3__message swig_types[64]
-#define SWIGTYPE_p_vsomeip_v3__message_acceptance_t swig_types[65]
-#define SWIGTYPE_p_vsomeip_v3__message_base swig_types[66]
-#define SWIGTYPE_p_vsomeip_v3__payload swig_types[67]
-#define SWIGTYPE_p_vsomeip_v3__remote_info_t swig_types[68]
-#define SWIGTYPE_p_vsomeip_v3__runtime swig_types[69]
+#define SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t swig_types[28]
+#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[29]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[30]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[31]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[32]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[33]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[34]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[35]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[36]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t swig_types[37]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t swig_types[38]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__state_type_eF_t swig_types[39]
+#define SWIGTYPE_p_std__mapT_std__size_t_unsigned_char_t swig_types[40]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[41]
+#define SWIGTYPE_p_std__mapT_unsigned_short_std__mapT_unsigned_short_std__mapT_unsigned_char_unsigned_int_t_t_t swig_types[42]
+#define SWIGTYPE_p_std__mapT_vsomeip_v3__remote_info_t_std__string_t swig_types[43]
+#define SWIGTYPE_p_std__setT_unsigned_short_t swig_types[44]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__application_t swig_types[45]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__configuration_t swig_types[46]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t swig_types[47]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__payload_t swig_types[48]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_manager_t swig_types[49]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_t swig_types[50]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__runtime_t swig_types[51]
+#define SWIGTYPE_p_std__string swig_types[52]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_t swig_types[53]
+#define SWIGTYPE_p_uid_t swig_types[54]
+#define SWIGTYPE_p_unsigned___int64 swig_types[55]
+#define SWIGTYPE_p_unsigned_char swig_types[56]
+#define SWIGTYPE_p_unsigned_int swig_types[57]
+#define SWIGTYPE_p_unsigned_long swig_types[58]
+#define SWIGTYPE_p_unsigned_long_long swig_types[59]
+#define SWIGTYPE_p_unsigned_short swig_types[60]
+#define SWIGTYPE_p_vsomeip_sec_client_t swig_types[61]
+#define SWIGTYPE_p_vsomeip_v3__application swig_types[62]
+#define SWIGTYPE_p_vsomeip_v3__debounce_filter_t swig_types[63]
+#define SWIGTYPE_p_vsomeip_v3__ip_address_t swig_types[64]
+#define SWIGTYPE_p_vsomeip_v3__message swig_types[65]
+#define SWIGTYPE_p_vsomeip_v3__message_acceptance_t swig_types[66]
+#define SWIGTYPE_p_vsomeip_v3__message_base swig_types[67]
+#define SWIGTYPE_p_vsomeip_v3__payload swig_types[68]
+#define SWIGTYPE_p_vsomeip_v3__remote_info_t swig_types[69]
+#define SWIGTYPE_p_vsomeip_v3__runtime swig_types[70]
 SWIGCLINKAGE SWIGINTERN swig_type_info *swig_types[];
 SWIGCLINKAGE SWIGINTERN swig_module_info swig_module;
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
@@ -1572,6 +1573,10 @@ Napi::Value _wrap_runtime__wrap_runtime_create_payload(const Napi::CallbackInfo 
 // jsnapi_class_method_declaration
 Napi::Value _wrap_runtime_get_application(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
+Napi::Value _wrap_runtime_register_trace_handler(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_runtime_get_trace_handler(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
 Napi::Value _wrap_runtime_remove_application(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_runtime_create_application__SWIG_2(const Napi::CallbackInfo &);
@@ -2032,9 +2037,7 @@ public:
   _exports_VsomeipCallbackWrapper_templ(const Napi::CallbackInfo &);
 _exports_VsomeipCallbackWrapper_templ(bool, const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_new_VsomeipCallbackWrapper__SWIG_0(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_new_VsomeipCallbackWrapper__SWIG_1(const Napi::CallbackInfo &);
+Napi::Value _wrap_new_VsomeipCallbackWrapper(const Napi::CallbackInfo &);
 virtual ~_exports_VsomeipCallbackWrapper_templ();
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_setApplication(const Napi::CallbackInfo &);
@@ -2064,6 +2067,8 @@ Napi::Value _wrap_VsomeipCallbackWrapper_registerSubscriptionHandler(const Napi:
 Napi::Value _wrap_VsomeipCallbackWrapper_registerSubscriptionStatusHandler(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_setWatchdogHandler(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_VsomeipCallbackWrapper_registerTraceHandler(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -5336,6 +5341,114 @@ Napi::Value _exports_runtime_templ<SWIG_OBJ_WRAP>::_wrap_runtime_get_application
   goto fail;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_runtime_templ<SWIG_OBJ_WRAP>::_wrap_runtime_register_trace_handler(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  vsomeip_v3::runtime *arg1 = (vsomeip_v3::runtime *) 0 ;
+  std::function< void (std::string const &) > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  bool result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_runtime_register_trace_handler.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_vsomeip_v3__runtime, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "runtime_register_trace_handler" "', argument " "1"" of type '" "vsomeip_v3::runtime *""'"); 
+    }
+    arg1 = reinterpret_cast< vsomeip_v3::runtime * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t,  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "runtime_register_trace_handler" "', argument " "2"" of type '" "std::function< void (std::string const &) > const &""'"); 
+    }
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "runtime_register_trace_handler" "', argument " "2"" of type '" "std::function< void (std::string const &) > const &""'"); 
+    }
+    arg2 = reinterpret_cast< std::function< void (std::string const &) > * >(argp2);
+    
+    
+    
+    
+    result = (bool)(arg1)->register_trace_handler((std::function< void (std::string const &) > const &)*arg2);
+    
+    
+    
+    jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_runtime_templ<SWIG_OBJ_WRAP>::_wrap_runtime_get_trace_handler(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  vsomeip_v3::runtime *arg1 = (vsomeip_v3::runtime *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  SwigValueWrapper< std::function< void (std::string const &) > > result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_runtime_get_trace_handler.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_vsomeip_v3__runtime, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "runtime_get_trace_handler" "', argument " "1"" of type '" "vsomeip_v3::runtime const *""'"); 
+    }
+    arg1 = reinterpret_cast< vsomeip_v3::runtime * >(argp1);
+    
+    
+    
+    
+    result = ((vsomeip_v3::runtime const *)arg1)->get_trace_handler();
+    
+    
+    
+    jsresult = SWIG_NewPointerObj((new std::function< void (std::string const &) >(result)), SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t, SWIG_POINTER_OWN |  0 );
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
   
 #endif
   return Napi::Value();
@@ -16719,88 +16832,13 @@ _exports_message_acceptance_t_templ<SWIG_OBJ_WRAP>::~_exports_message_acceptance
 }
 
 
-// js_overloaded_ctor
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_new_VsomeipCallbackWrapper__SWIG_0(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Object self;
-  std::shared_ptr< vsomeip_v3::application > arg1 ;
-  VsomeipCallbackWrapper *result;
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    NAPI_CHECK_RESULT(info.This().ToObject(), self);
-    this->owned = true;
-    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_VsomeipCallbackWrapper__SWIG_0.");
-    }
-    {
-      {
-        vsomeip_v3::application *plain_ptr;
-        int res = SWIG_ConvertPtr(info[0], reinterpret_cast<void**>(&plain_ptr), SWIGTYPE_p_vsomeip_v3__application,  0 );
-        if (!SWIG_IsOK(res)) {
-          SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_VsomeipCallbackWrapper" "', argument " "1"" of type '" "vsomeip_v3::application""'");
-        }
-        arg1 = std::shared_ptr< vsomeip_v3::application>(plain_ptr, SWIG_null_deleter());
-      }
-    }
-    result = (VsomeipCallbackWrapper *)new VsomeipCallbackWrapper(SWIG_STD_MOVE(arg1));
-    
-    
-    this->self = result;
-    
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-#endif
-  
-  return Napi::Value();
-}
-
-
-// js_overloaded_ctor
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_new_VsomeipCallbackWrapper__SWIG_1(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Object self;
-  VsomeipCallbackWrapper *result;
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    NAPI_CHECK_RESULT(info.This().ToObject(), self);
-    this->owned = true;
-    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_VsomeipCallbackWrapper__SWIG_1.");
-    }
-    result = (VsomeipCallbackWrapper *)new VsomeipCallbackWrapper();
-    
-    
-    this->self = result;
-    
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-#endif
-  
-  return Napi::Value();
-}
-
-
-// js_ctor_dispatcher
-template <typename SWIG_OBJ_WRAP>
+// js_ctor
+// This is the main constructor
 _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_exports_VsomeipCallbackWrapper_templ(const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
   Napi::Env env = info.Env();
-  Napi::Object self;
-  NAPI_CHECK_RESULT(info.This().ToObject(), self);
+  
   this->info = SWIGTYPE_p_VsomeipCallbackWrapper;
   if (info.Length() == 1 && info[0].IsExternal()) {
     // This constructor has been called internally from C++/SWIG
@@ -16809,93 +16847,55 @@ _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_exports_VsomeipCallbackWr
     this->owned = false;
     return;
   }
+  this->owned = true;
   
-  // switch all cases by means of series of if-returns.
-  
-  // js_ctor_dispatch_case
-  if(static_cast<int>(info.Length()) >= 1 && static_cast<int>(info.Length()) <= 1) {
+  std::shared_ptr< vsomeip_v3::runtime > arg1 ;
+  std::shared_ptr< vsomeip_v3::application > arg2 ;
+  VsomeipCallbackWrapper *result;
 #ifdef NAPI_CPP_EXCEPTIONS
-    bool tryNext = false;
-    try {
-      _wrap_new_VsomeipCallbackWrapper__SWIG_0(info);
-    } catch (const Napi::TypeError &) {
-      tryNext = true;
-    } catch (const Napi::Error &e) {
-      throw e;
-    }
-    if (!tryNext)
-    return;
-#else
-    _wrap_new_VsomeipCallbackWrapper__SWIG_0(info);
-    if (env.IsExceptionPending()) {
-      Napi::Error e = env.GetAndClearPendingException();
-      Napi::Value typeErrorValue;
-      bool isTypeError;
-      Napi::Function typeErrorCons;
-      // Yes, this is ugly
-      // TODO: Fix this in Node.js when the core team grows up
-      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
-      typeErrorCons = typeErrorValue.As<Napi::Function>();
-      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
-      if (!isTypeError) {
-        // This is not the error you are looking for
-        e.ThrowAsJavaScriptException();
-        SWIG_fail;
-      }
-    } else {
-      return;
-    }
+  try {
 #endif
-  }
-  
-  // js_ctor_dispatch_case
-  if(static_cast<int>(info.Length()) >= 0 && static_cast<int>(info.Length()) <= 0) {
+    if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_VsomeipCallbackWrapper.");
+    }
+    {
+      {
+        vsomeip_v3::runtime *plain_ptr;
+        int res = SWIG_ConvertPtr(info[0], reinterpret_cast<void**>(&plain_ptr), SWIGTYPE_p_vsomeip_v3__runtime,  0 );
+        if (!SWIG_IsOK(res)) {
+          SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_VsomeipCallbackWrapper" "', argument " "1"" of type '" "vsomeip_v3::runtime""'");
+        }
+        arg1 = std::shared_ptr< vsomeip_v3::runtime>(plain_ptr, SWIG_null_deleter());
+      }
+    }
+    {
+      {
+        vsomeip_v3::application *plain_ptr;
+        int res = SWIG_ConvertPtr(info[1], reinterpret_cast<void**>(&plain_ptr), SWIGTYPE_p_vsomeip_v3__application,  0 );
+        if (!SWIG_IsOK(res)) {
+          SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_VsomeipCallbackWrapper" "', argument " "2"" of type '" "vsomeip_v3::application""'");
+        }
+        arg2 = std::shared_ptr< vsomeip_v3::application>(plain_ptr, SWIG_null_deleter());
+      }
+    }
+    result = (VsomeipCallbackWrapper *)new VsomeipCallbackWrapper(SWIG_STD_MOVE(arg1),SWIG_STD_MOVE(arg2));
+    
+    
+    this->self = result;
+    
+    return;
 #ifdef NAPI_CPP_EXCEPTIONS
-    bool tryNext = false;
-    try {
-      _wrap_new_VsomeipCallbackWrapper__SWIG_1(info);
-    } catch (const Napi::TypeError &) {
-      tryNext = true;
-    } catch (const Napi::Error &e) {
-      throw e;
-    }
-    if (!tryNext)
-    return;
-#else
-    _wrap_new_VsomeipCallbackWrapper__SWIG_1(info);
-    if (env.IsExceptionPending()) {
-      Napi::Error e = env.GetAndClearPendingException();
-      Napi::Value typeErrorValue;
-      bool isTypeError;
-      Napi::Function typeErrorCons;
-      // Yes, this is ugly
-      // TODO: Fix this in Node.js when the core team grows up
-      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
-      typeErrorCons = typeErrorValue.As<Napi::Function>();
-      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
-      if (!isTypeError) {
-        // This is not the error you are looking for
-        e.ThrowAsJavaScriptException();
-        SWIG_fail;
-      }
-    } else {
-      return;
-    }
-#endif
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
   }
-  
-  
-  // default:
-  SWIG_Error(SWIG_ERROR, "Illegal arguments for construction of _exports_VsomeipCallbackWrapper");
-  
-#ifndef NAPI_CPP_EXCEPTIONS
-  goto fail;
+#else
 fail:
+  
   return;
 #endif
 }
 
-// This is the extendable constructor to be used from child classes
+// This is the bypass constructor to be used from child classes
 template <typename SWIG_OBJ_WRAP>
 _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_exports_VsomeipCallbackWrapper_templ(bool, const Napi::CallbackInfo &info)
 :SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
@@ -17885,6 +17885,74 @@ Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipC
     
     
     jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_registerTraceHandler(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  bool result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_VsomeipCallbackWrapper_registerTraceHandler.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VsomeipCallbackWrapper_registerTraceHandler" "', argument " "1"" of type '" "VsomeipCallbackWrapper *""'"); 
+    }
+    arg1 = reinterpret_cast< VsomeipCallbackWrapper * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "VsomeipCallbackWrapper_registerTraceHandler" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "VsomeipCallbackWrapper_registerTraceHandler" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    
+    
+    
+    
+    
+    result = (bool)(arg1)->registerTraceHandler((std::string const &)*arg2);
+    
+    
+    
+    jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
     
     if (SWIG_IsNewObj(res2)) delete arg2;
     
@@ -21868,6 +21936,14 @@ void _exports_VsomeipCallbackWrapper_inst::GetMembers(
         &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_setWatchdogHandler,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
+  // jsnapi_register_member_function
+  members.erase("registerTraceHandler");
+  members.insert({
+    "registerTraceHandler",
+      _exports_VsomeipCallbackWrapper_templ::InstanceMethod("registerTraceHandler",
+        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_registerTraceHandler,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
   
   /* add static class functions and variables */
   
@@ -23070,6 +23146,7 @@ SWIGINTERN swig_type_info _swigt__p_std__functionT_bool_funsigned_short_vsomeip_
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_fF_t = {"_p_std__functionT_void_fF_t", "vsomeip_v3::routing_ready_handler_t *|vsomeip_v3::watchdog_handler_t *|std::function< void () > *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_fip_address_t_const_RF_t = {"_p_std__functionT_void_fip_address_t_const_RF_t", "vsomeip_v3::reboot_notification_handler_t *|std::function< void (ip_address_t const &) > *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t = {"_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t", "vsomeip_v3::message_handler_t *|std::function< void (std::shared_ptr< message > const &) > *", 0, 0, (void*)0, 0};
+SWIGINTERN swig_type_info _swigt__p_std__functionT_void_fstd__string_const_RF_t = {"_p_std__functionT_void_fstd__string_const_RF_t", "vsomeip_v3::trace_handler_t *|std::function< void (std::string const &) > *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t = {"_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t", "vsomeip_v3::offered_services_handler_t *|std::function< void (std::vector< std::pair< unsigned short,unsigned short > > const &) > *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t = {"_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t", "vsomeip_v3::async_subscription_handler_t *|std::function< void (unsigned short,::uid_t,::uid_t,bool,std::function< void (bool const) >) > *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t = {"_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t", "vsomeip_v3::async_subscription_handler_ext_t *|std::function< void (unsigned short,::uid_t,::uid_t,std::string const &,bool,std::function< void (bool const) >) > *", 0, 0, (void*)0, 0};
@@ -23145,6 +23222,7 @@ SWIGINTERN swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__functionT_void_fF_t,
   &_swigt__p_std__functionT_void_fip_address_t_const_RF_t,
   &_swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,
+  &_swigt__p_std__functionT_void_fstd__string_const_RF_t,
   &_swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t,
   &_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t,
   &_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t,
@@ -23217,6 +23295,7 @@ SWIGINTERN swig_cast_info _swigc__p_std__functionT_bool_funsigned_short_vsomeip_
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_fF_t[] = {  {&_swigt__p_std__functionT_void_fF_t, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_fip_address_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fip_address_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
+SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_fstd__string_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__string_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t[] = {  {&_swigt__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -23289,6 +23368,7 @@ SWIGINTERN swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__functionT_void_fF_t,
   _swigc__p_std__functionT_void_fip_address_t_const_RF_t,
   _swigc__p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t,
+  _swigc__p_std__functionT_void_fstd__string_const_RF_t,
   _swigc__p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t,
   _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t,
   _swigc__p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t,
@@ -23336,8 +23416,8 @@ SWIGINTERN swig_cast_info *swig_cast_initial[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (END) -------- */
 
-SWIGINTERN swig_type_info *swig_types[71];
-SWIGINTERN swig_module_info swig_module = {swig_types, 70, 0, 0, 0, 0};
+SWIGINTERN swig_type_info *swig_types[72];
+SWIGINTERN swig_module_info swig_module = {swig_types, 71, 0, 0, 0, 0};
 
 /* Class: runtime (_exports_runtime) */
 // jsnapi_getclass
@@ -23411,6 +23491,22 @@ void _exports_runtime_inst::GetMembers(
     "get_application",
       _exports_runtime_templ::InstanceMethod("get_application",
         &_exports_runtime_templ::_wrap_runtime_get_application,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("register_trace_handler");
+  members.insert({
+    "register_trace_handler",
+      _exports_runtime_templ::InstanceMethod("register_trace_handler",
+        &_exports_runtime_templ::_wrap_runtime_register_trace_handler,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("get_trace_handler");
+  members.insert({
+    "get_trace_handler",
+      _exports_runtime_templ::InstanceMethod("get_trace_handler",
+        &_exports_runtime_templ::_wrap_runtime_get_trace_handler,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_register_member_function

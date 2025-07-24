@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.49
+Changes from v0.8.48 to v0.8.49:
+
+ 
+* [bug]:fix parseInt return negative value 
+* [bug]:fix panel view data change flow 
+* [opt]:allow funcional address return 
+* [opt]:opt ldf parse 
+* [bug]:fix lin ldf logical value display error 
+* [feat]:add gs_usb(candle) support
+---
+
 ## 0.8.48
 Changes from v0.8.47 to v0.8.48:
 

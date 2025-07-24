@@ -650,9 +650,9 @@ export class UDSTesterMain {
                   addrItem.type == 'lin' &&
                   addrItem.linAddr?.addrType == LIN_ADDR_TYPE.FUNCTIONAL
                 ) {
-                  needResponse = false
+                  allowNoResponse = true
                 } else if (addrItem.type == 'eth' && addrItem.ethAddr?.taType == 'functional') {
-                  needResponse = false
+                  allowNoResponse = true
                 }
                 if (!needResponse) {
                   await tester.delay(service.delay)

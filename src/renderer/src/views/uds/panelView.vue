@@ -46,6 +46,8 @@ const globalStart = useGlobalStart()
 let ruleBackMap: Record<string, any> = {}
 let filedBackMap: Record<string, string[]> = {}
 let dataStroe: Record<string, any> = {}
+// 添加时间戳映射来跟踪最后更新时间
+let lastUpdateTime: Record<string, number> = {}
 
 function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
   // console.log('data', field, value, rule, api, setFlag)
@@ -53,7 +55,11 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
     //check update here, 如果不相等，发送ipc
 
     if (dataStroe[field] !== value) {
-      // dataStroe[field] = value
+      // 立即更新本地存储，实现乐观更新
+      dataStroe[field] = value
+      // 记录更新时间戳
+      lastUpdateTime[field] = Date.now()
+
       if (ruleBackMap[field].variable && ruleBackMap[field].variable.variableType == 'user') {
         // window.logBus.emit(ruleBackMap[field].id, value)
         window.electron.ipcRenderer.send('ipc-var-set', {
@@ -72,11 +78,27 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
 
 function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
   if (filedBackMap[key]) {
+    const currentTime = Date.now()
+    const offset = 200
     for (const field of filedBackMap[key]) {
       const value = values[0][1].rawValue
-      if (dataStroe[field] !== value) {
+      // 只有在以下情况下才更新UI：
+      // 1. 本地数据确实不同
+      // 2. 距离最后一次用户操作超过100ms（防抖）
+      // 3. 或者这是第一次接收到数据（lastUpdateTime[field]不存在）
+      const timeSinceLastUpdate = lastUpdateTime[field]
+        ? currentTime - lastUpdateTime[field]
+        : Infinity
+      const shouldUpdate =
+        dataStroe[field] !== value && (timeSinceLastUpdate > offset || !lastUpdateTime[field])
+
+      if (shouldUpdate) {
         fApi.value.setValue(field, value)
         dataStroe[field] = value
+        // 只有在非用户操作触发的更新时才更新时间戳
+        if (timeSinceLastUpdate > offset || !lastUpdateTime[field]) {
+          lastUpdateTime[field] = currentTime
+        }
       }
     }
   }
@@ -95,6 +117,7 @@ function init() {
   filedBackMap = {}
   dataStroe = {}
   ruleBackMap = {}
+  lastUpdateTime = {} // 重置时间戳映射
   if (panel.value) {
     //递归变量rule，rule 有children 递归, 如果field存在，就写入filedMap
     const recursion = (rule: any) => {

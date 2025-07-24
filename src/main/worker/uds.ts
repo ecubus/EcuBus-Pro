@@ -2150,3 +2150,65 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
   })
   return await p
 }
+/**
+ * Get a frame from database by name
+ * 
+ * @category LIN
+ * @param {('lin')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * 
+ * @example
+ * ```ts
+ * // Get a LIN frame
+ * const linFrame = getFrameFromDB('lin', 'myLinDb', 'Frame1');
+
+ */
+export async function getFrameFromDB(
+  dbType: 'lin',
+  dbName: string,
+  frameName: string
+): Promise<LinMsg>
+
+/**
+ * Get a frame from database by name
+ *
+ * @category CAN
+ * @param {('can')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ *
+ * @example
+ * ```ts
+ * // Get a CAN frame
+ * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
+ * ```
+ */
+export async function getFrameFromDB(
+  dbType: 'can',
+  dbName: string,
+  frameName: string
+): Promise<CanMessage>
+// Implementation
+export async function getFrameFromDB(
+  dbType: 'lin' | 'can',
+  dbName: string,
+  frameName: string
+): Promise<LinMsg | CanMessage> {
+  const p: Promise<LinMsg | CanMessage> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: dbType == 'can' ? 'canApi' : 'linApi',
+      data: {
+        method: 'getFrameFromDB',
+        dbName,
+        frameName
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}

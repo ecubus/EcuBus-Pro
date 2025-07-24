@@ -53,7 +53,7 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
     //check update here, 如果不相等，发送ipc
 
     if (dataStroe[field] !== value) {
-      dataStroe[field] = value
+      // dataStroe[field] = value
       if (ruleBackMap[field].variable && ruleBackMap[field].variable.variableType == 'user') {
         // window.logBus.emit(ruleBackMap[field].id, value)
         window.electron.ipcRenderer.send('ipc-var-set', {

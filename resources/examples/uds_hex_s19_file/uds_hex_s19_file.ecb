@@ -1,13 +1,13 @@
 {
   "data": {
     "devices": {
-      "7ce31dc7-5c89-4205-ae1b-599c4604f973": {
+      "f44cd703-f9d0-41f9-bd82-af420f2b016a": {
         "type": "can",
         "canDevice": {
-          "id": "7ce31dc7-5c89-4205-ae1b-599c4604f973",
-          "name": "PEAK_1",
-          "handle": 81,
-          "vendor": "peak",
+          "id": "f44cd703-f9d0-41f9-bd82-af420f2b016a",
+          "name": "SIMULATE_1",
+          "handle": 0,
+          "vendor": "simulate",
           "canfd": false,
           "database": "",
           "bitrate": {
@@ -17,7 +17,7 @@
             "preScaler": 10,
             "freq": 500000,
             "clock": "80",
-            "_X_ROW_KEY": "row_51"
+            "_X_ROW_KEY": "row_94"
           }
         }
       }
@@ -27,9 +27,7 @@
         "name": "Can IA",
         "type": "can",
         "id": "7125c939-dcda-47cc-8fda-c6709a6ff01f",
-        "devices": [
-          "7ce31dc7-5c89-4205-ae1b-599c4604f973"
-        ],
+        "devices": [],
         "action": [
           {
             "trigger": {
@@ -130,7 +128,7 @@
             },
             "name": "",
             "id": "2",
-            "channel": "7ce31dc7-5c89-4205-ae1b-599c4604f973",
+            "channel": "",
             "type": "can",
             "dlc": 8,
             "data": [],
@@ -145,7 +143,7 @@
         "name": "Tester",
         "type": "can",
         "script": "tester.ts",
-        "targetDeviceId": "8e79b126-cf28-4ee7-97a8-c1ab51ebb27f",
+        "targetDeviceId": "f44cd703-f9d0-41f9-bd82-af420f2b016a",
         "seqList": [
           {
             "name": "Seq0",
@@ -468,7 +466,7 @@
         "type": "can",
         "id": "5c043bd6-ddca-449a-b535-1ae865085123",
         "channel": [
-          "7ce31dc7-5c89-4205-ae1b-599c4604f973"
+          "f44cd703-f9d0-41f9-bd82-af420f2b016a"
         ],
         "workNode": "",
         "attachTester": "f304259b-dc7d-460b-9729-4eee2d1156de",
@@ -541,10 +539,10 @@
         }
       }
     },
-    "tests": {},
     "guages": {},
     "vars": {},
-    "datas": {}
+    "datas": {},
+    "panels": {}
   },
   "project": {
     "wins": {
@@ -564,42 +562,12 @@
         "layoutType": "bottom",
         "hide": true
       },
-      "tester": {
-        "pos": {
-          "x": 327,
-          "y": 26,
-          "w": 906,
-          "h": 400
-        },
-        "title": "tester",
-        "label": "UDS Tester",
-        "id": "tester",
-        "options": {},
-        "hide": false
-      },
-      "graph": {
-        "pos": {
-          "x": 226,
-          "y": 8,
-          "w": 822,
-          "h": 525
-        },
-        "title": "graph",
-        "label": "Line",
-        "id": "graph",
-        "options": {
-          "params": {
-            "edit-index": "graph"
-          }
-        },
-        "hide": false
-      },
       "network": {
         "pos": {
-          "x": 952,
-          "y": 65,
-          "w": 600,
-          "h": 400
+          "x": 648,
+          "y": 26,
+          "w": 569,
+          "h": 424
         },
         "title": "network",
         "label": "Network",
@@ -609,10 +577,10 @@
       },
       "7125c939-dcda-47cc-8fda-c6709a6ff01f_ia": {
         "pos": {
-          "x": 952,
-          "y": 65,
-          "w": 824,
-          "h": 400
+          "x": 0,
+          "y": 176,
+          "w": 569,
+          "h": 245
         },
         "title": "cani",
         "label": "IA",
@@ -625,56 +593,33 @@
         },
         "hide": false
       },
-      "trace": {
+      "tester": {
         "pos": {
-          "x": 281.5,
-          "y": 65,
-          "w": 752,
-          "h": 368
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {}
-      },
-      "variable": {
-        "pos": {
-          "x": 632.5,
-          "y": 0,
-          "w": 600,
+          "x": 980,
+          "y": 250.5,
+          "w": 911,
           "h": 400
         },
-        "title": "variable",
-        "label": "Variable",
-        "id": "variable",
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
         "options": {}
       },
-      "hardware": {
+      "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 392.5,
-          "y": 65,
-          "w": 1292,
-          "h": 611
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
-      "datas": {
-        "pos": {
-          "x": 346.5,
-          "y": 215,
-          "w": 1116,
+          "x": 144,
+          "y": 438.5,
+          "w": 700,
           "h": 400
         },
-        "title": "datas",
-        "label": "Datas",
-        "id": "datas",
+        "title": "testerSequence",
+        "label": "Sequence",
+        "id": "f304259b-dc7d-460b-9729-4eee2d1156de_sequence",
         "options": {
           "params": {
-            "edit-index": "datas"
-          }
+            "edit-index": "f304259b-dc7d-460b-9729-4eee2d1156de"
+          },
+          "name": "Tester"
         }
       }
     },

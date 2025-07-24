@@ -27,5 +27,9 @@ describe('HexMemoryMap', () => {
       expect(memMap.get(33556480)).toBeDefined()
       expect(memMap.get(33557504)).toBeDefined()
     })
+    it('high address', () => {
+      const hexString = fs.readFileSync(path.resolve(__dirname, './high.hex'), 'utf-8')
+      const memMap = HexMemoryMap.fromHex(hexString)
+    })
   })
 })

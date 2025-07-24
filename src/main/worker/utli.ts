@@ -37,7 +37,7 @@ function hexpad(number: number): string {
 }
 
 function parseUint32(addr: string, base = 10): number {
-  return parseInt(addr, base) >>> 0
+  return (parseInt(addr, base) >>> 0) & 0xffffffff
 }
 
 // Polyfill as per https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
@@ -265,7 +265,6 @@ export class HexMemoryMap {
               ') wraps over 0xFFFF. This would trigger ambiguous behaviour. Please restructure your data so that for every record the data offset plus the data length do not exceed 0xFFFF.'
           )
         }
-
         blocks.set(ulba + offset, data)
       } else {
         // All non-data records must have a data offset of zero
@@ -291,7 +290,7 @@ export class HexMemoryMap {
           case 2: // Extended Segment Address Record
             // Sets the 16 most significant bits of the 20-bit Segment Base
             // Address for the subsequent data.
-            ulba = ((data[0] << 8) + data[1]) << 4
+            ulba = (((data[0] << 8) + data[1]) << 4) >>> 0
             break
 
           case 3: // Start Segment Address Record
@@ -302,7 +301,7 @@ export class HexMemoryMap {
           case 4: // Extended Linear Address Record
             // Sets the 16 most significant (upper) bits of the 32-bit Linear Address
             // for the subsequent data
-            ulba = ((data[0] << 8) + data[1]) << 16
+            ulba = (((data[0] << 8) + data[1]) << 16) >>> 0
             break
 
           case 5: // Start Linear Address Record

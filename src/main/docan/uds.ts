@@ -670,10 +670,7 @@ export class UDSTesterMain {
                     throw new Error('aborted')
                   }
                   try {
-                    rxData = await socket.read(timeout).catch((e) => {
-                      tester.lastActiveTs += getTsUs() - curUs
-                      throw e
-                    })
+                    rxData = await socket.read(timeout)
                   } catch (e: any) {
                     if (
                       (allowNoResponse &&
@@ -708,11 +705,6 @@ export class UDSTesterMain {
                   }
                   if (rxData.data[0] == 0x7f) {
                     if (rxData.data.length >= 3) {
-                      if (rxData.data[1] != Number(s.serviceId)) {
-                        throw new Error(
-                          `negative response with wrong service id, expect ${s.serviceId}, got ${rxData.data[1]}`
-                        )
-                      }
                       if (rxData.data[2] == 0x78) {
                         timeout = tester.tester.udsTime.pExtTime
                         continue
@@ -748,6 +740,10 @@ export class UDSTesterMain {
                   // Don't close socket from pool, it will be reused
                   break
                 } catch (e: any) {
+                  if (e.message && e.message.includes('serviceId not match')) {
+                    return false
+                  }
+
                   service.retryNum--
                   if (service.retryNum < 0) {
                     if (service.failBehavior == 'stop') {

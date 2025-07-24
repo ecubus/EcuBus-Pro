@@ -36,6 +36,10 @@ function hexpad(number: number): string {
   return number.toString(16).toUpperCase().padStart(2, '0')
 }
 
+function parseUint32(addr: string, base = 10): number {
+  return parseInt(addr, base) >>> 0
+}
+
 // Polyfill as per https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
 Number.isInteger =
   Number.isInteger ||
@@ -81,7 +85,7 @@ export class HexMemoryMap {
       if (blocks) {
         const addrs = Object.keys(blocks)
         for (const addr of addrs) {
-          this.set(parseInt(addr), blocks[addr])
+          this.set(parseUint32(addr), blocks[addr])
         }
       }
     } else if (blocks !== undefined && blocks !== null) {
@@ -211,7 +215,7 @@ export class HexMemoryMap {
 
       // String to Buffer - https://stackoverflow.com/questions/43131242/how-to-convert-a-hexademical-string-of-data-to-an-arraybuffer-in-javascript
       const recordBytes = Buffer.from(
-        recordStr.match(/[\da-f]{2}/gi)?.map((h) => parseInt(h, 16)) || []
+        recordStr.match(/[\da-f]{2}/gi)?.map((h) => parseUint32(h, 16)) || []
       )
 
       const recordLength = recordBytes[0]
@@ -229,7 +233,7 @@ export class HexMemoryMap {
       }
 
       const cs = checksum(recordBytes)
-      if (parseInt(recordChecksum, 16) !== cs) {
+      if (parseUint32(recordChecksum, 16) !== cs) {
         throw new Error(
           'Checksum failed at record ' +
             recordCount +
@@ -1012,7 +1016,7 @@ export class S19MemoryMap {
       if (blocks) {
         const addrs = Object.keys(blocks)
         for (const addr of addrs) {
-          this.set(parseInt(addr), blocks[addr])
+          this.set(parseUint32(addr), blocks[addr])
         }
       }
     } else if (blocks !== undefined && blocks !== null) {
@@ -1126,9 +1130,9 @@ export class S19MemoryMap {
         throw new Error(`Line ${recordCount} is too short: "${trimmedLine}"`)
       }
 
-      const recordType = parseInt(trimmedLine[1])
+      const recordType = parseUint32(trimmedLine[1])
       const lengthStr = trimmedLine.substr(2, 2)
-      const length = parseInt(lengthStr, 16)
+      const length = parseUint32(lengthStr, 16)
 
       if (isNaN(length)) {
         throw new Error(`Invalid length field in line ${recordCount}: "${lengthStr}"`)
@@ -1147,11 +1151,11 @@ export class S19MemoryMap {
       // Verify checksum
       let calculatedChecksum = length
       for (let i = 0; i < dataStr.length - 2; i += 2) {
-        calculatedChecksum += parseInt(dataStr.substr(i, 2), 16)
+        calculatedChecksum += parseUint32(dataStr.substr(i, 2), 16)
       }
       calculatedChecksum = ~calculatedChecksum & 0xff
 
-      const providedChecksum = parseInt(dataStr.substr(dataStr.length - 2), 16)
+      const providedChecksum = parseUint32(dataStr.substr(dataStr.length - 2), 16)
       if (calculatedChecksum !== providedChecksum) {
         throw new Error(
           `Checksum mismatch in line ${recordCount}. Expected ${calculatedChecksum.toString(16).toUpperCase().padStart(2, '0')}, got ${providedChecksum.toString(16).toUpperCase().padStart(2, '0')}`
@@ -1166,7 +1170,7 @@ export class S19MemoryMap {
         case 1: // S1 - Data record with 16-bit address
           {
             const addressStr = dataStr.substr(0, 4)
-            const address = parseInt(addressStr, 16)
+            const address = parseUint32(addressStr, 16)
             const dataBytes = dataStr.substr(4, dataStr.length - 6) // Exclude checksum
 
             if (dataBytes.length % 2 !== 0) {
@@ -1174,7 +1178,7 @@ export class S19MemoryMap {
             }
 
             const buffer = Buffer.from(
-              dataBytes.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) || []
+              dataBytes.match(/.{2}/g)?.map((byte) => parseUint32(byte, 16)) || []
             )
 
             if (buffer.length > 0) {
@@ -1186,7 +1190,7 @@ export class S19MemoryMap {
         case 2: // S2 - Data record with 24-bit address
           {
             const addressStr = dataStr.substr(0, 6)
-            const address = parseInt(addressStr, 16)
+            const address = parseUint32(addressStr, 16)
             const dataBytes = dataStr.substr(6, dataStr.length - 8) // Exclude checksum
 
             if (dataBytes.length % 2 !== 0) {
@@ -1194,7 +1198,7 @@ export class S19MemoryMap {
             }
 
             const buffer = Buffer.from(
-              dataBytes.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) || []
+              dataBytes.match(/.{2}/g)?.map((byte) => parseUint32(byte, 16)) || []
             )
 
             if (buffer.length > 0) {
@@ -1206,7 +1210,7 @@ export class S19MemoryMap {
         case 3: // S3 - Data record with 32-bit address
           {
             const addressStr = dataStr.substr(0, 8)
-            const address = parseInt(addressStr, 16)
+            const address = parseUint32(addressStr, 16)
             const dataBytes = dataStr.substr(8, dataStr.length - 10) // Exclude checksum
 
             if (dataBytes.length % 2 !== 0) {
@@ -1214,7 +1218,7 @@ export class S19MemoryMap {
             }
 
             const buffer = Buffer.from(
-              dataBytes.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) || []
+              dataBytes.match(/.{2}/g)?.map((byte) => parseUint32(byte, 16)) || []
             )
 
             if (buffer.length > 0) {
@@ -1232,21 +1236,21 @@ export class S19MemoryMap {
         case 7: // S7 - End record with 32-bit start address
           {
             const addressStr = dataStr.substr(0, 8)
-            startAddress = parseInt(addressStr, 16)
+            startAddress = parseUint32(addressStr, 16)
           }
           break
 
         case 8: // S8 - End record with 24-bit start address
           {
             const addressStr = dataStr.substr(0, 6)
-            startAddress = parseInt(addressStr, 16)
+            startAddress = parseUint32(addressStr, 16)
           }
           break
 
         case 9: // S9 - End record with 16-bit start address
           {
             const addressStr = dataStr.substr(0, 4)
-            startAddress = parseInt(addressStr, 16)
+            startAddress = parseUint32(addressStr, 16)
           }
           break
 

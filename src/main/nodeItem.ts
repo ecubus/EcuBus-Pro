@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
-import UdsTester, { linApiStartSch, linApiStopSch } from './workerClient'
+import UdsTester, { ApiGetFrameFromDB, linApiStartSch, linApiStopSch } from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, ServiceItem, UdsDevice } from './share/uds'
@@ -22,6 +22,9 @@ import Transport from 'winston-transport'
 import logo from './logo.html?raw'
 import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
+import { getFrameData, LinChecksumType } from './share/lin'
+import { CAN_ID_TYPE } from './share/can'
+import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 
 type TestTree = {
   label: string
@@ -171,6 +174,7 @@ export class NodeClass {
         this.pool.registerHandler('setVar', this.setVar.bind(this))
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
         this.pool.registerHandler('linApi', this.linApi.bind(this))
+        this.pool.registerHandler('canApi', this.canApi.bind(this))
         this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
 
         //cantp
@@ -812,7 +816,7 @@ export class NodeClass {
     }
   }
 
-  async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch) {
+  async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch | ApiGetFrameFromDB) {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined
       if (name != undefined) {
@@ -835,28 +839,107 @@ export class NodeClass {
       }
       return ret
     }
-    if (data.method == 'startSch') {
-      const device = findLinBase(data.device)
-      const db = global.database.lin[device.info.database || '']
-      if (db == undefined) {
-        throw new Error(`database is necessary`)
-      }
-      const lastSch = device.getActiveSchName()
-      device.stopSch()
-      const atviceMap: Record<string, boolean> = {}
-      if (data.activeCtrl) {
-        for (const [index, val] of data.activeCtrl.entries()) {
-          atviceMap[`${data.schName}-${index}`] = val
+    switch (data.method) {
+      case 'startSch': {
+        const device = findLinBase(data.device)
+        const db = global.database.lin[device.info.database || '']
+        if (db == undefined) {
+          throw new Error(`database is necessary`)
         }
+        const lastSch = device.getActiveSchName()
+        device.stopSch()
+        const atviceMap: Record<string, boolean> = {}
+        if (data.activeCtrl) {
+          for (const [index, val] of data.activeCtrl.entries()) {
+            atviceMap[`${data.schName}-${index}`] = val
+          }
+        }
+        device.startSch(db, data.schName, atviceMap, data.slot || 0)
+        device.log.sendEvent(
+          `schChanged, changed from ${lastSch || 'idle'} to ${data.schName} at slot ${data.slot || 0}`,
+          getTsUs() - this.startTs
+        )
+        break
       }
-      device.startSch(db, data.schName, atviceMap, data.slot || 0)
-      device.log.sendEvent(
-        `schChanged, changed from ${lastSch || 'idle'} to ${data.schName} at slot ${data.slot || 0}`,
-        getTsUs() - this.startTs
-      )
-    } else if (data.method == 'stopSch') {
-      const device = findLinBase(data.device)
-      device.stopSch()
+      case 'stopSch': {
+        const device = findLinBase(data.device)
+        device.stopSch()
+        break
+      }
+      case 'getFrameFromDB': {
+        let ret: LinMsg | undefined
+        const db = Object.values(global.database.lin).find((db) => db.name == data.dbName)
+        if (db) {
+          const frame = Object.values(db.frames).find((f) => f.name == data.frameName)
+          if (frame) {
+            // 判断方向
+            let direction = LinDirection.RECV
+            if (frame.publishedBy === db.node.master.nodeName) {
+              direction = LinDirection.SEND
+            }
+            // 检查是否为 event frame
+            const isEvent = !!Object.values(db.eventTriggeredFrames).find(
+              (ef) => ef.frameId === frame.id
+            )
+            // 计算校验类型
+            const checksumType =
+              frame.id === 0x3c || frame.id === 0x3d
+                ? LinChecksumType.CLASSIC
+                : LinChecksumType.ENHANCED
+            ret = {
+              frameId: frame.id,
+              data: getFrameData(db, frame),
+              direction,
+              checksumType,
+              database: db.id,
+              device: db.name,
+              name: frame.name,
+              isEvent
+            }
+          } else {
+            throw new Error(`frame ${data.frameName} not found`)
+          }
+        } else {
+          throw new Error(`database ${data.dbName} not found`)
+        }
+        return ret
+        break
+      }
+    }
+  }
+  async canApi(pool: UdsTester, data: ApiGetFrameFromDB) {
+    switch (data.method) {
+      case 'getFrameFromDB': {
+        let ret: CanMessage | undefined
+        // 查找 CAN 数据库
+        const db = Object.values(global.database.can).find((db) => db.name == data.dbName)
+        if (db) {
+          const msg = Object.values(db.messages).find((m) => m.name === data.frameName)
+
+          if (msg) {
+            // 构造 CanMessage
+            ret = {
+              id: msg.id,
+              name: msg.name,
+              device: db.name,
+              dir: 'OUT',
+              data: getMessageData(msg),
+              msgType: {
+                idType: msg.extId ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+                brs: false,
+                canfd: msg.canfd || false,
+                remote: false
+              },
+              database: db.id
+            }
+          } else {
+            throw new Error(`CAN message ${data.frameName} not found`)
+          }
+        } else {
+          throw new Error(`CAN database ${data.dbName} not found`)
+        }
+        return ret
+      }
     }
   }
   async sendFrame(pool: UdsTester, frame: CanMessage | LinMsg): Promise<number> {

@@ -185,7 +185,7 @@ export default class SecureAccessDll {
       }
       return retBuf
     } else {
-      throw new Error(`GenerateKeyExOpt failed with error code ${ret}`)
+      throw new Error(`GenerateKeyEx failed with error code ${ret}`)
     }
   }
   private loadDll(dllPath: string) {

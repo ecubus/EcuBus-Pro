@@ -307,7 +307,7 @@ export class CAN_TP implements CanTp {
         stMin = 127
       }
       const bs = addr.bs
-      if (listenOnly) {
+      if (listenOnly || addr.addrType == CAN_ADDR_TYPE.FUNCTIONAL) {
         resolve({
           ts: 0,
           bs,

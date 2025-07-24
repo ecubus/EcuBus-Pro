@@ -84,7 +84,7 @@ import UdsTester from '../workerClient'
 import { execFile as execCb } from 'child_process'
 import util from 'util'
 import { TesterInfo } from '../share/tester'
-import { CAN_TP, CAN_TP_SOCKET, CanTp, TpError } from './cantp'
+import { CAN_TP, CAN_TP_SOCKET, CanTp, TP_ERROR_ID, TpError } from './cantp'
 
 import { SIMULATE_CAN } from './simulate'
 import { SupportServiceId, serviceDetail } from '../uds/service'
@@ -94,9 +94,9 @@ import tsconfig from './ts.json'
 import json5 from 'json5'
 import { v4 } from 'uuid'
 import { glob } from 'glob'
-import { DOIP, DOIP_SOCKET } from '../doip'
+import { DOIP, DOIP_ERROR_ID, DOIP_SOCKET, DoipError } from '../doip'
 import LinBase from '../dolin/base'
-import { LIN_TP, LIN_TP_SOCKET } from '../dolin/lintp'
+import { LIN_TP, LIN_TP_ERROR_ID, LIN_TP_SOCKET, TpError as LinTpError } from '../dolin/lintp'
 import { LIN_ADDR_TYPE, LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
@@ -630,20 +630,22 @@ export class UDSTesterMain {
               await tester.pool?.triggerSend(tester.tester.name, s, addrItem, tester.lastActiveTs)
 
               const hasSub = serviceDetail[s.serviceId].hasSubFunction
+              let needResponse = true
+              let allowNoResponse = false
               if (hasSub) {
                 if (txBuffer.length < 2) {
                   throw new Error(`service ${s.name} tx length ${txBuffer.length} is invalid`)
                 }
 
                 const subFunction = s.params[0].value[0]
-                let needResponse = true
+
                 if ((subFunction & 0x80) == 0x80) {
                   needResponse = false
                 } else if (
                   addrItem.type == 'can' &&
                   addrItem.canAddr?.addrType == CAN_ADDR_TYPE.FUNCTIONAL
                 ) {
-                  needResponse = false
+                  allowNoResponse = true
                 } else if (
                   addrItem.type == 'lin' &&
                   addrItem.linAddr?.addrType == LIN_ADDR_TYPE.FUNCTIONAL
@@ -667,10 +669,25 @@ export class UDSTesterMain {
                   if (tester.ac.signal.aborted) {
                     throw new Error('aborted')
                   }
-                  rxData = await socket.read(timeout).catch((e) => {
+                  try {
+                    rxData = await socket.read(timeout).catch((e) => {
+                      tester.lastActiveTs += getTsUs() - curUs
+                      throw e
+                    })
+                  } catch (e: any) {
+                    if (
+                      (allowNoResponse &&
+                        e instanceof TpError &&
+                        e.errorId == TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
+                      (e instanceof LinTpError &&
+                        e.errorId == LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
+                      (e instanceof DoipError && e.errorId == DOIP_ERROR_ID.DOIP_TIMEOUT_UPPER_READ)
+                    ) {
+                      return true
+                    }
                     tester.lastActiveTs += getTsUs() - curUs
                     throw e
-                  })
+                  }
 
                   tester.lastActiveTs = rxData.ts
                   //node handle the response

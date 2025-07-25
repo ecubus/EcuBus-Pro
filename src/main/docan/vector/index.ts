@@ -154,7 +154,11 @@ export class VECTOR_CAN extends CanBase {
         throw new Error(this.getError(xlStatus))
       }
       if (this.PermissionMask.value() == 0) {
-        throw new Error('PermissionMask failed')
+        //allow failed
+        // throw new Error('PermissionMask failed')
+        global.sysLog.warn(
+          `${this.info.name}: No init access for the channel. The channel is configured by another application.`
+        )
       }
 
       // CAN波特率配置（完整逻辑）

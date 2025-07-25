@@ -6,52 +6,116 @@ import {
   output,
   test,
   assert,
-  LinCableErrorInject
+  LinCableErrorInject,
+  getFrameFromDB
 } from 'ECB'
-//TODO:get from ldf
-const FrameMap: Record<string, LinMsg> = {
-  /*ReadByIdentifier (Identifier = 0 ) All other parameters has to be filled with default values
-according to the IUT specification and according to the test case specification.*/
-  TST_FRAME_2: {
+
+let NAD = 0
+const FrameMap: Record<string, LinMsg> = {}
+
+Util.Init(async () => {
+  //AssignFrameIdRage
+  FrameMap['TST_FRAME_1'] = {
     direction: LinDirection.SEND,
     frameId: 0x3c,
     data: Buffer.from([0, 0x6, 0xb2, 0, 0, 0, 0, 0]),
     checksumType: LinChecksumType.CLASSIC
-  },
-  //device specific transmit frame (IUT is publisher)
-  TST_FRAME_4_Tx: {
-    direction: LinDirection.RECV,
-    frameId: 0x34,
-    data: Buffer.alloc(5),
-    checksumType: LinChecksumType.ENHANCED
-  },
-  //device specific receive frame (IUT is subscriber)
-  TST_FRAME_4_Rx: {
+  }
+
+  /*ReadByIdentifier (Identifier = 0 ) All other parameters has to be filled with default values
+  according to the IUT specification and according to the test case specification.*/
+  FrameMap['TST_FRAME_2'] = {
     direction: LinDirection.SEND,
-    frameId: 0x33,
-    data: Buffer.from([1, 2, 3, 4, 5]),
-    checksumType: LinChecksumType.ENHANCED
-  },
+    frameId: 0x3c,
+    data: Buffer.from([0, 0x6, 0xb2, 0, 0, 0, 0, 0]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+
+  /*ReadByIdentifier (Identifier != 0 ) All other parameters has to be filled with default values
+  according to the IUT specification and according to the test case specification.*/
+  const TST_FRAME_3 = await getFrameFromDB('lin', 'LINdb', 'Motor1.ReadByIdentifier')
+  FrameMap['TST_FRAME_3'] = TST_FRAME_3
+  //first byte of data field is NAD
+  NAD = TST_FRAME_3.data[0]
+
+  /*device specific transmit frame (IUT is publisher)*/
+  const TST_FRAME_4_Tx = await getFrameFromDB('lin', 'LINdb', 'Motor1_Dynamic')
+  FrameMap['TST_FRAME_4_Tx'] = TST_FRAME_4_Tx
+
+  /*device specific receive frame (IUT is subscriber)*/
+  const TST_FRAME_4_Rx = await getFrameFromDB('lin', 'LINdb', 'MotorControl')
+  FrameMap['TST_FRAME_4_Rx'] = TST_FRAME_4_Rx
+
+  /*request for event triggered frame*/
+  const TST_FRAME_5 = await getFrameFromDB('lin', 'LINdb', 'ETF_MotorStates')
+  FrameMap['TST_FRAME_5'] = TST_FRAME_5
+
   //slave response command frame, Identifier = 0x3D
-  TST_FRAME_6: {
+  FrameMap['TST_FRAME_6'] = {
     direction: LinDirection.RECV,
     frameId: 0x3d,
     data: Buffer.alloc(8),
     checksumType: LinChecksumType.CLASSIC
-  },
-  TST_FRAME_7: {
-    direction: LinDirection.RECV,
-    frameId: 0x34,
-    data: Buffer.alloc(5),
-    checksumType: LinChecksumType.ENHANCED
-  },
-  TST_FRAME_14: {
+  }
+
+  /*read response error bit*/
+  const TST_FRAME_7 = await getFrameFromDB('lin', 'LINdb', 'Motor1State_Cycl')
+  FrameMap['TST_FRAME_7'] = TST_FRAME_7
+
+  //go to sleep command frame
+  FrameMap['TST_FRAME_9'] = {
+    direction: LinDirection.SEND,
+    frameId: 0x3c,
+    data: Buffer.from([0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+
+  /* conditional change NAD */
+  FrameMap['TST_FRAME_10'] = {
+    frameId: 0x3c,
+    data: Buffer.from([NAD, 0x06, 0xb3, 0, 0, 0, 0, 0]),
+    direction: LinDirection.SEND,
+    checksumType: LinChecksumType.CLASSIC
+  }
+
+  /* functional request with NAD = 0x7E */
+  FrameMap['TST_FRAME_11'] = {
+    frameId: 0x3c,
+    data: Buffer.from([0x7e, 0x06, 0xb2, 0, 0, 0, 0, 0]),
+    direction: LinDirection.SEND,
+    checksumType: LinChecksumType.CLASSIC
+  }
+
+  /* ReadByIdentifier (Identifier = 0) with different NAD */
+  const TST_FRAME_12: LinMsg = {
+    ...TST_FRAME_3
+  }
+  TST_FRAME_12.data[0] = 0x35 //different NAD
+  FrameMap['TST_FRAME_12'] = TST_FRAME_12
+
+  /* AssignNAD*/
+  const TST_FRAME_13 = await getFrameFromDB('lin', 'LINdb', 'Motor1.AssignNAD')
+  FrameMap['TST_FRAME_13'] = TST_FRAME_13
+
+  /*This is a master request message (0x3C) which can carry any kind of diagnostic message,
+except messages of configuration and identification. XX can be SF (SingleFrame), CF
+(ConsecutiveFrame) or FF (FirstFrame).*/
+  FrameMap['TST_FRAME_14_XX'] = {
     direction: LinDirection.SEND,
     frameId: 0x3c,
     data: Buffer.alloc(8),
     checksumType: LinChecksumType.CLASSIC
   }
-}
+  /*this is a slave response message (0x3D) which can carry any kind of diagnostic message,
+except messages of configuration and identification. XX can be SF (SingleFrame), CF
+(ConsecutiveFrame) or FF (FirstFrame).*/
+  FrameMap['TST_FRAME_15_XX'] = {
+    direction: LinDirection.RECV,
+    frameId: 0x3d,
+    data: Buffer.alloc(8),
+    checksumType: LinChecksumType.CLASSIC
+  }
+})
 
 const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<boolean> => {
   return new Promise<boolean>((resolve, reject) => {
@@ -232,8 +296,13 @@ const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
       })
   })
 }
+const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 describe('8 Timing parameters', () => {
   test('PT-CT 5', async () => {
+    await delay(2000)
+    console.log('Lin Conformance Test: FrameMap initialized', FrameMap)
     //Variation of length of break field low phase
     const msg = FrameMap['TST_FRAME_4_Tx']
     const result = await sendLinWithRecv(msg, { breakLength: 3 })

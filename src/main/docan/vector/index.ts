@@ -345,7 +345,7 @@ export class VECTOR_CAN extends CanBase {
               data: data,
               isEcho: msg.flags & 0x40 ? true : false
             }
-            this._read(jsFrame, frame.timeStamp)
+            this._read(jsFrame, frame.timeStamp / 1000)
             //让出时间片
             await new Promise((resolve) => {
               setImmediate(() => {

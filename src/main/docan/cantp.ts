@@ -349,7 +349,7 @@ export class CAN_TP implements CanTp {
       const timeout = addr.nBs - elapseMs
       if (timeout <= 0) {
         socket.close()
-        reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_BS, addr))
+        reject(new TpError(TP_ERROR_ID.TP_TIMEOUT_BS, addr, undefined, `elapsed ${elapseMs}ms`))
         return
       }
       this.abortAllController.signal.onabort = () => {

@@ -115,6 +115,8 @@ except messages of configuration and identification. XX can be SF (SingleFrame),
     data: Buffer.alloc(8),
     checksumType: LinChecksumType.CLASSIC
   }
+
+  console.log('1111111111111', FrameMap)
 })
 
 const sendLinWithRecv = (msg: LinMsg, inject: LinCableErrorInject): Promise<boolean> => {
@@ -301,7 +303,6 @@ const delay = (ms: number): Promise<void> => {
 }
 describe('8 Timing parameters', () => {
   test('PT-CT 5', async () => {
-    await delay(2000)
     console.log('Lin Conformance Test: FrameMap initialized', FrameMap)
     //Variation of length of break field low phase
     const msg = FrameMap['TST_FRAME_4_Tx']

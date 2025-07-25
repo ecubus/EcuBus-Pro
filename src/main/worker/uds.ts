@@ -48,6 +48,8 @@ export { assert }
 
 import { before, test as nodeTest, TestContext } from 'node:test'
 
+let init = false
+let initfunc: () => void = () => {}
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
 
@@ -80,8 +82,20 @@ const testEnableControl: Record<number, boolean> = {}
  */
 
 export function test(name: string, fn: () => void | Promise<void>) {
-  nodeTest(name, (t) => {
-    t.before(() => {
+  nodeTest(name, async (t) => {
+    if (!init) {
+      try {
+        await initfunc()
+      } catch (e) {
+        console.error(`Util.Init function failed: ${e}`)
+      }
+      init = true
+    }
+    t.before(async () => {
+      if (testEnableControl[testCnt] != true) {
+        t.skip()
+        return
+      }
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
@@ -1440,7 +1454,12 @@ export class UtilClass {
    */
   Init(fc: () => void | Promise<void>) {
     this.event.clearListeners('__varFc' as any)
-    this.event.on('__varFc' as any, fc)
+    if (process.env.MODE == 'test') {
+      this.event.on('__varFc' as any, () => {})
+      initfunc = fc
+    } else {
+      this.event.on('__varFc' as any, fc)
+    }
   }
   /**
    * Register a function, this function will be invoked when UDSClass is terminated.

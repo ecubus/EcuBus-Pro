@@ -1659,6 +1659,7 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linStopScheduler(device?: string): Promise<void>;
 /**
+<<<<<<< HEAD
  * Set PWM duty cycle
  *
  * @category PWM
@@ -1681,4 +1682,43 @@ declare function setPwmDuty(value: {
     device?: string;
 }): Promise<void>;
 
+<<<<<<< HEAD
 export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+=======
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+=======
+ * Get a frame from database by name
+ *
+ * @category LIN
+ * @param {('lin')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ *
+ * @example
+ * ```ts
+ * // Get a LIN frame
+ * const linFrame = getFrameFromDB('lin', 'myLinDb', 'Frame1');
+
+ */
+declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string): Promise<LinMsg>;
+/**
+ * Get a frame from database by name
+ *
+ * @category CAN
+ * @param {('can')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ *
+ * @example
+ * ```ts
+ * // Get a CAN frame
+ * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
+ * ```
+ */
+declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): Promise<CanMessage>;
+
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, describe, getFrameFromDB, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq, test };
+>>>>>>> f304a8f (base ok)
+>>>>>>> e512906 (base ok)

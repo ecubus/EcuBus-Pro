@@ -907,42 +907,100 @@ export class NodeClass {
         break
       }
       case 'getFrameFromDB': {
-        let ret: LinMsg | undefined
         const db = Object.values(global.database.lin).find((db) => db.name == data.dbName)
         if (db) {
-          const frame = Object.values(db.frames).find((f) => f.name == data.frameName)
+          const frame = db.frames[data.frameName]
           if (frame) {
             // 判断方向
             let direction = LinDirection.RECV
             if (frame.publishedBy === db.node.master.nodeName) {
               direction = LinDirection.SEND
             }
-            // 检查是否为 event frame
-            const isEvent = !!Object.values(db.eventTriggeredFrames).find(
-              (ef) => ef.frameId === frame.id
-            )
+
             // 计算校验类型
             const checksumType =
               frame.id === 0x3c || frame.id === 0x3d
                 ? LinChecksumType.CLASSIC
                 : LinChecksumType.ENHANCED
-            ret = {
+            const ret: LinMsg = {
               frameId: frame.id,
               data: getFrameData(db, frame),
               direction,
               checksumType,
               database: db.id,
-              device: db.name,
-              name: frame.name,
-              isEvent
+              name: frame.name
             }
+            return ret
           } else {
-            throw new Error(`frame ${data.frameName} not found`)
+            // is event frame
+            const eventFrame = db.eventTriggeredFrames[data.frameName]
+            if (eventFrame) {
+              const containsFrame = eventFrame.frameNames[0]
+              const frame = db.frames[containsFrame]
+              if (frame) {
+                const ret: LinMsg = {
+                  frameId: eventFrame.frameId,
+                  data: Buffer.alloc(frame.frameSize + 1),
+                  direction: LinDirection.RECV,
+                  checksumType: LinChecksumType.CLASSIC,
+                  database: db.id,
+                  name: eventFrame.name,
+                  isEvent: true
+                }
+                return ret
+              }
+            }
+
+            const a = data.frameName.split('.')
+            const slaveNodeName = a[0]
+            const id = a[1]
+
+            //find slave node
+            const slaveNode = db.nodeAttrs[slaveNodeName]
+            if (slaveNode) {
+              if (id === 'ReadByIdentifier') {
+                const data = Buffer.alloc(8)
+                data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+                data.writeUInt8(0x6, 1)
+                data.writeUInt8(0xb2, 2)
+                data.writeUInt16LE(slaveNode.supplier_id, 4)
+                data.writeUInt16LE(slaveNode.function_id, 6)
+                const ret: LinMsg = {
+                  frameId: 0x3c,
+                  data,
+                  direction: LinDirection.SEND,
+                  checksumType: LinChecksumType.CLASSIC,
+                  database: db.id,
+                  name: 'ReadByIdentifier',
+                  isEvent: false
+                }
+                console.log('xxx')
+                return ret
+              } else if (id === 'AssignNAD') {
+                const data = Buffer.alloc(8)
+                data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+                data.writeUInt8(0x6, 1)
+                data.writeUInt8(0xb0, 2)
+                data.writeUInt16LE(slaveNode.supplier_id, 3)
+                data.writeUInt16LE(slaveNode.function_id, 5)
+                const ret: LinMsg = {
+                  frameId: 0x3c,
+                  data,
+                  direction: LinDirection.SEND,
+                  checksumType: LinChecksumType.CLASSIC,
+                  database: db.id,
+                  name: 'AssignNAD',
+                  isEvent: false
+                }
+                return ret
+              }
+            }
           }
+          throw new Error(`frame ${data.frameName} not found`)
         } else {
           throw new Error(`database ${data.dbName} not found`)
         }
-        return ret
+
         break
       }
     }
@@ -961,7 +1019,6 @@ export class NodeClass {
             ret = {
               id: msg.id,
               name: msg.name,
-              device: db.name,
               dir: 'OUT',
               data: getMessageData(msg),
               msgType: {

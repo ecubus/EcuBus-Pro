@@ -2157,6 +2157,11 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
  * @param {('lin')} dbType - The type of database
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
+ * | Special Frame | Description |
+ * | --- | --- |
+ * | ${slaveNodeName}.ReadByIdentifier | Returns ReadByIdentifier frame with correct NAD, where slaveNodeName is the name of the slave node |
+ * | ${slaveNodeName}.AssignNAD | Returns AssignNAD frame with correct InitialNAD SupplyId and FunctionId |
+ * 
  * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
  * 
  * @example

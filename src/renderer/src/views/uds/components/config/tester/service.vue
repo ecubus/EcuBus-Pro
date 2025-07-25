@@ -65,6 +65,7 @@
         class="hardware"
         :rules="rules"
         hide-required-asterisk
+        @submit.prevent
       >
         <el-form-item label="Name" prop="name" required>
           <el-input v-model="model.name" style="width: 100%" @change="reqParamChange" />

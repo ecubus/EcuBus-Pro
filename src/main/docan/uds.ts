@@ -663,12 +663,12 @@ export class UDSTesterMain {
               let timeout = tester.tester.udsTime.pTime
               do {
                 let rxData = undefined
-
+                const curUs = getTsUs()
                 try {
-                  const curUs = getTsUs()
                   if (tester.ac.signal.aborted) {
                     throw new Error('aborted')
                   }
+
                   try {
                     rxData = await socket.read(timeout)
                   } catch (e: any) {
@@ -741,7 +741,12 @@ export class UDSTesterMain {
                   break
                 } catch (e: any) {
                   if (e.message && e.message.includes('serviceId not match')) {
-                    return false
+                    //keep read
+                    const used = Math.floor((getTsUs() - curUs) / 1000)
+                    if (timeout > used) {
+                      timeout = timeout - used
+                    }
+                    continue
                   }
 
                   service.retryNum--

@@ -974,7 +974,6 @@ export class NodeClass {
                   name: 'ReadByIdentifier',
                   isEvent: false
                 }
-                console.log('xxx')
                 return ret
               } else if (id === 'AssignNAD') {
                 const data = Buffer.alloc(8)

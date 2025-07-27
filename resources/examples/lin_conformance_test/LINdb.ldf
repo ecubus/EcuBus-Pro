@@ -1,0 +1,211 @@
+/*************************************************************************************/
+
+//                                                                                     
+
+// Description: LIN Description file created using Vector's DaVinci Network Designer   
+
+// Created:     25 Oct 2007 15:32:29
+
+// Author:      Vector Informatik GmbH
+
+// Version:     0.1                                                                    
+
+//                                                                                     
+
+/*************************************************************************************/
+
+LIN_description_file;
+LIN_protocol_version = "2.2";
+LIN_language_version = "2.2";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: SeatECU, 5 ms, 0.1 ms ;
+  Slaves: Motor1, Motor2 ;
+}
+
+Signals {
+  Motor1_Dynamic_Sig: 8, 7, Motor1, SeatECU ;
+  Motor1ErrorCode: 8, 5, Motor1, SeatECU ;
+  Motor1ErrorValue: 8, 1, Motor1, SeatECU ;
+  Motor1LinError: 1, 0, Motor1, SeatECU ;
+  Motor1Position: 32, {0, 0, 0, 0}, Motor1, SeatECU ;
+  Motor1Temp: 8, 5, Motor1, SeatECU ;
+  Motor2_Dynamic_Sig: 8, 8, Motor2, SeatECU ;
+  Motor2ErrorCode: 8, 2, Motor2, SeatECU ;
+  Motor2ErrorValue: 8, 4, Motor2, SeatECU ;
+  Motor2LinError: 1, 0, Motor2, SeatECU ;
+  Motor2Position: 32, {0, 0, 0, 0}, Motor2, SeatECU ;
+  Motor2Temp: 8, 0, Motor2, SeatECU ;
+  MotorDirection: 2, 0, SeatECU, Motor1, Motor2 ;
+  MotorSelection: 4, 0, SeatECU, Motor1, Motor2 ;
+  MotorSpeed: 10, 0, SeatECU, Motor1, Motor2 ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  Motor1_Dynamic: 53, Motor1, 1 {
+    Motor1_Dynamic_Sig, 0 ;
+  }
+  Motor1State_Cycl: 51, Motor1, 6 {
+    Motor1Temp, 0 ;
+    Motor1Position, 8 ;
+    Motor1LinError, 40 ;
+  }
+  Motor1State_Event: 54, Motor1, 3 {
+    Motor1ErrorCode, 8 ;
+    Motor1ErrorValue, 16 ;
+  }
+  Motor2_Dynamic: 44, Motor2, 1 {
+    Motor2_Dynamic_Sig, 0 ;
+  }
+  Motor2State_Cycl: 52, Motor2, 6 {
+    Motor2Temp, 0 ;
+    Motor2Position, 8 ;
+    Motor2LinError, 40 ;
+  }
+  Motor2State_Event: 55, Motor2, 3 {
+    Motor2ErrorCode, 8 ;
+    Motor2ErrorValue, 16 ;
+  }
+  MotorControl: 45, SeatECU, 2 {
+    MotorDirection, 0 ;
+    MotorSpeed, 2 ;
+    MotorSelection, 12 ;
+  }
+}
+
+
+Event_triggered_frames {
+  ETF_MotorStates: ETF_CollisionResolving, 58, Motor1State_Event, Motor2State_Event ;
+}
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  Motor1{
+    LIN_protocol = "2.2" ;
+    configured_NAD = 0x2 ;
+    initial_NAD = 0x2 ;
+    product_id = 0x1E, 0x1, 0 ;
+    response_error = Motor1LinError ;
+    P2_min = 100 ms ;
+    ST_min = 20 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      MotorControl ;
+      Motor1State_Cycl ;
+      Motor1State_Event ;
+      ETF_MotorStates ;
+      Motor1_Dynamic ;
+    }
+  }
+  Motor2{
+    LIN_protocol = "2.2" ;
+    configured_NAD = 0x3 ;
+    initial_NAD = 0x3 ;
+    product_id = 0x1E, 0x1, 0 ;
+    response_error = Motor2LinError ;
+    P2_min = 100 ms ;
+    ST_min = 20 ms ;
+    N_As_timeout = 1000 ms ;
+    N_Cr_timeout = 1000 ms ;
+    configurable_frames {
+      MotorControl ;
+      Motor2State_Cycl ;
+      Motor2State_Event ;
+      ETF_MotorStates ;
+      Motor2_Dynamic ;
+    }
+  }
+}
+
+Schedule_tables {
+ NormalTable {
+    MotorControl delay 50 ms ;
+    Motor1State_Cycl delay 50 ms ;
+    Motor2State_Cycl delay 50 ms ;
+  }
+ DynamicTable {
+    Motor1_Dynamic delay 100 ms ;
+    Motor2_Dynamic delay 5 ms ;
+  }
+ NormalTableEvent {
+    MotorControl delay 50 ms ;
+    Motor1State_Cycl delay 50 ms ;
+    Motor2State_Cycl delay 50 ms ;
+    ETF_MotorStates delay 50 ms ;
+  }
+ InitTable {
+    AssignFrameId { Motor1, Motor1State_Cycl } delay 10 ms ;
+    AssignFrameId { Motor2, Motor2State_Cycl } delay 10 ms ;
+    AssignFrameId { Motor1, Motor1State_Event } delay 10 ms ;
+    AssignFrameId { Motor2, Motor2State_Event } delay 10 ms ;
+    AssignFrameId { Motor1, Motor1_Dynamic } delay 10 ms ;
+    AssignFrameId { Motor1, ETF_MotorStates } delay 10 ms ;
+    AssignFrameId { Motor2, ETF_MotorStates } delay 10 ms ;
+    AssignFrameId { Motor1, MotorControl } delay 10 ms ;
+    AssignFrameId { Motor2, MotorControl } delay 10 ms ;
+  }
+ ETF_CollisionResolving {
+    Motor2State_Event delay 10 ms ;
+    Motor1State_Event delay 10 ms ;
+  }
+}
+
+
+Signal_encoding_types {
+  MotorSpeed {
+    physical_value, 0, 0, 1, 0, "rpm" ;
+  }
+  encTemperature {
+    physical_value, 0, 80, 0.5, -20, "Degree" ;
+  }
+}
+
+Signal_representation {
+  MotorSpeed: MotorSpeed ;
+  encTemperature: Motor1Temp, Motor2Temp ;
+}

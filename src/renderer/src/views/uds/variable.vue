@@ -49,10 +49,14 @@
             {{ row.value?.initValue }}
           </template>
           <template #default_min="{ row }">
-            {{ row.value?.min }}
+            <template v-if="row.value?.type == 'number'">
+              {{ row.value?.min }}
+            </template>
           </template>
           <template #default_max="{ row }">
-            {{ row.value?.max }}
+            <template v-if="row.value?.type == 'number'">
+              {{ row.value?.max }}
+            </template>
           </template>
         </VxeGrid>
       </el-tab-pane>
@@ -94,6 +98,7 @@
       <el-form
         ref="variableForm"
         :model="newVariableForm"
+        :disabled="globalStart"
         label-width="120px"
         size="small"
         :rules="formRules"
@@ -176,12 +181,14 @@ import { VarItem, VarValueNumber, VarValueString, VarValueArray } from 'src/prel
 import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 import { getAllSysVar } from 'nodeCan/sysVar'
+import { useGlobalStart } from '@r/stores/runtime'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()
 const props = defineProps<{
   height: number
 }>()
+const globalStart = useGlobalStart()
 
 // Active tab
 const activeTab = ref('user')

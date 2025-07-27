@@ -24,6 +24,31 @@ export function setVar(name: string, value: number | string | number[]) {
 
   return { found, target }
 }
+export function getVar(name: string): number | string | number[] {
+  const target = Object.values(global.vars).find((v) => v.name == name)
+  if (target && target.value) {
+    if (target.value.type == 'number') {
+      if (target.value.value == undefined) {
+        return Number(target.value.initValue)
+      } else {
+        return Number(target.value.value)
+      }
+    } else if (target.value.type == 'string') {
+      if (target.value.value == undefined) {
+        return target.value.initValue || ''
+      } else {
+        return target.value.value || ''
+      }
+    } else if (target.value.type == 'array') {
+      if (target.value.value == undefined) {
+        return (target.value.initValue || []).map((v) => Number(v))
+      } else {
+        return (target.value.value || []).map((v) => Number(v))
+      }
+    }
+  }
+  throw new Error(`var ${name} not found`)
+}
 
 export function setVarByKey(key: string, value: number | string | number[]) {
   const target = global.vars[key]

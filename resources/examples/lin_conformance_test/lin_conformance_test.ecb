@@ -633,7 +633,143 @@
     },
     "graphs": {},
     "guages": {},
-    "vars": {},
+    "vars": {
+      "e29ff736-00ab-4db9-a2c9-e403b1a4a40f": {
+        "type": "user",
+        "id": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f",
+        "name": "lin_conformance_test"
+      },
+      "cd9c3b8b-4651-4b0d-bbeb-7d2d9d6792ed": {
+        "name": "InitialNAD",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "2",
+          "min": 0,
+          "max": 255
+        },
+        "id": "cd9c3b8b-4651-4b0d-bbeb-7d2d9d6792ed",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "378a8177-636a-4339-91e9-40fa35f2ade7": {
+        "name": "ConfiguredNAD",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "2",
+          "min": 0,
+          "max": 255
+        },
+        "id": "378a8177-636a-4339-91e9-40fa35f2ade7",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "092e2718-c9b1-4690-9cf4-7906cbe4e173": {
+        "name": "SupplierID",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "0x1e",
+          "min": 0,
+          "max": 65535
+        },
+        "id": "092e2718-c9b1-4690-9cf4-7906cbe4e173",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "412ed712-d160-45fb-b7cd-dd7dd7ed62f6": {
+        "name": "FunctionID",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "1",
+          "min": 0,
+          "max": 65535
+        },
+        "id": "412ed712-d160-45fb-b7cd-dd7dd7ed62f6",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "f2943692-b9a6-446c-ac94-4c50e43ce19e": {
+        "name": "Variant",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "0",
+          "min": 0,
+          "max": 255
+        },
+        "id": "f2943692-b9a6-446c-ac94-4c50e43ce19e",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "edd2a226-e8d9-46b0-b6ec-dacc74e37a4f": {
+        "name": "StatusFrameName",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "Motor1State_Cycl",
+          "min": 0,
+          "max": 100
+        },
+        "id": "edd2a226-e8d9-46b0-b6ec-dacc74e37a4f",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "e9c590e4-a463-41f2-aae1-216b37f30e58": {
+        "name": "TxFrameName",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "Motor1_Dynamic",
+          "min": 0,
+          "max": 100
+        },
+        "id": "e9c590e4-a463-41f2-aae1-216b37f30e58",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "f77e220d-2dc3-4c34-a4fc-c93dcac10ce6": {
+        "name": "RxFrameName",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "MotorControl",
+          "min": 0,
+          "max": 100
+        },
+        "id": "f77e220d-2dc3-4c34-a4fc-c93dcac10ce6",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "ee88bee0-9274-4ef6-a52b-78e11d57d018": {
+        "name": "EventFrameName",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "ETF_MotorStates",
+          "min": 0,
+          "max": 100
+        },
+        "id": "ee88bee0-9274-4ef6-a52b-78e11d57d018",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "e4c49aef-0460-49cd-91ce-1ea152eefe4d": {
+        "name": "StatusSignalOffset",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "40",
+          "min": 0,
+          "max": 100
+        },
+        "id": "e4c49aef-0460-49cd-91ce-1ea152eefe4d",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      }
+    },
     "datas": {},
     "panels": {}
   },
@@ -668,8 +804,8 @@
       },
       "trace": {
         "pos": {
-          "x": 139,
-          "y": 40,
+          "x": 73,
+          "y": 320,
           "w": 1583,
           "h": 438
         },
@@ -692,14 +828,26 @@
       },
       "hardware": {
         "pos": {
-          "x": 432.5,
-          "y": 64,
+          "x": 498.5,
+          "y": 58,
           "w": 600,
           "h": 400
         },
         "title": "hardware",
         "label": "Devices",
         "id": "hardware",
+        "options": {}
+      },
+      "variable": {
+        "pos": {
+          "x": 553.5,
+          "y": 130,
+          "w": 959,
+          "h": 400
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
         "options": {}
       }
     },

@@ -411,19 +411,31 @@ export class LinCable extends LinBase {
             const msg = `Sync error, got ${data[2]}, expected 0x55`
             this.log.error(ts, msg)
           } else if (data[0] == 2) {
-            this.log.error(ts, 'slave no response')
+            this.log.error(ts, 'slave no response', {
+              frameId: data[1],
+              data: Buffer.alloc(0),
+              direction: LinDirection.SEND,
+              checksumType:
+                data[1] == 0x3c || data[1] == 0x3d
+                  ? LinChecksumType.CLASSIC
+                  : LinChecksumType.ENHANCED,
+              checksum: 0,
+              ts: ts
+            })
           } else if (data[0] == 3) {
             //data format is not valid
-            const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte (start form sync phase,0:means sync phase,1:means PID phase)`
-            this.log.error(ts, msg)
-          } else if (data[0] == 0x82) {
-            //no enough data
-            const id = data[1]
-            const msg = this.slaveEntry.get(id)
-            if (msg) {
-              const msgStr = `No enough data, got ${data.length - 3}, expected ${msg.data.length}`
-              this.log.error(ts, msgStr)
-            }
+            const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte`
+            this.log.error(ts, msg, {
+              frameId: data[1],
+              data: data.subarray(2, data.length - 1),
+              direction: LinDirection.SEND,
+              checksumType:
+                data[1] == 0x3c || data[1] == 0x3d
+                  ? LinChecksumType.CLASSIC
+                  : LinChecksumType.ENHANCED,
+              checksum: 0,
+              ts: ts
+            })
           } else {
             //unknown error
             const msg = `Unknown error, ret:${data[1]}`

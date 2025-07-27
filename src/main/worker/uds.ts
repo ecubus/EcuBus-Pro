@@ -46,6 +46,8 @@ import assert from 'node:assert'
  */
 export { assert }
 
+export { getCheckSum as getLinCheckSum } from '../share/lin'
+
 import { before, test as nodeTest, TestContext } from 'node:test'
 
 let init = false
@@ -134,6 +136,7 @@ export { beforeEach, afterEach, before, after } from 'node:test'
  */
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
+import { VarItem } from 'src/preload/data'
 
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 // export { selfDescribe as describe }
@@ -1635,8 +1638,9 @@ export async function setVar<T extends keyof VariableMap>(
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
       id: id,
-      event: 'setVar',
+      event: 'varApi',
       data: {
+        method: 'setVar',
         name,
         value
       }
@@ -1645,6 +1649,37 @@ export async function setVar<T extends keyof VariableMap>(
     id++
   })
 
+  return await p
+}
+
+/**
+ * Get a variable value
+ *
+ * @category Variable
+ * @param {string} varName - The name of the variable to get
+ * @returns {Promise<VarItem>} - Returns a promise that resolves with the variable value and metadata
+ *
+ * @example
+ * ```ts
+ * // Get a variable value
+ * const var1 = await getVar('namespace.var1');
+ * console.log(var1.value); // Access the value
+ * console.log(var1.type); // Access the type
+ * ```
+ */
+export async function getVar<T extends keyof VariableMap>(varName: T): Promise<VariableMap[T]> {
+  const p: Promise<VariableMap[T]> = new Promise<VariableMap[T]>((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'varApi',
+      data: {
+        method: 'getVar',
+        name: varName
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
   return await p
 }
 
@@ -1880,10 +1915,6 @@ export async function linStopScheduler(device?: string): Promise<void> {
  * @param {('lin')} dbType - The type of database
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
- * | Special Frame | Description |
- * | --- | --- |
- * | ${slaveNodeName}.ReadByIdentifier | Returns ReadByIdentifier frame with correct NAD, where slaveNodeName is the name of the slave node |
- * | ${slaveNodeName}.AssignNAD | Returns AssignNAD frame with correct InitialNAD SupplyId and FunctionId |
  * 
  * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
  * 

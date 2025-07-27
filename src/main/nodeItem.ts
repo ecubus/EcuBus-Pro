@@ -183,7 +183,7 @@ export class NodeClass {
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
         this.pool.registerHandler('setSignal', NodeClass.setSignal)
-        this.pool.registerHandler('setVar', this.setVar.bind(this))
+        this.pool.registerHandler('varApi', this.varApi.bind(this))
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
         this.pool.registerHandler('linApi', this.linApi.bind(this))
         this.pool.registerHandler('canApi', this.canApi.bind(this))
@@ -761,14 +761,21 @@ export class NodeClass {
     }
     return info
   }
-  setVar(
+  varApi(
     pool: UdsTester,
     data: {
+      method: 'setVar' | 'getVar'
       name: string
       value: number | string | number[]
     }
   ) {
-    this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
+    if (data.method == 'setVar') {
+      this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
+    } else if (data.method == 'getVar') {
+      return this.varLog.getVar(data.name)
+    } else {
+      throw new Error(`invalid method ${data.method}`)
+    }
   }
   //only update raw value
   static setSignal(
@@ -951,49 +958,49 @@ export class NodeClass {
               }
             }
 
-            const a = data.frameName.split('.')
-            const slaveNodeName = a[0]
-            const id = a[1]
+            // const a = data.frameName.split('.')
+            // const slaveNodeName = a[0]
+            // const id = a[1]
 
-            //find slave node
-            const slaveNode = db.nodeAttrs[slaveNodeName]
-            if (slaveNode) {
-              if (id === 'ReadByIdentifier') {
-                const data = Buffer.alloc(8)
-                data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-                data.writeUInt8(0x6, 1)
-                data.writeUInt8(0xb2, 2)
-                data.writeUInt16LE(slaveNode.supplier_id, 4)
-                data.writeUInt16LE(slaveNode.function_id, 6)
-                const ret: LinMsg = {
-                  frameId: 0x3c,
-                  data,
-                  direction: LinDirection.SEND,
-                  checksumType: LinChecksumType.CLASSIC,
-                  database: db.id,
-                  name: 'ReadByIdentifier',
-                  isEvent: false
-                }
-                return ret
-              } else if (id === 'AssignNAD') {
-                const data = Buffer.alloc(8)
-                data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-                data.writeUInt8(0x6, 1)
-                data.writeUInt8(0xb0, 2)
-                data.writeUInt16LE(slaveNode.supplier_id, 3)
-                data.writeUInt16LE(slaveNode.function_id, 5)
-                const ret: LinMsg = {
-                  frameId: 0x3c,
-                  data,
-                  direction: LinDirection.SEND,
-                  checksumType: LinChecksumType.CLASSIC,
-                  database: db.id,
-                  name: 'AssignNAD',
-                  isEvent: false
-                }
-                return ret
-              }
-            }
+            // //find slave node
+            // const slaveNode = db.nodeAttrs[slaveNodeName]
+            // if (slaveNode) {
+            //   if (id === 'ReadByIdentifier') {
+            //     const data = Buffer.alloc(8)
+            //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+            //     data.writeUInt8(0x6, 1)
+            //     data.writeUInt8(0xb2, 2)
+            //     data.writeUInt16LE(slaveNode.supplier_id, 4)
+            //     data.writeUInt16LE(slaveNode.function_id, 6)
+            //     const ret: LinMsg = {
+            //       frameId: 0x3c,
+            //       data,
+            //       direction: LinDirection.SEND,
+            //       checksumType: LinChecksumType.CLASSIC,
+            //       database: db.id,
+            //       name: 'ReadByIdentifier',
+            //       isEvent: false
+            //     }
+            //     return ret
+            //   } else if (id === 'AssignNAD') {
+            //     const data = Buffer.alloc(8)
+            //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+            //     data.writeUInt8(0x6, 1)
+            //     data.writeUInt8(0xb0, 2)
+            //     data.writeUInt16LE(slaveNode.supplier_id, 3)
+            //     data.writeUInt16LE(slaveNode.function_id, 5)
+            //     const ret: LinMsg = {
+            //       frameId: 0x3c,
+            //       data,
+            //       direction: LinDirection.SEND,
+            //       checksumType: LinChecksumType.CLASSIC,
+            //       database: db.id,
+            //       name: 'AssignNAD',
+            //       isEvent: false
+            //     }
+            //     return ret
+            //   }
+            // }
           }
           throw new Error(`frame ${data.frameName} not found`)
         } else {

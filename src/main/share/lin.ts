@@ -201,6 +201,14 @@ export function getPID(frameId: number) {
   return LinPidTable[frameId]
 }
 
+/**
+ * Calculate LIN frame checksum
+ * @category LIN
+ * @param data - Data bytes to calculate checksum for
+ * @param checksumType - Type of checksum (CLASSIC for LIN 1.x or ENHANCED for LIN 2.x)
+ * @param pid - Protected ID, required for enhanced checksum calculation
+ * @returns Calculated checksum byte
+ */
 export function getCheckSum(data: Buffer, checksumType: LinChecksumType, pid?: number) {
   let checksum = 0
 

@@ -32,9 +32,10 @@ type HandlerMap = {
       value: number | number[]
     }
   ) => void
-  setVar: (
+  varApi: (
     pool: UdsTester,
     data: {
+      method: 'getVar' | 'setVar'
       name: string
       value: number | number[] | string
     }

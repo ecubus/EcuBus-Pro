@@ -1,11 +1,11 @@
 // import { Param, param2raw, ServiceItem } from '../views/Uds/service'
 import { v4 } from 'uuid'
-import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo } from './can'
+import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo, CanVendor } from './can'
 import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
 
 export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE'
-export type HardwareType = 'can' | 'lin' | 'eth'
+export type HardwareType = 'can' | 'lin' | 'eth' | 'pwm'
 //serviceDetail所有的key作为serviceId
 
 /**
@@ -496,9 +496,31 @@ export function getUdsDeviceName(item: UdsDevice) {
   return ''
 }
 
+export interface PwmDevice {
+  label: string
+  id: string
+  handle: any
+  serialNumber?: string
+  busy?: boolean
+}
+
+export interface PwmBaseInfo {
+  id: string
+  device: PwmDevice
+  baudRate: number
+  freq: number
+  initDuty: number
+  polarity: boolean
+  resetStatus: boolean
+  vendor: CanVendor
+  name: string
+  database?: string
+}
+
 export interface UdsDevice {
   type: HardwareType
   canDevice?: CanBaseInfo
   ethDevice?: EthBaseInfo
   linDevice?: LinBaseInfo
+  pwmDevice?: PwmBaseInfo
 }

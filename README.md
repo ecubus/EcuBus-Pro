@@ -34,11 +34,11 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 - 🚀 Modern, intuitive user interface
 - 💻 Cross-platform support (Windows, Linux, MacOS) - [Install](./docs/about/install.md)
 - 🔌 Multi-hardware support
-  - **[EcuBus-LinCable](./docs/um/hardware/lincable.md)**: LIN (Support Lin conformance test)
+  - **[EcuBus-LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)**: LIN (Support Lin conformance test), [PWM](https://app.whyengineer.com/docs/um/pwm/pwm.html)
   - **PEAK**: CAN, CAN-FD, LIN
   - **KVASER**: CAN, CAN-FD, LIN
   - **ZLG**: CAN, CAN-FD
-  - **Toomoss**: CAN, CAN-FD, LIN
+  - **Toomotss**: CAN, CAN-FD, LIN
   - **VECTOR**: CAN, CAN-FD, LIN
   - **SLCAN**: CAN, CAN-FD [Detail](https://app.whyengineer.com/docs/um/can/can.html#slcan-special)
   - **GS_USB (CANDLE)**: CAN, CAN-FD [Detail](https://app.whyengineer.com/docs/um/can/can.html#gs-usb)

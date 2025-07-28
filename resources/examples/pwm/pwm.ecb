@@ -6,15 +6,15 @@
         "pwmDevice": {
           "device": {
             "label": "",
-            "handle": "COM8",
+            "handle": "COM33",
             "id": ""
           },
           "name": "ECUBUS_PWM_0",
           "id": "318fabd9-9646-4ff6-80ab-10ea4e7d8603",
           "vendor": "ecubus",
           "freq": 1000,
-          "initDuty": 30,
-          "polarity": false,
+          "initDuty": 45,
+          "polarity": true,
           "resetStatus": false
         }
       }
@@ -69,34 +69,10 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "hardware": {
-        "pos": {
-          "x": 0,
-          "y": 0,
-          "w": 880,
-          "h": 390.5
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
-      "network": {
-        "pos": {
-          "x": 880,
-          "y": 0,
-          "w": 880,
-          "h": 390.5
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {}
-      },
       "ec6efb01-8865-477c-af90-85ba29f419bb_ia": {
         "pos": {
-          "x": 0,
-          "y": 390.5,
+          "x": 316,
+          "y": 90.5,
           "w": 880,
           "h": 390.5
         },
@@ -109,6 +85,18 @@
           },
           "name": "PWM IA"
         }
+      },
+      "hardware": {
+        "pos": {
+          "x": 553.5,
+          "y": 130,
+          "w": 956,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
       }
     }
   }

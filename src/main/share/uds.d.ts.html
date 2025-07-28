@@ -316,7 +316,7 @@ interface LinAddr {
 }
 
 type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE';
-type HardwareType = 'can' | 'lin' | 'eth';
+type HardwareType = 'can' | 'lin' | 'eth' | 'pwm';
 /**
  * @category UDS
  */
@@ -1636,5 +1636,27 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  * ```
  */
 declare function linStopScheduler(device?: string): Promise<void>;
+/**
+ * Set PWM duty cycle
+ *
+ * @category PWM
+ * @param {Object} value - The PWM configuration object
+ * @param {number} value.duty - Duty cycle percentage (0-100)
+ * @param {string} [value.device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when duty cycle is set
+ *
+ * @example
+ * ```ts
+ * // Set duty cycle to 50%
+ * await setPwmDuty({duty: 50});
+ *
+ * // Set duty cycle on specific device
+ * await setPwmDuty({duty: 75, device: 'Device1'});
+ * ```
+ */
+declare function setPwmDuty(value: {
+    duty: number;
+    device?: string;
+}): Promise<void>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setSignal, setVar, stopUdsSeq, test };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, describe, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };

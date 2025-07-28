@@ -54,6 +54,19 @@ compatibility with a wide range of automotive LIN devices and networks. Supporte
 include 19200, 10400, 9600, and 2400 bps, making LinCable suitable for both legacy and
 modern LIN applications.
 
+## PWM Output Capability
+
+LinCable includes advanced [PWM](../pwm/pwm.md) output functionality, making it
+a versatile tool for automotive development and testing. The PWM output feature enables
+precise control of digital signals for various automotive applications.
+
+### PWM Output Specifications
+- **Frequency Range**: 1 Hz to 20KHz with high precision
+- **Duty Cycle Control**: 0% to 100% with 0.1% resolution
+- **Output Voltage**: High level equals VBAT input voltage, low level equals 0V
+- **Channel Count**: Single PWM output channel
+- **Frequency Accuracy**: ±0.1% typical
+
 
 ## Cross-Platform and Software Integration
 

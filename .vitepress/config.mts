@@ -216,6 +216,10 @@ export default withMermaid({
             ]
           },
           {
+            text: 'PWM',
+            link: '/docs/um/pwm/pwm.md'
+          },
+          {
             text: 'Diagnostic',
             items: [
               {

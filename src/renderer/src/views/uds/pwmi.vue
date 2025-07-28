@@ -96,6 +96,7 @@ import waveIcon from '@iconify/icons-material-symbols/graphic-eq'
 import playIcon from '@iconify/icons-material-symbols/play-arrow'
 import stopIcon from '@iconify/icons-material-symbols/stop'
 import { useGlobalStart } from '@r/stores/runtime'
+import { cloneDeep } from 'lodash'
 
 interface PwmDevice {
   id: string
@@ -176,7 +177,11 @@ watchEffect(() => {
 // 占空比变化
 function onDutyCycleChange(value: number) {
   if (!isConnected.value) return
-  window.electron.ipcRenderer.send('ipc-pwm-set-duty', dataBase.ia[editIndex.value], value)
+  window.electron.ipcRenderer.send(
+    'ipc-pwm-set-duty',
+    cloneDeep(dataBase.ia[editIndex.value]),
+    value
+  )
 }
 
 function setDutyCyclePreset(value: number) {

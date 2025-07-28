@@ -178,17 +178,12 @@ export class EcuBusPwm extends PwmBase {
         return
       }
 
-      this.serialPort.write(cmd, (err) => {
-        if (err) {
-          reject(err)
+      this.serialPort.write(cmd)
+      this.serialPort.drain((drainErr) => {
+        if (drainErr) {
+          reject(drainErr)
         } else {
-          this.serialPort.drain((drainErr) => {
-            if (drainErr) {
-              reject(drainErr)
-            } else {
-              resolve()
-            }
-          })
+          resolve()
         }
       })
     })

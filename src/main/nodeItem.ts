@@ -2,10 +2,10 @@ import path from 'path'
 import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
-import UdsTester, { linApiStartSch, linApiStopSch } from './workerClient'
+import UdsTester, { linApiStartSch, linApiStopSch, pwmApiSetDuty } from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
-import { applyBuffer, getRxPdu, getTxPdu, ServiceItem, UdsDevice } from './share/uds'
+import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } from './share/uds'
 import { findService, UDSTesterMain } from './docan/uds'
 import { cloneDeep } from 'lodash'
 import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
@@ -22,6 +22,7 @@ import Transport from 'winston-transport'
 import logo from './logo.html?raw'
 import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
+import { PwmBase } from './pwm'
 
 type TestTree = {
   label: string
@@ -72,6 +73,7 @@ export class NodeClass {
   private linBaseId: string[] = []
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
+  private pwmBaseId: string[] = []
   private startTs = 0
   private boundCb: (frame: CanMessage | LinMsg) => void
   private udsTesterMap = new Map<string, UDSTesterMain>()
@@ -89,6 +91,7 @@ export class NodeClass {
     private linBaseMap: Map<string, LinBase>,
     private doips: DOIP[],
     private ethBaseMap: Map<string, EthBaseInfo>,
+    private pwmBaseMap: Map<string, PwmBase>,
     private projectPath: string,
     private projectName: string,
     private testers: Record<string, TesterInfo>,
@@ -124,6 +127,10 @@ export class NodeClass {
       const ethBaseItem = this.ethBaseMap.get(c)
       if (ethBaseItem) {
         this.ethBaseId.push(c)
+      }
+      const pwmBaseItem = this.pwmBaseMap.get(c)
+      if (pwmBaseItem) {
+        this.pwmBaseId.push(c)
       }
     }
     if (nodeItem.script) {
@@ -172,6 +179,7 @@ export class NodeClass {
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
         this.pool.registerHandler('linApi', this.linApi.bind(this))
         this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
+        this.pool.registerHandler('pwmApi', this.pwmApi.bind(this))
 
         //cantp
         for (const tester of Object.values(this.testers)) {
@@ -571,6 +579,7 @@ export class NodeClass {
       `
     return html
   }
+
   async generateHtml(reportPath?: string, returnHtml = false) {
     const root: TestTree = {
       label: this.nodeItem.name,
@@ -811,7 +820,33 @@ export class NodeClass {
       }
     }
   }
-
+  async pwmApi(pool: UdsTester, data: pwmApiSetDuty) {
+    const findPwmBase = (name?: string) => {
+      let ret: PwmBase | undefined
+      if (name != undefined) {
+        for (const channelId of this.pwmBaseId) {
+          const item = this.pwmBaseMap.get(channelId)
+          if (item && item.info.name == name) {
+            ret = item
+            break
+          }
+        }
+      } else {
+        // 返回第一个当前节点channel对应的pwmBase
+        if (this.pwmBaseId.length > 0) {
+          ret = this.pwmBaseMap.get(this.pwmBaseId[0])
+        }
+      }
+      if (ret == undefined) {
+        throw new Error(`device ${name} not found`)
+      }
+      return ret
+    }
+    const pwmBase = findPwmBase(data.device)
+    if (data.method == 'setDuty') {
+      pwmBase.setDutyCycle(data.duty)
+    }
+  }
   async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch) {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined

@@ -56,6 +56,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./variable.vue')),
     icon: varIcon
   },
+
   datas: {
     i: 'Datas',
     x: 0,
@@ -237,6 +238,19 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'IA',
     allowExt: true,
     component: defineAsyncComponent(() => import('./cani.vue')),
+    icon: interIcon
+  },
+  pwmi: {
+    i: 'IA',
+    x: 0,
+    y: 0,
+    minW: 700,
+    minH: 350,
+    w: 700,
+    h: 350,
+    label: 'IA',
+    key: 'IA',
+    component: defineAsyncComponent(() => import('./pwmi.vue')),
     icon: interIcon
   },
   lini: {

@@ -163,6 +163,22 @@ function addChild(parent: Tree) {
         c.children.push(cc)
       }
     }
+  } else if (parent.type == 'pwm') {
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'pwm' && item.pwmDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.pwmDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+    }
   }
   parent.children.push(c)
   //interactive
@@ -194,6 +210,22 @@ function addChild(parent: Tree) {
     for (const key of Object.keys(dataBase.ia)) {
       const item = dataBase.ia[key]
       if (item.type == 'lin') {
+        const cc: Tree = {
+          type: 'interactive',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: interIcon,
+          contextMenu: true,
+          id: key
+        }
+        i.children.push(cc)
+      }
+    }
+  } else if (parent.type == 'pwm') {
+    for (const key of Object.keys(dataBase.ia)) {
+      const item = dataBase.ia[key]
+      if (item.type == 'pwm') {
         const cc: Tree = {
           type: 'interactive',
           label: item.name,
@@ -245,7 +277,14 @@ const tData = computed(() => {
     children: [],
     id: 'node'
   }
-
+  const pwm: Tree = {
+    type: 'pwm',
+    label: 'PWM',
+    canAdd: false,
+    icon: networkNode,
+    children: [],
+    id: 'pwm'
+  }
   for (const key of Object.keys(dataBase.nodes)) {
     const item = dataBase.nodes[key]
 
@@ -264,8 +303,9 @@ const tData = computed(() => {
   addChild(can)
   addChild(lin)
   addChild(eth)
+  addChild(pwm)
   // addChild(node)
-  return [can, lin, eth, node]
+  return [can, lin, eth, pwm, node]
 })
 
 const defaultProps = {
@@ -615,6 +655,26 @@ function addNode(type: string, parent?: Tree) {
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
         type: 'lin',
+        id: id,
+        devices: devices, // Add an empty array for devices,
+        action: []
+      }
+      udsView.addIg(id, dataBase.ia[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
+    } else if (parent?.type == 'pwm') {
+      const devices: string[] = []
+      // for (const key of Object.keys(dataBase.devices)) {
+      //   const item = dataBase.devices[key]
+      //   if (item.type == 'pwm' && item.pwmDevice) {
+      //     devices.push(key)
+      //   }
+      // }
+      dataBase.ia[id] = {
+        name: parent?.label + ' IA',
+        type: 'pwm',
         id: id,
         devices: devices, // Add an empty array for devices,
         action: []

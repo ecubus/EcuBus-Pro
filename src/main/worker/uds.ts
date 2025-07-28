@@ -1853,3 +1853,38 @@ export async function linStopScheduler(device?: string): Promise<void> {
   })
   return await p
 }
+
+/**
+ * Set PWM duty cycle
+ *
+ * @category PWM
+ * @param {Object} value - The PWM configuration object
+ * @param {number} value.duty - Duty cycle percentage (0-100)
+ * @param {string} [value.device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when duty cycle is set
+ *
+ * @example
+ * ```ts
+ * // Set duty cycle to 50%
+ * await setPwmDuty({duty: 50});
+ *
+ * // Set duty cycle on specific device
+ * await setPwmDuty({duty: 75, device: 'Device1'});
+ * ```
+ */
+export async function setPwmDuty(value: { duty: number; device?: string }) {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'pwmApi',
+      data: {
+        method: 'setDuty',
+        duty: value.duty,
+        device: value.device
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}

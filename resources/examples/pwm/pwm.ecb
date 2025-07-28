@@ -1,0 +1,115 @@
+{
+  "data": {
+    "devices": {
+      "318fabd9-9646-4ff6-80ab-10ea4e7d8603": {
+        "type": "pwm",
+        "pwmDevice": {
+          "device": {
+            "label": "",
+            "handle": "COM8",
+            "id": ""
+          },
+          "name": "ECUBUS_PWM_0",
+          "id": "318fabd9-9646-4ff6-80ab-10ea4e7d8603",
+          "vendor": "ecubus",
+          "freq": 1000,
+          "initDuty": 30,
+          "polarity": false,
+          "resetStatus": false
+        }
+      }
+    },
+    "ia": {
+      "ec6efb01-8865-477c-af90-85ba29f419bb": {
+        "name": "PWM IA",
+        "type": "pwm",
+        "id": "ec6efb01-8865-477c-af90-85ba29f419bb",
+        "devices": [
+          "318fabd9-9646-4ff6-80ab-10ea4e7d8603"
+        ],
+        "action": []
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "fbaedc78-44ee-4bab-bd41-6d25d8ce14cc": {
+        "name": "Node 1",
+        "id": "fbaedc78-44ee-4bab-bd41-6d25d8ce14cc",
+        "channel": [
+          "318fabd9-9646-4ff6-80ab-10ea4e7d8603"
+        ],
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 880,
+          "h": 390.5
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 880,
+          "y": 0,
+          "w": 880,
+          "h": 390.5
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "ec6efb01-8865-477c-af90-85ba29f419bb_ia": {
+        "pos": {
+          "x": 0,
+          "y": 390.5,
+          "w": 880,
+          "h": 390.5
+        },
+        "title": "pwmi",
+        "label": "IA",
+        "id": "ec6efb01-8865-477c-af90-85ba29f419bb_ia",
+        "options": {
+          "params": {
+            "edit-index": "ec6efb01-8865-477c-af90-85ba29f419bb"
+          },
+          "name": "PWM IA"
+        }
+      }
+    }
+  }
+}

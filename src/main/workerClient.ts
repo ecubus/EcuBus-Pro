@@ -54,8 +54,13 @@ type HandlerMap = {
     }
   ) => void
   linApi: (pool: UdsTester, data: linApiStartSch | linApiStopSch) => void
+  pwmApi: (pool: UdsTester, data: pwmApiSetDuty) => void
 }
-
+export type pwmApiSetDuty = {
+  method: 'setDuty'
+  device?: string
+  duty: number
+}
 export type linApiStartSch = {
   method: 'startSch'
   device?: string

@@ -638,6 +638,13 @@ export class UDSView {
             'edit-index': id
           }
         })
+      } else if (item.type == 'pwm') {
+        this.layout.addWin('pwmi', `${id}_ia`, {
+          name: item.name,
+          params: {
+            'edit-index': id
+          }
+        })
       }
     })
     this.ceilMap.set(id, element)

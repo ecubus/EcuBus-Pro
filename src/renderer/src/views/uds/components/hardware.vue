@@ -82,6 +82,13 @@
           :vendor="activeTree.vendor"
           @change="nodeChange"
         />
+        <PwmNodeVue
+          v-else-if="activeTree.type == 'pwm'"
+          v-model="dataModify"
+          :index="activeTree.id"
+          :vendor="activeTree.vendor"
+          @change="nodeChange"
+        />
       </div>
     </div>
   </div>
@@ -114,6 +121,7 @@ import { useGlobalStart } from '@r/stores/runtime'
 import { ecubusPro } from './../../../../../../package.json'
 import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
 import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
+import PwmNodeVue from './config/node/pwmNode.vue'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -240,7 +248,7 @@ function nodeChange(id: string, name: string) {
 interface tree {
   label: string
   vendor: CanVendor
-  type?: 'can' | 'lin' | 'eth'
+  type?: 'can' | 'lin' | 'eth' | 'pwm'
   append: boolean
   id: string
   children?: tree[]
@@ -317,6 +325,28 @@ function addSubTree(vendor: CanVendor, node: tree) {
         vendor: vendor,
         id: key,
         type: 'lin'
+      })
+    }
+  }
+  const pwmTree: tree = {
+    label: 'PWM',
+    append: true,
+    id: vendor + 'PWM',
+    vendor: vendor,
+    type: 'pwm',
+    children: []
+  }
+  if (vendor == 'ecubus') {
+    node.children?.push(pwmTree)
+  }
+  for (const [key, value] of Object.entries(devices.devices)) {
+    if (value.type == 'pwm' && value.pwmDevice && value.pwmDevice.vendor == vendor) {
+      pwmTree.children?.push({
+        label: value.pwmDevice.name,
+        append: false,
+        vendor: vendor,
+        id: key,
+        type: 'pwm'
       })
     }
   }

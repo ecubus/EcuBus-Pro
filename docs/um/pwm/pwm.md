@@ -24,5 +24,5 @@ Open PWM IA through `Network` window. IA Ability:
     - 75%
     - 100%
 
-![pwm](IA.png)
+![pwm](ia.png)
 

@@ -20,16 +20,11 @@ export function createPwmDevice(info: PwmBaseInfo): PwmBase {
 /**
  * Get all available PWM devices
  */
-export async function getValidPwmDevices(): Promise<PwmDevice[]> {
-  const devices: PwmDevice[] = []
-
-  try {
-    // Get EcuBus PWM devices
-    const ecubusDevices = await EcuBusPwm.getValidDevices()
-    devices.push(...ecubusDevices)
-  } catch (error) {
-    console.error('Error getting EcuBus PWM devices:', error)
+export async function getValidPwmDevices(vendor: string): Promise<PwmDevice[]> {
+  vendor = vendor.toUpperCase()
+  if (vendor === 'ECUBUS') {
+    return EcuBusPwm.getValidDevices()
+  } else {
+    return []
   }
-
-  return devices
 }

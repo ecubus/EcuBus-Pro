@@ -82,6 +82,13 @@
           :vendor="activeTree.vendor"
           @change="nodeChange"
         />
+        <PwmNodeVue
+          v-else-if="activeTree.type == 'pwm'"
+          v-model="dataModify"
+          :index="activeTree.id"
+          :vendor="activeTree.vendor"
+          @change="nodeChange"
+        />
       </div>
     </div>
   </div>
@@ -114,6 +121,7 @@ import { useGlobalStart } from '@r/stores/runtime'
 import { ecubusPro } from './../../../../../../package.json'
 import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
 import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
+import PwmNodeVue from './config/node/pwmNode.vue'
 
 const loading = ref(false)
 const activeTree = ref<tree>()

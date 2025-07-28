@@ -5,6 +5,7 @@ import { CanBase } from 'src/main/docan/base'
 import { openCanDevice } from 'src/main/docan/can'
 import { openLinDevice } from 'src/main/dolin'
 import LinBase from 'src/main/dolin/base'
+import { createPwmDevice, PwmBase } from 'src/main/pwm'
 
 export default async function main(
   projectPath: string,
@@ -14,6 +15,7 @@ export default async function main(
   const canBaseMap = new Map<string, CanBase>()
   const ethBaseMap = new Map<string, EthBaseInfo>()
   const linBaseMap = new Map<string, LinBase>()
+  const pwmBaseMap = new Map<string, PwmBase>()
   for (const key in devices) {
     const device = devices[key]
     if (device.type == 'can' && device.canDevice) {
@@ -49,7 +51,20 @@ export default async function main(
         })
         linBaseMap.set(key, linBase)
       }
+    } else if (device.type == 'pwm' && device.pwmDevice) {
+      const pwmDevice = device.pwmDevice
+      const pwmBase = createPwmDevice(pwmDevice)
+      sysLog.info(`start pwm device ${pwmDevice.vendor}-${pwmDevice.device.handle} success`)
+      if (pwmBase) {
+        pwmBase.event.on('close', (errMsg) => {
+          if (errMsg) {
+            sysLog.error(`${pwmDevice.vendor}-${pwmDevice.device.handle} error: ${errMsg}`)
+            exit(-1)
+          }
+        })
+        pwmBaseMap.set(key, pwmBase)
+      }
     }
   }
-  return { canBaseMap, linBaseMap, ethBaseMap }
+  return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap }
 }

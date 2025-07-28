@@ -507,7 +507,6 @@ export interface PwmDevice {
 export interface PwmBaseInfo {
   id: string
   device: PwmDevice
-  baudRate: number
   freq: number
   initDuty: number
   polarity: boolean

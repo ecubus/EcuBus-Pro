@@ -2,8 +2,9 @@ import { PwmBaseInfo } from '../share/uds'
 import EventEmitter from 'events'
 
 export default abstract class PwmBase extends EventEmitter {
-  protected info: PwmBaseInfo
+  info: PwmBaseInfo
   protected isOpen = false
+  event = new EventEmitter()
 
   constructor(info: PwmBaseInfo) {
     super()
@@ -24,19 +25,16 @@ export default abstract class PwmBase extends EventEmitter {
    * Set PWM duty cycle (0-100)
    * @param dutyCycle Duty cycle percentage (0-100)
    */
-  abstract setDutyCycle(dutyCycle: number): void
+  abstract setDutyCycle(dutyCycle: number): Promise<void>
+
+  abstract getDutyCycle(): number
+
+  abstract getFrequency(): number
 
   /**
    * Check if device is open
    */
   isDeviceOpen(): boolean {
     return this.isOpen
-  }
-
-  /**
-   * Get device info
-   */
-  getInfo(): PwmBaseInfo {
-    return this.info
   }
 }

@@ -52,7 +52,16 @@ export interface LinInter {
   type: 'lin'
   action: any[]
 }
-export type Inter = CanInter | LinInter
+
+export interface PwmInter {
+  id: string
+  name: string
+  devices: string[]
+  type: 'pwm'
+  action: any[]
+}
+
+export type Inter = CanInter | LinInter | PwmInter
 export interface NodeItem {
   disabled?: boolean
   id: string

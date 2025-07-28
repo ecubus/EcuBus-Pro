@@ -28,13 +28,14 @@ import log from 'electron-log'
 import { UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
+import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
 
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, VarItem } from 'src/preload/data'
+import { DataSet, LinInter, NodeItem, PwmInter, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -160,6 +161,7 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     linBaseMap,
     doips,
     ethBaseMap,
+    pwmBaseMap,
     projectPath,
     projectName,
     testers,
@@ -227,6 +229,10 @@ ipcMain.handle('ipc-get-lin-devices', async (event, ...arg) => {
   return getLinDevices(arg[0])
 })
 
+ipcMain.handle('ipc-get-pwm-devices', async (event, ...arg) => {
+  return getValidPwmDevices(arg[0])
+})
+
 interface Subscription {
   owner: string
   name: string
@@ -250,6 +256,7 @@ interface NodeItemA {
 const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
+const pwmBaseMap = new Map<string, PwmBase>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 let cantps: {
@@ -281,6 +288,7 @@ async function globalStart(
         sysLog.info(`start can device ${canDevice.vendor}-${canDevice.handle} success`)
         if (canBase) {
           canBase.event.on('close', (errMsg) => {
+            canBase.event.removeAllListeners()
             if (errMsg) {
               sysLog.error(`${canDevice.vendor}-${canDevice.handle} error: ${errMsg}`)
               globalStop(true)
@@ -315,12 +323,28 @@ async function globalStart(
         sysLog.info(`start lin device ${linDevice.vendor}-${linDevice.device.handle} success`)
         if (linBase) {
           linBase.event.on('close', (errMsg) => {
+            linBase.event.removeAllListeners()
             if (errMsg) {
               sysLog.error(`${linDevice.vendor}-${linDevice.device.handle} error: ${errMsg}`)
               globalStop(true)
             }
           })
           linBaseMap.set(key, linBase)
+        }
+      } else if (device.type == 'pwm' && device.pwmDevice) {
+        const pwmDevice = device.pwmDevice
+        activeKey = pwmDevice.name
+        const pwmBase = createPwmDevice(pwmDevice)
+        sysLog.info(`start pwm device ${pwmDevice.vendor}-${pwmDevice.device.handle} success`)
+        if (pwmBase) {
+          pwmBase.event.on('close', (errMsg) => {
+            pwmBase.event.removeAllListeners()
+            if (errMsg) {
+              sysLog.error(`${pwmDevice.vendor}-${pwmDevice.device.handle} error: ${errMsg}`)
+              globalStop(true)
+            }
+          })
+          pwmBaseMap.set(key, pwmBase)
         }
       }
     }
@@ -465,6 +489,7 @@ async function globalStart(
       linBaseMap,
       doips,
       ethBaseMap,
+      pwmBaseMap,
       projectInfo.path,
       projectInfo.name,
       testers
@@ -635,6 +660,10 @@ export function globalStop(emit = false) {
     value.close()
   })
   linBaseMap.clear()
+  pwmBaseMap.forEach((value) => {
+    value.close()
+  })
+  pwmBaseMap.clear()
 
   nodeMap.forEach((value) => {
     value.close()
@@ -776,6 +805,17 @@ ipcMain.handle('ipc-stop-sequence', async (event, ...arg) => {
   if (uds) {
     uds.cancel()
     udsTesterMap.delete(id)
+  }
+})
+
+ipcMain.on('ipc-pwm-set-duty', async (event, ...arg) => {
+  const ia = arg[0] as PwmInter
+  const duty = arg[1] as number
+  for (const d of ia.devices) {
+    const pwmBase = pwmBaseMap.get(d)
+    if (pwmBase) {
+      pwmBase.setDutyCycle(duty)
+    }
   }
 })
 

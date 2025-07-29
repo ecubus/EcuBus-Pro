@@ -62,7 +62,7 @@ export class PeakLin extends LinBase {
         if (result == 0) {
           return `${v.Major}.${v.Minor}.${v.Revision}.${v.Build}`
         } else {
-          return `Get version failed: ${err2Str(result)}`
+          return `Get version failed`
         }
       } catch (e: any) {
         return `Get version error: ${e.message}`

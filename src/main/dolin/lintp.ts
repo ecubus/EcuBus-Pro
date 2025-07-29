@@ -90,6 +90,9 @@ export class LIN_TP_SOCKET {
     this.cb = this.recvHandle.bind(this)
     this.inst.event.on(this.recvId, this.cb)
   }
+  clear() {
+    this.recvBuffer = []
+  }
   recvHandle(val: { data: Buffer; ts: number } | TpError) {
     if (this.pendingRecv) {
       if (this.recvTimer) {

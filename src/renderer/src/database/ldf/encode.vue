@@ -95,7 +95,7 @@ function getEncodingTypeDetails(encode: SignalEncodeType) {
       case 'asciiValue':
         return 'ASCII'
       default:
-        return 'Unknown'
+        return 'Not supported'
     }
   })
   return details.join(', ')

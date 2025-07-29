@@ -107,6 +107,10 @@ export class CAN_TP_SOCKET {
   error(id: TP_ERROR_ID) {
     return new TpError(id, this.addr)
   }
+  clear() {
+    //clear recvBuffer
+    this.recvBuffer = []
+  }
   async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
     return new Promise((resolve, reject) => {
       if (this.closed) {

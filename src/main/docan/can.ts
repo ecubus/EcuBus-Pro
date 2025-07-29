@@ -62,7 +62,7 @@ export function getCanVersion(vendor: string) {
   } else if (vendor === 'CANDLE') {
     return Candle_CAN.getLibVersion()
   } else {
-    return 'unknown'
+    return 'Not supported'
   }
 }
 

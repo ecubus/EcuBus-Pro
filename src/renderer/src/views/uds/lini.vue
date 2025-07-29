@@ -407,7 +407,7 @@ function getFrameType(entry: any): string {
   if (entry.name in db.sporadicFrames) {
     return 'Sporadic'
   }
-  return 'Unknown'
+  return 'Not supported'
 }
 
 // // 修改处理激活状态变化的函数

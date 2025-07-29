@@ -554,6 +554,7 @@ export class UDSTesterMain {
         write: (data: Buffer) => Promise<number>
         read: (timeout: number) => Promise<{ ts: number; data: Buffer }>
         close: () => void
+        clear: () => void
       }>
       setOption: (cmd: string, val: any) => void
       close: (base: boolean) => void
@@ -572,6 +573,7 @@ export class UDSTesterMain {
         write: (data: Buffer) => Promise<number>
         read: (timeout: number) => Promise<{ ts: number; data: Buffer }>
         close: () => void
+        clear: () => void
       }
     >()
 
@@ -623,6 +625,7 @@ export class UDSTesterMain {
               }
 
               tester.activeId = s.id
+              socket.clear()
               const sentTs = await socket.write(txBuffer)
               tester.lastActiveTs = sentTs
 

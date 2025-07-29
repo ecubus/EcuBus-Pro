@@ -1890,6 +1890,9 @@ export class DOIP_SOCKET {
     }
     return socket
   }
+  clear() {
+    this.recvBuffer = []
+  }
   recvHandle(val: { data: Buffer; ts: number } | DoipError) {
     if (this.pendingRecv) {
       if (this.recvTimer) {

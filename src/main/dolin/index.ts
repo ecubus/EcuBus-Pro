@@ -63,7 +63,7 @@ export function getLinVersion(vendor: string) {
   } else if (vendor === 'ECUBUS') {
     return LinCable.getLibVersion()
   } else {
-    return 'unknown'
+    return 'Not supported'
   }
 }
 

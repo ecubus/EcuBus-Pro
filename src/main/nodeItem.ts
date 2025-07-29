@@ -2,7 +2,12 @@ import path from 'path'
 import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
-import UdsTester, { ApiGetFrameFromDB, linApiStartSch, linApiStopSch,  pwmApiSetDuty} from './workerClient'
+import UdsTester, {
+  ApiGetFrameFromDB,
+  linApiStartSch,
+  linApiStopSch,
+  pwmApiSetDuty
+} from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } from './share/uds'
@@ -26,7 +31,6 @@ import { PwmBase } from './pwm'
 import { getFrameData, LinChecksumType } from './share/lin'
 import { CAN_ID_TYPE } from './share/can'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
-
 
 type TestTree = {
   label: string
@@ -776,6 +780,7 @@ export class NodeClass {
     } else {
       throw new Error(`invalid method ${data.method}`)
     }
+    return
   }
   //only update raw value
   static setSignal(
@@ -1010,6 +1015,7 @@ export class NodeClass {
         break
       }
     }
+    return
   }
   async canApi(pool: UdsTester, data: ApiGetFrameFromDB) {
     switch (data.method) {

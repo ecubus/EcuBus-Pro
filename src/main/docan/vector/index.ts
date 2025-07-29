@@ -300,7 +300,7 @@ export class VECTOR_CAN extends CanBase {
   }
 
   async callback() {
-    let num = 100
+    let num = 1
     if (!this.info.canfd) {
       // 普通CAN接收
       let xlStatus = 0
@@ -355,6 +355,7 @@ export class VECTOR_CAN extends CanBase {
           }
         }
       }
+      await this.callback()
     } else {
       await this.callbackFd()
     }

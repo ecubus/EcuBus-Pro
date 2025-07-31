@@ -370,8 +370,6 @@ export function after(fn: () => void | Promise<void>) {
  */
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
-import { VarItem } from 'src/preload/data'
-
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 // export { selfDescribe as describe }
 

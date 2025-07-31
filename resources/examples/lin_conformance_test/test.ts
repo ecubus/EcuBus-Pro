@@ -8,11 +8,13 @@ import {
   assert,
   LinCableErrorInject,
   getFrameFromDB,
-  getVar
+  getVar,
+  getLinCheckSum
 } from 'ECB'
 
 const FrameMap: Record<string, LinMsg> = {}
 let ConfiguredNAD = 0
+let StatusSignalOffset = 0
 Util.Init(async () => {
   const InitNad = await getVar('lin_conformance_test.InitialNAD')
   ConfiguredNAD = await getVar('lin_conformance_test.ConfiguredNAD')
@@ -27,12 +29,13 @@ Util.Init(async () => {
   const RxFrameName = await getVar('lin_conformance_test.RxFrameName')
   const EventFrameName = await getVar('lin_conformance_test.EventFrameName')
   const StatusFrameName = await getVar('lin_conformance_test.StatusFrameName')
+  StatusSignalOffset = await getVar('lin_conformance_test.StatusSignalOffset')
 
   //AssignFrameIdRage
   FrameMap['TST_FRAME_1'] = {
     direction: LinDirection.SEND,
     frameId: 0x3c,
-    data: Buffer.from([ConfiguredNAD, 0x6, 0xb7, 0, 0, 0, 0, 0]),
+    data: Buffer.from([ConfiguredNAD, 0x6, 0xb7, 0xff, 0xff, 0xff, 0xff, 0xff]),
     checksumType: LinChecksumType.CLASSIC
   }
 
@@ -41,7 +44,16 @@ Util.Init(async () => {
   FrameMap['TST_FRAME_2'] = {
     direction: LinDirection.SEND,
     frameId: 0x3c,
-    data: Buffer.from([ConfiguredNAD, 0x6, 0xb2, 0, 0, 0, 0, 0]),
+    data: Buffer.from([
+      ConfiguredNAD,
+      0x6,
+      0xb2,
+      0,
+      SupplierIdBuf[0],
+      SupplierIdBuf[1],
+      FunctionIdBuf[0],
+      FunctionIdBuf[1]
+    ]),
     checksumType: LinChecksumType.CLASSIC
   }
 
@@ -54,11 +66,11 @@ Util.Init(async () => {
       ConfiguredNAD,
       0x6,
       0xb2,
+      1,
       SupplierIdBuf[0],
       SupplierIdBuf[1],
       FunctionIdBuf[0],
-      FunctionIdBuf[1],
-      0
+      FunctionIdBuf[1]
     ]),
     checksumType: LinChecksumType.CLASSIC
   }
@@ -154,12 +166,10 @@ except messages of configuration and identification. XX can be SF (SingleFrame),
     data: Buffer.alloc(8),
     checksumType: LinChecksumType.CLASSIC
   }
-
-  console.log('1111111111111', FrameMap)
 })
 
 const sendLinWithRecv = (
-  msg: LinMsg,
+  frame: LinMsg,
   inject: LinCableErrorInject
 ): Promise<{
   result: boolean
@@ -169,7 +179,7 @@ const sendLinWithRecv = (
     result: boolean
     msg?: LinMsg
   }>((resolve, reject) => {
-    msg.lincable = inject
+    frame.lincable = inject
     let timer: NodeJS.Timeout
     const cb = (msg: LinMsg) => {
       Util.OffLin(msg.frameId, cb)
@@ -190,8 +200,7 @@ const sendLinWithRecv = (
           )
           resolve({ result: false, msg })
         }
-      }
-      if (inject.breakDelLength != undefined) {
+      } else if (inject.breakDelLength != undefined) {
         //<1 >14 allow fail
         if (inject.breakDelLength < 1 || inject.breakDelLength > 14) {
           console.error(
@@ -201,8 +210,7 @@ const sendLinWithRecv = (
         } else {
           resolve({ result: true, msg })
         }
-      }
-      if (inject.hInterLength != undefined) {
+      } else if (inject.hInterLength != undefined) {
         //0-14 is o
         if (inject.hInterLength > 14) {
           console.error(
@@ -212,8 +220,7 @@ const sendLinWithRecv = (
         } else {
           resolve({ result: true, msg })
         }
-      }
-      if (inject.syncVal != undefined && inject.syncVal !== false) {
+      } else if (inject.syncVal != undefined && inject.syncVal !== false) {
         if (inject.syncVal != 0x55) {
           console.error(`Sync value ${inject.syncVal} is not 0x55, but output was successful.`)
           resolve({ result: false, msg })
@@ -225,33 +232,32 @@ const sendLinWithRecv = (
           }
           resolve({ result: true, msg })
         }
-      }
-      if (inject.pid == false || inject.syncVal == false) {
+      } else if (inject.pid == false || inject.syncVal == false) {
         //error here
         console.error(
           `Sending break | ${inject.syncVal == false ? 'without sync' : ' sync'} |  ${inject.pid == false ? 'without pid' : ' pid'}, but output was successful.`
         )
         resolve({ result: false, msg })
-      }
-
-      if (inject.errorInject != undefined) {
+      } else if (inject.errorInject != undefined) {
         console.error(
           `Error inject: ${inject.errorInject.bit} ${inject.errorInject.value}, but output was successful.`
         )
         resolve({ result: false, msg })
+      } else {
+        resolve({ result: true, msg }) //resolve true if output was successful
       }
     }
-    Util.OnLin(msg.frameId, cb)
-    output(msg)
+    Util.OnLin(frame.frameId, cb)
+    output(frame)
       .then(() => {
         timer = setTimeout(() => {
-          Util.OffLin(msg.frameId, cb)
+          Util.OffLin(frame.frameId, cb)
           console.log('timeout internal error')
           resolve({ result: false }) //resolve false if no response received
         }, 1000)
       })
       .catch((err) => {
-        Util.OffLin(msg.frameId, cb)
+        Util.OffLin(frame.frameId, cb)
         if (inject.breakLength != undefined) {
           if (inject.breakLength < 13) {
             //ok here
@@ -262,8 +268,7 @@ const sendLinWithRecv = (
             console.error(`Break length ${inject.breakLength} is ok, but output failed:`, err)
             resolve({ result: false })
           }
-        }
-        if (inject.breakDelLength != undefined) {
+        } else if (inject.breakDelLength != undefined) {
           //<1 >14 allow fail
           if (inject.breakDelLength < 1 || inject.breakDelLength > 14) {
             console.log(
@@ -278,8 +283,7 @@ const sendLinWithRecv = (
             )
             resolve({ result: false })
           }
-        }
-        if (inject.hInterLength != undefined) {
+        } else if (inject.hInterLength != undefined) {
           //0-14 is ok
           if (inject.hInterLength > 14) {
             console.log(
@@ -294,8 +298,7 @@ const sendLinWithRecv = (
             )
             resolve({ result: false })
           }
-        }
-        if (inject.syncVal != undefined && inject.syncVal !== false) {
+        } else if (inject.syncVal != undefined && inject.syncVal !== false) {
           if (inject.syncVal == 0x55) {
             console.error(`Sync value ${inject.syncVal} is 0x55, but output failed:`, err)
             resolve({ result: false })
@@ -303,20 +306,20 @@ const sendLinWithRecv = (
             console.log(`Sync value ${inject.syncVal} isn't 0x55, as expected.`, err)
             resolve({ result: true })
           }
-        }
-        if (inject.pid == false || inject.syncVal == false) {
+        } else if (inject.pid == false || inject.syncVal == false) {
           console.log(
             `Sending break | ${inject.syncVal == false ? 'without sync' : 'sync'} |  ${inject.pid == false ? 'without pid' : 'pid'}, as expected.`,
             err
           )
           resolve({ result: true })
-        }
-        if (inject.errorInject != undefined) {
+        } else if (inject.errorInject != undefined) {
           console.log(
             `Error inject: ${inject.errorInject.bit} ${inject.errorInject.value}, as expected.`,
             err
           )
           resolve({ result: true })
+        } else {
+          resolve({ result: false })
         }
       })
   })
@@ -347,35 +350,56 @@ const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
   })
 }
 
+const getErrorFlag = (data: Buffer): boolean => {
+  const offsetByte = Math.floor(StatusSignalOffset / 8)
+  const errorByte = data[offsetByte]
+  //LSB
+  const errorBit = StatusSignalOffset % 8
+  return (errorByte & (1 << errorBit)) !== 0
+}
+
 describe('7: L2: Essential test cases before test start', () => {
   test("[PT-CT 1] Diagnostic frame 'Master Request'", async () => {
     /*Test The test system sends TST_FRAME_1 and then TST_FRAME_7.
 Verification IUT shall answer
     */
     const msg1 = FrameMap['TST_FRAME_1']
-    await output(msg1)
+    const result = await sendLinWithSend(msg1, {})
+    assert(result == false)
     const msg7 = FrameMap['TST_FRAME_7']
-    await output(msg7)
+    await sendLinWithRecv(msg7, {})
   })
   test("[PT-CT 2] Command Frame 'Slave Response Frame'", async () => {
     const msg2 = FrameMap['TST_FRAME_2']
-    await output(msg2)
+    await sendLinWithSend(msg2, {})
     const msg6 = FrameMap['TST_FRAME_6']
-    await output(msg6)
+    await sendLinWithRecv(msg6, {})
   })
   test('[PT-CT 3] Error in Received Frame', async () => {
     const msg7 = FrameMap['TST_FRAME_7']
-    await output(msg7)
-    await output(msg7)
+    assert(msg7.direction == LinDirection.RECV)
+    const result0 = await sendLinWithRecv(msg7, {})
+    assert(result0.result)
+    assert(result0.msg != undefined)
+    assert(getErrorFlag(result0.msg.data) == false)
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result)
+    assert(result1.msg != undefined)
+    assert(getErrorFlag(result1.msg.data) == false)
     const msg2 = FrameMap['TST_FRAME_2']
+    const normalCheckSum = getLinCheckSum(msg2.data, LinChecksumType.CLASSIC)
+    //invert checksum
+    const invertCheckSum = (normalCheckSum ^ 0xff) & 0xff
+
     const result = await sendLinWithSend(msg2, {
-      checkSum: 1
+      checkSum: invertCheckSum
     })
     assert(result)
     const result2 = await sendLinWithRecv(msg7, {})
     assert(result2.result)
     assert(result2.msg != undefined)
-    //response_error_bit = TRUE
+    console.log(result2.msg.data)
+    assert(getErrorFlag(result2.msg.data) == true)
   })
 })
 

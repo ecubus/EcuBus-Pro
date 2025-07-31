@@ -194,7 +194,6 @@ export class LinCable extends LinBase {
             ts: ts,
             ...this.pendingPromise.sendMsg
           }
-
           if (ret == 0) {
             //ok, but not real ok
             const breakLength = data[1]
@@ -283,7 +282,6 @@ export class LinCable extends LinBase {
             }
 
             this.lastFrame.set(id, msg)
-
             this.log.linBase(msg)
             this.event.emit(`${id}`, msg)
             this.pendingPromise.resolve(msg)
@@ -382,6 +380,9 @@ export class LinCable extends LinBase {
                 msg.name = frameName
                 msg.workNode = publish
                 msg.isEvent = isEvent
+                msg.database = this.db.id
+              } else {
+                msg.database = undefined
               }
             }
             //check checksum

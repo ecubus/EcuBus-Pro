@@ -32,42 +32,43 @@ function parseLinData(raw: any) {
           }
         }
       }
-      if (!msg.name) continue
-      //find frame by frameId
-      const frame = db.frames[msg.name]
-      // Process signals if available
-      if (frame && frame.signals) {
-        msg.children = []
-        writeLinMessageData(frame, msg.data, db)
-        for (const signal of frame.signals) {
-          // Find signal definition
-          const signalDef = db.signals[signal.name]
-          if (!signalDef) continue
+      if (msg.name) {
+        //find frame by frameId
+        const frame = db.frames[msg.name]
+        // Process signals if available
+        if (frame && frame.signals) {
+          msg.children = []
+          writeLinMessageData(frame, msg.data, db)
+          for (const signal of frame.signals) {
+            // Find signal definition
+            const signalDef = db.signals[signal.name]
+            if (!signalDef) continue
 
-          // Create signal key
-          const signalKey = `lin.${db.name}.signals.${signal.name}`
+            // Create signal key
+            const signalKey = `lin.${db.name}.signals.${signal.name}`
 
-          // Initialize array if needed
-          if (!result[signalKey]) {
-            result[signalKey] = []
-          }
-
-          //转为秒
-          const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
-          const value = signalDef.physValue
-          result[signalKey].push([
-            ts,
-            {
-              value: value,
-              rawValue: signalDef.value
+            // Initialize array if needed
+            if (!result[signalKey]) {
+              result[signalKey] = []
             }
-          ])
-          msg.children.push({
-            name: signalDef.signalName,
-            data: `${signalDef.physValueEnum ? signalDef.physValueEnum : signalDef.physValue}  ${
-              signalDef.value
-            }`
-          })
+
+            //转为秒
+            const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
+            const value = signalDef.physValue
+            result[signalKey].push([
+              ts,
+              {
+                value: value,
+                rawValue: signalDef.value
+              }
+            ])
+            msg.children.push({
+              name: signalDef.signalName,
+              data: `${signalDef.physValueEnum ? signalDef.physValueEnum : signalDef.physValue}  ${
+                signalDef.value
+              }`
+            })
+          }
         }
       }
     }

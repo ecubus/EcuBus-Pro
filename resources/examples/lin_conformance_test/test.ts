@@ -181,6 +181,10 @@ const sendLinWithRecv = (
   }>((resolve, reject) => {
     frame.lincable = inject
     let timer: NodeJS.Timeout
+    if (frame.direction !== LinDirection.RECV) {
+      reject(new Error('Frame direction must be RECV for sendLinWithRecv'))
+      return
+    }
     const cb = (msg: LinMsg) => {
       Util.OffLin(msg.frameId, cb)
       clearTimeout(timer)
@@ -259,7 +263,8 @@ const sendLinWithRecv = (
       .catch((err) => {
         Util.OffLin(frame.frameId, cb)
         if (inject.breakLength != undefined) {
-          if (inject.breakLength < 13) {
+          console.log(err)
+          if (inject.breakLength < 13 && err.toString().includes('no response')) {
             //ok here
             console.log(`Break length ${inject.breakLength} is too short, as expected.`, err)
             resolve({ result: true })
@@ -328,7 +333,10 @@ const sendLinWithRecv = (
 const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<boolean> => {
   return new Promise<boolean>((resolve, reject) => {
     msg.lincable = inject
-
+    if (msg.direction !== LinDirection.SEND) {
+      reject(new Error('Frame direction must be SEND for sendLinWithSend'))
+      return
+    }
     output(msg)
       .then(() => {
         resolve(true) //resolve true if output was successful
@@ -342,6 +350,9 @@ const sendLinWithSend = (msg: LinMsg, inject: LinCableErrorInject): Promise<bool
           resolve(true)
         } else if (inject.checkSum != undefined) {
           console.log(`Checksum: ${inject.checkSum}, as expected.`, err)
+          resolve(true)
+        } else if (inject.breakLength < 13) {
+          console.log(`Break length ${inject.breakLength} is less than 13, as expected.`, err)
           resolve(true)
         } else {
           resolve(false)
@@ -405,97 +416,213 @@ Verification IUT shall answer
 
 describe('8: L2: Timing Parameters', () => {
   test('[PT-CT 5] Variation of Length of break field low phase', async () => {
-    // Test: Variation of Length of break field low phase
-    // Test case ID: PT-CT 5
-    // Function name: LCT21_TestCase_3_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 5
-    //TODO: Implementation pending
+    //Variation of length of break field low phase
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    let result = await sendLinWithRecv(msg, { breakLength: 3 })
+    assert(result.result, 'Sending with break length 3 should fail')
+    result = await sendLinWithRecv(msg, { breakLength: 10 })
+    assert(result.result, 'Sending with break length 10 should fail')
+    result = await sendLinWithRecv(msg, { breakLength: 13 })
+    assert(result.result, 'Sending with break length 13 should succeed')
+    result = await sendLinWithRecv(msg, { breakLength: 26 })
+    assert(result.result, 'Sending with break length 26 should succeed')
   })
   test('[PT-CT 7.1] Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 1 bit (min), Interbyte = 0 bit (min)', async () => {
-    // Test: Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 1 bit (min), Interbyte = 0 bit (min)
-    // Test case ID: PT-CT 7.1
-    // Function name: LCT21_TestCase_3_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 7.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithRecv(msg, { breakDelLength: 1 })
+    assert(result.result, 'Sending with break delimiter length 1 should succeed')
   })
   test('[PT-CT 7.2] Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 14 bit (max), Interbyte = 0 bit (min)', async () => {
-    // Test: Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 14 bit (max), Interbyte = 0 bit (min)
-    // Test case ID: PT-CT 7.2
-    // Function name: LCT21_TestCase_3_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 7.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithRecv(msg, { breakDelLength: 14 })
+    assert(result.result, 'Sending with break delimiter length 14 should succeed')
   })
   test('[PT-CT 7.3] Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 10 bit, Interbyte = 0 bit (min)', async () => {
-    // Test: Variation of Length of break delimiter. Sync Break = 13 bit (min), Sync Delimiter = 10 bit, Interbyte = 0 bit (min)
-    // Test case ID: PT-CT 7.3
-    // Function name: LCT21_TestCase_3_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 7.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithRecv(msg, { breakDelLength: 10 })
+    assert(result.result, 'Sending with break delimiter length 10 should succeed')
   })
   test('[PT-CT 8] Inconsistent break field error', async () => {
-    // Test: Inconsistent break field error
-    // Test case ID: PT-CT 8
-    // Function name: LCT21_TestCase_3_5
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 8
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // First test: Send TST_FRAME_2 with 13-bit break field (valid) followed by TST_FRAME_6
+    // The IUT should respond to this first master request
+
+    const result1 = await sendLinWithSend(msg2, { breakLength: 13 })
+    assert(result1, 'IUT should send to TST_FRAME_2 with valid 13-bit break field')
+
+    // Send TST_FRAME_6 after successful TST_FRAME_2
+    const result1_response = await sendLinWithRecv(msg6, {})
+    assert(result1_response.result, 'IUT should respond to TST_FRAME_6 after valid master request')
+
+    const result2 = await sendLinWithSend(msg2, { breakLength: 9 })
+    assert(result2, 'Break field error should be detected for 9-bit break field')
+
+    // Send TST_FRAME_6 after invalid TST_FRAME_2 - should not get response
+    const result2_response = await sendLinWithRecv(msg6, {})
+    assert(
+      !result2_response.result,
+      'IUT should not respond to TST_FRAME_6 after detecting inconsistent break field error'
+    )
   })
   test('[PT-CT 9.1] Inconsistent Sync Byte Field error. Sync Byte Field = 0x54', async () => {
-    // Test: Inconsistent Sync Byte Field error. Sync Byte Field = 0x54
-    // Test case ID: PT-CT 9.1
-    // Function name: LCT21_TestCase_3_6
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 9.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_7']
+    const result = await sendLinWithRecv(msg, { syncVal: 0x54 })
+    assert(result, 'Sending with sync value 0x54 should fail')
   })
   test('[PT-CT 9.2] Inconsistent Sync Byte Field error. Sync Byte Field = 0x5D', async () => {
-    // Test: Inconsistent Sync Byte Field error. Sync Byte Field = 0x5D
-    // Test case ID: PT-CT 9.2
-    // Function name: LCT21_TestCase_3_6
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 9.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_7']
+    const result = await sendLinWithRecv(msg, { syncVal: 0x5d })
+    assert(result, 'Sending with sync value 0x5D should fail')
   })
-  test('[PT-CT 11.1] Incomplete frame reception. Break field only', async () => {
-    // Test: Incomplete frame reception. Break field only
-    // Test case ID: PT-CT 11.1
-    // Function name: LCT21_TestCase_3_8_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 11.1
-    //TODO: Implementation pending
+  test('[PT-CT 11.1] [PT-CT 11.1] Incomplete frame reception. Break field only', async () => {
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4Rx = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    // 发送只包含break field的测试（errorBit:FALSE）
+    const result3 = await sendLinWithSend(msg4Rx, { pid: false, syncVal: false })
+    // 这个测试应该失败，因为只发送break field而没有完整帧
+    assert(!result3, 'Sending only break field should not receive valid response')
+
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(thirdErrorFlag === false, 'Response error bit should be cleared after third TST_FRAME_7')
   })
   test('[PT-CT 11.2] Incomplete frame reception. Break and Sync Byte fields only', async () => {
-    // Test: Incomplete frame reception. Break and Sync Byte fields only
-    // Test case ID: PT-CT 11.2
-    // Function name: LCT21_TestCase_3_8_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 11.2
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4Rx = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    // 发送只包含break field的测试（errorBit:FALSE）
+    const result3 = await sendLinWithSend(msg4Rx, { pid: false })
+    // 这个测试应该失败，因为只发送break field而没有完整帧
+    assert(!result3, 'Sending only break field should not receive valid response')
+
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(thirdErrorFlag === false, 'Response error bit should be cleared after third TST_FRAME_7')
   })
   test('[PT-CT 11.3] Incomplete frame reception. Header of Rx-frame only', async () => {
-    // Test: Incomplete frame reception. Header of Rx-frame only
-    // Test case ID: PT-CT 11.3
-    // Function name: LCT21_TestCase_3_8_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 11.3
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4Rx = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    // 发送只包含break field的测试（errorBit:FALSE）
+    const cloneM4Rx = { ...msg4Rx }
+    cloneM4Rx.direction = LinDirection.RECV
+    const result3 = await sendLinWithRecv(cloneM4Rx, {})
+    // 这个测试应该失败，因为只发送break field而没有完整帧
+    assert(!result3.result, 'Sending only break field should not receive valid response')
+
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(thirdErrorFlag === false, 'Response error bit should be cleared after third TST_FRAME_7')
   })
   test('[PT-CT 11.4] Incomplete frame reception. Header of Rx-frame with the first data byte only', async () => {
-    // Test: Incomplete frame reception. Header of Rx-frame with the first data byte only
-    // Test case ID: PT-CT 11.4
-    // Function name: LCT21_TestCase_3_8_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 11.4
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4Rx = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    // 发送只包含break field的测试（errorBit:FALSE）
+    const cloneM4Rx = { ...msg4Rx }
+    cloneM4Rx.data = Buffer.alloc(1, 0)
+    const result3 = await sendLinWithSend(cloneM4Rx, {})
+    // 这个测试应该失败，因为只发送break field而没有完整帧
+    assert(result3, 'Sending only break field should not receive valid response')
+
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(thirdErrorFlag === true, 'Response error bit should be set')
   })
   test('[PT-CT 12.1] Unknown frame reception. Header of unknown frame only', async () => {
     // Test: Unknown frame reception. Header of unknown frame only

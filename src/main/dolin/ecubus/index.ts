@@ -227,7 +227,11 @@ export class LinCable extends LinBase {
               return
             }
             if (breakLength < 13 || breakLength > 26) {
-              this.log.error(ts, 'break length is too short', msg)
+              this.log.error(
+                ts,
+                `break length is not valid, but got data ${[...msg.data].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`,
+                msg
+              )
 
               this.pendingPromise.reject(
                 new LinError(

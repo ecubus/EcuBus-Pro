@@ -1,0 +1,58 @@
+{
+  "data": {
+    "devices": {},
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "someip": {
+      "f5c9c84a-ce01-467b-91fd-33fe85ac1ed1": {
+        "id": "f5c9c84a-ce01-467b-91fd-33fe85ac1ed1",
+        "name": "someip_0",
+        "device": "",
+        "services": [],
+        "applications": []
+      }
+    }
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "soa": {
+        "pos": {
+          "x": 422,
+          "y": 31,
+          "w": 700,
+          "h": 400
+        },
+        "title": "soa",
+        "label": "SOA",
+        "id": "soa",
+        "options": {}
+      }
+    }
+  }
+}

@@ -620,10 +620,9 @@ export interface SomeipConfig
 export interface SomeipInfo {
   id: string
   name: string
-  device: string
   services: ServiceConfig[]
   simulateBy?: string
-  applications: ApplicationConfig[]
+  application: ApplicationConfig
 }
 
 // Re-export imported sub-interfaces for convenience

@@ -172,9 +172,11 @@ function addNewDevice(node: tree) {
     globalData.someip[id] = {
       id: id,
       name: name,
-      device: '',
       services: [],
-      applications: []
+      application: {
+        name: name,
+        id: ''
+      }
     }
   }
 

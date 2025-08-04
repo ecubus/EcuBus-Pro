@@ -25,11 +25,11 @@ Control and monitor LIN network communications through schedule table execution.
 
    - Access the schedule table configuration interface
    - Define communication parameters
-     ![Schedule Table Addition](image.png)
+     ![Schedule Table Addition](../../../media/um/lin/image.png)
 
 2. **Open Interaction**
    - View and manage existing schedule tables
-     ![Open Schedule Table](image-1.png)
+     ![Open Schedule Table](../../../media/um/lin/image-1.png)
 
 ## Node Simulation & Signal Editing
 
@@ -40,17 +40,17 @@ Configure and simulate LIN nodes to test network behavior.
 1. **Add Node**
 
    - Create a new node in the network
-     ![Add New Node](image-2.png)
+     ![Add New Node](../../../media/um/lin/image-2.png)
 
 2. **Configure Node Settings**
 
    - Set up node parameters and properties
-     ![Node Configuration](image-3.png)
+     ![Node Configuration](../../../media/um/lin/image-3.png)
 
 3. **Signal Value Editor**
    - Edit signal values for configured nodes
    - Note: Only signals published by the configured node can be modified
-     ![Signal Value Editor](image-4.png)
+     ![Signal Value Editor](../../../media/um/lin/image-4.png)
 
 ## LIN Transport Protocol and Diagnostics
 
@@ -62,15 +62,15 @@ Implement and test diagnostic services using LIN TP.
 
    - Import address information from LIN database
    - Set up diagnostic parameters
-     ![LIN Tester Setup](image-5.png)
+     ![LIN Tester Setup](../../../media/um/lin/image-5.png)
 
 2. **Diagnostic Execution**
 
    - Enable schedule table execution (required for diagnostics)
    - Send diagnostic requests and monitor responses
-     ![Diagnostic Execution](image-6.png)
+     ![Diagnostic Execution](../../../media/um/lin/image-6.png)
 
    Response handling:
 
    - View diagnostic responses from simulated nodes
-     ![Diagnostic Response](image-7.png)
+     ![Diagnostic Response](../../../media/um/lin/image-7.png)

@@ -4,7 +4,7 @@
   "disableSources": true,
   "out": "./resources/docs/scriptApi",
   "name": "EcuBus-Pro Script API Documentation",
-  "readme": "docs/um/script.md",
+  "readme": "docs/en/um/script.md",
   "skipErrorChecking": true,
 
   "navigationLinks": {

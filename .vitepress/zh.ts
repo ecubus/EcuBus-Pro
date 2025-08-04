@@ -66,6 +66,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: '赞助 ❤️', link: '/zh/docs/about/sponsor' },
         { text: '联系', link: '/zh/docs/about/contact' }
       ]
+    },
+    {
+      text: '用户手册',
+      items: [{ text: 'LIN', link: '/zh/docs/um/lin/lin' }]
     }
   ]
 }

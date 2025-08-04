@@ -768,6 +768,19 @@
         },
         "id": "e4c49aef-0460-49cd-91ce-1ea152eefe4d",
         "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "661272a5-af53-41c4-ade2-34fa84db110b": {
+        "name": "UnknownId",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "1",
+          "min": 0,
+          "max": 100
+        },
+        "id": "661272a5-af53-41c4-ade2-34fa84db110b",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
       }
     },
     "datas": {},

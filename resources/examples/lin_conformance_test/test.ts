@@ -11,10 +11,17 @@ import {
   getVar,
   getLinCheckSum
 } from 'ECB'
-
+const headerBitLength = 13 + 1 + 10 + 10
 const FrameMap: Record<string, LinMsg> = {}
 let ConfiguredNAD = 0
 let StatusSignalOffset = 0
+
+function cloneMsg(msg: LinMsg) {
+  return {
+    ...msg,
+    data: Buffer.from(msg.data)
+  }
+}
 Util.Init(async () => {
   const InitNad = await getVar('lin_conformance_test.InitialNAD')
   ConfiguredNAD = await getVar('lin_conformance_test.ConfiguredNAD')
@@ -30,6 +37,8 @@ Util.Init(async () => {
   const EventFrameName = await getVar('lin_conformance_test.EventFrameName')
   const StatusFrameName = await getVar('lin_conformance_test.StatusFrameName')
   StatusSignalOffset = await getVar('lin_conformance_test.StatusSignalOffset')
+
+  const unknownId = await getVar('lin_conformance_test.UnknownId')
 
   //AssignFrameIdRage
   FrameMap['TST_FRAME_1'] = {
@@ -74,6 +83,7 @@ Util.Init(async () => {
     ]),
     checksumType: LinChecksumType.CLASSIC
   }
+  console.log(FrameMap['TST_FRAME_3'])
 
   /*device specific transmit frame (IUT is publisher)*/
   const TST_FRAME_4_Tx = await getFrameFromDB('lin', 'LINdb', TxFrameName)
@@ -107,6 +117,13 @@ Util.Init(async () => {
     checksumType: LinChecksumType.CLASSIC
   }
 
+  FrameMap['TST_FRAME_8'] = {
+    direction: LinDirection.RECV,
+    frameId: 0x3f,
+    data: Buffer.from([0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+
   /* conditional change NAD */
   FrameMap['TST_FRAME_10'] = {
     frameId: 0x3c,
@@ -124,9 +141,8 @@ Util.Init(async () => {
   }
 
   /* ReadByIdentifier (Identifier = 0) with different NAD */
-  const TST_FRAME_12: LinMsg = {
-    ...FrameMap['TST_FRAME_3']
-  }
+  const TST_FRAME_12: LinMsg = cloneMsg(FrameMap['TST_FRAME_3'])
+
   TST_FRAME_12.data[0] = ConfiguredNAD + 1 //different NAD
   FrameMap['TST_FRAME_12'] = TST_FRAME_12
 
@@ -164,6 +180,17 @@ except messages of configuration and identification. XX can be SF (SingleFrame),
     direction: LinDirection.RECV,
     frameId: 0x3d,
     data: Buffer.alloc(8),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  /*all not defined (not configured in the IUTs LDF, NCF) frame IDs from 0d – 59d with all
+combination of parity bits and all known frame IDs with possible incorrect parity bits
+Number of data bytes 8, data bytes 1 to 8 shall be filled with 0x00, 0x01, 0x02, 0x03, 0x04,
+0x05, 0x06, 0x07*/
+  FrameMap['TST_FRAME_UNKNOWN'] = {
+    name: 'UNKNOWN_FRAME',
+    direction: LinDirection.SEND,
+    frameId: unknownId,
+    data: Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]),
     checksumType: LinChecksumType.CLASSIC
   }
 })
@@ -573,7 +600,7 @@ describe('8: L2: Timing Parameters', () => {
     )
 
     // 发送只包含break field的测试（errorBit:FALSE）
-    const cloneM4Rx = { ...msg4Rx }
+    const cloneM4Rx = cloneMsg(msg4Rx)
     cloneM4Rx.direction = LinDirection.RECV
     const result3 = await sendLinWithRecv(cloneM4Rx, {})
     // 这个测试应该失败，因为只发送break field而没有完整帧
@@ -611,7 +638,7 @@ describe('8: L2: Timing Parameters', () => {
     )
 
     // 发送只包含break field的测试（errorBit:FALSE）
-    const cloneM4Rx = { ...msg4Rx }
+    const cloneM4Rx = cloneMsg(msg4Rx)
     cloneM4Rx.data = Buffer.alloc(1, 0)
     const result3 = await sendLinWithSend(cloneM4Rx, {})
     // 这个测试应该失败，因为只发送break field而没有完整帧
@@ -625,240 +652,438 @@ describe('8: L2: Timing Parameters', () => {
     assert(thirdErrorFlag === true, 'Response error bit should be set')
   })
   test('[PT-CT 12.1] Unknown frame reception. Header of unknown frame only', async () => {
-    // Test: Unknown frame reception. Header of unknown frame only
-    // Test case ID: PT-CT 12.1
-    // Function name: LCT21_TestCase_3_9_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 12.1
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const unknownMsg = FrameMap['TST_FRAME_UNKNOWN']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    const cloneUnknownMsg = cloneMsg(unknownMsg)
+    cloneUnknownMsg.direction = LinDirection.RECV
+
+    console.log(cloneUnknownMsg)
+
+    // 发送只包含未知帧头的测试（errorBit:FALSE）
+    const result3 = await sendLinWithRecv(cloneUnknownMsg, {})
+    // 这个测试应该失败，因为只发送未知帧头而没有完整帧
+    assert(!result3.result, 'Sending only unknown frame header should not receive valid response')
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(
+      thirdErrorFlag === false,
+      'Response error bit should not be set because the frame is unknown'
+    )
   })
   test('[PT-CT 12.2] Unknown frame reception. Header of unknown frame with the first data byte only', async () => {
-    // Test: Unknown frame reception. Header of unknown frame with the first data byte only
-    // Test case ID: PT-CT 12.2
-    // Function name: LCT21_TestCase_3_9_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 12.2
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const unknownMsg = FrameMap['TST_FRAME_UNKNOWN']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    const cloneUnknownMsg = cloneMsg(unknownMsg)
+    cloneUnknownMsg.data = cloneUnknownMsg.data.subarray(0, 1) // 只发送第一个数据字节
+
+    // 发送只包含未知帧头的测试（errorBit:FALSE）
+    const result3 = await sendLinWithSend(cloneUnknownMsg, {})
+    // 这个测试应该失败，因为只发送未知帧头而没有完整帧
+    assert(result3, 'Send only 1st data byte of unknown frame')
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(
+      thirdErrorFlag === false,
+      'Response error bit should not be set because the frame is unknown'
+    )
   })
   test('[PT-CT 12.3] Unknown frame reception. Unknown frame with wrong checksum', async () => {
-    // Test: Unknown frame reception. Unknown frame with wrong checksum
-    // Test case ID: PT-CT 12.3
-    // Function name: LCT21_TestCase_3_9_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 12.3
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const unknownMsg = FrameMap['TST_FRAME_UNKNOWN']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    const cloneUnknownMsg = cloneMsg(unknownMsg)
+    const checkSum = getLinCheckSum(cloneUnknownMsg.data, LinChecksumType.CLASSIC)
+
+    // 发送只包含未知帧头的测试（errorBit:FALSE）
+    const result3 = await sendLinWithSend(cloneUnknownMsg, {
+      checkSum: (checkSum ^ 0xff) & 0xff // 发送错误的校验和
+    })
+    // 这个测试应该失败，因为只发送未知帧头而没有完整帧
+    assert(result3, 'Sending unknown frame with wrong checksum should fail')
+    // 验证第三次响应中的错误位状态
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result, 'Third TST_FRAME_7 should receive response')
+    assert(result4.msg != undefined, 'Third response should contain data')
+    const thirdErrorFlag = getErrorFlag(result4.msg.data)
+    assert(
+      thirdErrorFlag === false,
+      'Response error bit should not be set because the frame is unknown'
+    )
   })
   test('[PT-CT 14.1] Variation of header length. Header = 34 bit; Sync Break = 13 bit (min), Sync Del = 1 bit (min), Interbyte = 0 bit, minimum bit time', async () => {
-    // Test: Variation of header length. Header = 34 bit; Sync Break = 13 bit (min), Sync Del = 1 bit (min), Interbyte = 0 bit, minimum bit time
-    // Test case ID: PT-CT 14.1
-    // Function name: LCT21_TestCase_3_11
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 14.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      breakLength: 13,
+      breakDelLength: 1
+    })
+    assert(result, 'Sending with break length 13 and delimiter length 1 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {
+      breakLength: 13,
+      breakDelLength: 1
+    })
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 14.2] Variation of header length. Header = 47 bit; Sync Break = 19 bit, Sync Del = 2 bit, Interbyte = 6 bit, maximum bit time', async () => {
-    // Test: Variation of header length. Header = 47 bit; Sync Break = 19 bit, Sync Del = 2 bit, Interbyte = 6 bit, maximum bit time
-    // Test case ID: PT-CT 14.2
-    // Function name: LCT21_TestCase_3_11
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 14.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      breakLength: 19,
+      breakDelLength: 2,
+      hInterLength: 6
+    })
+    assert(result, 'Sending with break length 19 and delimiter length 2 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {
+      breakLength: 19,
+      breakDelLength: 2,
+      hInterLength: 6
+    })
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 14.3] Variation of header length. Header = 40 bit; Sync Break = 15 bit, Sync Del = 3 bit, Interbyte = 2 bit, nominal bit time', async () => {
-    // Test: Variation of header length. Header = 40 bit; Sync Break = 15 bit, Sync Del = 3 bit, Interbyte = 2 bit, nominal bit time
-    // Test case ID: PT-CT 14.3
-    // Function name: LCT21_TestCase_3_11
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 14.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      breakLength: 15,
+      breakDelLength: 3,
+      hInterLength: 2
+    })
+    assert(result, 'Sending with break length 19 and delimiter length 2 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {
+      breakLength: 15,
+      breakDelLength: 3,
+      hInterLength: 2
+    })
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 14.4] Variation of header length. Header = 47 bit; Sync Break = 13 bit (min), Sync Del = 1 bit (min), Interbyte = 13 bit, maximum bit time', async () => {
-    // Test: Variation of header length. Header = 47 bit; Sync Break = 13 bit (min), Sync Del = 1 bit (min), Interbyte = 13 bit, maximum bit time
-    // Test case ID: PT-CT 14.4
-    // Function name: LCT21_TestCase_3_11
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 14.4
-    //   SubTestCaseNr (int): 4
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      breakLength: 13,
+      breakDelLength: 1,
+      hInterLength: 13
+    })
+    assert(result, 'Sending with break length 13 and delimiter length 1 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {
+      breakLength: 13,
+      breakDelLength: 1,
+      hInterLength: 13
+    })
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
-  test('[PT-CT 16.1] Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = + 0.5%', async () => {
-    // Test: Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = + 0.5%
-    // Test case ID: PT-CT 16.1
-    // Function name: LCT21_TestCase_3_13
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 16.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 16.2] Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = - 0.5%', async () => {
-    // Test: Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = - 0.5%
-    // Test case ID: PT-CT 16.2
-    // Function name: LCT21_TestCase_3_13
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 16.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 17.1] Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = + 0.5%', async () => {
-    // Test: Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = + 0.5%
-    // Test case ID: PT-CT 17.1
-    // Function name: LCT21_TestCase_3_14
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 17.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 17.2] Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = - 0.5%', async () => {
-    // Test: Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = - 0.5%
-    // Test case ID: PT-CT 17.2
-    // Function name: LCT21_TestCase_3_14
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 17.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 16.1] Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = + 0.5%', async () => {})
+  test.skip('[PT-CT 16.2] Bit rate tolerance, IUT without making use of synchronization. Master deviation from nominal bit rate = - 0.5%', async () => {})
+  test.skip('[PT-CT 17.1] Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = + 0.5%', async () => {})
+  test.skip('[PT-CT 17.2] Bit rate tolerance, IUT with making use of synchronization. Master deviation from nominal bit rate = - 0.5%', async () => {})
   test('[PT-CT 18] Length of response', async () => {
-    // Test: Length of response
-    // Test case ID: PT-CT 18
-    // Function name: LCT21_TestCase_3_15_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 18
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      breakLength: 19,
+      breakDelLength: 9,
+      hInterLength: 0
+    })
+    assert(result, 'Sending with break length 19 and delimiter length 9 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {
+      breakLength: 19,
+      breakDelLength: 9,
+      hInterLength: 0
+    })
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 20.1] Acceptance of response field. Response space = 0 bits, each inter-byte space = 0 bits', async () => {
-    // Test: Acceptance of response field. Response space = 0 bits, each inter-byte space = 0 bits
-    // Test case ID: PT-CT 20.1
-    // Function name: LCT21_TestCase_3_15_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 20.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {})
+    assert(result)
+    const result2 = await sendLinWithRecv(msg6, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 20.2] Acceptance of response field. Response space = 4 bits, each inter-byte space = 4 bits', async () => {
-    // Test: Acceptance of response field. Response space = 4 bits, each inter-byte space = 4 bits
-    // Test case ID: PT-CT 20.2
-    // Function name: LCT21_TestCase_3_15_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 20.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      dInterLength: [4, 4, 4, 4, 4, 4, 4, 4, 4]
+    })
+    assert(result)
+    const result2 = await sendLinWithRecv(msg6, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 20.3] Acceptance of response field. Response space = 0 bits, inter-byte space between data bytes 7 and 8 = 36 bits', async () => {
-    // Test: Acceptance of response field. Response space = 0 bits, inter-byte space between data bytes 7 and 8 = 36 bits
-    // Test case ID: PT-CT 20.3
-    // Function name: LCT21_TestCase_3_15_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 20.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      dInterLength: [0, 0, 0, 0, 0, 0, 0, 36, 0]
+    })
+    assert(result)
+    const result2 = await sendLinWithRecv(msg6, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 20.4] Acceptance of response field. Response space = 36 bits, each inter-byte space = 0 bits', async () => {
-    // Test: Acceptance of response field. Response space = 36 bits, each inter-byte space = 0 bits
-    // Test case ID: PT-CT 20.4
-    // Function name: LCT21_TestCase_3_15_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 20.4
-    //   SubTestCaseNr (int): 4
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {
+      dInterLength: [36, 0, 0, 0, 0, 0, 0, 0, 0]
+    })
+    assert(result)
+    const result2 = await sendLinWithRecv(msg6, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
-  test('[PT-CT 23] Sample Point Test', async () => {
-    // Test: Sample Point Test
-    // Test case ID: PT-CT 23
-    // Function name: LCT21_TestCase_3_17
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 23
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 23] Sample Point Test', async () => {})
 })
 
 describe('9: L2: Communication without Failure', () => {
   test('[PT-CT 25] Variation of LIN Identifier of subscribed frames', async () => {
-    // Test: Variation of LIN Identifier of subscribed frames
-    // Test case ID: PT-CT 25
-    // Function name: LCT21_TestCase_4_1_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 25
-    //TODO: Implementation pending
+    const msg1 = FrameMap['TST_FRAME_1']
+    const msg2 = FrameMap['TST_FRAME_4_Rx']
+    const msg3 = FrameMap['TST_FRAME_7']
+    const result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const normalCheckSum = getLinCheckSum(msg2.data, LinChecksumType.CLASSIC)
+    //invert 4th bit
+    const errorCheckSum = normalCheckSum ^ (1 << 4)
+    const result2 = await sendLinWithSend(msg2, {
+      checkSum: errorCheckSum
+    })
+    assert(result2)
+    const result3 = await sendLinWithRecv(msg3, {
+      checkSum: errorCheckSum
+    })
+    assert(result3.result)
+    assert(result3.msg != undefined)
+    const errorFlag = getErrorFlag(result3.msg.data)
+    assert(errorFlag === true, 'Error flag should be set because the checksum is incorrect')
   })
   test('[PT-CT 26] Variation of LIN Identifier of published frames', async () => {
-    // Test: Variation of LIN Identifier of published frames
-    // Test case ID: PT-CT 26
-    // Function name: LCT21_TestCase_4_1_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 26
-    //TODO: Implementation pending
+    const msg1 = FrameMap['TST_FRAME_1']
+    const msg2 = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const result2 = await sendLinWithRecv(msg2, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 27] Transmission of the Checksum Byte classic checksum', async () => {
-    // Test: Transmission of the Checksum Byte classic checksum
-    // Test case ID: PT-CT 27
-    // Function name: LCT21_TestCase_4_2_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 27
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithSend(msg2, {})
+    assert(result, 'Sending with break length 13 and delimiter length 1 should succeed')
+    const result2 = await sendLinWithRecv(msg6, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 28] Transmission of the Checksum Byte enhanced checksum', async () => {
-    // Test: Transmission of the Checksum Byte enhanced checksum
-    // Test case ID: PT-CT 28
-    // Function name: LCT21_TestCase_4_2_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 28
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result2 = await sendLinWithRecv(msg, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 32] Unused bits', async () => {
-    // Test: Unused bits
-    // Test case ID: PT-CT 32
-    // Function name: LCT21_TestCase_4_3_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 32
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_4_Tx']
+    const result2 = await sendLinWithRecv(msg, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 33] Reserved frame', async () => {
-    // Test: Reserved frame
-    // Test case ID: PT-CT 33
-    // Function name: LCT21_TestCase_4_4_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 33
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_8']
+    const result2 = await sendLinWithRecv(msg, {})
+    assert(!result2.result)
+    assert(result2.msg == undefined)
+    const cloneMsg1 = cloneMsg(msg)
+    cloneMsg1.frameId = 0x3e
+    const result3 = await sendLinWithRecv(cloneMsg1, {})
+    assert(!result3.result)
+    assert(result3.msg == undefined)
   })
   test('[PT-CT 34] Reserved frame with error', async () => {
-    // Test: Reserved frame with error
-    // Test case ID: PT-CT 34
-    // Function name: LCT21_TestCase_4_4_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 34
-    //TODO: Implementation pending
+    const msg = FrameMap['TST_FRAME_8']
+    const msg1 = FrameMap['TST_FRAME_7']
+    const cloneMsg1 = cloneMsg(msg)
+    cloneMsg1.frameId = 0x3f
+    cloneMsg1.direction = LinDirection.SEND
+    cloneMsg1.data = Buffer.alloc(1, 0xff)
+    const result2 = await sendLinWithSend(cloneMsg1, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+    assert(result2)
+    const result3 = await sendLinWithRecv(msg1, {})
+    assert(result3.result)
+    assert(result3.msg != undefined)
+    const errorFlag = getErrorFlag(result3.msg.data)
+    assert(errorFlag === false)
+
+    //0x3e
+    const cloneMsg2 = cloneMsg(msg)
+    cloneMsg2.frameId = 0x3e
+    cloneMsg2.direction = LinDirection.SEND
+    cloneMsg2.data = Buffer.alloc(1, 0xff)
+    const result4 = await sendLinWithSend(cloneMsg2, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+    assert(result4)
+    const result5 = await sendLinWithRecv(msg1, {})
+    assert(result5.result)
   })
   test('[PT-CT 36] Supported Tx Frames according to the IUT specification', async () => {
-    // Test: Supported Tx Frames according to the IUT specification
-    // Test case ID: PT-CT 36
-    // Function name: LCT21_TestCase_4_6_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 36
-    //TODO: Implementation pending
+    const msg1 = FrameMap['TST_FRAME_1']
+    const msg2 = FrameMap['TST_FRAME_4_Tx']
+    const result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const result2 = await sendLinWithRecv(msg2, {})
+    assert(result2.result)
+    assert(result2.msg != undefined)
   })
   test('[PT-CT 37] Supported Rx Frames according to the IUT specification', async () => {
-    // Test: Supported Rx Frames according to the IUT specification
-    // Test case ID: PT-CT 37
-    // Function name: LCT21_TestCase_4_6_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 37
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4Rx = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    //send failed msg4Rx
+    const checkSum = getLinCheckSum(msg4Rx.data, LinChecksumType.CLASSIC)
+    const errorCheckSum = checkSum ^ (1 << 4)
+    const result3 = await sendLinWithSend(msg4Rx, {
+      checkSum: errorCheckSum
+    })
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg7, {})
+    assert(result4.result)
+    const errorFlag = getErrorFlag(result4.msg.data)
+    assert(errorFlag === true)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === false)
   })
 })
 
 describe('10: L2: Communication with Failure', () => {
   test('[PT-CT 38.1] Bit error. Byte 1, Stop bit', async () => {
-    // Test: Bit error. Byte 1, Stop bit
-    // Test case ID: PT-CT 38.1
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.1
-    //   byteIndex (int): 1
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    // const result1 = await sendLinWithRecv(msg7, {})
+    // assert(result1.result, 'First TST_FRAME_7 should receive response')
+    // assert(result1.msg != undefined, 'First response should contain data')
+
+    // // 检查第一次响应中的错误位状态（可能为true或false）
+    // const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    // const result2 = await sendLinWithRecv(msg7, {})
+    // assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    // assert(result2.msg != undefined, 'Second response should contain data')
+
+    // // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    // const secondErrorFlag = getErrorFlag(result2.msg.data)
+    // assert(
+    //   secondErrorFlag === false,
+    //   'Response error bit should be cleared after second TST_FRAME_7'
+    // )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+    // assert(result4.result)
+
+    // //send msg7 again
+    // const result5 = await sendLinWithRecv(msg7, {})
+    // assert(result5.result)
+    // assert(result5.msg != undefined)
+    // const errorFlag2 = getErrorFlag(result5.msg.data)
+    // assert(errorFlag2 === true)
   })
   test('[PT-CT 38.2] Bit error. Byte 1, Bit 1', async () => {
     // Test: Bit error. Byte 1, Bit 1

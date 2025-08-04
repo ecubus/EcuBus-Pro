@@ -19,9 +19,9 @@
        <img src="https://img.shields.io/github/stars/ecubus/EcuBus-Pro"/>
     </a>
   </div>
-  <b style="font-size:16px">A powerful automotive ECU development tool</b><br/>
+  <b style="font-size:20px;margin:10px;display:block">A powerful automotive ECU development tool</b>
   <i>Easy of use, Cross platform, Multi dongle, Powerful script ability, CLI support</i><br/>
-  Document: <a href="https://app.whyengineer.com">https://app.whyengineer.com</a>
+  Document: <a href="https://app.whyengineer.com">https://app.whyengineer.com</a> | <a href="https://app.whyengineer.com/zh">中文文档</a>
 </div>
 
 ## Overview
@@ -53,11 +53,6 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 
 [Read the Docs to Learn More.](https://app.whyengineer.com)
 
-## Visual Tour
-
-Take a visual journey through EcuBus-Pro's powerful features:
-
-[Browse Screenshots](./docs/about/screenshots.md) to see EcuBus-Pro in action and discover how it can streamline your ECU development workflow.
 
 ## Support & Sponsorship
 

@@ -16,7 +16,7 @@ Feel free to contact us for more details on sponsorship.
 
 ### Paypal
 
-![alt text](paypal.png)
+![alt text](../../media/about/paypal.png)
 [Become a sponsor](https://paypal.me/zengfrankie)
 
 ### OpenCollective
@@ -25,11 +25,11 @@ Feel free to contact us for more details on sponsorship.
 
 ### WeChat
 
-![alipay](wechat.jpg){width=200px}
+![wechat](../../media/about/wechat.jpg){width=200px}
 
 ### Alipay
 
-![alipay](alipay.jpg){width=200px}
+![alipay](../../media/about/alipay.jpg){width=200px}
 
 ## Sponsor tiers
 

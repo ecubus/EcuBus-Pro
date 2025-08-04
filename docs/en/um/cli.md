@@ -26,7 +26,7 @@ ecb_cli seq -h
 ecb_cli seq xx.ecb Tester_1 --log-level=debug
 ```
 
-![seq](./../about/seq.png)
+![seq](./../../media/um/seq.png)
 
 ### PNPM command
 

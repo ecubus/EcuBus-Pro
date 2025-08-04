@@ -11,29 +11,29 @@ Or from our CDN page if you are in 中国❤️:<CustomComponent/>
 
 ## Windows Install Guide
 
-![alt text](image.png)
+![alt text](../../media/about/image.png)
 
 ### You can decide for everyone or just for yourself
 
-![alt text](image-1.png)
+![alt text](../../media/about/image-1.png)
 
 ### You can see the detail information when open the `EcuBus-Pro`
 
-![alt text](image-2.png)
+![alt text](../../media/about/image-2.png)
 
 ## Auto Update
 
 `EcuBus-Pro` will check the latest version when you open it, if there is a new version, it will prompt you to update.
-![alt text](update1.png)
+![alt text](../../media/about/update1.png)
 
 - You can see the detail update information, click the `start to update` button to update.
-  ![alt text](update2.png)
+  ![alt text](../../media/about/update2.png)
 
 - Will display the update progress, please wait for a moment.
-  ![alt text](update3.png)
+  ![alt text](../../media/about/update3.png)
 
 - After the update is complete, you can click the `restart` button to restart the `EcuBus-Pro`.
 
 <script setup>
-import CustomComponent from './download.vue'
+import CustomComponent from './../../component/download.vue'
 </script>

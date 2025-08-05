@@ -1,0 +1,170 @@
+
+
+LIN_description_file;
+LIN_protocol_version = "J2602_1_1.0";
+LIN_language_version = "J2602_3_1.0";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: BMS, 10 ms, 0.5 ms, 48 bits, 40 %;
+  Slaves: BPS_VICM_LIN7_connector, BPS2_VICM_LIN7_connector ;
+}
+
+Signals {
+  BPS_Pressure: 14, 0, BPS_VICM_LIN7_connector, BMS ;
+  BPS2_Pressure: 14, 0, BPS2_VICM_LIN7_connector, BMS ;
+  BPS_ARC: 2, 0, BPS_VICM_LIN7_connector, BMS ;
+  BPS2_ARC: 2, 0, BPS2_VICM_LIN7_connector, BMS ;
+  BPS_CommErr: 3, 0, BPS_VICM_LIN7_connector, BMS ;
+  BPS2_CommErr: 3, 0, BPS2_VICM_LIN7_connector, BMS ;
+  back0: 16, 0, BPS_VICM_LIN7_connector, BMS ;
+  back1: 16, 0, BPS_VICM_LIN7_connector, BMS ;
+  back2: 8, 0, BPS_VICM_LIN7_connector, BMS ;
+  back4: 3, 0, BPS_VICM_LIN7_connector, BMS ;
+  back3: 2, 0, BPS_VICM_LIN7_connector, BMS ;
+  back5: 2, 0, BPS2_VICM_LIN7_connector, BMS ;
+  back6: 16, 0, BPS2_VICM_LIN7_connector, BMS ;
+  back7: 16, 0, BPS2_VICM_LIN7_connector, BMS ;
+  back8: 8, 0, BPS2_VICM_LIN7_connector, BMS ;
+  back9: 3, 0, BPS2_VICM_LIN7_connector, BMS ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  VICM_LIN7_BPS_Rsp_MSG: 0, BPS_VICM_LIN7_connector, 8 {
+    BPS_Pressure, 8 ;
+    BPS_ARC, 0 ;
+    BPS_CommErr, 5 ;
+    back0, 24 ;
+    back1, 40 ;
+    back2, 56 ;
+    back4, 2 ;
+    back3, 22 ;
+  }
+  VICM_LIN7_BPS2_Rsp_MSG: 32, BPS2_VICM_LIN7_connector, 8 {
+    BPS2_Pressure, 8 ;
+    BPS2_ARC, 0 ;
+    BPS2_CommErr, 5 ;
+    back5, 22 ;
+    back6, 24 ;
+    back7, 40 ;
+    back8, 56 ;
+    back9, 2 ;
+  }
+}
+
+
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  BPS_VICM_LIN7_connector{
+    LIN_protocol = "J2602_1_1.0" ;
+    configured_NAD = 0x60 ;
+    product_id = 0x100E, 0x1, 1 ;
+    response_error = BPS_CommErr ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    configurable_frames {
+      VICM_LIN7_BPS_Rsp_MSG = 0x0 ;
+    }
+    response_tolerance = 40 % ;
+    wakeup_time = 100 ms;
+    poweron_time = 200 ms;
+  }
+  BPS2_VICM_LIN7_connector{
+    LIN_protocol = "J2602_1_1.0" ;
+    configured_NAD = 0x68 ;
+    product_id = 0x100E, 0x2, 1 ;
+    response_error = BPS2_CommErr ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    configurable_frames {
+      VICM_LIN7_BPS2_Rsp_MSG = 0x20 ;
+    }
+    response_tolerance = 40 % ;
+    wakeup_time = 100 ms;
+    poweron_time = 200 ms;
+  }
+}
+
+Schedule_tables {
+ Cycle {
+    VICM_LIN7_BPS2_Rsp_MSG delay 50 ms ;
+    VICM_LIN7_BPS_Rsp_MSG delay 50 ms ;
+  }
+}
+
+
+Signal_encoding_types {
+  BPS1_Pressure_Encoding {
+    physical_value, 0, 16383, 0.018174327, -12.75, "kPa" ;
+    logical_value, 1, "Over Voltage" ;
+    logical_value, 2, "ASIC Fail" ;
+  }
+  BPS2_Pressure_Encoding {
+    physical_value, 0, 16383, 0.018174327, -12.75, "kPa" ;
+    logical_value, 1, "Over Voltage" ;
+    logical_value, 2, "Asic fail" ;
+  }
+  BPS_CommErr_Encoding {
+    logical_value, 0, "New Value Description" ;
+    logical_value, 1, "New Value Description" ;
+    logical_value, 2, "New Value Description" ;
+    logical_value, 3, "New Value Description" ;
+    logical_value, 4, "New Value Description" ;
+    logical_value, 5, "New Value Description" ;
+    logical_value, 6, "New Value Description" ;
+    logical_value, 7, "New Value Description" ;
+  }
+  Vol_Encoding {
+    physical_value, 0, 0, 0.001, 0, "V" ;
+  }
+}
+
+Signal_representation {
+  BPS1_Pressure_Encoding: BPS_Pressure ;
+  BPS2_Pressure_Encoding: BPS2_Pressure ;
+  BPS_CommErr_Encoding: BPS_CommErr, BPS2_CommErr ;
+}

@@ -40,6 +40,11 @@ test('BYD_HT&SZ.ldf', () => {
   const r = parse(ldf)
   // console.log(r)
 })
+test.skip('J2602', () => {
+  const ldf = fs.readFileSync(path.join(__dirname, 'test.ldf'), 'utf-8')
+  const r = parse(ldf)
+  // console.log(r)
+})
 
 test('ldf CHANGAN_WLK151Z_LIN_1.1', () => {
   const ldf = fs.readFileSync(path.join(__dirname, 'CHANGAN_WLK151Z_LIN_1.1.ldf'), 'utf-8')

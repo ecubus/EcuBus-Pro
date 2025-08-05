@@ -1,5 +1,16 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.50
+Changes from v0.8.49 to v0.8.50:
+
+ 
+* [opt]:add socket clear 
+* [bug]:fix vector can ts discontinuity 
+* [feat]:linCable add PWM output ability 
+* [opt]:allow doesn't access vector channel 
+* [bug]:fix enter input in service config page
+---
+
 ## 0.8.49
 Changes from v0.8.48 to v0.8.49:
 

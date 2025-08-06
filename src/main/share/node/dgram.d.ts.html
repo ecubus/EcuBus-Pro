@@ -543,3 +543,4 @@ declare module 'dgram' {
 declare module 'node:dgram' {
     export * from 'dgram';
 }
+

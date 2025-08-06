@@ -180,3 +180,4 @@ if (window.params.id) {
   })
 }
 app.mount('#app')
+

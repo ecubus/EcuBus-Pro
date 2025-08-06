@@ -51,3 +51,4 @@ if (process.contextIsolated) {
 } else {
   throw new Error('contextBridge is not enabled')
 }
+

@@ -36,3 +36,4 @@ export default {
         }, {type: 'switch', field: 'stretch'}]);
     }
 };
+

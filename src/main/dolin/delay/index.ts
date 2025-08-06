@@ -22,3 +22,4 @@ export default class Delay {
     delay.startDelay(ms, this.id, cb)
   }
 }
+

@@ -54,3 +54,4 @@ helpers.hasOwnProperty = function (obj, key) {
 for (const key of Object.keys(helpers)) {
   Handlebars.registerHelper(key, helpers[key])
 }
+

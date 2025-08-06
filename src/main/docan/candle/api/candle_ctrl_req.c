@@ -241,3 +241,4 @@ bool candle_ctrl_get_capability_externd(candle_device_t *dev, uint8_t channel, c
     return rc;
 }
 
+

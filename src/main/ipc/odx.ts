@@ -16,3 +16,4 @@ ipcMain.on('ipcCloseOdxParse', (event, id) => {
   odxPy[id].kill()
   delete odxPy[id]
 })
+

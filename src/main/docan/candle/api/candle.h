@@ -232,3 +232,4 @@ bool __stdcall DLL candle_channel_set_interfacenumber_endpoints(candle_handle hd
 #ifdef __cplusplus
 }
 #endif
+

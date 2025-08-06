@@ -102,3 +102,4 @@ export function htmlTemplate(json, options) {
     </body>
 </html>`
 }
+

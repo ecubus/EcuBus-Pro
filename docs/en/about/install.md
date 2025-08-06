@@ -37,3 +37,4 @@ Or from our CDN page if you are in 中国❤️:<CustomComponent/>
 <script setup>
 import CustomComponent from './../../component/download.vue'
 </script>
+

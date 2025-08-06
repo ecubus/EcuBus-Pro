@@ -6823,3 +6823,4 @@ canStatus CANLIBAPI kvIoSetModulePins(const CanHandle hnd, unsigned int module, 
 #include "obsolete.h"
 
 #endif /*  _CANLIB_H_ */
+

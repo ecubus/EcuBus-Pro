@@ -65,3 +65,4 @@ export default {
         }, { type: 'switch', field: 'disabled' }]);
     }
 };
+

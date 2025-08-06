@@ -109,3 +109,4 @@ int WINAPI IR_SendRaw(int DevHandle, unsigned int ChannelMask,unsigned int MODFr
 }
 #endif
 #endif
+

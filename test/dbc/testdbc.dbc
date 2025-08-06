@@ -248,3 +248,4 @@ VAL_ 432 MotorBlockedPermanentDetn 1 "motor permanent blocked error" 0 "No error
 VAL_ 432 De_ratingFlag 1 "De_rating  Flag" 0 "No De_rating Flag" ;
 VAL_ 432 eModuleOperationMode 3 "Failure" 2 "Failsafe Running" 1 "Speed Control Running" 0 "Idle" ;
 
+

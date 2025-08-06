@@ -7,3 +7,4 @@ import { ref } from 'vue'
 
 const link = ref(`https://ecubus.oss-cn-chengdu.aliyuncs.com/app/EcuBus-Pro%20${version}.exe`)
 </script>
+

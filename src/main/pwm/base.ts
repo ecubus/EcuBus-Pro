@@ -38,3 +38,4 @@ export default abstract class PwmBase extends EventEmitter {
     return this.isOpen
   }
 }
+

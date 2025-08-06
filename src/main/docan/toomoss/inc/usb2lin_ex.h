@@ -368,3 +368,4 @@ int WINAPI LIN_EX_Stop(int DevHandle, unsigned char LINIndex);
 /** @} USB转LIN*/
 #endif
 
+

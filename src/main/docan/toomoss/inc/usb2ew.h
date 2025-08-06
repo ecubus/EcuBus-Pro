@@ -76,3 +76,4 @@ int WINAPI EW_WriteBytes(int DevHandle, unsigned int ChannelMask,unsigned char A
 }
 #endif
 #endif
+

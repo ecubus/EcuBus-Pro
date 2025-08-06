@@ -90,3 +90,4 @@ ipcMain.handle('ipc-get-vendor', (event, arg) => {
     }
   })
 })
+

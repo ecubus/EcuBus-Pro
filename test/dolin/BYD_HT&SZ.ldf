@@ -867,3 +867,4 @@ Signal_representation {
   Thermal_Protection_State: GlassPanel_MotionAttributes, Thermal_Protection_State, R_Thermal_Protection_State, Thermal_Protection_State1 ;
   VehicleSpeed_Encoding: VehicleSpeed ;
 }
+

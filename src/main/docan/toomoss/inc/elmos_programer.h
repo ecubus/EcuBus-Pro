@@ -95,3 +95,4 @@ int WINAPI ELMOS_StartProg2(int DeviceHandle, unsigned char LINChannel, unsigned
 /** @} */
 #endif
 
+

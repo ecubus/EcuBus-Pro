@@ -198,3 +198,4 @@ int WINAPI DBC_SyncValueToCANFDMsg(long long DBCHandle, char* pMsgName, void* pC
 #endif
 
 
+

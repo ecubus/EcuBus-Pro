@@ -129,3 +129,4 @@ Util.On('Tester_can_0.RequestTransferExit550.send', async (req) => {
   resp.diagSetRaw(Buffer.from([0x77]))
   await resp.outputDiag()
 })
+

@@ -30,3 +30,4 @@ function a() {
   ____ecubus_pro_test___('____ecubus_pro_test___', () => {})
 }
 a()
+

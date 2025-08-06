@@ -651,3 +651,4 @@ declare module 'readline' {
 declare module 'node:readline' {
     export * from 'readline';
 }
+

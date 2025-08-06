@@ -31,3 +31,4 @@ Stop test when failed
 ```bash
 npx vitest --bail=1
 ```
+

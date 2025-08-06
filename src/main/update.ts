@@ -56,3 +56,4 @@ ipcMain.handle('ipc-update-releases-note', async (event, ...args) => {
 ipcMain.on('ipc-install-update', () => {
   autoUpdater.quitAndInstall(false, false)
 })
+

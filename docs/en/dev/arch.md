@@ -18,3 +18,4 @@ More information about the `Electron` framework can be found [here](https://www.
 - `swig` - The template engine for the project.
 
 We use [Electron-Vite](https://electron-vite.org/) to combine these stack together, which is a template for building `Electron` applications with `Vite`.
+

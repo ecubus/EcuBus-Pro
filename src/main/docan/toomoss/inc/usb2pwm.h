@@ -254,3 +254,4 @@ int WINAPI PWM_CAP_Stop(int DevHandle, unsigned char Channel);
 
 /** @} USB转PWM*/
 #endif
+

@@ -523,3 +523,4 @@ export interface UdsDevice {
   linDevice?: LinBaseInfo
   pwmDevice?: PwmBaseInfo
 }
+

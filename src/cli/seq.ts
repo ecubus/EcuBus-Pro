@@ -86,3 +86,4 @@ export default async function main(
     throw new Error(`tester ${testerName} has no target device`)
   }
 }
+

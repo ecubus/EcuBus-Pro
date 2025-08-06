@@ -28,3 +28,4 @@ export async function getValidPwmDevices(vendor: string): Promise<PwmDevice[]> {
     return []
   }
 }
+

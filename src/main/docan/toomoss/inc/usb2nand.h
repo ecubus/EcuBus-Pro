@@ -192,3 +192,4 @@ int WINAPI NAND_EraseBlock(int DevHandle,int ChipIndex,unsigned char *pCmds,unsi
 #endif
 
 #endif
+

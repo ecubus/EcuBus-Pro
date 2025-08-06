@@ -84,3 +84,4 @@ log from doip-custom-simulation:
 
 Start the sequence and open the trace window to view all frames. Alternatively, use Wireshark to capture these frames.
 ![trace](trace.png)
+

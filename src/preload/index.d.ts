@@ -41,3 +41,4 @@ declare global {
     params: Record<string, string>
   }
 }
+

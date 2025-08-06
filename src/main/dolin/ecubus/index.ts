@@ -689,3 +689,4 @@ export class LinCable extends LinBase {
     })
   }
 }
+

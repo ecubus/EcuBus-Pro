@@ -24,3 +24,4 @@ export interface TesterInfo {
     generatePath: string
   }[]
 }
+

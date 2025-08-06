@@ -133,3 +133,4 @@ typedef struct  tagIProperty
 }IProperty;
 
 #endif /*ZLG_CONFIG_INTF_H*/
+

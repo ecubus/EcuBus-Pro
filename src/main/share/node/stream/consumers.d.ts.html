@@ -10,3 +10,4 @@ declare module 'stream/consumers' {
 declare module 'node:stream/consumers' {
     export * from 'stream/consumers';
 }
+

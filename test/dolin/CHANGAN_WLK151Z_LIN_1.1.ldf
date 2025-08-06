@@ -163,3 +163,4 @@ Signal_representation {
     EF_voltage_Encoding:EF_voltage;
     TMS_EF_SpeedSet_Encoding:TMS_EF_SpeedSet;
 }
+

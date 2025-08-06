@@ -89,3 +89,4 @@ BA_ "AggType" SG_ 6 SmoothBattCurrent "AVG";
 BA_ "AggType" SG_ 6 BattVoltage "AVG";
 BA_ "AggType" SG_ 7 PowerState "LAST";
 
+

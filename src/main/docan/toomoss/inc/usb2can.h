@@ -563,3 +563,4 @@ int WINAPI CAN_ResetStartTime(int DevHandle, unsigned char CANIndex);
 
 /** @} USB转CAN*/
 #endif
+

@@ -368,3 +368,4 @@ declare module 'dns/promises' {
 declare module 'node:dns/promises' {
     export * from 'dns/promises';
 }
+

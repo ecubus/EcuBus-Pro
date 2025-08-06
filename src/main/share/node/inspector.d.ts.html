@@ -2739,3 +2739,4 @@ declare module 'node:inspector' {
     import inspector = require('inspector');
     export = inspector;
 }
+

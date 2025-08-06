@@ -82,3 +82,4 @@ async function put(list) {
   process.exit(0)
 }
 put(process.argv.slice(2))
+

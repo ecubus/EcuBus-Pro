@@ -26,3 +26,4 @@ public:
     static void CancelDelay(const Napi::CallbackInfo& info);
     static napi_value Init(Napi::Env env, napi_value exports);
 };
+

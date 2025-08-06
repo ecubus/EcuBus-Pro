@@ -711,3 +711,4 @@ bool __stdcall DLL candle_channel_set_interfacenumber_endpoints(candle_handle hd
     candle_device_t *dev = (candle_device_t*)hdev;
     return candle_ctrl_set_can_interfacenumber_endpoint(dev, ch);
 }
+

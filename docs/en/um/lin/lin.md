@@ -74,3 +74,4 @@ Implement and test diagnostic services using LIN TP.
 
    - View diagnostic responses from simulated nodes
      ![Diagnostic Response](../../../media/um/lin/image-7.png)
+

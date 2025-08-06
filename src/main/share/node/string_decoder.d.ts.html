@@ -65,3 +65,4 @@ declare module 'string_decoder' {
 declare module 'node:string_decoder' {
     export * from 'string_decoder';
 }
+

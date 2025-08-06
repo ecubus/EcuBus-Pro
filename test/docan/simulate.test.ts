@@ -1152,3 +1152,4 @@ describe('simulate canfd can-tp test', () => {
 
 //error SF: 0013000102030405060708090a0b0c0d0e0f1011
 //error FF: 1011000102030405060708090A0B0C0D0E0F10
+

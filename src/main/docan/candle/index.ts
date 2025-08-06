@@ -598,3 +598,4 @@ export class Candle_CAN extends CanBase {
     return `${id}-${msgType.canfd ? msgType.brs : false}-${msgType.remote}-${msgType.canfd}-${msgType.idType}`
   }
 }
+

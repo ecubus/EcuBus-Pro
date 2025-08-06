@@ -6,3 +6,4 @@ export function getJsPath(tsPath: string, projectPath: string) {
   const jsPath = path.join(outDir, scriptNameNoExt + '.js')
   return jsPath
 }
+

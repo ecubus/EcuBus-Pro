@@ -673,3 +673,4 @@ export default abstract class LinBase {
     }
   }
 }
+

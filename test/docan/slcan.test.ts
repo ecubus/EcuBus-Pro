@@ -177,3 +177,4 @@ describe('slcan test', () => {
     client.close()
   })
 })
+

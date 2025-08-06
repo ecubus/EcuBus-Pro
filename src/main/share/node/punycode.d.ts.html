@@ -115,3 +115,4 @@ declare module 'punycode' {
 declare module 'node:punycode' {
     export * from 'punycode';
 }
+

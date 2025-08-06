@@ -97,3 +97,4 @@ napi_value Delay::Init(Napi::Env env, napi_value exports) {
 }
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, Delay::Init)
+

@@ -289,3 +289,4 @@ export class KvaserLin extends LinBase {
     }
   }
 }
+

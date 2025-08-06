@@ -80,3 +80,4 @@ int WINAPI LIN_SlaveGetData(int DevHandle,unsigned char LINIndex,LIN_MSG *pLINMs
 #endif
 #endif
 
+

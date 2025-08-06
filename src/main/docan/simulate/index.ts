@@ -232,3 +232,4 @@ export function getVBusEventInfo() {
   }
   return num
 }
+

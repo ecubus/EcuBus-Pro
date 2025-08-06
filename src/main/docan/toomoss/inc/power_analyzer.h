@@ -97,3 +97,4 @@ int WINAPI  PA_GetPowerData(int DevHandle,int Channel,double *pPower,int BufferS
 
 #endif
 
+

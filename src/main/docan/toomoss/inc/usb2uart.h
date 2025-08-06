@@ -187,3 +187,4 @@ int WINAPI UART_ClearData(int DevHandle,unsigned char Channel);
 #endif
 /** @} USB转LIN*/
 #endif
+

@@ -512,3 +512,4 @@ export class KVASER_CAN extends CanBase {
     )
   }
 }
+

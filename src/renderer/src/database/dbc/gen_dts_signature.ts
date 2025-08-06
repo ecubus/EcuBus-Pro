@@ -9,3 +9,4 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const dtsString = generateCstDts(productions)
 const dtsPath = resolve(__dirname, 'dbc_cst.d.ts')
 writeFileSync(dtsPath, dtsString)
+

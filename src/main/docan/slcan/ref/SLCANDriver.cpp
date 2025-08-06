@@ -105,3 +105,4 @@ SLCANInterface *SLCANDriver::createOrUpdateInterface(int index, QString name, bo
     addInterface(scif);
     return scif;
 }
+

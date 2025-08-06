@@ -352,3 +352,4 @@ export class CRC {
     return CRC.defaults.find((o: CRC): boolean => o.name === name)
   }
 }
+

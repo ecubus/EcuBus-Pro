@@ -536,3 +536,4 @@ export class VarLOG {
     this.log.close()
   }
 }
+

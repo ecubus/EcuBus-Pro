@@ -888,3 +888,4 @@ helpers.splice = function (array, start, deleteCount, ...items) {
 for (const key of Object.keys(helpers)) {
   Handlebars.registerHelper(key, helpers[key])
 }
+

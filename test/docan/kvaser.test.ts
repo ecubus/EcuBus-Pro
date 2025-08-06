@@ -63,3 +63,4 @@ describe('kvaser test', () => {
     client.close()
   })
 })
+

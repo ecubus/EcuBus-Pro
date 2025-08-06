@@ -189,3 +189,4 @@ declare module 'node:path/win32' {
     import path = require('path/win32');
     export = path;
 }
+

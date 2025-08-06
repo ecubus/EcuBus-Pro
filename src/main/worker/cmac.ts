@@ -131,3 +131,4 @@ function getPaddedMessageBlock(message: Buffer, blockIndex: number) {
 
   return block
 }
+

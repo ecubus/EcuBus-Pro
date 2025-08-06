@@ -47,3 +47,4 @@ export default {
         }, {type: 'input', field: 'placeholder'}]);
     }
 };
+

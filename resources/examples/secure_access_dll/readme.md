@@ -48,3 +48,4 @@ console.log(seed)
 ## Others
 
 The default dll warper follow the [Guide](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf), if you want to use other interface, you can build the wrapper by yourself. See the [source code](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess) for more information.
+

@@ -413,3 +413,4 @@ function writeSignalToBuffer(signal: Signal, data: Buffer) {
     }
   }
 }
+

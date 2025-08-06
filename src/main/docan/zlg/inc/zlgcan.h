@@ -1072,3 +1072,4 @@ UINT FUNC_CALL ZCAN_ClearLINSlaveMsg(CHANNEL_HANDLE channel_handle, BYTE *pLINID
 #endif
 
 #endif  // ZLGCAN_H_
+

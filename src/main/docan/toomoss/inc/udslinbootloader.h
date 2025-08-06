@@ -37,3 +37,4 @@ int WINAPI USDLINBoot_ResetECU(int DevHandle,int LINIndex,unsigned char NAD);
 }
 #endif
 #endif // UDSLINBOOTLOADER_H
+

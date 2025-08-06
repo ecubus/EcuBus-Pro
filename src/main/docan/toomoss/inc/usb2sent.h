@@ -251,3 +251,4 @@ int WINAPI SENT_ResetStartTime(int DevHandle, unsigned char Channel);
 #endif
 /** @} USB转SENT*/
 #endif
+

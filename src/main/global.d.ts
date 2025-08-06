@@ -38,3 +38,4 @@ declare global {
       >
     | undefined
 }
+

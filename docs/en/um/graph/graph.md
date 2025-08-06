@@ -35,3 +35,4 @@ All valid variables from [`Variable Window`](./../var/var.md).
 
 You you zoom in/out the graph by dragging the mouse wheel.
 ![alt text](graph.gif)
+

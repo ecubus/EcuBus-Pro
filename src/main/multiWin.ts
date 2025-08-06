@@ -132,3 +132,4 @@ export function maximizeWindow(id: string) {
     winMap.get(id)?.maximize()
   }
 }
+

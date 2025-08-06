@@ -6987,3 +6987,4 @@ DECL_STDXL_FUNC(xlGetKeymanInfo, XLFP_GETKEYMANINFO,
 #endif  // _cplusplus
 
 #endif  // _V_XLAPI_H_
+

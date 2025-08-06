@@ -68,3 +68,4 @@ export default {
             }, {type: 'switch', field: 'defaultFirstOption'}])
     }
 };
+

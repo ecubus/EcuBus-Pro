@@ -169,3 +169,4 @@ declare module 'trace_events' {
 declare module 'node:trace_events' {
     export * from 'trace_events';
 }
+

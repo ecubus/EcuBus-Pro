@@ -1077,3 +1077,4 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   }
 }
 </style>
+

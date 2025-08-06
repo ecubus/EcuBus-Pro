@@ -70,3 +70,4 @@ BO_ 12 ID00CUI_status: 8 Vector__XXX
 BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "CAN";
 
+

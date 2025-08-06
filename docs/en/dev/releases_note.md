@@ -496,3 +496,4 @@ Changes from v0.8.4 to v0.8.5:
 * [feat]:opt release note display 
 * [feet]: add portable zip release 
 * [feat]: add load dll interface, see [https://app.whyengineer.com/examples/secure_access_dll/readme.html](https://app.whyengineer.com/examples/secure_access_dll/readme.html)
+

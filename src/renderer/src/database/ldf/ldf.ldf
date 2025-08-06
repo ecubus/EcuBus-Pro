@@ -204,3 +204,4 @@ Signal_representation {
   {{@key}}: {{#each this as |item index|}}{{item}}{{#unless @last}}, {{/unless}}{{/each}} ;
 {{/each}}
 }
+

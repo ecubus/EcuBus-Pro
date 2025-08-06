@@ -68,3 +68,4 @@ export default async function main(
   }
   return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap }
 }
+

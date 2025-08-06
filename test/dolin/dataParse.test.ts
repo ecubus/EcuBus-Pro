@@ -107,3 +107,4 @@ describe('LIN Signal Parse', () => {
   //     expect(result['lin.test.ldf.signals.MotorSelection'][0].val).toBe(2)
   // })
 })
+

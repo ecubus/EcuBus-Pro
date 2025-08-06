@@ -478,3 +478,4 @@ export function calcCanIdNormalFixed(sa: number, ta: number, addrType: CAN_ADDR_
     return 0x18db0000 | (ta << 8) | sa
   }
 }
+

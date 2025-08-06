@@ -24,3 +24,4 @@ TypeScript is a superset of JavaScript that adds optional static types to the la
 
 - [TypeScript Tutorial 1](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
 - [TypeScript Tutorial 2](https://www.tutorialspoint.com/typescript/index.htm)
+

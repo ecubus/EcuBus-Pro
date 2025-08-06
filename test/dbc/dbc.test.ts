@@ -242,3 +242,4 @@ describe('DBC Parser Tests', () => {
     expect(result.messages[0x17fe007b].signals['BatteryTotalDischargeHV'].startBit).toBe(120)
   })
 })
+

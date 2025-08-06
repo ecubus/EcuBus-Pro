@@ -43,3 +43,4 @@ export async function build(
 export async function getBuild(projectPath: string, projectName: string, entry: string) {
   return getBuildStatus(projectPath, projectName, entry)
 }
+

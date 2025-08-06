@@ -96,3 +96,4 @@ BA_ "VFrameFormat" BO_ 780 0;
 VAL_ 2147558193 Fam 1 "Enabled" 0 "Disabled" ;
 SIG_VALTYPE_ 2147558192 Bar : 1;
 SIG_VALTYPE_ 2147558194 Binary32 : 1;
+

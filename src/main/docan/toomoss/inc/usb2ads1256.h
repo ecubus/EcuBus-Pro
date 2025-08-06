@@ -103,3 +103,4 @@ int WINAPI ADS1256_Stop(int DevHandle,char Channel);
 
 #endif
 
+

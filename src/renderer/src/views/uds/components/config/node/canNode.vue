@@ -1214,3 +1214,4 @@ const handleCalculatorResult = (result: any) => {
   background-color: var(--el-color-danger-light-3);
 }
 </style>
+

@@ -52,3 +52,4 @@ export function useGlobalStart() {
   const runtime = useRuntimeStore()
   return toRef(runtime, 'globalStart')
 }
+

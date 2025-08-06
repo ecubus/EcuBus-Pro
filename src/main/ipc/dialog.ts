@@ -15,3 +15,4 @@ ipcMain.handle('ipc-show-message-box', async (event, options: Electron.MessageBo
 ipcMain.handle('icp-show-error-box', async (event, title: string, content: string) => {
   return await dialog.showErrorBox(title, content)
 })
+

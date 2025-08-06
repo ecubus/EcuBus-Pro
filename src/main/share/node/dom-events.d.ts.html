@@ -124,3 +124,4 @@ declare global {
             new (): __EventTarget;
         };
 }
+

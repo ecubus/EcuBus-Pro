@@ -100,3 +100,4 @@ int WINAPI GPIO_SendPulses(int DevHandle,unsigned int PinMask,unsigned int Pulse
 
 #endif
 
+

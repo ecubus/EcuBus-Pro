@@ -21,3 +21,4 @@ globalUseLocale();
 export default globalUseLocale;
 
 export {t, locale};
+

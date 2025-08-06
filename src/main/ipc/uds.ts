@@ -1043,3 +1043,4 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
     updateSignalVal(db, signalName, value)
   }
 })
+

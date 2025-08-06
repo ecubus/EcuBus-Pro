@@ -10,3 +10,4 @@ typedef unsigned short     USHORT;
 typedef unsigned char      UCHAR;
 
 #endif //TYPEDEF_H_
+

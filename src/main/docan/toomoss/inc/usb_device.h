@@ -274,3 +274,4 @@ unsigned char WINAPI DEV_GetDllBuildTime(char* pDateTime);
 /** @} usb_device*/
 #endif
 
+

@@ -41,3 +41,4 @@ ipcMain.handle('ipc-fs-exist', async (event, ...args) => {
 ipcMain.handle('ipc-fs-stat', async (event, ...args) => {
   return fsP.stat(args[0])
 })
+

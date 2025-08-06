@@ -95,3 +95,4 @@ setInterval(() => {
 3. **Message Monitoring**
    - View transmitted and received messages in the trace window
      ![alt text](image-7.png)
+

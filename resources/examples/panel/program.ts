@@ -24,3 +24,4 @@ Util.OnVar('Program.run', async (args) => {
 
 //2s - 5s
 const randomTime = Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000
+

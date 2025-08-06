@@ -88,3 +88,4 @@ int WINAPI ADC_GetData(int DevHandle,unsigned short *pDataBuffer,int BufferSize)
 
 #endif
 
+

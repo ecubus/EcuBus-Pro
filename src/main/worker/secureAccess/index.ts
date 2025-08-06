@@ -192,3 +192,4 @@ export default class SecureAccessDll {
     this._ref.LoadDLL(dllPath)
   }
 }
+

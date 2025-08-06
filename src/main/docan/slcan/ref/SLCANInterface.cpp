@@ -740,3 +740,4 @@ bool SLCANInterface::parseMessage(CanMessage &msg)
 
 
 }
+

@@ -11,3 +11,4 @@ const versions = reactive({ ...window.electron.process.versions })
     <li class="node-version">Node v{{ versions.node }}</li>
   </ul>
 </template>
+

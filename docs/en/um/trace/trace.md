@@ -74,3 +74,4 @@ When the corresponding hardware channel is bound to a [database](../database.md)
 
 
 
+

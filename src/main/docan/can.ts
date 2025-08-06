@@ -92,3 +92,4 @@ export function getCanDevices(vendor: string) {
 export function canClean() {
   KVASER_CAN.unloadDll()
 }
+

@@ -114,3 +114,4 @@ int WINAPI BMM_LIN_WaitDataNum(int DevHandle,unsigned char LINIndex,unsigned int
 /** @} */
 #endif
 
+

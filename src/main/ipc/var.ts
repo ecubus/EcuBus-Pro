@@ -20,3 +20,4 @@ ipcMain.on('ipc-signal-set', (event, arg) => {
     value: arg.value
   })
 })
+

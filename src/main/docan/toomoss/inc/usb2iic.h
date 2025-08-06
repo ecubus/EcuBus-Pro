@@ -91,3 +91,4 @@ int WINAPI SMBUS_BlockProcessCall(int DevHandle,int IICIndex,short SlaveAddr,uns
 }
 #endif
 #endif
+

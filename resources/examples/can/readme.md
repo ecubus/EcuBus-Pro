@@ -59,3 +59,4 @@ The nodes are connected in a CAN network topology, with Node 1 sending signals t
    - Inspect message details
 
 This example demonstrates how to set up automated signal generation and monitoring in EcuBus-Pro, making it ideal for learning basic CAN communication concepts and signal analysis features.
+

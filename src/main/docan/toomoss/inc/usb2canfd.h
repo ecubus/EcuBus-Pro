@@ -461,3 +461,4 @@ int WINAPI CANFD_ResetStartTime(int DevHandle, unsigned char CANIndex);
 /** @} USB转CANFD*/
 #endif
 
+

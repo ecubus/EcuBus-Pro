@@ -92,3 +92,4 @@ LinCable can be kept up-to-date with the latest improvements, bug fixes, and new
 requiring hardware replacement. The DFU process is straightforward and can be performed through
 the EcuBus-Pro software or dedicated DFU tools, providing a reliable and safe method for firmware
 updates.
+

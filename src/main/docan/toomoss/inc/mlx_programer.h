@@ -88,3 +88,4 @@ int WINAPI MLX_ProgFlash(int DeviceHandle, unsigned char LINChannel, const char*
 
 #endif
 
+

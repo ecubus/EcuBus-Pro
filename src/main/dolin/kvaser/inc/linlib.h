@@ -887,3 +887,4 @@ LinStatus LINLIBAPI linGetCanHandle(LinHandle h, unsigned int *canHandle);
 #endif
 
 #endif // __LINLIB_H
+

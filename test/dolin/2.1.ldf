@@ -179,3 +179,4 @@ Signal_encoding_types {
 Signal_representation {
   encTemperature: Motor1Temp, Motor2Temp ;
 }
+

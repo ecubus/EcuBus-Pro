@@ -687,3 +687,4 @@ export class SLCAN_CAN extends CanBase {
     return `readBase-${id}-${msgTypeNum}`
   }
 }
+

@@ -75,3 +75,4 @@ int WINAPI CNT_GetValue(int DevHandle, unsigned char ChannelMask,unsigned int *p
 }
 #endif
 #endif
+

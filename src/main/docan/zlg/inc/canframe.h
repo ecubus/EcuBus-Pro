@@ -122,3 +122,4 @@ typedef struct {
 #define CANFD_MTU (sizeof(struct canfd_frame))
 
 #endif //CANFRAME_H_
+

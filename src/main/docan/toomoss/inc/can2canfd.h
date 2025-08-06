@@ -8,3 +8,4 @@ void CAN2CANFD(CAN_MSG *pCANMsg,CANFD_MSG *pCANFDMsg,int len);
 void CANFD2CAN(CANFD_MSG *pCANFDMsg,CAN_MSG *pCANMsg,int len);
 
 #endif
+

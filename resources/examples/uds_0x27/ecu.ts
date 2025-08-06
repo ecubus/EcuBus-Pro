@@ -18,3 +18,4 @@ Util.On('Tester.SecurityAccess391.send', async (req) => {
   resp.diagSetRaw(Buffer.from([0x67, 0x2]))
   await resp.outputDiag()
 })
+

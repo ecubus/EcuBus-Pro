@@ -494,3 +494,4 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   messageTransmitterClause(children: MessageTransmitterClauseCstChildren, param?: IN): OUT
   dbcFile(children: DbcFileCstChildren, param?: IN): OUT
 }
+

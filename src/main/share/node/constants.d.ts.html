@@ -16,3 +16,4 @@ declare module 'node:constants' {
     import constants = require('constants');
     export = constants;
 }
+

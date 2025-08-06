@@ -369,3 +369,4 @@ helpers.bitShiftRight = function (a, b) {
 for (const key of Object.keys(helpers)) {
   Handlebars.registerHelper(key, helpers[key])
 }
+

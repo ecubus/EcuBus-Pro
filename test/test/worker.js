@@ -14,3 +14,4 @@ worker.on('message', (message) => {
 worker.on('error', (error) => {
   console.error('error', error)
 })
+

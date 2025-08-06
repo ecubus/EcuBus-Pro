@@ -76,3 +76,4 @@ int WINAPI CAN_BOOT_SetFrameTime(int DevHandle,int CANIndex,int TimeOfMs);
 }
 #endif
 #endif
+

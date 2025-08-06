@@ -298,3 +298,4 @@ canStatus CANLIBAPI canUninstallOwnBuffer(int handle, long id);
 /** @} */
 
 #endif /* _OBSOLETE_H_ */
+

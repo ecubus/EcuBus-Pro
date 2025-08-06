@@ -63,3 +63,4 @@ export function containsFn(val, obj, start) {
   }
   return val.indexOf(obj, start) !== -1
 }
+

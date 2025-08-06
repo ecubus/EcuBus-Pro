@@ -7,3 +7,4 @@ global.keyEvent = keyEvent
 ipcMain.on('ipc-key-down', (event, arg) => {
   keyEvent.emit('keydown', arg)
 })
+

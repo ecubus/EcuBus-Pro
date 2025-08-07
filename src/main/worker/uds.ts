@@ -46,7 +46,7 @@ import assert from 'node:assert'
  */
 export { assert }
 
-import { before, test as nodeTest, TestContext } from 'node:test'
+import { test as nodeTest, TestContext } from 'node:test'
 
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
@@ -113,7 +113,70 @@ test.skip = function (name: string, fn: () => void | Promise<void>) {
 /**
  * @category TEST
  */
-export { beforeEach, afterEach, before, after } from 'node:test'
+import {
+  beforeEach as nodeBeforeEach,
+  afterEach as nodeAfterEach,
+  before as nodeBefore,
+  after as nodeAfter
+} from 'node:test'
+
+/**
+ * Run setup code before each test in the current suite
+ * Only executes if the corresponding test is enabled
+ * @param fn - Function to run before each test
+ */
+export function beforeEach(fn: () => void | Promise<void>) {
+  nodeBeforeEach(() => {
+    // Use current testCnt to determine if this hook should run
+    if (testEnableControl[testCnt] === true) {
+      return fn()
+    }
+  })
+}
+
+/**
+ * Run cleanup code after each test in the current suite
+ * Only executes if the corresponding test is enabled
+ * @param fn - Function to run after each test
+ */
+export function afterEach(fn: () => void | Promise<void>) {
+  nodeAfterEach(() => {
+    // Use current testCnt to determine if this hook should run
+    if (testEnableControl[testCnt] === true) {
+      return fn()
+    }
+  })
+}
+
+/**
+ * Run setup code before all tests in the current suite
+ * Only executes if any test in the suite is enabled
+ * @param fn - Function to run before all tests
+ */
+export function before(fn: () => void | Promise<void>) {
+  nodeBefore(() => {
+    // Check if any test is enabled - if so, run the before hook
+    const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
+    if (hasEnabledTests) {
+      return fn()
+    }
+  })
+}
+
+/**
+ * Run cleanup code after all tests in the current suite
+ * Only executes if any test in the suite was enabled
+ * @param fn - Function to run after all tests
+ */
+export function after(fn: () => void | Promise<void>) {
+  nodeAfter(() => {
+    // Check if any test was enabled - if so, run the after hook
+    const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
+    if (hasEnabledTests) {
+      return fn()
+    }
+  })
+}
 
 /**
  * @category TEST
@@ -1888,4 +1951,3 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
   })
   return await p
 }
-

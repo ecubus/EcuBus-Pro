@@ -1,4 +1,13 @@
-import { describe, test, assert, CanMessage, DiagResponse, DiagRequest } from 'ECB'
+import {
+  describe,
+  test,
+  assert,
+  CanMessage,
+  DiagResponse,
+  DiagRequest,
+  beforeEach,
+  afterEach
+} from 'ECB'
 
 /**
  * Utility function to wait for a specific CAN message
@@ -81,3 +90,28 @@ describe('UDS Test', () => {
   })
 })
 
+// before each test.
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+describe('BeforeEach/AfterEach Test', () => {
+  beforeEach(() => {
+    console.log('Before each test')
+  })
+
+  afterEach(() => {
+    console.log('After each test')
+  })
+
+  // Test case that passes immediately
+  test('Test after beforeEach', async () => {
+    console.log('This test runs after beforeEach')
+    await delay(1000) // Simulate some delay
+    assert(true)
+  })
+
+  // Test case that fails immediately
+  test('Failing test after beforeEach', async () => {
+    await delay(1000) // Simulate some delay
+    assert(false, 'This test should fail')
+  })
+})

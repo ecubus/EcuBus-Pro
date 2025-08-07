@@ -100,9 +100,8 @@ const globalStart = useGlobalStart()
 // const logData = ref<LogData[]>([])
 
 function clearLog() {
-  // logData.value = []
-  xGrid.value?.remove().finally(() => {
-    xGrid.value?.scrollTo(0, 0)
+  xGrid.value?.scrollTo(0, 0).then(() => {
+    xGrid.value?.remove()
   })
 }
 
@@ -305,7 +304,7 @@ function testLog(
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'primary',
-        message: `Test ${item.message.data.data.name} starting...`,
+        message: `----- Test ${item.message.data.data.name} starting -----`,
 
         id: cnt++
       })
@@ -323,7 +322,7 @@ function testLog(
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'success',
-        message: `Test ${item.message.data.data.name} passed, ${item.message.data.data.details.duration_ms}ms`,
+        message: `----- Test ${item.message.data.data.name} passed, ${item.message.data.data.details.duration_ms}ms -----`,
         id: cnt++
       })
     } else if (item.message.data.type == 'test:fail') {
@@ -344,7 +343,7 @@ function testLog(
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'error',
-        message: `Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, file: ${file}:${item.message.data.data.line}, details: ${item.message.data.data.details.error.message}`,
+        message: `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, file: ${file}:${item.message.data.data.line}, details: ${item.message.data.data.details.error.message} -----`,
         id: cnt++
       })
     } else if (item.message.data.type == 'test:diagnostic') {
@@ -430,4 +429,3 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 </style>
-

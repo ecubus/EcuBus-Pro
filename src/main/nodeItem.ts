@@ -170,7 +170,11 @@ export class NodeClass {
         )
         if (this.testOptions) {
           this.startTs = getTsUs()
-          this.log?.systemMsg(`Test Config ${this.nodeItem.name} starting...`, getTsUs(), 'info')
+          this.log?.systemMsg(
+            `----- Test Config ${this.nodeItem.name} starting -----`,
+            getTsUs(),
+            'info'
+          )
         }
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
@@ -745,7 +749,7 @@ export class NodeClass {
     const info = await this.pool?.getTestInfo()
     if (this.testOptions) {
       this.log?.systemMsg(
-        `Test Config ${this.nodeItem.name} finished, total time: ${((getTsUs() - this.startTs) / 1000).toFixed(2)}ms`,
+        `----- Test Config ${this.nodeItem.name} finished, total time: ${((getTsUs() - this.startTs) / 1000).toFixed(2)}ms -----`,
         getTsUs(),
         'info'
       )
@@ -1329,4 +1333,3 @@ export class NodeClass {
     }
   }
 }
-

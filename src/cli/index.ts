@@ -121,14 +121,14 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
         return null
       }
       if (testEvent.type == 'test:dequeue') {
-        msg = `Test ${testEvent.data.name} starting...`
+        msg = `----- Test ${testEvent.data.name} starting -----`
       } else if (testEvent.type == 'test:pass') {
         if (testEvent.data.skip) {
           fn = colors.yellow
-          msg = `Test ${testEvent.data.name} skipped, ${testEvent.data.details.duration_ms}ms`
+          msg = `----- Test ${testEvent.data.name} skipped, ${testEvent.data.details.duration_ms}ms -----`
         } else {
           fn = colors.green
-          msg = `Test ${testEvent.data.name} passed, ${testEvent.data.details.duration_ms}ms`
+          msg = `----- Test ${testEvent.data.name} passed, ${testEvent.data.details.duration_ms}ms -----`
         }
       } else if (testEvent.type == 'test:fail') {
         fn = colors.red
@@ -136,7 +136,7 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
         if (file) {
           file = path.relative(process.cwd(), file)
         }
-        msg = `Test ${testEvent.data.name} failed, ${testEvent.data.details.duration_ms}ms, file: ${file}:${testEvent.data.line}, details: ${testEvent.data.details.error.message}`
+        msg = `----- Test ${testEvent.data.name} failed, ${testEvent.data.details.duration_ms}ms, file: ${file}:${testEvent.data.line}, details: ${testEvent.data.details.error.message} -----`
       } else if (testEvent.type == 'test:diagnostic') {
         msg = testEvent.data.message
         fn = colors.yellow
@@ -321,4 +321,3 @@ if (process.argv[1] == 'pnpm' || process.argv[2] == 'pnpm') {
   program.parse()
 }
 // console.log(process.argv)
-

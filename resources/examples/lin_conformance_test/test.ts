@@ -1047,24 +1047,24 @@ describe('10: L2: Communication with Failure', () => {
     const msg6 = FrameMap['TST_FRAME_6']
 
     // 第一次发送TST_FRAME_7 - 可能包含错误位
-    // const result1 = await sendLinWithRecv(msg7, {})
-    // assert(result1.result, 'First TST_FRAME_7 should receive response')
-    // assert(result1.msg != undefined, 'First response should contain data')
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
 
-    // // 检查第一次响应中的错误位状态（可能为true或false）
-    // const firstErrorFlag = getErrorFlag(result1.msg.data)
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
 
-    // // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
-    // const result2 = await sendLinWithRecv(msg7, {})
-    // assert(result2.result, 'Second TST_FRAME_7 should receive response')
-    // assert(result2.msg != undefined, 'Second response should contain data')
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
 
-    // // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
-    // const secondErrorFlag = getErrorFlag(result2.msg.data)
-    // assert(
-    //   secondErrorFlag === false,
-    //   'Response error bit should be cleared after second TST_FRAME_7'
-    // )
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
     const clonemsg3 = cloneMsg(msg3)
     //identify  = 2
     clonemsg3.data[3] = 2
@@ -1076,24 +1076,57 @@ describe('10: L2: Communication with Failure', () => {
         value: 0
       }
     })
-    // assert(result4.result)
+    assert(result4.result)
 
-    // //send msg7 again
-    // const result5 = await sendLinWithRecv(msg7, {})
-    // assert(result5.result)
-    // assert(result5.msg != undefined)
-    // const errorFlag2 = getErrorFlag(result5.msg.data)
-    // assert(errorFlag2 === true)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.2] Bit error. Byte 1, Bit 1', async () => {
-    // Test: Bit error. Byte 1, Bit 1
-    // Test case ID: PT-CT 38.2
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.2
-    //   byteIndex (int): 1
-    //   bitIndex (int): 0
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 1,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
   test('[PT-CT 38.3] Bit error. Interbyte Data 1-2, Bit 1', async () => {
     // Test: Bit error. Interbyte Data 1-2, Bit 1

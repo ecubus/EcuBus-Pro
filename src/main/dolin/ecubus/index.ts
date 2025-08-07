@@ -276,7 +276,7 @@ export class LinCable extends LinBase {
 
             const checksum = getCheckSum(val.subarray(0, val.length - 1), checksumType, pid)
             if (checksum != val[val.length - 1]) {
-              const errorMsg = `checksum error, got ${val[val.length - 1]}, expected ${checksum}`
+              const errorMsg = `checksum error, got ${val[val.length - 1]}, expected ${checksum}, data:${[...val].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`
               this.log.error(ts, errorMsg, msg)
 
               this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, errorMsg))
@@ -392,7 +392,7 @@ export class LinCable extends LinBase {
             //check checksum
             const checksum = getCheckSum(val, msg.checksumType, getPID(id))
             if (checksum != data[data.length - 1]) {
-              const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}`
+              const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}, data:${[...val].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`
               this.log.error(ts, msg)
             } else if (val.length < originalLen) {
               const msgStr = `No enough data, got ${val.length}, expected ${originalLen}`

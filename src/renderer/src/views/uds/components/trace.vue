@@ -68,6 +68,20 @@
       >
         <el-option v-for="item of allInstanceList" :key="item" :label="item" :value="item" />
       </el-select>
+      <el-select
+        v-model="idFilterList"
+        size="small"
+        style="width: 300px; margin: 4px"
+        multiple
+        collapse-tags
+        collapse-tags-tooltip
+        placeholder="Filter by ID"
+        clearable
+        allow-create
+        filterable
+      >
+        <el-option v-for="item of idList" :key="item" :label="item" :value="item" />
+      </el-select>
       <el-divider direction="vertical" />
       <el-dropdown size="small" @command="saveAll">
         <el-button type="info" link>
@@ -143,6 +157,8 @@ interface LogData {
   name?: string
   seqIndex?: number
   children?: LogData[] | { name: string; data: string }[]
+  deltaTime?: string
+  previousTs?: string
 }
 const isOverwrite = ref(false)
 function toggleOverwrite() {
@@ -172,6 +188,23 @@ const allInstanceList = computed(() => {
   }
   return list
 })
+
+// ID filter functionality
+const idFilterList = ref<string[]>([])
+const idList = ref<Set<string>>(new Set())
+
+function addToIdList(id: string) {
+  if (
+    id &&
+    id !== 'canError' &&
+    id !== 'linError' &&
+    id !== 'linEvent' &&
+    id !== 'udsScript' &&
+    id !== 'udsSystem'
+  ) {
+    idList.value.add(id)
+  }
+}
 // const logData = ref<LogData[]>([])
 
 interface CanBaseLog {
@@ -225,6 +258,7 @@ watch(globalStart, (val) => {
 
 function clearLog(msg = 'Clear Trace') {
   allLogData = []
+  idList.value.clear()
 
   scrollY = -1
 
@@ -266,6 +300,16 @@ function insertData2(data: LogData[]) {
         const idx = allLogData.findIndex((log) => log.key === item.key)
         if (idx !== -1) {
           // Overwrite the existing log entry
+          // Calculate delta time
+          const existingLog = allLogData[idx]
+          const currentTime = parseFloat(item.ts)
+          const previousTime = parseFloat(existingLog.ts)
+          const deltaMs = (currentTime - previousTime) * 1000 // Convert to milliseconds
+
+          // Store previous timestamp and delta time
+          item.previousTs = existingLog.ts
+          item.deltaTime = deltaMs >= 0 ? `(Δ${deltaMs.toFixed(1)}ms)` : ''
+
           allLogData[idx] = item
         } else {
           allLogData.push(item)
@@ -302,6 +346,14 @@ function logDisplay(method: string, vals: LogItem[]) {
 
   const logData: LogData[] = []
   const insertData = (data: LogData) => {
+    // Add ID to idList for future filtering
+    addToIdList(data.id)
+
+    // Apply ID filtering
+    if (idFilterList.value.length && data.id && !idFilterList.value.includes(data.id)) {
+      return
+    }
+
     if (isOverwrite.value) {
       data.key = `${data.channel}-${data.device}-${data.id}`
     } else {
@@ -760,7 +812,17 @@ let grid: EVirtTable
 let scrollY: number = -1
 
 const columes: Ref<Column[]> = ref([
-  { key: 'ts', title: 'Time', width: 100 },
+  {
+    key: 'ts',
+    title: 'Time',
+    width: 200,
+    formatter: (row) => {
+      if (isOverwrite.value && row.row.deltaTime) {
+        return `${row.row.ts} ${row.row.deltaTime}`
+      }
+      return row.row.ts
+    }
+  },
   { key: 'name', title: 'Name', width: 200 },
   { key: 'data', title: 'Data', width: 300 },
   { key: 'dir', title: 'Dir', width: 50 },
@@ -958,4 +1020,3 @@ onUnmounted(() => {
   background-color: rgba(0, 0, 0, 0.05);
 }
 </style>
-

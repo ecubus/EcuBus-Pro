@@ -137,7 +137,7 @@ const testEnableControl: Record<number, boolean> = {}
  */
 
 export function test(name: string, fn: () => void | Promise<void>) {
-  nodeTest(name, (t) => {
+  nodeTest(name, async (t) => {
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
@@ -148,9 +148,12 @@ export function test(name: string, fn: () => void | Promise<void>) {
 
     if (testEnableControl[testCnt] != true) {
       t.skip()
-    } else {
-      return fn()
+      return
     }
+
+    // 直接调用用户函数，不进行任何包装
+    // 这样错误堆栈会直接指向用户代码
+    return await fn()
   })
 }
 

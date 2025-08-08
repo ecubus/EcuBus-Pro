@@ -459,29 +459,42 @@ declare class SecureAccessDll {
 }
 
 /**
- * Test function for writing test cases. Provides test context and logging.
+ * Test function for writing test cases with conditional execution based on enable control.
+ * Provides test context, automatic logging, and supports both synchronous and asynchronous operations.
+ * Test execution is controlled by the testEnableControl configuration.
  *
  * @category TEST
  * @param {string} name - The name of the test case
- * @param {Function} fn - The test function to execute
+ * @param {Function} fn - The test function to execute (can be sync or async)
  * @property {Function} skip - Skip a test case, marking it as pending. The test will be reported as skipped and not executed.
  *
  * @example
  * ```ts
- * // Basic test case
- * test('should add numbers correctly', () => {
- *   assert.equal(1 + 1, 2);
+ * // Basic synchronous test case
+ * test('should validate CAN message format', () => {
+ *   const canMsg = { id: 0x123, data: [0x01, 0x02] };
+ *   assert.equal(canMsg.id, 0x123);
+ *   assert.equal(canMsg.data.length, 2);
  * });
  *
- * // Async test case
- * test('should handle async operations', async () => {
- *   const result = await someAsyncFunction();
- *   assert.equal(result, expectedValue);
+ * // Asynchronous test case for UDS communication
+ * test('should perform UDS diagnostic session', async () => {
+ *   await uds.service(0x10, 0x01); // DiagnosticSessionControl
+ *   const response = await uds.getResponse();
+ *   assert.equal(response[0], 0x50); // Positive response
  * });
  *
- * // Skip a test case
- * test.skip('feature not implemented', () => {
+ * // Test with CAN bus operations
+ * test('should send and receive CAN messages', async () => {
+ *   await can.send({ id: 0x7E0, data: [0x02, 0x10, 0x01] });
+ *   const msg = await can.recv(1000);
+ *   assert.notEqual(msg, null);
+ * });
+ *
+ * // Skip a test case when feature is not ready
+ * test.skip('LIN transport protocol test', () => {
  *   // Test code that will be skipped
+ *   lin.sendMessage(0x3C, [0x01, 0x02, 0x03]);
  * });
  * ```
  */
@@ -490,48 +503,184 @@ declare namespace test {
     var skip: (name: string, fn: () => void | Promise<void>) => void;
 }
 /**
- * Run setup code before each test in the current suite
- * Only executes if the corresponding test is enabled
- * @param fn - Function to run before each test
- */
-declare function beforeEach(fn: () => void | Promise<void>): void;
-/**
- * Run cleanup code after each test in the current suite
- * Only executes if the corresponding test is enabled
- * @param fn - Function to run after each test
- */
-declare function afterEach(fn: () => void | Promise<void>): void;
-/**
- * Run setup code before all tests in the current suite
- * Only executes if any test in the suite is enabled
- * @param fn - Function to run before all tests
- */
-declare function before(fn: () => void | Promise<void>): void;
-/**
- * Run cleanup code after all tests in the current suite
- * Only executes if any test in the suite was enabled
- * @param fn - Function to run after all tests
- */
-declare function after(fn: () => void | Promise<void>): void;
-/**
- * Create a test group.
+ * Run setup code before each test in the current suite.
+ * **MUST be used within a describe block.** Only executes if the corresponding test is enabled through testEnableControl.
+ * Useful for initializing test data, establishing connections, or setting up mock objects.
  *
- * @param name Test group name
- * @param fn Test group function
+ * @category TEST
+ * @param {Function} fn - Function to run before each test (can be sync or async)
  *
  * @example
  * ```ts
- * describe('Test Group 1', () => {
- *   test('Test case 1', () => {
- *     // test code
- *   })
+ * describe('CAN Communication Tests', () => {
+ *   // ✅ Correct: beforeEach inside describe block
+ *   beforeEach(async () => {
+ *     await can.open('kvaser', 0);
+ *     await can.setBitrate(500000);
+ *   });
  *
- *   test('Test case 2', () => {
- *     // test code
- *   })
- * })
+ *   beforeEach(() => {
+ *     uds.setTesterPresent(true);
+ *     uds.setTimeout(5000);
+ *   });
+ *
+ *   test('should send CAN message', () => {
+ *     // Test implementation
+ *   });
+ * });
+ *
+ * // ❌ Wrong: beforeEach outside describe block
+ * // beforeEach(() => { // This will not work properly });
  * ```
+ */
+declare function beforeEach(fn: () => void | Promise<void>): void;
+/**
+ * Run cleanup code after each test in the current suite.
+ * **MUST be used within a describe block.** Only executes if the corresponding test is enabled through testEnableControl.
+ * Used for cleaning up resources, closing connections, or resetting state after each test.
+ *
  * @category TEST
+ * @param {Function} fn - Function to run after each test (can be sync or async)
+ *
+ * @example
+ * ```ts
+ * describe('UDS Diagnostic Tests', () => {
+ *   // ✅ Correct: afterEach inside describe block
+ *   afterEach(async () => {
+ *     await can.close();
+ *   });
+ *
+ *   afterEach(() => {
+ *     uds.setTesterPresent(false);
+ *     uds.clearDtc();
+ *     testData = null;
+ *   });
+ *
+ *   test('should perform diagnostics', () => {
+ *     // Test implementation
+ *   });
+ * });
+ *
+ * // ❌ Wrong: afterEach outside describe block
+ * // afterEach(() => { // This will not work properly });
+ * ```
+ */
+declare function afterEach(fn: () => void | Promise<void>): void;
+/**
+ * Run setup code before all tests in the current suite.
+ * **MUST be used within a describe block.** Only executes if any test in the suite is enabled through testEnableControl.
+ * Used for one-time setup operations like initializing hardware, loading configuration, or establishing database connections.
+ *
+ * @category TEST
+ * @param {Function} fn - Function to run before all tests (can be sync or async)
+ *
+ * @example
+ * ```ts
+ * describe('Hardware Integration Tests', () => {
+ *   // ✅ Correct: before inside describe block
+ *   before(async () => {
+ *     await hardware.initialize();
+ *     await hardware.selfTest();
+ *   });
+ *
+ *   before(() => {
+ *     config = loadTestConfig('test-settings.json');
+ *     process.env.TEST_MODE = 'true';
+ *   });
+ *
+ *   test('should connect to ECU', () => {
+ *     // Test implementation
+ *   });
+ * });
+ *
+ * // ❌ Wrong: before outside describe block
+ * // before(() => { // This will not work properly });
+ * ```
+ */
+declare function before(fn: () => void | Promise<void>): void;
+/**
+ * Run cleanup code after all tests in the current suite.
+ * **MUST be used within a describe block.** Only executes if any test in the suite was enabled through testEnableControl.
+ * Used for final cleanup operations like closing hardware connections, saving test reports, or cleaning up temporary files.
+ *
+ * @category TEST
+ * @param {Function} fn - Function to run after all tests (can be sync or async)
+ *
+ * @example
+ * ```ts
+ * describe('System Integration Tests', () => {
+ *   // ✅ Correct: after inside describe block
+ *   after(async () => {
+ *     await hardware.shutdown();
+ *     await hardware.disconnect();
+ *   });
+ *
+ *   after(() => {
+ *     saveTestReport(testResults);
+ *     delete process.env.TEST_MODE;
+ *     console.log('All tests completed');
+ *   });
+ *
+ *   test('should perform system check', () => {
+ *     // Test implementation
+ *   });
+ * });
+ *
+ * // ❌ Wrong: after outside describe block
+ * // after(() => { // This will not work properly });
+ * ```
+ */
+declare function after(fn: () => void | Promise<void>): void;
+/**
+ * Create a test group to organize related test cases.
+ * **Required container for all test hook functions** (before, after, beforeEach, afterEach).
+ * Groups tests logically and provides a scope for shared setup/teardown operations.
+ * Automatically increments test counter for proper test enable control tracking.
+ *
+ * @category TEST
+ * @param {string} name - Test group name that describes the functionality being tested
+ * @param {Function} fn - Test group function containing test cases and hooks
+ *
+ * @example
+ * ```ts
+ * // ✅ Correct: All hooks must be inside describe blocks
+ * describe('CAN Communication Tests', () => {
+ *   before(async () => {
+ *     // One-time setup for the entire test suite
+ *     await hardware.initialize();
+ *   });
+ *
+ *   beforeEach(async () => {
+ *     // Setup before each test
+ *     await can.open('kvaser', 0);
+ *   });
+ *
+ *   test('should send CAN message', () => {
+ *     const result = can.send({ id: 0x123, data: [0x01, 0x02] });
+ *     assert.equal(result, true);
+ *   });
+ *
+ *   test('should receive CAN message', async () => {
+ *     const msg = await can.recv(1000);
+ *     assert.notEqual(msg, null);
+ *   });
+ *
+ *   afterEach(async () => {
+ *     // Cleanup after each test
+ *     await can.close();
+ *   });
+ *
+ *   after(() => {
+ *     // Final cleanup for the entire test suite
+ *     console.log('All CAN tests completed');
+ *   });
+ * });
+ *
+ * // ❌ Wrong: Hooks outside describe blocks will not work
+ * // before(() => { // This is invalid });
+ * // beforeEach(() => { // This is invalid });
+ * // test('standalone test', () => { // This works but hooks don't apply });
+ * ```
  */
 declare function describe(name: string, fn: () => void | Promise<void>): void;
 declare const testerList: readonly [

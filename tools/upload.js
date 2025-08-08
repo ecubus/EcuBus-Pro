@@ -46,7 +46,7 @@ async function put(list) {
   // tag need match v\d+\.\d+\.\d+$
   if(list.includes('--note')){
     // await make_release_note_all()
-    const releasePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
+    const releasePath = path.join(__dirname, '..', 'docs', 'en', 'dev', 'releases_note.md')
     await sw.put('app/releases_note.md', releasePath)
     console.log('releases_note.md pushed ok')
   }

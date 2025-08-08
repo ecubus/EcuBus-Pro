@@ -21,7 +21,7 @@ async function make_release_note_all() {
     tagList = tagList.splice(0, tagList.indexOf('v0.8.4') + 1)
 
     // 读取现有文件内容
-    const releaseNotePath = path.join(__dirname, '..', 'docs', 'dev', 'releases_note.md')
+    const releaseNotePath = path.join(__dirname, '..', 'docs', 'en', 'dev', 'releases_note.md')
     let existingContent = ''
     let fileExists = false
     try {
@@ -68,10 +68,10 @@ async function make_release_note_all() {
     let finalContent
     if (fileExists) {
       // 如果文件存在，保留标题，只替换内容部分
-      const titleMatch = existingContent.match(/^# EcuBus-Pro Release Notes\n\n/)
+      const titleMatch = existingContent.match(/^# EcuBus-Pro Release Notes\r?\n/)
       if (titleMatch) {
         // 保留标题，移除现有内容，添加新内容
-        finalContent = titleMatch[0] + newContent + existingContent.replace(/^# EcuBus-Pro Release Notes\n\n/, '')
+        finalContent = titleMatch[0] + newContent + existingContent.replace(/^# EcuBus-Pro Release Notes\r?\n/, '')
       } else {
         // 如果没有找到标题，添加标题
         finalContent = '# EcuBus-Pro Release Notes\n\n' + newContent + existingContent

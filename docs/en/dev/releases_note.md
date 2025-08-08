@@ -3,7 +3,11 @@
 ## 0.8.50
 Changes from v0.8.49 to v0.8.50:
 
- 
+* [opt]: add new line to every file by @NiiMER in #3c673a4
+* [feat]:add trace id filter and delta time in overwrite mode 
+* [opt]:opt test beforeEach and afterEach and log display 
+* [opt]:add 中文文档 
+* [feat]:Pwm output by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/176
 * [opt]:add socket clear 
 * [bug]:fix vector can ts discontinuity 
 * [feat]:linCable add PWM output ability 

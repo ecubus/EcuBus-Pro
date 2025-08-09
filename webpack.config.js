@@ -170,6 +170,9 @@ module.exports = {
         },
         sourceMapFilename: '[name].js.map'
     },
+    externalsPresets: {
+        node: true,
+    },
     target: 'node',
     plugins: [
        new MyCustomPlugin(),

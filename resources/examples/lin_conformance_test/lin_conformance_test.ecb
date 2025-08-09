@@ -805,20 +805,21 @@
       },
       "test": {
         "pos": {
-          "x": 470,
-          "y": 392,
+          "x": 484,
+          "y": 91,
           "w": 957,
           "h": 418
         },
         "title": "test",
         "label": "Test",
         "id": "test",
-        "options": {}
+        "options": {},
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 73,
-          "y": 320,
+          "x": 228,
+          "y": 480,
           "w": 1583,
           "h": 438
         },
@@ -829,8 +830,8 @@
       },
       "network": {
         "pos": {
-          "x": 170,
-          "y": 193,
+          "x": 54,
+          "y": 65,
           "w": 600,
           "h": 400
         },
@@ -841,26 +842,14 @@
       },
       "hardware": {
         "pos": {
-          "x": 498.5,
-          "y": 58,
+          "x": 980,
+          "y": 316.5,
           "w": 600,
           "h": 400
         },
         "title": "hardware",
         "label": "Devices",
         "id": "hardware",
-        "options": {}
-      },
-      "variable": {
-        "pos": {
-          "x": 553.5,
-          "y": 130,
-          "w": 959,
-          "h": 400
-        },
-        "title": "variable",
-        "label": "Variable",
-        "id": "variable",
         "options": {}
       }
     },

@@ -39,7 +39,7 @@ export type { LinAddr } from '../share/lin'
 export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
-import assert from 'node:assert'
+import assert, { AssertionError } from 'node:assert'
 
 /**
  * Node.js built-in assertion library for testing.
@@ -90,17 +90,37 @@ import assert from 'node:assert'
  */
 export { assert }
 
-
 import { test as nodeTest, TestContext } from 'node:test'
 
 export { getCheckSum as getLinCheckSum } from '../share/lin'
-
-
 
 let init = false
 let initfunc: () => void = () => {}
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
+
+/**
+ * 辅助函数：保留原始错误的堆栈信息
+ * @param fn 要执行的函数
+ * @returns 执行结果
+ */
+async function preserveErrorStack<T>(fn: () => T | Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (error) {
+    // 保留原始错误的堆栈信息，但过滤掉 uds.ts 相关的帧
+    if (error instanceof Error) {
+      const stack = error.stack?.split('\n')
+      //fisrt at line
+      const atLine = stack?.find((line) => /\d+:\d+/.test(line))
+
+      const newError = new Error(`${error.message}, pos: ${atLine}`)
+
+      throw newError
+    }
+    throw error
+  }
+}
 
 /**
  * Test function for writing test cases with conditional execution based on enable control.
@@ -168,7 +188,7 @@ export function test(name: string, fn: () => void | Promise<void>) {
     if (testEnableControl[testCnt] != true) {
       t.skip()
     } else {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -231,10 +251,10 @@ import {
  * ```
  */
 export function beforeEach(fn: () => void | Promise<void>) {
-  nodeBeforeEach(() => {
+  nodeBeforeEach(async () => {
     // Use current testCnt to determine if this hook should run
     if (testEnableControl[testCnt] === true) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -271,10 +291,10 @@ export function beforeEach(fn: () => void | Promise<void>) {
  * ```
  */
 export function afterEach(fn: () => void | Promise<void>) {
-  nodeAfterEach(() => {
+  nodeAfterEach(async () => {
     // Use current testCnt to determine if this hook should run
     if (testEnableControl[testCnt] === true) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -311,11 +331,11 @@ export function afterEach(fn: () => void | Promise<void>) {
  * ```
  */
 export function before(fn: () => void | Promise<void>) {
-  nodeBefore(() => {
+  nodeBefore(async () => {
     // Check if any test is enabled - if so, run the before hook
     const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
     if (hasEnabledTests) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -353,11 +373,11 @@ export function before(fn: () => void | Promise<void>) {
  * ```
  */
 export function after(fn: () => void | Promise<void>) {
-  nodeAfter(() => {
+  nodeAfter(async () => {
     // Check if any test was enabled - if so, run the after hook
     const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
     if (hasEnabledTests) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -426,12 +446,12 @@ const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
  * ```
  */
 export function describe(name: string, fn: () => void | Promise<void>) {
-  selfDescribe(name, (t) => {
+  selfDescribe(name, async (t) => {
     before(() => {
       testCnt++
     })
 
-    return fn()
+    return preserveErrorStack(fn)
   })
 }
 

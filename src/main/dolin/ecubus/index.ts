@@ -429,6 +429,7 @@ export class LinCable extends LinBase {
             })
           } else if (data[0] == 3) {
             //data format is not valid
+
             const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte`
             this.log.error(ts, msg, {
               frameId: data[1],
@@ -706,4 +707,3 @@ export class LinCable extends LinBase {
     })
   }
 }
-

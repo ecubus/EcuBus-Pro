@@ -15,12 +15,31 @@ const headerBitLength = 13 + 1 + 10 + 10
 const FrameMap: Record<string, LinMsg> = {}
 let ConfiguredNAD = 0
 let StatusSignalOffset = 0
+const IUTSleepTime = 5000
 
 function cloneMsg(msg: LinMsg) {
   return {
     ...msg,
     data: Buffer.from(msg.data)
   }
+}
+
+async function sendWakeUp(breakLength: number) {
+  const msg: LinMsg = {
+    data: Buffer.alloc(0),
+    direction: LinDirection.SEND,
+    frameId: 0,
+    checksumType: LinChecksumType.ENHANCED
+  }
+  await sendLinWithSend(msg, {
+    syncVal: false,
+    pid: false,
+    breakLength: breakLength
+  })
+}
+
+async function delay(timeout: number) {
+  return new Promise((resolve) => setTimeout(resolve, timeout))
 }
 Util.Init(async () => {
   const InitNad = await getVar('lin_conformance_test.InitialNAD')
@@ -83,7 +102,6 @@ Util.Init(async () => {
     ]),
     checksumType: LinChecksumType.CLASSIC
   }
-  console.log(FrameMap['TST_FRAME_3'])
 
   /*device specific transmit frame (IUT is publisher)*/
   const TST_FRAME_4_Tx = await getFrameFromDB('lin', 'LINdb', TxFrameName)
@@ -167,7 +185,7 @@ Util.Init(async () => {
   /*This is a master request message (0x3C) which can carry any kind of diagnostic message,
 except messages of configuration and identification. XX can be SF (SingleFrame), CF
 (ConsecutiveFrame) or FF (FirstFrame).*/
-  FrameMap['TST_FRAME_14_XX'] = {
+  FrameMap['TST_FRAME_14'] = {
     direction: LinDirection.SEND,
     frameId: 0x3c,
     data: Buffer.alloc(8),
@@ -193,6 +211,8 @@ Number of data bytes 8, data bytes 1 to 8 shall be filled with 0x00, 0x01, 0x02,
     data: Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]),
     checksumType: LinChecksumType.CLASSIC
   }
+
+  await sendWakeUp(5)
 })
 
 const sendLinWithRecv = (
@@ -283,7 +303,6 @@ const sendLinWithRecv = (
       .then(() => {
         timer = setTimeout(() => {
           Util.OffLin(frame.frameId, cb)
-          console.log('timeout internal error')
           resolve({ result: false }) //resolve false if no response received
         }, 1000)
       })
@@ -403,7 +422,7 @@ Verification IUT shall answer
     */
     const msg1 = FrameMap['TST_FRAME_1']
     const result = await sendLinWithSend(msg1, {})
-    assert(result == false)
+    assert(result)
     const msg7 = FrameMap['TST_FRAME_7']
     await sendLinWithRecv(msg7, {})
   })
@@ -1128,763 +1147,1115 @@ describe('10: L2: Communication with Failure', () => {
     const errorFlag2 = getErrorFlag(result5.msg.data)
     assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.3] Bit error. Interbyte Data 1-2, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 1-2, Bit 1
-    // Test case ID: PT-CT 38.3
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.3
-    //   byteIndex (int): 1
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.3] Bit error. Interbyte Data 1-2, Bit 1', async () => {})
   test('[PT-CT 38.4] Bit error. Byte 2, Stop bit', async () => {
-    // Test: Bit error. Byte 2, Stop bit
-    // Test case ID: PT-CT 38.4
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.4
-    //   byteIndex (int): 2
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 19,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.5] Bit error. Byte 2, Bit 2', async () => {
-    // Test: Bit error. Byte 2, Bit 2
-    // Test case ID: PT-CT 38.5
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.5
-    //   byteIndex (int): 2
-    //   bitIndex (int): 1
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 12,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.6] Bit error. Interbyte Data 2-3, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 2-3, Bit 1
-    // Test case ID: PT-CT 38.6
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.6
-    //   byteIndex (int): 2
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.6] Bit error. Interbyte Data 2-3, Bit 1', async () => {})
   test('[PT-CT 38.7] Bit error. Byte 3, Stop bit', async () => {
-    // Test: Bit error. Byte 3, Stop bit
-    // Test case ID: PT-CT 38.7
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.7
-    //   byteIndex (int): 3
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 29,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.8] Bit error. Byte 3, Bit 3', async () => {
-    // Test: Bit error. Byte 3, Bit 3
-    // Test case ID: PT-CT 38.8
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.8
-    //   byteIndex (int): 3
-    //   bitIndex (int): 2
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 23,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.9] Bit error. Interbyte Data 3-4, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 3-4, Bit 1
-    // Test case ID: PT-CT 38.9
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.9
-    //   byteIndex (int): 3
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.9] Bit error. Interbyte Data 3-4, Bit 1', async () => {})
   test('[PT-CT 38.10] Bit error. Byte 4, Stop bit', async () => {
-    // Test: Bit error. Byte 4, Stop bit
-    // Test case ID: PT-CT 38.10
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.10
-    //   byteIndex (int): 4
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 39,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.11] Bit error. Byte 4, Bit 6', async () => {
-    // Test: Bit error. Byte 4, Bit 6
-    // Test case ID: PT-CT 38.11
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.11
-    //   byteIndex (int): 4
-    //   bitIndex (int): 5
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 36,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.12] Bit error. Interbyte Data 4-5, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 4-5, Bit 1
-    // Test case ID: PT-CT 38.12
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.12
-    //   byteIndex (int): 4
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.12] Bit error. Interbyte Data 4-5, Bit 1', async () => {})
   test('[PT-CT 38.13] Bit error. Byte 5, Stop bit', async () => {
-    // Test: Bit error. Byte 5, Stop bit
-    // Test case ID: PT-CT 38.13
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.13
-    //   byteIndex (int): 5
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 49,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.14] Bit error. Byte 5, Bit 5', async () => {
-    // Test: Bit error. Byte 5, Bit 5
-    // Test case ID: PT-CT 38.14
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.14
-    //   byteIndex (int): 5
-    //   bitIndex (int): 4
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 45,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.15] Bit error. Interbyte Data 5-6, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 5-6, Bit 1
-    // Test case ID: PT-CT 38.15
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.15
-    //   byteIndex (int): 5
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.15] Bit error. Interbyte Data 5-6, Bit 1', async () => {})
   test('[PT-CT 38.16] Bit error. Byte 6, Stop bit', async () => {
-    // Test: Bit error. Byte 6, Stop bit
-    // Test case ID: PT-CT 38.16
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.16
-    //   byteIndex (int): 6
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 59,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.17] Bit error. Byte 6, Bit 4', async () => {
-    // Test: Bit error. Byte 6, Bit 4
-    // Test case ID: PT-CT 38.17
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.17
-    //   byteIndex (int): 6
-    //   bitIndex (int): 3
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 54,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.18] Bit error. Interbyte Data 6-7, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 6-7, Bit 1
-    // Test case ID: PT-CT 38.18
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.18
-    //   byteIndex (int): 6
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.18] Bit error. Interbyte Data 6-7, Bit 1', async () => {})
   test('[PT-CT 38.19] Bit error. Byte 7, Stop bit', async () => {
-    // Test: Bit error. Byte 7, Stop bit
-    // Test case ID: PT-CT 38.19
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.19
-    //   byteIndex (int): 7
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 69,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.20] Bit error. Byte 7, Bit 7', async () => {
-    // Test: Bit error. Byte 7, Bit 7
-    // Test case ID: PT-CT 38.20
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.20
-    //   byteIndex (int): 7
-    //   bitIndex (int): 6
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 67,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.21] Bit error. Interbyte Data 7-8, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 7-8, Bit 1
-    // Test case ID: PT-CT 38.21
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.21
-    //   byteIndex (int): 7
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.21] Bit error. Interbyte Data 7-8, Bit 1', async () => {})
   test('[PT-CT 38.22] Bit error. Byte 8, Stop bit', async () => {
-    // Test: Bit error. Byte 8, Stop bit
-    // Test case ID: PT-CT 38.22
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.22
-    //   byteIndex (int): 8
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 79,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 38.23] Bit error. Byte 8, Bit 8', async () => {
-    // Test: Bit error. Byte 8, Bit 8
-    // Test case ID: PT-CT 38.23
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.23
-    //   byteIndex (int): 8
-    //   bitIndex (int): 7
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 78,
+        value: 0
+      }
+    })
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === result4.result)
   })
-  test('[PT-CT 38.24] Bit error. Interbyte Data 8-Checksum, Bit 1', async () => {
-    // Test: Bit error. Interbyte Data 8-Checksum, Bit 1
-    // Test case ID: PT-CT 38.24
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.24
-    //   byteIndex (int): 8
-    //   bitIndex (int): 9
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 38.24] Bit error. Interbyte Data 8-Checksum, Bit 1', async () => {})
   test('[PT-CT 38.25] Bit error. Checksum field, Stop bit', async () => {
-    // Test: Bit error. Checksum field, Stop bit
-    // Test case ID: PT-CT 38.25
-    // Function name: LCT21_TestCase_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 38.25
-    //   byteIndex (int): 9
-    //   bitIndex (int): 8
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg3 = FrameMap['TST_FRAME_3']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const clonemsg3 = cloneMsg(msg3)
+    //identify  = 2
+    clonemsg3.data[3] = 2
+    const result3 = await sendLinWithSend(clonemsg3, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 89,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 39] Framing error in header of published frame', async () => {
-    // Test: Framing error in header of published frame
-    // Test case ID: PT-CT 39
-    // Function name: LCT21_TestCase_5_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 39
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4 = FrameMap['TST_FRAME_4_Tx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    //send msg4 with fault inject
+    const result4 = await sendLinWithRecv(msg4, {
+      errorInject: {
+        bit: headerBitLength - 1, //invert the stop bit
+        value: 0
+      }
+    })
+    assert(result4.result)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === false)
   })
   test('[PT-CT 40] Framing error in response field of subscribed frame', async () => {
-    // Test: Framing error in response field of subscribed frame
-    // Test case ID: PT-CT 40
-    // Function name: LCT21_TestCase_5_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 40
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4 = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    //send msg4 with fault inject
+    const result4 = await sendLinWithSend(msg4, {
+      errorInject: {
+        bit: headerBitLength + 9, //invert first byte stop bit
+        value: 0
+      }
+    })
+    assert(result4)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 41] Checksum error by inversion', async () => {
-    // Test: Checksum error by inversion
-    // Test case ID: PT-CT 41
-    // Function name: LCT21_TestCase_5_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 41
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg2 = FrameMap['TST_FRAME_2']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    //send msg4 with fault inject
+    const result4 = await sendLinWithSend(msg2, {
+      errorInject: {
+        bit: headerBitLength + msg2.data.length * 10 + 9, //invert checksum stop bit
+        value: 0
+      }
+    })
+    assert(result4)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 42] Checksum error by carry', async () => {
-    // Test: Checksum error by carry
-    // Test case ID: PT-CT 42
-    // Function name: LCT21_TestCase_5_5
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 42
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg14 = FrameMap['TST_FRAME_14']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    const cloneM14 = cloneMsg(msg14)
+    //send msg4 with fault inject
+    cloneM14.data = Buffer.from([0xff, 0, 0, 0, 0, 0, 0, 0])
+    const result4 = await sendLinWithSend(cloneM14, {
+      checkSum: 0xff
+    })
+    assert(result4)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
 })
 
 describe('11: L2: Event Triggered Frames', () => {
-  test('[PT-CT 43] Event Triggered Frame', async () => {
-    // Test: Event Triggered Frame
-    // Test case ID: PT-CT 43
-    // Function name: LCT21_TestCase_6_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 43
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 44] Event Triggered Frame with collision resolving', async () => {
-    // Test: Event Triggered Frame with collision resolving
-    // Test case ID: PT-CT 44
-    // Function name: LCT21_TestCase_6_2_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 44
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 45] Event Triggered Frame with errors in collision resolving', async () => {
-    // Test: Event Triggered Frame with errors in collision resolving
-    // Test case ID: PT-CT 45
-    // Function name: LCT21_TestCase_6_2_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 45
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 47] Error in Transmitted Frame with Collision', async () => {
-    // Test: Error in Transmitted Frame with Collision
-    // Test case ID: PT-CT 47
-    // Function name: LCT21_TestCase_6_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 47
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 43] Event Triggered Frame', async () => {})
+  test.skip('[PT-CT 44] Event Triggered Frame with collision resolving', async () => {})
+  test.skip('[PT-CT 45] Event Triggered Frame with errors in collision resolving', async () => {})
+  test.skip('[PT-CT 47] Error in Transmitted Frame with Collision', async () => {})
 })
 
 describe('12: NCNM: Status Management', () => {
   test('[PT-CT 48] Error in Received Frame', async () => {
-    // Test: Error in Received Frame
-    // Test case ID: PT-CT 48
-    // Function name: LCT21_TestCase_7_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 48
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg1 = FrameMap['TST_FRAME_1']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    //send msg4 with fault inject
+
+    const result4 = await sendLinWithSend(msg1, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+    assert(result4)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 49.1] Error in Transmitted Frame. Inverted checksum', async () => {
-    // Test: Error in Transmitted Frame. Inverted checksum
-    // Test case ID: PT-CT 49.1
-    // Function name: LCT21_TestCase_7_2_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 49.1
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    const result3 = await sendLinWithSend(msg2, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 89,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 49.2] Error in Transmitted Frame. Inverted stop bit of Byte 1', async () => {
-    // Test: Error in Transmitted Frame. Inverted stop bit of Byte 1
-    // Test case ID: PT-CT 49.2
-    // Function name: LCT21_TestCase_7_2_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 49.2
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg2 = FrameMap['TST_FRAME_2']
+    const msg6 = FrameMap['TST_FRAME_6']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+
+    const result3 = await sendLinWithSend(msg2, {})
+    assert(result3)
+    const result4 = await sendLinWithRecv(msg6, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+    assert(result4.result)
+
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === true)
   })
   test('[PT-CT 50] Response error bit handling', async () => {
-    // Test: Response error bit handling
-    // Test case ID: PT-CT 50
-    // Function name: LCT21_TestCase_7_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 50
-    //TODO: Implementation pending
+    const msg7 = FrameMap['TST_FRAME_7']
+    const msg4 = FrameMap['TST_FRAME_4_Rx']
+
+    // 第一次发送TST_FRAME_7 - 可能包含错误位
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result, 'First TST_FRAME_7 should receive response')
+    assert(result1.msg != undefined, 'First response should contain data')
+
+    // 检查第一次响应中的错误位状态（可能为true或false）
+    const firstErrorFlag = getErrorFlag(result1.msg.data)
+
+    // 第二次发送TST_FRAME_7 - 确保response_error_bit被清除
+    const result2 = await sendLinWithRecv(msg7, {})
+    assert(result2.result, 'Second TST_FRAME_7 should receive response')
+    assert(result2.msg != undefined, 'Second response should contain data')
+
+    // 验证第二次响应中的错误位必须被清除（errorBit:FALSE）
+    const secondErrorFlag = getErrorFlag(result2.msg.data)
+    assert(
+      secondErrorFlag === false,
+      'Response error bit should be cleared after second TST_FRAME_7'
+    )
+    //send msg4 with fault inject
+    const result4 = await sendLinWithSend(msg4, {
+      errorInject: {
+        bit: headerBitLength + msg4.data.length + 9, //invert checksum stop bit
+        value: 0
+      }
+    })
+    assert(result4)
+    //then send correct
+    const result6 = await sendLinWithSend(msg4, {})
+    assert(result6)
+    //send msg7 again
+    const result5 = await sendLinWithRecv(msg7, {})
+    assert(result5.result)
+    assert(result5.msg != undefined)
+    const errorFlag2 = getErrorFlag(result5.msg.data)
+    assert(errorFlag2 === false)
   })
 })
 
 describe('13: NCNM: Sleep/Wakeup tests', () => {
   test("[PT-CT 52.1] Receive 'Goto Sleep Command' with data bytes 2 to 8 filled with 0xFF", async () => {
-    // Test: Receive \'Goto Sleep Command\' with data bytes 2 to 8 filled with 0xFF
-    // Test case ID: PT-CT 52.1
-    // Function name: LCT21_TestCase_8_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 52.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    const msg9 = FrameMap['TST_FRAME_9']
+    const cloneMsg9 = cloneMsg(msg9)
+    cloneMsg9.data = Buffer.from([0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
+    const msg7 = FrameMap['TST_FRAME_7']
+    const result = await sendLinWithSend(cloneMsg9, {})
+    assert(result)
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result == false)
   })
   test("[PT-CT 52.2] Receive 'Goto Sleep Command' with data bytes 2 to 8 not filled with 0xFF", async () => {
-    // Test: Receive \'Goto Sleep Command\' with data bytes 2 to 8 not filled with 0xFF
-    // Test case ID: PT-CT 52.2
-    // Function name: LCT21_TestCase_8_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 52.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    const msg9 = FrameMap['TST_FRAME_9']
+    const cloneMsg9 = cloneMsg(msg9)
+    cloneMsg9.data = Buffer.from([0, 1, 2, 3, 4, 5, 6, 7])
+    const msg7 = FrameMap['TST_FRAME_7']
+    const result = await sendLinWithSend(cloneMsg9, {})
+    assert(result)
+    const result1 = await sendLinWithRecv(msg7, {})
+    assert(result1.result == false)
   })
   test('[PT-CT 54.1] Receive a Wake up signal - 250us', async () => {
-    // Test: Receive a Wake up signal - 250us
-    // Test case ID: PT-CT 54.1
-    // Function name: LCT21_TestCase_8_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 54.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
+    //await IUT enter sleep
+    await delay(IUTSleepTime)
+    await sendWakeUp(5)
+    await delay(100)
+    const msg2 = FrameMap['TST_FRAME_2']
+    await sendLinWithSend(msg2, {})
+    const msg6 = FrameMap['TST_FRAME_6']
+    await sendLinWithRecv(msg6, {})
   })
   test('[PT-CT 54.2] Receive a Wake up signal - 5ms', async () => {
-    // Test: Receive a Wake up signal - 5ms
-    // Test case ID: PT-CT 54.2
-    // Function name: LCT21_TestCase_8_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 54.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
+    await delay(IUTSleepTime)
+    await sendWakeUp(100)
+    await delay(100)
+    const msg2 = FrameMap['TST_FRAME_2']
+    await sendLinWithSend(msg2, {})
+    const msg6 = FrameMap['TST_FRAME_6']
+    await sendLinWithRecv(msg6, {})
   })
   test('[PT-CT 54.3] Receive a Wake up signal - 5 nominal bit times', async () => {
-    // Test: Receive a Wake up signal - 5 nominal bit times
-    // Test case ID: PT-CT 54.3
-    // Function name: LCT21_TestCase_8_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 54.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
+    await delay(IUTSleepTime)
+    await sendWakeUp(100)
+    await delay(5)
+    const msg2 = FrameMap['TST_FRAME_2']
+    await sendLinWithSend(msg2, {})
+    const msg6 = FrameMap['TST_FRAME_6']
+    await sendLinWithRecv(msg6, {})
   })
-  test('[PT-CT 55] Send a Wake up signal', async () => {
-    // Test: Send a Wake up signal
-    // Test case ID: PT-CT 55
-    // Function name: LCT21_TestCase_8_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 55
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 56] Send a block of wake up signals', async () => {
-    // Test: Send a block of wake up signals
-    // Test case ID: PT-CT 56
-    // Function name: LCT21_TestCase_8_5_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 56
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 57] Wait after one block of wakeup signals', async () => {
-    // Test: Wait after one block of wakeup signals
-    // Test case ID: PT-CT 57
-    // Function name: LCT21_TestCase_8_5_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 57
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 58] Send a Wake up signal, Frame header from a Master following', async () => {
-    // Test: Send a Wake up signal, Frame header from a Master following
-    // Test case ID: PT-CT 58
-    // Function name: LCT21_TestCase_8_5_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 58
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.1] Sleep Mode after Bus Idle, recessive level after Slave Response', async () => {
-    // Test: Sleep Mode after Bus Idle, recessive level after Slave Response
-    // Test case ID: PT-CT 59.1
-    // Function name: LCT21_TestCase_8_6_1_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.1
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.2] Sleep Mode after Bus Idle, recessive level after wake up', async () => {
-    // Test: Sleep Mode after Bus Idle, recessive level after wake up
-    // Test case ID: PT-CT 59.2
-    // Function name: LCT21_TestCase_8_6_1_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.2
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.3] Sleep Mode after Bus Idle, dominant level after wake up', async () => {
-    // Test: Sleep Mode after Bus Idle, dominant level after wake up
-    // Test case ID: PT-CT 59.3
-    // Function name: LCT21_TestCase_8_6_1_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.3
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.4] Sleep Mode after Bus Idle, recessive level after Break and Sync fields', async () => {
-    // Test: Sleep Mode after Bus Idle, recessive level after Break and Sync fields
-    // Test case ID: PT-CT 59.4
-    // Function name: LCT21_TestCase_8_6_1_4
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.4
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.5] Sleep Mode after Bus Idle, dominant level after Break and Sync fields', async () => {
-    // Test: Sleep Mode after Bus Idle, dominant level after Break and Sync fields
-    // Test case ID: PT-CT 59.5
-    // Function name: LCT21_TestCase_8_6_1_5
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.5
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.6] Sleep Mode after Bus Idle, recessive level after response error in master request', async () => {
-    // Test: Sleep Mode after Bus Idle, recessive level after response error in master request
-    // Test case ID: PT-CT 59.6
-    // Function name: LCT21_TestCase_8_6_1_6
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.6
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 59.7] Sleep Mode after Bus Idle, dominant level after response error in master request', async () => {
-    // Test: Sleep Mode after Bus Idle, dominant level after response error in master request
-    // Test case ID: PT-CT 59.7
-    // Function name: LCT21_TestCase_8_6_1_7
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 59.7
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 60] Sleep Mode after Bus Idle, recessive level after power up wake up', async () => {
-    // Test: Sleep Mode after Bus Idle, recessive level after power up wake up
-    // Test case ID: PT-CT 60
-    // Function name: LCT21_TestCase_8_6_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 60
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 55] Send a Wake up signal', async () => {})
+  test.skip('[PT-CT 56] Send a block of wake up signals', async () => {})
+  test.skip('[PT-CT 57] Wait after one block of wakeup signals', async () => {})
+  test.skip('[PT-CT 58] Send a Wake up signal, Frame header from a Master following', async () => {})
+  test.skip('[PT-CT 59.1] Sleep Mode after Bus Idle, recessive level after Slave Response', async () => {})
+  test.skip('[PT-CT 59.2] Sleep Mode after Bus Idle, recessive level after wake up', async () => {})
+  test.skip('[PT-CT 59.3] Sleep Mode after Bus Idle, dominant level after wake up', async () => {})
+  test.skip('[PT-CT 59.4] Sleep Mode after Bus Idle, recessive level after Break and Sync fields', async () => {})
+  test.skip('[PT-CT 59.5] Sleep Mode after Bus Idle, dominant level after Break and Sync fields', async () => {})
+  test.skip('[PT-CT 59.6] Sleep Mode after Bus Idle, recessive level after response error in master request', async () => {})
+  test.skip('[PT-CT 59.7] Sleep Mode after Bus Idle, dominant level after response error in master request', async () => {})
+  test.skip('[PT-CT 60] Sleep Mode after Bus Idle, recessive level after power up wake up', async () => {})
   test('[PT-CT 61] Timeout after Bus Idle', async () => {
-    // Test: Timeout after Bus Idle
-    // Test case ID: PT-CT 61
-    // Function name: LCT21_TestCase_8_7
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 61
-    //TODO: Implementation pending
+    const msg2 = FrameMap['TST_FRAME_2']
+    await sendLinWithSend(msg2, {})
+    const msg6 = FrameMap['TST_FRAME_6']
+    const result = await sendLinWithRecv(msg6, {})
+    assert(result.result)
+    await delay(4000)
+
+    await sendLinWithSend(msg2, {})
+
+    const result1 = await sendLinWithRecv(msg6, {})
+    assert(result1.result)
   })
 })
 
 describe('14: NCNM: Sleep mode after bus idle', () => {})
 
 describe('15: NCNM: Node Configuration', () => {
-  test('[PT-CT 62] Frame ID range assignment with indirect response', async () => {
-    // Test: Frame ID range assignment with indirect response
-    // Test case ID: PT-CT 62
-    // Function name: LCT21_TestCase_9_1_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 62
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 63] Frame ID range unassignment with indirect response', async () => {
-    // Test: Frame ID range unassignment with indirect response
-    // Test case ID: PT-CT 63
-    // Function name: LCT21_TestCase_9_1_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 63
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 64] LIN Product ID with direct response', async () => {
-    // Test: LIN Product ID with direct response
-    // Test case ID: PT-CT 64
-    // Function name: LCT21_TestCase_9_2_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 64
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 65] LIN Product ID with delayed response', async () => {
-    // Test: LIN Product ID with delayed response
-    // Test case ID: PT-CT 65
-    // Function name: LCT21_TestCase_9_2_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 65
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 62] Frame ID range assignment with indirect response', async () => {})
+  test.skip('[PT-CT 63] Frame ID range unassignment with indirect response', async () => {})
+  test.skip('[PT-CT 64] LIN Product ID with direct response', async () => {})
+  test.skip('[PT-CT 65] LIN Product ID with delayed response', async () => {})
 })
 
 describe('16: NCNM: Wildcards', () => {
-  test('[PT-CT 66.1] Request with NAD as wildcard', async () => {
-    // Test: Request with NAD as wildcard
-    // Test case ID: PT-CT 66.1
-    // Function name: LCT21_TestCase_10_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 66.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 66.2] Request with Supplier ID as wildcard', async () => {
-    // Test: Request with Supplier ID as wildcard
-    // Test case ID: PT-CT 66.2
-    // Function name: LCT21_TestCase_10_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 66.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 66.3] Request with Function ID as wildcard', async () => {
-    // Test: Request with Function ID as wildcard
-    // Test case ID: PT-CT 66.3
-    // Function name: LCT21_TestCase_10_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 66.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 66.4] Request with Supplier ID and Function ID as wildcard', async () => {
-    // Test: Request with Supplier ID and Function ID as wildcard
-    // Test case ID: PT-CT 66.4
-    // Function name: LCT21_TestCase_10_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 66.4
-    //   SubTestCaseNr (int): 4
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 66.1] Request with NAD as wildcard', async () => {})
+  test.skip('[PT-CT 66.2] Request with Supplier ID as wildcard', async () => {})
+  test.skip('[PT-CT 66.3] Request with Function ID as wildcard', async () => {})
+  test.skip('[PT-CT 66.4] Request with Supplier ID and Function ID as wildcard', async () => {})
 })
 
 describe('17: NCNM: Read by Identifier command', () => {
-  test('[PT-CT 67] Correct addressing. All Identifiers', async () => {
-    // Test: Correct addressing. All Identifiers
-    // Test case ID: PT-CT 67
-    // Function name: LCT21_TestCase_11_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 67
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 68.1] Incorrect addressing; Incorrect NAD', async () => {
-    // Test: Incorrect addressing; Incorrect NAD
-    // Test case ID: PT-CT 68.1
-    // Function name: LCT21_TestCase_11_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 68.1
-    //   SubTestCaseNr (int): 1
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 68.2] Incorrect addressing; Incorrect Supplier ID MSB', async () => {
-    // Test: Incorrect addressing; Incorrect Supplier ID MSB
-    // Test case ID: PT-CT 68.2
-    // Function name: LCT21_TestCase_11_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 68.2
-    //   SubTestCaseNr (int): 2
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 68.3] Incorrect addressing; Incorrect Supplier ID LSB', async () => {
-    // Test: Incorrect addressing; Incorrect Supplier ID LSB
-    // Test case ID: PT-CT 68.3
-    // Function name: LCT21_TestCase_11_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 68.3
-    //   SubTestCaseNr (int): 3
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 68.4] Incorrect addressing; Incorrect Function ID MSB', async () => {
-    // Test: Incorrect addressing; Incorrect Function ID MSB
-    // Test case ID: PT-CT 68.4
-    // Function name: LCT21_TestCase_11_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 68.4
-    //   SubTestCaseNr (int): 4
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 68.5] Incorrect addressing; Incorrect Function ID LSB', async () => {
-    // Test: Incorrect addressing; Incorrect Function ID LSB
-    // Test case ID: PT-CT 68.5
-    // Function name: LCT21_TestCase_11_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 68.5
-    //   SubTestCaseNr (int): 5
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 67] Correct addressing. All Identifiers', async () => {})
+  test.skip('[PT-CT 68.1] Incorrect addressing; Incorrect NAD', async () => {})
+  test.skip('[PT-CT 68.2] Incorrect addressing; Incorrect Supplier ID MSB', async () => {})
+  test.skip('[PT-CT 68.3] Incorrect addressing; Incorrect Supplier ID LSB', async () => {})
+  test.skip('[PT-CT 68.4] Incorrect addressing; Incorrect Function ID MSB', async () => {})
+  test.skip('[PT-CT 68.5] Incorrect addressing; Incorrect Function ID LSB', async () => {})
 })
 
 describe('18: NCNM: NAD Assignment', () => {
-  test('[PT-CT 69] NAD Assignment - followed by Read by Identifier command', async () => {
-    // Test: NAD Assignment - followed by Read by Identifier command
-    // Test case ID: PT-CT 69
-    // Function name: LCT21_TestCase_12_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 69
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 70] NAD Assignment - with positive response', async () => {
-    // Test: NAD Assignment - with positive response
-    // Test case ID: PT-CT 70
-    // Function name: LCT21_TestCase_12_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 70
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 71] Conditional change NAD', async () => {
-    // Test: Conditional change NAD
-    // Test case ID: PT-CT 71
-    // Function name: LCT21_TestCase_12_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 71
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 69] NAD Assignment - followed by Read by Identifier command', async () => {})
+  test.skip('[PT-CT 70] NAD Assignment - with positive response', async () => {})
+  test.skip('[PT-CT 71] Conditional change NAD', async () => {})
 })
 
 describe('19: NCNM: Transport Layer', () => {
-  test('[PT-CT 72] Transport layer Functional Request', async () => {
-    // Test: Transport layer Functional Request
-    // Test case ID: PT-CT 72
-    // Function name: LCT21_TestCase_13_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 72
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 73] Aborting diagnostic communication with new diagnostic request', async () => {
-    // Test: Aborting diagnostic communication with new diagnostic request
-    // Test case ID: PT-CT 73
-    // Function name: LCT21_TestCase_13_2_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 73
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 74] Receiving segmented request as specified', async () => {
-    // Test: Receiving segmented request as specified
-    // Test case ID: PT-CT 74
-    // Function name: LCT21_TestCase_13_3
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 74
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 75] Receiving segmented request if user frames between request parts', async () => {
-    // Test: Receiving segmented request if user frames between request parts
-    // Test case ID: PT-CT 75
-    // Function name: LCT21_TestCase_13_4_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 75
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 76] Receiving segmented request with functional request between request parts', async () => {
-    // Test: Receiving segmented request with functional request between request parts
-    // Test case ID: PT-CT 76
-    // Function name: LCT21_TestCase_13_4_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 76
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 77] Ignoring segmented requests after timeout', async () => {
-    // Test: Ignoring segmented requests after timeout
-    // Test case ID: PT-CT 77
-    // Function name: LCT21_TestCase_13_5_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 77
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 78] Observing Transport Layer timeout', async () => {
-    // Test: Observing Transport Layer timeout
-    // Test case ID: PT-CT 78
-    // Function name: LCT21_TestCase_13_5_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 78
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 79] Ignoring segmented requests with wrong sequence numbering', async () => {
-    // Test: Ignoring segmented requests with wrong sequence numbering
-    // Test case ID: PT-CT 79
-    // Function name: LCT21_TestCase_13_6
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 79
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 80] Responding with correct segmented response', async () => {
-    // Test: Responding with correct segmented response
-    // Test case ID: PT-CT 80
-    // Function name: LCT21_TestCase_13_7
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 80
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 81] Sending segmented response with user frames between response parts', async () => {
-    // Test: Sending segmented response with user frames between response parts
-    // Test case ID: PT-CT 81
-    // Function name: LCT21_TestCase_13_8_1
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 81
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 82] Sending segmented response with functional request between response parts', async () => {
-    // Test: Sending segmented response with functional request between response parts
-    // Test case ID: PT-CT 82
-    // Function name: LCT21_TestCase_13_8_2
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 82
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 83] Not responding to 0x3D if there is no request before', async () => {
-    // Test: Not responding to 0x3D if there is no request before
-    // Test case ID: PT-CT 83
-    // Function name: LCT21_TestCase_13_9
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 83
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 84] Not responding to 0x3D if the response is already sent', async () => {
-    // Test: Not responding to 0x3D if the response is already sent
-    // Test case ID: PT-CT 84
-    // Function name: LCT21_TestCase_13_10
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 84
-    //TODO: Implementation pending
-  })
-  test('[PT-CT 85] Aborting segmented response after timeout', async () => {
-    // Test: Aborting segmented response after timeout
-    // Test case ID: PT-CT 85
-    // Function name: LCT21_TestCase_13_11
-    // Parameters:
-    //   TestcaseNr (string): PT-CT 85
-    //TODO: Implementation pending
-  })
+  test.skip('[PT-CT 72] Transport layer Functional Request', async () => {})
+  test.skip('[PT-CT 73] Aborting diagnostic communication with new diagnostic request', async () => {})
+  test.skip('[PT-CT 74] Receiving segmented request as specified', async () => {})
+  test.skip('[PT-CT 75] Receiving segmented request if user frames between request parts', async () => {})
+  test.skip('[PT-CT 76] Receiving segmented request with functional request between request parts', async () => {})
+  test.skip('[PT-CT 77] Ignoring segmented requests after timeout', async () => {})
+  test.skip('[PT-CT 78] Observing Transport Layer timeout', async () => {})
+  test.skip('[PT-CT 79] Ignoring segmented requests with wrong sequence numbering', async () => {})
+  test.skip('[PT-CT 80] Responding with correct segmented response', async () => {})
+  test.skip('[PT-CT 81] Sending segmented response with user frames between response parts', async () => {})
+  test.skip('[PT-CT 82] Sending segmented response with functional request between response parts', async () => {})
+  test.skip('[PT-CT 83] Not responding to 0x3D if there is no request before', async () => {})
+  test.skip('[PT-CT 84] Not responding to 0x3D if the response is already sent', async () => {})
+  test.skip('[PT-CT 85] Aborting segmented response after timeout', async () => {})
 })
-

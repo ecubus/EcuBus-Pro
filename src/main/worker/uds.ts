@@ -39,7 +39,7 @@ export type { LinAddr } from '../share/lin'
 export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
-import assert from 'node:assert'
+import assert, { AssertionError } from 'node:assert'
 
 /**
  * Node.js built-in assertion library for testing.
@@ -92,8 +92,35 @@ export { assert }
 
 import { test as nodeTest, TestContext } from 'node:test'
 
+export { getCheckSum as getLinCheckSum } from '../share/lin'
+
+let init = false
+let initfunc: () => void = () => {}
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
+
+/**
+ * 辅助函数：保留原始错误的堆栈信息
+ * @param fn 要执行的函数
+ * @returns 执行结果
+ */
+async function preserveErrorStack<T>(fn: () => T | Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (error) {
+    // 保留原始错误的堆栈信息，但过滤掉 uds.ts 相关的帧
+    if (error instanceof Error) {
+      const stack = error.stack?.split('\n')
+      //fisrt at line
+      const atLine = stack?.find((line) => /\d+:\d+/.test(line))
+
+      const newError = new Error(`${error.message}, pos: ${atLine}`)
+
+      throw newError
+    }
+    throw error
+  }
+}
 
 /**
  * Test function for writing test cases with conditional execution based on enable control.
@@ -138,7 +165,19 @@ const testEnableControl: Record<number, boolean> = {}
 
 export function test(name: string, fn: () => void | Promise<void>) {
   nodeTest(name, async (t) => {
-    t.before(() => {
+    if (!init) {
+      try {
+        await initfunc()
+      } catch (e) {
+        console.error(`Util.Init function failed: ${e}`)
+      }
+      init = true
+    }
+    t.before(async () => {
+      if (testEnableControl[testCnt] != true) {
+        t.skip()
+        return
+      }
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
@@ -148,7 +187,8 @@ export function test(name: string, fn: () => void | Promise<void>) {
 
     if (testEnableControl[testCnt] != true) {
       t.skip()
-      return
+    } else {
+      return preserveErrorStack(fn)
     }
 
     // 直接调用用户函数，不进行任何包装
@@ -215,10 +255,10 @@ import {
  * ```
  */
 export function beforeEach(fn: () => void | Promise<void>) {
-  nodeBeforeEach(() => {
+  nodeBeforeEach(async () => {
     // Use current testCnt to determine if this hook should run
     if (testEnableControl[testCnt] === true) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -255,10 +295,10 @@ export function beforeEach(fn: () => void | Promise<void>) {
  * ```
  */
 export function afterEach(fn: () => void | Promise<void>) {
-  nodeAfterEach(() => {
+  nodeAfterEach(async () => {
     // Use current testCnt to determine if this hook should run
     if (testEnableControl[testCnt] === true) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -295,11 +335,11 @@ export function afterEach(fn: () => void | Promise<void>) {
  * ```
  */
 export function before(fn: () => void | Promise<void>) {
-  nodeBefore(() => {
+  nodeBefore(async () => {
     // Check if any test is enabled - if so, run the before hook
     const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
     if (hasEnabledTests) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -337,11 +377,11 @@ export function before(fn: () => void | Promise<void>) {
  * ```
  */
 export function after(fn: () => void | Promise<void>) {
-  nodeAfter(() => {
+  nodeAfter(async () => {
     // Check if any test was enabled - if so, run the after hook
     const hasEnabledTests = Object.values(testEnableControl).some((enabled) => enabled === true)
     if (hasEnabledTests) {
-      return fn()
+      return preserveErrorStack(fn)
     }
   })
 }
@@ -410,12 +450,12 @@ const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
  * ```
  */
 export function describe(name: string, fn: () => void | Promise<void>) {
-  selfDescribe(name, (t) => {
+  selfDescribe(name, async (t) => {
     before(() => {
       testCnt++
     })
 
-    return fn()
+    return preserveErrorStack(fn)
   })
 }
 
@@ -1705,7 +1745,12 @@ export class UtilClass {
    */
   Init(fc: () => void | Promise<void>) {
     this.event.clearListeners('__varFc' as any)
-    this.event.on('__varFc' as any, fc)
+    if (process.env.MODE == 'test') {
+      this.event.on('__varFc' as any, () => {})
+      initfunc = fc
+    } else {
+      this.event.on('__varFc' as any, fc)
+    }
   }
   /**
    * Register a function, this function will be invoked when UDSClass is terminated.
@@ -1881,8 +1926,9 @@ export async function setVar<T extends keyof VariableMap>(
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
       id: id,
-      event: 'setVar',
+      event: 'varApi',
       data: {
+        method: 'setVar',
         name,
         value
       }
@@ -1891,6 +1937,37 @@ export async function setVar<T extends keyof VariableMap>(
     id++
   })
 
+  return await p
+}
+
+/**
+ * Get a variable value
+ *
+ * @category Variable
+ * @param {string} varName - The name of the variable to get
+ * @returns {Promise<VarItem>} - Returns a promise that resolves with the variable value and metadata
+ *
+ * @example
+ * ```ts
+ * // Get a variable value
+ * const var1 = await getVar('namespace.var1');
+ * console.log(var1.value); // Access the value
+ * console.log(var1.type); // Access the type
+ * ```
+ */
+export async function getVar<T extends keyof VariableMap>(varName: T): Promise<VariableMap[T]> {
+  const p: Promise<VariableMap[T]> = new Promise<VariableMap[T]>((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'varApi',
+      data: {
+        method: 'getVar',
+        name: varName
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
   return await p
 }
 
@@ -2146,6 +2223,69 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
         method: 'setDuty',
         duty: value.duty,
         device: value.device
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}
+/**
+ * Get a frame from database by name
+ * 
+ * @category LIN
+ * @param {('lin')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * 
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * 
+ * @example
+ * ```ts
+ * // Get a LIN frame
+ * const linFrame = getFrameFromDB('lin', 'myLinDb', 'Frame1');
+
+ */
+export async function getFrameFromDB(
+  dbType: 'lin',
+  dbName: string,
+  frameName: string
+): Promise<LinMsg>
+
+/**
+ * Get a frame from database by name
+ *
+ * @category CAN
+ * @param {('can')} dbType - The type of database
+ * @param {string} dbName - The name of the database
+ * @param {string} frameName - The name of the frame to retrieve
+ * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ *
+ * @example
+ * ```ts
+ * // Get a CAN frame
+ * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
+ * ```
+ */
+export async function getFrameFromDB(
+  dbType: 'can',
+  dbName: string,
+  frameName: string
+): Promise<CanMessage>
+// Implementation
+export async function getFrameFromDB(
+  dbType: 'lin' | 'can',
+  dbName: string,
+  frameName: string
+): Promise<LinMsg | CanMessage> {
+  const p: Promise<LinMsg | CanMessage> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: dbType == 'can' ? 'canApi' : 'linApi',
+      data: {
+        method: 'getFrameFromDB',
+        dbName,
+        frameName
       }
     })
     emitMap.set(id, { resolve, reject })

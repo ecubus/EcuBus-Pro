@@ -194,7 +194,6 @@ export class LinCable extends LinBase {
             ts: ts,
             ...this.pendingPromise.sendMsg
           }
-
           if (ret == 0) {
             //ok, but not real ok
             const breakLength = data[1]
@@ -228,7 +227,11 @@ export class LinCable extends LinBase {
               return
             }
             if (breakLength < 13 || breakLength > 26) {
-              this.log.error(ts, 'break length is too short', msg)
+              this.log.error(
+                ts,
+                `break length is not valid, but got data ${[...msg.data].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`,
+                msg
+              )
 
               this.pendingPromise.reject(
                 new LinError(
@@ -273,7 +276,7 @@ export class LinCable extends LinBase {
 
             const checksum = getCheckSum(val.subarray(0, val.length - 1), checksumType, pid)
             if (checksum != val[val.length - 1]) {
-              const errorMsg = `checksum error, got ${val[val.length - 1]}, expected ${checksum}`
+              const errorMsg = `checksum error, got ${val[val.length - 1]}, expected ${checksum}, data:${[...val].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`
               this.log.error(ts, errorMsg, msg)
 
               this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, errorMsg))
@@ -283,7 +286,6 @@ export class LinCable extends LinBase {
             }
 
             this.lastFrame.set(id, msg)
-
             this.log.linBase(msg)
             this.event.emit(`${id}`, msg)
             this.pendingPromise.resolve(msg)
@@ -382,12 +384,15 @@ export class LinCable extends LinBase {
                 msg.name = frameName
                 msg.workNode = publish
                 msg.isEvent = isEvent
+                msg.database = this.db.id
+              } else {
+                msg.database = undefined
               }
             }
             //check checksum
             const checksum = getCheckSum(val, msg.checksumType, getPID(id))
             if (checksum != data[data.length - 1]) {
-              const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}`
+              const msg = `Checksum error, got ${data[data.length - 1]}, expected ${checksum}, data:${[...val].map((b) => b.toString(16).padStart(2, '0')).join(' ')}`
               this.log.error(ts, msg)
             } else if (val.length < originalLen) {
               const msgStr = `No enough data, got ${val.length}, expected ${originalLen}`
@@ -411,19 +416,32 @@ export class LinCable extends LinBase {
             const msg = `Sync error, got ${data[2]}, expected 0x55`
             this.log.error(ts, msg)
           } else if (data[0] == 2) {
-            this.log.error(ts, 'slave no response')
+            this.log.error(ts, 'slave no response', {
+              frameId: data[1],
+              data: Buffer.alloc(0),
+              direction: LinDirection.SEND,
+              checksumType:
+                data[1] == 0x3c || data[1] == 0x3d
+                  ? LinChecksumType.CLASSIC
+                  : LinChecksumType.ENHANCED,
+              checksum: 0,
+              ts: ts
+            })
           } else if (data[0] == 3) {
             //data format is not valid
-            const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte (start form sync phase,0:means sync phase,1:means PID phase)`
-            this.log.error(ts, msg)
-          } else if (data[0] == 0x82) {
-            //no enough data
-            const id = data[1]
-            const msg = this.slaveEntry.get(id)
-            if (msg) {
-              const msgStr = `No enough data, got ${data.length - 3}, expected ${msg.data.length}`
-              this.log.error(ts, msgStr)
-            }
+
+            const msg = `Data format is not valid, error stop bit occur in ${data.length - 2} byte`
+            this.log.error(ts, msg, {
+              frameId: data[1],
+              data: data.subarray(2, data.length - 1),
+              direction: LinDirection.SEND,
+              checksumType:
+                data[1] == 0x3c || data[1] == 0x3d
+                  ? LinChecksumType.CLASSIC
+                  : LinChecksumType.ENHANCED,
+              checksum: 0,
+              ts: ts
+            })
           } else {
             //unknown error
             const msg = `Unknown error, ret:${data[1]}`
@@ -689,4 +707,3 @@ export class LinCable extends LinBase {
     })
   }
 }
-

@@ -8,7 +8,7 @@ import { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
 import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
-import { setVar as setVarMain, setVarByKey } from './var'
+import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -531,6 +531,9 @@ export class VarLOG {
         uuid: this.id
       })
     }
+  }
+  getVar(name: string): number | string | number[] {
+    return getVarMain(name)
   }
   close() {
     this.log.close()

@@ -32,9 +32,10 @@ type HandlerMap = {
       value: number | number[]
     }
   ) => void
-  setVar: (
+  varApi: (
     pool: UdsTester,
     data: {
+      method: 'getVar' | 'setVar'
       name: string
       value: number | number[] | string
     }
@@ -53,6 +54,7 @@ type HandlerMap = {
       device?: string
     }
   ) => void
+  canApi: (pool: UdsTester, data: ApiGetFrameFromDB) => Promise<any>
   linApi: (pool: UdsTester, data: linApiStartSch | linApiStopSch) => void
   pwmApi: (pool: UdsTester, data: pwmApiSetDuty) => void
 }
@@ -67,6 +69,11 @@ export type linApiStartSch = {
   schName: string
   activeCtrl?: boolean[]
   slot?: number
+}
+export type ApiGetFrameFromDB = {
+  method: 'getFrameFromDB'
+  dbName: string
+  frameName: string
 }
 export type linApiStopSch = {
   method: 'stopSch'

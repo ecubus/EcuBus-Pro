@@ -670,7 +670,7 @@ const buildStatus = ref<string | undefined>()
 const buildLoading = ref(false)
 
 function refreshBuildStatus() {
-  if (model.value.script) {
+  if (model.value && model.value.script) {
     window.electron.ipcRenderer
       .invoke(
         'ipc-get-build-status',
@@ -1560,4 +1560,3 @@ async function chooseReportPath() {
   padding: 0;
 }
 </style>
-

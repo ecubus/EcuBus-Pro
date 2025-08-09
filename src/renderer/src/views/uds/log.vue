@@ -335,15 +335,18 @@ function testLog(
       if (testId.value != undefined && !testId.value.includes(key)) {
         continue
       }
-      let file = item.message.data.data.file
-      if (file) {
-        file = window.path.relative(project.projectInfo.path, file)
-      }
+      // let file = item.message.data.data.file
+      // if (file) {
+      //   file = window.path.relative(project.projectInfo.path, file)
+      // }
+      // Extract error description and first "at" entry only
+      const errorMessage = item.message.data.data.details.error.message
+
       logData.push({
         time: new Date().toLocaleTimeString(),
         label: item.message.data.data.name,
         level: 'error',
-        message: `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, file: ${file}:${item.message.data.data.line}, details: ${item.message.data.data.details.error.message} -----`,
+        message: `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, details: ${errorMessage} -----`,
         id: cnt++
       })
     } else if (item.message.data.type == 'test:diagnostic') {

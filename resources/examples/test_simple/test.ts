@@ -1,13 +1,6 @@
-import {
-  describe,
-  test,
-  assert,
-  CanMessage,
-  DiagResponse,
-  DiagRequest,
-  beforeEach,
-  afterEach
-} from 'ECB'
+import { describe, test, CanMessage, DiagResponse, DiagRequest, beforeEach, afterEach } from 'ECB'
+
+import assert from 'assert'
 
 /**
  * Utility function to wait for a specific CAN message
@@ -112,6 +105,6 @@ describe('BeforeEach/AfterEach Test', () => {
   // Test case that fails immediately
   test('Failing test after beforeEach', async () => {
     await delay(1000) // Simulate some delay
-    assert(false, 'This test should fail')
+    assert(false, 'This test should fail1')
   })
 })

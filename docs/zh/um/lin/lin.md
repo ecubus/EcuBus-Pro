@@ -90,3 +90,7 @@ LIN 是一种经济高效且确定性的通信协议，专为连接电子控制�
 4. **节点模拟**
    当Node配置了网络节点后，会自动模拟Node发送信号。
    比如，当设备Lin工作为Master模式，Node1配置为`Motor2`Slave网络节点，那么当收到`Motor2`的请求时，Node1会自动响应这一帧，给出Response。
+
+## 演示视频
+
+<iframe style="width: 100%; height: 400px;" src="//player.bilibili.com/player.html?isOutside=true&aid=114990216386999&bvid=BV15FtkzhEdr&cid=31555585022&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>

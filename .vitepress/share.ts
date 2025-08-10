@@ -12,6 +12,7 @@ export const shared = defineConfig({
     'docs/zh/:rest*': 'zh/docs/:rest*',
     'README.md': 'index.md',
     'README.zh.md': 'zh/index.md',
+    'resources/examples/:qqq/:slug*.zh.md': 'zh/examples/:qqq/:slug*.md',
     'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
   },
 

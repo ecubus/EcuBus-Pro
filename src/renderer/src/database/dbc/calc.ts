@@ -213,26 +213,37 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
       startBitInByte = 0
     }
   } else {
-    // Motorola格式 (Big Endian)
-    let startByte = Math.floor(signal.startBit / 8)
-    let startBitInByte = signal.startBit % 8
+    // Motorola格式 (Big Endian) - 修改后的版本
+    let currentBit = signal.startBit // 从startBit开始，这是LSB的位置
     let remainingBits = signal.length
+    let valueShift = 0 // 用于组装value的位偏移量
 
     while (remainingBits > 0) {
-      if (startByte < 0 || startByte >= data.length) break
+      const currentByte = Math.floor(currentBit / 8)
+      const bitInByte = currentBit % 8
 
-      const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
-      const position = startBitInByte
-      const mask = (1 << bitsInThisByte) - 1
-      const value = (data[startByte] >> position) & mask
+      if (currentByte < 0 || currentByte >= data.length) break
 
-      rawValue = (rawValue << bitsInThisByte) | value
+      // 从buffer中提取当前bit
+      const bitValue = (data[currentByte] >> bitInByte) & 1
 
-      remainingBits -= bitsInThisByte
-      startByte -= 1
-      startBitInByte = 7
+      // 将bit添加到rawValue中
+      rawValue |= bitValue << valueShift
+
+      remainingBits--
+      valueShift++
+
+      // Motorola格式的bit遍历规则（与写入相同）
+      if (bitInByte === 7) {
+        // 当前在byte的最高位，跳转到前一个byte的最低位
+        currentBit -= 15 // 从bit 39跳转到bit 24
+      } else {
+        // 在byte内向高位移动
+        currentBit++
+      }
     }
   }
+
   let physValue = rawValue
 
   // 检查原始值是否合法
@@ -391,26 +402,38 @@ function writeSignalToBuffer(signal: Signal, data: Buffer) {
       startBitInByte = 0
     }
   } else {
-    // Motorola格式 (Big Endian)
-    let startByte = Math.floor(signal.startBit / 8)
-    let startBitInByte = signal.startBit % 8
+    // Motorola格式 (Big Endian) - 根据实际测试数据修正
+    let currentBit = signal.startBit // 从startBit开始，这是LSB的位置
     let remainingBits = signal.length
+    let valueShift = 0 // 用于从value中提取bit的偏移量
 
     while (remainingBits > 0) {
-      if (startByte < 0 || startByte >= data.length) break
+      const currentByte = Math.floor(currentBit / 8)
+      const bitInByte = currentBit % 8
 
-      const bitsInThisByte = Math.min(8 - startBitInByte, remainingBits)
-      const position = startBitInByte
-      const mask = (1 << bitsInThisByte) - 1
-      const value = (rawValue >> (signal.length - remainingBits)) & mask
+      if (currentByte < 0 || currentByte >= data.length) break
 
-      data[startByte] &= ~(mask << position)
-      data[startByte] |= value << position
+      // 从value中提取当前bit
+      const bitValue = (rawValue >> valueShift) & 1
 
-      remainingBits -= bitsInThisByte
-      startByte += 1
-      startBitInByte = 0
+      // 清除目标bit并设置新值
+      const bitMask = 1 << bitInByte
+      data[currentByte] &= ~bitMask
+      if (bitValue) {
+        data[currentByte] |= bitMask
+      }
+
+      remainingBits--
+      valueShift++
+
+      // Motorola格式的bit遍历规则
+      if (bitInByte === 7) {
+        // 当前在byte的最高位，跳转到前一个byte的最低位
+        currentBit -= 15 // 从bit 39跳转到bit 24
+      } else {
+        // 在byte内向高位移动
+        currentBit++
+      }
     }
   }
 }
-

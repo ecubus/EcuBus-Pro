@@ -241,5 +241,23 @@ describe('DBC Parser Tests', () => {
     expect(result.messages[0x17fe007b].signals['BatteryTotalChargeHV'].startBit).toBe(88)
     expect(result.messages[0x17fe007b].signals['BatteryTotalDischargeHV'].startBit).toBe(120)
   })
-})
 
+  test('id2001.dbc', () => {
+    const id2001Dbc = fs.readFileSync(path.join(__dirname, 'id2001.dbc'), 'utf-8')
+    const result = parse(id2001Dbc)
+    expect(result).toBeDefined()
+    const msg = result.messages[0x200]
+    expect(msg.name).toBe('Message_200')
+    //set signal value
+    const s = msg.signals['test']
+    expect(s).toBeDefined()
+    s.value = 14
+    updateSignalRaw(s)
+    expect(s.physValue).toBe(14)
+    const buf = getMessageData(msg)
+
+    expect(buf).toEqual(Buffer.from([0, 0, 0, 1, 0xc0, 0, 0, 0]))
+    writeMessageData(msg, Buffer.from([0, 0, 0, 0xce, 0x80, 0, 0, 0]), result)
+    expect(s.value).toBe(0x674)
+  })
+})

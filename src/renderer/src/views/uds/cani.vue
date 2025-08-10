@@ -594,9 +594,7 @@ function idChange(v: string) {
 }
 function dataChangeDone() {
   if (formData.value && formData.value.database) {
-    const db = Object.values(dataBase.database.can).find(
-      (db) => db.name == formData.value!.database
-    )
+    const db = dataBase.database.can[formData.value.database]
     if (db) {
       const message = db.messages[parseInt(formData.value.id, 16)]
       if (message) {
@@ -852,4 +850,3 @@ function openFrameSelect() {
   }
 }
 </style>
-

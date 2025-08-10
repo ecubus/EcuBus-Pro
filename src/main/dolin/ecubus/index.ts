@@ -302,9 +302,11 @@ export class LinCable extends LinBase {
             return
           } else if (ret == 2) {
             //no sync
-            this.log.error(ts, 'no sync', msg)
+            this.log.error(ts, 'no sync (wakeup)', msg)
 
-            this.pendingPromise.reject(new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'no sync'))
+            this.pendingPromise.reject(
+              new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, msg, 'no sync (wakeup)')
+            )
             this.pendingPromise = undefined
 
             return

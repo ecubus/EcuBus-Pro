@@ -190,10 +190,6 @@ export function test(name: string, fn: () => void | Promise<void>) {
     } else {
       return preserveErrorStack(fn)
     }
-
-    // 直接调用用户函数，不进行任何包装
-    // 这样错误堆栈会直接指向用户代码
-    return await fn()
   })
 }
 

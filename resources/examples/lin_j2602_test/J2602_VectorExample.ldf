@@ -1,0 +1,186 @@
+/*************************************************************************************/
+
+//                                                                                     
+
+// Description: LIN Description file created using Vector LDF Explorer
+
+// Created:     31 Jan 2012 
+
+// Author:      Vector Informatik GmbH
+
+// Version:     1.0                                                                    
+
+//                                                                                     
+
+/*************************************************************************************/
+
+LIN_description_file;
+LIN_protocol_version = "J2602_1_1.0";
+LIN_language_version = "J2602_3_1.0";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: LIN_Master, 1 ms, 0 ms, 48 bits, 40 %;
+  Slaves: VectorSlave1 ;
+}
+
+Signals {
+  Slave1_RespErr: 3, 0, VectorSlave1, LIN_Master ;
+  Broadcastbyte1: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte2: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte3: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte4: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte5: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte6: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte7: 8, 0, LIN_Master, VectorSlave1 ;
+  Broadcastbyte8: 8, 0, LIN_Master, VectorSlave1 ;
+  IgnitionStatus: 8, 0, LIN_Master, VectorSlave1 ;
+  EnvironmentStatus: 8, 0, LIN_Master, VectorSlave1 ;
+}
+
+Diagnostic_signals {
+  MasterReqB0: 8, 0 ;
+  MasterReqB1: 8, 0 ;
+  MasterReqB2: 8, 0 ;
+  MasterReqB3: 8, 0 ;
+  MasterReqB4: 8, 0 ;
+  MasterReqB5: 8, 0 ;
+  MasterReqB6: 8, 0 ;
+  MasterReqB7: 8, 0 ;
+  SlaveRespB0: 8, 0 ;
+  SlaveRespB1: 8, 0 ;
+  SlaveRespB2: 8, 0 ;
+  SlaveRespB3: 8, 0 ;
+  SlaveRespB4: 8, 0 ;
+  SlaveRespB5: 8, 0 ;
+  SlaveRespB6: 8, 0 ;
+  SlaveRespB7: 8, 0 ;
+}
+
+
+
+Frames {
+  Slave1_TxFrame1: 0, VectorSlave1, 1 {
+    Slave1_RespErr, 5 ;
+  }
+  MasterNotification_ForSlave1: 1, LIN_Master, 2 {
+    IgnitionStatus, 0 ;
+    EnvironmentStatus, 8 ;
+  }
+  BroadcastFrame1: 56, LIN_Master, 8 {
+    Broadcastbyte1, 0 ;
+    Broadcastbyte2, 8 ;
+    Broadcastbyte3, 16 ;
+    Broadcastbyte4, 24 ;
+    Broadcastbyte5, 32 ;
+    Broadcastbyte6, 40 ;
+    Broadcastbyte7, 48 ;
+    Broadcastbyte8, 56 ;
+  }
+  BroadcastFrame2: 57, LIN_Master, 8 {
+    Broadcastbyte1, 0 ;
+    Broadcastbyte2, 8 ;
+    Broadcastbyte3, 16 ;
+    Broadcastbyte4, 24 ;
+    Broadcastbyte5, 32 ;
+    Broadcastbyte6, 40 ;
+    Broadcastbyte7, 48 ;
+    Broadcastbyte8, 56 ;
+  }
+  BroadcastFrame3: 58, LIN_Master, 8 {
+    Broadcastbyte1, 0 ;
+    Broadcastbyte2, 8 ;
+    Broadcastbyte3, 16 ;
+    Broadcastbyte4, 24 ;
+    Broadcastbyte5, 32 ;
+    Broadcastbyte6, 40 ;
+    Broadcastbyte7, 48 ;
+    Broadcastbyte8, 56 ;
+  }
+  BroadcastFrame4: 59, LIN_Master, 8 {
+    Broadcastbyte1, 0 ;
+    Broadcastbyte2, 8 ;
+    Broadcastbyte3, 16 ;
+    Broadcastbyte4, 24 ;
+    Broadcastbyte5, 32 ;
+    Broadcastbyte6, 40 ;
+    Broadcastbyte7, 48 ;
+    Broadcastbyte8, 56 ;
+  }
+}
+
+
+
+Diagnostic_frames {
+  MasterReq: 0x3c {
+    MasterReqB0, 0 ;
+    MasterReqB1, 8 ;
+    MasterReqB2, 16 ;
+    MasterReqB3, 24 ;
+    MasterReqB4, 32 ;
+    MasterReqB5, 40 ;
+    MasterReqB6, 48 ;
+    MasterReqB7, 56 ;
+  }
+  SlaveResp: 0x3d {
+    SlaveRespB0, 0 ;
+    SlaveRespB1, 8 ;
+    SlaveRespB2, 16 ;
+    SlaveRespB3, 24 ;
+    SlaveRespB4, 32 ;
+    SlaveRespB5, 40 ;
+    SlaveRespB6, 48 ;
+    SlaveRespB7, 56 ;
+  }
+}
+
+Node_attributes {
+  VectorSlave1{
+    LIN_protocol = "J2602_1_1.0" ;
+    configured_NAD = 0x60 ;
+    product_id = 0x1E, 0x3456, 2 ;
+    response_error = Slave1_RespErr ;
+    P2_min = 0 ms ;
+    ST_min = 0 ms ;
+    configurable_frames {
+      Slave1_TxFrame1 = 0x0 ;
+      MasterNotification_ForSlave1 = 0x1 ;
+      BroadcastFrame1 = 0x38 ;
+      BroadcastFrame2 = 0x39 ;
+      BroadcastFrame3 = 0x3A ;
+      BroadcastFrame4 = 0x3B ;
+    }
+    response_tolerance = 40 % ;
+  }
+}
+
+Schedule_tables {
+ NormalTable {
+    MasterNotification_ForSlave1 delay 20 ms ;
+    Slave1_TxFrame1 delay 17 ms ;
+  }
+ BroadcastingTable {
+    BroadcastFrame4 delay 17 ms ;
+    BroadcastFrame3 delay 17 ms ;
+    BroadcastFrame2 delay 17 ms ;
+    BroadcastFrame1 delay 17 ms ;
+  }
+}
+
+
+Signal_encoding_types {
+  RespError_Encoding {
+    logical_value, 0, "No Error" ;
+    logical_value, 1, "Reset" ;
+    logical_value, 2, "Reserved" ;
+    logical_value, 3, "Reserved" ;
+    logical_value, 4, "Data Error" ;
+    logical_value, 5, "CS Error" ;
+    logical_value, 6, "Framing Error" ;
+    logical_value, 7, "ID Parity Error" ;
+  }
+}
+
+Signal_representation {
+  RespError_Encoding: Slave1_RespErr;
+}

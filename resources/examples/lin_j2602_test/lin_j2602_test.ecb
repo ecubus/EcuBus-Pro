@@ -1,0 +1,88 @@
+{
+  "data": {
+    "devices": {
+      "f8c108a5-21a4-40c2-b4f6-086ae00b6066": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "COM34",
+            "id": ""
+          },
+          "name": "ECUBUS_0",
+          "id": "f8c108a5-21a4-40c2-b4f6-086ae00b6066",
+          "vendor": "ecubus",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "2b27e218-1db2-4fe3-af8c-5a45b6168c49": {
+        "id": "2b27e218-1db2-4fe3-af8c-5a45b6168c49",
+        "name": "lin_j2602_test",
+        "script": "test.ts",
+        "reportPath": "",
+        "channel": [
+          "f8c108a5-21a4-40c2-b4f6-086ae00b6066"
+        ],
+        "isTest": true
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 167,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "test": {
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1707,
+          "h": 330
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 0,
+          "y": 330,
+          "w": 1707,
+          "h": 330
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@
       <img class="product-image" src="./lincable.png" alt="LinCable" />
       <div class="product-info">
         <h1 class="product-title">EcuBus LinCable</h1>
+        <p class="product-subtitle">USB to LIN Adapter for Automotive Development</p>
 
         <button class="cart-btn" @click="showModal = true">
           <svg
@@ -75,6 +76,13 @@ const showModal = ref(false)
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 8px 0;
+  color: #1e293b;
+}
+.product-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
 }
 .product-meta {
   display: flex;
@@ -91,23 +99,25 @@ const showModal = ref(false)
 .cart-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: linear-gradient(135deg, #ff9800 0%, #ff6b35 100%);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 22px;
-  font-size: 1rem;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.08);
-  transition:
-    background 0.2s,
-    box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.2);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
 }
 .cart-btn:hover {
   background: linear-gradient(135deg, #ff6b35 0%, #ff9800 100%);
-  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 /* Modal Styles */
@@ -167,24 +177,136 @@ summary {
   padding: 16px 24px;
   color: #374151;
 }
-@media (max-width: 600px) {
+
+/* Enhanced Mobile Responsive Design */
+@media (max-width: 768px) {
+  .lincable-product-page-simple {
+    padding: 16px 8px;
+  }
+
   .product-card {
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border-radius: 12px;
   }
+
   .product-image {
     width: 100%;
-    height: 240px;
+    max-width: 280px;
+    height: 280px;
+    border-radius: 12px;
   }
-  .accordion-content {
-    padding: 12px 8px;
+
+  .product-info {
+    text-align: center;
+    width: 100%;
   }
+
+  .product-title {
+    font-size: 1.75rem;
+    margin: 0 0 12px 0;
+  }
+
+  .product-subtitle {
+    font-size: 1rem;
+    margin: 0 0 28px 0;
+    padding: 0 8px;
+  }
+
+  .cart-btn {
+    padding: 18px 32px;
+    font-size: 1.2rem;
+    border-radius: 16px;
+    max-width: 100%;
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.25);
+  }
+
   .modal-content {
-    padding: 18px 4vw 18px 4vw;
+    padding: 24px 20px 20px 20px;
+    margin: 20px;
+    border-radius: 16px;
     min-width: 0;
+    width: calc(100vw - 40px);
+    max-width: 400px;
   }
 }
+
+@media (max-width: 480px) {
+  .lincable-product-page-simple {
+    padding: 12px 6px;
+  }
+
+  .product-card {
+    padding: 16px;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .product-image {
+    max-width: 240px;
+    height: 240px;
+  }
+
+  .product-title {
+    font-size: 1.5rem;
+    margin: 0 0 10px 0;
+  }
+
+  .product-subtitle {
+    font-size: 0.95rem;
+    margin: 0 0 24px 0;
+    padding: 0 4px;
+  }
+
+  .cart-btn {
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    border-radius: 14px;
+  }
+
+  .modal-content {
+    padding: 20px 16px 16px 16px;
+    margin: 16px;
+    width: calc(100vw - 32px);
+  }
+
+  .modal-close {
+    top: 8px;
+    right: 12px;
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .product-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .product-image {
+    max-width: 200px;
+    height: 200px;
+  }
+
+  .product-title {
+    font-size: 1.35rem;
+    margin: 0 0 8px 0;
+  }
+
+  .product-subtitle {
+    font-size: 0.9rem;
+    margin: 0 0 20px 0;
+  }
+
+  .cart-btn {
+    padding: 14px 20px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+}
+
 .highlight {
   color: #ff9800;
   font-weight: 700;
@@ -201,6 +323,9 @@ summary {
   }
   .product-title {
     color: #f1f5f9 !important;
+  }
+  .product-subtitle {
+    color: #a0aec0 !important;
   }
   .product-meta {
     color: #a0aec0 !important;
@@ -253,6 +378,9 @@ summary {
 .dark .product-title {
   color: #f1f5f9 !important;
 }
+.dark .product-subtitle {
+  color: #a0aec0 !important;
+}
 .dark .product-meta {
   color: #a0aec0 !important;
 }
@@ -293,4 +421,3 @@ summary {
   color: #ffb300 !important;
 }
 </style>
-

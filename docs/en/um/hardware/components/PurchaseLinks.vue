@@ -305,6 +305,7 @@
   .purchase-options {
     grid-template-columns: 1fr;
     max-width: 400px;
+    gap: 20px;
   }
 
   .purchase-features {
@@ -314,19 +315,57 @@
   }
 
   .purchase-links {
-    padding: 24px;
+    padding: 24px 20px;
+    margin: 20px auto;
+    border-radius: 12px;
+  }
+
+  .purchase-title {
+    font-size: 22px;
+    margin: 0 0 10px 0;
+  }
+
+  .purchase-subtitle {
+    font-size: 15px;
+    margin: 0 0 28px 0;
+  }
+
+  .purchase-option {
+    padding: 20px;
+    min-height: 180px;
+  }
+
+  .platform-icon {
+    width: 44px;
+    height: 44px;
+    margin-right: 14px;
+  }
+
+  .platform-details h4 {
+    font-size: 17px;
+  }
+
+  .platform-details p {
+    font-size: 13px;
+  }
+
+  .purchase-button {
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 10px;
   }
 }
 
 @media (max-width: 480px) {
   .purchase-links {
-    padding: 16px;
-    margin: 16px 0;
+    padding: 20px 16px;
+    margin: 16px 8px;
+    border-radius: 10px;
   }
 
   .purchase-title {
     font-size: 20px;
-    margin: 0 0 6px 0;
+    margin: 0 0 8px 0;
   }
 
   .purchase-subtitle {
@@ -337,10 +376,12 @@
   .purchase-options {
     gap: 16px;
     margin-bottom: 24px;
+    max-width: 100%;
   }
 
   .purchase-option {
     padding: 16px;
+    min-height: 160px;
   }
 
   .platform-info {
@@ -362,8 +403,9 @@
   }
 
   .purchase-button {
-    padding: 10px 16px;
+    padding: 12px 18px;
     font-size: 14px;
+    border-radius: 8px;
   }
 
   .intl-note {
@@ -374,7 +416,8 @@
 
 @media (max-width: 360px) {
   .purchase-links {
-    padding: 12px;
+    padding: 16px 12px;
+    margin: 12px 6px;
   }
 
   .purchase-title {
@@ -386,7 +429,8 @@
   }
 
   .purchase-option {
-    padding: 12px;
+    padding: 14px;
+    min-height: 150px;
   }
 
   .platform-icon {
@@ -404,7 +448,7 @@
   }
 
   .purchase-button {
-    padding: 8px 12px;
+    padding: 10px 16px;
     font-size: 13px;
   }
 }
@@ -481,4 +525,3 @@
   background: #23272f !important;
 }
 </style>
-

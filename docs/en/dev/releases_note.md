@@ -1,5 +1,17 @@
 # EcuBus-Pro Release Notes
 
+
+## 0.8.51
+Changes from v0.8.50 to v0.8.51:
+
+ 
+* [bug]:fix dbc motorola signal data parse
+* [opt]:opt linCable error display
+* [opt]:opt lin_conformance_test example
+* [opt]:init sae j2602 test example
+---
+
+
 ## 0.8.50
 Changes from v0.8.49 to v0.8.50:
 

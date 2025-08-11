@@ -144,7 +144,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           items: [
             { text: 'LIN General', link: '/examples/lin/readme' },
             { text: 'LIN TP', link: '/examples/lin_tp/readme' },
-            { text: 'LIN Conformance Test', link: '/examples/lin_conformance_test/readme' }
+            { text: 'LIN Conformance Test', link: '/examples/lin_conformance_test/readme' },
+            { text: 'LIN SAE J2602 Test', link: '/examples/lin_j2602_test/readme' }
           ],
           collapsed: true
         },

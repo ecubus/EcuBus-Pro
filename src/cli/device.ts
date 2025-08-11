@@ -69,3 +69,20 @@ export default async function main(
   return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap }
 }
 
+export async function closeDevice(
+  canBaseMap: Map<string, CanBase>,
+  linBaseMap: Map<string, LinBase>,
+  ethBaseMap: Map<string, EthBaseInfo>,
+  pwmBaseMap: Map<string, PwmBase>
+) {
+  for (const canBase of canBaseMap.values()) {
+    await canBase.close()
+  }
+  for (const linBase of linBaseMap.values()) {
+    await linBase.close()
+  }
+
+  for (const pwmBase of pwmBaseMap.values()) {
+    await pwmBase.close()
+  }
+}

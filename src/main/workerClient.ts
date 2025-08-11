@@ -199,6 +199,9 @@ export default class UdsTester {
           if (testStartRegex.test(str) || testEndRegex.test(str)) {
             return
           }
+          if (str.includes('Util.Init function failed')) {
+            this.stop(true)
+          }
         }
         this.log.systemMsg(data.toString(), this.ts, 'error')
       }
@@ -210,7 +213,7 @@ export default class UdsTester {
     globalThis.varEvent?.on('update', this.varCb)
   }
   async getTestInfo() {
-    return new Promise<(TestEvent | string)[]>((resolve, reject) => {
+    return new Promise<TestEvent[]>((resolve, reject) => {
       if (this.env.MODE != 'test') {
         reject(new Error('not in test mode'))
         return
@@ -448,11 +451,10 @@ export default class UdsTester {
 
     if (!error) {
       // 尝试优雅地结束worker
-      try {
-        await this.workerEmit('__end', [])
-      } catch (e) {
-        // worker可能已经终止，忽略错误
-        null
+      if (this.worker.terminated == false) {
+        this.workerEmit('__end', []).catch(() => {
+          null
+        })
       }
     }
 
@@ -460,13 +462,13 @@ export default class UdsTester {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     try {
-      await this.pool.terminate()
+      this.worker?.worker?.terminate()
     } catch (e) {
       null
     }
 
     try {
-      this.worker?.worker?.terminate()
+      await this.pool.terminate(true)
     } catch (e) {
       null
     }
@@ -487,4 +489,3 @@ export default class UdsTester {
     }
   }
 }
-

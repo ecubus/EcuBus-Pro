@@ -5,7 +5,7 @@ import seqMain from './seq'
 import path from 'path'
 import fsP from 'fs/promises'
 import fs from 'fs'
-import { DataSet } from 'src/preload/data'
+import { DataSet, VarItem } from 'src/preload/data'
 import { Logger, transports } from 'winston'
 import { exit } from 'process'
 import { format } from 'winston'
@@ -14,6 +14,7 @@ import Transport from 'winston-transport'
 import colors from 'colors'
 import { CanMessage } from 'src/main/share/can'
 import { ServiceItem } from 'src/main/share/uds'
+import { LinMsg } from 'src/main/share/lin'
 import vm from 'vm'
 import pnpmScript from '../../resources/bin/pnpm/pnpm.cjs?asset&asarUnpack'
 import glob from 'glob'
@@ -21,11 +22,36 @@ import testMain from './test'
 import { TestEvent } from 'node:test/reporters'
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { build as buildFunc } from './build'
+import { getAllSysVar } from '../main/share/sysVar'
+import { cloneDeep } from 'lodash'
 
-declare global {
-  var sysLog: Logger
-  var scriptLog: Logger
-}
+// import async_hooks from 'async_hooks';
+
+// const stacks = new Map();
+
+// const hook = async_hooks.createHook({
+//   init(asyncId, type, triggerAsyncId) {
+//     if (type === 'PROMISE') {
+//       stacks.set(asyncId, new Error().stack);
+//     }
+//   },
+//   destroy(asyncId) {
+//     stacks.delete(asyncId);
+//   }
+// });
+
+// hook.enable();
+
+// // 定时打印还活着的 Promise 创建位置
+// setInterval(() => {
+//   if (stacks.size > 0) {
+//     console.log('Pending Promises:');
+//     for (const [id, stack] of stacks) {
+//       console.log(`Promise ID=${id} 创建堆栈:\n${stack}`);
+//     }
+//   }
+// }, 2000);
+
 // 创建一个自定义的 Transport 来过滤掉不需要的日志
 class FilteredConsoleTransport extends Transport {
   constructor(options: any) {
@@ -59,6 +85,38 @@ async function parseProject(projectPath: string): Promise<{
     const content = await fsP.readFile(projectPath, 'utf-8')
     const data = JSON.parse(content)
     const info = path.parse(projectPath)
+    global.database = data.data.database
+    global.vars = {}
+    global.tester = data.data.tester
+    const vars: Record<string, VarItem> = cloneDeep(data.data.vars)
+    const sysVars = getAllSysVar(data.data.devices, data.data.tester)
+    for (const v of Object.values(sysVars)) {
+      vars[v.id] = cloneDeep(v)
+    }
+    for (const key of Object.keys(vars)) {
+      const v = vars[key]
+
+      if (v.value) {
+        const parentName: string[] = []
+
+        // 递归查找所有父级名称
+        let currentVar = v
+        while (currentVar.parentId) {
+          const parent = vars[currentVar.parentId]
+          if (parent) {
+            parentName.unshift(parent.name) // 将父级名称添加到数组开头
+            currentVar = parent
+          } else {
+            break
+          }
+        }
+
+        parentName.push(v.name)
+        v.name = parentName.join('.')
+      }
+      global.vars[key] = v
+    }
+
     return {
       data: data.data,
       projectPath: info.dir,
@@ -110,6 +168,31 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
       } else {
         msg = `${data.serviceName}#${data.index} | ${data.action}`
       }
+    } else if (msg.method == 'linBase') {
+      const data = msg.data as LinMsg
+      //hex string  with space two by two
+      const hexData = data.data.toString('hex').match(/.{2}/g)?.join(' ')
+      const msgTypeStr = [
+        'LIN',
+        data.checksumType === 'CLASSIC' ? 'CLASSIC' : 'ENHANCED',
+        data.direction === 'SEND' ? 'SEND' : 'RECV'
+      ]
+        .filter(Boolean)
+        .join(' ')
+      // 将 ID 转换为十六进制
+      const hexId = data.frameId.toString(16)
+      msg = ` ${data.name || 'LIN'} | ${data.direction} |ID: 0x${hexId} | TS: ${data.ts} | ${msgTypeStr} | ${hexData}`
+    } else if (msg.method == 'linError') {
+      const data = msg.data as { msg: string; ts: number; data?: LinMsg }
+      if (data.data) {
+        const hexId = data.data.frameId.toString(16)
+        msg = `LIN Error | ID: 0x${hexId} | TS: ${data.ts} | ${data.msg}`
+      } else {
+        msg = `LIN Error | TS: ${data.ts} | ${data.msg}`
+      }
+    } else if (msg.method == 'linEvent') {
+      const data = msg.data as { msg: string; ts: number }
+      msg = `LIN Event | TS: ${data.ts} | ${data.msg}`
     } else if (msg.method == 'canError' || msg.method == 'udsError') {
       fn = colors.red
       const data = msg.data as { ts: number; msg?: string }
@@ -166,7 +249,7 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
 
 function addLoggingOption(command: Command) {
   command.option(
-    '--log-level <level>',
+    '-l,--log-level <level>',
     'print log messages of given level and above only, error->warning->info->debug ',
     'info'
   )
@@ -214,24 +297,36 @@ test.argument('<project>', 'EcuBus-Pro project path')
 test.argument('<name>', 'test config name')
 test.option('-r, --report <report>', 'report file name')
 test.option('-b, --build', 'force build')
+test.option('-t, --testNamePattern <pattern>', 'test name pattern')
+test.option('-v, --view', 'just show test tree')
 addLoggingOption(test)
 test.action(async (project, name, options) => {
   createLog(options.logLevel, options.logFile)
   try {
     const { data, projectPath, projectName } = await parseProject(project)
 
-    await testMain(projectPath, projectName, data, name, options.report, options.build)
+    await testMain(
+      projectPath,
+      projectName,
+      data,
+      name,
+      options.report,
+      options.build,
+      options.view,
+      options.testNamePattern
+    )
   } catch (e: any) {
     console.trace(e)
-    sysLog.error(e.message || 'failed to run test config')
+    console.error(e.message || 'failed to run test config')
     exit(1)
   }
+  //打印还有哪些pending的promise
 })
 
 const build = program.command('build').description('buils script file')
 build.argument('<project>', 'EcuBus-Pro project path')
 build.argument('<file>', 'scriptfile')
-test.option('-t, --test', 'Indicate is test file')
+
 addLoggingOption(build)
 build.action(async (project, file, options) => {
   createLog(options.logLevel, options.logFile)
@@ -243,7 +338,6 @@ build.action(async (project, file, options) => {
 
     await buildFunc(projectPath, projectName, data, file, options.test)
   } catch (e: any) {
-    console.trace(e)
     sysLog.error(e.message || 'failed to run test config')
     exit(1)
   }

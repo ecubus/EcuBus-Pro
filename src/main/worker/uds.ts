@@ -94,7 +94,7 @@ import { test as nodeTest, TestContext } from 'node:test'
 
 export { getCheckSum as getLinCheckSum } from '../share/lin'
 
-let init = false
+let init = process.env.ONLY ? true : false
 let initfunc: () => void = () => {}
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
@@ -168,8 +168,9 @@ export function test(name: string, fn: () => void | Promise<void>) {
     if (!init) {
       try {
         await initfunc()
-      } catch (e) {
+      } catch (e: any) {
         console.error(`Util.Init function failed: ${e}`)
+        process.exit(-1)
       }
       init = true
     }
@@ -2058,7 +2059,6 @@ export async function* reporter(source: TestEventGenerator) {
       event.type === 'test:start' ||
       event.type === 'test:pass' ||
       event.type === 'test:fail' ||
-      event.type === 'test:diagnostic' ||
       event.type === 'test:dequeue'
     ) {
       workerpool.workerEmit({

@@ -1469,7 +1469,7 @@ async function compileTscEntry(
   ]
   if (isTest) {
     cmaArray.push(
-      `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___('____ecubus_pro_test___',()=>{})`
+      `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___.only('____ecubus_pro_test___',()=>{})`
     )
   }
   const v = await exec(esbuildPath, cmaArray)
@@ -1578,4 +1578,3 @@ export async function compilePackage(projectPath: string) {
 
   return list
 }
-

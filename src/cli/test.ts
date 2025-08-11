@@ -142,7 +142,11 @@ export default async function main(
     processTestEvents(testInfo)
   }
   await node1.start(EnableObj)
-  await node1.getTestInfo()
+  const finalTestInfo = await node1.getTestInfo()
+
+  // 统计测试结果
+  const testSummary = analyzeTestResults(finalTestInfo)
+  printTestSummary(testSummary)
 
   if (reportPath) {
     const html = await node1.generateHtml(reportPath, true)
@@ -270,4 +274,81 @@ function printTestTree(testInfo: (TestEvent | string)[] | undefined) {
   })
 
   sysLog.info('') // Add empty line at the end
+}
+
+// 测试结果统计接口
+interface TestSummary {
+  total: number
+  passed: number
+  failed: number
+  skipped: number
+  failedTests: string[]
+}
+
+// 分析测试结果并生成统计信息
+function analyzeTestResults(testInfo: (TestEvent | string)[] | undefined): TestSummary {
+  const summary: TestSummary = {
+    total: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    failedTests: []
+  }
+
+  if (!testInfo || testInfo.length === 0) {
+    return summary
+  }
+
+  // 过滤掉内部测试标记
+  const filteredTestInfo = testInfo.filter(
+    (item: any) =>
+      typeof item === 'object' && item.data && item.data.name !== '____ecubus_pro_test___'
+  ) as TestEvent[]
+
+  for (const event of filteredTestInfo) {
+    switch (event.type) {
+      case 'test:dequeue':
+        summary.total++
+        break
+      case 'test:pass':
+        summary.passed++
+        break
+      case 'test:fail':
+        summary.failed++
+        if (event.data && event.data.name) {
+          summary.failedTests.push(event.data.name)
+        }
+        break
+      case 'test:start':
+        break
+      case 'test:complete':
+        break
+    }
+  }
+
+  return summary
+}
+
+// 打印测试结果总结
+function printTestSummary(summary: TestSummary): void {
+  const successRate = summary.total > 0 ? ((summary.passed / summary.total) * 100).toFixed(1) : 0
+  const result = summary.failed > 0 ? 'FAILED' : 'PASSED'
+
+  sysLog.info(
+    `Test Summary:\n` +
+      `  Total: ${summary.total}\n` +
+      `  Passed: ${summary.passed} ✅\n` +
+      `  Failed: ${summary.failed} ❌\n` +
+      `  Skipped: ${summary.skipped} ⏭️\n` +
+      `  Success Rate: ${successRate}%`
+  )
+  if (result == 'FAILED') {
+    sysLog.error(`Result: ${result}`)
+  } else {
+    sysLog.info(`Result: ${result}`)
+  }
+
+  if (summary.failed > 0 && summary.failedTests.length > 0) {
+    sysLog.error(`Failed Tests: ${summary.failedTests.join(', ')}`)
+  }
 }

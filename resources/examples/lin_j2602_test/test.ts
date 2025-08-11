@@ -440,3 +440,12 @@ describe('5.4', () => {
     assert.equal(getErrorFlag(result.msg.data, 5), 0)
   })
 })
+
+test('reset', async () => {
+  const msg = FrameMap['Slave1_TxFrame1']
+  const result = await sendLinWithRecv(msg, {})
+  assert(result.result)
+  assert(result.msg)
+
+  assert.equal(getErrorFlag(result.msg.data, 5), 1)
+})

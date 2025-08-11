@@ -1535,6 +1535,7 @@ declare class UtilClass {
      *
      */
     Off<Name extends keyof EventMap>(eventName: Name, listener: (eventData: EventMap[Name]) => void | Promise<void>): void;
+    private end;
     private start;
     private canMsg;
     private linMsg;

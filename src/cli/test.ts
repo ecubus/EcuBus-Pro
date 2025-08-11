@@ -18,7 +18,8 @@ export default async function main(
   testName: string,
   reportPath?: string,
   forceBuild?: boolean,
-  justShowTree?: boolean
+  justShowTree?: boolean,
+  pattern?: string
 ) {
   //find tester by name
   const testItem = Object.values(data.nodes).find((t) => t.name == testName && t.isTest)
@@ -36,7 +37,6 @@ export default async function main(
   }
 
   if (forceBuild) {
-    sysLog.info(`force build ${testItem.script}`)
     await build(projectPath, projectName, data, testItem.script, true)
   }
   const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap } = await deviceMain(
@@ -66,9 +66,12 @@ export default async function main(
     projectName,
     data.tester,
     {
+      testOnly: true,
       id: testItem.id
     }
   )
+  //surpress log this stage
+  node.log!.log.silent = true
 
   await node.start({})
   let testInfo: TestEvent[] | undefined = undefined
@@ -76,32 +79,79 @@ export default async function main(
   try {
     testInfo = await node.getTestInfo()
   } catch (e) {
-    sysLog.error(`get test info failed:${e}`)
     exit(-1)
   }
-
   if (!testInfo) {
-    sysLog.error(`test info is undefined`)
     exit(-1)
   }
 
   if (justShowTree) {
-    sysLog.info(`test tree:`, testInfo)
-    // Print test tree structure to terminal
-    // printTestTree(testInfo)
+    printTestTree(testInfo)
     node.close()
     await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap)
     return
   }
-
   node.close()
 
+  const node1 = new NodeClass(
+    testItem,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    pwmBaseMap,
+    projectPath,
+    projectName,
+    data.tester,
+    {
+      id: testItem.id
+    }
+  )
+
+  // Generate EnableObj based on pattern
+  const EnableObj: Record<number, boolean> = {}
+  if (testInfo && testInfo.length > 0) {
+    let testCnt = 0
+    const processTestEvents = (events: TestEvent[]) => {
+      for (const event of events) {
+        if (event.type === 'test:dequeue') {
+          testCnt++
+          const testName = event.data.name
+
+          // If pattern is provided, check if test name matches the pattern
+          if (pattern) {
+            try {
+              const regex = new RegExp(pattern)
+              if (regex.test(testName)) {
+                EnableObj[testCnt] = true
+              }
+            } catch (e) {
+              // If pattern is not a valid regex, treat it as a simple string match
+              if (testName.includes(pattern)) {
+                EnableObj[testCnt] = true
+              }
+            }
+          } else {
+            // If no pattern, enable all tests
+            EnableObj[testCnt] = true
+          }
+        }
+      }
+    }
+
+    processTestEvents(testInfo)
+  }
+  await node1.start(EnableObj)
+  await node1.getTestInfo()
+
   if (reportPath) {
-    const html = await node.generateHtml(reportPath, true)
+    const html = await node1.generateHtml(reportPath, true)
     reportPath = path.join(process.cwd(), reportPath)
     await fsP.writeFile(reportPath, html)
     sysLog.info(`test report saved to ${reportPath}`)
   }
+  node1.close()
+
   await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap)
 }
 
@@ -176,7 +226,7 @@ function printTreeNode(node: TestTreeNode, indent: string = '', isLast: boolean 
   const prefix = isLast ? '└── ' : '├── '
   const connector = isLast ? '    ' : '│   '
 
-  console.log(`${indent}${prefix}${node.label}`)
+  sysLog.info(`${indent}${prefix}${node.label}`)
 
   if (node.children && node.children.length > 0) {
     node.children.forEach((child, index) => {
@@ -200,17 +250,17 @@ function printTestTree(testInfo: (TestEvent | string)[] | undefined) {
   ) as TestEvent[]
 
   if (filteredTestInfo.length === 0) {
-    console.log('No tests found.')
+    sysLog.info('No tests found.')
     return
   }
 
   const roots = buildSubTree(filteredTestInfo)
 
-  console.log('\nTest Structure:')
-  console.log('==============')
+  sysLog.info('\nTest Structure:')
+  sysLog.info('==============')
 
   if (roots.length === 0) {
-    console.log('No test structure found.')
+    sysLog.info('No test structure found.')
     return
   }
 
@@ -219,5 +269,5 @@ function printTestTree(testInfo: (TestEvent | string)[] | undefined) {
     printTreeNode(root, '', isLast)
   })
 
-  console.log('') // Add empty line at the end
+  sysLog.info('') // Add empty line at the end
 }

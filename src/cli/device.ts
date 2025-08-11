@@ -76,13 +76,13 @@ export async function closeDevice(
   pwmBaseMap: Map<string, PwmBase>
 ) {
   for (const canBase of canBaseMap.values()) {
-    canBase.close()
+    await canBase.close()
   }
   for (const linBase of linBaseMap.values()) {
-    linBase.close()
+    await linBase.close()
   }
 
   for (const pwmBase of pwmBaseMap.values()) {
-    pwmBase.close()
+    await pwmBase.close()
   }
 }

@@ -210,7 +210,7 @@ export default class UdsTester {
     globalThis.varEvent?.on('update', this.varCb)
   }
   async getTestInfo() {
-    return new Promise<(TestEvent | string)[]>((resolve, reject) => {
+    return new Promise<TestEvent[]>((resolve, reject) => {
       if (this.env.MODE != 'test') {
         reject(new Error('not in test mode'))
         return
@@ -487,4 +487,3 @@ export default class UdsTester {
     }
   }
 }
-

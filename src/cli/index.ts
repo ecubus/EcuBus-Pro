@@ -25,6 +25,7 @@ import { build as buildFunc } from './build'
 declare global {
   var sysLog: Logger
   var scriptLog: Logger
+  var database: DataSet['database']
 }
 // 创建一个自定义的 Transport 来过滤掉不需要的日志
 class FilteredConsoleTransport extends Transport {
@@ -59,6 +60,7 @@ async function parseProject(projectPath: string): Promise<{
     const content = await fsP.readFile(projectPath, 'utf-8')
     const data = JSON.parse(content)
     const info = path.parse(projectPath)
+    global.database = data.data.database
     return {
       data: data.data,
       projectPath: info.dir,
@@ -214,13 +216,23 @@ test.argument('<project>', 'EcuBus-Pro project path')
 test.argument('<name>', 'test config name')
 test.option('-r, --report <report>', 'report file name')
 test.option('-b, --build', 'force build')
+test.option('-t, --testNamePattern <pattern>', 'test name pattern')
+test.option('-v, --view', 'just show test tree')
 addLoggingOption(test)
 test.action(async (project, name, options) => {
   createLog(options.logLevel, options.logFile)
   try {
     const { data, projectPath, projectName } = await parseProject(project)
 
-    await testMain(projectPath, projectName, data, name, options.report, options.build)
+    await testMain(
+      projectPath,
+      projectName,
+      data,
+      name,
+      options.report,
+      options.build,
+      options.view
+    )
   } catch (e: any) {
     console.trace(e)
     sysLog.error(e.message || 'failed to run test config')
@@ -231,7 +243,7 @@ test.action(async (project, name, options) => {
 const build = program.command('build').description('buils script file')
 build.argument('<project>', 'EcuBus-Pro project path')
 build.argument('<file>', 'scriptfile')
-test.option('-t, --test', 'Indicate is test file')
+
 addLoggingOption(build)
 build.action(async (project, file, options) => {
   createLog(options.logLevel, options.logFile)

@@ -13,6 +13,7 @@ export default defineConfig({
     },
     build: {
       target: 'node18',
+      sourcemap: true,
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/cli/index.ts'),

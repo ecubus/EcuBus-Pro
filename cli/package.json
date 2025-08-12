@@ -2,19 +2,20 @@
   "name": "ecb_cli",
   "author": "frankie.zengfu@gmail.com",
   "description": "EcbBus-Pro CLI Tool",
-  "bin": "out/ecb_cli.js",
+  "bin": "dist/ecb_cli.js",
   "pkg": {
     "assets": [
-      "./out/chunks/*.node",
+      "./dist/*.node",
       "./../resources/lib/**/*",
       "./../resources/bin/**/*",
       "./../resources/buildInScript/**/*"
+    
     ],
     "outputPath": "./../resources/lib"
   },
   "scripts": {
-    "linux": "pkg . -t node20-linux",
+    "linux": "npx esbuild ./out/ecb_cli.js --bundle --platform=node --format=cjs  --alias:@serialport/bindings-cpp=../resources/lib/js/bindings-cpp.js --alias:bindings=../resources/lib/js/node-bindings.js --loader:.node=file --outdir=./dist && pkg . -t node20-linux",
     "win": "pkg . -t node20-win",
-    "mac": "pkg . -t node20-macos"
+    "mac": "npx esbuild ./out/ecb_cli.js --bundle --platform=node --format=cjs  --alias:@serialport/bindings-cpp=../resources/lib/js/bindings-cpp.js --alias:bindings=../resources/lib/js/node-bindings.js --loader:.node=file --outdir=./dist && pkg . -t node20-macos"
   }
 }

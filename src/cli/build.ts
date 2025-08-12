@@ -1,9 +1,9 @@
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import esbuild from '../../resources/bin/esbuild?asset&asarUnpack'
+import esbuild from '../../resources/bin/esbuild.exe?asset&asarUnpack'
 
 let esbuild_executable = esbuild
-if (process.platform === 'win32') {
-  esbuild_executable = `${esbuild}.exe`
+if (process.platform === 'darwin') {
+  esbuild_executable = esbuild.replace('.exe', '_mac')
 }
 
 import path from 'path'
@@ -43,4 +43,3 @@ export async function build(
 export async function getBuild(projectPath: string, projectName: string, entry: string) {
   return getBuildStatus(projectPath, projectName, entry)
 }
-

@@ -865,9 +865,11 @@ var import_debug4 = __toESM(require_src());
 
 // lib/load-bindings.ts
 var import_util = require("util");
-var import_process = require("process");
-var name = import_process.platform === "win32" ? "./serialPortWin.node" : "./serialPortLinux.node";
-var binding = require(name);
+if(process.platform === "win32"){
+  var binding = require('./serialPortWin.node');
+}else{
+  var binding = require('./serialPortLinux.node');
+}
 var asyncClose = binding.close ? (0, import_util.promisify)(binding.close) : async () => {
   throw new Error('"binding.close" Method not implemented');
 };
@@ -915,9 +917,7 @@ var BindingsError = class extends Error {
 };
 
 // lib/poller.ts
-var import_process2 = require("process");
-var name2 = import_process2.platform === "win32" ? "./serialPortWin.node" : "./serialPortLinux.node";
-var PollerBindings = require(name2).Poller;
+var PollerBindings = binding.Poller;
 var logger = (0, import_debug.default)("serialport/bindings-cpp/poller");
 var EVENTS = {
   UV_READABLE: 1,

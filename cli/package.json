@@ -5,17 +5,13 @@
   "bin": "dist/ecb_cli.js",
   "pkg": {
     "assets": [
-      "./dist/*.node",
-      "./../resources/lib/**/*",
-      "./../resources/bin/**/*",
-      "./../resources/buildInScript/**/*"
-    
+      "./dist/*.node"
     ],
     "outputPath": "./../resources/lib"
   },
   "scripts": {
-    "linux": "npx esbuild ./out/ecb_cli.js --bundle --platform=node --format=cjs  --alias:@serialport/bindings-cpp=../resources/lib/js/bindings-cpp.js --alias:bindings=../resources/lib/js/node-bindings.js --loader:.node=file --outdir=./dist && pkg . -t node20-linux",
-    "win": "pkg . -t node20-win",
-    "mac": "npx esbuild ./out/ecb_cli.js --bundle --platform=node --format=cjs  --alias:@serialport/bindings-cpp=../resources/lib/js/bindings-cpp.js --alias:bindings=../resources/lib/js/node-bindings.js --loader:.node=file --outdir=./dist && pkg . -t node20-macos"
+    "linux": "npx webpack && pkg . -t node20-linux",
+    "win": "npx webpack && pkg . -t node20-win",
+    "mac": "npx webpack && pkg . -t node20-macos"
   }
 }

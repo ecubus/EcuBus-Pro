@@ -91,7 +91,7 @@ import { SupportServiceId, serviceDetail } from '../uds/service'
 import { ServiceId, checkServiceId } from '../share/uds'
 import { UdsLOG, VarLOG } from '../log'
 import tsconfig from './ts.json'
-import json5 from 'json5'
+
 import { v4 } from 'uuid'
 import { glob } from 'glob'
 import { DOIP, DOIP_ERROR_ID, DOIP_SOCKET, DoipError } from '../doip'
@@ -1139,7 +1139,7 @@ export async function deleteNode(projectPath: string, projectName: string, node:
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (fs.existsSync(tsconfigFile)) {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     if (node.script) {
       if (path.isAbsolute(node.script) === false) {
@@ -1163,7 +1163,7 @@ export async function deleteTester(projectPath: string, projectName: string, nod
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (fs.existsSync(tsconfigFile)) {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     if (node.script) {
       if (path.isAbsolute(node.script) === false) {
@@ -1289,7 +1289,7 @@ export * from './utli'
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     for (const tester of Object.values(data.tester)) {
       if (tester.script) {

@@ -118,6 +118,15 @@ export type PanelItem = {
   options: Object
 }
 
+export type LogItem = {
+  id: string
+  name: string
+  type: 'file'
+  format: string
+  path: string
+  channel: string[]
+}
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -136,5 +145,5 @@ export interface DataSet {
   datas: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue>>
   vars: Record<string, VarItem>
   panels: Record<string, PanelItem>
+  logs: Record<string, LogItem>
 }
-

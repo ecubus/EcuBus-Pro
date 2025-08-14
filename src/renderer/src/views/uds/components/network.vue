@@ -82,6 +82,7 @@ import textFields from '@iconify/icons-material-symbols/text-fields'
 import assistantDeviceRounded from '@iconify/icons-material-symbols/assistant-device-rounded'
 import editIcon from '@iconify/icons-material-symbols/edit'
 import locationDisabled from '@iconify/icons-material-symbols/location-disabled'
+import fileIcon from '@iconify/icons-material-symbols/file-open-rounded'
 import { Layout } from '../layout'
 import { v4 } from 'uuid'
 import { useDataStore } from '@r/stores/data'
@@ -285,6 +286,14 @@ const tData = computed(() => {
     children: [],
     id: 'pwm'
   }
+  const log: Tree = {
+    type: 'log',
+    label: 'Loging',
+    canAdd: true,
+    icon: fileIcon,
+    children: [],
+    id: 'log'
+  }
   for (const key of Object.keys(dataBase.nodes)) {
     const item = dataBase.nodes[key]
 
@@ -299,13 +308,26 @@ const tData = computed(() => {
     }
     node.children.push(cc)
   }
+  for (const key of Object.keys(dataBase.logs)) {
+    const item = dataBase.logs[key]
+    const cc: Tree = {
+      type: 'log',
+      label: item.name,
+      canAdd: false,
+      children: [],
+      icon: fileIcon,
+      id: key
+    }
+    log.children.push(cc)
+  }
 
   addChild(can)
   addChild(lin)
   addChild(eth)
   addChild(pwm)
+
   // addChild(node)
-  return [can, lin, eth, pwm, node]
+  return [can, lin, eth, pwm, node, log]
 })
 
 const defaultProps = {
@@ -575,6 +597,20 @@ function buildView() {
       udsView.addLink(key, to)
     }
   }
+  //add log
+  for (const key of Object.keys(dataBase.logs)) {
+    udsView.addLog(key, dataBase.logs[key])
+    //check devices if device is not in the list remove it
+    const ff = dataBase.logs[key].channel.filter((v) => {
+      return dataBase.devices[v] != undefined
+    })
+    if (ff.length != dataBase.logs[key].channel.length) {
+      dataBase.logs[key].channel = ff
+    }
+    for (const to of dataBase.logs[key].channel) {
+      udsView.addLink(key, to)
+    }
+  }
   fitPater()
 
   layout.on(`max:network`, fitPater)
@@ -706,6 +742,22 @@ function addNode(type: string, parent?: Tree) {
       for (const key of devices) {
         udsView.addLink(id, key)
       }
+    }
+  } else if (type == 'log') {
+    const id = v4()
+    const devices: string[] = []
+    dataBase.logs[id] = {
+      name: `Log ${Object.keys(dataBase.logs).length + 1}`,
+      id: id,
+      type: 'file',
+      format: 'asc',
+      path: '',
+      channel: []
+    }
+    udsView.addLog(id, dataBase.logs[id])
+    // add link
+    for (const key of devices) {
+      udsView.addLink(id, key)
     }
   }
   //fit
@@ -918,4 +970,3 @@ onUnmounted(() => {
   font-weight: bold;
 }
 </style>
-

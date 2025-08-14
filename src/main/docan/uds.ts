@@ -676,16 +676,17 @@ export class UDSTesterMain {
                     rxData = await socket.read(timeout)
                   } catch (e: any) {
                     if (
-                      (allowNoResponse &&
-                        e instanceof TpError &&
-                        e.errorId == TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
-                      (e instanceof LinTpError &&
-                        e.errorId == LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
-                      (e instanceof DoipError && e.errorId == DOIP_ERROR_ID.DOIP_TIMEOUT_UPPER_READ)
+                      allowNoResponse &&
+                      ((e instanceof TpError && e.errorId == TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
+                        (e instanceof LinTpError &&
+                          e.errorId == LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ) ||
+                        (e instanceof DoipError &&
+                          e.errorId == DOIP_ERROR_ID.DOIP_TIMEOUT_UPPER_READ))
                     ) {
                       return true
                     }
                     tester.lastActiveTs += getTsUs() - curUs
+
                     throw e
                   }
 

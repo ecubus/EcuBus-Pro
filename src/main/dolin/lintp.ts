@@ -328,6 +328,37 @@ export class LIN_TP implements LinTp {
         resolve: (value: { data: Buffer; ts: number }) => void,
         reject: (reason: TpError) => void
       ) => {
+        let selfStart = false
+        if (this.base.sch == undefined && this.base.info.database) {
+          //start sch
+          const db = global.database.lin[this.base.info.database]
+          if (db) {
+            let schName = '__SlaveRespTable'
+            let nextIndex = 0
+            let found = false
+            for (const s of db.schTables) {
+              s.entries.forEach((e, i) => {
+                if (e.name == 'DiagnosticSlaveResp' && s.entries.length == 1) {
+                  schName = s.name
+                  nextIndex = i
+                  found = true
+                }
+              })
+              if (found) {
+                break
+              }
+            }
+            selfStart = true
+            this.base.startSch(
+              db,
+              schName,
+              {
+                DiagnosticSlaveResp: true
+              },
+              0
+            )
+          }
+        }
         const cnt = this.cnt
         this.cnt++
         this.rejectMap.set(cnt, reject)
@@ -339,6 +370,9 @@ export class LIN_TP implements LinTp {
             reject(new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ, addr))
           }
           this.base.clearPendingDiagRead(cnt)
+          if (selfStart) {
+            this.base.stopSch()
+          }
         }, timeout)
 
         this.event.once(cmdId, (val) => {
@@ -351,6 +385,9 @@ export class LIN_TP implements LinTp {
               resolve({ data: val.data, ts: val.ts })
             }
             this.rejectMap.delete(cnt)
+            if (selfStart) {
+              this.base.stopSch()
+            }
           }
         })
       }
@@ -493,4 +530,3 @@ function baseHandle(val: LinMsg) {
     }
   }
 }
-

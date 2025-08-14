@@ -10,6 +10,7 @@ import path from 'path'
 import fsP from 'fs/promises'
 import { build, getBuild } from './build'
 import type { TestEvent } from 'node:test/reporters'
+import { format } from 'winston'
 
 export default async function main(
   projectPath: string,
@@ -108,44 +109,219 @@ export default async function main(
     }
   )
 
-  // Generate EnableObj based on pattern
+  // Generate EnableObj and isSingleRun based on pattern (matching test.vue logic)
   const EnableObj: Record<number, boolean> = {}
-  if (testInfo && testInfo.length > 0) {
-    let testCnt = 0
-    const processTestEvents = (events: TestEvent[]) => {
-      for (const event of events) {
-        if (event.type === 'test:dequeue') {
-          testCnt++
-          const testName = event.data.name
+  let isSingleRun: string[] | undefined = undefined
 
-          // If pattern is provided, check if test name matches the pattern
-          if (pattern) {
-            try {
-              const regex = new RegExp(pattern)
-              if (regex.test(testName)) {
-                EnableObj[testCnt] = true
-              }
-            } catch (e) {
-              // If pattern is not a valid regex, treat it as a simple string match
-              if (testName.includes(pattern)) {
-                EnableObj[testCnt] = true
-              }
-            }
-          } else {
-            // If no pattern, enable all tests
-            EnableObj[testCnt] = true
-          }
+  //filter
+  const filter = format((info: any, opts: any) => {
+    // Skip internal test markers
+    if ((info.message.data?.data as any)?.name === '____ecubus_pro_test___') {
+      return false
+    }
+
+    // Handle different test event types like testLog function
+    if (
+      info.message.data.type === 'test:dequeue' ||
+      info.message.data.type === 'test:pass' ||
+      info.message.data.type === 'test:fail'
+    ) {
+      if (isSingleRun) {
+        const key =
+          info.message.data.data.name +
+          ':' +
+          info.message.data.data.line +
+          ':' +
+          info.message.data.data.column
+
+        if (isSingleRun.includes(key)) {
+          return info
+        }
+        return false
+      }
+    }
+
+    return info
+  })
+
+  node1.log!.log.format = format.combine(filter(), node1.log!.log.format)
+  if (testInfo && testInfo.length > 0) {
+    // Build test tree structure similar to test.vue
+    const filteredTestInfo = testInfo.filter(
+      (item: any) =>
+        typeof item === 'object' && item.data && item.data.name !== '____ecubus_pro_test___'
+    ) as TestEvent[]
+
+    const roots = buildSubTree(filteredTestInfo)
+
+    // Create tree structure with testCnt like in test.vue
+    interface TestTreeWithCnt extends TestTreeNode {
+      testCnt?: number
+    }
+
+    const root2tree = (cnt: number, parent: TestTreeWithCnt, root: TestTreeNode): number => {
+      const newNode: TestTreeWithCnt = {
+        testCnt: cnt,
+        id: root.id,
+        type: 'test',
+        label: root.label,
+        children: []
+      }
+      cnt++
+      parent.children.push(newNode)
+
+      if (root.children && root.children.length > 0) {
+        for (const child of root.children) {
+          cnt = root2tree(cnt, newNode, child)
+        }
+      }
+      return cnt
+    }
+
+    // Build tree with test counts
+    const configNode: TestTreeWithCnt = {
+      id: testItem.id,
+      type: 'config',
+      label: testItem.name,
+      children: []
+    }
+
+    let cnt = 0
+    for (const root of roots) {
+      cnt = root2tree(cnt, configNode, root)
+    }
+
+    // Build parent references for tree navigation
+    const buildParentReferences = (node: TestTreeWithCnt, parent?: TestTreeWithCnt) => {
+      if (parent) {
+        ;(node as any).parent = parent
+      }
+      if (node.children) {
+        for (const child of node.children) {
+          buildParentReferences(child as TestTreeWithCnt, node)
         }
       }
     }
 
-    processTestEvents(testInfo)
+    // Build parent references for the entire tree
+    buildParentReferences(configNode)
+
+    // Implement getChildren function from test.vue
+    const getChildren = (val: TestTreeWithCnt, ids?: string[]) => {
+      const cntArray: number[] = []
+      for (const item of val.children) {
+        const childWithCnt = item as TestTreeWithCnt
+        if (childWithCnt.testCnt !== undefined) {
+          cntArray.push(childWithCnt.testCnt)
+          if (ids) {
+            ids.push(childWithCnt.id)
+          }
+        }
+        if (childWithCnt.children) {
+          const childCnts = getChildren(childWithCnt, ids)
+          cntArray.push(...childCnts)
+        }
+      }
+      return cntArray
+    }
+
+    // Find a node by id in the tree
+    const findNodeById = (tree: TestTreeWithCnt, id: string): TestTreeWithCnt | null => {
+      if (tree.id === id) {
+        return tree
+      }
+      if (tree.children) {
+        for (const child of tree.children) {
+          const found = findNodeById(child as TestTreeWithCnt, id)
+          if (found) {
+            return found
+          }
+        }
+      }
+      return null
+    }
+
+    // Implement getParent function similar to Vue component
+    const getParent = (node: TestTreeWithCnt, cntArray: number[]) => {
+      const parent = (node as any).parent as TestTreeWithCnt
+      if (parent && parent.type === 'test') {
+        if (parent.testCnt !== undefined) {
+          cntArray.push(parent.testCnt)
+        }
+        getParent(parent, cntArray)
+      }
+    }
+
+    // Logic similar to handleRun in test.vue
+    if (pattern) {
+      // Single run mode - find specific test by pattern
+      isSingleRun = []
+      const collectTestCnts: number[] = []
+
+      // Find test nodes that match the pattern (simplified - just collect IDs)
+      const findMatchingTests = (node: TestTreeWithCnt) => {
+        if (node.type === 'test') {
+          try {
+            const regex = new RegExp(pattern)
+            if (regex.test(node.label)) {
+              isSingleRun!.push(node.id)
+            }
+          } catch (e) {
+            // If pattern is not a valid regex, treat it as a simple string match
+            if (node.label.includes(pattern)) {
+              isSingleRun!.push(node.id)
+            }
+          }
+        }
+        if (node.children) {
+          for (const child of node.children) {
+            findMatchingTests(child as TestTreeWithCnt)
+          }
+        }
+      }
+
+      findMatchingTests(configNode)
+
+      // For each found test, also add its parents to EnableObj (like Vue component)
+      for (const testId of isSingleRun) {
+        const node = findNodeById(configNode, testId)
+        if (node) {
+          // Add the test itself if it has a testCnt
+          if (node.testCnt !== undefined) {
+            collectTestCnts.push(node.testCnt)
+          }
+          // Add all children
+          const childCnts = getChildren(node)
+          collectTestCnts.push(...childCnts)
+
+          // Add all parents (this was missing!)
+          const parentCnts: number[] = []
+          getParent(node, parentCnts)
+          collectTestCnts.push(...parentCnts)
+        }
+      }
+
+      // Remove duplicates and generate EnableObj from collected test counts
+      const uniqueTestCnts = [...new Set(collectTestCnts)]
+      for (const testCnt of uniqueTestCnts) {
+        EnableObj[testCnt] = true
+      }
+    } else {
+      // Run all tests (config mode)
+      isSingleRun = undefined
+      const allCnts = getChildren(configNode)
+
+      for (const testCnt of allCnts) {
+        EnableObj[testCnt] = true
+      }
+    }
   }
+
   await node1.start(EnableObj)
   const finalTestInfo = await node1.getTestInfo()
 
   // 统计测试结果
-  const testSummary = analyzeTestResults(finalTestInfo)
+  const testSummary = analyzeTestResults(finalTestInfo, isSingleRun)
   printTestSummary(testSummary)
 
   if (reportPath) {
@@ -157,6 +333,10 @@ export default async function main(
   node1.close()
 
   await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap)
+
+  if (testSummary.failed > 0) {
+    exit(-1)
+  }
 }
 
 // Tree structure interface (similar to TestTree in Vue component)
@@ -286,7 +466,10 @@ interface TestSummary {
 }
 
 // 分析测试结果并生成统计信息
-function analyzeTestResults(testInfo: (TestEvent | string)[] | undefined): TestSummary {
+function analyzeTestResults(
+  testInfo: (TestEvent | string)[] | undefined,
+  isSingleRun?: string[]
+): TestSummary {
   const summary: TestSummary = {
     total: 0,
     passed: 0,
@@ -300,10 +483,26 @@ function analyzeTestResults(testInfo: (TestEvent | string)[] | undefined): TestS
   }
 
   // 过滤掉内部测试标记
-  const filteredTestInfo = testInfo.filter(
+  let filteredTestInfo = testInfo.filter(
     (item: any) =>
       typeof item === 'object' && item.data && item.data.name !== '____ecubus_pro_test___'
   ) as TestEvent[]
+
+  // 如果是单个测试运行模式，进一步过滤只包含在isSingleRun中的测试
+  if (isSingleRun && isSingleRun.length > 0) {
+    filteredTestInfo = filteredTestInfo.filter((event: TestEvent) => {
+      if (
+        event.data &&
+        (event.type === 'test:dequeue' || event.type === 'test:pass' || event.type === 'test:fail')
+      ) {
+        // 构建测试ID (和buildSubTree中的逻辑保持一致)
+        const eventData = event.data as any
+        const testId = `${eventData.name}:${eventData.line || 0}:${eventData.column || 0}`
+        return isSingleRun.includes(testId)
+      }
+      return false
+    })
+  }
 
   for (const event of filteredTestInfo) {
     switch (event.type) {

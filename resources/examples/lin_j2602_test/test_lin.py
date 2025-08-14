@@ -5,7 +5,7 @@ import pytest
 def test_run_lin_j2602_test():
     """Test spawning multiple commands"""
     commands = [
-        ["ecb_cli", "test", "lin_j2602_test.ecb", "lin_j2602_test","-t","5.4.1.6 Multiple Errors","-l","debug"],
+        ["ecb_cli", "test", "lin_j2602_test.ecb", "lin_j2602_test","-t","5.4.1.6 Multiple Errors","-l","debug","-b"],
     ]
     
     for cmd in commands:

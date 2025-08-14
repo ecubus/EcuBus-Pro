@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { useDataStore } from './data'
 import { sortBy, toPairs, fromPairs, cloneDeep, assign, merge } from 'lodash'
 import { error, info } from 'electron-log'
+import { useRuntimeStore } from './runtime'
 
 export interface ProjectInfo {
   name: string
@@ -109,6 +110,8 @@ export const useProjectStore = defineStore('project', {
       if (val) {
         const data = useDataStore()
         data.$reset()
+        const runtime = useRuntimeStore()
+        runtime.$reset()
         this.open = true
         this.projectDirty = true
         this.router.push('/uds')
@@ -312,6 +315,8 @@ export const useProjectStore = defineStore('project', {
                   this.$reset()
                   const data = useDataStore()
                   data.$reset()
+                  const runtime = useRuntimeStore()
+                  runtime.$reset()
                   resolve(true)
                 })
                 .catch((e) => {
@@ -325,6 +330,8 @@ export const useProjectStore = defineStore('project', {
                 this.$reset()
                 const data = useDataStore()
                 data.$reset()
+                const runtime = useRuntimeStore()
+                runtime.$reset()
                 resolve(true)
               } else {
                 resolve(false)
@@ -334,6 +341,8 @@ export const useProjectStore = defineStore('project', {
           this.$reset()
           const data = useDataStore()
           data.$reset()
+          const runtime = useRuntimeStore()
+          runtime.$reset()
           resolve(true)
         }
       })
@@ -346,4 +355,3 @@ export const useProjectStore = defineStore('project', {
     }
   }
 })
-

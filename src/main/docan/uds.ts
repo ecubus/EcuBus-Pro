@@ -91,7 +91,7 @@ import { SupportServiceId, serviceDetail } from '../uds/service'
 import { ServiceId, checkServiceId } from '../share/uds'
 import { UdsLOG, VarLOG } from '../log'
 import tsconfig from './ts.json'
-import json5 from 'json5'
+
 import { v4 } from 'uuid'
 import { glob } from 'glob'
 import { DOIP, DOIP_ERROR_ID, DOIP_SOCKET, DoipError } from '../doip'
@@ -1139,7 +1139,7 @@ export async function deleteNode(projectPath: string, projectName: string, node:
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (fs.existsSync(tsconfigFile)) {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     if (node.script) {
       if (path.isAbsolute(node.script) === false) {
@@ -1163,7 +1163,7 @@ export async function deleteTester(projectPath: string, projectName: string, nod
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (fs.existsSync(tsconfigFile)) {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     if (node.script) {
       if (path.isAbsolute(node.script) === false) {
@@ -1289,7 +1289,7 @@ export * from './utli'
     await fsP.writeFile(tsconfigFile, JSON.stringify(tsconfig, null, 4))
   } else {
     const contnet = await fsP.readFile(tsconfigFile, 'utf-8')
-    const tsconfig = json5.parse(contnet)
+    const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     for (const tester of Object.values(data.tester)) {
       if (tester.script) {
@@ -1455,24 +1455,31 @@ async function compileTscEntry(
   //delete last build
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
+
+  const handleSpacePath = (pathStr: string) => {
+    return pathStr
+      .replace(/Program Files \(x86\)/g, 'PROGRA~2') // 32位程序目录 (任何盘符)
+      .replace(/Program Files/g, 'PROGRA~1') // 64位程序目录 (任何盘符)
+      .replace(/Documents and Settings/g, 'DOCUME~1') // 老版本Windows目录
+  }
   const cmaArray = [
     entry,
     '--sourcemap',
     '--bundle',
     '--platform=node',
     '--format=cjs',
-    `--alias:ECB=${libPath}`,
-    `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
-    `--alias:bindings=${libPath}/node-bindings`,
+    `--alias:ECB=${handleSpacePath(libPath)}`,
+    `--alias:@serialport/bindings-cpp=${handleSpacePath(libPath)}/bindings-cpp`,
+    `--alias:bindings=${handleSpacePath(libPath)}/node-bindings`,
     `--outdir=${outputDir}`,
-    `--inject:${path.join(libPath, 'uds.js')}`
+    `--inject:${path.join(handleSpacePath(libPath), 'uds.js')}`
   ]
   if (isTest) {
     cmaArray.push(
       `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___.only('____ecubus_pro_test___',()=>{})`
     )
   }
-  const v = await exec(esbuildPath, cmaArray)
+  const v = await exec(handleSpacePath(esbuildPath), cmaArray)
   if (v.stderr) {
     if (!v.stderr.includes('Done')) {
       throw new Error(v.stderr)

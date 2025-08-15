@@ -570,12 +570,13 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   const vars: Record<string, VarItem> = arg[i++] || {}
   const logs = arg[i++] as Record<string, LogItem>
+
   for (const log of Object.values(logs)) {
     if (log.type == 'file' && log.format == 'asc') {
       if (!path.isAbsolute(log.path)) {
         log.path = path.join(projectInfo.path, log.path)
       }
-      addTransport(() => ascTransport(log.path, Object.keys(devices)))
+      addTransport(() => ascTransport(log.path, log.channel, log.method))
     }
   }
 

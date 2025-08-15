@@ -83,7 +83,7 @@ export class PeakLin extends LinBase {
     this.initHardware(info.device, this.client, info.mode == LinMode.MASTER, Number(info.baudRate))
     LIN.LIN_RegisterFrameId(this.client, info.device.handle, 0, 0x3f)
     LIN.CreateTSFN(this.client, this.info.id, this.callback.bind(this))
-    this.log = new LinLOG('PEAK', info.name, this.event)
+    this.log = new LinLOG('PEAK', info.name, this.info.device.id, this.event)
     this.startTs = getTsUs()
 
     if (info.database) {
@@ -436,4 +436,3 @@ export class PeakLin extends LinBase {
     }
   }
 }
-

@@ -288,7 +288,7 @@ const tData = computed(() => {
   }
   const log: Tree = {
     type: 'log',
-    label: 'Loging',
+    label: 'Loggers',
     canAdd: true,
     icon: fileIcon,
     children: [],
@@ -763,12 +763,13 @@ function addNode(type: string, parent?: Tree) {
     const id = v4()
     const devices: string[] = []
     dataBase.logs[id] = {
-      name: `Log ${Object.keys(dataBase.logs).length + 1}`,
+      name: `Logger ${Object.keys(dataBase.logs).length + 1}`,
       id: id,
       type: 'file',
       format: 'asc',
       path: 'log.txt',
-      channel: []
+      channel: [],
+      method: []
     }
     udsView.addLog(id, dataBase.logs[id])
     // add link

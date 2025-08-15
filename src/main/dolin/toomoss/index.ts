@@ -62,7 +62,7 @@ export class ToomossLin extends LinBase {
   constructor(public info: LinBaseInfo) {
     super(info)
 
-    this.log = new LinLOG('TOOMOSS', info.name, this.event)
+    this.log = new LinLOG('TOOMOSS', info.name, this.info.device.id, this.event)
     this.startTs = getTsUs()
     this.handle = parseInt(info.device.handle.split(':')[0])
     this.deviceIndex = parseInt(info.device.handle.split(':')[1])
@@ -368,4 +368,3 @@ export class ToomossLin extends LinBase {
     return devices
   }
 }
-

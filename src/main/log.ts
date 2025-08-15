@@ -61,11 +61,14 @@ export class CanLOG {
   vendor: string
   log: Logger
   logTp: Logger
+  deviceId: string
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter
   ) {
+    this.deviceId = deviceId
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
@@ -96,6 +99,7 @@ export class CanLOG {
   canBase(data: CanMessage) {
     this.log.debug({
       method: 'canBase',
+      deviceId: this.deviceId,
       data
     })
     this.event.emit('can-frame', data)
@@ -103,18 +107,21 @@ export class CanLOG {
   canTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
     this.logTp.info({
       method: 'canTp',
+      deviceId: this.deviceId,
       data
     })
   }
   setOption(cmd: string, val: any) {
     this.log.info({
       method: 'setOption',
+      deviceId: this.deviceId,
       data: { cmd, val }
     })
   }
   error(ts: number, msg?: string) {
     this.log.error({
       method: 'canError',
+      deviceId: this.deviceId,
       data: {
         ts: ts,
         msg: msg
@@ -274,14 +281,17 @@ export class DoipLOG {
   vendor: string
   log: Logger
   logTp: Logger
+  deviceId: string
 
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter,
     private ts: number
   ) {
     this.vendor = vendor
+    this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
@@ -384,6 +394,7 @@ export class DoipLOG {
     }
     this.log.info({
       method: 'ipBase',
+      deviceId: this.deviceId,
       data: val
     })
     // this.event.emit('ip-frame', val)
@@ -392,6 +403,7 @@ export class DoipLOG {
   error(ts: number, msg?: string) {
     this.log.error({
       method: 'ipError',
+      deviceId: this.deviceId,
       data: {
         ts: ts,
         msg: msg
@@ -403,13 +415,16 @@ export class DoipLOG {
 export class LinLOG {
   vendor: string
   log: Logger
+  deviceId: string
 
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter
   ) {
     this.vendor = vendor
+    this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
@@ -429,7 +444,8 @@ export class LinLOG {
   linBase(data: LinMsg) {
     this.log.debug({
       method: 'linBase',
-      data
+      data,
+      deviceId: this.deviceId
     })
     this.event.emit('lin-frame', data)
   }
@@ -439,7 +455,8 @@ export class LinLOG {
       data: {
         msg,
         ts
-      }
+      },
+      deviceId: this.deviceId
     })
   }
   error(ts: number, msg?: string, data?: LinMsg) {
@@ -449,7 +466,8 @@ export class LinLOG {
         ts,
         msg,
         data
-      }
+      },
+      deviceId: this.deviceId
     })
   }
 }
@@ -539,4 +557,3 @@ export class VarLOG {
     this.log.close()
   }
 }
-

@@ -208,7 +208,7 @@ export class DOIP {
 
     //create tcp server bind to eth port 13400
     this.startTs = getTsUs()
-    this.log = new DoipLOG(base.vendor, this.eth.label, this.event, this.startTs)
+    this.log = new DoipLOG(base.vendor, this.eth.label, this.eth.id, this.event, this.startTs)
     this.udsLog = new UdsLOG(`Tester ${base.name}`)
 
     const udp4Server = dgram.createSocket('udp4')
@@ -1981,4 +1981,3 @@ export class DOIP_SOCKET {
     this.closed = true
   }
 }
-

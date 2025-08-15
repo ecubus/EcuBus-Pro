@@ -126,6 +126,7 @@ export type LogItem = {
   format: string
   path: string
   channel: string[]
+  method: string[]
 }
 
 export interface DataSet {

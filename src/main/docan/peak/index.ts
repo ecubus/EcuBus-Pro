@@ -439,7 +439,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     if (targetDevice == undefined) {
       throw new Error('device not found')
     }
-    this.log = new CanLOG('PEAK', this.info.name, this.event)
+    this.log = new CanLOG('PEAK', this.info.name, this.id, this.event)
     peak.CreateTSFN(this.handle, this.id, this.callback.bind(this))
 
     const buf = Buffer.alloc(1)
@@ -1186,4 +1186,3 @@ export class PEAK_TP extends CanBase implements CanTp {
     )
   }
 }
-

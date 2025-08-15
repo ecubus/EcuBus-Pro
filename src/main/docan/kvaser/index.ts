@@ -80,7 +80,7 @@ export class KVASER_CAN extends CanBase {
       throw new Error('device not found')
     }
     this.event = new EventEmitter()
-    this.log = new CanLOG('KVASER', info.name, this.event)
+    this.log = new CanLOG('KVASER', info.name, this.id, this.event)
 
     KV.canBusOff(this.handle)
 
@@ -512,4 +512,3 @@ export class KVASER_CAN extends CanBase {
     )
   }
 }
-

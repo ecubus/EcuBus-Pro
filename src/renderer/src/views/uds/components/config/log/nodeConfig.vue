@@ -24,14 +24,34 @@
                 inactive-text="Enabled"
               />
             </el-form-item>
+            <el-form-item label="Transport" prop="type">
+              <el-select v-model="formData.type" placeholder="Transport">
+                <el-option label="File" value="file" />
+                <el-option label="Socket" value="socket" disabled />
+              </el-select>
+            </el-form-item>
             <el-form-item label="Format" prop="format">
               <el-select v-model="formData.format" placeholder="Format">
                 <el-option label="CSV" value="csv" disabled />
                 <el-option label="ASCII" value="asc" />
               </el-select>
             </el-form-item>
-            <el-form-item label="File Path" prop="path" required>
+            <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">
               <el-input v-model="formData.path" placeholder="Log file Path" />
+            </el-form-item>
+            <el-form-item label="Record Types" prop="method">
+              <div>
+                <el-checkbox
+                  v-for="city in methods"
+                  :key="city"
+                  border
+                  :label="city"
+                  :value="city"
+                  @change="handleMethodChange(city, $event)"
+                >
+                  {{ city }}
+                </el-checkbox>
+              </div>
             </el-form-item>
           </el-form>
         </div>
@@ -117,22 +137,91 @@ const nameCheck = (rule: any, value: any, callback: any) => {
   }
 }
 
-const rules: FormRules = {
-  name: [
-    {
-      required: true,
-      trigger: 'blur',
-      validator: nameCheck
-    }
-  ],
-  path: [
-    {
-      required: true,
-      message: 'Please input log file path'
-    }
-  ]
-}
+const methods = ['CAN', 'LIN', 'ETH', 'UDS']
 
+const rules = computed(() => {
+  const rules: FormRules = {
+    name: [
+      {
+        required: true,
+        trigger: 'blur',
+        validator: nameCheck
+      }
+    ],
+    path: [
+      {
+        required: formData.value.type == 'file' ? true : false,
+        message: 'Please input log file path'
+      }
+    ]
+  }
+  return rules
+})
+
+function handleMethodChange(method: string, checked: boolean) {
+  switch (method) {
+    case 'CAN': {
+      const canMethod = ['canBase', 'canError']
+      if (checked) {
+        for (const m of canMethod) {
+          if (formData.value.method.indexOf(m) == -1) {
+            formData.value.method.push(m)
+          }
+        }
+      } else {
+        for (const m of canMethod) {
+          formData.value.method.splice(formData.value.method.indexOf(m), 1)
+        }
+      }
+      break
+    }
+    case 'LIN': {
+      const linMethod = ['linBase', 'linError', 'linEvent']
+      if (checked) {
+        for (const m of linMethod) {
+          if (formData.value.method.indexOf(m) == -1) {
+            formData.value.method.push(m)
+          }
+        }
+      } else {
+        for (const m of linMethod) {
+          formData.value.method.splice(formData.value.method.indexOf(m), 1)
+        }
+      }
+      break
+    }
+    case 'ETH': {
+      const ethMethod = ['ipBase', 'ipError']
+      if (checked) {
+        for (const m of ethMethod) {
+          if (formData.value.method.indexOf(m) == -1) {
+            formData.value.method.push(m)
+          }
+        }
+      } else {
+        for (const m of ethMethod) {
+          formData.value.method.splice(formData.value.method.indexOf(m), 1)
+        }
+      }
+      break
+    }
+    case 'UDS': {
+      const udsMethod = ['udsSent', 'udsRecv', 'udsNegRecv', 'udsError', 'udsScript', 'udsSystem']
+      if (checked) {
+        for (const m of udsMethod) {
+          if (formData.value.method.indexOf(m) == -1) {
+            formData.value.method.push(m)
+          }
+        }
+      } else {
+        for (const m of udsMethod) {
+          formData.value.method.splice(formData.value.method.indexOf(m), 1)
+        }
+      }
+      break
+    }
+  }
+}
 const project = useProjectStore()
 
 // const db = computed(() => {

@@ -8,6 +8,7 @@ interface AscLogInfo {
   message: {
     method: string
     data: any
+    deviceId?: string
   }
 }
 
@@ -23,13 +24,16 @@ function len2dlc(len: number): number {
   return 15
 }
 
-function ascFormat(devices: string[]): winston.Logform.Format {
-  let isHeaderWritten = false
-  let startTime = 0
+function ascFormat(devices: string[], method: string[]): winston.Logform.Format {
+  const isHeaderWritten = false
+  const startTime = 0
 
   return format((info: AscLogInfo, opts: any) => {
     console.log(info.message)
-    if (opts.devices.indexOf(info.device) == -1) {
+    if (info.message.deviceId && opts.devices.indexOf(info.message.deviceId) == -1) {
+      return false
+    }
+    if (opts.method.indexOf(info.message.method) == -1) {
       return false
     }
     // Write ASC header only once
@@ -46,20 +50,17 @@ function ascFormat(devices: string[]): winston.Logform.Format {
         year: 'numeric'
       })
 
-      info.message =
+      return (
         `date ${dateStr}\n` +
         'base hex  timestamps absolute\n' +
         'internal events logged\n' +
         `Begin Triggerblock ${dateStr}\n` +
         '0.000000 Start of measurement\n'
-
-      isHeaderWritten = true
-      startTime = (info.timestamp as number) || Date.now() / 1000
-      return info
+      )
     }
 
     // Process log data to ASC format
-    const logData = info.logData
+    const logData = info.message.data
     if (!logData) {
       return false // Skip if no log data
     }
@@ -127,19 +128,19 @@ function ascFormat(devices: string[]): winston.Logform.Format {
     }
 
     if (messageLine) {
-      info.message = `${relativeTime.toFixed(6)} ${messageLine}`
-      return info
+      return `${relativeTime.toFixed(6)} ${messageLine}`
     }
 
     return false // Skip if no valid message line
   })({
-    devices: devices
+    devices: devices,
+    method: method
   })
 }
 
-export default (filePath: string, devices: string[]) => {
+export default (filePath: string, devices: string[], method: string[]) => {
   return new winston.transports.File({
-    format: ascFormat(devices),
+    format: ascFormat(devices, method),
     filename: filePath
   })
 }

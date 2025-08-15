@@ -16,6 +16,7 @@ import { Inter, LogItem, NodeItem } from 'src/preload/data'
 import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import { useDark } from '@vueuse/core'
+import logConfig from './config/log/nodeConfig.vue'
 
 export interface udsBase {
   name: string
@@ -507,8 +508,8 @@ export class Log extends udsCeil {
         panel: false,
         edit: true,
         remove: true,
-        lockX: false,
-        lockY: true
+        lockX: true,
+        lockY: false
       }
     )
     this.addDocumentIcon()
@@ -775,8 +776,15 @@ export class UDSView {
   addLog(id: string, data: LogItem) {
     const e = this.ceilMap.get(id)
     if (!e) {
-      const element = new Log(this.paper!, this.graph, id, data, nodeXOffset, -200)
-      nodeXOffset -= 250
+      let logsNumbers = 0
+      for (const key of this.ceilMap.keys()) {
+        if (this.ceilMap.get(key) instanceof Log) {
+          logsNumbers++
+        }
+      }
+
+      const element = new Log(this.paper!, this.graph, id, data, 200, 150 + logsNumbers * 150)
+
       this.ceilMap.set(id, element)
       element.on('remove', (ceil) => {
         const dataBase = useDataStore()
@@ -789,7 +797,21 @@ export class UDSView {
         const dataBase = useDataStore()
         const id = ceil.getId()
         const item = dataBase.logs[id]
-        ElMessageBox.alert('Please select a work node')
+        ElMessageBox({
+          buttonSize: 'small',
+          showConfirmButton: false,
+          title: `Edit Log ${item.name}`,
+          showClose: false,
+          customStyle: {
+            width: '600px',
+            maxWidth: 'none'
+          },
+          message: () =>
+            h(logConfig, {
+              editIndex: id,
+              ceil: ceil
+            })
+        }).catch(null)
       })
       return element
     } else {

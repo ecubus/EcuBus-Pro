@@ -561,6 +561,22 @@ watchEffect(() => {
         }
       }
     }
+    //check log
+    for (const from of Object.keys(dataBase.logs)) {
+      for (const to of Object.keys(dataBase.devices)) {
+        if (dataBase.logs[from].channel.indexOf(to) == -1) {
+          udsView.removeLink(to, from)
+        }
+      }
+    }
+    //add new link
+    for (const key of Object.keys(dataBase.logs)) {
+      for (const to of dataBase.logs[key].channel) {
+        if (dataBase.devices[to]) {
+          udsView.addLink(to, key)
+        }
+      }
+    }
   }
 })
 
@@ -608,7 +624,7 @@ function buildView() {
       dataBase.logs[key].channel = ff
     }
     for (const to of dataBase.logs[key].channel) {
-      udsView.addLink(key, to)
+      udsView.addLink(to, key)
     }
   }
   fitPater()
@@ -751,7 +767,7 @@ function addNode(type: string, parent?: Tree) {
       id: id,
       type: 'file',
       format: 'asc',
-      path: '',
+      path: 'log.txt',
       channel: []
     }
     udsView.addLog(id, dataBase.logs[id])

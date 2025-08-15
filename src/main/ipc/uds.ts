@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
-
+import ascTransport from '../trasport/asc'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
@@ -25,7 +25,7 @@ import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 
-import { UdsLOG, VarLOG } from '../log'
+import { addTransport, UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
@@ -35,7 +35,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, PwmInter, VarItem } from 'src/preload/data'
+import { DataSet, LinInter, LogItem, NodeItem, PwmInter, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -564,10 +564,22 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const nodes = arg[i++] as Record<string, NodeItem>
 
   global.database = arg[i++]
+
   global.vars = {}
   global.tester = testers
 
   const vars: Record<string, VarItem> = arg[i++] || {}
+  const logs = arg[i++] as Record<string, LogItem>
+  for (const log of Object.values(logs)) {
+    if (log.type == 'file' && log.format == 'asc') {
+      if (!path.isAbsolute(log.path)) {
+        log.path = path.join(projectInfo.path, log.path)
+      }
+      addTransport(() => ascTransport(log.path, Object.keys(devices)))
+    }
+  }
+
+  /* --------- */
   const sysVars = getAllSysVar(devices, testers)
 
   for (const v of Object.values(sysVars)) {

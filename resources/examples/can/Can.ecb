@@ -68661,6 +68661,18 @@
           "formName": "test"
         }
       }
+    },
+    "logs": {
+      "1ed9f106-3de3-4b3e-a90c-e20b08f62da8": {
+        "name": "Log 1",
+        "id": "1ed9f106-3de3-4b3e-a90c-e20b08f62da8",
+        "type": "file",
+        "format": "asc",
+        "path": "log.txt",
+        "channel": [
+          "30dc0575-1555-40e4-802a-150e76338671"
+        ]
+      }
     }
   },
   "project": {
@@ -68738,25 +68750,6 @@
         "label": "Graph",
         "id": "graph",
         "options": {},
-        "hide": false
-      },
-      "pc10776a8-fc8c-45a3-8787-d5467bdcd26a": {
-        "pos": {
-          "x": 982,
-          "y": 0,
-          "w": 600,
-          "h": 406
-        },
-        "title": "panelPreview",
-        "label": "PanelPreview",
-        "id": "pc10776a8-fc8c-45a3-8787-d5467bdcd26a",
-        "options": {
-          "params": {
-            "edit-index": "pc10776a8-fc8c-45a3-8787-d5467bdcd26a"
-          },
-          "name": "test"
-        },
-        "isExternal": true,
         "hide": false
       }
     },

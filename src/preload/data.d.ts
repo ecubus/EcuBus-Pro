@@ -119,6 +119,7 @@ export type PanelItem = {
 }
 
 export type LogItem = {
+  disabled?: boolean
   id: string
   name: string
   type: 'file'

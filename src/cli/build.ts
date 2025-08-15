@@ -4,6 +4,8 @@ import esbuild from '../../resources/bin/esbuild.exe?asset&asarUnpack'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
+} else if (process.platform === 'linux') {
+  esbuild_executable = esbuild.replace('.exe', '_linux')
 }
 
 import path from 'path'

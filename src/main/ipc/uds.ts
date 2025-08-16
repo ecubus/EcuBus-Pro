@@ -576,6 +576,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
       if (!path.isAbsolute(log.path)) {
         log.path = path.join(projectInfo.path, log.path)
       }
+      console.log('add')
       addTransport(() => ascTransport(log.path, log.channel, log.method))
     }
   }

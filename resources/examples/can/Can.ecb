@@ -68663,14 +68663,18 @@
       }
     },
     "logs": {
-      "1ed9f106-3de3-4b3e-a90c-e20b08f62da8": {
-        "name": "Log 1",
-        "id": "1ed9f106-3de3-4b3e-a90c-e20b08f62da8",
+      "a25272ba-254f-4db2-93ad-d56c14ad0647": {
+        "name": "Logger 1",
+        "id": "a25272ba-254f-4db2-93ad-d56c14ad0647",
         "type": "file",
         "format": "asc",
         "path": "log.txt",
         "channel": [
           "30dc0575-1555-40e4-802a-150e76338671"
+        ],
+        "method": [
+          "canBase",
+          "canError"
         ]
       }
     }
@@ -68695,37 +68699,22 @@
       },
       "network": {
         "pos": {
-          "x": 0,
-          "y": 0,
-          "w": 853.5,
-          "h": 330
+          "x": 23,
+          "y": 3,
+          "w": 600,
+          "h": 400
         },
         "title": "network",
         "label": "Network",
         "id": "network",
-        "options": {},
-        "hide": false
-      },
-      "trace": {
-        "pos": {
-          "x": 853.5,
-          "y": 0,
-          "w": 853.5,
-          "h": 330
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {},
-        "hide": false,
-        "isExternal": false
+        "options": {}
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 0,
-          "y": 491,
-          "w": 1280,
-          "h": 516.5
+          "x": 592,
+          "y": 26.5,
+          "w": 700,
+          "h": 400
         },
         "title": "cani",
         "label": "IA",
@@ -68735,16 +68724,6 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
-        },
-        "hide": false,
-        "isExternal": false
-      },
-      "graph": {
-        "pos": {
-          "x": 1280,
-          "y": 491,
-          "w": 1280,
-          "h": 516.5
         }
       }
     },

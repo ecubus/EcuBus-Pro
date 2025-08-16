@@ -26,7 +26,10 @@ function len2dlc(len: number): number {
 
 function ascFormat(method: string[], initTs: number): winston.Logform.Format {
   return format((info: any, opts: any) => {
-    console.log(info)
+    console.log(info.message.method, opts)
+    if (opts.method.indexOf(info.message.method) == -1) {
+      return false
+    }
 
     // Process log data to ASC format
     const logData = info.message.data
@@ -103,7 +106,6 @@ function ascFormat(method: string[], initTs: number): winston.Logform.Format {
 
     return false // Skip if no valid message line
   })({
-    
     method: method
   })
 }
@@ -138,12 +140,13 @@ class FileTransport extends winston.transports.File {
   }
 }
 
-export default (filePath: string, devices: string[]) => {
+export default (filePath: string, devices: string[], method: string[]) => {
   const now = new Date()
   return new FileTransport(
     {
-      format: ascFormat(devices, now.getTime()),
-      filename: filePath
+      format: ascFormat(method, now.getTime()),
+      filename: filePath,
+      level: 'debug'
     },
     devices,
     now.getTime()

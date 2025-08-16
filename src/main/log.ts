@@ -70,6 +70,7 @@ export class CanLOG {
   ) {
     this.deviceId = deviceId
     this.vendor = vendor
+    console.log('qqq', externalTransport.length)
     const et1 = externalTransport.map((t) => t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
@@ -82,11 +83,12 @@ export class CanLOG {
     })
 
     //check device id
-    const combinedLogs = this.log.transports.find((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
     })
-    if (combinedLogs) {
-      this.log.remove(combinedLogs)
+
+    for (const log of combinedLogs) {
+      this.log.remove(log)
     }
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
@@ -311,11 +313,11 @@ export class DoipLOG {
       )
     })
     //check device id
-    const combinedLogs = this.log.transports.find((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
     })
-    if (combinedLogs) {
-      this.log.remove(combinedLogs)
+    for (const log of combinedLogs) {
+      this.log.remove(log)
     }
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
@@ -451,11 +453,12 @@ export class LinLOG {
       )
     })
     //check device id
-    const combinedLogs = this.log.transports.find((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
     })
-    if (combinedLogs) {
-      this.log.remove(combinedLogs)
+
+    for (const log of combinedLogs) {
+      this.log.remove(log)
     }
   }
   close() {
@@ -506,12 +509,12 @@ export class VarLOG {
       format: format.combine(format.json(), ...externalFormat)
     })
     //check device id
-    const combinedLogs = this.log.transports.find((transport) => {
+    const combinedLogs = this.log.transports.filter((transport) => {
       return Array.isArray((transport as any).devices)
     })
 
-    if (combinedLogs) {
-      this.log.remove(combinedLogs)
+    for (const log of combinedLogs) {
+      this.log.remove(log)
     }
   }
   setVarByKey(key: string, value: number | string | number[], ts: number) {

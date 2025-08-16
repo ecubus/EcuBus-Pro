@@ -44,6 +44,7 @@
                 <el-checkbox
                   v-for="city in methods"
                   :key="city"
+                  v-model="methodRef[city]"
                   border
                   :label="city"
                   :value="city"
@@ -121,7 +122,7 @@ const props = defineProps<{
 const globalStart = useGlobalStart()
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
-const buildStatus = ref<string | undefined>()
+const methodRef = ref<Record<string, boolean>>({})
 const formData = ref(cloneDeep(dataBase.logs[editIndex.value]))
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
@@ -318,6 +319,18 @@ const handleConfirm = async () => {
 
 onMounted(() => {
   // refreshBuildStatus()
+  if (formData.value.method.includes('canBase')) {
+    methodRef.value.CAN = true
+  }
+  if (formData.value.method.includes('linBase')) {
+    methodRef.value.LIN = true
+  }
+  if (formData.value.method.includes('ipBase')) {
+    methodRef.value.ETH = true
+  }
+  if (formData.value.method.includes('udsSent')) {
+    methodRef.value.UDS = true
+  }
 })
 </script>
 <style lang="scss">

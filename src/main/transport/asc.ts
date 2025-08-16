@@ -24,40 +24,9 @@ function len2dlc(len: number): number {
   return 15
 }
 
-function ascFormat(devices: string[], method: string[]): winston.Logform.Format {
-  const isHeaderWritten = false
-  const startTime = 0
-
-  return format((info: AscLogInfo, opts: any) => {
-    console.log(info.message)
-    if (info.message.deviceId && opts.devices.indexOf(info.message.deviceId) == -1) {
-      return false
-    }
-    if (opts.method.indexOf(info.message.method) == -1) {
-      return false
-    }
-    // Write ASC header only once
-    if (!isHeaderWritten) {
-      const now = new Date()
-      const dateStr = now.toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        year: 'numeric'
-      })
-
-      return (
-        `date ${dateStr}\n` +
-        'base hex  timestamps absolute\n' +
-        'internal events logged\n' +
-        `Begin Triggerblock ${dateStr}\n` +
-        '0.000000 Start of measurement\n'
-      )
-    }
+function ascFormat(method: string[], initTs: number): winston.Logform.Format {
+  return format((info: any, opts: any) => {
+    console.log(info)
 
     // Process log data to ASC format
     const logData = info.message.data
@@ -66,7 +35,7 @@ function ascFormat(devices: string[], method: string[]): winston.Logform.Format 
     }
 
     const timestamp = parseFloat(logData.ts) || 0
-    const relativeTime = timestamp - startTime
+    const relativeTime = timestamp - initTs
 
     // Format channel number
     const channel =
@@ -128,19 +97,55 @@ function ascFormat(devices: string[], method: string[]): winston.Logform.Format 
     }
 
     if (messageLine) {
-      return `${relativeTime.toFixed(6)} ${messageLine}`
+      info.message = `${relativeTime.toFixed(6)} ${messageLine}`
+      return info
     }
 
     return false // Skip if no valid message line
   })({
-    devices: devices,
+    
     method: method
   })
 }
 
-export default (filePath: string, devices: string[], method: string[]) => {
-  return new winston.transports.File({
-    format: ascFormat(devices, method),
-    filename: filePath
-  })
+class FileTransport extends winston.transports.File {
+  devices: string[]
+  constructor(opts: winston.transports.FileTransportOptions, devices: string[], initTs: number) {
+    super(opts)
+    this.devices = devices
+    const now = new Date(initTs)
+    const dateStr = now.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      year: 'numeric'
+    })
+
+    const header =
+      `date ${dateStr}\n` +
+      'base hex  timestamps absolute\n' +
+      'internal events logged\n' +
+      `Begin Triggerblock ${dateStr}\n` +
+      '0.000000 Start of measurement\n'
+    // this.write(header)
+  }
+  public close(): void {
+    // this.write('End TriggerBlock\n')
+  }
+}
+
+export default (filePath: string, devices: string[]) => {
+  const now = new Date()
+  return new FileTransport(
+    {
+      format: ascFormat(devices, now.getTime()),
+      filename: filePath
+    },
+    devices,
+    now.getTime()
+  )
 }

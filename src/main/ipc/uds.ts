@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
-import ascTransport from '../trasport/asc'
+import ascTransport from '../transport/asc'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')

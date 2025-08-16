@@ -80,6 +80,14 @@ export class CanLOG {
         ...externalFormat
       )
     })
+
+    //check device id
+    const combinedLogs = this.log.transports.find((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    })
+    if (combinedLogs) {
+      this.log.remove(combinedLogs)
+    }
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
@@ -302,6 +310,13 @@ export class DoipLOG {
         ...externalFormat
       )
     })
+    //check device id
+    const combinedLogs = this.log.transports.find((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    })
+    if (combinedLogs) {
+      this.log.remove(combinedLogs)
+    }
     const et2 = externalTransport.map((t) => t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
@@ -435,6 +450,13 @@ export class LinLOG {
         ...externalFormat
       )
     })
+    //check device id
+    const combinedLogs = this.log.transports.find((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.vendor) == -1
+    })
+    if (combinedLogs) {
+      this.log.remove(combinedLogs)
+    }
   }
   close() {
     this.log.close()
@@ -483,6 +505,14 @@ export class VarLOG {
       transports: [new Base(), ...et1],
       format: format.combine(format.json(), ...externalFormat)
     })
+    //check device id
+    const combinedLogs = this.log.transports.find((transport) => {
+      return Array.isArray((transport as any).devices)
+    })
+
+    if (combinedLogs) {
+      this.log.remove(combinedLogs)
+    }
   }
   setVarByKey(key: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarByKey(key, value)

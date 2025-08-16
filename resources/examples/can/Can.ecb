@@ -68697,8 +68697,8 @@
         "pos": {
           "x": 0,
           "y": 0,
-          "w": 1280,
-          "h": 516.5
+          "w": 853.5,
+          "h": 330
         },
         "title": "network",
         "label": "Network",
@@ -68708,10 +68708,10 @@
       },
       "trace": {
         "pos": {
-          "x": 1280,
+          "x": 853.5,
           "y": 0,
-          "w": 1280,
-          "h": 516.5
+          "w": 853.5,
+          "h": 330
         },
         "title": "trace",
         "label": "Trace",
@@ -68745,12 +68745,7 @@
           "y": 491,
           "w": 1280,
           "h": 516.5
-        },
-        "title": "graph",
-        "label": "Graph",
-        "id": "graph",
-        "options": {},
-        "hide": false
+        }
       }
     },
     "example": {

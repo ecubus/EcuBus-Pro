@@ -24,8 +24,8 @@ import { CAN_TP, TpError } from '../docan/cantp'
 import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
-
-import { addTransport, UdsLOG, VarLOG } from '../log'
+import Transport from 'winston-transport'
+import { addTransport, removeTransport, UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
@@ -553,6 +553,10 @@ async function globalStart(
     logQ.startTimer()
   }
 }
+function xascTransport(path: string, channel: string[], method: string[]) {
+  return ascTransport(path, channel, method)
+}
+const exTransportList: string[] = []
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   let i = 0
   const projectInfo = arg[i++] as {
@@ -576,8 +580,9 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
       if (!path.isAbsolute(log.path)) {
         log.path = path.join(projectInfo.path, log.path)
       }
-      console.log('add')
-      addTransport(() => ascTransport(log.path, log.channel, log.method))
+
+      const id = addTransport(() => ascTransport(log.path, log.channel, log.method))
+      exTransportList.push(id)
     }
   }
 
@@ -656,6 +661,10 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
+  for (const t of exTransportList) {
+    removeTransport(t)
+  }
+  exTransportList.splice(0, exTransportList.length)
   //testMap
   testMap.forEach((value) => {
     value.close()

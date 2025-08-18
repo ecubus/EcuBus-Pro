@@ -1,3 +1,4 @@
+import { CanMessage } from 'nodeCan/can'
 import winston, { format } from 'winston'
 import Transport from 'winston-transport'
 
@@ -12,7 +13,7 @@ interface AscLogInfo {
   }
 }
 
-// DLC calculation helper function
+// DLC calculation helper functions
 function len2dlc(len: number): number {
   if (len <= 8) return len
   if (len <= 12) return 9
@@ -24,119 +25,196 @@ function len2dlc(len: number): number {
   return 15
 }
 
+function dlc2len(dlc: number): number {
+  if (dlc <= 8) return dlc
+  switch (dlc) {
+    case 9:
+      return 12
+    case 10:
+      return 16
+    case 11:
+      return 20
+    case 12:
+      return 24
+    case 13:
+      return 32
+    case 14:
+      return 48
+    case 15:
+      return 64
+    default:
+      return dlc
+  }
+}
+
 function ascFormat(method: string[], initTs: number): winston.Logform.Format {
   return format((info: any, opts: any) => {
-    console.log(info.message.method, opts)
-    if (opts.method.indexOf(info.message.method) == -1) {
+    const method = info.message.method
+    if (opts.method.indexOf(method) == -1) {
       return false
     }
 
-    // Process log data to ASC format
-    const logData = info.message.data
-    if (!logData) {
-      return false // Skip if no log data
-    }
+    // Format channel number (Many interfaces start channel numbering at 0 which is invalid, so add 1)
+    const channel = opts.channel
 
-    const timestamp = parseFloat(logData.ts) || 0
-    const relativeTime = timestamp - initTs
-
-    // Format channel number
-    const channel =
-      logData.channel && Number.isInteger(parseInt(logData.channel))
-        ? parseInt(logData.channel) + 1
-        : 1
-
-    // Format ID
-    let id = ''
-    if (logData.id) {
-      id = logData.id.replace('0x', '').toUpperCase()
-      if (logData.msgType && logData.msgType.includes('EXT')) {
-        id += 'x' // Extended frame marker
-      }
-    }
-
-    // Format data
-    let data = ''
-    if (logData.data) {
-      data = logData.data.replace(/\s+/g, ' ').trim()
-    }
-
-    // Build message line
     let messageLine = ''
-
-    if (logData.method === 'canBase') {
-      // CAN message
-      const dlc = logData.dlc ? logData.dlc.toString(16) : '0'
-      const dir = logData.dir === 'Tx' ? 'Tx' : 'Rx'
-
-      if (logData.msgType && logData.msgType.includes('CANFD')) {
-        // CANFD message
-        const brs = logData.msgType.includes('BRS') ? '1' : '0'
-        const esi = '0' // Assume ESI is always 0
-        const dataLength = logData.len || 0
-
-        messageLine = `CANFD ${channel}  ${dir} ${id}                                 ${brs} ${esi} ${dlc} ${dataLength} ${data} 0 0 1000 0 0 0 0 0`
-      } else {
-        // Normal CAN message
-        const dtype = logData.data ? `d ${dlc}` : `r ${dlc}`
-        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} ${dtype} ${data}`
+    switch (method) {
+      case 'canBase': {
+        const logData = info.message.data
+        const msg = logData as CanMessage
+        const relativeTime = logData.ts / 1000_000 // Convert to seconds
+        messageLine = formatCanMessage(msg, channel, relativeTime)
+        break
       }
-    } else if (logData.method === 'canError') {
-      messageLine = `${channel}  ErrorFrame`
-    } else if (logData.method === 'linBase') {
-      // LIN message (treated as CAN format)
-      const dlc = logData.dlc ? logData.dlc.toString(16) : '0'
-      const dir = logData.dir === 'Tx' ? 'Tx' : 'Rx'
-      messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
-    } else if (
-      logData.method === 'udsSent' ||
-      logData.method === 'udsRecv' ||
-      logData.method === 'udsNegRecv'
-    ) {
-      // UDS message (treated as CAN format)
-      const dlc = logData.len ? len2dlc(logData.len).toString(16) : '0'
-      const dir = logData.method === 'udsSent' ? 'Tx' : 'Rx'
-      messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+      case 'canError': {
+        const relativeTime = info.message.data.ts / 1000_000 // Convert to seconds
+        messageLine = `${relativeTime.toFixed(6)} ${channel}  ErrorFrame`
+        break
+      }
+      default:
+        return false
     }
 
-    if (messageLine) {
-      info.message = `${relativeTime.toFixed(6)} ${messageLine}`
-      return info
-    }
-
-    return false // Skip if no valid message line
+    info[Symbol.for('message')] = messageLine
+    return info
   })({
     method: method
   })
 }
 
+function formatCanMessage(msg: CanMessage, channel: number, timestamp: number): string {
+  const dir = msg.dir === 'OUT' ? 'Tx' : 'Rx'
+
+  // Format arbitration ID with extended ID handling
+  let arbId = msg.id.toString(16).toUpperCase()
+  if (msg.msgType.idType === 'EXTENDED') {
+    arbId += 'x'
+  }
+
+  if (msg.msgType.canfd) {
+    // CAN FD format
+    return formatCanFdMessage(msg, channel, timestamp, dir, arbId)
+  } else {
+    // Classic CAN format
+    return formatClassicCanMessage(msg, channel, timestamp, dir, arbId)
+  }
+}
+
+function formatClassicCanMessage(
+  msg: CanMessage,
+  channel: number,
+  timestamp: number,
+  dir: string,
+  arbId: string
+): string {
+  if (msg.msgType.remote) {
+    // Remote frame
+    const dlc = msg.data.length
+    return `${timestamp.toFixed(6)} ${channel}  ${arbId.padEnd(15)} ${dir.padEnd(4)} r ${dlc.toString(16)}`
+  } else {
+    // Data frame
+    const dlc = msg.data.length
+    const dataHex = Array.from(msg.data)
+      .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
+      .join(' ')
+    return `${timestamp.toFixed(6)} ${channel}  ${arbId.padEnd(15)} ${dir.padEnd(4)} d ${dlc.toString(16)} ${dataHex}`
+  }
+}
+
+function formatCanFdMessage(
+  msg: CanMessage,
+  channel: number,
+  timestamp: number,
+  dir: string,
+  arbId: string
+): string {
+  const brs = msg.msgType.brs ? '1' : '0'
+  const esi = '0' // Error State Indicator - would need to be tracked separately
+  const dlc = len2dlc(msg.data.length)
+  const dataLength = msg.data.length
+  const dataHex = Array.from(msg.data)
+    .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
+    .join(' ')
+
+  // CAN FD format flags
+  let flags = 0
+  flags |= 1 << 12 // CAN FD flag
+  if (msg.msgType.brs) {
+    flags |= 1 << 13 // BRS flag
+  }
+  // ESI would be flags |= 1 << 14 if available
+
+  const symbolicName = '' // Would need message name from DBC
+  const messageDuration = '0'
+  const messageLength = '0'
+  const crc = '0'
+  const bitTimingConfArb = '0'
+  const bitTimingConfData = '0'
+  const bitTimingConfExtArb = '0'
+  const bitTimingConfExtData = '0'
+
+  return `${timestamp.toFixed(6)} CANFD ${channel.toString().padStart(3)} ${dir.padEnd(4)} ${arbId.padStart(8)}  ${symbolicName.padStart(32)} ${brs} ${esi} ${dlc.toString(16)} ${dataLength.toString().padStart(2)} ${dataHex} ${messageDuration.padStart(8)} ${messageLength.padStart(4)} ${flags.toString(16).toUpperCase().padStart(8)} ${crc.padStart(8)} ${bitTimingConfArb.padStart(8)} ${bitTimingConfData.padStart(8)} ${bitTimingConfExtArb.padStart(8)} ${bitTimingConfExtData.padStart(8)}`
+}
+
 class FileTransport extends winston.transports.File {
   devices: string[]
+  private headerWritten: boolean = false
+  private startTime: number
+
   constructor(opts: winston.transports.FileTransportOptions, devices: string[], initTs: number) {
     super(opts)
     this.devices = devices
+    this.startTime = initTs
+
+    // Write initial header
     const now = new Date(initTs)
-    const dateStr = now.toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      year: 'numeric'
-    })
+    const dateStr = this.formatHeaderDateTime(now)
 
     const header =
-      `date ${dateStr}\n` +
-      'base hex  timestamps absolute\n' +
-      'internal events logged\n' +
-      `Begin Triggerblock ${dateStr}\n` +
-      '0.000000 Start of measurement\n'
-    // this.write(header)
+      `date ${dateStr}\n` + 'base hex  timestamps absolute\n' + 'internal events logged\n'
+
+    // Write header immediately
+    // if (super.log) {
+    //   super.log({ level: 'info', message: header }, () => {})
+    // }
   }
+
+  private formatHeaderDateTime(dt: Date): string {
+    // Format according to ASC specification: "Mon Jul 14 09:29:58.492 2008"
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ]
+
+    const weekday = weekdays[dt.getDay()]
+    const month = months[dt.getMonth()]
+    const day = dt.getDate().toString().padStart(2, ' ')
+    const hour = dt.getHours().toString().padStart(2, '0')
+    const minute = dt.getMinutes().toString().padStart(2, '0')
+    const second = dt.getSeconds().toString().padStart(2, '0')
+    const msec = Math.floor(dt.getMilliseconds()) // Only 3 digits for milliseconds
+    const year = dt.getFullYear()
+
+    return `${weekday} ${month} ${day} ${hour}:${minute}:${second}.${msec.toString().padStart(3, '0')} ${year}`
+  }
+
   public close(): void {
-    // this.write('End TriggerBlock\n')
+    // Write end trigger block
+    // this.log({ level: 'info', message: 'End TriggerBlock\n' }, () => {})
+    if (super.close) {
+      super.close()
+    }
   }
 }
 

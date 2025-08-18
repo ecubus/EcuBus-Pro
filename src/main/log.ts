@@ -10,10 +10,11 @@ import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
+import { v4 } from 'uuid'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
-type LogFunc = () => Transport
+type LogFunc = (...args: any[]) => Transport
 
 export function createLogs(logs: LogFunc[], formats: Format[]) {
   global.sysLog = createLogger({
@@ -70,8 +71,7 @@ export class CanLOG {
   ) {
     this.deviceId = deviceId
     this.vendor = vendor
-    console.log('qqq', externalTransport.length)
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -90,7 +90,7 @@ export class CanLOG {
     for (const log of combinedLogs) {
       this.log.remove(log)
     }
-    const et2 = externalTransport.map((t) => t())
+    const et2 = externalTransport.map((t) => t.t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
       format: format.combine(
@@ -140,14 +140,20 @@ export class CanLOG {
   }
 }
 
-const externalTransport: (() => Transport)[] = []
+const externalTransport: { id: string; t: () => Transport }[] = []
 
-export function addTransport(t: () => Transport) {
-  externalTransport.push(t)
+export function addTransport(t: () => Transport): string {
+  const id = v4()
+  externalTransport.push({ id, t })
+  return id
 }
 
-export function clearTransport() {
-  externalTransport.splice(0, externalTransport.length)
+export function removeTransport(id: string) {
+  const index = externalTransport.findIndex((t) => t.id == id)
+  if (index != -1) {
+    console.log('removeTransport', id)
+    externalTransport.splice(index, 1)
+  }
 }
 
 const externalFormat: Format[] = []
@@ -163,7 +169,7 @@ export class UdsLOG {
   methodPrefix: string = ''
   startTime = Date.now()
   constructor(name: string) {
-    const et = externalTransport.map((t) => t())
+    const et = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et],
       format: format.combine(format.json(), format.label({ label: name }), ...externalFormat)
@@ -302,7 +308,7 @@ export class DoipLOG {
   ) {
     this.vendor = vendor
     this.deviceId = deviceId
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -319,7 +325,7 @@ export class DoipLOG {
     for (const log of combinedLogs) {
       this.log.remove(log)
     }
-    const et2 = externalTransport.map((t) => t())
+    const et2 = externalTransport.map((t) => t.t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
       format: format.combine(
@@ -442,7 +448,7 @@ export class LinLOG {
   ) {
     this.vendor = vendor
     this.deviceId = deviceId
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -503,7 +509,7 @@ export class VarLOG {
   constructor(id?: string) {
     this.id = id
 
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(format.json(), ...externalFormat)

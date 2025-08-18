@@ -32,8 +32,8 @@
             </el-form-item>
             <el-form-item label="Format" prop="format">
               <el-select v-model="formData.format" placeholder="Format">
-                <el-option label="CSV" value="csv" disabled />
-                <el-option label="ASCII" value="asc" />
+                <el-option label="ASC Format" value="asc" />
+                <el-option label="CSV Format" value="csv" disabled />
               </el-select>
             </el-form-item>
             <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">

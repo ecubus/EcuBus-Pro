@@ -63,7 +63,6 @@ function ascFormat(method: string[], channel: string[], initTs: number): winston
         channel = index + 1
       }
     }
-    // Format channel number (Many interfaces start channel numbering at 0 which is invalid, so add 1)
 
     let messageLine = ''
     switch (method) {
@@ -116,17 +115,17 @@ function formatClassicCanMessage(
   dir: string,
   arbId: string
 ): string {
+  const dlc = msg.data.length
+
   if (msg.msgType.remote) {
-    // Remote frame
-    const dlc = msg.data.length
-    return `${timestamp.toFixed(6)} ${channel}  ${arbId.padEnd(15)} ${dir.padEnd(4)} r ${dlc.toString(16)}`
+    // Remote frame format: <Time> <Channel> <ID> <Dir> r <DLC>
+    return `${timestamp.toFixed(6)} ${channel}  ${arbId} ${dir} r ${dlc.toString(16)}`
   } else {
-    // Data frame
-    const dlc = msg.data.length
+    // Data frame format: <Time> <Channel> <ID> <Dir> d <DLC> <D0> <D1>...<D7>
     const dataHex = Array.from(msg.data)
       .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
       .join(' ')
-    return `${timestamp.toFixed(6)} ${channel}  ${arbId.padEnd(15)} ${dir.padEnd(4)} d ${dlc.toString(16)} ${dataHex}`
+    return `${timestamp.toFixed(6)} ${channel}  ${arbId} ${dir} d ${dlc.toString(16)} ${dataHex}`
   }
 }
 
@@ -145,24 +144,29 @@ function formatCanFdMessage(
     .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
     .join(' ')
 
-  // CAN FD format flags
+  // Calculate message flags according to spec
   let flags = 0
-  flags |= 1 << 12 // CAN FD flag
+  flags |= 1 << 12 // FDF bit (CAN FD flag)
   if (msg.msgType.brs) {
     flags |= 1 << 13 // BRS flag
   }
-  // ESI would be flags |= 1 << 14 if available
+  if (esi === '1') {
+    flags |= 1 << 14 // ESI flag
+  }
 
-  const symbolicName = '' // Would need message name from DBC
-  const messageDuration = '0'
-  const messageLength = '0'
-  const crc = '0'
-  const bitTimingConfArb = '0'
-  const bitTimingConfData = '0'
-  const bitTimingConfExtArb = '0'
-  const bitTimingConfExtData = '0'
+  // Fields that would need to be provided by hardware/driver
+  const symbolicName = '' // Would need message name from DBC, padded to 32 chars
+  const messageDuration = '0' // In nanoseconds
+  const messageLength = '0' // Total bit count
+  const crc = '0' // CRC checksum (8 hex digits)
+  const bitTimingConfArb = '0' // Arbitration bit timing (8 hex digits)
+  const bitTimingConfData = '0' // Data bit timing (8 hex digits)
+  const bitTimingConfExtArb = '0' // Extended arbitration bit timing (8 hex digits)
+  const bitTimingConfExtData = '0' // Extended data bit timing (8 hex digits)
 
-  return `${timestamp.toFixed(6)} CANFD ${channel.toString().padStart(3)} ${dir.padEnd(4)} ${arbId.padStart(8)}  ${symbolicName.padStart(32)} ${brs} ${esi} ${dlc.toString(16)} ${dataLength.toString().padStart(2)} ${dataHex} ${messageDuration.padStart(8)} ${messageLength.padStart(4)} ${flags.toString(16).toUpperCase().padStart(8)} ${crc.padStart(8)} ${bitTimingConfArb.padStart(8)} ${bitTimingConfData.padStart(8)} ${bitTimingConfExtArb.padStart(8)} ${bitTimingConfExtData.padStart(8)}`
+  // CAN FD format according to spec:
+  // <Time> CANFD <Channel> <Dir> <ID> <SymbolicName> <BRS> <ESI> <DLC> <DataLength> <D1>...<D64> <MessageDuration> <MessageLength> <Flags> <CRC> <BitTimingConfArb> <BitTimingConfData> <BitTimingConfExtArb> <BitTimingConfExtData>
+  return `${timestamp.toFixed(6)} CANFD ${channel.toString().padStart(3)} ${dir} ${arbId.padStart(8)} ${symbolicName.padEnd(32)} ${brs} ${esi} ${dlc.toString(16).toLowerCase()} ${dataLength.toString()} ${dataHex} ${messageDuration.padStart(8)} ${messageLength.padStart(4)} ${flags.toString(16).toUpperCase().padStart(8)} ${crc.padStart(8)} ${bitTimingConfArb.padStart(8)} ${bitTimingConfData.padStart(8)} ${bitTimingConfExtArb.padStart(8)} ${bitTimingConfExtData.padStart(8)}`
 }
 
 class FileTransport extends winston.transports.File {
@@ -196,27 +200,28 @@ class FileTransport extends winston.transports.File {
 
     const weekday = weekdays[dt.getDay()]
     const month = months[dt.getMonth()]
-    const day = dt.getDate().toString().padStart(2, ' ')
+    const day = dt.getDate().toString()
     const hour = dt.getHours().toString().padStart(2, '0')
     const minute = dt.getMinutes().toString().padStart(2, '0')
     const second = dt.getSeconds().toString().padStart(2, '0')
-    const msec = Math.floor(dt.getMilliseconds()) // Only 3 digits for milliseconds
+    const msec = dt.getMilliseconds()
     const year = dt.getFullYear()
 
     return `${weekday} ${month} ${day} ${hour}:${minute}:${second}.${msec.toString().padStart(3, '0')} ${year}`
   }
+
   log(info: any, callback: any) {
     if (super.log) {
       if (this.isinit == false) {
-        // Write initial header
+        // Write initial header according to ASC spec
         const now = new Date(this.initTs)
         const dateStr = this.formatHeaderDateTime(now)
 
         const header =
           `date ${dateStr}\n` +
-          'base hex  timestamps absolute\n' +
+          'base hex timestamps absolute\n' +
           'internal events logged\n' +
-          `Begin TriggerBlock ${dateStr}\n`
+          `Begin Triggerblock ${dateStr}\n`
         super.log({ level: 'info', [Symbol.for('message')]: header }, () => {})
         this.isinit = true
       }
@@ -226,9 +231,9 @@ class FileTransport extends winston.transports.File {
   }
 
   public close(): void {
-    // Write end trigger block
-    if (this.isinit && this.log) {
-      this.log({ level: 'info', [Symbol.for('message')]: 'End TriggerBlock\n' }, () => {})
+    // Write end trigger block according to ASC spec
+    if (this.isinit && super.log) {
+      super.log({ level: 'info', [Symbol.for('message')]: 'End TriggerBlock\n' }, () => {})
     }
     if (super.close) {
       super.close()

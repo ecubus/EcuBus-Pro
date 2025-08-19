@@ -571,6 +571,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   global.vars = {}
   global.tester = testers
+  global.device = devices
 
   const vars: Record<string, VarItem> = arg[i++] || {}
   const logs = arg[i++] as Record<string, LogItem>

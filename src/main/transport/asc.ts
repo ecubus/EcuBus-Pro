@@ -47,15 +47,23 @@ function dlc2len(dlc: number): number {
   }
 }
 
-function ascFormat(method: string[], initTs: number): winston.Logform.Format {
+function ascFormat(method: string[], channel: string[], initTs: number): winston.Logform.Format {
   return format((info: any, opts: any) => {
+    if (typeof info.message === 'string') {
+      return info
+    }
     const method = info.message.method
     if (opts.method.indexOf(method) == -1) {
       return false
     }
-
+    let channel = 1
+    if (info.message.deviceId) {
+      const index = opts.channel.indexOf(info.message.deviceId)
+      if (index != -1) {
+        channel = index + 1
+      }
+    }
     // Format channel number (Many interfaces start channel numbering at 0 which is invalid, so add 1)
-    const channel = opts.channel
 
     let messageLine = ''
     switch (method) {
@@ -78,7 +86,8 @@ function ascFormat(method: string[], initTs: number): winston.Logform.Format {
     info[Symbol.for('message')] = messageLine
     return info
   })({
-    method: method
+    method: method,
+    channel: channel
   })
 }
 
@@ -158,25 +167,13 @@ function formatCanFdMessage(
 
 class FileTransport extends winston.transports.File {
   devices: string[]
-  private headerWritten: boolean = false
-  private startTime: number
+  isinit = false
+  initTs: number
 
   constructor(opts: winston.transports.FileTransportOptions, devices: string[], initTs: number) {
     super(opts)
     this.devices = devices
-    this.startTime = initTs
-
-    // Write initial header
-    const now = new Date(initTs)
-    const dateStr = this.formatHeaderDateTime(now)
-
-    const header =
-      `date ${dateStr}\n` + 'base hex  timestamps absolute\n' + 'internal events logged\n'
-
-    // Write header immediately
-    // if (super.log) {
-    //   super.log({ level: 'info', message: header }, () => {})
-    // }
+    this.initTs = initTs
   }
 
   private formatHeaderDateTime(dt: Date): string {
@@ -208,10 +205,31 @@ class FileTransport extends winston.transports.File {
 
     return `${weekday} ${month} ${day} ${hour}:${minute}:${second}.${msec.toString().padStart(3, '0')} ${year}`
   }
+  log(info: any, callback: any) {
+    if (super.log) {
+      if (this.isinit == false) {
+        // Write initial header
+        const now = new Date(this.initTs)
+        const dateStr = this.formatHeaderDateTime(now)
+
+        const header =
+          `date ${dateStr}\n` +
+          'base hex  timestamps absolute\n' +
+          'internal events logged\n' +
+          `Begin TriggerBlock ${dateStr}\n`
+        super.log({ level: 'info', [Symbol.for('message')]: header }, () => {})
+        this.isinit = true
+      }
+
+      super.log(info, callback)
+    }
+  }
 
   public close(): void {
     // Write end trigger block
-    // this.log({ level: 'info', message: 'End TriggerBlock\n' }, () => {})
+    if (this.isinit && this.log) {
+      this.log({ level: 'info', [Symbol.for('message')]: 'End TriggerBlock\n' }, () => {})
+    }
     if (super.close) {
       super.close()
     }
@@ -220,9 +238,11 @@ class FileTransport extends winston.transports.File {
 
 export default (filePath: string, devices: string[], method: string[]) => {
   const now = new Date()
+  const keys = Object.keys(global.device)
+
   return new FileTransport(
     {
-      format: ascFormat(method, now.getTime()),
+      format: ascFormat(method, keys, now.getTime()),
       filename: filePath,
       level: 'debug'
     },

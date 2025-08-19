@@ -151,7 +151,6 @@ export function addTransport(t: () => Transport): string {
 export function removeTransport(id: string) {
   const index = externalTransport.findIndex((t) => t.id == id)
   if (index != -1) {
-    console.log('removeTransport', id)
     externalTransport.splice(index, 1)
   }
 }

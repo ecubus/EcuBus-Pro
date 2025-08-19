@@ -88,6 +88,8 @@ async function parseProject(projectPath: string): Promise<{
     global.database = data.data.database
     global.vars = {}
     global.tester = data.data.tester
+    global.device = data.data.devices
+
     const vars: Record<string, VarItem> = cloneDeep(data.data.vars)
     const sysVars = getAllSysVar(data.data.devices, data.data.tester)
     for (const v of Object.values(sysVars)) {

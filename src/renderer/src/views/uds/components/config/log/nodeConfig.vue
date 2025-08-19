@@ -44,13 +44,14 @@
                 <el-checkbox
                   v-for="city in methods"
                   :key="city"
-                  v-model="methodRef[city]"
+                  v-model="methodRef[city.value]"
                   border
-                  :label="city"
-                  :value="city"
+                  :disabled="city.disabled"
+                  :label="city.label"
+                  :value="city.value"
                   @change="handleMethodChange(city, $event)"
                 >
-                  {{ city }}
+                  {{ city.label }}
                 </el-checkbox>
               </div>
             </el-form-item>
@@ -138,7 +139,32 @@ const nameCheck = (rule: any, value: any, callback: any) => {
   }
 }
 
-const methods = ['CAN', 'LIN', 'ETH', 'UDS']
+const methods = [
+  {
+    label: 'CAN',
+    value: 'CAN',
+    methods: ['canBase', 'canError'],
+    disabled: false
+  },
+  {
+    label: 'LIN',
+    value: 'LIN',
+    methods: ['linBase', 'linError', 'linEvent'],
+    disabled: true
+  },
+  {
+    label: 'ETH',
+    value: 'ETH',
+    methods: ['ipBase', 'ipError'],
+    disabled: true
+  },
+  {
+    label: 'UDS',
+    value: 'UDS',
+    methods: ['udsSent', 'udsRecv', 'udsNegRecv', 'udsError', 'udsScript', 'udsSystem'],
+    disabled: true
+  }
+]
 
 const rules = computed(() => {
   const rules: FormRules = {
@@ -159,67 +185,22 @@ const rules = computed(() => {
   return rules
 })
 
-function handleMethodChange(method: string, checked: boolean) {
-  switch (method) {
-    case 'CAN': {
-      const canMethod = ['canBase', 'canError']
-      if (checked) {
-        for (const m of canMethod) {
-          if (formData.value.method.indexOf(m) == -1) {
-            formData.value.method.push(m)
-          }
-        }
-      } else {
-        for (const m of canMethod) {
-          formData.value.method.splice(formData.value.method.indexOf(m), 1)
-        }
+function handleMethodChange(
+  method: { value: string; methods: string[]; disabled: boolean },
+  checked: boolean
+) {
+  const methodList = method.methods
+  if (checked) {
+    for (const m of methodList) {
+      if (formData.value.method.indexOf(m) == -1) {
+        formData.value.method.push(m)
       }
-      break
     }
-    case 'LIN': {
-      const linMethod = ['linBase', 'linError', 'linEvent']
-      if (checked) {
-        for (const m of linMethod) {
-          if (formData.value.method.indexOf(m) == -1) {
-            formData.value.method.push(m)
-          }
-        }
-      } else {
-        for (const m of linMethod) {
-          formData.value.method.splice(formData.value.method.indexOf(m), 1)
-        }
+  } else {
+    for (const m of methodList) {
+      if (formData.value.method.indexOf(m) != -1) {
+        formData.value.method.splice(formData.value.method.indexOf(m), 1)
       }
-      break
-    }
-    case 'ETH': {
-      const ethMethod = ['ipBase', 'ipError']
-      if (checked) {
-        for (const m of ethMethod) {
-          if (formData.value.method.indexOf(m) == -1) {
-            formData.value.method.push(m)
-          }
-        }
-      } else {
-        for (const m of ethMethod) {
-          formData.value.method.splice(formData.value.method.indexOf(m), 1)
-        }
-      }
-      break
-    }
-    case 'UDS': {
-      const udsMethod = ['udsSent', 'udsRecv', 'udsNegRecv', 'udsError', 'udsScript', 'udsSystem']
-      if (checked) {
-        for (const m of udsMethod) {
-          if (formData.value.method.indexOf(m) == -1) {
-            formData.value.method.push(m)
-          }
-        }
-      } else {
-        for (const m of udsMethod) {
-          formData.value.method.splice(formData.value.method.indexOf(m), 1)
-        }
-      }
-      break
     }
   }
 }
@@ -319,17 +300,12 @@ const handleConfirm = async () => {
 
 onMounted(() => {
   // refreshBuildStatus()
-  if (formData.value.method.includes('canBase')) {
-    methodRef.value.CAN = true
-  }
-  if (formData.value.method.includes('linBase')) {
-    methodRef.value.LIN = true
-  }
-  if (formData.value.method.includes('ipBase')) {
-    methodRef.value.ETH = true
-  }
-  if (formData.value.method.includes('udsSent')) {
-    methodRef.value.UDS = true
+  for (const m of methods) {
+    for (const sm of formData.value.method) {
+      if (m.methods.includes(sm)) {
+        methodRef.value[m.value] = true
+      }
+    }
   }
 })
 </script>

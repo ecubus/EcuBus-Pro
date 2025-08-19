@@ -150,9 +150,9 @@ function formatCanFdMessage(
   if (msg.msgType.brs) {
     flags |= 1 << 13 // BRS flag
   }
-  if (esi === '1') {
-    flags |= 1 << 14 // ESI flag
-  }
+  // if (esi == '1') {
+  //   flags |= 1 << 14 // ESI flag
+  // }
 
   // Fields that would need to be provided by hardware/driver
   const symbolicName = '' // Would need message name from DBC, padded to 32 chars

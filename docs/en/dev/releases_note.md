@@ -1,4 +1,14 @@
 # EcuBus-Pro Release Notes
+## 0.8.52
+Changes from v0.8.51 to v0.8.52:
+
+ 
+* [feat]:add file logger 
+* [bug]:fix esbuild missing in linux 
+* [opt]:opt lin tp sch method 
+* [opt]:opt ecb_cli test subcommand
+---
+
 
 
 ## 0.8.51

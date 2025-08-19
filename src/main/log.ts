@@ -10,10 +10,11 @@ import { LinMsg } from './share/lin'
 import { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
+import { v4 } from 'uuid'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
-type LogFunc = () => Transport
+type LogFunc = (...args: any[]) => Transport
 
 export function createLogs(logs: LogFunc[], formats: Format[]) {
   global.sysLog = createLogger({
@@ -61,13 +62,16 @@ export class CanLOG {
   vendor: string
   log: Logger
   logTp: Logger
+  deviceId: string
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter
   ) {
+    this.deviceId = deviceId
     this.vendor = vendor
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -77,7 +81,16 @@ export class CanLOG {
         ...externalFormat
       )
     })
-    const et2 = externalTransport.map((t) => t())
+
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
+    })
+
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
+    const et2 = externalTransport.map((t) => t.t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
       format: format.combine(
@@ -96,6 +109,7 @@ export class CanLOG {
   canBase(data: CanMessage) {
     this.log.debug({
       method: 'canBase',
+      deviceId: this.deviceId,
       data
     })
     this.event.emit('can-frame', data)
@@ -103,18 +117,21 @@ export class CanLOG {
   canTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
     this.logTp.info({
       method: 'canTp',
+      deviceId: this.deviceId,
       data
     })
   }
   setOption(cmd: string, val: any) {
     this.log.info({
       method: 'setOption',
+      deviceId: this.deviceId,
       data: { cmd, val }
     })
   }
   error(ts: number, msg?: string) {
     this.log.error({
       method: 'canError',
+      deviceId: this.deviceId,
       data: {
         ts: ts,
         msg: msg
@@ -123,14 +140,19 @@ export class CanLOG {
   }
 }
 
-const externalTransport: (() => Transport)[] = []
+const externalTransport: { id: string; t: () => Transport }[] = []
 
-export function addTransport(t: () => Transport) {
-  externalTransport.push(t)
+export function addTransport(t: () => Transport): string {
+  const id = v4()
+  externalTransport.push({ id, t })
+  return id
 }
 
-export function clearTransport() {
-  externalTransport.splice(0, externalTransport.length)
+export function removeTransport(id: string) {
+  const index = externalTransport.findIndex((t) => t.id == id)
+  if (index != -1) {
+    externalTransport.splice(index, 1)
+  }
 }
 
 const externalFormat: Format[] = []
@@ -146,7 +168,7 @@ export class UdsLOG {
   methodPrefix: string = ''
   startTime = Date.now()
   constructor(name: string) {
-    const et = externalTransport.map((t) => t())
+    const et = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et],
       format: format.combine(format.json(), format.label({ label: name }), ...externalFormat)
@@ -274,15 +296,18 @@ export class DoipLOG {
   vendor: string
   log: Logger
   logTp: Logger
+  deviceId: string
 
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter,
     private ts: number
   ) {
     this.vendor = vendor
-    const et1 = externalTransport.map((t) => t())
+    this.deviceId = deviceId
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -292,7 +317,14 @@ export class DoipLOG {
         ...externalFormat
       )
     })
-    const et2 = externalTransport.map((t) => t())
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
+    })
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
+    const et2 = externalTransport.map((t) => t.t())
     this.logTp = createLogger({
       transports: [new Base(), ...et2],
       format: format.combine(
@@ -384,6 +416,7 @@ export class DoipLOG {
     }
     this.log.info({
       method: 'ipBase',
+      deviceId: this.deviceId,
       data: val
     })
     // this.event.emit('ip-frame', val)
@@ -392,6 +425,7 @@ export class DoipLOG {
   error(ts: number, msg?: string) {
     this.log.error({
       method: 'ipError',
+      deviceId: this.deviceId,
       data: {
         ts: ts,
         msg: msg
@@ -403,14 +437,17 @@ export class DoipLOG {
 export class LinLOG {
   vendor: string
   log: Logger
+  deviceId: string
 
   constructor(
     vendor: string,
     instance: string,
+    deviceId: string,
     private event: EventEmitter
   ) {
     this.vendor = vendor
-    const et1 = externalTransport.map((t) => t())
+    this.deviceId = deviceId
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(
@@ -420,6 +457,14 @@ export class LinLOG {
         ...externalFormat
       )
     })
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
+    })
+
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
   }
   close() {
     this.log.close()
@@ -429,7 +474,8 @@ export class LinLOG {
   linBase(data: LinMsg) {
     this.log.debug({
       method: 'linBase',
-      data
+      data,
+      deviceId: this.deviceId
     })
     this.event.emit('lin-frame', data)
   }
@@ -439,7 +485,8 @@ export class LinLOG {
       data: {
         msg,
         ts
-      }
+      },
+      deviceId: this.deviceId
     })
   }
   error(ts: number, msg?: string, data?: LinMsg) {
@@ -449,7 +496,8 @@ export class LinLOG {
         ts,
         msg,
         data
-      }
+      },
+      deviceId: this.deviceId
     })
   }
 }
@@ -460,11 +508,19 @@ export class VarLOG {
   constructor(id?: string) {
     this.id = id
 
-    const et1 = externalTransport.map((t) => t())
+    const et1 = externalTransport.map((t) => t.t())
     this.log = createLogger({
       transports: [new Base(), ...et1],
       format: format.combine(format.json(), ...externalFormat)
     })
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return Array.isArray((transport as any).devices)
+    })
+
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
   }
   setVarByKey(key: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarByKey(key, value)
@@ -539,4 +595,3 @@ export class VarLOG {
     this.log.close()
   }
 }
-

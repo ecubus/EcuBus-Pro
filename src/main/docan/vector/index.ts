@@ -83,7 +83,7 @@ export class VECTOR_CAN extends CanBase {
     }
 
     this.event = new EventEmitter() //创建一个EventEmitter对象，然后使用其方法来发出和监听事件
-    this.log = new CanLOG('VECTOR', info.name, this.event) //
+    this.log = new CanLOG('VECTOR', info.name, this.id, this.event) //
 
     //'0:0' = 第几路总线：通道索引
     this.index = parseInt(info.handle.split(':')[1]) //通道索引： :0
@@ -743,4 +743,3 @@ export class VECTOR_CAN extends CanBase {
 }
 
 export { VECTOR }
-

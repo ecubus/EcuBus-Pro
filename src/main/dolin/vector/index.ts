@@ -137,7 +137,7 @@ export class VectorLin extends LinBase {
 
     VECTOR.CreateTSFN(this.PortHandle.value(), this.info.id, this.callback.bind(this))
 
-    this.log = new LinLOG('VECTOR', info.name, this.event)
+    this.log = new LinLOG('VECTOR', info.name, this.info.device.id, this.event)
     this.startTs = getTsUs()
 
     if (info.database) {
@@ -516,4 +516,3 @@ export class VectorLin extends LinBase {
     return devices
   }
 }
-

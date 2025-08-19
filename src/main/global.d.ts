@@ -25,6 +25,7 @@ declare global {
   var varEvent: EventEmitter<VarEvent> | undefined
   var database: DataSet['database']
   var tester: DataSet['tester']
+  var device: DataSet['device']
   var startTs: number
   var vars: Record<string, VarItem>
   var mainWindow: BrowserWindow
@@ -38,4 +39,3 @@ declare global {
       >
     | undefined
 }
-

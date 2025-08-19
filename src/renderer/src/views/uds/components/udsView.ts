@@ -12,10 +12,11 @@ import nodeConfig from './config/node/nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
 import { cloneDeep, get } from 'lodash'
-import { Inter, NodeItem } from 'src/preload/data'
+import { Inter, LogItem, NodeItem } from 'src/preload/data'
 import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import { useDark } from '@vueuse/core'
+import logConfig from './config/log/nodeConfig.vue'
 
 export interface udsBase {
   name: string
@@ -133,6 +134,10 @@ class Region extends joint.dia.Element {
     {
       tagName: 'path',
       selector: 'testIcon'
+    },
+    {
+      tagName: 'path',
+      selector: 'documentIcon'
     }
   ]
 }
@@ -147,6 +152,10 @@ export const colorMap: Record<string, { fill: string; color: string }> = {
   },
   node: {
     fill: 'rgb(184, 129.6, 48)',
+    color: '#FFFFFF'
+  },
+  log: {
+    fill: 'rgb(202, 176, 9)',
     color: '#FFFFFF'
   }
 }
@@ -203,6 +212,7 @@ export class udsCeil {
     })
 
     this.graph.addCell(this.rect)
+    // this.addDocumentIcon()
     ;(this.rect as any).on('change:position', (cell: any, newPos) => {
       if (newPos.x == this.x && newPos.y == this.y) {
         return
@@ -367,6 +377,18 @@ export class udsCeil {
       view.hideTools()
     }
   }
+
+  addDocumentIcon() {
+    // Add document SVG icon to the bottom-right corner
+    this.rect.attr('documentIcon', {
+      d: 'M18 16h3.65q.425 0 .713.288t.287.712t-.287.713t-.713.287H20.4l2.25 2.25q.275.275.275.688t-.275.712q-.3.3-.712.3t-.713-.3L19 19.425v1.225q0 .425-.288.713T18 21.65t-.712-.287T17 20.65V17q0-.425.288-.712T18 16M13 4v4q0 .425.288.713T14 9h4zM6 2h7.175q.4 0 .763.15t.637.425l4.85 4.85q.275.275.425.638t.15.762V13q0 .425-.288.713T19 14h-3q-.425 0-.712.288T15 15v6q0 .425-.288.713T14 22H6q-.825 0-1.412-.587T4 20V4q0-.825.588-1.412T6 2',
+      fill: 'currentColor',
+      transform: 'translate(132, 82) scale(0.5)',
+      'pointer-events': 'none',
+      opacity: 0.7
+    })
+  }
+
   getId() {
     return this.data.id
   }
@@ -460,6 +482,37 @@ export class IG extends udsCeil {
         lockY: true
       }
     )
+  }
+}
+
+export class Log extends udsCeil {
+  constructor(
+    paper: joint.dia.Paper,
+    graph: joint.dia.Graph,
+    id: string,
+    data: LogItem,
+    x: number,
+    y: number
+  ) {
+    super(
+      paper,
+      graph,
+      {
+        name: data.name,
+        type: 'log',
+        id: id
+      },
+      x,
+      y,
+      {
+        panel: false,
+        edit: true,
+        remove: true,
+        lockX: true,
+        lockY: false
+      }
+    )
+    this.addDocumentIcon()
   }
 }
 
@@ -720,6 +773,51 @@ export class UDSView {
 
     return element
   }
+  addLog(id: string, data: LogItem) {
+    const e = this.ceilMap.get(id)
+    if (!e) {
+      let logsNumbers = 0
+      for (const key of this.ceilMap.keys()) {
+        if (this.ceilMap.get(key) instanceof Log) {
+          logsNumbers++
+        }
+      }
+
+      const element = new Log(this.paper!, this.graph, id, data, 200, 150 + logsNumbers * 150)
+
+      this.ceilMap.set(id, element)
+      element.on('remove', (ceil) => {
+        const dataBase = useDataStore()
+        delete dataBase.logs[ceil.getId()]
+        ceil.events.removeAllListeners()
+        this.graph.removeCells([ceil.rect])
+        this.layout.removeWin(ceil.getId())
+      })
+      element.on('edit', (ceil) => {
+        const dataBase = useDataStore()
+        const id = ceil.getId()
+        const item = dataBase.logs[id]
+        ElMessageBox({
+          buttonSize: 'small',
+          showConfirmButton: false,
+          title: `Edit Log ${item.name}`,
+          showClose: false,
+          customStyle: {
+            width: '600px',
+            maxWidth: 'none'
+          },
+          message: () =>
+            h(logConfig, {
+              editIndex: id,
+              ceil: ceil
+            })
+        }).catch(null)
+      })
+      return element
+    } else {
+      return e
+    }
+  }
   addLink(from: string, to: string) {
     if (this.getLink(from, to)) {
       return
@@ -769,4 +867,3 @@ export class UDSView {
     }
   }
 }
-

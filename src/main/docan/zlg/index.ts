@@ -73,7 +73,7 @@ export class ZLG_CAN extends CanBase {
       throw new Error('Invalid handle')
     }
     this.event = new EventEmitter()
-    this.log = new CanLOG('ZLG', info.name, this.event)
+    this.log = new CanLOG('ZLG', info.name, this.id, this.event)
 
     this.deviceType = parseInt(info.handle.split('_')[0])
     this.index = parseInt(info.handle.split('_')[1])
@@ -667,4 +667,3 @@ export class ZLG_CAN extends CanBase {
     )
   }
 }
-

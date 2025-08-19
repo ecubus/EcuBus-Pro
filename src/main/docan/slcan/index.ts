@@ -86,7 +86,7 @@ export class SLCAN_CAN extends CanBase {
     this.info = baseInfo
 
     this.id = this.info.id
-    this.log = new CanLOG('SLCAN', this.info.name, this.event)
+    this.log = new CanLOG('SLCAN', this.info.name, this.id, this.event)
     this.attachCanMessage(this.busloadCb)
 
     // Initialize write queue
@@ -687,4 +687,3 @@ export class SLCAN_CAN extends CanBase {
     return `readBase-${id}-${msgTypeNum}`
   }
 }
-

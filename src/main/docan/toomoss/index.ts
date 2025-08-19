@@ -125,7 +125,7 @@ export class TOOMOSS_CAN extends CanBase {
 
     this.event = new EventEmitter()
 
-    this.log = new CanLOG('TOOMOSS', info.name, this.event)
+    this.log = new CanLOG('TOOMOSS', info.name, this.id, this.event)
 
     this.handle = parseInt(info.handle.split(':')[0])
     this.deviceIndex = parseInt(info.handle.split(':')[1])
@@ -498,4 +498,3 @@ export class TOOMOSS_CAN extends CanBase {
     return `${id}-${msgType.canfd ? msgType.brs : false}-${msgType.remote}-${msgType.canfd}-${msgType.idType}`
   }
 }
-

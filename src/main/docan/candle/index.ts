@@ -112,7 +112,7 @@ export class Candle_CAN extends CanBase {
 
     this.event = new EventEmitter()
 
-    this.log = new CanLOG('CANABLE', info.name, this.event)
+    this.log = new CanLOG('CANABLE', info.name, this.id, this.event)
 
     if (!Candle.candle_dev_open(this.target)) {
       throw new Error('Open device failed')
@@ -598,4 +598,3 @@ export class Candle_CAN extends CanBase {
     return `${id}-${msgType.canfd ? msgType.brs : false}-${msgType.remote}-${msgType.canfd}-${msgType.idType}`
   }
 }
-

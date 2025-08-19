@@ -52,7 +52,7 @@ export class SIMULATE_CAN extends CanBase {
     busInitStatus[info.handle] = true
     this.info = info
     this.event = vBusCountEvent[info.handle]
-    this.log = new CanLOG('SIMULATE', info.name, this.event)
+    this.log = new CanLOG('SIMULATE', info.name, this.info.id, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
     this.attachCanMessage(this.busloadCb)
@@ -232,4 +232,3 @@ export function getVBusEventInfo() {
   }
   return num
 }
-

@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
-
+import ascTransport from '../transport/asc'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
@@ -26,8 +26,8 @@ import { CAN_TP, TpError } from '../docan/cantp'
 import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
-
-import { UdsLOG, VarLOG } from '../log'
+import Transport from 'winston-transport'
+import { addTransport, removeTransport, UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
@@ -37,7 +37,7 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, NodeItem, PwmInter, VarItem } from 'src/preload/data'
+import { DataSet, LinInter, LogItem, NodeItem, PwmInter, VarItem } from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -555,6 +555,10 @@ async function globalStart(
     logQ.startTimer()
   }
 }
+function xascTransport(path: string, channel: string[], method: string[]) {
+  return ascTransport(path, channel, method)
+}
+const exTransportList: string[] = []
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   let i = 0
   const projectInfo = arg[i++] as {
@@ -566,10 +570,26 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const nodes = arg[i++] as Record<string, NodeItem>
 
   global.database = arg[i++]
+
   global.vars = {}
   global.tester = testers
+  global.device = devices
 
   const vars: Record<string, VarItem> = arg[i++] || {}
+  const logs = arg[i++] as Record<string, LogItem>
+
+  for (const log of Object.values(logs)) {
+    if (log.type == 'file' && log.format == 'asc') {
+      if (!path.isAbsolute(log.path)) {
+        log.path = path.join(projectInfo.path, log.path)
+      }
+
+      const id = addTransport(() => ascTransport(log.path, log.channel, log.method))
+      exTransportList.push(id)
+    }
+  }
+
+  /* --------- */
   const sysVars = getAllSysVar(devices, testers)
 
   for (const v of Object.values(sysVars)) {
@@ -644,6 +664,10 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
+  for (const t of exTransportList) {
+    removeTransport(t)
+  }
+  exTransportList.splice(0, exTransportList.length)
   //testMap
   testMap.forEach((value) => {
     value.close()

@@ -1457,30 +1457,30 @@ async function compileTscEntry(
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
 
-  const handleSpacePath = (pathStr: string) => {
-    return pathStr
-      .replace(/Program Files \(x86\)/g, 'PROGRA~2') // 32位程序目录 (任何盘符)
-      .replace(/Program Files/g, 'PROGRA~1') // 64位程序目录 (任何盘符)
-      .replace(/Documents and Settings/g, 'DOCUME~1') // 老版本Windows目录
-  }
+  libPath = path.relative(projectPath, libPath)
+
   const cmaArray = [
     entry,
     '--sourcemap',
     '--bundle',
     '--platform=node',
     '--format=cjs',
-    `--alias:ECB=${handleSpacePath(libPath)}`,
-    `--alias:@serialport/bindings-cpp=${handleSpacePath(libPath)}/bindings-cpp`,
-    `--alias:bindings=${handleSpacePath(libPath)}/node-bindings`,
+    `--alias:ECB=${libPath}`,
+    `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
+    `--alias:bindings=${libPath}/node-bindings`,
     `--outdir=${outputDir}`,
-    `--inject:${path.join(handleSpacePath(libPath), 'uds.js')}`
+    `--inject:${path.join(libPath, 'uds.js')}`,
+    `--define:process.platform="${process.platform}"`,
+    `--external:*.node`
   ]
   if (isTest) {
     cmaArray.push(
       `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___.only('____ecubus_pro_test___',()=>{})`
     )
   }
-  const v = await exec(handleSpacePath(esbuildPath), cmaArray)
+  const v = await exec(path.resolve(esbuildPath), cmaArray, {
+    cwd: projectPath
+  })
   if (v.stderr) {
     if (!v.stderr.includes('Done')) {
       throw new Error(v.stderr)

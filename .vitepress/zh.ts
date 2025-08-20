@@ -69,7 +69,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: '用户手册',
-      items: [{ text: 'LIN', link: '/zh/docs/um/lin/lin' }]
+      items: [
+        { text: 'LIN', link: '/zh/docs/um/lin/lin' },
+        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] }
+      ]
     },
     {
       text: '示例',

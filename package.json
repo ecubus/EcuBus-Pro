@@ -109,7 +109,7 @@
     "python-shell": "^5.0.0",
     "serialport": "^13.0.0",
     "sortablejs": "^1.15.2",
-    "ts-morph": "^24.0.0",
+    "ts-morph": "^26.0.0",
     "uuid": "^9.0.1",
     "vite-plugin-string": "^1.2.3",
     "vite-raw-plugin": "^1.0.2",

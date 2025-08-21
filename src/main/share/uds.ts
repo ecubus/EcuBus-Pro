@@ -121,9 +121,9 @@ export function param2str(param: Param): string {
 export function param2raw(param: Param): Buffer {
   return Buffer.from(param.value)
 }
-
+const maxSIze = 65536
 export function getTxPdu(service: ServiceItem, paddingVal = 0) {
-  const buffer = Buffer.alloc(4096, paddingVal)
+  const buffer = Buffer.alloc(maxSIze, paddingVal)
   buffer[0] = Number(service.serviceId)
   let allLen = 1
   for (const p of service.params) {
@@ -136,7 +136,7 @@ export function getTxPdu(service: ServiceItem, paddingVal = 0) {
 }
 
 export function getRxPdu(service: ServiceItem, paddingVal = 0) {
-  const buffer = Buffer.alloc(4096, paddingVal)
+  const buffer = Buffer.alloc(maxSIze, paddingVal)
 
   if (service.isNegativeResponse) {
     buffer[0] = 0x7f
@@ -523,4 +523,3 @@ export interface UdsDevice {
   linDevice?: LinBaseInfo
   pwmDevice?: PwmBaseInfo
 }
-

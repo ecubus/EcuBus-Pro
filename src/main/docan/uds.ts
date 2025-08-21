@@ -1491,6 +1491,8 @@ async function compileTscEntry(
   if (fs.existsSync(latBuildFile) === false) {
     throw new Error('build failed, file not exist')
   }
+
+  libPath = path.join(projectPath, libPath)
   //copy *.node to outputDir
   //glob libPath/*.node
   const nodeFiles = await glob('*.node', {

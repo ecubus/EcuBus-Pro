@@ -179,7 +179,7 @@ export class DOIP {
   aliveTimeout = 500
   generalTimeout = 5 * 60 * 1000
   inverseVersion = 0xfd
-  maxProcessSize = 4000
+  maxProcessSize = 40000
   private udp4Server?: dgram.Socket
   private server?: net.Server
   log: DoipLOG

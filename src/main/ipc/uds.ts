@@ -659,6 +659,11 @@ export function globalStop(emit = false) {
   //clear all timer
   logQ.stopTimer()
   clearTimeout(timer)
+  udsTesterMap.forEach((value) => {
+    value.close()
+  })
+  udsTesterMap.clear()
+
   timerMap.forEach((value) => {
     clearInterval(value.timer)
     value.socket.close()
@@ -829,7 +834,7 @@ ipcMain.handle('ipc-stop-sequence', async (event, ...arg) => {
   const uds = udsTesterMap.get(id)
 
   if (uds) {
-    uds.cancel()
+    uds.close()
     udsTesterMap.delete(id)
   }
 })

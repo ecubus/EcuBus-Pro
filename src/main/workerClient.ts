@@ -448,18 +448,19 @@ export default class UdsTester {
     if (this.getInfoPromise) {
       this.getInfoPromise.reject(new Error('worker terminated'))
     }
-
+    const pList = []
     if (!error) {
       // 尝试优雅地结束worker
-      if (this.worker.terminated == false) {
-        this.workerEmit('__end', []).catch(() => {
-          null
-        })
-      }
+      pList.push(this.workerEmit('__end', []))
     }
+    pList.push(new Promise((resolve) => setTimeout(resolve, 1000)))
 
-    // 等待一小段时间让worker完成清理
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    // 任意一个promise完成就结束
+    try {
+      await Promise.any(pList)
+    } catch (e) {
+      null
+    }
 
     try {
       this.worker?.worker?.terminate()

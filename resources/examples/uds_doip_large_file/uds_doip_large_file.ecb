@@ -1,0 +1,512 @@
+{
+  "data": {
+    "devices": {
+      "0151764d-2f88-4258-845d-4cffd2a8dd6f": {
+        "type": "eth",
+        "ethDevice": {
+          "device": {
+            "label": "",
+            "handle": "127.0.0.1",
+            "id": "",
+            "detail": {
+              "address": "127.0.0.1",
+              "netmask": "255.0.0.0",
+              "family": "IPv4",
+              "mac": "00:00:00:00:00:00",
+              "internal": true,
+              "cidr": "127.0.0.1/8"
+            }
+          },
+          "name": "SIMULATE_0",
+          "id": "0151764d-2f88-4258-845d-4cffd2a8dd6f",
+          "vendor": "simulate"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {
+      "fbca7661-9a0b-4c5b-b10f-f1e945f94952": {
+        "id": "fbca7661-9a0b-4c5b-b10f-f1e945f94952",
+        "name": "Tester",
+        "type": "eth",
+        "script": "tester.ts",
+        "targetDeviceId": "0151764d-2f88-4258-845d-4cffd2a8dd6f",
+        "seqList": [
+          {
+            "name": "Seq0",
+            "services": [
+              {
+                "enable": true,
+                "checkResp": false,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "aa508805-d34a-4584-82e9-f4dcc16c1658",
+                "delay": 50,
+                "_X_ROW_KEY": "row_26"
+              },
+              {
+                "enable": true,
+                "checkResp": false,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "bb986e08-436d-40cd-a13b-f2334c8e6ce9",
+                "delay": 0,
+                "_X_ROW_KEY": "row_27"
+              }
+            ]
+          }
+        ],
+        "address": [
+          {
+            "type": "eth",
+            "ethAddr": {
+              "name": "Addr0",
+              "taType": "physical",
+              "virReqType": "broadcast",
+              "virReqAddr": "",
+              "entityNotFoundBehavior": "normal",
+              "entity": {
+                "vin": "ecubus-pro eth000",
+                "eid": "00-00-00-00-00-00",
+                "gid": "00-00-00-00-00-00",
+                "nodeType": "node",
+                "logicalAddr": 100
+              },
+              "tester": {
+                "testerLogicalAddr": 200,
+                "routeActiveTime": 0,
+                "createConnectDelay": 1000
+              }
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "Job": [
+            {
+              "id": "aa508805-d34a-4584-82e9-f4dcc16c1658",
+              "name": "JobFunction0",
+              "serviceId": "Job",
+              "params": [],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            },
+            {
+              "id": "bb986e08-436d-40cd-a13b-f2334c8e6ce9",
+              "name": "JobFunction1",
+              "serviceId": "Job",
+              "params": [],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x34": [
+            {
+              "id": "63b4bd84-543d-48b5-a510-d829ee51fa41",
+              "name": "RequestDownload520",
+              "serviceId": "0x34",
+              "params": [
+                {
+                  "id": "9c02d714-7e38-4b50-9252-673f604316bc",
+                  "name": "dataFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "01ead937-36a7-4e9b-a863-a5cd1e68fbdf",
+                  "name": "addressAndLengthFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "abea11b4-f700-4f72-8150-63299ce8b7b0",
+                  "name": "memoryAddress",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "d2305d64-60a5-4ba8-96f8-638762926ade",
+                  "name": "memorySize",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "7512a038-f440-4ac1-b4bc-e7a0dd641d9c",
+                  "name": "lengthFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "d81b82fd-d7fa-429e-b235-9ceda7e1faa9",
+                  "name": "maxNumberOfBlockLength",
+                  "bitLen": 32,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  "phyValue": "00 00 00 00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x36": [
+            {
+              "id": "922af662-197f-458e-adb5-6e3d7a4fe552",
+              "name": "TransferData540",
+              "serviceId": "0x36",
+              "params": [
+                {
+                  "id": "ac71a944-3328-47df-b212-ef9ea9709914",
+                  "name": "blockSequenceCounter",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "904cf2fa-18b0-4185-a8d8-95ad9534ded5",
+                  "name": "transferRequestParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "4b10058a-eb0c-46b8-80b1-078fb805860d",
+                  "name": "blockSequenceCounter",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                },
+                {
+                  "id": "82c4a02a-ec65-4680-97c9-42d4cd2cba69",
+                  "name": "transferResponseParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ],
+          "0x37": [
+            {
+              "id": "05f67387-1c46-44c2-bd98-07b3d63ae513",
+              "name": "RequestTransferExit550",
+              "serviceId": "0x37",
+              "params": [
+                {
+                  "id": "c5486134-e76f-4d31-8aad-3cdfac2a6ecf",
+                  "name": "transferRequestParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "47fac85e-53f2-48b1-8495-c1c9c1867311",
+                  "name": "transferResponseParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ]
+        },
+        "simulateBy": "5c043bd6-ddca-449a-b535-1ae865085123"
+      }
+    },
+    "subFunction": {},
+    "nodes": {
+      "5c043bd6-ddca-449a-b535-1ae865085123": {
+        "name": "Node 1",
+        "type": "can",
+        "id": "5c043bd6-ddca-449a-b535-1ae865085123",
+        "channel": [
+          "0151764d-2f88-4258-845d-4cffd2a8dd6f"
+        ],
+        "workNode": "",
+        "attachTester": "f304259b-dc7d-460b-9729-4eee2d1156de",
+        "script": "ecu.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {
+      "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad",
+        "name": "BusLoad",
+        "color": "#86a0a1",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad",
+          "variableType": "system",
+          "variableName": "BusLoad"
+        },
+        "graph": {
+          "id": "graph"
+        }
+      },
+      "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq",
+        "name": "FrameFreq",
+        "color": "rgba(78, 98, 246, 1)",
+        "yAxis": {
+          "min": 0,
+          "max": 10000,
+          "unit": "f/s",
+          "splitLine": {
+            "show": false
+          }
+        },
+        "bindValue": {
+          "variableId": "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.FrameFreq",
+          "variableType": "system",
+          "variableName": "FrameFreq"
+        },
+        "graph": {
+          "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "series": {
+          "showSymbol": false,
+          "symbolSize": 6,
+          "symbol": "circle"
+        }
+      }
+    },
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 59,
+          "w": 2562,
+          "h": 452
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": true
+      },
+      "network": {
+        "pos": {
+          "x": 589,
+          "y": 53,
+          "w": 569,
+          "h": 424
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {},
+        "hide": false
+      },
+      "tester": {
+        "pos": {
+          "x": 1081,
+          "y": 123.5,
+          "w": 1205,
+          "h": 462
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {}
+      },
+      "fbca7661-9a0b-4c5b-b10f-f1e945f94952_services": {
+        "pos": {
+          "x": 879,
+          "y": 83.5,
+          "w": 1300,
+          "h": 609
+        },
+        "title": "testerService",
+        "label": "Service",
+        "id": "fbca7661-9a0b-4c5b-b10f-f1e945f94952_services",
+        "options": {
+          "params": {
+            "edit-index": "fbca7661-9a0b-4c5b-b10f-f1e945f94952"
+          },
+          "name": "Tester"
+        }
+      },
+      "fbca7661-9a0b-4c5b-b10f-f1e945f94952_sequence": {
+        "pos": {
+          "x": 324,
+          "y": 141.5,
+          "w": 1482,
+          "h": 400
+        },
+        "title": "testerSequence",
+        "label": "Sequence",
+        "id": "fbca7661-9a0b-4c5b-b10f-f1e945f94952_sequence",
+        "options": {
+          "params": {
+            "edit-index": "fbca7661-9a0b-4c5b-b10f-f1e945f94952"
+          },
+          "name": "Tester"
+        }
+      }
+    },
+    "example": {
+      "catalog": "UDS"
+    }
+  }
+}

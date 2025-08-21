@@ -286,7 +286,7 @@ function testLog(
     message: string
     id: number
   }[] = []
-  console.log(data)
+
   for (const item of data) {
     if ((item.message.data?.data as any).name == '____ecubus_pro_test___') {
       continue

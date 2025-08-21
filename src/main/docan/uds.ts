@@ -27,6 +27,7 @@ import zlibStr from '../share/node/zlib.d.ts.html?raw'
 import assertStr from '../share/node/assert.d.ts.html?raw'
 import async_hooksStr from '../share/node/async_hooks.d.ts.html?raw'
 import bufferStr from '../share/node/buffer.d.ts.html?raw'
+import buffer1Str from '../share/node/buffer.buffer.d.ts.html?raw'
 import child_processStr from '../share/node/child_process.d.ts.html?raw'
 import clusterStr from '../share/node/cluster.d.ts.html?raw'
 import consoleStr from '../share/node/console.d.ts.html?raw'
@@ -40,7 +41,7 @@ import domEventsStr from '../share/node/dom-events.d.ts.html?raw'
 import eventsStr from '../share/node/events.d.ts.html?raw'
 import fsStr from '../share/node/fs.d.ts.html?raw'
 import globalsStr from '../share/node/globals.d.ts.html?raw'
-import globals_globalStr from '../share/node/globals.global.d.ts.html?raw'
+import globals_globalStr from '../share/node/globals.typedarray.d.ts.html?raw'
 import httpStr from '../share/node/http.d.ts.html?raw'
 import http2Str from '../share/node/http2.d.ts.html?raw'
 import httpsStr from '../share/node/https.d.ts.html?raw'
@@ -277,10 +278,10 @@ export class UDSTesterMain {
     this.ac.abort()
   }
   close() {
-    this.log?.close()
     this.cancel()
     this.pool?.stop()
     this.switchPool?.stop()
+    this.log?.close()
     this.varLog.close()
   }
   private async delay(ms: number): Promise<void> {
@@ -1041,6 +1042,7 @@ const preDefineTypes: Record<string, string> = {
   'node_modules/@types/node/assert.d.ts': assertStr,
   'node_modules/@types/node/async_hooks.d.ts': async_hooksStr,
   'node_modules/@types/node/buffer.d.ts': bufferStr,
+  'node_modules/@types/node/buffer.buffer.d.ts': buffer1Str,
   'node_modules/@types/node/child_process.d.ts': child_processStr,
   'node_modules/@types/node/cluster.d.ts': clusterStr,
   'node_modules/@types/node/console.d.ts': consoleStr,
@@ -1054,7 +1056,7 @@ const preDefineTypes: Record<string, string> = {
   'node_modules/@types/node/events.d.ts': eventsStr,
   'node_modules/@types/node/fs.d.ts': fsStr,
   'node_modules/@types/node/globals.d.ts': globalsStr,
-  'node_modules/@types/node/globals.global.d.ts': globals_globalStr,
+  'node_modules/@types/node/globals.typedarray.d.ts': globals_globalStr,
   'node_modules/@types/node/http.d.ts': httpStr,
   'node_modules/@types/node/http2.d.ts': http2Str,
   'node_modules/@types/node/https.d.ts': httpsStr,

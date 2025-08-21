@@ -414,6 +414,7 @@ export class DoipLOG {
       ts: ts,
       name: name
     }
+
     this.log.info({
       method: 'ipBase',
       deviceId: this.deviceId,

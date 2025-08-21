@@ -14,22 +14,15 @@ Add a node item and attach the script(`node.ts`)
 ![alt text](image-1.png)
 
 ```typescript
-import { DiagResponse, RegisterEthVirtualEntity } from 'ECB'
+import { DiagResponse } from 'ECB'
 
-UDS.Init(async () => {
-  console.log('Registering virtual entity')
-  await RegisterEthVirtualEntity('127.0.0.1', {
-    vin: '123456789',
-    eid: '00-00-00-00-00-00',
-    gid: '00-00-00-00-00-00',
-    logicalAddr: 100
-  })
-})
-
-UDS.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
+Util.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
+  console.log('Received Diag request')
   const resp = DiagResponse.fromDiagRequest(req)
   await resp.outputDiag()
 })
+
+
 ```
 
 ## Tester
@@ -38,8 +31,11 @@ Address information need same as your register entity
 
 - Tester addr:200
 - Gateway addr:100
-
+- Simulate By: choose `sim_entity`, the node name.
 ![alt text](image-2.png)
+
+
+
 
 ## Execution
 

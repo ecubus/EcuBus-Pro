@@ -379,23 +379,21 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: val.message.data.name,
         children: val.message.data.children
       })
-    }
-    // else if (val.message.method == 'ipBase') {
-    //   insertData({
-    //     method: val.message.method,
-    //     dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
-    //     data: data2str(val.message.data.data),
-    //     ts: (val.message.data.ts / 1000000).toFixed(3),
-    //     id: `${val.message.data.local}=>${val.message.data.remote}`,
-    //     dlc: val.message.data.data.length,
-    //     len: val.message.data.data.length,
-    //     device: val.label,
-    //     channel: val.instance,
-    //     msgType: val.message.data.type.toLocaleUpperCase(),
-    //     name: val.message.data.name
-    //   })
-    // }
-    else if (val.message.method == 'linBase') {
+    } else if (val.message.method == 'ipBase') {
+      insertData({
+        method: val.message.method,
+        dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
+        data: data2str(val.message.data.data),
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: `${val.message.data.local}=>${val.message.data.remote}`,
+        dlc: val.message.data.data.length,
+        len: val.message.data.data.length,
+        device: val.label,
+        channel: val.instance,
+        msgType: val.message.data.type.toLocaleUpperCase(),
+        name: val.message.data.name
+      })
+    } else if (val.message.method == 'linBase') {
       insertData({
         method: val.message.method,
         dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
@@ -410,54 +408,52 @@ function logDisplay(method: string, vals: LogItem[]) {
         name: val.message.data.name,
         children: val.message.data.children
       })
-    }
-    // } else if (val.message.method == 'udsSent') {
-    //   let testerName = val.message.data.service.name
-    //   if (val.message.id) {
-    //     testerName = `${database.tester[val.message.id]?.name}.${val.message.data.service.name}`
-    //   }
+    } else if (val.message.method == 'udsSent') {
+      let testerName = val.message.data.service.name
+      if (val.message.id) {
+        testerName = `${database.tester[val.message.id]?.name}.${val.message.data.service.name}`
+      }
 
-    //   insertData({
-    //     method: val.message.method,
-    //     dir: '--',
-    //     name: testerName,
-    //     data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
-    //     ts: (val.message.data.ts / 1000000).toFixed(3),
-    //     id: testerName,
-    //     len: val.message.data.recvData ? val.message.data.recvData.length : 0,
-    //     device: val.label,
-    //     channel: val.instance,
-    //     msgType: 'UDS Req' + (val.message.data.msg || ''),
-    //     children: (val.message.data as any).children
-    //   })
-    // } else if (val.message.method == 'udsRecv') {
-    //   let testerName = val.message.data.service.name
-    //   if (val.message.id) {
-    //     testerName = `${database.tester[val.message.id]?.name}.${val.message.data.service.name}`
-    //   }
-    //   const data = val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0)
-    //   let method: string = val.message.method
-    //   let msgType = 'UDS Resp' + (val.message.data.msg || '')
+      insertData({
+        method: val.message.method,
+        dir: '--',
+        name: testerName,
+        data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: testerName,
+        len: val.message.data.recvData ? val.message.data.recvData.length : 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'UDS Req' + (val.message.data.msg || ''),
+        children: (val.message.data as any).children
+      })
+    } else if (val.message.method == 'udsRecv') {
+      let testerName = val.message.data.service.name
+      if (val.message.id) {
+        testerName = `${database.tester[val.message.id]?.name}.${val.message.data.service.name}`
+      }
+      const data = val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0)
+      let method: string = val.message.method
+      let msgType = 'UDS Resp' + (val.message.data.msg || '')
 
-    //   if (data[0] == 0x7f) {
-    //     method = 'udsNegRecv'
-    //     msgType = 'UDS Negative Resp' + (val.message.data.msg || '')
-    //   }
-    //   insertData({
-    //     method: method,
-    //     dir: '--',
-    //     name: testerName,
-    //     data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
-    //     ts: (val.message.data.ts / 1000000).toFixed(3),
-    //     id: testerName,
-    //     len: val.message.data.recvData ? val.message.data.recvData.length : 0,
-    //     device: val.label,
-    //     channel: val.instance,
-    //     msgType: msgType,
-    //     children: (val.message.data as any).children
-    //   })
-    // }
-    else if (val.message.method == 'canError') {
+      if (data[0] == 0x7f) {
+        method = 'udsNegRecv'
+        msgType = 'UDS Negative Resp' + (val.message.data.msg || '')
+      }
+      insertData({
+        method: method,
+        dir: '--',
+        name: testerName,
+        data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: testerName,
+        len: val.message.data.recvData ? val.message.data.recvData.length : 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: msgType,
+        children: (val.message.data as any).children
+      })
+    } else if (val.message.method == 'canError') {
       //find last udsSent or udsPreSend
 
       insertData({

@@ -416,7 +416,7 @@ function logDisplay(method: string, vals: LogItem[]) {
 
       insertData({
         method: val.message.method,
-        dir: '--',
+        dir: 'Tx',
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
         ts: (val.message.data.ts / 1000000).toFixed(3),
@@ -442,7 +442,7 @@ function logDisplay(method: string, vals: LogItem[]) {
       }
       insertData({
         method: method,
-        dir: '--',
+        dir: 'Rx',
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
         ts: (val.message.data.ts / 1000000).toFixed(3),

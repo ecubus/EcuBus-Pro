@@ -370,7 +370,7 @@ async function globalStart(
             const id = cantp.getReadId(addr.canAddr, true)
             cantp.event.on(id, (data) => {
               if (!(data instanceof TpError)) {
-                const log = new UdsLOG(tester.name)
+                const log = new UdsLOG(tester.name, val.info.name)
                 const item = findService(tester, data.data, true)
                 if (item) {
                   log.sent(tester.id, item, data.ts, data.data)
@@ -383,7 +383,7 @@ async function globalStart(
               const idR = cantp.getReadId(swapAddr(addr.canAddr), true)
               cantp.event.on(idR, (data) => {
                 if (!(data instanceof TpError)) {
-                  const log = new UdsLOG(tester.name)
+                  const log = new UdsLOG(tester.name, val.info.name)
                   const item = findService(tester, data.data, false)
                   if (item) {
                     log.recv(tester.id, item, data.ts, data.data)
@@ -448,7 +448,7 @@ async function globalStart(
             const id = lintp.getReadId(LinMode.MASTER, addr.linAddr)
             lintp.event.on(id, (data) => {
               if (!(data instanceof LinTpError)) {
-                const log = new UdsLOG(tester.name)
+                const log = new UdsLOG(tester.name, val.info.name)
 
                 const item = findService(tester, data.data, true)
                 if (item) {
@@ -461,7 +461,7 @@ async function globalStart(
             const idR = lintp.getReadId(LinMode.SLAVE, addr.linAddr)
             lintp.event.on(idR, (data) => {
               if (!(data instanceof LinTpError)) {
-                const log = new UdsLOG(tester.name)
+                const log = new UdsLOG(tester.name, val.info.name)
 
                 const item = findService(tester, data.data, false)
                 if (item) {

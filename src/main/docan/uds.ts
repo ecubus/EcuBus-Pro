@@ -315,7 +315,17 @@ export class UDSTesterMain {
     this.ac = new AbortController()
     const targetDevice = this.device
     if (targetDevice) {
-      this.log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`)
+      let instance = undefined
+      if (targetDevice.type == 'can' && targetDevice.canDevice) {
+        instance = targetDevice.canDevice.name
+      } else if (targetDevice.type == 'eth' && targetDevice.ethDevice) {
+        instance = targetDevice.ethDevice.name
+      } else if (targetDevice.type == 'lin' && targetDevice.linDevice) {
+        instance = targetDevice.linDevice.name
+      } else {
+        null
+      }
+      this.log = new UdsLOG(`${this.tester.name} Seq#${seqIndex}`, instance)
       if (this.tester.script) {
         let scriptPath
         if (path.isAbsolute(this.tester.script) === false) {

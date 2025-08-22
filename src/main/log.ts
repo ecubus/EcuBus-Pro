@@ -167,11 +167,15 @@ export class UdsLOG {
   log: Logger
   methodPrefix: string = ''
   startTime = Date.now()
-  constructor(name: string) {
+  constructor(name: string, instance?: string) {
     const et = externalTransport.map((t) => t.t())
+    const formatList = [format.json(), format.label({ label: name })]
+    if (instance) {
+      formatList.push(instanceFormat({ instance: instance }))
+    }
     this.log = createLogger({
       transports: [new Base(), ...et],
-      format: format.combine(format.json(), format.label({ label: name }), ...externalFormat)
+      format: format.combine(...formatList, ...externalFormat)
     })
   }
   addTransport(t: Transport) {

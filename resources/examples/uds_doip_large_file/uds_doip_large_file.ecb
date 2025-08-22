@@ -489,8 +489,8 @@
       },
       "fbca7661-9a0b-4c5b-b10f-f1e945f94952_sequence": {
         "pos": {
-          "x": 324,
-          "y": 141.5,
+          "x": 486,
+          "y": 124.5,
           "w": 1482,
           "h": 400
         },
@@ -503,6 +503,18 @@
           },
           "name": "Tester"
         }
+      },
+      "trace": {
+        "pos": {
+          "x": 376,
+          "y": 252.5,
+          "w": 763,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
       }
     },
     "example": {

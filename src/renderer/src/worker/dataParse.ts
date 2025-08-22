@@ -162,7 +162,6 @@ function parseUdsData(raw: any, method: string) {
   result[method] = list
   return result
 }
-
 function parseSetVar(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
@@ -192,7 +191,23 @@ export { parseLinData, initDataBase, parseCanData }
 // Check if we're in a worker context
 declare const self: Worker
 const isWorker = typeof self !== 'undefined'
-
+function collectTransferables(obj: any, list: ArrayBuffer[] = []) {
+  if (obj instanceof ArrayBuffer) {
+    list.push(obj)
+  } else if (ArrayBuffer.isView(obj)) {
+    // 处理TypedArray (Uint8Array, Float32Array等) 和 DataView
+    list.push(obj.buffer as any)
+  } else if (Array.isArray(obj)) {
+    // 处理数组
+    obj.forEach((item) => collectTransferables(item, list))
+  } else if (obj && typeof obj === 'object') {
+    // 处理对象，但排除已处理的类型
+    if (!(obj instanceof ArrayBuffer) && !ArrayBuffer.isView(obj)) {
+      Object.values(obj).forEach((value) => collectTransferables(value, list))
+    }
+  }
+  return list
+}
 // Only set up worker message handler if we're in a worker context
 if (isWorker) {
   self.onmessage = (event) => {
@@ -214,7 +229,8 @@ if (isWorker) {
       case 'udsRecv': {
         const result = parseUdsData(data, method)
         if (result) {
-          self.postMessage(result)
+          const transferables = collectTransferables(result)
+          self.postMessage(result, transferables)
         }
         break
       }
@@ -233,12 +249,16 @@ if (isWorker) {
         break
       }
 
-      default:
-        self.postMessage({
-          [method]: data
-        })
+      default: {
+        const transferables = collectTransferables(data)
+        self.postMessage(
+          {
+            [method]: data
+          },
+          transferables
+        )
         break
+      }
     }
   }
 }
-

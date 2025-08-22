@@ -4,13 +4,23 @@ import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
 class LogQueue {
+  private static instance: LogQueue | null = null
   list: any[] = []
   timer: any
   mainWin: BrowserWindow | undefined
-  constructor(
-    public win: BrowserWindow[],
+
+  private constructor(
+    public win: BrowserWindow[] = [],
     private period = 100
   ) {}
+
+  static getInstance(): LogQueue {
+    if (LogQueue.instance === null) {
+      LogQueue.instance = new LogQueue()
+    }
+    return LogQueue.instance
+  }
+
   addWin(win: BrowserWindow, isMain: boolean) {
     this.win.push(win)
     if (isMain) {
@@ -33,7 +43,15 @@ class LogQueue {
     this.win = this.win.filter((w) => w !== win)
   }
 }
-export const logQ = new LogQueue([])
+
+// Export the singleton instance
+export const logQ = LogQueue.getInstance()
+
+// Export a function to get the instance (alternative access method)
+export const getLogQueue = () => LogQueue.getInstance()
+
+// Export the class for type annotations if needed
+export type { LogQueue }
 
 const winMap = new Map<string, BrowserWindow>()
 const winPosMap = new Map<string, { x: number; y: number; width: number; height: number }>()
@@ -132,4 +150,3 @@ export function maximizeWindow(id: string) {
     winMap.get(id)?.maximize()
   }
 }
-

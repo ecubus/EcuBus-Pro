@@ -253,6 +253,7 @@ watch(globalStart, (val) => {
   if (val) {
     clearLog('Start Trace')
     isPaused.value = false
+    logData = []
   }
 })
 
@@ -267,8 +268,17 @@ function clearLog(msg = 'Clear Trace') {
   grid.setExpandRowKeys([])
   grid.scrollYTo(0)
 }
+const maxDataLen = 1024
 function data2str(data: Uint8Array) {
-  return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
+  if (data.length > maxDataLen) {
+    return (
+      data
+        .slice(0, maxDataLen)
+        .reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '') + '...'
+    )
+  } else {
+    return data.reduce((acc, val) => acc + val.toString(16).padStart(2, '0') + ' ', '')
+  }
 }
 function CanMsgType2Str(msgType: CanMsgType) {
   let str = ''
@@ -289,8 +299,8 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-const maxLogCount = 50000
-const showLogCount = 500
+const maxLogCount = 110
+const showLogCount = 100
 
 function insertData2(data: LogData[]) {
   if (isOverwrite.value) {
@@ -340,11 +350,12 @@ function insertData2(data: LogData[]) {
 }
 
 let uid = 0
+let logData: LogData[] = []
+let timer: any = null
 function logDisplay(method: string, vals: LogItem[]) {
   // Don't process logs when paused
   if (isPaused.value) return
 
-  const logData: LogData[] = []
   const insertData = (data: LogData) => {
     // Add ID to idList for future filtering
     addToIdList(data.id)
@@ -537,7 +548,6 @@ function logDisplay(method: string, vals: LogItem[]) {
       })
     }
   }
-  insertData2(logData)
 }
 
 const props = defineProps({
@@ -770,7 +780,6 @@ function getData() {
 
 defineExpose({
   clearLog,
-  insertData: insertData2,
   getData
 })
 
@@ -854,6 +863,13 @@ watch([isPaused, isOverwrite], (v) => {
 })
 
 onMounted(() => {
+  timer = setInterval(() => {
+    if (logData.length) {
+      insertData2(logData)
+      logData = []
+    }
+  }, 100)
+
   for (const item of checkList.value) {
     const v = LogFilter.value.find((v) => v.v == item)
     if (v) {
@@ -962,6 +978,7 @@ onUnmounted(() => {
   // cTable.close()
   // stage.destroy()
   grid.destroy()
+  clearInterval(timer)
 })
 </script>
 

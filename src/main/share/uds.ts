@@ -132,6 +132,9 @@ export function getTxPdu(service: ServiceItem, paddingVal = 0) {
     t.copy(buffer, allLen)
     allLen += len
   }
+  if (allLen > maxSIze) {
+    throw new Error(`service ${service.name} tx length is too long, max size is ${maxSIze}`)
+  }
   return buffer.subarray(0, allLen)
 }
 
@@ -153,6 +156,9 @@ export function getRxPdu(service: ServiceItem, paddingVal = 0) {
     const len = Math.ceil(p.bitLen / 8)
     t.copy(buffer, allLen)
     allLen += len
+  }
+  if (allLen > maxSIze) {
+    throw new Error(`service ${service.name} rx length is too long, max size is ${maxSIze}`)
   }
   return buffer.subarray(0, allLen)
 }

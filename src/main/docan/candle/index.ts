@@ -280,6 +280,7 @@ export class Candle_CAN extends CanBase {
       const isRtr = (msg.ID & 0x40000000) !== 0 // CANDLE_ID_RTR
       const isCanfd = (msg.Flags & 0x02) !== 0 // CANDLE_FLAG_FD
       const hasBrs = (msg.Flags & 0x04) !== 0 // CANDLE_FLAG_BRS
+      const isErr = msg.FrameType === 3 // CANDLE_FRAMETYPE_ERROR = 3
 
       const msgType: CanMsgType = {
         idType: isExtended ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
@@ -315,17 +316,88 @@ export class Candle_CAN extends CanBase {
           item.resolve(msg.TimeStamp)
         }
       } else {
-        const message: CanMessage = {
-          device: this.info.name,
-          dir: 'IN',
-          id: canId,
-          data: data,
-          ts: msg.TimeStamp,
-          msgType: msgType,
-          database: this.info.database
+        if (isErr) {
+          const ts = msg.TimeStamp
+          //   console.log('[DEBUG] get ts:', ts)
+          let str = ''
+          /* bus off */
+          if (msg.ID & 0x00000040) {
+            str += 'BUS_OFF, '
+          }
+          // CAN_ERR_CRTL
+          if (msg.ID & 0x00000004) {
+            const err_ctrl = data[1]
+            /* recovered to error active state */
+            if (err_ctrl & 0x40) {
+              str += 'ERROR_CRTL_ACTIVE, '
+            }
+            /* reached error passive status RX */
+            if (err_ctrl & 0x10) {
+              str += 'ERROR_CRTL_RX_PASSIVE, '
+            }
+            /* reached error passive status TX */
+            if (err_ctrl & 0x20) {
+              str += 'ERROR_CRTL_TX_PASSIVE, '
+            }
+            /* reached warning level for RX errors */
+            if (err_ctrl & 0x04) {
+              str += 'ERROR_CRTL_RX_WARNING, '
+            }
+            /* reached warning level for TX errors */
+            if (err_ctrl & 0x08) {
+              str += 'ERROR_CRTL_TX_WARNING, '
+            }
+          }
+          // CAN_ERR_PROT  protocol violations
+          if (msg.ID & 0x00000008) {
+            const err_port = data[2]
+            const err_port_crc = data[3]
+            /* bit stuffing error */
+            if (err_port & 0x04) {
+              str += 'ERROR_PROT_STUFF, '
+            }
+            /* frame format error */
+            if (err_port & 0x02) {
+              str += 'ERROR_PROT_FORM, '
+            }
+            /* unable to send dominant bit */
+            if (err_port & 0x08) {
+              str += 'ERROR_PROT_BIT0, '
+            }
+            /* unable to send recessive bit */
+            if (err_port & 0x10) {
+              str += 'ERROR_PROT_BIT1, '
+            }
+            /* CRC sequence */
+            if (err_port_crc & 0x08) {
+              str += 'ERROR_PROT_CRC, '
+            }
+          }
+          // CAN_ERR_ACK received no ACK on transmission
+          if (msg.ID & 0x00000020) {
+            str += 'ERROR_ACK, '
+          }
+
+          const transmit_error_count = data[6]
+          const receive_error_count = data[7]
+          if (transmit_error_count || receive_error_count) {
+            str += `TX_ERR_CNT:${transmit_error_count} RX_ERR_CNT:${receive_error_count}`
+          }
+            this.log.error(ts, `bus error, ${str}`)
+            this.close(true)
+        } else {
+          const message: CanMessage = {
+            device: this.info.name,
+            dir: 'IN',
+            id: canId,
+            data: data,
+            ts: msg.TimeStamp,
+            msgType: msgType,
+            database: this.info.database
+          }
+          this.log.canBase(message) //打印接收帧
+          this.event.emit(cmdId, message) //EventEmitter触发事件，接收帧触发
         }
-        this.log.canBase(message) //打印接收帧
-        this.event.emit(cmdId, message) //EventEmitter触发事件，接收帧触发
       }
     }
   }
@@ -436,7 +508,8 @@ export class Candle_CAN extends CanBase {
     }
     this.pendingBaseCmds.clear()
 
-    if (isReset) {
+      if (isReset) {
+      /* In HSCAN device, the device auto-resets on bus-off.*/
       // Reset logic would go here
       return
     } else {

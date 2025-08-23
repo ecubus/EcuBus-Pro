@@ -120,7 +120,13 @@ const getErrorFlag = (data: Buffer, offset: number): number => {
   const val = data[StatusSignalOffset]
   return val >> offset
 }
-
+test('timeout', async () => {
+  const t = FrameMap['3c']
+  const ct = cloneMsg(t)
+  ct.data = ct.data.subarray(0, 5)
+  const result1 = await sendLinWithSend(ct, {})
+  assert(result1)
+})
 describe('4.2', () => {
   test('4.2.1 Wrong Synch Field = 0x80 (one falling edge)', async () => {
     const msg = FrameMap['Slave1_TxFrame1']
@@ -375,6 +381,33 @@ describe('4.3', () => {
 })
 
 describe('5.4', () => {
+  test('5.4.1.2 Frame error', async () => {
+    const msg = FrameMap['Slave1_TxFrame1']
+    const t = FrameMap['3c']
+    const r = FrameMap['3d']
+    let result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+
+    //2. Send a $3C Targeted Reset to the DUT
+    const result1 = await sendLinWithSend(t, {
+      errorInject: {
+        bit: headerBitLength + 19,
+        value: 0
+      }
+    })
+    assert(!result1)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+    assert.equal(getErrorFlag(result.msg.data, 5), 6)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+  })
   test('5.4.1.6 Multiple Errors', async () => {
     const msg = FrameMap['Slave1_TxFrame1']
     const t = FrameMap['3c']

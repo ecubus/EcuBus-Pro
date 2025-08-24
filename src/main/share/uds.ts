@@ -122,24 +122,30 @@ export function param2raw(param: Param): Buffer {
   return Buffer.from(param.value)
 }
 const maxSIze = 65536
-export function getTxPdu(service: ServiceItem, paddingVal = 0) {
-  const buffer = Buffer.alloc(maxSIze, paddingVal)
+function reallocBuffer(buffer: Buffer, len: number) {
+  const newBuffer = Buffer.alloc(len)
+  buffer.copy(newBuffer, 0, 0, buffer.length)
+  return newBuffer
+}
+export function getTxPdu(service: ServiceItem) {
+  let buffer = Buffer.alloc(maxSIze)
   buffer[0] = Number(service.serviceId)
   let allLen = 1
   for (const p of service.params) {
     const t = param2raw(p)
     const len = Math.ceil(p.bitLen / 8)
+    if (allLen + len > maxSIze) {
+      buffer = reallocBuffer(buffer, (allLen + len) * 2)
+    }
     t.copy(buffer, allLen)
     allLen += len
   }
-  if (allLen > maxSIze) {
-    throw new Error(`service ${service.name} tx length is too long, max size is ${maxSIze}`)
-  }
+
   return buffer.subarray(0, allLen)
 }
 
-export function getRxPdu(service: ServiceItem, paddingVal = 0) {
-  const buffer = Buffer.alloc(maxSIze, paddingVal)
+export function getRxPdu(service: ServiceItem) {
+  let buffer = Buffer.alloc(maxSIze)
 
   if (service.isNegativeResponse) {
     buffer[0] = 0x7f
@@ -154,11 +160,11 @@ export function getRxPdu(service: ServiceItem, paddingVal = 0) {
   for (const p of service.respParams) {
     const t = param2raw(p)
     const len = Math.ceil(p.bitLen / 8)
+    if (allLen + len > maxSIze) {
+      buffer = reallocBuffer(buffer, (allLen + len) * 2)
+    }
     t.copy(buffer, allLen)
     allLen += len
-  }
-  if (allLen > maxSIze) {
-    throw new Error(`service ${service.name} rx length is too long, max size is ${maxSIze}`)
   }
   return buffer.subarray(0, allLen)
 }

@@ -82,6 +82,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           text: 'LIN',
           items: [{ text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' }],
           collapsed: false
+        },
+        {
+          text: 'UDS',
+          items: [{ text: 'UDS DoIP 大文件传输', link: 'uds_doip_large_file/readme.md' }],
+          collapsed: false
         }
       ]
     },

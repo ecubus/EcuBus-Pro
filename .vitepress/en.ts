@@ -166,7 +166,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
             { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
             { text: 'UDS Code Generate', link: '/examples/uds_generate_code/readme' },
             { text: 'UDS Authentication Service(0x29)', link: '/examples/uds_0x29/readme' },
-            { text: 'UDS Security Access(0x27)', link: '/examples/uds_0x27/readme' }
+            { text: 'UDS Security Access(0x27)', link: '/examples/uds_0x27/readme' },
+            { text: 'UDS DoIP Large File', link: '/examples/uds_doip_large_file/readme' }
           ],
           collapsed: true
         },

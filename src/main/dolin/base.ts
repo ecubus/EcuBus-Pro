@@ -171,6 +171,9 @@ export default abstract class LinBase {
     initData: Buffer,
     flag: number
   ): void
+  async powerCtrl(power: boolean): Promise<void> {
+    throw new Error('Power control not supported')
+  }
   // abstract registerNode(nodeName:string):void
   abstract _write(msg: LinMsg): Promise<number>
   async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {
@@ -673,4 +676,3 @@ export default abstract class LinBase {
     }
   }
 }
-

@@ -22,7 +22,7 @@ We’re not just creating another hardware product. We’re building tools that 
 
 Choose from our specialized EcuBus hardware options:
 
-![ecubus-hardware](./image.png)
+![ecubus-hardware](../../../media/um/hardware/image.png)
 
 ---
 

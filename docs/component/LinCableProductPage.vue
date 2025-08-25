@@ -4,7 +4,7 @@
     <div class="product-card">
       <img class="product-image" src="./lincable.png" alt="LinCable" />
       <div class="product-info">
-        <h1 class="product-title">EcuBus LinCable</h1>
+        <h1 class="product-title">EcuBus LinCable-V2</h1>
         <p class="product-subtitle">USB to LIN Adapter for Automotive Development</p>
 
         <button class="cart-btn" @click="showModal = true">

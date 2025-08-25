@@ -70,6 +70,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     {
       text: '用户手册',
       items: [
+        {
+          text: 'EcuBus的硬件',
+          link: '/zh/docs/um/hardware/index',
+          items: [{ text: 'LinCable', link: '/zh/docs/um/hardware/lincable' }]
+        },
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
         { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] }
       ]

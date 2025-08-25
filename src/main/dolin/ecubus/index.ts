@@ -657,6 +657,23 @@ export class LinCable extends LinBase {
     })
   }
 
+  override async powerCtrl(power: boolean) {
+    return new Promise<void>((resolve, reject) => {
+      if (power) {
+        this.serialPort.write('IO\r')
+      } else {
+        this.serialPort.write('IC\r')
+      }
+      this.serialPort.drain((err) => {
+        if (err) {
+          reject(
+            new LinError(LIN_ERROR_ID.LIN_BUS_ERROR, undefined, 'powerCtrl error, ' + err.message)
+          )
+        }
+        resolve()
+      })
+    })
+  }
   read(frameId: number) {
     return this.lastFrame.get(frameId)
   }

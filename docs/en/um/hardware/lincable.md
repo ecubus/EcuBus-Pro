@@ -1,5 +1,5 @@
 <script setup>
-import LinCableProductPage from './components/LinCableProductPage.vue'
+import LinCableProductPage from '../../../component/LinCableProductPage.vue'
 </script>
 # EcuBus LinCable – USB to LIN Adapter for Automotive Development
 
@@ -12,6 +12,34 @@ USB Type-C. Supporting a single LIN channel.
 
 **Board dimensions:** 59mm (height) × 19mm (length)
 
+
+## Diagram
+
+![lincable-diagram](../../../media/um/hardware/lincable.png)
+
+## LIN Protocol Support
+
+LinCable fully supports the LIN 2.0, 2.1, 2.2A, and SAE J2602 standards, providing
+compatibility with a wide range of automotive LIN devices and networks. Supported baud rates
+include 19200, 10400, 9600, and 2400 bps, making LinCable suitable for both legacy and
+modern LIN applications.
+
+## PWM Output Capability
+
+LinCable includes advanced [PWM](../pwm/pwm.md) output functionality, making it
+a versatile tool for automotive development and testing. The PWM output feature enables
+precise control of digital signals for various automotive applications.
+
+### PWM Output Specifications
+- **Frequency Range**: 1 Hz to 20KHz with high precision
+- **Duty Cycle Control**: 0% to 100% with 0.1% resolution
+- **Output Voltage**: High level equals VBAT input voltage, low level equals 0V
+- **Channel Count**: Single PWM output channel
+- **Frequency Accuracy**: ±0.1% typical
+
+## Power Control
+
+Support IUT power control, maximum current 2A, maximum voltage 18V
 
 ## Fault Injection and Conformance Testing
 
@@ -46,27 +74,6 @@ and quality assurance.
 ---
 
 > See [Lin Conformance Test Example](../../../resources/examples/lin_conformance_test/readme.md) for more details.   
-
-## Advanced LIN Protocol Support
-
-LinCable fully supports the LIN 2.0, 2.1, 2.2A, and SAE J2602 standards, providing
-compatibility with a wide range of automotive LIN devices and networks. Supported baud rates
-include 19200, 10400, 9600, and 2400 bps, making LinCable suitable for both legacy and
-modern LIN applications.
-
-## PWM Output Capability
-
-LinCable includes advanced [PWM](../pwm/pwm.md) output functionality, making it
-a versatile tool for automotive development and testing. The PWM output feature enables
-precise control of digital signals for various automotive applications.
-
-### PWM Output Specifications
-- **Frequency Range**: 1 Hz to 20KHz with high precision
-- **Duty Cycle Control**: 0% to 100% with 0.1% resolution
-- **Output Voltage**: High level equals VBAT input voltage, low level equals 0V
-- **Channel Count**: Single PWM output channel
-- **Frequency Accuracy**: ±0.1% typical
-
 
 ## Cross-Platform and Software Integration
 

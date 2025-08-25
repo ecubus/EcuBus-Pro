@@ -15,7 +15,7 @@ USB Type-C. Supporting a single LIN channel.
 
 ## Diagram
 
-![lincable-diagram](../../../media/um/hardware/lincable.png)
+![lincable-diagram](../../../media/um/hardware/linCable.png)
 
 ## LIN Protocol Support
 

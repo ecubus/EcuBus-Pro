@@ -14,7 +14,7 @@ EcuBus LinCable 适配器通过 USB Type-C 接口实现 LIN 网络与计算机�
 
 ## 系统框图
 
-![lincable-diagram](../../../media/um/hardware/lincable.png)
+![lincable-diagram](../../../media/um/hardware/linCable.png)
 
 ## LIN 协议支持
 

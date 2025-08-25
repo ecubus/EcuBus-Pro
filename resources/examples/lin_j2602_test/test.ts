@@ -52,6 +52,12 @@ Util.Init(async () => {
     data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
     checksumType: LinChecksumType.CLASSIC
   }
+  FrameMap['3a'] = {
+    frameId: 0x3a,
+    direction: LinDirection.SEND,
+    data: Buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    checksumType: LinChecksumType.CLASSIC
+  }
   FrameMap['3d'] = {
     frameId: 0x3d,
     direction: LinDirection.RECV,
@@ -383,15 +389,15 @@ describe('4.3', () => {
 describe('5.4', () => {
   test('5.4.1.2 Frame error', async () => {
     const msg = FrameMap['Slave1_TxFrame1']
-    const t = FrameMap['3c']
-    const r = FrameMap['3d']
+    const t = FrameMap['3a']
+
     let result = await sendLinWithRecv(msg, {})
     assert(result.result)
 
     //2. Send a $3C Targeted Reset to the DUT
     const result1 = await sendLinWithSend(t, {
       errorInject: {
-        bit: headerBitLength + 19,
+        bit: headerBitLength + 89,
         value: 0
       }
     })
@@ -401,6 +407,30 @@ describe('5.4', () => {
     assert(result.result)
     assert(result.msg)
     assert.equal(getErrorFlag(result.msg.data, 5), 6)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+  })
+  test('5.4.1.3 CheckSum error', async () => {
+    const msg = FrameMap['Slave1_TxFrame1']
+    const t = FrameMap['3c']
+
+    let result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+
+    //2. Send a $3C Targeted Reset to the DUT
+    const result1 = await sendLinWithSend(t, {
+      checkSum: 0xff
+    })
+    assert(!result1)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+    assert.equal(getErrorFlag(result.msg.data, 5), 5)
 
     result = await sendLinWithRecv(msg, {})
     assert(result.result)

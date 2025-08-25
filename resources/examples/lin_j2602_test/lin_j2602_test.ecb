@@ -6,7 +6,7 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM51",
+            "handle": "COM34",
             "id": "",
             "lincablePowerEnable": false
           },
@@ -89,7 +89,7 @@
         "pos": {
           "x": 474.5,
           "y": 115,
-          "w": 600,
+          "w": 861,
           "h": 400
         },
         "title": "hardware",

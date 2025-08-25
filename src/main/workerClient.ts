@@ -75,6 +75,11 @@ export type ApiGetFrameFromDB = {
   dbName: string
   frameName: string
 }
+export type linApiPowerCtrl = {
+  method: 'powerCtrl'
+  device?: string
+  power: boolean
+}
 export type linApiStopSch = {
   method: 'stopSch'
   device?: string

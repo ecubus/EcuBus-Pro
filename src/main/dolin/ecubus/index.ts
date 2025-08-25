@@ -99,7 +99,14 @@ export class LinCable extends LinBase {
     this.startReading()
     this.serialPort.flush()
     this.serialPort.write(str)
-    this.serialPort.drain()
+    this.serialPort.drain((err) => {
+      if (err) return
+      if (this.info.device.lincablePowerEnable) {
+        this.powerCtrl(true)
+      } else {
+        this.powerCtrl(false)
+      }
+    })
     this.serialPort.on('error', (err) => {
       if (!this.close) {
         this.log.error(this.getTs(), `Serial port error: ${err.message}`)
@@ -467,7 +474,7 @@ export class LinCable extends LinBase {
     }
 
     this.serialPort.write('C\r')
-    this.serialPort.drain(() => {
+    this.powerCtrl(false).finally(() => {
       this.serialPort.close()
       this.event.emit('close')
     })

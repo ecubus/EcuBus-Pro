@@ -2161,6 +2161,42 @@ export async function linStartScheduler(
 }
 
 /**
+ * Control the power of a LIN device
+ *
+ * @category LIN
+ * @param {boolean} power - The power state to set
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when power is set
+ *
+ * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
+ *
+ * @example
+ * ```ts
+ * // Set power to true
+ * await linPowerCtrl(true);
+ *
+ * // Set power to false on specific device
+ * await linPowerCtrl(false, 'Device1');
+ * ```
+ */
+export async function linPowerCtrl(power: boolean, device?: string) {
+  const p: Promise<void> = new Promise((resolve, reject) => {
+    workerpool.workerEmit({
+      id: id,
+      event: 'linApi',
+      data: {
+        method: 'powerCtrl',
+        device,
+        power
+      }
+    })
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
+  return await p
+}
+
+/**
  * Stop a LIN scheduler
  *
  * @category LIN

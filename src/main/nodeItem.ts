@@ -4,6 +4,7 @@ import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester, {
   ApiGetFrameFromDB,
+  linApiPowerCtrl,
   linApiStartSch,
   linApiStopSch,
   pwmApiSetDuty
@@ -868,7 +869,10 @@ export class NodeClass {
       pwmBase.setDutyCycle(data.duty)
     }
   }
-  async linApi(pool: UdsTester, data: linApiStartSch | linApiStopSch | ApiGetFrameFromDB) {
+  async linApi(
+    pool: UdsTester,
+    data: linApiStartSch | linApiStopSch | ApiGetFrameFromDB | linApiPowerCtrl
+  ) {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined
       if (name != undefined) {
@@ -1012,6 +1016,11 @@ export class NodeClass {
           throw new Error(`database ${data.dbName} not found`)
         }
 
+        break
+      }
+      case 'powerCtrl': {
+        const device = findLinBase(data.device)
+        await device.powerCtrl(data.power)
         break
       }
     }

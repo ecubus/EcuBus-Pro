@@ -6,8 +6,9 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM34",
-            "id": ""
+            "handle": "COM51",
+            "id": "",
+            "lincablePowerEnable": false
           },
           "name": "ECUBUS_0",
           "id": "f8c108a5-21a4-40c2-b4f6-086ae00b6066",
@@ -40,7 +41,8 @@
     "guages": {},
     "vars": {},
     "datas": {},
-    "panels": {}
+    "panels": {},
+    "logs": {}
   },
   "project": {
     "wins": {
@@ -81,6 +83,18 @@
         "title": "trace",
         "label": "Trace",
         "id": "trace",
+        "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 474.5,
+          "y": 115,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
         "options": {}
       }
     },

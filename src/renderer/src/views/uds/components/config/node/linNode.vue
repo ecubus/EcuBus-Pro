@@ -70,6 +70,13 @@
         <el-option label="Output 5V" :value="2" />
       </el-select>
     </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'ecubus'"
+      label="Power Enable"
+      prop="device.lincablePowerEnable"
+    >
+      <el-switch v-model="data.device.lincablePowerEnable" />
+    </el-form-item>
     <el-divider content-position="left"> Lin Parameters </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
@@ -321,4 +328,3 @@ onUnmounted(() => {
   /* 垂直居中对齐 */
 }
 </style>
-

@@ -11,6 +11,7 @@ export interface LinDevice {
   serialNumber?: string
   busy?: boolean
   toomossVolt?: number
+  lincablePowerEnable?: boolean
 }
 
 export interface LinBaseInfo {
@@ -286,4 +287,3 @@ export function getFrameData(db: LDF, frame: Frame): Buffer {
   }
   return data
 }
-

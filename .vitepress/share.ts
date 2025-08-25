@@ -96,13 +96,13 @@ export const shared = defineConfig({
     ['script', { src: 'https://sdk.rum.aliyuncs.com/v2/browser-sdk.js', crossorigin: 'anonymous' }],
     [
       'script',
-      { src: 'https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.js' }
+      { src: 'https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.js' }
     ],
     [
       'link',
       {
         rel: 'stylesheet',
-        href: 'https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/viewerjs/1.10.4/viewer.min.css'
+        href: 'https://cdn.jsdelivr.net/npm/viewerjs@1.11.7/dist/viewer.min.css'
       }
     ],
     [

@@ -1,4 +1,16 @@
 # EcuBus-Pro Release Notes
+## 0.8.53
+Changes from v0.8.52 to v0.8.53:
+
+ 
+* [api]:add lin power control api 
+* [opt]:opt trace performance 
+* [opt]:opt trace uds instrance and dir 
+* [opt]:remove uds max buffer size limit
+* [opt]:add CAN error reporting for Candle device in https://github.com/ecubus/EcuBus-Pro/pull/191 by @RCSN
+
+---
+
 ## 0.8.52
 Changes from v0.8.51 to v0.8.52:
 

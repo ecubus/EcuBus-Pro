@@ -1,6 +1,28 @@
 {
   "data": {
-    "devices": {},
+    "devices": {
+      "67f2631c-0ddf-42cc-9615-f2fc9b377a65": {
+        "type": "eth",
+        "ethDevice": {
+          "device": {
+            "label": "",
+            "handle": "127.0.0.1",
+            "id": "",
+            "detail": {
+              "address": "127.0.0.1",
+              "netmask": "255.0.0.0",
+              "family": "IPv4",
+              "mac": "00:00:00:00:00:00",
+              "internal": true,
+              "cidr": "127.0.0.1/8"
+            }
+          },
+          "name": "SIMULATE_0",
+          "id": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
+          "vendor": "simulate"
+        }
+      }
+    },
     "ia": {},
     "tester": {},
     "subFunction": {},
@@ -14,13 +36,36 @@
     "vars": {},
     "datas": {},
     "panels": {},
+    "logs": {},
     "someip": {
-      "f5c9c84a-ce01-467b-91fd-33fe85ac1ed1": {
-        "id": "f5c9c84a-ce01-467b-91fd-33fe85ac1ed1",
+      "e48f3aba-fe37-48e8-8ad6-d9926246ab12": {
+        "id": "e48f3aba-fe37-48e8-8ad6-d9926246ab12",
         "name": "someip_0",
-        "device": "",
-        "services": [],
-        "applications": []
+        "services": [
+          {
+            "service": "0x1234",
+            "instance": "0x5678",
+            "protocol": "someip",
+            "events": [],
+            "eventgroups": [],
+            "unreliable": 30510
+          },
+          {
+            "service": "0x1234",
+            "instance": "0x5679",
+            "protocol": "someip",
+            "reliable": {
+              "port": 30509
+            },
+            "events": [],
+            "eventgroups": []
+          }
+        ],
+        "application": {
+          "name": "someip_0",
+          "id": "0x1111"
+        },
+        "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65"
       }
     }
   },
@@ -41,11 +86,23 @@
         "id": "message",
         "layoutType": "bottom"
       },
+      "hardware": {
+        "pos": {
+          "x": 553.5,
+          "y": 130,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
       "soa": {
         "pos": {
-          "x": 422,
-          "y": 31,
-          "w": 700,
+          "x": 503.5,
+          "y": 130,
+          "w": 963,
           "h": 400
         },
         "title": "soa",

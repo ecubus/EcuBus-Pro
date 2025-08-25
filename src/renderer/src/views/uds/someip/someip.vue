@@ -9,12 +9,17 @@
       hide-required-asterisk
     >
       <el-form-item label="SomeIP Name" prop="name">
-        <el-input v-model="data.name" :disabled="globalStart" placeholder="Name" />
+        <el-input v-model="data.name" :disabled="globalStart" placeholder="SomeIP_0" />
       </el-form-item>
 
-      <el-form-item label="Simulate By" prop="simulateBy">
-        <el-select v-model="data.simulateBy" :disabled="globalStart" clearable>
-          <el-option v-for="item in nodesName" :key="item.id" :label="item.name" :value="item.id">
+      <el-form-item label="Device" prop="device">
+        <el-select
+          v-model="data.device"
+          :disabled="globalStart"
+          clearable
+          placeholder="Select Device"
+        >
+          <el-option v-for="item in deviceList" :key="item.id" :label="item.name" :value="item.id">
           </el-option>
         </el-select>
       </el-form-item>
@@ -25,7 +30,7 @@
         <el-input
           v-model="data.application.name"
           :disabled="globalStart"
-          placeholder="Application name"
+          placeholder="MyApplication"
         />
       </el-form-item>
 
@@ -37,36 +42,48 @@
           :max="6"
         />
       </el-form-item>
+      <el-collapse>
+        <el-collapse-item title="Advanced Application Configuration" name="1">
+          <el-form-item label-width="0">
+            <el-col :span="12">
+              <el-form-item label="Max Dispatchers" prop="application.max_dispatchers">
+                <el-input
+                  v-model.number="data.application.max_dispatchers"
+                  :disabled="globalStart"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="Max Dispatch Time" prop="application.max_dispatch_time">
+                <el-input
+                  v-model.number="data.application.max_dispatch_time"
+                  :disabled="globalStart"
+                />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
 
-      <el-form-item label-width="0">
-        <el-col :span="12">
-          <el-form-item label="Max Dispatchers" prop="application.max_dispatchers">
-            <el-input v-model.number="data.application.max_dispatchers" :disabled="globalStart" />
+          <el-form-item label-width="0">
+            <el-col :span="12">
+              <el-form-item label="Threads" prop="application.threads">
+                <el-input v-model.number="data.application.threads" :disabled="globalStart" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="IO Thread Nice" prop="application.io_thread_nice">
+                <el-input
+                  v-model.number="data.application.io_thread_nice"
+                  :disabled="globalStart"
+                />
+              </el-form-item>
+            </el-col>
           </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="Max Dispatch Time" prop="application.max_dispatch_time">
-            <el-input v-model.number="data.application.max_dispatch_time" :disabled="globalStart" />
-          </el-form-item>
-        </el-col>
-      </el-form-item>
 
-      <el-form-item label-width="0">
-        <el-col :span="12">
-          <el-form-item label="Threads" prop="application.threads">
-            <el-input v-model.number="data.application.threads" :disabled="globalStart" />
+          <el-form-item label="Session Handling" prop="application.has_session_handling">
+            <el-checkbox v-model="data.application.has_session_handling" :disabled="globalStart" />
           </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="IO Thread Nice" prop="application.io_thread_nice">
-            <el-input v-model.number="data.application.io_thread_nice" :disabled="globalStart" />
-          </el-form-item>
-        </el-col>
-      </el-form-item>
-
-      <el-form-item label="Session Handling" prop="application.has_session_handling">
-        <el-checkbox v-model="data.application.has_session_handling" :disabled="globalStart" />
-      </el-form-item>
+        </el-collapse-item>
+      </el-collapse>
 
       <el-divider content-position="left">
         <el-button icon="Plus" link type="primary" :disabled="globalStart" @click="addService">
@@ -124,22 +141,20 @@ import {
 } from 'vue'
 import { v4 } from 'uuid'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
+
 import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
-import { SomeipInfo, ServiceConfig, ApplicationConfig } from 'src/main/vsomeip/share'
+import type { SomeipInfo, ServiceConfig, ApplicationConfig } from 'src/main/vsomeip/share'
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import { useGlobalStart } from '@r/stores/runtime'
 
-// Import service configuration component (to be created)
-// import serviceConfig from './serviceConfig.vue'
+// Import service configuration component
+import serviceConfig from './serviceConfig.vue'
 
 const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()
 const dataBase = useDataStore()
-const nodesName = computed(() => {
-  return Object.values(dataBase.nodes)
-})
 
 const props = defineProps<{
   index: string
@@ -150,7 +165,7 @@ const data = ref<SomeipInfo>({
   id: v4(),
   name: '',
   services: [],
-  simulateBy: undefined,
+  device: '',
   application: {
     name: '',
     id: '0x6301',
@@ -164,10 +179,41 @@ const data = ref<SomeipInfo>({
 })
 
 function getServiceName(item: ServiceConfig, index: number) {
-  return `${item.service}.${item.instance}` || `Service${index}`
+  return `${item.service.replace('0x', '')}.${item.instance.replace('0x', '')}` || `Service${index}`
 }
 
 const serviceRef = ref<Record<number, any>>({})
+
+// Check for duplicate service+instance combinations
+function checkServiceDuplicates() {
+  const serviceMap = new Map<string, number>()
+  const duplicateIndices = new Set<number>()
+
+  data.value.services.forEach((service, index) => {
+    if (service.service && service.instance) {
+      const key = `${service.service}-${service.instance}`
+      if (serviceMap.has(key)) {
+        // Found duplicate
+        duplicateIndices.add(serviceMap.get(key)!)
+        duplicateIndices.add(index)
+      } else {
+        serviceMap.set(key, index)
+      }
+    }
+  })
+
+  // Clear previous errors for services that are no longer duplicates
+  for (const index in errors.value) {
+    if (!duplicateIndices.has(parseInt(index))) {
+      delete errors.value[parseInt(index)]
+    }
+  }
+
+  // Set errors for duplicate services
+  duplicateIndices.forEach((index) => {
+    errors.value[index] = new Error('Service ID and Instance ID combination already exists')
+  })
+}
 
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
@@ -183,8 +229,26 @@ const nameCheck = (rule: any, value: any, callback: any) => {
   }
 }
 
+const deviceList = computed(() => {
+  return Object.values(dataBase.devices)
+    .filter((item) => item.type == 'eth' && item.ethDevice)
+    .map((item) => item.ethDevice!)
+})
 const activeTabName = ref('')
 const emits = defineEmits(['change'])
+
+const idCheck = (rule: any, value: any, callback: any) => {
+  if (value) {
+    //must be hex string, max ffff
+    if (!/^0x[0-9a-fA-F]{1,4}$/.test(value)) {
+      callback(new Error('Please input valid application ID, must be hex string,ex:0x6301'))
+    }
+
+    callback()
+  } else {
+    callback(new Error('Please input application ID'))
+  }
+}
 
 const rules = computed<FormRules>(() => {
   return {
@@ -193,6 +257,12 @@ const rules = computed<FormRules>(() => {
         required: true,
         trigger: 'blur',
         validator: nameCheck
+      }
+    ],
+    device: [
+      {
+        required: true,
+        trigger: 'blur'
       }
     ],
     'application.name': [
@@ -205,8 +275,9 @@ const rules = computed<FormRules>(() => {
     'application.id': [
       {
         required: true,
-        message: 'Please input application ID',
-        trigger: 'blur'
+
+        trigger: 'blur',
+        validator: idCheck
       }
     ]
   }
@@ -242,11 +313,17 @@ const errors = ref<Record<number, any>>({})
 const onSubmit = async () => {
   try {
     errors.value = {}
+
+    // Check for duplicate service combinations first
+    checkServiceDuplicates()
+
+    // Validate each service configuration
     for (let i = 0; i < Object.values(serviceRef.value).length; i++) {
       await serviceRef.value[i]?.dataValid().catch((e: any) => {
         errors.value[i] = e
       })
     }
+
     await ruleFormRef.value?.validate()
     if (Object.keys(errors.value).length > 0) {
       return false
@@ -275,11 +352,11 @@ onBeforeMount(() => {
       data.value = cloneDeep(editData)
       if (data.value.services.length > 0) activeTabName.value = `index${0}`
 
-      // Check simulateBy exist
-      if (data.value.simulateBy) {
-        const node = dataBase.nodes[data.value.simulateBy]
-        if (!node) {
-          data.value.simulateBy = undefined
+      // Check device exist
+      if (data.value.device) {
+        const device = dataBase.devices[data.value.device]
+        if (!device || device.type !== 'eth' || !device.ethDevice) {
+          data.value.device = ''
         }
       }
     } else {
@@ -294,6 +371,10 @@ onBeforeMount(() => {
   watcher = watch(
     data,
     () => {
+      // Check for service duplicates when data changes
+      if (data.value.services && data.value.services.length > 0) {
+        checkServiceDuplicates()
+      }
       onSubmit()
     },
     { deep: true }

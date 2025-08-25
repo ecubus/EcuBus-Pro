@@ -621,7 +621,7 @@ export interface SomeipInfo {
   id: string
   name: string
   services: ServiceConfig[]
-  simulateBy?: string
+  device: string
   application: ApplicationConfig
 }
 

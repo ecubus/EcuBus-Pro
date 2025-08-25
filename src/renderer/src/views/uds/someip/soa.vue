@@ -48,14 +48,14 @@
     <div :id="`${winKey}Shift`" class="shift" />
     <div class="right">
       <div v-if="activeTree">
-        <!-- <testerCanVue
+        <someipVue
           v-if="activeTree.type"
           :index="activeTree.id"
           :type="activeTree.type"
           :height="h"
           @change="nodeChange"
         >
-        </testerCanVue> -->
+        </someipVue>
       </div>
     </div>
   </div>
@@ -86,6 +86,7 @@ import { v4 } from 'uuid'
 import { HardwareType } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
+import someipVue from './someip.vue'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -176,7 +177,8 @@ function addNewDevice(node: tree) {
       application: {
         name: name,
         id: ''
-      }
+      },
+      device: ''
     }
   }
 
@@ -228,10 +230,10 @@ function buildTree() {
   const eth: tree = {
     label: 'DDS',
     type: 'dds',
-    append: false,
+    append: true,
     id: 'DDS',
     children: [],
-    disabled: false
+    disabled: true
   }
 
   t.push(eth)

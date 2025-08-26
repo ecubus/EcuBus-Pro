@@ -139,62 +139,32 @@ function removeDevice(data: tree) {
     }
   })
 }
-function generateUniqueName(type: 'someip' | 'dds'): string {
-  let index = 0
-  let name = `${type}_${index}`
 
-  if (type == 'someip') {
-    // 检查是否存在同名配置
-    while (Object.values(globalData.someip).some((soa) => soa.name === name)) {
-      index++
-      name = `${type}_${index}`
-    }
-  }
-
-  return name
-}
 function addNewDevice(node: tree) {
   activeTree.value = undefined
-  const id = v4()
-
-  // 使用新的生成唯一名称的函数
-  const name = generateUniqueName(node.type)
-
-  treeRef.value?.append(
-    {
-      label: name,
-      append: false,
-      id: id,
-      type: node.type
-    },
-    node.id
-  )
-  if (node.type == 'someip') {
-    globalData.someip[id] = {
-      id: id,
-      name: name,
-      services: [],
-      application: {
-        name: name,
-        id: ''
-      },
-      device: ''
-    }
-  }
-
   nextTick(() => {
-    activeTree.value = treeRef.value?.getNode(id).data
-    treeRef.value.setCurrentKey(id)
+    activeTree.value = node
   })
 }
+
 function nodeChange(id: string, name: string) {
   //change tree stuff
+
   const node = treeRef.value?.getNode(id)
   if (node) {
     node.data.label = name
-    layout.changeWinName(`${id}_services`, name)
-    layout.changeWinName(`${id}_sequence`, name)
+  } else {
+    treeRef.value?.append(
+      {
+        label: name,
+        append: false,
+        id: id,
+        type: activeTree.value?.type
+      },
+      activeTree.value?.id
+    )
   }
+  activeTree.value = undefined
 }
 
 interface tree {

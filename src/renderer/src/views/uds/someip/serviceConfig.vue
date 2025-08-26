@@ -48,7 +48,7 @@
         <el-input v-model="modelValue.protocol" placeholder="someip"  />
       </el-form-item> -->
 
-      <el-form-item prop="unicast">
+      <el-form-item v-if="!sdEnable" prop="unicast" required>
         <template #label>
           <el-tooltip
             content="The unicast IP address that hosts the service instance. Required for external services when service discovery is disabled."
@@ -63,7 +63,7 @@
 
       <el-divider content-position="left">Communication Configuration</el-divider>
 
-      <el-form-item>
+      <el-form-item prop="tcpValidation">
         <template #label>
           <el-tooltip
             content="Enable reliable TCP communication for this service. TCP provides guaranteed delivery and error checking."
@@ -76,6 +76,7 @@
         <el-checkbox v-model="useReliable" @change="onReliableChange">
           Enable TCP Communication
         </el-checkbox>
+        <el-input v-model="tcpValidation" style="display: none" />
       </el-form-item>
 
       <div v-if="useReliable && modelValue.reliable" style="margin-bottom: 30px">
@@ -110,7 +111,7 @@
         </el-form-item>
       </div>
 
-      <el-form-item>
+      <el-form-item prop="udpValidation">
         <template #label>
           <el-tooltip
             content="Enable unreliable UDP communication for this service. UDP provides faster communication but without delivery guarantees."
@@ -123,6 +124,7 @@
         <el-checkbox v-model="useUnreliable" @change="onUnreliableChange">
           Enable UDP Communication
         </el-checkbox>
+        <el-input v-model="udpValidation" style="display: none" />
       </el-form-item>
 
       <div v-if="useUnreliable && modelValue.unreliable">
@@ -161,6 +163,7 @@ const ruleFormRef = ref<FormInstance>()
 const props = defineProps<{
   index: number
   services: ServiceConfig[]
+  sdEnable: boolean
 }>()
 
 const modelValue = defineModel<ServiceConfig>({ required: true })
@@ -168,6 +171,13 @@ const modelValue = defineModel<ServiceConfig>({ required: true })
 // Reactive flags for optional configurations
 const useReliable = ref(!!modelValue.value.reliable)
 const useUnreliable = ref(!!modelValue.value.unreliable)
+
+// Validation fields for form rules
+const tcpValidation = ref('')
+const udpValidation = ref('')
+const sdEnable = computed(() => {
+  return props.sdEnable
+})
 
 // Hex validation helper
 const hexValidator = (rule: any, value: any, callback: any) => {
@@ -187,6 +197,30 @@ const portValidator = (rule: any, value: any, callback: any) => {
   }
 }
 
+// TCP validation helper
+const tcpProtocolValidator = (rule: any, value: any, callback: any) => {
+  const hasReliable = !!modelValue.value.reliable
+  const hasUnreliable = modelValue.value.unreliable !== undefined
+
+  if (!hasReliable && !hasUnreliable) {
+    callback(new Error('At least one communication protocol must be enabled'))
+  } else {
+    callback()
+  }
+}
+
+// UDP validation helper
+const udpProtocolValidator = (rule: any, value: any, callback: any) => {
+  const hasReliable = !!modelValue.value.reliable
+  const hasUnreliable = modelValue.value.unreliable !== undefined
+
+  if (!hasReliable && !hasUnreliable) {
+    callback(new Error('At least one communication protocol must be enabled'))
+  } else {
+    callback()
+  }
+}
+
 const rules = computed<FormRules>(() => {
   return {
     service: [
@@ -197,7 +231,9 @@ const rules = computed<FormRules>(() => {
       { required: true, message: 'Please input instance ID', trigger: 'blur' },
       { validator: hexValidator, trigger: 'blur' }
     ],
-    'reliable.port': [{ validator: portValidator, trigger: 'blur' }]
+    'reliable.port': [{ validator: portValidator, trigger: 'blur' }],
+    tcpValidation: [{ validator: tcpProtocolValidator, trigger: 'change' }],
+    udpValidation: [{ validator: udpProtocolValidator, trigger: 'change' }]
   }
 })
 
@@ -215,6 +251,9 @@ const onReliableChange = (enabled: boolean) => {
       delete modelValue.value.reliable
     }
   }
+  // Trigger validation for both TCP and UDP
+  tcpValidation.value = tcpValidation.value === 'valid' ? 'check' : 'valid'
+  udpValidation.value = udpValidation.value === 'valid' ? 'check' : 'valid'
 }
 
 // Unreliable configuration management
@@ -228,6 +267,9 @@ const onUnreliableChange = (enabled: boolean) => {
       delete modelValue.value.unreliable
     }
   }
+  // Trigger validation for both TCP and UDP
+  tcpValidation.value = tcpValidation.value === 'valid' ? 'check' : 'valid'
+  udpValidation.value = udpValidation.value === 'valid' ? 'check' : 'valid'
 }
 
 // Validation method for parent component

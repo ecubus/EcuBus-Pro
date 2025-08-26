@@ -284,11 +284,6 @@ export interface ApplicationPlugin {
  */
 export interface ApplicationConfig {
   /**
-   * The name of the application
-   */
-  name: string
-
-  /**
    * The id of the application. Usually its high byte is equal to the diagnosis address.
    * In this case the low byte must be different from zero. Thus, if the diagnosis address is 0x63,
    * valid values range from 0x6301 until 0x63FF. It is also possible to use id values with
@@ -623,6 +618,7 @@ export interface SomeipInfo {
   services: ServiceConfig[]
   device: string
   application: ApplicationConfig
+  serviceDiscovery: ServiceDiscoveryConfig
 }
 
 // Re-export imported sub-interfaces for convenience

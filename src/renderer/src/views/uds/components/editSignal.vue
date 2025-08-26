@@ -125,7 +125,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { GraphBindSignalValue, GraphNode, VarItem } from 'src/preload/data'
+import type { GraphBindSignalValue, GraphNode, VarItem } from 'src/preload/data'
 import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
 import { useDataStore } from '@r/stores/data'
 import { getAllSysVar } from 'nodeCan/sysVar'
@@ -254,4 +254,3 @@ const activeCollapse = ref([]) // 默认折叠，空数组表示所有面板都�
   margin: 8px 0;
 }
 </style>
-

@@ -51,6 +51,13 @@ import { getAllSysVar } from '../share/sysVar'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 import { cloneDeep } from 'lodash'
 import { logQ } from '../multiWin'
+import { SomeipConfig, SomeipInfo } from '../vsomeip/share'
+import {
+  generateConfigFile,
+  startRouterCounter,
+  stopRouterCounter,
+  VSomeIP_Client
+} from '../vsomeip'
 
 const libPath = path.dirname(dllLib)
 
@@ -265,12 +272,14 @@ let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
+let someipClients: { client: VSomeIP_Client; config: SomeipConfig }[] = []
 
 async function globalStart(
   devices: Record<string, UdsDevice>,
   testers: Record<string, TesterInfo>,
   nodes: Record<string, NodeItem>,
-  projectInfo: { path: string; name: string }
+  projectInfo: { path: string; name: string },
+  someip: Record<string, SomeipInfo>
 ) {
   let activeKey = ''
   const varLog = new VarLOG()
@@ -504,7 +513,34 @@ async function globalStart(
       nodeItem.close()
     }
   }
-
+  let rounterInit = false
+  //someip
+  for (const key in someip) {
+    const val = someip[key]
+    const file = await generateConfigFile(val, projectInfo.path, devices)
+    if (rounterInit == false) {
+      await startRouterCounter(file)
+      rounterInit = true
+    }
+    const client = new VSomeIP_Client(val.name, file)
+    client.init()
+    client.on('state', (data) => {
+      console.log('someip state', data)
+      if (data == 0) {
+        console.log('offer service', val.name, val.services)
+        val.services.forEach((e) => {
+          client.app.offer_service(Number(e.service), Number(e.instance))
+        })
+      }
+    })
+    someipClients.push({
+      client: client,
+      config: val
+    })
+  }
+  someipClients.forEach((e) => {
+    e.client.start()
+  })
   //doip connect list
   // const list=doipConnectList.map((e)=>{
   //     return e.connect()
@@ -577,6 +613,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   const vars: Record<string, VarItem> = arg[i++] || {}
   const logs = arg[i++] as Record<string, LogItem>
+  const someip = arg[i++] as Record<string, SomeipInfo>
 
   for (const log of Object.values(logs)) {
     if (log.type == 'file' && log.format == 'asc') {
@@ -620,7 +657,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     global.vars[key] = v
   }
   try {
-    await globalStart(devices, testers, nodes, projectInfo)
+    await globalStart(devices, testers, nodes, projectInfo, someip)
   } catch (err: any) {
     globalStop(true)
     throw err
@@ -709,7 +746,15 @@ export function globalStop(emit = false) {
     value.close()
   })
   doips = []
-
+  someipClients.forEach((e) => {
+    e.config.services?.forEach((s) => {
+      console.log('stop offer service', s.service, s.instance)
+      e.client.app.stop_offer_service(Number(s.service), Number(s.instance))
+    })
+    e.client.stop()
+  })
+  stopRouterCounter()
+  someipClients = []
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {
       win.webContents.send('ipc-global-stop')
@@ -720,7 +765,7 @@ export function globalStop(emit = false) {
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
-  globalStop()
+  await globalStop()
 })
 
 const schMap = new Map<string, LinBase>()

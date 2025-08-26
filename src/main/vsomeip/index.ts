@@ -6,6 +6,10 @@ import { ServiceConfig } from './share/service-config'
 import { EventEmitter } from 'events'
 import os from 'os'
 import fs from 'fs'
+import fsP from 'fs/promises'
+import { SomeipInfo } from './share'
+import type { DataSet } from '../../preload/data'
+import { UdsDevice } from 'nodeCan/uds'
 
 // Import sysLog from global
 declare const sysLog: any
@@ -64,7 +68,6 @@ export type VsomeipEventMap = {
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
-let isStoppingRouter = false // Flag to distinguish active stopping from passive exit
 
 //
 
@@ -81,9 +84,10 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
       resolve()
       return
     }
-
-    // Reset stopping flag
-    isStoppingRouter = false
+    const lockFile = path.join(os.tmpdir(), 'vsomeip.lck')
+    if (fs.existsSync(lockFile)) {
+      fs.unlinkSync(lockFile)
+    }
 
     // Validate config file path
     if (!configFilePath || !path.isAbsolute(configFilePath)) {
@@ -109,12 +113,11 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
     })
 
     routingManagerProcess.on('exit', (code, signal) => {
-      if (!isStoppingRouter) {
+      if (routingManagerProcess) {
         // Passive exit - process crashed or was killed externally
         sysLog.error(`routing manager exited unexpectedly with code: ${code}, signal: ${signal}`)
+        routingManagerProcess = null
       }
-      routingManagerProcess = null
-      isStoppingRouter = false
     })
 
     // Wait a bit for the process to start
@@ -128,38 +131,9 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
   })
 }
 
-export function stopRouterCounter(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!routingManagerProcess) {
-      resolve()
-      return
-    }
-
-    // Set stopping flag
-    isStoppingRouter = true
-
-    // Try graceful shutdown first
-    routingManagerProcess.once('exit', (code, signal) => {
-      routingManagerProcess = null
-      isStoppingRouter = false
-      //manull delete vsomeip.lck file in temp
-      const lockFile = path.join(os.tmpdir(), 'vsomeip.lck')
-      if (fs.existsSync(lockFile)) {
-        fs.unlinkSync(lockFile)
-      }
-      resolve()
-    })
-
-    // Send SIGTERM for graceful shutdown
-    routingManagerProcess.kill('SIGTERM')
-
-    // Force kill after 3s if still running (increased timeout for Windows)
-    setTimeout(() => {
-      if (routingManagerProcess && !routingManagerProcess.killed) {
-        routingManagerProcess.kill('SIGKILL')
-      }
-    }, 1000)
-  })
+export function stopRouterCounter() {
+  routingManagerProcess?.kill('SIGKILL')
+  routingManagerProcess = null
 }
 
 export function isRouterCounterRunning(): boolean {
@@ -278,5 +252,93 @@ export class VSomeIP_Client {
       this.cb.stop()
     }
     vsomeip.UnregisterCallback(this.cbId)
+    this.app.stop()
   }
+}
+
+export async function generateConfigFile(
+  config: SomeipInfo,
+  projectPath: string,
+  devices: Record<string, UdsDevice>
+) {
+  // Extract device information to get network settings
+  let unicast: string | undefined
+  let netmask: string | undefined
+  let serviceUnicast: string | undefined
+
+  const device = devices[config.device]
+  if (device && device.type === 'eth' && device.ethDevice?.device?.detail) {
+    const detail = device.ethDevice.device.detail
+    if (detail.address) {
+      unicast = detail.address
+      serviceUnicast = detail.address
+    }
+    if (detail.netmask) {
+      netmask = detail.netmask
+    }
+  }
+
+  // Build the vsomeip configuration object
+  const vsomeipConfig: any = {}
+
+  // Only add network settings if they exist
+  if (unicast) {
+    vsomeipConfig.unicast = unicast
+  }
+  if (netmask) {
+    vsomeipConfig.netmask = netmask
+  }
+
+  const logPath = path.join(projectPath, '.ScriptBuild', config.name + '.log')
+  vsomeipConfig.logging = {
+    level: 'info',
+    file: {
+      enable: 'true',
+      path: logPath
+    }
+  }
+
+  vsomeipConfig.trace = {
+    enable: 'true',
+    sd_enable: 'true'
+  }
+
+  // Add minimal required logging configuration
+  // vsomeipConfig.logging = {
+  //   level: 'info',
+  //   console: 'true',
+  //   file: {
+  //     enable: 'true',
+  //     path: '/var/log/vsomeip.log'
+  //   },
+  //   dlt: 'true'
+  // }
+
+  // Add applications
+  vsomeipConfig.applications = [
+    {
+      name: config.name,
+      id: config.application.id
+    }
+  ]
+
+  vsomeipConfig.services = config.services
+
+  // Add routing
+  vsomeipConfig.routing = 'routingmanagerd'
+
+  vsomeipConfig.serviceDiscovery = config.serviceDiscovery
+
+  // Write the configuration to file
+  const filePath = path.join(projectPath, '.ScriptBuild', config.name + '.json')
+  // Ensure directory exists
+  const dir = path.dirname(filePath)
+  if (!fs.existsSync(dir)) {
+    await fsP.mkdir(dir, { recursive: true })
+  }
+
+  const configJson = JSON.stringify(vsomeipConfig, null, 4)
+  await fsP.writeFile(filePath, configJson, 'utf8')
+
+  return filePath
 }

@@ -84,41 +84,6 @@
           "find_initial_debounce_time": 200,
           "wait_route_netlink_notification": true
         }
-      },
-      "4ea41502-70b0-4259-876f-4e8f9ddd3c60": {
-        "id": "4ea41502-70b0-4259-876f-4e8f9ddd3c60",
-        "name": "SomeIP_1",
-        "services": [],
-        "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
-        "application": {
-          "id": "0x6302",
-          "max_dispatchers": 10,
-          "max_dispatch_time": 100,
-          "max_detached_thread_wait_time": 5,
-          "threads": 2,
-          "io_thread_nice": 0,
-          "has_session_handling": true
-        },
-        "serviceDiscovery": {
-          "enable": false,
-          "initial_state": "unknown",
-          "multicast": "224.224.224.0",
-          "port": 30490,
-          "protocol": "udp",
-          "initial_delay_min": 0,
-          "initial_delay_max": 3000,
-          "repetitions_base_delay": 10,
-          "repetitions_max": 3,
-          "ttl": "0xFFFFFF",
-          "cyclic_offer_delay": 1000,
-          "request_response_delay": 2000,
-          "offer_debounce_time": 500,
-          "find_debounce_time": 500,
-          "max_remote_subscribers": 3,
-          "find_initial_debounce_reps": 0,
-          "find_initial_debounce_time": 200,
-          "wait_route_netlink_notification": true
-        }
       }
     }
   },

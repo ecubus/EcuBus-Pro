@@ -46,7 +46,8 @@ export const useDataStore = defineStore('useDataStore', {
             cloneDeep(this.nodes),
             cloneDeep(this.database),
             cloneDeep(this.vars),
-            cloneDeep(this.logs)
+            cloneDeep(this.logs),
+            cloneDeep(this.someip)
           )
           .then(() => {
             window.startTime = Date.now()

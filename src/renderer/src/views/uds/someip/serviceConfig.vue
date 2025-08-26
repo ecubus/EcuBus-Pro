@@ -232,6 +232,7 @@ const rules = computed<FormRules>(() => {
       { validator: hexValidator, trigger: 'blur' }
     ],
     'reliable.port': [{ validator: portValidator, trigger: 'blur' }],
+    unreliable: [{ validator: portValidator, trigger: 'blur' }],
     tcpValidation: [{ validator: tcpProtocolValidator, trigger: 'change' }],
     udpValidation: [{ validator: udpProtocolValidator, trigger: 'change' }]
   }

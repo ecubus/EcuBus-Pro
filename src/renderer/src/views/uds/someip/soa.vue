@@ -93,6 +93,7 @@ const activeTree = ref<tree>()
 const props = defineProps<{
   height: number
   width: number
+  deviceId?: string
 }>()
 const winKey = 'soa'
 const h = toRef(props, 'height')
@@ -129,14 +130,9 @@ function removeDevice(data: tree) {
     buttonSize: 'small',
     appendTo: `#win${winKey}`
   }).then(() => {
-    if (data.type == 'someip') {
-      delete globalData.someip[data.id]
-      treeRef.value?.remove(data.id)
-      activeTree.value = undefined
-      //close relative window
-      layout.removeWin(`${data.id}_services`, true)
-      layout.removeWin(`${data.id}_sequence`, true)
-    }
+    delete globalData.devices[data.id]
+    treeRef.value?.remove(data.id)
+    activeTree.value = undefined
   })
 }
 
@@ -187,13 +183,16 @@ function buildTree() {
     id: 'CAN',
     children: []
   }
-  for (const key in globalData.someip) {
-    can.children?.push({
-      label: globalData.someip[key].name,
-      type: 'someip',
-      append: false,
-      id: key
-    })
+  for (const key in globalData.devices) {
+    const val = globalData.devices[key]
+    if (val.type == 'someip' && val.someipDevice) {
+      can.children?.push({
+        label: val.someipDevice.name,
+        type: 'someip',
+        append: false,
+        id: key
+      })
+    }
   }
   t.push(can)
 
@@ -210,7 +209,7 @@ function buildTree() {
 
   tData.value = t
 }
-
+const deviceId = toRef(props, 'deviceId')
 const layout = inject('layout') as Layout
 onMounted(() => {
   window.jQuery(`#${winKey}Shift`).resizable({
@@ -222,9 +221,15 @@ onMounted(() => {
     maxWidth: 400,
     minWidth: 150
   })
-
+  buildTree()
   nextTick(() => {
-    buildTree()
+    if (deviceId.value) {
+      const node = treeRef.value?.getNode(deviceId.value)
+      if (node) {
+        treeRef.value?.setCurrentKey(deviceId.value)
+        nodeClick(node.data, node)
+      }
+    }
   })
 })
 </script>

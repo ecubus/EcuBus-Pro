@@ -133,7 +133,6 @@ export type LogItem = {
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
-  someip: Record<string, SomeipInfo>
   subFunction: Record<string, { name: string; subFunction: string }[]>
   nodes: Record<string, NodeItem>
   ia: Record<string, Inter>

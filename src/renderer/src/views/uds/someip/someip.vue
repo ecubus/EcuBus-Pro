@@ -543,10 +543,11 @@ function checkServiceDuplicates() {
 
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
-    for (const key of Object.keys(dataBase.someip || {})) {
-      const hasName = dataBase.someip?.[key]?.name
-      if (hasName == value && key != editIndex.value) {
-        callback(new Error('The SomeIP name already exists'))
+    for (const key of Object.keys(dataBase.devices || {})) {
+      if (dataBase.devices[key].type == 'someip' && dataBase.devices[key].someipDevice) {
+        if (dataBase.devices[key].someipDevice.name == value && key != editIndex.value) {
+          callback(new Error('The SomeIP name already exists'))
+        }
       }
     }
     callback()
@@ -571,10 +572,13 @@ const idCheck = (rule: any, value: any, callback: any) => {
     }
 
     // Check for duplicate application ID across different SOME/IP configurations
-    for (const key of Object.keys(dataBase.someip)) {
-      const hasApplicationId = dataBase.someip[key].application.id
-      if (hasApplicationId == value && key != editIndex.value) {
-        callback(new Error('The application ID already exists'))
+    for (const key of Object.keys(dataBase.devices)) {
+      if (dataBase.devices[key].type == 'someip' && dataBase.devices[key].someipDevice) {
+        const hasApplicationId = dataBase.devices[key].someipDevice.application.id
+
+        if (hasApplicationId == value && key != editIndex.value) {
+          callback(new Error('The application ID already exists'))
+        }
       }
     }
 
@@ -734,10 +738,13 @@ const onSubmit = async () => {
     if (editIndex.value == '') {
       const id = v4()
       data.value.id = id
-      dataBase.someip[id] = cloneDeep(data.value)
+      dataBase.devices[id] = {
+        type: 'someip',
+        someipDevice: cloneDeep(data.value)
+      }
     } else {
       data.value.id = editIndex.value
-      dataBase.someip[editIndex.value] = cloneDeep(data.value)
+      dataBase.devices[editIndex.value].someipDevice = cloneDeep(data.value)
     }
 
     emits('change', data.value.id, data.value.name)
@@ -754,7 +761,12 @@ function generateUniqueName(): string {
   let name = `SomeIP_${index}`
 
   // 检查是否存在同名配置
-  while (Object.values(dataBase.someip).some((soa) => soa.name === name)) {
+  while (
+    Object.values(dataBase.devices).some(
+      (device) =>
+        device.type == 'someip' && device.someipDevice && device.someipDevice.name === name
+    )
+  ) {
     index++
     name = `SomeIP_${index}`
   }
@@ -763,9 +775,9 @@ function generateUniqueName(): string {
 }
 onBeforeMount(() => {
   if (editIndex.value) {
-    const editData = dataBase.someip[editIndex.value]
-    if (editData) {
-      data.value = cloneDeep(editData)
+    const editData = dataBase.devices[editIndex.value]
+    if (editData && editData.type == 'someip' && editData.someipDevice) {
+      data.value = cloneDeep(editData.someipDevice)
       if (data.value.services.length > 0) activeTabName.value = `index${0}`
 
       // Check device exist

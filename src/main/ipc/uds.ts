@@ -278,8 +278,7 @@ async function globalStart(
   devices: Record<string, UdsDevice>,
   testers: Record<string, TesterInfo>,
   nodes: Record<string, NodeItem>,
-  projectInfo: { path: string; name: string },
-  someip: Record<string, SomeipInfo>
+  projectInfo: { path: string; name: string }
 ) {
   let activeKey = ''
   const varLog = new VarLOG()
@@ -288,6 +287,7 @@ async function globalStart(
     value.close()
   })
   testMap.clear()
+  let rounterInit = false
   try {
     for (const key in devices) {
       const device = devices[key]
@@ -357,12 +357,34 @@ async function globalStart(
           })
           pwmBaseMap.set(key, pwmBase)
         }
+      } else if (device.type == 'someip' && device.someipDevice) {
+        const val = device.someipDevice
+        const file = await generateConfigFile(val, projectInfo.path, devices)
+        if (rounterInit == false) {
+          await startRouterCounter(file)
+          rounterInit = true
+        }
+        const client = new VSomeIP_Client(val.name, file)
+        client.init()
+        client.on('state', (data) => {
+          console.log('someip state', data)
+          if (data == 0) {
+            console.log('offer service', val.name, val.services)
+            val.services.forEach((e) => {
+              client.app.offer_service(Number(e.service), Number(e.instance))
+            })
+          }
+        })
+        someipClients.push({ client: client, config: device.someipDevice })
       }
     }
   } catch (err: any) {
     sysLog.error(`${activeKey} - ${err.toString()}`)
     throw err
   }
+  someipClients.forEach((e) => {
+    e.client.start()
+  })
   //testes
   const doipConnectList: {
     tester: TesterInfo
@@ -513,34 +535,7 @@ async function globalStart(
       nodeItem.close()
     }
   }
-  let rounterInit = false
-  //someip
-  for (const key in someip) {
-    const val = someip[key]
-    const file = await generateConfigFile(val, projectInfo.path, devices)
-    if (rounterInit == false) {
-      await startRouterCounter(file)
-      rounterInit = true
-    }
-    const client = new VSomeIP_Client(val.name, file)
-    client.init()
-    client.on('state', (data) => {
-      console.log('someip state', data)
-      if (data == 0) {
-        console.log('offer service', val.name, val.services)
-        val.services.forEach((e) => {
-          client.app.offer_service(Number(e.service), Number(e.instance))
-        })
-      }
-    })
-    someipClients.push({
-      client: client,
-      config: val
-    })
-  }
-  someipClients.forEach((e) => {
-    e.client.start()
-  })
+
   //doip connect list
   // const list=doipConnectList.map((e)=>{
   //     return e.connect()
@@ -613,7 +608,6 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   const vars: Record<string, VarItem> = arg[i++] || {}
   const logs = arg[i++] as Record<string, LogItem>
-  const someip = arg[i++] as Record<string, SomeipInfo>
 
   for (const log of Object.values(logs)) {
     if (log.type == 'file' && log.format == 'asc') {
@@ -657,7 +651,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     global.vars[key] = v
   }
   try {
-    await globalStart(devices, testers, nodes, projectInfo, someip)
+    await globalStart(devices, testers, nodes, projectInfo)
   } catch (err: any) {
     globalStop(true)
     throw err

@@ -433,7 +433,12 @@ export class udsHardware extends udsCeil {
       name = device.ethDevice.name
     } else if (device.type == 'lin' && device.linDevice) {
       name = device.linDevice.name
+    } else if (device.type == 'someip' && device.someipDevice) {
+      name = device.someipDevice.name
+    } else if (device.type == 'pwm' && device.pwmDevice) {
+      name = device.pwmDevice.name
     }
+
     super(
       paper,
       graph,
@@ -647,11 +652,19 @@ export class UDSView {
       deviceYOffset += 200
       this.ceilMap.set(id, element)
       element.on('edit', (ceil) => {
-        this.layout.addWin('hardware', 'hardware', {
-          params: {
-            deviceId: ceil.getId()
-          }
-        })
+        if (data.type == 'someip') {
+          this.layout.addWin('soa', 'soa', {
+            params: {
+              deviceId: ceil.getId()
+            }
+          })
+        } else {
+          this.layout.addWin('hardware', 'hardware', {
+            params: {
+              deviceId: ceil.getId()
+            }
+          })
+        }
       })
       return element
     } else {

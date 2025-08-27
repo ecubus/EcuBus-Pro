@@ -23,8 +23,7 @@ export const useDataStore = defineStore('useDataStore', {
     vars: {},
     datas: {},
     panels: {},
-    logs: {},
-    someip: {}
+    logs: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -46,8 +45,7 @@ export const useDataStore = defineStore('useDataStore', {
             cloneDeep(this.nodes),
             cloneDeep(this.database),
             cloneDeep(this.vars),
-            cloneDeep(this.logs),
-            cloneDeep(this.someip)
+            cloneDeep(this.logs)
           )
           .then(() => {
             window.startTime = Date.now()
@@ -77,8 +75,7 @@ export const useDataStore = defineStore('useDataStore', {
         vars: this.vars,
         datas: this.datas,
         panels: this.panels,
-        logs: this.logs,
-        someip: this.someip
+        logs: this.logs
       }
     }
   }

@@ -692,7 +692,6 @@ function addService() {
   data.value.services.push({
     service: uniqueServiceId,
     instance: instanceId,
-    protocol: 'someip',
     reliable: {
       port: 30509
     },

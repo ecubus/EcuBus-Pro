@@ -47,6 +47,14 @@ export interface VsomeipSubscriptionStatusInfo {
   status: number
 }
 
+const VsomeipState: Record<number, string> = {
+  0: 'ST_REGISTERED',
+  1: 'ST_DEREGISTERED',
+  2: 'ST_REGISTERING',
+  3: 'ST_ASSIGNING',
+  4: 'ST_ASSIGNED'
+}
+
 // Unified callback data structure
 export type VsomeipCallbackData =
   | { type: 'state'; data: number }
@@ -144,11 +152,15 @@ export class VSomeIP_Client {
   private rtm: any
   app: any
   sendc: any
+  private state: number = 1
   private cb: any = null
   private cbId: string | undefined
   private event = new EventEmitter()
   static traceRegister: boolean = false
-  constructor(name: string, configFilePath: string) {
+  constructor(
+    public name: string,
+    configFilePath: string
+  ) {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
     this.cb = new vsomeip.VsomeipCallbackWrapper(this.rtm, this.app)
@@ -159,11 +171,13 @@ export class VSomeIP_Client {
     // console.log('vSomeIP callback:', callbackData)/
 
     switch (callbackData.type) {
-      case 'state':
-        // 这里 callbackData.data 自动是 number
-        console.log('State changed:', callbackData.data)
+      case 'state': {
+        this.state = callbackData.data
+        const stateStr = VsomeipState[callbackData.data] || `Unknown state: ${callbackData.data}`
+        sysLog.info(`SomeIP ${this.name} state changed: ${stateStr}`)
         this.event.emit('state', callbackData.data)
         break
+      }
       case 'message':
         // 这里 callbackData.data 自动是 VsomeipMessage
         console.log('Message received:', callbackData.data)
@@ -200,6 +214,12 @@ export class VSomeIP_Client {
   }
   sendRequest(service: number, instance: number, method: number, payload: Buffer) {
     this.sendc.sendMessage(service, instance, method, payload)
+  }
+  requestService(service: number, instance: number) {
+    if (this.state != 0) {
+      throw new Error('SomeIP is not registered')
+    }
+    this.app.request_service(service, instance)
   }
 
   sendResponse(request: VsomeipMessage, payload: Buffer) {
@@ -289,9 +309,9 @@ export async function generateConfigFile(
     vsomeipConfig.netmask = netmask
   }
 
-  vsomeipConfig['local-clients-keepalive'] = {
-    enable: 'true'
-  }
+  // vsomeipConfig['local-clients-keepalive'] = {
+  //   enable: 'true'
+  // }
   const logPath = path.join(projectPath, '.ScriptBuild', config.name + '.log')
   vsomeipConfig.logging = {
     level: 'info',

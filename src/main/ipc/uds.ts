@@ -746,6 +746,7 @@ export function globalStop(emit = false) {
     value.close()
   })
   doips = []
+  stopRouterCounter()
   someipClients.forEach((e) => {
     e.config.services?.forEach((s) => {
       console.log('stop offer service', s.service, s.instance)
@@ -753,7 +754,7 @@ export function globalStop(emit = false) {
     })
     e.client.stop()
   })
-  stopRouterCounter()
+
   someipClients = []
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {

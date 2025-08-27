@@ -289,6 +289,9 @@ export async function generateConfigFile(
     vsomeipConfig.netmask = netmask
   }
 
+  vsomeipConfig['local-clients-keepalive'] = {
+    enable: 'true'
+  }
   const logPath = path.join(projectPath, '.ScriptBuild', config.name + '.log')
   vsomeipConfig.logging = {
     level: 'info',

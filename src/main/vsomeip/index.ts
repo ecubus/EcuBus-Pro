@@ -157,6 +157,11 @@ export class VSomeIP_Client {
   private cbId: string | undefined
   private event = new EventEmitter()
   static traceRegister: boolean = false
+  serviceValid: Map<string, boolean> = new Map()
+  private requestServiceMap: Map<
+    string,
+    { resolve: (value: unknown) => void; reject: (reason?: any) => void; timeout: NodeJS.Timeout }
+  > = new Map()
   constructor(
     public name: string,
     configFilePath: string
@@ -183,11 +188,24 @@ export class VSomeIP_Client {
         console.log('Message received:', callbackData.data)
         this.event.emit('message', callbackData.data)
         break
-      case 'availability':
+      case 'availability': {
         // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
         console.log('Availability changed:', callbackData.data)
         this.event.emit('availability', callbackData.data)
+        const key =
+          callbackData.data.instance.toString(16) + '.' + callbackData.data.service.toString(16)
+        const pending = this.requestServiceMap.get(key)
+        if (pending) {
+          clearTimeout(pending.timeout)
+          if (callbackData.data.available) {
+            pending.resolve(true)
+          } else {
+            pending.reject('Service is not available')
+          }
+        }
+        this.serviceValid.set(key, callbackData.data.available)
         break
+      }
       case 'subscription':
         // 这里 callbackData.data 自动是 VsomeipSubscriptionInfo
         console.log('Subscription changed:', callbackData.data)
@@ -215,11 +233,26 @@ export class VSomeIP_Client {
   sendRequest(service: number, instance: number, method: number, payload: Buffer) {
     this.sendc.sendMessage(service, instance, method, payload)
   }
-  requestService(service: number, instance: number) {
-    if (this.state != 0) {
-      throw new Error('SomeIP is not registered')
-    }
-    this.app.request_service(service, instance)
+  async requestService(service: number, instance: number, timeout: number = 1000) {
+    return new Promise((resolve, reject) => {
+      if (this.state != 0) {
+        reject('SomeIP is not registered')
+      }
+      const key = instance.toString(16) + '.' + service.toString(16)
+      if (!this.serviceValid.get(key)) {
+        this.requestServiceMap.set(key, {
+          resolve,
+          reject,
+          timeout: setTimeout(() => {
+            this.requestServiceMap.delete(key)
+            reject('Request service timeout')
+          }, timeout)
+        })
+        this.app.request_service(service, instance)
+      } else {
+        resolve(true)
+      }
+    })
   }
 
   sendResponse(request: VsomeipMessage, payload: Buffer) {
@@ -315,13 +348,14 @@ export async function generateConfigFile(
   const logPath = path.join(projectPath, '.ScriptBuild', config.name + '.log')
   vsomeipConfig.logging = {
     level: 'info',
+    dlt: 'false',
     file: {
       enable: 'true',
       path: logPath
     }
   }
 
-  vsomeipConfig.trace = {
+  vsomeipConfig.tracing = {
     enable: 'true',
     sd_enable: 'true'
   }

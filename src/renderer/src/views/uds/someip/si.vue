@@ -31,9 +31,10 @@
           plain
           style="width: 70px"
           :disabled="!globalStart"
+          :loading="loadingStates[rowIndex]"
           @click="sendFrame(rowIndex)"
         >
-          <Icon :icon="sendIcon" />
+          <Icon v-if="!loadingStates[rowIndex]" :icon="sendIcon" />
         </el-button>
         <el-button
           v-else
@@ -46,19 +47,6 @@
         >
           <Icon :icon="periodTimer[rowIndex] ? stopIcon : sendIcon" />
         </el-button>
-      </template>
-      <template #default_type="{ row }">
-        <el-select v-model="row.type" size="small" style="width: 100%">
-          <el-option
-            v-for="(l, v) in row.remote ? typeMapRemote : typeMap"
-            :key="v"
-            :value="v"
-            :label="l"
-          ></el-option>
-        </el-select>
-      </template>
-      <template #default_type1="{ row }">
-        {{ typeMap[row.type] }}
       </template>
       <template #default_dlc="{ row }">
         <el-select v-model="row.dlc" size="small" style="width: 100%">
@@ -78,11 +66,35 @@
           ></el-option>
         </el-select>
       </template>
-      <template #default_id="{ row }">
-        <el-input v-model="row.id" size="small" style="width: 100%" @input="idChange" />
+      <template #default_serviceId="{ row }">
+        <el-input
+          v-model="row.serviceId"
+          size="small"
+          style="width: 100%"
+          @input="idChange('serviceId', $event)"
+        />
+      </template>
+      <template #default_instanceId="{ row }">
+        <el-input
+          v-model="row.instanceId"
+          size="small"
+          style="width: 100%"
+          @input="idChange('instanceId', $event)"
+        />
+      </template>
+      <template #default_methodId="{ row }">
+        <el-input
+          v-model="row.methodId"
+          size="small"
+          style="width: 100%"
+          @input="idChange('methodId', $event)"
+        />
       </template>
       <template #default_name="{ row }">
         <el-input v-model="row.name" size="small" style="width: 100%" />
+      </template>
+      <template #default_params="{ row }">
+        {{ row.params.length }}
       </template>
       <template #toolbar>
         <div
@@ -106,7 +118,7 @@
               </el-button>
             </el-tooltip>
             <el-tooltip effect="light" content="Select Frame from Database" placement="bottom">
-              <el-button link @click="openFrameSelect">
+              <el-button link disabled @click="openFrameSelect">
                 <Icon :icon="databaseIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
@@ -224,9 +236,24 @@
           <el-form-item label="Name">
             <el-input v-model="formData.name" :disabled="formData.database != undefined" />
           </el-form-item>
-          <el-form-item label="ID">
-            <el-input v-model="formData.id" @input="idChange" />
+          <el-form-item label-width="0">
+            <el-col :span="8">
+              <el-form-item label="Service ID">
+                <el-input v-model="formData.serviceId" @input="idChange('serviceId', $event)" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Instance ID">
+                <el-input v-model="formData.instanceId" @input="idChange('instanceId', $event)" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Method ID">
+                <el-input v-model="formData.methodId" @input="idChange('methodId', $event)" />
+              </el-form-item>
+            </el-col>
           </el-form-item>
+
           <el-form-item label="Channel">
             <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
               <el-option
@@ -237,57 +264,34 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Type">
-            <el-select v-model="formData.type" size="small" style="width: 100%">
-              <el-option
-                v-for="(l, v) in formData.remote ? typeMapRemote : typeMap"
-                :key="v"
-                :value="v"
-                :label="l"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label-width="0">
-            <el-col :span="12">
-              <el-form-item label="Remote">
-                <el-checkbox v-model="formData.remote" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="BRS">
-                <el-checkbox v-model="formData.brs" :disabled="!formData.type.includes('fd')" />
-              </el-form-item>
-            </el-col>
-          </el-form-item>
-          <el-form-item label="DLC">
-            <el-select v-model="formData.dlc" size="small" style="width: 100%">
-              <el-option v-for="i in 16" :key="i" :value="i - 1"></el-option>
-            </el-select>
-          </el-form-item>
         </el-form>
         <el-tabs v-model="activeName">
           <el-tab-pane v-if="formData.database" label="Signal" name="signal">
-            <CanISignal
-              :message-id="formData.id"
-              :database="formData.database"
-              @change="handleDataChange"
+            <!-- <CanISignal
+                :message-id="formData.id"
+                :database="formData.database"
+                @change="handleDataChange"
+              /> -->
+          </el-tab-pane>
+          <el-tab-pane label="Request" name="req">
+            <paramVue
+              id="req"
+              ref="repParamRef"
+              v-model="formData.params"
+              :parent-id="editIndex"
+              sid=""
+              service-id="0x10"
             />
           </el-tab-pane>
-          <el-tab-pane label="Raw Data" name="raw">
-            <div style="margin-left: 10px">
-              <el-input
-                v-for="index in dlcToLen"
-                :key="index"
-                v-model="formData.data[index - 1]"
-                class="dataI"
-                :maxlength="2"
-                placeholder="00"
-                style="width: 65px; margin-right: 5px; margin-bottom: 5px"
-                @input="dataChange(index - 1, $event)"
-                @change="dataChangeDone"
-                ><template #prepend>{{ index - 1 }}</template></el-input
-              >
-            </div>
+          <el-tab-pane label="Response" name="resp">
+            <paramVue
+              id="resp"
+              ref="repParamRef"
+              v-model="formData.respParams"
+              :parent-id="editIndex"
+              sid=""
+              service-id="0x10"
+            />
           </el-tab-pane>
         </el-tabs>
       </div>
@@ -305,32 +309,25 @@
       width="600"
       align-center
     >
-      <Signal
+      <!-- <Signal
         :height="(h * 2) / 3"
         :width="480"
         protocol-filter="can"
         selectable-level="frame"
         :speical-db="speicalDb"
         @add-frame="handleFrameSelect"
-      />
+      /> -->
     </el-dialog>
   </div>
 </template>
 <script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch } from 'vue'
-import {
-  CAN_ID_TYPE,
-  CanBaseInfo,
-  CanDevice,
-  CanInterAction,
-  CanMsgType,
-  getDlcByLen
-} from 'nodeCan/can'
+import paramVue from '../components/config/tester/param.vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
-import CanISignal from './canisignale.vue'
+// import CanISignal from './canisignale.vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import infoIcon from '@iconify/icons-material-symbols/info-outline'
 import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
@@ -342,29 +339,22 @@ import sendIcon from '@iconify/icons-material-symbols/send'
 import stopIcon from '@iconify/icons-material-symbols/stop'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
-import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { cloneDeep, isEqual } from 'lodash'
 import { onKeyStroke, onKeyUp } from '@vueuse/core'
-import Signal from './components/signal.vue'
+// import Signal from './components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
-import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
+import { GraphBindFrameValue, GraphNode, SomeipAction } from 'src/preload/data'
 import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
+import { SomeipInfo } from 'src/main/vsomeip/share'
+import { ElMessage } from 'element-plus'
+import errorParse from '@r/util/ipcError'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
-const typeMap = {
-  can: 'CAN',
-  canfd: 'CAN FD',
-  ecan: 'Extended CAN',
-  ecanfd: 'Extended CAN FD'
-}
-const typeMapRemote = {
-  can: 'CAN',
-  ecan: 'Extended CAN'
-}
+
 const activeName = ref('signal')
 const connectV = ref(false)
 const editV = ref(false)
@@ -376,7 +366,7 @@ const runtime = useRuntimeStore()
 const periodTimer = computed({
   get: () => {
     const result: Record<number, boolean> = {}
-    for (const [key, value] of Object.entries(runtime.canPeriods)) {
+    for (const [key, value] of Object.entries(runtime.someipPeriods)) {
       const a = key.split('-')
       const item = a.slice(0, -1).join('-')
       const index = Number(a[a.length - 1])
@@ -392,25 +382,16 @@ const periodTimer = computed({
     for (const [index, value] of Object.entries(val)) {
       const key = `${editIndex.value}-${index}`
       if (value) {
-        runtime.setCanPeriod(key, true)
+        runtime.setSomeipPeriod(key, true)
       } else {
-        runtime.removeCanPeriod(key)
+        runtime.removeSomeipPeriod(key)
       }
     }
   }
 })
 const selectFrameVisible = ref(false)
-const speicalDb = computed(() => {
-  //connected device db
-  const list: string[] = []
-  for (const d of dataBase.ia[editIndex.value].devices) {
-    const db = dataBase.devices[d].canDevice?.database
-    if (db) {
-      list.push(db)
-    }
-  }
-  return list
-})
+const loadingStates = ref<Record<number, boolean>>({})
+
 const props = defineProps<{
   height: number
   editIndex: string
@@ -420,7 +401,7 @@ const h = toRef(props, 'height')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 const gridOptions = computed(() => {
-  const v: VxeGridProps<CanInterAction> = {
+  const v: VxeGridProps<SomeipAction> = {
     border: true,
     size: 'mini',
     columnConfig: {
@@ -444,6 +425,9 @@ const gridOptions = computed(() => {
           return false
         }
         if (column.field == 'name' && row.database != undefined) {
+          return false
+        }
+        if (column.field == 'params') {
           return false
         }
         return true
@@ -480,11 +464,25 @@ const gridOptions = computed(() => {
       },
       { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
       {
-        field: 'id',
-        title: 'ID (HEX)',
+        field: 'serviceId',
+        title: 'Service ID',
         minWidth: 100,
         editRender: {},
-        slots: { edit: 'default_id' }
+        slots: { edit: 'default_serviceId' }
+      },
+      {
+        field: 'instanceId',
+        title: 'Instance ID',
+        minWidth: 100,
+        editRender: {},
+        slots: { edit: 'default_instanceId' }
+      },
+      {
+        field: 'methodId',
+        title: 'Method ID',
+        minWidth: 100,
+        editRender: {},
+        slots: { edit: 'default_methodId' }
       },
       {
         field: 'channel',
@@ -493,129 +491,58 @@ const gridOptions = computed(() => {
         editRender: {},
         slots: { default: 'default_channel', edit: 'edit_channel' }
       },
+
       {
-        field: 'type',
-        title: 'Type',
+        field: 'params',
+        title: 'Params',
         width: 100,
         editRender: {},
-        slots: { default: 'default_type1', edit: 'default_type' }
-      },
-      { field: 'dlc', title: 'DLC', width: 100, editRender: {}, slots: { edit: 'default_dlc' } }
+        slots: { default: 'default_params' }
+      }
     ],
     data:
-      dataBase.ia[props.editIndex].type == 'can' ? dataBase.ia[props.editIndex]?.action || [] : []
+      dataBase.ia[props.editIndex]?.type == 'someip'
+        ? dataBase.ia[props.editIndex]?.action || []
+        : []
   }
   return v
 })
 function addFrame() {
   const channel = Object.keys(devices.value)[0] || ''
-  dataBase.ia[editIndex.value].action.push({
-    trigger: {
-      type: 'manual'
-    },
-    name: '',
-    id: '1',
-    channel: channel,
-    type: 'can',
-    dlc: 8,
-    data: []
-  })
+  if (dataBase.ia[editIndex.value]?.type == 'someip') {
+    dataBase.ia[editIndex.value].action.push({
+      trigger: {
+        type: 'manual'
+      },
+      name: '',
+      serviceId: '0x1000',
+      instanceId: '0x1001',
+      methodId: '0x1002',
+      channel: channel,
+      params: [],
+      respParams: []
+    })
+  }
 }
 watch(globalStart, (v) => {
   if (v == false) {
     // 当全局停止时，清除所有周期发送状态
-    for (const key of Object.keys(runtime.canPeriods)) {
+    for (const key of Object.keys(runtime.someipPeriods)) {
       if (key.startsWith(editIndex.value + '-')) {
-        runtime.removeCanPeriod(key)
+        runtime.removeSomeipPeriod(key)
       }
     }
   }
 })
-function getLenByDlc(dlc: number, canFd: boolean) {
-  const map: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 8,
-    10: 8,
-    11: 8,
-    12: 8,
-    13: 8,
-    14: 8,
-    15: 8
-  }
-  const mapFd: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 12,
-    10: 16,
-    11: 20,
-    12: 24,
-    13: 32,
-    14: 48,
-    15: 64
-  }
-  if (canFd) {
-    return mapFd[dlc] || 0
-  } else {
-    return map[dlc] || 0
-  }
-}
-const dlcToLen = computed(() => {
-  if (formData.value == undefined) {
-    return 0
-  }
-  const fd = formData.value.type.includes('fd')
-  const dlc = formData.value.dlc
-  return getLenByDlc(dlc, fd)
-})
+
 function ceilClick(val: any) {
   popoverIndex.value = val.rowIndex
 }
-function idChange(v: string) {
+function idChange(type: 'serviceId' | 'instanceId' | 'methodId', v: string) {
   //if last char is not hex, remove it
   if (v.length > 0) {
     if (v[v.length - 1].match(/[0-9a-fA-F]/) == null) {
-      dataBase.ia[editIndex.value].action[popoverIndex.value].id = v.slice(0, -1)
-    }
-  }
-}
-function dataChangeDone() {
-  if (formData.value && formData.value.database) {
-    const db = dataBase.database.can[formData.value.database]
-    if (db) {
-      const message = db.messages[parseInt(formData.value.id, 16)]
-      if (message) {
-        const data = Buffer.from(formData.value.data.map((v) => parseInt(v, 16)))
-        writeMessageData(message, data, db)
-      }
-    }
-  }
-}
-function dataChange(index: number, v: string) {
-  if (v.length > 0 && formData.value) {
-    if (v[v.length - 1].match(/[0-9a-fA-F]/) == null) {
-      formData.value.data[index] = v.slice(0, -1)
-    }
-  }
-}
-function handleDataChange(data: Buffer) {
-  if (formData.value) {
-    for (let i = 0; i < data.length; i++) {
-      formData.value.data[i] = data[i].toString(16)
+      dataBase.ia[editIndex.value].action[popoverIndex.value][type] = v.slice(0, -1)
     }
   }
 }
@@ -651,36 +578,52 @@ onKeyUp(true, () => {
     animate.value = false
   }, 200)
 })
-function sendFrame(index: number) {
+async function sendFrame(index: number) {
   const frame = dataBase.ia[editIndex.value]?.action[index]
   if (frame) {
     if (frame.trigger.type == 'manual') {
-      window.electron.ipcRenderer.send('ipc-send-can', cloneDeep(frame))
+      try {
+        loadingStates.value[index] = true
+        await window.electron.ipcRenderer.invoke('ipc-send-someip', cloneDeep(frame))
+      } catch (error: any) {
+        ElMessage.error({
+          message: errorParse(error),
+          offset: 30,
+          type: 'error',
+          appendTo: `#win${editIndex.value}_ia`
+        })
+      } finally {
+        loadingStates.value[index] = false
+      }
     } else {
       const key = `${editIndex.value}-${index}`
-      if (runtime.canPeriods[key]) {
-        runtime.removeCanPeriod(key)
-        window.electron.ipcRenderer.send('ipc-stop-can-period', key)
+      if (runtime.someipPeriods[key]) {
+        runtime.removeSomeipPeriod(key)
+        window.electron.ipcRenderer.send('ipc-stop-someip-period', key)
       } else {
-        runtime.setCanPeriod(key, true)
-        window.electron.ipcRenderer.send('ipc-send-can-period', key, cloneDeep(frame))
+        runtime.setSomeipPeriod(key, true)
+        window.electron.ipcRenderer.send('ipc-send-someip-period', key, cloneDeep(frame))
       }
     }
   }
 }
 
 const devices = computed(() => {
-  const dd: Record<string, CanBaseInfo> = {}
+  const dd: Record<string, SomeipInfo> = {}
   for (const d in dataBase.devices) {
-    if (dataBase.devices[d] && dataBase.devices[d].type == 'can' && dataBase.devices[d].canDevice) {
-      dd[d] = dataBase.devices[d].canDevice
+    if (
+      dataBase.devices[d] &&
+      dataBase.devices[d].type == 'someip' &&
+      dataBase.devices[d].someipDevice
+    ) {
+      dd[d] = dataBase.devices[d].someipDevice
     }
   }
   return dd
 })
 watch(devices, (val) => {
   //check channel
-  const action = dataBase.ia[editIndex.value].action as CanInterAction[]
+  const action = dataBase.ia[editIndex.value]?.action as SomeipAction[]
   const list = Object.keys(val)
   for (const a of action) {
     if (!list.includes(a.channel)) {
@@ -705,11 +648,11 @@ const allDeviceLabel = computed(() => {
 function editConnect() {
   connectV.value = true
 }
-const formData = ref<CanInterAction>()
+const formData = ref<SomeipAction>()
 function editFrame() {
   formData.value = cloneDeep(dataBase.ia[editIndex.value].action[popoverIndex.value])
   if (formData.value?.database == undefined) {
-    activeName.value = 'raw'
+    activeName.value = 'req'
   }
   nextTick(() => {
     editV.value = true
@@ -733,7 +676,7 @@ watch(
         Object.assign(dataBase.ia[editIndex.value].action[popoverIndex.value], v)
         if (globalStart.value) {
           window.electron.ipcRenderer.send(
-            'ipc-update-can-period',
+            'ipc-update-someip-period',
             `${editIndex.value}-${popoverIndex.value}`,
             v
           )
@@ -751,39 +694,6 @@ const fh = computed(() => Math.ceil((h.value * 2) / 3) + 'px')
 onMounted(async () => {
   // 不再需要从 IPC 获取状态
 })
-
-function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
-  if (frame.bindValue.frameInfo) {
-    const channel = Object.keys(devices.value)[0] || ''
-    const frameInfo = frame.bindValue.frameInfo as Message
-    let type: 'can' | 'canfd' | 'ecan' | 'ecanfd' = 'can'
-    if (frameInfo.canfd) {
-      if (frameInfo.extId) {
-        type = 'ecanfd'
-      } else {
-        type = 'canfd'
-      }
-    } else {
-      if (frameInfo.extId) {
-        type = 'ecan'
-      }
-    }
-    // 创建新的 frame action
-    dataBase.ia[editIndex.value].action.push({
-      trigger: {
-        type: 'manual'
-      },
-      database: frame.bindValue.dbKey,
-      name: frameInfo.name,
-      id: frameInfo.id.toString(16), // 转换为16进制字符串
-      channel: channel,
-      type: type,
-      dlc: frameInfo.length,
-      data: new Array(frameInfo.length).fill('00') // 初始化数据为全0
-    })
-  }
-  selectFrameVisible.value = false
-}
 
 function openFrameSelect() {
   selectFrameVisible.value = true

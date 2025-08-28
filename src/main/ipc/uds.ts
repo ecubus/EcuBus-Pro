@@ -37,7 +37,15 @@ import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, LogItem, NodeItem, PwmInter, VarItem } from 'src/preload/data'
+import {
+  DataSet,
+  LinInter,
+  LogItem,
+  NodeItem,
+  PwmInter,
+  SomeipAction,
+  VarItem
+} from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -266,13 +274,13 @@ const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
 const pwmBaseMap = new Map<string, PwmBase>()
+const someipMap = new Map<string, { client: VSomeIP_Client; config: SomeipConfig }>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
-let someipClients: { client: VSomeIP_Client; config: SomeipConfig }[] = []
 
 async function globalStart(
   devices: Record<string, UdsDevice>,
@@ -372,17 +380,19 @@ async function globalStart(
             console.log('offer service', val.name, val.services)
             val.services.forEach((e) => {
               client.app.offer_service(Number(e.service), Number(e.instance))
+              const key = Number(e.instance).toString(16) + '.' + Number(e.service).toString(16)
+              client.serviceValid.set(key, true)
             })
           }
         })
-        someipClients.push({ client: client, config: device.someipDevice })
+        someipMap.set(key, { client: client, config: device.someipDevice })
       }
     }
   } catch (err: any) {
     sysLog.error(`${activeKey} - ${err.toString()}`)
     throw err
   }
-  someipClients.forEach((e) => {
+  someipMap.forEach((e) => {
     e.client.start()
   })
   //testes
@@ -741,7 +751,7 @@ export function globalStop(emit = false) {
   })
   doips = []
   stopRouterCounter()
-  someipClients.forEach((e) => {
+  someipMap.forEach((e) => {
     e.config.services?.forEach((s) => {
       console.log('stop offer service', s.service, s.instance)
       e.client.app.stop_offer_service(Number(s.service), Number(s.instance))
@@ -749,7 +759,7 @@ export function globalStop(emit = false) {
     e.client.stop()
   })
 
-  someipClients = []
+  someipMap.clear()
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {
       win.webContents.send('ipc-global-stop')
@@ -1112,5 +1122,20 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
   const db = global.database.lin[dbIndex]
   if (db) {
     updateSignalVal(db, signalName, value)
+  }
+})
+
+ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
+  const ia = arg[0] as SomeipAction
+
+  const base = someipMap.get(ia.channel)
+  if (base) {
+    const methodId = Number(ia.methodId)
+    const serviceId = Number(ia.serviceId)
+    const instanceId = Number(ia.instanceId)
+    await base.client.requestService(serviceId, instanceId, 1000)
+    base.client.sendRequest(serviceId, instanceId, methodId, Buffer.alloc(5))
+  } else {
+    sysLog.error(`someip device not found`)
   }
 })

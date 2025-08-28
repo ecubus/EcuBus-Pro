@@ -308,6 +308,17 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'SOA',
     component: defineAsyncComponent(() => import('./someip/soa.vue')),
     icon: soaIcon
+  },
+  someipi: {
+    i: 'IA',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'IA',
+    key: 'IA',
+    component: defineAsyncComponent(() => import('./someip/si.vue')),
+    icon: interIcon
   }
   // script: {
   //   i: 'Script',

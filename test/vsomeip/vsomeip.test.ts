@@ -58,10 +58,10 @@ describe('hello world', async () => {
   })
   test('hello world', async () => {
     await delay(3000)
-    client.stop()
-    server.stop()
   })
   afterAll(() => {
     stopRouterCounter()
+    client.stop()
+    server.stop()
   })
 })

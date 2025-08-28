@@ -255,6 +255,22 @@ function addChild(parent: Tree) {
         i.children.push(cc)
       }
     }
+  } else if (parent.type == 'someip') {
+    for (const key of Object.keys(dataBase.ia)) {
+      const item = dataBase.ia[key]
+      if (item.type == 'someip') {
+        const cc: Tree = {
+          type: 'interactive',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: interIcon,
+          contextMenu: true,
+          id: key
+        }
+        i.children.push(cc)
+      }
+    }
   }
   if (parent.type != 'eth') {
     parent.children.push(i)
@@ -751,6 +767,20 @@ function addNode(type: string, parent?: Tree) {
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
         type: 'pwm',
+        id: id,
+        devices: devices, // Add an empty array for devices,
+        action: []
+      }
+      udsView.addIg(id, dataBase.ia[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
+    } else if (parent?.type == 'someip') {
+      const devices: string[] = []
+      dataBase.ia[id] = {
+        name: parent?.label + ' IA',
+        type: 'someip',
         id: id,
         devices: devices, // Add an empty array for devices,
         action: []

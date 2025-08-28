@@ -72,7 +72,81 @@
         }
       }
     },
-    "ia": {},
+    "ia": {
+      "f8ec96c4-c00f-45f9-84d9-446878e91dcd": {
+        "name": "SomeIP IA",
+        "type": "someip",
+        "id": "f8ec96c4-c00f-45f9-84d9-446878e91dcd",
+        "devices": [
+          "a3228634-b533-4933-baff-807d6e453db9"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "serviceId": "0x1234",
+            "instanceId": "0x1234",
+            "methodId": "0x1002",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [
+              {
+                "id": "d08a3591-0ad1-4b72-b4e3-f00e7646a268",
+                "name": "param2",
+                "desc": "",
+                "phyValue": "1",
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    49
+                  ]
+                },
+                "bitLen": 8,
+                "type": "ASCII",
+                "deletable": true,
+                "editable": true
+              },
+              {
+                "id": "63bf51c7-c4e1-480d-b2e2-cb4b315423d7",
+                "name": "param1",
+                "desc": "",
+                "phyValue": 0,
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    0
+                  ]
+                },
+                "bitLen": 8,
+                "type": "NUM",
+                "deletable": true,
+                "editable": true
+              }
+            ],
+            "respParams": [
+              {
+                "id": "1876833e-94d4-45e2-81c7-053e9e92fc6b",
+                "name": "param1",
+                "desc": "",
+                "phyValue": 0,
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    0
+                  ]
+                },
+                "bitLen": 8,
+                "type": "NUM",
+                "deletable": true,
+                "editable": true
+              }
+            ],
+            "_X_ROW_KEY": "row_204"
+          }
+        ]
+      }
+    },
     "tester": {},
     "subFunction": {},
     "nodes": {},
@@ -92,9 +166,9 @@
       "message": {
         "pos": {
           "x": 383,
-          "y": 219,
-          "w": 1677,
-          "h": 279
+          "y": 195.33300000000003,
+          "w": 1708.33,
+          "h": 195.66699999999997
         },
         "options": {
           "params": {}
@@ -106,15 +180,32 @@
       },
       "network": {
         "pos": {
-          "x": 133.5,
-          "y": 278.5,
-          "w": 806,
-          "h": 455
+          "x": 11.5,
+          "y": 0,
+          "w": 600,
+          "h": 400
         },
         "title": "network",
         "label": "Network",
         "id": "network",
         "options": {}
+      },
+      "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
+        "pos": {
+          "x": 631.5,
+          "y": 0,
+          "w": 992,
+          "h": 399
+        },
+        "title": "someipi",
+        "label": "IA",
+        "id": "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia",
+        "options": {
+          "params": {
+            "edit-index": "f8ec96c4-c00f-45f9-84d9-446878e91dcd"
+          },
+          "name": "SomeIP IA"
+        }
       }
     }
   }

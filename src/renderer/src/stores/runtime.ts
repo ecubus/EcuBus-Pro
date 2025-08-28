@@ -24,6 +24,7 @@ export type RunTimeStatus = {
   }
   globalStart: boolean
   canPeriods: Record<string, boolean>
+  someipPeriods: Record<string, boolean>
   rearrangeWindows: boolean
 }
 
@@ -34,6 +35,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
       isRunning: {}
     },
     canPeriods: {},
+    someipPeriods: {},
     globalStart: false,
     rearrangeWindows: false
   }),
@@ -44,6 +46,12 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     removeCanPeriod(key: string) {
       delete this.canPeriods[key]
+    },
+    setSomeipPeriod(key: string, value: boolean) {
+      this.someipPeriods[key] = value
+    },
+    removeSomeipPeriod(key: string) {
+      delete this.someipPeriods[key]
     }
   }
 })
@@ -52,4 +60,3 @@ export function useGlobalStart() {
   const runtime = useRuntimeStore()
   return toRef(runtime, 'globalStart')
 }
-

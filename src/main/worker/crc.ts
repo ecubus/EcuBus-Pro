@@ -151,7 +151,58 @@ export class CRC {
     this.inputReflected = inputReflected
     this.resultReflected = resultReflected
   }
-
+  /**
+   * Get built-in CRC by name
+   *
+   * Available built-in CRCs:
+   * | Name                | Width | Polynomial | Initial | Final XOR | Input Reflected | Result Reflected |
+   * |--------------------|-------|------------|---------|-----------|-----------------|------------------|
+   * | CRC8               | 8     | 0x07      | 0x00    | 0x00      | false          | false           |
+   * | CRC8_SAE_J1850    | 8     | 0x1d      | 0xff    | 0xff      | false          | false           |
+   * | CRC8_SAE_J1850_ZERO| 8     | 0x1d      | 0x00    | 0x00      | false          | false           |
+   * | CRC8_8H2F         | 8     | 0x2f      | 0xff    | 0xff      | false          | false           |
+   * | CRC8_CDMA2000     | 8     | 0x9b      | 0xff    | 0x00      | false          | false           |
+   * | CRC8_DARC         | 8     | 0x39      | 0x00    | 0x00      | true           | true            |
+   * | CRC8_DVB_S2       | 8     | 0xd5      | 0x00    | 0x00      | false          | false           |
+   * | CRC8_EBU          | 8     | 0x1d      | 0xff    | 0x00      | true           | true            |
+   * | CRC8_ICODE        | 8     | 0x1d      | 0xfd    | 0x00      | false          | false           |
+   * | CRC8_ITU          | 8     | 0x07      | 0x00    | 0x55      | false          | false           |
+   * | CRC8_MAXIM        | 8     | 0x31      | 0x00    | 0x00      | true           | true            |
+   * | CRC8_ROHC         | 8     | 0x07      | 0xff    | 0x00      | true           | true            |
+   * | CRC8_WCDMA        | 8     | 0x9b      | 0x00    | 0x00      | true           | true            |
+   * | CRC16_CCIT_ZERO   | 16    | 0x1021    | 0x0000  | 0x0000    | false          | false           |
+   * | CRC16_ARC         | 16    | 0x8005    | 0x0000  | 0x0000    | true           | true            |
+   * | CRC16_AUG_CCITT   | 16    | 0x1021    | 0x1d0f  | 0x0000    | false          | false           |
+   * | CRC16_BUYPASS     | 16    | 0x8005    | 0x0000  | 0x0000    | false          | false           |
+   * | CRC16_CCITT_FALSE | 16    | 0x1021    | 0xffff  | 0x0000    | false          | false           |
+   * | CRC16_CDMA2000    | 16    | 0xc867    | 0xffff  | 0x0000    | false          | false           |
+   * | CRC16_DDS_110     | 16    | 0x8005    | 0x800d  | 0x0000    | false          | false           |
+   * | CRC16_DECT_R      | 16    | 0x0589    | 0x0000  | 0x0001    | false          | false           |
+   * | CRC16_DECT_X      | 16    | 0x0589    | 0x0000  | 0x0000    | false          | false           |
+   * | CRC16_DNP         | 16    | 0x3d65    | 0x0000  | 0xffff    | true           | true            |
+   * | CRC16_EN_13757    | 16    | 0x3d65    | 0x0000  | 0xffff    | false          | false           |
+   * | CRC16_GENIBUS     | 16    | 0x1021    | 0xffff  | 0xffff    | false          | false           |
+   * | CRC16_MAXIM       | 16    | 0x8005    | 0x0000  | 0xffff    | true           | true            |
+   * | CRC16_MCRF4XX     | 16    | 0x1021    | 0xffff  | 0x0000    | true           | true            |
+   * | CRC16_RIELLO      | 16    | 0x1021    | 0xb2aa  | 0x0000    | true           | true            |
+   * | CRC16_T10_DIF     | 16    | 0x8bb7    | 0x0000  | 0x0000    | false          | false           |
+   * | CRC16_TELEDISK    | 16    | 0xa097    | 0x0000  | 0x0000    | false          | false           |
+   * | CRC32             | 32    | 0x04c11db7| 0xffffffff| 0xffffffff| true         | true            |
+   * | CRC32_BZIP2       | 32    | 0x04c11db7| 0xffffffff| 0xffffffff| false        | false           |
+   * | CRC32_C           | 32    | 0x1edc6f41| 0xffffffff| 0xffffffff| true         | true            |
+   * | CRC32_D           | 32    | 0xa833982b| 0xffffffff| 0xffffffff| true         | true            |
+   * | CRC32_MPEG2       | 32    | 0x04c11db7| 0xffffffff| 0x00000000| false        | false           |
+   * | CRC32_POSIX       | 32    | 0x04c11db7| 0x00000000| 0xffffffff| false        | false           |
+   * | CRC32_Q           | 32    | 0x814141ab| 0x00000000| 0x00000000| false        | false           |
+   * | CRC32_JAMCRC      | 32    | 0x04c11db7| 0xffffffff| 0x00000000| true         | true            |
+   * | CRC32_XFER        | 32    | 0x000000af| 0x00000000| 0x00000000| false        | false           |
+   *
+   * @param name - The name of the CRC algorithm to retrieve
+   * @returns The CRC instance if found, undefined otherwise
+   */
+  public static buildInCrc(name: string) {
+    return this.defaults.find((o: CRC): boolean => o.name === name)
+  }
   /**
    * Returns a list of default CRC configurations.
    *
@@ -256,13 +307,13 @@ export class CRC {
       var currByte = (divident << (this._width - 8)) & this._castMask
       for (var bit = 0; bit < 8; bit++) {
         if ((currByte & this._msbMask) != 0) {
-          currByte <<= 1
-          currByte ^= this._polynomial
+          currByte = ((currByte << 1) ^ this._polynomial) & this._castMask
         } else {
-          currByte <<= 1
+          currByte = (currByte << 1) & this._castMask
         }
       }
-      this._crcTable[divident] = currByte & this._castMask
+      // Ensure unsigned result
+      this._crcTable[divident] = (currByte & this._castMask) >>> 0
     }
   }
 
@@ -276,16 +327,16 @@ export class CRC {
 
       for (var bit = 0; bit < 8; bit++) {
         if ((currByte & this._msbMask) != 0) {
-          currByte <<= 1
-          currByte ^= this._polynomial
+          currByte = ((currByte << 1) ^ this._polynomial) & this._castMask
         } else {
-          currByte <<= 1
+          currByte = (currByte << 1) & this._castMask
         }
       }
 
       currByte = CrcUtil.ReflectGeneric(currByte, this.width)
 
-      this._crcTable[divident] = currByte & this._castMask
+      // Ensure unsigned result
+      this._crcTable[divident] = (currByte & this._castMask) >>> 0
     }
   }
 
@@ -308,7 +359,7 @@ export class CRC {
       /* update the MSB of crc value with next input byte */
       crc = (crc ^ (curByte << (this._width - 8))) & this._castMask
       /* this MSB byte value is the index into the lookup table */
-      var pos = (crc >> (this.width - 8)) & 0xff
+      var pos = (crc >>> (this.width - 8)) & 0xff
       /* shift out this index */
       crc = (crc << 8) & this._castMask
       /* XOR-in remainder from lookup table using the calculated index */
@@ -318,7 +369,8 @@ export class CRC {
     if (this.resultReflected) {
       crc = CrcUtil.ReflectGeneric(crc, this.width)
     }
-    return (crc ^ this._finalXorVal) & this._castMask
+    // Use unsigned right shift to ensure positive result
+    return ((crc ^ this._finalXorVal) & this._castMask) >>> 0
   }
 
   public computeBuffer(bytes: number[] | Buffer) {
@@ -327,11 +379,13 @@ export class CRC {
       return Buffer.from([val])
     } else if (this.width === 16) {
       let b = Buffer.alloc(2)
-      b.writeUInt16BE(val, 0)
+      // Ensure val is treated as unsigned 16-bit
+      b.writeUInt16BE(val & 0xffff, 0)
       return b
     } else if (this.width === 32) {
       let b = Buffer.alloc(4)
-      b.writeUInt32BE(val, 0)
+      // Ensure val is treated as unsigned 32-bit
+      b.writeUInt32BE(val >>> 0, 0)
       return b
     } else {
       throw new Error('Unsupported length')
@@ -352,4 +406,3 @@ export class CRC {
     return CRC.defaults.find((o: CRC): boolean => o.name === name)
   }
 }
-

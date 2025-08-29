@@ -1816,6 +1816,26 @@ declare function linStartScheduler(schName: string, slot: number): Promise<void>
  */
 declare function linStartScheduler(schName: string, slot: number, device: string): Promise<void>;
 /**
+ * Control the power of a LIN device
+ *
+ * @category LIN
+ * @param {boolean} power - The power state to set
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<void>} - Returns a promise that resolves when power is set
+ *
+ * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
+ *
+ * @example
+ * ```ts
+ * // Set power to true
+ * await linPowerCtrl(true);
+ *
+ * // Set power to false on specific device
+ * await linPowerCtrl(false, 'Device1');
+ * ```
+ */
+declare function linPowerCtrl(power: boolean, device?: string): Promise<void>;
+/**
  * Stop a LIN scheduler
  *
  * @category LIN
@@ -1888,4 +1908,4 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  */
 declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): Promise<CanMessage>;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getVar, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };

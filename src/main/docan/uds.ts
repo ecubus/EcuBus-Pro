@@ -1469,7 +1469,7 @@ async function compileTscEntry(
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
 
-  libPath = path.relative(projectPath, libPath)
+  const relativeLibPath = path.relative(projectPath, libPath)
 
   const cmaArray = [
     entry,
@@ -1477,11 +1477,11 @@ async function compileTscEntry(
     '--bundle',
     '--platform=node',
     '--format=cjs',
-    `--alias:ECB=${libPath}`,
-    `--alias:@serialport/bindings-cpp=${libPath}/bindings-cpp`,
-    `--alias:bindings=${libPath}/node-bindings`,
+    `--alias:ECB=${relativeLibPath}`,
+    `--alias:@serialport/bindings-cpp=${relativeLibPath}/bindings-cpp`,
+    `--alias:bindings=${relativeLibPath}/node-bindings`,
     `--outdir=${outputDir}`,
-    `--inject:${path.join(libPath, 'uds.js')}`,
+    `--inject:${path.join(relativeLibPath, 'uds.js')}`,
     `--define:process.platform="${process.platform}"`,
     `--external:*.node`
   ]
@@ -1502,7 +1502,6 @@ async function compileTscEntry(
     throw new Error('build failed, file not exist')
   }
 
-  libPath = path.join(projectPath, libPath)
   //copy *.node to outputDir
   //glob libPath/*.node
   const nodeFiles = await glob('*.node', {

@@ -32,7 +32,8 @@ class CrcUtil {
       }
     }
 
-    return resByte
+    // Ensure unsigned result
+    return resByte >>> 0
   }
 
   public static ReflectGeneric(val: number, width: number) {
@@ -42,9 +43,9 @@ class CrcUtil {
         resByte |= 1 << (width - 1 - i)
       }
     }
-    return resByte
+    // Ensure unsigned result for 32-bit values
+    return width === 32 ? resByte >>> 0 : resByte
   }
 }
 
 export default CrcUtil
-

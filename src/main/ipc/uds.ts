@@ -64,7 +64,8 @@ import {
   generateConfigFile,
   startRouterCounter,
   stopRouterCounter,
-  VSomeIP_Client
+  VSomeIP_Client,
+  VsomeipState
 } from '../vsomeip'
 
 const libPath = path.dirname(dllLib)
@@ -376,6 +377,8 @@ async function globalStart(
         client.init()
         client.on('state', (data) => {
           console.log('someip state', data)
+          const stateStr = VsomeipState[data] || `Unknown state: ${data}`
+          sysLog.log(stateStr.level, `${val.name} - ${stateStr.msg}`)
           if (data == 0) {
             console.log('offer service', val.name, val.services)
             val.services.forEach((e) => {
@@ -595,10 +598,10 @@ async function globalStart(
     }, 200)
     logQ.startTimer()
   }
+
+  global.startTs = getTsUs()
 }
-function xascTransport(path: string, channel: string[], method: string[]) {
-  return ascTransport(path, channel, method)
-}
+
 const exTransportList: string[] = []
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   let i = 0
@@ -751,9 +754,9 @@ export function globalStop(emit = false) {
   })
   doips = []
   stopRouterCounter()
+
   someipMap.forEach((e) => {
     e.config.services?.forEach((s) => {
-      console.log('stop offer service', s.service, s.instance)
       e.client.app.stop_offer_service(Number(s.service), Number(s.instance))
     })
     e.client.stop()

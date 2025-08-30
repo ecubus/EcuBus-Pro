@@ -47,12 +47,12 @@ export interface VsomeipSubscriptionStatusInfo {
   status: number
 }
 
-const VsomeipState: Record<number, string> = {
-  0: 'ST_REGISTERED',
-  1: 'ST_DEREGISTERED',
-  2: 'ST_REGISTERING',
-  3: 'ST_ASSIGNING',
-  4: 'ST_ASSIGNED'
+export const VsomeipState: Record<number, { level: string; msg: string }> = {
+  0: { level: 'info', msg: 'ST_REGISTERED' },
+  1: { level: 'error', msg: 'ST_DEREGISTERED' },
+  2: { level: 'warning', msg: 'ST_REGISTERING' },
+  3: { level: 'warning', msg: 'ST_ASSIGNING' },
+  4: { level: 'warning', msg: 'ST_ASSIGNED' }
 }
 
 // Unified callback data structure
@@ -178,8 +178,7 @@ export class VSomeIP_Client {
     switch (callbackData.type) {
       case 'state': {
         this.state = callbackData.data
-        const stateStr = VsomeipState[callbackData.data] || `Unknown state: ${callbackData.data}`
-        sysLog.info(`SomeIP ${this.name} state changed: ${stateStr}`)
+
         this.event.emit('state', callbackData.data)
         break
       }

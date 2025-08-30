@@ -344,7 +344,7 @@ import { cloneDeep, isEqual } from 'lodash'
 import { onKeyStroke, onKeyUp } from '@vueuse/core'
 // import Signal from './components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
-import { GraphBindFrameValue, GraphNode, SomeipAction } from 'src/preload/data'
+import { GraphBindFrameValue, GraphNode, SomeipAction, SomeipMessageType } from 'src/preload/data'
 import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
@@ -515,6 +515,7 @@ function addFrame() {
         type: 'manual'
       },
       name: '',
+      messageType: SomeipMessageType.REQUEST,
       serviceId: '0x1000',
       instanceId: '0x1001',
       methodId: '0x1002',

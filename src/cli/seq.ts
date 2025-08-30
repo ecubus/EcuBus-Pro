@@ -44,8 +44,13 @@ async function runSeq(
       }
     }
     if (tester.seqList[seqIndex]) {
-      await uds.runSequence(seqIndex, cycle)
-      canBase.close()
+      try {
+        await uds.runSequence(seqIndex, cycle)
+      } catch (e) {
+        throw e
+      } finally {
+        canBase.close()
+      }
     } else {
       if (seqName) {
         throw new Error(`sequence ${seqName} not found`)
@@ -86,4 +91,3 @@ export default async function main(
     throw new Error(`tester ${testerName} has no target device`)
   }
 }
-

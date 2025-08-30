@@ -240,7 +240,8 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
       const data = msg.data as { ts: number; msg?: string }
       msg = `${data.msg || 'error'}`
     } else {
-      console.log('raw', msg)
+      //不打印
+      return false
     }
   } else if (typeof msg === 'string') {
     msg = msg.trim()

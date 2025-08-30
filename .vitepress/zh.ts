@@ -85,7 +85,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       items: [
         {
           text: 'LIN',
-          items: [{ text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' }],
+          items: [
+            { text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' },
+            { text: 'LIN UDS', link: 'NSUC1612_LIN_OTA/readme.md' }
+          ],
           collapsed: false
         },
         {

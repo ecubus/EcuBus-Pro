@@ -2,14 +2,15 @@ import vsomeip from './build/Release/vsomeip.node'
 import routingmanager from '../../../resources/lib/routingmanagerd.exe?asset&asarUnpack'
 import { spawn, exec, ChildProcess } from 'child_process'
 import path from 'path'
-import { ServiceConfig } from './share/service-config'
+import { ServiceConfig } from '../share/someip/service-config'
 import { EventEmitter } from 'events'
 import os from 'os'
 import fs from 'fs'
 import fsP from 'fs/promises'
-import { SomeipInfo } from './share'
+import { SomeipInfo } from '../share/someip'
 import type { DataSet } from '../../preload/data'
 import { UdsDevice } from 'nodeCan/uds'
+import { SomeipLOG } from '../log'
 
 // Import sysLog from global
 declare const sysLog: any
@@ -152,6 +153,7 @@ export class VSomeIP_Client {
   private rtm: any
   app: any
   sendc: any
+  log: SomeipLOG
   private state: number = 1
   private cb: any = null
   private cbId: string | undefined
@@ -164,13 +166,15 @@ export class VSomeIP_Client {
   > = new Map()
   constructor(
     public name: string,
-    configFilePath: string
+    configFilePath: string,
+    public info: SomeipInfo
   ) {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
     this.cb = new vsomeip.VsomeipCallbackWrapper(this.rtm, this.app)
     this.sendc = new vsomeip.Send(this.rtm, this.app)
     this.cbId = vsomeip.RegisterCallback(name, name, this.callback.bind(this))
+    this.log = new SomeipLOG('Vsomeip', name, this.info.id, this.event)
   }
   callback(callbackData: VsomeipCallbackData) {
     // console.log('vSomeIP callback:', callbackData)/
@@ -220,10 +224,11 @@ export class VSomeIP_Client {
         console.log('Watchdog triggered')
         this.event.emit('watchdog')
         break
-      case 'trace':
-        console.log('Trace:', JSON.parse(callbackData.data))
-        this.event.emit('trace', JSON.parse(callbackData.data))
+      case 'trace': {
+        const data = JSON.parse(callbackData.data)
+        this.log.someipBase(Buffer.from(data.header), Buffer.from(data.data))
         break
+      }
       default:
         console.log('Unknown callback:', callbackData)
         break

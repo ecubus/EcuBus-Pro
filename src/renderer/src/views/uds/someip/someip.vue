@@ -451,7 +451,7 @@ import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'elem
 
 import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
-import type { SomeipInfo, ServiceConfig, ApplicationConfig } from 'src/main/vsomeip/share'
+import type { SomeipInfo, ServiceConfig, ApplicationConfig } from 'nodeCan/someip'
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import { useGlobalStart } from '@r/stores/runtime'

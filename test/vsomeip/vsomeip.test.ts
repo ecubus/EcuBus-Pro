@@ -17,10 +17,15 @@ describe('hello world', async () => {
   beforeAll(async () => {
     await startRouterCounter(path.join(__dirname, 'helloworld-local.json'))
     await delay(1000)
-    client = new VSomeIP_Client('hello_world_client', path.join(__dirname, 'helloworld-local.json'))
+    client = new VSomeIP_Client(
+      'hello_world_client',
+      path.join(__dirname, 'helloworld-local.json'),
+      {} as any
+    )
     server = new VSomeIP_Client(
       'hello_world_service',
-      path.join(__dirname, 'helloworld-local.json')
+      path.join(__dirname, 'helloworld-local.json'),
+      {} as any
     )
     client.init()
     server.init()

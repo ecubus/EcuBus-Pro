@@ -154,7 +154,7 @@
 import { ref, computed, watch, defineExpose } from 'vue'
 import { type FormRules, type FormInstance } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
-import type { ServiceConfig } from 'src/main/vsomeip/share'
+import type { ServiceConfig } from 'nodeCan/someip'
 import { useGlobalStart } from '@r/stores/runtime'
 
 const globalStart = useGlobalStart()

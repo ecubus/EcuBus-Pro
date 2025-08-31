@@ -6,7 +6,6 @@
     "src/renderer/src/**/*.vue",
     "src/preload/*.d.ts",
     "src/main/share/*",
-    "src/main/vsomeip/share/*"
   ],
   "files": ["package.json"],
   "compilerOptions": {

@@ -3,7 +3,7 @@ import { v4 } from 'uuid'
 import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo, CanVendor } from './can'
 import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
-import { SomeipInfo } from '../vsomeip/share'
+import { SomeipInfo } from './someip'
 
 export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE'
 export type HardwareType = 'can' | 'lin' | 'eth' | 'pwm' | 'someip'

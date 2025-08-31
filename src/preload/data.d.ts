@@ -3,7 +3,7 @@ import type { Param, UdsDevice } from 'src/main/share/uds'
 import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
-import type { SomeipInfo } from 'src/main/vsomeip/share'
+import type { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 
 import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
@@ -62,18 +62,6 @@ export interface PwmInter {
   action: any[]
 }
 
-export enum SomeipMessageType {
-  REQUEST = 0,
-  REQUEST_NO_RETURN = 1,
-  NOTIFICATION = 2,
-  RESPONSE = 0x80,
-  REQUEST_ACK = 0x40,
-  NOTIFICATION_ACK = 0x42,
-  ERROR = 0x81,
-  RESPONSE_ACK = 0xc0,
-  ERROR_ACK = 0xc1,
-  UNKNOWN = 255
-}
 export interface SomeipAction {
   trigger: {
     type: 'manual' | 'periodic'

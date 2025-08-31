@@ -621,6 +621,31 @@ export interface SomeipInfo {
   serviceDiscovery: ServiceDiscoveryConfig
 }
 
+export enum SomeipMessageType {
+  REQUEST = 0,
+  REQUEST_NO_RETURN = 1,
+  NOTIFICATION = 2,
+  RESPONSE = 0x80,
+  REQUEST_ACK = 0x40,
+  NOTIFICATION_ACK = 0x42,
+  ERROR = 0x81,
+  RESPONSE_ACK = 0xc0,
+  ERROR_ACK = 0xc1,
+  UNKNOWN = 255
+}
+export const SomeipMessageTypeMap: Record<SomeipMessageType, string> = {
+  [SomeipMessageType.REQUEST]: 'Request',
+  [SomeipMessageType.REQUEST_NO_RETURN]: 'Request No Return',
+  [SomeipMessageType.NOTIFICATION]: 'Notification',
+  [SomeipMessageType.RESPONSE]: 'Response',
+  [SomeipMessageType.REQUEST_ACK]: 'Request Ack',
+  [SomeipMessageType.NOTIFICATION_ACK]: 'Notification Ack',
+  [SomeipMessageType.ERROR]: 'Error',
+  [SomeipMessageType.RESPONSE_ACK]: 'Response Ack',
+  [SomeipMessageType.ERROR_ACK]: 'Error Ack',
+  [SomeipMessageType.UNKNOWN]: 'Unknown'
+}
+
 // Re-export imported sub-interfaces for convenience
 export type {
   GlobalPayloadConfig,

@@ -140,6 +140,7 @@ import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading } from 'element-plus'
 import { useGlobalStart } from '@r/stores/runtime'
+import { SomeipMessageType, SomeipMessageTypeMap } from 'nodeCan/someip'
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -223,6 +224,31 @@ interface IpBaseLog {
     name: string
   }
 }
+
+interface SomeipBaseLog {
+  method: 'someipBase'
+  data: {
+    header: {
+      ip: string
+      port: number
+      protocol: string
+      sending: boolean
+      instance: number
+    }
+    data: {
+      serviceId: number
+      methodId: number
+      clientId: number
+      sessionId: number
+      protocolVersion: number
+      interfaceVersion: number
+      messageType: SomeipMessageType
+      requestCode: number
+      payload: Buffer
+    }
+    ts: number
+  }
+}
 interface LinBaseLog {
   method: 'linBase'
   data: LinMsg
@@ -243,7 +269,7 @@ interface LinErrorLog {
 }
 
 interface LogItem {
-  message: CanBaseLog | UdsLog | UdsErrorLog | IpBaseLog | LinBaseLog | LinErrorLog
+  message: CanBaseLog | UdsLog | UdsErrorLog | IpBaseLog | LinBaseLog | LinErrorLog | SomeipBaseLog
   level: string
   instance: string
   label: string
@@ -546,6 +572,43 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: 'System Message'
       })
+    } else if (val.message.method == 'someipBase') {
+      console.table(val.message)
+      insertData({
+        method: val.message.method,
+        name: `${val.message.data.data.clientId.toString(16).padStart(4, '0')}.${val.message.data.data.sessionId.toString(16).padStart(4, '0')}`,
+        data: data2str(val.message.data.data.payload),
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: `${val.message.data.data.serviceId.toString(16).padStart(4, '0')}.${val.message.data.data.methodId.toString(16).padStart(4, '0')}`,
+        len: val.message.data.data.payload.length,
+        dlc: val.message.data.data.payload.length,
+        dir: val.message.data.header.sending ? 'Tx' : 'Rx',
+        device: val.label,
+        channel: val.instance,
+        msgType: SomeipMessageTypeMap[val.message.data.data.messageType],
+        children: [
+          {
+            name: 'Address',
+            data: `${val.message.data.header.ip}:${val.message.data.header.port}`
+          },
+          {
+            name: 'Protocol',
+            data: val.message.data.header.protocol
+          },
+          {
+            name: 'Instance',
+            data: val.message.data.header.instance.toString(16).padStart(4, '0')
+          },
+          {
+            name: 'Return Code',
+            data: val.message.data.data.requestCode.toString(16).padStart(4, '0')
+          },
+          {
+            name: 'Version',
+            data: `Protocol Version:${val.message.data.data.protocolVersion}, Interface Version:${val.message.data.data.interfaceVersion}`
+          }
+        ]
+      })
     }
   }
 }
@@ -569,14 +632,17 @@ const props = defineProps({
   },
   defaultCheckList: {
     type: Array as PropType<string[]>,
-    default: () => ['canBase', 'ipBase', 'linBase', 'uds']
+    default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase']
   }
 })
 
 // Initialize checkList with the prop value
 const checkList = ref(props.defaultCheckList)
 
-function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boolean) {
+function filterChange(
+  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase',
+  val: boolean
+) {
   const i = LogFilter.value.find((v) => v.v == method)
   if (i) {
     i.value.forEach((v) => {
@@ -791,7 +857,7 @@ function togglePause() {
 const LogFilter = ref<
   {
     label: string
-    v: 'uds' | 'canBase' | 'ipBase' | 'linBase'
+    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase'
     value: string[]
   }[]
 >([
@@ -814,6 +880,11 @@ const LogFilter = ref<
     label: 'ETH',
     v: 'ipBase',
     value: ['ipBase', 'ipError']
+  },
+  {
+    label: 'SomeIP',
+    v: 'someipBase',
+    value: ['someipBase', 'someipError']
   }
 ])
 

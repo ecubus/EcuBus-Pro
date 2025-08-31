@@ -59,7 +59,7 @@ import { getAllSysVar } from '../share/sysVar'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 import { cloneDeep } from 'lodash'
 import { logQ } from '../multiWin'
-import { SomeipConfig, SomeipInfo } from '../vsomeip/share'
+import { SomeipConfig, SomeipInfo } from '../share/someip'
 import {
   generateConfigFile,
   startRouterCounter,
@@ -275,7 +275,7 @@ const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
 const pwmBaseMap = new Map<string, PwmBase>()
-const someipMap = new Map<string, { client: VSomeIP_Client; config: SomeipConfig }>()
+const someipMap = new Map<string, VSomeIP_Client>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 let cantps: {
@@ -373,7 +373,7 @@ async function globalStart(
           await startRouterCounter(file)
           rounterInit = true
         }
-        const client = new VSomeIP_Client(val.name, file)
+        const client = new VSomeIP_Client(val.name, file, val)
         client.init()
         client.on('state', (data) => {
           console.log('someip state', data)
@@ -388,7 +388,7 @@ async function globalStart(
             })
           }
         })
-        someipMap.set(key, { client: client, config: device.someipDevice })
+        someipMap.set(key, client)
       }
     }
   } catch (err: any) {
@@ -396,7 +396,7 @@ async function globalStart(
     throw err
   }
   someipMap.forEach((e) => {
-    e.client.start()
+    e.start()
   })
   //testes
   const doipConnectList: {
@@ -756,10 +756,10 @@ export function globalStop(emit = false) {
   stopRouterCounter()
 
   someipMap.forEach((e) => {
-    e.config.services?.forEach((s) => {
-      e.client.app.stop_offer_service(Number(s.service), Number(s.instance))
+    e.info.services?.forEach((s) => {
+      e.app.stop_offer_service(Number(s.service), Number(s.instance))
     })
-    e.client.stop()
+    e.stop()
   })
 
   someipMap.clear()
@@ -1136,8 +1136,8 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
     const methodId = Number(ia.methodId)
     const serviceId = Number(ia.serviceId)
     const instanceId = Number(ia.instanceId)
-    await base.client.requestService(serviceId, instanceId, 1000)
-    base.client.sendRequest(serviceId, instanceId, methodId, Buffer.alloc(5))
+    await base.requestService(serviceId, instanceId, 1000)
+    base.sendRequest(serviceId, instanceId, methodId, Buffer.alloc(5))
   } else {
     sysLog.error(`someip device not found`)
   }

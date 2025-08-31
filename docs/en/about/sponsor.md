@@ -94,4 +94,5 @@ Please contact me to discuss what you want for this tier!
 | 2025-05-14 | 悦动思行 | WeChat | ¥20 | 请楼主一杯奶茶 |
 | 2025-7-19 | 算法行者 | WeChat | ¥20 | 支持开源精神 请大佬喝杯奶茶 |
 | 2025-8-28 | weapon | 微信 | ¥88 | 感谢大佬为开源做出的贡献 |
+| 2025-8-31 | X.Gong | 微信 | ¥100 | 赞助一下 | 
 

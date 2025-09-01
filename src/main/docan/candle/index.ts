@@ -39,7 +39,7 @@ export class Candle_CAN extends CanBase {
   canfdConfig: any
   startTime = getTsUs()
   tsOffset: number | undefined
-
+  static candleOpened = false
   private readAbort = new AbortController()
 
   rejectBaseMap = new Map<
@@ -120,7 +120,16 @@ export class Candle_CAN extends CanBase {
 
     // Check baud rate parameters against device capabilities
     const cap = this.target.bt_const
+    if (Candle_CAN.candleOpened == false) {
+      const candleInfo = {
+        channel_count: this.target.dconf.icount,
+        HW_version: `${(this.target.dconf.hw_version >> 24) & 0xff}.${(this.target.dconf.hw_version >> 16) & 0xff}.${(this.target.dconf.hw_version >> 8) & 0xff}`,
+        SW_version: `${(this.target.dconf.sw_version >> 16) & 0xff}.${(this.target.dconf.sw_version >> 8) & 0xff}.${(this.target.dconf.sw_version >> 0) & 0xff}`
+      }
 
+      sysLog.info(`candle info: ${JSON.stringify(candleInfo)}`)
+      Candle_CAN.candleOpened = true
+    }
     if (CLOCK != cap.fclk_can) {
       throw new Error(`Clock frequency mismatch: expected ${CLOCK}, got ${cap.fclk_can}`)
     }
@@ -383,8 +392,8 @@ export class Candle_CAN extends CanBase {
           if (transmit_error_count || receive_error_count) {
             str += `TX_ERR_CNT:${transmit_error_count} RX_ERR_CNT:${receive_error_count}`
           }
-            this.log.error(ts, `bus error, ${str}`)
-            this.close(true)
+          this.log.error(ts, `bus error, ${str}`)
+          this.close(true)
         } else {
           const message: CanMessage = {
             device: this.info.name,
@@ -484,7 +493,9 @@ export class Candle_CAN extends CanBase {
     if (process.platform == 'win32') {
       const v = Candle_CAN.getRawDeviceList()[0]
       if (v) {
-        return `SW:${v.dconf.sw_version}/HW:${v.dconf.hw_version}`
+        return `SW:${(v.dconf.sw_version >> 16) & 0xff}.${(v.dconf.sw_version >> 8) & 0xff}.${(v.dconf.sw_version >> 0) & 0xff}
+                HW:${(v.dconf.hw_version >> 24) & 0xff}.${(v.dconf.hw_version >> 16) & 0xff}.${(v.dconf.hw_version >> 8) & 0xff}
+                channel:${v.dconf.icount}`
       }
       return '1.0.0'
     } else {
@@ -508,7 +519,7 @@ export class Candle_CAN extends CanBase {
     }
     this.pendingBaseCmds.clear()
 
-      if (isReset) {
+    if (isReset) {
       /* In HSCAN device, the device auto-resets on bus-off.*/
       // Reset logic would go here
       return
@@ -519,7 +530,7 @@ export class Candle_CAN extends CanBase {
       Candle.candle_channel_stop(this.target, this.channel)
       Candle.candle_dev_close(this.target)
     }
-
+    Candle_CAN.candleOpened = false
     this._close()
   }
   writeBase(

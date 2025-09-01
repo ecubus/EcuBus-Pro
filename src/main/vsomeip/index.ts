@@ -141,8 +141,10 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
 }
 
 export function stopRouterCounter() {
-  routingManagerProcess?.kill('SIGKILL')
-  routingManagerProcess = null
+  if (routingManagerProcess) {
+    routingManagerProcess?.kill('SIGKILL')
+    routingManagerProcess = null
+  }
 }
 
 export function isRouterCounterRunning(): boolean {
@@ -226,6 +228,7 @@ export class VSomeIP_Client {
         break
       case 'trace': {
         const data = JSON.parse(callbackData.data)
+        console.log('trace:', data)
         this.log.someipBase(Buffer.from(data.header), Buffer.from(data.data))
         break
       }
@@ -236,6 +239,13 @@ export class VSomeIP_Client {
   }
   sendRequest(service: number, instance: number, method: number, payload: Buffer) {
     this.sendc.sendMessage(service, instance, method, payload)
+  }
+  releaseService() {
+    for (const key of this.serviceValid.keys()) {
+      const [instance, service] = key.split('.')
+      this.app.release_service(Number(instance), Number(service))
+    }
+    this.serviceValid.clear()
   }
   async requestService(service: number, instance: number, timeout: number = 1000) {
     return new Promise((resolve, reject) => {
@@ -301,6 +311,7 @@ export class VSomeIP_Client {
     return this
   }
   stop() {
+    this.releaseService()
     this.event.removeAllListeners()
     this.app.clear_all_handler()
 
@@ -310,6 +321,7 @@ export class VSomeIP_Client {
     }
     vsomeip.UnregisterCallback(this.cbId)
     this.app.stop()
+    this.rtm.remove_application(this.name)
   }
 }
 
@@ -320,7 +332,7 @@ export async function generateConfigFile(
 ) {
   // Extract device information to get network settings
   let unicast: string | undefined
-  let netmask: string | undefined
+
   let serviceUnicast: string | undefined
 
   const device = devices[config.device]
@@ -329,9 +341,6 @@ export async function generateConfigFile(
     if (detail.address) {
       unicast = detail.address
       serviceUnicast = detail.address
-    }
-    if (detail.netmask) {
-      netmask = detail.netmask
     }
   }
 
@@ -342,13 +351,11 @@ export async function generateConfigFile(
   if (unicast) {
     vsomeipConfig.unicast = unicast
   }
-  if (netmask) {
-    vsomeipConfig.netmask = netmask
-  }
 
   // vsomeipConfig['local-clients-keepalive'] = {
   //   enable: 'true'
   // }
+
   const logPath = path.join(projectPath, '.ScriptBuild', config.name + '.log')
   vsomeipConfig.logging = {
     level: 'info',
@@ -358,6 +365,7 @@ export async function generateConfigFile(
       path: logPath
     }
   }
+  vsomeipConfig['shutdown_timeout'] = 0
 
   vsomeipConfig.tracing = {
     enable: 'true',
@@ -388,7 +396,7 @@ export async function generateConfigFile(
   // Add routing
   vsomeipConfig.routing = 'routingmanagerd'
 
-  vsomeipConfig.serviceDiscovery = config.serviceDiscovery
+  vsomeipConfig['service-discovery'] = config.serviceDiscovery
 
   // Write the configuration to file
   const filePath = path.join(projectPath, '.ScriptBuild', config.name + '.json')

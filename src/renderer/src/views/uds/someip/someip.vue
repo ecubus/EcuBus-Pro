@@ -484,23 +484,16 @@ const data = ref<SomeipInfo>({
   },
   serviceDiscovery: {
     enable: false,
-    initial_state: 'unknown',
-    multicast: '224.224.224.0',
+    multicast: '224.224.224.245',
     port: 30490,
     protocol: 'udp',
-    initial_delay_min: 0,
-    initial_delay_max: 3000,
-    repetitions_base_delay: 10,
+    initial_delay_min: 10,
+    initial_delay_max: 100,
+    repetitions_base_delay: 200,
     repetitions_max: 3,
-    ttl: '0xFFFFFF',
+    ttl: '3',
     cyclic_offer_delay: 1000,
-    request_response_delay: 2000,
-    offer_debounce_time: 500,
-    find_debounce_time: 500,
-    max_remote_subscribers: 3,
-    find_initial_debounce_reps: 0,
-    find_initial_debounce_time: 200,
-    wait_route_netlink_notification: true
+    request_response_delay: 2000
   }
 })
 
@@ -590,8 +583,8 @@ const idCheck = (rule: any, value: any, callback: any) => {
 
 const portCheck = (rule: any, value: any, callback: any) => {
   if (value !== undefined && value !== null && value !== '') {
-    if (isNaN(value) || value < 1 || value > 65535) {
-      callback(new Error('Port must be 1 - 65535'))
+    if (isNaN(value) || value < 0 || value > 65535) {
+      callback(new Error('Port must be 0 - 65535'))
     } else {
       callback()
     }

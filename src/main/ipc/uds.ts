@@ -753,7 +753,6 @@ export function globalStop(emit = false) {
     value.close()
   })
   doips = []
-  stopRouterCounter()
 
   someipMap.forEach((e) => {
     e.info.services?.forEach((s) => {
@@ -761,6 +760,7 @@ export function globalStop(emit = false) {
     })
     e.stop()
   })
+  stopRouterCounter()
 
   someipMap.clear()
   if (emit) {

@@ -27,18 +27,7 @@
         "someipDevice": {
           "id": "a3228634-b533-4933-baff-807d6e453db9",
           "name": "SomeIP_0",
-          "services": [
-            {
-              "service": "0x1234",
-              "instance": "0x1234",
-              "reliable": {
-                "port": 30509,
-                "enable-magic-cookies": false
-              },
-              "events": [],
-              "eventgroups": []
-            }
-          ],
+          "services": [],
           "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
           "application": {
             "id": "0x6301",
@@ -50,16 +39,16 @@
             "has_session_handling": true
           },
           "serviceDiscovery": {
-            "enable": true,
+            "enable": false,
             "initial_state": "unknown",
-            "multicast": "224.224.224.0",
+            "multicast": "224.244.224.245",
             "port": 30490,
             "protocol": "udp",
             "initial_delay_min": 0,
             "initial_delay_max": 3000,
             "repetitions_base_delay": 10,
             "repetitions_max": 3,
-            "ttl": "0xFFFFFF",
+            "ttl": "1",
             "cyclic_offer_delay": 1000,
             "request_response_delay": 2000,
             "offer_debounce_time": 500,
@@ -100,14 +89,14 @@
           "serviceDiscovery": {
             "enable": true,
             "initial_state": "unknown",
-            "multicast": "224.224.224.0",
-            "port": 30490,
+            "multicast": "224.244.224.245",
+            "port": 0,
             "protocol": "udp",
             "initial_delay_min": 0,
             "initial_delay_max": 3000,
             "repetitions_base_delay": 10,
             "repetitions_max": 3,
-            "ttl": "0xFFFFFF",
+            "ttl": "1",
             "cyclic_offer_delay": 1000,
             "request_response_delay": 2000,
             "offer_debounce_time": 500,
@@ -215,8 +204,8 @@
         "pos": {
           "x": 383,
           "y": 195.33300000000003,
-          "w": 1708.33,
-          "h": 195.66699999999997
+          "w": 1677,
+          "h": 225.656
         },
         "options": {
           "params": {}
@@ -240,7 +229,7 @@
       },
       "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
         "pos": {
-          "x": 631.5,
+          "x": 473.5,
           "y": 0,
           "w": 992,
           "h": 399
@@ -253,6 +242,38 @@
             "edit-index": "f8ec96c4-c00f-45f9-84d9-446878e91dcd"
           },
           "name": "SomeIP IA"
+        }
+      },
+      "soa": {
+        "pos": {
+          "x": 496,
+          "y": 200.328125,
+          "w": 933,
+          "h": 400
+        },
+        "title": "soa",
+        "label": "SOA",
+        "id": "soa",
+        "options": {
+          "params": {
+            "deviceId": "b73633f1-a6c4-4cfd-983e-8bd83788d6de"
+          }
+        }
+      },
+      "hardware": {
+        "pos": {
+          "x": 980,
+          "y": 303.672,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {
+          "params": {
+            "deviceId": "67f2631c-0ddf-42cc-9615-f2fc9b377a65"
+          }
         }
       }
     }

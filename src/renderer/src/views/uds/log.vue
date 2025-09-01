@@ -100,8 +100,8 @@ const globalStart = useGlobalStart()
 // const logData = ref<LogData[]>([])
 
 function clearLog() {
-  xGrid.value?.scrollTo(0, 0).then(() => {
-    xGrid.value?.remove()
+  xGrid.value?.remove().then(() => {
+    xGrid.value?.scrollTo(0, 0)
   })
 }
 

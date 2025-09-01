@@ -5,6 +5,7 @@ import { ElMessageBox } from 'element-plus'
 import { useProjectStore } from './project'
 import { DataSet } from 'src/preload/data'
 import { useGlobalStart } from './runtime'
+import { nextTick } from 'vue'
 export type { DataSet }
 
 export const useDataStore = defineStore('useDataStore', {
@@ -36,24 +37,26 @@ export const useDataStore = defineStore('useDataStore', {
           method: 'initDataBase',
           data: cloneDeep(this.database)
         })
-        window.electron.ipcRenderer
-          .invoke(
-            'ipc-global-start',
-            cloneDeep(project.projectInfo),
-            cloneDeep(this.devices),
-            cloneDeep(this.tester),
-            cloneDeep(this.nodes),
-            cloneDeep(this.database),
-            cloneDeep(this.vars),
-            cloneDeep(this.logs)
-          )
-          .then(() => {
-            window.startTime = Date.now()
-          })
-          .catch((e: any) => {
-            globalStart.value = false
-            window.startTime = Date.now()
-          })
+        nextTick(() => {
+          window.electron.ipcRenderer
+            .invoke(
+              'ipc-global-start',
+              cloneDeep(project.projectInfo),
+              cloneDeep(this.devices),
+              cloneDeep(this.tester),
+              cloneDeep(this.nodes),
+              cloneDeep(this.database),
+              cloneDeep(this.vars),
+              cloneDeep(this.logs)
+            )
+            .then(() => {
+              window.startTime = Date.now()
+            })
+            .catch((e: any) => {
+              globalStart.value = false
+              window.startTime = Date.now()
+            })
+        })
       }
       if (type == 'stop' && globalStart.value == true) {
         window.electron.ipcRenderer.invoke('ipc-global-stop').finally(() => {

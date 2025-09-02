@@ -110,6 +110,9 @@ Thanks to all the contributors who have helped shape EcuBus-Pro:
 
 We welcome contributions! Please review our [contribution guidelines](./.github/contributing.md) before getting started.
 
+
+<!--@include: ./docs/share/comment.md-->
+
 ## License
 
 [License](./license.txt)

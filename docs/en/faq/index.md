@@ -68,5 +68,10 @@ setInterval(() => {
 :::
 
 
+# Ask Questions
 
+<script setup>
+import Twikoo from '../../component/Twikoo.vue'
+</script>
 
+<Twikoo lang="en-US" />

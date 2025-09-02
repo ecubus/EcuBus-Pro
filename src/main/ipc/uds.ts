@@ -375,19 +375,7 @@ async function globalStart(
         }
         const client = new VSomeIP_Client(val.name, file, val)
         client.init()
-        client.on('state', (data) => {
-          console.log('someip state', data)
-          const stateStr = VsomeipState[data] || `Unknown state: ${data}`
-          sysLog.log(stateStr.level, `${val.name} - ${stateStr.msg}`)
-          if (data == 0) {
-            console.log('offer service', val.name, val.services)
-            val.services.forEach((e) => {
-              client.app.offer_service(Number(e.service), Number(e.instance))
-              const key = Number(e.instance).toString(16) + '.' + Number(e.service).toString(16)
-              client.serviceValid.set(key, true)
-            })
-          }
-        })
+
         someipMap.set(key, client)
       }
     }
@@ -395,9 +383,7 @@ async function globalStart(
     sysLog.error(`${activeKey} - ${err.toString()}`)
     throw err
   }
-  someipMap.forEach((e) => {
-    e.start()
-  })
+
   //testes
   const doipConnectList: {
     tester: TesterInfo
@@ -755,14 +741,11 @@ export function globalStop(emit = false) {
   doips = []
 
   someipMap.forEach((e) => {
-    e.info.services?.forEach((s) => {
-      e.app.stop_offer_service(Number(s.service), Number(s.instance))
-    })
     e.stop()
   })
   stopRouterCounter()
-
   someipMap.clear()
+
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {
       win.webContents.send('ipc-global-stop')
@@ -1131,7 +1114,7 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
 ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
   const ia = arg[0] as SomeipAction
 
-  const base = someipMap.get(ia.channel)
+  const base = someipMap.get(ia.channel) as VSomeIP_Client
   if (base) {
     const methodId = Number(ia.methodId)
     const serviceId = Number(ia.serviceId)

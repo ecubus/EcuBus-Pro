@@ -8,7 +8,7 @@
     "test/**/*.ts",
     "src/renderer/src/database/**/*.ts",
     "src/renderer/src/worker/**/*.ts"
-  ],
+, "test/vsomeip/vsomeip.test.ts.bak"  ],
   "compilerOptions": {
     "composite": true,
     "noUnusedLocals": false,

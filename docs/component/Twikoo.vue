@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeMount, onUnmounted } from 'vue'
 import { useRouter } from 'vitepress'
 
 const envId = 'https://app.whyengineer.com/comments'
@@ -60,9 +60,18 @@ const props = defineProps({
   lang: {
     type: String,
     default: 'zh-CN'
+  },
+  page: {
+    type: String,
+    default: undefined
   }
 })
-
+onBeforeMount(() => {
+  window.TWIKOO_MAGIC_PATH = props.page
+})
+onUnmounted(() => {
+  window.TWIKOO_MAGIC_PATH = undefined
+})
 onMounted(() => {
   initTwikoo()
   initJs()

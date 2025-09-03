@@ -109,8 +109,11 @@ EcuBus-Pro是商业汽车诊断工具（如`CAN-OE`）的开源替代品。它�
 
 我们欢迎贡献！在开始之前，请查看我们的[贡献指南](./.github/contributing.md)。
 
-<!--@include: ./docs/share/comment.zh.md-->
 
 ## 许可证
 
 [许可证](./license.txt) 
+
+---
+
+<!--@include: ./docs/share/comment.zh.md-->

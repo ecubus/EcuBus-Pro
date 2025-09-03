@@ -1,11 +1,22 @@
 <!--.vitepress/theme/MyLayout.vue-->
 <script setup>
+import { useData, useRoute } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
+import Twikoo from '../../docs/component/Twikoo.vue'
 import 'viewerjs/dist/viewer.css'
 import Viewer from 'viewerjs'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { version } from '../../package.json'
 const { Layout } = DefaultTheme
+const { lang } = useData() // 获取当前语言，比如 'en-US' 或 'zh-CN'
+const route = useRoute()
+const pagePath = computed(() => {
+  let pagePath = route.path.replace('/zh', '')
+  if (pagePath == '/') {
+    pagePath = 'comment'
+  }
+  return pagePath
+})
 
 function getVerion() {
   const actionElements = document.querySelectorAll('.action')
@@ -81,6 +92,9 @@ onMounted(() => {
           />
         </div>
       </div>
+    </template>
+    <template #doc-after>
+      <Twikoo :page="pagePath" :lang="lang"></Twikoo>
     </template>
   </Layout>
 </template>

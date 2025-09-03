@@ -114,6 +114,4 @@ We welcome contributions! Please review our [contribution guidelines](./.github/
 
 [License](./license.txt)
 
----
 
-<!--@include: ./docs/share/comment.md-->

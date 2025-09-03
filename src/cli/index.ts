@@ -83,15 +83,13 @@ async function parseProject(projectPath: string): Promise<{
 
   try {
     const content = await fsP.readFile(projectPath, 'utf-8')
-    const data = JSON.parse(content)
+    const data1 = JSON.parse(content)
     const info = path.parse(projectPath)
-    global.database = data.data.database
+    global.dataSet = data1.data as DataSet
     global.vars = {}
-    global.tester = data.data.tester
-    global.device = data.data.devices
 
-    const vars: Record<string, VarItem> = cloneDeep(data.data.vars)
-    const sysVars = getAllSysVar(data.data.devices, data.data.tester)
+    const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
+    const sysVars = getAllSysVar(global.dataSet.devices, global.dataSet.tester)
     for (const v of Object.values(sysVars)) {
       vars[v.id] = cloneDeep(v)
     }
@@ -120,7 +118,7 @@ async function parseProject(projectPath: string): Promise<{
     }
 
     return {
-      data: data.data,
+      data: global.dataSet,
       projectPath: info.dir,
       projectName: info.base
     }

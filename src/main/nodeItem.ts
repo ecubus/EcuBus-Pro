@@ -796,7 +796,7 @@ export class NodeClass {
     }
     const s = data.signal.split('.')
     // 验证数据库是否存在
-    const db = Object.values(global.database.can).find((db) => db.name == s[0])
+    const db = Object.values(global.dataSet.database.can).find((db) => db.name == s[0])
     if (db) {
       const signalName = s[1]
       let ss: Signal | undefined
@@ -829,7 +829,7 @@ export class NodeClass {
       // }
       updateSignalPhys(ss)
     } else {
-      const linDb = Object.values(global.database.lin).find((db) => db.name == s[0])
+      const linDb = Object.values(global.dataSet.database.lin).find((db) => db.name == s[0])
       if (linDb) {
         const signalName = s[1]
 
@@ -898,7 +898,7 @@ export class NodeClass {
     switch (data.method) {
       case 'startSch': {
         const device = findLinBase(data.device)
-        const db = global.database.lin[device.info.database || '']
+        const db = global.dataSet.database.lin[device.info.database || '']
         if (db == undefined) {
           throw new Error(`database is necessary`)
         }
@@ -923,7 +923,7 @@ export class NodeClass {
         break
       }
       case 'getFrameFromDB': {
-        const db = Object.values(global.database.lin).find((db) => db.name == data.dbName)
+        const db = Object.values(global.dataSet.database.lin).find((db) => db.name == data.dbName)
         if (db) {
           const frame = db.frames[data.frameName]
           if (frame) {
@@ -1031,7 +1031,7 @@ export class NodeClass {
       case 'getFrameFromDB': {
         let ret: CanMessage | undefined
         // 查找 CAN 数据库
-        const db = Object.values(global.database.can).find((db) => db.name == data.dbName)
+        const db = Object.values(global.dataSet.database.can).find((db) => db.name == data.dbName)
         if (db) {
           const msg = Object.values(db.messages).find((m) => m.name === data.frameName)
 

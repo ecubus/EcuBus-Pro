@@ -20,3 +20,6 @@ setInterval(() => {
   output(canMsg)
 }, 1000)
 
+Util.OnSignal('Model3CAN.VCLEFT_liftgateLatchRequest', ({ rawValue, physValue }) => {
+  console.log(`Raw Value: ${rawValue}, Physical Value: ${physValue}`)
+})

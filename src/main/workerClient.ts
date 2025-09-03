@@ -156,7 +156,8 @@ export default class UdsTester {
         stderr: true,
         stdout: true,
         env: this.env,
-        execArgv: execArgv
+        execArgv: execArgv,
+        workerData: global.dataSet
       },
 
       onTerminateWorker: (v: any) => {

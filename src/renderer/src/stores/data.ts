@@ -39,16 +39,7 @@ export const useDataStore = defineStore('useDataStore', {
         })
         nextTick(() => {
           window.electron.ipcRenderer
-            .invoke(
-              'ipc-global-start',
-              cloneDeep(project.projectInfo),
-              cloneDeep(this.devices),
-              cloneDeep(this.tester),
-              cloneDeep(this.nodes),
-              cloneDeep(this.database),
-              cloneDeep(this.vars),
-              cloneDeep(this.logs)
-            )
+            .invoke('ipc-global-start', cloneDeep(project.projectInfo), cloneDeep(this.getData()))
             .then(() => {
               window.startTime = Date.now()
             })
@@ -65,7 +56,7 @@ export const useDataStore = defineStore('useDataStore', {
         // globalStart.value = false
       }
     },
-    getData() {
+    getData(): DataSet {
       return {
         devices: this.devices,
         ia: this.ia,

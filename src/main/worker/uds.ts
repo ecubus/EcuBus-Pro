@@ -40,6 +40,7 @@ export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert, { AssertionError } from 'node:assert'
+import { writeMessageData as writeLinMessageData } from 'src/renderer/src/database/ldf/calc'
 
 /**
  * Node.js built-in assertion library for testing.
@@ -391,7 +392,10 @@ export function after(fn: () => void | Promise<void>) {
  */
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
-
+import { DataSet } from 'src/preload/data'
+import { workerData } from 'node:worker_threads'
+import { writeMessageData } from 'src/renderer/src/database/dbc/calc'
+global.dataSet = workerData as DataSet
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 // export { selfDescribe as describe }
 
@@ -1324,6 +1328,129 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for signal updates from CAN/LIN databases.
+   * The signal will be emitted whenever the specified signal value changes.
+   *
+   * @param signal - The signal name to listen for (format: "database.signalName")
+   * @param fc - The callback function invoked when the signal is updated
+   * @param fc.rawValue - The raw signal value (number or Buffer)
+   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+   *
+   * @example
+   * ```typescript
+   * // Listen for engine RPM signal updates
+   * OnSignal("Engine.EngineRPM", ({ rawValue, physValue }) => {
+   *   console.log(`Engine RPM: ${physValue} (raw: ${rawValue})`)
+   * })
+   *
+   * // Listen for gear position signal with enum values
+   * OnSignal("Transmission.GearPosition", ({ rawValue, physValue }) => {
+   *   console.log(`Gear: ${physValue}`) // Could be "Park", "Drive", "Reverse", etc.
+   * })
+   *
+   * // Async callback example
+   * OnSignal("Battery.Voltage", async ({ rawValue, physValue }) => {
+   *   if (physValue < 12.0) {
+   *     await sendWarning("Low battery voltage detected!")
+   *   }
+   * })
+   * ```
+   */
+  OnSignal(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.on(signal as any, fc)
+  }
+
+  /**
+   * Registers a one-time event listener for signal updates from CAN/LIN databases.
+   * The listener will be automatically removed after the first signal update.
+   *
+   * @param signal - The signal name to listen for (format: "database.signalName")
+   * @param fc - The callback function invoked when the signal is updated (only once)
+   * @param fc.rawValue - The raw signal value (number or Buffer)
+   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+   *
+   * @example
+   * ```typescript
+   * // Wait for the first engine start signal
+   * OnSignalOnce("Engine.EngineStatus", ({ rawValue, physValue }) => {
+   *   if (physValue === "Running") {
+   *     console.log("Engine started successfully!")
+   *   }
+   * })
+   *
+   * // Wait for initialization complete signal
+   * OnSignalOnce("System.InitStatus", async ({ rawValue, physValue }) => {
+   *   if (physValue === "Complete") {
+   *     await startDiagnosticSequence()
+   *   }
+   * })
+   * ```
+   */
+  OnSignalOnce(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.once(signal as any).then(fc)
+  }
+
+  /**
+   * Removes an event listener for signal updates from CAN/LIN databases.
+   * The specified callback function will no longer be invoked for signal updates.
+   *
+   * @param signal - The signal name to stop listening for (format: "database.signalName")
+   * @param fc - The exact callback function to remove (must be the same reference)
+   *
+   * @example
+   * ```typescript
+   * // Define a callback function
+   * const rpmCallback = ({ rawValue, physValue }) => {
+   *   console.log(`RPM: ${physValue}`)
+   * }
+   *
+   * // Register the listener
+   * OnSignal("Engine.EngineRPM", rpmCallback)
+   *
+   * // Later, remove the listener
+   * OffSignal("Engine.EngineRPM", rpmCallback)
+   *
+   * // Anonymous functions cannot be removed easily, so use named functions:
+   * // ❌ This won't work for removal:
+   * // OnSignal("Engine.RPM", ({ physValue }) => console.log(physValue))
+   *
+   * // ✅ This will work for removal:
+   * const callback = ({ physValue }) => console.log(physValue)
+   * OnSignal("Engine.RPM", callback)
+   * OffSignal("Engine.RPM", callback)
+   * ```
+   */
+  OffSignal(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.off(signal as any, fc)
+  }
+  /**
    * Get the tester name, valid in Tester script
    * @returns {string}
    */
@@ -1645,6 +1772,30 @@ export class UtilClass {
   private async canMsg(msg: CanMessage) {
     await this.event.emit(`can.${msg.id}` as any, msg)
     await this.event.emit('can' as any, msg)
+    //signal emit
+
+    if (msg.device) {
+      const device = Object.values(global.dataSet.devices).find(
+        (device) => device.canDevice && device.canDevice.name == msg.device
+      )
+      if (device && device.canDevice!.database) {
+        const db = global.dataSet.database.can[device.canDevice!.database]
+        if (db) {
+          const message = db.messages[msg.id]
+          if (message) {
+            //apply message to signal
+            writeMessageData(message, msg.data, db)
+            //emit signal
+            for (const signal of Object.values(message.signals)) {
+              await this.event.emit(`${db.name}.${signal.name}` as any, {
+                rawValue: signal.value,
+                physValue: signal.physValueEnum || signal.physValue
+              })
+            }
+          }
+        }
+      }
+    }
   }
   private async linMsg(msg: LinMsg) {
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
@@ -1652,6 +1803,44 @@ export class UtilClass {
       await this.event.emit(`lin.${msg.database}.${msg.name}` as any, msg)
     }
     await this.event.emit('lin' as any, msg)
+    //signal emit
+    if (msg.device) {
+      const device = Object.values(global.dataSet.devices).find(
+        (device) => device.linDevice && device.linDevice.name == msg.device
+      )
+      if (device && device.linDevice!.database) {
+        const db = global.dataSet.database.lin[device.linDevice!.database]
+
+        if (db) {
+          if (!msg.name) {
+            for (const frame of Object.values(db.frames)) {
+              if (frame.id === msg.frameId) {
+                msg.name = frame.name
+                break
+              }
+            }
+          }
+          if (msg.name) {
+            //find frame by frameId
+            const frame = db.frames[msg.name]
+            if (frame && frame.signals) {
+              //apply message to signal
+              writeLinMessageData(frame, msg.data, db)
+              //emit signal
+              for (const signal of Object.values(frame.signals)) {
+                const signalDef = db.signals[signal.name]
+                if (signalDef) {
+                  await this.event.emit(`${db.name}.${signal.name}` as any, {
+                    rawValue: signalDef.value,
+                    physValue: signalDef.physValueEnum || signalDef.physValue
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)

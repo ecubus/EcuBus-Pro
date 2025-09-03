@@ -266,12 +266,7 @@ let cantps: {
 }[] = []
 let doips: DOIP[] = []
 
-async function globalStart(
-  devices: Record<string, UdsDevice>,
-  testers: Record<string, TesterInfo>,
-  nodes: Record<string, NodeItem>,
-  projectInfo: { path: string; name: string }
-) {
+async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
   let activeKey = ''
   const varLog = new VarLOG()
   const periodTaskList: ((diffMs: number, currentTs: number) => void)[] = []
@@ -280,8 +275,8 @@ async function globalStart(
   })
   testMap.clear()
   try {
-    for (const key in devices) {
-      const device = devices[key]
+    for (const key in data.devices) {
+      const device = data.devices[key]
       if (device.type == 'can' && device.canDevice) {
         const canDevice = device.canDevice
         activeKey = canDevice.name
@@ -360,8 +355,8 @@ async function globalStart(
     addr: UdsAddress
     connect: () => Promise<clientTcp>
   }[] = []
-  for (const key in testers) {
-    const tester = testers[key]
+  for (const key in data.tester) {
+    const tester = data.tester[key]
     if (tester.type == 'can') {
       for (const val of canBaseMap.values()) {
         const cantp = new CAN_TP(val)
@@ -480,8 +475,8 @@ async function globalStart(
   }
 
   //nodes
-  for (const key in nodes) {
-    const node = nodes[key]
+  for (const key in data.nodes) {
+    const node = data.nodes[key]
     if (node.isTest) {
       continue
     }
@@ -494,7 +489,7 @@ async function globalStart(
       pwmBaseMap,
       projectInfo.path,
       projectInfo.name,
-      testers
+      data.tester
     )
     try {
       await nodeItem.start()
@@ -555,28 +550,24 @@ async function globalStart(
     logQ.startTimer()
   }
 }
-function xascTransport(path: string, channel: string[], method: string[]) {
-  return ascTransport(path, channel, method)
-}
+
 const exTransportList: string[] = []
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
-  let i = 0
-  const projectInfo = arg[i++] as {
+  const projectInfo = arg[0] as {
     path: string
     name: string
   }
-  const devices = arg[i++] as Record<string, UdsDevice>
-  const testers = arg[i++] as Record<string, TesterInfo>
-  const nodes = arg[i++] as Record<string, NodeItem>
+  const data = arg[1] as DataSet
 
-  global.database = arg[i++]
+  global.dataSet = data
 
   global.vars = {}
-  global.tester = testers
-  global.device = devices
 
-  const vars: Record<string, VarItem> = arg[i++] || {}
-  const logs = arg[i++] as Record<string, LogItem>
+  const devices = data.devices
+  const testers = data.tester
+
+  const vars: Record<string, VarItem> = cloneDeep(data.vars)
+  const logs = data.logs
 
   for (const log of Object.values(logs)) {
     if (log.type == 'file' && log.format == 'asc') {
@@ -620,7 +611,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     global.vars[key] = v
   }
   try {
-    await globalStart(devices, testers, nodes, projectInfo)
+    await globalStart(data, projectInfo)
   } catch (err: any) {
     globalStop(true)
     throw err
@@ -734,7 +725,7 @@ ipcMain.handle('ipc-start-schedule', async (event, ...arg) => {
     const base = linBaseMap.get(d)
 
     if (base && base.info.database) {
-      const db = global.database.lin[base.info.database]
+      const db = global.dataSet.database.lin[base.info.database]
       base.startSch(db, schName, active, 0)
       schMap.set(base.info.id, base)
     }
@@ -765,7 +756,7 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
   const testerInfo = arg[2] as TesterInfo
-  const tester = global.tester[testerInfo.id]
+  const tester = global.dataSet.tester[testerInfo.id]
   tester.seqList = testerInfo.seqList
   const device = arg[3] as UdsDevice
   const seqIndex = arg[4] as number
@@ -925,7 +916,7 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
     let db: DBC | undefined
     let message: Message | undefined
     if (ia.database) {
-      db = global.database.can[ia.database]
+      db = global.dataSet.database.can[ia.database]
       if (db) {
         message = db.messages[parseInt(ia.id, 16)]
         if (message) {
@@ -963,7 +954,7 @@ function send(id: string) {
   let db: DBC | undefined
   let message: Message | undefined
   if (item.ia.database) {
-    db = global.database.can[item.ia.database]
+    db = global.dataSet.database.can[item.ia.database]
     if (db) {
       message = db.messages[parseInt(item.ia.id, 16)]
     }
@@ -986,7 +977,7 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
   const signalName = arg[2] as string
   const signal = arg[3] as Signal
 
-  const db = global.database.can[dbName]
+  const db = global.dataSet.database.can[dbName]
   if (db) {
     const message = db.messages[id]
     if (message) {
@@ -1069,7 +1060,7 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
   const dbIndex = arg[0] as string
   const signalName = arg[1] as string
   const value = arg[2] as any
-  const db = global.database.lin[dbIndex]
+  const db = global.dataSet.database.lin[dbIndex]
   if (db) {
     updateSignalVal(db, signalName, value)
   }

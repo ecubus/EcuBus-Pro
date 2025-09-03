@@ -27,5 +27,7 @@
     "src/main/share/*.ts",
     "src/main/worker/*.d.ts",
     "src/main/worker/*.ts",
+    "src/renderer/src/database/dbc/*.ts",
+    "src/renderer/src/database/ldf/*.ts"
   ]
 }

@@ -54,6 +54,7 @@ function initJs() {
 }
 
 function onRoute(to) {
+  window.TWIKOO_MAGIC_PATH = props.page
   if (to) setTimeout(initTwikoo, 1000)
 }
 const props = defineProps({

@@ -47,7 +47,6 @@ process.on('message', (message: any) => {
       break
     }
     case 'offerServices': {
-      console.log('offerServices', data.services)
       for (const e of data.services) {
         instance?.app.offer_service(Number(e.service), Number(e.instance))
       }

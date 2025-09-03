@@ -16,6 +16,10 @@ export interface VsomeipMessage {
   client: number
   session: number
   payload?: Buffer
+  messageType: number
+  requestCode: number
+  protocolVersion: number
+  interfaceVersion: number
   _messageId?: number // Internal message ID for response handling
 }
 

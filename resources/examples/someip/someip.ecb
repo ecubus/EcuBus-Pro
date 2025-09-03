@@ -260,21 +260,17 @@
           }
         }
       },
-      "hardware": {
+      "trace": {
         "pos": {
-          "x": 980,
-          "y": 303.672,
-          "w": 600,
+          "x": 25.5,
+          "y": 400,
+          "w": 700,
           "h": 400
         },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {
-          "params": {
-            "deviceId": "67f2631c-0ddf-42cc-9615-f2fc9b377a65"
-          }
-        }
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
       }
     }
   }

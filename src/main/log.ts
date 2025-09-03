@@ -12,6 +12,7 @@ import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
+import { VsomeipMessage } from './vsomeip/client'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -581,7 +582,7 @@ export class VarLOG {
 export class SomeipLOG {
   vendor: string
   log: Logger
-  ts = getTsUs()
+
   deviceId: string
 
   constructor(
@@ -598,7 +599,7 @@ export class SomeipLOG {
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
-        format.label({ label: `Someip-${vendor}` }),
+        format.label({ label: `${vendor}` }),
         ...externalFormat
       )
     })
@@ -615,8 +616,7 @@ export class SomeipLOG {
 
     this.event.removeAllListeners()
   }
-  someipBase(header: Buffer, data: Buffer) {
-    const ts = getTsUs() - this.ts
+  someipBase(header: Buffer, data: Buffer, ts: number) {
     try {
       const headerInfo = {
         ip: '',
@@ -687,12 +687,35 @@ export class SomeipLOG {
         }
       })
     }
-    return ts
+
     // this.event.emit('someip-frame', {
     //   header:headerInfo,
     //   data:dataInfo,
     //   ts:ts
     // })
+  }
+  someipMessage(message: VsomeipMessage, ts: number) {
+    this.log.info({
+      method: 'someipBase',
+      deviceId: this.deviceId,
+      data: {
+        header: {
+          sending: false
+        },
+        data: {
+          serviceId: message.service,
+          methodId: message.method,
+          clientId: message.client,
+          sessionId: message.session,
+          protocolVersion: message.protocolVersion,
+          interfaceVersion: message.interfaceVersion,
+          messageType: message.messageType,
+          requestCode: message.requestCode,
+          payload: Buffer.from(message.payload || [])
+        },
+        ts: ts
+      }
+    })
   }
   error(ts: number, msg?: string) {
     this.log.error({

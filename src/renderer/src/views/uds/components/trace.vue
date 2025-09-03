@@ -229,11 +229,11 @@ interface SomeipBaseLog {
   method: 'someipBase'
   data: {
     header: {
-      ip: string
-      port: number
-      protocol: string
+      ip?: string
+      port?: number
+      protocol?: string
       sending: boolean
-      instance: number
+      instance?: number
     }
     data: {
       serviceId: number
@@ -249,6 +249,7 @@ interface SomeipBaseLog {
     ts: number
   }
 }
+
 interface LinBaseLog {
   method: 'linBase'
   data: LinMsg
@@ -573,41 +574,48 @@ function logDisplay(method: string, vals: LogItem[]) {
         msgType: 'System Message'
       })
     } else if (val.message.method == 'someipBase') {
-      console.table(val.message)
+      const childrenList: { name: string; data: string }[] = [
+        {
+          name: 'Version',
+          data: `Protocol Version:${val.message.data.data.protocolVersion}, Interface Version:${val.message.data.data.interfaceVersion}`
+        },
+        {
+          name: 'Return Code',
+          data: '0x' + val.message.data.data.requestCode.toString(16).padStart(2, '0')
+        }
+      ]
+      if (val.message.data.header.ip) {
+        childrenList.push({
+          name: 'Address',
+          data: `${val.message.data.header.ip}:${val.message.data.header.port}`
+        })
+      }
+      if (val.message.data.header.protocol) {
+        childrenList.push({
+          name: 'Protocol',
+          data: val.message.data.header.protocol
+        })
+      }
+      if (val.message.data.header.instance) {
+        childrenList.push({
+          name: 'Instance',
+          data: '0x' + val.message.data.header.instance.toString(16).padStart(4, '0')
+        })
+      }
+
       insertData({
         method: val.message.method,
-        name: `${val.message.data.data.clientId.toString(16).padStart(4, '0')}.${val.message.data.data.sessionId.toString(16).padStart(4, '0')}`,
+        name: `Client:0x${val.message.data.data.clientId.toString(16).padStart(4, '0')} Session:0x${val.message.data.data.sessionId.toString(16).padStart(4, '0')}`,
         data: data2str(val.message.data.data.payload),
         ts: (val.message.data.ts / 1000000).toFixed(3),
-        id: `${val.message.data.data.serviceId.toString(16).padStart(4, '0')}.${val.message.data.data.methodId.toString(16).padStart(4, '0')}`,
+        id: `SID:0x${val.message.data.data.serviceId.toString(16).padStart(4, '0')} MID:0x${val.message.data.data.methodId.toString(16).padStart(4, '0')}`,
         len: val.message.data.data.payload.length,
         dlc: val.message.data.data.payload.length,
         dir: val.message.data.header.sending ? 'Tx' : 'Rx',
         device: val.label,
         channel: val.instance,
         msgType: SomeipMessageTypeMap[val.message.data.data.messageType],
-        children: [
-          {
-            name: 'Address',
-            data: `${val.message.data.header.ip}:${val.message.data.header.port}`
-          },
-          {
-            name: 'Protocol',
-            data: val.message.data.header.protocol
-          },
-          {
-            name: 'Instance',
-            data: val.message.data.header.instance.toString(16).padStart(4, '0')
-          },
-          {
-            name: 'Return Code',
-            data: val.message.data.data.requestCode.toString(16).padStart(4, '0')
-          },
-          {
-            name: 'Version',
-            data: `Protocol Version:${val.message.data.data.protocolVersion}, Interface Version:${val.message.data.data.interfaceVersion}`
-          }
-        ]
+        children: childrenList
       })
     }
   }
@@ -999,6 +1007,7 @@ onMounted(() => {
           case 'canError':
           case 'linError':
           case 'ipError':
+          case 'someipError':
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-danger')
               .trim()
@@ -1014,6 +1023,9 @@ onMounted(() => {
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-primary')
               .trim()
+            break
+          case 'someipBase':
+            color = 'purple'
             break
         }
         return {

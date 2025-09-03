@@ -174,6 +174,10 @@ void VsomeipCallbackWrapper::registerMessageHandler(uint16_t service, uint16_t i
                 msgObj.Set("method", Napi::Number::New(env, msg->get_method()));
                 msgObj.Set("client", Napi::Number::New(env, msg->get_client()));
                 msgObj.Set("session", Napi::Number::New(env, msg->get_session()));
+                msgObj.Set("messageType", Napi::Number::New(env, (uint8_t)msg->get_message_type()));
+                msgObj.Set("requestCode", Napi::Number::New(env, (uint8_t)msg->get_return_code()));
+                msgObj.Set("protocolVersion", Napi::Number::New(env, msg->get_protocol_version()));
+                msgObj.Set("interfaceVersion", Napi::Number::New(env, msg->get_interface_version()));
                 
                 // Add payload if available
                 if (msg->get_payload()) {

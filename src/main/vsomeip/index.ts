@@ -11,6 +11,7 @@ import { fork } from 'child_process'
 import type { VsomeipCallbackData } from './client'
 import { SomeipLOG } from '../log'
 import EventEmitter from 'events'
+import { getTsUs } from '../share/can'
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
@@ -177,8 +178,9 @@ export const VsomeipState: Record<number, { level: string; msg: string }> = {
 export class VSomeIP_Client {
   private worker: ChildProcess
   private id = 0
-  private state: number = 1
+  private state: number = Infinity
   private log: SomeipLOG
+
   private event = new EventEmitter()
   serviceValid: Map<string, boolean> = new Map()
   private requestServiceMap: Map<
@@ -219,22 +221,22 @@ export class VSomeIP_Client {
     })
   }
   callback(callbackData: VsomeipCallbackData) {
-    console.log('vSomeIP callback:', callbackData)
-
+    const ts = getTsUs() - global.startTs
     switch (callbackData.type) {
       case 'state': {
-        this.state = callbackData.data
-        const stateStr = VsomeipState[callbackData.data] || `Unknown state: ${callbackData.data}`
-        sysLog.log(stateStr.level, `${this.name} - ${stateStr.msg}`)
-        if (callbackData.data == 0) {
-          this.offerService(this.info.services)
+        if (this.state != callbackData.data) {
+          this.state = callbackData.data
+          const stateStr = VsomeipState[callbackData.data] || `Unknown state: ${callbackData.data}`
+          sysLog.log(stateStr.level, `${this.name} - ${stateStr.msg}`)
+          if (callbackData.data == 0) {
+            this.offerService(this.info.services)
+          }
         }
         break
       }
       case 'message':
-        // 这里 callbackData.data 自动是 VsomeipMessage
-        console.log('Message received:', callbackData.data)
-        this.event.emit('message', callbackData.data)
+        console.log('Message received:', callbackData.data, ts)
+        this.log.someipMessage(callbackData.data, ts)
         break
       case 'availability': {
         // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
@@ -271,8 +273,9 @@ export class VSomeIP_Client {
         break
       case 'trace': {
         const data = JSON.parse(callbackData.data)
-        console.log('trace:', data)
-        this.log.someipBase(Buffer.from(data.header), Buffer.from(data.data))
+        console.log('trace:', data, ts)
+
+        this.log.someipBase(Buffer.from(data.header), Buffer.from(data.data), ts)
         break
       }
       default:
@@ -308,35 +311,6 @@ export class VSomeIP_Client {
     })
   }
   async stop() {
-    // try{
-    //   console.log(111111,this.info.services)
-    //   // await this.send('stopOfferServices', { services: this.info.services })
-    //   console.log(22222)
-    //   const list:{
-    //     service:number,
-    //     instance:number
-    //   }[]=[]
-    //   this.serviceValid.keys().forEach((e:string)=>{
-    //     const [instance,service]=e.split('.')
-    //     const numberInstance=parseInt(instance, 16)
-    //     const numberService=parseInt(service, 16)
-    //     if(numberInstance!=0xffff&&numberService!=0xffff){
-    //     list.push({
-    //         service: numberService,
-    //         instance: numberInstance
-    //       })
-    //     }
-    //   })
-    //   console.log(list)
-
-    //   // await this.send('releaseServices', { services: list })
-    //   console.log(33333)
-
-    //   await this.send('stop', {})
-    //   console.log('stop')
-    // }catch(e){
-    //   null
-    // }
     this.worker.kill()
   }
   private send(method: string, data: any) {

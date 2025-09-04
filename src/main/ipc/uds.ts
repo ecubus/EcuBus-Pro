@@ -34,7 +34,8 @@ import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
 
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
-import { getLinDevices, openLinDevice, updateSignalVal } from '../dolin'
+import { getLinDevices, openLinDevice } from '../dolin'
+import { updateLinSignalVal } from '../util'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
 import { DataSet, LinInter, LogItem, NodeItem, PwmInter, VarItem } from 'src/preload/data'
@@ -1062,6 +1063,6 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
   const value = arg[2] as any
   const db = global.dataSet.database.lin[dbIndex]
   if (db) {
-    updateSignalVal(db, signalName, value)
+    updateLinSignalVal(db, signalName, value)
   }
 })

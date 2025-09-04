@@ -76,7 +76,9 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           items: [{ text: 'LinCable', link: '/zh/docs/um/hardware/lincable' }]
         },
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
-        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] }
+        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
+
+        { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] }
       ]
     },
     {

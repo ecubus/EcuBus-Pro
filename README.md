@@ -15,6 +15,9 @@
     <a href="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build-mac.yml">
       <img src="https://github.com/ecubus/EcuBus-Pro/actions/workflows/build-mac.yml/badge.svg" alt="github-ci" />
     </a>
+    <a href="https://repology.org/project/ecubus-pro/versions">
+      <img src="https://repology.org/badge/version-for-repo/aur/ecubus-pro.svg" alt="AUR package">
+    </a>
     <a href="https://github.com/ecubus/EcuBus-Pro">
        <img src="https://img.shields.io/github/stars/ecubus/EcuBus-Pro"/>
     </a>

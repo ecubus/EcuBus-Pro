@@ -12,7 +12,7 @@ import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
-import { VsomeipMessage } from './vsomeip/client'
+import { SomeipMessage } from './vsomeip/client'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -633,7 +633,7 @@ export class SomeipLOG {
         protocolVersion: number
         interfaceVersion: number
         messageType: SomeipMessageType
-        requestCode: number
+        returnCode: number
         payload: Buffer
       } = {
         serviceId: 0,
@@ -643,7 +643,7 @@ export class SomeipLOG {
         protocolVersion: 0,
         interfaceVersion: 0,
         messageType: SomeipMessageType.UNKNOWN,
-        requestCode: 0,
+        returnCode: 0,
         payload: Buffer.from([])
       }
       dataInfo.serviceId = data.readUint16BE(0)
@@ -653,7 +653,7 @@ export class SomeipLOG {
       dataInfo.protocolVersion = data.readUint8(12)
       dataInfo.interfaceVersion = data.readUint8(13)
       dataInfo.messageType = data.readUint8(14)
-      dataInfo.requestCode = data.readUint8(15)
+      dataInfo.returnCode = data.readUint8(15)
       dataInfo.payload = data.subarray(16)
 
       const protocolMap: Record<number, string> = {
@@ -694,7 +694,7 @@ export class SomeipLOG {
     //   ts:ts
     // })
   }
-  someipMessage(message: VsomeipMessage, ts: number) {
+  someipMessage(message: SomeipMessage, ts: number) {
     this.log.info({
       method: 'someipBase',
       deviceId: this.deviceId,
@@ -710,7 +710,7 @@ export class SomeipLOG {
           protocolVersion: message.protocolVersion,
           interfaceVersion: message.interfaceVersion,
           messageType: message.messageType,
-          requestCode: message.requestCode,
+          returnCode: message.returnCode,
           payload: Buffer.from(message.payload || [])
         },
         ts: ts

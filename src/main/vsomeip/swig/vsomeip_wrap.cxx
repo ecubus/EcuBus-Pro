@@ -883,76 +883,77 @@ public:
 SWIGCLINKAGE SWIGINTERN swig_type_info *swig_type_initial[];
 SWIGCLINKAGE SWIGINTERN swig_cast_info *swig_cast_initial[];
 #define SWIGTYPE_p_Send swig_types[0]
-#define SWIGTYPE_p_VsomeipCallbackWrapper swig_types[1]
-#define SWIGTYPE_p___int64 swig_types[2]
-#define SWIGTYPE_p_available_t swig_types[3]
-#define SWIGTYPE_p_char swig_types[4]
-#define SWIGTYPE_p_float swig_types[5]
-#define SWIGTYPE_p_int swig_types[6]
-#define SWIGTYPE_p_long swig_types[7]
-#define SWIGTYPE_p_long_long swig_types[8]
-#define SWIGTYPE_p_p_char swig_types[9]
-#define SWIGTYPE_p_p_unsigned_long swig_types[10]
-#define SWIGTYPE_p_sd_acceptance_map_type_t swig_types[11]
-#define SWIGTYPE_p_short swig_types[12]
-#define SWIGTYPE_p_signed___int64 swig_types[13]
-#define SWIGTYPE_p_signed_char swig_types[14]
-#define SWIGTYPE_p_std__arrayT_unsigned_char_16_t swig_types[15]
-#define SWIGTYPE_p_std__arrayT_unsigned_char_4_t swig_types[16]
-#define SWIGTYPE_p_std__chrono__milliseconds swig_types[17]
-#define SWIGTYPE_p_std__chrono__seconds swig_types[18]
-#define SWIGTYPE_p_std__functionT_bool_fmessage_acceptance_t_const_RF_t swig_types[19]
-#define SWIGTYPE_p_std__functionT_bool_fremote_info_t_const_RF_t swig_types[20]
-#define SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t swig_types[21]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t swig_types[22]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t swig_types[23]
-#define SWIGTYPE_p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t swig_types[24]
-#define SWIGTYPE_p_std__functionT_void_fF_t swig_types[25]
-#define SWIGTYPE_p_std__functionT_void_fip_address_t_const_RF_t swig_types[26]
-#define SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t swig_types[27]
-#define SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t swig_types[28]
-#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[29]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[30]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[31]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[32]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[33]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[34]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[35]
-#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[36]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t swig_types[37]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t swig_types[38]
-#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__state_type_eF_t swig_types[39]
-#define SWIGTYPE_p_std__mapT_std__size_t_unsigned_char_t swig_types[40]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[41]
-#define SWIGTYPE_p_std__mapT_unsigned_short_std__mapT_unsigned_short_std__mapT_unsigned_char_unsigned_int_t_t_t swig_types[42]
-#define SWIGTYPE_p_std__mapT_vsomeip_v3__remote_info_t_std__string_t swig_types[43]
-#define SWIGTYPE_p_std__setT_unsigned_short_t swig_types[44]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__application_t swig_types[45]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__configuration_t swig_types[46]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t swig_types[47]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__payload_t swig_types[48]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_manager_t swig_types[49]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_t swig_types[50]
-#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__runtime_t swig_types[51]
-#define SWIGTYPE_p_std__string swig_types[52]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_t swig_types[53]
-#define SWIGTYPE_p_uid_t swig_types[54]
-#define SWIGTYPE_p_unsigned___int64 swig_types[55]
-#define SWIGTYPE_p_unsigned_char swig_types[56]
-#define SWIGTYPE_p_unsigned_int swig_types[57]
-#define SWIGTYPE_p_unsigned_long swig_types[58]
-#define SWIGTYPE_p_unsigned_long_long swig_types[59]
-#define SWIGTYPE_p_unsigned_short swig_types[60]
-#define SWIGTYPE_p_vsomeip_sec_client_t swig_types[61]
-#define SWIGTYPE_p_vsomeip_v3__application swig_types[62]
-#define SWIGTYPE_p_vsomeip_v3__debounce_filter_t swig_types[63]
-#define SWIGTYPE_p_vsomeip_v3__ip_address_t swig_types[64]
-#define SWIGTYPE_p_vsomeip_v3__message swig_types[65]
-#define SWIGTYPE_p_vsomeip_v3__message_acceptance_t swig_types[66]
-#define SWIGTYPE_p_vsomeip_v3__message_base swig_types[67]
-#define SWIGTYPE_p_vsomeip_v3__payload swig_types[68]
-#define SWIGTYPE_p_vsomeip_v3__remote_info_t swig_types[69]
-#define SWIGTYPE_p_vsomeip_v3__runtime swig_types[70]
+#define SWIGTYPE_p_SomeipMessage swig_types[1]
+#define SWIGTYPE_p_VsomeipCallbackWrapper swig_types[2]
+#define SWIGTYPE_p___int64 swig_types[3]
+#define SWIGTYPE_p_available_t swig_types[4]
+#define SWIGTYPE_p_char swig_types[5]
+#define SWIGTYPE_p_float swig_types[6]
+#define SWIGTYPE_p_int swig_types[7]
+#define SWIGTYPE_p_long swig_types[8]
+#define SWIGTYPE_p_long_long swig_types[9]
+#define SWIGTYPE_p_p_char swig_types[10]
+#define SWIGTYPE_p_p_unsigned_long swig_types[11]
+#define SWIGTYPE_p_sd_acceptance_map_type_t swig_types[12]
+#define SWIGTYPE_p_short swig_types[13]
+#define SWIGTYPE_p_signed___int64 swig_types[14]
+#define SWIGTYPE_p_signed_char swig_types[15]
+#define SWIGTYPE_p_std__arrayT_unsigned_char_16_t swig_types[16]
+#define SWIGTYPE_p_std__arrayT_unsigned_char_4_t swig_types[17]
+#define SWIGTYPE_p_std__chrono__milliseconds swig_types[18]
+#define SWIGTYPE_p_std__chrono__seconds swig_types[19]
+#define SWIGTYPE_p_std__functionT_bool_fmessage_acceptance_t_const_RF_t swig_types[20]
+#define SWIGTYPE_p_std__functionT_bool_fremote_info_t_const_RF_t swig_types[21]
+#define SWIGTYPE_p_std__functionT_bool_fstd__shared_ptrT_payload_t_const_R_std__shared_ptrT_payload_t_const_RF_t swig_types[22]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_boolF_t swig_types[23]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short___uid_t___uid_t_std__string_const_R_boolF_t swig_types[24]
+#define SWIGTYPE_p_std__functionT_bool_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_boolF_t swig_types[25]
+#define SWIGTYPE_p_std__functionT_void_fF_t swig_types[26]
+#define SWIGTYPE_p_std__functionT_void_fip_address_t_const_RF_t swig_types[27]
+#define SWIGTYPE_p_std__functionT_void_fstd__shared_ptrT_message_t_const_RF_t swig_types[28]
+#define SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t swig_types[29]
+#define SWIGTYPE_p_std__functionT_void_fstd__vectorT_std__pairT_unsigned_short_unsigned_short_t_t_const_RF_t swig_types[30]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_bool_std__functionT_void_fbool_constF_tF_t swig_types[31]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short___uid_t___uid_t_std__string_const_R_bool_std__functionT_void_fbool_constF_tF_t swig_types[32]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_constF_t swig_types[33]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_const_unsigned_short_constF_t swig_types[34]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_boolF_t swig_types[35]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_unsigned_short_vsomeip_v3__availability_state_eF_t swig_types[36]
+#define SWIGTYPE_p_std__functionT_void_funsigned_short_vsomeip_sec_client_t_const_p_std__string_const_R_bool_std__functionT_void_fboolF_tF_t swig_types[37]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__routing_state_eF_t swig_types[38]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__security_update_state_eF_t swig_types[39]
+#define SWIGTYPE_p_std__functionT_void_fvsomeip_v3__state_type_eF_t swig_types[40]
+#define SWIGTYPE_p_std__mapT_std__size_t_unsigned_char_t swig_types[41]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[42]
+#define SWIGTYPE_p_std__mapT_unsigned_short_std__mapT_unsigned_short_std__mapT_unsigned_char_unsigned_int_t_t_t swig_types[43]
+#define SWIGTYPE_p_std__mapT_vsomeip_v3__remote_info_t_std__string_t swig_types[44]
+#define SWIGTYPE_p_std__setT_unsigned_short_t swig_types[45]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__application_t swig_types[46]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__configuration_t swig_types[47]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t swig_types[48]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__payload_t swig_types[49]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_manager_t swig_types[50]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__policy_t swig_types[51]
+#define SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__runtime_t swig_types[52]
+#define SWIGTYPE_p_std__string swig_types[53]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_t swig_types[54]
+#define SWIGTYPE_p_uid_t swig_types[55]
+#define SWIGTYPE_p_unsigned___int64 swig_types[56]
+#define SWIGTYPE_p_unsigned_char swig_types[57]
+#define SWIGTYPE_p_unsigned_int swig_types[58]
+#define SWIGTYPE_p_unsigned_long swig_types[59]
+#define SWIGTYPE_p_unsigned_long_long swig_types[60]
+#define SWIGTYPE_p_unsigned_short swig_types[61]
+#define SWIGTYPE_p_vsomeip_sec_client_t swig_types[62]
+#define SWIGTYPE_p_vsomeip_v3__application swig_types[63]
+#define SWIGTYPE_p_vsomeip_v3__debounce_filter_t swig_types[64]
+#define SWIGTYPE_p_vsomeip_v3__ip_address_t swig_types[65]
+#define SWIGTYPE_p_vsomeip_v3__message swig_types[66]
+#define SWIGTYPE_p_vsomeip_v3__message_acceptance_t swig_types[67]
+#define SWIGTYPE_p_vsomeip_v3__message_base swig_types[68]
+#define SWIGTYPE_p_vsomeip_v3__payload swig_types[69]
+#define SWIGTYPE_p_vsomeip_v3__remote_info_t swig_types[70]
+#define SWIGTYPE_p_vsomeip_v3__runtime swig_types[71]
 SWIGCLINKAGE SWIGINTERN swig_type_info *swig_types[];
 SWIGCLINKAGE SWIGINTERN swig_module_info swig_module;
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
@@ -2054,11 +2055,7 @@ Napi::Value _wrap_VsomeipCallbackWrapper_stop(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_registerStateHandler(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
-Napi::Value _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_0(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_1(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_VsomeipCallbackWrapper__wrap_VsomeipCallbackWrapper_registerMessageHandler(const Napi::CallbackInfo &);
+Napi::Value _wrap_VsomeipCallbackWrapper_registerMessageHandler(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_VsomeipCallbackWrapper_registerAvailabilityHandler(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
@@ -2085,6 +2082,69 @@ public:
 };
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
+class _exports_SomeipMessage_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
+public:
+  _exports_SomeipMessage_templ(const Napi::CallbackInfo &);
+_exports_SomeipMessage_templ(bool, const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_service_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_service_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_instance_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_instance_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_method_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_method_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_client_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_client_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_session_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_session_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_reliable_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_reliable_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_messageType_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_messageType_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_returnCode_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_returnCode_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_protocolVersion_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_protocolVersion_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_SomeipMessage_interfaceVersion_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_SomeipMessage_interfaceVersion_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_new_SomeipMessage(const Napi::CallbackInfo &);
+virtual ~_exports_SomeipMessage_templ();
+// jsnapi_class_epilogue_template
+};
+// jsnapi_class_instance
+class _exports_SomeipMessage_inst : public _exports_SomeipMessage_templ<_exports_SomeipMessage_inst> {
+public:
+  using _exports_SomeipMessage_templ::_exports_SomeipMessage_templ;
+  virtual ~_exports_SomeipMessage_inst() = default;
+  static void GetMembers(
+    Napi::Env,
+    std::map<std::string, _exports_SomeipMessage_templ::PropertyDescriptor> &,
+    std::map<std::string, _exports_SomeipMessage_templ::PropertyDescriptor> &
+    );
+  static Napi::Function GetClass(Napi::Env);
+};
+// jsnapi_class_prologue_template
+template <typename SWIG_OBJ_WRAP>
 class _exports_Send_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
 public:
   _exports_Send_templ(const Napi::CallbackInfo &);
@@ -2098,14 +2158,6 @@ Napi::Value _wrap_new_Send__SWIG_2(const Napi::CallbackInfo &);
 virtual ~_exports_Send_templ();
 // jsnapi_class_method_declaration
 Napi::Value _wrap_Send_sendMessage(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_Send_sendResponse(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_Send_storeMessage(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_Send_getMessage(const Napi::CallbackInfo &);
-// jsnapi_class_method_declaration
-Napi::Value _wrap_Send_removeMessage(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -17291,99 +17343,9 @@ fail:
 }
 
 
-// js_overloaded_function
+// js_function
 template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_0(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
-  uint16_t arg2 ;
-  uint16_t arg3 ;
-  uint16_t arg4 ;
-  std::string *arg5 = 0 ;
-  Send *arg6 = (Send *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  unsigned short val4 ;
-  int ecode4 = 0 ;
-  int res5 = SWIG_OLDOBJ ;
-  void *argp6 = 0 ;
-  int res6 = 0 ;
-  
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    
-    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "1"" of type '" "VsomeipCallbackWrapper *""'"); 
-    }
-    arg1 = reinterpret_cast< VsomeipCallbackWrapper * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
-    if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "2"" of type '" "uint16_t""'");
-    } 
-    arg2 = static_cast< uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
-    if (!SWIG_IsOK(ecode3)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "3"" of type '" "uint16_t""'");
-    } 
-    arg3 = static_cast< uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
-    if (!SWIG_IsOK(ecode4)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "4"" of type '" "uint16_t""'");
-    } 
-    arg4 = static_cast< uint16_t >(val4);{
-      {
-        std::string *ptr = (std::string *)0;
-        res5 = SWIG_AsPtr_std_string(info[3], &ptr);
-        if (!SWIG_IsOK(res5)) {
-          SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "5"" of type '" "std::string const &""'"); 
-        }
-        if (!ptr) {
-          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "5"" of type '" "std::string const &""'"); 
-        }
-        arg5 = ptr;
-      }
-    }
-    res6 = SWIG_ConvertPtr(info[4], &argp6,SWIGTYPE_p_Send, 0 |  0 );
-    if (!SWIG_IsOK(res6)) {
-      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "VsomeipCallbackWrapper_registerMessageHandler" "', argument " "6"" of type '" "Send *""'"); 
-    }
-    arg6 = reinterpret_cast< Send * >(argp6);
-    
-    
-    
-    
-    (arg1)->registerMessageHandler(arg2,arg3,arg4,(std::string const &)*arg5,arg6);
-    
-    
-    
-    jsresult = env.Undefined();
-    
-    if (SWIG_IsNewObj(res5)) delete arg5;
-    
-    return jsresult;
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    if (SWIG_IsNewObj(res5)) delete arg5;
-    
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-  if (SWIG_IsNewObj(res5)) delete arg5;
-  
-#endif
-  return Napi::Value();
-}
-
-
-// js_overloaded_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_1(const Napi::CallbackInfo &info) {
+Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper_registerMessageHandler(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   VsomeipCallbackWrapper *arg1 = (VsomeipCallbackWrapper *) 0 ;
@@ -17401,9 +17363,14 @@ Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipC
   int ecode4 = 0 ;
   int res5 = SWIG_OLDOBJ ;
   
+  
 #ifdef NAPI_CPP_EXCEPTIONS
   try {
 #endif
+    
+    if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_VsomeipCallbackWrapper_registerMessageHandler.");
+    }
     
     res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_VsomeipCallbackWrapper, 0 |  0 );
     if (!SWIG_IsOK(res1)) {
@@ -17459,93 +17426,6 @@ Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipC
 fail:
   if (SWIG_IsNewObj(res5)) delete arg5;
   
-#endif
-  return Napi::Value();
-}
-
-
-// js_function_dispatcher
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_VsomeipCallbackWrapper_templ<SWIG_OBJ_WRAP>::_wrap_VsomeipCallbackWrapper__wrap_VsomeipCallbackWrapper_registerMessageHandler(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  
-  // js_function_dispatch_case
-  if(static_cast<int>(info.Length()) >= 5 && static_cast<int>(info.Length()) <= 5) {
-#ifdef NAPI_CPP_EXCEPTIONS
-    bool tryNext = false;
-    try {
-      jsresult = _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_0(info);
-    } catch (const Napi::TypeError &) {
-      tryNext = true;
-    } catch (const Napi::Error &e) {
-      throw e;
-    }
-    if (!tryNext)
-    return jsresult;
-#else
-    _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_0(info);
-    if (env.IsExceptionPending()) {
-      Napi::Error e = env.GetAndClearPendingException();
-      Napi::Value typeErrorValue;
-      bool isTypeError;
-      Napi::Function typeErrorCons;
-      // Yes, this is ugly
-      // TODO: Fix this in Node.js when the core team grows up
-      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
-      typeErrorCons = typeErrorValue.As<Napi::Function>();
-      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
-      if (!isTypeError) {
-        // This is not the error you are looking for
-        e.ThrowAsJavaScriptException();
-        SWIG_fail;
-      }
-    } else {
-      return jsresult;
-    }
-#endif
-  }
-  
-  // js_function_dispatch_case
-  if(static_cast<int>(info.Length()) >= 4 && static_cast<int>(info.Length()) <= 4) {
-#ifdef NAPI_CPP_EXCEPTIONS
-    bool tryNext = false;
-    try {
-      jsresult = _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_1(info);
-    } catch (const Napi::TypeError &) {
-      tryNext = true;
-    } catch (const Napi::Error &e) {
-      throw e;
-    }
-    if (!tryNext)
-    return jsresult;
-#else
-    _wrap_VsomeipCallbackWrapper_registerMessageHandler__SWIG_1(info);
-    if (env.IsExceptionPending()) {
-      Napi::Error e = env.GetAndClearPendingException();
-      Napi::Value typeErrorValue;
-      bool isTypeError;
-      Napi::Function typeErrorCons;
-      // Yes, this is ugly
-      // TODO: Fix this in Node.js when the core team grows up
-      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
-      typeErrorCons = typeErrorValue.As<Napi::Function>();
-      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
-      if (!isTypeError) {
-        // This is not the error you are looking for
-        e.ThrowAsJavaScriptException();
-        SWIG_fail;
-      }
-    } else {
-      return jsresult;
-    }
-#endif
-  }
-  
-  SWIG_Error(SWIG_ERROR, "Illegal arguments for function registerMessageHandler.");
-#ifndef NAPI_CPP_EXCEPTIONS
-  goto fail;
-fail:
 #endif
   return Napi::Value();
 }
@@ -17973,6 +17853,887 @@ fail:
 }
 
 
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_service_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint16_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_service_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_service_set" "', argument " "2"" of type '" "uint16_t""'");
+    } 
+    arg2 = static_cast< uint16_t >(val2);
+    
+    if (arg1) (arg1)->service = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_service_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint16_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_service_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint16_t) ((arg1)->service);
+    
+    jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_instance_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint16_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_instance_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_instance_set" "', argument " "2"" of type '" "uint16_t""'");
+    } 
+    arg2 = static_cast< uint16_t >(val2);
+    
+    if (arg1) (arg1)->instance = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_instance_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint16_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_instance_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint16_t) ((arg1)->instance);
+    
+    jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_method_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint16_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_method_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_method_set" "', argument " "2"" of type '" "uint16_t""'");
+    } 
+    arg2 = static_cast< uint16_t >(val2);
+    
+    if (arg1) (arg1)->method = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_method_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint16_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_method_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint16_t) ((arg1)->method);
+    
+    jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_client_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint16_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_client_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_client_set" "', argument " "2"" of type '" "uint16_t""'");
+    } 
+    arg2 = static_cast< uint16_t >(val2);
+    
+    if (arg1) (arg1)->client = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_client_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint16_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_client_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint16_t) ((arg1)->client);
+    
+    jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_session_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint16_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_session_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_session_set" "', argument " "2"" of type '" "uint16_t""'");
+    } 
+    arg2 = static_cast< uint16_t >(val2);
+    
+    if (arg1) (arg1)->session = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_session_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint16_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_session_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint16_t) ((arg1)->session);
+    
+    jsresult = SWIG_From_unsigned_SS_short  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned short >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_reliable_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_reliable_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_bool(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_reliable_set" "', argument " "2"" of type '" "bool""'");
+    } 
+    arg2 = static_cast< bool >(val2);
+    
+    if (arg1) (arg1)->reliable = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_reliable_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_reliable_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (bool) ((arg1)->reliable);
+    
+    jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_messageType_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint8_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_messageType_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_messageType_set" "', argument " "2"" of type '" "uint8_t""'");
+    } 
+    arg2 = static_cast< uint8_t >(val2);
+    
+    if (arg1) (arg1)->messageType = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_messageType_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint8_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_messageType_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint8_t) ((arg1)->messageType);
+    
+    jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_returnCode_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint8_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_returnCode_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_returnCode_set" "', argument " "2"" of type '" "uint8_t""'");
+    } 
+    arg2 = static_cast< uint8_t >(val2);
+    
+    if (arg1) (arg1)->returnCode = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_returnCode_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint8_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_returnCode_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint8_t) ((arg1)->returnCode);
+    
+    jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_protocolVersion_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint8_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_protocolVersion_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_protocolVersion_set" "', argument " "2"" of type '" "uint8_t""'");
+    } 
+    arg2 = static_cast< uint8_t >(val2);
+    
+    if (arg1) (arg1)->protocolVersion = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_protocolVersion_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint8_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_protocolVersion_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint8_t) ((arg1)->protocolVersion);
+    
+    jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
+void _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_interfaceVersion_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  uint8_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_interfaceVersion_set" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_char(value, &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SomeipMessage_interfaceVersion_set" "', argument " "2"" of type '" "uint8_t""'");
+    } 
+    arg2 = static_cast< uint8_t >(val2);
+    
+    if (arg1) (arg1)->interfaceVersion = arg2;
+    
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return;
+#endif
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_wrap_SomeipMessage_interfaceVersion_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  SomeipMessage *arg1 = (SomeipMessage *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  uint8_t result;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SomeipMessage_interfaceVersion_get" "', argument " "1"" of type '" "SomeipMessage *""'"); 
+    }
+    arg1 = reinterpret_cast< SomeipMessage * >(argp1);
+    
+    result = (uint8_t) ((arg1)->interfaceVersion);
+    
+    jsresult = SWIG_From_unsigned_SS_char  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned char >(result));
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+template <typename SWIG_OBJ_WRAP>
+// js_ctor
+// This is the main constructor
+_exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_exports_SomeipMessage_templ(const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  Napi::Env env = info.Env();
+  
+  this->info = SWIGTYPE_p_SomeipMessage;
+  if (info.Length() == 1 && info[0].IsExternal()) {
+    // This constructor has been called internally from C++/SWIG
+    // to wrap an already existing C++ object in JS
+    this->self = info[0].As<Napi::External<void>>().Data();
+    this->owned = false;
+    return;
+  }
+  this->owned = true;
+  
+  SomeipMessage *result;
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    if(static_cast<int>(info.Length()) < 0 || static_cast<int>(info.Length()) > 0) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_new_SomeipMessage.");
+    }
+    result = (SomeipMessage *)new SomeipMessage();
+    
+    
+    this->self = result;
+    
+    return;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+fail:
+  
+  return;
+#endif
+}
+
+// This is the bypass constructor to be used from child classes
+template <typename SWIG_OBJ_WRAP>
+_exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::_exports_SomeipMessage_templ(bool, const Napi::CallbackInfo &info)
+:SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP>(true, info) {
+  
+}
+
+
+// js_dtoroverride
+template <typename SWIG_OBJ_WRAP>
+_exports_SomeipMessage_templ<SWIG_OBJ_WRAP>::~_exports_SomeipMessage_templ() {
+  this->SWIG_Finalize();
+  auto arg1 = reinterpret_cast<SomeipMessage *>(this->self);
+  if (this->owned && arg1) {
+    delete arg1;
+    this->self = SWIG_NULLPTR;
+  }
+}
+
+
 // js_overloaded_ctor
 template <typename SWIG_OBJ_WRAP>
 Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_new_Send__SWIG_0(const Napi::CallbackInfo &info) {
@@ -18265,26 +19026,20 @@ Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_sendMessage(const Nap
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   Send *arg1 = (Send *) 0 ;
-  uint16_t arg2 ;
-  uint16_t arg3 ;
-  uint16_t arg4 ;
-  char *arg5 = (char *) 0 ;
-  uint32_t arg6 ;
+  SomeipMessage *arg2 = (SomeipMessage *) 0 ;
+  char *arg3 = (char *) 0 ;
+  uint32_t arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned short val2 ;
-  int ecode2 = 0 ;
-  unsigned short val3 ;
-  int ecode3 = 0 ;
-  unsigned short val4 ;
-  int ecode4 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   
   
 #ifdef NAPI_CPP_EXCEPTIONS
   try {
 #endif
     
-    if(static_cast<int>(info.Length()) < 4 || static_cast<int>(info.Length()) > 4) {
+    if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
       SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_sendMessage.");
     }
     
@@ -18292,24 +19047,16 @@ Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_sendMessage(const Nap
     if (!SWIG_IsOK(res1)) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_sendMessage" "', argument " "1"" of type '" "Send *""'"); 
     }
-    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
-    if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_sendMessage" "', argument " "2"" of type '" "uint16_t""'");
-    } 
-    arg2 = static_cast< uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
-    if (!SWIG_IsOK(ecode3)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_sendMessage" "', argument " "3"" of type '" "uint16_t""'");
-    } 
-    arg3 = static_cast< uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
-    if (!SWIG_IsOK(ecode4)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_sendMessage" "', argument " "4"" of type '" "uint16_t""'");
-    } 
-    arg4 = static_cast< uint16_t >(val4);{
+    arg1 = reinterpret_cast< Send * >(argp1);res2 = SWIG_ConvertPtr(info[0], &argp2,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_sendMessage" "', argument " "2"" of type '" "SomeipMessage *""'"); 
+    }
+    arg2 = reinterpret_cast< SomeipMessage * >(argp2);{
       {
-        if (info[3].IsBuffer()) {
-          Napi::Buffer<char> buf = info[3].As<Napi::Buffer<char>>();
-          arg5 = reinterpret_cast<char *>(buf.Data());
-          arg6 = buf.ByteLength();
+        if (info[1].IsBuffer()) {
+          Napi::Buffer<char> buf = info[1].As<Napi::Buffer<char>>();
+          arg3 = reinterpret_cast<char *>(buf.Data());
+          arg4 = buf.ByteLength();
           
         } else {
           SWIG_exception_fail(SWIG_TypeError, "in method 'Send_sendMessage', argument is not a Buffer");
@@ -18321,252 +19068,7 @@ Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_sendMessage(const Nap
     
     
     
-    (arg1)->sendMessage(arg2,arg3,arg4,arg5,arg6);
-    
-    
-    
-    jsresult = env.Undefined();
-    
-    
-    return jsresult;
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-  
-#endif
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_sendResponse(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  Send *arg1 = (Send *) 0 ;
-  int arg2 ;
-  char *arg3 = (char *) 0 ;
-  uint32_t arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  
-  
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    
-    if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_sendResponse.");
-    }
-    
-    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_sendResponse" "', argument " "1"" of type '" "Send *""'"); 
-    }
-    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
-    if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_sendResponse" "', argument " "2"" of type '" "int""'");
-    } 
-    arg2 = static_cast< int >(val2);{
-      {
-        if (info[1].IsBuffer()) {
-          Napi::Buffer<char> buf = info[1].As<Napi::Buffer<char>>();
-          arg3 = reinterpret_cast<char *>(buf.Data());
-          arg4 = buf.ByteLength();
-          
-        } else {
-          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_sendResponse', argument is not a Buffer");
-        }
-      }
-    }
-    
-    
-    
-    
-    
-    (arg1)->sendResponse(arg2,arg3,arg4);
-    
-    
-    
-    jsresult = env.Undefined();
-    
-    
-    return jsresult;
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-  
-#endif
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_storeMessage(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  Send *arg1 = (Send *) 0 ;
-  SwigValueWrapper< std::shared_ptr< vsomeip_v3::message > > arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 ;
-  int res2 = 0 ;
-  int result;
-  
-  
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    
-    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_storeMessage.");
-    }
-    
-    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_storeMessage" "', argument " "1"" of type '" "Send *""'"); 
-    }
-    arg1 = reinterpret_cast< Send * >(argp1);{
-      {
-        res2 = SWIG_ConvertPtr(info[0], &argp2, SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t,  0 );
-        if (!SWIG_IsOK(res2)) {
-          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_storeMessage" "', argument " "2"" of type '" "std::shared_ptr< vsomeip_v3::message >""'"); 
-        }  
-        if (!argp2) {
-          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_storeMessage" "', argument " "2"" of type '" "std::shared_ptr< vsomeip_v3::message >""'");
-        } else {
-          arg2 = *(reinterpret_cast< std::shared_ptr< vsomeip_v3::message > * >(argp2));
-        }
-      }
-    }
-    
-    
-    
-    
-    
-    result = (int)(arg1)->storeMessage(SWIG_STD_MOVE(arg2));
-    
-    
-    
-    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
-    
-    
-    return jsresult;
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-  
-#endif
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_getMessage(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  Send *arg1 = (Send *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  SwigValueWrapper< std::shared_ptr< vsomeip_v3::message > > result;
-  
-  
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    
-    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_getMessage.");
-    }
-    
-    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_getMessage" "', argument " "1"" of type '" "Send *""'"); 
-    }
-    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
-    if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_getMessage" "', argument " "2"" of type '" "int""'");
-    } 
-    arg2 = static_cast< int >(val2);
-    
-    
-    
-    
-    result = (arg1)->getMessage(arg2);
-    
-    
-    
-    jsresult = SWIG_NewPointerObj((new std::shared_ptr< vsomeip_v3::message >(result)), SWIGTYPE_p_std__shared_ptrT_vsomeip_v3__message_t, SWIG_POINTER_OWN |  0 );
-    
-    
-    return jsresult;
-#ifdef NAPI_CPP_EXCEPTIONS
-  } catch (...) {
-    std::rethrow_exception(std::current_exception());
-  }
-#else
-  goto fail;
-fail:
-  
-#endif
-  return Napi::Value();
-}
-
-
-// js_function
-template <typename SWIG_OBJ_WRAP>
-Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_removeMessage(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  Send *arg1 = (Send *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  
-  
-#ifdef NAPI_CPP_EXCEPTIONS
-  try {
-#endif
-    
-    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
-      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_removeMessage.");
-    }
-    
-    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_removeMessage" "', argument " "1"" of type '" "Send *""'"); 
-    }
-    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
-    if (!SWIG_IsOK(ecode2)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_removeMessage" "', argument " "2"" of type '" "int""'");
-    } 
-    arg2 = static_cast< int >(val2);
-    
-    
-    
-    
-    (arg1)->removeMessage(arg2);
+    (arg1)->sendMessage(arg2,arg3,arg4);
     
     
     
@@ -21574,38 +22076,6 @@ void _exports_Send_inst::GetMembers(
         &_exports_Send_templ::_wrap_Send_sendMessage,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
-  // jsnapi_register_member_function
-  members.erase("sendResponse");
-  members.insert({
-    "sendResponse",
-      _exports_Send_templ::InstanceMethod("sendResponse",
-        &_exports_Send_templ::_wrap_Send_sendResponse,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  // jsnapi_register_member_function
-  members.erase("storeMessage");
-  members.insert({
-    "storeMessage",
-      _exports_Send_templ::InstanceMethod("storeMessage",
-        &_exports_Send_templ::_wrap_Send_storeMessage,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  // jsnapi_register_member_function
-  members.erase("getMessage");
-  members.insert({
-    "getMessage",
-      _exports_Send_templ::InstanceMethod("getMessage",
-        &_exports_Send_templ::_wrap_Send_getMessage,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
-  // jsnapi_register_member_function
-  members.erase("removeMessage");
-  members.insert({
-    "removeMessage",
-      _exports_Send_templ::InstanceMethod("removeMessage",
-        &_exports_Send_templ::_wrap_Send_removeMessage,
-        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
-    });
   
   /* add static class functions and variables */
   
@@ -21732,6 +22202,133 @@ void _exports_ip_address_t_inst::GetMembers(
       _exports_ip_address_t_templ::InstanceAccessor("is_v4_",
         &_exports_ip_address_t_templ::_wrap_ip_address_t_is_v4__get,
         &_exports_ip_address_t_templ::_wrap_ip_address_t_is_v4__set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  
+  /* add static class functions and variables */
+  
+  
+#ifndef NAPI_CPP_EXCEPTIONS
+  goto fail;
+fail:
+  return;
+#endif
+}
+
+/* Class: SomeipMessage (_exports_SomeipMessage) */
+// jsnapi_getclass
+Napi::Function _exports_SomeipMessage_inst::GetClass(Napi::Env env) {
+  std::map<std::string, _exports_SomeipMessage_templ::PropertyDescriptor> members, staticMembers;
+  GetMembers(env, members, staticMembers);
+  
+  std::vector<_exports_SomeipMessage_inst::PropertyDescriptor> symbolTable;
+  for (auto it = members.begin(); it != members.end(); it++)
+  symbolTable.push_back(it->second);
+  for (auto it = staticMembers.begin(); it != staticMembers.end(); it++)
+  symbolTable.push_back(it->second);
+  
+  return Napi::ObjectWrap<_exports_SomeipMessage_inst>::DefineClass(env, "SomeipMessage", symbolTable);
+}
+
+void _exports_SomeipMessage_inst::GetMembers(
+  Napi::Env env,
+  std::map<std::string, _exports_SomeipMessage_templ::PropertyDescriptor> &members,
+  std::map<std::string, _exports_SomeipMessage_templ::PropertyDescriptor> &staticMembers
+  ) {
+  std::map<std::string, SWIG_NAPI_ObjectWrap_templ<SWIG_NAPI_ObjectWrap_inst>::PropertyDescriptor> baseMembers, baseStaticMembers;
+  SWIG_NAPI_ObjectWrap_inst::GetMembers(env, baseMembers, baseStaticMembers);
+  members.insert(baseMembers.begin(), baseMembers.end());
+  staticMembers.insert(staticMembers.begin(), staticMembers.end());
+  
+  /* register wrapper functions */
+  // jsnapi_register_member_variable
+  members.erase("service");
+  members.insert({
+    "service",
+      _exports_SomeipMessage_templ::InstanceAccessor("service",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_service_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_service_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("instance");
+  members.insert({
+    "instance",
+      _exports_SomeipMessage_templ::InstanceAccessor("instance",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_instance_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_instance_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("method");
+  members.insert({
+    "method",
+      _exports_SomeipMessage_templ::InstanceAccessor("method",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_method_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_method_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("client");
+  members.insert({
+    "client",
+      _exports_SomeipMessage_templ::InstanceAccessor("client",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_client_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_client_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("session");
+  members.insert({
+    "session",
+      _exports_SomeipMessage_templ::InstanceAccessor("session",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_session_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_session_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("reliable");
+  members.insert({
+    "reliable",
+      _exports_SomeipMessage_templ::InstanceAccessor("reliable",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_reliable_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_reliable_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("messageType");
+  members.insert({
+    "messageType",
+      _exports_SomeipMessage_templ::InstanceAccessor("messageType",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_messageType_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_messageType_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("returnCode");
+  members.insert({
+    "returnCode",
+      _exports_SomeipMessage_templ::InstanceAccessor("returnCode",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_returnCode_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_returnCode_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("protocolVersion");
+  members.insert({
+    "protocolVersion",
+      _exports_SomeipMessage_templ::InstanceAccessor("protocolVersion",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_protocolVersion_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_protocolVersion_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("interfaceVersion");
+  members.insert({
+    "interfaceVersion",
+      _exports_SomeipMessage_templ::InstanceAccessor("interfaceVersion",
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_interfaceVersion_get,
+        &_exports_SomeipMessage_templ::_wrap_SomeipMessage_interfaceVersion_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   
@@ -21901,7 +22498,7 @@ void _exports_VsomeipCallbackWrapper_inst::GetMembers(
   members.insert({
     "registerMessageHandler",
       _exports_VsomeipCallbackWrapper_templ::InstanceMethod("registerMessageHandler",
-        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper__wrap_VsomeipCallbackWrapper_registerMessageHandler,
+        &_exports_VsomeipCallbackWrapper_templ::_wrap_VsomeipCallbackWrapper_registerMessageHandler,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   // jsnapi_register_member_function
@@ -23119,6 +23716,7 @@ static void *_p_vsomeip_v3__messageTo_p_vsomeip_v3__message_base(void *x, int *S
     return (void *)((vsomeip_v3::message_base *)  ((vsomeip_v3::message *) x));
 }
 SWIGINTERN swig_type_info _swigt__p_Send = {"_p_Send", "p_Send|Send *", 0, 0, (void*)0, 0};
+SWIGINTERN swig_type_info _swigt__p_SomeipMessage = {"_p_SomeipMessage", "SomeipMessage *|p_SomeipMessage", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_VsomeipCallbackWrapper = {"_p_VsomeipCallbackWrapper", "p_VsomeipCallbackWrapper|VsomeipCallbackWrapper *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p___int64 = {"_p___int64", "LONG64 *|LONGLONG *|__int64 *", 0, 0, (void*)0, 0};
 SWIGINTERN swig_type_info _swigt__p_available_t = {"_p_available_t", "available_t *", 0, 0, (void*)0, 0};
@@ -23195,6 +23793,7 @@ SWIGINTERN swig_type_info *swig_type_initial[] = {
 /* -------- TYPES TABLE (BEGIN) -------- */
 
   &_swigt__p_Send,
+  &_swigt__p_SomeipMessage,
   &_swigt__p_VsomeipCallbackWrapper,
   &_swigt__p___int64,
   &_swigt__p_available_t,
@@ -23268,6 +23867,7 @@ SWIGINTERN swig_type_info *swig_type_initial[] = {
 };
 
 SWIGINTERN swig_cast_info _swigc__p_Send[] = {  {&_swigt__p_Send, 0, 0, 0},{0, 0, 0, 0}};
+SWIGINTERN swig_cast_info _swigc__p_SomeipMessage[] = {  {&_swigt__p_SomeipMessage, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_VsomeipCallbackWrapper[] = {  {&_swigt__p_VsomeipCallbackWrapper, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p___int64[] = {  {&_swigt__p___int64, 0, 0, 0},{0, 0, 0, 0}};
 SWIGINTERN swig_cast_info _swigc__p_available_t[] = {  {&_swigt__p_available_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -23341,6 +23941,7 @@ SWIGINTERN swig_cast_info _swigc__p_vsomeip_v3__runtime[] = {  {&_swigt__p_vsome
 
 SWIGINTERN swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Send,
+  _swigc__p_SomeipMessage,
   _swigc__p_VsomeipCallbackWrapper,
   _swigc__p___int64,
   _swigc__p_available_t,
@@ -23416,8 +24017,8 @@ SWIGINTERN swig_cast_info *swig_cast_initial[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (END) -------- */
 
-SWIGINTERN swig_type_info *swig_types[72];
-SWIGINTERN swig_module_info swig_module = {swig_types, 71, 0, 0, 0, 0};
+SWIGINTERN swig_type_info *swig_types[73];
+SWIGINTERN swig_module_info swig_module = {swig_types, 72, 0, 0, 0, 0};
 
 /* Class: runtime (_exports_runtime) */
 // jsnapi_getclass
@@ -24834,16 +25435,26 @@ if (SWIGTYPE_p_VsomeipCallbackWrapper->clientdata == SWIG_NULLPTR) {
 Napi::FunctionReference *_exports_VsomeipCallbackWrapper_ctor_ref = new Napi::FunctionReference();
 *_exports_VsomeipCallbackWrapper_ctor_ref = Napi::Persistent(_exports_VsomeipCallbackWrapper_ctor);
 env.GetInstanceData<EnvInstanceData>()->ctor[9] = _exports_VsomeipCallbackWrapper_ctor_ref;
+/* Class: SomeipMessage (_exports_SomeipMessage) */
+// jsnapi_registerclass
+Napi::Function _exports_SomeipMessage_ctor = _exports_SomeipMessage_inst::GetClass(env);
+exports.Set("SomeipMessage", _exports_SomeipMessage_ctor);
+if (SWIGTYPE_p_SomeipMessage->clientdata == SWIG_NULLPTR) {
+  SWIGTYPE_p_SomeipMessage->clientdata = new size_t(10);
+}
+Napi::FunctionReference *_exports_SomeipMessage_ctor_ref = new Napi::FunctionReference();
+*_exports_SomeipMessage_ctor_ref = Napi::Persistent(_exports_SomeipMessage_ctor);
+env.GetInstanceData<EnvInstanceData>()->ctor[10] = _exports_SomeipMessage_ctor_ref;
 /* Class: Send (_exports_Send) */
 // jsnapi_registerclass
 Napi::Function _exports_Send_ctor = _exports_Send_inst::GetClass(env);
 exports.Set("Send", _exports_Send_ctor);
 if (SWIGTYPE_p_Send->clientdata == SWIG_NULLPTR) {
-  SWIGTYPE_p_Send->clientdata = new size_t(10);
+  SWIGTYPE_p_Send->clientdata = new size_t(11);
 }
 Napi::FunctionReference *_exports_Send_ctor_ref = new Napi::FunctionReference();
 *_exports_Send_ctor_ref = Napi::Persistent(_exports_Send_ctor);
-env.GetInstanceData<EnvInstanceData>()->ctor[10] = _exports_Send_ctor_ref;
+env.GetInstanceData<EnvInstanceData>()->ctor[11] = _exports_Send_ctor_ref;
 
 
   /* initialize the inheritance helpers */
@@ -25009,6 +25620,21 @@ do {
   NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
   NAPI_CHECK_MAYBE(setProto.Call({
     _exports_VsomeipCallbackWrapper_ctor, SWIG_NAPI_ObjectWrap_ctor
+  }));
+  NAPI_CHECK_MAYBE(setProto.Call({
+    protoSub, protoBase
+  }));
+} while (0);
+
+
+// Inheritance for _exports_SomeipMessage (SomeipMessage) <- SWIG_NAPI_ObjectWrap
+// jsnapi_setup_inheritance
+do {
+  Napi::Value protoBase, protoSub;
+  NAPI_CHECK_RESULT(_exports_SomeipMessage_ctor.Get("prototype"), protoSub);
+  NAPI_CHECK_RESULT(SWIG_NAPI_ObjectWrap_ctor.Get("prototype"), protoBase);
+  NAPI_CHECK_MAYBE(setProto.Call({
+    _exports_SomeipMessage_ctor, SWIG_NAPI_ObjectWrap_ctor
   }));
   NAPI_CHECK_MAYBE(setProto.Call({
     protoSub, protoBase

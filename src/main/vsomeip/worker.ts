@@ -1,6 +1,7 @@
 // main/worker.ts
 
-import client from './client'
+import { SomeipMessageType } from '../share/someip'
+import client, { SomeipMessage } from './client'
 
 let instance: client | null = null
 process.on('message', (message: any) => {
@@ -38,12 +39,19 @@ process.on('message', (message: any) => {
       break
     }
     case 'sendRequest': {
-      instance?.sendRequest(
-        Number(data.service),
-        Number(data.instance),
-        Number(data.method),
-        Buffer.from(data.payload)
-      )
+      const msg: SomeipMessage = {
+        service: Number(data.service),
+        instance: Number(data.instance),
+        method: Number(data.method),
+        client: 0,
+        session: 0,
+        payload: Buffer.from(data.payload),
+        messageType: SomeipMessageType.REQUEST,
+        returnCode: 0,
+        protocolVersion: 0,
+        interfaceVersion: 0
+      }
+      instance?.sendMessage(msg)
       break
     }
     case 'offerServices': {

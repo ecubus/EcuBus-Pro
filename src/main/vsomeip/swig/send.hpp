@@ -25,7 +25,20 @@ namespace vsomeip_v3 {
     class message;
 }
 
-
+struct SomeipMessage {
+    uint16_t service;
+    uint16_t instance;
+    uint16_t method;
+    uint16_t client;
+    uint16_t session;
+   
+    bool reliable;
+    uint8_t messageType;
+    uint8_t returnCode;
+    uint8_t protocolVersion;
+    uint8_t interfaceVersion;
+   
+};
 
 /**
  * \brief vSomeIP callback wrapper class for Node.js integration
@@ -38,8 +51,8 @@ class Send {
 private:
     std::shared_ptr<vsomeip_v3::runtime> rtm_;
     std::shared_ptr<vsomeip_v3::application> app_;
-    std::map<int, std::shared_ptr<vsomeip_v3::message>> messageStore_;
-    int messageIdCounter_;
+  
+
 
 public:
     /**
@@ -54,14 +67,9 @@ public:
      */
     ~Send();
 
-    void sendMessage(uint16_t service, uint16_t instance,uint16_t method,char* data,uint32_t length);
+    void sendMessage(struct SomeipMessage* message,char* data,uint32_t length);
     
-    void sendResponse(int messageId, char* data, uint32_t length);
-    
-    // Helper methods for message management
-    int storeMessage(std::shared_ptr<vsomeip_v3::message> msg);
-    std::shared_ptr<vsomeip_v3::message> getMessage(int messageId);
-    void removeMessage(int messageId);
+   
 };
 
 

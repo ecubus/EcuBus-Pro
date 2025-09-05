@@ -243,7 +243,7 @@ interface SomeipBaseLog {
       protocolVersion: number
       interfaceVersion: number
       messageType: SomeipMessageType
-      requestCode: number
+      returnCode: number
       payload: Buffer
     }
     ts: number
@@ -581,7 +581,7 @@ function logDisplay(method: string, vals: LogItem[]) {
         },
         {
           name: 'Return Code',
-          data: '0x' + val.message.data.data.requestCode.toString(16).padStart(2, '0')
+          data: '0x' + val.message.data.data.returnCode.toString(16).padStart(2, '0')
         }
       ]
       if (val.message.data.header.ip) {
@@ -993,11 +993,7 @@ onMounted(() => {
               .getPropertyValue('--el-color-success')
               .trim()
             break
-          case 'ipBase':
-            color = getComputedStyle(document.documentElement)
-              .getPropertyValue('--el-color-primary-dark-2')
-              .trim()
-            break
+
           case 'udsSent':
           case 'udsRecv':
             color = getComputedStyle(document.documentElement)
@@ -1024,6 +1020,7 @@ onMounted(() => {
               .getPropertyValue('--el-color-primary')
               .trim()
             break
+          case 'ipBase':
           case 'someipBase':
             color = 'purple'
             break

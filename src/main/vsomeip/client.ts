@@ -1,6 +1,7 @@
 import vsomeip from './build/Release/vsomeip.node'
 import dllLib from '../../../resources/lib/vsomeip3.dll?asset&asarUnpack'
 import path from 'path'
+import { SomeipMessageType } from '../share/someip'
 
 const libPath = path.dirname(dllLib)
 
@@ -9,18 +10,18 @@ if (process.platform == 'win32') {
 }
 // vSomeIP Callback Management System TypeScript Interface
 
-export interface VsomeipMessage {
+export interface SomeipMessage {
   service: number
   instance: number
   method: number
   client: number
   session: number
-  payload?: Buffer
-  messageType: number
-  requestCode: number
+  payload: Buffer
+  messageType: SomeipMessageType
+  returnCode: number
   protocolVersion: number
+  reliable?: boolean
   interfaceVersion: number
-  _messageId?: number // Internal message ID for response handling
 }
 
 export interface VsomeipAvailabilityInfo {
@@ -47,7 +48,7 @@ export interface VsomeipSubscriptionStatusInfo {
 // Unified callback data structure
 export type VsomeipCallbackData =
   | { type: 'state'; data: number }
-  | { type: 'message'; data: VsomeipMessage }
+  | { type: 'message'; data: SomeipMessage }
   | { type: 'availability'; data: VsomeipAvailabilityInfo }
   | { type: 'subscription'; data: VsomeipSubscriptionInfo }
   | { type: 'subscription_status'; data: VsomeipSubscriptionStatusInfo }
@@ -85,18 +86,21 @@ export default class VSomeIP_Client {
     this.cbId = vsomeip.RegisterCallback(name, name, cb.bind(this))
   }
 
-  sendRequest(service: number, instance: number, method: number, payload: Buffer) {
-    this.sendc.sendMessage(service, instance, method, payload)
+  sendMessage(message: SomeipMessage) {
+    const msg = new vsomeip.SomeipMessage()
+    msg.service = message.service
+    msg.instance = message.instance
+    msg.method = message.method
+    msg.client = message.client
+    msg.session = message.session
+    msg.payload = message.payload
+    msg.messageType = message.messageType
+    msg.returnCode = message.returnCode
+    msg.protocolVersion = message.protocolVersion
+    msg.interfaceVersion = message.interfaceVersion
+    this.sendc.sendMessage(msg, message.payload)
   }
 
-  sendResponse(request: VsomeipMessage, payload: Buffer) {
-    // Send a response based on the received request message using message ID
-    if (request._messageId !== undefined) {
-      this.sendc.sendResponse(request._messageId, payload)
-    } else {
-      console.warn('Cannot send response: message ID not available')
-    }
-  }
   init() {
     if (!VSomeIP_Client.traceRegister) {
       this.cb.registerTraceHandler(this.cbId)
@@ -107,7 +111,7 @@ export default class VSomeIP_Client {
       throw new Error('Failed to initialize application')
     } else {
       this.cb.registerStateHandler(this.cbId)
-      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId, this.sendc)
+      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId)
       this.cb.registerAvailabilityHandler(0xffff, 0xffff, this.cbId)
     }
   }

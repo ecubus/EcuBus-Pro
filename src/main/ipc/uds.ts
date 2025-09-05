@@ -364,7 +364,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
         }
       } else if (device.type == 'someip' && device.someipDevice) {
         const val = device.someipDevice
-        const file = await generateConfigFile(val, projectInfo.path, devices)
+        const file = await generateConfigFile(val, projectInfo.path, data.devices)
         if (rounterInit == false) {
           await startRouterCounter(file)
           rounterInit = true

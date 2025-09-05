@@ -114,7 +114,7 @@ public:
      * \param sendInstance Pointer to Send instance for message storage
      */
     void registerMessageHandler(uint16_t service, uint16_t instance, uint16_t method, 
-                               const std::string& callbackId, class Send* sendInstance = nullptr);
+                               const std::string& callbackId);
     
     /**
      * \brief Register an availability handler callback

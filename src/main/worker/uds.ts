@@ -24,10 +24,16 @@ import workerpool, { worker } from 'workerpool'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
-import { CanMessage } from '../share/can'
+import { CAN_ID_TYPE, CanMessage } from '../share/can'
 import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
-import { LinMsg, LinCableErrorInject } from '../share/lin'
+import {
+  LinMsg,
+  LinCableErrorInject,
+  LinDirection,
+  LinChecksumType,
+  getFrameData
+} from '../share/lin'
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
 export { SecureAccessDll }
 export type { CanMessage }
@@ -40,6 +46,8 @@ export type { CanMsgType } from '../share/can'
 export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert, { AssertionError } from 'node:assert'
+import { writeMessageData as writeLinMessageData } from 'src/renderer/src/database/ldf/calc'
+import { setSignal as setSignalNode } from '../util'
 
 /**
  * Node.js built-in assertion library for testing.
@@ -391,7 +399,11 @@ export function after(fn: () => void | Promise<void>) {
  */
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
-
+import { DataSet } from 'src/preload/data'
+import { workerData } from 'node:worker_threads'
+import { getMessageData, writeMessageData } from 'src/renderer/src/database/dbc/calc'
+import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+global.dataSet = workerData as DataSet
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 // export { selfDescribe as describe }
 
@@ -1324,6 +1336,129 @@ export class UtilClass {
     }
   }
   /**
+   * Registers an event listener for signal updates from CAN/LIN databases.
+   * The signal will be emitted whenever the specified signal value changes.
+   *
+   * @param signal - The signal name to listen for (format: "database.signalName")
+   * @param fc - The callback function invoked when the signal is updated
+   * @param fc.rawValue - The raw signal value (number or Buffer)
+   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+   *
+   * @example
+   * ```typescript
+   * // Listen for engine RPM signal updates
+   * OnSignal("Engine.EngineRPM", ({ rawValue, physValue }) => {
+   *   console.log(`Engine RPM: ${physValue} (raw: ${rawValue})`)
+   * })
+   *
+   * // Listen for gear position signal with enum values
+   * OnSignal("Transmission.GearPosition", ({ rawValue, physValue }) => {
+   *   console.log(`Gear: ${physValue}`) // Could be "Park", "Drive", "Reverse", etc.
+   * })
+   *
+   * // Async callback example
+   * OnSignal("Battery.Voltage", async ({ rawValue, physValue }) => {
+   *   if (physValue < 12.0) {
+   *     await sendWarning("Low battery voltage detected!")
+   *   }
+   * })
+   * ```
+   */
+  OnSignal(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.on(signal as any, fc)
+  }
+
+  /**
+   * Registers a one-time event listener for signal updates from CAN/LIN databases.
+   * The listener will be automatically removed after the first signal update.
+   *
+   * @param signal - The signal name to listen for (format: "database.signalName")
+   * @param fc - The callback function invoked when the signal is updated (only once)
+   * @param fc.rawValue - The raw signal value (number or Buffer)
+   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+   *
+   * @example
+   * ```typescript
+   * // Wait for the first engine start signal
+   * OnSignalOnce("Engine.EngineStatus", ({ rawValue, physValue }) => {
+   *   if (physValue === "Running") {
+   *     console.log("Engine started successfully!")
+   *   }
+   * })
+   *
+   * // Wait for initialization complete signal
+   * OnSignalOnce("System.InitStatus", async ({ rawValue, physValue }) => {
+   *   if (physValue === "Complete") {
+   *     await startDiagnosticSequence()
+   *   }
+   * })
+   * ```
+   */
+  OnSignalOnce(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.once(signal as any).then(fc)
+  }
+
+  /**
+   * Removes an event listener for signal updates from CAN/LIN databases.
+   * The specified callback function will no longer be invoked for signal updates.
+   *
+   * @param signal - The signal name to stop listening for (format: "database.signalName")
+   * @param fc - The exact callback function to remove (must be the same reference)
+   *
+   * @example
+   * ```typescript
+   * // Define a callback function
+   * const rpmCallback = ({ rawValue, physValue }) => {
+   *   console.log(`RPM: ${physValue}`)
+   * }
+   *
+   * // Register the listener
+   * OnSignal("Engine.EngineRPM", rpmCallback)
+   *
+   * // Later, remove the listener
+   * OffSignal("Engine.EngineRPM", rpmCallback)
+   *
+   * // Anonymous functions cannot be removed easily, so use named functions:
+   * // ❌ This won't work for removal:
+   * // OnSignal("Engine.RPM", ({ physValue }) => console.log(physValue))
+   *
+   * // ✅ This will work for removal:
+   * const callback = ({ physValue }) => console.log(physValue)
+   * OnSignal("Engine.RPM", callback)
+   * OffSignal("Engine.RPM", callback)
+   * ```
+   */
+  OffSignal(
+    signal: SignalName,
+    fc: ({
+      rawValue,
+      physValue
+    }: {
+      rawValue: number | Buffer
+      physValue: any
+    }) => void | Promise<void>
+  ) {
+    this.event.off(signal as any, fc)
+  }
+  /**
    * Get the tester name, valid in Tester script
    * @returns {string}
    */
@@ -1645,6 +1780,30 @@ export class UtilClass {
   private async canMsg(msg: CanMessage) {
     await this.event.emit(`can.${msg.id}` as any, msg)
     await this.event.emit('can' as any, msg)
+    //signal emit
+
+    if (msg.device) {
+      const device = Object.values(global.dataSet.devices).find(
+        (device) => device.canDevice && device.canDevice.name == msg.device
+      )
+      if (device && device.canDevice!.database) {
+        const db = global.dataSet.database.can[device.canDevice!.database]
+        if (db) {
+          const message = db.messages[msg.id]
+          if (message) {
+            //apply message to signal
+            writeMessageData(message, msg.data, db)
+            //emit signal
+            for (const signal of Object.values(message.signals)) {
+              await this.event.emit(`${db.name}.${signal.name}` as any, {
+                rawValue: signal.value,
+                physValue: signal.physValueEnum || signal.physValue
+              })
+            }
+          }
+        }
+      }
+    }
   }
   private async linMsg(msg: LinMsg) {
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
@@ -1652,6 +1811,44 @@ export class UtilClass {
       await this.event.emit(`lin.${msg.database}.${msg.name}` as any, msg)
     }
     await this.event.emit('lin' as any, msg)
+    //signal emit
+    if (msg.device) {
+      const device = Object.values(global.dataSet.devices).find(
+        (device) => device.linDevice && device.linDevice.name == msg.device
+      )
+      if (device && device.linDevice!.database) {
+        const db = global.dataSet.database.lin[device.linDevice!.database]
+
+        if (db) {
+          if (!msg.name) {
+            for (const frame of Object.values(db.frames)) {
+              if (frame.id === msg.frameId) {
+                msg.name = frame.name
+                break
+              }
+            }
+          }
+          if (msg.name) {
+            //find frame by frameId
+            const frame = db.frames[msg.name]
+            if (frame && frame.signals) {
+              //apply message to signal
+              writeLinMessageData(frame, msg.data, db)
+              //emit signal
+              for (const signal of Object.values(frame.signals)) {
+                const signalDef = db.signals[signal.name]
+                if (signalDef) {
+                  await this.event.emit(`${db.name}.${signal.name}` as any, {
+                    rawValue: signalDef.value,
+                    physValue: signalDef.physValueEnum || signalDef.physValue
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
@@ -1884,6 +2081,12 @@ export async function setSignal(
   value: number | number[] | string
 ): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
+    try {
+      setSignalNode({ signal, value })
+    } catch (e) {
+      reject(e)
+      return
+    }
     workerpool.workerEmit({
       id: id,
       event: 'setSignal',
@@ -1897,6 +2100,76 @@ export async function setSignal(
   })
 
   return await p
+}
+
+/**
+ * Get a signal's raw value and physical value
+ *
+ * @category LIN
+ * @category CAN
+ * @param {SignalName} signal - The signal name in format 'dbName.signalName'
+ * @returns {Object} Object containing raw value and physical value
+ * @returns {number|number[]|undefined} rawValue - The raw value of the signal
+ * @returns {any} physValue - The physical value or enum value of the signal
+ *
+ * @example
+ * ```ts
+ * // Get signal value for CAN signal
+ * const canSignal = getSignal('can.engineSpeed');
+ * console.log('Raw value:', canSignal.rawValue); // e.g. 1000
+ * console.log('Physical value:', canSignal.physValue); // e.g. '1000 rpm'
+ *
+ * // Get signal value for LIN signal
+ * const linSignal = getSignal('lin.temperature');
+ * console.log('Raw value:', linSignal.rawValue); // e.g. 50
+ * console.log('Physical value:', linSignal.physValue); // e.g. '25°C'
+ * ```
+ */
+export function getSignal(signal: SignalName): {
+  rawValue: number | number[] | undefined
+  physValue: any
+} {
+  const s = signal.split('.')
+  // 验证数据库是否存在
+  const db = Object.values(global.dataSet.database.can).find((db) => db.name == s[0])
+  if (db) {
+    const signalName = s[1]
+    let ss: Signal | undefined
+    for (const msg of Object.values(db.messages)) {
+      for (const signal of Object.values(msg.signals)) {
+        if (signal.name == signalName) {
+          ss = signal
+          break
+        }
+      }
+      if (ss) {
+        break
+      }
+    }
+    if (!ss) {
+      throw new Error(`Signal ${signalName} not found`)
+    }
+    return {
+      rawValue: ss.value || ss.initValue,
+      physValue: ss.physValueEnum || ss.physValue
+    }
+  } else {
+    const linDb = Object.values(global.dataSet.database.lin).find((db) => db.name == s[0])
+    if (linDb) {
+      const signalName = s[1]
+
+      const signal = linDb.signals[signalName]
+      if (!signal) {
+        throw new Error(`Signal ${signalName} not found`)
+      }
+      return {
+        rawValue: signal.value || signal.initValue,
+        physValue: signal.physValueEnum || signal.physValue
+      }
+    }
+  }
+
+  throw new Error(`Signal ${signal} not found`)
 }
 
 /**
@@ -2270,7 +2543,7 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
  * 
- * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * @returns {LinMsg} The frame object from the database
  * 
  * @example
  * ```ts
@@ -2278,11 +2551,7 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
  * const linFrame = getFrameFromDB('lin', 'myLinDb', 'Frame1');
 
  */
-export async function getFrameFromDB(
-  dbType: 'lin',
-  dbName: string,
-  frameName: string
-): Promise<LinMsg>
+export function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string): LinMsg
 
 /**
  * Get a frame from database by name
@@ -2291,7 +2560,7 @@ export async function getFrameFromDB(
  * @param {('can')} dbType - The type of database
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
- * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * @returns {CanMessage} The frame object from the database
  *
  * @example
  * ```ts
@@ -2299,29 +2568,135 @@ export async function getFrameFromDB(
  * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
  * ```
  */
-export async function getFrameFromDB(
-  dbType: 'can',
-  dbName: string,
-  frameName: string
-): Promise<CanMessage>
+export function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage
 // Implementation
-export async function getFrameFromDB(
+export function getFrameFromDB(
   dbType: 'lin' | 'can',
   dbName: string,
   frameName: string
-): Promise<LinMsg | CanMessage> {
-  const p: Promise<LinMsg | CanMessage> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
-      id: id,
-      event: dbType == 'can' ? 'canApi' : 'linApi',
-      data: {
-        method: 'getFrameFromDB',
-        dbName,
-        frameName
+): LinMsg | CanMessage {
+  if (dbType == 'lin') {
+    const db = Object.values(global.dataSet.database.lin).find((db) => db.name == dbName)
+    if (db) {
+      const frame = db.frames[frameName]
+      if (frame) {
+        // 判断方向
+        let direction = LinDirection.RECV
+        if (frame.publishedBy === db.node.master.nodeName) {
+          direction = LinDirection.SEND
+        }
+
+        // 计算校验类型
+        const checksumType =
+          frame.id === 0x3c || frame.id === 0x3d
+            ? LinChecksumType.CLASSIC
+            : LinChecksumType.ENHANCED
+        const ret: LinMsg = {
+          frameId: frame.id,
+          data: getFrameData(db, frame),
+          direction,
+          checksumType,
+          database: db.id,
+          name: frame.name
+        }
+        return ret
+      } else {
+        // is event frame
+        const eventFrame = db.eventTriggeredFrames[frameName]
+        if (eventFrame) {
+          const containsFrame = eventFrame.frameNames[0]
+          const frame = db.frames[containsFrame]
+          if (frame) {
+            const ret: LinMsg = {
+              frameId: eventFrame.frameId,
+              data: Buffer.alloc(frame.frameSize + 1),
+              direction: LinDirection.RECV,
+              checksumType: LinChecksumType.CLASSIC,
+              database: db.id,
+              name: eventFrame.name,
+              isEvent: true
+            }
+            return ret
+          }
+        }
+
+        // const a = data.frameName.split('.')
+        // const slaveNodeName = a[0]
+        // const id = a[1]
+
+        // //find slave node
+        // const slaveNode = db.nodeAttrs[slaveNodeName]
+        // if (slaveNode) {
+        //   if (id === 'ReadByIdentifier') {
+        //     const data = Buffer.alloc(8)
+        //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+        //     data.writeUInt8(0x6, 1)
+        //     data.writeUInt8(0xb2, 2)
+        //     data.writeUInt16LE(slaveNode.supplier_id, 4)
+        //     data.writeUInt16LE(slaveNode.function_id, 6)
+        //     const ret: LinMsg = {
+        //       frameId: 0x3c,
+        //       data,
+        //       direction: LinDirection.SEND,
+        //       checksumType: LinChecksumType.CLASSIC,
+        //       database: db.id,
+        //       name: 'ReadByIdentifier',
+        //       isEvent: false
+        //     }
+        //     return ret
+        //   } else if (id === 'AssignNAD') {
+        //     const data = Buffer.alloc(8)
+        //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
+        //     data.writeUInt8(0x6, 1)
+        //     data.writeUInt8(0xb0, 2)
+        //     data.writeUInt16LE(slaveNode.supplier_id, 3)
+        //     data.writeUInt16LE(slaveNode.function_id, 5)
+        //     const ret: LinMsg = {
+        //       frameId: 0x3c,
+        //       data,
+        //       direction: LinDirection.SEND,
+        //       checksumType: LinChecksumType.CLASSIC,
+        //       database: db.id,
+        //       name: 'AssignNAD',
+        //       isEvent: false
+        //     }
+        //     return ret
+        //   }
+        // }
       }
-    })
-    emitMap.set(id, { resolve, reject })
-    id++
-  })
-  return await p
+      throw new Error(`frame ${frameName} not found`)
+    } else {
+      throw new Error(`database ${dbName} not found`)
+    }
+  } else if (dbType == 'can') {
+    let ret: CanMessage | undefined
+    // 查找 CAN 数据库
+    const db = Object.values(global.dataSet.database.can).find((db) => db.name == dbName)
+    if (db) {
+      const msg = Object.values(db.messages).find((m) => m.name === frameName)
+
+      if (msg) {
+        // 构造 CanMessage
+        return {
+          id: msg.id,
+          name: msg.name,
+          dir: 'OUT',
+          data: getMessageData(msg),
+          msgType: {
+            idType: msg.extId ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+            brs: false,
+            canfd: msg.canfd || false,
+            remote: false
+          },
+          database: db.id
+        }
+      } else {
+        throw new Error(`CAN message ${frameName} not found`)
+      }
+    } else {
+      throw new Error(`CAN database ${dbName} not found`)
+    }
+  } else {
+    throw new Error(`database type ${dbType} not supported`)
+  }
 }

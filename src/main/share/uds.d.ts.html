@@ -1351,6 +1351,103 @@ declare class UtilClass {
      */
     OnCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
     /**
+     * Registers an event listener for signal updates from CAN/LIN databases.
+     * The signal will be emitted whenever the specified signal value changes.
+     *
+     * @param signal - The signal name to listen for (format: "database.signalName")
+     * @param fc - The callback function invoked when the signal is updated
+     * @param fc.rawValue - The raw signal value (number or Buffer)
+     * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+     *
+     * @example
+     * ```typescript
+     * // Listen for engine RPM signal updates
+     * OnSignal("Engine.EngineRPM", ({ rawValue, physValue }) => {
+     *   console.log(`Engine RPM: ${physValue} (raw: ${rawValue})`)
+     * })
+     *
+     * // Listen for gear position signal with enum values
+     * OnSignal("Transmission.GearPosition", ({ rawValue, physValue }) => {
+     *   console.log(`Gear: ${physValue}`) // Could be "Park", "Drive", "Reverse", etc.
+     * })
+     *
+     * // Async callback example
+     * OnSignal("Battery.Voltage", async ({ rawValue, physValue }) => {
+     *   if (physValue < 12.0) {
+     *     await sendWarning("Low battery voltage detected!")
+     *   }
+     * })
+     * ```
+     */
+    OnSignal(signal: SignalName, fc: ({ rawValue, physValue }: {
+        rawValue: number | Buffer;
+        physValue: any;
+    }) => void | Promise<void>): void;
+    /**
+     * Registers a one-time event listener for signal updates from CAN/LIN databases.
+     * The listener will be automatically removed after the first signal update.
+     *
+     * @param signal - The signal name to listen for (format: "database.signalName")
+     * @param fc - The callback function invoked when the signal is updated (only once)
+     * @param fc.rawValue - The raw signal value (number or Buffer)
+     * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
+     *
+     * @example
+     * ```typescript
+     * // Wait for the first engine start signal
+     * OnSignalOnce("Engine.EngineStatus", ({ rawValue, physValue }) => {
+     *   if (physValue === "Running") {
+     *     console.log("Engine started successfully!")
+     *   }
+     * })
+     *
+     * // Wait for initialization complete signal
+     * OnSignalOnce("System.InitStatus", async ({ rawValue, physValue }) => {
+     *   if (physValue === "Complete") {
+     *     await startDiagnosticSequence()
+     *   }
+     * })
+     * ```
+     */
+    OnSignalOnce(signal: SignalName, fc: ({ rawValue, physValue }: {
+        rawValue: number | Buffer;
+        physValue: any;
+    }) => void | Promise<void>): void;
+    /**
+     * Removes an event listener for signal updates from CAN/LIN databases.
+     * The specified callback function will no longer be invoked for signal updates.
+     *
+     * @param signal - The signal name to stop listening for (format: "database.signalName")
+     * @param fc - The exact callback function to remove (must be the same reference)
+     *
+     * @example
+     * ```typescript
+     * // Define a callback function
+     * const rpmCallback = ({ rawValue, physValue }) => {
+     *   console.log(`RPM: ${physValue}`)
+     * }
+     *
+     * // Register the listener
+     * OnSignal("Engine.EngineRPM", rpmCallback)
+     *
+     * // Later, remove the listener
+     * OffSignal("Engine.EngineRPM", rpmCallback)
+     *
+     * // Anonymous functions cannot be removed easily, so use named functions:
+     * // ❌ This won't work for removal:
+     * // OnSignal("Engine.RPM", ({ physValue }) => console.log(physValue))
+     *
+     * // ✅ This will work for removal:
+     * const callback = ({ physValue }) => console.log(physValue)
+     * OnSignal("Engine.RPM", callback)
+     * OffSignal("Engine.RPM", callback)
+     * ```
+     */
+    OffSignal(signal: SignalName, fc: ({ rawValue, physValue }: {
+        rawValue: number | Buffer;
+        physValue: any;
+    }) => void | Promise<void>): void;
+    /**
      * Get the tester name, valid in Tester script
      * @returns {string}
      */
@@ -1691,6 +1788,33 @@ declare function output(msg: LinMsg): Promise<number>;
  */
 declare function setSignal(signal: SignalName, value: number | number[] | string): Promise<void>;
 /**
+ * Get a signal's raw value and physical value
+ *
+ * @category LIN
+ * @category CAN
+ * @param {SignalName} signal - The signal name in format 'dbName.signalName'
+ * @returns {Object} Object containing raw value and physical value
+ * @returns {number|number[]|undefined} rawValue - The raw value of the signal
+ * @returns {any} physValue - The physical value or enum value of the signal
+ *
+ * @example
+ * ```ts
+ * // Get signal value for CAN signal
+ * const canSignal = getSignal('can.engineSpeed');
+ * console.log('Raw value:', canSignal.rawValue); // e.g. 1000
+ * console.log('Physical value:', canSignal.physValue); // e.g. '1000 rpm'
+ *
+ * // Get signal value for LIN signal
+ * const linSignal = getSignal('lin.temperature');
+ * console.log('Raw value:', linSignal.rawValue); // e.g. 50
+ * console.log('Physical value:', linSignal.physValue); // e.g. '25°C'
+ * ```
+ */
+declare function getSignal(signal: SignalName): {
+    rawValue: number | number[] | undefined;
+    physValue: any;
+};
+/**
  * Set a variable value
  *
  * @category Variable
@@ -1882,7 +2006,7 @@ declare function setPwmDuty(value: {
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
  *
- * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * @returns {LinMsg} The frame object from the database
  *
  * @example
  * ```ts
@@ -1890,7 +2014,7 @@ declare function setPwmDuty(value: {
  * const linFrame = getFrameFromDB('lin', 'myLinDb', 'Frame1');
 
  */
-declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string): Promise<LinMsg>;
+declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string): LinMsg;
 /**
  * Get a frame from database by name
  *
@@ -1898,7 +2022,7 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  * @param {('can')} dbType - The type of database
  * @param {string} dbName - The name of the database
  * @param {string} frameName - The name of the frame to retrieve
- * @returns {Promise<LinMsg|CanMessage>} The frame object from the database
+ * @returns {CanMessage} The frame object from the database
  *
  * @example
  * ```ts
@@ -1906,6 +2030,6 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
  * ```
  */
-declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): Promise<CanMessage>;
+declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, type TesterInfo, type TesterName, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };

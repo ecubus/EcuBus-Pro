@@ -83,21 +83,3 @@ export function getLinDevices(vendor: string) {
     return []
   }
 }
-
-export function updateSignalVal(db: LDF, signalName: string, value: number | number[] | string) {
-  const signal = db.signals[signalName]
-  if (signal) {
-    //compare value
-    const lastValue = signal.value != undefined ? signal.value : signal.initValue
-    if (!isEqual(lastValue, value)) {
-      signal.update = true
-    }
-    if (typeof value === 'string') {
-      //find in encode
-      //TODO:
-    } else {
-      signal.value = value
-    }
-  }
-}
-

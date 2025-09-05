@@ -1,4 +1,3 @@
-import { LinMsg } from 'nodeCan/lin'
 import { Frame, LDF, SignalEncodeType } from '../ldfParse'
 
 export function getPhysicalValue(
@@ -234,4 +233,3 @@ export function writeMessageData(frame: Frame, data: Buffer, db: LDF) {
     }
   }
 }
-

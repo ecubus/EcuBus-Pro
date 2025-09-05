@@ -18,3 +18,4 @@ resources/examples/**/*.code-workspace
 resources/examples/**/*.html
 resources/examples/**/**/*/.html
 *.bak
+log.txt

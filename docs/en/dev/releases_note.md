@@ -1,4 +1,15 @@
 # EcuBus-Pro Release Notes
+
+## 0.8.54
+Changes from v0.8.53 to v0.8.54:
+
+* [update] add display version info for candle in https://github.com/ecubus/EcuBus-Pro/pull/194 by @RCSN
+* [bug]:fix script build doesn't copy *.node
+* [bug]:fix the log clearing process, which casue some init log been cleared 
+* [demo]:add NSUC1612_LIN_OTA demo 
+* [bug]:fix crc error
+---
+
 ## 0.8.53
 Changes from v0.8.52 to v0.8.53:
 

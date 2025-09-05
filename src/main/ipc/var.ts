@@ -3,7 +3,7 @@ import EventEmitter from 'events'
 import { VarEvent } from '../global'
 import { VarLOG } from '../log'
 import { getTsUs } from '../share/can'
-import { NodeClass } from '../nodeItem'
+import { setSignal } from '../util'
 const varEvent = new EventEmitter<VarEvent>()
 global.varEvent = varEvent
 
@@ -15,9 +15,8 @@ ipcMain.on('ipc-var-set', (event, arg) => {
   varLOG.setVar(arg.name, arg.value, getTsUs() - global.startTs)
 })
 ipcMain.on('ipc-signal-set', (event, arg) => {
-  NodeClass.setSignal(null as any, {
+  setSignal({
     signal: arg.name,
     value: arg.value
   })
 })
-

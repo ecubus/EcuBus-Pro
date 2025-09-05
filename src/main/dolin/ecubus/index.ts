@@ -69,7 +69,7 @@ export class LinCable extends LinBase {
     this.startTs = getTsUs()
 
     if (info.database) {
-      this.db = global.database.lin[info.database]
+      this.db = global.dataSet.database.lin[info.database]
     }
 
     // for (let i = 0; i <= 0x3f; i++) {

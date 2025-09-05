@@ -331,7 +331,7 @@ export class LIN_TP implements LinTp {
         let selfStart = false
         if (this.base.sch == undefined && this.base.info.database) {
           //start sch
-          const db = global.database.lin[this.base.info.database]
+          const db = global.dataSet.database.lin[this.base.info.database]
           if (db) {
             let schName = '__SlaveRespTable'
             let nextIndex = 0

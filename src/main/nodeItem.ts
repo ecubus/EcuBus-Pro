@@ -3,7 +3,6 @@ import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester, {
-  ApiGetFrameFromDB,
   linApiPowerCtrl,
   linApiStartSch,
   linApiStopSch,
@@ -15,13 +14,12 @@ import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } 
 import { findService, UDSTesterMain } from './docan/uds'
 import { cloneDeep } from 'lodash'
 import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
-import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
 import { EthAddr, EthBaseInfo, VinInfo } from './share/doip'
 import { LIN_TP, TpError as LinTpError } from './dolin/lintp'
 import { LinDirection, LinMode, LinMsg } from './share/lin'
-import { updateSignalVal } from './dolin'
+
 import { DOIP, DoipError } from './doip'
 import { CanBase } from './docan/base'
 import Transport from 'winston-transport'
@@ -29,10 +27,7 @@ import logo from './logo.html?raw'
 import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
 import { PwmBase } from './pwm'
-import { getFrameData, LinChecksumType } from './share/lin'
-import { CAN_ID_TYPE } from './share/can'
-import { getMessageData } from 'src/renderer/src/database/dbc/calc'
-
+import { setSignal } from './util'
 type TestTree = {
   label: string
   type: 'test' | 'config' | 'log'
@@ -187,7 +182,7 @@ export class NodeClass {
         }
         this.pool.registerHandler('output', this.sendFrame.bind(this))
         this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
-        this.pool.registerHandler('setSignal', NodeClass.setSignal)
+        this.pool.registerHandler('setSignal', setSignal)
         this.pool.registerHandler('varApi', this.varApi.bind(this))
         this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
         this.pool.registerHandler('linApi', this.linApi.bind(this))
@@ -766,14 +761,7 @@ export class NodeClass {
     }
     return info
   }
-  varApi(
-    pool: UdsTester,
-    data: {
-      method: 'setVar' | 'getVar'
-      name: string
-      value: number | string | number[]
-    }
-  ) {
+  varApi(data: { method: 'setVar' | 'getVar'; name: string; value: number | string | number[] }) {
     if (data.method == 'setVar') {
       this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
     } else if (data.method == 'getVar') {
@@ -783,66 +771,8 @@ export class NodeClass {
     }
     return
   }
-  //only update raw value
-  static setSignal(
-    pool: UdsTester,
-    data: {
-      signal: string
-      value: number | number[]
-    }
-  ) {
-    if (Array.isArray(data.value)) {
-      throw new Error('can not set array value')
-    }
-    const s = data.signal.split('.')
-    // 验证数据库是否存在
-    const db = Object.values(global.database.can).find((db) => db.name == s[0])
-    if (db) {
-      const signalName = s[1]
-      let ss: Signal | undefined
-      for (const msg of Object.values(db.messages)) {
-        for (const signal of Object.values(msg.signals)) {
-          if (signal.name == signalName) {
-            ss = signal
-            break
-          }
-        }
-        if (ss) {
-          break
-        }
-      }
-      if (!ss) {
-        throw new Error(`Signal ${signalName} not found`)
-      }
-      ss.physValue = data.value
-      // if (typeof data.value === 'string' && (ss.values || ss.valueTable)) {
-      //   const value: {
-      //     label: string
-      //     value: number
-      //   }[] = ss.values ? ss.values : db.valueTables[ss.valueTable!].values
-      //   if (value) {
-      //     const v = value.find((v) => v.label === data.value)
-      //     if (v) {
-      //       ss.physValue = v.value
-      //     }
-      //   }
-      // }
-      updateSignalPhys(ss)
-    } else {
-      const linDb = Object.values(global.database.lin).find((db) => db.name == s[0])
-      if (linDb) {
-        const signalName = s[1]
 
-        const signal = linDb.signals[signalName]
-        if (!signal) {
-          throw new Error(`Signal ${signalName} not found`)
-        }
-        // 更新信号值
-        updateSignalVal(linDb, signalName, data.value)
-      }
-    }
-  }
-  async pwmApi(pool: UdsTester, data: pwmApiSetDuty) {
+  async pwmApi(data: pwmApiSetDuty) {
     const findPwmBase = (name?: string) => {
       let ret: PwmBase | undefined
       if (name != undefined) {
@@ -869,10 +799,7 @@ export class NodeClass {
       pwmBase.setDutyCycle(data.duty)
     }
   }
-  async linApi(
-    pool: UdsTester,
-    data: linApiStartSch | linApiStopSch | ApiGetFrameFromDB | linApiPowerCtrl
-  ) {
+  async linApi(data: linApiStartSch | linApiStopSch | linApiPowerCtrl) {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined
       if (name != undefined) {
@@ -898,7 +825,7 @@ export class NodeClass {
     switch (data.method) {
       case 'startSch': {
         const device = findLinBase(data.device)
-        const db = global.database.lin[device.info.database || '']
+        const db = global.dataSet.database.lin[device.info.database || '']
         if (db == undefined) {
           throw new Error(`database is necessary`)
         }
@@ -922,102 +849,7 @@ export class NodeClass {
         device.stopSch()
         break
       }
-      case 'getFrameFromDB': {
-        const db = Object.values(global.database.lin).find((db) => db.name == data.dbName)
-        if (db) {
-          const frame = db.frames[data.frameName]
-          if (frame) {
-            // 判断方向
-            let direction = LinDirection.RECV
-            if (frame.publishedBy === db.node.master.nodeName) {
-              direction = LinDirection.SEND
-            }
 
-            // 计算校验类型
-            const checksumType =
-              frame.id === 0x3c || frame.id === 0x3d
-                ? LinChecksumType.CLASSIC
-                : LinChecksumType.ENHANCED
-            const ret: LinMsg = {
-              frameId: frame.id,
-              data: getFrameData(db, frame),
-              direction,
-              checksumType,
-              database: db.id,
-              name: frame.name
-            }
-            return ret
-          } else {
-            // is event frame
-            const eventFrame = db.eventTriggeredFrames[data.frameName]
-            if (eventFrame) {
-              const containsFrame = eventFrame.frameNames[0]
-              const frame = db.frames[containsFrame]
-              if (frame) {
-                const ret: LinMsg = {
-                  frameId: eventFrame.frameId,
-                  data: Buffer.alloc(frame.frameSize + 1),
-                  direction: LinDirection.RECV,
-                  checksumType: LinChecksumType.CLASSIC,
-                  database: db.id,
-                  name: eventFrame.name,
-                  isEvent: true
-                }
-                return ret
-              }
-            }
-
-            // const a = data.frameName.split('.')
-            // const slaveNodeName = a[0]
-            // const id = a[1]
-
-            // //find slave node
-            // const slaveNode = db.nodeAttrs[slaveNodeName]
-            // if (slaveNode) {
-            //   if (id === 'ReadByIdentifier') {
-            //     const data = Buffer.alloc(8)
-            //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-            //     data.writeUInt8(0x6, 1)
-            //     data.writeUInt8(0xb2, 2)
-            //     data.writeUInt16LE(slaveNode.supplier_id, 4)
-            //     data.writeUInt16LE(slaveNode.function_id, 6)
-            //     const ret: LinMsg = {
-            //       frameId: 0x3c,
-            //       data,
-            //       direction: LinDirection.SEND,
-            //       checksumType: LinChecksumType.CLASSIC,
-            //       database: db.id,
-            //       name: 'ReadByIdentifier',
-            //       isEvent: false
-            //     }
-            //     return ret
-            //   } else if (id === 'AssignNAD') {
-            //     const data = Buffer.alloc(8)
-            //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-            //     data.writeUInt8(0x6, 1)
-            //     data.writeUInt8(0xb0, 2)
-            //     data.writeUInt16LE(slaveNode.supplier_id, 3)
-            //     data.writeUInt16LE(slaveNode.function_id, 5)
-            //     const ret: LinMsg = {
-            //       frameId: 0x3c,
-            //       data,
-            //       direction: LinDirection.SEND,
-            //       checksumType: LinChecksumType.CLASSIC,
-            //       database: db.id,
-            //       name: 'AssignNAD',
-            //       isEvent: false
-            //     }
-            //     return ret
-            //   }
-            // }
-          }
-          throw new Error(`frame ${data.frameName} not found`)
-        } else {
-          throw new Error(`database ${data.dbName} not found`)
-        }
-
-        break
-      }
       case 'powerCtrl': {
         const device = findLinBase(data.device)
         await device.powerCtrl(data.power)
@@ -1026,41 +858,8 @@ export class NodeClass {
     }
     return
   }
-  async canApi(pool: UdsTester, data: ApiGetFrameFromDB) {
-    switch (data.method) {
-      case 'getFrameFromDB': {
-        let ret: CanMessage | undefined
-        // 查找 CAN 数据库
-        const db = Object.values(global.database.can).find((db) => db.name == data.dbName)
-        if (db) {
-          const msg = Object.values(db.messages).find((m) => m.name === data.frameName)
-
-          if (msg) {
-            // 构造 CanMessage
-            ret = {
-              id: msg.id,
-              name: msg.name,
-              dir: 'OUT',
-              data: getMessageData(msg),
-              msgType: {
-                idType: msg.extId ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
-                brs: false,
-                canfd: msg.canfd || false,
-                remote: false
-              },
-              database: db.id
-            }
-          } else {
-            throw new Error(`CAN message ${data.frameName} not found`)
-          }
-        } else {
-          throw new Error(`CAN database ${data.dbName} not found`)
-        }
-        return ret
-      }
-    }
-  }
-  async sendFrame(pool: UdsTester, frame: CanMessage | LinMsg): Promise<number> {
+  async canApi(data: any) {}
+  async sendFrame(frame: CanMessage | LinMsg): Promise<number> {
     if ('msgType' in frame) {
       frame.msgType.uuid = this.nodeItem.id
       if (this.canBaseId.length == 1) {
@@ -1108,16 +907,13 @@ export class NodeClass {
       throw new Error(`device ${frame.device} not found`)
     }
   }
-  async sendDiag(
-    pool: UdsTester,
-    data: {
-      device?: string
-      address?: string
-      service: ServiceItem
-      isReq: boolean
-      testerName: string
-    }
-  ): Promise<number> {
+  async sendDiag(data: {
+    device?: string
+    address?: string
+    service: ServiceItem
+    isReq: boolean
+    testerName: string
+  }): Promise<number> {
     const tester = Object.values(this.testers).find((t) => t.name == data.testerName)
     if (!tester) {
       throw new Error(`tester ${data.testerName} not found`)
@@ -1331,13 +1127,7 @@ export class NodeClass {
     }
     return 0
   }
-  async runUdsSeq(
-    pool: UdsTester,
-    data: {
-      name: string
-      device?: string
-    }
-  ) {
+  async runUdsSeq(data: { name: string; device?: string }) {
     let targetDevice: UdsDevice | undefined
     if (this.nodeItem.channel.length > 0) {
       for (const id of this.nodeItem.channel) {
@@ -1421,13 +1211,7 @@ export class NodeClass {
       }
     }
   }
-  stopUdsSeq(
-    pool: UdsTester,
-    data: {
-      name: string
-      device?: string
-    }
-  ) {
+  stopUdsSeq(data: { name: string; device?: string }) {
     const uds = this.udsTesterMap.get(data.name)
     if (uds) {
       uds.cancel()

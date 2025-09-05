@@ -106,7 +106,7 @@ export default abstract class LinBase {
     if (this.info.database) {
       const dbName = workNode.split(':')[0]
       const nodeName = workNode.split(':')[1]
-      const db = global.database.lin[this.info.database]
+      const db = global.dataSet.database.lin[this.info.database]
       if (db && db.name == dbName) {
         //setup entry for unconditional frames
         for (const frameName in db.frames) {

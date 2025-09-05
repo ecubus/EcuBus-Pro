@@ -76,7 +76,9 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           items: [{ text: 'LinCable', link: '/zh/docs/um/hardware/lincable' }]
         },
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
-        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] }
+        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
+
+        { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] }
       ]
     },
     {
@@ -85,7 +87,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       items: [
         {
           text: 'LIN',
-          items: [{ text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' }],
+          items: [
+            { text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' },
+            { text: 'LIN UDS', link: 'NSUC1612_LIN_OTA/readme.md' }
+          ],
           collapsed: false
         },
         {

@@ -14,49 +14,25 @@ import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 
 type HandlerMap = {
-  output: (pool: UdsTester, data: any) => Promise<number>
-  sendDiag: (
-    pool: UdsTester,
-    data: {
-      device?: string
-      address?: string
-      service: ServiceItem
-      isReq: boolean
-      testerName: string
-    }
-  ) => Promise<number>
-  setSignal: (
-    pool: UdsTester,
-    data: {
-      signal: string
-      value: number | number[]
-    }
-  ) => void
-  varApi: (
-    pool: UdsTester,
-    data: {
-      method: 'getVar' | 'setVar'
-      name: string
-      value: number | number[] | string
-    }
-  ) => void
-  runUdsSeq: (
-    pool: UdsTester,
-    data: {
-      name: string
-      device?: string
-    }
-  ) => void
-  stopUdsSeq: (
-    pool: UdsTester,
-    data: {
-      name: string
-      device?: string
-    }
-  ) => void
-  canApi: (pool: UdsTester, data: ApiGetFrameFromDB) => Promise<any>
-  linApi: (pool: UdsTester, data: linApiStartSch | linApiStopSch) => void
-  pwmApi: (pool: UdsTester, data: pwmApiSetDuty) => void
+  output: (data: any) => Promise<number>
+  sendDiag: (data: {
+    device?: string
+    address?: string
+    service: ServiceItem
+    isReq: boolean
+    testerName: string
+  }) => Promise<number>
+  setSignal: (data: { signal: string; value: number | number[] }) => void
+  varApi: (data: {
+    method: 'getVar' | 'setVar'
+    name: string
+    value: number | number[] | string
+  }) => void
+  runUdsSeq: (data: { name: string; device?: string }) => void
+  stopUdsSeq: (data: { name: string; device?: string }) => void
+  linApi: (data: linApiStartSch | linApiStopSch) => void
+  pwmApi: (data: pwmApiSetDuty) => void
+  canApi: (data: any) => void
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'
@@ -70,11 +46,7 @@ export type linApiStartSch = {
   activeCtrl?: boolean[]
   slot?: number
 }
-export type ApiGetFrameFromDB = {
-  method: 'getFrameFromDB'
-  dbName: string
-  frameName: string
-}
+
 export type linApiPowerCtrl = {
   method: 'powerCtrl'
   device?: string
@@ -156,7 +128,8 @@ export default class UdsTester {
         stderr: true,
         stdout: true,
         env: this.env,
-        execArgv: execArgv
+        execArgv: execArgv,
+        workerData: global.dataSet
       },
 
       onTerminateWorker: (v: any) => {
@@ -307,7 +280,7 @@ export default class UdsTester {
       if (handler) {
         // 调用handler并处理结果
         try {
-          const result = handler(this, data)
+          const result = handler(data)
           if (result instanceof Promise) {
             result
               .then((r) => {

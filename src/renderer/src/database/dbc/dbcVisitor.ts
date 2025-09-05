@@ -98,6 +98,7 @@ export interface Signal {
     name: string
     range: number[]
   }
+  initValue?: number
   value?: number
   physValue?: number | string
   physValueEnum?: string
@@ -820,4 +821,3 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     //
   }
 }
-

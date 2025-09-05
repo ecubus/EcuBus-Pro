@@ -101,7 +101,7 @@ export class ToomossLin extends LinBase {
     LIN.DEV_ResetTimestamp(this.handle)
 
     if (info.database) {
-      this.db = global.database.lin[info.database]
+      this.db = global.dataSet.database.lin[info.database]
     }
 
     // LIN.LIN_EX_Stop(this.handle, this.deviceIndex)

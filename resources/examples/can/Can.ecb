@@ -68699,10 +68699,10 @@
       },
       "network": {
         "pos": {
-          "x": 23,
-          "y": 3,
-          "w": 600,
-          "h": 400
+          "x": 0,
+          "y": 0,
+          "w": 853.5,
+          "h": 330
         },
         "title": "network",
         "label": "Network",
@@ -68711,10 +68711,10 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 780,
-          "y": 13.5,
-          "w": 700,
-          "h": 400
+          "x": 853.5,
+          "y": 0,
+          "w": 853.5,
+          "h": 330
         },
         "title": "cani",
         "label": "IA",
@@ -68724,6 +68724,34 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 0,
+          "y": 330,
+          "w": 853.5,
+          "h": 330
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      },
+      "graph": {
+        "pos": {
+          "x": 853.5,
+          "y": 330,
+          "w": 853.5,
+          "h": 330
+        },
+        "title": "graph",
+        "label": "Line",
+        "id": "graph",
+        "options": {
+          "params": {
+            "edit-index": "graph"
+          }
         }
       }
     },

@@ -243,7 +243,7 @@ class FileTransport extends winston.transports.File {
 
 export default (filePath: string, devices: string[], method: string[]) => {
   const now = new Date()
-  const keys = Object.keys(global.device)
+  const keys = Object.keys(global.dataSet.devices)
 
   return new FileTransport(
     {

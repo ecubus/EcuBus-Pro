@@ -1,3 +1,5 @@
+[![Packaging status](https://repology.org/badge/vertical-allrepos/ecubus-pro.svg)](https://repology.org/project/ecubus-pro/versions)
+
 # Install
 
 You can download the latest version of `EcuBus-Pro` from the [github releases page](https://github.com/ecubus/EcuBus-Pro/releases)
@@ -33,6 +35,17 @@ Or from our CDN page if you are in 中国❤️:<CustomComponent/>
   ![alt text](../../media/about/update3.png)
 
 - After the update is complete, you can click the `restart` button to restart the `EcuBus-Pro`.
+
+  ## Arch Linux Install Guide
+
+  Install via [AUR repository](https://aur.archlinux.org/packages/ecubus-pro) or [self-hosted repository](https://github.com/taotieren/aur-repo).
+
+  ```bash
+  # AUR
+  yay -Syu ecubus-pro
+  # OR self-hosted
+  sudo pacman -Syu ecubus-pro
+  ```
 
 <script setup>
 import CustomComponent from './../../component/download.vue'

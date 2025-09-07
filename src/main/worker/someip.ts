@@ -21,9 +21,7 @@ class SomeipMessageBase {
    * @param msg - The SOME/IP message data
    */
   constructor(public msg: SomeipMessage) {}
-  toString() {
-    return JSON.stringify(this.msg)
-  }
+
   setPayload(payload: Buffer) {
     this.msg.payload = payload
   }

@@ -1124,6 +1124,7 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
       protocolVersion: ia.protocolVersion != undefined ? ia.protocolVersion : 1,
       interfaceVersion: ia.interfaceVersion != undefined ? ia.interfaceVersion : 0,
       ts: 0,
+      reliable: ia.reliable,
       sending: true
     }
     await base.requestService(Number(ia.serviceId), Number(ia.instanceId), 1000)

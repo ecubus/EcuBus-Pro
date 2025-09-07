@@ -60,6 +60,7 @@
     "api": "typedoc --tsconfig tsconfig.worker.json",
     "docan": "cd src/main/docan && npx node-gyp rebuild",
     "dolin": "cd src/main/dolin && npx node-gyp rebuild",
+    "someip": "cd src/main/vsomeip && npx node-gyp rebuild",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",

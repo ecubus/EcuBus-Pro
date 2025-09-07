@@ -66,5 +66,6 @@ process.on('message', (message: any) => {
       break
     }
   }
+
   process.send!(response)
 })

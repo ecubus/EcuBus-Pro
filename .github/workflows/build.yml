@@ -28,6 +28,8 @@ jobs:
         run: npm run docan
       - name: Build dolin
         run: npm run dolin
+      - name: Build someip
+        run: npm run someip
       - name: Build worker
         run: npm run worker
       - name: Build api

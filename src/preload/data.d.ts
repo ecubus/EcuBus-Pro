@@ -68,6 +68,7 @@ export interface SomeipAction {
     period?: number
     onKey?: string
   }
+  reliable?: boolean
   name: string
   database?: string
   serviceId: string

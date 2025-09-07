@@ -23,12 +23,12 @@ jobs:
           cache: npm # or pnpm / yarn
       - name: Install dependencies
         run: npm install
-      - name: Build with VitePress
-        run: npm run docs:build
       - name: Build docan
         run: npm run docan
       - name: Build dolin
         run: npm run dolin
+      - name: Build someip
+        run: npm run someip
       - name: Build worker
         run: npm run worker
       - name: Build api

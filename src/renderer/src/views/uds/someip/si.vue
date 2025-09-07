@@ -279,15 +279,28 @@
               </el-form-item>
             </el-col>
           </el-form-item>
-          <el-form-item label="Channel">
-            <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
-              <el-option
-                v-for="key in dataBase.ia[editIndex].devices"
-                :key="key"
-                :value="key"
-                :label="devices[key]?.name"
-              ></el-option>
-            </el-select>
+          <el-form-item label-width="0">
+            <el-col :span="8">
+              <el-form-item label="Channel">
+                <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
+                  <el-option
+                    v-for="key in dataBase.ia[editIndex].devices"
+                    :key="key"
+                    :value="key"
+                    :label="devices[key]?.name"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Reliable">
+                <el-select v-model="formData.reliable" placeholder="False">
+                  <el-option :value="true" label="True" />
+                  <el-option :value="false" label="False" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8"> </el-col>
           </el-form-item>
         </el-form>
         <el-tabs v-model="activeName">
@@ -430,6 +443,7 @@ const props = defineProps<{
 const h = toRef(props, 'height')
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
+
 const gridOptions = computed(() => {
   const v: VxeGridProps<SomeipAction> = {
     border: true,
@@ -573,6 +587,8 @@ watch(globalStart, (v) => {
         runtime.removeSomeipPeriod(key)
       }
     }
+    //clear loadingStates
+    loadingStates.value = {}
   }
 })
 

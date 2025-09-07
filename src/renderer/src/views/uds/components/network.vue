@@ -560,6 +560,10 @@ watchEffect(() => {
         udsView.changeName(key, dataBase.devices[key].ethDevice.name)
       } else if (dataBase.devices[key].type == 'lin' && dataBase.devices[key].linDevice) {
         udsView.changeName(key, dataBase.devices[key].linDevice.name)
+      } else if (dataBase.devices[key].type == 'someip' && dataBase.devices[key].someipDevice) {
+        udsView.changeName(key, dataBase.devices[key].someipDevice.name)
+      } else if (dataBase.devices[key].type == 'pwm' && dataBase.devices[key].pwmDevice) {
+        udsView.changeName(key, dataBase.devices[key].pwmDevice.name)
       }
     }
     // test nodes

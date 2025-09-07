@@ -238,7 +238,6 @@ export class VSomeIP_Client {
         break
       }
       case 'message':
-        console.log('Message received:', callbackData.data, ts)
         this.log.someipMessage(callbackData.data, false, ts)
         break
       case 'availability': {
@@ -277,7 +276,6 @@ export class VSomeIP_Client {
         break
       case 'trace': {
         const data = JSON.parse(callbackData.data)
-        console.log('trace:', data, ts)
 
         this.log.someipBase(Buffer.from(data.header), Buffer.from(data.data), ts)
         break
@@ -328,6 +326,7 @@ export class VSomeIP_Client {
         reject('vsomeip is not running')
       } else {
         this.worker.send({
+          id,
           method: method,
           data: data
         })

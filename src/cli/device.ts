@@ -6,6 +6,7 @@ import { openCanDevice } from 'src/main/docan/can'
 import { openLinDevice } from 'src/main/dolin'
 import LinBase from 'src/main/dolin/base'
 import { createPwmDevice, PwmBase } from 'src/main/pwm'
+import { generateConfigFile, VSomeIP_Client } from 'src/main/vsomeip'
 
 export default async function main(
   projectPath: string,
@@ -16,6 +17,7 @@ export default async function main(
   const ethBaseMap = new Map<string, EthBaseInfo>()
   const linBaseMap = new Map<string, LinBase>()
   const pwmBaseMap = new Map<string, PwmBase>()
+  const someipMap = new Map<string, VSomeIP_Client>()
   for (const key in devices) {
     const device = devices[key]
     if (device.type == 'can' && device.canDevice) {
@@ -64,16 +66,23 @@ export default async function main(
         })
         pwmBaseMap.set(key, pwmBase)
       }
+    } else if (device.type == 'someip' && device.someipDevice) {
+      const val = device.someipDevice
+      const file = await generateConfigFile(val, projectPath, devices)
+      const client = new VSomeIP_Client(val.name, file, val)
+      client.init()
+      someipMap.set(key, client)
     }
   }
-  return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap }
+  return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap }
 }
 
 export async function closeDevice(
   canBaseMap: Map<string, CanBase>,
   linBaseMap: Map<string, LinBase>,
   ethBaseMap: Map<string, EthBaseInfo>,
-  pwmBaseMap: Map<string, PwmBase>
+  pwmBaseMap: Map<string, PwmBase>,
+  someipMap: Map<string, VSomeIP_Client>
 ) {
   for (const canBase of canBaseMap.values()) {
     await canBase.close()
@@ -84,5 +93,8 @@ export async function closeDevice(
 
   for (const pwmBase of pwmBaseMap.values()) {
     await pwmBase.close()
+  }
+  for (const someipBase of someipMap.values()) {
+    await someipBase.stop()
   }
 }

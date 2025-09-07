@@ -1,8 +1,9 @@
 import type { CanInterAction } from 'src/main/share/can'
-import type { UdsDevice } from 'src/main/share/uds'
+import type { Param, UdsDevice } from 'src/main/share/uds'
 import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
+import type { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 
 import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
@@ -61,7 +62,34 @@ export interface PwmInter {
   action: any[]
 }
 
-export type Inter = CanInter | LinInter | PwmInter
+export interface SomeipAction {
+  trigger: {
+    type: 'manual' | 'periodic'
+    period?: number
+    onKey?: string
+  }
+  name: string
+  database?: string
+  serviceId: string
+  instanceId: string
+  methodId: string
+  protocolVersion?: number
+  interfaceVersion?: number
+  channel: string
+  messageType: SomeipMessageType
+  params: Param[]
+  respParams: Param[]
+}
+
+export interface SomeipInter {
+  id: string
+  name: string
+  devices: string[]
+  type: 'someip'
+  action: SomeipAction[]
+}
+
+export type Inter = CanInter | LinInter | PwmInter | SomeipInter
 export interface NodeItem {
   disabled?: boolean
   id: string

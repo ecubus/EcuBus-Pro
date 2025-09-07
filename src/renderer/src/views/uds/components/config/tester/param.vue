@@ -608,7 +608,7 @@ const rowDrop = (event: { preventDefault: () => void }) => {
   event.preventDefault()
   nextTick(() => {
     const wrapper = document.querySelector(
-      `#paramTable${props.id} .el-table__body-wrapper tbody`
+      `#paramTable${props.parentId}${props.id} .el-table__body-wrapper tbody`
     ) as HTMLElement
     Sortable.create(wrapper, {
       filter: '.fixed',
@@ -667,4 +667,3 @@ const tableRowClassName = (val: any) => {
   cursor: pointer;
 }
 </style>
-

@@ -502,7 +502,8 @@ const gridOptions = computed(() => {
       },
       { field: 'dlc', title: 'DLC', width: 100, editRender: {}, slots: { edit: 'default_dlc' } }
     ],
-    data: dataBase.ia[props.editIndex]?.action || []
+    data:
+      dataBase.ia[props.editIndex].type == 'can' ? dataBase.ia[props.editIndex]?.action || [] : []
   }
   return v
 })

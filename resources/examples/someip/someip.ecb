@@ -1,0 +1,288 @@
+{
+  "data": {
+    "devices": {
+      "67f2631c-0ddf-42cc-9615-f2fc9b377a65": {
+        "type": "eth",
+        "ethDevice": {
+          "device": {
+            "label": "",
+            "handle": "127.0.0.1",
+            "id": "",
+            "detail": {
+              "address": "127.0.0.1",
+              "netmask": "255.0.0.0",
+              "family": "IPv4",
+              "mac": "00:00:00:00:00:00",
+              "internal": true,
+              "cidr": "127.0.0.1/8"
+            }
+          },
+          "name": "SIMULATE_0",
+          "id": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
+          "vendor": "simulate"
+        }
+      },
+      "a3228634-b533-4933-baff-807d6e453db9": {
+        "type": "someip",
+        "someipDevice": {
+          "id": "a3228634-b533-4933-baff-807d6e453db9",
+          "name": "SomeIP_0",
+          "services": [],
+          "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
+          "application": {
+            "id": "0x6301",
+            "max_dispatchers": 10,
+            "max_dispatch_time": 100,
+            "max_detached_thread_wait_time": 5,
+            "threads": 2,
+            "io_thread_nice": 0,
+            "has_session_handling": true
+          },
+          "serviceDiscovery": {
+            "enable": false,
+            "initial_state": "unknown",
+            "multicast": "224.244.224.245",
+            "port": 30490,
+            "protocol": "udp",
+            "initial_delay_min": 0,
+            "initial_delay_max": 3000,
+            "repetitions_base_delay": 10,
+            "repetitions_max": 3,
+            "ttl": "1",
+            "cyclic_offer_delay": 1000,
+            "request_response_delay": 2000,
+            "offer_debounce_time": 500,
+            "find_debounce_time": 500,
+            "max_remote_subscribers": 3,
+            "find_initial_debounce_reps": 0,
+            "find_initial_debounce_time": 200,
+            "wait_route_netlink_notification": true
+          }
+        }
+      },
+      "b73633f1-a6c4-4cfd-983e-8bd83788d6de": {
+        "type": "someip",
+        "someipDevice": {
+          "id": "b73633f1-a6c4-4cfd-983e-8bd83788d6de",
+          "name": "SomeIP_1",
+          "services": [
+            {
+              "service": "0x1234",
+              "instance": "0x1111",
+              "reliable": {
+                "port": 30510
+              },
+              "events": [],
+              "eventgroups": []
+            }
+          ],
+          "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
+          "application": {
+            "id": "0x6302",
+            "max_dispatchers": 10,
+            "max_dispatch_time": 100,
+            "max_detached_thread_wait_time": 5,
+            "threads": 2,
+            "io_thread_nice": 0,
+            "has_session_handling": true
+          },
+          "serviceDiscovery": {
+            "enable": true,
+            "initial_state": "unknown",
+            "multicast": "224.244.224.245",
+            "port": 0,
+            "protocol": "udp",
+            "initial_delay_min": 0,
+            "initial_delay_max": 3000,
+            "repetitions_base_delay": 10,
+            "repetitions_max": 3,
+            "ttl": "1",
+            "cyclic_offer_delay": 1000,
+            "request_response_delay": 2000,
+            "offer_debounce_time": 500,
+            "find_debounce_time": 500,
+            "max_remote_subscribers": 3,
+            "find_initial_debounce_reps": 0,
+            "find_initial_debounce_time": 200,
+            "wait_route_netlink_notification": true
+          }
+        }
+      }
+    },
+    "ia": {
+      "f8ec96c4-c00f-45f9-84d9-446878e91dcd": {
+        "name": "SomeIP IA",
+        "type": "someip",
+        "id": "f8ec96c4-c00f-45f9-84d9-446878e91dcd",
+        "devices": [
+          "a3228634-b533-4933-baff-807d6e453db9"
+        ],
+        "action": [
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "serviceId": "0x1234",
+            "instanceId": "0x1111",
+            "methodId": "0x1002",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [
+              {
+                "id": "d08a3591-0ad1-4b72-b4e3-f00e7646a268",
+                "name": "param2",
+                "desc": "",
+                "phyValue": "1",
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    49
+                  ]
+                },
+                "bitLen": 8,
+                "type": "ASCII",
+                "deletable": true,
+                "editable": true
+              },
+              {
+                "id": "63bf51c7-c4e1-480d-b2e2-cb4b315423d7",
+                "name": "param1",
+                "desc": "",
+                "phyValue": 0,
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    0
+                  ]
+                },
+                "bitLen": 8,
+                "type": "NUM",
+                "deletable": true,
+                "editable": true
+              }
+            ],
+            "respParams": [
+              {
+                "id": "1876833e-94d4-45e2-81c7-053e9e92fc6b",
+                "name": "param1",
+                "desc": "",
+                "phyValue": 0,
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    0
+                  ]
+                },
+                "bitLen": 8,
+                "type": "NUM",
+                "deletable": true,
+                "editable": true
+              }
+            ],
+            "_X_ROW_KEY": "row_204",
+            "messageType": 0
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "28db0f2e-1e2a-44eb-8934-9f7fb2b8dd04": {
+        "name": "Node 1",
+        "id": "28db0f2e-1e2a-44eb-8934-9f7fb2b8dd04",
+        "channel": [
+          "b73633f1-a6c4-4cfd-983e-8bd83788d6de"
+        ],
+        "workNode": "",
+        "script": "someip.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 195.33300000000003,
+          "w": 1677,
+          "h": 225.656
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "network": {
+        "pos": {
+          "x": 11.5,
+          "y": 0,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
+        "pos": {
+          "x": 473.5,
+          "y": 0,
+          "w": 992,
+          "h": 399
+        },
+        "title": "someipi",
+        "label": "IA",
+        "id": "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia",
+        "options": {
+          "params": {
+            "edit-index": "f8ec96c4-c00f-45f9-84d9-446878e91dcd"
+          },
+          "name": "SomeIP IA"
+        }
+      },
+      "soa": {
+        "pos": {
+          "x": 496,
+          "y": 200.328125,
+          "w": 933,
+          "h": 400
+        },
+        "title": "soa",
+        "label": "SOA",
+        "id": "soa",
+        "options": {
+          "params": {
+            "deviceId": "b73633f1-a6c4-4cfd-983e-8bd83788d6de"
+          }
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 49.5,
+          "y": 283.0000305175781,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {}
+      }
+    }
+  }
+}

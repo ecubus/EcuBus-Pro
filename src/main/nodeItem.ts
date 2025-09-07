@@ -28,6 +28,8 @@ import fsP from 'fs/promises'
 import type { TestEvent } from 'node:test/reporters'
 import { PwmBase } from './pwm'
 import { setSignal } from './util'
+import { VSomeIP_Client } from './vsomeip'
+import { SomeipMessage } from './share/someip'
 type TestTree = {
   label: string
   type: 'test' | 'config' | 'log'
@@ -78,8 +80,9 @@ export class NodeClass {
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
   private pwmBaseId: string[] = []
+  private someipBaseId: string[] = []
   private startTs = 0
-  private boundCb: (frame: CanMessage | LinMsg) => void
+  private boundCb: (frame: CanMessage | LinMsg | SomeipMessage) => void
   private udsTesterMap = new Map<string, UDSTesterMain>()
   freeEvent: {
     doip: DOIP
@@ -96,6 +99,7 @@ export class NodeClass {
     private doips: DOIP[],
     private ethBaseMap: Map<string, EthBaseInfo>,
     private pwmBaseMap: Map<string, PwmBase>,
+    private someipMap: Map<string, VSomeIP_Client>,
     private projectPath: string,
     private projectName: string,
     private testers: Record<string, TesterInfo>,
@@ -135,6 +139,11 @@ export class NodeClass {
       const pwmBaseItem = this.pwmBaseMap.get(c)
       if (pwmBaseItem) {
         this.pwmBaseId.push(c)
+      }
+      const someipBaseItem = this.someipMap.get(c)
+      if (someipBaseItem) {
+        this.someipBaseId.push(c)
+        someipBaseItem.attachLinMessage(this.boundCb)
       }
     }
     if (nodeItem.script) {
@@ -859,7 +868,7 @@ export class NodeClass {
     return
   }
   async canApi(data: any) {}
-  async sendFrame(frame: CanMessage | LinMsg): Promise<number> {
+  async sendFrame(frame: CanMessage | LinMsg | SomeipMessage): Promise<number> {
     if ('msgType' in frame) {
       frame.msgType.uuid = this.nodeItem.id
       if (this.canBaseId.length == 1) {
@@ -876,6 +885,21 @@ export class NodeClass {
           return await baseItem.writeBase(frame.id, frame.msgType, frame.data, {
             database: baseItem.info.database
           })
+        }
+      }
+      throw new Error(`device ${frame.device} not found`)
+    } else if ('instance' in frame) {
+      frame.payload = Buffer.from(frame.payload)
+      if (this.someipBaseId.length == 1) {
+        const baseItem = this.someipMap.get(this.someipBaseId[0])
+        if (baseItem) {
+          return await baseItem.sendRequest(frame)
+        }
+      }
+      for (const c of this.someipBaseId) {
+        const baseItem = this.someipMap.get(c)
+        if (baseItem && baseItem.info.name == frame.device) {
+          return await baseItem.sendRequest(frame)
         }
       }
       throw new Error(`device ${frame.device} not found`)
@@ -1267,10 +1291,14 @@ export class NodeClass {
     this.pool?.updateTs(0)
     await this.pool?.start(this.projectPath, this.nodeItem.name, testControl)
   }
-  cb(frame: CanMessage | LinMsg) {
+  cb(frame: CanMessage | LinMsg | SomeipMessage) {
     if ('msgType' in frame) {
       if (frame.msgType.uuid != this.nodeItem.id) {
         this.pool?.triggerCanFrame(frame)
+      }
+    } else if ('instance' in frame) {
+      if (frame.uuid != this.nodeItem.id) {
+        this.pool?.triggerSomeipFrame(frame)
       }
     } else {
       if (frame.uuid != this.nodeItem.id || frame.direction == LinDirection.RECV) {

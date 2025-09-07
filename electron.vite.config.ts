@@ -12,7 +12,15 @@ export default defineConfig({
         src: resolve(__dirname, 'src')
       }
     },
-    plugins: [externalizeDepsPlugin(), ConditionalCompile()]
+    plugins: [externalizeDepsPlugin(), ConditionalCompile()],
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve(__dirname, 'src/main/index.ts'),
+          vsomeip: resolve(__dirname, 'src/main/vsomeip/worker.ts')
+        }
+      }
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

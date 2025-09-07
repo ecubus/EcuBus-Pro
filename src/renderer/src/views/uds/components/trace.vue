@@ -140,6 +140,12 @@ import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading } from 'element-plus'
 import { useGlobalStart } from '@r/stores/runtime'
+import {
+  SomeipMessageType,
+  SomeipMessageTypeMap,
+  VsomeipAvailabilityInfo,
+  SomeipMessage
+} from 'nodeCan/someip'
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -223,6 +229,20 @@ interface IpBaseLog {
     name: string
   }
 }
+
+interface SomeipBaseLog {
+  method: 'someipBase'
+  data: SomeipMessage
+}
+
+interface SomeipServiceValidLog {
+  method: 'someipServiceValid'
+  data: {
+    info: VsomeipAvailabilityInfo
+    ts: number
+  }
+}
+
 interface LinBaseLog {
   method: 'linBase'
   data: LinMsg
@@ -243,7 +263,15 @@ interface LinErrorLog {
 }
 
 interface LogItem {
-  message: CanBaseLog | UdsLog | UdsErrorLog | IpBaseLog | LinBaseLog | LinErrorLog
+  message:
+    | CanBaseLog
+    | UdsLog
+    | UdsErrorLog
+    | IpBaseLog
+    | LinBaseLog
+    | LinErrorLog
+    | SomeipBaseLog
+    | SomeipServiceValidLog
   level: string
   instance: string
   label: string
@@ -546,6 +574,55 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: 'System Message'
       })
+    } else if (val.message.method == 'someipBase') {
+      const childrenList: { name: string; data: string }[] = [
+        {
+          name: 'Version',
+          data: `Protocol Version:${val.message.data.protocolVersion}, Interface Version:${val.message.data.interfaceVersion}`
+        },
+        {
+          name: 'Return Code',
+          data: '0x' + val.message.data.returnCode.toString(16).padStart(2, '0')
+        }
+      ]
+      if (val.message.data.ip) {
+        childrenList.push({
+          name: 'Address',
+          data: `${val.message.data.ip}:${val.message.data.port}`
+        })
+      }
+      if (val.message.data.protocol) {
+        childrenList.push({
+          name: 'Protocol',
+          data: val.message.data.protocol
+        })
+      }
+
+      insertData({
+        method: val.message.method,
+        name: `Client:0x${val.message.data.client.toString(16).padStart(4, '0')} Session:0x${val.message.data.session.toString(16).padStart(4, '0')}`,
+        data: data2str(val.message.data.payload),
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: `SID:0x${val.message.data.service.toString(16).padStart(4, '0')} IID:0x${val.message.data.instance.toString(16).padStart(4, '0')} MID:0x${val.message.data.method.toString(16).padStart(4, '0')}`,
+        len: val.message.data.payload.length,
+        dlc: val.message.data.payload.length,
+        dir: val.message.data.sending ? 'Tx' : 'Rx',
+        device: val.label,
+        channel: val.instance,
+        msgType: SomeipMessageTypeMap[val.message.data.messageType],
+        children: childrenList
+      })
+    } else if (val.message.method == 'someipServiceValid') {
+      insertData({
+        method: val.message.method,
+        data: `Service:0x${val.message.data.info.service.toString(16).padStart(4, '0')} Instance:0x${val.message.data.info.instance.toString(16).padStart(4, '0')} Available:${val.message.data.info.available}`,
+        ts: (val.message.data.ts / 1000000).toFixed(3),
+        id: '',
+        len: 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'SomeIP Service Valid'
+      })
     }
   }
 }
@@ -569,14 +646,17 @@ const props = defineProps({
   },
   defaultCheckList: {
     type: Array as PropType<string[]>,
-    default: () => ['canBase', 'ipBase', 'linBase', 'uds']
+    default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase']
   }
 })
 
 // Initialize checkList with the prop value
 const checkList = ref(props.defaultCheckList)
 
-function filterChange(method: 'uds' | 'canBase' | 'ipBase' | 'linBase', val: boolean) {
+function filterChange(
+  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase',
+  val: boolean
+) {
   const i = LogFilter.value.find((v) => v.v == method)
   if (i) {
     i.value.forEach((v) => {
@@ -791,7 +871,7 @@ function togglePause() {
 const LogFilter = ref<
   {
     label: string
-    v: 'uds' | 'canBase' | 'ipBase' | 'linBase'
+    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase'
     value: string[]
   }[]
 >([
@@ -814,6 +894,11 @@ const LogFilter = ref<
     label: 'ETH',
     v: 'ipBase',
     value: ['ipBase', 'ipError']
+  },
+  {
+    label: 'SomeIP',
+    v: 'someipBase',
+    value: ['someipBase', 'someipError', 'someipServiceValid']
   }
 ])
 
@@ -914,11 +999,7 @@ onMounted(() => {
               .getPropertyValue('--el-color-success')
               .trim()
             break
-          case 'ipBase':
-            color = getComputedStyle(document.documentElement)
-              .getPropertyValue('--el-color-primary-dark-2')
-              .trim()
-            break
+
           case 'udsSent':
           case 'udsRecv':
             color = getComputedStyle(document.documentElement)
@@ -928,6 +1009,7 @@ onMounted(() => {
           case 'canError':
           case 'linError':
           case 'ipError':
+          case 'someipError':
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-danger')
               .trim()
@@ -943,6 +1025,10 @@ onMounted(() => {
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-primary')
               .trim()
+            break
+          case 'ipBase':
+          case 'someipBase':
+            color = 'purple'
             break
         }
         return {

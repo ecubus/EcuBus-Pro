@@ -11,6 +11,8 @@ import { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
+import { SomeipMessageType } from './share/someip/index'
+import { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -61,7 +63,7 @@ const instanceFormat = format((info, opts: any) => {
 export class CanLOG {
   vendor: string
   log: Logger
-  logTp: Logger
+
   deviceId: string
   constructor(
     vendor: string,
@@ -91,19 +93,10 @@ export class CanLOG {
       this.log.remove(log)
     }
     const et2 = externalTransport.map((t) => t.t())
-    this.logTp = createLogger({
-      transports: [new Base(), ...et2],
-      format: format.combine(
-        format.json(),
-        instanceFormat({ instance: instance }),
-        format.label({ label: `CanTp-${vendor}` }),
-        ...externalFormat
-      )
-    })
   }
   close() {
     this.log.close()
-    this.logTp.close()
+
     this.event.removeAllListeners()
   }
   canBase(data: CanMessage) {
@@ -114,13 +107,7 @@ export class CanLOG {
     })
     this.event.emit('can-frame', data)
   }
-  canTp(data: { dir: 'OUT' | 'IN'; data: Buffer; ts: number; addr: CanAddr }) {
-    this.logTp.info({
-      method: 'canTp',
-      deviceId: this.deviceId,
-      data
-    })
-  }
+
   setOption(cmd: string, val: any) {
     this.log.info({
       method: 'setOption',
@@ -299,7 +286,7 @@ export class UdsLOG {
 export class DoipLOG {
   vendor: string
   log: Logger
-  logTp: Logger
+
   deviceId: string
 
   constructor(
@@ -329,18 +316,9 @@ export class DoipLOG {
       this.log.remove(log)
     }
     const et2 = externalTransport.map((t) => t.t())
-    this.logTp = createLogger({
-      transports: [new Base(), ...et2],
-      format: format.combine(
-        format.json(),
-        instanceFormat({ instance: instance }),
-        format.label({ label: `CanTp-${vendor}` })
-      )
-    })
   }
   close() {
     this.log.close()
-    this.logTp.close()
     this.event.removeAllListeners()
   }
   ipBase(
@@ -598,5 +576,130 @@ export class VarLOG {
   }
   close() {
     this.log.close()
+  }
+}
+
+export class SomeipLOG {
+  vendor: string
+  log: Logger
+
+  deviceId: string
+
+  constructor(
+    vendor: string,
+    instance: string,
+    deviceId: string,
+    private event: EventEmitter
+  ) {
+    this.vendor = vendor
+    this.deviceId = deviceId
+    const et1 = externalTransport.map((t) => t.t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(
+        format.json(),
+        instanceFormat({ instance: instance }),
+        format.label({ label: `${vendor}` }),
+        ...externalFormat
+      )
+    })
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
+    })
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
+  }
+  close() {
+    this.log.close()
+
+    this.event.removeAllListeners()
+  }
+  someipBase(header: Buffer, data: Buffer, ts: number) {
+    try {
+      const dataInfo: SomeipMessage = {
+        sending: false,
+        service: 0,
+        instance: 0,
+        method: 0,
+        client: 0,
+        session: 0,
+        protocolVersion: 0,
+        interfaceVersion: 0,
+        messageType: SomeipMessageType.UNKNOWN,
+        returnCode: 0,
+        payload: Buffer.from([]),
+        ts: ts
+      }
+      dataInfo.service = data.readUint16BE(0)
+      dataInfo.method = data.readUint16BE(2)
+      dataInfo.client = data.readUint16BE(8)
+      dataInfo.session = data.readUint16BE(10)
+      dataInfo.protocolVersion = data.readUint8(12)
+      dataInfo.interfaceVersion = data.readUint8(13)
+      dataInfo.messageType = data.readUint8(14)
+      dataInfo.returnCode = data.readUint8(15)
+      dataInfo.payload = data.subarray(16)
+
+      const protocolMap: Record<number, string> = {
+        0: 'local',
+        1: 'udp',
+        2: 'tcp',
+        3: 'unknown'
+      }
+      dataInfo.ip = header.readUint32BE(0).toString(16)
+      dataInfo.port = header.readUint16BE(4)
+      dataInfo.protocol = protocolMap[header.readUint8(6)] || 'unknown'
+      dataInfo.sending = header.readUint8(7) == 1
+      dataInfo.instance = header.readUint16BE(8)
+
+      this.log.info({
+        method: 'someipBase',
+        deviceId: this.deviceId,
+        data: dataInfo
+      })
+      this.event.emit('someip-frame', dataInfo)
+    } catch (e: any) {
+      this.log.error({
+        method: 'someipError',
+        deviceId: this.deviceId,
+        data: {
+          ts: ts,
+          error: e.toString()
+        }
+      })
+    }
+  }
+  someipMessage(message: SomeipMessage, sending: boolean, ts: number) {
+    message.ts = ts
+    message.sending = sending
+    message.payload = Buffer.from(message.payload)
+    this.log.info({
+      method: 'someipBase',
+      deviceId: this.deviceId,
+      data: message
+    })
+    this.event.emit('someip-frame', message)
+  }
+  someipServiceValid(info: VsomeipAvailabilityInfo, ts: number) {
+    this.log.info({
+      method: 'someipServiceValid',
+      deviceId: this.deviceId,
+      data: {
+        info,
+        ts: ts
+      }
+    })
+  }
+  error(ts: number, msg?: string) {
+    this.log.error({
+      method: 'someipError',
+      deviceId: this.deviceId,
+      data: {
+        ts: ts,
+        error: msg
+      }
+    })
   }
 }

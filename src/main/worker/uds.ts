@@ -403,6 +403,8 @@ import { DataSet } from 'src/preload/data'
 import { workerData } from 'node:worker_threads'
 import { getMessageData, writeMessageData } from 'src/renderer/src/database/dbc/calc'
 import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
+import { SomeipMessage, SomeipMessageType } from '../share/someip'
 global.dataSet = workerData as DataSet
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 // export { selfDescribe as describe }
@@ -1530,6 +1532,100 @@ export class UtilClass {
       this.event.off(`lin.${id}` as any, fc)
     }
   }
+
+  /**
+   * Registers an event listener for SOMEIP messages.
+   *
+   * @param id - The SOMEIP message identifier in format "service.instance.method" or "service.instance.*". If `true`, listens for all SOMEIP messages.
+   * @param fc - The callback function to be invoked when a SOMEIP message is received.
+   *
+   * @example
+   * ```ts
+   * // Listen for all SOMEIP messages
+   * Util.OnSomeipMessage(true, (msg) => {
+   *   console.log('Received SOMEIP message:', msg);
+   * });
+   *
+   * // Listen for specific service/instance/method
+   * Util.OnSomeipMessage('0034.5678.90ab', (msg) => {
+   *   console.log('Received specific SOMEIP message:', msg);
+   * });
+   *
+   * // Listen for specific service/wildcard
+   * Util.OnSomeipMessage('0034.*.*', (msg) => {
+   *   console.log('Received specific SOMEIP message:', msg);
+   * });
+   * ```
+   */
+  OnSomeipMessage(
+    id: string | true,
+    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.on('someip' as any, fc)
+    } else {
+      this.event.on(`someip.${id}` as any, fc)
+    }
+  }
+
+  /**
+   * Unsubscribes from SOMEIP messages.
+   *
+   * @param id - The SOMEIP message identifier to unsubscribe from. If `true`, unsubscribes from all SOMEIP messages.
+   * @param fc - The callback function to remove from the event listeners.
+   *
+   * @example
+   * ```ts
+   * const handler = (msg) => console.log(msg);
+   *
+   * // Unsubscribe from all SOMEIP messages
+   * Util.OffSomeipMessage(true, handler);
+   *
+   * // Unsubscribe from specific service/instance/method
+   * Util.OffSomeipMessage('1234.5678.90ab', handler);
+   * ```
+   */
+  OffSomeipMessage(
+    id: string | true,
+    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.off('someip' as any, fc)
+    } else {
+      this.event.off(`someip.${id}` as any, fc)
+    }
+  }
+
+  /**
+   * Registers a one-time event listener for SOMEIP messages.
+   * The listener will be automatically removed after being invoked once.
+   *
+   * @param id - The SOMEIP message identifier in format "service.instance.method" or "service.instance.*". If `true`, listens for all SOMEIP messages.
+   * @param fc - The callback function to be invoked once when a SOMEIP message is received.
+   *
+   * @example
+   * ```ts
+   * // Listen once for any SOMEIP message
+   * Util.OnSomeipMessageOnce(true, (msg) => {
+   *   console.log('Received one SOMEIP message:', msg);
+   * });
+   *
+   * // Listen once for specific service/instance/method
+   * Util.OnSomeipMessageOnce('1234.5678.90ab', (msg) => {
+   *   console.log('Received one specific SOMEIP message:', msg);
+   * });
+   * ```
+   */
+  OnSomeipMessageOnce(
+    id: string | true,
+    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.once('someip' as any).then(fc)
+    } else {
+      this.event.once(`someip.${id}` as any).then(fc)
+    }
+  }
   /**
    * Registers an event listener for a specific key.
    *
@@ -1850,6 +1946,32 @@ export class UtilClass {
       }
     }
   }
+  private async someipMsg(data: SomeipMessage) {
+    let someipMsg: SomeipMessageBase
+    if (data.messageType == SomeipMessageType.REQUEST) {
+      someipMsg = new SomeipMessageRequest(data)
+    } else if (data.messageType == SomeipMessageType.RESPONSE) {
+      someipMsg = new SomeipMessageResponse(data)
+    } else {
+      throw new Error(`someip message type not supported: ${data.messageType}`)
+    }
+
+    const msg = someipMsg.msg
+    msg.payload = Buffer.from(msg.payload)
+    await this.event.emit(
+      `someip.${msg.service.toString(16).padStart(4, '0')}.*.*` as any,
+      someipMsg
+    )
+    await this.event.emit(
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.*` as any,
+      someipMsg
+    )
+    await this.event.emit(
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.${msg.method.toString(16).padStart(4, '0')}` as any,
+      someipMsg
+    )
+    await this.event.emit('someip' as any, someipMsg)
+  }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
@@ -1897,6 +2019,7 @@ export class UtilClass {
       })
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
       this.event.on('__linMsg' as any, this.linMsg.bind(this))
+      this.event.on('__someipMsg' as any, this.someipMsg.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
       this.event.on('__varUpdate' as any, this.varUpdate.bind(this))
     }
@@ -2045,18 +2168,28 @@ export async function output(msg: CanMessage): Promise<number>
  * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
  */
 export async function output(msg: LinMsg): Promise<number>
-export async function output(msg: CanMessage | LinMsg): Promise<number> {
+/**
+ * Sends a SOMEIP message
+ *
+ * @category SOMEIP
+ * @param {SomeipMessage} msg - The SOMEIP message to be sent
+ * @returns {Promise<number>} - Returns a promise that resolves to sent timestamp
+ */
+export async function output(msg: SomeipMessageBase): Promise<number>
+export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Promise<number> {
   const p: Promise<number> = new Promise((resolve, reject) => {
     workerpool.workerEmit({
       id: id,
       event: 'output',
-      data: msg
+      data: msg instanceof SomeipMessageBase ? msg.msg : msg
     })
     emitMap.set(id, { resolve, reject })
     id++
   })
   return await p
 }
+
+export { SomeipMessageRequest, SomeipMessageResponse }
 
 /**
  * Set a signal value

@@ -146,6 +146,10 @@ export const colorMap: Record<string, { fill: string; color: string }> = {
     fill: 'rgb(51.2, 126.4, 204)',
     color: '#FFFFFF'
   },
+  soa: {
+    fill: 'rgb(51.2, 126.4, 102)',
+    color: '#FFFFFF'
+  },
   interactive: {
     fill: 'rgb(121.3, 187.1, 255)',
     color: '#FFFFFF'
@@ -427,19 +431,26 @@ export class udsHardware extends udsCeil {
     y = 100
   ) {
     let name = 'Device'
+    let type = 'device'
     if (device.type == 'can' && device.canDevice) {
       name = device.canDevice.name
     } else if (device.type == 'eth' && device.ethDevice) {
       name = device.ethDevice.name
     } else if (device.type == 'lin' && device.linDevice) {
       name = device.linDevice.name
+    } else if (device.type == 'someip' && device.someipDevice) {
+      name = device.someipDevice.name
+      type = 'soa'
+    } else if (device.type == 'pwm' && device.pwmDevice) {
+      name = device.pwmDevice.name
     }
+
     super(
       paper,
       graph,
       {
         name: name,
-        type: 'device',
+        type: type,
         id: id
       },
       x,
@@ -647,11 +658,19 @@ export class UDSView {
       deviceYOffset += 200
       this.ceilMap.set(id, element)
       element.on('edit', (ceil) => {
-        this.layout.addWin('hardware', 'hardware', {
-          params: {
-            deviceId: ceil.getId()
-          }
-        })
+        if (data.type == 'someip') {
+          this.layout.addWin('soa', 'soa', {
+            params: {
+              deviceId: ceil.getId()
+            }
+          })
+        } else {
+          this.layout.addWin('hardware', 'hardware', {
+            params: {
+              deviceId: ceil.getId()
+            }
+          })
+        }
       })
       return element
     } else {
@@ -668,10 +687,12 @@ export class UDSView {
     nodeXOffset -= 250
     element.on('remove', (ceil) => {
       const dataBase = useDataStore()
-      delete dataBase.ia[ceil.getId()]
+
       ceil.events.removeAllListeners()
       this.graph.removeCells([ceil.rect])
-      this.layout.removeWin(ceil.getId())
+      console.log('remove', ceil.getId())
+      this.layout.removeWin(`${ceil.getId()}_ia`)
+      delete dataBase.ia[ceil.getId()]
     })
     element.on('edit', (ceil) => {
       const dataBase = useDataStore()
@@ -693,6 +714,13 @@ export class UDSView {
         })
       } else if (item.type == 'pwm') {
         this.layout.addWin('pwmi', `${id}_ia`, {
+          name: item.name,
+          params: {
+            'edit-index': id
+          }
+        })
+      } else if (item.type == 'someip') {
+        this.layout.addWin('someipi', `${id}_ia`, {
           name: item.name,
           params: {
             'edit-index': id

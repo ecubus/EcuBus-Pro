@@ -91,7 +91,7 @@ import interIcon from '@iconify/icons-material-symbols/interactive-space-outline
 import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
-import { max } from 'lodash'
+import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
 
 interface Tree {
   id: string
@@ -180,6 +180,22 @@ function addChild(parent: Tree) {
         c.children.push(cc)
       }
     }
+  } else if (parent.type == 'someip') {
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'someip' && item.someipDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.someipDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+    }
   }
   parent.children.push(c)
   //interactive
@@ -239,11 +255,26 @@ function addChild(parent: Tree) {
         i.children.push(cc)
       }
     }
+  } else if (parent.type == 'someip') {
+    for (const key of Object.keys(dataBase.ia)) {
+      const item = dataBase.ia[key]
+      if (item.type == 'someip') {
+        const cc: Tree = {
+          type: 'interactive',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: interIcon,
+          contextMenu: true,
+          id: key
+        }
+        i.children.push(cc)
+      }
+    }
   }
   if (parent.type != 'eth') {
     parent.children.push(i)
   }
-  //node
 }
 const tData = computed(() => {
   const can: Tree = {
@@ -320,14 +351,23 @@ const tData = computed(() => {
     }
     log.children.push(cc)
   }
+  const someip: Tree = {
+    type: 'someip',
+    label: 'SomeIP',
+    canAdd: false,
+    icon: soaIcon,
+    children: [],
+    id: 'someip'
+  }
 
   addChild(can)
   addChild(lin)
   addChild(eth)
   addChild(pwm)
+  addChild(someip)
 
   // addChild(node)
-  return [can, lin, eth, pwm, node, log]
+  return [can, lin, eth, someip, pwm, node, log]
 })
 
 const defaultProps = {
@@ -727,6 +767,20 @@ function addNode(type: string, parent?: Tree) {
       dataBase.ia[id] = {
         name: parent?.label + ' IA',
         type: 'pwm',
+        id: id,
+        devices: devices, // Add an empty array for devices,
+        action: []
+      }
+      udsView.addIg(id, dataBase.ia[id])
+      // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
+    } else if (parent?.type == 'someip') {
+      const devices: string[] = []
+      dataBase.ia[id] = {
+        name: parent?.label + ' IA',
+        type: 'someip',
         id: id,
         devices: devices, // Add an empty array for devices,
         action: []

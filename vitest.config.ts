@@ -48,6 +48,15 @@ export const nodejsPolarsDirnamePlugin = () => {
 
 //export default mergeConfig(config.main as any, defineConfig({
 export default defineConfig({
-  test: {},
+  test: {
+    // 全局设置文件，在所有测试文件运行前执行
+    setupFiles: ['./test/setup.ts']
+    // 或者使用 setupFilesAfterEnv，在测试环境设置后执行
+    // setupFilesAfterEnv: ['./test/setup-after-env.ts'],
+    // 全局设置，在整个测试套件开始前执行一次
+    // globalSetup: './test/global-setup.ts',
+    // 全局清理，在整个测试套件结束后执行一次
+    // globalTeardown: './test/global-teardown.ts',
+  },
   plugins: [nodejsPolarsDirnamePlugin()]
 })

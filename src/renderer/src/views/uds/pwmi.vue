@@ -85,7 +85,7 @@ import { ref, computed, onMounted, onUnmounted, toRef, watchEffect } from 'vue'
 import { Icon } from '@iconify/vue'
 import { ElMessage } from 'element-plus'
 import { useDataStore } from '@r/stores/data'
-import { PwmBaseInfo } from 'src/main/share/uds'
+import type { PwmBaseInfo } from 'src/main/share/uds'
 
 // Icons
 import deviceIcon from '@iconify/icons-material-symbols/device-hub'
@@ -276,4 +276,3 @@ function setDutyCyclePreset(value: number) {
   width: 100px;
 }
 </style>
-

@@ -23,7 +23,7 @@ import {
 import { CAN_ID_TYPE, CanInterAction, formatError, getTsUs, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
-import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
+import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 import Transport from 'winston-transport'
@@ -38,7 +38,15 @@ import { getLinDevices, openLinDevice } from '../dolin'
 import { updateLinSignalVal } from '../util'
 import EventEmitter from 'events'
 import LinBase from '../dolin/base'
-import { DataSet, LinInter, LogItem, NodeItem, PwmInter, VarItem } from 'src/preload/data'
+import {
+  DataSet,
+  LinInter,
+  LogItem,
+  NodeItem,
+  PwmInter,
+  SomeipAction,
+  VarItem
+} from 'src/preload/data'
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
@@ -52,6 +60,14 @@ import { getAllSysVar } from '../share/sysVar'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 import { cloneDeep } from 'lodash'
 import { logQ } from '../multiWin'
+import { SomeipConfig, SomeipInfo, SomeipMessage, SomeipMessageType } from '../share/someip'
+import {
+  generateConfigFile,
+  startRouterCounter,
+  stopRouterCounter,
+  VSomeIP_Client,
+  VsomeipState
+} from '../vsomeip'
 
 const libPath = path.dirname(dllLib)
 
@@ -165,6 +181,7 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     doips,
     ethBaseMap,
     pwmBaseMap,
+    someipMap,
     projectPath,
     projectName,
     testers,
@@ -260,6 +277,7 @@ const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
 const pwmBaseMap = new Map<string, PwmBase>()
+const someipMap = new Map<string, VSomeIP_Client>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 let cantps: {
@@ -275,6 +293,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     value.close()
   })
   testMap.clear()
+  let rounterInit = false
   try {
     for (const key in data.devices) {
       const device = data.devices[key]
@@ -344,12 +363,24 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
           })
           pwmBaseMap.set(key, pwmBase)
         }
+      } else if (device.type == 'someip' && device.someipDevice) {
+        const val = device.someipDevice
+        const file = await generateConfigFile(val, projectInfo.path, data.devices)
+        if (rounterInit == false) {
+          await startRouterCounter(file)
+          rounterInit = true
+        }
+        const client = new VSomeIP_Client(val.name, file, val)
+        client.init()
+
+        someipMap.set(key, client)
       }
     }
   } catch (err: any) {
     sysLog.error(`${activeKey} - ${err.toString()}`)
     throw err
   }
+
   //testes
   const doipConnectList: {
     tester: TesterInfo
@@ -488,6 +519,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       doips,
       ethBaseMap,
       pwmBaseMap,
+      someipMap,
       projectInfo.path,
       projectInfo.name,
       data.tester
@@ -550,6 +582,8 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     }, 200)
     logQ.startTimer()
   }
+
+  global.startTs = getTsUs()
 }
 
 const exTransportList: string[] = []
@@ -702,6 +736,12 @@ export function globalStop(emit = false) {
   })
   doips = []
 
+  someipMap.forEach((e) => {
+    e.stop()
+  })
+  stopRouterCounter()
+  someipMap.clear()
+
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {
       win.webContents.send('ipc-global-stop')
@@ -712,7 +752,7 @@ export function globalStop(emit = false) {
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {
-  globalStop()
+  await globalStop()
 })
 
 const schMap = new Map<string, LinBase>()
@@ -1064,5 +1104,31 @@ ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {
   const db = global.dataSet.database.lin[dbIndex]
   if (db) {
     updateLinSignalVal(db, signalName, value)
+  }
+})
+
+ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
+  const ia = arg[0] as SomeipAction
+
+  const base = someipMap.get(ia.channel) as VSomeIP_Client
+  if (base) {
+    const msg: SomeipMessage = {
+      service: Number(ia.serviceId),
+      instance: Number(ia.instanceId),
+      method: Number(ia.methodId),
+      payload: getParamBuffer(ia.params),
+      messageType: ia.messageType,
+      client: 0,
+      session: 0,
+      returnCode: 0,
+      protocolVersion: ia.protocolVersion != undefined ? ia.protocolVersion : 1,
+      interfaceVersion: ia.interfaceVersion != undefined ? ia.interfaceVersion : 0,
+      ts: 0,
+      sending: true
+    }
+    await base.requestService(Number(ia.serviceId), Number(ia.instanceId), 1000)
+    await base.sendRequest(msg)
+  } else {
+    sysLog.error(`someip device not found`)
   }
 })

@@ -23,7 +23,7 @@ import {
 import { CAN_ID_TYPE, CanInterAction, formatError, getTsUs, swapAddr } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
-import { getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
+import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 import Transport from 'winston-transport'
@@ -60,7 +60,7 @@ import { getAllSysVar } from '../share/sysVar'
 import { IntervalHistogram, monitorEventLoopDelay } from 'perf_hooks'
 import { cloneDeep } from 'lodash'
 import { logQ } from '../multiWin'
-import { SomeipConfig, SomeipInfo } from '../share/someip'
+import { SomeipConfig, SomeipInfo, SomeipMessage, SomeipMessageType } from '../share/someip'
 import {
   generateConfigFile,
   startRouterCounter,
@@ -181,6 +181,7 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     doips,
     ethBaseMap,
     pwmBaseMap,
+    someipMap,
     projectPath,
     projectName,
     testers,
@@ -518,6 +519,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       doips,
       ethBaseMap,
       pwmBaseMap,
+      someipMap,
       projectInfo.path,
       projectInfo.name,
       data.tester
@@ -1110,11 +1112,22 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
 
   const base = someipMap.get(ia.channel) as VSomeIP_Client
   if (base) {
-    const methodId = Number(ia.methodId)
-    const serviceId = Number(ia.serviceId)
-    const instanceId = Number(ia.instanceId)
-    await base.requestService(serviceId, instanceId, 1000)
-    base.sendRequest(serviceId, instanceId, methodId, Buffer.alloc(5))
+    const msg: SomeipMessage = {
+      service: Number(ia.serviceId),
+      instance: Number(ia.instanceId),
+      method: Number(ia.methodId),
+      payload: getParamBuffer(ia.params),
+      messageType: ia.messageType,
+      client: 0,
+      session: 0,
+      returnCode: 0,
+      protocolVersion: ia.protocolVersion != undefined ? ia.protocolVersion : 1,
+      interfaceVersion: ia.interfaceVersion != undefined ? ia.interfaceVersion : 0,
+      ts: 0,
+      sending: true
+    }
+    await base.requestService(Number(ia.serviceId), Number(ia.instanceId), 1000)
+    await base.sendRequest(msg)
   } else {
     sysLog.error(`someip device not found`)
   }

@@ -415,6 +415,8 @@ const allDevices = computed(() => {
       dd[d] = dataBase.devices[d].linDevice
     } else if (dataBase.devices[d].type == 'pwm' && dataBase.devices[d].pwmDevice) {
       dd[d] = dataBase.devices[d].pwmDevice
+    } else if (dataBase.devices[d].type == 'someip' && dataBase.devices[d].someipDevice) {
+      dd[d] = dataBase.devices[d].someipDevice
     }
   }
   return dd
@@ -495,4 +497,3 @@ onMounted(() => {
   margin-top: 5px;
 }
 </style>
-

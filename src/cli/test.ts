@@ -40,7 +40,7 @@ export default async function main(
   if (forceBuild) {
     await build(projectPath, projectName, data, testItem.script, true)
   }
-  const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap } = await deviceMain(
+  const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap } = await deviceMain(
     projectPath,
     projectName,
     data.devices
@@ -63,6 +63,7 @@ export default async function main(
     doips,
     ethBaseMap,
     pwmBaseMap,
+    someipMap,
     projectPath,
     projectName,
     data.tester,
@@ -89,7 +90,7 @@ export default async function main(
   if (justShowTree) {
     printTestTree(testInfo)
     node.close()
-    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap)
+    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap)
     return
   }
   node.close()
@@ -101,6 +102,7 @@ export default async function main(
     doips,
     ethBaseMap,
     pwmBaseMap,
+    someipMap,
     projectPath,
     projectName,
     data.tester,
@@ -332,7 +334,7 @@ export default async function main(
   }
   node1.close()
 
-  await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap)
+  await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap)
 
   if (testSummary.failed > 0) {
     exit(-1)

@@ -12,6 +12,7 @@ import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
+import { SomeipMessage } from 'nodeCan/someip'
 
 type HandlerMap = {
   output: (data: any) => Promise<number>
@@ -367,6 +368,14 @@ export default class UdsTester {
   async triggerCanFrame(msg: CanMessage) {
     try {
       const r = await this.workerEmit('__canMsg', msg)
+      return r
+    } catch (e: any) {
+      throw formatError(e)
+    }
+  }
+  async triggerSomeipFrame(msg: SomeipMessage) {
+    try {
+      const r = await this.workerEmit('__someipMsg', msg)
       return r
     } catch (e: any) {
       throw formatError(e)

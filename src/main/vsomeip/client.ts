@@ -1,7 +1,12 @@
 import vsomeip from './build/Release/vsomeip.node'
 import dllLib from '../../../resources/lib/vsomeip3.dll?asset&asarUnpack'
 import path from 'path'
-import { SomeipMessageType } from '../share/someip'
+import {
+  SomeipMessage,
+  VsomeipAvailabilityInfo,
+  VsomeipSubscriptionInfo,
+  VsomeipSubscriptionStatusInfo
+} from '../share/someip'
 
 const libPath = path.dirname(dllLib)
 
@@ -9,41 +14,6 @@ if (process.platform == 'win32') {
   vsomeip.LoadDll(libPath)
 }
 // vSomeIP Callback Management System TypeScript Interface
-
-export interface SomeipMessage {
-  service: number
-  instance: number
-  method: number
-  client: number
-  session: number
-  payload: Buffer
-  messageType: SomeipMessageType
-  returnCode: number
-  protocolVersion: number
-  reliable?: boolean
-  interfaceVersion: number
-}
-
-export interface VsomeipAvailabilityInfo {
-  service: number
-  instance: number
-  available: boolean
-}
-
-export interface VsomeipSubscriptionInfo {
-  client: number
-  uid: number
-  gid: number
-  subscribed: boolean
-}
-
-export interface VsomeipSubscriptionStatusInfo {
-  service: number
-  instance: number
-  eventgroup: number
-  event: number
-  status: number
-}
 
 // Unified callback data structure
 export type VsomeipCallbackData =
@@ -98,7 +68,8 @@ export default class VSomeIP_Client {
     msg.returnCode = message.returnCode
     msg.protocolVersion = message.protocolVersion
     msg.interfaceVersion = message.interfaceVersion
-    this.sendc.sendMessage(msg, message.payload)
+    msg.reliable = message.reliable || false
+    this.sendc.sendMessage(msg, Buffer.from(message.payload))
   }
 
   init() {

@@ -633,6 +633,50 @@ export enum SomeipMessageType {
   ERROR_ACK = 0xc1,
   UNKNOWN = 255
 }
+
+export interface SomeipMessage {
+  uuid?: string
+  service: number
+  instance: number
+  method: number
+  client: number
+  session: number
+  payload: Buffer
+  messageType: SomeipMessageType
+  returnCode: number
+  protocolVersion: number
+  interfaceVersion: number
+  ts: number
+  reliable?: boolean
+  sending: boolean
+  protocol?: string
+  ip?: string
+  port?: number
+  database?: string
+  device?: string
+}
+
+export interface VsomeipAvailabilityInfo {
+  service: number
+  instance: number
+  available: boolean
+}
+
+export interface VsomeipSubscriptionInfo {
+  client: number
+  uid: number
+  gid: number
+  subscribed: boolean
+}
+
+export interface VsomeipSubscriptionStatusInfo {
+  service: number
+  instance: number
+  eventgroup: number
+  event: number
+  status: number
+}
+
 export const SomeipMessageTypeMap: Record<SomeipMessageType, string> = {
   [SomeipMessageType.REQUEST]: 'Request',
   [SomeipMessageType.REQUEST_NO_RETURN]: 'Request No Return',

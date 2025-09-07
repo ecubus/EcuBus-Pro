@@ -73,6 +73,8 @@ export interface SomeipAction {
   serviceId: string
   instanceId: string
   methodId: string
+  protocolVersion?: number
+  interfaceVersion?: number
   channel: string
   messageType: SomeipMessageType
   params: Param[]

@@ -96,6 +96,9 @@
       <template #default_params="{ row }">
         {{ row.params.length }}
       </template>
+      <template #default_messageType="{ row }">
+        {{ SomeipMessageTypeMap[row.messageType] }}
+      </template>
       <template #toolbar>
         <div
           style="
@@ -228,7 +231,7 @@
       >
         <el-form
           :model="formData"
-          label-width="80"
+          label-width="120"
           size="small"
           class="formH"
           :disabled="periodTimer[popoverIndex] == true"
@@ -253,7 +256,29 @@
               </el-form-item>
             </el-col>
           </el-form-item>
-
+          <el-form-item label-width="0">
+            <el-col :span="8">
+              <el-form-item label="Message Type">
+                <el-select v-model="formData.messageType">
+                  <el-option :value="SomeipMessageType.REQUEST" label="Request" />
+                  <el-option
+                    :value="SomeipMessageType.REQUEST_NO_RETURN"
+                    label="Request No Return"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Protocol Version">
+                <el-input v-model="formData.protocolVersion" placeholder="1" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Interface Version">
+                <el-input v-model="formData.interfaceVersion" placeholder="0" />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
           <el-form-item label="Channel">
             <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
               <el-option
@@ -283,7 +308,11 @@
               service-id="0x10"
             />
           </el-tab-pane>
-          <el-tab-pane label="Response" name="resp">
+          <el-tab-pane
+            v-if="formData.messageType == SomeipMessageType.REQUEST"
+            label="Response"
+            name="resp"
+          >
             <paramVue
               id="resp"
               ref="repParamRef"
@@ -351,6 +380,7 @@ import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 import { ElMessage } from 'element-plus'
 import errorParse from '@r/util/ipcError'
+import { SomeipMessageTypeMap } from 'nodeCan/someip'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -430,6 +460,9 @@ const gridOptions = computed(() => {
         if (column.field == 'params') {
           return false
         }
+        if (column.field == 'messageType') {
+          return false
+        }
         return true
       }
     },
@@ -463,6 +496,13 @@ const gridOptions = computed(() => {
         slots: { default: 'default_trigger' }
       },
       { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
+      {
+        field: 'messageType',
+        title: 'Message Type',
+        width: 120,
+        editRender: {},
+        slots: { default: 'default_messageType' }
+      },
       {
         field: 'serviceId',
         title: 'Service ID',

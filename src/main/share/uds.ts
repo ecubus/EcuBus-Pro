@@ -128,11 +128,10 @@ function reallocBuffer(buffer: Buffer, len: number) {
   buffer.copy(newBuffer, 0, 0, buffer.length)
   return newBuffer
 }
-export function getTxPdu(service: ServiceItem) {
+export function getParamBuffer(params: Param[]) {
+  let allLen = 0
   let buffer = Buffer.alloc(maxSIze)
-  buffer[0] = Number(service.serviceId)
-  let allLen = 1
-  for (const p of service.params) {
+  for (const p of params) {
     const t = param2raw(p)
     const len = Math.ceil(p.bitLen / 8)
     if (allLen + len > maxSIze) {
@@ -145,8 +144,12 @@ export function getTxPdu(service: ServiceItem) {
   return buffer.subarray(0, allLen)
 }
 
+export function getTxPdu(service: ServiceItem) {
+  return Buffer.concat([Buffer.from([Number(service.serviceId)]), getParamBuffer(service.params)])
+}
+
 export function getRxPdu(service: ServiceItem) {
-  let buffer = Buffer.alloc(maxSIze)
+  const buffer = Buffer.alloc(maxSIze)
 
   if (service.isNegativeResponse) {
     buffer[0] = 0x7f
@@ -154,20 +157,10 @@ export function getRxPdu(service: ServiceItem) {
     buffer[2] = service.nrc || 0x00
     return buffer.subarray(0, 3)
   }
-
-  let allLen = 1
-  buffer[0] = Number(service.serviceId) + 0x40
-
-  for (const p of service.respParams) {
-    const t = param2raw(p)
-    const len = Math.ceil(p.bitLen / 8)
-    if (allLen + len > maxSIze) {
-      buffer = reallocBuffer(buffer, (allLen + len) * 2)
-    }
-    t.copy(buffer, allLen)
-    allLen += len
-  }
-  return buffer.subarray(0, allLen)
+  return Buffer.concat([
+    Buffer.from([Number(service.serviceId) + 0x40]),
+    getParamBuffer(service.respParams)
+  ])
 }
 export function applyBuffer(service: ServiceItem, data: Buffer, isReq: boolean) {
   if (!data || data.length === 0) {

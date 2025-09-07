@@ -1,4 +1,3 @@
-import type { SomeipInfo, ServiceConfig } from 'nodeCan/someip'
 import { UdsDevice } from 'nodeCan/uds'
 import path, { resolve } from 'path'
 import fs from 'fs'
@@ -12,6 +11,7 @@ import type { VsomeipCallbackData } from './client'
 import { SomeipLOG } from '../log'
 import EventEmitter from 'events'
 import { getTsUs } from '../share/can'
+import { SomeipMessage, SomeipInfo, ServiceConfig } from '../share/someip'
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
@@ -194,7 +194,7 @@ export class VSomeIP_Client {
   constructor(
     private name: string,
     private configFilePath: string,
-    private info: SomeipInfo
+    public info: SomeipInfo
   ) {
     this.worker = fork(resolve(__dirname, 'vsomeip.js'))
     this.log = new SomeipLOG('Vsomeip', name, this.info.id, this.event)
@@ -212,6 +212,9 @@ export class VSomeIP_Client {
         this.callback(event)
       }
     })
+  }
+  attachLinMessage(cb: (msg: SomeipMessage) => void) {
+    this.event.on('someip-frame', cb)
   }
   init() {
     return this.send('init', {
@@ -236,24 +239,25 @@ export class VSomeIP_Client {
       }
       case 'message':
         console.log('Message received:', callbackData.data, ts)
-        this.log.someipMessage(callbackData.data, ts)
+        this.log.someipMessage(callbackData.data, false, ts)
         break
       case 'availability': {
-        // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
-        console.log('Availability changed:', callbackData.data)
-        this.event.emit('availability', callbackData.data)
-        const key = this.getKey16(callbackData.data.service, callbackData.data.instance)
-        const pending = this.requestServiceMap.get(key)
-        if (pending) {
-          clearTimeout(pending.timeout)
-          if (callbackData.data.available) {
-            pending.resolve(true)
-          } else {
-            pending.reject('Service is not available')
+        if (callbackData.data.instance != 0xffff && callbackData.data.service != 0xffff) {
+          // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
+          this.log.someipServiceValid(callbackData.data, ts)
+          const key = this.getKey16(callbackData.data.service, callbackData.data.instance)
+          const pending = this.requestServiceMap.get(key)
+          if (pending) {
+            clearTimeout(pending.timeout)
+            if (callbackData.data.available) {
+              pending.resolve(true)
+            } else {
+              pending.reject('Service is not available')
+            }
+            this.requestServiceMap.delete(key)
           }
-          this.requestServiceMap.delete(key)
+          this.serviceValid.set(key, callbackData.data.available)
         }
-        this.serviceValid.set(key, callbackData.data.available)
         break
       }
       case 'subscription':
@@ -283,8 +287,11 @@ export class VSomeIP_Client {
         break
     }
   }
-  sendRequest(service: number, instance: number, method: number, payload: Buffer) {
-    return this.send('sendRequest', { service, instance, method, payload })
+  async sendRequest(msg: SomeipMessage) {
+    await this.send('sendRequest', { msg })
+    const ts = getTsUs() - global.startTs
+
+    return ts
   }
   private getKey16(service: number, instance: number) {
     return instance.toString(16).padStart(4, '0') + '.' + service.toString(16).padStart(4, '0')

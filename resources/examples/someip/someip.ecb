@@ -179,14 +179,25 @@
                 "editable": true
               }
             ],
-            "_X_ROW_KEY": "row_204"
+            "_X_ROW_KEY": "row_204",
+            "messageType": 0
           }
         ]
       }
     },
     "tester": {},
     "subFunction": {},
-    "nodes": {},
+    "nodes": {
+      "28db0f2e-1e2a-44eb-8934-9f7fb2b8dd04": {
+        "name": "Node 1",
+        "id": "28db0f2e-1e2a-44eb-8934-9f7fb2b8dd04",
+        "channel": [
+          "b73633f1-a6c4-4cfd-983e-8bd83788d6de"
+        ],
+        "workNode": "",
+        "script": "someip.ts"
+      }
+    },
     "database": {
       "lin": {},
       "can": {}
@@ -262,8 +273,8 @@
       },
       "trace": {
         "pos": {
-          "x": 25.5,
-          "y": 400,
+          "x": 49.5,
+          "y": 283.0000305175781,
           "w": 700,
           "h": 400
         },

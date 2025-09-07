@@ -208,7 +208,7 @@ Send::Send(std::shared_ptr<vsomeip_v3::runtime> rtm,std::shared_ptr<vsomeip_v3::
 
 void Send::sendMessage(struct SomeipMessage* message,char* data,uint32_t length){
     // Create a new request
-    std::shared_ptr<vsomeip::message> rq = rtm_->create_message();
+    std::shared_ptr<vsomeip::message> rq = rtm_->create_message(message->reliable);
     
     // Set the service, instance, and method as target of the request
     rq->set_service(message->service);
@@ -264,7 +264,7 @@ void VsomeipCallbackWrapper::registerAvailabilityHandler(uint16_t service, uint1
                 
                 jsCallback.Call({result});
             });
-        });
+        },ANY_MAJOR,ANY_MINOR);
 }
 
 // Subscription handler wrapper

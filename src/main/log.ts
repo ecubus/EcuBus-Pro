@@ -12,7 +12,7 @@ import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
-import { SomeipMessage } from './vsomeip/client'
+import { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -618,38 +618,24 @@ export class SomeipLOG {
   }
   someipBase(header: Buffer, data: Buffer, ts: number) {
     try {
-      const headerInfo = {
-        ip: '',
-        port: 0,
-        protocol: 'unknown',
+      const dataInfo: SomeipMessage = {
         sending: false,
-        instance: 0
-      }
-      const dataInfo: {
-        serviceId: number
-        methodId: number
-        clientId: number
-        sessionId: number
-        protocolVersion: number
-        interfaceVersion: number
-        messageType: SomeipMessageType
-        returnCode: number
-        payload: Buffer
-      } = {
-        serviceId: 0,
-        methodId: 0,
-        clientId: 0,
-        sessionId: 0,
+        service: 0,
+        instance: 0,
+        method: 0,
+        client: 0,
+        session: 0,
         protocolVersion: 0,
         interfaceVersion: 0,
         messageType: SomeipMessageType.UNKNOWN,
         returnCode: 0,
-        payload: Buffer.from([])
+        payload: Buffer.from([]),
+        ts: ts
       }
-      dataInfo.serviceId = data.readUint16BE(0)
-      dataInfo.methodId = data.readUint16BE(2)
-      dataInfo.clientId = data.readUint16BE(8)
-      dataInfo.sessionId = data.readUint16BE(10)
+      dataInfo.service = data.readUint16BE(0)
+      dataInfo.method = data.readUint16BE(2)
+      dataInfo.client = data.readUint16BE(8)
+      dataInfo.session = data.readUint16BE(10)
       dataInfo.protocolVersion = data.readUint8(12)
       dataInfo.interfaceVersion = data.readUint8(13)
       dataInfo.messageType = data.readUint8(14)
@@ -662,57 +648,46 @@ export class SomeipLOG {
         2: 'tcp',
         3: 'unknown'
       }
-      headerInfo.ip = header.readUint32BE(0).toString(16)
-      headerInfo.port = header.readUint16BE(4)
-      headerInfo.protocol = protocolMap[header.readUint8(6)] || 'unknown'
-      headerInfo.sending = header.readUint8(7) == 1
-      headerInfo.instance = header.readUint16BE(8)
+      dataInfo.ip = header.readUint32BE(0).toString(16)
+      dataInfo.port = header.readUint16BE(4)
+      dataInfo.protocol = protocolMap[header.readUint8(6)] || 'unknown'
+      dataInfo.sending = header.readUint8(7) == 1
+      dataInfo.instance = header.readUint16BE(8)
 
       this.log.info({
         method: 'someipBase',
         deviceId: this.deviceId,
-        data: {
-          header: headerInfo,
-          data: dataInfo,
-          ts: ts
-        }
+        data: dataInfo
       })
-    } catch (e) {
+      this.event.emit('someip-frame', dataInfo)
+    } catch (e: any) {
       this.log.error({
         method: 'someipError',
         deviceId: this.deviceId,
         data: {
           ts: ts,
-          error: e
+          error: e.toString()
         }
       })
     }
-
-    // this.event.emit('someip-frame', {
-    //   header:headerInfo,
-    //   data:dataInfo,
-    //   ts:ts
-    // })
   }
-  someipMessage(message: SomeipMessage, ts: number) {
+  someipMessage(message: SomeipMessage, sending: boolean, ts: number) {
+    message.ts = ts
+    message.sending = sending
+    message.payload = Buffer.from(message.payload)
     this.log.info({
       method: 'someipBase',
       deviceId: this.deviceId,
+      data: message
+    })
+    this.event.emit('someip-frame', message)
+  }
+  someipServiceValid(info: VsomeipAvailabilityInfo, ts: number) {
+    this.log.info({
+      method: 'someipServiceValid',
+      deviceId: this.deviceId,
       data: {
-        header: {
-          sending: false
-        },
-        data: {
-          serviceId: message.service,
-          methodId: message.method,
-          clientId: message.client,
-          sessionId: message.session,
-          protocolVersion: message.protocolVersion,
-          interfaceVersion: message.interfaceVersion,
-          messageType: message.messageType,
-          returnCode: message.returnCode,
-          payload: Buffer.from(message.payload || [])
-        },
+        info,
         ts: ts
       }
     })
@@ -723,7 +698,7 @@ export class SomeipLOG {
       deviceId: this.deviceId,
       data: {
         ts: ts,
-        msg: msg
+        error: msg
       }
     })
   }

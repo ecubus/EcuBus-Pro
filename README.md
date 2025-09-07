@@ -44,6 +44,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
   - **GS_USB (CANDLE)**: CAN, CAN-FD [Detail](https://app.whyengineer.com/docs/um/can/can.html#gs-usb)
 - 🛠️ Comprehensive diagnostic capabilities
   - **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
+- 🖧  **SOME/IP**: SOME/IP protocol support - [Details](./docs/um/someip/index.md)
 - 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)
 - 🧪 **Test**: HIL Test Framework - [Details](./docs/um/test/test.md)
 - 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)

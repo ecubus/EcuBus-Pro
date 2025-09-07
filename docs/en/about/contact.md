@@ -9,4 +9,4 @@
 - Discord: [https://discord.gg/TTQGeW3Tgf](https://discord.gg/TTQGeW3Tgf)
 - 微信公众号:
 
-![alt text](mp.png) 
+![alt text](../../media/about/mp.png) 

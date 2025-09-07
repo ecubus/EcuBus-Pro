@@ -283,6 +283,9 @@
         "id": "trace",
         "options": {}
       }
+    },
+    "example": {
+      "catalog": "SOME/IP"
     }
   }
 }

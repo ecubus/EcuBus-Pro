@@ -1,9 +1,9 @@
 import { SomeipMessageRequest, SomeipMessageResponse, output } from 'ECB'
 
 Util.OnSomeipMessage('1234.*.*', async (msg) => {
-  console.log(msg.msg)
   if (msg instanceof SomeipMessageRequest) {
-    const response = SomeipMessageResponse.fromSomeipRequest(msg)
+    console.log('received request', msg.msg)
+    const response = SomeipMessageResponse.fromSomeipRequest(msg, Buffer.from('ecbbus-pro someip'))
     await output(response)
   }
 })

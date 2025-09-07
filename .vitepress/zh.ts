@@ -97,6 +97,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           text: 'UDS',
           items: [{ text: 'UDS DoIP 大文件传输', link: 'uds_doip_large_file/readme.md' }],
           collapsed: false
+        },
+        {
+          text: 'SOME/IP',
+          items: [{ text: '请求/响应', link: 'someip/readme.md' }],
+          collapsed: false
         }
       ]
     },

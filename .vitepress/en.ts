@@ -180,6 +180,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         {
           text: 'Panel',
           link: '/examples/panel/readme'
+        },
+        {
+          text: 'SOME/IP',
+          items: [{ text: 'Request/Response', link: '/examples/someip/readme' }],
+          collapsed: true
         }
       ]
     },

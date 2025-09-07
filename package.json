@@ -176,6 +176,9 @@
     "webpack-cli": "^5.1.4",
     "yaml": "^2.6.0"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.46.2"
+  },
   "overrides": {
     "esbuild": "^0.25.0",
     "axios": "^1.8.2",

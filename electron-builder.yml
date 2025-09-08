@@ -54,5 +54,3 @@ linux:
     Icon: ecubuspro
     Categoried: Development
   maintainer: https://github.com/ecubus/EcuBus-Pro
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/

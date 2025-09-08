@@ -1186,7 +1186,10 @@ export class NodeClass {
       const targetTester = Object.values(this.testers).find((t) => t.name == testerName)
       if (targetDevice && targetTester) {
         const cycle = 1
-        const seqIndex = targetTester.seqList.findIndex((t) => (t.name = seqName))
+        const seqIndex = targetTester.seqList.findIndex((t) => t.name == seqName)
+        if (seqIndex == -1) {
+          throw new Error(`sequence ${seqName} not found in ${testerName}`)
+        }
 
         const uds = new UDSTesterMain(
           {

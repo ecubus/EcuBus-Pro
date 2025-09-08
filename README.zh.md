@@ -44,7 +44,7 @@ EcuBus-Pro是商业汽车诊断工具（如`CAN-OE`）的开源替代品。它�
   - **GS_USB (CANDLE)**: CAN、CAN-FD [详情](https://app.whyengineer.com/docs/um/can/can.html#gs-usb)
 - 🛠️ 全面的诊断功能
   - **诊断协议**: CAN/CAN-FD、DoIP、LIN
-- 🖧  **SOME/IP**: SOME/IP协议支持 - [详情](./docs/um/someip/index.md)
+- 🌐 **SOME/IP**: SOME/IP协议支持 - [详情](./docs/um/someip/index.md)
 - 📝 **脚本**: 基于TypeScript的高级自动化 - [详情](./docs/um/script.md)
 - 🧪 **测试**: HIL测试框架 - [详情](./docs/um/test/test.md)
 - 📊 **数据库支持**: LIN LDF（编辑和导出）、CAN DBC（查看） - [详情](./docs/um/database.md)

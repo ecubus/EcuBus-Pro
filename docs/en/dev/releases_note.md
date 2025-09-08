@@ -1,4 +1,14 @@
 # EcuBus-Pro Release Notes
+## 0.8.55
+Changes from v0.8.54 to v0.8.55:
+
+* [feat]:add archLinux build in https://github.com/ecubus/EcuBus-Pro/pull/197 by @taotieren
+* [bug]:fix api runUdsSeq can run correnct sequence bug 
+* [feat]:base someip feature ok, [Detail](https://app.whyengineer.com/zh/docs/um/someip/)
+* [api]:add getSignal api 
+* [api]:add onSignal API
+---
+
 
 ## 0.8.54
 Changes from v0.8.53 to v0.8.54:

@@ -1,3 +1,5 @@
+import precisionTimer from './build/Release/precision_timer.node'
+
 /**
  * 定时任务信息
  */
@@ -6,8 +8,6 @@ export interface TimerTask {
   taskId: number
   /** 触发时间 */
   triggerTime: number
-  /** 用户数据 */
-  userData?: any
 }
 
 /**
@@ -16,26 +16,29 @@ export interface TimerTask {
  */
 export class PrecisionTimer {
   private timerName: string
-  private callback: (task: TimerTask) => void
-  private isCreated: boolean = false
 
-  constructor(name: string, callback: (task: TimerTask) => void) {
+  private isCreated: boolean = false
+  private timerMap: Map<number, () => void> = new Map()
+
+  constructor(name: string) {
     this.timerName = name
-    this.callback = callback
+  }
+  callCallback(task: TimerTask) {
+    const callback = this.timerMap.get(task.taskId)
+    if (callback) {
+      callback()
+    }
   }
 
   /**
    * 创建定时器
    */
-  async create(): Promise<void> {
+  create() {
     if (this.isCreated) {
-      throw new Error('Timer already created')
+      return
     }
 
-    // 动态导入原生模块
-    const precisionTimer = await this.loadPrecisionTimerModule()
-
-    precisionTimer.createPrecisionTimer(this.timerName, this.callback)
+    precisionTimer.createPrecisionTimer(this.timerName, this.callCallback.bind(this))
     this.isCreated = true
   }
 
@@ -46,17 +49,16 @@ export class PrecisionTimer {
    * @param userData 用户数据
    * @returns 任务ID
    */
-  async addTask(
-    delayMicrosec: number,
-    intervalMicrosec: number = 0,
-    userData?: any
-  ): Promise<number> {
+  addTask(delayMicrosec: number, intervalMicrosec: number = 0, callback: () => void): number {
     if (!this.isCreated) {
       throw new Error('Timer not created')
     }
 
-    const precisionTimer = await this.loadPrecisionTimerModule()
-    return precisionTimer.addTimerTask(this.timerName, delayMicrosec, intervalMicrosec, userData)
+    const id = precisionTimer.addTimerTask(this.timerName, delayMicrosec, intervalMicrosec)
+
+    this.timerMap.set(id, callback)
+
+    return id
   }
 
   /**
@@ -64,24 +66,22 @@ export class PrecisionTimer {
    * @param taskId 任务ID
    * @returns 是否成功取消
    */
-  async cancelTask(taskId: number): Promise<boolean> {
+  cancelTask(taskId: number): boolean {
     if (!this.isCreated) {
       throw new Error('Timer not created')
     }
 
-    const precisionTimer = await this.loadPrecisionTimerModule()
     return precisionTimer.cancelTimerTask(this.timerName, taskId)
   }
 
   /**
    * 销毁定时器
    */
-  async destroy(): Promise<void> {
+  destroy(): void {
     if (!this.isCreated) {
       return
     }
 
-    const precisionTimer = await this.loadPrecisionTimerModule()
     precisionTimer.destroyPrecisionTimer(this.timerName)
     this.isCreated = false
   }
@@ -90,25 +90,8 @@ export class PrecisionTimer {
    * 获取当前高精度时间戳
    * @returns 时间戳（微秒）
    */
-  static async getCurrentTimestamp(): Promise<number> {
-    const precisionTimer = await PrecisionTimer.loadPrecisionTimerModuleStatic()
+  static getCurrentTimestamp(): number {
     return precisionTimer.getCurrentTimestamp()
-  }
-
-  private async loadPrecisionTimerModule(): Promise<any> {
-    return PrecisionTimer.loadPrecisionTimerModuleStatic()
-  }
-
-  private static async loadPrecisionTimerModuleStatic(): Promise<any> {
-    try {
-      // 在实际使用时，这里应该导入编译后的原生模块
-      // return require('./precision_timer.node');
-      throw new Error(
-        'Precision timer native module not available. Please compile the C++ module first.'
-      )
-    } catch (error) {
-      throw new Error(`Failed to load precision timer module: ${error}`)
-    }
   }
 }
 

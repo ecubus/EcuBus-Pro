@@ -69,6 +69,8 @@ import {
   VsomeipState
 } from '../vsomeip'
 
+import { PrecisionTimer } from '../timer/timer'
+
 const libPath = path.dirname(dllLib)
 
 let monitor: IntervalHistogram | undefined
@@ -284,6 +286,7 @@ let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
+const canPeriodTimer = new PrecisionTimer('canPeriodTimer')
 
 async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
   let activeKey = ''
@@ -582,7 +585,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     }, 200)
     logQ.startTimer()
   }
-
+  canPeriodTimer.create()
   global.startTs = getTsUs()
 }
 
@@ -674,10 +677,10 @@ ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
 })
 
 interface timerType {
-  timer: NodeJS.Timeout
   socket: CAN_SOCKET
   period: number
   ia: CanInterAction
+  timerid: number
 }
 const timerMap = new Map<string, timerType>()
 
@@ -691,10 +694,11 @@ export function globalStop(emit = false) {
   udsTesterMap.clear()
 
   timerMap.forEach((value) => {
-    clearInterval(value.timer)
+    canPeriodTimer.cancelTask(value.timerid)
     value.socket.close()
   })
   timerMap.clear()
+  canPeriodTimer.destroy()
   for (const t of exTransportList) {
     removeTransport(t)
   }
@@ -1069,18 +1073,22 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     //if timer exist, clear it
     const timer = timerMap.get(id)
     if (timer) {
-      clearInterval(timer.timer)
+      canPeriodTimer.cancelTask(timer.timerid)
       timer.socket.close()
     }
-
+    const timerid = canPeriodTimer.addTask(
+      (ia.trigger.period || 10) * 1000,
+      (ia.trigger.period || 10) * 1000,
+      () => {
+        send(id)
+      }
+    )
     //create new timer
-    const t = setInterval(() => {
-      send(id)
-    }, ia.trigger.period || 10)
+
     timerMap.set(id, {
-      timer: t,
       socket: socket,
       period: ia.trigger.period || 10,
+      timerid: timerid,
       ia: ia
     })
   } else {
@@ -1091,7 +1099,7 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
   const id = arg[0] as string
   const timer = timerMap.get(id)
   if (timer) {
-    clearInterval(timer.timer)
+    canPeriodTimer.cancelTask(timer.timerid)
     timer.socket.close()
     timerMap.delete(id)
   }

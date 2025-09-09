@@ -134,7 +134,7 @@ void HighPrecisionDelay(uint64_t delayMicrosec) {
         uint32_t sleepMs = static_cast<uint32_t>(delayMicrosec / 1000);
         
         uint64_t remainingMicrosec = delayMicrosec % 1000;
-        if(sleepMs > 1) {
+        if(sleepMs >= 1) {
             sleepMs = sleepMs - 1;
             remainingMicrosec+=1000;
         }

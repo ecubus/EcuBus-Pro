@@ -286,7 +286,7 @@ let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
-const canPeriodTimer = new PrecisionTimer('canPeriodTimer')
+const canPeriodTimer = new PrecisionTimer('___canPeriodTimer___')
 
 async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
   let activeKey = ''

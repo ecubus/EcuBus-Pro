@@ -25,10 +25,8 @@ jobs:
         run: npm install
       - name: Build with VitePress
         run: npm run docs:build
-      - name: Build docan
-        run: npm run docan
-      - name: Build dolin
-        run: npm run dolin
+      - name: Build native
+        run: npm run native
       - name: Build worker
         run: npm run worker
       - name: Build api

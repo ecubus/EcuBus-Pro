@@ -135,7 +135,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           text: 'CAN',
           items: [
             { text: 'CAN Basic', link: '/examples/can/readme' },
-            { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' }
+            { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
+            { text: 'CAN High-Precision Timer', link: '/examples/can_timer/readme' }
           ],
           collapsed: true
         },

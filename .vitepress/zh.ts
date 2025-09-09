@@ -86,6 +86,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       base: '/zh/examples/',
       items: [
         {
+          text: 'CAN',
+          items: [{ text: 'CAN高精度定时器', link: 'can_timer/readme.md' }],
+          collapsed: false
+        },
+        {
           text: 'LIN',
           items: [
             { text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' },

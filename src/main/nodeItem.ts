@@ -770,11 +770,9 @@ export class NodeClass {
     }
     return info
   }
-  varApi(data: { method: 'setVar' | 'getVar'; name: string; value: number | string | number[] }) {
+  varApi(data: { method: 'setVar'; name: string; value: number | string | number[] }) {
     if (data.method == 'setVar') {
       this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
-    } else if (data.method == 'getVar') {
-      return this.varLog.getVar(data.name)
     } else {
       throw new Error(`invalid method ${data.method}`)
     }

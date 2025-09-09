@@ -23,12 +23,8 @@ jobs:
           cache: npm # or pnpm / yarn
       - name: Install dependencies
         run: npm install
-      - name: Build docan
-        run: npm run docan
-      - name: Build dolin
-        run: npm run dolin
-      - name: Build someip
-        run: npm run someip
+      - name: Build native
+        run: npm run native
       - name: Build worker
         run: npm run worker
       - name: Build api

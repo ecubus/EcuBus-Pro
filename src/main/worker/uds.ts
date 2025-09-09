@@ -48,7 +48,9 @@ import { dot } from 'node:test/reporters'
 import assert, { AssertionError } from 'node:assert'
 import { writeMessageData as writeLinMessageData } from 'src/renderer/src/database/ldf/calc'
 import { setSignal as setSignalNode } from '../util'
-
+export { PrecisionTimer } from '../timer/timer'
+export type { TimerTask } from '../timer/timer'
+import { setVar as setVarMain, getVar as getVarMain } from '../var'
 /**
  * Node.js built-in assertion library for testing.
  * Provides various assertion methods to validate test expectations.
@@ -1858,6 +1860,7 @@ export class UtilClass {
   ) {
     // process.chdir(projectPath)
     this.testerName = testerName
+
     for (const key of Object.keys(val)) {
       //convert all param.value to buffer
       const service = val[key]
@@ -2327,17 +2330,23 @@ export async function setVar<T extends keyof VariableMap>(
   value: VariableMap[T]
 ): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
-      id: id,
-      event: 'varApi',
-      data: {
-        method: 'setVar',
-        name,
-        value
-      }
-    })
-    emitMap.set(id, { resolve, reject })
-    id++
+    const { found, target } = setVarMain(name, value)
+    if (found && target) {
+      workerpool.workerEmit({
+        id: id,
+        event: 'varApi',
+        data: {
+          method: 'setVar',
+          name,
+          value
+        }
+      })
+      emitMap.set(id, { resolve, reject })
+
+      id++
+    } else {
+      reject(new Error(`var ${name} not found`))
+    }
   })
 
   return await p
@@ -2348,30 +2357,18 @@ export async function setVar<T extends keyof VariableMap>(
  *
  * @category Variable
  * @param {string} varName - The name of the variable to get
- * @returns {Promise<VarItem>} - Returns a promise that resolves with the variable value and metadata
+ * @returns {VarItem} - Returns the variable value and metadata
  *
  * @example
  * ```ts
  * // Get a variable value
- * const var1 = await getVar('namespace.var1');
+ * const var1 = getVar('namespace.var1');
  * console.log(var1.value); // Access the value
  * console.log(var1.type); // Access the type
  * ```
  */
-export async function getVar<T extends keyof VariableMap>(varName: T): Promise<VariableMap[T]> {
-  const p: Promise<VariableMap[T]> = new Promise<VariableMap[T]>((resolve, reject) => {
-    workerpool.workerEmit({
-      id: id,
-      event: 'varApi',
-      data: {
-        method: 'getVar',
-        name: varName
-      }
-    })
-    emitMap.set(id, { resolve, reject })
-    id++
-  })
-  return await p
+export function getVar<T extends keyof VariableMap>(varName: T): VariableMap[T] {
+  return getVarMain(varName) as VariableMap[T]
 }
 
 /**

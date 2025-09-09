@@ -1,9 +1,8 @@
 /* eslint-disable no-var */
-import { UDSClass, CanMessage } from './uds'
+import { UDSClass } from './uds'
 
 declare global {
   var Util: UDSClass
 }
 
 export {}
-

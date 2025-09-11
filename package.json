@@ -166,7 +166,7 @@
     "typedoc": "^0.27.6",
     "typescript": "^5.3.3",
     "viewerjs": "^1.11.6",
-    "vite": "^5.4.19",
+    "vite": "^5.4.20",
     "vite-plugin-conditional-compiler": "^0.3.1",
     "vite-plugin-node-polyfills": "^0.21.0",
     "vitepress": "^1.6.3",

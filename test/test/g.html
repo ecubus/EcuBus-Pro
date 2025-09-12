@@ -402,16 +402,51 @@
                             const point = api.coord([viewportStart, yPos]);
                             
                             return {
-                                type: 'text',
-                                style: {
-                                    text: name,
-                                    x: point[0] - 30,
-                                    y: point[1],
-                                    textAlign: 'right',
-                                    textVerticalAlign: 'middle',
-                                    fontSize: 12,
-                                    fill: '#333',
-                                    fontWeight: 'normal'
+                                type: 'group',
+                                children: [
+                                    // 按键背景
+                                    {
+                                        type: 'rect',
+                                        shape: {
+                                            x: point[0] - 80,
+                                            y: point[1] - 12,
+                                            width: 70,
+                                            height: 24,
+                                            r: 4
+                                        },
+                                        style: {
+                                            fill: '#f0f0f0',
+                                            stroke: '#ccc',
+                                            lineWidth: 1
+                                        }
+                                    },
+                                    // 按键文本
+                                    {
+                                        type: 'text',
+                                        style: {
+                                            text: '你好',
+                                            x: point[0] - 45,
+                                            y: point[1],
+                                            textAlign: 'center',
+                                            textVerticalAlign: 'middle',
+                                            fontSize: 12,
+                                            fill: '#333',
+                                            fontWeight: 'normal'
+                                        }
+                                    }
+                                ],
+                                // 添加交互样式
+                                onmouseover: function() {
+                                    this.children[0].style.fill = '#e0e0e0';
+                                    this.children[0].style.stroke = '#999';
+                                },
+                                onmouseout: function() {
+                                    this.children[0].style.fill = '#f0f0f0';
+                                    this.children[0].style.stroke = '#ccc';
+                                },
+                                onclick: function() {
+                                    console.log('点击了标签:', name);
+                                    // 这里可以添加点击事件处理逻辑
                                 }
                             };
                         },

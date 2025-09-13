@@ -327,8 +327,8 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-const maxLogCount = 110
-const showLogCount = 100
+const maxLogCount = 20000
+const showLogCount = 1000
 
 function insertData2(data: LogData[]) {
   if (isOverwrite.value) {

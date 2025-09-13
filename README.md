@@ -32,7 +32,7 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
 
 - 🆓 Open-source and free to use
 - 🚀 Modern, intuitive user interface
-- 💻 Cross-platform support (Windows, Linux, MacOS) - [Install](./docs/about/install.md)
+- 💻 Cross-platform support (Windows, Linux, MacOS) - [Install](./docs/en/about/install.md)
 - 🔌 Multi-hardware support
   - **[EcuBus-LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)**: LIN (Support Lin conformance test), [PWM](https://app.whyengineer.com/docs/um/pwm/pwm.html)
   - **PEAK**: CAN, CAN-FD, LIN
@@ -44,13 +44,13 @@ EcuBus-Pro is an open-source alternative to commercial automotive diagnostic too
   - **GS_USB (CANDLE)**: CAN, CAN-FD [Detail](https://app.whyengineer.com/docs/um/can/can.html#gs-usb)
 - 🛠️ Comprehensive diagnostic capabilities
   - **Diagnostic Protocols**: CAN/CAN-FD, DoIP, LIN
-- 🌐 **SOME/IP**: SOME/IP protocol support - [Details](./docs/um/someip/index.md)
-- 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/um/script.md)
-- 🧪 **Test**: HIL Test Framework - [Details](./docs/um/test/test.md)
-- 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/um/database.md)
-- 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/um/graph/graph.md)
-- ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/um/cli.md)
-- 🎨 **Panel**: Drag-and-drop interface builder for custom UI - [Details](./docs/um/panel/index.md)
+- 🌐 **SOME/IP**: SOME/IP protocol support - [Details](./docs/en/um/someip/index.md)
+- 📝 **Scripting**: Advanced TypeScript-based automation - [Details](./docs/en/um/script.md)
+- 🧪 **Test**: HIL Test Framework - [Details](./docs/en/um/test/test.md)
+- 📊 **Database Support**: LIN LDF (edit & export), CAN DBC (view) - [Details](./docs/en/um/database.md)
+- 📈 **Data Visualization**: Real-time signal graphing and analysis - [Details](./docs/en/um/graph/graph.md)
+- ⌨️ **Command Line**: Full-featured CLI for automation and integration - [Details](./docs/en/um/cli.md)
+- 🎨 **Panel**: Drag-and-drop interface builder for custom UI - [Details](./docs/en/um/panel/index.md)
 
 [Read the Docs to Learn More.](https://app.whyengineer.com)
 

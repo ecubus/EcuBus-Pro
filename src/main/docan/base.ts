@@ -260,7 +260,9 @@ export abstract class CanBase {
         max: 0,
         frameSentFreq: 0,
         frameRecvFreq: 0,
-        frameFreq: 0
+        frameFreq: 0,
+        sentCnt: this.busLoadingStats.sentFrames,
+        recvCnt: this.busLoadingStats.recvFrames
       }
     }
 
@@ -273,7 +275,9 @@ export abstract class CanBase {
         max: this.busLoadingStats.maxLoading,
         frameSentFreq: 0,
         frameRecvFreq: 0,
-        frameFreq: 0
+        frameFreq: 0,
+        sentCnt: this.busLoadingStats.sentFrames,
+        recvCnt: this.busLoadingStats.recvFrames
       }
     }
 
@@ -319,7 +323,9 @@ export abstract class CanBase {
       max: Number(this.busLoadingStats.maxLoading.toFixed(2)),
       frameSentFreq: Math.floor(frameSentFreq),
       frameRecvFreq: Math.floor(frameRecvFreq),
-      frameFreq: Math.floor(frameFreq)
+      frameFreq: Math.floor(frameFreq),
+      sentCnt: this.busLoadingStats.sentFrames,
+      recvCnt: this.busLoadingStats.recvFrames
     }
   }
 }
@@ -436,4 +442,3 @@ export class CAN_SOCKET {
     this.closed = true
   }
 }
-

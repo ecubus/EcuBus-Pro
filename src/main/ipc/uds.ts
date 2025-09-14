@@ -326,7 +326,9 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
                 { key: `Statistics.${canDevice.id}.BusLoadAvg`, value: busLoad.average },
                 { key: `Statistics.${canDevice.id}.FrameSentFreq`, value: busLoad.frameSentFreq },
                 { key: `Statistics.${canDevice.id}.FrameRecvFreq`, value: busLoad.frameRecvFreq },
-                { key: `Statistics.${canDevice.id}.FrameFreq`, value: busLoad.frameFreq }
+                { key: `Statistics.${canDevice.id}.FrameFreq`, value: busLoad.frameFreq },
+                { key: `Statistics.${canDevice.id}.SentCnt`, value: busLoad.sentCnt },
+                { key: `Statistics.${canDevice.id}.RecvCnt`, value: busLoad.recvCnt }
               ],
               currentTs
             )

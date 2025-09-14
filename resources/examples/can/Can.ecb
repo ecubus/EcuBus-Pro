@@ -68562,7 +68562,49 @@
     },
     "guages": {},
     "vars": {},
-    "datas": {},
+    "datas": {
+      "Statistics.30dc0575-1555-40e4-802a-150e76338671.FrameSentFreq": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.30dc0575-1555-40e4-802a-150e76338671.FrameSentFreq",
+        "name": "FrameSentFreq",
+        "color": "#2fe33b",
+        "yAxis": {
+          "min": 0,
+          "max": 10000,
+          "unit": "f/s"
+        },
+        "bindValue": {
+          "variableId": "Statistics.30dc0575-1555-40e4-802a-150e76338671.FrameSentFreq",
+          "variableType": "system",
+          "variableName": "FrameSentFreq",
+          "variableFullName": "Statistics.SIMULATE_0.FrameSentFreq"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "Statistics.30dc0575-1555-40e4-802a-150e76338671.SentCnt": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.30dc0575-1555-40e4-802a-150e76338671.SentCnt",
+        "name": "SentCnt",
+        "color": "#06ec1a",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "Statistics.30dc0575-1555-40e4-802a-150e76338671.SentCnt",
+          "variableType": "system",
+          "variableName": "SentCnt",
+          "variableFullName": "Statistics.SIMULATE_0.SentCnt"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      }
+    },
     "panels": {
       "c10776a8-fc8c-45a3-8787-d5467bdcd26a": {
         "name": "test",
@@ -68711,10 +68753,10 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 853.5,
-          "y": 0,
+          "x": 1037.5,
+          "y": 5,
           "w": 853.5,
-          "h": 330
+          "h": 826
         },
         "title": "cani",
         "label": "IA",
@@ -68729,7 +68771,7 @@
       "trace": {
         "pos": {
           "x": 0,
-          "y": 330,
+          "y": 191,
           "w": 853.5,
           "h": 330
         },
@@ -68741,7 +68783,7 @@
       "graph": {
         "pos": {
           "x": 853.5,
-          "y": 330,
+          "y": 191,
           "w": 853.5,
           "h": 330
         },
@@ -68751,6 +68793,34 @@
         "options": {
           "params": {
             "edit-index": "graph"
+          }
+        }
+      },
+      "variable": {
+        "pos": {
+          "x": 420,
+          "y": 174.5,
+          "w": 989,
+          "h": 400
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
+        "options": {}
+      },
+      "datas": {
+        "pos": {
+          "x": 706,
+          "y": 291.5,
+          "w": 1039,
+          "h": 400
+        },
+        "title": "datas",
+        "label": "Datas",
+        "id": "datas",
+        "options": {
+          "params": {
+            "edit-index": "datas"
           }
         }
       }

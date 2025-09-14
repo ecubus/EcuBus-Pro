@@ -54,15 +54,50 @@ export function getAllSysVar(
   }
 
   for (const device of Object.values(devices)) {
-    const buslist = [
-      'BusLoad',
-      'BusLoadMin',
-      'BusLoadMax',
-      'BusLoadAvg',
-      'FrameSentFreq',
-      'FrameRecvFreq',
-      'FrameFreq'
-    ]
+    const buslist: Record<string, { min: number; max?: number; unit?: string }> = {
+      BusLoad: {
+        min: 0,
+        max: 100,
+        unit: '%'
+      },
+      BusLoadMin: {
+        min: 0,
+        max: 100,
+        unit: '%'
+      },
+      BusLoadMax: {
+        min: 0,
+        max: 100,
+        unit: '%'
+      },
+      BusLoadAvg: {
+        min: 0,
+        max: 100,
+        unit: '%'
+      },
+      FrameSentFreq: {
+        min: 0,
+        max: 100,
+        unit: 'f/s'
+      },
+      FrameRecvFreq: {
+        min: 0,
+        max: 100,
+        unit: 'f/s'
+      },
+      FrameFreq: {
+        min: 0,
+        max: 100,
+        unit: 'f/s'
+      },
+      SentCnt: {
+        min: 0
+      },
+      RecvCnt: {
+        min: 0
+      }
+    }
+
     if (device.type === 'can' && device.canDevice) {
       list[`Statistics.${device.canDevice.id}`] = {
         type: 'system',
@@ -70,20 +105,20 @@ export function getAllSysVar(
         name: device.canDevice.name,
         parentId: 'Statistics'
       }
-      for (const item of buslist) {
-        const isFrameFreq = item.includes('Frame')
+      for (const key of Object.keys(buslist)) {
+        const item = buslist[key as keyof typeof buslist]
 
-        list[`Statistics.${device.canDevice.id}.${item}`] = {
+        list[`Statistics.${device.canDevice.id}.${key}`] = {
           type: 'system',
-          id: `Statistics.${device.canDevice.id}.${item}`,
-          name: `${item}`,
+          id: `Statistics.${device.canDevice.id}.${key}`,
+          name: `${key}`,
           parentId: `Statistics.${device.canDevice.id}`,
           value: {
             type: 'number',
             initValue: 0,
-            min: 0,
-            max: isFrameFreq ? 10000 : 100,
-            unit: isFrameFreq ? 'f/s' : '%'
+            min: item.min,
+            max: item.max,
+            unit: item.unit
           }
         }
       }
@@ -128,4 +163,3 @@ export function getAllSysVar(
   }
   return list
 }
-

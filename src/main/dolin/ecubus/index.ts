@@ -519,7 +519,10 @@ export class LinCable extends LinBase {
         str += m.data.toString('hex').padStart(2 * m.data.length, '0')
 
         // checksum
-        const checksum = m.lincable?.checkSum || getCheckSum(m.data, m.checksumType, pid)
+        const checksum =
+          m.lincable?.checkSum == undefined
+            ? getCheckSum(m.data, m.checksumType, pid)
+            : m.lincable.checkSum
         str += checksum.toString(16).padStart(2, '0')
 
         //dinter length

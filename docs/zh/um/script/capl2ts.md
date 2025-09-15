@@ -24,6 +24,7 @@ EcuBus-Pro 给出的答案是：使用 `Typescript` 编写脚本。EcuBus-Pro �
 | **打印日志**     | `write("Hello CAPL");`                        | `console.log("Hello EcuBus-Pro");`                        |
 | **消息接收事件** | `on message CAN1.MyMsg{  write("Received");}` | `Util.OnCan(0x1, (msg) => {  console.log("Received");});` |
 | **事件回调**     | `on key 'a' { ... }`                          | `Util.OnKey('a', () => { ... });`                         |
+| **变量监听**     | `on envVar EnvChecksumError { ... }`          | `Util.OnVar('EnvChecksumError', () => { ... });`          |
 
 
 
@@ -31,4 +32,5 @@ EcuBus-Pro 给出的答案是：使用 `Typescript` 编写脚本。EcuBus-Pro �
 
 > 示例持续完善中，欢迎大家一起贡献示例
 1. [监听信号的变化，输出时间间隔](./capl2ts1.md)
+2. [监听变量的变化，发生Lin信号,手动设置错误的CheckSum](./capl2ts2.md)
 

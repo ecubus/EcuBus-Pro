@@ -121,7 +121,7 @@
     "vue-router": "^4.2.5",
     "vuedraggable": "4.1.0",
     "vxe-pc-ui": "^4.2.53",
-    "vxe-table": "4.9.4",
+    "vxe-table": "^4.16.11",
     "winston": "^3.17.0",
     "workerpool": "github:frankie-zeng/workerpool#24f9e85",
     "xterm": "^5.3.0"

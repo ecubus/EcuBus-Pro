@@ -512,3 +512,20 @@ test('reset', async () => {
 
   assert.equal(getErrorFlag(result.msg.data, 5), 1)
 })
+
+test('1.2.3', async () => {
+  const msg = {
+    frameId: 6,
+    direction: LinDirection.SEND,
+    data: Buffer.from([0, 0xa5, 0x80]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  const result = await sendLinWithSend(msg, {})
+  assert(result)
+  const msg1 = FrameMap['Slave1_TxFrame1']
+  const result1 = await sendLinWithRecv(msg1, {})
+  assert(result1.result)
+  assert(result1.msg)
+
+  assert.equal(getErrorFlag(result1.msg.data, 5), 0)
+})

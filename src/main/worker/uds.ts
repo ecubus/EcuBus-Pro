@@ -174,7 +174,7 @@ async function preserveErrorStack<T>(fn: () => T | Promise<T>): Promise<T> {
  */
 
 export function test(name: string, fn: () => void | Promise<void>) {
-  nodeTest(name, async (t) => {
+  selfTest(name, async (t) => {
     if (!init) {
       try {
         await initfunc()
@@ -205,7 +205,7 @@ export function test(name: string, fn: () => void | Promise<void>) {
 }
 
 test.skip = function (name: string, fn: () => void | Promise<void>) {
-  nodeTest(name, (t) => {
+  selfTest(name, (t) => {
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
@@ -409,6 +409,7 @@ import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from '
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
 global.dataSet = workerData as DataSet
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
+const selfTest = process.env.ONLY ? nodeTest.only : nodeTest
 // export { selfDescribe as describe }
 
 /**

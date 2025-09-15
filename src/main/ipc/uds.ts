@@ -1008,14 +1008,18 @@ function send(id: string) {
   }
   if (message) {
     const data = getMessageData(message)
-    item.socket.write(data).catch(null)
+    item.socket.write(data).catch(() => {
+      null
+    })
   } else {
     const len = getLenByDlc(item.ia.dlc, item.ia.type.includes('fd'))
     const b = Buffer.alloc(len)
     for (const [index, d] of item.ia.data.entries()) {
       b[index] = parseInt(d, 16)
     }
-    item.socket.write(b).catch(null)
+    item.socket.write(b).catch(() => {
+      null
+    })
   }
 }
 ipcMain.on('ipc-update-can-signal', (event, ...arg) => {

@@ -75,7 +75,11 @@ export class PrecisionTimer {
   callCallback(task: TimerTask) {
     const callback = this.timerMap.get(task.taskId)
     if (callback) {
-      callback()
+      try {
+        callback()
+      } catch (error) {
+        null
+      }
     }
   }
 

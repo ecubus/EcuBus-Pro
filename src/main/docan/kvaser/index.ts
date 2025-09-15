@@ -462,7 +462,7 @@ export class KVASER_CAN extends CanBase {
           const str = err2str(res)
           reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, str))
 
-          this.close(false, str)
+          // this.close(false, str)
         }
       }
     )

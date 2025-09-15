@@ -72,13 +72,13 @@
           {
             "trigger": {
               "type": "periodic",
-              "period": 10
+              "period": 1
             },
             "name": "",
             "id": "1",
             "channel": "030b067c-a10c-464e-b54f-d442b525becc",
-            "type": "can",
-            "dlc": 8,
+            "type": "canfd",
+            "dlc": 15,
             "data": [
               "11",
               "22",
@@ -89,7 +89,36 @@
               "77",
               "88"
             ],
-            "_X_ROW_KEY": "row_24"
+            "_X_ROW_KEY": "row_24",
+            "brs": true
+          },
+          {
+            "trigger": {
+              "type": "periodic",
+              "period": 3
+            },
+            "name": "",
+            "id": "2",
+            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "type": "canfd",
+            "dlc": 15,
+            "data": [],
+            "_X_ROW_KEY": "row_25",
+            "brs": true
+          },
+          {
+            "trigger": {
+              "type": "periodic",
+              "period": 1
+            },
+            "name": "",
+            "id": "3",
+            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "type": "canfd",
+            "dlc": 15,
+            "data": [],
+            "_X_ROW_KEY": "row_26",
+            "brs": true
           }
         ]
       }
@@ -112,7 +141,50 @@
       "can": {}
     },
     "graphs": {},
-    "guages": {},
+    "guages": {
+      "Statistics.030b067c-a10c-464e-b54f-d442b525becc.BusLoad": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.030b067c-a10c-464e-b54f-d442b525becc.BusLoad",
+        "name": "BusLoad",
+        "color": "#daff25",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "Statistics.030b067c-a10c-464e-b54f-d442b525becc.BusLoad",
+          "variableType": "system",
+          "variableName": "BusLoad",
+          "variableFullName": "Statistics.KVASER_0.BusLoad"
+        },
+        "graph": {
+          "id": "gauge"
+        }
+      },
+      "Statistics.030b067c-a10c-464e-b54f-d442b525becc.FrameSentFreq": {
+        "type": "variable",
+        "enable": true,
+        "id": "Statistics.030b067c-a10c-464e-b54f-d442b525becc.FrameSentFreq",
+        "name": "FrameSentFreq",
+        "color": "#bd5d7e",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "f/s"
+        },
+        "bindValue": {
+          "variableId": "Statistics.030b067c-a10c-464e-b54f-d442b525becc.FrameSentFreq",
+          "variableType": "system",
+          "variableName": "FrameSentFreq",
+          "variableFullName": "Statistics.KVASER_0.FrameSentFreq"
+        },
+        "graph": {
+          "id": "gauge"
+        }
+      }
+    },
     "vars": {},
     "datas": {},
     "panels": {},
@@ -137,8 +209,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 233,
-          "y": 133,
+          "x": 110,
+          "y": 81,
           "w": 802,
           "h": 601
         },
@@ -149,7 +221,7 @@
       },
       "network": {
         "pos": {
-          "x": 1650,
+          "x": 1625,
           "y": 0,
           "w": 600,
           "h": 400
@@ -161,8 +233,8 @@
       },
       "c24115ee-7080-4573-a216-af88cea85085_ia": {
         "pos": {
-          "x": 1152,
-          "y": 348,
+          "x": 463,
+          "y": 400,
           "w": 1041,
           "h": 400
         },
@@ -178,8 +250,8 @@
       },
       "trace": {
         "pos": {
-          "x": 416,
-          "y": 55,
+          "x": 37,
+          "y": 0,
           "w": 965,
           "h": 400
         },
@@ -187,9 +259,25 @@
         "label": "Trace",
         "id": "trace",
         "options": {}
+      },
+      "gauge": {
+        "pos": {
+          "x": 676,
+          "y": 0,
+          "w": 1196,
+          "h": 400
+        },
+        "title": "gauge",
+        "label": "Gauge",
+        "id": "gauge",
+        "options": {
+          "params": {
+            "edit-index": "gauge"
+          }
+        }
       }
     },
-     "example": {
+    "example": {
       "catalog": "CAN"
     }
   }

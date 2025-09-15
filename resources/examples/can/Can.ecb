@@ -53,6 +53,19 @@
               "80"
             ],
             "_X_ROW_KEY": "row_2971"
+          },
+          {
+            "trigger": {
+              "type": "periodic",
+              "period": 100
+            },
+            "name": "",
+            "id": "1",
+            "channel": "30dc0575-1555-40e4-802a-150e76338671",
+            "type": "can",
+            "dlc": 8,
+            "data": [],
+            "_X_ROW_KEY": "row_60"
           }
         ]
       }

@@ -169,6 +169,8 @@ bool WaitForStopSignal(PlatformHandle stopEvent, uint32_t timeoutMs) {
 
 // 定时器线程入口函数
 void TimerThreadEntry(TimerContext* context) {
+    const uint64_t BATCH_THRESHOLD_MICROSEC = 100; // 100微秒内的任务批量处理
+    
     while (!context->stopped.load()) {
         std::unique_lock<std::mutex> lock(context->queueMutex);
         
@@ -188,52 +190,99 @@ void TimerThreadEntry(TimerContext* context) {
         uint64_t currentTime = GetHighPrecisionTimestamp(context);
         
         if (nextTask->triggerTimeMicrosec <= currentTime) {
-            // 时间到了，执行任务
-            context->taskQueue.pop();
+            // 收集所有在批处理阈值内的就绪任务
+            std::vector<TimerTask*> readyTasks;
+            uint64_t batchEndTime = currentTime + BATCH_THRESHOLD_MICROSEC;
+            
+            // 收集当前时间之前的任务和批处理阈值内的任务
+            while (!context->taskQueue.empty()) {
+                auto task = context->taskQueue.top();
+                if (task->triggerTimeMicrosec <= batchEndTime) {
+                    context->taskQueue.pop();
+                    readyTasks.push_back(task);
+                } else {
+                    break; // 后续任务都太晚了，停止收集
+                }
+            }
+            
             lock.unlock();
             
-            if (nextTask->active.load()) {
-                // 调用JavaScript回调
-                auto callback = [](Napi::Env env, Napi::Function jsCallback, TimerTask* task) {
-                    if (!task) {
+            // 过滤出活跃的任务并准备回调数据
+            std::vector<TimerTask*> activeTasks;
+            std::vector<TimerTask*> periodicTasksToReschedule;
+            
+            for (auto task : readyTasks) {
+                if (task->active.load()) {
+                    activeTasks.push_back(task);
+                    
+                    // 检查是否需要重新调度周期性任务
+                    if (task->intervalMicrosec > 0) {
+                        periodicTasksToReschedule.push_back(task);
+                    }
+                }
+            }
+            
+            // 如果有活跃任务，进行批量回调
+            if (!activeTasks.empty()) {
+                // 批量调用JavaScript回调
+                auto callback = [](Napi::Env env, Napi::Function jsCallback, std::vector<TimerTask*>* tasks) {
+                    if (!tasks || tasks->empty()) {
                         jsCallback.Call({env.Null()});
                         return;
                     }
                     
-                    Napi::Object taskObj = Napi::Object::New(env);
-                    taskObj.Set("taskId", Napi::Number::New(env, static_cast<double>(task->taskId)));
-                    taskObj.Set("triggerTime", Napi::Number::New(env, static_cast<double>(task->triggerTimeMicrosec)));
-                    
-                    jsCallback.Call({taskObj});
-                };
-                
-                // 异步调用JavaScript回调
-                context->callbackTsfn.NonBlockingCall(nextTask, callback);
-                
-                // 如果是周期性任务，重新添加到队列
-                if (nextTask->intervalMicrosec > 0 && nextTask->active.load()) {
-                    // 基于绝对时间调度，避免累积漂移
-                    // 计算下一次应该触发的绝对时间
-                    uint64_t nextScheduledTime = nextTask->originalTriggerTime + nextTask->intervalMicrosec;
-                    
-                    // 如果计划时间已经过去太多，则跳过错过的周期
-                    while (nextScheduledTime <= currentTime) {
-                        nextScheduledTime += nextTask->intervalMicrosec;
+                    // 创建任务数组
+                    Napi::Array taskArray = Napi::Array::New(env, tasks->size());
+                    for (size_t i = 0; i < tasks->size(); i++) {
+                        TimerTask* task = (*tasks)[i];
+                        Napi::Object taskObj = Napi::Object::New(env);
+                        taskObj.Set("taskId", Napi::Number::New(env, static_cast<double>(task->taskId)));
+                        taskObj.Set("triggerTime", Napi::Number::New(env, static_cast<double>(task->triggerTimeMicrosec)));
+                        taskArray.Set(i, taskObj);
                     }
                     
-                    // 更新触发时间和原始计划时间
-                    nextTask->triggerTimeMicrosec = nextScheduledTime;
-                    nextTask->originalTriggerTime = nextScheduledTime;
+                    jsCallback.Call({taskArray});
                     
-                    std::lock_guard<std::mutex> queueLock(context->queueMutex);
-                    context->taskQueue.push(nextTask);
-                } else {
-                    // 非周期性任务或已取消的任务，手动释放内存
-                    delete nextTask;
+                    // 清理传递的任务向量
+                    delete tasks;
+                };
+                
+                // 创建任务向量的副本用于传递给回调
+                auto* tasksForCallback = new std::vector<TimerTask*>(activeTasks);
+                
+                // 异步调用JavaScript回调（批量）
+                context->callbackTsfn.NonBlockingCall(tasksForCallback, callback);
+            }
+            
+            // 重新调度周期性任务
+            if (!periodicTasksToReschedule.empty()) {
+                std::lock_guard<std::mutex> queueLock(context->queueMutex);
+                for (auto task : periodicTasksToReschedule) {
+                    if (task->active.load()) {
+                        // 基于绝对时间调度，避免累积漂移
+                        // 计算下一次应该触发的绝对时间
+                        uint64_t nextScheduledTime = task->originalTriggerTime + task->intervalMicrosec;
+                        
+                        // 如果计划时间已经过去太多，则跳过错过的周期
+                        while (nextScheduledTime <= currentTime) {
+                            nextScheduledTime += task->intervalMicrosec;
+                        }
+                        
+                        // 更新触发时间和原始计划时间
+                        task->triggerTimeMicrosec = nextScheduledTime;
+                        task->originalTriggerTime = nextScheduledTime;
+                        
+                        context->taskQueue.push(task);
+                    }
                 }
-            } else {
-                // 取消的任务，手动释放内存
-                delete nextTask;
+            }
+            
+            // 清理非周期性任务和已取消的任务
+            for (auto task : readyTasks) {
+                if (!task->active.load() || task->intervalMicrosec == 0) {
+                    // 非周期性任务或已取消的任务，手动释放内存
+                    delete task;
+                }
             }
         } else {
             // 还没到时间，计算等待时间

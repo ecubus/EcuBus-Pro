@@ -1,38 +1,78 @@
-EcuBus-Pro Community License v1.0
-(Based on Apache 2.0, with additional commercial and redistribution conditions)
+EcuBus-Pro Community License v1.1
+(Based on GPLv3 principles with additional commercial and branding terms)
 
-1. Grant of Use
-You may use, reproduce, and distribute EcuBus-Pro under the terms of the Apache License 2.0, except as modified by the additional conditions below.
+Copyright © 2025 Whyengineer, Inc.
+All rights reserved.
 
-2. Commercial Use Restrictions
-2.1. If you:
+------------------------------------------------------------
+1. License Grant
+------------------------------------------------------------
+You may use, modify, and distribute EcuBus-Pro under this License.
+If you cannot or do not wish to comply, you must obtain a commercial
+license from Whyengineer, Inc.
 
-Integrate proprietary device support without open-sourcing it; or
+------------------------------------------------------------
+2. Copyleft Requirements
+------------------------------------------------------------
+- If you distribute modified versions (source or binary), you must:
+  * Release the complete source code of your modifications,
+  * License modifications under this same License,
+  * Clearly state the changes you made.
+- These obligations also apply to SaaS or cloud deployments.
 
-Use EcuBus-Pro or derivatives in internal closed-source deployments (including SaaS or diagnostic tooling),
+------------------------------------------------------------
+3. Commercial Use Restrictions
+------------------------------------------------------------
+A commercial license is required if you:
+- Integrate proprietary device support or closed-source extensions,
+- Use EcuBus-Pro in internal closed-source environments (SaaS, diagnostics,
+  private deployments),
+- Distribute EcuBus-Pro as part of a commercial product without releasing
+  modifications.
 
-You must obtain a commercial license from Whyengineer, Inc.
+------------------------------------------------------------
+4. Branding and Trademarks
+------------------------------------------------------------
+- The EcuBus-Pro name, logo, and trademarks are the property of
+  Whyengineer, Inc.
+- You may not remove or alter branding in user interfaces.
+- Branding exceptions require a commercial license.
 
-2.2. “Internal closed-source use” means usage within an organization without public release of modifications or source code.
+------------------------------------------------------------
+5. Contributions
+------------------------------------------------------------
+By contributing, you:
+- Agree contributions may be used in both Community and Commercial editions,
+- Grant Whyengineer, Inc. the right to relicense contributions in future
+  versions.
 
-3. Copyleft Clause
-If you distribute or use modified versions of EcuBus-Pro, you must:
+------------------------------------------------------------
+6. Enforcement and Termination
+------------------------------------------------------------
+- Violations automatically terminate your rights under this License.
+- Whyengineer, Inc. may enforce this License and seek damages.
 
-Release all source code modifications under this same license,
+------------------------------------------------------------
+7. Disclaimer of Warranty
+------------------------------------------------------------
+EcuBus-Pro is provided "as is," without warranties of any kind.
+Whyengineer, Inc. is not liable for damages arising from its use.
 
-Host the code in a public repository,
+------------------------------------------------------------
+8. Dual Licensing
+------------------------------------------------------------
+- Community License (this License): Free, with obligations above.
+- Commercial License: Permits closed-source, proprietary, and internal use
+  without restrictions.
 
-Unless you obtain a commercial license.
-
-4. Branding and UI Restrictions
-You may not remove or alter the EcuBus-Pro name, logo, or trademarks in the frontend (defined as the src/renderer directory or corresponding UI in binary builds).
-
-5. Contribution Terms
-By contributing code, you:
-
-Agree that your contributions may be used under commercial licenses,
-
-Grant Whyengineer, Inc. the right to update this license in future versions.
-
-6. Legal Enforcement
-Violation of the above terms may result in termination of your license and legal action to recover damages.
+------------------------------------------------------------
+9. Usage Summary Table
+------------------------------------------------------------
+Usage Scenario                                      Community   Commercial
+------------------------------------------------------------
+Personal, educational, or research use              Allowed     Not required
+Open-source project integration (must open-source)  Allowed     Optional
+Internal closed-source use (SaaS, diagnostics)      Not allowed Required
+Proprietary device support or closed extensions     Not allowed Required
+Commercial distribution without open-sourcing mods  Not allowed Required
+Branding changes (remove/change EcuBus-Pro logo)    Not allowed Required

@@ -26,6 +26,33 @@ SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw
 
 Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schneider USB/CAN devices and candleLight USB CAN interfaces.
 
+### Linux gs_usb
+
+Linux kernels 3.7 and above have merged the `gs_usb` driver.
+Check if the `gs_usb` module is enabled using 
+
+```bash
+lsmod | grep gs_usb
+```
+
+If it's not loaded, use 
+
+```bash
+sudo modprobe gs_usb
+```
+
+To remove it, use 
+
+```bash
+sudo rmmod gs_usb
+```
+
+Configure automatic loading at startup:
+
+```bash
+echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
+```
+
 ## Device Configuration
 
 For demonstration purposes, we'll use a simulated device. You can configure the baud rate and sample point in the device settings.

@@ -1706,33 +1706,45 @@ export const serviceDetail: ServiceDetial = {
   },
   '0x3E': {
     name: 'TesterPresent',
-    hasSubFunction: false,
+    hasSubFunction: true,
     defaultParams: [
       {
         param: {
-          id: 'controlType',
-          name: 'controlType',
+          id: 'subFunction',
+          name: 'subFunction',
           bitLen: 8,
           deletable: false,
           editable: true,
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00'
-        }
+        },
+        enum: [
+          {
+            name: 'zeroSubFunction',
+            value: '0x0'
+          }
+        ]
       }
     ],
     defaultRespParams: [
       {
         param: {
-          id: 'controlType',
-          name: 'controlType',
+          id: 'subFunction',
+          name: 'subFunction',
           bitLen: 8,
           deletable: false,
           editable: true,
           type: 'NUM',
           value: Buffer.from([0x0]),
           phyValue: '00'
-        }
+        },
+        enum: [
+          {
+            name: 'zeroSubFunction',
+            value: '0x0'
+          }
+        ]
       }
     ]
   },
@@ -2044,4 +2056,3 @@ for (let pluginFile of pluginFiles) {
     null
   }
 }
-

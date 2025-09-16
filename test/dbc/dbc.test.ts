@@ -132,7 +132,7 @@ describe('DBC Parser Tests', () => {
     const msg = result.messages[326]
     expect(msg.name).toBe('ISGF_1')
     writeMessageData(msg, Buffer.from([0xa0, 0x08, 0x7f, 0xff, 0x0, 0x3f, 0xc7, 0xf8]), result)
-    console.log(msg.signals['ISGF_TorqMax_M146'])
+    expect(msg.signals['ISGF_TorqMax_M146'].value).toBeDefined()
   })
   test('dbc can1-vw-skoda-audi-uds-v2.5', () => {
     const result = parse(dbcContentVwSkodaAudi)

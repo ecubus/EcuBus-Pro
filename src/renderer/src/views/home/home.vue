@@ -57,6 +57,35 @@
                   </el-table>
                 </el-scrollbar>
               </div>
+
+              <!-- Advertisement Slots -->
+              <el-divider content-position="left"
+                ><strong>Advertising Partnership</strong></el-divider
+              >
+              <div class="ad-slots">
+                <div class="ad-slot premium" @click="openAdLink('ad1')">
+                  <div class="ad-icon">
+                    <Icon :icon="starIcon" />
+                  </div>
+                  <div class="ad-content">
+                    <div class="ad-title">📢 Advertise Here</div>
+                    <div class="ad-description">
+                      Showcase your products and services to professional automotive engineers
+                    </div>
+                    <div class="ad-cta">Contact Us →</div>
+                  </div>
+                </div>
+                <!-- <div class="ad-slot sponsor" @click="openAdLink('ad2')">
+                  <div class="ad-icon">
+                    <Icon :icon="heartIcon" />
+                  </div>
+                  <div class="ad-content">
+                    <div class="ad-title">🤝 Partner With Us</div>
+                    <div class="ad-description">Become an official EcuBus Pro partner and serve the automotive industry together</div>
+                    <div class="ad-cta">Learn More →</div>
+                  </div>
+                </div> -->
+              </div>
             </div>
           </div>
 
@@ -377,7 +406,7 @@ import policyIcon from '@iconify/icons-material-symbols/assignment'
 import policy from './policy.vue'
 import { useProjectList, useProjectStore } from '@r/stores/project'
 import { version, ecubusPro } from './../../../../../package.json'
-import { ElMessage, ElNotification, version as elVer } from 'element-plus'
+import { version as elVer } from 'element-plus'
 import log from 'electron-log/renderer'
 import newVue from './new.vue'
 import { useRouter } from 'vue-router'
@@ -391,6 +420,8 @@ import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
+import starIcon from '@iconify/icons-material-symbols/star-outline'
+import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
 
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
@@ -410,7 +441,7 @@ const recentHeight = computed(() => {
   return height.value - 35 - 180 + 'px'
 })
 const infoHeight = computed(() => {
-  return height.value - 235 - 80 + 'px'
+  return height.value - 235 - 80 - 220 + 'px' // Reduced by 120px to make room for ads
 })
 
 const hasNotify = computed(() => {
@@ -438,6 +469,15 @@ function openProject(p: any) {
 
 function openUm() {
   window.electron.ipcRenderer.send('ipc-open-um')
+}
+
+function openAdLink(adId: string) {
+  if (adId === 'ad1') {
+    window.electron.ipcRenderer.send(
+      'ipc-open-link',
+      'https://app.whyengineer.com/docs/about/contact.html'
+    )
+  }
 }
 
 const versions = ref([
@@ -791,5 +831,128 @@ onMounted(() => {
   gap: 5px;
   margin: 0 10px;
 }
-</style>
 
+.ad-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px;
+}
+
+.ad-slot {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    var(--el-bg-color-overlay) 0%,
+    var(--el-color-info-light-9) 100%
+  );
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ad-slot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.ad-slot:hover::before {
+  left: 100%;
+}
+
+.ad-slot:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.ad-slot.premium {
+  border-color: var(--el-color-primary);
+  background: linear-gradient(
+    135deg,
+    var(--el-color-primary-light-9) 0%,
+    var(--el-color-primary-light-8) 100%
+  );
+}
+
+.ad-slot.premium:hover {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 8px 25px rgba(64, 158, 255, 0.3);
+}
+
+.ad-slot.sponsor {
+  border-color: var(--el-color-success);
+  background: linear-gradient(
+    135deg,
+    var(--el-color-success-light-9) 0%,
+    var(--el-color-success-light-8) 100%
+  );
+}
+
+.ad-slot.sponsor:hover {
+  border-color: var(--el-color-success);
+  box-shadow: 0 8px 25px rgba(103, 194, 58, 0.3);
+}
+
+.ad-icon {
+  font-size: 24px;
+  color: var(--el-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+}
+
+.ad-slot.sponsor .ad-icon {
+  color: var(--el-color-success);
+}
+
+.ad-content {
+  flex: 1;
+  text-align: left;
+}
+
+.ad-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.ad-description {
+  font-size: 14px;
+  color: var(--el-text-color-regular);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.ad-cta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ad-slot.sponsor .ad-cta {
+  color: var(--el-color-success);
+}
+</style>

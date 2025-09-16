@@ -697,6 +697,7 @@ watch(
 function suppressChange(val) {
   const lastVal = model.value.params[0].value[0]
   if (val) {
+    activeName.value = 'request'
     paramSetVal(model.value.params[0], lastVal | 0x80)
   } else {
     paramSetVal(model.value.params[0], lastVal & 0x7f)
@@ -1031,4 +1032,3 @@ onMounted(() => {
   width: v-bind(leftWidth - 100 + 'px') !important;
 }
 </style>
-

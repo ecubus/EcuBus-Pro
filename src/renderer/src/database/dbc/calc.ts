@@ -292,15 +292,17 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
     // 计算物理值
     physValue = physValue * (signal.factor || 1) + (signal.offset || 0)
 
-    if (signal.minimum != signal.maximum) {
-      // 检查物理值是否在有效范围内
-      if (signal.minimum !== undefined && physValue < signal.minimum) {
-        return // 如果物理值小于最小值，不更新信号
-      }
-      if (signal.maximum !== undefined && physValue > signal.maximum) {
-        return // 如果物理值大于最大值，不更新信号
-      }
-    }
+    // if (signal.minimum != signal.maximum) {
+    //   // 检查物理值是否在有效范围内
+    //   if (signal.minimum !== undefined && physValue < signal.minimum) {
+    //     console.log('physValue', physValue,signal.minimum,signal.attributes,signal.maximum)
+    //     return // 如果物理值小于最小值，不更新信号
+    //   }
+    //   if (signal.maximum !== undefined && physValue > signal.maximum) {
+    //     console.log('physValue', physValue,signal.minimum,signal.attributes,signal.maximum)
+    //     return // 如果物理值大于最大值，不更新信号
+    //   }
+    // }
   }
 
   // 所有检查都通过后，更新信号值

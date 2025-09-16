@@ -253,22 +253,24 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
   }
 
   // 对于枚举值，检查值是否在有效范围内
-  if (signal.values) {
-    const validValues = Object.values(signal.values).map((v) => v.value)
-    if (!validValues.includes(rawValue)) {
-      return // 如果值不在枚举列表中，不更新信号
-    }
-  } else if (signal.valueTable) {
-    // 如果有值表，检查值是否在值表范围内
+  // if (signal.values) {
+  //   const validValues = Object.values(signal.values).map((v) => v.value)
+  //   if (!validValues.includes(rawValue)) {
+  //     return // 如果值不在枚举列表中，不更新信号
+  //   }
+  // } else if (signal.valueTable) {
+  //   // 如果有值表，检查值是否在值表范围内
 
-    const vt = Object.values(db.valueTables).find((vt) => vt.name === signal.valueTable)
-    if (vt) {
-      const validValues = vt.values.map((v) => v.value)
-      if (!validValues.includes(rawValue)) {
-        return // 如果值不在值表中，不更新信号
-      }
-    }
-  } else {
+  //   const vt = Object.values(db.valueTables).find((vt) => vt.name === signal.valueTable)
+  //   if (vt) {
+  //     const validValues = vt.values.map((v) => v.value)
+  //     if (!validValues.includes(rawValue)) {
+  //       return // 如果值不在值表中，不更新信号
+  //     }
+  //   }
+  // } else
+
+  {
     // 对于数值类型信号，检查是否在最小值和最大值范围内
 
     if (signal.valueType == 1) {

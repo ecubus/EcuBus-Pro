@@ -54,6 +54,15 @@ BO_ 2147558195 CanFd: 64 FOO
  SG_ Fie : 0|64@1+ (1,0) [0|0] ""  FUM
  SG_ Fas : 64|64@1+ (1,0) [0|0] "" Vector__XXX
 
+BO_ 326 ISGF_1: 8 PDC01
+ SG_ ISGF_TorqAct_M146 : 51|11@0+ (0.25,-255) [-255|255] "Nm" Vector__XXX
+ SG_ ISGF_TorqMin_M146 : 45|10@0+ (0.25,-255) [-255|0] "Nm" Vector__XXX
+ SG_ ISGF_TorqMax_M146 : 39|10@0+ (0.25,0) [0|255] "Nm" Vector__XXX
+ SG_ ISGF_SpdAct_M146 : 23|16@0+ (1,-32767) [-32766|32767] "rpm" Vector__XXX
+ SG_ ISGF_1_RollgCntr1_M146 : 11|4@0+ (1,0) [0|14] "" Vector__XXX
+ SG_ ISGF_Modest_M146 : 15|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ ISGF_1_CRC1_M146 : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
 BO_ 780 FOOBAR: 8 FIE
  SG_ ACC_02_CRC : 0|12@1- (1,0) [0|1] ""  BAR
 
@@ -94,6 +103,11 @@ BA_ "VFrameFormat" BO_ 2147558194 1;
 BA_ "VFrameFormat" BO_ 2147558195 15;
 BA_ "VFrameFormat" BO_ 780 0;
 VAL_ 2147558193 Fam 1 "Enabled" 0 "Disabled" ;
+VAL_ 326 ISGF_TorqAct_M146 2047 "Invalid" ;
+VAL_ 326 ISGF_TorqMin_M146 1023 "Invalid" ;
+VAL_ 326 ISGF_TorqMax_M146 1023 "Invalid" ;
+VAL_ 326 ISGF_SpdAct_M146 65535 "Invalid" ;
+
 SIG_VALTYPE_ 2147558192 Bar : 1;
 SIG_VALTYPE_ 2147558194 Binary32 : 1;
 

@@ -54,6 +54,29 @@ sudo rmmod gs_usb
 echo "gs_usb" | sudo tee /etc/modules-load.d/gs_usb.conf
 ```
 
+非 root 权限用户使用需要添加对应的用户组
+
+检查设备所属组，假设是 `ttyUSB0`,以实际接入设备为准：
+
+```bash
+stat -c "%G" /dev/ttyUSB0
+```
+
+- Arch Linux：应返回 uucp
+
+```bash
+sudo usermod -aG uucp $USER
+newgrp uucp
+```
+
+- Debian/Ubuntu：应返回 dialout
+- Fedora/RHEL：应返回 dialout
+
+```bash
+sudo usermod -aG dialout $USER
+newgrp dialout
+```
+
 ## 设备配置
 
 出于演示目的，我们将使用一个模拟设备。您可以在设备设置中配置波特率和采样点。

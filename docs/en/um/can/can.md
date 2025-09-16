@@ -53,6 +53,29 @@ Configure automatic loading at startup:
 echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
 ```
 
+Non-root users require corresponding user group membership.
+
+Check the device group ownership. Assuming `ttyUSB0` (actual device may vary):
+
+```bash
+stat -c "%G" /dev/ttyUSB0
+```
+
+- Arch Linux: Should return uucp
+
+```bash
+sudo usermod -aG uucp $USER
+newgrp uucp
+```
+
+- Debian/Ubuntu: Should return `dialout`
+- Fedora/RHEL: Should return `dialout`
+
+```bash
+sudo usermod -aG dialout $USER
+newgrp dialout
+```
+
 ## Device Configuration
 
 For demonstration purposes, we'll use a simulated device. You can configure the baud rate and sample point in the device settings.

@@ -56,21 +56,27 @@ echo "gs_usb" | sudo tee /etc/modules-load.d/gs_usb.conf
 
 非 root 权限用户使用需要添加对应的用户组
 
+使用 `devadm` 监听设备连接，来获取准确的设备路径：
+
+```bash
+sudo devadm monitor --property
+```
+
 检查设备所属组，假设是 `ttyUSB0`,以实际接入设备为准：
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
 ```
 
-- Arch Linux：应返回 uucp
+- Arch Linux：应返回 `uucp`
 
 ```bash
 sudo usermod -aG uucp $USER
 newgrp uucp
 ```
 
-- Debian/Ubuntu：应返回 dialout
-- Fedora/RHEL：应返回 dialout
+- Debian/Ubuntu：应返回 `dialout`
+- Fedora/RHEL：应返回 `dialout`
 
 ```bash
 sudo usermod -aG dialout $USER

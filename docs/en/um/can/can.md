@@ -55,13 +55,19 @@ echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
 
 Non-root users require corresponding user group membership.
 
+Use `devadm` to monitor device connections and obtain the precise device path:
+
+```bash
+sudo devadm monitor --property
+```
+
 Check the device group ownership. Assuming `ttyUSB0` (actual device may vary):
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
 ```
 
-- Arch Linux: Should return uucp
+- Arch Linux: Should return `uucp`
 
 ```bash
 sudo usermod -aG uucp $USER

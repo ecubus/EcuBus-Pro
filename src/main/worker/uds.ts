@@ -104,8 +104,14 @@ import { test as nodeTest, TestContext } from 'node:test'
 
 export { getCheckSum as getLinCheckSum } from '../share/lin'
 
-let init = process.env.ONLY ? true : false
-let initfunc: () => void = () => {}
+let init = process.env.ONLY == 'true' ? true : false
+let initPromiseResolve: () => void = () => {}
+let initPromiseReject: (e: any) => void = () => {}
+const initPromise = new Promise<void>((resolve, reject) => {
+  initPromiseResolve = resolve
+  initPromiseReject = reject
+})
+
 let testCnt = 0
 const testEnableControl: Record<number, boolean> = {}
 
@@ -177,13 +183,14 @@ export function test(name: string, fn: () => void | Promise<void>) {
   selfTest(name, async (t) => {
     if (!init) {
       try {
-        await initfunc()
+        await initPromise
       } catch (e: any) {
         console.error(`Util.Init function failed: ${e}`)
         process.exit(-1)
       }
       init = true
     }
+
     t.before(async () => {
       if (testEnableControl[testCnt] != true) {
         t.skip()
@@ -409,8 +416,8 @@ import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from '
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
 global.dataSet = workerData as DataSet
-const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
-const selfTest = process.env.ONLY ? nodeTest.only : nodeTest
+const selfDescribe = process.env.ONLY == 'true' ? nodeDescribe.only : nodeDescribe
+const selfTest = process.env.ONLY == 'true' ? nodeTest.only : nodeTest
 // export { selfDescribe as describe }
 
 /**
@@ -1863,33 +1870,35 @@ export class UtilClass {
     // process.chdir(projectPath)
     this.testerName = testerName
     global.vars = {}
-    const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
-    const sysVars = getAllSysVar(global.dataSet.devices, global.dataSet.tester)
-    for (const v of Object.values(sysVars)) {
-      vars[v.id] = cloneDeep(v)
-    }
-    for (const key of Object.keys(vars)) {
-      const v = vars[key]
-
-      if (v.value) {
-        const parentName: string[] = []
-
-        // 递归查找所有父级名称
-        let currentVar = v
-        while (currentVar.parentId) {
-          const parent = vars[currentVar.parentId]
-          if (parent) {
-            parentName.unshift(parent.name) // 将父级名称添加到数组开头
-            currentVar = parent
-          } else {
-            break
-          }
-        }
-
-        parentName.push(v.name)
-        v.name = parentName.join('.')
+    if (global.dataSet) {
+      const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
+      const sysVars = getAllSysVar(global.dataSet.devices, global.dataSet.tester)
+      for (const v of Object.values(sysVars)) {
+        vars[v.id] = cloneDeep(v)
       }
-      global.vars[key] = v
+      for (const key of Object.keys(vars)) {
+        const v = vars[key]
+
+        if (v.value) {
+          const parentName: string[] = []
+
+          // 递归查找所有父级名称
+          let currentVar = v
+          while (currentVar.parentId) {
+            const parent = vars[currentVar.parentId]
+            if (parent) {
+              parentName.unshift(parent.name) // 将父级名称添加到数组开头
+              currentVar = parent
+            } else {
+              break
+            }
+          }
+
+          parentName.push(v.name)
+          v.name = parentName.join('.')
+        }
+        global.vars[key] = v
+      }
     }
     for (const key of Object.keys(val)) {
       //convert all param.value to buffer
@@ -2096,8 +2105,14 @@ export class UtilClass {
   Init(fc: () => void | Promise<void>) {
     this.event.clearListeners('__varFc' as any)
     if (process.env.MODE == 'test') {
-      this.event.on('__varFc' as any, () => {})
-      initfunc = fc
+      this.event.on('__varFc' as any, async () => {
+        try {
+          await fc()
+          initPromiseResolve()
+        } catch (e) {
+          initPromiseReject(e)
+        }
+      })
     } else {
       this.event.on('__varFc' as any, fc)
     }

@@ -188,7 +188,8 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
     projectName,
     testers,
     {
-      id: test.id
+      id: test.id,
+      testOnly: false
     }
   )
   await node.start(testControl)

@@ -87,7 +87,7 @@ export default class UdsTester {
       PROJECT_NAME: string
       MODE: 'node' | 'sequence' | 'test'
       NAME: string
-      ONLY?: boolean
+      ONLY?: string
     },
     private jsFilePath: string,
     log: UdsLOG,
@@ -112,9 +112,12 @@ export default class UdsTester {
       execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
       if (this.testOptions?.testOnly) {
         execArgv.push('--test-only')
-        this.env.ONLY = true
+        this.env.ONLY = 'true'
+      } else {
+        this.env.ONLY = 'false'
       }
     }
+
     this.pool = workerpool.pool(jsFilePath, {
       minWorkers: 1,
       maxWorkers: 1,

@@ -1,11 +1,12 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
-import { cloneDeep } from 'lodash'
-import { ElMessageBox } from 'element-plus'
+import { cloneDeep, result } from 'lodash'
+import { ElMessageBox, ElProgress } from 'element-plus'
 import { useProjectStore } from './project'
-import { DataSet } from 'src/preload/data'
+import { DataSet, NodeItem } from 'src/preload/data'
 import { useGlobalStart } from './runtime'
-import { nextTick } from 'vue'
+import { nextTick, h, ref } from 'vue'
+
 export type { DataSet }
 
 export const useDataStore = defineStore('useDataStore', {
@@ -38,10 +39,102 @@ export const useDataStore = defineStore('useDataStore', {
           data: cloneDeep(this.database)
         })
         nextTick(() => {
-          window.electron.ipcRenderer
-            .invoke('ipc-global-start', cloneDeep(project.projectInfo), cloneDeep(this.getData()))
+          const nodes = Object.values(this.nodes).filter((e) => !e.isTest)
+
+          const checkScriptStatus = async () => {
+            const needBuild: NodeItem[] = []
+            for (const node of nodes) {
+              if (node.script) {
+                const status = await window.electron.ipcRenderer.invoke(
+                  'ipc-get-build-status',
+                  project.projectInfo.path,
+                  project.projectInfo.name,
+                  node.script
+                )
+                if (status != 'success') {
+                  needBuild.push(node)
+                }
+              }
+            }
+            if (needBuild.length > 0) {
+              const totalScripts = needBuild.length
+              const process = ref(0)
+
+              // Create a reactive component for the progress dialog
+              const ProgressComponent = {
+                setup() {
+                  return () =>
+                    h(
+                      'div',
+                      {
+                        style: 'width: 400px;'
+                      },
+                      [
+                        h(ElProgress, {
+                          percentage: process.value,
+                          status: process.value === 100 ? 'success' : undefined,
+                          strokeWidth: 13
+                        })
+                      ]
+                    )
+                }
+              }
+
+              ElMessageBox({
+                title: 'Building Scripts',
+                message: h(ProgressComponent),
+                buttonSize: 'small',
+                showCancelButton: true,
+                showConfirmButton: false,
+                showClose: false,
+                closeOnClickModal: false,
+                closeOnPressEscape: false
+              })
+              let hasError = false
+              for (const node of needBuild) {
+                try {
+                  await window.electron.ipcRenderer.invoke(
+                    'ipc-build-project',
+                    project.projectInfo.path,
+                    project.projectInfo.name,
+                    cloneDeep(this.getData()),
+                    node.script,
+                    false
+                  )
+                } catch (e: any) {
+                  hasError = true
+                }
+                process.value += Math.round(100 / totalScripts)
+                // Force update the dialog content
+                await nextTick()
+              }
+              process.value = 100
+
+              const delay = new Promise((resolve) => setTimeout(resolve, 500))
+              await delay
+              ElMessageBox.close()
+
+              if (hasError) {
+                throw new Error('Some scripts failed to build')
+              }
+            }
+          }
+
+          checkScriptStatus()
             .then(() => {
-              window.startTime = Date.now()
+              window.electron.ipcRenderer
+                .invoke(
+                  'ipc-global-start',
+                  cloneDeep(project.projectInfo),
+                  cloneDeep(this.getData())
+                )
+                .then(() => {
+                  window.startTime = Date.now()
+                })
+                .catch((e: any) => {
+                  globalStart.value = false
+                  window.startTime = Date.now()
+                })
             })
             .catch((e: any) => {
               globalStart.value = false

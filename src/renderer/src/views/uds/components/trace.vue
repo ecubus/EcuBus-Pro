@@ -972,6 +972,7 @@ onMounted(() => {
       WIDTH: tableWidth.value,
       HEIGHT: tableHeight.value,
       DISABLED: true,
+      CELL_PADDING: 4,
       HEADER_HEIGHT: 28,
       CELL_HEIGHT: 28,
       ROW_KEY: 'key',

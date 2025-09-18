@@ -65,7 +65,7 @@ Util.Init(async () => {
     checksumType: LinChecksumType.CLASSIC
   }
   StatusSignalOffset = 0
-  await sendWakeUp(1)
+  await sendWakeUp(5)
 })
 
 const sendLinWithRecv = (
@@ -614,36 +614,121 @@ test('5.7.2.2.1', async () => {
   assert.equal(getErrorFlag(result1.msg.data, 5), 5)
 })
 
-test('7.2.1.2.1 Receive a Wake Up Request, DUT as Slave', async () => {
-  //go to sleep
+describe('7.2.1.2 Wake-Up request to the Slave', () => {
+  test('7.2.1.2.1', async () => {
+    //go to sleep
 
-  let result
-  const msg = {
-    frameId: 0x3c,
-    direction: LinDirection.SEND,
-    data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
-    checksumType: LinChecksumType.CLASSIC
-  }
-  result = await sendLinWithSend(msg, {})
-  assert(result)
-  //delay 3s
-  await delay(3000)
-  //send wakeup
-  await sendWakeUp(1)
-  const msg1 = {
-    frameId: 0x3c,
-    direction: LinDirection.SEND,
-    data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
-    checksumType: LinChecksumType.CLASSIC
-  }
-  result = await sendLinWithSend(msg1, {})
-  assert(result)
-  const r = FrameMap['3d']
-  const result1 = await sendLinWithRecv(r, {})
-  assert(!result1.result)
-  assert(!result1.msg)
-})
+    let result
+    const msg = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg, {})
+    assert(result)
+    //delay 1s
+    await delay(1000)
+    //send wakeup
+    await sendWakeUp(1)
+    const msg1 = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const r = FrameMap['3d']
+    const result1 = await sendLinWithRecv(r, {})
+    assert(!result1.result)
+    assert(!result1.msg)
+  })
+  test('7.2.1.2.2', async () => {
+    //go to sleep
 
-test('xxxx1', async () => {
-  console.log('xxx', 1)
+    let result
+    const msg = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg, {})
+    assert(result)
+    //delay 1s
+    await delay(1000)
+    //send wakeup 250us
+    await sendWakeUp(5)
+    const msg1 = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const r = FrameMap['3d']
+    const result1 = await sendLinWithRecv(r, {})
+    assert(result1.result)
+    assert(result1.msg)
+  })
+  test('7.2.1.2.3', async () => {
+    //go to sleep
+
+    let result
+    const msg = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg, {})
+    assert(result)
+    //delay 1s
+    await delay(1000)
+    //send wakeup 1ms
+    await sendWakeUp(20)
+    const msg1 = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const r = FrameMap['3d']
+    const result1 = await sendLinWithRecv(r, {})
+    assert(result1.result)
+    assert(result1.msg)
+  })
+  test('7.2.1.2.4', async () => {
+    //go to sleep
+
+    let result
+    const msg = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg, {})
+    assert(result)
+    //delay 1s
+    await delay(1000)
+    //send wakeup 5ms
+    await sendWakeUp(100)
+    const msg1 = {
+      frameId: 0x3c,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    result = await sendLinWithSend(msg1, {})
+    assert(result)
+    const r = FrameMap['3d']
+    const result1 = await sendLinWithRecv(r, {})
+    assert(result1.result)
+    assert(result1.msg)
+  })
 })

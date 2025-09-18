@@ -401,12 +401,13 @@ export function after(fn: () => void | Promise<void>) {
  */
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
-import { DataSet } from 'src/preload/data'
+import { DataSet, VarItem } from 'src/preload/data'
 import { workerData } from 'node:worker_threads'
 import { getMessageData, writeMessageData } from 'src/renderer/src/database/dbc/calc'
 import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
+import { getAllSysVar } from '../share/sysVar'
 global.dataSet = workerData as DataSet
 const selfDescribe = process.env.ONLY ? nodeDescribe.only : nodeDescribe
 const selfTest = process.env.ONLY ? nodeTest.only : nodeTest
@@ -1861,7 +1862,35 @@ export class UtilClass {
   ) {
     // process.chdir(projectPath)
     this.testerName = testerName
+    global.vars = {}
+    const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
+    const sysVars = getAllSysVar(global.dataSet.devices, global.dataSet.tester)
+    for (const v of Object.values(sysVars)) {
+      vars[v.id] = cloneDeep(v)
+    }
+    for (const key of Object.keys(vars)) {
+      const v = vars[key]
 
+      if (v.value) {
+        const parentName: string[] = []
+
+        // 递归查找所有父级名称
+        let currentVar = v
+        while (currentVar.parentId) {
+          const parent = vars[currentVar.parentId]
+          if (parent) {
+            parentName.unshift(parent.name) // 将父级名称添加到数组开头
+            currentVar = parent
+          } else {
+            break
+          }
+        }
+
+        parentName.push(v.name)
+        v.name = parentName.join('.')
+      }
+      global.vars[key] = v
+    }
     for (const key of Object.keys(val)) {
       //convert all param.value to buffer
       const service = val[key]

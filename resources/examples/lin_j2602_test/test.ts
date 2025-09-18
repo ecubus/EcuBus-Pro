@@ -65,7 +65,7 @@ Util.Init(async () => {
     checksumType: LinChecksumType.CLASSIC
   }
   StatusSignalOffset = 0
-  await sendWakeUp(5)
+  await sendWakeUp(1)
 })
 
 const sendLinWithRecv = (
@@ -179,6 +179,37 @@ describe('4.2', () => {
     assert(result.msg)
 
     assert.equal(getErrorFlag(result.msg.data, 5), 1)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+  })
+  test('4.2.5 Error in an unassigned frame', async () => {
+    const msg = FrameMap['Slave1_TxFrame1']
+
+    let result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+
+    //get status
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+
+    const msg1 = {
+      frameId: 6,
+      direction: LinDirection.SEND,
+      data: Buffer.alloc(8, 0xff),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    const result1 = await sendLinWithSend(msg1, {
+      checkSum: 0x3
+    })
+
+    assert(!result1)
 
     result = await sendLinWithRecv(msg, {})
     assert(result.result)
@@ -384,6 +415,40 @@ describe('4.3', () => {
 
     assert.equal(getErrorFlag(result.msg.data, 5), 0)
   })
+  test('4.3.7 Error Status after a Stop Bit Error in unknown frames', async () => {
+    const msg = FrameMap['Slave1_TxFrame1']
+
+    let result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+
+    //get status
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+
+    const msg1 = {
+      frameId: 6,
+      direction: LinDirection.SEND,
+      data: Buffer.from([0, 0xa5, 0x80]),
+      checksumType: LinChecksumType.CLASSIC
+    }
+    const result1 = await sendLinWithSend(msg1, {
+      errorInject: {
+        bit: headerBitLength + 9,
+        value: 0
+      }
+    })
+
+    assert(!result1)
+
+    result = await sendLinWithRecv(msg, {})
+    assert(result.result)
+    assert(result.msg)
+
+    assert.equal(getErrorFlag(result.msg.data, 5), 0)
+  })
 })
 
 describe('5.4', () => {
@@ -528,4 +593,57 @@ test('1.2.3', async () => {
   assert(result1.msg)
 
   assert.equal(getErrorFlag(result1.msg.data, 5), 0)
+})
+
+test('5.7.2.2.1', async () => {
+  const msg = {
+    frameId: 59,
+    direction: LinDirection.SEND,
+    data: Buffer.alloc(8, 0),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  const result = await sendLinWithSend(msg, {
+    checkSum: 0
+  })
+  assert(!result)
+  const msg1 = FrameMap['Slave1_TxFrame1']
+  const result1 = await sendLinWithRecv(msg1, {})
+  assert(result1.result)
+  assert(result1.msg)
+
+  assert.equal(getErrorFlag(result1.msg.data, 5), 5)
+})
+
+test('7.2.1.2.1 Receive a Wake Up Request, DUT as Slave', async () => {
+  //go to sleep
+
+  let result
+  const msg = {
+    frameId: 0x3c,
+    direction: LinDirection.SEND,
+    data: Buffer.from([0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  result = await sendLinWithSend(msg, {})
+  assert(result)
+  //delay 3s
+  await delay(3000)
+  //send wakeup
+  await sendWakeUp(1)
+  const msg1 = {
+    frameId: 0x3c,
+    direction: LinDirection.SEND,
+    data: Buffer.from([0x60, 0x01, 0xb5, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  result = await sendLinWithSend(msg1, {})
+  assert(result)
+  const r = FrameMap['3d']
+  const result1 = await sendLinWithRecv(r, {})
+  assert(!result1.result)
+  assert(!result1.msg)
+})
+
+test('xxxx1', async () => {
+  console.log('xxx', 1)
 })

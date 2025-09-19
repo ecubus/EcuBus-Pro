@@ -84,7 +84,7 @@ export const useDataStore = defineStore('useDataStore', {
                 title: 'Building Scripts',
                 message: h(ProgressComponent),
                 buttonSize: 'small',
-                showCancelButton: true,
+                showCancelButton: false,
                 showConfirmButton: false,
                 showClose: false,
                 closeOnClickModal: false,

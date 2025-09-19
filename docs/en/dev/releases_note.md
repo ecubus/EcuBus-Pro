@@ -1,4 +1,15 @@
 # EcuBus-Pro Release Notes
+
+## 0.8.56
+Changes from v0.8.55 to v0.8.56:
+
+* [feat]:add auto build script when start 
+* [bug]:fix uds TesterPresent can't set 0x80 
+* [bug]:fix can dbc value undefined issue 
+* [feat]:add can statistics sentCnt and recvCnt 
+* [feat]:add high precision timer
+---
+
 ## 0.8.55
 Changes from v0.8.54 to v0.8.55:
 

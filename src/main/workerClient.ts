@@ -328,7 +328,7 @@ export default class UdsTester {
           .exec('__eventDone', [
             id,
             {
-              err: 'no handler found'
+              err: `API ${event} can't be used in this ${this.env.MODE} mode`
             }
           ])
           .catch(reject)

@@ -288,7 +288,7 @@ declare class HexMemoryMap {
      * @param {Number} [padByte=0xFF] The value of the byte assumed to be used as padding
      * @return {Buffer}
      */
-    slicePad(address: number, length: number, padByte?: number): Buffer<ArrayBuffer>;
+    slicePad(address: number, length: number, padByte?: number): Buffer;
     /**
      * Checks whether the current memory map contains the one given as a parameter.
      *
@@ -576,7 +576,7 @@ declare class S19MemoryMap {
      * @param {Number} [padByte=0xFF] The value of the byte assumed to be used as padding
      * @return {Buffer}
      */
-    slicePad(address: number, length: number, padByte?: number): Buffer<ArrayBuffer>;
+    slicePad(address: number, length: number, padByte?: number): Buffer;
     /**
      * Checks whether the current memory map contains the one given as a parameter.
      *

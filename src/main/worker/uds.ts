@@ -2183,6 +2183,9 @@ export class UtilClass {
  */
 export const Util = new UtilClass()
 global.Util = Util
+Util.Init(() => {
+  initPromiseResolve()
+})
 
 /**
  * Sends a CAN message

@@ -11,7 +11,7 @@ You can get detail setup steps from [Detail Windows Setup Guide](./detialSetup.m
 
 ## Prerequisites
 
-- Node.js (v20 or higher)
+- Node.js (v22)
 - npm
 - Node-gyp
 

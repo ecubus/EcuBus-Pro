@@ -32,13 +32,7 @@ npm install
 `build native module`
 
 ```bash
-cd src/main/docan
-npx node-gyp rebuild
-cd ../..
-
-cd src/main/dolin
-npx node-gyp rebuild
-cd ../..
+npm run native
 ```
 
 `run`

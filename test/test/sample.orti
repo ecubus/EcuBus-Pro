@@ -1,0 +1,293 @@
+/***********************/
+ /* Declaration Section */ 
+ /***********************/ 
+ VERSION { KOIL = "2.1"; OSSEMANTICS = "ORTI", "2.1"; }; I
+ MPLEMENTATION VendorX_ORTI { 
+    OS { 
+        ENUM [ 
+            "basicTaskFirst" = "&(gTaskControlBlocks[0])", 
+            "extendedTaskFirst" = "&(gTaskControlBlocks[1])", 
+            "extendedTaskSecond" = "&(gTaskControlBlocks[2])" 
+        ] RUNNINGTASK, "Running Task Identification"; 
+        ENUM "unsigned char" [ 
+            "51" = 0, 
+            "50" = 1, 
+            "30" = 2, 
+            "10" = 3 
+        ] RUNNINGTASKPRIORITY, "Priority of Running Task"; 
+        ENUM "unsigned char" [ 
+            "NO_ISR" = 0, 
+            "Timer2Int" = 1, 
+            "CanRxInt" = 2, 
+            "CanTxInt" = 3 
+        ] RUNNINGISR2, "Running ISR of category 2"; 
+        TOTRACE ENUM "unsigned char" [ 
+            "ActivateTask" = 2, 
+            "TerminateTask" = 4, 
+            "ChainTask" = 6, 
+            "Schedule" = 8,
+            "StartOS" = 52,
+            "ShutdownOS" = 54
+        ] SERVICETRACE, "OS Services Watch"; 
+        ENUM "unsigned char" [ 
+            "E_OK" = 0, 
+            "E_OS_ACCESS" = 1, 
+            "E_OS_CALLEVEL" = 2, 
+            "E_OS_ID" = 3, 
+            "E_OS_LIMIT" = 4, 
+            "E_OS_NOFUNC" = 5, 
+            "E_OS_RESOURCE" = 6, 
+            "E_OS_STATE" = 7, 
+            "E_OS_VALUE" = 8 
+        ] LASTERROR, "Last OSEK error"; 
+        ENUM "unsigned char" [ 
+            "DEFAULT_APPMODE" = 0,
+            "DIAGNIOSTIC_MODE" = 1 
+            ] CURRENTAPPMODE, "Current application mode"; 
+    }, "OS"; 
+    
+    TASK { 
+        ENUM "unsigned char" [ 
+            "51" = 0, 
+            "50" = 1, 
+            "30" = 2, 
+            "10" = 3 
+        ] PRIORITY , "Actual Prio";
+        ENUM "unsigned char" [ 
+            "READY"=0, 
+            "RUNNING"=1, 
+            "WAITING"=2, 
+            "READY"=3, 
+            "SUSPENDED"=4,
+            "TERMINATED"=5
+        ] STATE, "Current State";
+        ENUM "unsigned short *" [ 
+            "Stack0" : taskStack0 = "&(taskStack0[0])", 
+            "Stack1" : taskStack1 = "&(taskStack1[0])", 
+            "Stack2" : taskStack2 = "&(taskStack2[0])" 
+        ] STACK, "Task Stack"; 
+        CTYPE "unsigned char" REMAININGACTIVATIONS, "Remaining task activations"; 
+        ENUM "unsigned short *" [ 
+            "Context 0" : Context_0 = 0, 
+            "Context 1" : Context_1 = 1, 
+            "Context 2" : Context_2 = 2 
+        ] CONTEXT, "Task Context"; 
+        STRING vs_Home_Priority, "Home Priority"; 
+        STRING vs_Task_Type, "Task Type"; /* BASIC / EXTENDED */ 
+        STRING vs_Schedule, "Schedule"; /* non preemptive, full preemptive */ 
+        CTYPE "unsigned short" vs_Event_Mask, "Wait Mask"; 
+        CTYPE "unsigned short" vs_Event_Flags, "Event Flags"; 
+        STRING vs_max_Activations, "max. Activations";
+    }, "Tasks"; 
+    STACK { 
+        CTYPE SIZE, "Stack Size (Byte)"; 
+        CTYPE "unsigned short *" BASEADDRESS, "Base Address"; 
+        STRING STACKDIRECTION, "Stack Direction"; 
+        CTYPE "unsigned short" FILLPATTERN, "Stack Fill Pattern"; 
+    }, "Stacks";
+    ALARM {
+        CTYPE "unsigned long" ALARMTIME, "Alarm Time";
+        CTYPE "unsigned long" CYCLETIME, "Cycle Time";
+        ENUM [
+            "STOPPED" = 0,
+            "RUNNING" = 1
+        ] STATE, "Alarm state";
+        STRING ACTION, "Action";
+        STRING COUNTER, "Counter";
+    }, "Alarms";
+    CONTEXT { 
+        CTYPE "unsigned long" _CPU_R0, "CPU register R0";
+        CTYPE "unsigned long" _CPU_R1, "CPU register R1";
+        CTYPE "unsigned long" _CPU_R2, "CPU register R2";
+        CTYPE "unsigned long" _CPU_R3, "CPU register R3";
+        CTYPE "unsigned long" _CPU_PC, "CPU register PC";
+        CTYPE "unsigned long" _CPU_SR, "CPU register SR";
+        CTYPE "unsigned char" VALID;
+    }, "Task Context";
+    RESOURCE {
+        ENUM "unsigned char" [
+            "UNLOCKED" = 0,
+            "LOCKED" = 1
+        ] STATE, "Resource State";
+        ENUM "unsigned char" [
+            "Task basicTaskFirst" = 0,
+            "Task extendedTaskSecond" = 1,
+            "ISR Timer2Int" = 2
+        ] LOCKER, "Resource Locker";
+        STRING PRIORITY, "Ceiling priority";
+    }, "Resources";
+    MESSAGECONTAINER { 
+        STRING MSGNAME, "Message Name"; 
+        STRING MSGTYPE, "Message Type"; 
+        CTYPE QUEUESIZE, "Queue Size"; 
+        CTYPE QUEUECOUNT, "Entry Count"; 
+        CTYPE FIRSTELEMENT, "First Message"; 
+    }, "Message Container";
+    vs_ISR { 
+        STRING vs_Priority, "Priority"; 
+    }, "ISRs";
+}; /* END OF IMPLEMENTATION */
+
+
+/***********************/ 
+/* Information Section */ 
+/***********************/ 
+
+OS VendorX_arch {
+    RUNNINGTASK = "gActiveTaskTcb";
+    RUNNINGTASKPRIORITY = "osRunTaskPrio";
+    RUNNINGISR2 = osORTIIsr2Id";
+    SERVICETRACE = "osORTIServiceId";
+    LASTERROR = "Last_OSEK_err";
+    CURRENTAPPMODE = "osAppMode";
+};
+
+TASK basicTaskFirst {
+    PRIORITY = "(gTaskControlBlocks[0].actualPrio)";
+    STATE = "(gTaskControlBlocks[0].taskState)";
+    STACK = "&(taskStack0[0])";
+    REMAININGACTIVATIONS = "(gTaskControlBlocks[0].actCount)";
+    CONTEXT = "0";
+    vs_Home_Priority = "10";
+    vs_Task_Type = "BASIC";
+    vs_Schedule = "FULL Preemptive";
+    vs_Event_Mask = "0";
+    vs_Event_Flags = "0";
+    vs_max_Activations = "1";
+};
+
+TASK extendedTaskFirst {
+    PRIORITY = "(gTaskControlBlocks[1].actualPrio)";
+    STATE = "(gTaskControlBlocks[1].taskState)";
+    STACK = "&(taskStack1[0])";
+    REMAININGACTIVATIONS = "(gTaskControlBlocks[1].actCount)";
+    CONTEXT = "1";
+    vs_Home_Priority = "30";
+    vs_Task_Type = "EXTENDED";
+    vs_Schedule = "FULL Preemptive";
+    vs_Event_Mask = "(gTaskControlBlocks[1].eventMask)";
+    vs_Event_Flags = "(gTaskControlBlocks[1].eventFlag)";
+    vs_max_Activations = "1";
+};
+
+TASK extendedTaskSecond {
+    PRIORITY = "(gTaskControlBlocks[2].actualPrio)";
+    STATE = "(gTaskControlBlocks[2].taskState)";
+    STACK = "&(taskStack2[0])";
+    REMAININGACTIVATIONS = "(gTaskControlBlocks[2].actCount)";
+    CONTEXT = "2";
+    vs_Home_Priority = "50";
+    vs_Task_Type = "EXTENDED";
+    vs_Schedule = "FULL Preemptive";
+    vs_Event_Mask = "(gTaskControlBlocks[2].eventMask)";
+    vs_Event_Flags = "(gTaskControlBlocks[2].eventFlag)";
+    vs_max_Activations = "1";
+};
+
+
+STACK taskStack0 {
+    SIZE = "128";
+    STACKDIRECTION = "UP";
+    BASEADDRESS = "&(taskStack0[0])";
+    FILLPATTERN = "0xAA55";
+};
+
+STACK taskStack1 {
+    SIZE = "128";
+    STACKDIRECTION = "UP";
+    BASEADDRESS = "&(taskStack1[0])";
+    FILLPATTERN = "0xAA55";
+};
+
+STACK taskStack2 {
+    SIZE = "256";
+    STACKDIRECTION = "UP";
+    BASEADDRESS = "&(taskStack2[0])";
+    FILLPATTERN = "0xAA55";
+};
+
+ALARM myFirstAlarm {
+    ALARMTIME = "gAlarm[0].alarmTime";
+    CYCLETIME = "gAlarm[0].cycleTime";
+    STATE = "(gAlarm[0].alarmTime == 0)?0:1";
+    ACTION = "ActivateTask basicTaskFirst";
+    COUNTER = "SystemTimer";
+};
+
+RESOURCE resBasic {
+    STATE = "(gResource[0].resourceCounter != 0)?1:0";
+    LOCKER = "gResource[0].owner";
+    PRIORITY = "TASK: 51";
+};
+
+RESOURCE resTimerData {
+    STATE = "(gResource[1].resourceCounter != 0)?1:0";
+    LOCKER = "gResource[1].owner";
+    PRIORITY = "ISR: 3";
+};
+
+CONTEXT Context_0 {
+    _CPU_R0 = "((unsigned long *)(gTaskControlBlocks[0].sp))[5]";
+    _CPU_R1 = "((unsigned long *)(gTaskControlBlocks[0].sp))[4]";
+    _CPU_R2 = "((unsigned long *)(gTaskControlBlocks[0].sp))[3]";
+    _CPU_R3 = "((unsigned long *)(gTaskControlBlocks[0].sp))[2]";
+    _CPU_PC = "((unsigned long *)(gTaskControlBlocks[0].sp))[1]";
+    _CPU_SR = "((unsigned long *)(gTaskControlBlocks[0].sp))[0]";
+    VALID = "(gTaskControlBlocks[0].taskState != 1) && (gTaskControlBlocks[0].taskState != 4)";
+};
+
+CONTEXT Context_1 {
+    _CPU_R0 = "((unsigned long *)(gTaskControlBlocks[1].sp))[5]";
+    _CPU_R1 = "((unsigned long *)(gTaskControlBlocks[1].sp))[4]";
+    _CPU_R2 = "((unsigned long *)(gTaskControlBlocks[1].sp))[3]";
+    _CPU_R3 = "((unsigned long *)(gTaskControlBlocks[1].sp))[2]";
+    _CPU_PC = "((unsigned long *)(gTaskControlBlocks[1].sp))[1]";
+    _CPU_SR = "((unsigned long *)(gTaskControlBlocks[1].sp))[0]";
+    VALID = "(gTaskControlBlocks[1].taskState != 1) && (gTaskControlBlocks[1].taskState != 4)";
+};
+
+CONTEXT Context_2 {
+    _CPU_R0 = "((unsigned long *)(gTaskControlBlocks[2].sp))[5]";
+    _CPU_R1 = "((unsigned long *)(gTaskControlBlocks[2].sp))[4]";
+    _CPU_R2 = "((unsigned long *)(gTaskControlBlocks[2].sp))[3]";
+    _CPU_R3 = "((unsigned long *)(gTaskControlBlocks[2].sp))[2]";
+    _CPU_PC = "((unsigned long *)(gTaskControlBlocks[2].sp))[1]";
+    _CPU_SR = "((unsigned long *)(gTaskControlBlocks[2].sp))[0]";
+    VALID = "(gTaskControlBlocks[2].taskState != 1) && (gTaskControlBlocks[2].taskState != 4)";
+};
+
+MESSAGECONTAINER DrvTx_Msg_0_3 {
+    MSGNAME = "DrvTx";
+    MSGTYPE = "QUEUED";
+    QUEUESIZE = "5";
+    QUEUECOUNT = "osQMsg[0].msgCount";
+    FIRSTELEMENT = "osQMsg[0].rdPtr";
+};
+
+MESSAGECONTAINER DataA_Msg_1_3 {
+    MSGNAME = "DataA";
+    MSGTYPE = "UNQUEUED";
+    QUEUESIZE = "1";
+    QUEUECOUNT = "1";
+    FIRSTELEMENT = "osUnqMsg[0].msgPtr";
+};
+
+MESSAGECONTAINER DataA_Msg_1_4 {
+    MSGNAME = "DataA";
+    MSGTYPE = "UNQUEUED";
+    QUEUESIZE = "1";
+    QUEUECOUNT = "1";
+    FIRSTELEMENT = "osUnqMsg[0].msgPtr";
+};
+
+vs_ISR Timer2Int {
+    vs_Priority = "3";
+};
+
+vs_ISR CanRxInt {
+    vs_Priority = "1";
+};
+
+vs_ISR CanTxInt {
+    vs_Priority = "7";
+};

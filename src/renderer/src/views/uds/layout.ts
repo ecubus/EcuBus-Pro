@@ -26,6 +26,7 @@ import varIcon from '@iconify/icons-mdi/application-variable-outline'
 import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import soaIcon from '@iconify/icons-material-symbols/linked-services'
+import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -319,6 +320,17 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'IA',
     component: defineAsyncComponent(() => import('./someip/si.vue')),
     icon: interIcon
+  },
+  osTrace: {
+    i: 'OSTrace',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'OSTrace',
+    key: 'OSTrace',
+    component: defineAsyncComponent(() => import('../ostrace/graph.vue')),
+    icon: osTraceIcon
   }
   // script: {
   //   i: 'Script',

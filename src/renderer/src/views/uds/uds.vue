@@ -382,6 +382,11 @@
               <span>Variables</span>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
+            <div class="grid girdenable" @click="openOsTrace()">
+              <Icon :icon="osTraceIcon" style="font-size: 24px" />
+              <span>OS Trace</span>
+            </div>
+            <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="openApi()">
               <Icon :icon="apiIcon" style="font-size: 24px" />
               <span>Script Api</span>
@@ -721,6 +726,7 @@ import data from '@iconify/icons-ep/full-screen'
 import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
 import soaConfigIcon from '@iconify/icons-material-symbols/linked-services'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
+import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -1003,6 +1009,10 @@ function rearrangeWindows(windows: any[]) {
 
 function openApi() {
   window.electron.ipcRenderer.send('ipc-open-script-api')
+}
+
+function openOsTrace() {
+  layoutMaster.addWin('osTrace', 'osTrace')
 }
 
 onMounted(() => {

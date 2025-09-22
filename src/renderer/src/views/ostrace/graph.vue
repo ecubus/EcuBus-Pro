@@ -367,6 +367,30 @@ const visibleBlocks: VisibleBlock[] = [
   {
     type: 0,
     name: 'Task_0',
+    start: 0.00486,
+    coreId: 0,
+    status: 0,
+    end: 0.85966
+  },
+  {
+    type: 0,
+    name: 'Task_1',
+    start: 0.00487,
+    coreId: 0,
+    status: 0,
+    end: 2.9595
+  },
+  {
+    type: 0,
+    name: 'Task_3',
+    start: 0.00488,
+    coreId: 0,
+    status: 0,
+    end: 8.95218
+  },
+  {
+    type: 0,
+    name: 'Task_0',
     start: 0.85966,
     coreId: 0,
     status: 1,
@@ -446,11 +470,19 @@ const visibleBlocks: VisibleBlock[] = [
   },
   {
     type: 0,
+    name: 'Task_0',
+    start: 2.95222,
+    coreId: 0,
+    status: 5,
+    end: undefined
+  },
+  {
+    type: 0,
     name: 'Task_1',
     start: 2.9595,
     coreId: 0,
     status: 1,
-    end: 3.98592
+    end: 3.96578
   },
   {
     type: 4,
@@ -507,6 +539,22 @@ const visibleBlocks: VisibleBlock[] = [
     coreId: 0,
     status: 0,
     end: undefined
+  },
+  {
+    type: 0,
+    name: 'Task_1',
+    start: 3.98176,
+    coreId: 0,
+    status: 1,
+    end: 3.98592
+  },
+  {
+    type: 0,
+    name: 'Task_1',
+    start: 3.98592,
+    coreId: 0,
+    status: 4,
+    end: 7.8922
   },
   {
     type: 4,
@@ -598,6 +646,14 @@ const visibleBlocks: VisibleBlock[] = [
   },
   {
     type: 0,
+    name: 'Task_2',
+    start: 7.88526,
+    coreId: 0,
+    status: 5,
+    end: undefined
+  },
+  {
+    type: 0,
     name: 'Task_1',
     start: 7.8922,
     coreId: 0,
@@ -630,11 +686,19 @@ const visibleBlocks: VisibleBlock[] = [
   },
   {
     type: 0,
+    name: 'Task_1',
+    start: 8.89586,
+    coreId: 0,
+    status: 5,
+    end: undefined
+  },
+  {
+    type: 0,
     name: 'Task_3',
     start: 8.95218,
     coreId: 0,
     status: 1,
-    end: undefined
+    end: 8.96572
   },
   {
     type: 1,
@@ -682,6 +746,14 @@ const visibleBlocks: VisibleBlock[] = [
     start: 9.89952,
     coreId: 0,
     status: 0,
+    end: undefined
+  },
+  {
+    type: 0,
+    name: 'Task_3',
+    start: 9.95218,
+    coreId: 0,
+    status: 1,
     end: undefined
   }
 ]
@@ -750,7 +822,8 @@ function initChart() {
         bottom: 10,
         showDetail: false,
         showDataShadow: false,
-        realtime: true
+        realtime: true,
+        filterMode: 'none'
       }
     ],
     grid: {
@@ -825,7 +898,9 @@ function initChart() {
         ) {
           const blockData = visibleBlocks[params.dataIndex]
           if (blockData) {
-            const end = blockData.end || time.value
+            const end =
+              blockData.end ||
+              (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
             // 查找对应的 core 名称
             const core = coreConfigs.value.find((c) => c.id === blockData.coreId)
             const coreName = core ? core.name : `Core-${blockData.coreId}`
@@ -848,14 +923,21 @@ function initChart() {
         name: '运算块',
         type: 'custom',
         renderItem: function (params, api) {
-          console.log('xx', params)
           const start = api.value(0)
-          const end = api.value(1) || time.value
+          const end =
+            api.value(1) ||
+            (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
           const name = api.value(2)
           const coreId = api.value(3)
           const type = api.value(4)
           const status = api.value(5)
 
+          if (type == TaskType.SERVICE || type == TaskType.HOOK) {
+            return null
+          }
+          if (type == TaskType.TASK && status != 1) {
+            return null
+          }
           // 根据 coreId 和 name 查找对应的颜色和位置信息
           let color = '#95a5a6' // 默认颜色
           let yPos = 0
@@ -952,7 +1034,7 @@ function initChart() {
                   textAlign: 'center',
                   textVerticalAlign: 'middle',
                   fontSize: 8,
-                  fill: '#fff',
+                  fill: '#000',
                   fontWeight: 'bold',
                   overflow: 'truncate'
                 }
@@ -1008,9 +1090,14 @@ watch(
     }
   }
 )
-
+const datazoomInfo = {
+  start: 0,
+  end: 100
+}
 function initEvent() {
-  chart.on('datazoom', (params) => {
+  chart.on('datazoom', (params: any) => {
+    datazoomInfo.start = params.start
+    datazoomInfo.end = params.end
     updateTimeLine()
   })
 }

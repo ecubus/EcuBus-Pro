@@ -32,7 +32,7 @@ EcuBus-Pro是商业汽车诊断工具（如`CAN-OE`）的开源替代品。它�
 
 - 🆓 开源且免费使用
 - 🚀 现代化、直观的用户界面
-- 💻 跨平台支持（Windows、Linux、MacOS）- [安装指南](./docs/zh/about/install.md)
+- 💻 跨平台支持（Windows、Linux、MacOS）- [安装指南](./docs/about/install.md)
 - 🔌 多硬件支持
   - **[EcuBus-LinCable](https://app.whyengineer.com/zh/docs/um/hardware/lincable.html)**: LIN（支持LIN一致性测试）、[PWM](https://app.whyengineer.com/zh/docs/um/pwm/pwm.html)
   - **PEAK**: CAN、CAN-FD、LIN
@@ -45,12 +45,12 @@ EcuBus-Pro是商业汽车诊断工具（如`CAN-OE`）的开源替代品。它�
 - 🛠️ 全面的诊断功能
   - **诊断协议**: CAN/CAN-FD、DoIP、LIN
 - 🌐 **SOME/IP**: SOME/IP协议支持 - [详情](https://app.whyengineer.com/zh/docs/um/someip/index.html)
-- 📝 **脚本**: 基于TypeScript的高级自动化 - [详情](./docs/zh/um/script.md)
-- 🧪 **测试**: HIL测试框架 - [详情](./docs/zh/um/test/test.md)
-- 📊 **数据库支持**: LIN LDF（编辑和导出）、CAN DBC（查看） - [详情](./docs/zh/um/database.md)
-- 📈 **数据可视化**: 实时信号图表和分析 - [详情](./docs/zh/um/graph/graph.md)
-- ⌨️ **命令行**: 功能齐全的CLI，支持自动化和集成 - [详情](./docs/zh/um/cli.md)
-- 🎨 **面板**: 拖拽式界面构建器，用于自定义UI - [详情](./docs/zh/um/panel/index.md)
+- 📝 **脚本**: 基于TypeScript的高级自动化 - [详情](./docs/um/script.md)
+- 🧪 **测试**: HIL测试框架 - [详情](./docs/um/test/test.md)
+- 📊 **数据库支持**: LIN LDF（编辑和导出）、CAN DBC（查看） - [详情](./docs/um/database.md)
+- 📈 **数据可视化**: 实时信号图表和分析 - [详情](./docs/um/graph/graph.md)
+- ⌨️ **命令行**: 功能齐全的CLI，支持自动化和集成 - [详情](./docs/um/cli.md)
+- 🎨 **面板**: 拖拽式界面构建器，用于自定义UI - [详情](./docs/um/panel/index.md)
 
 [阅读文档了解更多](https://app.whyengineer.com/zh/)
 

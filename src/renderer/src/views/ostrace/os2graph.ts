@@ -41,6 +41,17 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
     }>
   >()
 
+  // Track active resource and spinlock blocks per task/ISR
+  const taskIsrResourceSpinlocks = new Map<
+    string, // key = coreId-taskType-entityId
+    Array<{
+      type: TaskType.RESOURCE | TaskType.SPINLOCK
+      entityId: number
+      key: string
+      block: VisibleBlock
+    }>
+  >()
+
   // Helper function to create a unique key for tracking active blocks
   const createKey = (coreId: number, type: TaskType, entityId: number): string => {
     return `${coreId}-${type}-${entityId}`
@@ -61,6 +72,8 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         return event.event.hookType
       case TaskType.SERVICE:
         return event.event.serviceId
+      case TaskType.LINE:
+        return 0 // LIN blocks don't have entity IDs
       default:
         return 0
     }
@@ -82,6 +95,8 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         return `Hook_${entityId}`
       case TaskType.SERVICE:
         return `Service_${entityId}`
+      case TaskType.LINE:
+        return `${event.event.from}:${event.event.to}`
       default:
         return `Unknown_${entityId}`
     }
@@ -102,6 +117,8 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         return event.event.coreId
       case TaskType.SERVICE:
         return event.event.coreId
+      case TaskType.LINE:
+        return event.event.coreId
       default:
         return 0
     }
@@ -118,6 +135,8 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         return event.event.status
       case TaskType.RESOURCE:
         return event.event.status
+      case TaskType.LINE:
+        return 0 // LIN blocks don't have status
       default:
         return 0
     }
@@ -158,6 +177,57 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
     }
   }
 
+  // Helper function to interrupt resource and spinlock blocks for a specific task/ISR
+  const interruptResourceSpinlocks = (ownerKey: string, timestamp: number): void => {
+    const resourceSpinlocks = taskIsrResourceSpinlocks.get(ownerKey)
+    if (resourceSpinlocks) {
+      resourceSpinlocks.forEach((item) => {
+        // End the current resource/spinlock block
+        item.block.end = timestamp
+      })
+    }
+  }
+
+  // Helper function to resume resource and spinlock blocks for a specific task/ISR
+  const resumeResourceSpinlocks = (ownerKey: string, timestamp: number): void => {
+    const resourceSpinlocks = taskIsrResourceSpinlocks.get(ownerKey)
+    if (resourceSpinlocks) {
+      resourceSpinlocks.forEach((item) => {
+        // Create a new block to resume the resource/spinlock
+        const resumeBlock: VisibleBlock = {
+          type: item.type,
+          name: item.block.name,
+          start: timestamp,
+          coreId: item.block.coreId,
+          status: item.block.status
+        }
+        blocks.push(resumeBlock)
+
+        // Update the active block reference
+        activeBlocks.set(item.key, {
+          block: resumeBlock,
+          startIndex: blocks.length - 1
+        })
+
+        // Update the item reference
+        item.block = resumeBlock
+      })
+    }
+  }
+
+  // Helper function to create LIN block for context switching
+  const createLinBlock = (from: string, to: string, coreId: number, timestamp: number): void => {
+    const linBlock: VisibleBlock = {
+      type: TaskType.LINE,
+      name: `${from}:${to}`,
+      start: timestamp,
+      end: undefined, // LIN blocks have undefined end time as per requirements
+      coreId: coreId,
+      status: 0
+    }
+    blocks.push(linBlock)
+  }
+
   // Process events in chronological order
   events.forEach((event, index) => {
     const entityId = getEntityId(event)
@@ -172,6 +242,23 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         // ISR is starting - interrupt whatever is currently running on this core
         const currentRunning = coreRunningState.get(coreId)
         if (currentRunning) {
+          // Create LIN block for the transition from current running context to ISR
+          // For tasks, only create LIN block if the task is active (status = 0)
+          let shouldCreateLinBlock = true
+          if (currentRunning.type === TaskType.TASK) {
+            const currentTaskBlock = activeBlocks.get(currentRunning.key)
+            shouldCreateLinBlock = !!(currentTaskBlock && currentTaskBlock.block.status === 1) // TaskStatus.ACTIVE
+          }
+
+          if (shouldCreateLinBlock) {
+            const fromName =
+              currentRunning.type === TaskType.TASK
+                ? `Task_${currentRunning.entityId}`
+                : `ISR_${currentRunning.entityId}`
+            const toName = `ISR_${entityId}`
+            createLinBlock(fromName, toName, coreId, timestamp)
+          }
+
           // End the current block (TASK or ISR being interrupted)
           const currentBlock = activeBlocks.get(currentRunning.key)
           if (currentBlock) {
@@ -184,6 +271,11 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
             interruptedStack.set(coreId, [])
           }
           interruptedStack.get(coreId)!.push(currentRunning)
+        }
+
+        // Interrupt any active resource and spinlock blocks owned by the interrupted task/ISR
+        if (currentRunning) {
+          interruptResourceSpinlocks(currentRunning.key, timestamp)
         }
 
         // Start ISR block
@@ -221,6 +313,25 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
           // Pop the most recently interrupted context
           const interruptedContext = stack.pop()!
 
+          // Create LIN block for the transition from ISR back to the interrupted context
+          // For tasks, only create LIN block if the task will be active (status = 0)
+          let shouldCreateLinBlock = true
+          if (interruptedContext.type === TaskType.TASK) {
+            const interruptedTaskBlock = activeBlocks.get(interruptedContext.key)
+            shouldCreateLinBlock = !!(
+              interruptedTaskBlock && interruptedTaskBlock.block.status === 1
+            ) // TaskStatus.ACTIVE
+          }
+
+          if (shouldCreateLinBlock) {
+            const fromName = `ISR_${entityId}`
+            const toName =
+              interruptedContext.type === TaskType.TASK
+                ? `Task_${interruptedContext.entityId}`
+                : `ISR_${interruptedContext.entityId}`
+            createLinBlock(fromName, toName, coreId, timestamp)
+          }
+
           // Resume the interrupted context by creating a new block
           const interruptedBlock = activeBlocks.get(interruptedContext.key)
           if (interruptedBlock) {
@@ -243,6 +354,9 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
             coreRunningState.set(coreId, interruptedContext)
           }
 
+          // Resume any interrupted resource and spinlock blocks owned by the resumed task/ISR
+          resumeResourceSpinlocks(interruptedContext.key, timestamp)
+
           // Clean up empty stack
           if (stack.length === 0) {
             interruptedStack.delete(coreId)
@@ -261,6 +375,24 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
           // Can't start TASK while ISR is running - this shouldn't happen in normal OS behavior
           // But if it does, we'll just queue the TASK event
           return
+        }
+
+        // Create LIN block for task switching (from previous task to new task)
+        // Only create LIN block if both the current and new tasks are active (status = 0)
+        if (
+          currentRunning &&
+          currentRunning.type === TaskType.TASK &&
+          currentRunning.entityId !== entityId
+        ) {
+          const currentTaskBlock = activeBlocks.get(currentRunning.key)
+          const isCurrentTaskActive = currentTaskBlock && currentTaskBlock.block.status === 1 // TaskStatus.ACTIVE
+          const isNewTaskActive = getStatus(event) === 0 // TaskStatus.ACTIVE
+
+          if (isCurrentTaskActive && isNewTaskActive) {
+            const fromName = `Task_${currentRunning.entityId}`
+            const toName = `Task_${entityId}`
+            createLinBlock(fromName, toName, coreId, timestamp)
+          }
         }
       }
 
@@ -294,6 +426,23 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
           key: key
         })
       }
+
+      // Track resource and spinlock blocks - associate them with the currently running task/ISR
+      if (event.type === TaskType.RESOURCE || event.type === TaskType.SPINLOCK) {
+        const currentRunning = coreRunningState.get(coreId)
+        if (currentRunning) {
+          // Associate this resource/spinlock with the currently running task/ISR
+          if (!taskIsrResourceSpinlocks.has(currentRunning.key)) {
+            taskIsrResourceSpinlocks.set(currentRunning.key, [])
+          }
+          taskIsrResourceSpinlocks.get(currentRunning.key)!.push({
+            type: event.type,
+            entityId: entityId,
+            key: key,
+            block: newBlock
+          })
+        }
+      }
     } else if (shouldEndBlock(event)) {
       // End the active block for this entity
       if (activeBlocks.has(key)) {
@@ -304,6 +453,22 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         // Update core running state
         if (event.type === TaskType.TASK) {
           coreRunningState.delete(coreId)
+        }
+
+        // Remove resource and spinlock blocks from tracking when they end
+        if (event.type === TaskType.RESOURCE || event.type === TaskType.SPINLOCK) {
+          // Find which task/ISR owns this resource/spinlock and remove it
+          for (const [ownerKey, resourceSpinlocks] of taskIsrResourceSpinlocks.entries()) {
+            const index = resourceSpinlocks.findIndex((item) => item.key === key)
+            if (index !== -1) {
+              resourceSpinlocks.splice(index, 1)
+              // Clean up empty array
+              if (resourceSpinlocks.length === 0) {
+                taskIsrResourceSpinlocks.delete(ownerKey)
+              }
+              break
+            }
+          }
         }
       }
     } else if (event.type === TaskType.HOOK || event.type === TaskType.SERVICE) {
@@ -325,7 +490,17 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
     // Leave end as undefined - the rendering code will use current time
     block.end = undefined
   })
-  //sort blocks by start time
-  blocks.sort((a, b) => a.start - b.start)
+  //sort blocks by start time, prioritize TASK and ISR when start times are equal
+  blocks.sort((a, b) => {
+    // First sort by start time
+    if (a.start !== b.start) {
+      return a.start - b.start
+    }
+
+    // If start times are equal, prioritize TASK and ISR types
+    // TaskType.TASK = 0, TaskType.ISR = 1, others are higher values
+    // Lower type values should come first when start times are equal
+    return a.type - b.type
+  })
   return blocks
 }

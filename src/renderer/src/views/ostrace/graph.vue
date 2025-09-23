@@ -245,9 +245,28 @@ const coreConfigs = ref([
       { name: 'Task_1', color: 'rgb(243, 156, 18)' },
       { name: 'ISR_0', color: 'rgb(241, 196, 15)' },
       { name: 'Task_2', color: 'rgb(155, 89, 182)' },
+      { name: 'ISR_3', color: 'rgb(46, 204, 113)' },
       { name: 'Task_3', color: 'rgb(230, 126, 34)' },
+      { name: 'Task_4', color: 'rgb(230, 126, 34)' },
+      { name: 'Task_5', color: 'rgb(230, 126, 34)' },
+      { name: 'Task_6', color: 'rgb(230, 126, 34)' },
+      { name: 'Task_7', color: 'rgb(230, 126, 34)' },
       { name: 'ISR_1', color: 'rgb(46, 204, 113)' },
+      { name: 'ISR_2', color: 'rgb(46, 204, 113)' },
+
+      { name: 'ISR_4', color: 'rgb(46, 204, 113)' },
+      { name: 'ISR_5', color: 'rgb(46, 204, 113)' },
+      { name: 'ISR_6', color: 'rgb(46, 204, 113)' },
+      { name: 'ISR_7', color: 'rgb(46, 204, 113)' },
       { name: 'Idle', color: 'rgb(149, 165, 166)' }
+    ]
+  },
+  {
+    id: 1,
+    name: 'Core 1',
+    buttons: [
+      { name: 'Task_2', color: 'rgb(155, 89, 182)' },
+      { name: 'ISR_3', color: 'rgb(46, 204, 113)' }
     ]
   }
   // {
@@ -509,12 +528,12 @@ const visibleBlocks: VisibleBlock[] = [
     end: undefined
   },
   {
-    type: 5,
-    name: 'Service_121',
+    type: -1,
+    name: 'Task_1:ISR_0',
     start: 3.96578,
+    end: undefined,
     coreId: 0,
-    status: 0,
-    end: undefined
+    status: 0
   },
   {
     type: 1,
@@ -523,6 +542,14 @@ const visibleBlocks: VisibleBlock[] = [
     coreId: 0,
     status: 0,
     end: 3.98176
+  },
+  {
+    type: 5,
+    name: 'Service_121',
+    start: 3.96578,
+    coreId: 0,
+    status: 0,
+    end: undefined
   },
   {
     type: 5,
@@ -539,6 +566,14 @@ const visibleBlocks: VisibleBlock[] = [
     coreId: 0,
     status: 0,
     end: undefined
+  },
+  {
+    type: -1,
+    name: 'ISR_0:Task_1',
+    start: 3.98176,
+    end: undefined,
+    coreId: 0,
+    status: 0
   },
   {
     type: 0,
@@ -701,6 +736,14 @@ const visibleBlocks: VisibleBlock[] = [
     end: 8.96572
   },
   {
+    type: -1,
+    name: 'Task_3:ISR_1',
+    start: 8.96572,
+    end: undefined,
+    coreId: 0,
+    status: 0
+  },
+  {
     type: 1,
     name: 'ISR_1',
     start: 8.96572,
@@ -749,6 +792,14 @@ const visibleBlocks: VisibleBlock[] = [
     end: undefined
   },
   {
+    type: -1,
+    name: 'ISR_1:Task_3',
+    start: 9.95218,
+    end: undefined,
+    coreId: 0,
+    status: 0
+  },
+  {
     type: 0,
     name: 'Task_3',
     start: 9.95218,
@@ -757,7 +808,6 @@ const visibleBlocks: VisibleBlock[] = [
     end: undefined
   }
 ]
-
 function updateTimeLine() {
   if (!chart) return
 
@@ -904,7 +954,14 @@ function initChart() {
             // 查找对应的 core 名称
             const core = coreConfigs.value.find((c) => c.id === blockData.coreId)
             const coreName = core ? core.name : `Core-${blockData.coreId}`
-
+            if (blockData.type == TaskType.LINE) {
+              return `
+               <strong>${blockData.name.split(':').join('->')}</strong><br/>
+               Core: ${coreName}<br/>
+               Time: ${blockData.start * 1000000}us<br/>
+               
+             `
+            }
             return `
                <strong>${blockData.name}</strong><br/>
                ${parseInfo(blockData.type, blockData.status, '<br/>')}
@@ -935,7 +992,7 @@ function initChart() {
           if (type == TaskType.SERVICE || type == TaskType.HOOK) {
             return null
           }
-          if (type == TaskType.TASK && status != 1) {
+          if (type == TaskType.TASK && status == 5) {
             return null
           }
           // 根据 coreId 和 name 查找对应的颜色和位置信息
@@ -955,11 +1012,51 @@ function initChart() {
               yPos += buttonIndex
               break
             } else {
-              if (type == TaskType.TASK || type == TaskType.ISR) {
-                return null
+              if (type == TaskType.LINE) {
+                const names = name.split(':')
+                const from = names[0]
+                const to = names[1]
+                const fromBlock = core.buttons.findIndex((b) => b.name === from)
+                const toBlock = core.buttons.findIndex((b) => b.name === to)
+
+                if (fromBlock != -1 && toBlock != -1) {
+                  color = 'black'
+                  let toOffset = 0
+                  let fromOffset = 0
+                  if (fromBlock > toBlock) {
+                    fromOffset += 1
+                  } else {
+                    toOffset += 1
+                  }
+                  const startPoint = api.coord([
+                    start,
+                    totalButtons.value - yPos - fromBlock - fromOffset
+                  ])
+                  const endPoint = api.coord([
+                    start,
+                    totalButtons.value - yPos - toBlock - toOffset
+                  ])
+
+                  //返回一个垂直的先from - to 的线
+                  return {
+                    type: 'line',
+                    shape: {
+                      x1: startPoint[0],
+                      y1: startPoint[1],
+                      x2: endPoint[0],
+                      y2: endPoint[1]
+                    },
+                    style: {
+                      stroke: color,
+                      lineWidth: 1
+                    }
+                  }
+                }
               }
+              return null
             }
           }
+
           let height = buttonHeight.value
           yPos = totalButtons.value - yPos - 1
           if (type == TaskType.TASK || type == TaskType.ISR) {
@@ -971,10 +1068,15 @@ function initChart() {
               yPos: yPos,
               color: color
             }
+            if (type == TaskType.TASK && status != 1) {
+              height = height * 0.1
+              yPos += 0.45
+            }
           } else {
             if (coreStatus[coreId] == undefined) {
               return null
             }
+
             coreStatus[coreId].cnt++
 
             if (coreStatus[coreId].cntTimer != undefined && start >= coreStatus[coreId].cntTimer) {
@@ -1009,6 +1111,7 @@ function initChart() {
 
           return {
             type: 'group',
+
             children: [
               // 主块
               {
@@ -1100,6 +1203,105 @@ function initEvent() {
     datazoomInfo.end = params.end
     updateTimeLine()
   })
+
+  // Add mouse wheel event listener for datazoom and scale control
+  const chartDom = chart.getDom()
+  chartDom.addEventListener('wheel', handleWheelEvent, { passive: false })
+}
+
+// Mouse wheel event handler
+function handleWheelEvent(event: WheelEvent) {
+  event.preventDefault()
+
+  const delta = -event.deltaY / 1000 // Normalize wheel delta
+  const isCtrlPressed = event.ctrlKey
+
+  if (isCtrlPressed) {
+    // Ctrl + wheel: adjust datazoom window size (zoom in/out the visible range)
+    handleScaleAdjustment(delta, event)
+  } else {
+    // Normal wheel: adjust datazoom position (pan left/right)
+    handleDatazoomAdjustment(delta)
+  }
+}
+
+// Handle datazoom window size adjustment (Ctrl+wheel)
+function handleScaleAdjustment(delta: number, event: WheelEvent) {
+  // Get current datazoom range
+  const currentStart = datazoomInfo.start
+  const currentEnd = datazoomInfo.end
+  const currentRange = currentEnd - currentStart
+
+  // Calculate zoom factor (positive delta = zoom in/smaller window, negative = zoom out/larger window)
+  const zoomFactor = 1 - delta * 0.1
+  let newRange = currentRange * zoomFactor
+
+  // Ensure minimum and maximum range limits
+  newRange = Math.max(1, Math.min(100, newRange)) // Range between 1% and 100%
+
+  // Calculate center point of current datazoom window
+  const center = (currentStart + currentEnd) / 2
+
+  // Calculate new start and end positions centered around current center
+  let newStart = center - newRange / 2
+  let newEnd = center + newRange / 2
+
+  // Ensure boundaries (0-100%)
+  if (newStart < 0) {
+    newStart = 0
+    newEnd = newRange
+  } else if (newEnd > 100) {
+    newEnd = 100
+    newStart = 100 - newRange
+  }
+
+  // Update datazoom window
+  chart.dispatchAction({
+    type: 'dataZoom',
+    start: newStart,
+    end: newEnd
+  })
+}
+
+// Handle datazoom area adjustment (normal wheel scrolling)
+function handleDatazoomAdjustment(delta: number) {
+  const currentOption = chart.getOption() as any
+  const dataZoom = currentOption.dataZoom[0]
+
+  // Get current datazoom range
+  const currentStart = datazoomInfo.start
+  const currentEnd = datazoomInfo.end
+
+  // Calculate scroll amount (as percentage)
+  const scrollAmount = delta * 5 // 5% per scroll step
+
+  // Calculate new range
+  let newStart = currentStart - scrollAmount
+  let newEnd = currentEnd - scrollAmount
+
+  // Ensure boundaries
+  if (newStart < 0) {
+    const offset = -newStart
+    newStart = 0
+    newEnd += offset
+  }
+  if (newEnd > 100) {
+    const offset = newEnd - 100
+    newEnd = 100
+    newStart -= offset
+  }
+
+  // Ensure minimum range
+  if (newEnd - newStart < 1) {
+    return
+  }
+
+  // Update datazoom
+  chart.dispatchAction({
+    type: 'dataZoom',
+    start: Math.max(0, newStart),
+    end: Math.min(100, newEnd)
+  })
 }
 onMounted(() => {
   // 初始化数据
@@ -1135,6 +1337,12 @@ onUnmounted(() => {
     clearInterval(timer)
     timer = null
   }
+
+  // Remove wheel event listener
+  if (chart && chart.getDom()) {
+    chart.getDom().removeEventListener('wheel', handleWheelEvent)
+  }
+
   chart.dispose()
 })
 </script>

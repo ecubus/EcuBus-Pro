@@ -13,6 +13,11 @@ describe('parse', () => {
     expect(blocks).toBeDefined()
     // console.log(blocks)
   })
+  it('should parse comprehensive test events', () => {
+    const blocks = os2block(comprehensiveTestEvents)
+    expect(blocks).toBeDefined()
+    // console.log(blocks)
+  })
 })
 
 it('parse ORTI file', () => {

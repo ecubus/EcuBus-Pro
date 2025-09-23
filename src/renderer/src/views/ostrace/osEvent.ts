@@ -25,7 +25,7 @@ export enum TaskType {
   RESOURCE = 3,
   HOOK = 4,
   SERVICE = 5,
-  LINE = 6
+  LINE = -1
 }
 
 export enum SpinlockStatus {
@@ -65,6 +65,12 @@ export interface HookEvent {
 export interface ServiceEvent {
   serviceParam: number
   serviceId: number
+  coreId: number
+}
+
+export interface LineEvent {
+  from: string
+  to: string
   coreId: number
 }
 
@@ -132,6 +138,12 @@ export type OsEvent =
   | {
       type: TaskType.SERVICE
       event: ServiceEvent
+      ts: number
+      comment: string
+    }
+  | {
+      type: TaskType.LINE
+      event: LineEvent
       ts: number
       comment: string
     }

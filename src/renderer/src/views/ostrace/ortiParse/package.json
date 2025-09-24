@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "tsx gen_orti_signature.ts"
+  }
+}
+

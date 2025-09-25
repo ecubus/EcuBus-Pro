@@ -15,7 +15,7 @@ import {
   CType,
   ORTITaskType,
   ORTIScheduleType
-} from './index'
+} from '../ortiParse'
 import {
   ICstNodeVisitor,
   OrtiFileCstChildren,
@@ -52,6 +52,8 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
 
   ortiFile(children: OrtiFileCstChildren): ORTIFile {
     const result: ORTIFile = {
+      id: '',
+      name: '',
       version: { koil: '', osSemantics: { type: '', version: '' } },
       implementation: {} as ORTIImplementation,
       osInstance: {} as ORTIosInstance,

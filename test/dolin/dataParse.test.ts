@@ -15,7 +15,8 @@ describe('LIN Signal Parse', () => {
       lin: {
         'test.ldf': ldf
       },
-      can: {}
+      can: {},
+      orti: {}
     })
   })
 
@@ -107,4 +108,3 @@ describe('LIN Signal Parse', () => {
   //     expect(result['lin.test.ldf.signals.MotorSelection'][0].val).toBe(2)
   // })
 })
-

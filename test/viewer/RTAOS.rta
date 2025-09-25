@@ -1,6 +1,6 @@
 IMPLEMENTATION rta_orti  {
   OS {
-    ENUM UINT8 [
+    ENUM "UINT8" [
       "E_OK" = 0,
       "E_OS_ACCESS" = 1,
       "E_OS_CALLEVEL" = 2,
@@ -31,7 +31,7 @@ IMPLEMENTATION rta_orti  {
       "E_OS_SYS_ERROR_LIMIT" = 27,
     ] LASTERROR, "Last OSEK error";
 
-    ENUM UINT8 [
+    ENUM "UINT8" [
       "ActivateTask" = 1,
       "Os_AdvanceCounter" = 2,
       "CancelAlarm" = 3,
@@ -127,14 +127,14 @@ IMPLEMENTATION rta_orti  {
       "n/a" = 0
     ] vs_p_OSServiceId, "OS_97";
 
-    ENUM UINT8 [
+    ENUM "UINT8" [
       "StartupHook" = 0,
       "ShutdownHook" = 1,
       "Restart" = 2,
       "ErrorHook" = 3
     ] vs_p_OSAppId, "OS_96";
 
-    ENUM UINT8 [
+    ENUM "UINT8" [
       "NO_APPMODE" = 0,
       "OSDEFAULTAPPMODE" = 1
     ] CURRENTAPPMODE, "Current AppMode";
@@ -207,7 +207,7 @@ IMPLEMENTATION rta_orti  {
     STRING vs_INTERVALS, "Filter INTERVALS";
     STRING vs_PROCESSES, "Filter Processes";
     STRING vs_STACK, "Filter STACK";
-    UINT8 vs_BPSWidth, "Big Pset width";
+    "UINT8" vs_BPSWidth, "Big Pset width";
   };
   Profile {
     STRING vs_ID, "Trace ID";
@@ -259,7 +259,7 @@ ISR2 Millisecond {
   vs_p_Disp = "102";
 };
 
-TASK 'Idle' {
+TASK Idle {
   vs_ID = "1";
   vs_ACTIVATIONS = "1";
   vs_BASEPRIORITY = "0";

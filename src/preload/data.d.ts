@@ -4,6 +4,7 @@ import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 import type { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
+import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
 
 import type { YAXisOption, XAXisOption, LineSeriesOption, GaugeSeriesOption } from 'echarts'
 
@@ -175,6 +176,7 @@ export interface DataSet {
   database: {
     lin: Record<string, LDF>
     can: Record<string, DBC>
+    orti: Record<string, ORTIFile>
   }
   graphs: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>>
   guages: Record<

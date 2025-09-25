@@ -3,7 +3,7 @@ import { parseExcelFromFile } from './../../src/renderer/src/views/ostrace/table
 import path from 'path'
 import fs from 'fs'
 import os2block from '../../src/renderer/src/views/ostrace/os2graph'
-import { parseORTI } from '../../src/renderer/src/views/ostrace/ortiParse'
+import { parseORTI } from '../../src/renderer/src/database/ortiParse'
 describe('parse', () => {
   it('should parse Excel file', async () => {
     const eventList = await parseExcelFromFile(path.resolve(__dirname, './demo.xlsx'))
@@ -54,4 +54,14 @@ it('parse ORTI file3', () => {
     path.resolve(__dirname, './Os_Trace_比赛demo.orti.json'),
     JSON.stringify(orti.data, null, 2)
   )
+})
+
+it.skip('parse ORTI file4', () => {
+  const orti = parseORTI(fs.readFileSync(path.resolve(__dirname, './RTAOS.rta'), 'utf-8'))
+  expect(orti).toBeDefined()
+  expect(orti.errors).toBeDefined()
+  console.log(orti.errors[0])
+  expect(orti.errors.length).toBe(0)
+  // console.log(orti.data)
+  fs.writeFileSync(path.resolve(__dirname, './RTAOS.rta.json'), JSON.stringify(orti.data, null, 2))
 })

@@ -1,9 +1,9 @@
 // OSEK ORTI (OSEK Run Time Interface) TypeScript Interfaces and Parser
 // 基于实际 ORTI 文件格式重新设计，使用 Chevrotain 解析器
 
-import { ORTILexer } from './lexer'
-import { ortiParser } from './parser'
-import { ortiVisitor } from './visitor'
+import { ORTILexer } from './orti/lexer'
+import { ortiParser } from './orti/parser'
+import { ortiVisitor } from './orti/visitor'
 
 /**
  * 版本信息
@@ -248,6 +248,8 @@ export interface ORTIParseResult {
  * 完整的 ORTI 文件结构
  */
 export interface ORTIFile {
+  id: string
+  name: string
   // 版本段
   version: ORTIVersion
 

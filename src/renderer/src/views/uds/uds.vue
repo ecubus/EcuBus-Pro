@@ -321,6 +321,43 @@
             </div> -->
           </div>
         </el-tab-pane>
+        <el-tab-pane name="osTrace">
+          <template #label>
+            <span class="lr">
+              <Icon :icon="osTraceIcon" style="font-size: 16px" />
+              <span>OS Trace</span>
+            </span>
+          </template>
+          <div style="display: flex; gap: 5px; padding: 15px">
+            <div class="grid girdenable" @click="openOsTrace()">
+              <Icon :icon="osTraceIcon" style="font-size: 24px" />
+              <span>OS Trace</span>
+            </div>
+            <!-- <div class="grid girdenable">
+              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
+              <el-dropdown @command="openDatabase">
+                <span class="lr">
+                  Test Config
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                  
+                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
+                     >
+                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
+
+                    </el-dropdown-item>
+                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
+
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div> -->
+          </div>
+        </el-tab-pane>
         <!-- <el-tab-pane label="">
         <template #label>
           <span class="lr">
@@ -357,11 +394,10 @@
                   <el-dropdown-menu size="small">
                     <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
                       </el-dropdown-item> -->
-                    <el-dropdown-item icon="CirclePlusFilled" command="addLin"
-                      >Add Lin (LDF)
-                    </el-dropdown-item>
-                    <el-dropdown-item icon="CirclePlusFilled" command="addCan"
-                      >Add CAN (DBC)
+                    <el-dropdown-item icon="CirclePlusFilled" command="addLin">Add Lin (LDF) </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addCan">Add CAN (DBC) </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addOrti"
+                      >Add OS (ORTI)
                     </el-dropdown-item>
                     <el-dropdown-item
                       v-for="(item, index) in dataBaseList"
@@ -380,11 +416,6 @@
             <div class="grid girdenable" @click="handleSelect(['variable'])">
               <Icon :icon="varIcon" style="font-size: 24px" />
               <span>Variables</span>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click="openOsTrace()">
-              <Icon :icon="osTraceIcon" style="font-size: 24px" />
-              <span>OS Trace</span>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="openApi()">
@@ -895,7 +926,8 @@ async function openDatabase(testerIndex: string) {
   // })
   const fileExtMap = {
     lin: 'ldf',
-    can: 'dbc'
+    can: 'dbc',
+    orti: 'orti'
   }
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
@@ -925,6 +957,14 @@ async function openDatabase(testerIndex: string) {
           dbcFile: file
         }
       })
+    } else if (type == 'orti') {
+      const id = v4()
+      layoutMaster.addWin('orti', `${id}`, {
+        params: {
+          'edit-index': id,
+          ortiFile: file
+        }
+      })
     }
   } else if (testerIndex.startsWith('LIN.')) {
     const name = testerIndex.split('.').slice(1).join('.')
@@ -951,6 +991,20 @@ async function openDatabase(testerIndex: string) {
             'edit-index': key
           }
         })
+      }
+    }
+  } else if (testerIndex.startsWith('ORTI.')) {
+    const name = testerIndex.split('.').slice(1).join('.')
+    //for orti
+    for (const key of Object.keys(dataBase.database.orti)) {
+      if (dataBase.database.orti[key].name == name) {
+        layoutMaster.addWin('orti', key, {
+          name: dataBase.database.orti[key].name,
+          params: {
+            'edit-index': key
+          }
+        })
+        break
       }
     }
   }

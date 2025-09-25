@@ -299,6 +299,17 @@ export const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('../../database/dbc/index.vue')),
     icon: database
   },
+  orti: {
+    i: 'ORTI',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'ORTI',
+    key: 'ORTI',
+    component: defineAsyncComponent(() => import('../../database/orti/index.vue')),
+    icon: database
+  },
   soa: {
     i: 'SOA',
     x: 0,

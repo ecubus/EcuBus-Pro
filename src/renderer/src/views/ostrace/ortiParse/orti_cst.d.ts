@@ -60,112 +60,16 @@ export interface ImplementationBlockCstNode extends CstNode {
 }
 
 export type ImplementationBlockCstChildren = {
-  osBlock?: OsBlockCstNode[]
-  taskBlock?: TaskBlockCstNode[]
-  stackBlock?: StackBlockCstNode[]
-  alarmBlock?: AlarmBlockCstNode[]
-  resourceBlock?: ResourceBlockCstNode[]
-  isrBlock?: IsrBlockCstNode[]
-  configBlock?: ConfigBlockCstNode[]
+  genericBlock: GenericBlockCstNode[]
 }
 
-export interface OsBlockCstNode extends CstNode {
-  name: 'osBlock'
-  children: OsBlockCstChildren
+export interface GenericBlockCstNode extends CstNode {
+  name: 'genericBlock'
+  children: GenericBlockCstChildren
 }
 
-export type OsBlockCstChildren = {
-  OS: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface TaskBlockCstNode extends CstNode {
-  name: 'taskBlock'
-  children: TaskBlockCstChildren
-}
-
-export type TaskBlockCstChildren = {
-  TASK: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface StackBlockCstNode extends CstNode {
-  name: 'stackBlock'
-  children: StackBlockCstChildren
-}
-
-export type StackBlockCstChildren = {
-  STACK: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface AlarmBlockCstNode extends CstNode {
-  name: 'alarmBlock'
-  children: AlarmBlockCstChildren
-}
-
-export type AlarmBlockCstChildren = {
-  ALARM: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface ResourceBlockCstNode extends CstNode {
-  name: 'resourceBlock'
-  children: ResourceBlockCstChildren
-}
-
-export type ResourceBlockCstChildren = {
-  RESOURCE: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface IsrBlockCstNode extends CstNode {
-  name: 'isrBlock'
-  children: IsrBlockCstChildren
-}
-
-export type IsrBlockCstChildren = {
-  VS_ISR: IToken[]
-  LeftBrace: IToken[]
-  typeDefinition?: TypeDefinitionCstNode[]
-  RightBrace: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
-  Semicolon: IToken[]
-}
-
-export interface ConfigBlockCstNode extends CstNode {
-  name: 'configBlock'
-  children: ConfigBlockCstChildren
-}
-
-export type ConfigBlockCstChildren = {
-  VS_CONFIG: IToken[]
+export type GenericBlockCstChildren = {
+  blockType: IToken[]
   LeftBrace: IToken[]
   typeDefinition?: TypeDefinitionCstNode[]
   RightBrace: IToken[]
@@ -192,11 +96,11 @@ export interface CtypeDefinitionCstNode extends CstNode {
 
 export type CtypeDefinitionCstChildren = {
   CTYPE: IToken[]
-  dataType: StringValueCstNode[]
-  variableName: IToken[]
+  dataType?: StringValueCstNode[]
+  variableName?: IToken[]
   ArrayNotation?: IToken[]
-  Comma: IToken[]
-  description: StringValueCstNode[]
+  Comma?: IToken[]
+  description?: StringValueCstNode[]
   Semicolon: IToken[]
 }
 
@@ -212,7 +116,7 @@ export type EnumDefinitionCstChildren = {
   LeftBracket: IToken[]
   enumValueList: EnumValueListCstNode[]
   RightBracket: IToken[]
-  variableName: IToken[]
+  variableName?: IToken[]
   ArrayNotation?: IToken[]
   Comma: IToken[]
   description: StringValueCstNode[]
@@ -250,10 +154,10 @@ export interface EnumValueCstNode extends CstNode {
 export type EnumValueCstChildren = {
   enumKey: StringValueCstNode[]
   Equals?: IToken[]
-  enumValue?: NumberValueCstNode[]
+  enumValue?: ValueCstNode[]
   Colon?: IToken[]
   enumIdentifier?: IToken[]
-  enumReference?: StringValueCstNode[]
+  enumReference?: ValueCstNode[]
 }
 
 export interface InformationSectionCstNode extends CstNode {
@@ -262,106 +166,16 @@ export interface InformationSectionCstNode extends CstNode {
 }
 
 export type InformationSectionCstChildren = {
-  osInstance?: OsInstanceCstNode[]
-  taskInstance?: TaskInstanceCstNode[]
-  stackInstance?: StackInstanceCstNode[]
-  alarmInstance?: AlarmInstanceCstNode[]
-  resourceInstance?: ResourceInstanceCstNode[]
-  isrInstance?: IsrInstanceCstNode[]
-  configInstance?: ConfigInstanceCstNode[]
+  genericInstance: GenericInstanceCstNode[]
 }
 
-export interface OsInstanceCstNode extends CstNode {
-  name: 'osInstance'
-  children: OsInstanceCstChildren
+export interface GenericInstanceCstNode extends CstNode {
+  name: 'genericInstance'
+  children: GenericInstanceCstChildren
 }
 
-export type OsInstanceCstChildren = {
-  OS: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface TaskInstanceCstNode extends CstNode {
-  name: 'taskInstance'
-  children: TaskInstanceCstChildren
-}
-
-export type TaskInstanceCstChildren = {
-  TASK: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface StackInstanceCstNode extends CstNode {
-  name: 'stackInstance'
-  children: StackInstanceCstChildren
-}
-
-export type StackInstanceCstChildren = {
-  STACK: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface AlarmInstanceCstNode extends CstNode {
-  name: 'alarmInstance'
-  children: AlarmInstanceCstChildren
-}
-
-export type AlarmInstanceCstChildren = {
-  ALARM: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface ResourceInstanceCstNode extends CstNode {
-  name: 'resourceInstance'
-  children: ResourceInstanceCstChildren
-}
-
-export type ResourceInstanceCstChildren = {
-  RESOURCE: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface IsrInstanceCstNode extends CstNode {
-  name: 'isrInstance'
-  children: IsrInstanceCstChildren
-}
-
-export type IsrInstanceCstChildren = {
-  VS_ISR: IToken[]
-  instanceName: IToken[]
-  LeftBrace: IToken[]
-  propertyAssignment?: PropertyAssignmentCstNode[]
-  RightBrace: IToken[]
-  Semicolon: IToken[]
-}
-
-export interface ConfigInstanceCstNode extends CstNode {
-  name: 'configInstance'
-  children: ConfigInstanceCstChildren
-}
-
-export type ConfigInstanceCstChildren = {
-  VS_CONFIG: IToken[]
+export type GenericInstanceCstChildren = {
+  instanceType: IToken[]
   instanceName: IToken[]
   LeftBrace: IToken[]
   propertyAssignment?: PropertyAssignmentCstNode[]
@@ -375,7 +189,7 @@ export interface PropertyAssignmentCstNode extends CstNode {
 }
 
 export type PropertyAssignmentCstChildren = {
-  propertyName: IToken[]
+  propertyName?: IToken[]
   LeftBracket?: IToken[]
   arrayIndex?: NumberValueCstNode[]
   RightBracket?: IToken[]
@@ -410,6 +224,7 @@ export interface NumberValueCstNode extends CstNode {
 }
 
 export type NumberValueCstChildren = {
+  QuotedHexNumber?: IToken[]
   HexNumber?: IToken[]
   DecimalNumber?: IToken[]
 }
@@ -437,13 +252,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   versionProperty(children: VersionPropertyCstChildren, param?: IN): OUT
   implementationSection(children: ImplementationSectionCstChildren, param?: IN): OUT
   implementationBlock(children: ImplementationBlockCstChildren, param?: IN): OUT
-  osBlock(children: OsBlockCstChildren, param?: IN): OUT
-  taskBlock(children: TaskBlockCstChildren, param?: IN): OUT
-  stackBlock(children: StackBlockCstChildren, param?: IN): OUT
-  alarmBlock(children: AlarmBlockCstChildren, param?: IN): OUT
-  resourceBlock(children: ResourceBlockCstChildren, param?: IN): OUT
-  isrBlock(children: IsrBlockCstChildren, param?: IN): OUT
-  configBlock(children: ConfigBlockCstChildren, param?: IN): OUT
+  genericBlock(children: GenericBlockCstChildren, param?: IN): OUT
   typeDefinition(children: TypeDefinitionCstChildren, param?: IN): OUT
   ctypeDefinition(children: CtypeDefinitionCstChildren, param?: IN): OUT
   enumDefinition(children: EnumDefinitionCstChildren, param?: IN): OUT
@@ -451,13 +260,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   enumValueList(children: EnumValueListCstChildren, param?: IN): OUT
   enumValue(children: EnumValueCstChildren, param?: IN): OUT
   informationSection(children: InformationSectionCstChildren, param?: IN): OUT
-  osInstance(children: OsInstanceCstChildren, param?: IN): OUT
-  taskInstance(children: TaskInstanceCstChildren, param?: IN): OUT
-  stackInstance(children: StackInstanceCstChildren, param?: IN): OUT
-  alarmInstance(children: AlarmInstanceCstChildren, param?: IN): OUT
-  resourceInstance(children: ResourceInstanceCstChildren, param?: IN): OUT
-  isrInstance(children: IsrInstanceCstChildren, param?: IN): OUT
-  configInstance(children: ConfigInstanceCstChildren, param?: IN): OUT
+  genericInstance(children: GenericInstanceCstChildren, param?: IN): OUT
   propertyAssignment(children: PropertyAssignmentCstChildren, param?: IN): OUT
   value(children: ValueCstChildren, param?: IN): OUT
   stringValue(children: StringValueCstChildren, param?: IN): OUT

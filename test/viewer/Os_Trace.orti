@@ -605,7 +605,19 @@ TASK OsTask_Idle_Core5 {
 };
 
 
-
+TASK basicTaskFirst {
+    PRIORITY = "(gTaskControlBlocks[0].actualPrio)";
+    STATE = "(gTaskControlBlocks[0].taskState)";
+    STACK = "&(taskStack0[0])";
+    REMAININGACTIVATIONS = "(gTaskControlBlocks[0].actCount)";
+    CONTEXT = "0";
+    vs_Home_Priority = "10";
+    vs_Task_Type = "BASIC";
+    vs_Schedule = "FULL Preemptive";
+    vs_Event_Mask = "0";
+    vs_Event_Flags = "0";
+    vs_max_Activations = "1";
+};
 
 STACK taskStack_iSoft_Auto_OsTask_10ms_BSW { 
     SIZE = "1024";
@@ -617,7 +629,7 @@ STACK taskStack_iSoft_Auto_OsTask_10ms_BSW {
 STACK taskStack_iSoft_Auto_OsTask_5ms_BSW { 
     SIZE = "1024";
     STACKDIRECTION = "DOWN"; 
-    BASEADDRESS = "&Os_iSoft_Auto_OsTask_5ms_BSW_Stack"; 
+    BASEADDRESS = "(gTaskControlBlocks[0].actualPrio)"; 
     FILLPATTERN = "0xCCCCCCCC"; 
 };
 

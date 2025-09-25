@@ -23,13 +23,7 @@ import {
   VersionPropertyCstChildren,
   ImplementationSectionCstChildren,
   ImplementationBlockCstChildren,
-  OsBlockCstChildren,
-  TaskBlockCstChildren,
-  StackBlockCstChildren,
-  AlarmBlockCstChildren,
-  ResourceBlockCstChildren,
-  IsrBlockCstChildren,
-  ConfigBlockCstChildren,
+  GenericBlockCstChildren,
   TypeDefinitionCstChildren,
   CtypeDefinitionCstChildren,
   EnumDefinitionCstChildren,
@@ -37,13 +31,7 @@ import {
   EnumValueListCstChildren,
   EnumValueCstChildren,
   InformationSectionCstChildren,
-  OsInstanceCstChildren,
-  TaskInstanceCstChildren,
-  StackInstanceCstChildren,
-  AlarmInstanceCstChildren,
-  ResourceInstanceCstChildren,
-  IsrInstanceCstChildren,
-  ConfigInstanceCstChildren,
+  GenericInstanceCstChildren,
   PropertyAssignmentCstChildren,
   ValueCstChildren,
   StringValueCstChildren,
@@ -134,7 +122,6 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
 
   versionSection(children: VersionSectionCstChildren): Partial<ORTIVersion> {
     const result: Partial<ORTIVersion> = {}
-
     if (children.versionProperty) {
       children.versionProperty.forEach((propNode) => {
         const prop = this.visit(propNode)
@@ -219,56 +206,20 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
   implementationBlock(
     children: ImplementationBlockCstChildren
   ): { type: string; data: any } | null {
-    if (children.osBlock) {
-      return { type: 'os', data: this.visit(children.osBlock[0]) }
-    }
-    if (children.taskBlock) {
-      return { type: 'task', data: this.visit(children.taskBlock[0]) }
-    }
-    if (children.stackBlock) {
-      return { type: 'stack', data: this.visit(children.stackBlock[0]) }
-    }
-    if (children.alarmBlock) {
-      return { type: 'alarm', data: this.visit(children.alarmBlock[0]) }
-    }
-    if (children.resourceBlock) {
-      return { type: 'resource', data: this.visit(children.resourceBlock[0]) }
-    }
-    if (children.isrBlock) {
-      return { type: 'isr', data: this.visit(children.isrBlock[0]) }
-    }
-    if (children.configBlock) {
-      return { type: 'config', data: this.visit(children.configBlock[0]) }
+    if (children.genericBlock) {
+      return this.visit(children.genericBlock[0])
     }
     return null
   }
 
-  osBlock(children: OsBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
+  genericBlock(children: GenericBlockCstChildren): { type: string; data: any } {
+    const blockType = children.blockType[0].image.toLowerCase()
+    const data = this.processTypeDefinitionBlock(children)
 
-  taskBlock(children: TaskBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
-
-  stackBlock(children: StackBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
-
-  alarmBlock(children: AlarmBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
-
-  resourceBlock(children: ResourceBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
-
-  isrBlock(children: IsrBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
-  }
-
-  configBlock(children: ConfigBlockCstChildren): any {
-    return this.processTypeDefinitionBlock(children)
+    return {
+      type: blockType === 'vs_isr' ? 'isr' : blockType === 'vs_config' ? 'config' : blockType,
+      data
+    }
   }
 
   // ============== Type Definitions ==============
@@ -302,9 +253,9 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
   }
 
   ctypeDefinition(children: CtypeDefinitionCstChildren): { name: string; definition: CType } {
-    const name = children.variableName[0].image
-    const type = this.extractStringValue(children.dataType[0])
-    const description = this.extractStringValue(children.description[0])
+    const name = children.variableName?.[0]?.image || ''
+    const type = children.dataType ? this.extractStringValue(children.dataType[0]) : ''
+    const description = children.description ? this.extractStringValue(children.description[0]) : ''
     const isArray = !!children.ArrayNotation
 
     return {
@@ -319,7 +270,7 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
   }
 
   enumDefinition(children: EnumDefinitionCstChildren): { name: string; definition: ORTIEnum } {
-    const name = children.variableName[0].image
+    const name = children.variableName?.[0]?.image || ''
     const enumType = children.enumType ? this.extractStringValue(children.enumType[0]) : undefined
     const description = this.extractStringValue(children.description[0])
     const isArray = !!children.ArrayNotation
@@ -380,12 +331,12 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
     const key = this.extractStringValue(children.enumKey[0])
 
     if (children.enumValue) {
-      const value = this.extractNumberValue(children.enumValue[0])
+      const value = this.visit(children.enumValue[0])
       return { key, value }
     }
 
     if (children.enumReference) {
-      const reference = this.extractStringValue(children.enumReference[0])
+      const reference = this.visit(children.enumReference[0])
       return { key, value: reference }
     }
 
@@ -395,143 +346,51 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
   // ============== Information Section ==============
 
   informationSection(children: InformationSectionCstChildren): { type: string; data: any } | null {
-    if (children.osInstance) {
-      return { type: 'os', data: this.visit(children.osInstance[0]) }
-    }
-    if (children.taskInstance) {
-      return { type: 'task', data: this.visit(children.taskInstance[0]) }
-    }
-    if (children.stackInstance) {
-      return { type: 'stack', data: this.visit(children.stackInstance[0]) }
-    }
-    if (children.alarmInstance) {
-      return { type: 'alarm', data: this.visit(children.alarmInstance[0]) }
-    }
-    if (children.resourceInstance) {
-      return { type: 'resource', data: this.visit(children.resourceInstance[0]) }
-    }
-    if (children.isrInstance) {
-      return { type: 'isr', data: this.visit(children.isrInstance[0]) }
-    }
-    if (children.configInstance) {
-      return { type: 'config', data: this.visit(children.configInstance[0]) }
+    if (children.genericInstance) {
+      return this.visit(children.genericInstance[0])
     }
     return null
   }
 
-  osInstance(children: OsInstanceCstChildren): ORTIosInstance {
+  genericInstance(children: GenericInstanceCstChildren): { type: string; data: any } {
+    const instanceType = children.instanceType[0].image.toLowerCase()
     const name = children.instanceName[0].image
     const properties = this.extractProperties(children)
 
-    // Extract core number
-    const coreNum = properties.vs_CORE_NUM ? parseInt(properties.vs_CORE_NUM) : 0
-
-    // Extract core configurations
-    const coreConfigs: any[] = []
-    for (let i = 0; i < coreNum; i++) {
-      const config = {
-        coreIndex: i,
-        coreId: properties[`vs_CORE_ID[${i}]`] || '',
-        runningTask: properties[`RUNNINGTASK[${i}]`] || '',
-        runningTaskPriority: properties[`RUNNINGTASKPRIORITY[${i}]`] || '',
-        runningIsr2: properties[`RUNNINGISR2[${i}]`] || '',
-        serviceTrace: properties[`vs_SERVICETRACE[${i}]`] || '',
-        lastError: properties[`LASTERROR[${i}]`] || '',
-        currentAppMode: properties[`CURRENTAPPMODE[${i}]`] || ''
-      }
-      coreConfigs.push(config)
+    let data: any
+    switch (instanceType) {
+      case 'os':
+        data = this.createOsInstance(name, properties)
+        break
+      case 'task':
+        data = this.createTaskInstance(name, properties)
+        break
+      case 'stack':
+        data = this.createStackInstance(name, properties)
+        break
+      case 'alarm':
+        data = this.createAlarmInstance(name, properties)
+        break
+      case 'resource':
+        data = this.createResourceInstance(name, properties)
+        break
+      case 'vs_isr':
+        data = this.createIsrInstance(name, properties)
+        return { type: 'isr', data }
+      case 'vs_config':
+        data = this.createConfigInstance(name, properties)
+        return { type: 'config', data }
+      default:
+        data = { name, properties }
     }
 
-    return {
-      name,
-      coreNum,
-      coreConfigs
-    }
-  }
-
-  taskInstance(children: TaskInstanceCstChildren): ORTITaskInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      priority: properties.PRIORITY || '',
-      state: properties.STATE || '',
-      stack: properties.STACK || '',
-      remainingActivations: properties.REMAININGACTIVATIONS || '',
-      homePriority: properties.vs_Home_Priority || '',
-      taskType: this.parseTaskType(properties.vs_Task_Type),
-      schedule: this.parseScheduleType(properties.vs_Schedule),
-      maxActivations: properties.vs_max_Activations || ''
-    }
-  }
-
-  stackInstance(children: StackInstanceCstChildren): ORTIStackInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      size: properties.SIZE || '',
-      stackDirection: properties.STACKDIRECTION || '',
-      baseAddress: properties.BASEADDRESS || '',
-      fillPattern: properties.FILLPATTERN || ''
-    }
-  }
-
-  alarmInstance(children: AlarmInstanceCstChildren): ORTIAlarmInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      alarmTime: properties.ALARMTIME || '',
-      cycleTime: properties.CYCLETIME || '',
-      state: properties.STATE || '',
-      action: properties.ACTION || '',
-      counter: properties.COUNTER || ''
-    }
-  }
-
-  resourceInstance(children: ResourceInstanceCstChildren): ORTIResourceInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      state: properties.STATE || '',
-      locker: properties.LOCKER || '',
-      priority: properties.PRIORITY || ''
-    }
-  }
-
-  isrInstance(children: IsrInstanceCstChildren): ORTIIsrInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      priority: properties.vs_Priority || '',
-      type: properties.vs_Type || '',
-      state: properties.vs_State || ''
-    }
-  }
-
-  configInstance(children: ConfigInstanceCstChildren): ORTIConfigInstance {
-    const name = children.instanceName[0].image
-    const properties = this.extractProperties(children)
-
-    return {
-      name,
-      scalabilityClass: properties.vs_ScalabilityClass || '',
-      statusLevel: properties.vs_StatusLevel || ''
-    }
+    return { type: instanceType, data }
   }
 
   // ============== Property Assignment ==============
 
   propertyAssignment(children: PropertyAssignmentCstChildren): { name: string; value: any } {
-    const propertyName = children.propertyName[0].image
+    const propertyName = children.propertyName?.[0]?.image || ''
     const arrayIndex = children.arrayIndex ? this.extractNumberValue(children.arrayIndex[0]) : null
     const propertyValue = this.visit(children.propertyValue[0])
 
@@ -584,6 +443,102 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
     return result
   }
 
+  // ============== Instance Creation Helpers ==============
+
+  private createOsInstance(name: string, properties: { [key: string]: any }): ORTIosInstance {
+    // Extract core number
+    const coreNum = properties.vs_CORE_NUM ? parseInt(properties.vs_CORE_NUM) : 0
+
+    // Extract core configurations
+    const coreConfigs: any[] = []
+    for (let i = 0; i < coreNum; i++) {
+      const config = {
+        coreIndex: i,
+        coreId: properties[`vs_CORE_ID[${i}]`] || '',
+        runningTask: properties[`RUNNINGTASK[${i}]`] || '',
+        runningTaskPriority: properties[`RUNNINGTASKPRIORITY[${i}]`] || '',
+        runningIsr2: properties[`RUNNINGISR2[${i}]`] || '',
+        serviceTrace: properties[`vs_SERVICETRACE[${i}]`] || '',
+        lastError: properties[`LASTERROR[${i}]`] || '',
+        currentAppMode: properties[`CURRENTAPPMODE[${i}]`] || ''
+      }
+      coreConfigs.push(config)
+    }
+
+    return {
+      name,
+      coreNum,
+      coreConfigs
+    }
+  }
+
+  private createTaskInstance(name: string, properties: { [key: string]: any }): ORTITaskInstance {
+    return {
+      name,
+      priority: properties.PRIORITY || '',
+      state: properties.STATE || '',
+      stack: properties.STACK || '',
+      remainingActivations: properties.REMAININGACTIVATIONS || '',
+      homePriority: properties.vs_Home_Priority || '',
+      taskType: this.parseTaskType(properties.vs_Task_Type),
+      schedule: this.parseScheduleType(properties.vs_Schedule),
+      maxActivations: properties.vs_max_Activations || ''
+    }
+  }
+
+  private createStackInstance(name: string, properties: { [key: string]: any }): ORTIStackInstance {
+    return {
+      name,
+      size: properties.SIZE || '',
+      stackDirection: properties.STACKDIRECTION || '',
+      baseAddress: properties.BASEADDRESS || '',
+      fillPattern: properties.FILLPATTERN || ''
+    }
+  }
+
+  private createAlarmInstance(name: string, properties: { [key: string]: any }): ORTIAlarmInstance {
+    return {
+      name,
+      alarmTime: properties.ALARMTIME || '',
+      cycleTime: properties.CYCLETIME || '',
+      state: properties.STATE || '',
+      action: properties.ACTION || '',
+      counter: properties.COUNTER || ''
+    }
+  }
+
+  private createResourceInstance(
+    name: string,
+    properties: { [key: string]: any }
+  ): ORTIResourceInstance {
+    return {
+      name,
+      state: properties.STATE || '',
+      locker: properties.LOCKER || '',
+      priority: properties.PRIORITY || ''
+    }
+  }
+
+  private createIsrInstance(name: string, properties: { [key: string]: any }): ORTIIsrInstance {
+    return {
+      name,
+      priority: properties.vs_Priority || '',
+      type: properties.vs_Type || '',
+      state: properties.vs_State || ''
+    }
+  }
+
+  private createConfigInstance(
+    name: string,
+    properties: { [key: string]: any }
+  ): ORTIConfigInstance {
+    return {
+      name,
+      scalabilityClass: properties.vs_ScalabilityClass || '',
+      statusLevel: properties.vs_StatusLevel || ''
+    }
+  }
+
   // ============== Helper Methods ==============
 
   private extractProperties(children: any): { [key: string]: any } {
@@ -602,10 +557,13 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
   }
 
   private extractStringValue(children: any): string {
-    if (!children || !children.StringLiteral) return ''
-    const str = children.StringLiteral[0].image
-    // Remove quotes
-    return str.slice(1, -1)
+    if (children.StringLiteral) {
+      const str = children.StringLiteral[0].image
+      return str.slice(1, -1)
+    } else if (children.children) {
+      return this.extractStringValue(children.children)
+    }
+    return ''
   }
 
   private extractNumberValue(children: any): number {
@@ -617,6 +575,17 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
 
     if (children.DecimalNumber) {
       return parseFloat(children.DecimalNumber[0].image)
+    }
+
+    if (children.QuotedHexNumber) {
+      // Remove quotes and parse hex: "0x1234" -> 0x1234
+      const hexStr = children.QuotedHexNumber[0].image.slice(1, -1)
+      return parseInt(hexStr, 16)
+    }
+
+    // Handle nested children structure like extractStringValue
+    if (children.children) {
+      return this.extractNumberValue(children.children)
     }
 
     return 0

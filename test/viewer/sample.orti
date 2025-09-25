@@ -1,8 +1,8 @@
 /***********************/
  /* Declaration Section */ 
  /***********************/ 
- VERSION { KOIL = "2.1"; OSSEMANTICS = "ORTI", "2.1"; }; I
- MPLEMENTATION VendorX_ORTI { 
+ VERSION { KOIL = "2.1"; OSSEMANTICS = "ORTI", "2.1"; };
+ IMPLEMENTATION VendorX_ORTI { 
     OS { 
         ENUM [ 
             "basicTaskFirst" = "&(gTaskControlBlocks[0])", 
@@ -136,7 +136,7 @@
 OS VendorX_arch {
     RUNNINGTASK = "gActiveTaskTcb";
     RUNNINGTASKPRIORITY = "osRunTaskPrio";
-    RUNNINGISR2 = osORTIIsr2Id";
+    RUNNINGISR2 = "osORTIIsr2Id";
     SERVICETRACE = "osORTIServiceId";
     LASTERROR = "Last_OSEK_err";
     CURRENTAPPMODE = "osAppMode";

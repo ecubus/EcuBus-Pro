@@ -5,18 +5,11 @@ import {
   KOIL,
   OSSEMANTICS,
   IMPLEMENTATION,
-  OS,
-  TASK,
-  STACK,
-  ALARM,
-  RESOURCE,
   CTYPE,
   ENUM,
   TOTRACE,
   STRING,
   SIZE,
-  VS_ISR,
-  VS_CONFIG,
   LeftBrace,
   RightBrace,
   LeftBracket,
@@ -106,91 +99,14 @@ export class ORTIParser extends CstParser {
   })
 
   private implementationBlock = this.RULE('implementationBlock', () => {
-    this.OR([
-      { ALT: () => this.SUBRULE(this.osBlock) },
-      { ALT: () => this.SUBRULE(this.taskBlock) },
-      { ALT: () => this.SUBRULE(this.stackBlock) },
-      { ALT: () => this.SUBRULE(this.alarmBlock) },
-      { ALT: () => this.SUBRULE(this.resourceBlock) },
-      { ALT: () => this.SUBRULE(this.isrBlock) },
-      { ALT: () => this.SUBRULE(this.configBlock) }
-    ])
+    this.SUBRULE(this.genericBlock)
   })
 
-  private osBlock = this.RULE('osBlock', () => {
-    this.CONSUME(OS)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private taskBlock = this.RULE('taskBlock', () => {
-    this.CONSUME(TASK)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private stackBlock = this.RULE('stackBlock', () => {
-    this.CONSUME(STACK)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private alarmBlock = this.RULE('alarmBlock', () => {
-    this.CONSUME(ALARM)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private resourceBlock = this.RULE('resourceBlock', () => {
-    this.CONSUME(RESOURCE)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private isrBlock = this.RULE('isrBlock', () => {
-    this.CONSUME(VS_ISR)
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.typeDefinition)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Comma)
-    this.SUBRULE(this.stringValue, { LABEL: 'description' })
-    this.CONSUME(Semicolon)
-  })
-
-  private configBlock = this.RULE('configBlock', () => {
-    this.CONSUME(VS_CONFIG)
+  // Generic block pattern: IDENTIFIER { ... } , "description" ;
+  // This handles the unified format for all block types using generic identifiers
+  // The blockType can be any identifier (OS, TASK, STACK, ALARM, RESOURCE, vs_ISR, vs_CONFIG, etc.)
+  private genericBlock = this.RULE('genericBlock', () => {
+    this.CONSUME(Identifier, { LABEL: 'blockType' })
     this.CONSUME(LeftBrace)
     this.MANY(() => {
       this.SUBRULE(this.typeDefinition)
@@ -223,17 +139,6 @@ export class ORTIParser extends CstParser {
         }
       },
       {
-        // Handle keywords used as identifiers
-        ALT: () => {
-          this.CONSUME(STACK, { LABEL: 'variableName' })
-        }
-      },
-      {
-        ALT: () => {
-          this.CONSUME(ALARM, { LABEL: 'variableName' })
-        }
-      },
-      {
         ALT: () => {
           this.CONSUME(SIZE, { LABEL: 'variableName' })
         }
@@ -242,8 +147,10 @@ export class ORTIParser extends CstParser {
     this.OPTION2(() => {
       this.CONSUME(ArrayNotation)
     })
-    this.CONSUME(Comma)
-    this.SUBRULE2(this.stringValue, { LABEL: 'description' })
+    this.OPTION3(() => {
+      this.CONSUME(Comma)
+      this.SUBRULE2(this.stringValue, { LABEL: 'description' })
+    })
     this.CONSUME(Semicolon)
   })
 
@@ -263,18 +170,6 @@ export class ORTIParser extends CstParser {
       {
         ALT: () => {
           this.CONSUME(Identifier, { LABEL: 'variableName' })
-        }
-      },
-      {
-        // Handle case where STACK appears as identifier (not keyword)
-        ALT: () => {
-          this.CONSUME(STACK, { LABEL: 'variableName' })
-        }
-      },
-      {
-        // Handle case where ALARM appears as identifier (not keyword)
-        ALT: () => {
-          this.CONSUME(ALARM, { LABEL: 'variableName' })
         }
       },
       {
@@ -317,7 +212,7 @@ export class ORTIParser extends CstParser {
       {
         ALT: () => {
           this.CONSUME(Equals)
-          this.SUBRULE(this.numberValue, { LABEL: 'enumValue' })
+          this.SUBRULE(this.value, { LABEL: 'enumValue' })
         }
       },
       {
@@ -325,7 +220,7 @@ export class ORTIParser extends CstParser {
           this.CONSUME(Colon)
           this.CONSUME(Identifier, { LABEL: 'enumIdentifier' })
           this.CONSUME1(Equals)
-          this.SUBRULE1(this.stringValue, { LABEL: 'enumReference' })
+          this.SUBRULE1(this.value, { LABEL: 'enumReference' })
         }
       }
     ])
@@ -334,86 +229,15 @@ export class ORTIParser extends CstParser {
   // ============== Information Section ==============
 
   private informationSection = this.RULE('informationSection', () => {
-    this.OR([
-      { ALT: () => this.SUBRULE(this.osInstance) },
-      { ALT: () => this.SUBRULE(this.taskInstance) },
-      { ALT: () => this.SUBRULE(this.stackInstance) },
-      { ALT: () => this.SUBRULE(this.alarmInstance) },
-      { ALT: () => this.SUBRULE(this.resourceInstance) },
-      { ALT: () => this.SUBRULE(this.isrInstance) },
-      { ALT: () => this.SUBRULE(this.configInstance) }
-    ])
+    this.SUBRULE(this.genericInstance)
   })
 
-  private osInstance = this.RULE('osInstance', () => {
-    this.CONSUME(OS)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private taskInstance = this.RULE('taskInstance', () => {
-    this.CONSUME(TASK)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private stackInstance = this.RULE('stackInstance', () => {
-    this.CONSUME(STACK)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private alarmInstance = this.RULE('alarmInstance', () => {
-    this.CONSUME(ALARM)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private resourceInstance = this.RULE('resourceInstance', () => {
-    this.CONSUME(RESOURCE)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private isrInstance = this.RULE('isrInstance', () => {
-    this.CONSUME(VS_ISR)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
-    this.CONSUME(LeftBrace)
-    this.MANY(() => {
-      this.SUBRULE(this.propertyAssignment)
-    })
-    this.CONSUME(RightBrace)
-    this.CONSUME(Semicolon)
-  })
-
-  private configInstance = this.RULE('configInstance', () => {
-    this.CONSUME(VS_CONFIG)
-    this.CONSUME(Identifier, { LABEL: 'instanceName' })
+  // Generic instance pattern: IDENTIFIER instanceName { ... } ;
+  // This handles the unified format for all instance types using generic identifiers
+  // The instanceType can be any identifier (OS, TASK, STACK, ALARM, RESOURCE, vs_ISR, vs_CONFIG, etc.)
+  private genericInstance = this.RULE('genericInstance', () => {
+    this.CONSUME(Identifier, { LABEL: 'instanceType' })
+    this.CONSUME1(Identifier, { LABEL: 'instanceName' })
     this.CONSUME(LeftBrace)
     this.MANY(() => {
       this.SUBRULE(this.propertyAssignment)
@@ -427,27 +251,6 @@ export class ORTIParser extends CstParser {
       {
         ALT: () => {
           this.CONSUME(Identifier, { LABEL: 'propertyName' })
-        }
-      },
-      {
-        // Handle keywords used as property names
-        ALT: () => {
-          this.CONSUME(STACK, { LABEL: 'propertyName' })
-        }
-      },
-      {
-        ALT: () => {
-          this.CONSUME(ALARM, { LABEL: 'propertyName' })
-        }
-      },
-      {
-        ALT: () => {
-          this.CONSUME(TASK, { LABEL: 'propertyName' })
-        }
-      },
-      {
-        ALT: () => {
-          this.CONSUME(RESOURCE, { LABEL: 'propertyName' })
         }
       },
       {

@@ -39,20 +39,11 @@ export const VERSION = createToken({ name: 'VERSION', pattern: /VERSION/ })
 export const KOIL = createToken({ name: 'KOIL', pattern: /KOIL/ })
 export const OSSEMANTICS = createToken({ name: 'OSSEMANTICS', pattern: /OSSEMANTICS/ })
 export const IMPLEMENTATION = createToken({ name: 'IMPLEMENTATION', pattern: /IMPLEMENTATION/ })
-export const OS = createToken({ name: 'OS', pattern: /OS/ })
-export const TASK = createToken({ name: 'TASK', pattern: /TASK/ })
-export const STACK = createToken({ name: 'STACK', pattern: /STACK/ })
-export const ALARM = createToken({ name: 'ALARM', pattern: /ALARM/ })
-export const RESOURCE = createToken({ name: 'RESOURCE', pattern: /RESOURCE/ })
 export const CTYPE = createToken({ name: 'CTYPE', pattern: /CTYPE/ })
 export const ENUM = createToken({ name: 'ENUM', pattern: /ENUM/ })
 export const TOTRACE = createToken({ name: 'TOTRACE', pattern: /TOTRACE/ })
 export const STRING = createToken({ name: 'STRING', pattern: /STRING/ })
 export const SIZE = createToken({ name: 'SIZE', pattern: /SIZE/ })
-
-// Custom ORTI keywords (with vs_ prefix)
-export const VS_ISR = createToken({ name: 'VS_ISR', pattern: /vs_ISR/ })
-export const VS_CONFIG = createToken({ name: 'VS_CONFIG', pattern: /vs_CONFIG/ })
 
 // Punctuation
 export const LeftBrace = createToken({ name: 'LeftBrace', pattern: /{/ })
@@ -116,18 +107,11 @@ export const allTokens = [
   KOIL,
   OSSEMANTICS,
   IMPLEMENTATION,
-  OS,
-  TASK,
-  STACK,
-  ALARM,
-  RESOURCE,
   CTYPE,
   ENUM,
   TOTRACE,
   STRING,
   SIZE,
-  VS_ISR,
-  VS_CONFIG,
 
   // Punctuation
   LeftBrace,

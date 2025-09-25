@@ -294,6 +294,7 @@ export function parseORTI(input: string): ORTIParseResult {
     }
 
     // 语法分析
+
     ortiParser.input = lexingResult.tokens
     const cst = ortiParser.ortiFile()
 

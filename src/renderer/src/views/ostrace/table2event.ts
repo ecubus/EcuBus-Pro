@@ -89,7 +89,6 @@ function rowDataToOsEvent(rowData: any[]): OsEvent | null {
  * Parse task type from string or number (4-bit identifier)parseTaskType
  */
 function parseTaskType(value: any): TaskType {
-  console.log('parseTaskType', value)
   value = parseInt(value)
   // Handle 4-bit identifier values (0-15)
   switch (value) {

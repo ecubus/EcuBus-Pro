@@ -40,3 +40,18 @@ it('parse ORTI file2', () => {
     JSON.stringify(orti.data, null, 2)
   )
 })
+
+it('parse ORTI file3', () => {
+  const orti = parseORTI(
+    fs.readFileSync(path.resolve(__dirname, './Os_Trace_比赛demo.orti'), 'utf-8')
+  )
+  expect(orti).toBeDefined()
+  expect(orti.errors).toBeDefined()
+  console.log(orti.errors[0])
+  expect(orti.errors.length).toBe(0)
+  // console.log(orti.data)
+  fs.writeFileSync(
+    path.resolve(__dirname, './Os_Trace_比赛demo.orti.json'),
+    JSON.stringify(orti.data, null, 2)
+  )
+})

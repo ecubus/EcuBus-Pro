@@ -73,7 +73,6 @@ export class PrecisionTimer {
    * @internal
    */
   callCallback(tasks: TimerTask[]) {
-    console.log(tasks.length)
     for (const task of tasks) {
       const callback = this.timerMap.get(task.taskId)
       if (callback) {

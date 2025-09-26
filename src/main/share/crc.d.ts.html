@@ -183,7 +183,7 @@ declare class CRC {
      * @returns {number} - The computed CRC value.
      */
     compute(bytes: number[] | Buffer): number;
-    computeBuffer(bytes: number[] | Buffer): Buffer;
+    computeBuffer(bytes: number[] | Buffer): Buffer<ArrayBuffer>;
     get table(): number[];
     /**
      * Retrieves a CRC object from the defaults list by its name.

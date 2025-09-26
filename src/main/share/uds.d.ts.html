@@ -1430,7 +1430,7 @@ declare class Service {
      * })
      * ```
      */
-    diagGetRaw(): Buffer;
+    diagGetRaw(): Buffer<ArrayBuffer>;
 }
 /**
  * @category UDS
@@ -2336,4 +2336,5 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  */
 declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, type CanAddr, type CanMessage, type CanMsgType, DiagJob, DiagRequest, DiagResponse, type EntityAddr, type EthAddr, type JobName, type LinAddr, type LinCableErrorInject, LinChecksumType, LinDirection, LinMode, type LinMsg, PrecisionTimer, RegisterEthVirtualEntity, SecureAccessDll, type ServiceEvent, type ServiceId, type ServiceItem, type ServiceName, type ServiceNameRecv, type ServiceNameSend, type SignalName, SomeipMessageRequest, SomeipMessageResponse, type TesterInfo, type TesterName, type TimerTask, type UdsAddress, type UdsSeqName, Util, UtilClass, type VariableMap, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, PrecisionTimer, RegisterEthVirtualEntity, SecureAccessDll, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, reporter, runUdsSeq, setPwmDuty, setSignal, setVar, stopUdsSeq, test };
+export type { CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, TimerTask, UdsAddress, UdsSeqName, VariableMap };

@@ -2022,11 +2022,13 @@ export class UtilClass {
     if (Array.isArray(data)) {
       const promiseList: Promise<void>[] = []
       for (const item of data) {
+        setVarMain(item.name, item.value)
         promiseList.push(this.event.emit(`varUpdate${item.name}` as any, item))
         promiseList.push(this.event.emit(`varUpdate*` as any, item))
       }
       await Promise.all(promiseList)
     } else {
+      setVarMain(data.name, data.value)
       await this.event.emit(`varUpdate${data.name}` as any, data)
       await this.event.emit(`varUpdate*` as any, data)
     }

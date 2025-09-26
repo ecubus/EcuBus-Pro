@@ -133,8 +133,8 @@ const globalStart = useGlobalStart()
 
 const existed = computed(() => {
   let existed = false
-  if (database.database && database.database.lin) {
-    existed = database.database.lin[props.editIndex] ? true : false
+  if (database.database && database.database.can) {
+    existed = database.database.can[props.editIndex] ? true : false
   }
   return existed
 })
@@ -381,4 +381,3 @@ onMounted(() => {
   }
 }
 </style>
-

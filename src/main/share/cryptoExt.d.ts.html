@@ -11,6 +11,6 @@
  * //which should print 070a16b46b4d4144f79bdd9dd04a287c
  * console.log(result.toString('hex'));
  */
-declare function CMAC(key: Buffer, message: Buffer): Buffer;
+declare function CMAC(key: Buffer, message: Buffer): Buffer<ArrayBufferLike>;
 
 export { CMAC };

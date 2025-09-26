@@ -77,6 +77,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: 'CAN', link: '/zh/docs/um/can/can' },
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
+        { text: 'PWM', link: '/zh/docs/um/pwm/pwm' },
         { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
         { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] },
         { text: 'SOME/IP', link: '/zh/docs/um/someip/index' }
@@ -95,7 +96,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           text: 'LIN',
           items: [
             { text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' },
-            { text: 'LIN UDS', link: 'NSUC1612_LIN_OTA/readme.md' }
+            { text: 'LIN UDS', link: 'NSUC1612_LIN_OTA/readme.md' },
+            { text: 'LIN 自动寻址', link: 'lin_aa/readme.md' }
           ],
           collapsed: false
         },

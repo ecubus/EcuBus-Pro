@@ -25,7 +25,8 @@ export const useDataStore = defineStore('useDataStore', {
     vars: {},
     datas: {},
     panels: {},
-    logs: {}
+    logs: {},
+    traces: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -162,7 +163,8 @@ export const useDataStore = defineStore('useDataStore', {
         vars: this.vars,
         datas: this.datas,
         panels: this.panels,
-        logs: this.logs
+        logs: this.logs,
+        traces: this.traces
       }
     }
   }

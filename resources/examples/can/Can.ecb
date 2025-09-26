@@ -68732,6 +68732,19 @@
           "canError"
         ]
       }
+    },
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Main",
+        "filter": [
+          "canBase"
+        ],
+        "filterDevice": [
+          "SIMULATE_0"
+        ],
+        "filterId": []
+      }
     }
   },
   "project": {
@@ -68781,18 +68794,6 @@
           "name": "Can IA"
         }
       },
-      "trace": {
-        "pos": {
-          "x": 0,
-          "y": 191,
-          "w": 853.5,
-          "h": 330
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {}
-      },
       "graph": {
         "pos": {
           "x": 853.5,
@@ -68835,6 +68836,23 @@
           "params": {
             "edit-index": "datas"
           }
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 422.5,
+          "y": 62,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Main"
         }
       }
     },

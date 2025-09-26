@@ -45,7 +45,11 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-checkbox-group v-model="checkList" size="small" style="margin: 10px; width: 150px">
+            <el-checkbox-group
+              v-model="trace.filter"
+              size="small"
+              style="margin: 10px; width: 100px"
+            >
               <el-checkbox
                 v-for="item of LogFilter"
                 :key="item.v"
@@ -58,7 +62,7 @@
         </template>
       </el-dropdown>
       <el-select
-        v-model="instanceList"
+        v-model="trace.filterDevice"
         size="small"
         style="width: 200px; margin: 4px; margin-left: 6px"
         multiple
@@ -69,7 +73,7 @@
         <el-option v-for="item of allInstanceList" :key="item" :label="item" :value="item" />
       </el-select>
       <el-select
-        v-model="idFilterList"
+        v-model="trace.filterId"
         size="small"
         style="width: 300px; margin: 4px"
         multiple
@@ -95,6 +99,17 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <el-dropdown size="small" @command="othersFeature">
+        <el-button type="info" link>
+          <Icon :icon="othersIcon" />
+        </el-button>
+
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="changeName">Change Name</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
     <div :id="`traceTable-${props.editIndex}`" class="realLog"></div>
   </div>
@@ -103,6 +118,7 @@
 import {
   ref,
   onMounted,
+  onBeforeMount,
   onUnmounted,
   computed,
   toRef,
@@ -111,7 +127,8 @@ import {
   PropType,
   nextTick,
   handleError,
-  Ref
+  Ref,
+  inject
 } from 'vue'
 
 import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
@@ -132,13 +149,14 @@ import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import switchIcon from '@iconify/icons-material-symbols/cameraswitch-outline-rounded'
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
+import othersIcon from '@iconify/icons-material-symbols/more-horiz'
 import ExcelJS from 'exceljs'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
-import { ElLoading } from 'element-plus'
+import { ElLoading, ElMessageBox } from 'element-plus'
 import { useGlobalStart } from '@r/stores/runtime'
 import {
   SomeipMessageType,
@@ -146,6 +164,9 @@ import {
   VsomeipAvailabilityInfo,
   SomeipMessage
 } from 'nodeCan/someip'
+import { TraceItem } from 'src/preload/data'
+import { cloneDeep } from 'lodash'
+import { Layout } from '../layout'
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -180,7 +201,33 @@ function toggleOverwrite() {
   }
 }
 const database = useDataStore()
-const instanceList = ref<string[]>([])
+
+function othersFeature(command: string) {
+  if (command == 'changeName') {
+    ElMessageBox.prompt('Please enter the new name', 'Change Name', {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`,
+      inputValue: trace.value.name,
+
+      inputValidator: (val: string) => {
+        if (val) {
+          return true
+        } else {
+          return "Name can't be empty"
+        }
+      }
+    })
+      .then(({ value }) => {
+        trace.value.name = value
+        layout.changeWinName(props.editIndex, trace.value.name)
+      })
+      .catch(() => {
+        null
+      })
+  }
+}
 const allInstanceList = computed(() => {
   const list: string[] = []
   for (const item of Object.values(database.devices)) {
@@ -196,7 +243,7 @@ const allInstanceList = computed(() => {
 })
 
 // ID filter functionality
-const idFilterList = ref<string[]>([])
+
 const idList = ref<Set<string>>(new Set())
 
 function addToIdList(id: string) {
@@ -389,7 +436,7 @@ function logDisplay(method: string, vals: LogItem[]) {
     addToIdList(data.id)
 
     // Apply ID filtering
-    if (idFilterList.value.length && data.id && !idFilterList.value.includes(data.id)) {
+    if (trace.value.filterId!.length && data.id && !trace.value.filterId!.includes(data.id)) {
       return
     }
 
@@ -401,7 +448,11 @@ function logDisplay(method: string, vals: LogItem[]) {
     logData.push(data)
   }
   for (const val of vals) {
-    if (instanceList.value.length && val.instance && !instanceList.value.includes(val.instance))
+    if (
+      trace.value.filterDevice!.length &&
+      val.instance &&
+      !trace.value.filterDevice!.includes(val.instance)
+    )
       continue
     if (val.message.method == 'canBase') {
       insertData({
@@ -649,9 +700,6 @@ const props = defineProps({
     default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase']
   }
 })
-
-// Initialize checkList with the prop value
-const checkList = ref(props.defaultCheckList)
 
 function filterChange(
   method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase',
@@ -947,6 +995,45 @@ watch([isPaused, isOverwrite], (v) => {
   }
 })
 
+const trace = ref<TraceItem>(
+  cloneDeep(
+    database.traces[props.editIndex] || {
+      id: props.editIndex,
+      name: `Trace`,
+      filter: props.defaultCheckList,
+      filterDevice: [],
+      filterId: []
+    }
+  )
+)
+
+const layout = inject('layout') as Layout
+
+watch(
+  trace,
+  (newVal) => {
+    database.traces[props.editIndex] = newVal
+    layout.changeWinName(props.editIndex, newVal.name)
+  },
+  {
+    deep: true
+  }
+)
+
+onBeforeMount(() => {
+  if (trace.value.filter == undefined) {
+    trace.value.filter = props.defaultCheckList
+  }
+
+  if (trace.value.filterDevice == undefined) {
+    trace.value.filterDevice = []
+  }
+
+  if (trace.value.filterId == undefined) {
+    trace.value.filterId = []
+  }
+  layout.changeWinName(props.editIndex, trace.value.name)
+})
 onMounted(() => {
   timer = setInterval(() => {
     if (logData.length) {
@@ -955,7 +1042,7 @@ onMounted(() => {
     }
   }, 100)
 
-  for (const item of checkList.value) {
+  for (const item of trace.value.filter!) {
     const v = LogFilter.value.find((v) => v.v == item)
     if (v) {
       for (const val of v.value) {

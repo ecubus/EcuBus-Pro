@@ -380,6 +380,9 @@
         "id": "hardware",
         "options": {}
       }
+    },
+    "example": {
+      "catalog": "LIN"
     }
   }
 }

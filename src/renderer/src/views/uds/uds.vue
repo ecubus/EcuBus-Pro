@@ -41,9 +41,48 @@
               <span>Stop</span>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click="handleSelect(['trace'])">
+            <div class="grid girdenable">
               <Icon :icon="logIcon" style="font-size: 24px" />
-              <span>Trace</span>
+              <el-dropdown @command="openTrace">
+                <span class="lr">
+                  Trace
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <el-dropdown-item command="trace">
+                      <div
+                        style="display: flex; align-items: center; justify-content: space-between"
+                      >
+                        <span>{{ dataBase.traces['trace']?.name || 'Trace' }}</span>
+                        <el-divider direction="vertical" />
+
+                        <el-button link>
+                          <el-icon @click.stop="openTrace('addTrace')"
+                            ><CirclePlusFilled
+                          /></el-icon>
+                        </el-button>
+                      </div>
+                    </el-dropdown-item>
+                    <template v-for="(item, key) in dataBase.traces" :key="key">
+                      <el-dropdown-item v-if="key != 'trace'" :command="key">
+                        <div style="display: flex; align-items: center; width: 100%">
+                          {{ item.name || `Trace` }}
+                          <el-divider direction="vertical" />
+
+                          <el-button link type="danger">
+                            <el-icon @click.stop="openTrace('deletaTrace', key)"
+                              ><Delete
+                            /></el-icon>
+                          </el-button>
+                        </div>
+                      </el-dropdown-item>
+                    </template>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable">
@@ -85,7 +124,9 @@
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu size="small">
-                    <el-dropdown-item command="panel" icon="Plus"> Add Panel</el-dropdown-item>
+                    <el-dropdown-item command="panel" icon="CirclePlusFilled">
+                      Add Panel</el-dropdown-item
+                    >
 
                     <el-dropdown-item
                       v-for="(item, index) in Object.values(dataBase.panels)"
@@ -316,8 +357,12 @@
                   <el-dropdown-menu size="small">
                     <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
                       </el-dropdown-item> -->
-                    <el-dropdown-item icon="Plus" command="addLin">Add Lin (LDF) </el-dropdown-item>
-                    <el-dropdown-item icon="Plus" command="addCan">Add CAN (DBC) </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addLin"
+                      >Add Lin (LDF)
+                    </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addCan"
+                      >Add CAN (DBC)
+                    </el-dropdown-item>
                     <el-dropdown-item
                       v-for="(item, index) in dataBaseList"
                       :key="item.url"
@@ -692,6 +737,35 @@ provide('udsView', udsView)
 
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+function openTrace(command: string, key?: string) {
+  if (command == 'trace') {
+    layoutMaster.addWin('trace', 'trace', {
+      params: {
+        'edit-index': 'trace'
+      }
+    })
+  } else if (command == 'addTrace') {
+    const id = v4()
+    dataBase.traces[id] = {
+      id: id,
+      name: `Trace${Object.keys(dataBase.traces).length + 1}`
+    }
+    layoutMaster.addWin('trace', id, {
+      params: {
+        'edit-index': id
+      }
+    })
+  } else if (command == 'deletaTrace') {
+    delete dataBase.traces[key!]
+    layoutMaster.removeWin(key!)
+  } else {
+    layoutMaster.addWin('trace', command, {
+      params: {
+        'edit-index': command
+      }
+    })
+  }
 }
 function openGraph(command: string) {
   if (command == 'graph') {
@@ -1311,4 +1385,3 @@ watch([contentH, contentW], (val) => {
   color: var(--el-color-primary);
 }
 </style>
-

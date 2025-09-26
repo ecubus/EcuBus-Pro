@@ -147,7 +147,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
             { text: 'LIN TP', link: '/examples/lin_tp/readme' },
             { text: 'LIN Conformance Test', link: '/examples/lin_conformance_test/readme' },
             { text: 'LIN SAE J2602 Test', link: '/examples/lin_j2602_test/readme' },
-            { text: 'LIN UDS', link: '/examples/NSUC1612_LIN_OTA/readme' }
+            { text: 'LIN UDS', link: '/examples/NSUC1612_LIN_OTA/readme' },
+            { text: 'LIN Auto Addressing', link: '/examples/lin_aa/readme' }
           ],
           collapsed: true
         },

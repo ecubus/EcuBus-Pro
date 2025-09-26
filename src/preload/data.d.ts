@@ -158,6 +158,14 @@ export type LogItem = {
   method: string[]
 }
 
+export type TraceItem = {
+  id: string
+  name: string
+  filter?: string[]
+  filterDevice?: string[]
+  filterId?: string[]
+}
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -177,4 +185,5 @@ export interface DataSet {
   vars: Record<string, VarItem>
   panels: Record<string, PanelItem>
   logs: Record<string, LogItem>
+  traces: Record<string, TraceItem>
 }

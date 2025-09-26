@@ -130,14 +130,16 @@ const leftWidth = ref(200)
 const props = defineProps<{
   height: number
   width: number
-  editIndex?: string
+  editIndex: string
 }>()
 
 const dataStore = useDataStore()
 const datas = dataStore.datas
-const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#wingraph'))
+const appendId = computed(() => `#win${props.editIndex}`)
 const height = computed(() => props.height - 19)
-const charid = computed(() => props.editIndex || 'ostrace')
+console.log(height.value)
+const charid = computed(() => `${props.editIndex}_graph`)
+
 const width = computed(() => props.width)
 
 const time = ref(0)
@@ -1308,7 +1310,9 @@ onMounted(() => {
   const dom = document.getElementById(charid.value)
   if (dom) {
     chart = echarts.init(dom)
+    initChart()
   }
+
   window.jQuery(`#Shift-${charid.value}`).resizable({
     handles: 'e',
     resize: (e, ui) => {
@@ -1317,7 +1321,7 @@ onMounted(() => {
     maxWidth: 300,
     minWidth: 100
   })
-  initChart()
+
   if (globalStart.value) {
     timer = setInterval(updateTime, 500)
   }

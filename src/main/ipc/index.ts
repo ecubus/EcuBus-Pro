@@ -6,6 +6,7 @@ import './examples'
 import './key'
 import './pnpm'
 import './var'
+import './serialPort'
 import { ipcMain, shell } from 'electron'
 import { getCanVersion } from '../docan/can'
 import { getLinVersion } from '../dolin'
@@ -90,4 +91,3 @@ ipcMain.handle('ipc-get-vendor', (event, arg) => {
     }
   })
 })
-

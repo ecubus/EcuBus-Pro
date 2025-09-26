@@ -250,6 +250,12 @@ export interface ORTIParseResult {
 export interface ORTIFile {
   id: string
   name: string
+  // connector
+  connector?: {
+    type: string
+    device: string
+    options: Record<string, string>
+  }
   // 版本段
   version: ORTIVersion
 

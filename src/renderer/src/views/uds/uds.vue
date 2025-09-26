@@ -321,43 +321,7 @@
             </div> -->
           </div>
         </el-tab-pane>
-        <el-tab-pane name="osTrace">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="osTraceIcon" style="font-size: 16px" />
-              <span>OS Trace</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable" @click="openOsTrace()">
-              <Icon :icon="osTraceIcon" style="font-size: 24px" />
-              <span>OS Trace</span>
-            </div>
-            <!-- <div class="grid girdenable">
-              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
-              <el-dropdown @command="openDatabase">
-                <span class="lr">
-                  Test Config
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                  
-                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
-                     >
-                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
 
-                    </el-dropdown-item>
-                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
-
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div> -->
-          </div>
-        </el-tab-pane>
         <!-- <el-tab-pane label="">
         <template #label>
           <span class="lr">
@@ -416,6 +380,34 @@
             <div class="grid girdenable" @click="handleSelect(['variable'])">
               <Icon :icon="varIcon" style="font-size: 24px" />
               <span>Variables</span>
+            </div>
+            <el-divider direction="vertical" style="height: 54px" />
+
+            <div class="grid girdenable">
+              <Icon :icon="osTraceIcon" style="font-size: 24px" />
+              <el-dropdown @command="openOsTrace">
+                <span class="lr">
+                  OS Trace
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu size="small">
+                    <el-dropdown-item
+                      v-for="(item, key) in dataBase.database.orti"
+                      :key="key"
+                      :command="key"
+                      >{{ item.name }}
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      v-if="Object.keys(dataBase.database.orti).length == 0"
+                      disabled
+                      >No ORTI File<br />Add In Database</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
             <div class="grid girdenable" @click="openApi()">
@@ -1065,8 +1057,13 @@ function openApi() {
   window.electron.ipcRenderer.send('ipc-open-script-api')
 }
 
-function openOsTrace() {
-  layoutMaster.addWin('osTrace', 'osTrace')
+function openOsTrace(index: string) {
+  layoutMaster.addWin('osTrace', `${index}_trace`, {
+    name: dataBase.database.orti[index].name,
+    params: {
+      'edit-index': `${index}_trace`
+    }
+  })
 }
 
 onMounted(() => {

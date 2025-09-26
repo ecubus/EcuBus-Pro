@@ -1,0 +1,385 @@
+{
+  "data": {
+    "devices": {
+      "84b30943-78ee-4b95-a8b9-365b16855abc": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "1107301892:0",
+            "id": "",
+            "toomossVolt": 1
+          },
+          "name": "TOOMOSS_1",
+          "id": "84b30943-78ee-4b95-a8b9-365b16855abc",
+          "vendor": "toomoss",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      },
+      "f37c535b-cc90-45f3-abbd-f5a6bdd9ae5b": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "0:0",
+            "id": ""
+          },
+          "name": "VECTOR_1",
+          "id": "f37c535b-cc90-45f3-abbd-f5a6bdd9ae5b",
+          "vendor": "vector",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {
+      "41d41b64-46be-47d6-abd2-a10e151d683f": {
+        "id": "41d41b64-46be-47d6-abd2-a10e151d683f",
+        "name": "Tester_lin_0",
+        "type": "lin",
+        "script": "",
+        "targetDeviceId": "",
+        "seqList": [],
+        "address": [],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {},
+        "simulateBy": "3edc5d68-d398-4c11-97b8-8116b6033f21"
+      }
+    },
+    "subFunction": {},
+    "nodes": {
+      "3edc5d68-d398-4c11-97b8-8116b6033f21": {
+        "name": "MasterNode",
+        "id": "3edc5d68-d398-4c11-97b8-8116b6033f21",
+        "channel": [
+          "84b30943-78ee-4b95-a8b9-365b16855abc"
+        ],
+        "workNode": "",
+        "script": "E:\\Joe\\Git\\EcuBus-Pro\\resources\\examples\\lin_aa\\lin_aa.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {
+      "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1": {
+        "type": "user",
+        "id": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1",
+        "name": "LIN_AA"
+      },
+      "2665e061-e921-4d57-bfd3-9eada719fa13": {
+        "name": "SupplierID",
+        "desc": "SupplierId",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "7fff",
+          "min": 0,
+          "max": 65535
+        },
+        "id": "2665e061-e921-4d57-bfd3-9eada719fa13",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      },
+      "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0": {
+        "name": "NadTable",
+        "desc": "Store NAD that needs to be allocated.",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "01 02 03",
+          "min": 0,
+          "max": 100
+        },
+        "id": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      },
+      "0a6047db-6861-4cf9-9660-ba7d90a0ea25": {
+        "name": "StartAA",
+        "desc": "Start auto addressing steps.",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      }
+    },
+    "datas": {},
+    "panels": {
+      "72b0ec7c-bc37-49ce-b36a-dce564d99482": {
+        "name": "lin_aa",
+        "id": "72b0ec7c-bc37-49ce-b36a-dce564d99482",
+        "rule": [
+          {
+            "type": "input",
+            "field": "Fbeemfzn6l8aaqc",
+            "title": "{{$t.AFh01EJy}}",
+            "info": "Add the NAD you need to allocate here.",
+            "$required": false,
+            "props": {
+              "type": "text",
+              "maxlength": 128,
+              "placeholder": "    Default:7FFF",
+              "clearable": true,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "2665e061-e921-4d57-bfd3-9eada719fa13",
+                "name": "SupplierID",
+                "color": "#505b3b",
+                "yAxis": {
+                  "min": 0,
+                  "max": 65535
+                },
+                "bindValue": {
+                  "variableId": "2665e061-e921-4d57-bfd3-9eada719fa13",
+                  "variableType": "user",
+                  "variableName": "SupplierID",
+                  "variableFullName": "LIN_AA.SupplierID"
+                }
+              },
+              "disabled": false
+            },
+            "_fc_id": "id_Fuhvmfzn6l8aarc",
+            "name": "ref_Fh7nmfzn6l8aasc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "input",
+            "wrap": {
+              "labelWidth": "20px"
+            }
+          },
+          {
+            "type": "input",
+            "field": "Fiekmg0klntyabc",
+            "title": "{{$t.AaREz7nZ}}",
+            "info": "Add the NAD you need to allocate here.",
+            "$required": false,
+            "props": {
+              "type": "text",
+              "maxlength": 128,
+              "placeholder": "    Default:01 02 03",
+              "clearable": true,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+                "name": "NadTable",
+                "color": "#92f403",
+                "yAxis": {
+                  "min": 0,
+                  "max": 100
+                },
+                "bindValue": {
+                  "variableId": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+                  "variableType": "user",
+                  "variableName": "NadTable",
+                  "variableFullName": "LIN_AA.NadTable"
+                }
+              },
+              "disabled": false
+            },
+            "_fc_id": "id_F2bxmg0klntyacc",
+            "name": "ref_Fwjmmg0klntyadc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "input",
+            "wrap": {
+              "labelWidth": "20px"
+            }
+          },
+          {
+            "type": "BButton",
+            "props": {
+              "releaseValue": 0,
+              "pressValue": 1,
+              "plain": false,
+              "circle": false,
+              "round": false,
+              "loading": false,
+              "size": "default",
+              "type": "primary",
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+                "name": "StartAA",
+                "color": "#c9ddf1",
+                "yAxis": {
+                  "min": 0,
+                  "max": 1
+                },
+                "bindValue": {
+                  "variableId": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+                  "variableType": "user",
+                  "variableName": "StartAA",
+                  "variableFullName": "LIN_AA.StartAA"
+                }
+              }
+            },
+            "children": [
+              "Start "
+            ],
+            "_fc_id": "id_Fhmkmfzn0n4iakc",
+            "name": "ref_F7hsmfzn0n4ialc",
+            "field": "Faecmfzn0n4iamc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "BButton",
+            "title": "",
+            "info": "Start Auto Addressing.",
+            "style": {
+              "color": "#000000ff",
+              "backgroundColor": "#dbe0ebff",
+              "boxShadow": "4px 4px 3px -2px #E7E5E5FF",
+              "marginTop": "15px",
+              "marginRight": "20px",
+              "marginLeft": "130px",
+              "height": "40px",
+              "width": "200px"
+            }
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "top",
+            "size": "default",
+            "labelWidth": "125px",
+            "labelSuffix": "(hex):"
+          },
+          "language": {
+            "zh-cn": {
+              "AFh01EJy": "供应商ID",
+              "AaREz7nZ": "地址列表"
+            },
+            "en": {
+              "AFh01EJy": "Supplier ID",
+              "AaREz7nZ": "NadTable"
+            }
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "lin_aa"
+        }
+      }
+    },
+    "logs": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2568.67,
+          "h": 416.99
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": -6,
+          "y": 14.5,
+          "w": 1060,
+          "h": 593
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {},
+        "hide": false,
+        "backupPos": {
+          "x": -6,
+          "y": 14.5,
+          "w": 1060,
+          "h": 593
+        },
+        "isMax": false
+      },
+      "variable": {
+        "pos": {
+          "x": 1754,
+          "y": 25.500030517578125,
+          "w": 531,
+          "h": 400
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
+        "options": {},
+        "hide": true
+      },
+      "trace": {
+        "pos": {
+          "x": 1054,
+          "y": 23.500030517578125,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {},
+        "hide": false
+      },
+      "p72b0ec7c-bc37-49ce-b36a-dce564d99482": {
+        "pos": {
+          "x": 1054,
+          "y": 423.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "panelPreview",
+        "label": "PanelPreview",
+        "id": "p72b0ec7c-bc37-49ce-b36a-dce564d99482",
+        "options": {
+          "params": {
+            "edit-index": "p72b0ec7c-bc37-49ce-b36a-dce564d99482"
+          },
+          "name": "lin_aa"
+        },
+        "hide": false
+      },
+      "hardware": {
+        "pos": {
+          "x": 1665,
+          "y": 423.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      }
+    }
+  }
+}

@@ -576,7 +576,7 @@ declare class PrecisionTimer {
      * @param task - Timer task information containing taskId and triggerTime
      * @internal
      */
-    callCallback(tasks: TimerTask[]): void;
+    callCallback(task: TimerTask): void;
     /**
      * Creates and initializes the precision timer.
      * Must be called before adding any tasks.

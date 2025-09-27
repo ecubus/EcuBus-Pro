@@ -72,15 +72,13 @@ export class PrecisionTimer {
    * @param task - Timer task information containing taskId and triggerTime
    * @internal
    */
-  callCallback(tasks: TimerTask[]) {
-    for (const task of tasks) {
-      const callback = this.timerMap.get(task.taskId)
-      if (callback) {
-        try {
-          callback()
-        } catch (error) {
-          null
-        }
+  callCallback(task: TimerTask) {
+    const callback = this.timerMap.get(task.taskId)
+    if (callback) {
+      try {
+        callback()
+      } catch (error) {
+        null
       }
     }
   }

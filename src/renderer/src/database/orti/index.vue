@@ -14,18 +14,36 @@
         </el-tooltip>
       </template>
       <el-tab-pane name="Overview" label="Overview">
-        <el-form
-          ref="formRef"
-          :model="dbcObj"
-          label-width="100px"
-          size="small"
-          style="margin: 20px"
-        >
-          <el-form-item label="Name">
-            <el-input v-model="dbcObj.name" />
-          </el-form-item>
-          <el-form-item> </el-form-item>
-        </el-form>
+        <div>
+          <vxe-grid
+            ref="coreConfigGridRef"
+            v-bind="coreConfigGridOptions"
+            v-model:data="dbcObj.coreConfigs"
+            :height="h - 40"
+          >
+            <template #edit_type="{ row }">
+              <el-select v-model="row.type" size="small" style="width: 100%">
+                <el-option label="Task" :value="0" />
+                <el-option label="ISR" :value="1" />
+              </el-select>
+            </template>
+            <template #edit_color="{ row }">
+              <el-color-picker v-model="row.color" size="small" />
+            </template>
+            <template #default_color="{ row }">
+              <div
+                :style="{
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: row.color,
+                  border: '1px solid #ccc',
+                  borderRadius: '3px',
+                  margin: '0 auto'
+                }"
+              ></div>
+            </template>
+          </vxe-grid>
+        </div>
       </el-tab-pane>
       <el-tab-pane name="Connector" label="Connector">
         <el-form
@@ -205,7 +223,7 @@ import { Layout } from '@r/views/uds/layout'
 import { useDataStore } from '@r/stores/data'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
-import { VxeGrid, VxeGridProps } from 'vxe-table'
+import { VxeGrid, VxeGridProps, VxeGridInstance } from 'vxe-table'
 import { ORTIFile, parseORTI } from '../ortiParse'
 import { useGlobalStart } from '@r/stores/runtime'
 
@@ -219,6 +237,7 @@ const props = defineProps<{
 }>()
 
 const overfiewRef = ref()
+const coreConfigGridRef = ref<VxeGridInstance>()
 
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
@@ -229,6 +248,74 @@ const database = useDataStore()
 const dbcObj = ref<ORTIFile>() as Ref<ORTIFile>
 
 const globalStart = useGlobalStart()
+
+// Core configs grid configuration
+const coreConfigGridOptions = ref<VxeGridProps>({
+  border: true,
+  stripe: true,
+  resizable: true,
+  showHeaderOverflow: true,
+  showOverflow: true,
+  keepSource: true,
+  size: 'mini',
+  id: 'coreConfigGrid',
+  rowConfig: {
+    isHover: true
+  },
+  columnConfig: {
+    resizable: true
+  },
+  sortConfig: {
+    trigger: 'cell',
+    remote: false
+  },
+  filterConfig: {
+    remote: false
+  },
+  editConfig: {
+    trigger: 'click',
+    mode: 'cell',
+    showStatus: true
+  },
+
+  columns: [
+    { align: 'center', field: 'name', title: 'Name', width: 200, editRender: { name: 'input' } },
+    {
+      field: 'id',
+      title: 'ID',
+      align: 'center',
+      minWidth: 80,
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      field: 'coreId',
+      title: 'Core ID',
+      width: 100,
+
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      align: 'center',
+      field: 'type',
+      title: 'Type',
+      width: 100,
+      editRender: {},
+      slots: { edit: 'edit_type' },
+      formatter: ({ cellValue }) => {
+        return cellValue === 0 ? 'Task' : cellValue === 1 ? 'ISR' : cellValue
+      }
+    },
+    {
+      align: 'center',
+      field: 'color',
+      title: 'Color',
+      width: 120,
+
+      editRender: {},
+      slots: { edit: 'edit_color', default: 'default_color' }
+    }
+  ]
+})
 
 // Connector form data
 const connectorFormRef = ref()
@@ -324,6 +411,27 @@ watch(
   { deep: true }
 )
 
+// Watch for changes in coreConfigs to mark window as modified
+watch(
+  () => dbcObj.value?.coreConfigs,
+  () => {
+    if (dbcObj.value) {
+      layout.setWinModified(props.editIndex, true)
+    }
+  },
+  { deep: true }
+)
+
+// Watch for changes in database name to mark window as modified
+watch(
+  () => dbcObj.value?.name,
+  () => {
+    if (dbcObj.value) {
+      layout.setWinModified(props.editIndex, true)
+    }
+  }
+)
+
 const deviceList = ref<
   {
     label: string
@@ -381,6 +489,17 @@ function deleteDatabase() {
     .catch(null)
 }
 function saveDataBase() {
+  // Check if name is empty
+  if (!dbcObj.value.name || dbcObj.value.name.trim() === '') {
+    ElNotification({
+      offset: 50,
+      type: 'error',
+      message: 'Database name cannot be empty',
+      appendTo: `#win${props.editIndex}`
+    })
+    return
+  }
+
   // Check for duplicate database name
   const isDuplicateName = Object.entries(database.database.orti).some(([key, db]) => {
     // Skip comparing with itself

@@ -9,9 +9,9 @@
       "lin": {},
       "can": {},
       "orti": {
-        "98521019-8bdd-417f-a085-a1348e1502c6": {
-          "id": "98521019-8bdd-417f-a085-a1348e1502c6",
-          "name": "XmenOS",
+        "1f5475f3-e6be-448b-88be-4ca0100d8903": {
+          "id": "1f5475f3-e6be-448b-88be-4ca0100d8903",
+          "name": "Os_Trace",
           "version": {
             "koil": "2.2",
             "osSemantics": {
@@ -658,21 +658,27 @@
           ],
           "resources": [
             {
-              "name": "OsResource_1",
+              "name": "RES_SCHEDULER_CORE0",
               "state": "Os_TraceResourceCore0[0].state",
               "locker": "Os_TraceResourceCore0[0].occupyObjectId",
+              "priority": "7"
+            },
+            {
+              "name": "OsResource_1",
+              "state": "Os_TraceResourceCore0[1].state",
+              "locker": "Os_TraceResourceCore0[1].occupyObjectId",
               "priority": "3"
             },
             {
               "name": "OsResource_2",
-              "state": "Os_TraceResourceCore0[1].state",
-              "locker": "Os_TraceResourceCore0[1].occupyObjectId",
+              "state": "Os_TraceResourceCore0[2].state",
+              "locker": "Os_TraceResourceCore0[2].occupyObjectId",
               "priority": "5"
             },
             {
               "name": "OsResource_Init",
-              "state": "Os_TraceResourceCore0[2].state",
-              "locker": "Os_TraceResourceCore0[2].occupyObjectId",
+              "state": "Os_TraceResourceCore0[3].state",
+              "locker": "Os_TraceResourceCore0[3].occupyObjectId",
               "priority": "1"
             }
           ],
@@ -745,9 +751,131 @@
               "statusLevel": "EXTENDED"
             }
           ],
+          "coreConfigs": [
+            {
+              "id": 0,
+              "name": "OsTask_5ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(78,175,128)",
+              "_X_ROW_KEY": "row_1705"
+            },
+            {
+              "id": 1,
+              "name": "OsTask_20ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(237,1,204)",
+              "_X_ROW_KEY": "row_1706"
+            },
+            {
+              "id": 2,
+              "name": "OsTask_Event",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(146,50,155)",
+              "_X_ROW_KEY": "row_1707"
+            },
+            {
+              "id": 3,
+              "name": "OsTask_init",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(176,182,33)",
+              "_X_ROW_KEY": "row_1708"
+            },
+            {
+              "id": 4,
+              "name": "OsTask_10ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(11,7,113)",
+              "_X_ROW_KEY": "row_1709"
+            },
+            {
+              "id": 5,
+              "name": "OsTask_100ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(51,226,122)",
+              "_X_ROW_KEY": "row_1710"
+            },
+            {
+              "id": 6,
+              "name": "OsTask_Resource",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(114,137,172)",
+              "_X_ROW_KEY": "row_1711"
+            },
+            {
+              "id": 7,
+              "name": "OsTask_Rand1",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(59,146,6)",
+              "_X_ROW_KEY": "row_1712"
+            },
+            {
+              "id": 8,
+              "name": "OsTask_Rand2",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(157,55,213)",
+              "_X_ROW_KEY": "row_1713"
+            },
+            {
+              "id": 9,
+              "name": "OsTask_Rand3",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(252,58,7)",
+              "_X_ROW_KEY": "row_1714"
+            },
+            {
+              "id": 10,
+              "name": "OsTask_Idle_Core0",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(228,5,217)",
+              "_X_ROW_KEY": "row_1715"
+            },
+            {
+              "id": 0,
+              "name": "SYS_TIMER_CORE0",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(125,232,185)",
+              "_X_ROW_KEY": "row_1716"
+            },
+            {
+              "id": 1,
+              "name": "CPU0_SB",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(140,16,88)",
+              "_X_ROW_KEY": "row_1717"
+            },
+            {
+              "id": 2,
+              "name": "CPU1_SB",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(158,41,58)",
+              "_X_ROW_KEY": "row_1718"
+            },
+            {
+              "id": 65535,
+              "name": "NoRunningIsr2",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(208,31,218)",
+              "_X_ROW_KEY": "row_1719"
+            }
+          ],
           "connector": {
             "type": "SerialPort",
-            "device": "COM6",
+            "device": "",
             "options": {
               "baudRate": "115200",
               "dataBits": "8",
@@ -767,7 +895,8 @@
     "vars": {},
     "datas": {},
     "panels": {},
-    "logs": {}
+    "logs": {},
+    "traces": {}
   },
   "project": {
     "wins": {
@@ -786,22 +915,21 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "98521019-8bdd-417f-a085-a1348e1502c6": {
+      "1f5475f3-e6be-448b-88be-4ca0100d8903": {
         "pos": {
-          "x": 685.5,
-          "y": 88.5,
+          "x": 492.5,
+          "y": 1,
           "w": 700,
           "h": 400
         },
         "title": "orti",
         "label": "ORTI",
-        "id": "98521019-8bdd-417f-a085-a1348e1502c6",
+        "id": "1f5475f3-e6be-448b-88be-4ca0100d8903",
         "options": {
           "params": {
-            "edit-index": "98521019-8bdd-417f-a085-a1348e1502c6",
-            "ortiFile": "D:\\code\\ecubus-pro\\test\\viewer\\Os_Trace_比赛demo.orti"
+            "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903"
           },
-          "name": "XmenOS"
+          "name": "Os_Trace"
         }
       }
     }

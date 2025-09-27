@@ -134,10 +134,9 @@ const props = defineProps<{
 }>()
 
 const dataStore = useDataStore()
-const datas = dataStore.datas
-const appendId = computed(() => `#win${props.editIndex}`)
+const orti = dataStore.database.orti[props.editIndex]
 const height = computed(() => props.height - 19)
-console.log(height.value)
+
 const charid = computed(() => `${props.editIndex}_graph`)
 
 const width = computed(() => props.width)
@@ -1495,6 +1494,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   width: 100%;
+  height: 100%;
   padding: 0 8px;
   position: relative;
 }
@@ -1516,11 +1516,16 @@ onUnmounted(() => {
   top: 50%;
   transform: translateY(-50%);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   color: white;
   font-size: 20px;
   z-index: 10;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .arrow-left {

@@ -76,9 +76,9 @@ export interface ORTIImplementation {
   os: {
     coreNum: CType
     coreId: ORTIEnum
-    runningTask: ORTIEnum
-    runningTaskPriority: CType
-    runningIsr2: ORTIEnum
+    RUNNINGTASK: ORTIEnum
+    RUNNINGTASKPRIORITY: CType
+    RUNNINGISR2: ORTIEnum
     serviceTrace: ORTIEnum
     lastError: ORTIEnum
     currentAppMode: ORTIEnum
@@ -256,6 +256,14 @@ export interface ORTIFile {
     device: string
     options: Record<string, string>
   }
+  coreConfigs: {
+    coreId: number
+
+    id: number
+    type: number
+    name: string
+    color: string
+  }[]
   // 版本段
   version: ORTIVersion
 
@@ -328,6 +336,38 @@ export function parseORTI(input: string): ORTIParseResult {
 
     result.success = true
     result.data = ortiFile
+
+    //parse coreConfigs
+    if (ortiFile.implementation.os.RUNNINGTASK && ortiFile.implementation.os.RUNNINGTASK.values) {
+      const vv = ortiFile.implementation.os.RUNNINGTASK.values
+      for (const key of Object.keys(vv)) {
+        if (typeof vv[key] === 'number' && key != 'NoRunningTask') {
+          const randomColor = `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
+          ortiFile.coreConfigs.push({
+            id: vv[key],
+            name: key,
+            coreId: 0,
+            type: 0,
+            color: randomColor
+          })
+        }
+      }
+    }
+    if (ortiFile.implementation.os.RUNNINGISR2 && ortiFile.implementation.os.RUNNINGISR2.values) {
+      const vv = ortiFile.implementation.os.RUNNINGISR2.values
+      for (const key of Object.keys(vv)) {
+        if (typeof vv[key] === 'number' && key != 'NoRunningIsr2') {
+          const randomColor = `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
+          ortiFile.coreConfigs.push({
+            id: vv[key],
+            name: key,
+            coreId: 0,
+            type: 1,
+            color: randomColor
+          })
+        }
+      }
+    }
 
     return result
   } catch (error) {

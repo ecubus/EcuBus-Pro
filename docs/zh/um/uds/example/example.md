@@ -4,15 +4,14 @@
 
 本文演示如何在 S32K144 微控制器上，结合 EcuBus-Pro，实现完整的 UDS（统一诊断服务）引导程序。示例覆盖固件升级的全流程：从初始配置到脚本实现。
 
-
-
 ## 工程配置
+
 ### 硬件与通信设置
+
 + 按如下方式配置 Hardware>Device 界面，选择 Leaf V3。其他 CAN 卡配置方式类似，只需确保波特率为 500K。
   
 > [!NOTE]
 > 支持的 CAN 设备列表：[CAN Devices](./../../can/can.md)
-
 
 ![Hardware Device Configuration](images/01-hardware-device-config.png)
 
@@ -22,12 +21,12 @@
 
 + 设置寻址模式。S32K144 官方 CAN UDS Bootloader 示例采用 Normal 固定寻址，配置如下。
 
-
-
 ![Addressing Mode Configuration](images/03-addressing-mode-config.png)
 
 ### 诊断服务配置
+
 #### DiagnosticSessionControl（诊断会话控制，$10）
+
 + 进入扩展会话的配置：
 
 ![Extended Session Configuration](images/04-extended-session-config.png)
@@ -37,11 +36,13 @@
 ![Programming Session Configuration](images/05-programming-session-config.png)
 
 #### ECUReset（ECU 复位，$11）
+
 + 硬件复位配置如下，此处使用硬件复位。
 
 ![Hardware Reset Configuration](images/06-hardware-reset-config.png)
 
 #### SecurityAccess（安全访问，$27）
+
 + 种子请求配置如下。需要进入 Response 界面，将 securitySeed 长度修改为 128bit，否则无法接收 MCU 返回的完整 seed 数据。
 
 ![Security Seed Request Configuration](images/07-security-seed-request-config.png)
@@ -51,52 +52,61 @@
 ![Security Key Response Configuration](images/08-security-key-response-config.png)
 
 #### CommunicationControl（通信控制，$28）
+
 + 关闭网络管理报文以及正常报文收发，配置如下。
 
 ![Communication Control Configuration](images/09-communication-control-config.png)
 
 #### WriteDataByIdentifier（按标识写数据，$2E）
+
 + 写入指定 DID。S32K144 官方 CAN UDS Bootloader 示例使用 0xF15A，配置如下。
 
 ![Write Data By Identifier Configuration](images/10-write-data-by-identifier-config.png)
 
 #### RoutineControl（例程控制，$31）
-+ routineID 为 0x0202 的例程用于通知 MCU 执行 CRC 校验，配置如下。
+
++ routineID 为 0x0202 的例程用于控制 MCU 执行 CRC 校验，配置如下:
 
 ![Routine Control Configuration](images/11-routine-control-crc-config.png)
 
-+ routineID 为 0xFF00 的例程用于通知 MCU 执行 Flash 擦除，配置如下。
++ routineID 为 0xFF00 的例程用于控制 MCU 执行 Flash 擦除，配置如下:
 
 ![Flash Erase Configuration](images/12-routine-control-flash-erase-config.png)
 
-+ routineID 为 0xFF01 的例程用于通知 MCU 执行固件校验，配置如下。
++ routineID 为 0xFF01 的例程用于控制 MCU 执行固件校验，配置如下:
 
 ![Firmware Verification Configuration](images/13-routine-control-firmware-check-config.png)
 
 #### RequestDownload（请求下载，$34）
+
 + 请求下载配置如下。实际使用中，存储地址与存储空间将在脚本中赋值。
 
 ![Request Download Configuration](images/14-request-download-config.png)
 
 #### TransferData（传输数据，$36）
-+ 传输数据配置如下。实际使用中，会在脚本中反复调用并赋值。
+
++ 传输数据配置如下。实际使用中，会在脚本中重复调用并赋值。
 
 ![Transfer Data Configuration](images/15-transfer-data-config.png)
 
 #### RequestTransferExit（请求结束传输，$37）
+
 + 结束传输配置如下。
 
 ![Request Transfer Exit Configuration](images/16-request-transfer-exit-config.png)
 
 #### JobFunction
-> 什么是 Job？Job 是 EcuBus-Pro 中的一种抽象服务。使用 Job 时必须有相应的脚本，通过脚本来实现 Job 的返回。Job 的返回必须是一个数组，数组元素可以是 0-N 个普通 UDS 服务或 Job。Job 通常用于固件下载、上传，以及需要不确定数量 0x36 服务的场景，也可用于其它任意需要的场景。
 
-添加空的 JobFunction0 与 JobFunction1，便于通过脚本组合下载相关服务。
+> 什么是 Job？Job 是 EcuBus-Pro 中的一种抽象服务。在使用 Job 时，必须配套提供相应的脚本。脚本用于实现 Job 的返回结果。Job 的返回要求是一个数组，该数组可以包含 0-N 个标准的 UDS 服务或其他 Jobs。
+Job 通常应用于固件下载、上传等需要执行数量未知的多次 0x36（TransferData）服务的场景，但同样可以适用于其他任意需要的情况。
+
+添加空的 JobFunction0 和 JobFunction1，以便通过脚本组合和编排与下载相关的服务。
 
 ![JobFunction Configuration](images/17-job-function-config.png)
 
 ### 序列（Sequence）配置
-完整的 UDS 升级流程配置如下图所示：
+
+整个UDS升级过程如下图所示配置（仅供参考）
 
 ![Sequence Configuration](images/18-sequence-config.png)
 
@@ -126,7 +136,9 @@
 1. 通过 $11 服务执行硬件复位
 
 ## 实现
+
 ### 开发环境准备
+
 + 在工程目录中创建新的 ts 文件；
 
 ![Create New TS File](images/19-create-ts-file.png)
@@ -140,7 +152,9 @@
 ![Load Script File in UDS Tester](images/21-load-script-vscode.png)
 
 ### 脚本开发
+
 #### 引入必要模块
+
 ```typescript
 // Import necessary modules
 import crypto from 'crypto'
@@ -150,6 +164,7 @@ import fs from 'fs/promises'
 ```
 
 #### 准备所需的 CRC 算法与相关变量
+
 ```typescript
 // Create CRC instance, configure parameters: type 'self', 16 bits, polynomial 0x3d65, initial value 0, XOR value 0xffff, input/output reflection
 const crc = new CRC('self', 16, 0x3d65, 0, 0xffff, true, true)
@@ -160,6 +175,7 @@ let content: undefined | Buffer = undefined
 ```
 
 #### 固件文件配置
+
 ```typescript
 // Define file list, containing start address and file path for each file
 const fileList: {
@@ -182,6 +198,7 @@ const fileList: {
 ```
 
 #### Security Access 实现
+
 ```typescript
 /**
  * Listen to security access response event, encrypt received security seed and send response request
@@ -210,6 +227,7 @@ Util.On('S32K144_CAN_UDS_Bootloader.SecurityAccess390.recv', async (v) => {
 ```
 
 #### JobFunction0 实现 - 下载请求与 CRC 校验
+
 ```typescript
 /**
  * Register job function 0, handle file download requests and CRC verification requests
@@ -260,6 +278,7 @@ Util.Register('S32K144_CAN_UDS_Bootloader.JobFunction0', async () => {
 ```
 
 #### JobFunction1 实现 - 分片传输与结束
+
 ```typescript
 /**
  * Register job function 1, handle file chunk transfer requests and transfer exit requests
@@ -329,7 +348,3 @@ Util.Register('S32K144_CAN_UDS_Bootloader.JobFunction1', () => {
 ---
 
 *本示例可作为在汽车应用中实现 UDS 引导程序的基础。请根据具体项目需求自定义配置与脚本。*
-
-
-
-

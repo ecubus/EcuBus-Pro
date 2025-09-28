@@ -10,9 +10,9 @@ Toomoss & Vector
 
 ## 图示
 
-![alt](lin_aa.gif)
+![alt](lin_aa_demo.gif)
 
-## 功能
+## 功能lin_aa_demolin_aa_demo
 
 - LIN设备自动寻址功能
 

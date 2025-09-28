@@ -21,37 +21,6 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
     }
   >()
 
-  // Track what is currently running on each core (for ISR preemption handling)
-  const coreRunningState = new Map<
-    number,
-    {
-      type: TaskType.TASK | TaskType.ISR
-      entityId: number
-      key: string
-    }
-  >()
-
-  // Track interrupted contexts for each core (stack-like structure for nested interrupts)
-  const interruptedStack = new Map<
-    number,
-    Array<{
-      type: TaskType.TASK | TaskType.ISR
-      entityId: number
-      key: string
-    }>
-  >()
-
-  // Track active resource and spinlock blocks per task/ISR
-  const taskIsrResourceSpinlocks = new Map<
-    string, // key = coreId-taskType-entityId
-    Array<{
-      type: TaskType.RESOURCE | TaskType.SPINLOCK
-      entityId: number
-      key: string
-      block: VisibleBlock
-    }>
-  >()
-
   // Helper function to create a unique key for tracking active blocks
   const createKey = (coreId: number, type: TaskType, entityId: number): string => {
     return `${coreId}-${type}-${entityId}`
@@ -142,7 +111,7 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
   const shouldEndBlock = (event: OsEvent): boolean => {
     switch (event.type) {
       case TaskType.TASK:
-        return false // TASK blocks will be ended by the next TASK event, not by specific status
+        return event.event.status === 5 || event.event.status === 4 // TERMINATE or PREEMPT
       case TaskType.ISR:
         return event.event.status === 1 // STOP
       case TaskType.SPINLOCK:
@@ -151,44 +120,6 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
         return event.event.status === 1 // STOP
       default:
         return false
-    }
-  }
-
-  // Helper function to interrupt resource and spinlock blocks for a specific task/ISR
-  const interruptResourceSpinlocks = (ownerKey: string, timestamp: number): void => {
-    const resourceSpinlocks = taskIsrResourceSpinlocks.get(ownerKey)
-    if (resourceSpinlocks) {
-      resourceSpinlocks.forEach((item) => {
-        // End the current resource/spinlock block
-        item.block.end = timestamp
-      })
-    }
-  }
-
-  // Helper function to resume resource and spinlock blocks for a specific task/ISR
-  const resumeResourceSpinlocks = (ownerKey: string, timestamp: number): void => {
-    const resourceSpinlocks = taskIsrResourceSpinlocks.get(ownerKey)
-    if (resourceSpinlocks) {
-      resourceSpinlocks.forEach((item) => {
-        // Create a new block to resume the resource/spinlock
-        const resumeBlock: VisibleBlock = {
-          type: item.type,
-          id: item.block.id,
-          start: timestamp,
-          coreId: item.block.coreId,
-          status: item.block.status
-        }
-        blocks.push(resumeBlock)
-
-        // Update the active block reference
-        activeBlocks.set(item.key, {
-          block: resumeBlock,
-          startIndex: blocks.length - 1
-        })
-
-        // Update the item reference
-        item.block = resumeBlock
-      })
     }
   }
 
@@ -212,253 +143,63 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
     const key = createKey(coreId, event.type, entityId)
     const timestamp = event.ts / coreFreq // Convert to seconds
 
-    // Handle ISR preemption logic
     if (event.type === TaskType.ISR) {
+      //start
       if (event.event.status === 0) {
-        // ISR START
-        // ISR is starting - interrupt whatever is currently running on this core
-        const currentRunning = coreRunningState.get(coreId)
-        if (currentRunning) {
-          // Create LIN block for the transition from current running context to ISR
-          // For tasks, only create LIN block if the task is active (status = 0)
-          let shouldCreateLinBlock = true
-          if (currentRunning.type === TaskType.TASK) {
-            const currentTaskBlock = activeBlocks.get(currentRunning.key)
-            shouldCreateLinBlock = !!(currentTaskBlock && currentTaskBlock.block.status === 1) // TaskStatus.ACTIVE
-          }
-
-          if (shouldCreateLinBlock) {
-            const fromName =
-              currentRunning.type === TaskType.TASK
-                ? `Task_${currentRunning.entityId}`
-                : `ISR_${currentRunning.entityId}`
-            const toName = `ISR_${entityId}`
-            createLinBlock(fromName, toName, coreId, timestamp)
-          }
-
-          // End the current block (TASK or ISR being interrupted)
-          const currentBlock = activeBlocks.get(currentRunning.key)
-          if (currentBlock) {
-            currentBlock.block.end = timestamp
-            // Don't delete from activeBlocks yet - we'll resume it later
-          }
-
-          // Push the interrupted context onto the stack
-          if (!interruptedStack.has(coreId)) {
-            interruptedStack.set(coreId, [])
-          }
-          interruptedStack.get(coreId)!.push(currentRunning)
-        }
-
-        // Interrupt any active resource and spinlock blocks owned by the interrupted task/ISR
-        if (currentRunning) {
-          interruptResourceSpinlocks(currentRunning.key, timestamp)
-        }
-
-        // Start ISR block
-        const newBlock: VisibleBlock = {
-          type: event.type,
-          id: getEntityId(event),
-          start: timestamp,
-          coreId: coreId,
-          status: getStatus(event)
-        }
-        blocks.push(newBlock)
         activeBlocks.set(key, {
-          block: newBlock,
-          startIndex: blocks.length - 1
+          block: {
+            start: timestamp,
+            end: undefined,
+            coreId: coreId,
+            status: 0,
+            type: TaskType.ISR,
+            id: entityId
+          },
+          startIndex: index
         })
-
-        // Update core running state
-        coreRunningState.set(coreId, {
-          type: TaskType.ISR,
-          entityId: entityId,
-          key: key
-        })
-      } else if (event.event.status === 1) {
-        // ISR STOP
-        // End ISR block
-        if (activeBlocks.has(key)) {
-          const activeBlock = activeBlocks.get(key)!
-          activeBlock.block.end = timestamp
+      } else {
+        const block = activeBlocks.get(key)
+        if (block) {
+          block.block.end = timestamp
+          blocks.push(block.block)
           activeBlocks.delete(key)
         }
-
-        // Resume the most recently interrupted context from the stack
-        const stack = interruptedStack.get(coreId)
-        if (stack && stack.length > 0) {
-          // Pop the most recently interrupted context
-          const interruptedContext = stack.pop()!
-
-          // Create LIN block for the transition from ISR back to the interrupted context
-          // For tasks, only create LIN block if the task will be active (status = 0)
-          let shouldCreateLinBlock = true
-          if (interruptedContext.type === TaskType.TASK) {
-            const interruptedTaskBlock = activeBlocks.get(interruptedContext.key)
-            shouldCreateLinBlock = !!(
-              interruptedTaskBlock && interruptedTaskBlock.block.status === 1
-            ) // TaskStatus.ACTIVE
-          }
-
-          if (shouldCreateLinBlock) {
-            const fromName = `ISR_${entityId}`
-            const toName =
-              interruptedContext.type === TaskType.TASK
-                ? `Task_${interruptedContext.entityId}`
-                : `ISR_${interruptedContext.entityId}`
-            createLinBlock(fromName, toName, coreId, timestamp)
-          }
-
-          // Resume the interrupted context by creating a new block
-          const interruptedBlock = activeBlocks.get(interruptedContext.key)
-          if (interruptedBlock) {
-            const resumeBlock: VisibleBlock = {
-              type: interruptedContext.type,
-              id: interruptedBlock.block.id,
-              start: timestamp,
-              coreId: coreId,
-              status: interruptedBlock.block.status
-            }
-            blocks.push(resumeBlock)
-
-            // Update the active block reference
-            activeBlocks.set(interruptedContext.key, {
-              block: resumeBlock,
-              startIndex: blocks.length - 1
-            })
-
-            // Update core running state
-            coreRunningState.set(coreId, interruptedContext)
-          }
-
-          // Resume any interrupted resource and spinlock blocks owned by the resumed task/ISR
-          resumeResourceSpinlocks(interruptedContext.key, timestamp)
-
-          // Clean up empty stack
-          if (stack.length === 0) {
-            interruptedStack.delete(coreId)
-          }
-        } else {
-          // No interrupted context, core is now idle
-          coreRunningState.delete(coreId)
-        }
       }
-    } else if (shouldStartBlock(event)) {
-      // Handle TASK and other events
-      if (event.type === TaskType.TASK) {
-        // Check if there's an ISR running on this core
-        const currentRunning = coreRunningState.get(coreId)
-        if (currentRunning && currentRunning.type === TaskType.ISR) {
-          // Can't start TASK while ISR is running - this shouldn't happen in normal OS behavior
-          // But if it does, we'll just queue the TASK event
-          return
-        }
-
-        // Create LIN block for task switching (from previous task to new task)
-        // Only create LIN block if both the current and new tasks are active (status = 0)
-        if (
-          currentRunning &&
-          currentRunning.type === TaskType.TASK &&
-          currentRunning.entityId !== entityId
-        ) {
-          const currentTaskBlock = activeBlocks.get(currentRunning.key)
-          const isCurrentTaskActive = currentTaskBlock && currentTaskBlock.block.status === 1 // TaskStatus.ACTIVE
-          const isNewTaskActive = getStatus(event) === 0 // TaskStatus.ACTIVE
-
-          if (isCurrentTaskActive && isNewTaskActive) {
-            const fromName = `Task_${currentRunning.entityId}`
-            const toName = `Task_${entityId}`
-            createLinBlock(fromName, toName, coreId, timestamp)
-          }
-        }
-      }
-
-      // End any existing active block for this entity
-      if (activeBlocks.has(key)) {
-        const activeBlock = activeBlocks.get(key)!
-        activeBlock.block.end = timestamp
-        activeBlocks.delete(key)
-      }
-
-      // Start a new block
-      const newBlock: VisibleBlock = {
-        type: event.type,
-        id: getEntityId(event),
-        start: timestamp,
-        coreId: coreId,
-        status: getStatus(event)
-      }
-
-      blocks.push(newBlock)
-      activeBlocks.set(key, {
-        block: newBlock,
-        startIndex: blocks.length - 1
-      })
-
-      // Update core running state for TASK events
-      if (event.type === TaskType.TASK) {
-        coreRunningState.set(coreId, {
-          type: TaskType.TASK,
-          entityId: entityId,
-          key: key
+    } else if (event.type === TaskType.TASK) {
+      //active
+      if (event.event.status === 0) {
+        activeBlocks.set(key, {
+          block: {
+            start: timestamp,
+            end: undefined,
+            coreId: coreId,
+            status: 0,
+            type: TaskType.TASK,
+            id: entityId
+          },
+          startIndex: index
         })
-      }
-
-      // Track resource and spinlock blocks - associate them with the currently running task/ISR
-      if (event.type === TaskType.RESOURCE || event.type === TaskType.SPINLOCK) {
-        const currentRunning = coreRunningState.get(coreId)
-        if (currentRunning) {
-          // Associate this resource/spinlock with the currently running task/ISR
-          if (!taskIsrResourceSpinlocks.has(currentRunning.key)) {
-            taskIsrResourceSpinlocks.set(currentRunning.key, [])
-          }
-          taskIsrResourceSpinlocks.get(currentRunning.key)!.push({
-            type: event.type,
-            entityId: entityId,
-            key: key,
-            block: newBlock
+      } else {
+        const block = activeBlocks.get(key)
+        if (block) {
+          block.block.end = timestamp
+          blocks.push(block.block)
+          activeBlocks.delete(key)
+        }
+        if (event.event.status == 1 || event.event.status == 4) {
+          activeBlocks.set(key, {
+            block: {
+              start: timestamp,
+              end: undefined,
+              coreId: coreId,
+              status: event.event.status,
+              type: TaskType.TASK,
+              id: entityId
+            },
+            startIndex: index
           })
         }
       }
-    } else if (shouldEndBlock(event)) {
-      // End the active block for this entity
-      if (activeBlocks.has(key)) {
-        const activeBlock = activeBlocks.get(key)!
-        activeBlock.block.end = timestamp
-        activeBlocks.delete(key)
-
-        // Update core running state
-        if (event.type === TaskType.TASK) {
-          coreRunningState.delete(coreId)
-        }
-
-        // Remove resource and spinlock blocks from tracking when they end
-        if (event.type === TaskType.RESOURCE || event.type === TaskType.SPINLOCK) {
-          // Find which task/ISR owns this resource/spinlock and remove it
-          for (const [ownerKey, resourceSpinlocks] of taskIsrResourceSpinlocks.entries()) {
-            const index = resourceSpinlocks.findIndex((item) => item.key === key)
-            if (index !== -1) {
-              resourceSpinlocks.splice(index, 1)
-              // Clean up empty array
-              if (resourceSpinlocks.length === 0) {
-                taskIsrResourceSpinlocks.delete(ownerKey)
-              }
-              break
-            }
-          }
-        }
-      }
-    } else if (event.type === TaskType.HOOK || event.type === TaskType.SERVICE) {
-      // For HOOK and SERVICE events, create instant blocks (very short duration)
-      const instantBlock: VisibleBlock = {
-        type: event.type,
-        id: getEntityId(event),
-        start: timestamp,
-        end: undefined, // 1 microsecond duration for visibility
-        coreId: coreId,
-        status: getStatus(event)
-      }
-      blocks.push(instantBlock)
     }
   })
 
@@ -466,6 +207,7 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
   activeBlocks.forEach(({ block }) => {
     // Leave end as undefined - the rendering code will use current time
     block.end = undefined
+    blocks.push(block)
   })
   //sort blocks by start time, prioritize TASK and ISR when start times are equal
   blocks.sort((a, b) => {

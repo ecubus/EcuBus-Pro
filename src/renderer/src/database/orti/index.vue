@@ -28,7 +28,7 @@
               </el-select>
             </template>
             <template #edit_color="{ row }">
-              <el-color-picker v-model="row.color" size="small" />
+              <el-color-picker v-model="row.color" size="small" :teleported="false" />
             </template>
             <template #default_color="{ row }">
               <div
@@ -41,6 +41,36 @@
                   margin: '0 auto'
                 }"
               ></div>
+            </template>
+            <template #default_buttons="{ rowIndex }">
+              <!-- delete row -->
+              <el-button type="danger" link @click="deleteRow(rowIndex)">
+                <Icon :icon="deleteIcon" />
+              </el-button>
+            </template>
+            <template #toolbar>
+              <div
+                style="
+                  justify-content: flex-start;
+                  display: flex;
+                  align-items: center;
+                  gap: 2px;
+                  padding: 5px;
+                "
+              >
+                <span style="padding-left: 5px; padding-right: 5px">Name:</span>
+                <el-input
+                  v-model="dbcObj.name"
+                  placeholder="Enter name"
+                  style="width: 200px"
+                  size="small"
+                />
+                <el-divider direction="vertical" />
+                <!-- add row -->
+                <el-button type="primary" link @click="addRow">
+                  <Icon :icon="addIcon" /><span>Add</span>
+                </el-button>
+              </div>
             </template>
           </vxe-grid>
         </div>
@@ -217,6 +247,7 @@ import {
 
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
+import addIcon from '@iconify/icons-material-symbols/add'
 
 import { Icon } from '@iconify/vue'
 import { Layout } from '@r/views/uds/layout'
@@ -277,21 +308,32 @@ const coreConfigGridOptions = ref<VxeGridProps>({
     mode: 'cell',
     showStatus: true
   },
-
+  toolbarConfig: {
+    slots: {
+      tools: 'toolbar'
+    }
+  },
   columns: [
+    {
+      align: 'center',
+      title: '#',
+      width: 50,
+      type: 'seq',
+      resizable: false
+    },
     { align: 'center', field: 'name', title: 'Name', width: 200, editRender: { name: 'input' } },
     {
       field: 'id',
       title: 'ID',
       align: 'center',
-      minWidth: 80,
+      minWidth: 60,
       editRender: { name: 'input', attrs: { type: 'number' } }
     },
     {
       field: 'coreId',
       title: 'Core ID',
-      width: 100,
-
+      width: 80,
+      align: 'center',
       editRender: { name: 'input', attrs: { type: 'number' } }
     },
     {
@@ -313,10 +355,31 @@ const coreConfigGridOptions = ref<VxeGridProps>({
 
       editRender: {},
       slots: { edit: 'edit_color', default: 'default_color' }
+    },
+    {
+      align: 'center',
+      field: 'buttons',
+      title: '',
+      width: 50,
+      fixed: 'right',
+      slots: { default: 'default_buttons' }
     }
   ]
 })
 
+function deleteRow(rowIndex: number) {
+  dbcObj.value?.coreConfigs.splice(rowIndex, 1)
+}
+
+function addRow() {
+  dbcObj.value?.coreConfigs.push({
+    id: 0,
+    name: `Task_${dbcObj.value?.coreConfigs.length}`,
+    coreId: 0,
+    type: 0,
+    color: `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
+  })
+}
 // Connector form data
 const connectorFormRef = ref()
 const connectorForm = ref({
@@ -499,7 +562,34 @@ function saveDataBase() {
     })
     return
   }
-
+  //task 里 ID 不能重复
+  const idList = new Set()
+  const isrList = new Set()
+  for (const task of dbcObj.value.coreConfigs) {
+    if (task.type === 0) {
+      if (idList.has(`${task.coreId}_${task.id}`)) {
+        ElNotification({
+          offset: 50,
+          type: 'error',
+          message: `Task ID "${task.id}" already exists in core ${task.coreId}`,
+          appendTo: `#win${props.editIndex}`
+        })
+        return
+      }
+      idList.add(`${task.coreId}_${task.id}`)
+    } else if (task.type === 1) {
+      if (isrList.has(`${task.coreId}_${task.id}`)) {
+        ElNotification({
+          offset: 50,
+          type: 'error',
+          message: `ISR ID "${task.id}" already exists`,
+          appendTo: `#win${props.editIndex}`
+        })
+        return
+      }
+      isrList.add(`${task.coreId}_${task.id}`)
+    }
+  }
   // Check for duplicate database name
   const isDuplicateName = Object.entries(database.database.orti).some(([key, db]) => {
     // Skip comparing with itself

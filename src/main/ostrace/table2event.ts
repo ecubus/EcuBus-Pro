@@ -1,4 +1,11 @@
-import { OsEvent, TaskType, TaskStatus, IsrStatus, SpinlockStatus, ResourceStatus } from './osEvent'
+import {
+  OsEvent,
+  TaskType,
+  TaskStatus,
+  IsrStatus,
+  SpinlockStatus,
+  ResourceStatus
+} from '../share/osEvent'
 import * as ExcelJS from 'exceljs'
 
 /**
@@ -7,8 +14,6 @@ import * as ExcelJS from 'exceljs'
  * @returns OsEvent | null
  */
 function rowDataToOsEvent(rowData: any[]): OsEvent | null {
-  console.log('rowDataToOsEvent', rowData)
-
   // Fixed column positions: [时间戳, 标识, ID, 状态]
   const ts = parseTimestamp(rowData[0]) // 第1列：时间戳
   const type = parseTaskType(rowData[1]) // 第2列：运行对象标识

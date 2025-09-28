@@ -1,17 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { parseExcelFromFile } from './../../src/renderer/src/views/ostrace/table2event'
+import { parseExcelFromFile } from './../../src/main/ostrace/table2event'
 import path from 'path'
 import fs from 'fs'
-import os2block from '../../src/renderer/src/views/ostrace/os2graph'
+import os2block from '../../src/main/ostrace/os2graph'
 import { parseORTI } from '../../src/renderer/src/database/ortiParse'
 describe('parse', () => {
   it('should parse Excel file', async () => {
-    const eventList = await parseExcelFromFile(path.resolve(__dirname, './demo.xlsx'))
+    const eventList = await parseExcelFromFile(path.resolve(__dirname, './demo1.xlsx'))
     expect(eventList).toBeDefined()
     // console.log(eventList)
-    const blocks = os2block(eventList)
+    const blocks = os2block(eventList, 100_000_000)
     expect(blocks).toBeDefined()
-    // console.log(blocks)
+    console.log(blocks)
+    fs.writeFileSync(path.resolve(__dirname, './blocks.json'), JSON.stringify(blocks, null, 2))
   })
   // it('should parse comprehensive test events', () => {
   //   const blocks = os2block(comprehensiveTestEvents)

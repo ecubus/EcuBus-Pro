@@ -121,10 +121,10 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 import { useGlobalStart } from '@r/stores/runtime'
 import * as echarts from 'echarts'
 import { ECBasicOption } from 'echarts/types/dist/shared'
-import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType } from './osEvent'
+import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType } from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
-import { parseExcel, parseExcelFromFile } from './table2event'
-import os2block from './os2graph'
+import { ElLoading } from 'element-plus'
+
 const isPaused = ref(false)
 const leftWidth = ref(200)
 const props = defineProps<{
@@ -134,7 +134,7 @@ const props = defineProps<{
 }>()
 
 const dataStore = useDataStore()
-const orti = dataStore.database.orti[props.editIndex]
+const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_trace', '')])
 const height = computed(() => props.height - 19)
 
 const charid = computed(() => `${props.editIndex}_graph`)
@@ -185,9 +185,10 @@ const updateTime = () => {
 const globalStart = useGlobalStart()
 
 const project = useProjectStore()
-const loading = ref(false)
+
 async function loadOfflineTrace() {
-  loading.value = true
+  const loading = ElLoading.service({ fullscreen: true })
+  visibleBlocks = []
   try {
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
       defaultPath: project.projectInfo.path,
@@ -197,24 +198,29 @@ async function loadOfflineTrace() {
     })
     const file = r.filePaths[0]
     if (file) {
-      // console.log('file', file)
-      // const events = await parseExcelFromFile(fileUrl)
-      // visibleBlocks = os2block(events)
-      // //update chart
-      // chart.setOption({
-      //   series: [
-      //     {
-      //       data: visibleBlocks
-      //     }
-      //   ]
-      // })
-      // //update time
-      // time.value = visibleBlocks.at(-1)?.end || 0
+      visibleBlocks = await window.electron.ipcRenderer.invoke('ipc-ostrace-parse-excel', file)
+      visibleBlocks = visibleBlocks.slice(0, 200)
+      console.log('visibleBlocks', visibleBlocks)
+
+      chart.setOption({
+        series: [
+          {
+            data: visibleBlocks.map((block) => [
+              block.start,
+              block.end,
+              block.id,
+              block.coreId,
+              block.type,
+              block.status
+            ])
+          }
+        ]
+      })
     }
   } catch (error) {
     console.error(error)
   } finally {
-    loading.value = false
+    loading.close()
   }
 }
 // 确保定时器时间间隔与graph.vue保持一致
@@ -236,68 +242,42 @@ const darkColor = (color: string, level: number) => {
   const [r, g, b] = rgb.map((v) => Math.max(0, Math.min(255, v * factor)))
   return `rgb(${r}, ${g}, ${b})`
 }
-// Dynamic core configuration - can be extended infinitely
-const coreConfigs = ref([
-  {
-    id: 0,
-    name: 'Core 0',
-    buttons: [
-      { name: 'Task_0', color: 'rgb(231, 76, 60)' },
-      { name: 'Task_1', color: 'rgb(243, 156, 18)' },
-      { name: 'ISR_0', color: 'rgb(241, 196, 15)' },
-      { name: 'Task_2', color: 'rgb(155, 89, 182)' },
-      { name: 'ISR_3', color: 'rgb(46, 204, 113)' },
-      { name: 'Task_3', color: 'rgb(230, 126, 34)' },
-      { name: 'Task_4', color: 'rgb(230, 126, 34)' },
-      { name: 'Task_5', color: 'rgb(230, 126, 34)' },
-      { name: 'Task_6', color: 'rgb(230, 126, 34)' },
-      { name: 'Task_7', color: 'rgb(230, 126, 34)' },
-      { name: 'ISR_1', color: 'rgb(46, 204, 113)' },
-      { name: 'ISR_2', color: 'rgb(46, 204, 113)' },
 
-      { name: 'ISR_4', color: 'rgb(46, 204, 113)' },
-      { name: 'ISR_5', color: 'rgb(46, 204, 113)' },
-      { name: 'ISR_6', color: 'rgb(46, 204, 113)' },
-      { name: 'ISR_7', color: 'rgb(46, 204, 113)' },
-      { name: 'Idle', color: 'rgb(149, 165, 166)' }
-    ]
-  },
-  {
-    id: 1,
-    name: 'Core 1',
-    buttons: [
-      { name: 'Task_2', color: 'rgb(155, 89, 182)' },
-      { name: 'ISR_3', color: 'rgb(46, 204, 113)' }
-    ]
+// Dynamic core configuration - can be extended infinitely
+const coreConfigs = computed(() => {
+  const configs: {
+    id: number
+    name: string
+    buttons: Array<{ name: string; color: string; id: number; type: number }>
+  }[] = []
+  for (const task of orti.value.coreConfigs) {
+    //check if core is already in configs
+    const core = configs.find((c) => c.id === task.coreId)
+    if (!core) {
+      configs.push({
+        id: task.coreId,
+        name: task.name,
+        buttons: [
+          {
+            name: task.name,
+            color: task.color,
+            id: task.id,
+            type: task.type
+          }
+        ]
+      })
+    }
+    if (core) {
+      core.buttons.push({
+        name: task.name,
+        color: task.color,
+        id: task.id,
+        type: task.type
+      })
+    }
   }
-  // {
-  //   id: 1,
-  //   name: 'Core 1',
-  //   buttons: [
-  //     { name: 'ETH1_RX', color: 'rgb(231, 76, 60)' },
-  //     { name: 'main_task', color: 'rgb(34, 198, 246)' },
-  //     { name: 'idle', color: 'rgb(149, 165, 166)' }
-  //   ]
-  // },
-  // Example of adding more cores - simply uncomment and modify as needed:
-  // {
-  //   id: 2,
-  //   name: 'Core 2',
-  //   buttons: [
-  //     { name: 'GPU_Task', color: 'rgb(230, 126, 34)' },
-  //     { name: 'AI_Process', color: 'rgb(22, 160, 133)' },
-  //     { name: 'ML_Inference', color: 'rgb(142, 68, 173)' }
-  //   ]
-  // }
-  // {
-  //   id: 3,
-  //   name: 'Core 3',
-  //   buttons: [
-  //     { name: 'Network_IO', color: '#d35400' },
-  //     { name: 'File_IO', color: '#c0392b' }
-  //   ]
-  // }
-])
+  return configs
+})
 
 // Computed property for total button count across all cores
 const totalButtons = computed(() => {
@@ -327,48 +307,13 @@ const separatorPositions = computed(() => {
   return positions
 })
 
-// Utility functions for dynamic core management
-const addCore = (
-  coreId: number,
-  coreName?: string,
-  buttons: Array<{ name: string; color: string }> = []
-) => {
-  const newCore = {
-    id: coreId,
-    name: coreName || `Core ${coreId}`,
-    buttons: buttons
-  }
-  coreConfigs.value.push(newCore)
-}
-
-const removeCore = (coreId: number) => {
-  const index = coreConfigs.value.findIndex((core) => core.id === coreId)
-  if (index !== -1) {
-    coreConfigs.value.splice(index, 1)
-  }
-}
-
-const addButtonToCore = (coreId: number, button: { name: string; color: string }) => {
-  const core = coreConfigs.value.find((c) => c.id === coreId)
-  if (core) {
-    core.buttons.push(button)
-  }
-}
-
-const removeButtonFromCore = (coreId: number, buttonIndex: number) => {
-  const core = coreConfigs.value.find((c) => c.id === coreId)
-  if (core && core.buttons[buttonIndex]) {
-    core.buttons.splice(buttonIndex, 1)
-  }
-}
-
 interface VisibleBlock {
   type: TaskType
-  name: string
+  id: number
   start: number
   end?: number
   coreId: number
-  status: number
+  status: number | string
 }
 
 const coreStatus: Record<
@@ -383,430 +328,1788 @@ const coreStatus: Record<
     color: string
   }
 > = {}
-const visibleBlocks: VisibleBlock[] = [
+let visibleBlocks: VisibleBlock[] = [
   {
     type: 0,
-    name: 'Task_0',
-    start: 0.00486,
-    coreId: 0,
-    status: 0,
-    end: 0.85966
-  },
-  {
-    type: 0,
-    name: 'Task_1',
-    start: 0.00487,
-    coreId: 0,
-    status: 0,
-    end: 2.9595
-  },
-  {
-    type: 0,
-    name: 'Task_3',
-    start: 0.00488,
-    coreId: 0,
-    status: 0,
-    end: 8.95218
-  },
-  {
-    type: 0,
-    name: 'Task_0',
-    start: 0.85966,
+    id: 3,
+    start: 7.34641237,
     coreId: 0,
     status: 1,
-    end: 2.95222
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 0.86664,
-    coreId: 0,
-    status: 0,
-    end: 0.95218
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 0.95218,
-    coreId: 0,
-    status: 0,
-    end: 1.95218
+    end: 7.34642422
   },
   {
     type: 5,
-    name: 'Service_120',
-    start: 0.95952,
+    id: 114,
+    start: 7.34641693,
     coreId: 0,
     status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_121',
-    start: 1.8633,
-    coreId: 0,
-    status: 0,
-    end: 3.96578
-  },
-  {
-    type: 5,
-    name: 'Service_136',
-    start: 1.87022,
-    coreId: 0,
-    status: 0,
-    end: 5.88488
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 1.95218,
-    coreId: 0,
-    status: 0,
-    end: 1.95948
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 1.95948,
-    coreId: 0,
-    status: 0,
-    end: 3.8706
-  },
-  {
-    type: 5,
-    name: 'Service_137',
-    start: 2.86696,
-    coreId: 0,
-    status: 0,
-    end: 5.95948
-  },
-  {
-    type: 5,
-    name: 'Service_114',
-    start: 2.87388,
-    coreId: 0,
-    status: 0,
-    end: 6.95948
+    end: 7.35575198
   },
   {
     type: 0,
-    name: 'Task_0',
-    start: 2.95222,
+    id: 3,
+    start: 7.34642422,
     coreId: 0,
-    status: 5,
-    end: undefined
+    status: 5
   },
   {
     type: 0,
-    name: 'Task_1',
-    start: 2.9595,
+    id: 10,
+    start: 7.34642422,
+    coreId: 0,
+    status: 0,
+    end: 7.34643662
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.34643662,
     coreId: 0,
     status: 1,
-    end: 3.96578
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 3.8706,
-    coreId: 0,
-    status: 0,
-    end: 3.87752
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 3.87752,
-    coreId: 0,
-    status: 0,
-    end: 4.87428
-  },
-  {
-    type: 5,
-    name: 'Service_122',
-    start: 3.9522,
-    coreId: 0,
-    status: 0,
-    end: undefined
+    end: 7.34670309
   },
   {
     type: -1,
-    name: 'Task_1:ISR_0',
-    start: 3.96578,
-    end: undefined,
+    id: 0,
+    start: 7.34670309,
     coreId: 0,
-    status: 0
+    status: 'Task_10:ISR_0'
   },
   {
     type: 1,
-    name: 'ISR_0',
-    start: 3.96578,
+    id: 0,
+    start: 7.34670309,
     coreId: 0,
     status: 0,
-    end: 3.98176
-  },
-  {
-    type: 5,
-    name: 'Service_121',
-    start: 3.96578,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_112',
-    start: 3.96602,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_113',
-    start: 3.97002,
-    coreId: 0,
-    status: 0,
-    end: undefined
+    end: 7.34671157
   },
   {
     type: -1,
-    name: 'ISR_0:Task_1',
-    start: 3.98176,
-    end: undefined,
+    id: 0,
+    start: 7.34671157,
     coreId: 0,
-    status: 0
+    status: 'ISR_0:Task_10'
   },
   {
     type: 0,
-    name: 'Task_1',
-    start: 3.98176,
+    id: 10,
+    start: 7.34671157,
     coreId: 0,
     status: 1,
-    end: 3.98592
-  },
-  {
-    type: 0,
-    name: 'Task_1',
-    start: 3.98592,
-    coreId: 0,
-    status: 4,
-    end: 7.8922
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 4.87428,
-    coreId: 0,
-    status: 0,
-    end: 4.8812
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 4.8812,
-    coreId: 0,
-    status: 0,
-    end: 4.95948
-  },
-  {
-    type: 0,
-    name: 'Task_2',
-    start: 4.95218,
-    coreId: 0,
-    status: 1,
-    end: 7.88526
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 4.95948,
-    coreId: 0,
-    status: 0,
-    end: 5.87794
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 5.87794,
-    coreId: 0,
-    status: 0,
-    end: 7.95218
-  },
-  {
-    type: 5,
-    name: 'Service_136',
-    start: 5.88488,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 3,
-    name: 'Resource_1',
-    start: 5.95218,
-    coreId: 0,
-    status: 0,
-    end: 6.88854
-  },
-  {
-    type: 5,
-    name: 'Service_137',
-    start: 5.95948,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_138',
-    start: 6.8816,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_139',
-    start: 6.95218,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_114',
-    start: 6.95948,
-    coreId: 0,
-    status: 0,
-    end: 8.88892
-  },
-  {
-    type: 0,
-    name: 'Task_2',
-    start: 7.88526,
-    coreId: 0,
-    status: 5,
-    end: undefined
-  },
-  {
-    type: 0,
-    name: 'Task_1',
-    start: 7.8922,
-    coreId: 0,
-    status: 1,
-    end: 8.89586
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 7.95218,
-    coreId: 0,
-    status: 0,
-    end: 7.95948
-  },
-  {
-    type: 4,
-    name: 'Hook_0',
-    start: 7.95948,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_114',
-    start: 8.88892,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 0,
-    name: 'Task_1',
-    start: 8.89586,
-    coreId: 0,
-    status: 5,
-    end: undefined
-  },
-  {
-    type: 0,
-    name: 'Task_3',
-    start: 8.95218,
-    coreId: 0,
-    status: 1,
-    end: 8.96572
+    end: 7.34770293
   },
   {
     type: -1,
-    name: 'Task_3:ISR_1',
-    start: 8.96572,
-    end: undefined,
+    id: 0,
+    start: 7.34770293,
     coreId: 0,
-    status: 0
+    status: 'Task_10:ISR_0'
   },
   {
     type: 1,
-    name: 'ISR_1',
-    start: 8.96572,
+    id: 0,
+    start: 7.34770293,
     coreId: 0,
     status: 0,
-    end: 9.95218
-  },
-  {
-    type: 5,
-    name: 'Service_50',
-    start: 8.96596,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 2,
-    name: 'Spinlock_0',
-    start: 8.96996,
-    coreId: 0,
-    status: 0,
-    end: 9.8926
-  },
-  {
-    type: 5,
-    name: 'Service_51',
-    start: 8.9817,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_52',
-    start: 8.98586,
-    coreId: 0,
-    status: 0,
-    end: undefined
-  },
-  {
-    type: 5,
-    name: 'Service_53',
-    start: 9.89952,
-    coreId: 0,
-    status: 0,
-    end: undefined
+    end: 7.34771094
   },
   {
     type: -1,
-    name: 'ISR_1:Task_3',
-    start: 9.95218,
-    end: undefined,
+    id: 0,
+    start: 7.34771094,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.34771094,
+    coreId: 0,
+    status: 1,
+    end: 7.34870287
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.34870287,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.34870287,
+    coreId: 0,
+    status: 0,
+    end: 7.34871083
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.34871083,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.34871083,
+    coreId: 0,
+    status: 1,
+    end: 7.34970287
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.34970287,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.34970287,
+    coreId: 0,
+    status: 0,
+    end: 7.34971083
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.34971083,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.34971083,
+    coreId: 0,
+    status: 1,
+    end: 7.35070289
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35070289,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35070289,
+    coreId: 0,
+    status: 0,
+    end: 7.35073568
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.35071017,
+    coreId: 0,
+    status: 0,
+    end: 7.35571003
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.35071568,
+    coreId: 0,
+    status: 0,
+    end: 7.35571533
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35073568,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35073568,
+    coreId: 0,
+    status: 1,
+    end: 7.35170294
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35170294,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35170294,
+    coreId: 0,
+    status: 0,
+    end: 7.35171092
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35171092,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35171092,
+    coreId: 0,
+    status: 1,
+    end: 7.35270297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35270297,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35270297,
+    coreId: 0,
+    status: 0,
+    end: 7.35271093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35271093,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35271093,
+    coreId: 0,
+    status: 1,
+    end: 7.35370291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35370291,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35370291,
+    coreId: 0,
+    status: 0,
+    end: 7.35371087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35371087,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35371087,
+    coreId: 0,
+    status: 1,
+    end: 7.35470295
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35470295,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35470295,
+    coreId: 0,
+    status: 0,
+    end: 7.35471091
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35471091,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35471091,
+    coreId: 0,
+    status: 1,
+    end: 7.35570292
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35570292,
+    coreId: 0,
+    status: 'Task_10:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35570292,
+    coreId: 0,
+    status: 0,
+    end: 7.35574727
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.35571003,
+    coreId: 0,
+    status: 0,
+    end: 7.35572238
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.35571533,
+    coreId: 0,
+    status: 0,
+    end: 7.3557278
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.35572238,
+    coreId: 0,
+    status: 0,
+    end: 7.36070998
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.3557278,
+    coreId: 0,
+    status: 0,
+    end: 7.36071532
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35574727,
+    coreId: 0,
+    status: 'ISR_0:Task_10'
+  },
+  {
+    type: 0,
+    id: 10,
+    start: 7.35574727,
+    coreId: 0,
+    status: 1
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.35575198,
+    coreId: 0,
+    status: 0,
+    end: 7.36576367
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.355759,
+    coreId: 0,
+    status: 5,
+    end: 7.36577069
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.3557647,
+    coreId: 0,
+    status: 1,
+    end: 7.35670291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35670291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35670291,
+    coreId: 0,
+    status: 0,
+    end: 7.35671089
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35671089,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.35671089,
+    coreId: 0,
+    status: 1,
+    end: 7.35770296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35770296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35770296,
+    coreId: 0,
+    status: 0,
+    end: 7.35771092
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35771092,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.35771092,
+    coreId: 0,
+    status: 1,
+    end: 7.35870292
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35870292,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35870292,
+    coreId: 0,
+    status: 0,
+    end: 7.35871088
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35871088,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.35871088,
+    coreId: 0,
+    status: 1,
+    end: 7.35970297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35970297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.35970297,
+    coreId: 0,
+    status: 0,
+    end: 7.35971093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.35971093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.35971093,
+    coreId: 0,
+    status: 1,
+    end: 7.36070291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36070291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36070291,
+    coreId: 0,
+    status: 0,
+    end: 7.36072317
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.36070998,
+    coreId: 0,
+    status: 0,
+    end: 7.36571003
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.36071532,
+    coreId: 0,
+    status: 0,
+    end: 7.36571534
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36072317,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36072317,
+    coreId: 0,
+    status: 1,
+    end: 7.36170297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36170297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36170297,
+    coreId: 0,
+    status: 0,
+    end: 7.36171093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36171093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36171093,
+    coreId: 0,
+    status: 1,
+    end: 7.36270296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36270296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36270296,
+    coreId: 0,
+    status: 0,
+    end: 7.36271092
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36271092,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36271092,
+    coreId: 0,
+    status: 1,
+    end: 7.36370296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36370296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36370296,
+    coreId: 0,
+    status: 0,
+    end: 7.36371092
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36371092,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36371092,
+    coreId: 0,
+    status: 1,
+    end: 7.36470291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36470291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36470291,
+    coreId: 0,
+    status: 0,
+    end: 7.36471087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36471087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36471087,
+    coreId: 0,
+    status: 1,
+    end: 7.36570296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36570296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36570296,
+    coreId: 0,
+    status: 0,
+    end: 7.36575892
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.36571003,
+    coreId: 0,
+    status: 0,
+    end: 7.3657223
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.36571534,
+    coreId: 0,
+    status: 0,
+    end: 7.36572756
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.3657223,
+    coreId: 0,
+    status: 0,
+    end: 7.36573411
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.36572756,
+    coreId: 0,
+    status: 0,
+    end: 7.36573945
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.36573411,
+    coreId: 0,
+    status: 0,
+    end: 7.37071004
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.36573945,
+    coreId: 0,
+    status: 0,
+    end: 7.37071538
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36575892,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36575892,
+    coreId: 0,
+    status: 1,
+    end: 7.36580007
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.36576367,
+    coreId: 0,
+    status: 0,
+    end: 7.36578736
+  },
+  {
+    type: 0,
+    id: 1,
+    start: 7.36577069,
+    coreId: 0,
+    status: 5,
+    end: 7.38577066
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.36577069,
+    coreId: 0,
+    status: 0,
+    end: 7.36578283
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.36578283,
+    coreId: 0,
+    status: 1,
+    end: 7.36579438
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.36578736,
+    coreId: 0,
+    status: 0,
+    end: 7.37575191
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.36579438,
+    coreId: 0,
+    status: 5,
+    end: 7.37575898
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36580007,
+    coreId: 0,
+    status: 1,
+    end: 7.36670294
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36670294,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36670294,
+    coreId: 0,
+    status: 0,
+    end: 7.36671095
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36671095,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36671095,
+    coreId: 0,
+    status: 1,
+    end: 7.36770291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36770291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36770291,
+    coreId: 0,
+    status: 0,
+    end: 7.36771087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36771087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36771087,
+    coreId: 0,
+    status: 1,
+    end: 7.36870291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36870291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36870291,
+    coreId: 0,
+    status: 0,
+    end: 7.36871087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36871087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36871087,
+    coreId: 0,
+    status: 1,
+    end: 7.36970291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36970291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.36970291,
+    coreId: 0,
+    status: 0,
+    end: 7.36971087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.36971087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.36971087,
+    coreId: 0,
+    status: 1,
+    end: 7.37070297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37070297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37070297,
+    coreId: 0,
+    status: 0,
+    end: 7.37072298
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.37071004,
+    coreId: 0,
+    status: 0,
+    end: 7.37571007
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.37071538,
+    coreId: 0,
+    status: 0,
+    end: 7.37571547
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37072298,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37072298,
+    coreId: 0,
+    status: 1,
+    end: 7.37170293
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37170293,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37170293,
+    coreId: 0,
+    status: 0,
+    end: 7.37171089
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37171089,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37171089,
+    coreId: 0,
+    status: 1,
+    end: 7.37270295
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37270295,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37270295,
+    coreId: 0,
+    status: 0,
+    end: 7.37271091
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37271091,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37271091,
+    coreId: 0,
+    status: 1,
+    end: 7.37370291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37370291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37370291,
+    coreId: 0,
+    status: 0,
+    end: 7.37371087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37371087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37371087,
+    coreId: 0,
+    status: 1,
+    end: 7.37470297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37470297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37470297,
+    coreId: 0,
+    status: 0,
+    end: 7.37471093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37471093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37471093,
+    coreId: 0,
+    status: 1,
+    end: 7.37570296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37570296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37570296,
+    coreId: 0,
+    status: 0,
+    end: 7.3757472
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.37571007,
+    coreId: 0,
+    status: 0,
+    end: 7.37572239
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.37571547,
+    coreId: 0,
+    status: 0,
+    end: 7.37572773
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.37572239,
+    coreId: 0,
+    status: 0,
+    end: 7.38070998
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.37572773,
+    coreId: 0,
+    status: 0,
+    end: 7.38071522
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.3757472,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.3757472,
+    coreId: 0,
+    status: 1,
+    end: 7.37576466
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.37575191,
+    coreId: 0,
+    status: 0,
+    end: 7.38576364
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.37575898,
+    coreId: 0,
+    status: 5,
+    end: 7.38577066
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37576466,
+    coreId: 0,
+    status: 1,
+    end: 7.37670295
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37670295,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37670295,
+    coreId: 0,
+    status: 0,
+    end: 7.37671093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37671093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37671093,
+    coreId: 0,
+    status: 1,
+    end: 7.37770297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37770297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37770297,
+    coreId: 0,
+    status: 0,
+    end: 7.37771093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37771093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37771093,
+    coreId: 0,
+    status: 1,
+    end: 7.37870296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37870296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37870296,
+    coreId: 0,
+    status: 0,
+    end: 7.37871092
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37871092,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37871092,
+    coreId: 0,
+    status: 1,
+    end: 7.37970295
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37970295,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.37970295,
+    coreId: 0,
+    status: 0,
+    end: 7.37971091
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.37971091,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.37971091,
+    coreId: 0,
+    status: 1,
+    end: 7.38070291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38070291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38070291,
+    coreId: 0,
+    status: 0,
+    end: 7.38072307
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.38070998,
+    coreId: 0,
+    status: 0,
+    end: 7.38571
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.38071522,
+    coreId: 0,
+    status: 0,
+    end: 7.38571531
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38072307,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38072307,
+    coreId: 0,
+    status: 1,
+    end: 7.38170294
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38170294,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38170294,
+    coreId: 0,
+    status: 0,
+    end: 7.3817109
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.3817109,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.3817109,
+    coreId: 0,
+    status: 1,
+    end: 7.38270293
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38270293,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38270293,
+    coreId: 0,
+    status: 0,
+    end: 7.38271089
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38271089,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38271089,
+    coreId: 0,
+    status: 1,
+    end: 7.38370294
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38370294,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38370294,
+    coreId: 0,
+    status: 0,
+    end: 7.3837109
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.3837109,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.3837109,
+    coreId: 0,
+    status: 1,
+    end: 7.38470297
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38470297,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38470297,
+    coreId: 0,
+    status: 0,
+    end: 7.38471093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38471093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38471093,
+    coreId: 0,
+    status: 1,
+    end: 7.38570293
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38570293,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38570293,
+    coreId: 0,
+    status: 0,
+    end: 7.38575889
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.38571,
+    coreId: 0,
+    status: 0,
+    end: 7.38572227
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.38571531,
+    coreId: 0,
+    status: 0,
+    end: 7.38572753
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.38572227,
+    coreId: 0,
+    status: 0,
+    end: 7.38573408
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.38572753,
+    coreId: 0,
+    status: 0,
+    end: 7.38573942
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.38573408,
+    coreId: 0,
+    status: 0,
+    end: 7.39071003
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.38573942,
+    coreId: 0,
+    status: 0,
+    end: 7.39071527
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38575889,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38575889,
+    coreId: 0,
+    status: 1,
+    end: 7.38579986
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.38576364,
+    coreId: 0,
+    status: 0,
+    end: 7.38578725
+  },
+  {
+    type: 0,
+    id: 1,
+    start: 7.38577066,
+    coreId: 0,
+    status: 5
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.38577066,
+    coreId: 0,
+    status: 0,
+    end: 7.38578279
+  },
+  {
+    type: 0,
+    id: 4,
+    start: 7.38578279,
+    coreId: 0,
+    status: 1,
+    end: 7.38579418
+  },
+  {
+    type: 5,
+    id: 114,
+    start: 7.38578725,
     coreId: 0,
     status: 0
   },
   {
     type: 0,
-    name: 'Task_3',
-    start: 9.95218,
+    id: 4,
+    start: 7.38579418,
+    coreId: 0,
+    status: 5
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38579986,
     coreId: 0,
     status: 1,
-    end: undefined
+    end: 7.38670292
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38670292,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38670292,
+    coreId: 0,
+    status: 0,
+    end: 7.38671093
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38671093,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38671093,
+    coreId: 0,
+    status: 1,
+    end: 7.38770295
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38770295,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38770295,
+    coreId: 0,
+    status: 0,
+    end: 7.38771091
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38771091,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38771091,
+    coreId: 0,
+    status: 1,
+    end: 7.38870291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38870291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38870291,
+    coreId: 0,
+    status: 0,
+    end: 7.38871087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38871087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38871087,
+    coreId: 0,
+    status: 1,
+    end: 7.38970291
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38970291,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.38970291,
+    coreId: 0,
+    status: 0,
+    end: 7.38971087
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.38971087,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.38971087,
+    coreId: 0,
+    status: 1,
+    end: 7.39070296
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.39070296,
+    coreId: 0,
+    status: 'Task_0:ISR_0'
+  },
+  {
+    type: 1,
+    id: 0,
+    start: 7.39070296,
+    coreId: 0,
+    status: 0,
+    end: 7.39072287
+  },
+  {
+    type: 5,
+    id: 112,
+    start: 7.39071003,
+    coreId: 0,
+    status: 0
+  },
+  {
+    type: 5,
+    id: 113,
+    start: 7.39071527,
+    coreId: 0,
+    status: 0
+  },
+  {
+    type: -1,
+    id: 0,
+    start: 7.39072287,
+    coreId: 0,
+    status: 'ISR_0:Task_0'
+  },
+  {
+    type: 0,
+    id: 0,
+    start: 7.39072287,
+    coreId: 0,
+    status: 1
   }
 ]
 function updateTimeLine() {
@@ -887,8 +2190,8 @@ function initChart() {
     graphic: [initTimeLine],
     xAxis: {
       type: 'value',
-      min: 0,
-      max: 10,
+      min: 7,
+      max: 8,
       name: '[s]',
       nameLocation: 'end',
       nameGap: 0,
@@ -953,19 +2256,26 @@ function initChart() {
               blockData.end ||
               (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
             // 查找对应的 core 名称
-            const core = coreConfigs.value.find((c) => c.id === blockData.coreId)
-            const coreName = core ? core.name : `Core-${blockData.coreId}`
-            if (blockData.type == TaskType.LINE) {
-              return `
-               <strong>${blockData.name.split(':').join('->')}</strong><br/>
-               Core: ${coreName}<br/>
-               Time: ${blockData.start * 1000000}us<br/>
-               
-             `
+            const coreName = `Core-${blockData.coreId}`
+            let task
+            for (const core of coreConfigs.value) {
+              if (core.id === blockData.coreId) {
+                task = core.buttons.find((b) => b.id === blockData.id && b.type === blockData.type)
+              }
             }
+
+            // if (blockData.type == TaskType.LINE) {
+            //   return `
+            //    <strong>${blockData.name.split(':').join('->')}</strong><br/>
+            //    Core: ${coreName}<br/>
+            //    Time: ${blockData.start * 1000000}us<br/>
+
+            //  `
+            // }
+
             return `
-               <strong>${blockData.name}</strong><br/>
-               ${parseInfo(blockData.type, blockData.status, '<br/>')}
+               <strong>${task?.name}</strong><br/>
+               ${parseInfo(blockData.type, blockData.status as number, '<br/>')}
                Core: ${coreName}<br/>
                Start: ${blockData.start * 1000000}us<br/>
                Duration: ${(end - blockData.start) * 1000000}us<br/>
@@ -985,7 +2295,7 @@ function initChart() {
           const end =
             api.value(1) ||
             (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
-          const name = api.value(2)
+          const id = api.value(2)
           const coreId = api.value(3)
           const type = api.value(4)
           const status = api.value(5)
@@ -1006,54 +2316,55 @@ function initChart() {
               continue
             }
 
-            const buttonIndex = core.buttons.findIndex((b) => b.name === name)
+            const buttonIndex = core.buttons.findIndex((b) => b.id === id && b.type === type)
             if (buttonIndex != -1) {
               const button = core.buttons[buttonIndex]
+
               color = button.color
               yPos += buttonIndex
               break
             } else {
-              if (type == TaskType.LINE) {
-                const names = name.split(':')
-                const from = names[0]
-                const to = names[1]
-                const fromBlock = core.buttons.findIndex((b) => b.name === from)
-                const toBlock = core.buttons.findIndex((b) => b.name === to)
+              // if (type == TaskType.LINE) {
+              //   const names = name.split(':')
+              //   const from = names[0]
+              //   const to = names[1]
+              //   const fromBlock = core.buttons.findIndex((b) => b.name === from)
+              //   const toBlock = core.buttons.findIndex((b) => b.name === to)
 
-                if (fromBlock != -1 && toBlock != -1) {
-                  color = 'black'
-                  let toOffset = 0
-                  let fromOffset = 0
-                  if (fromBlock > toBlock) {
-                    fromOffset += 1
-                  } else {
-                    toOffset += 1
-                  }
-                  const startPoint = api.coord([
-                    start,
-                    totalButtons.value - yPos - fromBlock - fromOffset
-                  ])
-                  const endPoint = api.coord([
-                    start,
-                    totalButtons.value - yPos - toBlock - toOffset
-                  ])
+              //   if (fromBlock != -1 && toBlock != -1) {
+              //     color = 'black'
+              //     let toOffset = 0
+              //     let fromOffset = 0
+              //     if (fromBlock > toBlock) {
+              //       fromOffset += 1
+              //     } else {
+              //       toOffset += 1
+              //     }
+              //     const startPoint = api.coord([
+              //       start,
+              //       totalButtons.value - yPos - fromBlock - fromOffset
+              //     ])
+              //     const endPoint = api.coord([
+              //       start,
+              //       totalButtons.value - yPos - toBlock - toOffset
+              //     ])
 
-                  //返回一个垂直的先from - to 的线
-                  return {
-                    type: 'line',
-                    shape: {
-                      x1: startPoint[0],
-                      y1: startPoint[1],
-                      x2: endPoint[0],
-                      y2: endPoint[1]
-                    },
-                    style: {
-                      stroke: color,
-                      lineWidth: 1
-                    }
-                  }
-                }
-              }
+              //     //返回一个垂直的先from - to 的线
+              //     return {
+              //       type: 'line',
+              //       shape: {
+              //         x1: startPoint[0],
+              //         y1: startPoint[1],
+              //         x2: endPoint[0],
+              //         y2: endPoint[1]
+              //       },
+              //       style: {
+              //         stroke: color,
+              //         lineWidth: 1
+              //       }
+              //     }
+              //   }
+              // }
               return null
             }
           }
@@ -1149,7 +2460,7 @@ function initChart() {
         data: visibleBlocks.map((block) => [
           block.start,
           block.end,
-          block.name,
+          block.id,
           block.coreId,
           block.type,
           block.status

@@ -1,15 +1,15 @@
-import { TaskType, OsEvent } from './osEvent'
+import { TaskType, OsEvent } from '../share/osEvent'
 
 interface VisibleBlock {
   type: TaskType
-  name: string
+  id: number
   start: number
   end?: number
   coreId: number
-  status: number
+  status: number | string
 }
 
-export default function os2block(events: OsEvent[]): VisibleBlock[] {
+export default function os2block(events: OsEvent[], coreFreq: number): VisibleBlock[] {
   const blocks: VisibleBlock[] = []
 
   // Track active blocks for each core and entity
@@ -76,29 +76,6 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         return 0 // LIN blocks don't have entity IDs
       default:
         return 0
-    }
-  }
-
-  // Helper function to get entity name
-  const getEntityName = (event: OsEvent): string => {
-    const entityId = getEntityId(event)
-    switch (event.type) {
-      case TaskType.TASK:
-        return `Task_${entityId}`
-      case TaskType.ISR:
-        return `ISR_${entityId}`
-      case TaskType.SPINLOCK:
-        return `Spinlock_${entityId}`
-      case TaskType.RESOURCE:
-        return `Resource_${entityId}`
-      case TaskType.HOOK:
-        return `Hook_${entityId}`
-      case TaskType.SERVICE:
-        return `Service_${entityId}`
-      case TaskType.LINE:
-        return `${event.event.from}:${event.event.to}`
-      default:
-        return `Unknown_${entityId}`
     }
   }
 
@@ -196,7 +173,7 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         // Create a new block to resume the resource/spinlock
         const resumeBlock: VisibleBlock = {
           type: item.type,
-          name: item.block.name,
+          id: item.block.id,
           start: timestamp,
           coreId: item.block.coreId,
           status: item.block.status
@@ -219,11 +196,11 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
   const createLinBlock = (from: string, to: string, coreId: number, timestamp: number): void => {
     const linBlock: VisibleBlock = {
       type: TaskType.LINE,
-      name: `${from}:${to}`,
+      id: 0,
       start: timestamp,
       end: undefined, // LIN blocks have undefined end time as per requirements
       coreId: coreId,
-      status: 0
+      status: `${from}:${to}`
     }
     blocks.push(linBlock)
   }
@@ -233,7 +210,7 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
     const entityId = getEntityId(event)
     const coreId = getCoreId(event)
     const key = createKey(coreId, event.type, entityId)
-    const timestamp = event.ts / 1000000 // Convert to seconds
+    const timestamp = event.ts / coreFreq // Convert to seconds
 
     // Handle ISR preemption logic
     if (event.type === TaskType.ISR) {
@@ -281,7 +258,7 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
         // Start ISR block
         const newBlock: VisibleBlock = {
           type: event.type,
-          name: getEntityName(event),
+          id: getEntityId(event),
           start: timestamp,
           coreId: coreId,
           status: getStatus(event)
@@ -337,7 +314,7 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
           if (interruptedBlock) {
             const resumeBlock: VisibleBlock = {
               type: interruptedContext.type,
-              name: interruptedBlock.block.name,
+              id: interruptedBlock.block.id,
               start: timestamp,
               coreId: coreId,
               status: interruptedBlock.block.status
@@ -406,7 +383,7 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
       // Start a new block
       const newBlock: VisibleBlock = {
         type: event.type,
-        name: getEntityName(event),
+        id: getEntityId(event),
         start: timestamp,
         coreId: coreId,
         status: getStatus(event)
@@ -475,9 +452,9 @@ export default function os2block(events: OsEvent[]): VisibleBlock[] {
       // For HOOK and SERVICE events, create instant blocks (very short duration)
       const instantBlock: VisibleBlock = {
         type: event.type,
-        name: getEntityName(event),
+        id: getEntityId(event),
         start: timestamp,
-        end: timestamp + 0.000001, // 1 microsecond duration for visibility
+        end: undefined, // 1 microsecond duration for visibility
         coreId: coreId,
         status: getStatus(event)
       }

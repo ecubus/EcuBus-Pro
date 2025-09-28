@@ -765,7 +765,7 @@
               "name": "OsTask_20ms",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(237,1,204)",
+              "color": "#15cb42",
               "_X_ROW_KEY": "row_1706"
             },
             {
@@ -863,14 +863,6 @@
               "type": 1,
               "color": "rgb(158,41,58)",
               "_X_ROW_KEY": "row_1718"
-            },
-            {
-              "id": 65535,
-              "name": "NoRunningIsr2",
-              "coreId": 0,
-              "type": 1,
-              "color": "rgb(208,31,218)",
-              "_X_ROW_KEY": "row_1719"
             }
           ],
           "connector": {
@@ -917,10 +909,10 @@
       },
       "1f5475f3-e6be-448b-88be-4ca0100d8903": {
         "pos": {
-          "x": 492.5,
-          "y": 1,
-          "w": 700,
-          "h": 400
+          "x": 260.5,
+          "y": 55.5,
+          "w": 830,
+          "h": 402
         },
         "title": "orti",
         "label": "ORTI",
@@ -928,6 +920,23 @@
         "options": {
           "params": {
             "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903"
+          },
+          "name": "Os_Trace"
+        }
+      },
+      "1f5475f3-e6be-448b-88be-4ca0100d8903_trace": {
+        "pos": {
+          "x": 1215.5,
+          "y": 28.5,
+          "w": 700,
+          "h": 400
+        },
+        "title": "osTrace",
+        "label": "OSTrace",
+        "id": "1f5475f3-e6be-448b-88be-4ca0100d8903_trace",
+        "options": {
+          "params": {
+            "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903_trace"
           },
           "name": "Os_Trace"
         }

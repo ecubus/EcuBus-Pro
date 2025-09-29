@@ -10,7 +10,7 @@ Toomoss & Vector
 
 ## Graphic
 
-![alt](lin_aa.gif)
+![alt](lin_aa_demo.gif)
 
 ## Features
 

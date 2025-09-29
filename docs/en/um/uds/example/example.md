@@ -4,15 +4,14 @@
 
 This guide demonstrates how to implement a complete UDS (Unified Diagnostic Services) bootloader using EcuBus-Pro with the S32K144 microcontroller. The example covers the entire firmware update process, from initial configuration to script implementation.
 
-
-
 ## Project Configuration
+
 ### Hardware and Communication Setup
+
 + Configure the Hardware>Device interface as follows, select Leaf V3. Other CAN card configurations are similar, just ensure the baud rate is at 500K.
   
 > [!NOTE]
 > All Supported CAN Devices: [CAN Devices](./../../can/can.md)
-
 
 ![Hardware Device Configuration](images/01-hardware-device-config.png)
 
@@ -22,12 +21,12 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 + Set the addressing mode. The S32K144 official CAN UDS Bootloader example uses Normal fixed addressing, configured as follows.
 
-
-
 ![Addressing Mode Configuration](images/03-addressing-mode-config.png)
 
 ### Diagnostic Services Configuration
+
 #### DiagnosticSessionControl (Diagnostic Session Control) ($10) Service
+
 + Configuration for entering extended session:
 
 ![Extended Session Configuration](images/04-extended-session-config.png)
@@ -37,11 +36,13 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 ![Programming Session Configuration](images/05-programming-session-config.png)
 
 #### ECUReset (ECU Reset) ($11) Service
+
 + Hardware reset configuration is as follows, using hardware reset here.
 
 ![Hardware Reset Configuration](images/06-hardware-reset-config.png)
 
 #### SecurityAccess (Security Access) ($27) Service
+
 + Seed request configuration is as follows. You need to enter the Response interface and change the securitySeed length to 128bit, otherwise you cannot receive the complete seed data replied by the MCU.
 
 ![Security Seed Request Configuration](images/07-security-seed-request-config.png)
@@ -51,17 +52,20 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 ![Security Key Response Configuration](images/08-security-key-response-config.png)
 
 #### CommunicationControl (Communication Control) ($28) Service
+
 + Disable network management messages and normal message transceivers, configured as follows.
 
 ![Communication Control Configuration](images/09-communication-control-config.png)
 
 #### WriteDataByIdentifier (Write Data By Identifier) ($2E) Service
-+ Write to specified DID. The S32K144 official CAN UDS Bootloader example uses 0xF15A, configured as follows.
+
++ Write to specified DID. The S32K144 official CAN UDS Bootloader example uses 0xF15A, configured as follows:
 
 ![Write Data By Identifier Configuration](images/10-write-data-by-identifier-config.png)
 
 #### RoutineControl (Routine Control) ($31) Service
-+ Routine with routineID 0x0202 is used to notify the MCU to perform CRC verification, configured as follows.
+
++ Routine with routineID 0x0202 is used to notify the MCU to perform CRC verification, configured as follows:
 
 ![Routine Control Configuration](images/11-routine-control-crc-config.png)
 
@@ -69,26 +73,30 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 ![Flash Erase Configuration](images/12-routine-control-flash-erase-config.png)
 
-+ Routine with routineID 0xFF01 is used to notify the MCU to perform firmware verification, configured as follows.
++ Routine with routineID 0xFF01 is used to notify the MCU to perform firmware verification, configured as follows:
 
 ![Firmware Verification Configuration](images/13-routine-control-firmware-check-config.png)
 
 #### RequestDownload (Request Download) ($34) Service
+
 + Request download configuration is as follows. The storage address and storage space will be assigned in the script during actual use.
 
 ![Request Download Configuration](images/14-request-download-config.png)
 
 #### TransferData (Transfer Data) ($36) Service
+
 + Transfer data configuration is as follows. During actual use, it will be repeatedly called and assigned values in the script.
 
 ![Transfer Data Configuration](images/15-transfer-data-config.png)
 
 #### RequestTransferExit (Request Transfer Exit) ($37) Service
+
 + Stop transfer configuration is as follows.
 
 ![Request Transfer Exit Configuration](images/16-request-transfer-exit-config.png)
 
 #### JobFunction
+
 > What is a Job? A Job is an abstract service in EcuBus-Pro. When using a Job, there must be a corresponding script. Through the script, the Job's return is implemented. The Job's return requirement is an array, which can be 0-N normal UDS services or Jobs. Jobs are typically used for firmware download, upload, and other scenarios that require multiple unknown quantities of 0x36 services, but can also be used for any other situations you want.
 
 Add empty JobFunction0 and JobFunction1 to facilitate combining download-related services through scripts.
@@ -96,7 +104,8 @@ Add empty JobFunction0 and JobFunction1 to facilitate combining download-related
 ![JobFunction Configuration](images/17-job-function-config.png)
 
 ### Sequence Configuration
-The entire UDS upgrade process is configured as shown in the following diagram:
+
+The entire UDS upgrade process is configured as shown in the following diagram (for reference only)：
 
 ![Sequence Configuration](images/18-sequence-config.png)
 
@@ -126,7 +135,9 @@ It is mainly divided into three phases:
 1. Perform hardware reset through $11 service
 
 ## Implementation
+
 ### Development Environment Setup
+
 + Create a new ts file in the project directory;
 
 ![Create New TS File](images/19-create-ts-file.png)
@@ -140,7 +151,9 @@ It is mainly divided into three phases:
 ![Load Script File in UDS Tester](images/21-load-script-vscode.png)
 
 ### Script Development
+
 #### Import Necessary Modules
+
 ```typescript
 // Import necessary modules
 import crypto from 'crypto'
@@ -150,6 +163,7 @@ import fs from 'fs/promises'
 ```
 
 #### Prepare Required CRC Algorithm and Related Variables
+
 ```typescript
 // Create CRC instance, configure parameters: type 'self', 16 bits, polynomial 0x3d65, initial value 0, XOR value 0xffff, input/output reflection
 const crc = new CRC('self', 16, 0x3d65, 0, 0xffff, true, true)
@@ -160,6 +174,7 @@ let content: undefined | Buffer = undefined
 ```
 
 #### Firmware File Configuration
+
 ```typescript
 // Define file list, containing start address and file path for each file
 const fileList: {
@@ -182,6 +197,7 @@ const fileList: {
 ```
 
 #### Security Access Implementation
+
 ```typescript
 /**
  * Listen to security access response event, encrypt received security seed and send response request
@@ -210,6 +226,7 @@ Util.On('S32K144_CAN_UDS_Bootloader.SecurityAccess390.recv', async (v) => {
 ```
 
 #### JobFunction0 Implementation - Download Request and CRC Verification
+
 ```typescript
 /**
  * Register job function 0, handle file download requests and CRC verification requests
@@ -260,6 +277,7 @@ Util.Register('S32K144_CAN_UDS_Bootloader.JobFunction0', async () => {
 ```
 
 #### JobFunction1 Implementation - Data Transfer and Completion
+
 ```typescript
 /**
  * Register job function 1, handle file chunk transfer requests and transfer exit requests
@@ -329,7 +347,3 @@ Util.Register('S32K144_CAN_UDS_Bootloader.JobFunction1', () => {
 ---
 
 *This example serves as a foundation for implementing UDS bootloaders in automotive applications. Customize the configuration and scripts according to your specific project requirements.*
-
-
-
-

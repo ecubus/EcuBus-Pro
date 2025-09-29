@@ -256,6 +256,7 @@ export interface ORTIFile {
     device: string
     options: Record<string, string>
   }
+  cpuFreq: number
   coreConfigs: {
     coreId: number
 

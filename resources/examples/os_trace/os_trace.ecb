@@ -878,7 +878,8 @@
               "ipAddress": "",
               "port": ""
             }
-          }
+          },
+          "cpuFreq": 100
         }
       }
     },

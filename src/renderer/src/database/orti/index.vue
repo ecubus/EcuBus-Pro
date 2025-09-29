@@ -66,6 +66,17 @@
                   size="small"
                 />
                 <el-divider direction="vertical" />
+                <!-- cpuFreq -->
+                <span style="padding-left: 5px; padding-right: 5px">CPU Frequency(MHz):</span>
+                <el-input-number
+                  v-model="dbcObj.cpuFreq"
+                  placeholder="Enter CPU Frequency"
+                  style="width: 200px"
+                  size="small"
+                  :step="1"
+                />
+
+                <el-divider direction="vertical" />
                 <!-- add row -->
                 <el-button type="primary" link @click="addRow">
                   <Icon :icon="addIcon" /><span>Add</span>
@@ -558,6 +569,16 @@ function saveDataBase() {
       offset: 50,
       type: 'error',
       message: 'Database name cannot be empty',
+      appendTo: `#win${props.editIndex}`
+    })
+    return
+  }
+  //cpu freq can't be 0
+  if (dbcObj.value.cpuFreq <= 0) {
+    ElNotification({
+      offset: 50,
+      type: 'error',
+      message: 'CPU Frequency cannot be 0',
       appendTo: `#win${props.editIndex}`
     })
     return

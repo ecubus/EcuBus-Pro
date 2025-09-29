@@ -7,10 +7,10 @@ import { parseORTI } from '../../src/renderer/src/database/ortiParse'
 describe('parse', () => {
   it('should parse Excel file', async () => {
     // const eventList = await parseExcelFromFile(path.resolve(__dirname, './TC39X_SysTrace.xlsx'))
-    const eventList = await parseExcelFromFile(path.resolve(__dirname, './demo1.xlsx'))
+    const eventList = await parseExcelFromFile(path.resolve(__dirname, './TC39X_SysTrace.xlsx'))
     expect(eventList).toBeDefined()
     // console.log(eventList)
-    const blocks = os2block(eventList, 100_000_000)
+    const { blocks } = os2block(eventList, 100)
     expect(blocks).toBeDefined()
     console.log(blocks[0])
     fs.writeFileSync(path.resolve(__dirname, './blocks.json'), JSON.stringify(blocks, null, 2))

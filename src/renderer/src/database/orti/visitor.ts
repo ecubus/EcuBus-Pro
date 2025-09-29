@@ -54,6 +54,7 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
     const result: ORTIFile = {
       id: '',
       name: '',
+      cpuFreq: 100,
       version: { koil: '', osSemantics: { type: '', version: '' } },
       implementation: {} as ORTIImplementation,
       osInstance: {} as ORTIosInstance,

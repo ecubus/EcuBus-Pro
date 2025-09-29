@@ -117,7 +117,7 @@ import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 
 import saveIcon from '@iconify/icons-material-symbols/save'
-
+import testdata from './blocks.json'
 import { useGlobalStart } from '@r/stores/runtime'
 import * as echarts from 'echarts'
 import { ECBasicOption } from 'echarts/types/dist/shared'
@@ -198,11 +198,20 @@ async function loadOfflineTrace() {
     })
     const file = r.filePaths[0]
     if (file) {
-      visibleBlocks = await window.electron.ipcRenderer.invoke('ipc-ostrace-parse-excel', file)
-      visibleBlocks = visibleBlocks.slice(0, 200)
+      const res = await window.electron.ipcRenderer.invoke(
+        'ipc-ostrace-parse-excel',
+        file,
+        orti.value.cpuFreq
+      )
+      visibleBlocks = res.blocks.slice(0, 400)
+
       console.log('visibleBlocks', visibleBlocks)
 
       chart.setOption({
+        xAxis: {
+          min: 5,
+          max: 6
+        },
         series: [
           {
             data: visibleBlocks.map((block) => [
@@ -328,534 +337,7 @@ const coreStatus: Record<
     color: string
   }
 > = {}
-let visibleBlocks: VisibleBlock[] = [
-  {
-    start: 7.34641237,
-    end: 7.34642422,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 3
-  },
-  {
-    start: 7.34642422,
-    end: 7.34643662,
-    coreId: 0,
-    status: 0,
-    type: 0,
-    id: 10
-  },
-  {
-    start: 7.34643662,
-    end: 7.35072347,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 10
-  },
-  {
-    start: 7.34670309,
-    end: 7.34671157,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.34770293,
-    end: 7.34771094,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.34870287,
-    end: 7.34871083,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.34970287,
-    end: 7.34971083,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35070289,
-    end: 7.35073568,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35072347,
-    coreId: 0,
-    status: 4,
-    type: 0,
-    id: 10
-  },
-  {
-    start: 7.35073165,
-    end: 7.35573506,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.35170294,
-    end: 7.35171092,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35270297,
-    end: 7.35271093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35370291,
-    end: 7.35371087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35470295,
-    end: 7.35471091,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35570292,
-    end: 7.35574727,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35573506,
-    end: 7.3557647,
-    coreId: 0,
-    status: 4,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.35574324,
-    end: 7.355759,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.3557647,
-    end: 7.36574671,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.35670291,
-    end: 7.35671089,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35770296,
-    end: 7.35771092,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35870292,
-    end: 7.35871088,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.35970297,
-    end: 7.35971093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36070291,
-    end: 7.36072317,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36170297,
-    end: 7.36171093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36270296,
-    end: 7.36271092,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36370296,
-    end: 7.36371092,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36470291,
-    end: 7.36471087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36570296,
-    end: 7.36575892,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36574671,
-    end: 7.36580007,
-    coreId: 0,
-    status: 4,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.36575489,
-    end: 7.36577069,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 1
-  },
-  {
-    start: 7.36577069,
-    end: 7.36578283,
-    coreId: 0,
-    status: 0,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.36578283,
-    end: 7.36579438,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.36580007,
-    end: 7.37573499,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.36670294,
-    end: 7.36671095,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36770291,
-    end: 7.36771087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36870291,
-    end: 7.36871087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.36970291,
-    end: 7.36971087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37070297,
-    end: 7.37072298,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37170293,
-    end: 7.37171089,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37270295,
-    end: 7.37271091,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37370291,
-    end: 7.37371087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37470297,
-    end: 7.37471093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37570296,
-    end: 7.3757472,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37573499,
-    end: 7.37576466,
-    coreId: 0,
-    status: 4,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.37574317,
-    end: 7.37575898,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.37576466,
-    end: 7.38574668,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.37670295,
-    end: 7.37671093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37770297,
-    end: 7.37771093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37870296,
-    end: 7.37871092,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.37970295,
-    end: 7.37971091,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38070291,
-    end: 7.38072307,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38170294,
-    end: 7.3817109,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38270293,
-    end: 7.38271089,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38370294,
-    end: 7.3837109,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38470297,
-    end: 7.38471093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38570293,
-    end: 7.38575889,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38574668,
-    end: 7.38579986,
-    coreId: 0,
-    status: 4,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.38575486,
-    end: 7.38577066,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 1
-  },
-  {
-    start: 7.38577066,
-    end: 7.38578279,
-    coreId: 0,
-    status: 0,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.38578279,
-    end: 7.38579418,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 4
-  },
-  {
-    start: 7.38579986,
-    coreId: 0,
-    status: 1,
-    type: 0,
-    id: 0
-  },
-  {
-    start: 7.38670292,
-    end: 7.38671093,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38770295,
-    end: 7.38771091,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38870291,
-    end: 7.38871087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.38970291,
-    end: 7.38971087,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  },
-  {
-    start: 7.39070296,
-    end: 7.39072287,
-    coreId: 0,
-    status: 0,
-    type: 1,
-    id: 0
-  }
-]
+let visibleBlocks: VisibleBlock[] = testdata.slice(0, 200)
 function updateTimeLine() {
   if (!chart) return
 
@@ -912,16 +394,20 @@ function initChart() {
   }
   const option: ECBasicOption = {
     animation: false,
+    animationDuration: 0,
     dataZoom: [
       {
         show: true,
-        type: 'slider',
+        type: 'inside',
         height: 15,
         bottom: 10,
         showDetail: false,
         showDataShadow: false,
         realtime: true,
-        filterMode: 'none'
+        // filterMode:'none',
+        zoomOnMouseWheel: 'ctrl'
+        // minValueSpan:0.000001,//1us
+        // maxValueSpan:0.1,
       }
     ],
     grid: {
@@ -934,8 +420,8 @@ function initChart() {
     graphic: [initTimeLine],
     xAxis: {
       type: 'value',
-      min: 7.3,
-      max: 7.4,
+      min: 7,
+      max: 8.4,
       name: '[s]',
       nameLocation: 'end',
       nameGap: 0,
@@ -1162,6 +648,10 @@ function initChart() {
 
           const startPoint = api.coord([start, yPos])
           const endPoint = api.coord([end, yPos])
+          let width = endPoint[0] - startPoint[0]
+          if (width < 4) {
+            width = 4
+          }
 
           return {
             type: 'group',
@@ -1173,7 +663,7 @@ function initChart() {
                 shape: {
                   x: startPoint[0],
                   y: startPoint[1] - height,
-                  width: endPoint[0] - startPoint[0],
+                  width: width,
                   height: height
                 },
                 style: {
@@ -1195,7 +685,7 @@ function initChart() {
                   fontWeight: 'bold',
 
                   overflow: 'truncate', // 超出截断
-                  width: endPoint[0] - startPoint[0] - 4 // 文字允许的宽度（稍微减一点边距）
+                  width: width - 4 // 文字允许的宽度（稍微减一点边距）
                 }
               }
             ]

@@ -1,3 +1,4 @@
+import { number } from 'echarts'
 import { TaskType, OsEvent } from '../share/osEvent'
 
 interface VisibleBlock {
@@ -6,12 +7,22 @@ interface VisibleBlock {
   start: number
   end?: number
   coreId: number
-  status: number | string
+  status: number
+  endStatus?: number
 }
 
-export default function os2block(events: OsEvent[], coreFreq: number): VisibleBlock[] {
+export default function os2block(
+  events: OsEvent[],
+  coreFreq: number,
+  maxts?: number
+): { blocks: VisibleBlock[]; minTs: number; maxTs: number } {
   const blocks: VisibleBlock[] = []
+  let minTs = 0
+  let maxTs = 0
+  //coreFreq is in MHz
+  coreFreq = coreFreq * 1000000
 
+  maxts = maxts || 0xffffffff
   // Track active blocks for each core and entity
   const activeBlocks = new Map<
     string,
@@ -124,24 +135,41 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
   }
 
   // Helper function to create LIN block for context switching
-  const createLinBlock = (from: string, to: string, coreId: number, timestamp: number): void => {
-    const linBlock: VisibleBlock = {
-      type: TaskType.LINE,
-      id: 0,
-      start: timestamp,
-      end: undefined, // LIN blocks have undefined end time as per requirements
-      coreId: coreId,
-      status: `${from}:${to}`
-    }
-    blocks.push(linBlock)
-  }
+  // const createLinBlock = (from: string, to: string, coreId: number, timestamp: number): void => {
+  //   const linBlock: VisibleBlock = {
+  //     type: TaskType.LINE,
+  //     id: 0,
+  //     start: timestamp,
+  //     end: undefined, // LIN blocks have undefined end time as per requirements
+  //     coreId: coreId,
+  //     status: `${from}:${to}`
+  //   }
+  //   blocks.push(linBlock)
+  // }
+  let lastRawTs = 0
+  let overflowTime = 0
 
   // Process events in chronological order
   events.forEach((event, index) => {
     const entityId = getEntityId(event)
     const coreId = getCoreId(event)
     const key = createKey(coreId, event.type, entityId)
-    const timestamp = event.ts / coreFreq // Convert to seconds
+
+    // Check for overflow by comparing raw timestamps
+    if (event.ts < lastRawTs) {
+      overflowTime++
+    }
+    lastRawTs = event.ts
+
+    // Calculate adjusted timestamp with overflow compensation
+    const ts = event.ts + overflowTime * maxts
+    const timestamp = ts / coreFreq // Convert to seconds
+    if (timestamp < minTs) {
+      minTs = timestamp
+    }
+    if (timestamp > maxTs) {
+      maxTs = timestamp
+    }
 
     if (event.type === TaskType.ISR) {
       //start
@@ -161,6 +189,7 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
+          block.block.endStatus = event.event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }
@@ -183,6 +212,7 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
+          block.block.endStatus = event.event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }
@@ -200,6 +230,59 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
           })
         }
       }
+    } else if (event.type === TaskType.SPINLOCK) {
+      if (event.event.status === 0) {
+        activeBlocks.set(key, {
+          block: {
+            start: timestamp,
+            end: undefined,
+            coreId: coreId,
+            status: 0,
+            type: TaskType.SPINLOCK,
+            id: entityId
+          },
+          startIndex: index
+        })
+      } else {
+        const block = activeBlocks.get(key)
+        if (block) {
+          block.block.end = timestamp
+          block.block.endStatus = event.event.status
+          blocks.push(block.block)
+          activeBlocks.delete(key)
+        }
+      }
+    } else if (event.type === TaskType.RESOURCE) {
+      if (event.event.status === 0) {
+        activeBlocks.set(key, {
+          block: {
+            start: timestamp,
+            end: undefined,
+            coreId: coreId,
+            status: 0,
+            type: TaskType.RESOURCE,
+            id: entityId
+          },
+          startIndex: index
+        })
+      } else {
+        const block = activeBlocks.get(key)
+        if (block) {
+          block.block.end = timestamp
+          block.block.endStatus = event.event.status
+          blocks.push(block.block)
+          activeBlocks.delete(key)
+        }
+      }
+    } else {
+      blocks.push({
+        type: event.type,
+        id: entityId,
+        start: timestamp,
+        end: undefined,
+        coreId: coreId,
+        status: getStatus(event)
+      })
     }
   })
 
@@ -221,5 +304,9 @@ export default function os2block(events: OsEvent[], coreFreq: number): VisibleBl
     // Lower type values should come first when start times are equal
     return a.type - b.type
   })
-  return blocks
+  return {
+    blocks,
+    minTs,
+    maxTs
+  }
 }

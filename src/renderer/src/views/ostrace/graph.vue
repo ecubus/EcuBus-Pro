@@ -397,13 +397,15 @@ function initChart() {
     animationDuration: 0,
     dataZoom: [
       {
-        show: true,
+        disable: false,
+
         type: 'inside',
         height: 15,
         bottom: 10,
         showDetail: false,
         showDataShadow: false,
         realtime: true,
+        moveOnMouseWheel: 'alt',
         // filterMode:'none',
         zoomOnMouseWheel: 'ctrl'
         // minValueSpan:0.000001,//1us

@@ -88,6 +88,16 @@
                 </div>
               </div>
             </div>
+            <div class="controls-hint">
+              <div class="hint-item">
+                <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to
+                zoom
+              </div>
+              <div class="hint-item">
+                <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to
+                shift
+              </div>
+            </div>
           </div>
         </div>
         <div :id="`Shift-${charid}`" class="shift"></div>
@@ -102,7 +112,9 @@
             width: width - 10 + 'px'
           }"
         ></div>
-        <div :id="charid" class="right"></div>
+        <div class="right">
+          <canvas :id="charid" :width="width - leftWidth - 1" :height="height"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -119,12 +131,15 @@ import { useDataStore } from '@r/stores/data'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import testdata from './blocks.json'
 import { useGlobalStart } from '@r/stores/runtime'
-import * as echarts from 'echarts'
-import { ECBasicOption } from 'echarts/types/dist/shared'
-import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType } from 'nodeCan/osEvent'
+import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
+import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType, VisibleBlock } from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
 import { ElLoading } from 'element-plus'
-
+import DataHandlerWorker from './dataHandler.ts?worker'
+const dataHandlerWorker = new DataHandlerWorker()
+dataHandlerWorker.onmessage = (event) => {
+  console.log('dataHandlerWorker', event.data)
+}
 const isPaused = ref(false)
 const leftWidth = ref(200)
 const props = defineProps<{
@@ -142,7 +157,7 @@ const charid = computed(() => `${props.editIndex}_graph`)
 const width = computed(() => props.width)
 
 const time = ref(0)
-let chart: echarts.ECharts
+let pixiRenderer: PixiGraphRenderer | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 
 // 更新时间显示的函数
@@ -172,14 +187,9 @@ const updateTime = () => {
   maxX = Math.ceil(maxX) + 5
   minX = Math.floor(minX)
 
-  // Update x-axis range and separator lines
-  if (chart) {
-    chart.setOption({
-      xAxis: {
-        max: maxX,
-        min: minX
-      }
-    })
+  // Update viewport range
+  if (pixiRenderer) {
+    pixiRenderer.updateViewport(minX, maxX)
   }
 }
 const globalStart = useGlobalStart()
@@ -207,24 +217,10 @@ async function loadOfflineTrace() {
 
       console.log('visibleBlocks', visibleBlocks)
 
-      chart.setOption({
-        xAxis: {
-          min: 5,
-          max: 6
-        },
-        series: [
-          {
-            data: visibleBlocks.map((block) => [
-              block.start,
-              block.end,
-              block.id,
-              block.coreId,
-              block.type,
-              block.status
-            ])
-          }
-        ]
-      })
+      if (pixiRenderer) {
+        pixiRenderer.setBlocks(visibleBlocks)
+        pixiRenderer.updateViewport(5, 6)
+      }
     }
   } catch (error) {
     console.error(error)
@@ -244,13 +240,6 @@ watch(globalStart, (val) => {
     timer = null
   }
 })
-
-const darkColor = (color: string, level: number) => {
-  const rgb = color.match(/\d+/g)!.map(Number)
-  const factor = 1 - 0.2 * level
-  const [r, g, b] = rgb.map((v) => Math.max(0, Math.min(255, v * factor)))
-  return `rgb(${r}, ${g}, ${b})`
-}
 
 // Dynamic core configuration - can be extended infinitely
 const coreConfigs = computed(() => {
@@ -316,400 +305,39 @@ const separatorPositions = computed(() => {
   return positions
 })
 
-interface VisibleBlock {
-  type: TaskType
-  id: number
-  start: number
-  end?: number
-  coreId: number
-  status: number | string
-}
-
-const coreStatus: Record<
-  number,
-  {
-    activeDataIndex: number
-    lasttype: TaskType
-    status: number
-    cnt: number
-    cntTimer?: number
-    yPos: number
-    color: string
-  }
-> = {}
-let visibleBlocks: VisibleBlock[] = testdata.slice(0, 200)
+let visibleBlocks: VisibleBlock[] = testdata
 function updateTimeLine() {
-  if (!chart) return
+  if (!pixiRenderer) return
 
   const currentTimeX = time.value
-
-  const x = chart.convertToPixel('grid', [currentTimeX, 0])
-
-  // Update timeline position using incremental update
-  chart.setOption({
-    graphic: [
-      {
-        id: 'timeline',
-        $action: 'replace',
-        type: 'line',
-        shape: {
-          x1: x[0],
-          y1: 0,
-          x2: x[0],
-          y2: x[1]
-        },
-        style: {
-          stroke: 'blue',
-          lineWidth: 1
-        },
-        silent: true,
-        z: 100,
-        invisible: !globalStart.value
-      }
-    ]
-  })
+  pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
 }
 
 watch([() => globalStart.value, () => time.value], () => {
   updateTimeLine()
 })
 
-function initChart() {
-  const initTimeLine = {
-    id: 'timeline',
-    type: 'line',
-    shape: {
-      x1: 0,
-      y1: 0,
-      x2: 0,
-      y2: height.value - 45
-    },
-    style: {
-      stroke: 'blue',
-      lineWidth: 1
-    },
-    silent: true,
-    z: 100,
-    invisible: !globalStart.value
+async function initPixiGraph() {
+  const canvas = document.getElementById(charid.value) as HTMLCanvasElement
+  if (!canvas) return
+
+  const config: GraphConfig = {
+    width: width.value,
+    height: height.value,
+    leftWidth: leftWidth.value,
+    totalButtons: totalButtons.value,
+    buttonHeight: buttonHeight.value,
+    coreConfigs: coreConfigs.value
   }
-  const option: ECBasicOption = {
-    animation: false,
-    animationDuration: 0,
-    dataZoom: [
-      {
-        disable: false,
 
-        type: 'inside',
-        height: 15,
-        bottom: 10,
-        showDetail: false,
-        showDataShadow: false,
-        realtime: true,
-        moveOnMouseWheel: 'alt',
-        // filterMode:'none',
-        zoomOnMouseWheel: 'ctrl'
-        // minValueSpan:0.000001,//1us
-        // maxValueSpan:0.1,
-      }
-    ],
-    grid: {
-      left: '5px',
-      right: '20px',
-      top: '0',
-      bottom: '45px',
-      containLabel: false
-    },
-    graphic: [initTimeLine],
-    xAxis: {
-      type: 'value',
-      min: 7,
-      max: 8.4,
-      name: '[s]',
-      nameLocation: 'end',
-      nameGap: 0,
-      nameTextStyle: {
-        fontSize: 12,
-        padding: [0, 0, 0, 5] // 调整 [s] 的位置，上右下左
-      },
-
-      axisLabel: {
-        show: true
-        // interval:1,
-        // formatter: (value: number) => Number.isInteger(value) ? value.toFixed(0) : ''
-      },
-      axisTick: {
-        show: true,
-        interval: 10
-      },
-      splitLine: {
-        show: false
-      },
-      axisLine: {
-        show: false,
-        onZero: false,
-        lineStyle: {
-          color: '#333'
-        }
-      },
-      triggerEvent: false,
-      position: 'bottom'
-    },
-    yAxis: {
-      min: 0,
-      max: totalButtons.value,
-      interval: 1,
-      triggerEvent: true,
-      splitLine: {
-        show: false
-      },
-      axisLine: {
-        show: false
-      },
-      axisTick: {
-        show: false,
-        length: 5
-      },
-
-      axisLabel: {
-        show: false
-      }
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: function (params) {
-        if (
-          params.componentType === 'series' &&
-          params.seriesType === 'custom' &&
-          params.seriesName === '运算块'
-        ) {
-          const blockData = visibleBlocks[params.dataIndex]
-          if (blockData) {
-            const end =
-              blockData.end ||
-              (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
-            // 查找对应的 core 名称
-            const coreName = `Core-${blockData.coreId}`
-            let task
-            for (const core of coreConfigs.value) {
-              if (core.id === blockData.coreId) {
-                task = core.buttons.find((b) => b.id === blockData.id && b.type === blockData.type)
-              }
-            }
-
-            // if (blockData.type == TaskType.LINE) {
-            //   return `
-            //    <strong>${blockData.name.split(':').join('->')}</strong><br/>
-            //    Core: ${coreName}<br/>
-            //    Time: ${blockData.start * 1000000}us<br/>
-
-            //  `
-            // }
-
-            return `
-               <strong>${task?.name}</strong><br/>
-               ${parseInfo(blockData.type, blockData.status as number, '<br/>')}
-               Core: ${coreName}<br/>
-               Start: ${blockData.start * 1000000}us<br/>
-               Duration: ${(end - blockData.start) * 1000000}us<br/>
-               End: ${end * 1000000}us
-             `
-          }
-        }
-        return ''
-      }
-    },
-    series: [
-      {
-        name: '运算块',
-        type: 'custom',
-        renderItem: function (params, api) {
-          const start = api.value(0)
-          const end =
-            api.value(1) ||
-            (globalStart.value ? time.value : (chart.getOption().xAxis as any)[0].max)
-          const id = api.value(2)
-          const coreId = api.value(3)
-          const type = api.value(4)
-          const status = api.value(5)
-
-          if (type == TaskType.SERVICE || type == TaskType.HOOK) {
-            return null
-          }
-
-          // 根据 coreId 和 name 查找对应的颜色和位置信息
-          let color = '#95a5a6' // 默认颜色
-          let yPos = 0
-
-          for (const core of coreConfigs.value) {
-            if (core.id != coreId) {
-              yPos += core.buttons.length
-              continue
-            }
-
-            const buttonIndex = core.buttons.findIndex((b) => b.id === id && b.type === type)
-            if (buttonIndex != -1) {
-              const button = core.buttons[buttonIndex]
-
-              color = button.color
-              yPos += buttonIndex
-              break
-            } else {
-              // if (type == TaskType.LINE) {
-              //   const names = name.split(':')
-              //   const from = names[0]
-              //   const to = names[1]
-              //   const fromBlock = core.buttons.findIndex((b) => b.name === from)
-              //   const toBlock = core.buttons.findIndex((b) => b.name === to)
-
-              //   if (fromBlock != -1 && toBlock != -1) {
-              //     color = 'black'
-              //     let toOffset = 0
-              //     let fromOffset = 0
-              //     if (fromBlock > toBlock) {
-              //       fromOffset += 1
-              //     } else {
-              //       toOffset += 1
-              //     }
-              //     const startPoint = api.coord([
-              //       start,
-              //       totalButtons.value - yPos - fromBlock - fromOffset
-              //     ])
-              //     const endPoint = api.coord([
-              //       start,
-              //       totalButtons.value - yPos - toBlock - toOffset
-              //     ])
-
-              //     //返回一个垂直的先from - to 的线
-              //     return {
-              //       type: 'line',
-              //       shape: {
-              //         x1: startPoint[0],
-              //         y1: startPoint[1],
-              //         x2: endPoint[0],
-              //         y2: endPoint[1]
-              //       },
-              //       style: {
-              //         stroke: color,
-              //         lineWidth: 1
-              //       }
-              //     }
-              //   }
-              // }
-              return null
-            }
-          }
-
-          let height = buttonHeight.value
-          yPos = totalButtons.value - yPos - 1
-          let text = ''
-          const diff = end - start
-          if (type == TaskType.TASK || type == TaskType.ISR) {
-            if (diff > 1) {
-              //s
-              text = `${diff.toFixed(1)}s`
-            } else if (diff > 0.001) {
-              //ms
-              text = `${(diff * 1000).toFixed(1)}ms`
-            } else {
-              text = `${(diff * 1000000).toFixed(1)}us`
-            }
-          }
-          if (type == TaskType.TASK || type == TaskType.ISR) {
-            coreStatus[coreId] = {
-              status: status,
-              lasttype: type,
-              activeDataIndex: params.dataIndex,
-              cnt: 0,
-              yPos: yPos,
-              color: color
-            }
-            if (type == TaskType.TASK && status != 1) {
-              height = height * 0.1
-              text = ''
-              yPos += 0.45
-            }
-          } else {
-            if (coreStatus[coreId] == undefined) {
-              return null
-            }
-
-            coreStatus[coreId].cnt++
-
-            if (coreStatus[coreId].cntTimer != undefined && start >= coreStatus[coreId].cntTimer) {
-              coreStatus[coreId].cnt--
-            }
-            //use api.value(1) ? or  end
-            coreStatus[coreId].cntTimer = api.value(1)
-
-            yPos = coreStatus[coreId].yPos + (coreStatus[coreId].cnt - 1) * 0.2
-            color = coreStatus[coreId].color
-            //add alpha
-            color = darkColor(color, coreStatus[coreId].cnt)
-            height = height * 0.2
-          }
-
-          const startPoint = api.coord([start, yPos])
-          const endPoint = api.coord([end, yPos])
-          let width = endPoint[0] - startPoint[0]
-          if (width < 4) {
-            width = 4
-          }
-
-          return {
-            type: 'group',
-
-            children: [
-              // 主块
-              {
-                type: 'rect',
-                shape: {
-                  x: startPoint[0],
-                  y: startPoint[1] - height,
-                  width: width,
-                  height: height
-                },
-                style: {
-                  fill: color
-                }
-              },
-
-              // 块内文本（持续时间）
-              {
-                type: 'text',
-                style: {
-                  text: text,
-                  x: (startPoint[0] + endPoint[0]) / 2,
-                  y: startPoint[1] - height / 2,
-                  textAlign: 'center',
-                  textVerticalAlign: 'middle',
-                  fontSize: 8,
-                  fill: '#000',
-                  fontWeight: 'bold',
-
-                  overflow: 'truncate', // 超出截断
-                  width: width - 4 // 文字允许的宽度（稍微减一点边距）
-                }
-              }
-            ]
-          }
-        },
-        data: visibleBlocks.map((block) => [
-          block.start,
-          block.end,
-          block.id,
-          block.coreId,
-          block.type,
-          block.status
-        ]),
-        z: 1
-      }
-    ]
+  try {
+    pixiRenderer = await PixiGraphRenderer.create(canvas, config)
+    pixiRenderer.setBlocks(visibleBlocks)
+    pixiRenderer.updateViewport(7, 8.4)
+  } catch (error) {
+    console.error('Failed to initialize Pixi renderer:', error)
   }
-  chart.setOption(option)
-  initEvent()
 }
-
-const linColor = 'black'
 
 // Example usage (commented out):
 // To add a new core: addCore(2, 'Core 2', [{ name: 'NewTask', color: '#e67e22' }])
@@ -741,123 +369,12 @@ watch(
     }
   }
 )
-const datazoomInfo = {
-  start: 0,
-  end: 100
-}
-function initEvent() {
-  chart.on('datazoom', (params: any) => {
-    datazoomInfo.start = params.start
-    datazoomInfo.end = params.end
-    updateTimeLine()
-  })
-
-  // Add mouse wheel event listener for datazoom and scale control
-  const chartDom = chart.getDom()
-  chartDom.addEventListener('wheel', handleWheelEvent, { passive: false })
-}
-
-// Mouse wheel event handler
-function handleWheelEvent(event: WheelEvent) {
-  event.preventDefault()
-
-  const delta = -event.deltaY / 1000 // Normalize wheel delta
-  const isCtrlPressed = event.ctrlKey
-
-  if (isCtrlPressed) {
-    // Ctrl + wheel: adjust datazoom window size (zoom in/out the visible range)
-    handleScaleAdjustment(delta, event)
-  } else {
-    // Normal wheel: adjust datazoom position (pan left/right)
-    handleDatazoomAdjustment(delta)
-  }
-}
-
-// Handle datazoom window size adjustment (Ctrl+wheel)
-function handleScaleAdjustment(delta: number, event: WheelEvent) {
-  // Get current datazoom range
-  const currentStart = datazoomInfo.start
-  const currentEnd = datazoomInfo.end
-  const currentRange = currentEnd - currentStart
-
-  // Calculate zoom factor (positive delta = zoom in/smaller window, negative = zoom out/larger window)
-  const zoomFactor = 1 - delta * 0.1
-  let newRange = currentRange * zoomFactor
-
-  // Ensure minimum and maximum range limits
-  newRange = Math.max(1, Math.min(100, newRange)) // Range between 1% and 100%
-
-  // Calculate center point of current datazoom window
-  const center = (currentStart + currentEnd) / 2
-
-  // Calculate new start and end positions centered around current center
-  let newStart = center - newRange / 2
-  let newEnd = center + newRange / 2
-
-  // Ensure boundaries (0-100%)
-  if (newStart < 0) {
-    newStart = 0
-    newEnd = newRange
-  } else if (newEnd > 100) {
-    newEnd = 100
-    newStart = 100 - newRange
-  }
-
-  // Update datazoom window
-  chart.dispatchAction({
-    type: 'dataZoom',
-    start: newStart,
-    end: newEnd
-  })
-}
-
-// Handle datazoom area adjustment (normal wheel scrolling)
-function handleDatazoomAdjustment(delta: number) {
-  const currentOption = chart.getOption() as any
-  const dataZoom = currentOption.dataZoom[0]
-
-  // Get current datazoom range
-  const currentStart = datazoomInfo.start
-  const currentEnd = datazoomInfo.end
-
-  // Calculate scroll amount (as percentage)
-  const scrollAmount = delta * 5 // 5% per scroll step
-
-  // Calculate new range
-  let newStart = currentStart - scrollAmount
-  let newEnd = currentEnd - scrollAmount
-
-  // Ensure boundaries
-  if (newStart < 0) {
-    const offset = -newStart
-    newStart = 0
-    newEnd += offset
-  }
-  if (newEnd > 100) {
-    const offset = newEnd - 100
-    newEnd = 100
-    newStart -= offset
-  }
-
-  // Ensure minimum range
-  if (newEnd - newStart < 1) {
-    return
-  }
-
-  // Update datazoom
-  chart.dispatchAction({
-    type: 'dataZoom',
-    start: Math.max(0, newStart),
-    end: Math.min(100, newEnd)
-  })
-}
+// Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
-  // 初始化数据
-  const dom = document.getElementById(charid.value)
-  if (dom) {
-    chart = echarts.init(dom)
-    initChart()
-  }
+  // Wait for DOM to be ready
+  nextTick(async () => {
+    await initPixiGraph()
+  })
 
   window.jQuery(`#Shift-${charid.value}`).resizable({
     handles: 'e',
@@ -874,26 +391,35 @@ onMounted(() => {
 })
 
 watch([() => height.value, () => width.value, () => leftWidth.value], () => {
-  // Update chart after resize
+  // Update pixi renderer after resize
   nextTick(() => {
-    chart.resize()
-    updateTimeLine()
+    if (pixiRenderer) {
+      pixiRenderer.updateConfig({
+        width: width.value,
+        height: height.value,
+        leftWidth: leftWidth.value,
+        totalButtons: totalButtons.value,
+        buttonHeight: buttonHeight.value,
+        coreConfigs: coreConfigs.value
+      })
+      updateTimeLine()
+    }
   })
 })
 
 onUnmounted(() => {
+  dataHandlerWorker.terminate()
   // 清除定时器
   if (timer) {
     clearInterval(timer)
     timer = null
   }
 
-  // Remove wheel event listener
-  if (chart && chart.getDom()) {
-    chart.getDom().removeEventListener('wheel', handleWheelEvent)
+  // Cleanup pixi renderer
+  if (pixiRenderer) {
+    pixiRenderer.destroy()
+    pixiRenderer = null
   }
-
-  chart.dispose()
 })
 </script>
 <style scoped>
@@ -1100,6 +626,43 @@ onUnmounted(() => {
   background-color: var(--el-color-info-dark-2);
   z-index: 1000;
   pointer-events: none;
+}
+
+.controls-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--el-text-color-regular);
+  background: var(--el-bg-color-overlay);
+  padding: 4px 8px;
+  border-radius: 4px;
+  /* border: 1px solid var(--el-border-color-light); */
+  margin-top: 4px;
+  max-height: 40px;
+  overflow: hidden;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hint-item kbd {
+  background: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color);
+  border-radius: 2px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-family: monospace;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  line-height: 1;
+}
+
+.mouse-icon {
+  font-size: 12px;
+  color: var(--el-text-color-regular);
 }
 </style>
 

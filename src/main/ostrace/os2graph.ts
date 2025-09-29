@@ -1,15 +1,4 @@
-import { number } from 'echarts'
-import { TaskType, OsEvent } from '../share/osEvent'
-
-interface VisibleBlock {
-  type: TaskType
-  id: number
-  start: number
-  end?: number
-  coreId: number
-  status: number
-  endStatus?: number
-}
+import { TaskType, OsEvent, VisibleBlock } from '../share/osEvent'
 
 export default function os2block(
   events: OsEvent[],

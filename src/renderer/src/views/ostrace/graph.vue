@@ -94,8 +94,8 @@
                 zoom
               </div>
               <div class="hint-item">
-                <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to
-                shift
+                <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" />/
+                <kbd>Drag</kbd> to shift
               </div>
             </div>
           </div>
@@ -124,7 +124,17 @@ import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
 
-import { ref, onMounted, computed, h, onUnmounted, watch, nextTick, watchEffect } from 'vue'
+import {
+  ref,
+  onMounted,
+  computed,
+  h,
+  onUnmounted,
+  watch,
+  nextTick,
+  watchEffect,
+  onBeforeUnmount
+} from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 
@@ -305,7 +315,7 @@ const separatorPositions = computed(() => {
   return positions
 })
 
-let visibleBlocks: VisibleBlock[] = testdata
+let visibleBlocks: VisibleBlock[] = testdata.slice(0, 100)
 function updateTimeLine() {
   if (!pixiRenderer) return
 
@@ -390,35 +400,45 @@ onMounted(() => {
   }
 })
 
-watch([() => height.value, () => width.value, () => leftWidth.value], () => {
-  // Update pixi renderer after resize
-  nextTick(() => {
-    if (pixiRenderer) {
-      pixiRenderer.updateConfig({
-        width: width.value,
-        height: height.value,
-        leftWidth: leftWidth.value,
-        totalButtons: totalButtons.value,
-        buttonHeight: buttonHeight.value,
-        coreConfigs: coreConfigs.value
-      })
-      updateTimeLine()
-    }
-  })
-})
+watch(
+  [
+    () => width.value,
+    () => leftWidth.value,
+    () => totalButtons.value,
+    () => buttonHeight.value,
+    () => coreConfigs.value
+  ],
+  () => {
+    // Update pixi renderer after resize
+    nextTick(() => {
+      if (pixiRenderer) {
+        pixiRenderer.updateConfig({
+          width: width.value,
+          height: height.value,
+          leftWidth: leftWidth.value,
+          totalButtons: totalButtons.value,
+          buttonHeight: buttonHeight.value,
+          coreConfigs: coreConfigs.value
+        })
+        updateTimeLine()
+      }
+    })
+  }
+)
 
+onBeforeUnmount(() => {
+  // Cleanup pixi renderer
+  if (pixiRenderer) {
+    pixiRenderer.destroy()
+    pixiRenderer = null
+  }
+})
 onUnmounted(() => {
   dataHandlerWorker.terminate()
   // 清除定时器
   if (timer) {
     clearInterval(timer)
     timer = null
-  }
-
-  // Cleanup pixi renderer
-  if (pixiRenderer) {
-    pixiRenderer.destroy()
-    pixiRenderer = null
   }
 })
 </script>

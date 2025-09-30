@@ -897,8 +897,8 @@
         "pos": {
           "x": 383,
           "y": 219,
-          "w": 1280,
-          "h": 200
+          "w": 2562,
+          "h": 121
         },
         "options": {
           "params": {}
@@ -906,7 +906,8 @@
         "title": "message",
         "label": "Message",
         "id": "message",
-        "layoutType": "bottom"
+        "layoutType": "bottom",
+        "hide": true
       },
       "1f5475f3-e6be-448b-88be-4ca0100d8903": {
         "pos": {
@@ -923,14 +924,15 @@
             "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903"
           },
           "name": "Os_Trace"
-        }
+        },
+        "hide": true
       },
       "1f5475f3-e6be-448b-88be-4ca0100d8903_trace": {
         "pos": {
-          "x": 1215.5,
-          "y": 28.5,
+          "x": 966,
+          "y": 67,
           "w": 700,
-          "h": 400
+          "h": 756
         },
         "title": "osTrace",
         "label": "OSTrace",

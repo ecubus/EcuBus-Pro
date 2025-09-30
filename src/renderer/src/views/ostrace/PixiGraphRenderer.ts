@@ -26,6 +26,7 @@ export class PixiGraphRenderer {
   private container!: PIXI.Container
   private blocksContainer!: PIXI.Container
   private timelineContainer!: PIXI.Container
+  private xAxisContainer!: PIXI.Container
   private tooltip!: HTMLDivElement
   private config: GraphConfig
   private viewport: ViewportState
@@ -81,9 +82,11 @@ export class PixiGraphRenderer {
     this.container = new PIXI.Container()
     this.blocksContainer = new PIXI.Container()
     this.timelineContainer = new PIXI.Container()
+    this.xAxisContainer = new PIXI.Container()
 
     this.container.addChild(this.blocksContainer)
     this.container.addChild(this.timelineContainer)
+    this.container.addChild(this.xAxisContainer)
     this.app.stage.addChild(this.container)
 
     // Create tooltip
@@ -94,6 +97,7 @@ export class PixiGraphRenderer {
 
     // Initial render
     this.updateViewport()
+    this.renderXAxis()
   }
 
   private createTooltip() {
@@ -135,7 +139,7 @@ export class PixiGraphRenderer {
   private handleWheel(event: WheelEvent) {
     event.preventDefault()
 
-    const delta = -event.deltaY / 1000
+    const delta = -event.deltaY / 2000
     const isCtrlPressed = event.ctrlKey
     const isAltPressed = event.altKey
 
@@ -149,34 +153,34 @@ export class PixiGraphRenderer {
   }
 
   private handleZoom(delta: number, mouseX: number) {
-    const zoomFactor = 1 + delta * 0.1
+    const zoomFactor = 1 + delta * 0.5
     const oldScaleX = this.viewport.scaleX
-    const newScaleX = Math.max(0.1, Math.min(10, oldScaleX * zoomFactor))
+    const newScaleX = Math.max(0.1, oldScaleX * zoomFactor)
 
     // Zoom around mouse position
     const mouseWorldX = this.screenToWorldX(mouseX)
     this.viewport.scaleX = newScaleX
     const newMouseWorldX = this.screenToWorldX(mouseX)
-    this.viewport.offsetX += (mouseWorldX - newMouseWorldX) * this.getPixelsPerSecond()
+    this.viewport.offsetX -= (mouseWorldX - newMouseWorldX) * this.getPixelsPerSecond()
 
     this.updateViewport()
+    this.renderXAxis()
   }
 
   private handlePan(deltaX: number) {
     this.viewport.offsetX += deltaX
     this.updateViewport()
+    this.renderXAxis()
   }
 
   private handleMouseDown(event: MouseEvent) {
-    if (event.altKey) {
-      this.isDragging = true
-      this.lastPointerPosition = { x: event.clientX, y: event.clientY }
-      this.app.canvas.style.cursor = 'grabbing'
-    }
+    this.isDragging = true
+    this.lastPointerPosition = { x: event.clientX, y: event.clientY }
+    this.app.canvas.style.cursor = 'grabbing'
   }
 
   private handleMouseMove(event: MouseEvent) {
-    if (this.isDragging && event.altKey) {
+    if (this.isDragging) {
       const deltaX = event.clientX - this.lastPointerPosition.x
       this.handlePan(deltaX)
       this.lastPointerPosition = { x: event.clientX, y: event.clientY }
@@ -226,6 +230,7 @@ export class PixiGraphRenderer {
   }
 
   private showTooltip(clientX: number, clientY: number, block: VisibleBlock) {
+    return
     const end = block.end || this.viewport.maxX
     const coreName = `Core-${block.coreId}`
 
@@ -261,7 +266,7 @@ export class PixiGraphRenderer {
   }
 
   private screenToWorldY(screenY: number): number {
-    return (this.config.height - screenY) / this.config.buttonHeight
+    return screenY / this.config.buttonHeight
   }
 
   private worldToScreenX(worldX: number): number {
@@ -269,7 +274,7 @@ export class PixiGraphRenderer {
   }
 
   private worldToScreenY(worldY: number): number {
-    return this.config.height - worldY * this.config.buttonHeight
+    return worldY * this.config.buttonHeight
   }
 
   private getPixelsPerSecond(): number {
@@ -292,7 +297,7 @@ export class PixiGraphRenderer {
       const buttonIndex = core.buttons.findIndex((b) => b.id === block.id && b.type === block.type)
       if (buttonIndex !== -1) {
         yPos += buttonIndex
-        return this.config.totalButtons - yPos - 1
+        return yPos
       }
     }
     return null
@@ -335,17 +340,19 @@ export class PixiGraphRenderer {
     Object.assign(this.config, config)
     this.app.renderer.resize(this.config.width - this.config.leftWidth - 1, this.config.height)
     this.renderBlocks()
+    this.renderXAxis()
   }
 
   public updateViewport(minX?: number, maxX?: number) {
     if (minX !== undefined) this.viewport.minX = minX
     if (maxX !== undefined) this.viewport.maxX = maxX
     this.renderBlocks()
+    this.renderXAxis()
   }
-
   public setBlocks(blocks: VisibleBlock[]) {
     this.visibleBlocks = blocks
     this.renderBlocks()
+    this.renderXAxis()
   }
 
   public updateTimeline(currentTime: number, visible: boolean = true) {
@@ -447,15 +454,15 @@ export class PixiGraphRenderer {
     const startX = this.worldToScreenX(start)
     const endX = this.worldToScreenX(end)
     let width = endX - startX
-    if (width < 4) {
-      width = 4
+    if (width < 1) {
+      width = 1
     }
 
     const screenY = this.worldToScreenY(finalYPos)
 
     // Create block graphic
     const blockGraphic = new PIXI.Graphics()
-    blockGraphic.rect(startX, screenY - height, width, height).fill(this.colorToHex(color))
+    blockGraphic.rect(startX, screenY, width, height).fill(this.colorToHex(color))
 
     // Add text if it fits
     if (text && width > 20) {
@@ -473,14 +480,131 @@ export class PixiGraphRenderer {
       textGraphic.x = startX + width / 2
       textGraphic.y = screenY - height / 2
 
-      // Only add text if it fits within the block
-      if (textGraphic.width <= width - 4) {
-        blockGraphic.addChild(textGraphic)
-      }
+      blockGraphic.addChild(textGraphic)
     }
 
     this.blocksContainer.addChild(blockGraphic)
     this.blockGraphics.push(blockGraphic)
+  }
+
+  private calculateTickInterval(): { interval: number; unit: string } {
+    const timeRange = this.viewport.maxX - this.viewport.minX
+    const pixelsPerSecond = this.getPixelsPerSecond()
+    const canvasWidth = this.config.width - this.config.leftWidth - 1
+
+    // Target approximately 5-10 ticks across the visible area
+    const targetTicks = 8
+    const rawInterval = timeRange / targetTicks
+
+    // Define nice intervals in different units
+    const intervals = [
+      { value: 0.000001, unit: 'μs', multiplier: 1000000 }, // 1 microsecond
+      { value: 0.000002, unit: 'μs', multiplier: 1000000 }, // 2 microseconds
+      { value: 0.000005, unit: 'μs', multiplier: 1000000 }, // 5 microseconds
+      { value: 0.00001, unit: 'μs', multiplier: 1000000 }, // 10 microseconds
+      { value: 0.00002, unit: 'μs', multiplier: 1000000 }, // 20 microseconds
+      { value: 0.00005, unit: 'μs', multiplier: 1000000 }, // 50 microseconds
+      { value: 0.0001, unit: 'μs', multiplier: 1000000 }, // 100 microseconds
+      { value: 0.0002, unit: 'μs', multiplier: 1000000 }, // 200 microseconds
+      { value: 0.0005, unit: 'μs', multiplier: 1000000 }, // 500 microseconds
+      { value: 0.001, unit: 'ms', multiplier: 1000 }, // 1 millisecond
+      { value: 0.002, unit: 'ms', multiplier: 1000 }, // 2 milliseconds
+      { value: 0.005, unit: 'ms', multiplier: 1000 }, // 5 milliseconds
+      { value: 0.01, unit: 'ms', multiplier: 1000 }, // 10 milliseconds
+      { value: 0.02, unit: 'ms', multiplier: 1000 }, // 20 milliseconds
+      { value: 0.05, unit: 'ms', multiplier: 1000 }, // 50 milliseconds
+      { value: 0.1, unit: 'ms', multiplier: 1000 }, // 100 milliseconds
+      { value: 0.2, unit: 'ms', multiplier: 1000 }, // 200 milliseconds
+      { value: 0.5, unit: 'ms', multiplier: 1000 }, // 500 milliseconds
+      { value: 1, unit: 's', multiplier: 1 }, // 1 second
+      { value: 2, unit: 's', multiplier: 1 }, // 2 seconds
+      { value: 5, unit: 's', multiplier: 1 }, // 5 seconds
+      { value: 10, unit: 's', multiplier: 1 }, // 10 seconds
+      { value: 30, unit: 's', multiplier: 1 }, // 30 seconds
+      { value: 60, unit: 's', multiplier: 1 } // 1 minute
+    ]
+
+    // Find the best interval
+    let bestInterval = intervals[0]
+    for (const interval of intervals) {
+      if (interval.value >= rawInterval) {
+        bestInterval = interval
+        break
+      }
+      bestInterval = interval
+    }
+
+    return { interval: bestInterval.value, unit: bestInterval.unit }
+  }
+
+  private renderXAxis() {
+    // Clear existing x-axis
+    this.xAxisContainer.removeChildren()
+
+    const { interval, unit } = this.calculateTickInterval()
+    const axisHeight = 30 // Height of the x-axis area
+    const tickHeight = 8
+    const axisY = this.config.height - axisHeight
+
+    // Draw main axis line
+    const axisLine = new PIXI.Graphics()
+    console.log(this.config.width - this.config.leftWidth - 1)
+    axisLine.moveTo(0, axisY).lineTo(this.config.width - this.config.leftWidth - 1, axisY)
+    axisLine.stroke({ color: 0x333333, width: 1 })
+    this.xAxisContainer.addChild(axisLine)
+
+    // Calculate tick positions
+    const startTime = Math.floor(this.viewport.minX / interval) * interval
+    const endTime = this.viewport.maxX
+
+    for (let time = startTime; time <= endTime; time += interval) {
+      if (time < this.viewport.minX) continue
+
+      const screenX = this.worldToScreenX(time)
+      if (screenX < 0 || screenX > this.config.width - this.config.leftWidth - 1) continue
+
+      // Draw tick mark
+      const tick = new PIXI.Graphics()
+      tick.moveTo(screenX, axisY).lineTo(screenX, axisY + tickHeight)
+      tick.stroke({ color: 0x333333, width: 1 })
+      this.xAxisContainer.addChild(tick)
+
+      // Draw label
+      const labelValue = this.formatTimeLabel(time, unit)
+      const label = new PIXI.Text({
+        text: labelValue,
+        style: {
+          fontSize: 10,
+          fill: 0x333333,
+          fontFamily: 'Arial',
+          align: 'center'
+        }
+      })
+
+      label.anchor.set(0.5, 0)
+      label.x = screenX
+      label.y = axisY + tickHeight + 2
+
+      this.xAxisContainer.addChild(label)
+    }
+  }
+
+  private formatTimeLabel(time: number, unit: string): string {
+    switch (unit) {
+      case 'μs':
+        return `${(time * 1000000).toFixed(0)}μs`
+      case 'ms':
+        return `${(time * 1000).toFixed(0)}ms`
+      case 's':
+        if (time >= 60) {
+          const minutes = Math.floor(time / 60)
+          const seconds = time % 60
+          return seconds === 0 ? `${minutes}m` : `${minutes}m${seconds.toFixed(0)}s`
+        }
+        return `${time.toFixed(0)}s`
+      default:
+        return time.toFixed(3)
+    }
   }
 
   public destroy() {

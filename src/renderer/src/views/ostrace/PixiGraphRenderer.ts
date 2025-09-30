@@ -163,13 +163,16 @@ export class PixiGraphRenderer {
     const newMouseWorldX = this.screenToWorldX(mouseX)
     this.viewport.offsetX -= (mouseWorldX - newMouseWorldX) * this.getPixelsPerSecond()
 
-    this.updateViewport()
+    // Only update container transform, don't re-render blocks
+    this.applyViewportTransform()
     this.renderXAxis()
   }
 
   private handlePan(deltaX: number) {
     this.viewport.offsetX += deltaX
-    this.updateViewport()
+
+    // Only update container transform, don't re-render blocks
+    this.applyViewportTransform()
     this.renderXAxis()
   }
 
@@ -261,6 +264,26 @@ export class PixiGraphRenderer {
     this.tooltip.style.display = 'none'
   }
 
+  // Base coordinate conversion (without viewport transform)
+  private getBasePixelsPerSecond(): number {
+    return (
+      (this.config.width - this.config.leftWidth - 1) / (this.viewport.maxX - this.viewport.minX)
+    )
+  }
+
+  private worldToBaseScreenX(worldX: number): number {
+    return (worldX - this.viewport.minX) * this.getBasePixelsPerSecond()
+  }
+
+  private worldToBaseScreenY(worldY: number): number {
+    return worldY * this.config.buttonHeight
+  }
+
+  // Full coordinate conversion (with viewport transform)
+  private getPixelsPerSecond(): number {
+    return this.getBasePixelsPerSecond() * this.viewport.scaleX
+  }
+
   private screenToWorldX(screenX: number): number {
     return (screenX - this.viewport.offsetX) / this.getPixelsPerSecond() + this.viewport.minX
   }
@@ -275,14 +298,6 @@ export class PixiGraphRenderer {
 
   private worldToScreenY(worldY: number): number {
     return worldY * this.config.buttonHeight
-  }
-
-  private getPixelsPerSecond(): number {
-    return (
-      ((this.config.width - this.config.leftWidth - 1) /
-        (this.viewport.maxX - this.viewport.minX)) *
-      this.viewport.scaleX
-    )
   }
 
   private getBlockYPosition(block: VisibleBlock): number | null {
@@ -344,10 +359,48 @@ export class PixiGraphRenderer {
   }
 
   public updateViewport(minX?: number, maxX?: number) {
+    const needsRerender = minX !== undefined || maxX !== undefined
     if (minX !== undefined) this.viewport.minX = minX
     if (maxX !== undefined) this.viewport.maxX = maxX
-    this.renderBlocks()
+
+    if (needsRerender) {
+      // Only re-render blocks when data range changes
+      this.renderBlocks()
+    } else {
+      // Just update transform for zoom/pan
+      this.applyViewportTransform()
+    }
     this.renderXAxis()
+  }
+
+  private applyViewportTransform() {
+    // Apply container transform using PIXI's built-in transformation
+    // This is much faster than re-rendering all blocks
+    this.blocksContainer.scale.x = this.viewport.scaleX
+    this.blocksContainer.position.x = this.viewport.offsetX
+
+    // Apply inverse scale to all text children and control visibility based on scaled width
+    this.blockGraphics.forEach((graphic) => {
+      graphic.children.forEach((child) => {
+        if (child instanceof PIXI.Text && child.label === 'duration-text') {
+          // Apply inverse scale to keep text size constant
+          child.scale.x = 1 / this.viewport.scaleX
+
+          // Calculate the actual displayed width after scaling
+          const baseWidth = (child as any).baseWidth || 0
+          const displayedWidth = baseWidth * this.viewport.scaleX
+
+          // Show text only if the displayed width is large enough
+          child.visible = displayedWidth > 20
+        }
+      })
+    })
+
+    // Update timeline position as well
+    if (this.timeline) {
+      this.timelineContainer.scale.x = this.viewport.scaleX
+      this.timelineContainer.position.x = this.viewport.offsetX
+    }
   }
   public setBlocks(blocks: VisibleBlock[]) {
     this.visibleBlocks = blocks
@@ -363,7 +416,8 @@ export class PixiGraphRenderer {
     if (!visible) return
 
     this.timeline = new PIXI.Graphics()
-    const x = this.worldToScreenX(currentTime)
+    // Use base coordinates, container transform will handle zoom/pan
+    const x = this.worldToBaseScreenX(currentTime)
 
     this.timeline.moveTo(x, 0).lineTo(x, this.config.height).stroke({ color: 0x0000ff, width: 1 })
 
@@ -384,6 +438,9 @@ export class PixiGraphRenderer {
       const block = this.visibleBlocks[i]
       this.renderBlock(block, i)
     }
+
+    // Apply current viewport transform after rendering
+    this.applyViewportTransform()
   }
 
   private renderBlock(block: VisibleBlock, dataIndex: number) {
@@ -451,21 +508,23 @@ export class PixiGraphRenderer {
       height = height * 0.2
     }
 
-    const startX = this.worldToScreenX(start)
-    const endX = this.worldToScreenX(end)
+    // Use base screen coordinates (without viewport transform)
+    // The container transform will handle zoom and pan
+    const startX = this.worldToBaseScreenX(start)
+    const endX = this.worldToBaseScreenX(end)
     let width = endX - startX
     if (width < 1) {
       width = 1
     }
 
-    const screenY = this.worldToScreenY(finalYPos)
+    const screenY = this.worldToBaseScreenY(finalYPos)
 
     // Create block graphic
     const blockGraphic = new PIXI.Graphics()
     blockGraphic.rect(startX, screenY, width, height).fill(this.colorToHex(color))
 
-    // Add text if it fits
-    if (text && width > 20) {
+    // Always add text if available (visibility will be controlled by viewport transform)
+    if (text) {
       const textGraphic = new PIXI.Text({
         text,
         style: {
@@ -478,7 +537,11 @@ export class PixiGraphRenderer {
 
       textGraphic.anchor.set(0.5)
       textGraphic.x = startX + width / 2
-      textGraphic.y = screenY - height / 2
+      textGraphic.y = screenY + height / 2
+
+      // Store the base width for later visibility calculation
+      textGraphic.label = 'duration-text'
+      ;(textGraphic as any).baseWidth = width
 
       blockGraphic.addChild(textGraphic)
     }
@@ -488,12 +551,14 @@ export class PixiGraphRenderer {
   }
 
   private calculateTickInterval(): { interval: number; unit: string } {
-    const timeRange = this.viewport.maxX - this.viewport.minX
-    const pixelsPerSecond = this.getPixelsPerSecond()
+    // Calculate the actual visible time range based on current zoom and pan
     const canvasWidth = this.config.width - this.config.leftWidth - 1
+    const visibleMinX = this.screenToWorldX(0)
+    const visibleMaxX = this.screenToWorldX(canvasWidth)
+    const timeRange = visibleMaxX - visibleMinX
 
-    // Target approximately 5-10 ticks across the visible area
-    const targetTicks = 8
+    // Always target exactly 10 ticks
+    const targetTicks = 10
     const rawInterval = timeRange / targetTicks
 
     // Define nice intervals in different units
@@ -542,23 +607,23 @@ export class PixiGraphRenderer {
     this.xAxisContainer.removeChildren()
 
     const { interval, unit } = this.calculateTickInterval()
-    const axisHeight = 30 // Height of the x-axis area
-    const tickHeight = 8
+    const axisHeight = 44 // Height of the x-axis area
+    const tickHeight = 6
     const axisY = this.config.height - axisHeight
 
     // Draw main axis line
-    const axisLine = new PIXI.Graphics()
-    console.log(this.config.width - this.config.leftWidth - 1)
-    axisLine.moveTo(0, axisY).lineTo(this.config.width - this.config.leftWidth - 1, axisY)
-    axisLine.stroke({ color: 0x333333, width: 1 })
-    this.xAxisContainer.addChild(axisLine)
+
+    // Calculate the actual visible time range based on current zoom and pan
+    const canvasWidth = this.config.width - this.config.leftWidth - 1
+    const visibleMinX = this.screenToWorldX(0)
+    const visibleMaxX = this.screenToWorldX(canvasWidth)
 
     // Calculate tick positions
-    const startTime = Math.floor(this.viewport.minX / interval) * interval
-    const endTime = this.viewport.maxX
+    const startTime = Math.floor(visibleMinX / interval) * interval
+    const endTime = visibleMaxX
 
     for (let time = startTime; time <= endTime; time += interval) {
-      if (time < this.viewport.minX) continue
+      if (time < visibleMinX) continue
 
       const screenX = this.worldToScreenX(time)
       if (screenX < 0 || screenX > this.config.width - this.config.leftWidth - 1) continue

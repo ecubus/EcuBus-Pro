@@ -109,7 +109,7 @@
           :style="{
             top: separator.y + 'px',
             left: 0,
-            width: width - 10 + 'px'
+            width: width + 4 + 'px'
           }"
         ></div>
         <div class="right">
@@ -315,7 +315,8 @@ const separatorPositions = computed(() => {
   return positions
 })
 
-let visibleBlocks: VisibleBlock[] = testdata.slice(0, 100)
+let visibleBlocks: VisibleBlock[] = testdata
+console.log('visibleBlocks', visibleBlocks.at(-1)?.end)
 function updateTimeLine() {
   if (!pixiRenderer) return
 

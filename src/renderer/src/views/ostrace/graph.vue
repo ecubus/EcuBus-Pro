@@ -38,16 +38,25 @@
             </el-button>
           </el-tooltip>
         </el-button-group>
-        <span
-          style="
-            margin-right: 10px;
-            font-size: 12px;
-            color: var(--el-text-color-regular);
-            margin-left: auto;
-          "
-        >
-          Time: {{ time }}s
-        </span>
+        <!-- 滚动控制 -->
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+          <span style="font-size: 12px; color: var(--el-text-color-regular); min-width: 80px">
+            Span: {{ formatTimeSpan(timeSpan) }}
+          </span>
+          <el-slider
+            v-model="timeSpanSliderValue"
+            :min="0"
+            :max="100"
+            size="small"
+            :show-tooltip="false"
+            class="blue-slider"
+            style="width: 200px; height: 20px"
+            @input="handleTimeSpanChange"
+          />
+          <span style="font-size: 12px; color: var(--el-text-color-regular); margin-right: 10px">
+            Time: {{ time }}s
+          </span>
+        </div>
       </div>
       <div class="main">
         <div class="left">
@@ -139,7 +148,7 @@ import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 
 import saveIcon from '@iconify/icons-material-symbols/save'
-import testdata from './blocks.json'
+// import testdata from './blocks.json'
 import { useGlobalStart } from '@r/stores/runtime'
 import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
 import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType, VisibleBlock } from 'nodeCan/osEvent'
@@ -170,6 +179,53 @@ const time = ref(0)
 let pixiRenderer: PixiGraphRenderer | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 
+// Time span slider control (logarithmic scale from 10us to 50s)
+const MIN_TIME_SPAN = 0.00001 // 10 microseconds in seconds
+const MAX_TIME_SPAN = 5 // 20 seconds maximum
+const timeSpanSliderValue = ref(100) // 0-100 slider value
+const timeSpan = ref(0.01) // Default 10ms time span
+
+// Convert slider value (0-100) to time span (10us to 100s) using logarithmic scale
+function sliderValueToTimeSpan(value: number): number {
+  const minLog = Math.log10(MIN_TIME_SPAN)
+  const maxLog = Math.log10(MAX_TIME_SPAN)
+  const logValue = minLog + (value / 100) * (maxLog - minLog)
+  return Math.pow(10, logValue)
+}
+
+// Convert time span back to slider value
+function timeSpanToSliderValue(span: number): number {
+  const minLog = Math.log10(MIN_TIME_SPAN)
+  const maxLog = Math.log10(MAX_TIME_SPAN)
+  const logSpan = Math.log10(span)
+  return ((logSpan - minLog) / (maxLog - minLog)) * 100
+}
+
+// Format time span for display
+function formatTimeSpan(span: number): string {
+  if (span >= 1) {
+    return `${span.toFixed(2)}s`
+  } else if (span >= 0.001) {
+    return `${(span * 1000).toFixed(2)}ms`
+  } else {
+    return `${(span * 1000000).toFixed(1)}μs`
+  }
+}
+
+// Handle time span change from slider
+function handleTimeSpanChange(value: number) {
+  const newSpan = sliderValueToTimeSpan(value)
+  timeSpan.value = newSpan
+
+  if (pixiRenderer) {
+    // Keep minX fixed, only adjust maxX
+    const newMinX = pixiRenderer.viewport.minX
+    const newMaxX = newMinX + newSpan
+
+    pixiRenderer.updateViewport(newMinX, newMaxX)
+  }
+}
+
 // 更新时间显示的函数
 const updateTime = () => {
   if (isPaused.value) return
@@ -199,7 +255,7 @@ const updateTime = () => {
 
   // Update viewport range
   if (pixiRenderer) {
-    pixiRenderer.updateViewport(minX, maxX)
+    // pixiRenderer.updateViewport(minX, maxX)
   }
 }
 const globalStart = useGlobalStart()
@@ -223,13 +279,16 @@ async function loadOfflineTrace() {
         file,
         orti.value.cpuFreq
       )
-      visibleBlocks = res.blocks.slice(0, 400)
-
-      console.log('visibleBlocks', visibleBlocks)
+      visibleBlocks = res.blocks
 
       if (pixiRenderer) {
         pixiRenderer.setBlocks(visibleBlocks)
-        pixiRenderer.updateViewport(5, 6)
+        const startTs = visibleBlocks[0].start
+        const span = MAX_TIME_SPAN
+
+        timeSpan.value = span
+        timeSpanSliderValue.value = timeSpanToSliderValue(span)
+        handleTimeSpanChange(timeSpanSliderValue.value)
       }
     }
   } catch (error) {
@@ -315,13 +374,13 @@ const separatorPositions = computed(() => {
   return positions
 })
 
-let visibleBlocks: VisibleBlock[] = testdata
-console.log('visibleBlocks', visibleBlocks.at(-1)?.end)
+let visibleBlocks: VisibleBlock[] = []
+
 function updateTimeLine() {
   if (!pixiRenderer) return
 
   const currentTimeX = time.value
-  pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
+  // pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
 }
 
 watch([() => globalStart.value, () => time.value], () => {
@@ -338,13 +397,21 @@ async function initPixiGraph() {
     leftWidth: leftWidth.value,
     totalButtons: totalButtons.value,
     buttonHeight: buttonHeight.value,
-    coreConfigs: coreConfigs.value
+    coreConfigs: coreConfigs.value,
+    maxTimeSpan: MAX_TIME_SPAN
   }
 
   try {
     pixiRenderer = await PixiGraphRenderer.create(canvas, config)
+
     pixiRenderer.setBlocks(visibleBlocks)
-    pixiRenderer.updateViewport(7, 8.4)
+    // pixiRenderer.updateViewport(7, 10)
+
+    // Initialize time span from viewport
+    const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+    timeSpan.value = initialSpan
+    timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
+    handleTimeSpanChange(timeSpanSliderValue.value)
   } catch (error) {
     console.error('Failed to initialize Pixi renderer:', error)
   }
@@ -703,6 +770,17 @@ onUnmounted(() => {
   &.node-menu {
     padding: 0 !important;
     background: var(--el-bg-color) !important;
+  }
+}
+
+.blue-slider {
+  .el-slider__runway {
+    .el-slider__button-wrapper {
+      .el-slider__button {
+        height: 14px !important;
+        width: 14px !important;
+      }
+    }
   }
 }
 </style>

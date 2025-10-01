@@ -7,6 +7,7 @@ export interface GraphConfig {
   leftWidth: number
   totalButtons: number
   buttonHeight: number
+  maxTimeSpan: number
   coreConfigs: Array<{
     id: number
     name: string
@@ -15,10 +16,10 @@ export interface GraphConfig {
 }
 
 export interface ViewportState {
-  minX: number
-  maxX: number
-  scaleX: number
-  offsetX: number
+  minTs: number // Data start time
+  maxTs: number // Data end time
+  minX: number // Current viewport start time
+  maxX: number // Current viewport end time
 }
 
 export class PixiGraphRenderer {
@@ -29,12 +30,17 @@ export class PixiGraphRenderer {
   private xAxisContainer!: PIXI.Container
   private tooltip!: HTMLDivElement
   private config: GraphConfig
-  private viewport: ViewportState
-  private visibleBlocks: VisibleBlock[] = []
+  public viewport: ViewportState
+  private allBlocks: VisibleBlock[] = [] // Store all blocks
+  private visibleBlocks: VisibleBlock[] = [] // Only blocks within current viewport
   private blockGraphics: PIXI.Graphics[] = []
+  private blockGraphicsMap: Map<number, PIXI.Graphics> = new Map() // Map block index to graphics
   private timeline: PIXI.Graphics | null = null
   private isDragging = false
+  private timer: number | null = null
+  private tooltipTimer: number | null = null
   private lastPointerPosition = { x: 0, y: 0 }
+  private record: Record<string, { pos: number; color: string; name: string }> = {}
   private coreStatus: Record<
     number,
     {
@@ -51,10 +57,10 @@ export class PixiGraphRenderer {
   private constructor(config: GraphConfig) {
     this.config = config
     this.viewport = {
-      minX: 7,
-      maxX: 8.4,
-      scaleX: 1,
-      offsetX: 0
+      minTs: 0,
+      maxTs: 0,
+      minX: 0,
+      maxX: 0
     }
 
     // Initialize PIXI Application
@@ -73,6 +79,7 @@ export class PixiGraphRenderer {
       width: this.config.width - this.config.leftWidth - 1,
       height: this.config.height,
       backgroundColor: 0xffffff,
+      preference: 'webgpu',
       antialias: true,
       resolution: window.devicePixelRatio || 1,
       autoDensity: true
@@ -154,24 +161,82 @@ export class PixiGraphRenderer {
 
   private handleZoom(delta: number, mouseX: number) {
     const zoomFactor = 1 + delta * 0.5
-    const oldScaleX = this.viewport.scaleX
-    const newScaleX = Math.max(0.1, oldScaleX * zoomFactor)
+
+    // Get the world X position at mouse
+    const mouseWorldX = this.screenToWorldX(mouseX)
+
+    // Calculate new range
+    const currentRange = this.viewport.maxX - this.viewport.minX
+    let newRange = currentRange / zoomFactor
+
+    // Limit the range to MAX_TIME_SPAN
+    if (newRange > this.config.maxTimeSpan) {
+      newRange = this.config.maxTimeSpan
+    }
 
     // Zoom around mouse position
-    const mouseWorldX = this.screenToWorldX(mouseX)
-    this.viewport.scaleX = newScaleX
-    const newMouseWorldX = this.screenToWorldX(mouseX)
-    this.viewport.offsetX -= (mouseWorldX - newMouseWorldX) * this.getPixelsPerSecond()
+    const mouseRatio = (mouseWorldX - this.viewport.minX) / currentRange
+    let newMinX = mouseWorldX - newRange * mouseRatio
+    let newMaxX = mouseWorldX + newRange * (1 - mouseRatio)
 
-    // Only update container transform, don't re-render blocks
+    // Clamp to data bounds
+    newMinX = Math.max(this.viewport.minTs, newMinX)
+    newMaxX = Math.min(this.viewport.maxTs, newMaxX)
+
+    // Ensure the range doesn't exceed MAX_TIME_SPAN
+    if (newMaxX - newMinX > this.config.maxTimeSpan) {
+      const center = (newMinX + newMaxX) / 2
+      newMinX = center - this.config.maxTimeSpan / 2
+      newMaxX = center + this.config.maxTimeSpan / 2
+
+      // Re-clamp to data bounds
+      if (newMinX < this.viewport.minTs) {
+        newMinX = this.viewport.minTs
+        newMaxX = newMinX + this.config.maxTimeSpan
+      } else if (newMaxX > this.viewport.maxTs) {
+        newMaxX = this.viewport.maxTs
+        newMinX = newMaxX - this.config.maxTimeSpan
+      }
+    }
+
+    this.viewport.minX = newMinX
+    this.viewport.maxX = newMaxX
+
+    // Update visible blocks and re-render
+    this.updateVisibleBlocks()
     this.applyViewportTransform()
     this.renderXAxis()
   }
 
   private handlePan(deltaX: number) {
-    this.viewport.offsetX += deltaX
+    // Convert screen pixels to world units
+    const canvasWidth = this.config.width - this.config.leftWidth - 1
+    const viewportRange = this.viewport.maxX - this.viewport.minX
+    const worldDelta = (-deltaX * viewportRange) / canvasWidth
 
-    // Only update container transform, don't re-render blocks
+    // Update viewport range
+    let newMinX = this.viewport.minX + worldDelta
+    let newMaxX = this.viewport.maxX + worldDelta
+
+    // Clamp to data bounds
+    if (newMinX < this.viewport.minTs) {
+      newMinX = this.viewport.minTs
+      newMaxX = this.viewport.minTs + viewportRange
+    } else if (newMaxX > this.viewport.maxTs) {
+      newMaxX = this.viewport.maxTs
+      newMinX = this.viewport.maxTs - viewportRange
+    }
+
+    // Ensure the range doesn't exceed MAX_TIME_SPAN
+    if (newMaxX - newMinX > this.config.maxTimeSpan) {
+      newMaxX = newMinX + this.config.maxTimeSpan
+    }
+
+    this.viewport.minX = newMinX
+    this.viewport.maxX = newMaxX
+
+    // Update visible blocks and re-render
+    this.updateVisibleBlocks()
     this.applyViewportTransform()
     this.renderXAxis()
   }
@@ -180,6 +245,12 @@ export class PixiGraphRenderer {
     this.isDragging = true
     this.lastPointerPosition = { x: event.clientX, y: event.clientY }
     this.app.canvas.style.cursor = 'grabbing'
+    // Clear tooltip timer when dragging starts
+    if (this.tooltipTimer !== null) {
+      clearTimeout(this.tooltipTimer)
+      this.tooltipTimer = null
+    }
+    this.hideTooltip()
   }
 
   private handleMouseMove(event: MouseEvent) {
@@ -196,9 +267,21 @@ export class PixiGraphRenderer {
   private handleMouseUp() {
     this.isDragging = false
     this.app.canvas.style.cursor = 'default'
+    // Clear tooltip timer when mouse leaves
+    if (this.tooltipTimer !== null) {
+      clearTimeout(this.tooltipTimer)
+      this.tooltipTimer = null
+    }
+    this.hideTooltip()
   }
 
   private handleTooltip(event: MouseEvent) {
+    // Clear existing tooltip timer
+    if (this.tooltipTimer !== null) {
+      clearTimeout(this.tooltipTimer)
+      this.tooltipTimer = null
+    }
+
     const rect = this.app.canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
@@ -209,7 +292,11 @@ export class PixiGraphRenderer {
     const hoveredBlock = this.findBlockAt(worldX, worldY)
 
     if (hoveredBlock) {
-      this.showTooltip(event.clientX, event.clientY, hoveredBlock)
+      // Set a timer to show tooltip after 500ms
+      this.tooltipTimer = window.setTimeout(() => {
+        this.showTooltip(event.clientX, event.clientY, hoveredBlock)
+        this.tooltipTimer = null
+      }, 200)
     } else {
       this.hideTooltip()
     }
@@ -224,7 +311,7 @@ export class PixiGraphRenderer {
       const blockEnd = block.end || this.viewport.maxX
       if (worldX >= block.start && worldX <= blockEnd) {
         const yPos = this.getBlockYPosition(block)
-        if (yPos !== null && Math.abs(worldY - yPos) < this.config.buttonHeight / 2) {
+        if (yPos !== null && worldY - yPos.pos < 1 && worldY - yPos.pos > 0) {
           return block
         }
       }
@@ -233,19 +320,13 @@ export class PixiGraphRenderer {
   }
 
   private showTooltip(clientX: number, clientY: number, block: VisibleBlock) {
-    return
     const end = block.end || this.viewport.maxX
     const coreName = `Core-${block.coreId}`
 
-    let task
-    for (const core of this.config.coreConfigs) {
-      if (core.id === block.coreId) {
-        task = core.buttons.find((b) => b.id === block.id && b.type === block.type)
-        break
-      }
-    }
+    const task = this.getBlockYPosition(block)
 
-    const content = `
+    if (task) {
+      const content = `
       <strong>${task?.name || 'Unknown'}</strong>
       ${parseInfo(block.type, block.status as number, '\n')}
       Core: ${coreName}
@@ -254,38 +335,45 @@ export class PixiGraphRenderer {
       End: ${(end * 1000000).toFixed(1)}us
     `.trim()
 
-    this.tooltip.innerHTML = content.replace(/\n/g, '<br>')
-    this.tooltip.style.display = 'block'
-    this.tooltip.style.left = clientX + 10 + 'px'
-    this.tooltip.style.top = clientY - 10 + 'px'
+      this.tooltip.innerHTML = content.replace(/\n/g, '<br>')
+      this.tooltip.style.display = 'block'
+      this.tooltip.style.left = clientX + 10 + 'px'
+      this.tooltip.style.top = clientY - 10 + 'px'
+    }
   }
 
   private hideTooltip() {
     this.tooltip.style.display = 'none'
   }
 
-  // Base coordinate conversion (without viewport transform)
-  private getBasePixelsPerSecond(): number {
+  // Coordinate conversion based on data bounds (minTs to maxTs)
+  private getDataPixelsPerSecond(): number {
+    return (
+      (this.config.width - this.config.leftWidth - 1) / (this.viewport.maxTs - this.viewport.minTs)
+    )
+  }
+
+  private worldToDataScreenX(worldX: number): number {
+    return (worldX - this.viewport.minTs) * this.getDataPixelsPerSecond()
+  }
+
+  private worldToDataScreenY(worldY: number): number {
+    return worldY * this.config.buttonHeight
+  }
+
+  // Coordinate conversion for current viewport (minX to maxX)
+  private getViewportPixelsPerSecond(): number {
     return (
       (this.config.width - this.config.leftWidth - 1) / (this.viewport.maxX - this.viewport.minX)
     )
   }
 
-  private worldToBaseScreenX(worldX: number): number {
-    return (worldX - this.viewport.minX) * this.getBasePixelsPerSecond()
-  }
-
-  private worldToBaseScreenY(worldY: number): number {
-    return worldY * this.config.buttonHeight
-  }
-
-  // Full coordinate conversion (with viewport transform)
-  private getPixelsPerSecond(): number {
-    return this.getBasePixelsPerSecond() * this.viewport.scaleX
-  }
-
   private screenToWorldX(screenX: number): number {
-    return (screenX - this.viewport.offsetX) / this.getPixelsPerSecond() + this.viewport.minX
+    return (
+      (screenX / (this.config.width - this.config.leftWidth - 1)) *
+        (this.viewport.maxX - this.viewport.minX) +
+      this.viewport.minX
+    )
   }
 
   private screenToWorldY(screenY: number): number {
@@ -293,41 +381,42 @@ export class PixiGraphRenderer {
   }
 
   private worldToScreenX(worldX: number): number {
-    return (worldX - this.viewport.minX) * this.getPixelsPerSecond() + this.viewport.offsetX
+    return (worldX - this.viewport.minX) * this.getViewportPixelsPerSecond()
   }
 
   private worldToScreenY(worldY: number): number {
     return worldY * this.config.buttonHeight
   }
 
-  private getBlockYPosition(block: VisibleBlock): number | null {
-    let yPos = 0
+  private getBlockYPosition(block: VisibleBlock) {
+    const key = `${block.coreId}-${block.id}-${block.type}`
+    if (this.record[key]) {
+      return this.record[key]
+    } else {
+      let yPos = 0
 
-    for (const core of this.config.coreConfigs) {
-      if (core.id !== block.coreId) {
-        yPos += core.buttons.length
-        continue
-      }
+      for (const core of this.config.coreConfigs) {
+        if (core.id !== block.coreId) {
+          yPos += core.buttons.length
+          continue
+        }
 
-      const buttonIndex = core.buttons.findIndex((b) => b.id === block.id && b.type === block.type)
-      if (buttonIndex !== -1) {
-        yPos += buttonIndex
-        return yPos
-      }
-    }
-    return null
-  }
+        const buttonIndex = core.buttons.findIndex(
+          (b) => b.id === block.id && b.type === block.type
+        )
+        if (buttonIndex !== -1) {
+          yPos += buttonIndex
 
-  private getBlockColor(block: VisibleBlock): string {
-    for (const core of this.config.coreConfigs) {
-      if (core.id === block.coreId) {
-        const button = core.buttons.find((b) => b.id === block.id && b.type === block.type)
-        if (button) {
-          return button.color
+          this.record[key] = {
+            pos: yPos,
+            color: core.buttons[buttonIndex].color,
+            name: core.buttons[buttonIndex].name
+          }
+          return this.record[key]
         }
       }
+      return null
     }
-    return '#95a5a6'
   }
 
   private darkColor(color: string, level: number): string {
@@ -352,43 +441,81 @@ export class PixiGraphRenderer {
   }
 
   public updateConfig(config: Partial<GraphConfig>) {
-    Object.assign(this.config, config)
-    this.app.renderer.resize(this.config.width - this.config.leftWidth - 1, this.config.height)
-    this.renderBlocks()
-    this.renderXAxis()
+    //hide tooltip
+    if (this.tooltipTimer !== null) {
+      clearTimeout(this.tooltipTimer)
+      this.tooltipTimer = null
+    }
+    this.hideTooltip()
+
+    const action = () => {
+      this.timer = requestAnimationFrame(() => {
+        const preservedMinX = this.viewport.minX
+        const preservedMaxX = this.viewport.maxX
+        Object.assign(this.config, config)
+
+        this.app.renderer.resize(this.config.width - this.config.leftWidth - 1, this.config.height)
+        this.renderBlocks()
+        // Restore the preserved viewport state
+        this.viewport.minX = preservedMinX
+        this.viewport.maxX = preservedMaxX
+
+        // Apply the viewport transform with preserved zoom/pan state
+        this.applyViewportTransform()
+        this.renderXAxis()
+        this.timer = null
+
+        this.app.renderer.render(this.app.stage)
+      })
+    }
+    if (this.timer) {
+      cancelAnimationFrame(this.timer)
+      action()
+    } else {
+      action()
+    }
   }
 
   public updateViewport(minX?: number, maxX?: number) {
-    const needsRerender = minX !== undefined || maxX !== undefined
-    if (minX !== undefined) this.viewport.minX = minX
-    if (maxX !== undefined) this.viewport.maxX = maxX
+    if (minX !== undefined && minX > this.viewport.minTs) this.viewport.minX = minX
+    if (maxX !== undefined && maxX < this.viewport.maxTs) this.viewport.maxX = maxX
 
-    if (needsRerender) {
-      // Only re-render blocks when data range changes
-      this.renderBlocks()
-    } else {
-      // Just update transform for zoom/pan
-      this.applyViewportTransform()
+    // Ensure the range doesn't exceed MAX_TIME_SPAN
+    if (this.viewport.maxX - this.viewport.minX > this.config.maxTimeSpan) {
+      this.viewport.maxX = this.viewport.minX + this.config.maxTimeSpan
     }
+
+    // Update visible blocks and transform
+    this.updateVisibleBlocks()
     this.renderXAxis()
   }
 
   private applyViewportTransform() {
-    // Apply container transform using PIXI's built-in transformation
-    // This is much faster than re-rendering all blocks
-    this.blocksContainer.scale.x = this.viewport.scaleX
-    this.blocksContainer.position.x = this.viewport.offsetX
+    // Calculate scale and position based on viewport range
+    // Blocks are rendered in data coordinates (minTs to maxTs)
+    // Transform them to viewport coordinates (minX to maxX)
+
+    const dataRange = this.viewport.maxTs - this.viewport.minTs
+    const viewportRange = this.viewport.maxX - this.viewport.minX
+    const scale = dataRange / viewportRange
+
+    const canvasWidth = this.config.width - this.config.leftWidth - 1
+    const dataPixelsPerSecond = canvasWidth / dataRange
+    const offsetX = -(this.viewport.minX - this.viewport.minTs) * dataPixelsPerSecond * scale
+
+    this.blocksContainer.scale.x = scale
+    this.blocksContainer.position.x = offsetX
 
     // Apply inverse scale to all text children and control visibility based on scaled width
     this.blockGraphics.forEach((graphic) => {
       graphic.children.forEach((child) => {
         if (child instanceof PIXI.Text && child.label === 'duration-text') {
           // Apply inverse scale to keep text size constant
-          child.scale.x = 1 / this.viewport.scaleX
+          child.scale.x = 1 / scale
 
           // Calculate the actual displayed width after scaling
           const baseWidth = (child as any).baseWidth || 0
-          const displayedWidth = baseWidth * this.viewport.scaleX
+          const displayedWidth = baseWidth * scale
 
           // Show text only if the displayed width is large enough
           child.visible = displayedWidth > 20
@@ -398,14 +525,38 @@ export class PixiGraphRenderer {
 
     // Update timeline position as well
     if (this.timeline) {
-      this.timelineContainer.scale.x = this.viewport.scaleX
-      this.timelineContainer.position.x = this.viewport.offsetX
+      this.timelineContainer.scale.x = scale
+      this.timelineContainer.position.x = offsetX
     }
   }
   public setBlocks(blocks: VisibleBlock[]) {
-    this.visibleBlocks = blocks
-    this.renderBlocks()
+    this.allBlocks = blocks
+
+    // Initialize viewport based on first 50 seconds of data
+    if (blocks.length > 0) {
+      this.viewport.minTs = blocks[0].start
+
+      // Find the maxTs from all blocks
+      let maxTs = blocks[0].start
+      for (const block of blocks) {
+        if (block.end && block.end > maxTs) {
+          maxTs = block.end
+        }
+      }
+      this.viewport.maxTs = maxTs
+
+      // Set initial viewport to first 50 seconds or less if data is shorter
+      this.viewport.minX = this.viewport.minTs
+      this.viewport.maxX = Math.min(
+        this.viewport.minTs + this.config.maxTimeSpan,
+        this.viewport.maxTs
+      )
+    }
+
+    // Update visible blocks for the initial viewport
+    this.updateVisibleBlocks()
     this.renderXAxis()
+    this.app.renderer.render(this.app.stage)
   }
 
   public updateTimeline(currentTime: number, visible: boolean = true) {
@@ -416,12 +567,66 @@ export class PixiGraphRenderer {
     if (!visible) return
 
     this.timeline = new PIXI.Graphics()
-    // Use base coordinates, container transform will handle zoom/pan
-    const x = this.worldToBaseScreenX(currentTime)
+    // Use data coordinates, container transform will handle zoom/pan
+    const x = this.worldToDataScreenX(currentTime)
 
     this.timeline.moveTo(x, 0).lineTo(x, this.config.height).stroke({ color: 0x0000ff, width: 1 })
 
     this.timelineContainer.addChild(this.timeline)
+  }
+
+  private updateVisibleBlocks() {
+    // Filter blocks that are visible in current viewport
+    // Add some buffer (10% on each side) to avoid pop-in effects
+    const buffer = (this.viewport.maxX - this.viewport.minX) * 0.1
+    const minVisible = this.viewport.minX - buffer
+    const maxVisible = this.viewport.maxX + buffer
+
+    const newVisibleIndices = new Set<number>()
+    const newVisibleBlocks: VisibleBlock[] = []
+
+    // Find blocks within the visible range
+    for (let i = 0; i < this.allBlocks.length; i++) {
+      const block = this.allBlocks[i]
+
+      // Check if block overlaps with visible range
+      if (block.start <= maxVisible) {
+        newVisibleIndices.add(i)
+        newVisibleBlocks.push(block)
+      }
+      if (block.start > this.viewport.maxX) {
+        break
+      }
+    }
+
+    // Remove blocks that are no longer visible
+    const indicesToRemove: number[] = []
+    this.blockGraphicsMap.forEach((graphic, index) => {
+      if (!newVisibleIndices.has(index)) {
+        this.blocksContainer.removeChild(graphic)
+        graphic.destroy()
+        indicesToRemove.push(index)
+      }
+    })
+    indicesToRemove.forEach((index) => this.blockGraphicsMap.delete(index))
+
+    // Add new blocks that became visible
+    this.coreStatus = {}
+    for (let i = 0; i < this.allBlocks.length; i++) {
+      const block = this.allBlocks[i]
+      const blockEnd = block.end || this.viewport.maxX
+
+      if (block.start <= maxVisible && blockEnd >= minVisible) {
+        if (!this.blockGraphicsMap.has(i)) {
+          this.renderBlock(block, i)
+        }
+      }
+    }
+
+    this.visibleBlocks = newVisibleBlocks
+
+    // Apply current viewport transform after updating
+    this.applyViewportTransform()
   }
 
   private renderBlocks() {
@@ -431,12 +636,18 @@ export class PixiGraphRenderer {
       graphic.destroy()
     })
     this.blockGraphics = []
+    this.blockGraphicsMap.clear()
     this.coreStatus = {}
 
-    // Render visible blocks
-    for (let i = 0; i < this.visibleBlocks.length; i++) {
-      const block = this.visibleBlocks[i]
-      this.renderBlock(block, i)
+    // Render visible blocks only
+    for (let i = 0; i < this.allBlocks.length; i++) {
+      const block = this.allBlocks[i]
+      const blockEnd = block.end || this.viewport.maxX
+
+      // Only render blocks within visible viewport
+      if (block.start <= this.viewport.maxX && blockEnd >= this.viewport.minX) {
+        this.renderBlock(block, i)
+      }
     }
 
     // Apply current viewport transform after rendering
@@ -451,13 +662,13 @@ export class PixiGraphRenderer {
     const yPos = this.getBlockYPosition(block)
     if (yPos === null) return
 
-    let color = this.getBlockColor(block)
     let height = this.config.buttonHeight
-    let finalYPos = yPos
+    let finalYPos = yPos.pos
     let text = ''
+    let color = yPos.color
 
     const start = block.start
-    const end = block.end || this.viewport.maxX
+    const end = block.end || this.viewport.maxTs + 0.01
     const diff = end - start
 
     // Calculate text based on duration
@@ -508,16 +719,13 @@ export class PixiGraphRenderer {
       height = height * 0.2
     }
 
-    // Use base screen coordinates (without viewport transform)
+    // Use data screen coordinates (based on full data range minTs to maxTs)
     // The container transform will handle zoom and pan
-    const startX = this.worldToBaseScreenX(start)
-    const endX = this.worldToBaseScreenX(end)
-    let width = endX - startX
-    if (width < 1) {
-      width = 1
-    }
+    const startX = this.worldToDataScreenX(start)
+    const endX = this.worldToDataScreenX(end)
+    const width = endX - startX
 
-    const screenY = this.worldToBaseScreenY(finalYPos)
+    const screenY = this.worldToDataScreenY(finalYPos)
 
     // Create block graphic
     const blockGraphic = new PIXI.Graphics()
@@ -548,6 +756,7 @@ export class PixiGraphRenderer {
 
     this.blocksContainer.addChild(blockGraphic)
     this.blockGraphics.push(blockGraphic)
+    this.blockGraphicsMap.set(dataIndex, blockGraphic)
   }
 
   private calculateTickInterval(): { interval: number; unit: string } {
@@ -673,6 +882,12 @@ export class PixiGraphRenderer {
   }
 
   public destroy() {
+    // Clear tooltip timer
+    if (this.tooltipTimer !== null) {
+      clearTimeout(this.tooltipTimer)
+      this.tooltipTimer = null
+    }
+
     if (this.tooltip && this.tooltip.parentNode) {
       this.tooltip.parentNode.removeChild(this.tooltip)
     }

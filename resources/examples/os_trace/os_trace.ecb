@@ -866,20 +866,24 @@
             }
           ],
           "connector": {
-            "type": "SerialPort",
+            "type": "BinaryFile",
             "device": "",
             "options": {
-              "baudRate": "115200",
-              "dataBits": "8",
-              "stopBits": "1",
-              "parity": "none",
-              "flowControl": "none",
+              "baudRate": "",
+              "dataBits": "",
+              "stopBits": "",
+              "parity": "",
               "bitRate": "",
               "ipAddress": "",
-              "port": ""
+              "port": "",
+              "file": "a.bin"
             }
           },
-          "cpuFreq": 100
+          "cpuFreq": 100,
+          "recordFile": {
+            "enable": true,
+            "name": "processed_log.csv"
+          }
         }
       }
     },
@@ -909,12 +913,29 @@
         "layoutType": "bottom",
         "hide": true
       },
+      "trace": {
+        "pos": {
+          "x": 227.5,
+          "y": 33.5,
+          "w": 1046,
+          "h": 582
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      },
       "1f5475f3-e6be-448b-88be-4ca0100d8903": {
         "pos": {
-          "x": 260.5,
-          "y": 55.5,
-          "w": 830,
-          "h": 402
+          "x": 498.5,
+          "y": 115.5,
+          "w": 700,
+          "h": 400
         },
         "title": "orti",
         "label": "ORTI",
@@ -922,24 +943,6 @@
         "options": {
           "params": {
             "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903"
-          },
-          "name": "Os_Trace"
-        },
-        "hide": true
-      },
-      "1f5475f3-e6be-448b-88be-4ca0100d8903_trace": {
-        "pos": {
-          "x": 966,
-          "y": 67,
-          "w": 700,
-          "h": 756
-        },
-        "title": "osTrace",
-        "label": "OSTrace",
-        "id": "1f5475f3-e6be-448b-88be-4ca0100d8903_trace",
-        "options": {
-          "params": {
-            "edit-index": "1f5475f3-e6be-448b-88be-4ca0100d8903_trace"
           },
           "name": "Os_Trace"
         }

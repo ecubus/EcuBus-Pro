@@ -5,6 +5,7 @@ import { CanMessage } from 'nodeCan/can'
 import { LinMsg } from 'nodeCan/lin'
 import { ServiceItem } from 'nodeCan/uds'
 import { DataSet } from 'src/preload/data'
+import { OsEvent, TaskStatus, taskStatusRecord, TaskType, taskTypeRecord } from 'nodeCan/osEvent'
 
 // Database reference
 let database: DataSet['database']
@@ -123,6 +124,74 @@ function parseCanData(raw: any) {
   }
   result['canBase'] = list
   return result
+}
+
+function parseORTIData(raw: any) {
+  const result: Record<string, any> = {}
+  const findDb = (db?: string) => {
+    if (!db) return null
+    return database.orti[db]
+  }
+  const list: any[] = []
+
+  for (const rawEvent of raw) {
+    const osEvent: OsEvent = rawEvent.message.data
+    const timestampInSeconds = rawEvent.message.ts
+
+    const db = findDb(osEvent.database)
+    const eventData = {
+      name: '',
+      ts: timestampInSeconds,
+      data: `Index:${osEvent.index} Time:${osEvent.ts} Core:${osEvent.coreId} ${getStatusDescription(osEvent.type, osEvent.status)}`,
+      id: getID(osEvent.type, osEvent.id, osEvent.coreId)
+    }
+    if (db) {
+      // Find matching configuration for this event
+      const config = db.coreConfigs.find(
+        (item) =>
+          item.coreId === osEvent.coreId && item.type === osEvent.type && item.id === osEvent.id
+      )
+
+      if (config) {
+        eventData.name = config.name
+
+        // Attach parsed event data back to original raw event
+      }
+    }
+
+    list.push({
+      message: {
+        method: 'osEvent',
+        data: eventData
+      }
+    })
+  }
+
+  result['osEvent'] = list
+  return result
+}
+
+function getID(type: TaskType, id: number, coreId: number): string {
+  return `${taskTypeRecord[type]}.${id}_${coreId}`
+}
+// Helper function to get status description for different event types
+function getStatusDescription(type: TaskType, status: number): string {
+  switch (type) {
+    case TaskType.TASK:
+      return `Status:${taskStatusRecord[status as TaskStatus] || `Unknown(${status})`}`
+    case TaskType.ISR:
+      return `Status:${status === 0 ? 'Start' : 'Stop'}`
+    case TaskType.SPINLOCK:
+      return `Status:${status === 0 ? 'Locked' : 'Unlocked'}`
+    case TaskType.RESOURCE:
+      return `Status:${status === 0 ? 'Start' : 'Stop'}`
+    case TaskType.HOOK:
+      return `Param:${status}`
+    case TaskType.SERVICE:
+      return `Param:${status}`
+    default:
+      return `Status:${status}`
+  }
 }
 // Initialize database reference
 function initDataBase(db: DataSet['database']) {
@@ -248,7 +317,13 @@ if (isWorker) {
         }
         break
       }
-
+      case 'osEvent': {
+        const result = parseORTIData(data)
+        if (result) {
+          self.postMessage(result)
+        }
+        break
+      }
       default: {
         const transferables = collectTransferables(data)
         self.postMessage(

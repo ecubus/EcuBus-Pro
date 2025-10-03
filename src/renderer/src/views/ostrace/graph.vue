@@ -51,7 +51,8 @@
             :show-tooltip="false"
             class="blue-slider"
             style="width: 200px; height: 20px"
-            @input="handleTimeSpanChange"
+            @input="handleTimeSpanChange($event, false)"
+            @change="handleTimeSpanChange($event, true)"
           />
           <span style="font-size: 12px; color: var(--el-text-color-regular); margin-right: 10px">
             Time: {{ time }}s
@@ -123,6 +124,19 @@
         ></div>
         <div class="right">
           <canvas :id="charid" :width="width - leftWidth - 1" :height="height"></canvas>
+          <!-- Custom scrollbar overlay -->
+          <div v-show="scrollbarThumbWidth > 0" class="custom-scrollbar">
+            <div class="scrollbar-track">
+              <div
+                class="scrollbar-thumb"
+                :style="{
+                  left: scrollbarPosition + '%',
+                  width: scrollbarThumbWidth + '%'
+                }"
+                @mousedown="handleScrollbarMouseDown"
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -179,6 +193,13 @@ const time = ref(0)
 let pixiRenderer: PixiGraphRenderer | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 
+// Scrollbar state
+const scrollbarPosition = ref(0) // 0-100 percentage
+const scrollbarThumbWidth = ref(0) // percentage of total width
+let isScrollbarDragging = false
+let scrollbarDragStartX = 0
+let scrollbarDragStartPosition = 0
+
 // Time span slider control (logarithmic scale from 10us to 50s)
 const MIN_TIME_SPAN = 0.00001 // 10 microseconds in seconds
 const MAX_TIME_SPAN = 5 // 20 seconds maximum
@@ -213,7 +234,7 @@ function formatTimeSpan(span: number): string {
 }
 
 // Handle time span change from slider
-function handleTimeSpanChange(value: number) {
+function handleTimeSpanChange(value: number, refresh: boolean) {
   const newSpan = sliderValueToTimeSpan(value)
   timeSpan.value = newSpan
 
@@ -221,8 +242,9 @@ function handleTimeSpanChange(value: number) {
     // Keep minX fixed, only adjust maxX
     const newMinX = pixiRenderer.viewport.minX
     const newMaxX = newMinX + newSpan
-
-    pixiRenderer.updateViewport(newMinX, newMaxX)
+    if (refresh) {
+      pixiRenderer.updateViewport(newMinX, newMaxX)
+    }
   }
 }
 
@@ -288,7 +310,7 @@ async function loadOfflineTrace() {
 
         timeSpan.value = span
         timeSpanSliderValue.value = timeSpanToSliderValue(span)
-        handleTimeSpanChange(timeSpanSliderValue.value)
+        handleTimeSpanChange(timeSpanSliderValue.value, true)
       }
     }
   } catch (error) {
@@ -404,6 +426,32 @@ async function initPixiGraph() {
   try {
     pixiRenderer = await PixiGraphRenderer.create(canvas, config)
 
+    // Calculate scrollbar thumb width based on viewport
+    const updateScrollbarThumbWidth = () => {
+      if (pixiRenderer) {
+        const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
+        const visibleRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+        if (totalRange > 0) {
+          scrollbarThumbWidth.value = Math.max(5, Math.min(100, (visibleRange / totalRange) * 100))
+        }
+      }
+    }
+
+    // Set scale change callback
+    pixiRenderer.setOnScaleChange((scale: number) => {
+      timeSpan.value = scale
+      timeSpanSliderValue.value = timeSpanToSliderValue(scale)
+      updateScrollbarThumbWidth()
+    })
+
+    // Set pan percentage change callback
+    pixiRenderer.setOnPanPercentageChange((percentage: number) => {
+      updateScrollbarThumbWidth()
+      if (!isScrollbarDragging) {
+        scrollbarPosition.value = percentage
+      }
+    })
+
     pixiRenderer.setBlocks(visibleBlocks)
     // pixiRenderer.updateViewport(7, 10)
 
@@ -411,10 +459,56 @@ async function initPixiGraph() {
     const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
     timeSpan.value = initialSpan
     timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
-    handleTimeSpanChange(timeSpanSliderValue.value)
+    handleTimeSpanChange(timeSpanSliderValue.value, true)
+
+    // Initialize scrollbar
+    updateScrollbarThumbWidth()
   } catch (error) {
     console.error('Failed to initialize Pixi renderer:', error)
   }
+}
+
+// Scrollbar mouse handlers
+const handleScrollbarMouseDown = (event: MouseEvent) => {
+  isScrollbarDragging = true
+  scrollbarDragStartX = event.clientX
+  scrollbarDragStartPosition = scrollbarPosition.value
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isScrollbarDragging || !pixiRenderer) return
+
+    const canvas = document.getElementById(charid.value) as HTMLCanvasElement
+    if (!canvas) return
+
+    const canvasRect = canvas.getBoundingClientRect()
+    const canvasWidth = canvasRect.width
+    const deltaX = e.clientX - scrollbarDragStartX
+    const deltaPercentage = (deltaX / canvasWidth) * 100
+
+    let newPosition = scrollbarDragStartPosition + deltaPercentage
+
+    // Clamp position to valid range considering thumb width
+    newPosition = Math.max(0, Math.min(100 - scrollbarThumbWidth.value, newPosition))
+
+    scrollbarPosition.value = newPosition
+
+    // Update renderer viewport based on scrollbar position
+    const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
+    const viewportRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+    const newMinX = pixiRenderer.viewport.minTs + (newPosition / 100) * totalRange
+    const newMaxX = newMinX + viewportRange
+
+    pixiRenderer.updateViewport(newMinX, newMaxX)
+  }
+
+  const handleMouseUp = () => {
+    isScrollbarDragging = false
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
 }
 
 // Example usage (commented out):
@@ -751,6 +845,45 @@ onUnmounted(() => {
 .mouse-icon {
   font-size: 12px;
   color: var(--el-text-color-regular);
+}
+
+.custom-scrollbar {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+.scrollbar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.05);
+  border-top: 1px solid var(--el-border-color-lighter);
+  pointer-events: auto;
+}
+
+.scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--el-color-primary);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  border-radius: 2px;
+  pointer-events: auto;
+}
+
+.scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+.scrollbar-thumb:active {
+  opacity: 1;
 }
 </style>
 

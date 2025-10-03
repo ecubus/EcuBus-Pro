@@ -36,6 +36,8 @@ export class PixiGraphRenderer {
   private blockGraphics: PIXI.Graphics[] = []
   private blockGraphicsMap: Map<number, PIXI.Graphics> = new Map() // Map block index to graphics
   private timeline: PIXI.Graphics | null = null
+  private visibleWindowStart: number = 0 // Start index of visible window
+  private visibleWindowEnd: number = 0 // End index of visible window
   private isDragging = false
   private timer: number | null = null
   private tooltipTimer: number | null = null
@@ -53,6 +55,8 @@ export class PixiGraphRenderer {
       color: string
     }
   > = {}
+  private onScaleChange?: (scale: number) => void
+  private onPanPercentageChange?: (percentage: number) => void
 
   private constructor(config: GraphConfig) {
     this.config = config
@@ -206,6 +210,10 @@ export class PixiGraphRenderer {
     this.updateVisibleBlocks()
     this.applyViewportTransform()
     this.renderXAxis()
+    if (this.onScaleChange) {
+      this.onScaleChange(newMaxX - newMinX)
+    }
+    this.notifyPanPercentageChange()
   }
 
   private handlePan(deltaX: number) {
@@ -239,6 +247,7 @@ export class PixiGraphRenderer {
     this.updateVisibleBlocks()
     this.applyViewportTransform()
     this.renderXAxis()
+    this.notifyPanPercentageChange()
   }
 
   private handleMouseDown(event: MouseEvent) {
@@ -477,17 +486,26 @@ export class PixiGraphRenderer {
   }
 
   public updateViewport(minX?: number, maxX?: number) {
-    if (minX !== undefined && minX > this.viewport.minTs) this.viewport.minX = minX
-    if (maxX !== undefined && maxX < this.viewport.maxTs) this.viewport.maxX = maxX
+    if (minX !== undefined) {
+      this.viewport.minX = Math.max(this.viewport.minTs, minX)
+    }
+    if (maxX !== undefined) {
+      this.viewport.maxX = Math.min(this.viewport.maxTs, maxX)
+    }
 
     // Ensure the range doesn't exceed MAX_TIME_SPAN
     if (this.viewport.maxX - this.viewport.minX > this.config.maxTimeSpan) {
       this.viewport.maxX = this.viewport.minX + this.config.maxTimeSpan
     }
 
+    // Clamp again after adjusting maxX
+    this.viewport.minX = Math.max(this.viewport.minTs, this.viewport.minX)
+    this.viewport.maxX = Math.min(this.viewport.maxTs, this.viewport.maxX)
+
     // Update visible blocks and transform
     this.updateVisibleBlocks()
     this.renderXAxis()
+    this.notifyPanPercentageChange()
   }
 
   private applyViewportTransform() {
@@ -531,6 +549,10 @@ export class PixiGraphRenderer {
   }
   public setBlocks(blocks: VisibleBlock[]) {
     this.allBlocks = blocks
+
+    // Reset window boundaries
+    this.visibleWindowStart = 0
+    this.visibleWindowEnd = 0
 
     // Initialize viewport based on first 50 seconds of data
     if (blocks.length > 0) {
@@ -576,54 +598,142 @@ export class PixiGraphRenderer {
   }
 
   private updateVisibleBlocks() {
-    // Filter blocks that are visible in current viewport
-    // Add some buffer (10% on each side) to avoid pop-in effects
+    // Add buffer to rendered range to avoid pop-in effects
     const buffer = (this.viewport.maxX - this.viewport.minX) * 0.1
     const minVisible = this.viewport.minX - buffer
     const maxVisible = this.viewport.maxX + buffer
 
-    const newVisibleIndices = new Set<number>()
-    const newVisibleBlocks: VisibleBlock[] = []
+    // Calculate current rendered range
+    const currentRenderedMin =
+      this.visibleWindowStart < this.allBlocks.length
+        ? (this.allBlocks[this.visibleWindowStart]?.start ?? this.viewport.minTs)
+        : this.viewport.minTs
+    const currentRenderedMax =
+      this.visibleWindowEnd > 0 && this.visibleWindowEnd <= this.allBlocks.length
+        ? (this.allBlocks[this.visibleWindowEnd - 1]?.start ?? this.viewport.maxTs)
+        : this.viewport.maxTs
+    const renderedRange = currentRenderedMax - currentRenderedMin
 
-    // Find blocks within the visible range
-    for (let i = 0; i < this.allBlocks.length; i++) {
-      const block = this.allBlocks[i]
+    // Only update rendered blocks if range exceeds maxTimeSpan (need to cull) or if new blocks need to be added
+    const needsCulling = renderedRange > this.config.maxTimeSpan * 1.5 // 50% margin before culling
 
-      // Check if block overlaps with visible range
-      if (block.start <= maxVisible) {
-        newVisibleIndices.add(i)
-        newVisibleBlocks.push(block)
+    let newWindowStart = this.visibleWindowStart
+    let newWindowEnd = this.visibleWindowEnd
+
+    if (needsCulling) {
+      // Need to remove far-away blocks to save memory
+      const lookbackTime = minVisible - this.config.maxTimeSpan
+
+      // Find new window start
+      newWindowStart = this.visibleWindowStart
+      while (newWindowStart > 0) {
+        const block = this.allBlocks[newWindowStart - 1]
+        if (block.start < lookbackTime) {
+          break
+        }
+        newWindowStart--
       }
-      if (block.start > this.viewport.maxX) {
-        break
+
+      while (newWindowStart < this.allBlocks.length) {
+        const block = this.allBlocks[newWindowStart]
+        const blockEnd = block.end || this.viewport.maxTs
+        if (blockEnd >= minVisible) {
+          break
+        }
+        newWindowStart++
+      }
+
+      // Find new window end
+      newWindowEnd = this.visibleWindowEnd
+      while (newWindowEnd < this.allBlocks.length) {
+        const block = this.allBlocks[newWindowEnd]
+        if (block.start > maxVisible) {
+          break
+        }
+        newWindowEnd++
+      }
+
+      while (newWindowEnd > newWindowStart && newWindowEnd > 0) {
+        const block = this.allBlocks[newWindowEnd - 1]
+        if (block.start <= maxVisible) {
+          break
+        }
+        newWindowEnd--
+      }
+
+      newWindowStart = Math.max(0, Math.min(newWindowStart, this.allBlocks.length))
+      newWindowEnd = Math.max(0, Math.min(newWindowEnd, this.allBlocks.length))
+
+      // Remove blocks that are now outside the window
+      for (let i = this.visibleWindowStart; i < newWindowStart; i++) {
+        const graphic = this.blockGraphicsMap.get(i)
+        if (graphic) {
+          this.blocksContainer.removeChild(graphic)
+          graphic.destroy()
+          this.blockGraphicsMap.delete(i)
+        }
+      }
+
+      for (let i = newWindowEnd; i < this.visibleWindowEnd; i++) {
+        const graphic = this.blockGraphicsMap.get(i)
+        if (graphic) {
+          this.blocksContainer.removeChild(graphic)
+          graphic.destroy()
+          this.blockGraphicsMap.delete(i)
+        }
+      }
+    } else {
+      // No culling needed, just expand window if necessary
+      // Expand left
+      while (newWindowStart > 0) {
+        const block = this.allBlocks[newWindowStart - 1]
+        const blockEnd = block.end || this.viewport.maxTs
+        if (blockEnd < minVisible) {
+          break
+        }
+        newWindowStart--
+      }
+
+      // Expand right
+      while (newWindowEnd < this.allBlocks.length) {
+        const block = this.allBlocks[newWindowEnd]
+        if (block.start > maxVisible) {
+          break
+        }
+        newWindowEnd++
       }
     }
 
-    // Remove blocks that are no longer visible
-    const indicesToRemove: number[] = []
-    this.blockGraphicsMap.forEach((graphic, index) => {
-      if (!newVisibleIndices.has(index)) {
-        this.blocksContainer.removeChild(graphic)
-        graphic.destroy()
-        indicesToRemove.push(index)
-      }
-    })
-    indicesToRemove.forEach((index) => this.blockGraphicsMap.delete(index))
-
-    // Add new blocks that became visible
+    // Rebuild core status for rendering context
     this.coreStatus = {}
-    for (let i = 0; i < this.allBlocks.length; i++) {
-      const block = this.allBlocks[i]
-      const blockEnd = block.end || this.viewport.maxX
 
-      if (block.start <= maxVisible && blockEnd >= minVisible) {
-        if (!this.blockGraphicsMap.has(i)) {
+    // Add new blocks that came into view
+    for (let i = newWindowStart; i < Math.min(this.visibleWindowStart, newWindowEnd); i++) {
+      if (!this.blockGraphicsMap.has(i)) {
+        const block = this.allBlocks[i]
+        const blockEnd = block.end || this.viewport.maxTs
+        if (block.start <= maxVisible && blockEnd >= minVisible) {
           this.renderBlock(block, i)
         }
       }
     }
 
-    this.visibleBlocks = newVisibleBlocks
+    for (let i = Math.max(newWindowStart, this.visibleWindowEnd); i < newWindowEnd; i++) {
+      if (!this.blockGraphicsMap.has(i)) {
+        const block = this.allBlocks[i]
+        const blockEnd = block.end || this.viewport.maxTs
+        if (block.start <= maxVisible && blockEnd >= minVisible) {
+          this.renderBlock(block, i)
+        }
+      }
+    }
+
+    // Update visible window indices
+    this.visibleWindowStart = newWindowStart
+    this.visibleWindowEnd = newWindowEnd
+
+    // Update visible blocks array for tooltip and other uses
+    this.visibleBlocks = this.allBlocks.slice(newWindowStart, newWindowEnd)
 
     // Apply current viewport transform after updating
     this.applyViewportTransform()
@@ -878,6 +988,25 @@ export class PixiGraphRenderer {
         return `${time.toFixed(0)}s`
       default:
         return time.toFixed(3)
+    }
+  }
+
+  public setOnScaleChange(callback: (scale: number) => void) {
+    this.onScaleChange = callback
+  }
+
+  public setOnPanPercentageChange(callback: (percentage: number) => void) {
+    this.onPanPercentageChange = callback
+  }
+
+  private notifyPanPercentageChange() {
+    if (this.onPanPercentageChange) {
+      const totalRange = this.viewport.maxTs - this.viewport.minTs
+      if (totalRange > 0) {
+        const currentPosition = this.viewport.minX - this.viewport.minTs
+        const percentage = (currentPosition / totalRange) * 100
+        this.onPanPercentageChange(Math.max(0, Math.min(100, percentage)))
+      }
     }
   }
 

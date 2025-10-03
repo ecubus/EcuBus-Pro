@@ -309,6 +309,22 @@ interface LinErrorLog {
   data: { msg: string; ts: number; data?: LinMsg }
 }
 
+interface OsEventLog {
+  method: 'osEvent'
+  data: {
+    data: string
+    name: string
+    id: string
+    ts: number
+  }
+}
+
+interface OsErrorLog {
+  method: 'osError'
+  error: string
+  ts: number
+}
+
 interface LogItem {
   message:
     | CanBaseLog
@@ -319,6 +335,8 @@ interface LogItem {
     | LinErrorLog
     | SomeipBaseLog
     | SomeipServiceValidLog
+    | OsEventLog
+    | OsErrorLog
   level: string
   instance: string
   label: string
@@ -674,6 +692,31 @@ function logDisplay(method: string, vals: LogItem[]) {
         channel: val.instance,
         msgType: 'SomeIP Service Valid'
       })
+    } else if (val.message.method == 'osEvent') {
+      insertData({
+        method: val.message.method,
+
+        data: val.message.data.data,
+        ts: (val.message.data.ts / 1000000).toFixed(6),
+        name: val.message.data.name,
+        id: val.message.data.id,
+        len: 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'OS Event'
+      })
+    } else if (val.message.method == 'osError') {
+      insertData({
+        method: val.message.method,
+        name: '',
+        data: val.message.error,
+        ts: (val.message.ts / 1000000).toFixed(6),
+        id: 'osError',
+        len: 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'OS Error'
+      })
     }
   }
 }
@@ -697,12 +740,12 @@ const props = defineProps({
   },
   defaultCheckList: {
     type: Array as PropType<string[]>,
-    default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase']
+    default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase', 'osTrace']
   }
 })
 
 function filterChange(
-  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase',
+  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase' | 'osTrace',
   val: boolean
 ) {
   const i = LogFilter.value.find((v) => v.v == method)
@@ -919,7 +962,7 @@ function togglePause() {
 const LogFilter = ref<
   {
     label: string
-    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase'
+    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase' | 'osTrace'
     value: string[]
   }[]
 >([
@@ -947,6 +990,11 @@ const LogFilter = ref<
     label: 'SomeIP',
     v: 'someipBase',
     value: ['someipBase', 'someipError', 'someipServiceValid']
+  },
+  {
+    label: 'OS Trace',
+    v: 'osTrace',
+    value: ['osEvent', 'osError']
   }
 ])
 
@@ -992,6 +1040,10 @@ watch([isPaused, isOverwrite], (v) => {
       columes.value[0].type = undefined
       scrollY = -1
     }
+  }
+  if (v[0]) {
+    //load data
+    grid.loadData(allLogData)
   }
 })
 
@@ -1118,6 +1170,14 @@ onMounted(() => {
           case 'someipBase':
             color = 'purple'
             break
+          case 'osEvent':
+            color = 'rgb(108, 22, 133)'
+            break
+          case 'osError':
+            color = getComputedStyle(document.documentElement)
+              .getPropertyValue('--el-color-danger')
+              .trim()
+            break
         }
         return {
           color: color
@@ -1203,6 +1263,14 @@ onUnmounted(() => {
 
 .udsNegRecv {
   color: var(--el-color-warning);
+}
+
+.osEvent {
+  color: rgb(108, 22, 133);
+}
+
+.osError {
+  color: var(--el-color-danger);
 }
 
 .pause-active {

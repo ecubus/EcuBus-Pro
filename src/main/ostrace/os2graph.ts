@@ -11,7 +11,7 @@ export default function os2block(
   //coreFreq is in MHz
   coreFreq = coreFreq * 1000000
 
-  maxts = maxts || 0xffffffff
+  maxts = maxts || 0x100000000 // 2^32 for 32-bit timestamp overflow
   // Track active blocks for each core and entity
   const activeBlocks = new Map<
     string,
@@ -26,66 +26,19 @@ export default function os2block(
     return `${coreId}-${type}-${entityId}`
   }
 
-  // Helper function to get entity ID from event
+  // Helper function to get entity ID from event (simplified)
   const getEntityId = (event: OsEvent): number => {
-    switch (event.type) {
-      case TaskType.TASK:
-        return event.event.taskId
-      case TaskType.ISR:
-        return event.event.isrId
-      case TaskType.SPINLOCK:
-        return event.event.spinlockId
-      case TaskType.RESOURCE:
-        return event.event.resourceId
-      case TaskType.HOOK:
-        return event.event.hookType
-      case TaskType.SERVICE:
-        return event.event.serviceId
-      case TaskType.LINE:
-        return 0 // LIN blocks don't have entity IDs
-      default:
-        return 0
-    }
+    return event.id
   }
 
-  // Helper function to get core ID from event
+  // Helper function to get core ID from event (simplified)
   const getCoreId = (event: OsEvent): number => {
-    switch (event.type) {
-      case TaskType.TASK:
-        return event.event.coreId
-      case TaskType.ISR:
-        return event.event.coreId
-      case TaskType.SPINLOCK:
-        return event.event.coreId
-      case TaskType.RESOURCE:
-        return event.event.coreId
-      case TaskType.HOOK:
-        return event.event.coreId
-      case TaskType.SERVICE:
-        return event.event.coreId
-      case TaskType.LINE:
-        return event.event.coreId
-      default:
-        return 0
-    }
+    return event.coreId
   }
 
-  // Helper function to get status from event
+  // Helper function to get status from event (simplified)
   const getStatus = (event: OsEvent): number => {
-    switch (event.type) {
-      case TaskType.TASK:
-        return event.event.status
-      case TaskType.ISR:
-        return event.event.status
-      case TaskType.SPINLOCK:
-        return event.event.status
-      case TaskType.RESOURCE:
-        return event.event.status
-      case TaskType.LINE:
-        return 0 // LIN blocks don't have status
-      default:
-        return 0
-    }
+    return event.status
   }
 
   // Helper function to determine if event should start a block
@@ -94,11 +47,11 @@ export default function os2block(
       case TaskType.TASK:
         return true // All TASK status changes should create blocks
       case TaskType.ISR:
-        return event.event.status === 0 // START
+        return event.status === 0 // START
       case TaskType.SPINLOCK:
-        return event.event.status === 0 // LOCKED
+        return event.status === 0 // LOCKED
       case TaskType.RESOURCE:
-        return event.event.status === 0 // START
+        return event.status === 0 // START
       case TaskType.HOOK:
       case TaskType.SERVICE:
         return true // These are typically point events that create instant blocks
@@ -111,13 +64,13 @@ export default function os2block(
   const shouldEndBlock = (event: OsEvent): boolean => {
     switch (event.type) {
       case TaskType.TASK:
-        return event.event.status === 5 || event.event.status === 4 // TERMINATE or PREEMPT
+        return event.status === 5 || event.status === 4 // TERMINATE or PREEMPT
       case TaskType.ISR:
-        return event.event.status === 1 // STOP
+        return event.status === 1 // STOP
       case TaskType.SPINLOCK:
-        return event.event.status === 1 // UNLOCKED
+        return event.status === 1 // UNLOCKED
       case TaskType.RESOURCE:
-        return event.event.status === 1 // STOP
+        return event.status === 1 // STOP
       default:
         return false
     }
@@ -162,7 +115,7 @@ export default function os2block(
 
     if (event.type === TaskType.ISR) {
       //start
-      if (event.event.status === 0) {
+      if (event.status === 0) {
         activeBlocks.set(key, {
           block: {
             start: timestamp,
@@ -178,14 +131,14 @@ export default function os2block(
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
-          block.block.endStatus = event.event.status
+          block.block.endStatus = event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }
       }
     } else if (event.type === TaskType.TASK) {
       //active
-      if (event.event.status === 0) {
+      if (event.status === 0) {
         activeBlocks.set(key, {
           block: {
             start: timestamp,
@@ -201,17 +154,17 @@ export default function os2block(
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
-          block.block.endStatus = event.event.status
+          block.block.endStatus = event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }
-        if (event.event.status == 1 || event.event.status == 4) {
+        if (event.status == 1 || event.status == 4) {
           activeBlocks.set(key, {
             block: {
               start: timestamp,
               end: undefined,
               coreId: coreId,
-              status: event.event.status,
+              status: event.status,
               type: TaskType.TASK,
               id: entityId
             },
@@ -220,7 +173,7 @@ export default function os2block(
         }
       }
     } else if (event.type === TaskType.SPINLOCK) {
-      if (event.event.status === 0) {
+      if (event.status === 0) {
         activeBlocks.set(key, {
           block: {
             start: timestamp,
@@ -236,13 +189,13 @@ export default function os2block(
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
-          block.block.endStatus = event.event.status
+          block.block.endStatus = event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }
       }
     } else if (event.type === TaskType.RESOURCE) {
-      if (event.event.status === 0) {
+      if (event.status === 0) {
         activeBlocks.set(key, {
           block: {
             start: timestamp,
@@ -258,7 +211,7 @@ export default function os2block(
         const block = activeBlocks.get(key)
         if (block) {
           block.block.end = timestamp
-          block.block.endStatus = event.event.status
+          block.block.endStatus = event.status
           blocks.push(block.block)
           activeBlocks.delete(key)
         }

@@ -90,12 +90,13 @@
         <el-form
           ref="connectorFormRef"
           :model="connectorForm"
+          :rules="connectorFormRules"
           label-width="120px"
           size="small"
           class="connector-form"
           style="margin: 20px"
         >
-          <el-form-item label="Type" required>
+          <el-form-item label="Type" prop="type" required>
             <el-select
               v-model="connectorForm.type"
               placeholder="Select connector type"
@@ -103,44 +104,46 @@
               @change="onConnectorTypeChange"
             >
               <el-option label="SerialPort" value="SerialPort" />
+              <el-option label="Binary File" value="BinaryFile" />
               <el-option label="CAN" value="CAN" disabled />
               <el-option label="ETH" value="ETH" disabled />
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="connectorForm.type" label="Device">
-            <el-select
-              v-model="connectorForm.device"
-              placeholder="Select device"
-              style="width: 300px"
-              filterable
-            >
-              <el-option
-                v-for="device in deviceList"
-                :key="device.value"
-                :label="device.label"
-                :value="device.value"
-              />
-              <template #footer>
-                <el-button
-                  text
-                  style="float: right; margin-bottom: 10px"
-                  size="small"
-                  icon="RefreshRight"
-                  @click="refreshDeviceList"
-                >
-                  Refresh
-                </el-button>
-              </template>
-            </el-select>
-          </el-form-item>
-
           <!-- SerialPort specific options -->
           <template v-if="connectorForm.type === 'SerialPort'">
-            <el-form-item label="Baud Rate">
+            <el-form-item v-if="connectorForm.type" label="Device" prop="device">
+              <el-select
+                v-model="connectorForm.device"
+                placeholder="Select device"
+                style="width: 300px"
+                filterable
+              >
+                <el-option
+                  v-for="device in deviceList"
+                  :key="device.value"
+                  :label="device.label"
+                  :value="device.value"
+                />
+                <template #footer>
+                  <el-button
+                    text
+                    style="float: right; margin-bottom: 10px"
+                    size="small"
+                    icon="RefreshRight"
+                    @click="refreshDeviceList"
+                  >
+                    Refresh
+                  </el-button>
+                </template>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="Baud Rate" prop="options.baudRate">
               <el-select
                 v-model="connectorForm.options.baudRate"
                 placeholder="Select baud rate"
+                filterable
+                creatable
                 style="width: 150px"
               >
                 <el-option label="9600" value="9600" />
@@ -192,18 +195,6 @@
                 <el-option label="Space" value="space" />
               </el-select>
             </el-form-item>
-
-            <el-form-item label="Flow Control">
-              <el-select
-                v-model="connectorForm.options.flowControl"
-                placeholder="Select flow control"
-                style="width: 150px"
-              >
-                <el-option label="None" value="none" />
-                <el-option label="Hardware" value="hardware" />
-                <el-option label="Software" value="software" />
-              </el-select>
-            </el-form-item>
           </template>
 
           <template v-if="connectorForm.type === 'CAN'">
@@ -236,6 +227,59 @@
               />
             </el-form-item>
           </template>
+
+          <template v-if="connectorForm.type === 'BinaryFile'">
+            <el-form-item label="File" prop="options.file">
+              <el-input
+                v-model="connectorForm.options.file"
+                placeholder="Enter file path"
+                style="width: 80%"
+              >
+                <template #append>
+                  <el-button type="primary" link @click="chooseFile">
+                    <Icon :icon="newIcon" />
+                  </el-button>
+                </template>
+              </el-input>
+            </el-form-item>
+          </template>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane name="Record File" label="Record File">
+        <el-form
+          ref="recordFileFormRef"
+          :model="recordFileForm"
+          label-width="120px"
+          size="small"
+          class="connector-form"
+          style="margin: 20px"
+        >
+          <el-form-item label="Enable Record">
+            <el-switch v-model="recordFileForm.enable" />
+            <span style="margin-left: 10px; color: var(--el-text-color-secondary); font-size: 12px">
+              Enable recording of trace data to file
+            </span>
+          </el-form-item>
+
+          <el-form-item label="File Name" prop="name">
+            <el-input
+              v-model="recordFileForm.name"
+              placeholder="Enter file name (e.g., processed_log.csv)"
+              style="width: 80%"
+            >
+              <template #append>
+                <el-button type="primary" link @click="chooseRecordFile">
+                  <Icon :icon="newIcon" />
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-alert type="info" :closable="false" show-icon style="margin-top: 20px">
+            <template #title>
+              The trace data will be recorded to the specified file. You can later use this file for
+              offline analysis.
+            </template>
+          </el-alert>
         </el-form>
       </el-tab-pane>
     </el-tabs>
@@ -259,7 +303,7 @@ import {
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import addIcon from '@iconify/icons-material-symbols/add'
-
+import newIcon from '@iconify/icons-material-symbols/new-window'
 import { Icon } from '@iconify/vue'
 import { Layout } from '@r/views/uds/layout'
 import { useDataStore } from '@r/stores/data'
@@ -268,6 +312,7 @@ import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps, VxeGridInstance } from 'vxe-table'
 import { ORTIFile, parseORTI } from '../ortiParse'
 import { useGlobalStart } from '@r/stores/runtime'
+import { useProjectStore } from '@r/stores/project'
 
 const layout = inject('layout') as Layout
 
@@ -402,13 +447,40 @@ const connectorForm = ref({
     dataBits: '8',
     stopBits: '1',
     parity: 'none',
-    flowControl: 'none',
+
     // CAN options
     bitRate: '',
     // ETH options
     ipAddress: '',
-    port: ''
+    port: '',
+    // BinaryFile options
+    file: ''
   }
+})
+
+// Record File form data
+const recordFileFormRef = ref()
+const recordFileForm = ref({
+  enable: false,
+  name: 'processed_log.csv'
+})
+
+// Connector form validation rules
+const connectorFormRules = computed(() => {
+  const rules: any = {
+    type: [{ required: true, message: 'Please select connector type', trigger: 'change' }]
+  }
+
+  if (connectorForm.value.type === 'SerialPort') {
+    rules.device = [{ required: true, message: 'Please select a device', trigger: 'change' }]
+    rules['options.baudRate'] = [
+      { required: true, message: 'Please select a baud rate', trigger: 'change' }
+    ]
+  } else if (connectorForm.value.type === 'BinaryFile') {
+    rules['options.file'] = [{ required: true, message: 'Please select a file', trigger: 'change' }]
+  }
+
+  return rules
 })
 
 // Initialize connector form from dbcObj
@@ -423,10 +495,26 @@ function initializeConnectorForm() {
   }
 }
 
+// Initialize record file form from dbcObj
+function initializeRecordFileForm() {
+  if (dbcObj.value?.recordFile) {
+    recordFileForm.value.enable = dbcObj.value.recordFile.enable ?? false
+    recordFileForm.value.name = dbcObj.value.recordFile.name || ''
+  } else {
+    recordFileForm.value.enable = false
+    recordFileForm.value.name = ''
+  }
+}
+
 // Handle connector type change
 function onConnectorTypeChange(type: string) {
   // Reset options when type changes
   connectorForm.value.device = ''
+
+  // Clear form validation
+  nextTick(() => {
+    connectorFormRef.value?.clearValidate()
+  })
 
   // Refresh device list for SerialPort
   if (type === 'SerialPort') {
@@ -438,10 +526,11 @@ function onConnectorTypeChange(type: string) {
       dataBits: '8',
       stopBits: '1',
       parity: 'none',
-      flowControl: 'none',
+
       bitRate: '',
       ipAddress: '',
-      port: ''
+      port: '',
+      file: ''
     }
   } else if (type === 'CAN') {
     connectorForm.value.options = {
@@ -449,10 +538,11 @@ function onConnectorTypeChange(type: string) {
       dataBits: '',
       stopBits: '',
       parity: '',
-      flowControl: '',
+
       bitRate: '500000',
       ipAddress: '',
-      port: ''
+      port: '',
+      file: ''
     }
   } else if (type === 'ETH') {
     connectorForm.value.options = {
@@ -460,11 +550,57 @@ function onConnectorTypeChange(type: string) {
       dataBits: '',
       stopBits: '',
       parity: '',
-      flowControl: '',
+
       bitRate: '',
       ipAddress: '192.168.1.100',
-      port: '8080'
+      port: '8080',
+      file: ''
     }
+  } else if (connectorForm.value.type === 'BinaryFile') {
+    connectorForm.value.options = {
+      baudRate: '',
+      dataBits: '',
+      stopBits: '',
+      parity: '',
+
+      bitRate: '',
+      ipAddress: '',
+      port: '',
+      file: ''
+    }
+  }
+}
+
+async function chooseFile() {
+  const project = useProjectStore()
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Choose File',
+    properties: ['openFile'],
+    filters: [{ name: 'Binary', extensions: ['bin'] }]
+  })
+
+  let file = r.filePaths[0]
+  if (file) {
+    if (project.projectInfo.path) file = window.path.relative(project.projectInfo.path, file)
+
+    connectorForm.value.options.file = file
+  }
+}
+
+async function chooseRecordFile() {
+  const project = useProjectStore()
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Choose Record File',
+    filters: [{ name: 'CSV', extensions: ['csv'] }]
+  })
+
+  let file = r.filePath
+  if (file) {
+    if (project.projectInfo.path) file = window.path.relative(project.projectInfo.path, file)
+
+    recordFileForm.value.name = file
   }
 }
 
@@ -477,6 +613,22 @@ watch(
         type: newVal.type,
         device: newVal.device,
         options: { ...newVal.options }
+      }
+      // Mark window as modified
+      layout.setWinModified(props.editIndex, true)
+    }
+  },
+  { deep: true }
+)
+
+// Update dbcObj recordFile when form changes
+watch(
+  recordFileForm,
+  (newVal) => {
+    if (dbcObj.value) {
+      dbcObj.value.recordFile = {
+        enable: newVal.enable,
+        name: newVal.name
       }
       // Mark window as modified
       layout.setWinModified(props.editIndex, true)
@@ -562,7 +714,7 @@ function deleteDatabase() {
     })
     .catch(null)
 }
-function saveDataBase() {
+async function saveDataBase() {
   // Check if name is empty
   if (!dbcObj.value.name || dbcObj.value.name.trim() === '') {
     ElNotification({
@@ -583,6 +735,22 @@ function saveDataBase() {
     })
     return
   }
+
+  // Validate connector form
+  try {
+    await connectorFormRef.value?.validate()
+  } catch (error) {
+    // ElNotification({
+    //   offset: 50,
+    //   type: 'error',
+    //   message: 'Please complete the connector configuration',
+    //   appendTo: `#win${props.editIndex}`
+    // })
+    // Switch to Connector tab to show validation errors
+    editableTabsValue.value = 'Connector'
+    return
+  }
+
   //task 里 ID 不能重复
   const idList = new Set()
   const isrList = new Set()
@@ -639,6 +807,11 @@ function saveDataBase() {
         options: { ...connectorForm.value.options }
       }
     }
+    // Ensure record file data is properly saved
+    db.recordFile = {
+      enable: recordFileForm.value.enable,
+      name: recordFileForm.value.name
+    }
     database.database.orti[props.editIndex] = db
   })
   layout.changeWinName(props.editIndex, dbcObj.value.name)
@@ -673,6 +846,7 @@ onMounted(() => {
           dbcObj.value = result.data
           dbcObj.value.name = window.path.parse(props.ortiFile!).name
           initializeConnectorForm()
+          initializeRecordFileForm()
         } else {
           ElMessageBox.alert('Parse failed', 'Error', {
             confirmButtonText: 'OK',
@@ -706,6 +880,7 @@ ${result.errors[0].message}
   } else {
     dbcObj.value = cloneDeep(database.database.orti[props.editIndex])
     initializeConnectorForm()
+    initializeRecordFileForm()
     loading.value = false
     nextTick(() => {
       layout.setWinModified(props.editIndex, false)

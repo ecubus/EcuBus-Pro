@@ -256,6 +256,10 @@ export interface ORTIFile {
     device: string
     options: Record<string, string>
   }
+  recordFile?: {
+    enable: boolean
+    name: string
+  }
   cpuFreq: number
   coreConfigs: {
     coreId: number

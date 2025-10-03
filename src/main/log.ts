@@ -1,5 +1,5 @@
 /* eslint-disable no-var */
-import { transport, createLogger, format, Logger } from 'winston'
+import { transport, createLogger, format, Logger, transports } from 'winston'
 import type { Format } from 'logform'
 import Transport from 'winston-transport'
 import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/can'
@@ -13,6 +13,7 @@ import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
 import { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
+import { OsEvent } from './share/osEvent'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -700,6 +701,64 @@ export class SomeipLOG {
         ts: ts,
         error: msg
       }
+    })
+  }
+}
+
+export class OsTraceLOG {
+  vendor: string
+  log: Logger
+
+  constructor(vendor: string, writerToFile?: string) {
+    this.vendor = vendor
+
+    const et1 = externalTransport.map((t) => t.t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(
+        format.json(),
+
+        format.label({ label: `${vendor}` }),
+        ...externalFormat
+      )
+    })
+
+    if (writerToFile) {
+      const csvLine = format((info: any, opts: any) => {
+        const d = info.data || {}
+        const method = info.message.method
+        if (method === 'osEvent') {
+          const d = info.message.data || {}
+          info[Symbol.for('message')] = `${d.ts},${d.type},${d.id},${d.status}`
+          return info
+        }
+        return false
+      })
+      const fileTransport = new transports.File({
+        filename: writerToFile,
+        level: 'info',
+        format: format.combine(csvLine())
+      })
+      this.log.add(fileTransport)
+    }
+  }
+  close() {
+    this.log.close()
+  }
+  osEvent(ts: number, event: OsEvent) {
+    this.log.info({
+      method: 'osEvent',
+      data: event,
+      ts: ts
+    })
+  }
+
+  error(ts: number, msg?: string) {
+    this.log.error({
+      method: 'osError',
+
+      error: msg,
+      ts: ts
     })
   }
 }

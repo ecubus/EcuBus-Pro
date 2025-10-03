@@ -27,67 +27,15 @@ function rowDataToOsEvent(rowData: any[]): OsEvent | null {
     return null // Skip invalid rows
   }
 
-  let event: any
-
-  switch (type) {
-    case TaskType.TASK:
-      event = {
-        status: parseTaskStatus(statusOrParam),
-        taskId: objectId,
-        coreId
-      }
-      break
-
-    case TaskType.ISR:
-      event = {
-        status: parseIsrStatus(statusOrParam),
-        isrId: objectId,
-        coreId
-      }
-      break
-
-    case TaskType.SPINLOCK:
-      event = {
-        status: parseSpinlockStatus(statusOrParam),
-        spinlockId: objectId,
-        coreId
-      }
-      break
-
-    case TaskType.RESOURCE:
-      event = {
-        status: parseResourceStatus(statusOrParam),
-        resourceId: objectId,
-        coreId
-      }
-      break
-
-    case TaskType.HOOK:
-      event = {
-        hookParam: statusOrParam,
-        hookType: 0, // Default hook type since we only have 4 columns
-        coreId
-      }
-      break
-
-    case TaskType.SERVICE:
-      event = {
-        serviceParam: statusOrParam,
-        serviceId: objectId,
-        coreId
-      }
-      break
-
-    default:
-      return null
-  }
-
+  // Unified event structure - simply map columns to fields
   return {
     type,
-    event,
+    id: objectId,
+    status: statusOrParam,
+    coreId,
     ts,
     comment
-  } as OsEvent
+  }
 }
 
 /**

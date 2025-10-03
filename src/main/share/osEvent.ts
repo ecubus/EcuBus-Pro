@@ -92,6 +92,16 @@ export const taskStatusRecord: Record<TaskStatus, string> = {
   [TaskStatus.PREEMPT]: 'Preempt',
   [TaskStatus.TERMINATE]: 'Terminate'
 }
+
+export const taskTypeRecord: Record<TaskType, string> = {
+  [TaskType.TASK]: 'Task',
+  [TaskType.ISR]: 'ISR',
+  [TaskType.SPINLOCK]: 'Spinlock',
+  [TaskType.RESOURCE]: 'Resource',
+  [TaskType.HOOK]: 'Hook',
+  [TaskType.SERVICE]: 'Service',
+  [TaskType.LINE]: 'Line'
+}
 export const isrStatusRecord: Record<IsrStatus, string> = {
   [IsrStatus.START]: 'Start',
   [IsrStatus.STOP]: 'Stop'
@@ -114,46 +124,14 @@ export function parseInfo(type: TaskType, status: number, br?: string): string {
   return str
 }
 
-export type OsEvent =
-  | {
-      type: TaskType.TASK
-      event: TaskEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.ISR
-      event: IsrEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.SPINLOCK
-      event: SpinlockEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.RESOURCE
-      event: ResourceEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.HOOK
-      event: HookEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.SERVICE
-      event: ServiceEvent
-      ts: number
-      comment: string
-    }
-  | {
-      type: TaskType.LINE
-      event: LineEvent
-      ts: number
-      comment: string
-    }
+// Unified event structure to reduce computational overhead
+export interface OsEvent {
+  database?: string
+  index?: number
+  type: TaskType
+  id: number
+  status: number
+  coreId: number
+  ts: number
+  comment: string
+}

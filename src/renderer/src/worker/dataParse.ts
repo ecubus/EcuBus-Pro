@@ -6,11 +6,11 @@ import { LinMsg } from 'nodeCan/lin'
 import { ServiceItem } from 'nodeCan/uds'
 import { DataSet } from 'src/preload/data'
 import { OsEvent, TaskStatus, taskStatusRecord, TaskType, taskTypeRecord } from 'nodeCan/osEvent'
-
+import OsStatistics from './osStatistics'
 // Database reference
 let database: DataSet['database']
 
-// Process LIN data messages
+const osStatistics: Map<string, OsStatistics> = new Map()
 function parseLinData(raw: any) {
   const findDb = (db?: string) => {
     if (!db) return null
@@ -151,11 +151,28 @@ function parseORTIData(raw: any) {
         (item) =>
           item.coreId === osEvent.coreId && item.type === osEvent.type && item.id === osEvent.id
       )
-
+      let name = ''
       if (config) {
         eventData.name = config.name
+        name = config.name
 
         // Attach parsed event data back to original raw event
+      }
+      const osStat = osStatistics.get(db.id)
+      if (osStat) {
+        const pr = osStat.processEvent(osEvent)
+        for (const item of pr) {
+          if (!result[item.id]) {
+            result[item.id] = []
+          }
+          result[item.id].push([
+            parseFloat((timestampInSeconds / 1000000).toFixed(3)),
+            {
+              value: item.value,
+              rawValue: item.value
+            }
+          ])
+        }
       }
     }
 
@@ -168,6 +185,7 @@ function parseORTIData(raw: any) {
   }
 
   result['osEvent'] = list
+
   return result
 }
 
@@ -285,6 +303,20 @@ if (isWorker) {
     switch (method) {
       case 'initDataBase': {
         initDataBase(data)
+        //clear osStatistics
+        osStatistics.clear()
+        //create osStatistics
+        for (const key of Object.keys(database.orti)) {
+          const s = new OsStatistics(key, database.orti[key].cpuFreq)
+          for (const item of database.orti[key].coreConfigs) {
+            if (item.type == TaskType.TASK) {
+              if (item.isIdle || item.name.toLowerCase().includes('idle')) {
+                s.markIdleTask(item.id, item.coreId)
+              }
+            }
+          }
+          osStatistics.set(key, s)
+        }
         break
       }
       case 'canBase': {

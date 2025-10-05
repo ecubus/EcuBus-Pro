@@ -631,7 +631,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   }
 
   /* --------- */
-  const sysVars = getAllSysVar(devices, testers)
+  const sysVars = getAllSysVar(devices, testers, data.database.orti)
 
   for (const v of Object.values(sysVars)) {
     vars[v.id] = cloneDeep(v)

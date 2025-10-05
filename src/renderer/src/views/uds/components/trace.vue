@@ -1044,6 +1044,7 @@ watch([isPaused, isOverwrite], (v) => {
   if (v[0]) {
     //load data
     grid.loadData(allLogData)
+    grid.scrollYTo(99999999999)
   }
 })
 

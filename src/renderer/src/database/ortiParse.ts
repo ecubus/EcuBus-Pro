@@ -263,7 +263,7 @@ export interface ORTIFile {
   cpuFreq: number
   coreConfigs: {
     coreId: number
-
+    isIdle?: boolean
     id: number
     type: number
     name: string

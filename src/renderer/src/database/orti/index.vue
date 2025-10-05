@@ -105,6 +105,7 @@
             >
               <el-option label="SerialPort" value="SerialPort" />
               <el-option label="Binary File" value="BinaryFile" />
+              <el-option label="CSV File" value="CSVFile" />
               <el-option label="CAN" value="CAN" disabled />
               <el-option label="ETH" value="ETH" disabled />
             </el-select>
@@ -228,7 +229,7 @@
             </el-form-item>
           </template>
 
-          <template v-if="connectorForm.type === 'BinaryFile'">
+          <template v-if="connectorForm.type === 'BinaryFile' || connectorForm.type === 'CSVFile'">
             <el-form-item label="File" prop="options.file">
               <el-input
                 v-model="connectorForm.options.file"
@@ -276,8 +277,8 @@
           </el-form-item>
           <el-alert type="info" :closable="false" show-icon style="margin-top: 20px">
             <template #title>
-              The trace data will be recorded to the specified file. You can later use this file for
-              offline analysis.
+              The trace data will be recorded to the specified file in CSV format with raw data
+              columns: <strong>timestamp, type, id, status</strong> (no header).
             </template>
           </el-alert>
         </el-form>
@@ -476,7 +477,7 @@ const connectorFormRules = computed(() => {
     rules['options.baudRate'] = [
       { required: true, message: 'Please select a baud rate', trigger: 'change' }
     ]
-  } else if (connectorForm.value.type === 'BinaryFile') {
+  } else if (connectorForm.value.type === 'BinaryFile' || connectorForm.value.type === 'CSVFile') {
     rules['options.file'] = [{ required: true, message: 'Please select a file', trigger: 'change' }]
   }
 
@@ -556,7 +557,7 @@ function onConnectorTypeChange(type: string) {
       port: '8080',
       file: ''
     }
-  } else if (connectorForm.value.type === 'BinaryFile') {
+  } else if (connectorForm.value.type === 'BinaryFile' || connectorForm.value.type === 'CSVFile') {
     connectorForm.value.options = {
       baudRate: '',
       dataBits: '',
@@ -577,7 +578,11 @@ async function chooseFile() {
     defaultPath: project.projectInfo.path,
     title: 'Choose File',
     properties: ['openFile'],
-    filters: [{ name: 'Binary', extensions: ['bin'] }]
+    filters: [
+      connectorForm.value.type === 'BinaryFile'
+        ? { name: 'Binary', extensions: ['bin'] }
+        : { name: 'CSV', extensions: ['csv'] }
+    ]
   })
 
   let file = r.filePaths[0]

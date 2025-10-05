@@ -249,6 +249,9 @@ export default (filePath: string, devices: string[], method: string[]) => {
     {
       format: ascFormat(method, keys, now.getTime()),
       filename: filePath,
+      options: {
+        flags: 'w'
+      },
       level: 'debug'
     },
     devices,

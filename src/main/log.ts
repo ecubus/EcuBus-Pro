@@ -729,6 +729,7 @@ export class OsTraceLOG {
         const method = info.message.method
         if (method === 'osEvent') {
           const d = info.message.data || {}
+
           info[Symbol.for('message')] = `${d.ts},${d.type},${d.id},${d.status}`
           return info
         }
@@ -737,6 +738,9 @@ export class OsTraceLOG {
       const fileTransport = new transports.File({
         filename: writerToFile,
         level: 'info',
+        options: {
+          options: { flags: 'w' }
+        },
         format: format.combine(csvLine())
       })
       this.log.add(fileTransport)

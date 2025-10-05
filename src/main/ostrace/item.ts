@@ -16,6 +16,7 @@ export default class TraceItem {
   private serialPort?: SerialPort
   private file?: fs.ReadStream
   private leftBuffer: Buffer = Buffer.alloc(0)
+  private leftCsvBuffer: string = ''
   private index?: number
   private lastTimestamp?: number
   private tsOverflow = 0
@@ -48,6 +49,17 @@ export default class TraceItem {
         this.file = fs.createReadStream(this.orti.connector.options.file)
         this.file.on('data', (chunk: any) => {
           this.dataCallback(chunk)
+        })
+      } else if (this.orti.connector.type === 'CSVFile') {
+        if (!path.isAbsolute(this.orti.connector.options.file)) {
+          this.orti.connector.options.file = path.join(
+            projectPath,
+            this.orti.connector.options.file
+          )
+        }
+        this.file = fs.createReadStream(this.orti.connector.options.file, 'utf-8')
+        this.file.on('data', (chunk: any) => {
+          this.csvCallback(chunk as string)
         })
       }
     }
@@ -130,6 +142,43 @@ export default class TraceItem {
         comment: ''
       }
 
+      this.log.osEvent(ts, osEvent)
+    }
+  }
+  csvCallback = (data: string) => {
+    const ts = getTsUs() - this.systemTs
+
+    // Prepend any leftover data from previous chunk
+    data = this.leftCsvBuffer + data
+
+    // Split by newlines
+    const lines = data.split('\n')
+
+    // Keep the last line if it's incomplete (no trailing newline)
+    this.leftCsvBuffer = data.endsWith('\n') ? '' : lines.pop() || ''
+
+    // Process complete lines
+    for (const line of lines) {
+      if (!line.trim()) continue // Skip empty lines
+
+      const [timestamp, type, id, status] = line.split(',')
+
+      // Validate data before parsing
+      if (!timestamp || !type || !id || !status) continue
+      if (this.index == undefined) {
+        this.index = 0
+      }
+      const osEvent: OsEvent = {
+        index: this.index,
+        database: this.orti.id,
+        type: parseInt(type),
+        id: parseInt(id),
+        status: parseInt(status),
+        coreId: 0,
+        ts: parseInt(timestamp),
+        comment: ''
+      }
+      this.index++
       this.log.osEvent(ts, osEvent)
     }
   }

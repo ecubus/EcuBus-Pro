@@ -318,6 +318,58 @@ export function getAllSysVar(
         desc: 'ISR调用间隔平均时间'
       }
     }
+
+    const ResourceList: Record<
+      string,
+      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
+    > = {
+      Status: {
+        type: 'string',
+        desc: 'Resource当前状态'
+      },
+      AcquireCount: {
+        type: 'number',
+        min: 0,
+        desc: 'Resource获取次数'
+      },
+      ReleaseCount: {
+        type: 'number',
+        min: 0,
+        desc: 'Resource释放次数'
+      }
+    }
+
+    const ServiceList: Record<
+      string,
+      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
+    > = {
+      Count: {
+        type: 'number',
+        min: 0,
+        desc: 'Service调用次数'
+      },
+      LastStatus: {
+        type: 'number',
+        min: 0,
+        desc: 'Service最后状态'
+      }
+    }
+
+    const HookList: Record<
+      string,
+      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
+    > = {
+      Count: {
+        type: 'number',
+        min: 0,
+        desc: 'Hook触发次数'
+      },
+      LastStatus: {
+        type: 'number',
+        min: 0,
+        desc: 'Hook最后状态参数'
+      }
+    }
     list[`OsTrace.${item.id}`] = {
       type: 'system',
       id: `OsTrace.${item.id}`,
@@ -325,24 +377,36 @@ export function getAllSysVar(
       parentId: 'OsTrace'
     }
     let coreNum = 0
+    list[`OsTrace.${item.id}.Task`] = {
+      type: 'system',
+      id: `OsTrace.${item.id}.Task`,
+      name: `Task`,
+      parentId: `OsTrace.${item.id}`
+    }
+    list[`OsTrace.${item.id}.ISR`] = {
+      type: 'system',
+      id: `OsTrace.${item.id}.ISR`,
+      name: `ISR`,
+      parentId: `OsTrace.${item.id}`
+    }
 
     for (const core of item.coreConfigs) {
       coreNum = Math.max(coreNum, core.coreId + 1)
       if (core.type == TaskType.TASK) {
-        list[`OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`] = {
+        list[`OsTrace.${item.id}.Task.${core.type}_${core.id}_${core.coreId}`] = {
           type: 'system',
-          id: `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`,
+          id: `OsTrace.${item.id}.Task.${core.type}_${core.id}_${core.coreId}`,
           name: core.name,
-          parentId: `OsTrace.${item.id}`
+          parentId: `OsTrace.${item.id}.Task`
         }
         for (const key of Object.keys(Ortilist)) {
           const vitem = Ortilist[key as keyof typeof Ortilist]
-          const vkey = `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}.${key}`
+          const vkey = `OsTrace.${item.id}.Task.${core.type}_${core.id}_${core.coreId}.${key}`
           list[vkey] = {
             type: 'system',
             id: vkey,
             name: `${key}`,
-            parentId: `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`,
+            parentId: `OsTrace.${item.id}.Task.${core.type}_${core.id}_${core.coreId}`,
             value: {
               type: vitem.type,
               min: vitem.min,
@@ -353,20 +417,20 @@ export function getAllSysVar(
           }
         }
       } else if (core.type == TaskType.ISR) {
-        list[`OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`] = {
+        list[`OsTrace.${item.id}.ISR.${core.type}_${core.id}_${core.coreId}`] = {
           type: 'system',
-          id: `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`,
+          id: `OsTrace.${item.id}.ISR.${core.type}_${core.id}_${core.coreId}`,
           name: core.name,
-          parentId: `OsTrace.${item.id}`
+          parentId: `OsTrace.${item.id}.ISR`
         }
         for (const key of Object.keys(ISRList)) {
           const vitem = ISRList[key as keyof typeof ISRList]
-          const vkey = `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}.${key}`
+          const vkey = `OsTrace.${item.id}.ISR.${core.type}_${core.id}_${core.coreId}.${key}`
           list[vkey] = {
             type: 'system',
             id: vkey,
             name: `${key}`,
-            parentId: `OsTrace.${item.id}.${core.type}_${core.id}_${core.coreId}`,
+            parentId: `OsTrace.${item.id}.ISR.${core.type}_${core.id}_${core.coreId}`,
             value: {
               type: vitem.type,
               min: vitem.min,
@@ -378,6 +442,109 @@ export function getAllSysVar(
         }
       }
     }
+
+    list[`OsTrace.${item.id}.Resource`] = {
+      type: 'system',
+      id: `OsTrace.${item.id}.Resource`,
+      name: `Resource`,
+      parentId: `OsTrace.${item.id}`
+    }
+
+    // Process Resource configs
+    for (const resource of item.resourceConfigs || []) {
+      const resourceKey = `OsTrace.${item.id}.Resource.${TaskType.RESOURCE}_${resource.id}_${resource.coreId}`
+      list[resourceKey] = {
+        type: 'system',
+        id: resourceKey,
+        name: resource.name,
+        parentId: `OsTrace.${item.id}.Resource`
+      }
+      for (const key of Object.keys(ResourceList)) {
+        const vitem = ResourceList[key as keyof typeof ResourceList]
+        const vkey = `OsTrace.${item.id}.Resource.${resourceKey}.${key}`
+        list[vkey] = {
+          type: 'system',
+          id: vkey,
+          name: `${key}`,
+          parentId: resourceKey,
+          value: {
+            type: vitem.type,
+            min: vitem.min,
+            max: vitem.max,
+            unit: vitem.unit
+          },
+          desc: vitem.desc
+        }
+      }
+    }
+    list[`OsTrace.${item.id}.Service`] = {
+      type: 'system',
+      id: `OsTrace.${item.id}.Service`,
+      name: `Service`,
+      parentId: `OsTrace.${item.id}`
+    }
+
+    // Process Service configs
+    for (const service of item.serviceConfigs || []) {
+      const serviceKey = `OsTrace.${item.id}.Service.${TaskType.SERVICE}_${service.id}_0`
+      list[serviceKey] = {
+        type: 'system',
+        id: serviceKey,
+        name: service.name,
+        parentId: `OsTrace.${item.id}.Service`
+      }
+      for (const key of Object.keys(ServiceList)) {
+        const vitem = ServiceList[key as keyof typeof ServiceList]
+        const vkey = `OsTrace.${item.id}.Service.${serviceKey}.${key}`
+        list[vkey] = {
+          type: 'system',
+          id: vkey,
+          name: `${key}`,
+          parentId: serviceKey,
+          value: {
+            type: vitem.type,
+            min: vitem.min,
+            max: vitem.max,
+            unit: vitem.unit
+          },
+          desc: vitem.desc
+        }
+      }
+    }
+    list[`OsTrace.${item.id}.Hook`] = {
+      type: 'system',
+      id: `OsTrace.${item.id}.Hook`,
+      name: `Hook`,
+      parentId: `OsTrace.${item.id}`
+    }
+    // Process Hook configs
+    for (const hook of item.hostConfigs || []) {
+      const hookKey = `OsTrace.${item.id}.Hook.${TaskType.HOOK}_${hook.id}_0`
+      list[hookKey] = {
+        type: 'system',
+        id: hookKey,
+        name: hook.name,
+        parentId: `OsTrace.${item.id}.Hook`
+      }
+      for (const key of Object.keys(HookList)) {
+        const vitem = HookList[key as keyof typeof HookList]
+        const vkey = `OsTrace.${item.id}.Hook.${hookKey}.${key}`
+        list[vkey] = {
+          type: 'system',
+          id: vkey,
+          name: `${key}`,
+          parentId: hookKey,
+          value: {
+            type: vitem.type,
+            min: vitem.min,
+            max: vitem.max,
+            unit: vitem.unit
+          },
+          desc: vitem.desc
+        }
+      }
+    }
+
     for (let i = 0; i < coreNum; i++) {
       list[`OsTrace.${item.id}.Core${i}`] = {
         type: 'system',

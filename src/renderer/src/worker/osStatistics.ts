@@ -1,25 +1,5 @@
 import { OsEvent, TaskType, TaskStatus, IsrStatus, ResourceStatus } from 'nodeCan/osEvent'
 
-// Resource statistics result
-interface ResourceStatistics {
-  id: number
-  coreId: number
-  key: string
-  currentStatus: string
-  acquireCount: number
-  releaseCount: number
-}
-
-// Service statistics result
-interface ServiceStatistics {
-  id: number
-  coreId: number
-  key: string
-  isActive: boolean
-  enterCount: number
-  exitCount: number
-}
-
 // Task internal state (用于事件处理)
 interface TaskState {
   id: number
@@ -93,9 +73,16 @@ interface ResourceState {
 interface ServiceState {
   id: number
   coreId: number
-  isActive: boolean
-  enterCount: number
-  exitCount: number
+  count: number
+  lastStatus: number
+}
+
+// Hook internal state
+interface HookState {
+  id: number
+  coreId: number
+  count: number
+  lastStatus: number
 }
 
 export default class OsStatistics {
@@ -104,13 +91,8 @@ export default class OsStatistics {
   private isrs: Map<string, IsrState> = new Map()
   private resources: Map<string, ResourceState> = new Map()
   private services: Map<string, ServiceState> = new Map()
+  private hooks: Map<string, HookState> = new Map()
 
-  // 实时更新的统计结果（直接可查询）
-
-  private resourceStats: Map<string, ResourceStatistics> = new Map()
-  private serviceStats: Map<string, ServiceStatistics> = new Map()
-
-  private errorHookCount = 0
   private startTime?: number
   private endTime?: number
 
@@ -134,10 +116,8 @@ export default class OsStatistics {
     this.isrs.clear()
     this.resources.clear()
     this.services.clear()
+    this.hooks.clear()
 
-    this.resourceStats.clear()
-    this.serviceStats.clear()
-    this.errorHookCount = 0
     this.startTime = undefined
     this.endTime = undefined
     this.coreExecutionTime.clear()
@@ -236,13 +216,13 @@ export default class OsStatistics {
         needUpdateLoad = true
         break
       case TaskType.RESOURCE:
-        this.processResourceEvent(event)
+        result.push(...this.processResourceEvent(event))
         break
       case TaskType.SERVICE:
-        this.processServiceEvent(event)
+        result.push(...this.processServiceEvent(event))
         break
       case TaskType.HOOK:
-        this.processHookEvent(event)
+        result.push(...this.processHookEvent(event))
         break
     }
     if (needUpdateLoad) {
@@ -627,7 +607,7 @@ export default class OsStatistics {
     return result
   }
 
-  private processResourceEvent(event: OsEvent): void {
+  private processResourceEvent(event: OsEvent): { id: string; value: any }[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as ResourceStatus
 
@@ -651,60 +631,83 @@ export default class OsStatistics {
     }
 
     // 立即更新统计结果
-    this.updateResourceStatistics(key, resource)
+    return this.updateResourceStatistics(key, resource)
   }
 
-  private updateResourceStatistics(key: string, resource: ResourceState): void {
-    this.resourceStats.set(key, {
-      id: resource.id,
-      coreId: resource.coreId,
-      key,
-      currentStatus: ResourceStatus[resource.currentStatus],
-      acquireCount: resource.acquireCount,
-      releaseCount: resource.releaseCount
+  private updateResourceStatistics(
+    key: string,
+    resource: ResourceState
+  ): { id: string; value: any }[] {
+    const result: { id: string; value: any }[] = []
+
+    // Return current status data
+    result.push({
+      id: `OsTrace.Resource.${key}.Status`,
+      value: ResourceStatus[resource.currentStatus]
     })
+    result.push({ id: `OsTrace.Resource.${key}.AcquireCount`, value: resource.acquireCount })
+    result.push({ id: `OsTrace.Resource.${key}.ReleaseCount`, value: resource.releaseCount })
+
+    return result
   }
 
-  private processServiceEvent(event: OsEvent): void {
+  private processServiceEvent(event: OsEvent): { id: string; value: any }[] {
     const key = this.getKey(event.type, event.id, event.coreId)
 
     if (!this.services.has(key)) {
       this.services.set(key, {
         id: event.id,
         coreId: event.coreId,
-        isActive: false,
-        enterCount: 0,
-        exitCount: 0
+        count: 0,
+        lastStatus: 0
       })
     }
 
     const service = this.services.get(key)!
-
-    if (event.status === 0) {
-      service.isActive = true
-      service.enterCount++
-    } else {
-      service.isActive = false
-      service.exitCount++
-    }
+    service.count++
+    service.lastStatus = event.status
 
     // 立即更新统计结果
-    this.updateServiceStatistics(key, service)
+    return this.updateServiceStatistics(key, service)
   }
 
-  private updateServiceStatistics(key: string, service: ServiceState): void {
-    this.serviceStats.set(key, {
-      id: service.id,
-      coreId: service.coreId,
-      key,
-      isActive: service.isActive,
-      enterCount: service.enterCount,
-      exitCount: service.exitCount
-    })
+  private updateServiceStatistics(
+    key: string,
+    service: ServiceState
+  ): { id: string; value: any }[] {
+    const result: { id: string; value: any }[] = []
+
+    // Return current status data
+    result.push({ id: `OsTrace.Service.${key}.Count`, value: service.count })
+    result.push({ id: `OsTrace.Service.${key}.LastStatus`, value: service.lastStatus })
+
+    return result
   }
 
-  private processHookEvent(event: OsEvent): void {
-    this.errorHookCount++
+  private processHookEvent(event: OsEvent): { id: string; value: any }[] {
+    const result: { id: string; value: any }[] = []
+
+    // Track hook details
+    const key = this.getKey(event.type, event.id, event.coreId)
+
+    if (!this.hooks.has(key)) {
+      this.hooks.set(key, {
+        id: event.id,
+        coreId: event.coreId,
+        count: 0,
+        lastStatus: 0
+      })
+    }
+
+    const hook = this.hooks.get(key)!
+    hook.count++
+    hook.lastStatus = event.status
+
+    // Return hook status data
+    result.push({ id: `OsTrace.Hook.${key}.Count`, value: hook.count })
+    result.push({ id: `OsTrace.Hook.${key}.LastStatus`, value: hook.lastStatus })
+
+    return result
   }
 
   private updateCoreLoad(coreId: number): { id: string; value: any }[] {

@@ -46,6 +46,9 @@
           <el-tooltip effect="light" content="Add Variable" placement="bottom">
             <el-button type="primary" link :disabled="!highlightedRows.length" @click="addVariable">
               <Icon :icon="variableIcon" style="font-size: 14px" />
+              <span v-if="highlightedRows.length" style="margin-left: 4px; font-size: 12px">
+                ({{ highlightedRows.length }})
+              </span>
             </el-button>
           </el-tooltip>
           <el-tooltip
@@ -294,15 +297,10 @@ function filterTreeData(
       if (count >= MAX_SEARCH_RESULTS) return null
 
       const newItem = { ...item }
-      if (item.children && item.children.length) {
-        const result = filterTreeData(item.children, searchText)
-        newItem.children = result.items
-        count += result.count
-      }
 
-      const matches =
+      // 检查当前节点是否匹配
+      const currentMatches =
         item.name.toLowerCase().includes(searchText) ||
-        (newItem.children && newItem.children.length > 0) ||
         item.value?.type?.toLowerCase().includes(searchText) ||
         String(item.value?.initValue).toLowerCase().includes(searchText) ||
         String(item.value?.min).includes(searchText) ||
@@ -310,11 +308,29 @@ function filterTreeData(
         item.value?.unit?.toLowerCase().includes(searchText) ||
         matchesId(searchText, item.id)
 
-      if (matches) {
+      // 如果当前节点匹配，保留所有子节点
+      if (currentMatches) {
         count++
+        // 保持原有的子节点结构不变
+        if (item.children && item.children.length) {
+          newItem.children = item.children
+        }
+        return newItem
       }
 
-      return matches ? newItem : null
+      // 如果当前节点不匹配，递归过滤子节点
+      if (item.children && item.children.length) {
+        const result = filterTreeData(item.children, searchText)
+        newItem.children = result.items
+        count += result.count
+
+        // 如果有子节点匹配，保留当前节点
+        if (newItem.children.length > 0) {
+          return newItem
+        }
+      }
+
+      return null
     })
     .filter(Boolean) as TreeItem[]
 

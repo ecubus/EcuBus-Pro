@@ -1801,145 +1801,19 @@
     "guages": {},
     "vars": {},
     "datas": {
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMin": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg",
-        "name": "ExecutionTimeAvg",
-        "color": "#82950a",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg",
-          "variableType": "system",
-          "variableName": "ExecutionTimeAvg",
-          "variableFullName": "OsTrace.Os_Trace.SYS_TIMER_CORE0.ExecutionTimeAvg"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg",
-        "name": "CallIntervalAvg",
-        "color": "#289bec",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg",
-          "variableType": "system",
-          "variableName": "CallIntervalAvg",
-          "variableFullName": "OsTrace.Os_Trace.SYS_TIMER_CORE0.CallIntervalAvg"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent",
-        "name": "LoadPercent",
-        "color": "#24d480",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "%"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent",
-          "variableType": "system",
-          "variableName": "LoadPercent",
-          "variableFullName": "OsTrace.Os_Trace.Core0.LoadPercent"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime",
-        "name": "TotalTime",
-        "color": "#3e5d42",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "ms"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime",
-          "variableType": "system",
-          "variableName": "TotalTime",
-          "variableFullName": "OsTrace.Os_Trace.Core0.TotalTime"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate",
-        "name": "RunningRate",
-        "color": "#560b13",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "%"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate",
-          "variableType": "system",
-          "variableName": "RunningRate",
-          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.RunningRate"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg",
-        "name": "DelayTimeAvg",
-        "color": "#80b4a0",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg",
-          "variableType": "system",
-          "variableName": "DelayTimeAvg",
-          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeAvg"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMin",
         "name": "DelayTimeMin",
-        "color": "#b8e7d5",
+        "color": "#2c2972",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMin",
           "variableType": "system",
           "variableName": "DelayTimeMin",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeMin"
@@ -1948,19 +1822,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMax": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMax",
         "name": "DelayTimeMax",
-        "color": "#93adf2",
+        "color": "#787602",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeMax",
           "variableType": "system",
           "variableName": "DelayTimeMax",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeMax"
@@ -1969,19 +1843,40 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeAvg": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin",
-        "name": "ActivationIntervalMin",
-        "color": "#e38409",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeAvg",
+        "name": "DelayTimeAvg",
+        "color": "#a82ee7",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.DelayTimeAvg",
+          "variableType": "system",
+          "variableName": "DelayTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMin": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMin",
+        "name": "ActivationIntervalMin",
+        "color": "#cd7775",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMin",
           "variableType": "system",
           "variableName": "ActivationIntervalMin",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalMin"
@@ -1990,19 +1885,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMax": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMax",
         "name": "ActivationIntervalMax",
-        "color": "#975768",
+        "color": "#24005c",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalMax",
           "variableType": "system",
           "variableName": "ActivationIntervalMax",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalMax"
@@ -2011,19 +1906,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalAvg": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalAvg",
         "name": "ActivationIntervalAvg",
-        "color": "#afeb07",
+        "color": "#f4d351",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActivationIntervalAvg",
           "variableType": "system",
           "variableName": "ActivationIntervalAvg",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalAvg"
@@ -2032,19 +1927,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMin": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMin",
         "name": "StartIntervalMin",
-        "color": "#bf4c9a",
+        "color": "#dd1543",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMin",
           "variableType": "system",
           "variableName": "StartIntervalMin",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalMin"
@@ -2053,19 +1948,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMax": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMax",
         "name": "StartIntervalMax",
-        "color": "#bae780",
+        "color": "#e1cdb8",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalMax",
           "variableType": "system",
           "variableName": "StartIntervalMax",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalMax"
@@ -2074,19 +1969,19 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalAvg": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalAvg",
         "name": "StartIntervalAvg",
-        "color": "#b2453c",
+        "color": "#7010ba",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "us"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartIntervalAvg",
           "variableType": "system",
           "variableName": "StartIntervalAvg",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalAvg"
@@ -2095,18 +1990,81 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMin": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMin",
+        "name": "ExecutionTimeMin",
+        "color": "#b05a7f",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMin",
+          "variableType": "system",
+          "variableName": "ExecutionTimeMin",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ExecutionTimeMin"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMax": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMax",
+        "name": "ExecutionTimeMax",
+        "color": "#a6252c",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeMax",
+          "variableType": "system",
+          "variableName": "ExecutionTimeMax",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ExecutionTimeMax"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#f4a1d8",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ExecutionTimeAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartCount",
         "name": "StartCount",
-        "color": "#00767e",
+        "color": "#10e032",
         "yAxis": {
           "min": 0,
           "max": 100
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.StartCount",
           "variableType": "system",
           "variableName": "StartCount",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartCount"
@@ -2115,18 +2073,18 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Status": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Status",
         "name": "Status",
-        "color": "#502e2f",
+        "color": "#999356",
         "yAxis": {
           "min": 0,
           "max": 100
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Status",
           "variableType": "system",
           "variableName": "Status",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.Status"
@@ -2135,18 +2093,18 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActiveCount": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActiveCount",
         "name": "ActiveCount",
-        "color": "#142934",
+        "color": "#33fd13",
         "yAxis": {
           "min": 0,
           "max": 100
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.ActiveCount",
           "variableType": "system",
           "variableName": "ActiveCount",
           "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActiveCount"
@@ -2155,43 +2113,43 @@
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.RunningRate": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter",
-        "name": "Jitter",
-        "color": "#0e1815",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.RunningRate",
+        "name": "RunningRate",
+        "color": "#6b9423",
         "yAxis": {
           "min": 0,
           "max": 100,
           "unit": "%"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.RunningRate",
           "variableType": "system",
-          "variableName": "Jitter",
-          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.Jitter"
+          "variableName": "RunningRate",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.RunningRate"
         },
         "graph": {
           "id": "datas"
         }
       },
-      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Jitter": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime",
-        "name": "ExecutionTime",
-        "color": "#973a6e",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Jitter",
+        "name": "Jitter",
+        "color": "#4de46d",
         "yAxis": {
           "min": 0,
           "max": 100,
-          "unit": "ms"
+          "unit": "%"
         },
         "bindValue": {
-          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.0_1_0.Jitter",
           "variableType": "system",
-          "variableName": "ExecutionTime",
-          "variableFullName": "OsTrace.Os_Trace.Core0.ExecutionTime"
+          "variableName": "Jitter",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.Jitter"
         },
         "graph": {
           "id": "datas"
@@ -2240,8 +2198,8 @@
       },
       "datas": {
         "pos": {
-          "x": 836.5,
-          "y": 77,
+          "x": 354.5,
+          "y": 3,
           "w": 1046,
           "h": 671
         },
@@ -2264,8 +2222,8 @@
       },
       "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
         "pos": {
-          "x": 279.5,
-          "y": 47.5,
+          "x": 72.5,
+          "y": 35.5,
           "w": 845,
           "h": 400
         },

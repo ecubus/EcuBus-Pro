@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECharts运算块时间轴</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        #chart {
+            width: 100%;
+            height: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .controls button {
+            margin: 0 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .controls .play-btn {
+            background-color: #5470c6;
+            color: white;
+        }
+        .controls .play-btn:hover {
+            background-color: #4056a6;
+        }
+        .controls .pause-btn {
+            background-color: #ee6666;
+            color: white;
+        }
+        .controls .pause-btn:hover {
+            background-color: #d44646;
+        }
+        .controls .reset-btn {
+            background-color: #91cc75;
+            color: white;
+        }
+        .controls .reset-btn:hover {
+            background-color: #7bb255;
+        }
+        .controls label {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .controls input[type="range"] {
+            margin: 0 10px;
+            width: 150px;
+        }
+        .time-info {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">运算块时间轴示例</div>
+    <div class="controls">
+        <button class="play-btn" onclick="startAnimation()">播放</button>
+        <button class="pause-btn" onclick="pauseAnimation()">暂停</button>
+        <button class="reset-btn" onclick="resetAnimation()">重置</button>
+        <label>速度:</label>
+        <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1" onchange="updateSpeed()">
+        <span id="speedValue">1.0x</span>
+        <label>自动生成块:</label>
+        <input type="checkbox" id="autoGenerate" checked onchange="toggleAutoGenerate()">
+    </div>
+    <div class="time-info">
+        当前时间: <span id="currentTime">0.0</span>s | 活跃块数: <span id="activeBlocks">6</span>
+    </div>
+    <div id="chart"></div>
+
+    <script>
+        // 初始化ECharts实例
+        const chart = echarts.init(document.getElementById('chart'));
+
+        // 动画控制变量
+        let currentTime = 0;
+        let isPlaying = false;
+        let animationSpeed = 1.0;
+        let autoGenerateBlocks = true;
+        let animationId = null;
+        let lastUpdateTime = Date.now();
+        let nextBlockId = 7;
+
+        // 时间窗口设置
+        const timeWindow = 15; // 显示15秒的时间窗口
+        let viewportStart = 0;
+
+        // 预定义的块名称和颜色
+        const blockTemplates = [
+            { names: ['初始化', '启动', '引导', '配置'], colors: ['#5470c6', '#4056a6', '#3046a6'] },
+            { names: ['数据加载', '读取数据', '获取信息', '导入'], colors: ['#91cc75', '#7bb255', '#6ba245'] },
+            { names: ['预处理', '数据清洗', '格式化', '验证'], colors: ['#fac858', '#e6b848', '#d6a838'] },
+            { names: ['计算处理', '运算', '分析', '处理'], colors: ['#ee6666', '#d44646', '#c43636'] },
+            { names: ['结果输出', '写入', '保存', '导出'], colors: ['#73c0de', '#63b0ce', '#53a0be'] },
+            { names: ['清理', '释放', '回收', '整理'], colors: ['#3ba272', '#2b9262', '#1b8252'] },
+            { names: ['监控', '检查', '诊断', '测试'], colors: ['#fc8452', '#ec7442', '#dc6432'] },
+            { names: ['同步', '更新', '刷新', '重载'], colors: ['#9a60b4', '#8a50a4', '#7a4094'] }
+        ];
+
+        // 初始运算块数据
+        let blocks = [
+            { id: 1, name: '初始化', start: 0, duration: 2, color: '#5470c6', yPos: 5.5, height: 60 },
+            { id: 2, name: '数据加载', start: 2, duration: 3, color: '#91cc75', yPos: 4.2, height: 80 },
+            { id: 3, name: '预处理', start: 5, duration: 1.5, color: '#fac858', yPos: 3.1, height: 40 },
+            { id: 4, name: '计算处理', start: 6.5, duration: 4, color: '#ee6666', yPos: 2.0, height: 100 },
+            { id: 5, name: '结果输出', start: 10.5, duration: 1, color: '#73c0de', yPos: 0.8, height: 50 },
+            { id: 6, name: '清理', start: 11.5, duration: 0.5, color: '#3ba272', yPos: 6.2, height: 30 }
+        ];
+
+        // 生成随机块
+        function generateRandomBlock() {
+            const template = blockTemplates[Math.floor(Math.random() * blockTemplates.length)];
+            const name = template.names[Math.floor(Math.random() * template.names.length)];
+            const color = template.colors[Math.floor(Math.random() * template.colors.length)];
+            
+            return {
+                id: nextBlockId++,
+                name: name,
+                start: currentTime + Math.random() * 3, // 在当前时间后0-3秒内开始
+                duration: 0.5 + Math.random() * 4, // 持续0.5-4.5秒
+                color: color,
+                yPos: 0.5 + Math.random() * 6, // Y位置在0.5-6.5之间
+                height: 30 + Math.random() * 80 // 高度在30-110之间
+            };
+        }
+
+        // 移除过期的块（在视口左侧超过5秒的块）
+        function removeOldBlocks() {
+            // blocks = blocks.filter(block => (block.start + block.duration) > (viewportStart - 5));
+        }
+
+        // 生成连接线数据
+        function generateConnections() {
+            const connections = [];
+            const sortedBlocks = blocks.sort((a, b) => a.start - b.start);
+            
+            for (let i = 0; i < sortedBlocks.length - 1; i++) {
+                const currentBlock = sortedBlocks[i];
+                const nextBlock = sortedBlocks[i + 1];
+                const endTime = currentBlock.start + currentBlock.duration;
+                const startTime = nextBlock.start;
+                
+                // 只绘制在视口内的连接线
+                if (endTime >= viewportStart && startTime <= viewportStart + timeWindow) {
+                    connections.push([
+                        [endTime, currentBlock.yPos],
+                        [endTime, nextBlock.yPos],
+                        [startTime, nextBlock.yPos]
+                    ]);
+                }
+            }
+            return connections;
+        }
+
+        // 更新图表配置
+        function updateChart() {
+            const connections = generateConnections();
+            
+            // 过滤在当前视口内的块
+            const visibleBlocks = blocks.filter(block => 
+                (block.start + block.duration) >= viewportStart && 
+                block.start <= (viewportStart + timeWindow)
+            );
+
+            const option = {
+                title: {
+                    text: '运算流程时间轴 (动态)',
+                    left: 'center',
+                    top: 20,
+                    textStyle: {
+                        fontSize: 16,
+                        color: '#333'
+                    }
+                },
+                dataZoom: [
+            {
+              show: true,
+              type: 'slider',
+              height: 12,
+              bottom: 10,
+              showDetail: true,
+              showDataShadow: false
+            }
+          ],
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.componentType === 'series' && params.seriesType === 'custom' && params.seriesName === '运算块') {
+                            const blockData = visibleBlocks[params.dataIndex];
+                            if (blockData) {
+                                return `
+                                    <strong>${blockData.name}</strong><br/>
+                                    开始时间: ${blockData.start.toFixed(1)}s<br/>
+                                    持续时间: ${blockData.duration.toFixed(1)}s<br/>
+                                    结束时间: ${(blockData.start + blockData.duration).toFixed(1)}s<br/>
+                                    块高度: ${blockData.height.toFixed(0)}px<br/>
+                                    ID: ${blockData.id}
+                                `;
+                            }
+                        }
+                        return '';
+                    }
+                },
+                graphic: currentTime > 0 ? [
+                    // 当前时间指示线 - 只在动画开始后显示
+                    {
+                        type: 'line',
+                        shape: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 0
+                        },
+                        style: {
+                            stroke: '#ff4444',
+                            lineWidth: 3
+                        },
+                        silent: true,
+                        z: 100
+                    }
+                ] : [],
+                grid: {
+                    left: 120,
+                    right: 50,
+                    top: 80,
+                    bottom: 80
+                },
+                xAxis: {
+                    type: 'value',
+                    name: '时间 (秒)',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    min: viewportStart,
+                    max: viewportStart + timeWindow,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#333'
+                        }
+                    },
+                    axisTick: {
+                        show: true
+                    },
+                    axisLabel: {
+                        formatter: '{value}s'
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#e0e0e0',
+                            type: 'dashed'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 0,
+                    max: 7,
+                    axisLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                },
+                series: [
+                    // 运算块系列
+                    {
+                        name: '运算块',
+                        type: 'custom',
+                        renderItem: function(params, api) {
+                            const start = api.value(0);
+                            const duration = api.value(1);
+                            const name = api.value(2);
+                            const color = api.value(3);
+                            const yPos = api.value(4);
+                            const height = api.value(5);
+                            
+                            const startPoint = api.coord([start, yPos]);
+                            const endPoint = api.coord([start + duration, yPos]);
+                            
+                            // 检查块是否正在执行（当前时间在块的时间范围内）
+                            const isActive = currentTime >= start && currentTime <= (start + duration);
+                            const blockColor = isActive ? '#ffff00' : color; // 正在执行的块显示为黄色
+                            const borderColor = isActive ? '#ff0000' : '#000'; // 正在执行的块边框为红色
+                            
+                            return {
+                                type: 'group',
+                                children: [
+                                    // 主块
+                                    {
+                                        type: 'rect',
+                                        shape: {
+                                            x: startPoint[0],
+                                            y: startPoint[1] - height/2,
+                                            width: Math.max(endPoint[0] - startPoint[0], 1),
+                                            height: height
+                                        },
+                                        style: {
+                                            fill: blockColor,
+                                            opacity: isActive ? 0.8 : 0.7
+                                        }
+                                    },
+                                    // 左边框
+                                    {
+                                        type: 'line',
+                                        shape: {
+                                            x1: startPoint[0],
+                                            y1: startPoint[1] - height/2,
+                                            x2: startPoint[0],
+                                            y2: startPoint[1] + height/2
+                                        },
+                                        style: {
+                                            stroke: borderColor,
+                                            lineWidth: isActive ? 6 : 3
+                                        }
+                                    },
+                                    // 右边框
+                                    {
+                                        type: 'line',
+                                        shape: {
+                                            x1: endPoint[0],
+                                            y1: startPoint[1] - height/2,
+                                            x2: endPoint[0],
+                                            y2: startPoint[1] + height/2
+                                        },
+                                        style: {
+                                            stroke: borderColor,
+                                            lineWidth: isActive ? 6 : 3
+                                        }
+                                    },
+                                    // 块内文本（持续时间）
+                                    {
+                                        type: 'text',
+                                        style: {
+                                            text: `${duration.toFixed(1)}s`,
+                                            x: (startPoint[0] + endPoint[0]) / 2,
+                                            y: startPoint[1],
+                                            textAlign: 'center',
+                                            textVerticalAlign: 'middle',
+                                            fontSize: isActive ? 12 : 10,
+                                            fill: isActive ? '#000' : '#fff',
+                                            fontWeight: 'bold'
+                                        }
+                                    }
+                                ]
+                            };
+                        },
+                        data: visibleBlocks.map(block => [
+                            block.start,
+                            block.duration,
+                            block.name,
+                            block.color,
+                            block.yPos,
+                            block.height
+                        ]),
+                        z: 1
+                    },
+                    // Y轴标签系列（块名称）
+                    {
+                        name: 'Y轴标签',
+                        type: 'custom',
+                        renderItem: function(params, api) {
+                            const name = api.value(0);
+                            const yPos = api.value(1);
+                            
+                            const point = api.coord([viewportStart, yPos]);
+                            
+                            return {
+                                type: 'group',
+                                children: [
+                                    // 按键背景
+                                    {
+                                        type: 'rect',
+                                        shape: {
+                                            x: point[0] - 80,
+                                            y: point[1] - 12,
+                                            width: 70,
+                                            height: 24,
+                                            r: 4
+                                        },
+                                        style: {
+                                            fill: '#f0f0f0',
+                                            stroke: '#ccc',
+                                            lineWidth: 1
+                                        }
+                                    },
+                                    // 按键文本
+                                    {
+                                        type: 'text',
+                                        style: {
+                                            text: '你好',
+                                            x: point[0] - 45,
+                                            y: point[1],
+                                            textAlign: 'center',
+                                            textVerticalAlign: 'middle',
+                                            fontSize: 12,
+                                            fill: '#333',
+                                            fontWeight: 'normal'
+                                        }
+                                    }
+                                ],
+                                // 添加交互样式
+                                onmouseover: function() {
+                                    this.children[0].style.fill = '#e0e0e0';
+                                    this.children[0].style.stroke = '#999';
+                                },
+                                onmouseout: function() {
+                                    this.children[0].style.fill = '#f0f0f0';
+                                    this.children[0].style.stroke = '#ccc';
+                                },
+                                onclick: function() {
+                                    console.log('点击了标签:', name);
+                                    // 这里可以添加点击事件处理逻辑
+                                }
+                            };
+                        },
+                        data: visibleBlocks.map(block => [
+                            block.name,
+                            block.yPos
+                        ]),
+                        z: 1
+                    },
+                    // 连接线系列
+                    {
+                        name: '连接线',
+                        type: 'custom',
+                        renderItem: function(params, api) {
+                            const connection = connections[params.dataIndex];
+                            if (!connection) return null;
+                            
+                            const point1 = api.coord(connection[0]);
+                            const point2 = api.coord(connection[1]);
+                            const point3 = api.coord(connection[2]);
+                            
+                            return {
+                                type: 'group',
+                                children: [
+                                    // 垂直线段
+                                    {
+                                        type: 'line',
+                                        shape: {
+                                            x1: point1[0],
+                                            y1: point1[1],
+                                            x2: point2[0],
+                                            y2: point2[1],
+                                        },
+                                        style: {
+                                            stroke: '#666',
+                                            lineWidth: 2,
+                                            type: 'dashed'
+                                        }
+                                    },
+                                    // 水平线段
+                                    {
+                                        type: 'line',
+                                        shape: {
+                                            x1: point2[0],
+                                            y1: point2[1],
+                                            x2: point3[0],
+                                            y2: point3[1],
+                                        },
+                                        style: {
+                                            stroke: '#666',
+                                            lineWidth: 2,
+                                            type: 'dashed'
+                                        }
+                                    }
+                                ]
+                            };
+                        },
+                        data: connections.map((conn, index) => index),
+                        z: 0
+                    },
+                    // 时间点标记
+                    {
+                        name: '时间点',
+                        type: 'scatter',
+                        data: visibleBlocks.map(block => [block.start, block.yPos]).concat(
+                            visibleBlocks.map(block => [block.start + block.duration, block.yPos])
+                        ),
+                        symbol: 'circle',
+                        symbolSize: 3,
+                        itemStyle: {
+                            color: '#333',
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        },
+                        z: 2
+                    }
+                ]
+            };
+
+            // 更新当前时间指示线
+            if (option.graphic && option.graphic[0]) {
+                try {
+                    // 确保图表已经渲染完成
+                    if (chart.getModel() && chart.getModel().getComponent('grid')) {
+                        const timeLineCoord = chart.convertToPixel('grid', [currentTime, 3.5]);
+                        const gridRect = chart.getModel().getComponent('grid').coordinateSystem.getRect();
+                        
+                        if (timeLineCoord && gridRect) {
+                            option.graphic[0].shape = {
+                                x1: timeLineCoord[0],
+                                y1: gridRect.y,
+                                x2: timeLineCoord[0],
+                                y2: gridRect.y + gridRect.height
+                            };
+                        }
+                    }
+                } catch (error) {
+                    // 如果坐标转换失败，隐藏时间线
+                    option.graphic[0].shape = {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 0
+                    };
+                }
+            }
+
+            chart.setOption(option, true);
+            
+            // 更新UI显示
+            document.getElementById('currentTime').textContent = currentTime.toFixed(1);
+            document.getElementById('activeBlocks').textContent = blocks.length;
+        }
+
+        // 动画循环
+        function animate() {
+            if (!isPlaying) return;
+            
+            const now = Date.now();
+            const deltaTime = (now - lastUpdateTime) / 1000 * animationSpeed;
+            lastUpdateTime = now;
+            
+            currentTime += deltaTime;
+            
+            // 更新视口位置（跟随当前时间）
+            viewportStart = Math.max(0, currentTime - timeWindow * 0.3); // 当前时间显示在视口的30%位置
+            
+            // 随机生成新块
+            if (autoGenerateBlocks && Math.random() < 0.02 * animationSpeed) { // 2%概率每帧生成新块
+                blocks.push(generateRandomBlock());
+            }
+            
+            // 移除过期的块
+            removeOldBlocks();
+            
+            // 更新图表 - 添加错误处理
+            try {
+                updateChart();
+            } catch (error) {
+                console.warn('Chart update error:', error);
+                // 继续动画，不中断
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // 控制函数
+        function startAnimation() {
+            if (!isPlaying) {
+                isPlaying = true;
+                lastUpdateTime = Date.now();
+                animate();
+            }
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function resetAnimation() {
+            pauseAnimation();
+            currentTime = 0;
+            viewportStart = 0;
+            nextBlockId = 7;
+            
+            // 重置为初始块
+            blocks = [
+                { id: 1, name: '初始化', start: 0, duration: 2, color: '#5470c6', yPos: 5.5, height: 60 },
+                { id: 2, name: '数据加载', start: 2, duration: 3, color: '#91cc75', yPos: 4.2, height: 80 },
+                { id: 3, name: '预处理', start: 5, duration: 1.5, color: '#fac858', yPos: 3.1, height: 40 },
+                { id: 4, name: '计算处理', start: 6.5, duration: 4, color: '#ee6666', yPos: 2.0, height: 100 },
+                { id: 5, name: '结果输出', start: 10.5, duration: 1, color: '#73c0de', yPos: 0.8, height: 50 },
+                { id: 6, name: '清理', start: 11.5, duration: 0.5, color: '#3ba272', yPos: 6.2, height: 30 }
+            ];
+            
+            updateChart();
+        }
+
+        function updateSpeed() {
+            const slider = document.getElementById('speedSlider');
+            animationSpeed = parseFloat(slider.value);
+            document.getElementById('speedValue').textContent = animationSpeed.toFixed(1) + 'x';
+        }
+
+        function toggleAutoGenerate() {
+            const checkbox = document.getElementById('autoGenerate');
+            autoGenerateBlocks = checkbox.checked;
+        }
+
+        // 初始化 - 延迟确保图表完全加载
+        setTimeout(() => {
+            updateChart();
+        }, 100);
+
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            chart.resize();
+            updateChart();
+        });
+
+        // 添加点击事件
+        chart.on('click', function(params) {
+            if (params.componentType === 'series' && params.seriesType === 'custom' && params.seriesName === '运算块') {
+                const visibleBlocks = blocks.filter(block => 
+                    (block.start + block.duration) >= viewportStart && 
+                    block.start <= (viewportStart + timeWindow)
+                );
+                const blockData = visibleBlocks[params.dataIndex];
+                if (blockData) {
+                    alert(`点击了运算块: ${blockData.name}\nID: ${blockData.id}\n开始时间: ${blockData.start.toFixed(1)}s\n持续时间: ${blockData.duration.toFixed(1)}s\n块高度: ${blockData.height.toFixed(0)}px`);
+                }
+            }
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case ' ': // 空格键播放/暂停
+                    event.preventDefault();
+                    if (isPlaying) {
+                        pauseAnimation();
+                    } else {
+                        startAnimation();
+                    }
+                    break;
+                case 'r': // R键重置
+                case 'R':
+                    resetAnimation();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

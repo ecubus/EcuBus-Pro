@@ -1,0 +1,1357 @@
+{
+  "data": {
+    "devices": {},
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {
+        "1f5475f3-e6be-448b-88be-4ca0100d8903": {
+          "id": "1f5475f3-e6be-448b-88be-4ca0100d8903",
+          "name": "Os_Trace",
+          "version": {
+            "koil": "2.2",
+            "osSemantics": {
+              "type": "ORTI",
+              "version": "2.2"
+            }
+          },
+          "implementation": {
+            "name": "ISoft_ORTI",
+            "os": {
+              "vs_CORE_NUM": {
+                "type": "int",
+                "variableName": "vs_CORE_NUM",
+                "description": "Number of Cores",
+                "isArray": false
+              },
+              "vs_CORE_ID": {
+                "name": "Os_CoreIdType",
+                "type": "Os_CoreIdType",
+                "values": {
+                  "CORE_ID_0": 0
+                },
+                "variableName": "vs_CORE_ID",
+                "description": "Current Core ID",
+                "isArray": true,
+                "totrace": false
+              },
+              "RUNNINGTASK": {
+                "name": "RUNNINGTASK",
+                "values": {
+                  "OsTask_5ms": 0,
+                  "OsTask_20ms": 1,
+                  "OsTask_Event": 2,
+                  "OsTask_init": 3,
+                  "OsTask_10ms": 4,
+                  "OsTask_100ms": 5,
+                  "OsTask_Resource": 6,
+                  "OsTask_Rand1": 7,
+                  "OsTask_Rand2": 8,
+                  "OsTask_Rand3": 9,
+                  "OsTask_Idle_Core0": 10,
+                  "NoRunningTask": 65535
+                },
+                "variableName": "RUNNINGTASK",
+                "description": "Running Task Identification",
+                "isArray": true,
+                "totrace": true
+              },
+              "RUNNINGTASKPRIORITY": {
+                "type": "unsigned short",
+                "variableName": "RUNNINGTASKPRIORITY",
+                "description": "Priority of Running Task",
+                "isArray": true
+              },
+              "RUNNINGISR2": {
+                "name": "RUNNINGISR2",
+                "values": {
+                  "SYS_TIMER_CORE0": 0,
+                  "CPU0_SB": 1,
+                  "CPU1_SB": 2,
+                  "NoRunningIsr2": 65535
+                },
+                "variableName": "RUNNINGISR2",
+                "description": "Running ISR of category 2",
+                "isArray": true,
+                "totrace": true
+              },
+              "vs_SERVICETRACE": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "GetApplicationID": 0,
+                  "GetISRID": 1,
+                  "CallTrustedFunction": 2,
+                  "CheckISRMemoryAccess": 3,
+                  "CheckTaskMemoryAccess": 4,
+                  "CheckObjectAccess": 5,
+                  "CheckObjectOwnership": 6,
+                  "StartScheduleTableRel": 7,
+                  "StartScheduleTableAbs": 8,
+                  "StopScheduleTable": 9,
+                  "NextScheduleTable": 10,
+                  "StartScheduleTableSynchron": 11,
+                  "SyncScheduleTable": 12,
+                  "SetScheduleTableAsync": 13,
+                  "GetScheduleTableStatus": 14,
+                  "IncrementCounter": 15,
+                  "GetCounterValue": 16,
+                  "GetElapsedValue": 17,
+                  "TerminateApplication": 18,
+                  "AllowAccess": 19,
+                  "GetApplicationState": 20,
+                  "GetNumberOfActivatedCores": 21,
+                  "GetCoreID": 22,
+                  "StartCore": 23,
+                  "StartNonAutosarCore": 24,
+                  "GetSpinlock": 25,
+                  "ReleaseSpinlock": 26,
+                  "TryToGetSpinlock": 27,
+                  "ShutdownAllCores": 28,
+                  "ControlIdle": 29,
+                  "IocSend": 30,
+                  "IocWrite": 31,
+                  "IocSendGroup": 32,
+                  "IocWriteGroup": 33,
+                  "IocReceive": 34,
+                  "IocRead": 35,
+                  "IocReceiveGroup": 36,
+                  "IocReadGroup": 37,
+                  "IocEmptyQueue": 38,
+                  "GetCurrentApplicationID": 39,
+                  "ReadPeripheral8": 40,
+                  "ReadPeripheral16": 41,
+                  "ReadPeripheral32": 42,
+                  "WritePeripheral8": 43,
+                  "WritePeripheral16": 44,
+                  "WritePeripheral32": 45,
+                  "ModifyPeripheral8": 46,
+                  "ModifyPeripheral32": 47,
+                  "DisableInterruptSource": 48,
+                  "EnableInterruptSource": 49,
+                  "ClearPendingInterrupt": 50,
+                  "ActivateTaskAsyn": 51,
+                  "SetEventAsyn": 52,
+                  "ModifyPeripheral16": 53,
+                  "WaitAllEvents": 215,
+                  "IocCallBackNotify": 222,
+                  "ActivateTask": 223,
+                  "TerminateTask": 224,
+                  "ChainTask": 225,
+                  "Schedule": 226,
+                  "GetTaskID": 227,
+                  "GetTaskState": 228,
+                  "EnableAllInterrupts": 229,
+                  "DisableAllInterrupts": 230,
+                  "ResumeAllInterrupts": 231,
+                  "SuspendAllInterrupts": 232,
+                  "ResumeOSInterrupts": 233,
+                  "SuspendOSInterrupts": 234,
+                  "DeclareResource": 235,
+                  "GetResource": 236,
+                  "ReleaseResource": 237,
+                  "DeclareEvent": 238,
+                  "SetEvent": 239,
+                  "ClearEvent": 240,
+                  "GetEvent": 241,
+                  "WaitEvent": 242,
+                  "GetAlarmBase": 243,
+                  "GetAlarm": 244,
+                  "SetRelAlarm": 245,
+                  "SetAbsAlarm": 246,
+                  "CancelAlarm": 247,
+                  "GetActiveApplicationMode": 248,
+                  "StartOS": 249,
+                  "ShutdownOS": 250,
+                  "ErrorHook": 251,
+                  "PreTaskHook": 252,
+                  "PostTaskHook": 253,
+                  "StartupHook": 254,
+                  "ShutdownHook": 255,
+                  "NoService": 68
+                },
+                "variableName": "vs_SERVICETRACE",
+                "description": "OS Services Watch",
+                "isArray": true,
+                "totrace": true
+              },
+              "LASTERROR": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "E_OK": 0,
+                  "E_OS_ACCESS": 49,
+                  "E_OS_CALLEVEL": 2,
+                  "E_OS_ID": 3,
+                  "E_OS_LIMIT": 4,
+                  "E_OS_NOFUNC": 5,
+                  "E_OS_RESOURCE": 6,
+                  "E_OS_STATE": 7,
+                  "E_OS_VALUE": 8,
+                  "E_OS_SERVICEID": 9,
+                  "E_OS_RATE": 10,
+                  "E_OS_ILLEGAL_ADDRESS": 11,
+                  "E_OS_MISSINGEND": 12,
+                  "E_OS_DISABLEDINT": 13,
+                  "E_OS_STACKFAULT": 14,
+                  "E_OS_PROTECTION_MEMORY": 15,
+                  "E_OS_PROTECTION_TIME": 16,
+                  "E_OS_PROTECTION_LOCKED": 17,
+                  "E_OS_PROTECTION_EXCEPTION": 18,
+                  "E_OS_PROTECTION_RATE": 19,
+                  "E_OS_PROTECTION_ARRIVAL": 20,
+                  "E_OS_CORE": 21,
+                  "E_OS_INTERFERENCE_DEADLOCK": 22,
+                  "E_OS_NESTING_DEADLOCK": 23,
+                  "E_OS_SPINLOCK": 24
+                },
+                "variableName": "LASTERROR",
+                "description": "Last OSEK error",
+                "isArray": true,
+                "totrace": false
+              },
+              "CURRENTAPPMODE": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "DONOTCARE": 0,
+                  "OSDEFAULTAPPMODE": 1
+                },
+                "variableName": "CURRENTAPPMODE",
+                "description": "Current application mode",
+                "isArray": true,
+                "totrace": false
+              }
+            },
+            "task": {
+              "PRIORITY": {
+                "type": "unsigned short",
+                "variableName": "PRIORITY",
+                "description": "Actual Prio",
+                "isArray": false
+              },
+              "STATE": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "WAITING": 0,
+                  "READY": 1,
+                  "SUSPENDED": 2,
+                  "RUNNING": 3,
+                  "START": 4
+                },
+                "variableName": "STATE",
+                "description": "Current State",
+                "isArray": false,
+                "totrace": false
+              },
+              "STACK": {
+                "name": "Os_StackType",
+                "type": "Os_StackType",
+                "values": {
+                  "taskStack_OsTask_5ms": "&taskStack_OsTask_5ms",
+                  "taskStack_OsTask_20ms": "&taskStack_OsTask_20ms",
+                  "taskStack_OsTask_Event": "&taskStack_OsTask_Event",
+                  "taskStack_OsTask_init": "&taskStack_OsTask_init",
+                  "taskStack_OsTask_10ms": "&taskStack_OsTask_10ms",
+                  "taskStack_OsTask_100ms": "&taskStack_OsTask_100ms",
+                  "taskStack_OsTask_Resource": "&taskStack_OsTask_Resource",
+                  "taskStack_OsTask_Rand1": "&taskStack_OsTask_Rand1",
+                  "taskStack_OsTask_Rand2": "&taskStack_OsTask_Rand2",
+                  "taskStack_OsTask_Rand3": "&taskStack_OsTask_Rand3",
+                  "taskStack_OsTask_Idle_Core0": "&taskStack_OsTask_Idle_Core0"
+                },
+                "variableName": "STACK",
+                "description": "Task Stack",
+                "isArray": false,
+                "totrace": false
+              },
+              "REMAININGACTIVATIONS": {
+                "type": "unsigned char",
+                "variableName": "REMAININGACTIVATIONS",
+                "description": "Remaining task activations",
+                "isArray": false
+              },
+              "vs_Home_Priority": {
+                "type": "string",
+                "variableName": "vs_Home_Priority",
+                "description": "Home Priority"
+              },
+              "vs_Task_Type": {
+                "type": "string",
+                "variableName": "vs_Task_Type",
+                "description": "Task Type"
+              },
+              "vs_Schedule": {
+                "type": "string",
+                "variableName": "vs_Schedule",
+                "description": "Schedule"
+              },
+              "vs_max_Activations": {
+                "type": "string",
+                "variableName": "vs_max_Activations",
+                "description": "max. Activations"
+              }
+            },
+            "stack": {
+              "SIZE": {
+                "type": "",
+                "variableName": "SIZE",
+                "description": "Stack Size (Byte)",
+                "isArray": false
+              },
+              "BASEADDRESS": {
+                "type": "unsigned char *",
+                "variableName": "BASEADDRESS",
+                "description": "Base Address",
+                "isArray": false
+              },
+              "STACKDIRECTION": {
+                "type": "string",
+                "variableName": "STACKDIRECTION",
+                "description": "Stack Direction"
+              },
+              "FILLPATTERN": {
+                "type": "unsigned char",
+                "variableName": "FILLPATTERN",
+                "description": "Stack Fill Pattern",
+                "isArray": false
+              }
+            },
+            "alarm": {
+              "ALARMTIME": {
+                "type": "unsigned long",
+                "variableName": "ALARMTIME",
+                "description": "Alarm Time",
+                "isArray": false
+              },
+              "CYCLETIME": {
+                "type": "unsigned long",
+                "variableName": "CYCLETIME",
+                "description": "Cycle Time",
+                "isArray": false
+              },
+              "STATE": {
+                "name": "STATE",
+                "values": {
+                  "STOPPED": 0,
+                  "RUNNING": 1
+                },
+                "variableName": "STATE",
+                "description": "Alarm state",
+                "isArray": false,
+                "totrace": false
+              },
+              "ACTION": {
+                "type": "string",
+                "variableName": "ACTION",
+                "description": "Action"
+              },
+              "COUNTER": {
+                "type": "string",
+                "variableName": "COUNTER",
+                "description": "Counter"
+              }
+            },
+            "resource": {
+              "STATE": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "UNLOCKED": 0,
+                  "LOCKED": 1
+                },
+                "variableName": "STATE",
+                "description": "Resource State",
+                "isArray": false,
+                "totrace": false
+              },
+              "LOCKER": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "OsTask_5ms": 0,
+                  "OsTask_20ms": 1,
+                  "OsTask_Event": 2,
+                  "OsTask_init": 3,
+                  "OsTask_10ms": 4,
+                  "OsTask_100ms": 5,
+                  "OsTask_Resource": 6,
+                  "OsTask_Rand1": 7,
+                  "OsTask_Rand2": 8,
+                  "OsTask_Rand3": 9,
+                  "OsTask_Idle_Core0": 10,
+                  "SYS_TIMER_CORE0": 32768,
+                  "CPU0_SB": 32769,
+                  "CPU1_SB": 32770,
+                  "NoLoker": 65535
+                },
+                "variableName": "LOCKER",
+                "description": "Resource Locker",
+                "isArray": false,
+                "totrace": false
+              },
+              "PRIORITY": {
+                "type": "string",
+                "variableName": "PRIORITY",
+                "description": "Ceiling priority"
+              }
+            },
+            "isr": {
+              "vs_Priority": {
+                "type": "string",
+                "variableName": "vs_Priority",
+                "description": "Priority"
+              },
+              "vs_Type": {
+                "type": "string",
+                "variableName": "vs_Type",
+                "description": "Type"
+              },
+              "vs_State": {
+                "name": "unsigned char",
+                "type": "unsigned char",
+                "values": {
+                  "EXITED": 0,
+                  "ENTERED": 1
+                },
+                "variableName": "vs_State",
+                "description": "State",
+                "isArray": false,
+                "totrace": false
+              }
+            },
+            "config": {
+              "vs_ScalabilityClass": {
+                "type": "string",
+                "variableName": "vs_ScalabilityClass",
+                "description": "Scalability Class"
+              },
+              "vs_StatusLevel": {
+                "type": "string",
+                "variableName": "vs_StatusLevel",
+                "description": "Status Level"
+              }
+            }
+          },
+          "osInstance": {
+            "name": "ISoft_TC397",
+            "coreNum": 1,
+            "coreConfigs": [
+              {
+                "coreIndex": 0,
+                "coreId": "Os_TraceSysCore0.coreId",
+                "runningTask": "Os_TraceSysCore0.runTaskId",
+                "runningTaskPriority": "Os_TraceSysCore0.runTaskPrio",
+                "runningIsr2": "Os_TraceSysCore0.runIsrId",
+                "serviceTrace": "Os_TraceSysCore0.curServiceId",
+                "lastError": "Os_TraceSysCore0.LastError",
+                "currentAppMode": "Os_TraceSysCore0.curAppMode"
+              }
+            ]
+          },
+          "tasks": [
+            {
+              "name": "OsTask_5ms",
+              "priority": "Os_TCBCore0[0].taskRunPrio",
+              "state": "Os_TCBCore0[0].taskState",
+              "stack": "&taskStack_OsTask_5ms",
+              "remainingActivations": "Os_TCBCore0[0].taskActCount",
+              "homePriority": "2",
+              "taskType": "EXTENDED",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_20ms",
+              "priority": "Os_TCBCore0[1].taskRunPrio",
+              "state": "Os_TCBCore0[1].taskState",
+              "stack": "&taskStack_OsTask_20ms",
+              "remainingActivations": "Os_TCBCore0[1].taskActCount",
+              "homePriority": "4",
+              "taskType": "EXTENDED",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Event",
+              "priority": "Os_TCBCore0[2].taskRunPrio",
+              "state": "Os_TCBCore0[2].taskState",
+              "stack": "&taskStack_OsTask_Event",
+              "remainingActivations": "Os_TCBCore0[2].taskActCount",
+              "homePriority": "6",
+              "taskType": "EXTENDED",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_init",
+              "priority": "Os_TCBCore0[3].taskRunPrio",
+              "state": "Os_TCBCore0[3].taskState",
+              "stack": "&taskStack_OsTask_init",
+              "remainingActivations": "Os_TCBCore0[3].taskActCount",
+              "homePriority": "1",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_10ms",
+              "priority": "Os_TCBCore0[4].taskRunPrio",
+              "state": "Os_TCBCore0[4].taskState",
+              "stack": "&taskStack_OsTask_10ms",
+              "remainingActivations": "Os_TCBCore0[4].taskActCount",
+              "homePriority": "3",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_100ms",
+              "priority": "Os_TCBCore0[5].taskRunPrio",
+              "state": "Os_TCBCore0[5].taskState",
+              "stack": "&taskStack_OsTask_100ms",
+              "remainingActivations": "Os_TCBCore0[5].taskActCount",
+              "homePriority": "5",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Resource",
+              "priority": "Os_TCBCore0[6].taskRunPrio",
+              "state": "Os_TCBCore0[6].taskState",
+              "stack": "&taskStack_OsTask_Resource",
+              "remainingActivations": "Os_TCBCore0[6].taskActCount",
+              "homePriority": "1",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Rand1",
+              "priority": "Os_TCBCore0[7].taskRunPrio",
+              "state": "Os_TCBCore0[7].taskState",
+              "stack": "&taskStack_OsTask_Rand1",
+              "remainingActivations": "Os_TCBCore0[7].taskActCount",
+              "homePriority": "3",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Rand2",
+              "priority": "Os_TCBCore0[8].taskRunPrio",
+              "state": "Os_TCBCore0[8].taskState",
+              "stack": "&taskStack_OsTask_Rand2",
+              "remainingActivations": "Os_TCBCore0[8].taskActCount",
+              "homePriority": "4",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Rand3",
+              "priority": "Os_TCBCore0[9].taskRunPrio",
+              "state": "Os_TCBCore0[9].taskState",
+              "stack": "&taskStack_OsTask_Rand3",
+              "remainingActivations": "Os_TCBCore0[9].taskActCount",
+              "homePriority": "7",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            },
+            {
+              "name": "OsTask_Idle_Core0",
+              "priority": "Os_TCBCore0[10].taskRunPrio",
+              "state": "Os_TCBCore0[10].taskState",
+              "stack": "&taskStack_OsTask_Idle_Core0",
+              "remainingActivations": "Os_TCBCore0[10].taskActCount",
+              "homePriority": "0",
+              "taskType": "BASIC",
+              "schedule": "FULL",
+              "maxActivations": "1"
+            }
+          ],
+          "stacks": [
+            {
+              "name": "taskStack_OsTask_5ms",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_5ms_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_20ms",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_20ms_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Event",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_Event_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_init",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_init_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_10ms",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_10ms_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_100ms",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_100ms_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Resource",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_Resource_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Rand1",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_Rand1_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Rand2",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_Rand2_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Rand3",
+              "size": "1024",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_OsTask_Rand3_Stack",
+              "fillPattern": 3435973836
+            },
+            {
+              "name": "taskStack_OsTask_Idle_Core0",
+              "size": "512",
+              "stackDirection": "DOWN",
+              "baseAddress": "&Os_TaskStack_Idle_Core0",
+              "fillPattern": 3435973836
+            }
+          ],
+          "resources": [
+            {
+              "name": "RES_SCHEDULER_CORE0",
+              "state": "Os_TraceResourceCore0[0].state",
+              "locker": "Os_TraceResourceCore0[0].occupyObjectId",
+              "priority": "7"
+            },
+            {
+              "name": "OsResource_1",
+              "state": "Os_TraceResourceCore0[1].state",
+              "locker": "Os_TraceResourceCore0[1].occupyObjectId",
+              "priority": "3"
+            },
+            {
+              "name": "OsResource_2",
+              "state": "Os_TraceResourceCore0[2].state",
+              "locker": "Os_TraceResourceCore0[2].occupyObjectId",
+              "priority": "5"
+            },
+            {
+              "name": "OsResource_Init",
+              "state": "Os_TraceResourceCore0[3].state",
+              "locker": "Os_TraceResourceCore0[3].occupyObjectId",
+              "priority": "1"
+            }
+          ],
+          "alarms": [
+            {
+              "name": "OsAlarm_5ms",
+              "alarmTime": "Os_ACBCore0[0].alarmStart",
+              "cycleTime": "Os_ACBCore0[0].alarmCycle",
+              "state": "Os_TraceAlarmCore0[0].state",
+              "action": "ActivateTask(OsTask_5ms)",
+              "counter": "SystemTimer_Core_0"
+            },
+            {
+              "name": "OsAlarm_10ms",
+              "alarmTime": "Os_ACBCore0[1].alarmStart",
+              "cycleTime": "Os_ACBCore0[1].alarmCycle",
+              "state": "Os_TraceAlarmCore0[1].state",
+              "action": "ActivateTask(OsTask_10ms)",
+              "counter": "SystemTimer_Core_0"
+            },
+            {
+              "name": "OsAlarm_20ms",
+              "alarmTime": "Os_ACBCore0[2].alarmStart",
+              "cycleTime": "Os_ACBCore0[2].alarmCycle",
+              "state": "Os_TraceAlarmCore0[2].state",
+              "action": "ActivateTask(OsTask_20ms)",
+              "counter": "SystemTimer_Core_0"
+            },
+            {
+              "name": "OsAlarm_100ms",
+              "alarmTime": "Os_ACBCore0[3].alarmStart",
+              "cycleTime": "Os_ACBCore0[3].alarmCycle",
+              "state": "Os_TraceAlarmCore0[3].state",
+              "action": "ActivateTask(OsTask_100ms)",
+              "counter": "SystemTimer_Core_0"
+            },
+            {
+              "name": "OsAlarm_500ms",
+              "alarmTime": "Os_ACBCore0[4].alarmStart",
+              "cycleTime": "Os_ACBCore0[4].alarmCycle",
+              "state": "Os_TraceAlarmCore0[4].state",
+              "action": "ActivateTask(OsTask_Rand3)",
+              "counter": "SystemTimer_Core_0"
+            }
+          ],
+          "isrs": [
+            {
+              "name": "SYS_TIMER_CORE0",
+              "priority": "199",
+              "type": "CATEGORY_2",
+              "state": "Os_TraceIsrCore0[0].state"
+            },
+            {
+              "name": "CPU0_SB",
+              "priority": "101",
+              "type": "CATEGORY_2",
+              "state": "Os_TraceIsrCore0[1].state"
+            },
+            {
+              "name": "CPU1_SB",
+              "priority": "123",
+              "type": "CATEGORY_2",
+              "state": "Os_TraceIsrCore0[2].state"
+            }
+          ],
+          "configs": [
+            {
+              "name": "CONFIG_TC397",
+              "scalabilityClass": "SC1",
+              "statusLevel": "EXTENDED"
+            }
+          ],
+          "coreConfigs": [
+            {
+              "id": 0,
+              "name": "OsTask_5ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(78,175,128)",
+              "_X_ROW_KEY": "row_1705"
+            },
+            {
+              "id": 1,
+              "name": "OsTask_20ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "#15cb42",
+              "_X_ROW_KEY": "row_1706"
+            },
+            {
+              "id": 2,
+              "name": "OsTask_Event",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(146,50,155)",
+              "_X_ROW_KEY": "row_1707"
+            },
+            {
+              "id": 3,
+              "name": "OsTask_init",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(176,182,33)",
+              "_X_ROW_KEY": "row_1708"
+            },
+            {
+              "id": 4,
+              "name": "OsTask_10ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(11,7,113)",
+              "_X_ROW_KEY": "row_1709"
+            },
+            {
+              "id": 5,
+              "name": "OsTask_100ms",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(51,226,122)",
+              "_X_ROW_KEY": "row_1710"
+            },
+            {
+              "id": 6,
+              "name": "OsTask_Resource",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(114,137,172)",
+              "_X_ROW_KEY": "row_1711"
+            },
+            {
+              "id": 7,
+              "name": "OsTask_Rand1",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(59,146,6)",
+              "_X_ROW_KEY": "row_1712"
+            },
+            {
+              "id": 8,
+              "name": "OsTask_Rand2",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(157,55,213)",
+              "_X_ROW_KEY": "row_1713"
+            },
+            {
+              "id": 9,
+              "name": "OsTask_Rand3",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(252,58,7)",
+              "_X_ROW_KEY": "row_1714"
+            },
+            {
+              "id": 10,
+              "name": "OsTask_Idle_Core0",
+              "coreId": 0,
+              "type": 0,
+              "color": "rgb(228,5,217)",
+              "_X_ROW_KEY": "row_1715"
+            },
+            {
+              "id": 0,
+              "name": "SYS_TIMER_CORE0",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(125,232,185)",
+              "_X_ROW_KEY": "row_1716"
+            },
+            {
+              "id": 1,
+              "name": "CPU0_SB",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(140,16,88)",
+              "_X_ROW_KEY": "row_1717"
+            },
+            {
+              "id": 2,
+              "name": "CPU1_SB",
+              "coreId": 0,
+              "type": 1,
+              "color": "rgb(158,41,58)",
+              "_X_ROW_KEY": "row_1718"
+            }
+          ],
+          "connector": {
+            "type": "CSVFile",
+            "device": "",
+            "options": {
+              "baudRate": "",
+              "dataBits": "",
+              "stopBits": "",
+              "parity": "",
+              "bitRate": "",
+              "ipAddress": "",
+              "port": "",
+              "file": "demo.csv"
+            }
+          },
+          "cpuFreq": 100,
+          "recordFile": {
+            "enable": true,
+            "name": "processed_log.csv"
+          }
+        }
+      }
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#82950a",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.SYS_TIMER_CORE0.ExecutionTimeAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg",
+        "name": "CallIntervalAvg",
+        "color": "#289bec",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.1_0_0.CallIntervalAvg",
+          "variableType": "system",
+          "variableName": "CallIntervalAvg",
+          "variableFullName": "OsTrace.Os_Trace.SYS_TIMER_CORE0.CallIntervalAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent",
+        "name": "LoadPercent",
+        "color": "#24d480",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.LoadPercent",
+          "variableType": "system",
+          "variableName": "LoadPercent",
+          "variableFullName": "OsTrace.Os_Trace.Core0.LoadPercent"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime",
+        "name": "TotalTime",
+        "color": "#3e5d42",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "ms"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.TotalTime",
+          "variableType": "system",
+          "variableName": "TotalTime",
+          "variableFullName": "OsTrace.Os_Trace.Core0.TotalTime"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate",
+        "name": "RunningRate",
+        "color": "#560b13",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.RunningRate",
+          "variableType": "system",
+          "variableName": "RunningRate",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.RunningRate"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg",
+        "name": "DelayTimeAvg",
+        "color": "#80b4a0",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeAvg",
+          "variableType": "system",
+          "variableName": "DelayTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin",
+        "name": "DelayTimeMin",
+        "color": "#b8e7d5",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMin",
+          "variableType": "system",
+          "variableName": "DelayTimeMin",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeMin"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax",
+        "name": "DelayTimeMax",
+        "color": "#93adf2",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.DelayTimeMax",
+          "variableType": "system",
+          "variableName": "DelayTimeMax",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.DelayTimeMax"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin",
+        "name": "ActivationIntervalMin",
+        "color": "#e38409",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMin",
+          "variableType": "system",
+          "variableName": "ActivationIntervalMin",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalMin"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax",
+        "name": "ActivationIntervalMax",
+        "color": "#975768",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalMax",
+          "variableType": "system",
+          "variableName": "ActivationIntervalMax",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalMax"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg",
+        "name": "ActivationIntervalAvg",
+        "color": "#afeb07",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActivationIntervalAvg",
+          "variableType": "system",
+          "variableName": "ActivationIntervalAvg",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActivationIntervalAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin",
+        "name": "StartIntervalMin",
+        "color": "#bf4c9a",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMin",
+          "variableType": "system",
+          "variableName": "StartIntervalMin",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalMin"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax",
+        "name": "StartIntervalMax",
+        "color": "#bae780",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalMax",
+          "variableType": "system",
+          "variableName": "StartIntervalMax",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalMax"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg",
+        "name": "StartIntervalAvg",
+        "color": "#b2453c",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartIntervalAvg",
+          "variableType": "system",
+          "variableName": "StartIntervalAvg",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartIntervalAvg"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount",
+        "name": "StartCount",
+        "color": "#00767e",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.StartCount"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status",
+        "name": "Status",
+        "color": "#502e2f",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Status",
+          "variableType": "system",
+          "variableName": "Status",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.Status"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount",
+        "name": "ActiveCount",
+        "color": "#142934",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.ActiveCount",
+          "variableType": "system",
+          "variableName": "ActiveCount",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.ActiveCount"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter",
+        "name": "Jitter",
+        "color": "#0e1815",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.0_1_0.Jitter",
+          "variableType": "system",
+          "variableName": "Jitter",
+          "variableFullName": "OsTrace.Os_Trace.OsTask_20ms.Jitter"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime",
+        "name": "ExecutionTime",
+        "color": "#973a6e",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "ms"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1f5475f3-e6be-448b-88be-4ca0100d8903.Core0.ExecutionTime",
+          "variableType": "system",
+          "variableName": "ExecutionTime",
+          "variableFullName": "OsTrace.Os_Trace.Core0.ExecutionTime"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      }
+    },
+    "panels": {},
+    "logs": {},
+    "traces": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2562,
+          "h": 121
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": true
+      },
+      "trace": {
+        "pos": {
+          "x": 593.5,
+          "y": 62.5,
+          "w": 1046,
+          "h": 582
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        },
+        "hide": false
+      },
+      "datas": {
+        "pos": {
+          "x": 348.5,
+          "y": 10,
+          "w": 1046,
+          "h": 671
+        },
+        "title": "datas",
+        "label": "Datas",
+        "id": "datas",
+        "options": {
+          "params": {
+            "edit-index": "datas"
+          }
+        },
+        "hide": false,
+        "backupPos": {
+          "x": 508.5,
+          "y": 146.5,
+          "w": 600,
+          "h": 400
+        },
+        "isMax": false
+      }
+    }
+  }
+}

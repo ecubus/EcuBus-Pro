@@ -18,7 +18,8 @@ export const useDataStore = defineStore('useDataStore', {
     nodes: {},
     database: {
       lin: {},
-      can: {}
+      can: {},
+      orti: {}
     },
     graphs: {},
     guages: {},

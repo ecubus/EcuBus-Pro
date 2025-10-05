@@ -70,6 +70,7 @@ import {
 } from '../vsomeip'
 
 import { PrecisionTimer } from '../timer/timer'
+import TraceItem from '../ostrace/item'
 
 const libPath = path.dirname(dllLib)
 
@@ -283,6 +284,7 @@ const pwmBaseMap = new Map<string, PwmBase>()
 const someipMap = new Map<string, VSomeIP_Client>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
+const ortiMap = new Map<string, TraceItem>()
 let cantps: {
   close: () => void
 }[] = []
@@ -539,6 +541,13 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     }
   }
 
+  //orti
+  for (const key in data.database.orti) {
+    const orti = data.database.orti[key]
+    const traceItem = new TraceItem(orti, projectInfo.path)
+    ortiMap.set(key, traceItem)
+  }
+
   //doip connect list
   // const list=doipConnectList.map((e)=>{
   //     return e.connect()
@@ -622,7 +631,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   }
 
   /* --------- */
-  const sysVars = getAllSysVar(devices, testers)
+  const sysVars = getAllSysVar(devices, testers, data.database.orti)
 
   for (const v of Object.values(sysVars)) {
     vars[v.id] = cloneDeep(v)
@@ -748,6 +757,11 @@ export function globalStop(emit = false) {
   })
   stopRouterCounter()
   someipMap.clear()
+
+  ortiMap.forEach((value) => {
+    value.close()
+  })
+  ortiMap.clear()
 
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {

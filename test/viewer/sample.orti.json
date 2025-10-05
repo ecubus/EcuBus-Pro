@@ -1,0 +1,404 @@
+{
+  "version": {
+    "koil": "2.1",
+    "osSemantics": {
+      "type": "ORTI",
+      "version": "2.1"
+    }
+  },
+  "implementation": {
+    "name": "VendorX_ORTI",
+    "os": {
+      "RUNNINGTASK": {
+        "name": "RUNNINGTASK",
+        "values": {
+          "basicTaskFirst": "&(gTaskControlBlocks[0])",
+          "extendedTaskFirst": "&(gTaskControlBlocks[1])",
+          "extendedTaskSecond": "&(gTaskControlBlocks[2])"
+        },
+        "variableName": "RUNNINGTASK",
+        "description": "Running Task Identification",
+        "isArray": false,
+        "totrace": false
+      },
+      "RUNNINGTASKPRIORITY": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "10": 3,
+          "30": 2,
+          "50": 1,
+          "51": 0
+        },
+        "variableName": "RUNNINGTASKPRIORITY",
+        "description": "Priority of Running Task",
+        "isArray": false,
+        "totrace": false
+      },
+      "RUNNINGISR2": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "NO_ISR": 0,
+          "Timer2Int": 1,
+          "CanRxInt": 2,
+          "CanTxInt": 3
+        },
+        "variableName": "RUNNINGISR2",
+        "description": "Running ISR of category 2",
+        "isArray": false,
+        "totrace": false
+      },
+      "SERVICETRACE": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "ActivateTask": 2,
+          "TerminateTask": 4,
+          "ChainTask": 6,
+          "Schedule": 8,
+          "StartOS": 52,
+          "ShutdownOS": 54
+        },
+        "variableName": "SERVICETRACE",
+        "description": "OS Services Watch",
+        "isArray": false,
+        "totrace": true
+      },
+      "LASTERROR": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "E_OK": 0,
+          "E_OS_ACCESS": 1,
+          "E_OS_CALLEVEL": 2,
+          "E_OS_ID": 3,
+          "E_OS_LIMIT": 4,
+          "E_OS_NOFUNC": 5,
+          "E_OS_RESOURCE": 6,
+          "E_OS_STATE": 7,
+          "E_OS_VALUE": 8
+        },
+        "variableName": "LASTERROR",
+        "description": "Last OSEK error",
+        "isArray": false,
+        "totrace": false
+      },
+      "CURRENTAPPMODE": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "DEFAULT_APPMODE": 0,
+          "DIAGNIOSTIC_MODE": 1
+        },
+        "variableName": "CURRENTAPPMODE",
+        "description": "Current application mode",
+        "isArray": false,
+        "totrace": false
+      }
+    },
+    "task": {
+      "PRIORITY": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "10": 3,
+          "30": 2,
+          "50": 1,
+          "51": 0
+        },
+        "variableName": "PRIORITY",
+        "description": "Actual Prio",
+        "isArray": false,
+        "totrace": false
+      },
+      "STATE": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "READY": 3,
+          "RUNNING": 1,
+          "WAITING": 2,
+          "SUSPENDED": 4,
+          "TERMINATED": 5
+        },
+        "variableName": "STATE",
+        "description": "Current State",
+        "isArray": false,
+        "totrace": false
+      },
+      "STACK": {
+        "name": "unsigned short *",
+        "type": "unsigned short *",
+        "values": {
+          "Stack0": "&(taskStack0[0])",
+          "Stack1": "&(taskStack1[0])",
+          "Stack2": "&(taskStack2[0])"
+        },
+        "variableName": "STACK",
+        "description": "Task Stack",
+        "isArray": false,
+        "totrace": false
+      },
+      "REMAININGACTIVATIONS": {
+        "type": "unsigned char",
+        "variableName": "REMAININGACTIVATIONS",
+        "description": "Remaining task activations",
+        "isArray": false
+      },
+      "CONTEXT": {
+        "name": "unsigned short *",
+        "type": "unsigned short *",
+        "values": {
+          "Context 0": 0,
+          "Context 1": 1,
+          "Context 2": 2
+        },
+        "variableName": "CONTEXT",
+        "description": "Task Context",
+        "isArray": false,
+        "totrace": false
+      },
+      "vs_Home_Priority": {
+        "type": "string",
+        "variableName": "vs_Home_Priority",
+        "description": "Home Priority"
+      },
+      "vs_Task_Type": {
+        "type": "string",
+        "variableName": "vs_Task_Type",
+        "description": "Task Type"
+      },
+      "vs_Schedule": {
+        "type": "string",
+        "variableName": "vs_Schedule",
+        "description": "Schedule"
+      },
+      "vs_Event_Mask": {
+        "type": "unsigned short",
+        "variableName": "vs_Event_Mask",
+        "description": "Wait Mask",
+        "isArray": false
+      },
+      "vs_Event_Flags": {
+        "type": "unsigned short",
+        "variableName": "vs_Event_Flags",
+        "description": "Event Flags",
+        "isArray": false
+      },
+      "vs_max_Activations": {
+        "type": "string",
+        "variableName": "vs_max_Activations",
+        "description": "max. Activations"
+      }
+    },
+    "stack": {
+      "SIZE": {
+        "type": "",
+        "variableName": "SIZE",
+        "description": "Stack Size (Byte)",
+        "isArray": false
+      },
+      "BASEADDRESS": {
+        "type": "unsigned short *",
+        "variableName": "BASEADDRESS",
+        "description": "Base Address",
+        "isArray": false
+      },
+      "STACKDIRECTION": {
+        "type": "string",
+        "variableName": "STACKDIRECTION",
+        "description": "Stack Direction"
+      },
+      "FILLPATTERN": {
+        "type": "unsigned short",
+        "variableName": "FILLPATTERN",
+        "description": "Stack Fill Pattern",
+        "isArray": false
+      }
+    },
+    "alarm": {
+      "ALARMTIME": {
+        "type": "unsigned long",
+        "variableName": "ALARMTIME",
+        "description": "Alarm Time",
+        "isArray": false
+      },
+      "CYCLETIME": {
+        "type": "unsigned long",
+        "variableName": "CYCLETIME",
+        "description": "Cycle Time",
+        "isArray": false
+      },
+      "STATE": {
+        "name": "STATE",
+        "values": {
+          "STOPPED": 0,
+          "RUNNING": 1
+        },
+        "variableName": "STATE",
+        "description": "Alarm state",
+        "isArray": false,
+        "totrace": false
+      },
+      "ACTION": {
+        "type": "string",
+        "variableName": "ACTION",
+        "description": "Action"
+      },
+      "COUNTER": {
+        "type": "string",
+        "variableName": "COUNTER",
+        "description": "Counter"
+      }
+    },
+    "resource": {
+      "STATE": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "UNLOCKED": 0,
+          "LOCKED": 1
+        },
+        "variableName": "STATE",
+        "description": "Resource State",
+        "isArray": false,
+        "totrace": false
+      },
+      "LOCKER": {
+        "name": "unsigned char",
+        "type": "unsigned char",
+        "values": {
+          "Task basicTaskFirst": 0,
+          "Task extendedTaskSecond": 1,
+          "ISR Timer2Int": 2
+        },
+        "variableName": "LOCKER",
+        "description": "Resource Locker",
+        "isArray": false,
+        "totrace": false
+      },
+      "PRIORITY": {
+        "type": "string",
+        "variableName": "PRIORITY",
+        "description": "Ceiling priority"
+      }
+    },
+    "isr": {
+      "vs_Priority": {
+        "type": "string",
+        "variableName": "vs_Priority",
+        "description": "Priority"
+      }
+    },
+    "config": {}
+  },
+  "osInstance": {
+    "name": "VendorX_arch",
+    "coreNum": 0,
+    "coreConfigs": []
+  },
+  "tasks": [
+    {
+      "name": "basicTaskFirst",
+      "priority": "(gTaskControlBlocks[0].actualPrio)",
+      "state": "(gTaskControlBlocks[0].taskState)",
+      "stack": "&(taskStack0[0])",
+      "remainingActivations": "(gTaskControlBlocks[0].actCount)",
+      "homePriority": "10",
+      "taskType": "BASIC",
+      "schedule": "FULL",
+      "maxActivations": "1"
+    },
+    {
+      "name": "extendedTaskFirst",
+      "priority": "(gTaskControlBlocks[1].actualPrio)",
+      "state": "(gTaskControlBlocks[1].taskState)",
+      "stack": "&(taskStack1[0])",
+      "remainingActivations": "(gTaskControlBlocks[1].actCount)",
+      "homePriority": "30",
+      "taskType": "EXTENDED",
+      "schedule": "FULL",
+      "maxActivations": "1"
+    },
+    {
+      "name": "extendedTaskSecond",
+      "priority": "(gTaskControlBlocks[2].actualPrio)",
+      "state": "(gTaskControlBlocks[2].taskState)",
+      "stack": "&(taskStack2[0])",
+      "remainingActivations": "(gTaskControlBlocks[2].actCount)",
+      "homePriority": "50",
+      "taskType": "EXTENDED",
+      "schedule": "FULL",
+      "maxActivations": "1"
+    }
+  ],
+  "stacks": [
+    {
+      "name": "taskStack0",
+      "size": "128",
+      "stackDirection": "UP",
+      "baseAddress": "&(taskStack0[0])",
+      "fillPattern": 43605
+    },
+    {
+      "name": "taskStack1",
+      "size": "128",
+      "stackDirection": "UP",
+      "baseAddress": "&(taskStack1[0])",
+      "fillPattern": 43605
+    },
+    {
+      "name": "taskStack2",
+      "size": "256",
+      "stackDirection": "UP",
+      "baseAddress": "&(taskStack2[0])",
+      "fillPattern": 43605
+    }
+  ],
+  "resources": [
+    {
+      "name": "resBasic",
+      "state": "(gResource[0].resourceCounter != 0)?1:0",
+      "locker": "gResource[0].owner",
+      "priority": "TASK: 51"
+    },
+    {
+      "name": "resTimerData",
+      "state": "(gResource[1].resourceCounter != 0)?1:0",
+      "locker": "gResource[1].owner",
+      "priority": "ISR: 3"
+    }
+  ],
+  "alarms": [
+    {
+      "name": "myFirstAlarm",
+      "alarmTime": "gAlarm[0].alarmTime",
+      "cycleTime": "gAlarm[0].cycleTime",
+      "state": "(gAlarm[0].alarmTime == 0)?0:1",
+      "action": "ActivateTask basicTaskFirst",
+      "counter": "SystemTimer"
+    }
+  ],
+  "isrs": [
+    {
+      "name": "Timer2Int",
+      "priority": "3",
+      "type": "",
+      "state": ""
+    },
+    {
+      "name": "CanRxInt",
+      "priority": "1",
+      "type": "",
+      "state": ""
+    },
+    {
+      "name": "CanTxInt",
+      "priority": "7",
+      "type": "",
+      "state": ""
+    }
+  ],
+  "configs": []
+}

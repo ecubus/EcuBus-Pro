@@ -204,7 +204,7 @@ const userTableData = computed(() => {
   return list
 })
 const systemTableData = computed(() => {
-  return Object.values(getAllSysVar(dataStore.devices, dataStore.tester))
+  return Object.values(getAllSysVar(dataStore.devices, dataStore.tester, dataStore.database.orti))
 })
 // Define popoverIndex to track the selected variable
 const popoverIndex = ref('')
@@ -571,4 +571,3 @@ const namespaceTreeData = computed(() => {
   }
 }
 </style>
-

@@ -1872,7 +1872,11 @@ export class UtilClass {
     global.vars = {}
     if (global.dataSet) {
       const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
-      const sysVars = getAllSysVar(global.dataSet.devices, global.dataSet.tester)
+      const sysVars = getAllSysVar(
+        global.dataSet.devices,
+        global.dataSet.tester,
+        global.dataSet.database.orti
+      )
       for (const v of Object.values(sysVars)) {
         vars[v.id] = cloneDeep(v)
       }

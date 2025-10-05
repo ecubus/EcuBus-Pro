@@ -7,8 +7,9 @@
     "src/preload/**/*",
     "test/**/*.ts",
     "src/renderer/src/database/**/*.ts",
-    "src/renderer/src/worker/**/*.ts"
-, "test/vsomeip/vsomeip.test.ts.bak"  ],
+    "src/renderer/src/worker/**/*.ts",
+    "src/renderer/src/views/ostrace/**/*.ts"
+ ],
   "compilerOptions": {
     "composite": true,
     "noUnusedLocals": false,

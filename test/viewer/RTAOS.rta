@@ -1,0 +1,590 @@
+IMPLEMENTATION rta_orti  {
+  OS {
+    ENUM "UINT8" [
+      "E_OK" = 0,
+      "E_OS_ACCESS" = 1,
+      "E_OS_CALLEVEL" = 2,
+      "E_OS_ID" = 3,
+      "E_OS_LIMIT" = 4,
+      "E_OS_NOFUNC" = 5,
+      "E_OS_RESOURCE" = 6,
+      "E_OS_STATE" = 7,
+      "E_OS_VALUE" = 8,
+      "E_OS_SERVICEID" = 9,
+      "E_OS_ILLEGAL_ADDRESS" = 10,
+      "E_OS_MISSINGEND" = 11,
+      "E_OS_DISABLEDINT" = 12,
+      "E_OS_STACKFAULT" = 13,
+      "E_OS_PROTECTION_MEMORY" = 14,
+      "E_OS_PROTECTION_TIME" = 15,
+      "E_OS_PROTECTION_ARRIVAL" = 16,
+      "E_OS_PROTECTION_LOCKED" = 17,
+      "E_OS_PROTECTION_EXCEPTION" = 18,
+      "E_OS_CORE" = 19,
+      "E_OS_SPINLOCK" = 20,
+      "E_OS_INTERFERENCE_DEADLOCK" = 21,
+      "E_OS_NESTING_DEADLOCK" = 22,
+      "E_OS_SYS_NO_RESTART" = 23,
+      "E_OS_SYS_RESTART" = 24,
+      "E_OS_SYS_OVERRUN" = 25,
+      "E_OS_SYS_XCORE_QFULL" = 26,
+      "E_OS_SYS_ERROR_LIMIT" = 27,
+    ] LASTERROR, "Last OSEK error";
+
+    ENUM "UINT8" [
+      "ActivateTask" = 1,
+      "Os_AdvanceCounter" = 2,
+      "CancelAlarm" = 3,
+      "CallTrustedFunction" = 4,
+      "CheckISRMemoryAccess" = 5,
+      "CheckObjectAccess" = 6,
+      "CheckObjectOwnership" = 7,
+      "CheckTaskMemoryAccess" = 8,
+      "ChainTask" = 9,
+      "ClearEvent" = 10,
+      "ControlIdle" = 11,
+      "CurrentIdleMode" = 12,
+      "DisableAllInterrupts" = 13,
+      "EnableAllInterrupts" = 14,
+      "GetActiveApplicationMode" = 15,
+      "GetAlarm" = 16,
+      "GetAlarmBase" = 17,
+      "GetApplicationID" = 18,
+      "GetCurrentApplicationID" = 19,
+      "GetCounterValue" = 20,
+      "GetElapsedCounterValue" = 21,
+      "GetEvent" = 22,
+      "GetISRID" = 23,
+      "GetResource" = 24,
+      "GetScheduleTableStatus" = 25,
+      "GetTaskID" = 26,
+      "GetTaskState" = 27,
+      "GetVersionInfo" = 28,
+      "IncrementCounter" = 29,
+      "NextScheduleTable" = 30,
+      "Os_GetCurrentIMask" = 31,
+      "Os_GetCurrentTPL" = 32,
+      "Os_GetExecutionTime" = 33,
+      "Os_GetISRMaxExecutionTime" = 34,
+      "Os_GetTaskMaxExecutionTime" = 35,
+      "Os_ResetISRMaxExecutionTime" = 36,
+      "Os_ResetTaskMaxExecutionTime" = 37,
+      "Os_GetElapsedTime" = 38,
+      "Os_GetTaskElapsedTime" = 39,
+      "Os_GetISRElapsedTime" = 40,
+      "Os_GetIdleElapsedTime" = 41,
+      "Os_ResetTaskElapsedTime" = 42,
+      "Os_ResetISRElapsedTime" = 43,
+      "Os_ResetIdleElapsedTime" = 44,
+      "Os_GetStackSize" = 45,
+      "Os_GetStackUsage" = 46,
+      "Os_GetStackValue" = 47,
+      "Os_GetISRMaxStackUsage" = 48,
+      "Os_GetTaskMaxStackUsage" = 49,
+      "Os_ResetISRMaxStackUsage" = 50,
+      "Os_ResetTaskMaxStackUsage" = 51,
+      "ReleaseResource" = 52,
+      "ResumeAllInterrupts" = 53,
+      "ResumeOSInterrupts" = 54,
+      "Schedule" = 55,
+      "SetEvent" = 56,
+      "SetAbsAlarm" = 57,
+      "SetRelAlarm" = 58,
+      "ShutdownOS" = 59,
+      "StartOS" = 60,
+      "StartScheduleTableAbs" = 61,
+      "StartScheduleTableRel" = 62,
+      "StartScheduleTableSynchron" = 63,
+      "SyncScheduleTable" = 64,
+      "SyncScheduleTableRel" = 65,
+      "SetScheduleTableAsync" = 66,
+      "StopScheduleTable" = 67,
+      "SuspendAllInterrupts" = 68,
+      "SuspendOSInterrupts" = 69,
+      "TerminateTask" = 70,
+      "WaitEvent" = 71,
+      "EnableInterruptSource" = 72,
+      "DisableInterruptSource" = 73,
+      "ClearPendingInterrupt" = 74,
+      "ModifyPeripheral32" = 75,
+      "ReadPeripheral32" = 76,
+      "WritePeripheral32" = 77,
+      "ModifyPeripheral16" = 78,
+      "ReadPeripheral16" = 79,
+      "WritePeripheral16" = 80,
+      "Restart" = 81,
+      "ModifyPeripheral8" = 82,
+      "ReadPeripheral8" = 83,
+      "WritePeripheral8" = 84,
+      "AllowAccess" = 85,
+      "GetApplicationState" = 86,
+      "GetNumberOfActivatedCores" = 87,
+      "ShutdownAllCores" = 88,
+      "StartCore" = 89,
+      "GetSpinlock" = 90,
+      "ReleaseSpinlock" = 91,
+      "TryToGetSpinlock" = 92,
+      "n/a" = 0
+    ] vs_p_OSServiceId, "OS_97";
+
+    ENUM "UINT8" [
+      "StartupHook" = 0,
+      "ShutdownHook" = 1,
+      "Restart" = 2,
+      "ErrorHook" = 3
+    ] vs_p_OSAppId, "OS_96";
+
+    ENUM "UINT8" [
+      "NO_APPMODE" = 0,
+      "OSDEFAULTAPPMODE" = 1
+    ] CURRENTAPPMODE, "Current AppMode";
+    STRING vs_SPEED, "Processor speed";
+    STRING vs_STOPWATCHSPEED, "Stopwatch speed";
+
+    STRING vs_p_Fmt1, "StartOS Data format";
+    STRING vs_p_Fmt2, "ShutdownOS Data format";
+  };
+  TASK {
+    STRING vs_ID, "Trace ID";
+    UINT16 vs_ACTIVATIONS, "Maximum activations";
+    STRING vs_BASEPRIORITY, "Base priority";
+    STRING vs_DISPATCHPRIORITY, "Dispatch priority";
+    STRING vs_p_Pri, "Base priority";
+    STRING vs_p_Disp, "Dispatch priority";
+    STRING vs_TYPE, "Conformance type";
+    STRING vs_InternalRes, "Internal resource ID";
+    STRING vs_RESOURCES, "Resources";
+    STRING vs_p_OSEvents, "Events";
+    UINT16 vs_pbit, "Pset";
+  };
+  ISR2 {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Pri, "Base priority";
+    STRING vs_p_Disp, "Dispatch priority";
+    STRING vs_InternalRes, "Internal resource ID";
+    STRING vs_RESOURCES, "Resources";
+  };
+  ISR1 {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Pri, "Base priority";
+    STRING vs_p_Disp, "Dispatch priority";
+    STRING vs_InternalRes, "Internal resource ID";
+  };
+  ALARM {
+    STRING vs_ID, "Trace ID";
+    STRING ACTION, "Action";
+    STRING vs_Owner, "Owning counter ID";
+  };
+  COUNTER {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Fmt, "Data format";
+  };
+  Trace {
+    STRING vs_VERSION, "Trace version";
+    STRING vs_p_TickDuration, "GetStopwatch() tick duration";
+    STRING vs_p_MaxAbsTime, "Max GetStopwatch() value";
+    STRING vs_p_BigEndian, "BigEndian";
+    STRING vs_p_IntSize, "IntSize";
+    STRING vs_p_NumCores, "Number of cores";
+    STRING vs_ErrorFmt, "ErrorFmt";
+    STRING vs_KindSize, "KindSize";
+    STRING vs_InfoSize, "InfoSize";
+    STRING vs_TimeSize, "TimeSize";
+    STRING vs_TASKS_AND_ISRS, "Filter TASKS_AND_ISRS";
+    STRING vs_STARTUP_SHUTDOWN, "Filter STARTUP_SHUTDOWN";
+    STRING vs_ACTIVATIONS, "Filter ACTIVATIONS";
+    STRING vs_COUNTERS_ALARMS, "Filter COUNTERS_ALARMS";
+    STRING vs_SCHEDULES, "Filter SCHEDULES";
+    STRING vs_RESOURCES, "Filter RESOURCES";
+    STRING vs_INTERRUPT_LOCKS, "Filter INTERRUPT_LOCKS";
+    STRING vs_ERRORS, "Filter ERRORS";
+    STRING vs_OSEK_MESSAGES, "Filter OSEK_MESSAGES";
+    STRING vs_MESSAGE_DATA, "Filter MESSAGE_DATA";
+    STRING vs_SWITCHING_OVERHEADS, "Filter SWITCHING_OVERHEADS";
+    STRING vs_OSEK_EVENTS, "Filter OSEK_EVENTS";
+    STRING vs_TRACEPOINTS, "Filter TRACEPOINTS";
+    STRING vs_TASK_TRACEPOINTS, "Filter TASK_TRACEPOINTS";
+    STRING vs_INTERVALS, "Filter INTERVALS";
+    STRING vs_PROCESSES, "Filter Processes";
+    STRING vs_STACK, "Filter STACK";
+    "UINT8" vs_BPSWidth, "Big Pset width";
+  };
+  Profile {
+    STRING vs_ID, "Trace ID";
+    STRING vs_Owner, "Owning Task/ISR";
+  };
+  TaskTracepoint {
+    STRING vs_ID, "Trace ID";
+    STRING vs_Owner, "Owning Task/ISR";
+    STRING vs_p_Fmt, "Data Format";
+  };
+  Tracepoint {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Fmt, "Data Format";
+  };
+  CritExec {
+    STRING vs_ID, "Trace ID";
+    STRING vs_Owner, "Owning Task/ISR/Profile";
+    STRING vs_p_Budget, "Budget";
+  };
+  Interval {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Fmt, "Data Format";
+  };
+  Resource {
+    STRING vs_ID, "Trace ID";
+    STRING vs_p_Pri, "Task priority";
+    STRING vs_p_Isr, "ISR priority";
+    STRING vs_Owner, "Owning resource";
+    STRING vs_Internal, "Internal?";
+  };
+  Schedule {
+    STRING vs_ID, "Trace ID";
+  };
+};
+
+OS OS {
+  vs_p_Fmt1 = "%98E";
+  vs_p_Fmt2 = "%99E";
+};
+
+ISR1 CrossCoreInterrupt {
+  vs_ID = "16";
+  vs_p_Pri = "1";
+  vs_p_Disp = "1";
+};
+ISR2 Millisecond {
+  vs_ID = "15";
+  vs_p_Pri = "102";
+  vs_p_Disp = "102";
+};
+
+TASK Idle {
+  vs_ID = "1";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "0";
+  vs_DISPATCHPRIORITY = "0";
+  vs_p_Pri = "0";
+  vs_p_Disp = "0";
+  vs_TYPE = "BCC1";
+  vs_pbit = "0";
+};
+TASK Core0_OsTask_BSW_10ms {
+  vs_ID = "2";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "9";
+  vs_DISPATCHPRIORITY = "11";
+  vs_p_Pri = "9";
+  vs_p_Disp = "11";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core0";
+  vs_pbit, "1";
+};
+TASK Core1_OsTask_BSW_10ms {
+  vs_ID = "3";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "10";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "10";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core1";
+  vs_pbit, "2";
+};
+TASK Core2_OsTask_BSW_10ms {
+  vs_ID = "4";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "11";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "11";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core2";
+  vs_pbit, "3";
+};
+TASK Core3_OsTask_BSW_10ms {
+  vs_ID = "5";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "12";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "12";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core3";
+  vs_pbit, "4";
+};
+TASK Core4_OsTask_BSW_10ms {
+  vs_ID = "6";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "13";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "13";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core4";
+  vs_pbit, "5";
+};
+TASK Core5_OsTask_BSW_10ms {
+  vs_ID = "7";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "14";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "14";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core5";
+  vs_pbit, "6";
+};
+TASK Core0_OsTask_BSW_1ms {
+  vs_ID = "8";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "20";
+  vs_DISPATCHPRIORITY = "11";
+  vs_p_Pri = "20";
+  vs_p_Disp = "11";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core0";
+  vs_pbit, "7";
+};
+TASK Core1_OsTask_BSW_1ms {
+  vs_ID = "9";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "21";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "21";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core1";
+  vs_pbit, "8";
+};
+TASK Core2_OsTask_BSW_1ms {
+  vs_ID = "10";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "22";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "22";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core2";
+  vs_pbit, "9";
+};
+TASK Core3_OsTask_BSW_1ms {
+  vs_ID = "11";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "23";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "23";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core3";
+  vs_pbit, "10";
+};
+TASK Core4_OsTask_BSW_1ms {
+  vs_ID = "12";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "24";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "24";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core4";
+  vs_pbit, "11";
+};
+TASK Core5_OsTask_BSW_1ms {
+  vs_ID = "13";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "25";
+  vs_DISPATCHPRIORITY = "10";
+  vs_p_Pri = "25";
+  vs_p_Disp = "10";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core5";
+  vs_pbit, "12";
+};
+TASK Core0_ECU_StartupTask {
+  vs_ID = "14";
+  vs_ACTIVATIONS = "1";
+  vs_BASEPRIORITY = "30";
+  vs_DISPATCHPRIORITY = "11";
+  vs_p_Pri = "30";
+  vs_p_Disp = "11";
+  vs_TYPE = "BCC1";
+  vs_RESOURCES = "RTE_RESOURCE_OS_APP_OsApplication_Core0";
+  vs_pbit, "13";
+};
+Tracepoint OSApp_OsApplication_Core0 {
+  vs_ID = "1";
+  vs_p_Fmt = "%96E";
+};
+Tracepoint OSApp_OsApplication_Core1 {
+  vs_ID = "2";
+  vs_p_Fmt = "%96E";
+};
+Tracepoint OSApp_OsApplication_Core2 {
+  vs_ID = "3";
+  vs_p_Fmt = "%96E";
+};
+Tracepoint OSApp_OsApplication_Core3 {
+  vs_ID = "4";
+  vs_p_Fmt = "%96E";
+};
+Tracepoint OSApp_OsApplication_Core4 {
+  vs_ID = "5";
+  vs_p_Fmt = "%96E";
+};
+Tracepoint OSApp_OsApplication_Core5 {
+  vs_ID = "6";
+  vs_p_Fmt = "%96E";
+};
+
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core1 {
+  vs_ID = "1";
+  vs_p_Pri = "20";
+};
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core2 {
+  vs_ID = "2";
+  vs_p_Pri = "20";
+};
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core3 {
+  vs_ID = "3";
+  vs_p_Pri = "20";
+};
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core4 {
+  vs_ID = "4";
+  vs_p_Pri = "20";
+};
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core5 {
+  vs_ID = "5";
+  vs_p_Pri = "20";
+};
+
+Resource RTE_RESOURCE_OS_APP_OsApplication_Core0 {
+  vs_ID = "6";
+  vs_p_Pri = "30";
+};
+
+Resource Os_Core0_RES_SCHEDULER {
+  vs_ID = "7";
+  vs_p_Pri = "30";
+};
+
+Resource Os_Core1_RES_SCHEDULER {
+  vs_ID = "8";
+  vs_p_Pri = "20";
+};
+
+Resource Os_Core2_RES_SCHEDULER {
+  vs_ID = "9";
+  vs_p_Pri = "20";
+};
+
+Resource Os_Core3_RES_SCHEDULER {
+  vs_ID = "10";
+  vs_p_Pri = "20";
+};
+
+Resource Os_Core4_RES_SCHEDULER {
+  vs_ID = "11";
+  vs_p_Pri = "20";
+};
+
+Resource Os_Core5_RES_SCHEDULER {
+  vs_ID = "12";
+  vs_p_Pri = "20";
+};
+
+COUNTER Rte_TickCounter {
+  vs_ID = "1";
+};
+
+ALARM Rte_ScheduleTable_ExpiryPoint1 {
+  vs_ID = "1";
+  vs_Owner = "1";
+  ACTION = "Activate Core0_OsTask_BSW_10ms. Activate Core1_OsTask_BSW_10ms. Activate Core2_OsTask_BSW_10ms. Activate Core3_OsTask_BSW_10ms. Activate Core4_OsTask_BSW_10ms. Activate Core5_OsTask_BSW_10ms. Activate Core0_OsTask_BSW_1ms. Activate Core1_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint2 {
+  vs_ID = "2";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint3 {
+  vs_ID = "3";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint4 {
+  vs_ID = "4";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint5 {
+  vs_ID = "5";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint6 {
+  vs_ID = "6";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint7 {
+  vs_ID = "7";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint8 {
+  vs_ID = "8";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint9 {
+  vs_ID = "9";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+ALARM Rte_ScheduleTable_ExpiryPoint10 {
+  vs_ID = "10";
+  vs_Owner = "1";
+  ACTION = "Activate Core1_OsTask_BSW_1ms. Activate Core0_OsTask_BSW_1ms. Activate Core2_OsTask_BSW_1ms. Activate Core3_OsTask_BSW_1ms. Activate Core4_OsTask_BSW_1ms. Activate Core5_OsTask_BSW_1ms";
+};
+
+Schedule Rte_ScheduleTable {
+  vs_ID = "1";
+  vs_p_Fmt = "%d";
+};
+
+Trace Trace {
+  vs_VERSION = "2.1.0";
+  vs_p_TickDuration = 2.0;
+  vs_KindSize = "1";
+  vs_InfoSize = "1";
+  vs_TimeSize = "2";
+
+  vs_p_BigEndian = "0";
+  vs_p_IntSize = "16";
+  vs_p_MaxAbsTime = "4294967295";
+  vs_p_NumCores = "6";
+  vs_ErrorFmt = "%99E";
+
+  vs_ACTIVATIONS = "true";
+  vs_RESOURCES = "true";
+  vs_INTERRUPT_LOCKS = "true";
+  vs_SWITCHING_OVERHEADS = "true";
+  vs_TASKS_AND_ISRS = "true";
+  vs_ERRORS = "true";
+  vs_TASK_TRACEPOINT = "true";
+  vs_TRACEPOINT = "true";
+  vs_INTERVALS = "true";
+  vs_MESSAGE_DATA = "true";
+  vs_STARTUP_AND_SHUTDOWN = "true";
+  vs_ALARMS = "true";
+  vs_SCHEDULETABLES = "true";
+  vs_OSEK_EVENTS = "true";
+  vs_EXPIRY_POINTS = "true";
+};
+

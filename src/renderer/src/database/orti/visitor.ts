@@ -64,7 +64,10 @@ export class ORTIVisitor extends BaseCstVisitor implements ICstNodeVisitor<any, 
       alarms: [],
       isrs: [],
       configs: [],
-      coreConfigs: []
+      coreConfigs: [],
+      resourceConfigs: [],
+      serviceConfigs: [],
+      hostConfigs: []
     }
 
     // Process version sections

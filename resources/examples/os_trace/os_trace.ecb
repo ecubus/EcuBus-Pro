@@ -9,9 +9,10 @@
       "lin": {},
       "can": {},
       "orti": {
-        "1f5475f3-e6be-448b-88be-4ca0100d8903": {
-          "id": "1f5475f3-e6be-448b-88be-4ca0100d8903",
+        "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
+          "id": "1712396f-dfa8-4dd7-82bb-c046ae3b927d",
           "name": "Os_Trace",
+          "cpuFreq": 100,
           "version": {
             "koil": "2.2",
             "osSemantics": {
@@ -757,114 +758,1028 @@
               "name": "OsTask_5ms",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(78,175,128)",
-              "_X_ROW_KEY": "row_1705"
+              "color": "rgb(153,233,173)",
+              "_X_ROW_KEY": "row_40"
             },
             {
               "id": 1,
               "name": "OsTask_20ms",
               "coreId": 0,
               "type": 0,
-              "color": "#15cb42",
-              "_X_ROW_KEY": "row_1706"
+              "color": "rgb(183,38,227)",
+              "_X_ROW_KEY": "row_41"
             },
             {
               "id": 2,
               "name": "OsTask_Event",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(146,50,155)",
-              "_X_ROW_KEY": "row_1707"
+              "color": "rgb(156,221,60)",
+              "_X_ROW_KEY": "row_42"
             },
             {
               "id": 3,
               "name": "OsTask_init",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(176,182,33)",
-              "_X_ROW_KEY": "row_1708"
+              "color": "rgb(250,48,113)",
+              "_X_ROW_KEY": "row_43"
             },
             {
               "id": 4,
               "name": "OsTask_10ms",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(11,7,113)",
-              "_X_ROW_KEY": "row_1709"
+              "color": "rgb(195,93,128)",
+              "_X_ROW_KEY": "row_44"
             },
             {
               "id": 5,
               "name": "OsTask_100ms",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(51,226,122)",
-              "_X_ROW_KEY": "row_1710"
+              "color": "rgb(59,244,77)",
+              "_X_ROW_KEY": "row_45"
             },
             {
               "id": 6,
               "name": "OsTask_Resource",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(114,137,172)",
-              "_X_ROW_KEY": "row_1711"
+              "color": "rgb(188,163,84)",
+              "_X_ROW_KEY": "row_46"
             },
             {
               "id": 7,
               "name": "OsTask_Rand1",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(59,146,6)",
-              "_X_ROW_KEY": "row_1712"
+              "color": "rgb(212,107,198)",
+              "_X_ROW_KEY": "row_47"
             },
             {
               "id": 8,
               "name": "OsTask_Rand2",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(157,55,213)",
-              "_X_ROW_KEY": "row_1713"
+              "color": "rgb(215,183,99)",
+              "_X_ROW_KEY": "row_48"
             },
             {
               "id": 9,
               "name": "OsTask_Rand3",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(252,58,7)",
-              "_X_ROW_KEY": "row_1714"
+              "color": "rgb(67,189,200)",
+              "_X_ROW_KEY": "row_49"
             },
             {
               "id": 10,
               "name": "OsTask_Idle_Core0",
               "coreId": 0,
               "type": 0,
-              "color": "rgb(228,5,217)",
-              "_X_ROW_KEY": "row_1715"
+              "color": "rgb(34,241,88)",
+              "_X_ROW_KEY": "row_50"
             },
             {
               "id": 0,
               "name": "SYS_TIMER_CORE0",
               "coreId": 0,
               "type": 1,
-              "color": "rgb(125,232,185)",
-              "_X_ROW_KEY": "row_1716"
+              "color": "rgb(171,231,24)",
+              "_X_ROW_KEY": "row_51"
             },
             {
               "id": 1,
               "name": "CPU0_SB",
               "coreId": 0,
               "type": 1,
-              "color": "rgb(140,16,88)",
-              "_X_ROW_KEY": "row_1717"
+              "color": "rgb(44,197,73)",
+              "_X_ROW_KEY": "row_52"
             },
             {
               "id": 2,
               "name": "CPU1_SB",
               "coreId": 0,
               "type": 1,
-              "color": "rgb(158,41,58)",
-              "_X_ROW_KEY": "row_1718"
+              "color": "rgb(246,183,144)",
+              "_X_ROW_KEY": "row_53"
             }
           ],
+          "resourceConfigs": [
+            {
+              "id": 0,
+              "name": "RES_SCHEDULER_CORE0",
+              "coreId": 0,
+              "_X_ROW_KEY": "row_677"
+            },
+            {
+              "id": 1,
+              "name": "OsResource_1",
+              "coreId": 0,
+              "_X_ROW_KEY": "row_678"
+            },
+            {
+              "id": 2,
+              "name": "OsResource_2",
+              "coreId": 0,
+              "_X_ROW_KEY": "row_679"
+            },
+            {
+              "id": 3,
+              "name": "OsResource_Init",
+              "coreId": 0,
+              "_X_ROW_KEY": "row_680"
+            }
+          ],
+          "serviceConfigs": [
+            {
+              "id": 0,
+              "name": "GetApplicationID Start",
+              "_X_ROW_KEY": "row_686"
+            },
+            {
+              "id": 1,
+              "name": "GetApplicationID Return",
+              "_X_ROW_KEY": "row_687"
+            },
+            {
+              "id": 2,
+              "name": "GetISRID Start",
+              "_X_ROW_KEY": "row_688"
+            },
+            {
+              "id": 3,
+              "name": "GetISRID Return",
+              "_X_ROW_KEY": "row_689"
+            },
+            {
+              "id": 4,
+              "name": "CallTrustedFunction Start",
+              "_X_ROW_KEY": "row_690"
+            },
+            {
+              "id": 5,
+              "name": "CallTrustedFunction Return",
+              "_X_ROW_KEY": "row_691"
+            },
+            {
+              "id": 6,
+              "name": "CheckISRMemoryAccess Start",
+              "_X_ROW_KEY": "row_692"
+            },
+            {
+              "id": 7,
+              "name": "CheckISRMemoryAccess Return",
+              "_X_ROW_KEY": "row_693"
+            },
+            {
+              "id": 8,
+              "name": "CheckTaskMemoryAccess Start",
+              "_X_ROW_KEY": "row_694"
+            },
+            {
+              "id": 9,
+              "name": "CheckTaskMemoryAccess Return",
+              "_X_ROW_KEY": "row_695"
+            },
+            {
+              "id": 10,
+              "name": "CheckObjectAccess Start",
+              "_X_ROW_KEY": "row_696"
+            },
+            {
+              "id": 11,
+              "name": "CheckObjectAccess Return",
+              "_X_ROW_KEY": "row_697"
+            },
+            {
+              "id": 12,
+              "name": "CheckObjectOwnership Start",
+              "_X_ROW_KEY": "row_698"
+            },
+            {
+              "id": 13,
+              "name": "CheckObjectOwnership Return",
+              "_X_ROW_KEY": "row_699"
+            },
+            {
+              "id": 14,
+              "name": "StartScheduleTableRel Start",
+              "_X_ROW_KEY": "row_700"
+            },
+            {
+              "id": 15,
+              "name": "StartScheduleTableRel Return",
+              "_X_ROW_KEY": "row_701"
+            },
+            {
+              "id": 16,
+              "name": "StartScheduleTableAbs Start",
+              "_X_ROW_KEY": "row_702"
+            },
+            {
+              "id": 17,
+              "name": "StartScheduleTableAbs Return",
+              "_X_ROW_KEY": "row_703"
+            },
+            {
+              "id": 18,
+              "name": "StopScheduleTable Start",
+              "_X_ROW_KEY": "row_704"
+            },
+            {
+              "id": 19,
+              "name": "StopScheduleTable Return",
+              "_X_ROW_KEY": "row_705"
+            },
+            {
+              "id": 20,
+              "name": "NextScheduleTable Start",
+              "_X_ROW_KEY": "row_706"
+            },
+            {
+              "id": 21,
+              "name": "NextScheduleTable Return",
+              "_X_ROW_KEY": "row_707"
+            },
+            {
+              "id": 22,
+              "name": "StartScheduleTableSynchron Start",
+              "_X_ROW_KEY": "row_708"
+            },
+            {
+              "id": 23,
+              "name": "StartScheduleTableSynchron Return",
+              "_X_ROW_KEY": "row_709"
+            },
+            {
+              "id": 24,
+              "name": "SyncScheduleTable Start",
+              "_X_ROW_KEY": "row_710"
+            },
+            {
+              "id": 25,
+              "name": "SyncScheduleTable Return",
+              "_X_ROW_KEY": "row_711"
+            },
+            {
+              "id": 26,
+              "name": "SetScheduleTableAsync Start",
+              "_X_ROW_KEY": "row_712"
+            },
+            {
+              "id": 27,
+              "name": "SetScheduleTableAsync Return",
+              "_X_ROW_KEY": "row_713"
+            },
+            {
+              "id": 28,
+              "name": "GetScheduleTableStatus Start",
+              "_X_ROW_KEY": "row_714"
+            },
+            {
+              "id": 29,
+              "name": "GetScheduleTableStatus Return",
+              "_X_ROW_KEY": "row_715"
+            },
+            {
+              "id": 30,
+              "name": "IncrementCounter Start",
+              "_X_ROW_KEY": "row_716"
+            },
+            {
+              "id": 31,
+              "name": "IncrementCounter Return",
+              "_X_ROW_KEY": "row_717"
+            },
+            {
+              "id": 32,
+              "name": "GetCounterValue Start",
+              "_X_ROW_KEY": "row_718"
+            },
+            {
+              "id": 33,
+              "name": "GetCounterValue Return",
+              "_X_ROW_KEY": "row_719"
+            },
+            {
+              "id": 34,
+              "name": "GetElapsedValue Start",
+              "_X_ROW_KEY": "row_720"
+            },
+            {
+              "id": 35,
+              "name": "GetElapsedValue Return",
+              "_X_ROW_KEY": "row_721"
+            },
+            {
+              "id": 36,
+              "name": "TerminateApplication Start",
+              "_X_ROW_KEY": "row_722"
+            },
+            {
+              "id": 37,
+              "name": "TerminateApplication Return",
+              "_X_ROW_KEY": "row_723"
+            },
+            {
+              "id": 38,
+              "name": "AllowAccess Start",
+              "_X_ROW_KEY": "row_724"
+            },
+            {
+              "id": 39,
+              "name": "AllowAccess Return",
+              "_X_ROW_KEY": "row_725"
+            },
+            {
+              "id": 40,
+              "name": "GetApplicationState Start",
+              "_X_ROW_KEY": "row_726"
+            },
+            {
+              "id": 41,
+              "name": "GetApplicationState Return",
+              "_X_ROW_KEY": "row_727"
+            },
+            {
+              "id": 42,
+              "name": "GetNumberOfActivatedCores Start",
+              "_X_ROW_KEY": "row_728"
+            },
+            {
+              "id": 43,
+              "name": "GetNumberOfActivatedCores Return",
+              "_X_ROW_KEY": "row_729"
+            },
+            {
+              "id": 44,
+              "name": "GetCoreID Start",
+              "_X_ROW_KEY": "row_730"
+            },
+            {
+              "id": 45,
+              "name": "GetCoreID Return",
+              "_X_ROW_KEY": "row_731"
+            },
+            {
+              "id": 46,
+              "name": "StartCore Start",
+              "_X_ROW_KEY": "row_732"
+            },
+            {
+              "id": 47,
+              "name": "StartCore Return",
+              "_X_ROW_KEY": "row_733"
+            },
+            {
+              "id": 48,
+              "name": "StartNonAutosarCore Start",
+              "_X_ROW_KEY": "row_734"
+            },
+            {
+              "id": 49,
+              "name": "StartNonAutosarCore Return",
+              "_X_ROW_KEY": "row_735"
+            },
+            {
+              "id": 50,
+              "name": "GetSpinlock Start",
+              "_X_ROW_KEY": "row_736"
+            },
+            {
+              "id": 51,
+              "name": "GetSpinlock Return",
+              "_X_ROW_KEY": "row_737"
+            },
+            {
+              "id": 52,
+              "name": "ReleaseSpinlock Start",
+              "_X_ROW_KEY": "row_738"
+            },
+            {
+              "id": 53,
+              "name": "ReleaseSpinlock Return",
+              "_X_ROW_KEY": "row_739"
+            },
+            {
+              "id": 54,
+              "name": "TryToGetSpinlock Start",
+              "_X_ROW_KEY": "row_740"
+            },
+            {
+              "id": 55,
+              "name": "TryToGetSpinlock Return",
+              "_X_ROW_KEY": "row_741"
+            },
+            {
+              "id": 56,
+              "name": "ShutdownAllCores Start",
+              "_X_ROW_KEY": "row_742"
+            },
+            {
+              "id": 57,
+              "name": "ShutdownAllCores Return",
+              "_X_ROW_KEY": "row_743"
+            },
+            {
+              "id": 58,
+              "name": "ControlIdle Start",
+              "_X_ROW_KEY": "row_744"
+            },
+            {
+              "id": 59,
+              "name": "ControlIdle Return",
+              "_X_ROW_KEY": "row_745"
+            },
+            {
+              "id": 60,
+              "name": "IocSend Start",
+              "_X_ROW_KEY": "row_746"
+            },
+            {
+              "id": 61,
+              "name": "IocSend Return",
+              "_X_ROW_KEY": "row_747"
+            },
+            {
+              "id": 62,
+              "name": "IocWrite Start",
+              "_X_ROW_KEY": "row_748"
+            },
+            {
+              "id": 63,
+              "name": "IocWrite Return",
+              "_X_ROW_KEY": "row_749"
+            },
+            {
+              "id": 64,
+              "name": "IocSendGroup Start",
+              "_X_ROW_KEY": "row_750"
+            },
+            {
+              "id": 65,
+              "name": "IocSendGroup Return",
+              "_X_ROW_KEY": "row_751"
+            },
+            {
+              "id": 66,
+              "name": "IocWriteGroup Start",
+              "_X_ROW_KEY": "row_752"
+            },
+            {
+              "id": 67,
+              "name": "IocWriteGroup Return",
+              "_X_ROW_KEY": "row_753"
+            },
+            {
+              "id": 68,
+              "name": "IocReceive Start",
+              "_X_ROW_KEY": "row_754"
+            },
+            {
+              "id": 69,
+              "name": "IocReceive Return",
+              "_X_ROW_KEY": "row_755"
+            },
+            {
+              "id": 70,
+              "name": "IocRead Start",
+              "_X_ROW_KEY": "row_756"
+            },
+            {
+              "id": 71,
+              "name": "IocRead Return",
+              "_X_ROW_KEY": "row_757"
+            },
+            {
+              "id": 72,
+              "name": "IocReceiveGroup Start",
+              "_X_ROW_KEY": "row_758"
+            },
+            {
+              "id": 73,
+              "name": "IocReceiveGroup Return",
+              "_X_ROW_KEY": "row_759"
+            },
+            {
+              "id": 74,
+              "name": "IocReadGroup Start",
+              "_X_ROW_KEY": "row_760"
+            },
+            {
+              "id": 75,
+              "name": "IocReadGroup Return",
+              "_X_ROW_KEY": "row_761"
+            },
+            {
+              "id": 76,
+              "name": "IocEmptyQueue Start",
+              "_X_ROW_KEY": "row_762"
+            },
+            {
+              "id": 77,
+              "name": "IocEmptyQueue Return",
+              "_X_ROW_KEY": "row_763"
+            },
+            {
+              "id": 78,
+              "name": "GetCurrentApplicationID Start",
+              "_X_ROW_KEY": "row_764"
+            },
+            {
+              "id": 79,
+              "name": "GetCurrentApplicationID Return",
+              "_X_ROW_KEY": "row_765"
+            },
+            {
+              "id": 80,
+              "name": "ReadPeripheral8 Start",
+              "_X_ROW_KEY": "row_766"
+            },
+            {
+              "id": 81,
+              "name": "ReadPeripheral8 Return",
+              "_X_ROW_KEY": "row_767"
+            },
+            {
+              "id": 82,
+              "name": "ReadPeripheral16 Start",
+              "_X_ROW_KEY": "row_768"
+            },
+            {
+              "id": 83,
+              "name": "ReadPeripheral16 Return",
+              "_X_ROW_KEY": "row_769"
+            },
+            {
+              "id": 84,
+              "name": "ReadPeripheral32 Start",
+              "_X_ROW_KEY": "row_770"
+            },
+            {
+              "id": 85,
+              "name": "ReadPeripheral32 Return",
+              "_X_ROW_KEY": "row_771"
+            },
+            {
+              "id": 86,
+              "name": "WritePeripheral8 Start",
+              "_X_ROW_KEY": "row_772"
+            },
+            {
+              "id": 87,
+              "name": "WritePeripheral8 Return",
+              "_X_ROW_KEY": "row_773"
+            },
+            {
+              "id": 88,
+              "name": "WritePeripheral16 Start",
+              "_X_ROW_KEY": "row_774"
+            },
+            {
+              "id": 89,
+              "name": "WritePeripheral16 Return",
+              "_X_ROW_KEY": "row_775"
+            },
+            {
+              "id": 90,
+              "name": "WritePeripheral32 Start",
+              "_X_ROW_KEY": "row_776"
+            },
+            {
+              "id": 91,
+              "name": "WritePeripheral32 Return",
+              "_X_ROW_KEY": "row_777"
+            },
+            {
+              "id": 92,
+              "name": "ModifyPeripheral8 Start",
+              "_X_ROW_KEY": "row_778"
+            },
+            {
+              "id": 93,
+              "name": "ModifyPeripheral8 Return",
+              "_X_ROW_KEY": "row_779"
+            },
+            {
+              "id": 94,
+              "name": "ModifyPeripheral32 Start",
+              "_X_ROW_KEY": "row_780"
+            },
+            {
+              "id": 95,
+              "name": "ModifyPeripheral32 Return",
+              "_X_ROW_KEY": "row_781"
+            },
+            {
+              "id": 96,
+              "name": "DisableInterruptSource Start",
+              "_X_ROW_KEY": "row_782"
+            },
+            {
+              "id": 97,
+              "name": "DisableInterruptSource Return",
+              "_X_ROW_KEY": "row_783"
+            },
+            {
+              "id": 98,
+              "name": "EnableInterruptSource Start",
+              "_X_ROW_KEY": "row_784"
+            },
+            {
+              "id": 99,
+              "name": "EnableInterruptSource Return",
+              "_X_ROW_KEY": "row_785"
+            },
+            {
+              "id": 100,
+              "name": "ClearPendingInterrupt Start",
+              "_X_ROW_KEY": "row_786"
+            },
+            {
+              "id": 101,
+              "name": "ClearPendingInterrupt Return",
+              "_X_ROW_KEY": "row_787"
+            },
+            {
+              "id": 102,
+              "name": "ActivateTaskAsyn Start",
+              "_X_ROW_KEY": "row_788"
+            },
+            {
+              "id": 103,
+              "name": "ActivateTaskAsyn Return",
+              "_X_ROW_KEY": "row_789"
+            },
+            {
+              "id": 104,
+              "name": "SetEventAsyn Start",
+              "_X_ROW_KEY": "row_790"
+            },
+            {
+              "id": 105,
+              "name": "SetEventAsyn Return",
+              "_X_ROW_KEY": "row_791"
+            },
+            {
+              "id": 106,
+              "name": "ModifyPeripheral16 Start",
+              "_X_ROW_KEY": "row_792"
+            },
+            {
+              "id": 107,
+              "name": "ModifyPeripheral16 Return",
+              "_X_ROW_KEY": "row_793"
+            },
+            {
+              "id": 108,
+              "name": "WaitAllEvents Start",
+              "_X_ROW_KEY": "row_794"
+            },
+            {
+              "id": 109,
+              "name": "WaitAllEvents Return",
+              "_X_ROW_KEY": "row_795"
+            },
+            {
+              "id": 110,
+              "name": "IocCallBackNotify Start",
+              "_X_ROW_KEY": "row_796"
+            },
+            {
+              "id": 111,
+              "name": "IocCallBackNotify Return",
+              "_X_ROW_KEY": "row_797"
+            },
+            {
+              "id": 112,
+              "name": "ActivateTask Start",
+              "_X_ROW_KEY": "row_798"
+            },
+            {
+              "id": 113,
+              "name": "ActivateTask Return",
+              "_X_ROW_KEY": "row_799"
+            },
+            {
+              "id": 114,
+              "name": "TerminateTask Start",
+              "_X_ROW_KEY": "row_800"
+            },
+            {
+              "id": 115,
+              "name": "TerminateTask Return",
+              "_X_ROW_KEY": "row_801"
+            },
+            {
+              "id": 116,
+              "name": "ChainTask Start",
+              "_X_ROW_KEY": "row_802"
+            },
+            {
+              "id": 117,
+              "name": "ChainTask Return",
+              "_X_ROW_KEY": "row_803"
+            },
+            {
+              "id": 118,
+              "name": "Schedule Start",
+              "_X_ROW_KEY": "row_804"
+            },
+            {
+              "id": 119,
+              "name": "Schedule Return",
+              "_X_ROW_KEY": "row_805"
+            },
+            {
+              "id": 120,
+              "name": "GetTaskID Start",
+              "_X_ROW_KEY": "row_806"
+            },
+            {
+              "id": 121,
+              "name": "GetTaskID Return",
+              "_X_ROW_KEY": "row_807"
+            },
+            {
+              "id": 122,
+              "name": "GetTaskState Start",
+              "_X_ROW_KEY": "row_808"
+            },
+            {
+              "id": 123,
+              "name": "GetTaskState Return",
+              "_X_ROW_KEY": "row_809"
+            },
+            {
+              "id": 124,
+              "name": "EnableAllInterrupts Start",
+              "_X_ROW_KEY": "row_810"
+            },
+            {
+              "id": 125,
+              "name": "EnableAllInterrupts Return",
+              "_X_ROW_KEY": "row_811"
+            },
+            {
+              "id": 126,
+              "name": "DisableAllInterrupts Start",
+              "_X_ROW_KEY": "row_812"
+            },
+            {
+              "id": 127,
+              "name": "DisableAllInterrupts Return",
+              "_X_ROW_KEY": "row_813"
+            },
+            {
+              "id": 128,
+              "name": "ResumeAllInterrupts Start",
+              "_X_ROW_KEY": "row_814"
+            },
+            {
+              "id": 129,
+              "name": "ResumeAllInterrupts Return",
+              "_X_ROW_KEY": "row_815"
+            },
+            {
+              "id": 130,
+              "name": "SuspendAllInterrupts Start",
+              "_X_ROW_KEY": "row_816"
+            },
+            {
+              "id": 131,
+              "name": "SuspendAllInterrupts Return",
+              "_X_ROW_KEY": "row_817"
+            },
+            {
+              "id": 132,
+              "name": "ResumeOSInterrupts Start",
+              "_X_ROW_KEY": "row_818"
+            },
+            {
+              "id": 133,
+              "name": "ResumeOSInterrupts Return",
+              "_X_ROW_KEY": "row_819"
+            },
+            {
+              "id": 134,
+              "name": "SuspendOSInterrupts Start",
+              "_X_ROW_KEY": "row_820"
+            },
+            {
+              "id": 135,
+              "name": "SuspendOSInterrupts Return",
+              "_X_ROW_KEY": "row_821"
+            },
+            {
+              "id": 136,
+              "name": "GetResource Start",
+              "_X_ROW_KEY": "row_822"
+            },
+            {
+              "id": 137,
+              "name": "GetResource Return",
+              "_X_ROW_KEY": "row_823"
+            },
+            {
+              "id": 138,
+              "name": "ReleaseResource Start",
+              "_X_ROW_KEY": "row_824"
+            },
+            {
+              "id": 139,
+              "name": "ReleaseResource Return",
+              "_X_ROW_KEY": "row_825"
+            },
+            {
+              "id": 140,
+              "name": "SetEvent Start",
+              "_X_ROW_KEY": "row_826"
+            },
+            {
+              "id": 141,
+              "name": "SetEvent Return",
+              "_X_ROW_KEY": "row_827"
+            },
+            {
+              "id": 142,
+              "name": "ClearEvent Start",
+              "_X_ROW_KEY": "row_828"
+            },
+            {
+              "id": 143,
+              "name": "ClearEvent Return",
+              "_X_ROW_KEY": "row_829"
+            },
+            {
+              "id": 144,
+              "name": "GetEvent Start",
+              "_X_ROW_KEY": "row_830"
+            },
+            {
+              "id": 145,
+              "name": "GetEvent Return",
+              "_X_ROW_KEY": "row_831"
+            },
+            {
+              "id": 146,
+              "name": "WaitEvent Start",
+              "_X_ROW_KEY": "row_832"
+            },
+            {
+              "id": 147,
+              "name": "WaitEvent Return",
+              "_X_ROW_KEY": "row_833"
+            },
+            {
+              "id": 148,
+              "name": "GetAlarmBase Start",
+              "_X_ROW_KEY": "row_834"
+            },
+            {
+              "id": 149,
+              "name": "GetAlarmBase Return",
+              "_X_ROW_KEY": "row_835"
+            },
+            {
+              "id": 150,
+              "name": "GetAlarm Start",
+              "_X_ROW_KEY": "row_836"
+            },
+            {
+              "id": 151,
+              "name": "GetAlarm Return",
+              "_X_ROW_KEY": "row_837"
+            },
+            {
+              "id": 152,
+              "name": "SetRelAlarm Start",
+              "_X_ROW_KEY": "row_838"
+            },
+            {
+              "id": 153,
+              "name": "SetRelAlarm Return",
+              "_X_ROW_KEY": "row_839"
+            },
+            {
+              "id": 154,
+              "name": "SetAbsAlarm Start",
+              "_X_ROW_KEY": "row_840"
+            },
+            {
+              "id": 155,
+              "name": "SetAbsAlarm Return",
+              "_X_ROW_KEY": "row_841"
+            },
+            {
+              "id": 156,
+              "name": "CancelAlarm Start",
+              "_X_ROW_KEY": "row_842"
+            },
+            {
+              "id": 157,
+              "name": "CancelAlarm Return",
+              "_X_ROW_KEY": "row_843"
+            },
+            {
+              "id": 158,
+              "name": "GetActiveApplicationMode Start",
+              "_X_ROW_KEY": "row_844"
+            },
+            {
+              "id": 159,
+              "name": "GetActiveApplicationMode Return",
+              "_X_ROW_KEY": "row_845"
+            },
+            {
+              "id": 160,
+              "name": "StartOS Start",
+              "_X_ROW_KEY": "row_846"
+            },
+            {
+              "id": 161,
+              "name": "StartOS Return",
+              "_X_ROW_KEY": "row_847"
+            },
+            {
+              "id": 162,
+              "name": "ShutdownOS Start",
+              "_X_ROW_KEY": "row_848"
+            },
+            {
+              "id": 163,
+              "name": "ShutdownOS Return",
+              "_X_ROW_KEY": "row_849"
+            }
+          ],
+          "hostConfigs": [
+            {
+              "id": 0,
+              "name": "ErrorHook Start",
+              "_X_ROW_KEY": "row_217"
+            },
+            {
+              "id": 1,
+              "name": "ErrorHook Return",
+              "_X_ROW_KEY": "row_218"
+            },
+            {
+              "id": 2,
+              "name": "PostTaskHook Start",
+              "_X_ROW_KEY": "row_219"
+            },
+            {
+              "id": 3,
+              "name": "PostTaskHook Return",
+              "_X_ROW_KEY": "row_220"
+            },
+            {
+              "id": 4,
+              "name": "PreTaskHook Start",
+              "_X_ROW_KEY": "row_221"
+            },
+            {
+              "id": 5,
+              "name": "PreTaskHook Return",
+              "_X_ROW_KEY": "row_222"
+            },
+            {
+              "id": 6,
+              "name": "ProtectionHook Start",
+              "_X_ROW_KEY": "row_223"
+            },
+            {
+              "id": 7,
+              "name": "ProtectionHook Return",
+              "_X_ROW_KEY": "row_224"
+            },
+            {
+              "id": 8,
+              "name": "StartupHook Start",
+              "_X_ROW_KEY": "row_225"
+            },
+            {
+              "id": 9,
+              "name": "StartupHook Return",
+              "_X_ROW_KEY": "row_226"
+            },
+            {
+              "id": 10,
+              "name": "ShutdownHook Start",
+              "_X_ROW_KEY": "row_227"
+            },
+            {
+              "id": 11,
+              "name": "ShutdownHook Return",
+              "_X_ROW_KEY": "row_228"
+            }
+          ],
+          "recordFile": {
+            "enable": false,
+            "name": ""
+          },
           "connector": {
             "type": "CSVFile",
             "device": "",
@@ -878,11 +1793,6 @@
               "port": "",
               "file": "demo.csv"
             }
-          },
-          "cpuFreq": 100,
-          "recordFile": {
-            "enable": true,
-            "name": "processed_log.csv"
           }
         }
       }
@@ -1330,8 +2240,8 @@
       },
       "datas": {
         "pos": {
-          "x": 348.5,
-          "y": 10,
+          "x": 836.5,
+          "y": 77,
           "w": 1046,
           "h": 671
         },
@@ -1351,6 +2261,24 @@
           "h": 400
         },
         "isMax": false
+      },
+      "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
+        "pos": {
+          "x": 279.5,
+          "y": 47.5,
+          "w": 845,
+          "h": 400
+        },
+        "title": "orti",
+        "label": "ORTI",
+        "id": "1712396f-dfa8-4dd7-82bb-c046ae3b927d",
+        "options": {
+          "params": {
+            "edit-index": "1712396f-dfa8-4dd7-82bb-c046ae3b927d",
+            "ortiFile": "C:\\Users\\frank\\xwechat_files\\wxid_ksy52jgjjzmo21_9118\\msg\\file\\2025-09\\Os_Trace.orti"
+          },
+          "name": "Os_Trace"
+        }
       }
     }
   }

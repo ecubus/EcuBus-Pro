@@ -13,7 +13,7 @@
           </el-button>
         </el-tooltip>
       </template>
-      <el-tab-pane name="Overview" label="Overview">
+      <el-tab-pane name="TASK/ISR" label="TASK/ISR">
         <div>
           <vxe-grid
             ref="coreConfigGridRef"
@@ -55,23 +55,23 @@
                   display: flex;
                   align-items: center;
                   gap: 2px;
-                  padding: 5px;
+                  height: 34px;
                 "
               >
                 <span style="padding-left: 5px; padding-right: 5px">Name:</span>
                 <el-input
                   v-model="dbcObj.name"
                   placeholder="Enter name"
-                  style="width: 200px"
+                  style="width: 150px"
                   size="small"
                 />
                 <el-divider direction="vertical" />
                 <!-- cpuFreq -->
-                <span style="padding-left: 5px; padding-right: 5px">CPU Frequency(MHz):</span>
+                <span style="padding-left: 5px; padding-right: 5px">CPU Freq(MHz):</span>
                 <el-input-number
                   v-model="dbcObj.cpuFreq"
                   placeholder="Enter CPU Frequency"
-                  style="width: 200px"
+                  style="width: 100px"
                   size="small"
                   :step="1"
                 />
@@ -79,7 +79,100 @@
                 <el-divider direction="vertical" />
                 <!-- add row -->
                 <el-button type="primary" link @click="addRow">
-                  <Icon :icon="addIcon" /><span>Add</span>
+                  <Icon :icon="addIcon" /><span>Add Task/ISR</span>
+                </el-button>
+              </div>
+            </template>
+          </vxe-grid>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="Resource" label="Resource">
+        <div>
+          <vxe-grid
+            ref="resourceConfigGridRef"
+            v-bind="resourceConfigGridOptions"
+            v-model:data="dbcObj.resourceConfigs"
+            :height="h - 40"
+          >
+            <template #resource_buttons="{ rowIndex }">
+              <el-button type="danger" link @click="deleteResourceRow(rowIndex)">
+                <Icon :icon="deleteIcon" />
+              </el-button>
+            </template>
+            <template #resource_toolbar>
+              <div
+                style="
+                  justify-content: flex-start;
+                  display: flex;
+                  align-items: center;
+                  gap: 2px;
+                  height: 34px;
+                "
+              >
+                <el-button type="primary" link @click="addResourceRow">
+                  <Icon :icon="addIcon" /><span>Add Resource</span>
+                </el-button>
+              </div>
+            </template>
+          </vxe-grid>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="Service" label="Service">
+        <div>
+          <vxe-grid
+            ref="serviceConfigGridRef"
+            v-bind="serviceConfigGridOptions"
+            v-model:data="dbcObj.serviceConfigs"
+            :height="h - 40"
+          >
+            <template #service_buttons="{ rowIndex }">
+              <el-button type="danger" link @click="deleteServiceRow(rowIndex)">
+                <Icon :icon="deleteIcon" />
+              </el-button>
+            </template>
+            <template #service_toolbar>
+              <div
+                style="
+                  justify-content: flex-start;
+                  display: flex;
+                  align-items: center;
+                  gap: 2px;
+                  height: 34px;
+                "
+              >
+                <el-button type="primary" link @click="addServiceRow">
+                  <Icon :icon="addIcon" /><span>Add Service</span>
+                </el-button>
+              </div>
+            </template>
+          </vxe-grid>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="Hook" label="Hook">
+        <div>
+          <vxe-grid
+            ref="hookConfigGridRef"
+            v-bind="hookConfigGridOptions"
+            v-model:data="dbcObj.hostConfigs"
+            :height="h - 40"
+          >
+            <template #hook_buttons="{ rowIndex }">
+              <el-button type="danger" link @click="deleteHookRow(rowIndex)">
+                <Icon :icon="deleteIcon" />
+              </el-button>
+            </template>
+            <template #hook_toolbar>
+              <div
+                style="
+                  justify-content: flex-start;
+                  display: flex;
+                  align-items: center;
+                  gap: 2px;
+                  height: 34px;
+                "
+              >
+                <el-button type="primary" link @click="addHookRow">
+                  <Icon :icon="addIcon" /><span>Add Hook</span>
                 </el-button>
               </div>
             </template>
@@ -326,10 +419,13 @@ const props = defineProps<{
 
 const overfiewRef = ref()
 const coreConfigGridRef = ref<VxeGridInstance>()
+const resourceConfigGridRef = ref<VxeGridInstance>()
+const serviceConfigGridRef = ref<VxeGridInstance>()
+const hookConfigGridRef = ref<VxeGridInstance>()
 
 const h = toRef(props, 'height')
 const w = toRef(props, 'width')
-const editableTabsValue = ref('Overview')
+const editableTabsValue = ref('TASK/ISR')
 provide('height', h)
 const database = useDataStore()
 
@@ -435,6 +531,227 @@ function addRow() {
     coreId: 0,
     type: 0,
     color: `rgb(${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
+  })
+}
+
+// Resource configs grid configuration
+const resourceConfigGridOptions = ref<VxeGridProps>({
+  border: true,
+  stripe: true,
+  resizable: true,
+  showHeaderOverflow: true,
+  showOverflow: true,
+  keepSource: true,
+  size: 'mini',
+  id: 'resourceConfigGrid',
+  rowConfig: {
+    isHover: true
+  },
+  columnConfig: {
+    resizable: true
+  },
+  sortConfig: {
+    trigger: 'cell',
+    remote: false
+  },
+  filterConfig: {
+    remote: false
+  },
+  editConfig: {
+    trigger: 'click',
+    mode: 'cell',
+    showStatus: true
+  },
+  toolbarConfig: {
+    slots: {
+      tools: 'resource_toolbar'
+    }
+  },
+  columns: [
+    {
+      align: 'center',
+      title: '#',
+      width: 50,
+      type: 'seq',
+      resizable: false
+    },
+    { align: 'center', field: 'name', title: 'Name', editRender: { name: 'input' } },
+    {
+      field: 'id',
+      title: 'ID',
+      align: 'center',
+      width: 100,
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      field: 'coreId',
+      title: 'Core ID',
+      width: 100,
+      align: 'center',
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      align: 'center',
+      field: 'buttons',
+      title: '',
+      width: 50,
+      fixed: 'right',
+      slots: { default: 'resource_buttons' }
+    }
+  ]
+})
+
+function deleteResourceRow(rowIndex: number) {
+  dbcObj.value?.resourceConfigs.splice(rowIndex, 1)
+}
+
+function addResourceRow() {
+  dbcObj.value?.resourceConfigs.push({
+    id: dbcObj.value?.resourceConfigs.length || 0,
+    name: `Resource_${dbcObj.value?.resourceConfigs.length}`,
+    coreId: 0
+  })
+}
+
+// Service configs grid configuration
+const serviceConfigGridOptions = ref<VxeGridProps>({
+  border: true,
+  stripe: true,
+  resizable: true,
+  showHeaderOverflow: true,
+  showOverflow: true,
+  keepSource: true,
+  size: 'mini',
+  id: 'serviceConfigGrid',
+  rowConfig: {
+    isHover: true
+  },
+  columnConfig: {
+    resizable: true
+  },
+  sortConfig: {
+    trigger: 'cell',
+    remote: false
+  },
+  filterConfig: {
+    remote: false
+  },
+  editConfig: {
+    trigger: 'click',
+    mode: 'cell',
+    showStatus: true
+  },
+  toolbarConfig: {
+    slots: {
+      tools: 'service_toolbar'
+    }
+  },
+  columns: [
+    {
+      align: 'center',
+      title: '#',
+      width: 50,
+      type: 'seq',
+      resizable: false
+    },
+    { align: 'center', field: 'name', title: 'Name', minWidth: 250, editRender: { name: 'input' } },
+    {
+      field: 'id',
+      title: 'ID',
+      align: 'center',
+      width: 100,
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      align: 'center',
+      field: 'buttons',
+      title: '',
+      width: 50,
+      fixed: 'right',
+      slots: { default: 'service_buttons' }
+    }
+  ]
+})
+
+function deleteServiceRow(rowIndex: number) {
+  dbcObj.value?.serviceConfigs.splice(rowIndex, 1)
+}
+
+function addServiceRow() {
+  dbcObj.value?.serviceConfigs.push({
+    id: dbcObj.value?.serviceConfigs.length || 0,
+    name: `Service_${dbcObj.value?.serviceConfigs.length}`
+  })
+}
+
+// Hook configs grid configuration
+const hookConfigGridOptions = ref<VxeGridProps>({
+  border: true,
+  stripe: true,
+  resizable: true,
+  showHeaderOverflow: true,
+  showOverflow: true,
+  keepSource: true,
+  size: 'mini',
+  id: 'hookConfigGrid',
+  rowConfig: {
+    isHover: true
+  },
+  columnConfig: {
+    resizable: true
+  },
+  sortConfig: {
+    trigger: 'cell',
+    remote: false
+  },
+  filterConfig: {
+    remote: false
+  },
+  editConfig: {
+    trigger: 'click',
+    mode: 'cell',
+    showStatus: true
+  },
+  toolbarConfig: {
+    slots: {
+      tools: 'hook_toolbar'
+    }
+  },
+  columns: [
+    {
+      align: 'center',
+      title: '#',
+      width: 50,
+      type: 'seq',
+      resizable: false
+    },
+    { align: 'center', field: 'name', title: 'Name', minWidth: 250, editRender: { name: 'input' } },
+    {
+      field: 'id',
+      title: 'ID',
+      align: 'center',
+      width: 100,
+      editRender: { name: 'input', attrs: { type: 'number' } }
+    },
+    {
+      align: 'center',
+      field: 'buttons',
+      title: '',
+      width: 50,
+      fixed: 'right',
+      slots: { default: 'hook_buttons' }
+    }
+  ]
+})
+
+function deleteHookRow(rowIndex: number) {
+  dbcObj.value?.hostConfigs.splice(rowIndex, 1)
+}
+
+function addHookRow() {
+  dbcObj.value?.hostConfigs.push({
+    id: dbcObj.value?.hostConfigs.length || 0,
+    name: `Hook_${dbcObj.value?.hostConfigs.length}`
   })
 }
 // Connector form data
@@ -661,6 +978,39 @@ watch(
       layout.setWinModified(props.editIndex, true)
     }
   }
+)
+
+// Watch for changes in resourceConfigs to mark window as modified
+watch(
+  () => dbcObj.value?.resourceConfigs,
+  () => {
+    if (dbcObj.value) {
+      layout.setWinModified(props.editIndex, true)
+    }
+  },
+  { deep: true }
+)
+
+// Watch for changes in serviceConfigs to mark window as modified
+watch(
+  () => dbcObj.value?.serviceConfigs,
+  () => {
+    if (dbcObj.value) {
+      layout.setWinModified(props.editIndex, true)
+    }
+  },
+  { deep: true }
+)
+
+// Watch for changes in hostConfigs to mark window as modified
+watch(
+  () => dbcObj.value?.hostConfigs,
+  () => {
+    if (dbcObj.value) {
+      layout.setWinModified(props.editIndex, true)
+    }
+  },
+  { deep: true }
 )
 
 const deviceList = ref<
@@ -968,5 +1318,11 @@ ${result.errors[0].message}
       height: 32px;
     }
   }
+}
+</style>
+<style scoped>
+:deep(.vxe-toolbar) {
+  padding: 0px !important;
+  display: block !important;
 }
 </style>

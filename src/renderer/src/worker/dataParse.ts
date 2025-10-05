@@ -146,18 +146,28 @@ function parseORTIData(raw: any) {
       id: getID(osEvent.type, osEvent.id, osEvent.coreId)
     }
     if (db) {
-      // Find matching configuration for this event
-      const config = db.coreConfigs.find(
-        (item) =>
-          item.coreId === osEvent.coreId && item.type === osEvent.type && item.id === osEvent.id
-      )
-      let name = ''
-      if (config) {
-        eventData.name = config.name
-        name = config.name
-
-        // Attach parsed event data back to original raw event
+      let name
+      if (osEvent.type == TaskType.TASK || osEvent.type == TaskType.ISR) {
+        // Find matching configuration for this event
+        const config = db.coreConfigs.find(
+          (item) =>
+            item.coreId === osEvent.coreId && item.type === osEvent.type && item.id === osEvent.id
+        )
+        name = config?.name
+      } else if (osEvent.type == TaskType.RESOURCE) {
+        const config = db.resourceConfigs.find(
+          (item) => item.coreId === osEvent.coreId && item.id === osEvent.id
+        )
+        name = config?.name
+      } else if (osEvent.type == TaskType.SERVICE) {
+        const config = db.serviceConfigs.find((item) => item.id === osEvent.id)
+        name = config?.name
+      } else if (osEvent.type == TaskType.HOOK) {
+        const config = db.hostConfigs.find((item) => item.id === osEvent.id)
+        name = config?.name
       }
+      eventData.name = name || ''
+
       const osStat = osStatistics.get(db.id)
       if (osStat) {
         const pr = osStat.processEvent(osEvent)

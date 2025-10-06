@@ -55,10 +55,11 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 - **Stop Bits**: 停止位（1、1.5、2）
 - **Parity**: 校验位（None、Even、Odd、Mark、Space）
 
-**数据格式：** 15字节二进制数据（大端序）
+**数据格式：** 16字节二进制数据（大端序）
 
 | 字段 | 长度 | 说明 |
 |------|------|------|
+| frame header | 1 byte | 帧头 (0x5A) |
 | index | 4 bytes | 事件索引（MSB） |
 | timestamp | 4 bytes | 时间戳（MSB） |
 | type | 1 byte | 事件类型 |
@@ -74,12 +75,12 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 
 #### 二进制文件（BinaryFile）
 
-从二进制文件读取OS Trace数据，数据格式与串口相同（15字节二进制数据）
+从二进制文件读取OS Trace数据，数据格式与串口相同（16字节二进制数据）
 
 **配置项：**
 - **File**: 选择二进制文件路径（支持相对路径）
 
-**数据格式：** 与串口相同，15字节二进制数据
+**数据格式：** 与串口相同，16字节二进制数据
 
 #### CSV文件（CSVFile）
 
@@ -91,7 +92,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 **数据格式：** CSV格式，每行一个事件
 
 > [!NOTE]
-> CSV文件的格式为：timestamp,type,id,status,不能包含表头
+> CSV文件的格式为：timestamp,type,id,status,不能包含表头，时间戳单位为us
 
 ```csv
 
@@ -101,7 +102,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 ```
 
 **字段说明：**
-- **timestamp**: 时间戳
+- **timestamp**: 时间戳(us)
 - **type**: 事件类型（0=TASK, 1=ISR, 2=RESOURCE, 3=SERVICE, 4=HOOK, 5=SPINLOCK）
 - **id**: 对象ID
 - **status**: 状态值
@@ -116,7 +117,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 Record File用于决定将TRACE数据写入到本地文件中，写入的数据格式为CSV格式。
 
 > [!NOTE]
-> 每行一个事件，格式为：timestamp,type,id,status
+> 每行一个事件，格式为：timestamp,type,id,status，时间戳单位为us
 
 ![recordFile](record.png)
 

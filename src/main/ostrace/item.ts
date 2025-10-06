@@ -7,9 +7,12 @@ import { OsTraceLOG } from '../log'
 import { getTsUs } from '../share/can'
 import path from 'path'
 /*
-|4byte index (MSB) |4byte timestamp (MSB) |1 byte type|2byte type id(MSB)|2byte type status(MSB)|1byte coreID|1byte CRC8|
+|1 byte frame header (0x5A)|4byte index (MSB) |4byte timestamp (MSB) |1 byte type|2byte type id(MSB)|2byte type status(MSB)|1byte coreID|1byte CRC8|
 */
+const FRAME_HEADER = 0x5a
+const FRAME_HEADER_SIZE = 1
 const DATA_LENGTH = 15
+const FRAME_LENGTH = FRAME_HEADER_SIZE + DATA_LENGTH
 const crc8 = CRC.default('CRC8')!
 
 export default class TraceItem {
@@ -22,6 +25,10 @@ export default class TraceItem {
   private tsOverflow = 0
   private log: OsTraceLOG
   private systemTs: number = 0
+  private offsetTs?: number
+  private eventQueue: Array<{ osEvent: OsEvent; realTs: number }> = []
+  private timer?: NodeJS.Timeout
+
   constructor(
     public orti: ORTIFile,
     projectPath: string
@@ -72,24 +79,71 @@ export default class TraceItem {
     }
     this.log = new OsTraceLOG(this.orti.name, logFile)
     this.systemTs = getTsUs()
+
+    // Start 50ms timer to check queue only for file sources
+    if (this.file) {
+      this.timer = setInterval(() => {
+        this.processQueue()
+      }, 50)
+    }
   }
   getRealTs(ts: number) {
     return ts + this.tsOverflow * 0x1_0000_0000
   }
+
+  processQueue() {
+    const currentTs = getTsUs() - this.systemTs
+
+    // Process events whose time has arrived (realTs - offsetTs <= currentTs)
+    while (this.eventQueue.length > 0) {
+      const first = this.eventQueue[0]
+      const eventTs = first.realTs - (this.offsetTs || 0)
+
+      if (eventTs <= currentTs) {
+        // Time has arrived, emit the event
+        this.eventQueue.shift()
+        this.log.osEvent(eventTs, first.osEvent)
+      } else {
+        // Event time hasn't arrived yet, wait
+        break
+      }
+    }
+  }
+
   dataCallback = (data: Buffer) => {
     const ts = getTsUs() - this.systemTs
     // Append new data to leftover buffer
     this.leftBuffer = Buffer.concat([this.leftBuffer, data])
 
-    // Process complete blocks
-    while (this.leftBuffer.length >= DATA_LENGTH) {
-      // Extract one block
-      const block = this.leftBuffer.subarray(0, DATA_LENGTH)
-      this.leftBuffer = this.leftBuffer.subarray(DATA_LENGTH)
+    // Process frames - always search for frame header
+    while (this.leftBuffer.length > 0) {
+      // Search for frame header from the beginning of buffer
+      const headerIndex = this.leftBuffer.indexOf(FRAME_HEADER)
+
+      // If no frame header found, discard all data and wait for more
+      if (headerIndex === -1) {
+        this.leftBuffer = Buffer.alloc(0)
+        break
+      }
+
+      // Skip bytes before frame header
+      if (headerIndex > 0) {
+        this.leftBuffer = this.leftBuffer.subarray(headerIndex)
+        continue
+      }
+
+      // Now headerIndex is 0, frame header is at the beginning
+      // Check if we have enough data for a complete frame
+      if (this.leftBuffer.length < FRAME_LENGTH) {
+        break
+      }
+
+      // Extract one frame (skip header byte, get data)
+      const block = this.leftBuffer.subarray(FRAME_HEADER_SIZE, FRAME_LENGTH)
 
       // Parse the block
       const currentIndex32 = block.readUInt32BE(0)
-      const timestamp32 = block.readUInt32BE(4)
+      const timestamp32 = block.readUInt32BE(4) / this.orti.cpuFreq
       const type = block.readUInt8(8)
       const typeId = block.readUInt16BE(9)
       const typeStatus = block.readUInt16BE(11)
@@ -110,6 +164,10 @@ export default class TraceItem {
         )
         continue
       }
+
+      // Valid frame found - remove the entire frame from buffer
+      this.leftBuffer = this.leftBuffer.subarray(FRAME_LENGTH)
+
       // Check index continuity
       if (this.index == undefined) {
         this.index = currentIndex32
@@ -141,8 +199,18 @@ export default class TraceItem {
         ts: realTs,
         comment: ''
       }
+      if (this.offsetTs == undefined) {
+        this.offsetTs = realTs - ts
+      }
 
-      this.log.osEvent(ts, osEvent)
+      // For file sources, add to queue; for serial port, emit immediately
+      if (this.file) {
+        this.eventQueue.push({ osEvent, realTs })
+      } else {
+        this.log.osEvent(realTs - this.offsetTs, osEvent)
+      }
+
+      // After processing a valid frame, loop continues and will search for next frame header
     }
   }
   csvCallback = (data: string) => {
@@ -178,12 +246,28 @@ export default class TraceItem {
         ts: parseInt(timestamp),
         comment: ''
       }
+      if (this.offsetTs == undefined) {
+        this.offsetTs = osEvent.ts - ts
+      }
+
       this.index++
-      this.log.osEvent(ts, osEvent)
+
+      // For file sources, add to queue; otherwise emit immediately
+      if (this.file) {
+        this.eventQueue.push({ osEvent, realTs: osEvent.ts })
+      } else {
+        this.log.osEvent(osEvent.ts - this.offsetTs, osEvent)
+      }
     }
   }
   async close() {
     return new Promise<void>((resolve) => {
+      // Clear the timer (only exists for file sources)
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = undefined
+      }
+
       if (this.serialPort) {
         this.serialPort.close(() => {
           resolve()

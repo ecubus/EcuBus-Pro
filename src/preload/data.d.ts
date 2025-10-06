@@ -29,7 +29,6 @@ export interface VarValueString {
   type: 'string'
   value?: string
   initValue?: string
-  enum?: { name: string; value: string }[]
 }
 
 export interface VarValueArray {
@@ -110,6 +109,7 @@ export type GraphBindSignalValue = {
   frameId: number
   startBit: number
   bitLength: number
+  stringRange?: { name: string; value: number }[]
 }
 
 export type GraphBindFrameValue = {
@@ -122,6 +122,8 @@ export type GraphBindVariableValue = {
   variableType: 'user' | 'system'
   variableName: string
   variableFullName: string
+  variableValueType?: 'number' | 'string' | 'array'
+  stringRange?: { name: string; value: number }[]
 }
 
 export type GraphNode<T, S = any> = {

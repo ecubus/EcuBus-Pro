@@ -80,12 +80,7 @@ class ElectronLog extends Transport {
 
 function createWindow(): void {
   // Get stored window bounds and state
-  const windowBounds = store.get('windowBounds', {
-    width: 1000,
-    height: 600,
-    x: undefined,
-    y: undefined
-  }) as Electron.Rectangle
+  const windowBounds = store.get('windowBounds') as Electron.Rectangle
   const isMaximized = store.get('windowMaximized', false)
 
   function getBounds() {
@@ -98,10 +93,9 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     minWidth: 1000,
     minHeight: 600,
-    width: windowBounds.width,
-    height: windowBounds.height,
-    x: windowBounds.x,
-    y: windowBounds.y,
+    width: 1000,
+    height: 600,
+
     frame: false,
     show: false,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -112,6 +106,9 @@ function createWindow(): void {
       contextIsolation: true
     }
   })
+  if (windowBounds) {
+    mainWindow.setBounds(windowBounds)
+  }
   global.mainWindow = mainWindow
   logQ.addWin(mainWindow, true)
   createLogs(
@@ -139,11 +136,11 @@ function createWindow(): void {
         mainWindow.unmaximize()
         store.set('windowMaximized', false)
       } else {
-        // Save current bounds before maximizing
-        store.set('windowBounds', getBounds())
         mainWindow.maximize()
         store.set('windowMaximized', true)
       }
+      // Save current bounds before maximizing
+      store.set('windowBounds', getBounds())
     }
   })
 
@@ -153,9 +150,7 @@ function createWindow(): void {
     } else {
       globalStop()
       // Only save bounds if window is not maximized
-      if (!mainWindow.isMaximized()) {
-        store.set('windowBounds', getBounds())
-      }
+      store.set('windowBounds', getBounds())
       store.set('windowMaximized', mainWindow.isMaximized())
       closeAllWindows()
       mainWindow.close()
@@ -221,4 +216,3 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-

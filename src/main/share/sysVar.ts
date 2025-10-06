@@ -2,8 +2,16 @@ import { VarItem } from 'src/preload/data'
 import { UdsDevice } from './uds'
 import { TesterInfo } from './tester'
 import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
-import { TaskType } from './osEvent'
+import { IsrStatus, ResourceStatus, TaskStatus, TaskType } from './osEvent'
 
+interface Item {
+  type: 'string' | 'number'
+  min?: number
+  max?: number
+  unit?: string
+  desc?: string
+  enum?: { name: string; value: number }[]
+}
 export const MonitorVar: VarItem[] = [
   {
     type: 'system',
@@ -162,10 +170,7 @@ export function getAllSysVar(
   }
 
   for (const item of Object.values(orti)) {
-    const Ortilist: Record<
-      string,
-      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
-    > = {
+    const Ortilist: Record<string, Item> = {
       DelayTimeMin: {
         type: 'number',
         min: 0,
@@ -244,8 +249,18 @@ export function getAllSysVar(
         desc: '任务开始次数'
       },
       Status: {
-        type: 'string',
-        desc: 'Task当前状态'
+        type: 'number',
+        desc: 'Task当前状态',
+        max: 5,
+        min: 0,
+        enum: [
+          { name: 'Active', value: TaskStatus.ACTIVE },
+          { name: 'Start', value: TaskStatus.START },
+          { name: 'Suspended', value: TaskStatus.WAIT },
+          { name: 'Release', value: TaskStatus.RELEASE },
+          { name: 'Preempt', value: TaskStatus.PREEMPT },
+          { name: 'Terminate', value: TaskStatus.TERMINATE }
+        ]
       },
       ActiveCount: {
         type: 'number',
@@ -268,10 +283,7 @@ export function getAllSysVar(
       }
     }
 
-    const ISRList: Record<
-      string,
-      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
-    > = {
+    const ISRList: Record<string, Item> = {
       ExecutionTimeMin: {
         type: 'number',
         min: 0,
@@ -296,8 +308,14 @@ export function getAllSysVar(
         desc: 'ISR运行次数'
       },
       Status: {
-        type: 'string',
-        desc: 'ISR当前状态'
+        type: 'number',
+        desc: 'ISR当前状态',
+        max: 1,
+        min: 0,
+        enum: [
+          { name: 'Start', value: IsrStatus.START },
+          { name: 'Stop', value: IsrStatus.STOP }
+        ]
       },
       CallIntervalMin: {
         type: 'number',
@@ -319,13 +337,16 @@ export function getAllSysVar(
       }
     }
 
-    const ResourceList: Record<
-      string,
-      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
-    > = {
+    const ResourceList: Record<string, Item> = {
       Status: {
-        type: 'string',
-        desc: 'Resource当前状态'
+        type: 'number',
+        desc: 'Resource当前状态',
+        max: 1,
+        min: 0,
+        enum: [
+          { name: 'Start', value: ResourceStatus.START },
+          { name: 'Stop', value: ResourceStatus.STOP }
+        ]
       },
       AcquireCount: {
         type: 'number',
@@ -339,10 +360,7 @@ export function getAllSysVar(
       }
     }
 
-    const ServiceList: Record<
-      string,
-      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
-    > = {
+    const ServiceList: Record<string, Item> = {
       Count: {
         type: 'number',
         min: 0,
@@ -355,10 +373,7 @@ export function getAllSysVar(
       }
     }
 
-    const HookList: Record<
-      string,
-      { type: 'string' | 'number'; min?: number; max?: number; unit?: string; desc?: string }
-    > = {
+    const HookList: Record<string, Item> = {
       Count: {
         type: 'number',
         min: 0,
@@ -411,7 +426,8 @@ export function getAllSysVar(
               type: vitem.type,
               min: vitem.min,
               max: vitem.max,
-              unit: vitem.unit
+              unit: vitem.unit,
+              enum: vitem.enum
             },
             desc: vitem.desc
           }
@@ -435,7 +451,8 @@ export function getAllSysVar(
               type: vitem.type,
               min: vitem.min,
               max: vitem.max,
-              unit: vitem.unit
+              unit: vitem.unit,
+              enum: vitem.enum
             },
             desc: vitem.desc
           }
@@ -471,7 +488,8 @@ export function getAllSysVar(
             type: vitem.type,
             min: vitem.min,
             max: vitem.max,
-            unit: vitem.unit
+            unit: vitem.unit,
+            enum: vitem.enum
           },
           desc: vitem.desc
         }
@@ -505,7 +523,8 @@ export function getAllSysVar(
             type: vitem.type,
             min: vitem.min,
             max: vitem.max,
-            unit: vitem.unit
+            unit: vitem.unit,
+            enum: vitem.enum
           },
           desc: vitem.desc
         }
@@ -538,7 +557,8 @@ export function getAllSysVar(
             type: vitem.type,
             min: vitem.min,
             max: vitem.max,
-            unit: vitem.unit
+            unit: vitem.unit,
+            enum: vitem.enum
           },
           desc: vitem.desc
         }

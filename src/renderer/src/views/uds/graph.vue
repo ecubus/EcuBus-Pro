@@ -382,6 +382,7 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
   if (isPaused.value) {
     return
   }
+  console.log(key, datas)
 
   // 获取对应的echarts实例
   const chart = chartInstances[key]
@@ -393,7 +394,9 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
   }
 
   // 添加新数据， 添加第一个的number，第二个Object里的value
-  chartDataCache[key] = chartDataCache[key].concat(datas.map((v) => [v[0], v[1].value]))
+  chartDataCache[key] = chartDataCache[key].concat(
+    datas.map((v) => [v[0], typeof v[1].value === 'number' ? v[1].value : v[1].rawValue])
+  )
 
   // 如果数据超过1000个点，移除最早的数据
   if (chartDataCache[key].length > 1000) {
@@ -701,6 +704,13 @@ const getChartOption = (
         fontSize: 10,
         show: true,
         formatter: (value: number) => {
+          if (chart.bindValue.stringRange) {
+            const val = chart.bindValue.stringRange.find((v) => v.value == value)?.name
+            if (val) {
+              return val
+            }
+          }
+
           let val = Number.isInteger(value) ? value.toFixed(0) : ''
           //如果val太大，显示科学计数法
           if (val.length > 6) {
@@ -880,6 +890,7 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
       }
     }
     filteredTreeData.value.push(node)
+
     window.logBus.on(node.id, dataUpdate)
     graphs[node.id] = node
     nextTick(() => {
@@ -1077,4 +1088,3 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   }
 }
 </style>
-

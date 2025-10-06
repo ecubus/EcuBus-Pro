@@ -99,6 +99,7 @@ interface TreeItem {
     min?: number
     max?: number
     unit?: string
+    enum?: { name: string; value: number }[]
   }
   desc?: string
 }
@@ -274,7 +275,9 @@ function addVariable() {
         variableId: row.id,
         variableType: row.type,
         variableName: row.name,
-        variableFullName: fullNameList.join('.')
+        variableFullName: fullNameList.join('.'),
+        variableValueType: row.value?.type as 'number' | 'string' | 'array',
+        stringRange: row.value?.enum
       }
     })
   }

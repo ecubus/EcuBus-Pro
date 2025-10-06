@@ -85,6 +85,13 @@ interface HookState {
   lastStatus: number
 }
 
+interface VarResult {
+  id: string
+  value: {
+    value: number | string
+    rawValue: number
+  }
+}
 export default class OsStatistics {
   // 内部状态（用于事件处理）
   private tasks: Map<string, TaskState> = new Map()
@@ -204,7 +211,7 @@ export default class OsStatistics {
     }
 
     let needUpdateLoad = false
-    const result: { id: string; value: any }[] = []
+    const result: VarResult[] = []
     // 处理事件并立即更新统计
     switch (event.type) {
       case TaskType.TASK:
@@ -233,7 +240,16 @@ export default class OsStatistics {
   }
 
   private getKey(type: TaskType, id: number, coreId: number): string {
-    return `${this.id}.${type}_${id}_${coreId}`
+    const map: Record<TaskType, string> = {
+      [TaskType.TASK]: 'Task',
+      [TaskType.ISR]: 'ISR',
+      [TaskType.RESOURCE]: 'Resource',
+      [TaskType.SERVICE]: 'Service',
+      [TaskType.HOOK]: 'Hook',
+      [TaskType.SPINLOCK]: 'Spinlock',
+      [TaskType.LINE]: 'Line'
+    }
+    return `${this.id}.${map[type]}.${type}_${id}_${coreId}`
   }
 
   private addCoreExecutionTime(coreId: number, execTime: number): void {
@@ -241,7 +257,7 @@ export default class OsStatistics {
     this.coreExecutionTime.set(coreId, current + execTime)
   }
 
-  private processTaskEvent(event: OsEvent) {
+  private processTaskEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as TaskStatus
 
@@ -402,8 +418,8 @@ export default class OsStatistics {
     return result
   }
 
-  private updateTaskStatistics(key: string, task: TaskState): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private updateTaskStatistics(key: string, task: TaskState): VarResult[] {
+    const result: VarResult[] = []
 
     const avgActivationInterval =
       task.activationIntervalCount > 0
@@ -424,9 +440,18 @@ export default class OsStatistics {
       task.delayTimeMax
     )
 
-    result.push({ id: `OsTrace.${key}.DelayTimeMin`, value: delayStats.min / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.DelayTimeMax`, value: delayStats.max / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.DelayTimeAvg`, value: delayStats.avg / this.cpuFreq })
+    result.push({
+      id: `OsTrace.${key}.DelayTimeMin`,
+      value: { value: delayStats.min / this.cpuFreq, rawValue: delayStats.min }
+    })
+    result.push({
+      id: `OsTrace.${key}.DelayTimeMax`,
+      value: { value: delayStats.max / this.cpuFreq, rawValue: delayStats.max }
+    })
+    result.push({
+      id: `OsTrace.${key}.DelayTimeAvg`,
+      value: { value: delayStats.avg / this.cpuFreq, rawValue: delayStats.avg }
+    })
 
     const activationStats = this.formatTimeStats(
       task.activationIntervalSum,
@@ -437,15 +462,15 @@ export default class OsStatistics {
 
     result.push({
       id: `OsTrace.${key}.ActivationIntervalMin`,
-      value: activationStats.min / this.cpuFreq
+      value: { value: activationStats.min / this.cpuFreq, rawValue: activationStats.min }
     })
     result.push({
       id: `OsTrace.${key}.ActivationIntervalMax`,
-      value: activationStats.max / this.cpuFreq
+      value: { value: activationStats.max / this.cpuFreq, rawValue: activationStats.max }
     })
     result.push({
       id: `OsTrace.${key}.ActivationIntervalAvg`,
-      value: activationStats.avg / this.cpuFreq
+      value: { value: activationStats.avg / this.cpuFreq, rawValue: activationStats.avg }
     })
 
     const startStats = this.formatTimeStats(
@@ -455,9 +480,18 @@ export default class OsStatistics {
       task.startIntervalMax
     )
 
-    result.push({ id: `OsTrace.${key}.StartIntervalMin`, value: startStats.min / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.StartIntervalMax`, value: startStats.max / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.StartIntervalAvg`, value: startStats.avg / this.cpuFreq })
+    result.push({
+      id: `OsTrace.${key}.StartIntervalMin`,
+      value: { value: startStats.min / this.cpuFreq, rawValue: startStats.min }
+    })
+    result.push({
+      id: `OsTrace.${key}.StartIntervalMax`,
+      value: { value: startStats.max / this.cpuFreq, rawValue: startStats.max }
+    })
+    result.push({
+      id: `OsTrace.${key}.StartIntervalAvg`,
+      value: { value: startStats.avg / this.cpuFreq, rawValue: startStats.avg }
+    })
 
     // 任务执行时间统计（不包括被中断的时间）
     const executionStats = this.formatTimeStats(
@@ -469,31 +503,46 @@ export default class OsStatistics {
 
     result.push({
       id: `OsTrace.${key}.ExecutionTimeMin`,
-      value: executionStats.min / this.cpuFreq
+      value: { value: executionStats.min / this.cpuFreq, rawValue: executionStats.min }
     })
     result.push({
       id: `OsTrace.${key}.ExecutionTimeMax`,
-      value: executionStats.max / this.cpuFreq
+      value: { value: executionStats.max / this.cpuFreq, rawValue: executionStats.max }
     })
     result.push({
       id: `OsTrace.${key}.ExecutionTimeAvg`,
-      value: executionStats.avg / this.cpuFreq
+      value: { value: executionStats.avg / this.cpuFreq, rawValue: executionStats.avg }
     })
 
-    result.push({ id: `OsTrace.${key}.Status`, value: TaskStatus[task.currentStatus] })
-    result.push({ id: `OsTrace.${key}.ActiveCount`, value: task.activeCount })
+    result.push({
+      id: `OsTrace.${key}.Status`,
+      value: { value: TaskStatus[task.currentStatus], rawValue: task.currentStatus }
+    })
+    result.push({
+      id: `OsTrace.${key}.ActiveCount`,
+      value: { value: task.activeCount, rawValue: task.activeCount }
+    })
 
-    result.push({ id: `OsTrace.${key}.StartCount`, value: task.startCount })
+    result.push({
+      id: `OsTrace.${key}.StartCount`,
+      value: { value: task.startCount, rawValue: task.startCount }
+    })
     //Task实际运行次数与被激活次数的百分比Running\ Active
     const runningRate = task.activeCount > 0 ? (task.startCount / task.activeCount) * 100 : 0
 
-    result.push({ id: `OsTrace.${key}.RunningRate`, value: runningRate.toFixed(2) + '%' })
-    result.push({ id: `OsTrace.${key}.Jitter`, value: avgJitter.toFixed(2) + '%' })
+    result.push({
+      id: `OsTrace.${key}.RunningRate`,
+      value: { value: Number(runningRate.toFixed(2)), rawValue: runningRate }
+    })
+    result.push({
+      id: `OsTrace.${key}.Jitter`,
+      value: { value: Number(avgJitter.toFixed(2)), rawValue: avgJitter }
+    })
 
     return result
   }
 
-  private processIsrEvent(event: OsEvent) {
+  private processIsrEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as IsrStatus
 
@@ -571,17 +620,26 @@ export default class OsStatistics {
     return this.updateIsrStatistics(key, isr)
   }
 
-  private updateIsrStatistics(key: string, isr: IsrState): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private updateIsrStatistics(key: string, isr: IsrState): VarResult[] {
+    const result: VarResult[] = []
     const execStats = this.formatTimeStats(
       isr.executionTimeSum,
       isr.executionTimeCount,
       isr.executionTimeMin,
       isr.executionTimeMax
     )
-    result.push({ id: `OsTrace.${key}.ExecutionTimeMin`, value: execStats.min / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.ExecutionTimeMax`, value: execStats.max / this.cpuFreq })
-    result.push({ id: `OsTrace.${key}.ExecutionTimeAvg`, value: execStats.avg / this.cpuFreq })
+    result.push({
+      id: `OsTrace.${key}.ExecutionTimeMin`,
+      value: { value: execStats.min / this.cpuFreq, rawValue: execStats.min }
+    })
+    result.push({
+      id: `OsTrace.${key}.ExecutionTimeMax`,
+      value: { value: execStats.max / this.cpuFreq, rawValue: execStats.max }
+    })
+    result.push({
+      id: `OsTrace.${key}.ExecutionTimeAvg`,
+      value: { value: execStats.avg / this.cpuFreq, rawValue: execStats.avg }
+    })
 
     const callIntervalStats = this.formatTimeStats(
       isr.callIntervalSum,
@@ -591,23 +649,29 @@ export default class OsStatistics {
     )
     result.push({
       id: `OsTrace.${key}.CallIntervalMin`,
-      value: callIntervalStats.min / this.cpuFreq
+      value: { value: callIntervalStats.min / this.cpuFreq, rawValue: callIntervalStats.min }
     })
     result.push({
       id: `OsTrace.${key}.CallIntervalMax`,
-      value: callIntervalStats.max / this.cpuFreq
+      value: { value: callIntervalStats.max / this.cpuFreq, rawValue: callIntervalStats.max }
     })
     result.push({
       id: `OsTrace.${key}.CallIntervalAvg`,
-      value: callIntervalStats.avg / this.cpuFreq
+      value: { value: callIntervalStats.avg / this.cpuFreq, rawValue: callIntervalStats.avg }
     })
 
-    result.push({ id: `OsTrace.${key}.RunCount`, value: isr.runCount })
-    result.push({ id: `OsTrace.${key}.Status`, value: IsrStatus[isr.currentStatus] })
+    result.push({
+      id: `OsTrace.${key}.RunCount`,
+      value: { value: isr.runCount, rawValue: isr.runCount }
+    })
+    result.push({
+      id: `OsTrace.${key}.Status`,
+      value: { value: IsrStatus[isr.currentStatus], rawValue: isr.currentStatus }
+    })
     return result
   }
 
-  private processResourceEvent(event: OsEvent): { id: string; value: any }[] {
+  private processResourceEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as ResourceStatus
 
@@ -634,24 +698,27 @@ export default class OsStatistics {
     return this.updateResourceStatistics(key, resource)
   }
 
-  private updateResourceStatistics(
-    key: string,
-    resource: ResourceState
-  ): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private updateResourceStatistics(key: string, resource: ResourceState): VarResult[] {
+    const result: VarResult[] = []
 
     // Return current status data
     result.push({
       id: `OsTrace.Resource.${key}.Status`,
-      value: ResourceStatus[resource.currentStatus]
+      value: { value: ResourceStatus[resource.currentStatus], rawValue: resource.currentStatus }
     })
-    result.push({ id: `OsTrace.Resource.${key}.AcquireCount`, value: resource.acquireCount })
-    result.push({ id: `OsTrace.Resource.${key}.ReleaseCount`, value: resource.releaseCount })
+    result.push({
+      id: `OsTrace.Resource.${key}.AcquireCount`,
+      value: { value: resource.acquireCount, rawValue: resource.acquireCount }
+    })
+    result.push({
+      id: `OsTrace.Resource.${key}.ReleaseCount`,
+      value: { value: resource.releaseCount, rawValue: resource.releaseCount }
+    })
 
     return result
   }
 
-  private processServiceEvent(event: OsEvent): { id: string; value: any }[] {
+  private processServiceEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
 
     if (!this.services.has(key)) {
@@ -671,21 +738,24 @@ export default class OsStatistics {
     return this.updateServiceStatistics(key, service)
   }
 
-  private updateServiceStatistics(
-    key: string,
-    service: ServiceState
-  ): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private updateServiceStatistics(key: string, service: ServiceState): VarResult[] {
+    const result: VarResult[] = []
 
     // Return current status data
-    result.push({ id: `OsTrace.Service.${key}.Count`, value: service.count })
-    result.push({ id: `OsTrace.Service.${key}.LastStatus`, value: service.lastStatus })
+    result.push({
+      id: `OsTrace.Service.${key}.Count`,
+      value: { value: service.count, rawValue: service.count }
+    })
+    result.push({
+      id: `OsTrace.Service.${key}.LastStatus`,
+      value: { value: service.lastStatus, rawValue: service.lastStatus }
+    })
 
     return result
   }
 
-  private processHookEvent(event: OsEvent): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private processHookEvent(event: OsEvent): VarResult[] {
+    const result: VarResult[] = []
 
     // Track hook details
     const key = this.getKey(event.type, event.id, event.coreId)
@@ -704,14 +774,20 @@ export default class OsStatistics {
     hook.lastStatus = event.status
 
     // Return hook status data
-    result.push({ id: `OsTrace.Hook.${key}.Count`, value: hook.count })
-    result.push({ id: `OsTrace.Hook.${key}.LastStatus`, value: hook.lastStatus })
+    result.push({
+      id: `OsTrace.Hook.${key}.Count`,
+      value: { value: hook.count, rawValue: hook.count }
+    })
+    result.push({
+      id: `OsTrace.Hook.${key}.LastStatus`,
+      value: { value: hook.lastStatus, rawValue: hook.lastStatus }
+    })
 
     return result
   }
 
-  private updateCoreLoad(coreId: number): { id: string; value: any }[] {
-    const result: { id: string; value: any }[] = []
+  private updateCoreLoad(coreId: number): VarResult[] {
+    const result: VarResult[] = []
     const totalTime = this.endTime && this.startTime ? this.endTime - this.startTime : 0
 
     if (totalTime <= 0) return result
@@ -720,14 +796,17 @@ export default class OsStatistics {
     const execTime = this.coreExecutionTime.get(coreId) || 0
     const loadPercent = (execTime / totalTime) * 100
 
-    result.push({ id: `OsTrace.${this.id}.Core${coreId}.LoadPercent`, value: loadPercent })
+    result.push({
+      id: `OsTrace.${this.id}.Core${coreId}.LoadPercent`,
+      value: { value: loadPercent, rawValue: loadPercent }
+    })
     result.push({
       id: `OsTrace.${this.id}.Core${coreId}.ExecutionTime`,
-      value: execTime / this.cpuFreq / 1000
+      value: { value: execTime / this.cpuFreq / 1000, rawValue: execTime }
     })
     result.push({
       id: `OsTrace.${this.id}.Core${coreId}.TotalTime`,
-      value: totalTime / this.cpuFreq / 1000
+      value: { value: totalTime / this.cpuFreq / 1000, rawValue: totalTime }
     })
     return result
   }

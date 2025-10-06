@@ -237,7 +237,7 @@
                 v-model="connectorForm.options.baudRate"
                 placeholder="Select baud rate"
                 filterable
-                creatable
+                allow-create
                 style="width: 150px"
               >
                 <el-option label="9600" value="9600" />

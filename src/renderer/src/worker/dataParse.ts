@@ -54,7 +54,7 @@ function parseLinData(raw: any) {
             }
 
             //转为秒
-            const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
+            const ts = (msg.ts || 0) / 1000000
             const value = signalDef.physValue
             result[signalKey].push([
               ts,
@@ -101,7 +101,7 @@ function parseCanData(raw: any) {
           if (!result[signalKey]) {
             result[signalKey] = []
           }
-          const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(3))
+          const ts = (msg.ts || 0) / 1000000
           const value = signal.physValue
           result[signalKey].push([
             ts,
@@ -136,16 +136,18 @@ function parseORTIData(raw: any) {
 
   for (const rawEvent of raw) {
     const osEvent: OsEvent = rawEvent.message.data
-    const timestampInSeconds = rawEvent.message.ts
-
+    const ts = rawEvent.message.ts
     const db = findDb(osEvent.database)
+
     const eventData = {
       name: '',
-      ts: timestampInSeconds,
+      ts: ts,
       data: `Index:${osEvent.index} Time:${osEvent.ts} Core:${osEvent.coreId} ${getStatusDescription(osEvent.type, osEvent.status)}`,
       id: getID(osEvent.type, osEvent.id, osEvent.coreId)
     }
     if (db) {
+      const timestampInSeconds = ts / 1000000
+
       let name
       if (osEvent.type == TaskType.TASK || osEvent.type == TaskType.ISR) {
         // Find matching configuration for this event
@@ -176,10 +178,10 @@ function parseORTIData(raw: any) {
             result[item.id] = []
           }
           result[item.id].push([
-            parseFloat((timestampInSeconds / 1000000).toFixed(3)),
+            timestampInSeconds,
             {
-              value: item.value,
-              rawValue: item.value
+              value: item.value.value,
+              rawValue: item.value.rawValue
             }
           ])
         }
@@ -263,7 +265,7 @@ function parseSetVar(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
     const val = item.message.data
-    const ts = parseFloat(((item.message.ts || 0) / 1000000).toFixed(3))
+    const ts = (item.message.ts || 0) / 1000000
     if (Array.isArray(val)) {
       for (const sval of val) {
         if (!result[sval.id]) {

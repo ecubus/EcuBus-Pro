@@ -449,15 +449,12 @@ function saveParam(index: number, justValid: boolean) {
           }
         }
         if (ss.suppress) {
-          console.log('xxx')
           oldBuffer[0] = (0x80 | oldBuffer[0]) >>> 0
         }
         if (props.subFunction) {
-          console.log('yyy', newBuffer[0])
           newBuffer[0] = (0x80 | newBuffer[0]) >>> 0
-          console.log(newBuffer[0])
         }
-        console.log('zzz', newBuffer, oldBuffer)
+
         if (Buffer.compare(newBuffer, oldBuffer) == 0) {
           paramError.value['value'] =
             `The id already exists in service ${ss.name}, please change it`

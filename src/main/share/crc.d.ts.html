@@ -1,4 +1,8 @@
 /**
+ * Built-in CRC algorithm names
+ */
+type CRCName = 'CRC8' | 'CRC8_SAE_J1850' | 'CRC8_SAE_J1850_ZERO' | 'CRC8_8H2F' | 'CRC8_CDMA2000' | 'CRC8_DARC' | 'CRC8_DVB_S2' | 'CRC8_EBU' | 'CRC8_ICODE' | 'CRC8_ITU' | 'CRC8_MAXIM' | 'CRC8_ROHC' | 'CRC8_WCDMA' | 'CRC16_CCIT_ZERO' | 'CRC16_ARC' | 'CRC16_AUG_CCITT' | 'CRC16_BUYPASS' | 'CRC16_CCITT_FALSE' | 'CRC16_CDMA2000' | 'CRC16_DDS_110' | 'CRC16_DECT_R' | 'CRC16_DECT_X' | 'CRC16_DNP' | 'CRC16_EN_13757' | 'CRC16_GENIBUS' | 'CRC16_MAXIM' | 'CRC16_MCRF4XX' | 'CRC16_RIELLO' | 'CRC16_T10_DIF' | 'CRC16_TELEDISK' | 'CRC16_TMS37157' | 'CRC16_USB' | 'CRC16_A' | 'CRC16_KERMIT' | 'CRC16_MODBUS' | 'CRC16_X_25' | 'CRC16_XMODEM' | 'CRC32' | 'CRC32_BZIP2' | 'CRC32_C' | 'CRC32_D' | 'CRC32_MPEG2' | 'CRC32_POSIX' | 'CRC32_Q' | 'CRC32_JAMCRC' | 'CRC32_XFER';
+/**
  * CRC (Cyclic Redundancy Check) class for computing various CRC algorithms.
  *
  * This class provides a comprehensive implementation of CRC calculation algorithms
@@ -84,52 +88,59 @@ declare class CRC {
      * Get built-in CRC by name
      *
      * Available built-in CRCs:
-     * | Name                | Width | Polynomial | Initial | Final XOR | Input Reflected | Result Reflected |
-     * |--------------------|-------|------------|---------|-----------|-----------------|------------------|
-     * | CRC8               | 8     | 0x07      | 0x00    | 0x00      | false          | false           |
-     * | CRC8_SAE_J1850    | 8     | 0x1d      | 0xff    | 0xff      | false          | false           |
-     * | CRC8_SAE_J1850_ZERO| 8     | 0x1d      | 0x00    | 0x00      | false          | false           |
-     * | CRC8_8H2F         | 8     | 0x2f      | 0xff    | 0xff      | false          | false           |
-     * | CRC8_CDMA2000     | 8     | 0x9b      | 0xff    | 0x00      | false          | false           |
-     * | CRC8_DARC         | 8     | 0x39      | 0x00    | 0x00      | true           | true            |
-     * | CRC8_DVB_S2       | 8     | 0xd5      | 0x00    | 0x00      | false          | false           |
-     * | CRC8_EBU          | 8     | 0x1d      | 0xff    | 0x00      | true           | true            |
-     * | CRC8_ICODE        | 8     | 0x1d      | 0xfd    | 0x00      | false          | false           |
-     * | CRC8_ITU          | 8     | 0x07      | 0x00    | 0x55      | false          | false           |
-     * | CRC8_MAXIM        | 8     | 0x31      | 0x00    | 0x00      | true           | true            |
-     * | CRC8_ROHC         | 8     | 0x07      | 0xff    | 0x00      | true           | true            |
-     * | CRC8_WCDMA        | 8     | 0x9b      | 0x00    | 0x00      | true           | true            |
-     * | CRC16_CCIT_ZERO   | 16    | 0x1021    | 0x0000  | 0x0000    | false          | false           |
-     * | CRC16_ARC         | 16    | 0x8005    | 0x0000  | 0x0000    | true           | true            |
-     * | CRC16_AUG_CCITT   | 16    | 0x1021    | 0x1d0f  | 0x0000    | false          | false           |
-     * | CRC16_BUYPASS     | 16    | 0x8005    | 0x0000  | 0x0000    | false          | false           |
-     * | CRC16_CCITT_FALSE | 16    | 0x1021    | 0xffff  | 0x0000    | false          | false           |
-     * | CRC16_CDMA2000    | 16    | 0xc867    | 0xffff  | 0x0000    | false          | false           |
-     * | CRC16_DDS_110     | 16    | 0x8005    | 0x800d  | 0x0000    | false          | false           |
-     * | CRC16_DECT_R      | 16    | 0x0589    | 0x0000  | 0x0001    | false          | false           |
-     * | CRC16_DECT_X      | 16    | 0x0589    | 0x0000  | 0x0000    | false          | false           |
-     * | CRC16_DNP         | 16    | 0x3d65    | 0x0000  | 0xffff    | true           | true            |
-     * | CRC16_EN_13757    | 16    | 0x3d65    | 0x0000  | 0xffff    | false          | false           |
-     * | CRC16_GENIBUS     | 16    | 0x1021    | 0xffff  | 0xffff    | false          | false           |
-     * | CRC16_MAXIM       | 16    | 0x8005    | 0x0000  | 0xffff    | true           | true            |
-     * | CRC16_MCRF4XX     | 16    | 0x1021    | 0xffff  | 0x0000    | true           | true            |
-     * | CRC16_RIELLO      | 16    | 0x1021    | 0xb2aa  | 0x0000    | true           | true            |
-     * | CRC16_T10_DIF     | 16    | 0x8bb7    | 0x0000  | 0x0000    | false          | false           |
-     * | CRC16_TELEDISK    | 16    | 0xa097    | 0x0000  | 0x0000    | false          | false           |
-     * | CRC32             | 32    | 0x04c11db7| 0xffffffff| 0xffffffff| true         | true            |
-     * | CRC32_BZIP2       | 32    | 0x04c11db7| 0xffffffff| 0xffffffff| false        | false           |
-     * | CRC32_C           | 32    | 0x1edc6f41| 0xffffffff| 0xffffffff| true         | true            |
-     * | CRC32_D           | 32    | 0xa833982b| 0xffffffff| 0xffffffff| true         | true            |
-     * | CRC32_MPEG2       | 32    | 0x04c11db7| 0xffffffff| 0x00000000| false        | false           |
-     * | CRC32_POSIX       | 32    | 0x04c11db7| 0x00000000| 0xffffffff| false        | false           |
-     * | CRC32_Q           | 32    | 0x814141ab| 0x00000000| 0x00000000| false        | false           |
-     * | CRC32_JAMCRC      | 32    | 0x04c11db7| 0xffffffff| 0x00000000| true         | true            |
-     * | CRC32_XFER        | 32    | 0x000000af| 0x00000000| 0x00000000| false        | false           |
+     * | Name                | Width | Polynomial | Initial    | Final XOR  | Input Reflected | Result Reflected |
+     * |--------------------|-------|------------|------------|------------|-----------------|------------------|
+     * | CRC8               | 8     | 0x07       | 0x00       | 0x00       | false           | false            |
+     * | CRC8_SAE_J1850     | 8     | 0x1d       | 0xff       | 0xff       | false           | false            |
+     * | CRC8_SAE_J1850_ZERO| 8     | 0x1d       | 0x00       | 0x00       | false           | false            |
+     * | CRC8_8H2F          | 8     | 0x2f       | 0xff       | 0xff       | false           | false            |
+     * | CRC8_CDMA2000      | 8     | 0x9b       | 0xff       | 0x00       | false           | false            |
+     * | CRC8_DARC          | 8     | 0x39       | 0x00       | 0x00       | true            | true             |
+     * | CRC8_DVB_S2        | 8     | 0xd5       | 0x00       | 0x00       | false           | false            |
+     * | CRC8_EBU           | 8     | 0x1d       | 0xff       | 0x00       | true            | true             |
+     * | CRC8_ICODE         | 8     | 0x1d       | 0xfd       | 0x00       | false           | false            |
+     * | CRC8_ITU           | 8     | 0x07       | 0x00       | 0x55       | false           | false            |
+     * | CRC8_MAXIM         | 8     | 0x31       | 0x00       | 0x00       | true            | true             |
+     * | CRC8_ROHC          | 8     | 0x07       | 0xff       | 0x00       | true            | true             |
+     * | CRC8_WCDMA         | 8     | 0x9b       | 0x00       | 0x00       | true            | true             |
+     * | CRC16_CCIT_ZERO    | 16    | 0x1021     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC16_ARC          | 16    | 0x8005     | 0x0000     | 0x0000     | true            | true             |
+     * | CRC16_AUG_CCITT    | 16    | 0x1021     | 0x1d0f     | 0x0000     | false           | false            |
+     * | CRC16_BUYPASS      | 16    | 0x8005     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC16_CCITT_FALSE  | 16    | 0x1021     | 0xffff     | 0x0000     | false           | false            |
+     * | CRC16_CDMA2000     | 16    | 0xc867     | 0xffff     | 0x0000     | false           | false            |
+     * | CRC16_DDS_110      | 16    | 0x8005     | 0x800d     | 0x0000     | false           | false            |
+     * | CRC16_DECT_R       | 16    | 0x0589     | 0x0000     | 0x0001     | false           | false            |
+     * | CRC16_DECT_X       | 16    | 0x0589     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC16_DNP          | 16    | 0x3d65     | 0x0000     | 0xffff     | true            | true             |
+     * | CRC16_EN_13757     | 16    | 0x3d65     | 0x0000     | 0xffff     | false           | false            |
+     * | CRC16_GENIBUS      | 16    | 0x1021     | 0xffff     | 0xffff     | false           | false            |
+     * | CRC16_MAXIM        | 16    | 0x8005     | 0x0000     | 0xffff     | true            | true             |
+     * | CRC16_MCRF4XX      | 16    | 0x1021     | 0xffff     | 0x0000     | true            | true             |
+     * | CRC16_RIELLO       | 16    | 0x1021     | 0xb2aa     | 0x0000     | true            | true             |
+     * | CRC16_T10_DIF      | 16    | 0x8bb7     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC16_TELEDISK     | 16    | 0xa097     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC16_TMS37157     | 16    | 0x1021     | 0x89ec     | 0x0000     | true            | true             |
+     * | CRC16_USB          | 16    | 0x8005     | 0xffff     | 0xffff     | true            | true             |
+     * | CRC16_A            | 16    | 0x1021     | 0xc6c6     | 0x0000     | true            | true             |
+     * | CRC16_KERMIT       | 16    | 0x1021     | 0x0000     | 0x0000     | true            | true             |
+     * | CRC16_MODBUS       | 16    | 0x8005     | 0xffff     | 0x0000     | true            | true             |
+     * | CRC16_X_25         | 16    | 0x1021     | 0xffff     | 0xffff     | true            | true             |
+     * | CRC16_XMODEM       | 16    | 0x1021     | 0x0000     | 0x0000     | false           | false            |
+     * | CRC32              | 32    | 0x04c11db7 | 0xffffffff | 0xffffffff | true            | true             |
+     * | CRC32_BZIP2        | 32    | 0x04c11db7 | 0xffffffff | 0xffffffff | false           | false            |
+     * | CRC32_C            | 32    | 0x1edc6f41 | 0xffffffff | 0xffffffff | true            | true             |
+     * | CRC32_D            | 32    | 0xa833982b | 0xffffffff | 0xffffffff | true            | true             |
+     * | CRC32_MPEG2        | 32    | 0x04c11db7 | 0xffffffff | 0x00000000 | false           | false            |
+     * | CRC32_POSIX        | 32    | 0x04c11db7 | 0x00000000 | 0xffffffff | false           | false            |
+     * | CRC32_Q            | 32    | 0x814141ab | 0x00000000 | 0x00000000 | false           | false            |
+     * | CRC32_JAMCRC       | 32    | 0x04c11db7 | 0xffffffff | 0x00000000 | true            | true             |
+     * | CRC32_XFER         | 32    | 0x000000af | 0x00000000 | 0x00000000 | false           | false            |
      *
      * @param name - The name of the CRC algorithm to retrieve
      * @returns The CRC instance if found, undefined otherwise
      */
-    static buildInCrc(name: string): CRC | undefined;
+    static buildInCrc(name: CRCName): CRC | undefined;
     /**
      * Returns a list of default CRC configurations.
      *
@@ -185,13 +196,7 @@ declare class CRC {
     compute(bytes: number[] | Buffer): number;
     computeBuffer(bytes: number[] | Buffer): Buffer<ArrayBuffer>;
     get table(): number[];
-    /**
-     * Retrieves a CRC object from the defaults list by its name.
-     *
-     * @param name - The name of the CRC object to find.
-     * @returns The CRC object with the specified name, or `undefined` if not found.
-     */
-    static default(name: string): CRC | undefined;
 }
 
 export { CRC };
+export type { CRCName };

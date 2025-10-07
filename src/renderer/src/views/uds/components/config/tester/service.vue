@@ -328,6 +328,7 @@ function nodeClick(data: any) {
   } else {
     activeService.value = ''
   }
+  activeName.value = 'request'
 }
 
 function removeService(serviceId: ServiceId, id: string) {
@@ -697,12 +698,14 @@ watch(
 )
 
 function suppressChange() {
-  const lastVal = model.value.params[0].value[0]
-  if (model.value.suppress) {
-    activeName.value = 'request'
-    paramSetVal(model.value.params[0], lastVal | 0x80)
-  } else {
-    paramSetVal(model.value.params[0], lastVal & 0x7f)
+  if (model.value.serviceId.startsWith('0x')) {
+    const lastVal = model.value.params[0].value[0]
+    if (model.value.suppress) {
+      activeName.value = 'request'
+      paramSetVal(model.value.params[0], lastVal | 0x80)
+    } else {
+      paramSetVal(model.value.params[0], lastVal & 0x7f)
+    }
   }
   reqParamChange()
 }

@@ -13,7 +13,7 @@ const FRAME_HEADER = 0x5a
 const FRAME_HEADER_SIZE = 1
 const DATA_LENGTH = 15
 const FRAME_LENGTH = FRAME_HEADER_SIZE + DATA_LENGTH
-const crc8 = CRC.default('CRC8')!
+const crc8 = CRC.buildInCrc('CRC8')!
 
 export default class TraceItem {
   private serialPort?: SerialPort

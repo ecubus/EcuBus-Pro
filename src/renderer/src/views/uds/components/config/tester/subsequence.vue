@@ -115,18 +115,18 @@
             <el-option value="continue" label="Continue" />
           </el-select>
         </template>
-        <template #default_status="{ $rowIndex }">
+        <template #default_status="{ rowIndex }">
           <div
             :class="{
-              'seq-success': excuseResults[$rowIndex]?.status === 'finished',
-              'seq-error': excuseResults[$rowIndex]?.status === 'error',
-              'seq-notStart': excuseResults[$rowIndex]?.status === 'notStart',
+              'seq-success': excuseResults[rowIndex]?.status === 'finished',
+              'seq-error': excuseResults[rowIndex]?.status === 'error',
+              'seq-notStart': excuseResults[rowIndex]?.status === 'notStart',
               'seq-start':
-                excuseResults[$rowIndex]?.status === 'start' ||
-                excuseResults[$rowIndex]?.status === 'progress'
+                excuseResults[rowIndex]?.status === 'start' ||
+                excuseResults[rowIndex]?.status === 'progress'
             }"
           >
-            {{ excuseResults[$rowIndex]?.msg }}
+            {{ excuseResults[rowIndex]?.msg }}
           </div>
         </template>
         <template #toolbar>

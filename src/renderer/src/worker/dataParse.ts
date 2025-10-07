@@ -342,8 +342,7 @@ if (isWorker) {
       case 'udsRecv': {
         const result = parseUdsData(data, method)
         if (result) {
-          const transferables = collectTransferables(result)
-          self.postMessage(result, transferables)
+          self.postMessage(result)
         }
         break
       }

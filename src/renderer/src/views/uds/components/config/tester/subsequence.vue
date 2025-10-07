@@ -115,6 +115,20 @@
             <el-option value="continue" label="Continue" />
           </el-select>
         </template>
+        <template #default_status="{ $rowIndex }">
+          <div
+            :class="{
+              'seq-success': excuseResults[$rowIndex]?.status === 'finished',
+              'seq-error': excuseResults[$rowIndex]?.status === 'error',
+              'seq-notStart': excuseResults[$rowIndex]?.status === 'notStart',
+              'seq-start':
+                excuseResults[$rowIndex]?.status === 'start' ||
+                excuseResults[$rowIndex]?.status === 'progress'
+            }"
+          >
+            {{ excuseResults[$rowIndex]?.msg }}
+          </div>
+        </template>
         <template #toolbar>
           <div
             style="
@@ -313,27 +327,7 @@ const gridOptions = computed(() => {
         resizable: false,
         editRender: {},
         slots: {
-          default: ({ rowIndex }) => {
-            const getStatusClass = () => {
-              const status = excuseResults.value[rowIndex]?.status
-              switch (status) {
-                case 'finished':
-                  return 'seq-success'
-                case 'error':
-                  return 'seq-error'
-                case 'notStart':
-                  return 'seq-notStart'
-                case 'start':
-                  return 'seq-start'
-                case 'progress':
-                  return 'seq-start'
-                default:
-                  return ''
-              }
-            }
-
-            return <div class={getStatusClass()}>{excuseResults.value[rowIndex]?.msg}</div>
-          }
+          default: 'default_status'
         }
       }
     ]
@@ -525,4 +519,3 @@ onUnmounted(() => {
   color: var(--el-color-warning);
 }
 </style>
-

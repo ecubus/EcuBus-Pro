@@ -352,6 +352,7 @@ import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
 import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
+import { v4 } from 'uuid'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -433,7 +434,8 @@ const gridOptions = computed(() => {
       gt: 0
     },
     rowConfig: {
-      isCurrent: true
+      isCurrent: true,
+      keyField: 'uuid'
     },
     editConfig: {
       trigger: 'click',
@@ -510,6 +512,7 @@ const gridOptions = computed(() => {
 function addFrame() {
   const channel = Object.keys(devices.value)[0] || ''
   dataBase.ia[editIndex.value].action.push({
+    uuid: v4(),
     trigger: {
       type: 'manual'
     },
@@ -770,6 +773,7 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
     }
     // 创建新的 frame action
     dataBase.ia[editIndex.value].action.push({
+      uuid: v4(),
       trigger: {
         type: 'manual'
       },

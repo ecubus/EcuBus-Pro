@@ -63,6 +63,7 @@ export interface PwmInter {
 }
 
 export interface SomeipAction {
+  uuid: string
   trigger: {
     type: 'manual' | 'periodic'
     period?: number

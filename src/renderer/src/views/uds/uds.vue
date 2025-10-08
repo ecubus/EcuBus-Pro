@@ -358,8 +358,12 @@
                   <el-dropdown-menu size="small">
                     <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
                       </el-dropdown-item> -->
-                    <el-dropdown-item icon="CirclePlusFilled" command="addLin">Add Lin (LDF) </el-dropdown-item>
-                    <el-dropdown-item icon="CirclePlusFilled" command="addCan">Add CAN (DBC) </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addLin"
+                      >Add Lin (LDF)
+                    </el-dropdown-item>
+                    <el-dropdown-item icon="CirclePlusFilled" command="addCan"
+                      >Add CAN (DBC)
+                    </el-dropdown-item>
                     <el-dropdown-item icon="CirclePlusFilled" command="addOrti"
                       >Add OS (ORTI)
                     </el-dropdown-item>
@@ -383,7 +387,7 @@
             </div>
             <el-divider direction="vertical" style="height: 54px" />
 
-            <div class="grid girdenable">
+            <!-- <div class="grid girdenable">
               <Icon :icon="osTraceIcon" style="font-size: 24px" />
               <el-dropdown @command="openOsTrace">
                 <span class="lr">
@@ -409,7 +413,7 @@
                 </template>
               </el-dropdown>
             </div>
-            <el-divider direction="vertical" style="height: 54px" />
+            <el-divider direction="vertical" style="height: 54px" /> -->
             <div class="grid girdenable" @click="openApi()">
               <Icon :icon="apiIcon" style="font-size: 24px" />
               <span>Script Api</span>

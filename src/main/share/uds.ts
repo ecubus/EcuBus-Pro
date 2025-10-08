@@ -441,6 +441,7 @@ export function paramSetSize(param: Param, bitSize: number) {
   param.value = newValue
 }
 export interface SequenceItem {
+  uuid: string
   enable: boolean
   checkResp: boolean
   retryNum: number

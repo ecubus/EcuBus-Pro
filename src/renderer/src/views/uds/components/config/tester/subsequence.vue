@@ -235,7 +235,7 @@ const gridOptions = computed(() => {
     showOverflow: false,
     rowConfig: {
       isCurrent: true,
-      useKey: true
+      keyField: 'uuid'
     },
     id: `sequenceTable${props.id}${props.index}`,
     editConfig: {
@@ -344,6 +344,7 @@ const excuseResults = ref<
 >([])
 function addService() {
   data.value.services.push({
+    uuid: v4(),
     enable: true,
     checkResp: true,
     retryNum: 0,

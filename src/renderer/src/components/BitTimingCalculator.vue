@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineModel, defineEmits, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { CanVendor } from 'nodeCan/can'
 
 interface CalculatorResult {
@@ -160,4 +160,3 @@ onMounted(() => {
   gap: 10px;
 }
 </style>
-

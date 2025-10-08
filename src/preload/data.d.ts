@@ -138,7 +138,9 @@ export type GraphNode<T, S = any> = {
   disZoom?: boolean
   yAxis?: YAXisOption
   xAxis?: XAXisOption
-
+  tooltip?: {
+    show: boolean
+  }
   series?: S
   type: 'signal' | 'variable' | 'frame'
   bindValue: T

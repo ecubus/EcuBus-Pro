@@ -267,6 +267,9 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
 
     // 更新图表配置
     chartInstances[updatedNode.id].setOption({
+      tooltip: {
+        show: globalStart.value ? false : (updatedNode.tooltip?.show ?? true)
+      },
       yAxis: {
         ...updatedNode.yAxis,
         // 更新轴标签颜色
@@ -363,6 +366,9 @@ watch(globalStart, (val) => {
         xAxis: {
           min: 0,
           max: 10
+        },
+        tooltip: {
+          show: val ? false : (graphs[c.id].tooltip?.show ?? true)
         }
       })
     })
@@ -598,6 +604,7 @@ const initChart = (chartId: string) => {
     updateChartOption(chartId)
     if (graphs[chartId]) {
       chart.setOption({
+        tooltip: graphs[chartId].tooltip,
         yAxis: graphs[chartId].yAxis,
         xAxis: graphs[chartId].xAxis,
         series: graphs[chartId].series
@@ -634,6 +641,34 @@ const getChartOption = (
   const isFirst = index === 0
   const option: ECBasicOption = {
     animation: false,
+    tooltip: {
+      show: globalStart.value ? false : (chart.tooltip?.show ?? true),
+      formatter: (params: any) => {
+        if (Array.isArray(params)) {
+          const param = params[0]
+          if (param && param.data) {
+            let value = param.data[1]
+            if (chart.bindValue.stringRange) {
+              const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
+              if (stringVal) {
+                value = stringVal.name
+              }
+            }
+            return `${param.seriesName}<br/>Time: ${param.data[0]}s<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}${chart.yAxis?.unit ?? ''}`
+          }
+        } else if (params && params.data) {
+          let value = params.data[1]
+          if (chart.bindValue.stringRange) {
+            const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
+            if (stringVal) {
+              value = stringVal.name
+            }
+          }
+          return `${params.seriesName}<br/>Time: ${params.data[0].toFixed(2)}s<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}${chart.yAxis?.unit ?? ''}`
+        }
+        return ''
+      }
+    },
     dataZoom: [
       {
         show: isLast,

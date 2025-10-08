@@ -70,6 +70,11 @@
             <el-form-item label="Disable Zoom">
               <el-switch v-model="form.disZoom" />
             </el-form-item>
+            <el-divider content-position="left">Tooltip</el-divider>
+            <el-form-item label="Show Tooltip">
+              <el-switch v-model="form.tooltip.show" />
+            </el-form-item>
+
             <el-divider content-position="left">X Axis</el-divider>
             <el-form-item label="Show Grid">
               <el-switch v-model="form.xAxis.splitLine.show" />
@@ -185,6 +190,9 @@ const form = ref({
     }
   },
   disZoom: props.node.disZoom ?? false,
+  tooltip: {
+    show: props.node.tooltip?.show ?? true
+  },
   series: {
     showSymbol: props.node.series?.showSymbol ?? false,
     symbolSize: props.node.series?.symbolSize ?? 6,
@@ -217,6 +225,9 @@ const handleSubmit = () => {
       }
     },
     disZoom: form.value.disZoom,
+    tooltip: {
+      show: form.value.tooltip.show
+    },
     series: {
       showSymbol: form.value.series.showSymbol,
       symbolSize: form.value.series.symbolSize,

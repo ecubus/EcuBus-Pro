@@ -1805,8 +1805,11 @@
         "name": "Status",
         "color": "#de3ac7",
         "yAxis": {
-          "min": 0.38871787927423557,
-          "max": 5.092021802265955
+          "min": -0.3782072191634471,
+          "max": 4.325096703828278,
+          "splitLine": {
+            "show": false
+          }
         },
         "bindValue": {
           "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.Status",
@@ -1843,6 +1846,27 @@
         },
         "graph": {
           "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "tooltip": {
+          "show": true
+        },
+        "series": {
+          "step": "start",
+          "showSymbol": true,
+          "symbolSize": 6,
+          "symbol": "circle"
         }
       }
     },
@@ -2046,8 +2070,8 @@
       },
       "graph": {
         "pos": {
-          "x": -98.5,
-          "y": 54.5,
+          "x": 1414.5,
+          "y": 327.5,
           "w": 747,
           "h": 400
         },

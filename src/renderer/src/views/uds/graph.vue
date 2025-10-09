@@ -268,7 +268,7 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
     // 更新图表配置
     chartInstances[updatedNode.id].setOption({
       tooltip: {
-        show: globalStart.value ? false : (updatedNode.tooltip?.show ?? true)
+        show: getShowTooTip(updatedNode.id, updatedNode.tooltip?.show)
       },
       yAxis: {
         ...updatedNode.yAxis,
@@ -368,7 +368,7 @@ watch(globalStart, (val) => {
           max: 10
         },
         tooltip: {
-          show: val ? false : (graphs[c.id].tooltip?.show ?? true)
+          show: getShowTooTip(c.id)
         }
       })
     })
@@ -379,6 +379,32 @@ watch(globalStart, (val) => {
   } else {
     clearInterval(timer)
   }
+})
+
+const getShowTooTip = (id: string, val?: boolean) => {
+  if (val == undefined) {
+    val = graphs[id].tooltip?.show
+  }
+  if (val) {
+    if (isPaused.value) {
+      return true
+    } else if (!globalStart.value) {
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return false
+  }
+}
+watch(isPaused, (val) => {
+  enabledCharts.value.forEach((c) => {
+    chartInstances[c.id].setOption({
+      tooltip: {
+        show: getShowTooTip(c.id)
+      }
+    })
+  })
 })
 
 // 添加数据缓存
@@ -644,19 +670,7 @@ const getChartOption = (
     tooltip: {
       show: globalStart.value ? false : (chart.tooltip?.show ?? true),
       formatter: (params: any) => {
-        if (Array.isArray(params)) {
-          const param = params[0]
-          if (param && param.data) {
-            let value = param.data[1]
-            if (chart.bindValue.stringRange) {
-              const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
-              if (stringVal) {
-                value = stringVal.name
-              }
-            }
-            return `${param.seriesName}<br/>Time: ${param.data[0]}s<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}${chart.yAxis?.unit ?? ''}`
-          }
-        } else if (params && params.data) {
+        if (params && params.data) {
           let value = params.data[1]
           if (chart.bindValue.stringRange) {
             const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
@@ -664,7 +678,7 @@ const getChartOption = (
               value = stringVal.name
             }
           }
-          return `${params.seriesName}<br/>Time: ${params.data[0].toFixed(2)}s<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}${chart.yAxis?.unit ?? ''}`
+          return `Time: ${params.data[0] * 1000}ms<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}`
         }
         return ''
       }

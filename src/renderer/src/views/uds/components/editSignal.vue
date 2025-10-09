@@ -94,6 +94,12 @@
             </el-form-item>
 
             <el-divider content-position="left">Series</el-divider>
+            <el-form-item label="Step">
+              <el-select v-model="form.series.step">
+                <el-option label="Step" value="end" />
+                <el-option label="Line" :value="false" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="Show Points">
               <el-switch v-model="form.series.showSymbol" />
             </el-form-item>
@@ -194,6 +200,7 @@ const form = ref({
     show: props.node.tooltip?.show ?? true
   },
   series: {
+    step: props.node.series?.step,
     showSymbol: props.node.series?.showSymbol ?? false,
     symbolSize: props.node.series?.symbolSize ?? 6,
     symbol: props.node.series?.symbol ?? 'circle'
@@ -229,6 +236,7 @@ const handleSubmit = () => {
       show: form.value.tooltip.show
     },
     series: {
+      step: form.value.series.step,
       showSymbol: form.value.series.showSymbol,
       symbolSize: form.value.series.symbolSize,
       symbol: form.value.series.symbol

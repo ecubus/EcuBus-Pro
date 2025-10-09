@@ -76,7 +76,13 @@ function dataChange(field: string, value: any, rule: any, api: any, setFlag: boo
   }
 }
 
-function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
+function dataUpdate({
+  key,
+  values
+}: {
+  key: string
+  values: [number, { value: number | string; rawValue: number }][]
+}) {
   if (filedBackMap[key]) {
     const currentTime = Date.now()
     const offset = 200
@@ -111,7 +117,7 @@ const panel = computed(() => {
 
 function init() {
   for (const key of Object.keys(filedBackMap)) {
-    window.logBus.detach(key, dataUpdate)
+    window.logBus.off(key, dataUpdate)
   }
   rule.value = []
   filedBackMap = {}
@@ -172,8 +178,7 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(timer)
   for (const key of Object.keys(filedBackMap)) {
-    window.logBus.detach(key, dataUpdate)
+    window.logBus.off(key, dataUpdate)
   }
 })
 </script>
-

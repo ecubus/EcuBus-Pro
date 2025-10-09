@@ -240,7 +240,7 @@ function handleCheckChange(
   if (checked) {
     window.logBus.on(data.id, dataUpdate)
   } else {
-    window.logBus.detach(data.id, dataUpdate)
+    window.logBus.off(data.id, dataUpdate)
   }
 }
 
@@ -447,7 +447,13 @@ const chartDataCache: Record<string, (number | string)[][]> = {}
 const TIME_BUCKET_SIZE = 0.1 // 100ms
 const chartTimeIndex: Record<string, Map<number, number>> = {}
 
-function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
+function dataUpdate({
+  key,
+  values
+}: {
+  key: string
+  values: [number, { value: number | string; rawValue: number }][]
+}) {
   if (isPaused.value) {
     return
   }
@@ -464,7 +470,7 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
 
   // 添加新数据并更新时间索引
   const startIndex = chartDataCache[key].length
-  const newData = datas.map((v) => [
+  const newData = values.map((v) => [
     v[0],
     typeof v[1].value === 'number' ? v[1].value : v[1].rawValue
   ])
@@ -1007,7 +1013,7 @@ onUnmounted(() => {
   })
   //detach
   filteredTreeData.value.forEach((key) => {
-    window.logBus.detach(key.id, dataUpdate)
+    window.logBus.off(key.id, dataUpdate)
   })
 })
 
@@ -1066,7 +1072,7 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]
-  window.logBus.detach(data.id, dataUpdate)
+  window.logBus.off(data.id, dataUpdate)
 }
 </script>
 <style scoped>

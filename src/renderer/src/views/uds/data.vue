@@ -286,7 +286,13 @@ watch(
   }
 )
 
-function dataUpdate(key: string, values: [number, { value: number | string; rawValue: number }][]) {
+function dataUpdate({
+  key,
+  values
+}: {
+  key: string
+  values: [number, { value: number | string; rawValue: number }][]
+}) {
   if (isPaused.value) {
     return
   }
@@ -403,7 +409,7 @@ onUnmounted(() => {
 
   // 解除所有事件监听
   Object.keys(datas).forEach((key) => {
-    window.logBus.detach(key, dataUpdate)
+    window.logBus.off(key, dataUpdate)
   })
 })
 
@@ -432,7 +438,7 @@ const deleteSignal = () => {
       }
 
       // 解除事件监听
-      window.logBus.detach(selectedRowId.value, dataUpdate)
+      window.logBus.off(selectedRowId.value, dataUpdate)
 
       // 从数据存储中删除
       if (datas[selectedRowId.value]) {
@@ -535,4 +541,3 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
   }
 }
 </style>
-

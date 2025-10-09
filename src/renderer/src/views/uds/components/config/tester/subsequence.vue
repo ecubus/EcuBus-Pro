@@ -378,7 +378,8 @@ function ceilClick(val: any) {
   actionRow.value = val.rowIndex
 }
 
-function error(method: string, vals: LogItem[]) {
+function error({ values }: { values: LogItem[] }) {
+  const vals = values
   for (const val of vals) {
     if (val.message.id != props.id) {
       continue
@@ -425,7 +426,8 @@ interface LogItem {
     method: string
   }
 }
-function logDisplay(method: string, vals: LogItem[]) {
+function logDisplay({ values }: { values: LogItem[] }) {
+  const vals = values
   for (const val of vals) {
     if (val.message.id != props.id) {
       continue
@@ -465,8 +467,8 @@ onMounted(() => {
   window.logBus.on('udsError', error)
 })
 onUnmounted(() => {
-  window.logBus.detach('udsIndex', logDisplay)
-  window.logBus.detach('udsError', error)
+  window.logBus.off('udsIndex', logDisplay)
+  window.logBus.off('udsError', error)
 })
 </script>
 

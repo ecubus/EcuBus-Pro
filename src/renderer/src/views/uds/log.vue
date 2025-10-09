@@ -245,7 +245,7 @@ function saveLog() {
   xGrid.value.exportData()
 }
 
-function udsLog(method: string, datas: any[]) {
+function udsLog({ values }: { values: any[] }) {
   const logData: {
     time: string
     label: string
@@ -253,7 +253,7 @@ function udsLog(method: string, datas: any[]) {
     message: string
     id: number
   }[] = []
-  datas.forEach((data) => {
+  values.forEach((data) => {
     logData.push({
       time: new Date().toLocaleTimeString(),
       label: data.label,
@@ -267,9 +267,10 @@ function udsLog(method: string, datas: any[]) {
   })
 }
 
-function testLog(
-  method: string,
-  data: {
+function testLog({
+  values
+}: {
+  values: {
     message: {
       id: string
       data: TestEvent
@@ -278,7 +279,8 @@ function testLog(
     level: string
     label: string
   }[]
-) {
+}) {
+  const data = values
   const logData: {
     time: string
     label: string
@@ -391,11 +393,11 @@ onUnmounted(() => {
     mainLog()
   }
   if (props.captureTest) {
-    window.logBus.detach('testInfo', testLog)
+    window.logBus.off('testInfo', testLog)
   }
-  window.logBus.detach(props.prefix + 'udsSystem', udsLog)
-  window.logBus.detach(props.prefix + 'udsScript', udsLog)
-  window.logBus.detach(props.prefix + 'udsWarning', udsLog)
+  window.logBus.off(props.prefix + 'udsSystem', udsLog)
+  window.logBus.off(props.prefix + 'udsScript', udsLog)
+  window.logBus.off(props.prefix + 'udsWarning', udsLog)
 })
 </script>
 

@@ -19,7 +19,7 @@ import type { Api } from './api'
 import type { Ref } from 'vue'
 import path from 'path'
 import { Logger } from 'winston'
-import EventBus from './../renderer/src/event'
+import type { Emitter } from 'mitt'
 import { ServiceDetial } from 'nodeCan/uds'
 
 declare global {
@@ -27,7 +27,7 @@ declare global {
     electron: ElectronAPI
     api: Api
     jQuery: any
-    logBus: EventBus
+    logBus: Emitter<any>
     dataParseWorker: Worker
     store: {
       set: (property: string, val: unknown) => void
@@ -41,4 +41,3 @@ declare global {
     params: Record<string, string>
   }
 }
-

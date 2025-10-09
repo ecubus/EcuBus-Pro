@@ -276,7 +276,8 @@ onBeforeMount(() => {
 })
 
 const presentStart = ref(false)
-function presentChange(medhotd: string, present: any[]) {
+function presentChange({ values }: { values: any[] }) {
+  const present = values
   for (const p of present) {
     if (p.message.method == 'setOption' && p.message.data.cmd == 'startTesterPresent') {
       if (tester.value.id == p.message.data.val.id) {
@@ -307,7 +308,7 @@ onMounted(() => {
   window.logBus.on('setOption', presentChange)
 })
 onUnmounted(() => {
-  window.logBus.detach('setOption', presentChange)
+  window.logBus.off('setOption', presentChange)
 })
 </script>
 <style scoped>
@@ -350,4 +351,3 @@ onUnmounted(() => {
   border-color: var(--el-color-success-light-7) !important;
 }
 </style>
-

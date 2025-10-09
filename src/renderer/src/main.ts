@@ -20,7 +20,7 @@ import jQuery from 'jquery'
 window.jQuery = jQuery
 await import('jquery-ui/dist/jquery-ui.js')
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
-import EventBus from './event'
+import mitt from 'mitt'
 import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
@@ -39,7 +39,7 @@ const runtimeChannel = new BroadcastChannel('ipc-runtime')
 
 const dataParseWorker = new DataParseWorker()
 
-window.logBus = new EventBus()
+window.logBus = mitt()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
   //main tab
@@ -47,7 +47,7 @@ dataParseWorker.onmessage = (event) => {
     channel.postMessage(event.data)
   }
   for (const key of Object.keys(event.data)) {
-    window.logBus.emit(key, undefined, key, event.data[key])
+    window.logBus.emit(key, { key, values: event.data[key] })
   }
 }
 
@@ -132,7 +132,7 @@ if (window.params.id) {
   router.push(`/${window.params.path}`)
   channel.onmessage = (event) => {
     for (const key of Object.keys(event.data)) {
-      window.logBus.emit(key, undefined, key, event.data[key])
+      window.logBus.emit(key, { key, values: event.data[key] })
     }
   }
   dataChannel.onmessage = (event) => {
@@ -180,4 +180,3 @@ if (window.params.id) {
   })
 }
 app.mount('#app')
-

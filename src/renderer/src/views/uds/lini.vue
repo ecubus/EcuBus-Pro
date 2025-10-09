@@ -530,9 +530,10 @@ watch([() => tableData.value], () => {
   }
 })
 
-function schChanged(
-  method: string,
-  logs: {
+function schChanged({
+  values
+}: {
+  values: {
     message: {
       method: string
       data: {
@@ -542,7 +543,8 @@ function schChanged(
     }
     instance: string
   }[]
-) {
+}) {
+  const logs = values
   const selfDevice = dataBase.ia[editIndex.value].devices[0]
   for (const log of logs) {
     if (
@@ -567,8 +569,8 @@ function schChanged(
   }
 }
 
-onUnmounted(() => {
-  window.logBus.detach('linEvent', schChanged)
+;(onUnmounted(() => {
+  window.logBus.off('linEvent', schChanged)
 }),
   onMounted(() => {
     // Get initial active SCH
@@ -588,7 +590,7 @@ onUnmounted(() => {
         activeStates.value[`${table.Table}-${entry.index}`] = true
       }
     }
-  })
+  }))
 </script>
 <style lang="scss">
 .expand-wrapper {
@@ -596,4 +598,3 @@ onUnmounted(() => {
 }
 </style>
 <style scoped></style>
-

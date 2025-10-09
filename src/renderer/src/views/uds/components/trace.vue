@@ -445,7 +445,8 @@ function insertData2(data: LogData[]) {
 let uid = 0
 let logData: LogData[] = []
 let timer: any = null
-function logDisplay(method: string, vals: LogItem[]) {
+function logDisplay({ values }: { values: LogItem[] }) {
+  const vals = values
   // Don't process logs when paused
   if (isPaused.value) return
 
@@ -751,7 +752,7 @@ function filterChange(
   const i = LogFilter.value.find((v) => v.v == method)
   if (i) {
     i.value.forEach((v) => {
-      window.logBus.detach(v, logDisplay)
+      window.logBus.off(v, logDisplay)
       if (val) {
         window.logBus.on(v, logDisplay)
       }
@@ -1207,7 +1208,7 @@ watch([tableWidth, tableHeight], () => {
 onUnmounted(() => {
   LogFilter.value.forEach((v) => {
     for (const val of v.value) {
-      window.logBus.detach(val, logDisplay)
+      window.logBus.off(val, logDisplay)
     }
   })
   // cTable.close()

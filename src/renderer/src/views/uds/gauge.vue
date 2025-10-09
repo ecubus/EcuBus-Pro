@@ -243,7 +243,7 @@ function handleCheckChange(
   if (checked) {
     window.logBus.on(data.id, dataUpdate)
   } else {
-    window.logBus.detach(data.id, dataUpdate)
+    window.logBus.off(data.id, dataUpdate)
   }
 }
 
@@ -360,7 +360,13 @@ watch(
   }
 )
 
-function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
+function dataUpdate({
+  key,
+  values
+}: {
+  key: string
+  values: [number, { value: number | string; rawValue: number }][]
+}) {
   if (isPaused.value) {
     return
   }
@@ -370,8 +376,8 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
   if (!chart) return
 
   // 仅获取最后一条数据
-  if (datas && datas.length > 0) {
-    const latestData = datas[datas.length - 1]
+  if (values && values.length > 0) {
+    const latestData = values[values.length - 1]
 
     // 更新时间
     if (latestData && typeof latestData[0] === 'number') {
@@ -606,7 +612,7 @@ onUnmounted(() => {
 
   //detach
   filteredTreeData.value.forEach((key) => {
-    window.logBus.detach(key.id, dataUpdate)
+    window.logBus.off(key.id, dataUpdate)
   })
 })
 
@@ -660,7 +666,7 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]
-  window.logBus.detach(data.id, dataUpdate)
+  window.logBus.off(data.id, dataUpdate)
 }
 
 const getChartContainerStyle = (index: number) => {
@@ -882,4 +888,3 @@ const getChartContainerStyle = (index: number) => {
   }
 }
 </style>
-

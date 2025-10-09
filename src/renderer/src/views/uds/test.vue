@@ -781,9 +781,10 @@ async function openTs() {
   return file
 }
 
-function testLog(
-  method: string,
-  data: {
+function testLog({
+  values
+}: {
+  values: {
     message: {
       id: string
       data: TestEvent
@@ -792,7 +793,9 @@ function testLog(
     level: string
     label: string
   }[]
-) {
+}) {
+  const data = values
+
   for (const item of data) {
     if (item.message.data.type == 'test:dequeue') {
       const key =
@@ -872,7 +875,7 @@ onMounted(() => {
   })
 })
 onUnmounted(() => {
-  window.logBus.detach('testInfo', testLog)
+  window.logBus.off('testInfo', testLog)
 })
 
 const editDialogVisible = ref(false)

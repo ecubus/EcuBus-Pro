@@ -97,6 +97,7 @@ const handleTemplateSelect = async (template: example) => {
 
     // Wait for DOM update then render mermaid diagrams
     await nextTick()
+
     const elements = document.getElementsByClassName('mermaid')
     Array.from(elements).forEach((element) => {
       mermaid
@@ -132,7 +133,13 @@ function addLocalBaseUrl() {
         // the URL is absolute, do not touch it
         return
       }
-      tempToken.href = 'local-resource://' + window.readmePath + '\\' + tempToken.href
+      // Build full file path
+      const fullPath = window.readmePath + '\\' + tempToken.href
+      // Normalize to forward slashes
+      const normalizedPath = fullPath.replace(/\\/g, '/')
+      // Use triple slash after protocol to avoid browser parsing issues with drive letters
+      // local-resource:///D:/path instead of local-resource://D:/path
+      tempToken.href = 'local-resource:///' + normalizedPath
     }
   } as MarkedExtension
 }
@@ -336,4 +343,3 @@ onMounted(() => {
   justify-content: center;
 }
 </style>
-

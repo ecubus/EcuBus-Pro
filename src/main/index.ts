@@ -16,6 +16,20 @@ log.initialize()
 
 const protocol = 'ecubuspro'
 const ProtocolRegExp = new RegExp(`^${protocol}://`)
+
+// Register custom protocol as privileged before app is ready
+eProtocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'local-resource',
+    privileges: {
+      secure: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+      corsEnabled: true
+    }
+  }
+])
+
 /* single instance */
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
@@ -24,14 +38,22 @@ if (!gotTheLock) {
 log.info(app.getGPUFeatureStatus())
 
 function registerLocalResourceProtocol() {
-  eProtocol.registerFileProtocol('local-resource', (request, callback) => {
-    const url = request.url.replace(/^local-resource:\/\//, '')
-    // Decode URL to prevent errors when loading filenames with UTF-8 chars or chars like "#"
-    const decodedUrl = decodeURI(url) // Needed in case URL contains spaces
+  eProtocol.handle('local-resource', (request) => {
     try {
-      return callback(decodedUrl)
+      // Remove protocol prefix (handle both // and /// after protocol)
+      const url = request.url.replace(/^local-resource:\/\/\/?/, '')
+      // Decode URL components to handle encoded characters
+      const decodedUrl = decodeURIComponent(url)
+      // Normalize path (handle both forward and back slashes)
+      const normalizedPath = decodedUrl.replace(/\\/g, '/')
+      // For Windows absolute paths (e.g., D:/path), ensure proper file:/// format
+      const fileUrl = /^[a-zA-Z]:\//.test(normalizedPath)
+        ? `file:///${normalizedPath}`
+        : `file://${normalizedPath}`
+      return net.fetch(fileUrl)
     } catch (error) {
-      console.error('ERROR: registerLocalResourceProtocol: Could not get file path:', error)
+      log.error('ERROR: registerLocalResourceProtocol:', error)
+      return new Response(null, { status: 404 })
     }
   })
 }
@@ -194,6 +216,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
   registerLocalResourceProtocol()
 
   createWindow()

@@ -270,6 +270,7 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
       tooltip: {
         show: getShowTooTip(updatedNode.id, updatedNode.tooltip?.show)
       },
+      name: updatedNode.name,
       yAxis: {
         ...updatedNode.yAxis,
         // 更新轴标签颜色
@@ -377,6 +378,13 @@ watch(globalStart, (val) => {
     }
     timer = setInterval(updateTime, 500)
   } else {
+    enabledCharts.value.forEach((c) => {
+      chartInstances[c.id].setOption({
+        tooltip: {
+          show: getShowTooTip(c.id)
+        }
+      })
+    })
     clearInterval(timer)
   }
 })
@@ -414,7 +422,6 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
   if (isPaused.value) {
     return
   }
-  console.log(key, datas)
 
   // 获取对应的echarts实例
   const chart = chartInstances[key]

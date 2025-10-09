@@ -210,7 +210,7 @@ const form = ref({
 const handleSubmit = () => {
   const node: GraphNode<GraphBindSignalValue> = {
     ...props.node,
-    name: form.value.name,
+
     color: form.value.color,
     yAxis: {
       ...props.node.yAxis,
@@ -218,7 +218,8 @@ const handleSubmit = () => {
       max: form.value.yAxis.max,
       splitLine: {
         show: form.value.yAxis.splitLine.show
-      }
+      },
+      name: form.value.name
     },
     xAxis: {
       splitLine: {

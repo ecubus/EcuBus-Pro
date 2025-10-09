@@ -287,7 +287,8 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
         },
         itemStyle: {
           color: updatedNode.color
-        }
+        },
+        showSymbol: getShowSymbol(updatedNode.id, updatedNode.series?.showSymbol)
       }
     })
 
@@ -357,12 +358,14 @@ watch(globalStart, (val) => {
     //clear cache
     Object.keys(chartDataCache).forEach((key) => {
       chartDataCache[key] = []
+      chartTimeIndex[key] = new Map()
     })
     //clear all charts data and set start to 0
     enabledCharts.value.forEach((c) => {
       chartInstances[c.id].setOption({
         series: {
-          data: []
+          data: [],
+          showSymbol: getShowSymbol(c.id)
         },
         xAxis: {
           min: 0,
@@ -382,6 +385,9 @@ watch(globalStart, (val) => {
       chartInstances[c.id].setOption({
         tooltip: {
           show: getShowTooTip(c.id)
+        },
+        series: {
+          showSymbol: getShowSymbol(c.id)
         }
       })
     })
@@ -405,11 +411,30 @@ const getShowTooTip = (id: string, val?: boolean) => {
     return false
   }
 }
+const getShowSymbol = (id: string, val?: boolean) => {
+  if (val == undefined) {
+    val = graphs[id].series?.showSymbol
+  }
+  if (val) {
+    if (isPaused.value) {
+      return true
+    } else if (!globalStart.value) {
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return false
+  }
+}
 watch(isPaused, (val) => {
   enabledCharts.value.forEach((c) => {
     chartInstances[c.id].setOption({
       tooltip: {
         show: getShowTooTip(c.id)
+      },
+      series: {
+        showSymbol: getShowSymbol(c.id)
       }
     })
   })
@@ -417,6 +442,10 @@ watch(isPaused, (val) => {
 
 // 添加数据缓存
 const chartDataCache: Record<string, (number | string)[][]> = {}
+// 时间索引缓存：key为图表ID，value为时间桶到数据索引的映射
+// 时间桶粒度为100ms，例如：时间0.15s对应桶1 (Math.floor(0.15/0.1))
+const TIME_BUCKET_SIZE = 0.1 // 100ms
+const chartTimeIndex: Record<string, Map<number, number>> = {}
 
 function dataUpdate(key: string, datas: [number, { value: number | string; rawValue: number }][]) {
   if (isPaused.value) {
@@ -430,16 +459,81 @@ function dataUpdate(key: string, datas: [number, { value: number | string; rawVa
   // 初始化或获取缓存数据
   if (!chartDataCache[key]) {
     chartDataCache[key] = []
+    chartTimeIndex[key] = new Map()
   }
 
-  // 添加新数据， 添加第一个的number，第二个Object里的value
-  chartDataCache[key] = chartDataCache[key].concat(
-    datas.map((v) => [v[0], typeof v[1].value === 'number' ? v[1].value : v[1].rawValue])
-  )
+  // 添加新数据并更新时间索引
+  const startIndex = chartDataCache[key].length
+  const newData = datas.map((v) => [
+    v[0],
+    typeof v[1].value === 'number' ? v[1].value : v[1].rawValue
+  ])
 
-  // 如果数据超过1000个点，移除最早的数据
-  if (chartDataCache[key].length > 1000) {
-    chartDataCache[key].splice(0, chartDataCache[key].length - 1000)
+  // 更新时间索引：记录每个时间桶的第一个数据索引
+  newData.forEach((point, i) => {
+    const timeBucket = Math.floor((point[0] as number) / TIME_BUCKET_SIZE)
+    if (!chartTimeIndex[key].has(timeBucket)) {
+      chartTimeIndex[key].set(timeBucket, startIndex + i)
+    }
+  })
+
+  chartDataCache[key] = chartDataCache[key].concat(newData)
+
+  // 性能优化：只有当数据量超过阈值时才进行清理，避免频繁操作
+  const MAX_POINTS = 2000 // 最大保留点数
+  if (chartDataCache[key].length > MAX_POINTS) {
+    // 获取当前x轴的最小值，删除所有小于 (minX - bufferTime) 的数据点
+    const currentOption = chart.getOption() as any
+    const xAxis = currentOption.xAxis?.[0]
+    if (xAxis && xAxis.min !== undefined) {
+      const bufferTime = 5
+      const minX = xAxis.min - bufferTime
+
+      // 使用时间索引快速定位删除位置 O(1)
+      const targetBucket = Math.floor(minX / TIME_BUCKET_SIZE)
+      let firstValidIndex = -1
+
+      // 从目标桶开始向后查找第一个有效的索引
+      for (let bucket = targetBucket; bucket <= targetBucket + 10; bucket++) {
+        if (chartTimeIndex[key].has(bucket)) {
+          firstValidIndex = chartTimeIndex[key].get(bucket)!
+          break
+        }
+      }
+
+      if (firstValidIndex > 0) {
+        // 删除数据
+        chartDataCache[key].splice(0, firstValidIndex)
+
+        // 清理失效的时间索引桶，并更新剩余索引
+        const bucketsToDelete: number[] = []
+        chartTimeIndex[key].forEach((index, bucket) => {
+          if (index < firstValidIndex) {
+            bucketsToDelete.push(bucket)
+          } else {
+            chartTimeIndex[key].set(bucket, index - firstValidIndex)
+          }
+        })
+        bucketsToDelete.forEach((bucket) => chartTimeIndex[key].delete(bucket))
+      }
+    } else {
+      // 如果无法获取x轴信息，则保留最新的1500个点
+      const deleteCount = chartDataCache[key].length - 1500
+      if (deleteCount > 0) {
+        chartDataCache[key].splice(0, deleteCount)
+
+        // 更新时间索引
+        const bucketsToDelete: number[] = []
+        chartTimeIndex[key].forEach((index, bucket) => {
+          if (index < deleteCount) {
+            bucketsToDelete.push(bucket)
+          } else {
+            chartTimeIndex[key].set(bucket, index - deleteCount)
+          }
+        })
+        bucketsToDelete.forEach((bucket) => chartTimeIndex[key].delete(bucket))
+      }
+    }
   }
 
   // 更新图表
@@ -798,7 +892,8 @@ const getChartOption = (
         type: 'line',
         triggerLineEvent: true,
         showSymbol: false,
-
+        large: true,
+        sampling: 'lttb',
         itemStyle: {
           color: chart.color
         },
@@ -905,9 +1000,10 @@ onUnmounted(() => {
     instance.off('mouseup')
     instance.dispose()
   })
-  // 清理数据缓存
+  // 清理数据缓存和时间索引
   Object.keys(chartDataCache).forEach((key) => {
     delete chartDataCache[key]
+    delete chartTimeIndex[key]
   })
   //detach
   filteredTreeData.value.forEach((key) => {
@@ -964,8 +1060,9 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
     chartInstances[data.id].dispose()
     delete chartInstances[data.id]
   }
-  // 删除数据缓存
+  // 删除数据缓存和时间索引
   delete chartDataCache[data.id]
+  delete chartTimeIndex[data.id]
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]

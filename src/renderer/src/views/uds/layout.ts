@@ -342,6 +342,17 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'OSTrace',
     component: defineAsyncComponent(() => import('../ostrace/table.vue')),
     icon: osTraceIcon
+  },
+  plugin: {
+    i: 'Plugin',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'Plugin',
+    key: 'Plugin',
+    component: defineAsyncComponent(() => import('../../plugin/plugin.vue')),
+    icon: osTraceIcon
   }
   // script: {
   //   i: 'Script',

@@ -32,6 +32,12 @@ import { Layout } from './views/uds/layout'
 import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
+import * as vue from 'vue'
+import * as lodash from 'lodash'
+import wujieVue from 'wujie-vue3'
+window.lodash = lodash
+window.vue = vue
+
 const channel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
@@ -115,6 +121,7 @@ app.use(VxeTooltip)
 app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
+app.use(wujieVue)
 
 const dataStore = useDataStore()
 const projectStore = useProjectStore()

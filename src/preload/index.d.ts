@@ -27,6 +27,8 @@ declare global {
     electron: ElectronAPI
     api: Api
     jQuery: any
+    lodash: any
+    vue: any
     logBus: Emitter<any>
     dataParseWorker: Worker
     store: {

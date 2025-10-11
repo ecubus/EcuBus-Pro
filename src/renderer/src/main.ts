@@ -32,8 +32,6 @@ import { Layout } from './views/uds/layout'
 import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
-import * as vue from 'vue'
-import * as lodash from 'lodash'
 import wujieVue from 'wujie-vue3'
 
 const channel = new BroadcastChannel('ipc-log')

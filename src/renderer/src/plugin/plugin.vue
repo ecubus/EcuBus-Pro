@@ -18,21 +18,24 @@ const editIndex = toRef(props, 'editIndex')
 const width = toRef(props, 'width')
 const height = toRef(props, 'height')
 const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
-console.log(libPath)
+
 const basePath = 'D:/code/ecubus-plugin-template/dist'
 const importMap = {
   imports: {
     vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,
     '@vue/shared': `local-resource:///${libPath}/shared.esm-bundler.min.js`,
-    'element-plus': 'https://cdn.jsdelivr.net/npm/element-plus@latest/dist/index.full.min.mjs',
-    'element-plus/': 'https://cdn.jsdelivr.net/npm/element-plus@latest/',
-    '@element-plus/icons-vue':
-      'https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@2/dist/index.min.js'
+    'element-plus': `local-resource:///${libPath}/elementplus.index.full.min.mjs`,
+    '@element-plus/icons-vue': `local-resource:///${libPath}/elementplus.icon.min.js`
   }
 }
 const plugins = [
   {
     jsBeforeLoaders: [
+      {
+        callback(appWindow) {
+          appWindow.document.head.innerHTML += `<link rel="stylesheet" href="local-resource:///${libPath}/element.css">`
+        }
+      },
       {
         content: JSON.stringify(importMap, null, 2),
         attrs: {

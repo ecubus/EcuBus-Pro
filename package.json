@@ -113,7 +113,6 @@
     "pixi.js": "^8.13.2",
     "python-shell": "^5.0.0",
     "serialport": "^13.0.0",
-    "single-spa": "^6.0.3",
     "sortablejs": "^1.15.2",
     "ts-morph": "^26.0.0",
     "uuid": "^9.0.1",

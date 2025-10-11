@@ -51,7 +51,9 @@ const plugins = [
       code = code.replace(reSrc, 'src="local-resource:///' + basePath + '/$1"')
 
       return code
-    }
+    },
+
+    cssExcludes: [/element-plus/]
   }
 ]
 const customFetch = (url: string, options?: RequestInit) => {

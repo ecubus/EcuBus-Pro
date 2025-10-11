@@ -35,8 +35,6 @@ import { assign, cloneDeep } from 'lodash'
 import * as vue from 'vue'
 import * as lodash from 'lodash'
 import wujieVue from 'wujie-vue3'
-window.lodash = lodash
-window.vue = vue
 
 const channel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')

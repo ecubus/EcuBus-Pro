@@ -1,17 +1,24 @@
 <template>
   <div>
     <!--D:\code\app-template\dist\index.html  -->
-    <WujieVue
-      style="height: 100px; width: 100px"
-      name="A"
-      url="file:///D:/code/app-template/dist/index.html"
-      :fetch="customFetch"
-      :plugins="plugins"
-    ></WujieVue>
+    <WujieVue name="A" url="file:///index.html" :fetch="customFetch" :plugins="plugins"></WujieVue>
   </div>
 </template>
 
 <script setup lang="ts">
+import { toRef } from 'vue'
+
+const props = defineProps<{
+  editIndex: string
+
+  width: number
+  height: number
+}>()
+const editIndex = toRef(props, 'editIndex')
+const width = toRef(props, 'width')
+const height = toRef(props, 'height')
+
+const basePath = 'D:/code/ecubus-plugin-template/dist'
 const importMap = {
   imports: {
     vue: 'https://cdn.jsdelivr.net/npm/@vue/runtime-dom@latest/dist/runtime-dom.esm-browser.js',
@@ -24,16 +31,29 @@ const importMap = {
 }
 const plugins = [
   {
-    // 在子应用所有的js之前
-    // jsBeforeLoaders: [
-    //   // 插入一个内联监本
-    //   { content: 'console.log("app",window.parent.vue)' },
-    //   { content: 'window.vue = window.parent.vue' }
-    // ]
+    jsBeforeLoaders: [
+      {
+        content: JSON.stringify(importMap, null, 2),
+        attrs: {
+          type: 'importmap'
+        }
+      }
+    ],
+
+    htmlLoader: (code) => {
+      const reHref = /href="\.\/([^"]*)"/g
+      const reSrc = /src="\.\/([^"]*)"/g
+      code = code.replace(reHref, 'href="local-resource:///' + basePath + '/$1"')
+      code = code.replace(reSrc, 'src="local-resource:///' + basePath + '/$1"')
+
+      return code
+    }
   }
 ]
 const customFetch = (url: string, options?: RequestInit) => {
-  url = url.replace('file:///', 'local-resource:///')
+  url = url.replace('file:///', 'local-resource:///' + basePath + '/')
   return window.fetch(url, options)
 }
 </script>
+
+<style scoped></style>

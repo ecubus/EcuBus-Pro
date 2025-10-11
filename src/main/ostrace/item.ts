@@ -143,7 +143,8 @@ export default class TraceItem {
 
       // Parse the block
       const currentIndex32 = block.readUInt32BE(0)
-      const timestamp32 = block.readUInt32BE(4) / this.orti.cpuFreq
+      const rawTimestamp32 = block.readUInt32BE(4)
+      const timestamp32 = rawTimestamp32 / this.orti.cpuFreq
       const type = block.readUInt8(8)
       const typeId = block.readUInt16BE(9)
       const typeStatus = block.readUInt16BE(11)
@@ -189,6 +190,7 @@ export default class TraceItem {
 
       // Convert to OsEvent using unified structure
       const realTs = this.getRealTs(timestamp32)
+      const rawTs = this.getRealTs(rawTimestamp32)
       const osEvent: OsEvent = {
         index: currentIndex32,
         database: this.orti.id,
@@ -196,7 +198,7 @@ export default class TraceItem {
         id: typeId,
         status: typeStatus,
         coreId: coreID,
-        ts: realTs,
+        ts: rawTs,
         comment: ''
       }
       if (this.offsetTs == undefined) {

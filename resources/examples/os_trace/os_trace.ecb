@@ -1777,8 +1777,8 @@
             }
           ],
           "recordFile": {
-            "enable": false,
-            "name": ""
+            "enable": true,
+            "name": "test.csv"
           },
           "connector": {
             "type": "BinaryFile",
@@ -2347,14 +2347,14 @@
           },
           "name": "Os_Trace"
         },
-        "hide": true
+        "hide": false
       },
       "graph": {
         "pos": {
-          "x": 0,
-          "y": -28,
-          "w": 1707,
-          "h": 769
+          "x": 540.5,
+          "y": 14.5,
+          "w": 747,
+          "h": 400
         },
         "title": "graph",
         "label": "Line",
@@ -2371,7 +2371,7 @@
           "w": 747,
           "h": 400
         },
-        "isMax": true
+        "isMax": false
       }
     }
   }

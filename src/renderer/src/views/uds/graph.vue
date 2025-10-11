@@ -317,7 +317,6 @@ const updateTime = () => {
   }
   // 更新x轴范围
   let maxX = 5
-  let minX = 0
   Object.values(chartDataCache).forEach((v) => {
     const lastOne = v[v.length - 1]
     if (lastOne) {
@@ -326,29 +325,34 @@ const updateTime = () => {
         maxX = val
       }
     }
-    // 获取每个图表数据的最小x值
-    const firstOne = v[0]
-    if (firstOne) {
-      const val = firstOne[0] as number
-      if (val < minX || minX === 0) {
-        minX = val
-      }
-    }
   })
+
   const ts = (Date.now() - window.startTime) / 1000
   if (ts > maxX) {
     maxX = ts
   }
 
   time.value = maxX
-  maxX = Math.ceil(maxX) + 5
-  minX = Math.floor(minX)
+
+  // 实现10秒滑动窗口：当时间超过10秒时，只显示最近10秒
+  const WINDOW_SIZE = 10 // 10秒窗口
+  let minX = 0
+  let displayMaxX = maxX
+
+  if (maxX > WINDOW_SIZE) {
+    maxX = Math.floor(maxX)
+    minX = maxX - WINDOW_SIZE
+    displayMaxX = maxX
+  } else {
+    minX = 0
+    displayMaxX = WINDOW_SIZE
+  }
 
   enabledCharts.value.forEach((c) => {
     chartInstances[c.id].setOption({
       xAxis: {
         min: minX,
-        max: maxX
+        max: displayMaxX + 5
       }
     })
   })

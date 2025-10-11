@@ -17,12 +17,13 @@ const props = defineProps<{
 const editIndex = toRef(props, 'editIndex')
 const width = toRef(props, 'width')
 const height = toRef(props, 'height')
-
+const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
+console.log(libPath)
 const basePath = 'D:/code/ecubus-plugin-template/dist'
 const importMap = {
   imports: {
-    vue: 'https://cdn.jsdelivr.net/npm/@vue/runtime-dom@latest/dist/runtime-dom.esm-browser.js',
-    '@vue/shared': 'https://cdn.jsdelivr.net/npm/@vue/shared@latest/dist/shared.esm-bundler.js',
+    vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,
+    '@vue/shared': `local-resource:///${libPath}/shared.esm-bundler.min.js`,
     'element-plus': 'https://cdn.jsdelivr.net/npm/element-plus@latest/dist/index.full.min.mjs',
     'element-plus/': 'https://cdn.jsdelivr.net/npm/element-plus@latest/',
     '@element-plus/icons-vue':

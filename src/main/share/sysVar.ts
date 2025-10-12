@@ -267,12 +267,12 @@ export function getAllSysVar(
         min: 0,
         desc: '任务激活次数'
       },
-      RunningRate: {
+      TaskLost: {
         type: 'number',
         min: 0,
         max: 100,
         unit: '%',
-        desc: 'Task实际运行次数与被激活次数的百分比'
+        desc: '(Task被激活次数-Task运行次数)/Task被激活次数'
       },
       Jitter: {
         type: 'number',

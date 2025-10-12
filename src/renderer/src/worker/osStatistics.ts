@@ -430,7 +430,7 @@ export default class OsStatistics {
 
     const avgJitter =
       avgActivationInterval > 0
-        ? ((avgStartInterval - avgActivationInterval) / avgActivationInterval) * 100
+        ? (Math.abs(avgStartInterval - avgActivationInterval) / avgActivationInterval) * 100
         : 0
 
     const delayStats = this.formatTimeStats(
@@ -528,11 +528,12 @@ export default class OsStatistics {
       value: { value: task.startCount, rawValue: task.startCount }
     })
     //Task实际运行次数与被激活次数的百分比Running\ Active
-    const runningRate = task.activeCount > 0 ? (task.startCount / task.activeCount) * 100 : 0
+    const TaskLost =
+      task.activeCount > 0 ? ((task.activeCount - task.startCount) / task.activeCount) * 100 : 0
 
     result.push({
-      id: `OsTrace.${key}.RunningRate`,
-      value: { value: Number(runningRate.toFixed(2)), rawValue: runningRate }
+      id: `OsTrace.${key}.TaskLost`,
+      value: { value: Number(TaskLost.toFixed(2)), rawValue: TaskLost }
     })
     result.push({
       id: `OsTrace.${key}.Jitter`,

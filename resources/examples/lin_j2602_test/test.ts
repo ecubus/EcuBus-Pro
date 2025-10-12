@@ -732,3 +732,25 @@ describe('7.2.1.2 Wake-Up request to the Slave', () => {
     assert(result1.msg)
   })
 })
+
+test('customer issue', async () => {
+  //go to sleep
+
+  let result
+  const msg = {
+    frameId: 0,
+    direction: LinDirection.SEND,
+    data: Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+    checksumType: LinChecksumType.CLASSIC
+  }
+  result = await sendLinWithSend(msg, {
+    errorInject: {
+      bit: headerBitLength + 9,
+      value: 0
+    }
+  })
+  assert(!result)
+
+  result = await sendLinWithSend(msg, {})
+  assert(result)
+})

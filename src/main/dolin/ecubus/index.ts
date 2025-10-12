@@ -81,7 +81,8 @@ export class LinCable extends LinBase {
       2400: '00',
       9600: '01',
       10400: '02',
-      19200: '03'
+      19200: '03',
+      0: '04' //0 means:custom baud rate
     }
     let str = 'O'
     const baud = baudMap[this.info.baudRate]
@@ -98,7 +99,18 @@ export class LinCable extends LinBase {
     str += `${baud}\r`
     this.startReading()
     this.serialPort.flush()
+    if (this.info.baudRate == 0) {
+      //custom baudrate
+      const buf = Buffer.alloc(2)
+      buf[0] = this.info.device.lincableCustomBaudRateBitMap || 0
+      buf[1] = this.info.device.lincableCustomBaudRatePrescale || 0
+      let line = buf.toString('hex').padStart(4, '0')
+      line = `B${line}\r`
+      console.log('xx', line)
+      this.serialPort.write(line)
+    }
     this.serialPort.write(str)
+
     this.serialPort.drain((err) => {
       if (err) return
       if (this.info.device.lincablePowerEnable) {

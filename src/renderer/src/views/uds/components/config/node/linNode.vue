@@ -92,11 +92,45 @@
           <el-select v-model="data.baudRate" required>
             <el-option label="9600" :value="9600" />
             <el-option label="19200" :value="19200" />
+            <el-option label="Custom" :value="0" :disabled="props.vendor != 'ecubus'" />
           </el-select>
         </el-form-item>
       </el-col>
     </el-form-item>
+    <template v-if="data.baudRate == 0">
+      <el-form-item label-width="0">
+        <el-col :span="12">
+          <el-form-item label="MajorPrescale" prop="device.lincableCustomBaudRatePrescale">
+            <el-select v-model="data.device.lincableCustomBaudRatePrescale">
+              <el-option label="/2" :value="0" />
+              <el-option label="/4" :value="1" />
+              <el-option label="/8" :value="2" />
+              <el-option label="/16" :value="3" />
+              <el-option label="/32" :value="4" />
+              <el-option label="/64" :value="5" />
+              <el-option label="/128" :value="6" />
+              <el-option label="/256" :value="7" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="MinorPrescale" prop="device.lincableCustomBaudRateBitMap">
+            <el-input-number
+              v-model="data.device.lincableCustomBaudRateBitMap"
+              :min="0"
+              :max="32"
+              :step="1"
+              controls-position="right"
+            >
+            </el-input-number>
+          </el-form-item>
+        </el-col>
+      </el-form-item>
 
+      <el-form-item label="BaudRate">
+        <el-alert :type="calculatedType" :closable="false">{{ calculatedBaudRate }}</el-alert>
+      </el-form-item>
+    </template>
     <el-divider content-position="left"> Database </el-divider>
     <el-form-item label="Database" prop="database">
       <el-select
@@ -236,6 +270,28 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     callback(new Error('Please input node name'))
   }
 }
+const calculatedBaudRate = ref('')
+const calculatedType = ref('primary')
+const baudRateCheck = (rule: any, value: any, callback: any) => {
+  if (data.value.baudRate == 0) {
+    const majorPrescale = Math.pow(2, (data.value.device.lincableCustomBaudRatePrescale || 1) + 1)
+    const minorPrescale = data.value.device.lincableCustomBaudRateBitMap || 1
+    const baudRate = 5_500_000 / (majorPrescale * minorPrescale)
+    calculatedBaudRate.value = `${baudRate.toFixed(1)}`
+    if (baudRate > 20000 && baudRate <= 50000) {
+      calculatedBaudRate.value = `${baudRate.toFixed(1)} WARNING: This LIN PHY may not support such high speed, using this speed may cause communication abnormalities, please use with caution`
+      calculatedType.value = 'warning'
+    } else if (baudRate > 50000) {
+      calculatedType.value = 'error'
+      callback(new Error(`baud rate must be <= 50000`))
+    } else {
+      calculatedType.value = 'primary'
+    }
+    callback()
+  } else {
+    callback()
+  }
+}
 
 const rules = computed(() => {
   return {
@@ -259,12 +315,18 @@ const rules = computed(() => {
         message: 'Please select node',
         trigger: 'change'
       }
-    ]
+    ],
+    'device.lincableCustomBaudRatePrescale': [{ trigger: 'change', validator: baudRateCheck }],
+    'device.lincableCustomBaudRateBitMap': [{ trigger: 'change', validator: baudRateCheck }]
   }
 })
 
 const editIndex = ref(props.index)
-
+onMounted(() => {
+  ruleFormRef.value?.validate().catch(() => {
+    null
+  })
+})
 const emits = defineEmits(['change'])
 const onSubmit = () => {
   ruleFormRef.value?.validate((valid) => {

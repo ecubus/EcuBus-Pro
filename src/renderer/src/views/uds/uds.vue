@@ -41,7 +41,7 @@
               <span>Stop</span>
             </div>
             <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable">
+            <div class="grid girdenable" @click.stop="openTrace('trace')">
               <Icon :icon="logIcon" style="font-size: 24px" />
               <el-dropdown @command="openTrace">
                 <span class="lr">

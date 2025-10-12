@@ -19,5 +19,6 @@ resources/examples/**/*.html
 resources/examples/**/**/*.html
 resources/examples/**/**/*.csv
 resources/examples/**/**/*.txt
+resources/examples/**/**/*.bin
 *.bak
 log.txt

@@ -12,6 +12,8 @@ export interface LinDevice {
   busy?: boolean
   toomossVolt?: number
   lincablePowerEnable?: boolean
+  lincableCustomBaudRateBitMap?: number
+  lincableCustomBaudRatePrescale?: number
 }
 
 export interface LinBaseInfo {

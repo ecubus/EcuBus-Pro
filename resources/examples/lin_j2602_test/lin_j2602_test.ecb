@@ -8,7 +8,9 @@
             "label": "",
             "handle": "COM34",
             "id": "",
-            "lincablePowerEnable": false
+            "lincablePowerEnable": false,
+            "lincableCustomBaudRatePrescale": 3,
+            "lincableCustomBaudRateBitMap": 9
           },
           "name": "ECUBUS_0",
           "id": "f8c108a5-21a4-40c2-b4f6-086ae00b6066",
@@ -35,14 +37,31 @@
     },
     "database": {
       "lin": {},
-      "can": {}
+      "can": {},
+      "orti": {}
     },
     "graphs": {},
     "guages": {},
     "vars": {},
     "datas": {},
     "panels": {},
-    "logs": {}
+    "logs": {},
+    "traces": {
+      "662b0627-6409-4f7b-b028-1fb3a6992089": {
+        "id": "662b0627-6409-4f7b-b028-1fb3a6992089",
+        "name": "Trace1",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [],
+        "filterId": []
+      }
+    }
   },
   "project": {
     "wins": {
@@ -73,24 +92,12 @@
         "id": "test",
         "options": {}
       },
-      "trace": {
-        "pos": {
-          "x": 0,
-          "y": 330,
-          "w": 1707,
-          "h": 330
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {}
-      },
       "hardware": {
         "pos": {
-          "x": 474.5,
-          "y": 115,
+          "x": 495.5,
+          "y": 0,
           "w": 861,
-          "h": 400
+          "h": 545
         },
         "title": "hardware",
         "label": "Devices",

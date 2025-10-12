@@ -28,7 +28,7 @@ export default class TraceItem {
   private offsetTs?: number
   private eventQueue: Array<{ osEvent: OsEvent; realTs: number }> = []
   private timer?: NodeJS.Timeout
-
+  private cnt = 0
   constructor(
     public orti: ORTIFile,
     projectPath: string
@@ -156,13 +156,14 @@ export default class TraceItem {
 
       // Check CRC
       if (calculatedCRC !== receivedCRC) {
-        console.error(
-          `CRC mismatch! Expected: ${calculatedCRC}, Received: ${receivedCRC}, Index: ${currentIndex32}`
-        )
         this.log.error(
           ts,
           `CRC mismatch! Expected: ${calculatedCRC}, Received: ${receivedCRC}, Index: ${currentIndex32}`
         )
+
+        // Skip this entire frame and search for next frame header
+        this.leftBuffer = this.leftBuffer.subarray(FRAME_LENGTH)
+
         continue
       }
 
@@ -204,7 +205,7 @@ export default class TraceItem {
       if (this.offsetTs == undefined) {
         this.offsetTs = realTs - ts
       }
-
+      this.cnt++
       // For file sources, add to queue; for serial port, emit immediately
       if (this.file) {
         this.eventQueue.push({ osEvent, realTs })

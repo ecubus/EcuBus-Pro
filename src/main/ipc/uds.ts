@@ -69,7 +69,6 @@ import {
   VsomeipState
 } from '../vsomeip'
 
-import { PrecisionTimer } from '../timer/timer'
 import TraceItem from '../ostrace/item'
 
 const libPath = path.dirname(dllLib)
@@ -289,7 +288,6 @@ let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
-const canPeriodTimer = new PrecisionTimer('___canPeriodTimer___')
 
 async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
   let activeKey = ''
@@ -597,7 +595,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     }, 200)
     logQ.startTimer()
   }
-  canPeriodTimer.create()
+
   global.startTs = getTsUs()
 }
 
@@ -692,7 +690,7 @@ interface timerType {
   socket: CAN_SOCKET
   period: number
   ia: CanInterAction
-  timerid: number
+  timer: NodeJS.Timeout
 }
 const timerMap = new Map<string, timerType>()
 
@@ -706,11 +704,10 @@ export function globalStop(emit = false) {
   udsTesterMap.clear()
 
   timerMap.forEach((value) => {
-    canPeriodTimer.cancelTask(value.timerid)
+    clearTimeout(value.timer)
     value.socket.close()
   })
   timerMap.clear()
-  canPeriodTimer.destroy()
   for (const t of exTransportList) {
     removeTransport(t)
   }
@@ -1094,22 +1091,18 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     //if timer exist, clear it
     const timer = timerMap.get(id)
     if (timer) {
-      canPeriodTimer.cancelTask(timer.timerid)
+      clearTimeout(timer.timer)
       timer.socket.close()
     }
-    const timerid = canPeriodTimer.addTask(
-      (ia.trigger.period || 10) * 1000,
-      (ia.trigger.period || 10) * 1000,
-      () => {
-        send(id)
-      }
-    )
+    const newTimer = setTimeout(() => {
+      send(id)
+    }, ia.trigger.period || 10)
     //create new timer
 
     timerMap.set(id, {
       socket: socket,
       period: ia.trigger.period || 10,
-      timerid: timerid,
+      timer: newTimer,
       ia: ia
     })
   } else {
@@ -1120,7 +1113,7 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
   const id = arg[0] as string
   const timer = timerMap.get(id)
   if (timer) {
-    canPeriodTimer.cancelTask(timer.timerid)
+    clearTimeout(timer.timer)
     timer.socket.close()
     timerMap.delete(id)
   }

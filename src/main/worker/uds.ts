@@ -48,8 +48,7 @@ import { dot } from 'node:test/reporters'
 import assert, { AssertionError } from 'node:assert'
 import { writeMessageData as writeLinMessageData } from 'src/renderer/src/database/ldf/calc'
 import { setSignal as setSignalNode } from '../util'
-export { PrecisionTimer } from '../timer/timer'
-export type { TimerTask } from '../timer/timer'
+
 import { setVar as setVarMain, getVar as getVarMain } from '../var'
 /**
  * Node.js built-in assertion library for testing.

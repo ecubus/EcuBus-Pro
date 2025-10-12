@@ -1995,92 +1995,22 @@
           "symbolSize": 6,
           "symbol": "circle"
         }
-      }
-    },
-    "guages": {},
-    "vars": {},
-    "datas": {
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
-        "name": "LoadPercent",
-        "color": "#98665b",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "%"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
-          "variableType": "system",
-          "variableName": "LoadPercent",
-          "variableFullName": "OsTrace.Os_Trace.Core0.LoadPercent",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
       },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.ExecutionTime": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.ExecutionTime",
-        "name": "ExecutionTime",
-        "color": "#65a62d",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "ms"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.ExecutionTime",
-          "variableType": "system",
-          "variableName": "ExecutionTime",
-          "variableFullName": "OsTrace.Os_Trace.Core0.ExecutionTime",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime",
-        "name": "TotalTime",
-        "color": "#ff15e1",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "ms"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime",
-          "variableType": "system",
-          "variableName": "TotalTime",
-          "variableFullName": "OsTrace.Os_Trace.Core0.TotalTime",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.Status": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.Status",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status",
         "name": "Status",
-        "color": "#798694",
+        "color": "#5e6a33",
         "yAxis": {
           "min": 0,
           "max": 5
         },
         "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.Status",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status",
           "variableType": "system",
           "variableName": "Status",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.Status",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand1.Status",
           "variableValueType": "number",
           "stringRange": [
             {
@@ -2110,333 +2040,76 @@
           ]
         },
         "graph": {
-          "id": "datas"
+          "id": "graph"
         }
       },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMin": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.Status": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMin",
-        "name": "ActivationIntervalMin",
-        "color": "#1992ed",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.Status",
+        "name": "Status",
+        "color": "#222e3d",
         "yAxis": {
           "min": 0,
-          "max": 100,
-          "unit": "us"
+          "max": 5
         },
         "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMin",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.Status",
           "variableType": "system",
-          "variableName": "ActivationIntervalMin",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.ActivationIntervalMin",
-          "variableValueType": "number"
+          "variableName": "Status",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand2.Status",
+          "variableValueType": "number",
+          "stringRange": [
+            {
+              "name": "Active",
+              "value": 0
+            },
+            {
+              "name": "Start",
+              "value": 1
+            },
+            {
+              "name": "Suspended",
+              "value": 2
+            },
+            {
+              "name": "Release",
+              "value": 3
+            },
+            {
+              "name": "Preempt",
+              "value": 4
+            },
+            {
+              "name": "Terminate",
+              "value": 5
+            }
+          ]
         },
         "graph": {
-          "id": "datas"
+          "id": "graph"
         }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMax": {
+      }
+    },
+    "guages": {},
+    "vars": {},
+    "datas": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMax",
-        "name": "ActivationIntervalMax",
-        "color": "#2e2da0",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime",
+        "name": "TotalTime",
+        "color": "#ff15e1",
         "yAxis": {
           "min": 0,
           "max": 100,
-          "unit": "us"
+          "unit": "ms"
         },
         "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalMax",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.TotalTime",
           "variableType": "system",
-          "variableName": "ActivationIntervalMax",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.ActivationIntervalMax",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalAvg",
-        "name": "ActivationIntervalAvg",
-        "color": "#1196c6",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ActivationIntervalAvg",
-          "variableType": "system",
-          "variableName": "ActivationIntervalAvg",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.ActivationIntervalAvg",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMin": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMin",
-        "name": "StartIntervalMin",
-        "color": "#34642f",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMin",
-          "variableType": "system",
-          "variableName": "StartIntervalMin",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.StartIntervalMin",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMax": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMax",
-        "name": "StartIntervalMax",
-        "color": "#166b50",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalMax",
-          "variableType": "system",
-          "variableName": "StartIntervalMax",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.StartIntervalMax",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalAvg",
-        "name": "StartIntervalAvg",
-        "color": "#00a07a",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartIntervalAvg",
-          "variableType": "system",
-          "variableName": "StartIntervalAvg",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.StartIntervalAvg",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMin": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMin",
-        "name": "DelayTimeMin",
-        "color": "#3d9fce",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMin",
-          "variableType": "system",
-          "variableName": "DelayTimeMin",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.DelayTimeMin",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax",
-        "name": "DelayTimeMax",
-        "color": "#93516d",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax",
-          "variableType": "system",
-          "variableName": "DelayTimeMax",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.DelayTimeMax",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeAvg",
-        "name": "DelayTimeAvg",
-        "color": "#bbb553",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeAvg",
-          "variableType": "system",
-          "variableName": "DelayTimeAvg",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.DelayTimeAvg",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMin": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMin",
-        "name": "ActivationIntervalMin",
-        "color": "#7f2e92",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMin",
-          "variableType": "system",
-          "variableName": "ActivationIntervalMin",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.ActivationIntervalMin",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMax": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMax",
-        "name": "ActivationIntervalMax",
-        "color": "#cc915b",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalMax",
-          "variableType": "system",
-          "variableName": "ActivationIntervalMax",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.ActivationIntervalMax",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalAvg",
-        "name": "ActivationIntervalAvg",
-        "color": "#a2136b",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ActivationIntervalAvg",
-          "variableType": "system",
-          "variableName": "ActivationIntervalAvg",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.ActivationIntervalAvg",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMin": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMin",
-        "name": "StartIntervalMin",
-        "color": "#83107f",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMin",
-          "variableType": "system",
-          "variableName": "StartIntervalMin",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.StartIntervalMin",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMax": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMax",
-        "name": "StartIntervalMax",
-        "color": "#afd718",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalMax",
-          "variableType": "system",
-          "variableName": "StartIntervalMax",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.StartIntervalMax",
-          "variableValueType": "number"
-        },
-        "graph": {
-          "id": "datas"
-        }
-      },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalAvg": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalAvg",
-        "name": "StartIntervalAvg",
-        "color": "#40ea52",
-        "yAxis": {
-          "min": 0,
-          "max": 100,
-          "unit": "us"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartIntervalAvg",
-          "variableType": "system",
-          "variableName": "StartIntervalAvg",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.StartIntervalAvg",
+          "variableName": "TotalTime",
+          "variableFullName": "OsTrace.Os_Trace.Core0.TotalTime",
           "variableValueType": "number"
         },
         "graph": {
@@ -2486,6 +2159,438 @@
         "graph": {
           "id": "datas"
         }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#ebec8d",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#473a8e",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#8236bd",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_10ms.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#d46e55",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Event.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#aa0880",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_100ms.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#12d042",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Resource.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#175585",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand1.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#9733bc",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_8_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand2.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_9_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_9_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#f83b35",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_9_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand3.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
+        "name": "LoadPercent",
+        "color": "#87e956",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
+          "variableType": "system",
+          "variableName": "LoadPercent",
+          "variableFullName": "OsTrace.Os_Trace.Core0.LoadPercent",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartCount",
+        "name": "StartCount",
+        "color": "#11194e",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartCount",
+        "name": "StartCount",
+        "color": "#2cc1cb",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_1_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_20ms.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.StartCount",
+        "name": "StartCount",
+        "color": "#69f816",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_2_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Event.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_3_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_3_0.StartCount",
+        "name": "StartCount",
+        "color": "#c5ec38",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_3_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_init.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.StartCount",
+        "name": "StartCount",
+        "color": "#1ef5d1",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_4_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_10ms.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.StartCount",
+        "name": "StartCount",
+        "color": "#e5cbe9",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_5_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_100ms.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.StartCount",
+        "name": "StartCount",
+        "color": "#77d492",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_6_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Resource.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.RunCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.RunCount",
+        "name": "RunCount",
+        "color": "#8442e1",
+        "yAxis": {
+          "min": 0,
+          "max": 100
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.RunCount",
+          "variableType": "system",
+          "variableName": "RunCount",
+          "variableFullName": "OsTrace.Os_Trace.ISR.SYS_TIMER_CORE0.RunCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.ExecutionTimeAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.ExecutionTimeAvg",
+        "name": "ExecutionTimeAvg",
+        "color": "#b4b7de",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.ExecutionTimeAvg",
+          "variableType": "system",
+          "variableName": "ExecutionTimeAvg",
+          "variableFullName": "OsTrace.Os_Trace.ISR.SYS_TIMER_CORE0.ExecutionTimeAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.CallIntervalAvg": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.CallIntervalAvg",
+        "name": "CallIntervalAvg",
+        "color": "#06307a",
+        "yAxis": {
+          "min": 0,
+          "max": 100,
+          "unit": "us"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.CallIntervalAvg",
+          "variableType": "system",
+          "variableName": "CallIntervalAvg",
+          "variableFullName": "OsTrace.Os_Trace.ISR.SYS_TIMER_CORE0.CallIntervalAvg",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "datas"
+        }
       }
     },
     "panels": {},
@@ -2526,14 +2631,14 @@
           },
           "name": "Trace"
         },
-        "hide": false
+        "hide": true
       },
       "datas": {
         "pos": {
-          "x": 253.5,
-          "y": 0,
-          "w": 1046,
-          "h": 671
+          "x": 0,
+          "y": -28,
+          "w": 1722,
+          "h": 782
         },
         "title": "datas",
         "label": "Datas",
@@ -2545,19 +2650,19 @@
         },
         "hide": false,
         "backupPos": {
-          "x": 508.5,
-          "y": 146.5,
-          "w": 600,
-          "h": 400
+          "x": 153.5,
+          "y": 0,
+          "w": 1046,
+          "h": 671
         },
-        "isMax": false
+        "isMax": true
       },
       "graph": {
         "pos": {
-          "x": 611.5,
-          "y": 14,
+          "x": 759.5,
+          "y": 22,
           "w": 1031,
-          "h": 400
+          "h": 584
         },
         "title": "graph",
         "label": "Line",
@@ -2567,7 +2672,7 @@
             "edit-index": "graph"
           }
         },
-        "hide": false,
+        "hide": true,
         "backupPos": {
           "x": 540.5,
           "y": 14.5,

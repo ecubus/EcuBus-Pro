@@ -249,17 +249,18 @@ export default class TraceItem {
         ts: parseInt(timestamp),
         comment: ''
       }
+      const realTs = osEvent.ts / this.orti.cpuFreq
       if (this.offsetTs == undefined) {
-        this.offsetTs = osEvent.ts - ts
+        this.offsetTs = realTs - ts
       }
 
       this.index++
 
       // For file sources, add to queue; otherwise emit immediately
       if (this.file) {
-        this.eventQueue.push({ osEvent, realTs: osEvent.ts })
+        this.eventQueue.push({ osEvent, realTs: realTs })
       } else {
-        this.log.osEvent(osEvent.ts - this.offsetTs, osEvent)
+        this.log.osEvent(realTs - this.offsetTs, osEvent)
       }
     }
   }

@@ -44,20 +44,18 @@ public:
     ThreadBasedCyclicSendTask(
         BusABC* bus,
         std::mutex* lock,
-        const std::vector<CanMessage>& messages,
+        const CanMessage& message,
         double periodSec,
         double durationSec = 0.0,
         OnErrorCallback onError = nullptr,
         bool autostart = true)
         : bus_(bus),
           sendLock_(lock),
-          messages_(messages),
+          message_(message),
           period_(periodSec),
           duration_(durationSec > 0 ? std::optional<double>(durationSec) : std::nullopt),
           onError_(onError)
     {
-        if (messages.empty())
-            throw std::invalid_argument("messages cannot be empty");
         if (periodSec < 0.001)
             throw std::invalid_argument("period cannot be smaller than 1 ms");
 
@@ -97,29 +95,14 @@ public:
     // ================================================================
     // 动态修改内部CAN数据（线程安全）
     // ================================================================
-    void modifyData(size_t index, const std::vector<uint8_t>& newData) {
+    void modifyData(const std::vector<uint8_t>& newData) {
         std::lock_guard<std::mutex> guard(dataLock_);
-        if (index >= messages_.size()) {
-            throw std::out_of_range("Invalid message index");
-        }
-        messages_[index].data = newData;
-    }
-
-    // 批量修改所有 messages
-    void modifyAllData(const std::vector<std::vector<uint8_t>>& newDataList) {
-        std::lock_guard<std::mutex> guard(dataLock_);
-        if (newDataList.size() != messages_.size()) {
-            throw std::invalid_argument("Size mismatch between newDataList and messages");
-        }
-        for (size_t i = 0; i < messages_.size(); ++i) {
-            messages_[i].data = newDataList[i];
-        }
+        message_.data = newData;
     }
 
 private:
     void run() {
         using namespace std::chrono;
-        size_t msgIndex = 0;
         auto nextDueTime = steady_clock::now();
         auto endTime = duration_ ? steady_clock::now() + duration<double>(duration_.value()) : time_point<steady_clock>::max();
 
@@ -141,7 +124,7 @@ private:
                 CanMessage msgCopy;
                 {   // 复制当前 message，避免发送时数据被修改
                     std::lock_guard<std::mutex> guard(dataLock_);
-                    msgCopy = messages_[msgIndex];
+                    msgCopy = message_;
                 }
 
                 {
@@ -161,8 +144,6 @@ private:
                 }
             }
 
-            msgIndex = (msgIndex + 1) % messages_.size();
-
 #ifdef _WIN32
             if (hTimer_) {
                 WaitForSingleObject(hTimer_, INFINITE);
@@ -178,7 +159,7 @@ private:
 private:
     BusABC* bus_;
     std::mutex* sendLock_;
-    std::vector<CanMessage> messages_;
+    CanMessage message_;
     double period_;
     std::optional<double> duration_;
     OnErrorCallback onError_;

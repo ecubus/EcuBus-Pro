@@ -810,7 +810,8 @@ const getChartOption = (
         height: 20,
         bottom: 10,
         showDetail: true,
-        showDataShadow: false
+        showDataShadow: false,
+        filter: 'weakFilter'
       }
     ],
     grid: {

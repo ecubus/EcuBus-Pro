@@ -331,18 +331,18 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'IA',
     component: defineAsyncComponent(() => import('./someip/si.vue')),
     icon: interIcon
+  },
+  osTrace: {
+    i: 'OSTrace',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'OSTrace',
+    key: 'OSTrace',
+    component: defineAsyncComponent(() => import('../ostrace/table.vue')),
+    icon: osTraceIcon
   }
-  // osTrace: {
-  //   i: 'OSTrace',
-  //   x: 0,
-  //   y: 0,
-  //   w: 700,
-  //   h: 400,
-  //   label: 'OSTrace',
-  //   key: 'OSTrace',
-  //   component: defineAsyncComponent(() => import('../ostrace/graph.vue')),
-  //   icon: osTraceIcon
-  // }
   // script: {
   //   i: 'Script',
   //   x: 0,

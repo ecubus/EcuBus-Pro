@@ -129,7 +129,7 @@ export default class TraceItem {
   }
 
   async close() {
-    this.log.close()
+    this.log?.close()
     this.closeFlag = true
     this.parser?.close()
     const p = new Promise<void>((resolve) => {

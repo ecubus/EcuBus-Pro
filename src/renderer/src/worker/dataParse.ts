@@ -54,7 +54,7 @@ function parseLinData(raw: any) {
             }
 
             //转为秒
-            const ts = (msg.ts || 0) / 1000000
+            const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(6))
             const value = signalDef.physValue
             result[signalKey].push([
               ts,
@@ -101,7 +101,7 @@ function parseCanData(raw: any) {
           if (!result[signalKey]) {
             result[signalKey] = []
           }
-          const ts = (msg.ts || 0) / 1000000
+          const ts = parseFloat(((msg.ts || 0) / 1000000).toFixed(6))
           const value = signal.physValue
           result[signalKey].push([
             ts,
@@ -146,7 +146,7 @@ function parseORTIData(raw: any) {
       id: getID(osEvent.type, osEvent.id, osEvent.coreId)
     }
     if (db) {
-      const timestampInSeconds = ts / 1000000
+      const timestampInSeconds = parseFloat(((ts || 0) / 1000000).toFixed(6))
 
       let name
       if (osEvent.type == TaskType.TASK || osEvent.type == TaskType.ISR) {

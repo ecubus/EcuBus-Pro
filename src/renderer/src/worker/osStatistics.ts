@@ -58,6 +58,8 @@ interface IsrState {
 
   executionStartTime?: number
   lastCallTime?: number
+  // Accumulated execution time when ISR is interrupted by another ISR
+  currentExecutionAccumulated: number
 }
 
 // Resource internal state
@@ -110,6 +112,8 @@ export default class OsStatistics {
 
   // Track currently running task on each core (to handle ISR interruptions)
   private runningTaskOnCore: Map<number, string> = new Map()
+  // Stack to track nested ISRs on each core (for ISR preemption scenarios)
+  private runningIsrStackOnCore: Map<number, string[]> = new Map()
 
   constructor(
     private id: string,
@@ -130,6 +134,7 @@ export default class OsStatistics {
     this.coreExecutionTime.clear()
     this.idleTaskIds.clear()
     this.runningTaskOnCore.clear()
+    this.runningIsrStackOnCore.clear()
   }
 
   private initTaskState(id: number, coreId: number, status: TaskStatus): TaskState {
@@ -177,7 +182,8 @@ export default class OsStatistics {
       callIntervalSum: 0,
       callIntervalCount: 0,
       callIntervalMin: Number.MAX_VALUE,
-      callIntervalMax: 0
+      callIntervalMax: 0,
+      currentExecutionAccumulated: 0
     }
   }
 
@@ -257,6 +263,7 @@ export default class OsStatistics {
     this.coreExecutionTime.set(coreId, current + execTime)
   }
 
+  // 修复后的processTaskEvent方法中的关键部分
   private processTaskEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as TaskStatus
@@ -293,11 +300,11 @@ export default class OsStatistics {
         break
 
       case TaskStatus.START:
-        // Track start count and intervals (for first start after becoming ready)
+        // 只在第一次START时统计
         if (!task.hasStartedInCurrentCycle) {
           task.startCount++
 
-          // Calculate delay from when task became ready (ACTIVE or PREEMPT)
+          // 计算延迟时间（从ACTIVE到START）
           if (task.lastActiveTime !== undefined) {
             const delay = event.ts - task.lastActiveTime
             const stats = this.updateRunningStats(
@@ -313,7 +320,7 @@ export default class OsStatistics {
             task.delayTimeMax = stats.max
           }
 
-          // Calculate start interval (time between successive first-starts)
+          // 计算START间隔
           if (task.lastStartTime !== undefined) {
             const interval = event.ts - task.lastStartTime
             const stats = this.updateRunningStats(
@@ -329,65 +336,49 @@ export default class OsStatistics {
             task.startIntervalMax = stats.max
           }
           task.lastStartTime = event.ts
-
           task.hasStartedInCurrentCycle = true
         }
 
+        // 关键修复：每次START都重新开始执行时间计时
+        // 这样可以正确处理ISR中断后的恢复场景
         task.currentExecutionStartTime = event.ts
-        // Track this task as running on this core
+
+        // 记录任务正在此核心上运行
         this.runningTaskOnCore.set(event.coreId, key)
         break
 
       case TaskStatus.PREEMPT:
+        // 任务被抢占，累加已执行时间
         if (task.currentExecutionStartTime !== undefined) {
           const partialExecTime = event.ts - task.currentExecutionStartTime
-          task.currentExecutionAccumulated += partialExecTime
 
-          // 累加到对应核心的执行时间（不包括空闲任务）
-          if (!this.idleTaskIds.has(key)) {
-            this.addCoreExecutionTime(event.coreId, partialExecTime)
+          if (partialExecTime > 0 && partialExecTime < 1e15) {
+            task.currentExecutionAccumulated += partialExecTime
+
+            if (!this.idleTaskIds.has(key)) {
+              this.addCoreExecutionTime(event.coreId, partialExecTime)
+            }
           }
 
           task.currentExecutionStartTime = undefined
         }
 
-        // Task is no longer running on this core
         if (this.runningTaskOnCore.get(event.coreId) === key) {
           this.runningTaskOnCore.delete(event.coreId)
         }
         break
 
       case TaskStatus.WAIT:
+        // 任务等待，累加已执行时间
         if (task.currentExecutionStartTime !== undefined) {
           const partialExecTime = event.ts - task.currentExecutionStartTime
-          task.currentExecutionAccumulated += partialExecTime
 
-          // 累加到对应核心的执行时间（不包括空闲任务）
-          if (!this.idleTaskIds.has(key)) {
-            this.addCoreExecutionTime(event.coreId, partialExecTime)
-          }
+          if (partialExecTime > 0 && partialExecTime < 1e15) {
+            task.currentExecutionAccumulated += partialExecTime
 
-          task.currentExecutionStartTime = undefined
-        }
-
-        // Task is no longer running on this core
-        if (this.runningTaskOnCore.get(event.coreId) === key) {
-          this.runningTaskOnCore.delete(event.coreId)
-        }
-        break
-
-      case TaskStatus.RELEASE:
-        // Waiting → Ready, 不需要特殊处理
-        break
-
-      case TaskStatus.TERMINATE:
-        if (task.currentExecutionStartTime !== undefined) {
-          const partialExecTime = event.ts - task.currentExecutionStartTime
-          task.currentExecutionAccumulated += partialExecTime
-
-          // 累加到对应核心的执行时间（不包括空闲任务）
-          if (!this.idleTaskIds.has(key)) {
-            this.addCoreExecutionTime(event.coreId, partialExecTime)
+            if (!this.idleTaskIds.has(key)) {
+              this.addCoreExecutionTime(event.coreId, partialExecTime)
+            }
           }
 
           task.currentExecutionStartTime = undefined
@@ -395,7 +386,35 @@ export default class OsStatistics {
 
         task.isInExecution = false
 
-        // 记录本次执行时间统计（不包括被中断的时间）
+        if (this.runningTaskOnCore.get(event.coreId) === key) {
+          this.runningTaskOnCore.delete(event.coreId)
+        }
+        break
+
+      case TaskStatus.RELEASE:
+        // 从WAIT恢复到就绪状态
+        task.isInExecution = true
+        break
+
+      case TaskStatus.TERMINATE:
+        // 任务终止，累加最后的执行时间
+        if (task.currentExecutionStartTime !== undefined) {
+          const partialExecTime = event.ts - task.currentExecutionStartTime
+
+          if (partialExecTime > 0 && partialExecTime < 1e15) {
+            task.currentExecutionAccumulated += partialExecTime
+
+            if (!this.idleTaskIds.has(key)) {
+              this.addCoreExecutionTime(event.coreId, partialExecTime)
+            }
+          }
+
+          task.currentExecutionStartTime = undefined
+        }
+
+        task.isInExecution = false
+
+        // 记录本次完整的执行时间统计
         if (task.currentExecutionAccumulated > 0) {
           const stats = this.updateRunningStats(
             task.executionTimeSum,
@@ -413,7 +432,6 @@ export default class OsStatistics {
         task.currentExecutionAccumulated = 0
         task.hasStartedInCurrentCycle = false
 
-        // Task is no longer running on this core
         if (this.runningTaskOnCore.get(event.coreId) === key) {
           this.runningTaskOnCore.delete(event.coreId)
         }
@@ -551,6 +569,7 @@ export default class OsStatistics {
     return result
   }
 
+  // 修复后的processIsrEvent方法（支持ISR嵌套/中断抢占）
   private processIsrEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as IsrStatus
@@ -563,29 +582,66 @@ export default class OsStatistics {
     isr.currentStatus = status
 
     if (status === IsrStatus.START) {
-      // Pause the currently running task on this core (if any)
-      const runningTaskKey = this.runningTaskOnCore.get(event.coreId)
-      if (runningTaskKey) {
-        const runningTask = this.tasks.get(runningTaskKey)
-        if (runningTask && runningTask.currentExecutionStartTime !== undefined) {
-          // Save the partial execution time accumulated so far
-          const partialExecTime = event.ts - runningTask.currentExecutionStartTime
-          runningTask.currentExecutionAccumulated += partialExecTime
+      // Get or initialize ISR stack for this core
+      if (!this.runningIsrStackOnCore.has(event.coreId)) {
+        this.runningIsrStackOnCore.set(event.coreId, [])
+      }
+      const isrStack = this.runningIsrStackOnCore.get(event.coreId)!
 
-          // Add to core execution time (不包括空闲任务)
-          if (!this.idleTaskIds.has(runningTaskKey)) {
+      // Check if there's an ISR already running (nested interrupt scenario)
+      if (isrStack.length > 0) {
+        // Pause the currently running ISR (at the top of the stack)
+        const runningIsrKey = isrStack[isrStack.length - 1]
+        const runningIsr = this.isrs.get(runningIsrKey)
+        if (runningIsr && runningIsr.executionStartTime !== undefined) {
+          // Save accumulated execution time for the interrupted ISR
+          const partialExecTime = event.ts - runningIsr.executionStartTime
+
+          // Prevent abnormal values
+          if (partialExecTime > 0 && partialExecTime < 1e15) {
+            // Accumulate the partial execution time for the interrupted ISR
+            runningIsr.currentExecutionAccumulated += partialExecTime
+
+            // Also add to core execution time immediately since ISR time counts
             this.addCoreExecutionTime(event.coreId, partialExecTime)
           }
 
-          // Clear the start time to indicate task is paused
-          runningTask.currentExecutionStartTime = undefined
+          // Clear the ISR's execution start time (indicates ISR is paused)
+          runningIsr.executionStartTime = undefined
+        }
+      } else {
+        // No ISR running, so pause the currently running task
+        const runningTaskKey = this.runningTaskOnCore.get(event.coreId)
+        if (runningTaskKey) {
+          const runningTask = this.tasks.get(runningTaskKey)
+          if (runningTask && runningTask.currentExecutionStartTime !== undefined) {
+            // Save accumulated execution time
+            const partialExecTime = event.ts - runningTask.currentExecutionStartTime
+
+            // Prevent abnormal values
+            if (partialExecTime > 0 && partialExecTime < 1e15) {
+              runningTask.currentExecutionAccumulated += partialExecTime
+
+              // Add to core execution time (excluding idle tasks)
+              if (!this.idleTaskIds.has(runningTaskKey)) {
+                this.addCoreExecutionTime(event.coreId, partialExecTime)
+              }
+            }
+
+            // Clear task's execution start time (indicates task is paused)
+            runningTask.currentExecutionStartTime = undefined
+          }
         }
       }
 
+      // Push current ISR to the stack
+      isrStack.push(key)
+
+      // Start timing for this ISR
       isr.executionStartTime = event.ts
       isr.runCount++
 
-      // Calculate call interval
+      // Calculate ISR call interval
       if (isr.lastCallTime !== undefined) {
         const interval = event.ts - isr.lastCallTime
         const stats = this.updateRunningStats(
@@ -602,32 +658,79 @@ export default class OsStatistics {
       }
       isr.lastCallTime = event.ts
     } else if (status === IsrStatus.STOP) {
+      // Record execution time for this ISR
       if (isr.executionStartTime !== undefined) {
-        const execTime = event.ts - isr.executionStartTime
+        const lastSegmentTime = event.ts - isr.executionStartTime
+
+        // Prevent abnormal values
+        if (lastSegmentTime > 0 && lastSegmentTime < 1e15) {
+          // Add the last segment to the accumulated time
+          isr.currentExecutionAccumulated += lastSegmentTime
+
+          // Also count this segment toward core load
+          this.addCoreExecutionTime(event.coreId, lastSegmentTime)
+        }
+
+        isr.executionStartTime = undefined
+      }
+
+      // Now record the total execution time (accumulated + last segment)
+      if (isr.currentExecutionAccumulated > 0) {
         const stats = this.updateRunningStats(
           isr.executionTimeSum,
           isr.executionTimeCount,
           isr.executionTimeMin,
           isr.executionTimeMax,
-          execTime
+          isr.currentExecutionAccumulated
         )
         isr.executionTimeSum = stats.sum
         isr.executionTimeCount = stats.count
         isr.executionTimeMin = stats.min
         isr.executionTimeMax = stats.max
 
-        // ISR的执行时间也计入核心负载
-        this.addCoreExecutionTime(event.coreId, execTime)
-
-        isr.executionStartTime = undefined
+        // Reset accumulated time for next run
+        isr.currentExecutionAccumulated = 0
       }
 
-      // Don't automatically resume task execution time tracking after ISR
-      // Task will resume timing only when it gets a START event again
-      // This is because ISR may trigger scheduler and a different task may run
+      // Pop this ISR from the stack
+      const isrStack = this.runningIsrStackOnCore.get(event.coreId)
+      if (isrStack && isrStack.length > 0) {
+        const poppedKey = isrStack.pop()
+
+        // Verify we're popping the correct ISR
+        if (poppedKey !== key) {
+          console.warn(`ISR stack mismatch: expected ${key}, got ${poppedKey}`)
+        }
+
+        // Check if there's another ISR below in the stack
+        if (isrStack.length > 0) {
+          // Resume the previously interrupted ISR
+          const resumingIsrKey = isrStack[isrStack.length - 1]
+          const resumingIsr = this.isrs.get(resumingIsrKey)
+          if (resumingIsr && resumingIsr.executionStartTime === undefined) {
+            // Resume timing from this moment
+            resumingIsr.executionStartTime = event.ts
+          }
+        } else {
+          // No more ISRs in the stack, resume the interrupted task
+          const runningTaskKey = this.runningTaskOnCore.get(event.coreId)
+          if (runningTaskKey) {
+            const runningTask = this.tasks.get(runningTaskKey)
+            // Only resume timing if the task is still in execution state
+            if (
+              runningTask &&
+              runningTask.isInExecution &&
+              runningTask.currentExecutionStartTime === undefined
+            ) {
+              // Resume timing task's execution time from ISR end moment
+              runningTask.currentExecutionStartTime = event.ts
+            }
+          }
+        }
+      }
     }
 
-    // 立即更新统计结果
+    // Immediately update statistics
     return this.updateIsrStatistics(key, isr)
   }
 
@@ -714,15 +817,15 @@ export default class OsStatistics {
 
     // Return current status data
     result.push({
-      id: `OsTrace.Resource.${key}.Status`,
+      id: `OsTrace.${key}.Status`,
       value: { value: ResourceStatus[resource.currentStatus], rawValue: resource.currentStatus }
     })
     result.push({
-      id: `OsTrace.Resource.${key}.AcquireCount`,
+      id: `OsTrace.${key}.AcquireCount`,
       value: { value: resource.acquireCount, rawValue: resource.acquireCount }
     })
     result.push({
-      id: `OsTrace.Resource.${key}.ReleaseCount`,
+      id: `OsTrace.${key}.ReleaseCount`,
       value: { value: resource.releaseCount, rawValue: resource.releaseCount }
     })
 
@@ -754,11 +857,11 @@ export default class OsStatistics {
 
     // Return current status data
     result.push({
-      id: `OsTrace.Service.${key}.Count`,
+      id: `OsTrace.${key}.Count`,
       value: { value: service.count, rawValue: service.count }
     })
     result.push({
-      id: `OsTrace.Service.${key}.LastStatus`,
+      id: `OsTrace.${key}.LastStatus`,
       value: { value: service.lastStatus, rawValue: service.lastStatus }
     })
 
@@ -786,11 +889,11 @@ export default class OsStatistics {
 
     // Return hook status data
     result.push({
-      id: `OsTrace.Hook.${key}.Count`,
+      id: `OsTrace.${key}.Count`,
       value: { value: hook.count, rawValue: hook.count }
     })
     result.push({
-      id: `OsTrace.Hook.${key}.LastStatus`,
+      id: `OsTrace.${key}.LastStatus`,
       value: { value: hook.lastStatus, rawValue: hook.lastStatus }
     })
 

@@ -256,7 +256,7 @@ export function getAllSysVar(
         enum: [
           { name: 'Active', value: TaskStatus.ACTIVE },
           { name: 'Start', value: TaskStatus.START },
-          { name: 'Suspended', value: TaskStatus.WAIT },
+          { name: 'Wait', value: TaskStatus.WAIT },
           { name: 'Release', value: TaskStatus.RELEASE },
           { name: 'Preempt', value: TaskStatus.PREEMPT },
           { name: 'Terminate', value: TaskStatus.TERMINATE }

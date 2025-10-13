@@ -7,7 +7,8 @@
           v-bind="userGridOptions"
           class="variableTable"
           :data="userTableData"
-          @cell-click="cellClick"
+          @checkbox-all="handleCheckboxChange"
+          @checkbox-change="handleCheckboxChange"
         >
           <template #toolbar>
             <div
@@ -52,8 +53,16 @@
                   </el-tooltip>
                   <el-divider direction="vertical"></el-divider>
                   <el-tooltip effect="light" content="Delete Signal" placement="bottom">
-                    <el-button link type="danger" :disabled="!selectedRowId" @click="deleteSignal">
+                    <el-button
+                      link
+                      type="danger"
+                      :disabled="!selectedRows.length"
+                      @click="deleteSignal"
+                    >
                       <Icon :icon="deleteIcon" />
+                      <span v-if="selectedRows.length" style="margin-left: 4px; font-size: 12px">
+                        ({{ selectedRows.length }})
+                      </span>
                     </el-button>
                   </el-tooltip>
                 </el-button-group>
@@ -157,11 +166,12 @@ type TableType = {
 // 用户表格数据和配置
 const userTableData = ref<TableType[]>([])
 const userVariableGrid = ref()
-const selectedRowId = ref('')
 
-// 处理单元格点击事件
-const cellClick = (params: any) => {
-  selectedRowId.value = params.row.id
+const selectedRows = ref<TableType[]>([])
+
+// 处理复选框变化事件
+const handleCheckboxChange = () => {
+  selectedRows.value = userVariableGrid.value.getCheckboxRecords()
 }
 
 function getUnit(row: GraphNode<GraphBindSignalValue | GraphBindVariableValue>) {
@@ -184,7 +194,13 @@ const userGridOptions = computed<VxeGridProps<TableType>>(() => ({
   columnConfig: {
     resizable: true
   },
+  checkboxConfig: {
+    highlight: true,
+    showHeader: true,
+    trigger: 'row'
+  },
   columns: [
+    { type: 'checkbox', width: 50 },
     { type: 'seq', width: 50, title: '#' },
     { field: 'name', title: 'Name', minWidth: 150, slots: { default: 'default_name' } },
     {
@@ -210,9 +226,7 @@ const userGridOptions = computed<VxeGridProps<TableType>>(() => ({
   ],
   data: userTableData.value,
   rowConfig: {
-    keyField: 'id',
-    isHover: true,
-    isCurrent: true
+    keyField: 'id'
   },
   toolbarConfig: {
     slots: {
@@ -421,9 +435,15 @@ const addSignal = () => {
 
 // 删除信号功能
 const deleteSignal = () => {
-  if (!selectedRowId.value) return
+  if (!selectedRows.value.length) return
 
-  ElMessageBox.confirm('Are you sure you want to delete this signal?', 'Delete Signal', {
+  const count = selectedRows.value.length
+  const message =
+    count === 1
+      ? 'Are you sure you want to delete this signal?'
+      : `Are you sure you want to delete ${count} signals?`
+
+  ElMessageBox.confirm(message, 'Delete Signal', {
     confirmButtonText: 'Confirm',
     cancelButtonText: 'Cancel',
     type: 'warning',
@@ -431,22 +451,27 @@ const deleteSignal = () => {
     buttonSize: 'small'
   })
     .then(() => {
-      // 从表格中移除
-      const index = userTableData.value.findIndex((row) => row.id === selectedRowId.value)
-      if (index !== -1) {
-        userTableData.value.splice(index, 1)
-      }
+      // 批量删除
+      selectedRows.value.forEach((row) => {
+        // 从表格中移除
+        const index = userTableData.value.findIndex((r) => r.id === row.id)
+        if (index !== -1) {
+          userTableData.value.splice(index, 1)
+        }
 
-      // 解除事件监听
-      window.logBus.off(selectedRowId.value, dataUpdate)
+        // 解除事件监听
+        window.logBus.off(row.id, dataUpdate)
 
-      // 从数据存储中删除
-      if (datas[selectedRowId.value]) {
-        delete datas[selectedRowId.value]
-      }
+        // 从数据存储中删除
+        if (datas[row.id]) {
+          delete datas[row.id]
+        }
+      })
 
       // 清除选中状态
-      selectedRowId.value = ''
+      selectedRows.value = []
+
+      userVariableGrid.value?.clearCheckboxRow()
       userVariableGrid.value?.clearCurrentRow()
     })
     .catch(() => {
@@ -519,6 +544,15 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+</style>
+
+<style>
+.row-highlight {
+  background-color: #e6f3ff !important;
+}
+.vxe-table--render-default .vxe-body--row.row--checked > .vxe-body--column {
+  background-color: #e6f3ff !important;
 }
 </style>
 

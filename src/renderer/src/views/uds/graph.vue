@@ -176,7 +176,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import zoomInIcon from '@iconify/icons-material-symbols/zoom-in'
 import dragVerticalIcon from '@iconify/icons-material-symbols/drag-pan'
 import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
-import { ref, onMounted, computed, h, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, computed, h, onUnmounted, watch, nextTick, inject } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 import { GraphBindSignalValue, GraphBindVariableValue, GraphNode } from 'src/preload/data'
@@ -191,6 +191,7 @@ import addVar from './components/addVar.vue'
 import editSignal from './components/editSignal.vue'
 import { LineSeriesOption } from 'echarts'
 import { useGlobalStart } from '@r/stores/runtime'
+import { Layout } from './layout'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 
@@ -450,7 +451,7 @@ const chartDataCache: Record<string, (number | string)[][]> = {}
 // 时间桶粒度为100ms，例如：时间0.15s对应桶1 (Math.floor(0.15/0.1))
 const TIME_BUCKET_SIZE = 0.1 // 100ms
 const chartTimeIndex: Record<string, Map<number, number>> = {}
-
+const layout = inject('layout') as Layout
 function dataUpdate({
   key,
   values
@@ -761,12 +762,20 @@ const updateChartOption = (chartId: string) => {
   }
 }
 
-// 监听图表容器大小变化
-watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
+function reszie(q?: any) {
+  if (q && q.id != props.editIndex) {
+    return
+  }
   nextTick(() => {
     Object.values(chartInstances).forEach((instance) => {
       instance.resize()
     })
+  })
+}
+// 监听图表容器大小变化
+watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
+  nextTick(() => {
+    reszie()
   })
 })
 
@@ -955,6 +964,7 @@ onMounted(() => {
   if (globalStart.value) {
     timer = setInterval(updateTime, 500)
   }
+  layout.on('show', reszie)
 })
 
 // 监听启用图表的变化
@@ -1019,6 +1029,7 @@ onUnmounted(() => {
   filteredTreeData.value.forEach((key) => {
     window.logBus.off(key.id, dataUpdate)
   })
+  layout.off('show', reszie)
 })
 
 const signalDialogVisible = ref(false)

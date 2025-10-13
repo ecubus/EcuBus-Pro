@@ -22,3 +22,5 @@ resources/examples/**/**/*.txt
 resources/examples/**/**/*.bin
 *.bak
 log.txt
+tools/a.bin
+tools/a.txt

@@ -97,7 +97,7 @@ export class OsTraceParser {
         )
 
         // Skip this entire frame and search for next frame header
-        this.leftBuffer = this.leftBuffer.subarray(FRAME_LENGTH)
+        this.leftBuffer = this.leftBuffer.subarray(1)
         continue
       }
 

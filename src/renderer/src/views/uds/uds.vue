@@ -391,7 +391,7 @@
               <Icon :icon="osTraceIcon" style="font-size: 24px" />
               <el-dropdown @command="openOsTrace">
                 <span class="lr">
-                  OS Trace
+                  OS Info
                   <el-icon class="el-icon--right">
                     <arrow-down />
                   </el-icon>

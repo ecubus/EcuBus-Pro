@@ -40,8 +40,8 @@ export default class TraceItem {
             const ts = getTsUs() - this.systemTs
             this.log.error(ts, error)
           },
-          onNeedMoreData: () => {
-            null
+          getEventLength: () => {
+            return 0
           }
         })
 
@@ -53,8 +53,8 @@ export default class TraceItem {
           stopBits: parseInt(this.orti.connector.options.stopBits) as any,
           autoOpen: true
         })
-        this.serialPort.on('data', async (data: Buffer) => {
-          await this.parser!.parseBinaryData(data)
+        this.serialPort.on('data', (data: Buffer) => {
+          this.parser!.parseBinaryData(data)
         })
       } else if (
         this.orti.connector.type === 'BinaryFile' ||
@@ -131,6 +131,7 @@ export default class TraceItem {
   async close() {
     this.log.close()
     this.closeFlag = true
+    this.parser?.close()
     const p = new Promise<void>((resolve) => {
       if (this.serialPort) {
         this.serialPort.close(() => {

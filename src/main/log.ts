@@ -708,6 +708,7 @@ export class SomeipLOG {
 export class OsTraceLOG {
   vendor: string
   log: Logger
+  closeFlag = false
 
   constructor(vendor: string, writerToFile?: string) {
     this.vendor = vendor
@@ -747,9 +748,13 @@ export class OsTraceLOG {
     }
   }
   close() {
+    this.closeFlag = true
     this.log.close()
   }
   osEvent(ts: number, event: OsEvent) {
+    if (this.closeFlag) {
+      return
+    }
     this.log.info({
       method: 'osEvent',
       data: event,
@@ -758,6 +763,9 @@ export class OsTraceLOG {
   }
 
   error(ts: number, msg?: string) {
+    if (this.closeFlag) {
+      return
+    }
     this.log.error({
       method: 'osError',
 

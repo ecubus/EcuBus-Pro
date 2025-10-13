@@ -1,9 +1,10 @@
 import { parentPort, workerData } from 'worker_threads'
 import fs from 'fs'
+import { pipeline } from 'stream/promises'
 import type { OsEvent } from '../share/osEvent'
 import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
 import { getTsUs } from '../share/can'
-import { OsTraceParser } from './parser'
+import { BinaryParserStream, CsvParserStream } from './parser'
 
 interface WorkerData {
   orti: ORTIFile
@@ -11,91 +12,78 @@ interface WorkerData {
 }
 
 class OsTraceWorker {
-  private file?: fs.ReadStream
   private orti: ORTIFile
   private filePath: string
   private eventQueue: Array<{ osEvent: OsEvent; realTs: number }> = []
   private timer?: NodeJS.Timeout
   private systemTs: number = 0
   private offsetTs?: number
-  private parser: OsTraceParser
-  private isPaused: boolean = false
-  private readonly MAX_QUEUE_SIZE = 10000 // 最大队列长度
-  private readonly MIN_QUEUE_SIZE = 5000 // 恢复读取的阈值
+  private pipelineAbortController?: AbortController
 
   constructor(data: WorkerData) {
     this.orti = data.orti
     this.filePath = data.filePath
     this.systemTs = getTsUs()
 
-    // Create parser with callbacks
-    this.parser = new OsTraceParser(this.orti, {
-      onEvent: (osEvent, realTs) => {
-        this.handleEvent(osEvent, realTs)
-      },
-      onError: (error) => {
-        parentPort?.postMessage({ type: 'error', data: error })
-      },
-      onNeedMoreData: () => {
-        this.checkResume()
-      }
-    })
-
-    if (this.orti.connector?.type === 'BinaryFile') {
-      this.file = fs.createReadStream(this.filePath, {
-        highWaterMark: 16384 // 增大缓冲区，减少读取次数
-      })
-      this.file.on('data', async (chunk: any) => {
-        this.file!.pause()
-        await this.parser.parseBinaryData(chunk as Buffer)
-        this.checkResume()
-      })
-      this.file.on('end', () => {
-        parentPort?.postMessage({ type: 'end' })
-      })
-      this.file.on('error', (error) => {
-        parentPort?.postMessage({ type: 'error', data: error.message })
-      })
-    } else if (this.orti.connector?.type === 'CSVFile') {
-      this.file = fs.createReadStream(this.filePath, {
-        encoding: 'utf-8',
-        highWaterMark: 16384 // 增大缓冲区，减少读取次数
-      })
-      this.file.on('data', async (chunk: any) => {
-        this.file!.pause()
-        await this.parser.parseCsvData(chunk as string)
-        this.checkResume()
-      })
-      this.file.on('end', () => {
-        parentPort?.postMessage({ type: 'end' })
-      })
-      this.file.on('error', (error) => {
-        parentPort?.postMessage({ type: 'error', data: error.message })
-      })
-    }
-
     // Start 50ms timer to process queue
     this.timer = setInterval(() => {
       this.processQueue()
     }, 50)
+
+    // Start pipeline
+    this.startPipeline()
   }
 
-  private checkResume() {
-    // 如果队列长度超过最大值，暂停文件读取
-    if (this.eventQueue.length > this.MAX_QUEUE_SIZE) {
-      if (!this.isPaused) {
-        this.isPaused = true
-        // 不再 resume，等待队列消费
+  private async startPipeline() {
+    try {
+      this.pipelineAbortController = new AbortController()
+      const { signal } = this.pipelineAbortController
+
+      if (this.orti.connector?.type === 'BinaryFile') {
+        const readStream = fs.createReadStream(this.filePath, {
+          highWaterMark: 16384
+        })
+
+        const parserStream = new BinaryParserStream(this.orti, {
+          onEvent: (osEvent, realTs) => {
+            this.handleEvent(osEvent, realTs)
+          },
+          onError: (error) => {
+            parentPort?.postMessage({ type: 'error', data: error })
+          },
+          getEventLength: () => {
+            return this.eventQueue.length
+          }
+        })
+
+        await pipeline(readStream, parserStream, { signal })
+      } else if (this.orti.connector?.type === 'CSVFile') {
+        const readStream = fs.createReadStream(this.filePath, {
+          encoding: 'utf-8',
+          highWaterMark: 16384
+        })
+
+        const parserStream = new CsvParserStream(this.orti, {
+          onEvent: (osEvent, realTs) => {
+            this.handleEvent(osEvent, realTs)
+          },
+          onError: (error) => {
+            parentPort?.postMessage({ type: 'error', data: error })
+          },
+          getEventLength: () => {
+            return this.eventQueue.length
+          }
+        })
+
+        await pipeline(readStream, parserStream, { signal })
       }
-    }
-    // 如果队列长度降到阈值以下，恢复文件读取
-    else if (this.eventQueue.length < this.MIN_QUEUE_SIZE && this.isPaused) {
-      this.isPaused = false
-      this.file?.resume()
-    }
-    // 正常情况，继续读取
-    else if (!this.isPaused) {
-      this.file?.resume()
+
+      // Pipeline completed successfully
+      parentPort?.postMessage({ type: 'end' })
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        parentPort?.postMessage({ type: 'error', data: error.message })
+      }
     }
   }
 
@@ -121,15 +109,11 @@ class OsTraceWorker {
         data: evnets
       })
     }
-
-    // 处理完队列后检查是否需要恢复文件读取
-    this.checkResume()
   }
 
   handleEvent(osEvent: OsEvent, realTs: number) {
-    const ts = getTsUs() - this.systemTs
-
     if (this.offsetTs == undefined) {
+      const ts = getTsUs() - this.systemTs
       this.offsetTs = realTs - ts
     }
 
@@ -142,8 +126,8 @@ class OsTraceWorker {
       clearInterval(this.timer)
       this.timer = undefined
     }
-    if (this.file) {
-      this.file.close()
+    if (this.pipelineAbortController) {
+      this.pipelineAbortController.abort()
     }
   }
 }

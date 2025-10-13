@@ -1,6 +1,7 @@
 import { CRC } from '../worker/crc'
 import type { OsEvent } from '../share/osEvent'
 import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
+import { Transform, TransformCallback } from 'stream'
 
 /*
 |1 byte frame header (0x5A)|4byte index (MSB) |4byte timestamp (MSB) |1 byte type|2byte type id(MSB)|2byte type status(MSB)|1byte coreID|1byte CRC8|
@@ -10,11 +11,12 @@ const FRAME_HEADER_SIZE = 1
 const DATA_LENGTH = 15
 const FRAME_LENGTH = FRAME_HEADER_SIZE + DATA_LENGTH
 const crc8 = CRC.buildInCrc('CRC8')!
+const EVENT_LENGTH_WATERMARK = 2000
 
 export interface ParseCallbacks {
   onEvent: (osEvent: OsEvent, realTs: number) => void
   onError: (error: string) => void
-  onNeedMoreData: () => void
+  getEventLength: () => number
 }
 
 export class OsTraceParser {
@@ -23,6 +25,8 @@ export class OsTraceParser {
   private index?: number
   private lastTimestamp?: number
   private tsOverflow = 0
+  private closeFlag = false
+  private flushFlag = false
 
   constructor(
     private orti: ORTIFile,
@@ -33,15 +37,22 @@ export class OsTraceParser {
     return ts + this.tsOverflow * 0x1_0000_0000
   }
 
+  async delay(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms))
+  }
+  close() {
+    this.closeFlag = true
+  }
+  flush() {
+    this.flushFlag = true
+  }
+
   async parseBinaryData(data: Buffer) {
     // Append new data to leftover buffer
     this.leftBuffer = Buffer.concat([this.leftBuffer, data])
 
-    let frameCount = 0
-    const BATCH_SIZE = 50 // 每处理50帧释放一次CPU
-
     // Process frames - always search for frame header
-    while (this.leftBuffer.length > 0) {
+    while (this.leftBuffer.length > 0 && !this.closeFlag) {
       // Search for frame header from the beginning of buffer
       const headerIndex = this.leftBuffer.indexOf(FRAME_HEADER)
 
@@ -128,16 +139,9 @@ export class OsTraceParser {
       // Notify via callback
       this.callbacks.onEvent(osEvent, realTs)
 
-      // 每处理BATCH_SIZE个帧后释放CPU
-      frameCount++
-      if (frameCount >= BATCH_SIZE) {
-        frameCount = 0
-        await new Promise((resolve) => setImmediate(resolve))
+      if (this.callbacks.getEventLength() >= EVENT_LENGTH_WATERMARK) {
+        await this.delay(50)
       }
-    }
-
-    if (this.leftBuffer.length < FRAME_LENGTH) {
-      this.callbacks.onNeedMoreData()
     }
   }
 
@@ -151,11 +155,11 @@ export class OsTraceParser {
     // Keep the last line if it's incomplete (no trailing newline)
     this.leftCsvBuffer = data.endsWith('\n') ? '' : lines.pop() || ''
 
-    let lineCount = 0
-    const BATCH_SIZE = 50 // 每处理50行释放一次CPU
-
     // Process complete lines
     for (const line of lines) {
+      if (this.closeFlag) {
+        break
+      }
       if (!line.trim()) continue // Skip empty lines
 
       const [timestamp, type, id, status] = line.split(',')
@@ -182,12 +186,60 @@ export class OsTraceParser {
       // Notify via callback
       this.callbacks.onEvent(osEvent, realTs)
 
-      // 每处理BATCH_SIZE行后释放CPU
-      lineCount++
-      if (lineCount >= BATCH_SIZE) {
-        lineCount = 0
-        await new Promise((resolve) => setImmediate(resolve))
+      if (this.callbacks.getEventLength() >= EVENT_LENGTH_WATERMARK) {
+        await this.delay(50)
       }
     }
+  }
+}
+
+// Binary data parser stream
+export class BinaryParserStream extends Transform {
+  private parser: OsTraceParser
+
+  constructor(orti: ORTIFile, callbacks: ParseCallbacks) {
+    super({ objectMode: true })
+    this.parser = new OsTraceParser(orti, callbacks)
+  }
+
+  _transform(chunk: Buffer, encoding: string, callback: (error?: Error | null) => void) {
+    this.parser
+      .parseBinaryData(chunk)
+      .then(() => {
+        callback()
+      })
+      .catch((error) => {
+        callback(error as Error)
+      })
+  }
+}
+
+// CSV data parser stream
+export class CsvParserStream extends Transform {
+  private parser: OsTraceParser
+
+  constructor(orti: ORTIFile, callbacks: ParseCallbacks) {
+    super({ objectMode: true, encoding: 'utf-8' })
+    this.parser = new OsTraceParser(orti, callbacks)
+  }
+
+  _transform(chunk: string, encoding: string, callback: (error?: Error | null) => void) {
+    this.parser
+      .parseCsvData(chunk)
+      .then(() => {
+        callback()
+      })
+      .catch((error) => {
+        callback(error as Error)
+      })
+  }
+  //abort
+  _destroy(error: Error | null, callback: (error?: Error | null) => void) {
+    this.parser.close()
+    callback(error)
+  }
+  _flush(callback: TransformCallback): void {
+    this.parser.flush()
+    callback()
   }
 }

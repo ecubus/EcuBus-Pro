@@ -833,7 +833,7 @@ export class Layout {
       await nextTick()
       this.layoutInit(id, `#win${id} .uds-draggable`, `#win${id}`, true, layoutType)
       this.clickWin(id)
-      this.event.emit('add', this.data.project.wins[id])
+      this.event.emit('show', this.data.project.wins[id])
     } else {
       const t1 = this.validLayout[title]
 

@@ -7,15 +7,17 @@ import { getTsUs } from '../share/can'
 import path from 'path'
 import workerPath from './worker?modulePath'
 import { OsTraceParser } from './parser'
+import fs from 'fs'
 
 export default class TraceItem {
   private serialPort?: SerialPort
   private worker?: Worker
   private parser?: OsTraceParser
-  private log: OsTraceLOG
+  private log!: OsTraceLOG
   private systemTs: number = 0
   private offsetTs?: number
   private cnt = 0
+  private closeFlag = false
   constructor(
     public orti: ORTIFile,
     projectPath: string
@@ -62,6 +64,10 @@ export default class TraceItem {
         if (!path.isAbsolute(filePath)) {
           filePath = path.join(projectPath, filePath)
         }
+        if (!fs.existsSync(filePath)) {
+          global.sysLog.error(`file ${filePath} not found`)
+          return
+        }
 
         // Create worker to handle file processing
         this.worker = new Worker(workerPath, {
@@ -73,6 +79,9 @@ export default class TraceItem {
 
         // Handle messages from worker
         this.worker.on('message', (message: any) => {
+          if (this.closeFlag) {
+            return
+          }
           switch (message.type) {
             case 'event': {
               // Directly log the event received from worker
@@ -120,6 +129,8 @@ export default class TraceItem {
   }
 
   async close() {
+    this.log.close()
+    this.closeFlag = true
     const p = new Promise<void>((resolve) => {
       if (this.serialPort) {
         this.serialPort.close(() => {
@@ -135,6 +146,5 @@ export default class TraceItem {
       }
     })
     await p
-    this.log.close()
   }
 }

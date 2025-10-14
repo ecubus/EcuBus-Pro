@@ -569,7 +569,7 @@ export default class OsStatistics {
     return result
   }
 
-  // 修复后的processIsrEvent方法（支持ISR嵌套/中断抢占）
+  // 修复后的processIsrEvent方法
   private processIsrEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as IsrStatus
@@ -602,7 +602,7 @@ export default class OsStatistics {
             // Accumulate the partial execution time for the interrupted ISR
             runningIsr.currentExecutionAccumulated += partialExecTime
 
-            // Also add to core execution time immediately since ISR time counts
+            // Add to core execution time (ISR time counts toward core load)
             this.addCoreExecutionTime(event.coreId, partialExecTime)
           }
 
@@ -637,8 +637,9 @@ export default class OsStatistics {
       // Push current ISR to the stack
       isrStack.push(key)
 
-      // Start timing for this ISR
+      // Start timing for this ISR (reset accumulated time for new run)
       isr.executionStartTime = event.ts
+      isr.currentExecutionAccumulated = 0
       isr.runCount++
 
       // Calculate ISR call interval
@@ -658,7 +659,7 @@ export default class OsStatistics {
       }
       isr.lastCallTime = event.ts
     } else if (status === IsrStatus.STOP) {
-      // Record execution time for this ISR
+      // Record the last execution segment for this ISR
       if (isr.executionStartTime !== undefined) {
         const lastSegmentTime = event.ts - isr.executionStartTime
 
@@ -667,14 +668,13 @@ export default class OsStatistics {
           // Add the last segment to the accumulated time
           isr.currentExecutionAccumulated += lastSegmentTime
 
-          // Also count this segment toward core load
+          // Add this segment to core execution time
           this.addCoreExecutionTime(event.coreId, lastSegmentTime)
         }
 
         isr.executionStartTime = undefined
       }
 
-      // Now record the total execution time (accumulated + last segment)
       if (isr.currentExecutionAccumulated > 0) {
         const stats = this.updateRunningStats(
           isr.executionTimeSum,

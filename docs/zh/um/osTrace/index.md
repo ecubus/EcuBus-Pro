@@ -92,7 +92,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 **数据格式：** CSV格式，每行一个事件
 
 > [!NOTE]
-> CSV文件的格式为：timestamp,type,id,status,不能包含表头，时间戳单位为us
+> CSV文件的格式为：timestamp,type,id,status,不能包含表头，时间戳单位为tick
 
 ```csv
 
@@ -102,7 +102,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 ```
 
 **字段说明：**
-- **timestamp**: 时间戳(us)
+- **timestamp**: 时间戳(tick)
 - **type**: 事件类型（0=TASK, 1=ISR, 2=RESOURCE, 3=SERVICE, 4=HOOK, 5=SPINLOCK）
 - **id**: 对象ID
 - **status**: 状态值
@@ -117,13 +117,13 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 Record File用于决定将TRACE数据写入到本地文件中，写入的数据格式为CSV格式。
 
 > [!NOTE]
-> 每行一个事件，格式为：timestamp,type,id,status，时间戳单位为us
+> 每行一个事件，格式为：timestamp,type,id,status，时间戳单位为tick
 
 ![recordFile](record.png)
 
 
 
-## 查看OS的数据和统计值
+## 查看OS的Trace数据和自动生成的系统变量
 
 OS的发生过来的数据可以用过`Trace`窗口进行查看
 
@@ -134,7 +134,27 @@ OS的发生过来的数据可以用过`Trace`窗口进行查看
 
 ![var](var.png)
 
-用户可以根据自己的需求，选择用LINE，Gauge，Data等组件来展示这些变量。
+## 查看OS的统计信息
+
+OS的统计信息可以通过`Others->Os Info->对于的ORTI文件名`查看
+
+![statistics](info.png)
+
+## 自定义查看某个特定变量的信息
+
+用户可以根据自己的需求，选择用**LINE，Gauge，Data**等组件来展示这些变量。
+
+比如：用户想查看5msTask和SystemTick ISR 的实时运行状态，通过点击`Home->Graph->Line`, 然后点击顶部的`Add Variables`。
+![addVar](addLinVar.png)
+
+选择`5msTask->Status`和`SystemTick ISR->Status`，然后点击`Add`，就可以看到5msTask和SystemTick ISR的实时运行状态。
+![addLine](addVar2.png)
+
+效果展示：
+![demo](demo.png)
+
+
+
 
 
 

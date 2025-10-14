@@ -1869,6 +1869,37 @@
           "symbolSize": 6,
           "symbol": "circle"
         }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status",
+        "name": "Status",
+        "color": "#b41839",
+        "yAxis": {
+          "min": 0,
+          "max": 1
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status",
+          "variableType": "system",
+          "variableName": "Status",
+          "variableFullName": "OsTrace.Os_Trace.ISR.SYS_TIMER_CORE0.Status",
+          "variableValueType": "number",
+          "stringRange": [
+            {
+              "name": "Start",
+              "value": 0
+            },
+            {
+              "name": "Stop",
+              "value": 1
+            }
+          ]
+        },
+        "graph": {
+          "id": "graph"
+        }
       }
     },
     "guages": {},
@@ -2384,7 +2415,7 @@
           "x": 383,
           "y": 219,
           "w": 2562,
-          "h": 121
+          "h": 100
         },
         "options": {
           "params": {}
@@ -2413,19 +2444,19 @@
         },
         "hide": false,
         "backupPos": {
-          "x": 503.5,
-          "y": 169.5,
-          "w": 700,
-          "h": 400
+          "x": 0,
+          "y": 0,
+          "w": 2560,
+          "h": 556
         },
         "isMax": false
       },
       "graph": {
         "pos": {
-          "x": 0,
+          "x": 291,
           "y": 556,
-          "w": 2560,
-          "h": 556
+          "w": 2269,
+          "h": 577
         },
         "title": "graph",
         "label": "Line",
@@ -2434,7 +2465,28 @@
           "params": {
             "edit-index": "graph"
           }
-        }
+        },
+        "hide": false
+      },
+      "variable": {
+        "pos": {
+          "x": 980,
+          "y": 356,
+          "w": 600,
+          "h": 400
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
+        "options": {},
+        "hide": true,
+        "backupPos": {
+          "x": 980,
+          "y": 356,
+          "w": 600,
+          "h": 400
+        },
+        "isMax": false
       }
     }
   }

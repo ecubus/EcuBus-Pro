@@ -575,7 +575,16 @@ const isDragging = ref(false)
 const isZoomY = ref(false)
 const inYArea = ref(false)
 let timer
-
+const maxYAxisLength = ref(80)
+watch(maxYAxisLength, (newVal) => {
+  enabledCharts.value.forEach((c) => {
+    chartInstances[c.id].setOption({
+      grid: {
+        left: newVal + 'px'
+      }
+    })
+  })
+})
 // 修改初始化图表实例函数
 const initChart = (chartId: string) => {
   const dom = document.getElementById(`chart-${props.editIndex}-${chartId}`)
@@ -815,7 +824,7 @@ const getChartOption = (
       }
     ],
     grid: {
-      left: '80px', // 增加左边距，为标题留出空间
+      left: maxYAxisLength.value + 'px',
       right: '20px',
       top: isFirst ? '20px' : '10px',
       bottom: isLast ? '45px' : '4px',
@@ -874,9 +883,19 @@ const getChartOption = (
         fontSize: 10,
         show: true,
         formatter: (value: number) => {
+          const getWidth = (label: string) => {
+            const rect = echarts.format.getTextRect(label, '10px')
+            return Math.ceil(rect.width + 40)
+          }
+
           if (chart.bindValue.stringRange) {
             const val = chart.bindValue.stringRange.find((v) => v.value == value)?.name
             if (val) {
+              const w = getWidth(val)
+
+              if (w > maxYAxisLength.value) {
+                maxYAxisLength.value = w
+              }
               return val
             }
           }
@@ -886,13 +905,15 @@ const getChartOption = (
           if (val.length > 6) {
             val = value.toExponential()
           }
-          if (val.length > 6) {
-            return ''
-          }
           if (val.length > 0) {
-            return val + (chart.yAxis?.unit ?? '')
+            val = val + (chart.yAxis?.unit ?? '')
           }
-          return ''
+          const w = getWidth(val)
+
+          if (w > maxYAxisLength.value) {
+            maxYAxisLength.value = w
+          }
+          return val
         }
       },
       name: chart.name,
@@ -995,6 +1016,11 @@ watch(
             top: isFirst ? '20px' : '10px',
             bottom: isLast ? '45px' : '4px'
           },
+          xAxis: {
+            axisLabel: {
+              show: isLast
+            }
+          },
           dataZoom: [
             {
               show: isLast,
@@ -1089,6 +1115,18 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]
   window.logBus.off(data.id, dataUpdate)
+
+  //update 底部x轴刻度显示, 只有last 才显示
+  enabledCharts.value.forEach((c, dd) => {
+    const chart = chartInstances[c.id]
+    chart.setOption({
+      xAxis: {
+        axisLabel: {
+          show: dd === enabledCharts.value.length - 1
+        }
+      }
+    })
+  })
 }
 </script>
 <style scoped>

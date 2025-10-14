@@ -60,6 +60,27 @@ export class KVASER_CAN extends CanBase {
   >()
 
   rejectMap = new Map<number, Function>()
+  startPeriodSend(message: CanMessage, period: number, duration?: number): string {
+    return KV.StartPeriodSend(
+      this.id,
+      {
+        id: message.id,
+        extendId: message.msgType.idType == CAN_ID_TYPE.EXTENDED,
+        remoteFrame: message.msgType.remote,
+        brs: message.msgType.brs,
+        canfd: message.msgType.canfd,
+        data: [...message.data]
+      },
+      period / 1000,
+      duration || 0
+    )
+  }
+  stopPeriodSend(taskId: string): void {
+    KV.StopPeriodSend(taskId)
+  }
+  changePeriodData(taskId: string, data: Buffer): void {
+    KV.ChangeData(taskId, [...data])
+  }
   constructor(info: CanBaseInfo) {
     super()
     this.info = info

@@ -59,8 +59,29 @@ describe('kvaser test', () => {
     const r = await Promise.all(list)
     console.log(r)
   })
+  test('period send', async () => {
+    const taskId = client.startPeriodSend(
+      {
+        id: 0x100,
+        msgType: { idType: CAN_ID_TYPE.STANDARD, brs: false, canfd: false, remote: false },
+        data: Buffer.alloc(8, 0),
+        dir: 'OUT'
+      },
+      100
+    )
+    const delay = (ms: number) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true)
+        }, ms)
+      })
+    await delay(1000)
+    client.changePeriodData(taskId, Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]))
+    await delay(1000)
+
+    client.stopPeriodSend(taskId)
+  })
   afterAll(() => {
     client.close()
   })
 })
-

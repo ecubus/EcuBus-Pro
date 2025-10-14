@@ -1,6 +1,6 @@
 #include "canlib.h"
 #include "napi.h"
-#include "../../timer/timer.hpp"
+#include "timer.hpp"
 #include <chrono>
 #include <thread>
 #include <windows.h>
@@ -13,12 +13,32 @@ public:
   KvaserBus(CanHandle handle) : handle_(handle) {}
   
   void send(const CanMessage& msg) override {
+    // Build flags based on message properties
+    unsigned int flag = 0;
+    
+    if (msg.extendId) {
+      flag |= canMSG_EXT;  // 0x0004 - Extended (29-bit) identifier
+    } else {
+      flag |= canMSG_STD;  // 0x0002 - Standard (11-bit) identifier
+    }
+    
+    if (msg.canfd) {
+      flag |= canFDMSG_FDF;  // 0x010000 - CAN FD message
+      if (msg.brs) {
+        flag |= canFDMSG_BRS;  // 0x020000 - Bit rate switch
+      }
+    }
+    
+    if (msg.remoteFrame) {
+      flag |= canMSG_RTR;  // 0x0001 - Remote request
+    }
+    
     canStatus status = canWrite(
       handle_,
       msg.arbitration_id,
       const_cast<uint8_t*>(msg.data.data()),
       msg.data.size(),
-      0  // flags
+      flag
     );
     
     if (status != canOK) {
@@ -49,7 +69,6 @@ std::map<std::string, TsfnContext *> tsfnContextMap;
 // Map to store cyclic send tasks by ID
 std::map<std::string, ThreadBasedCyclicSendTask*> cyclicTaskMap;
 std::map<std::string, KvaserBus*> busMap;
-std::map<std::string, std::mutex*> lockMap;
 
 // Counter for generating unique task IDs
 static std::atomic<uint64_t> taskIdCounter{0};
@@ -180,7 +199,10 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
   // Parse single message
   CanMessage msg;
   msg.arbitration_id = msgObj.Get("id").As<Napi::Number>().Uint32Value();
-  msg.channel = msgObj.Has("channel") ? msgObj.Get("channel").As<Napi::Number>().Int32Value() : 0;
+  msg.extendId = msgObj.Has("extendId") ? msgObj.Get("extendId").As<Napi::Boolean>().Value() : false;
+  msg.remoteFrame = msgObj.Has("remoteFrame") ? msgObj.Get("remoteFrame").As<Napi::Boolean>().Value() : false;
+  msg.brs = msgObj.Has("brs") ? msgObj.Get("brs").As<Napi::Boolean>().Value() : false;
+  msg.canfd = msgObj.Has("canfd") ? msgObj.Get("canfd").As<Napi::Boolean>().Value() : false;
   
   Napi::Array dataArray = msgObj.Get("data").As<Napi::Array>();
   for (uint32_t j = 0; j < dataArray.Length(); j++) {
@@ -192,18 +214,15 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
   std::string taskId = std::to_string(taskNum);
   
   KvaserBus* bus = nullptr;
-  std::mutex* lock = nullptr;
   ThreadBasedCyclicSendTask* task = nullptr;
   
   try {
-    // Create bus and lock for this task
+    // Create bus for this task
     bus = new KvaserBus(context->handle);
-    lock = new std::mutex();
     
     // Create new cyclic task with single message
     task = new ThreadBasedCyclicSendTask(
       bus,
-      lock,
       msg,  // Pass single message directly
       period,
       duration,
@@ -213,21 +232,16 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
     
     // Store in maps only after successful creation
     busMap[taskId] = bus;
-    lockMap[taskId] = lock;
     cyclicTaskMap[taskId] = task;
     
     // Return task ID
     return Napi::String::New(env, taskId);
     
   } catch (const std::exception& e) {
-    // Clean up resources on failure (correct order: task first, then lock, then bus)
+    // Clean up resources on failure (correct order: task first, then bus)
     if (task) {
       delete task;
       task = nullptr;
-    }
-    if (lock) {
-      delete lock;
-      lock = nullptr;
     }
     if (bus) {
       delete bus;
@@ -259,17 +273,12 @@ void StopPeriodSend(const Napi::CallbackInfo &info) {
   // Find all resources first
   auto taskIt = cyclicTaskMap.find(taskId);
   auto busIt = busMap.find(taskId);
-  auto lockIt = lockMap.find(taskId);
   
-  // Delete in correct order: task first (may use bus/lock in destructor), then lock, then bus
+  // Stop and delete in correct order: stop task first, then delete task (may use bus in destructor), then delete bus
   if (taskIt != cyclicTaskMap.end()) {
+    taskIt->second->stop(); // 显式调用 stop() 以立刻停止
     delete taskIt->second;
     cyclicTaskMap.erase(taskIt);
-  }
-  
-  if (lockIt != lockMap.end()) {
-    delete lockIt->second;
-    lockMap.erase(lockIt);
   }
   
   if (busIt != busMap.end()) {

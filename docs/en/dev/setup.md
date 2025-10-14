@@ -29,19 +29,45 @@ cd EcuBus-Pro
 npm install
 ```
 
-`build native module`
+## Build Steps
+
+### Build Documentation
+
+```bash
+npm run docs:build
+```
+
+### Build Native Module
 
 ```bash
 npm run native
 ```
 
-`run`
+### Build Worker
+
+```bash
+npm run worker
+```
+
+### Build API
+
+```bash
+npm run api
+```
+
+### Build CLI (Windows)
+
+```bash
+npm run cli:build:win
+```
+
+### Run Development
 
 ```bash
 npm run dev
 ```
 
-`build`
+### Build Application (Windows)
 
 ```bash
 npm run build:win

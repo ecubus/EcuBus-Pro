@@ -21,7 +21,7 @@ OSEK OS追踪是通过外部接口实时获取OSEK OS的运行状态，并将其
 ### TASK/ISR
 
 1. 设置Name
-2. 设置CPU真正的运行频率（取悦于你的timestamp格式，如果你的timestamp已经是us，那么CPU频率可以是1）
+2. 设置CPU真正的运行频率（取决于你的timestamp格式，如果你的timestamp已经是us，那么CPU频率可以是1）
 
 ![task](task.png)
 

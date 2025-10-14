@@ -39,6 +39,7 @@ export class KVASER_CAN extends CanBase {
   id: string
   log: CanLOG
   timeOffset = 0
+  periodIds: string[] = []
   private readAbort = new AbortController()
   pendingBaseCmds = new Map<
     string,
@@ -61,7 +62,8 @@ export class KVASER_CAN extends CanBase {
 
   rejectMap = new Map<number, Function>()
   startPeriodSend(message: CanMessage, period: number, duration?: number): string {
-    return KV.StartPeriodSend(
+    console.log('startPeriodSend', this.id, message, period, duration)
+    const taskId = KV.StartPeriodSend(
       this.id,
       {
         id: message.id,
@@ -74,8 +76,12 @@ export class KVASER_CAN extends CanBase {
       period / 1000,
       duration || 0
     )
+    this.periodIds.push(taskId)
+
+    return taskId
   }
   stopPeriodSend(taskId: string): void {
+    this.periodIds = this.periodIds.filter((item) => item != taskId)
     KV.StopPeriodSend(taskId)
   }
   changePeriodData(taskId: string, data: Buffer): void {
@@ -397,6 +403,10 @@ export class KVASER_CAN extends CanBase {
       KV.FreeTSFN(this.id)
       this.event.emit('close', msg)
       this._close()
+      for (const id of this.periodIds) {
+        KV.StopPeriodSend(id)
+      }
+      this.periodIds = []
     }
   }
   writeBase(

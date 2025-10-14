@@ -363,9 +363,9 @@ export class CAN_SOCKET {
     this.recvId = this.inst.getReadBaseId(id, msgType)
     this.cb = this.recvHandle.bind(this)
     this.inst.event.on(this.recvId, this.cb)
-    this.startPeriodSend = inst.startPeriodSend
-    this.stopPeriodSend = inst.stopPeriodSend
-    this.changePeriodData = inst.changePeriodData
+    this.startPeriodSend = inst.startPeriodSend?.bind(inst)
+    this.stopPeriodSend = inst.stopPeriodSend?.bind(inst)
+    this.changePeriodData = inst.changePeriodData?.bind(inst)
   }
   getSystemTs() {
     const hrTime = process.hrtime()

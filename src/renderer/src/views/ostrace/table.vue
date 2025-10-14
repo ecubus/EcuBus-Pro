@@ -171,7 +171,6 @@ const getColumns = (type: CategoryType) => {
         { field: 'name', title: 'Core Name', minWidth: 150 },
         { field: 'coreId', title: 'Core ID', width: 100 },
         { field: 'loadPercent', title: 'Load (%)', width: 120 },
-        { field: 'executionTime', title: 'Execution Time (ms)', width: 160 },
         { field: 'totalTime', title: 'Total Time (ms)', width: 150 }
       ]
     case 'task':
@@ -394,7 +393,6 @@ function dataUpdate({
   // 映射metric名称到字段名
   const metricMap: Record<string, string> = {
     LoadPercent: 'loadPercent',
-    ExecutionTime: 'executionTime',
     TotalTime: 'totalTime',
     Status: 'status',
     ActiveCount: 'activeCount',
@@ -491,7 +489,7 @@ const initializeData = () => {
         totalTime: '--'
       }
 
-      const keys = ['LoadPercent', 'ExecutionTime', 'TotalTime']
+      const keys = ['LoadPercent', 'TotalTime']
       keys.forEach((xkey) => {
         bindKeys.push(`${key}.${xkey}`)
       })

@@ -1,5 +1,11 @@
 import { OsEvent, TaskType, TaskStatus, IsrStatus, ResourceStatus } from 'nodeCan/osEvent'
 
+// 时间窗口配置 - 记录每个时间点的执行时间片段
+interface TimeWindow {
+  timestamp: number // 时间戳
+  executionTime: number // 该时间点的执行时间
+}
+
 // Task internal state (用于事件处理)
 interface TaskState {
   id: number
@@ -105,8 +111,9 @@ export default class OsStatistics {
   private startTime?: number
   private endTime?: number
 
-  // 每个核心的执行时间统计
-  private coreExecutionTime: Map<number, number> = new Map()
+  // 滑动时间窗口 - 用于负载计算
+  private readonly WINDOW_DURATION: number // 窗口时长（CPU cycles）
+  private coreTimeWindows: Map<number, TimeWindow[]> = new Map()
 
   private idleTaskIds: Set<string> = new Set()
 
@@ -117,8 +124,11 @@ export default class OsStatistics {
 
   constructor(
     private id: string,
-    private cpuFreq: number
+    private cpuFreq: number,
+    windowDurationMs: number = 5000
   ) {
+    // 将窗口时长转换为CPU cycles
+    this.WINDOW_DURATION = windowDurationMs * 1000 * cpuFreq
     this.reset()
   }
 
@@ -131,7 +141,8 @@ export default class OsStatistics {
 
     this.startTime = undefined
     this.endTime = undefined
-    this.coreExecutionTime.clear()
+
+    this.coreTimeWindows.clear()
     this.idleTaskIds.clear()
     this.runningTaskOnCore.clear()
     this.runningIsrStackOnCore.clear()
@@ -240,7 +251,7 @@ export default class OsStatistics {
     }
     if (needUpdateLoad) {
       // 更新所有核心负载
-      result.push(...this.updateCoreLoad(event.coreId))
+      result.push(...this.updateCoreLoad(event.coreId, event.ts))
     }
     return result
   }
@@ -258,9 +269,59 @@ export default class OsStatistics {
     return `${this.id}.${map[type]}.${type}_${id}_${coreId}`
   }
 
-  private addCoreExecutionTime(coreId: number, execTime: number): void {
-    const current = this.coreExecutionTime.get(coreId) || 0
-    this.coreExecutionTime.set(coreId, current + execTime)
+  // 修改：添加执行时间到滑动窗口
+  private addCoreExecutionTime(coreId: number, execTime: number, timestamp: number): void {
+    // 更新累计执行时间（保留用于其他统计）
+
+    // 添加到时间窗口
+    if (!this.coreTimeWindows.has(coreId)) {
+      this.coreTimeWindows.set(coreId, [])
+    }
+
+    const windows = this.coreTimeWindows.get(coreId)!
+
+    // 创建新窗口记录
+    windows.push({
+      timestamp: timestamp,
+      executionTime: execTime
+    })
+
+    // 清理过期窗口（保留窗口时长内的数据）
+    const cutoffTime = timestamp - this.WINDOW_DURATION
+    while (windows.length > 0 && windows[0].timestamp < cutoffTime) {
+      windows.shift()
+    }
+  }
+
+  // 计算滑动窗口内的负载
+  private calculateWindowLoad(coreId: number, currentTime: number): number {
+    const windows = this.coreTimeWindows.get(coreId)
+    if (!windows || windows.length === 0) {
+      return 0
+    }
+
+    const cutoffTime = currentTime - this.WINDOW_DURATION
+    let totalExecTime = 0
+    let earliestTimestamp = currentTime
+
+    // 汇总窗口内的执行时间，并找到最早的时间戳
+    for (const window of windows) {
+      if (window.timestamp >= cutoffTime) {
+        totalExecTime += window.executionTime
+        earliestTimestamp = Math.min(earliestTimestamp, window.timestamp)
+      }
+    }
+
+    // 计算实际的时间窗口大小
+    // 在刚启动时，实际窗口可能小于 WINDOW_DURATION
+    const actualWindowDuration = currentTime - earliestTimestamp
+
+    // 使用实际窗口大小作为分母，避免除以 0
+
+    const loadPercent = (totalExecTime / actualWindowDuration) * 100
+
+    // 限制在合理范围内（0-100%）
+    return Math.min(Math.max(loadPercent, 0), 100)
   }
 
   // 修复后的processTaskEvent方法中的关键部分
@@ -356,7 +417,7 @@ export default class OsStatistics {
             task.currentExecutionAccumulated += partialExecTime
 
             if (!this.idleTaskIds.has(key)) {
-              this.addCoreExecutionTime(event.coreId, partialExecTime)
+              this.addCoreExecutionTime(event.coreId, partialExecTime, event.ts)
             }
           }
 
@@ -377,7 +438,7 @@ export default class OsStatistics {
             task.currentExecutionAccumulated += partialExecTime
 
             if (!this.idleTaskIds.has(key)) {
-              this.addCoreExecutionTime(event.coreId, partialExecTime)
+              this.addCoreExecutionTime(event.coreId, partialExecTime, event.ts)
             }
           }
 
@@ -405,7 +466,7 @@ export default class OsStatistics {
             task.currentExecutionAccumulated += partialExecTime
 
             if (!this.idleTaskIds.has(key)) {
-              this.addCoreExecutionTime(event.coreId, partialExecTime)
+              this.addCoreExecutionTime(event.coreId, partialExecTime, event.ts)
             }
           }
 
@@ -603,7 +664,7 @@ export default class OsStatistics {
             runningIsr.currentExecutionAccumulated += partialExecTime
 
             // Add to core execution time (ISR time counts toward core load)
-            this.addCoreExecutionTime(event.coreId, partialExecTime)
+            this.addCoreExecutionTime(event.coreId, partialExecTime, event.ts)
           }
 
           // Clear the ISR's execution start time (indicates ISR is paused)
@@ -624,7 +685,7 @@ export default class OsStatistics {
 
               // Add to core execution time (excluding idle tasks)
               if (!this.idleTaskIds.has(runningTaskKey)) {
-                this.addCoreExecutionTime(event.coreId, partialExecTime)
+                this.addCoreExecutionTime(event.coreId, partialExecTime, event.ts)
               }
             }
 
@@ -669,7 +730,7 @@ export default class OsStatistics {
           isr.currentExecutionAccumulated += lastSegmentTime
 
           // Add this segment to core execution time
-          this.addCoreExecutionTime(event.coreId, lastSegmentTime)
+          this.addCoreExecutionTime(event.coreId, lastSegmentTime, event.ts)
         }
 
         isr.executionStartTime = undefined
@@ -900,28 +961,26 @@ export default class OsStatistics {
     return result
   }
 
-  private updateCoreLoad(coreId: number): VarResult[] {
+  // 修改：使用滑动窗口计算负载
+  private updateCoreLoad(coreId: number, currentTime: number): VarResult[] {
     const result: VarResult[] = []
-    const totalTime = this.endTime && this.startTime ? this.endTime - this.startTime : 0
 
-    if (totalTime <= 0) return result
-
-    // 更新每个核心的负载统计（不包括空闲任务的执行时间）
-    const execTime = this.coreExecutionTime.get(coreId) || 0
-    const loadPercent = (execTime / totalTime) * 100
+    // 使用滑动窗口计算当前负载
+    const loadPercent = this.calculateWindowLoad(coreId, currentTime)
 
     result.push({
       id: `OsTrace.${this.id}.Core${coreId}.LoadPercent`,
-      value: { value: loadPercent, rawValue: loadPercent }
+      value: { value: Number(loadPercent.toFixed(2)), rawValue: loadPercent }
     })
-    result.push({
-      id: `OsTrace.${this.id}.Core${coreId}.ExecutionTime`,
-      value: { value: execTime / this.cpuFreq / 1000, rawValue: execTime }
-    })
+
+    // 保留总体统计（可选）
+    const totalTime = this.endTime && this.startTime ? this.endTime - this.startTime : 0
+
     result.push({
       id: `OsTrace.${this.id}.Core${coreId}.TotalTime`,
       value: { value: totalTime / this.cpuFreq / 1000, rawValue: totalTime }
     })
+
     return result
   }
 

@@ -583,12 +583,6 @@ export function getAllSysVar(
           unit: '%',
           desc: 'Core负载百分比'
         },
-        ExecutionTime: {
-          type: 'number',
-          min: 0,
-          unit: 'ms',
-          desc: 'Core执行时间'
-        },
         TotalTime: {
           type: 'number',
           min: 0,

@@ -33,7 +33,7 @@ public:
       flag |= canMSG_RTR;  // 0x0001 - Remote request
     }
     
-    canStatus status = canWrite(
+    canWrite(
       handle_,
       msg.arbitration_id,
       const_cast<uint8_t*>(msg.data.data()),
@@ -41,11 +41,7 @@ public:
       flag
     );
     
-    if (status != canOK) {
-      char errorText[256];
-      canGetErrorText(status, errorText, sizeof(errorText));
-      throw std::runtime_error(std::string("canWrite failed: ") + errorText);
-    }
+   
   }
   
 private:

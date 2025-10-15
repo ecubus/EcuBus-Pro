@@ -89,6 +89,11 @@ public:
         if (thread_.joinable())
             thread_.join();
         thread_ = std::thread(&ThreadBasedCyclicSendTask::run, this);
+        
+        // 设置线程为高优先级，确保精确的周期性发送
+#ifdef _WIN32
+        SetThreadPriority(thread_.native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
+#endif
     }
 
     // 停止周期任务

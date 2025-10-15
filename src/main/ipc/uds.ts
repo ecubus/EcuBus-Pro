@@ -1126,6 +1126,8 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     if (socket.startPeriodSend) {
       const initMsg: CanMessage = {
         id: parseInt(ia.id, 16),
+        name: ia.name,
+        database: ia.database,
         msgType: {
           idType: ia.type.includes('e') ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
           brs: ia.brs || false,

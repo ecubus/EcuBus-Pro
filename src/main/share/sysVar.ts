@@ -383,6 +383,12 @@ export function getAllSysVar(
         type: 'number',
         min: 0,
         desc: 'Hook最后状态参数'
+      },
+      LastTriggerTime: {
+        type: 'number',
+        min: 0,
+        unit: 'us',
+        desc: 'Hook最后一次触发相对时间'
       }
     }
     list[`OsTrace.${item.id}`] = {

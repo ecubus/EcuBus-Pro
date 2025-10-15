@@ -91,6 +91,7 @@ interface HookState {
   coreId: number
   count: number
   lastStatus: number
+  lastTriggerTime?: number
 }
 
 interface VarResult {
@@ -943,6 +944,12 @@ export default class OsStatistics {
     const hook = this.hooks.get(key)!
     hook.count++
     hook.lastStatus = event.status
+    // record last trigger time relative to startTime (ms)
+    if (!this.startTime) {
+      this.startTime = event.ts
+    }
+    const delta = event.ts - this.startTime
+    hook.lastTriggerTime = delta
 
     // Return hook status data
     result.push({
@@ -952,6 +959,10 @@ export default class OsStatistics {
     result.push({
       id: `OsTrace.${key}.LastStatus`,
       value: { value: hook.lastStatus, rawValue: hook.lastStatus }
+    })
+    result.push({
+      id: `OsTrace.${key}.LastTriggerTime`,
+      value: { value: delta / this.cpuFreq, rawValue: delta }
     })
 
     return result

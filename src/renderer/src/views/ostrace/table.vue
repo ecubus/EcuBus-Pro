@@ -123,6 +123,7 @@ type HookTableRow = {
   name: string
   count: number
   lastStatus: number | string
+  lastTriggerTime?: number | string
 }
 
 type CpuTableRow = {
@@ -223,7 +224,8 @@ const getColumns = (type: CategoryType) => {
       return [
         { field: 'name', title: 'Name', minWidth: 150 },
         { field: 'count', title: 'Count', width: 120 },
-        { field: 'lastStatus', title: 'Last Status', width: 120 }
+        { field: 'lastStatus', title: 'Last Status', width: 120 },
+        { field: 'lastTriggerTime', title: 'Last Trigger Time (μs)', width: 180 }
       ]
     default:
       return []
@@ -379,7 +381,8 @@ function dataUpdate({
       case 'hook':
         Object.assign(row, {
           count: 0,
-          lastStatus: '--'
+          lastStatus: '--',
+          lastTriggerTime: '--'
         })
         break
     }
@@ -418,7 +421,8 @@ function dataUpdate({
     AcquireCount: 'acquireCount',
     ReleaseCount: 'releaseCount',
     Count: 'count',
-    LastStatus: 'lastStatus'
+    LastStatus: 'lastStatus',
+    LastTriggerTime: 'lastTriggerTime'
   }
 
   const fieldName = metricMap[metric!]
@@ -646,10 +650,11 @@ const initializeData = () => {
           id: key,
           name: hookConfig.name,
           count: 0,
-          lastStatus: '--'
+          lastStatus: '--',
+          lastTriggerTime: '--'
         }
         hookCategory.tableData.push(row)
-        const keys = ['Count', 'LastStatus']
+        const keys = ['Count', 'LastStatus', 'LastTriggerTime']
         keys.forEach((xkey) => {
           bindKeys.push(`${key}.${xkey}`)
         })

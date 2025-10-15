@@ -23,7 +23,7 @@ export class OsTraceParser {
   private leftBuffer: Buffer = Buffer.alloc(0)
   private leftCsvBuffer: string = ''
   private index?: number
-  private lastTimestamp?: number
+  private lastRawTimestamp?: number
   private tsOverflow = 0
   private closeFlag = false
   private flushFlag = false
@@ -80,7 +80,6 @@ export class OsTraceParser {
       // Parse the block
       const currentIndex32 = block.readUInt32BE(0)
       const rawTimestamp32 = block.readUInt32BE(4)
-      const timestamp32 = rawTimestamp32 / this.orti.cpuFreq
       const type = block.readUInt8(8)
       const typeId = block.readUInt16BE(9)
       const typeStatus = block.readUInt16BE(11)
@@ -117,14 +116,15 @@ export class OsTraceParser {
         this.index = currentIndex32
       }
 
-      if (this.lastTimestamp != undefined && timestamp32 < this.lastTimestamp) {
+      // Detect timestamp overflow using raw timestamp (not divided by frequency)
+      if (this.lastRawTimestamp != undefined && rawTimestamp32 < this.lastRawTimestamp) {
         this.tsOverflow++
       }
-      this.lastTimestamp = timestamp32
+      this.lastRawTimestamp = rawTimestamp32
 
-      // Convert to OsEvent using unified structure
-      const realTs = this.getRealTs(timestamp32)
+      // Convert to OsEvent using unified structure - use raw timestamp with overflow
       const rawTs = this.getRealTs(rawTimestamp32)
+      const realTs = rawTs / this.orti.cpuFreq
       const osEvent: OsEvent = {
         index: currentIndex32,
         database: this.orti.id,

@@ -300,16 +300,12 @@ export default class OsStatistics {
       return 0
     }
 
-    const cutoffTime = currentTime - this.WINDOW_DURATION
     let totalExecTime = 0
     let earliestTimestamp = currentTime
 
-    // 汇总窗口内的执行时间，并找到最早的时间戳
     for (const window of windows) {
-      if (window.timestamp >= cutoffTime) {
-        totalExecTime += window.executionTime
-        earliestTimestamp = Math.min(earliestTimestamp, window.timestamp)
-      }
+      totalExecTime += window.executionTime
+      earliestTimestamp = Math.min(earliestTimestamp, window.timestamp)
     }
 
     // 计算实际的时间窗口大小

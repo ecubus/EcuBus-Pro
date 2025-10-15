@@ -328,6 +328,10 @@ export abstract class CanBase {
       recvCnt: this.busLoadingStats.recvFrames
     }
   }
+
+  startPeriodSend?(message: CanMessage, period: number, duration?: number): string
+  stopPeriodSend?(taskId: string): void
+  changePeriodData?(taskId: string, data: Buffer): void
 }
 
 export class CAN_SOCKET {
@@ -340,6 +344,9 @@ export class CAN_SOCKET {
   recvBuffer: ({ data: Buffer; ts: number } | CanError)[] = []
   recvTimer: NodeJS.Timeout | null = null
   cb: any
+  startPeriodSend?: (message: CanMessage, period: number, duration?: number) => string
+  stopPeriodSend?: (taskId: string) => void
+  changePeriodData?: (taskId: string, data: Buffer) => void
   pendingRecv: {
     resolve: (value: { data: Buffer; ts: number }) => void
     reject: (reason: CanError) => void
@@ -356,6 +363,9 @@ export class CAN_SOCKET {
     this.recvId = this.inst.getReadBaseId(id, msgType)
     this.cb = this.recvHandle.bind(this)
     this.inst.event.on(this.recvId, this.cb)
+    this.startPeriodSend = inst.startPeriodSend?.bind(inst)
+    this.stopPeriodSend = inst.stopPeriodSend?.bind(inst)
+    this.changePeriodData = inst.changePeriodData?.bind(inst)
   }
   getSystemTs() {
     const hrTime = process.hrtime()

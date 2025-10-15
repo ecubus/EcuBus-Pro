@@ -20,7 +20,14 @@ import {
   refreshProject,
   UDSTesterMain
 } from '../docan/uds'
-import { CAN_ID_TYPE, CanInterAction, formatError, getTsUs, swapAddr } from '../share/can'
+import {
+  CAN_ID_TYPE,
+  CanInterAction,
+  CanMessage,
+  formatError,
+  getTsUs,
+  swapAddr
+} from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
@@ -690,7 +697,8 @@ interface timerType {
   socket: CAN_SOCKET
   period: number
   ia: CanInterAction
-  timer: NodeJS.Timeout
+  timer?: NodeJS.Timeout
+  taskId?: string
 }
 const timerMap = new Map<string, timerType>()
 
@@ -704,7 +712,12 @@ export function globalStop(emit = false) {
   udsTesterMap.clear()
 
   timerMap.forEach((value) => {
-    clearTimeout(value.timer)
+    if (value.timer) {
+      clearTimeout(value.timer)
+    }
+    if (value.taskId) {
+      value.socket.stopPeriodSend?.(value.taskId)
+    }
     value.socket.close()
   })
   timerMap.clear()
@@ -1007,9 +1020,9 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 //     return info
 // })
 
-function send(id: string) {
+function send(id: string, send: boolean): Buffer | null {
   const item = timerMap.get(id)
-  if (!item) return
+  if (!item) return null
   let db: DBC | undefined
   let message: Message | undefined
   if (item.ia.database) {
@@ -1020,19 +1033,28 @@ function send(id: string) {
   }
   if (message) {
     const data = getMessageData(message)
-    item.socket.write(data).catch(() => {
-      null
-    })
+    if (send) {
+      item.socket.write(data).catch(() => {
+        null
+      })
+    } else {
+      return data
+    }
   } else {
     const len = getLenByDlc(item.ia.dlc, item.ia.type.includes('fd'))
     const b = Buffer.alloc(len)
     for (const [index, d] of item.ia.data.entries()) {
       b[index] = parseInt(d, 16)
     }
-    item.socket.write(b).catch(() => {
-      null
-    })
+    if (send) {
+      item.socket.write(b).catch(() => {
+        null
+      })
+    } else {
+      return b
+    }
   }
+  return null
 }
 ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
   const dbName = arg[0] as string
@@ -1091,18 +1113,44 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     //if timer exist, clear it
     const timer = timerMap.get(id)
     if (timer) {
-      clearTimeout(timer.timer)
+      if (timer.timer) {
+        clearTimeout(timer.timer)
+      }
+      if (timer.taskId) {
+        timer.socket.stopPeriodSend?.(timer.taskId)
+      }
       timer.socket.close()
     }
-    const newTimer = setTimeout(() => {
-      send(id)
-    }, ia.trigger.period || 10)
+    let taskId: string | undefined
+    let newTimer: NodeJS.Timeout | undefined
+    if (socket.startPeriodSend) {
+      const initMsg: CanMessage = {
+        id: parseInt(ia.id, 16),
+        name: ia.name,
+        database: ia.database,
+        msgType: {
+          idType: ia.type.includes('e') ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+          brs: ia.brs || false,
+          canfd: fd,
+          remote: ia.remote || false
+        },
+        data: send(id, false) || Buffer.alloc(getLenByDlc(ia.dlc, fd)),
+        dir: 'OUT'
+      }
+      taskId = socket.startPeriodSend(initMsg, ia.trigger.period || 10)
+    } else {
+      newTimer = setInterval(() => {
+        send(id, true)
+      }, ia.trigger.period || 10)
+    }
+
     //create new timer
 
     timerMap.set(id, {
       socket: socket,
       period: ia.trigger.period || 10,
       timer: newTimer,
+      taskId: taskId,
       ia: ia
     })
   } else {
@@ -1113,7 +1161,12 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
   const id = arg[0] as string
   const timer = timerMap.get(id)
   if (timer) {
-    clearTimeout(timer.timer)
+    if (timer.timer) {
+      clearTimeout(timer.timer)
+    }
+    if (timer.taskId) {
+      timer.socket.stopPeriodSend?.(timer.taskId)
+    }
     timer.socket.close()
     timerMap.delete(id)
   }

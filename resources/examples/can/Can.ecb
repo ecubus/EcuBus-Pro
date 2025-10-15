@@ -1,23 +1,23 @@
 {
   "data": {
     "devices": {
-      "30dc0575-1555-40e4-802a-150e76338671": {
+      "095b8b1b-4a1c-4522-aaf6-0a592d385618": {
         "type": "can",
         "canDevice": {
-          "id": "30dc0575-1555-40e4-802a-150e76338671",
-          "name": "SIMULATE_0",
+          "id": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
+          "name": "KVASER_0",
           "handle": 0,
-          "vendor": "simulate",
+          "vendor": "kvaser",
           "canfd": false,
-          "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+          "database": "",
           "bitrate": {
             "sjw": 1,
             "timeSeg1": 13,
             "timeSeg2": 2,
-            "preScaler": 10,
+            "preScaler": 2,
             "freq": 500000,
-            "clock": "80",
-            "_X_ROW_KEY": "row_71"
+            "clock": "16",
+            "_X_ROW_KEY": "row_68"
           }
         }
       }
@@ -28,18 +28,18 @@
         "type": "can",
         "id": "a6773bbd-db04-405f-9a23-af32b1c12e70",
         "devices": [
-          "30dc0575-1555-40e4-802a-150e76338671"
+          "095b8b1b-4a1c-4522-aaf6-0a592d385618"
         ],
         "action": [
           {
             "trigger": {
               "type": "periodic",
-              "period": 100
+              "period": 10
             },
             "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
             "name": "ID142VCLEFT_liftgateStatus",
             "id": "142",
-            "channel": "30dc0575-1555-40e4-802a-150e76338671",
+            "channel": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
             "type": "can",
             "dlc": 8,
             "data": [
@@ -52,7 +52,8 @@
               "0",
               "80"
             ],
-            "_X_ROW_KEY": "row_2971"
+            "_X_ROW_KEY": "row_2971",
+            "uuid": "row_53"
           },
           {
             "trigger": {
@@ -61,11 +62,12 @@
             },
             "name": "",
             "id": "1",
-            "channel": "30dc0575-1555-40e4-802a-150e76338671",
+            "channel": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
             "type": "can",
             "dlc": 8,
             "data": [],
-            "_X_ROW_KEY": "row_60"
+            "_X_ROW_KEY": "row_60",
+            "uuid": "row_54"
           }
         ]
       }
@@ -78,7 +80,7 @@
         "type": "can",
         "id": "a033fc39-90a2-4982-8f59-cbd28c10b638",
         "channel": [
-          "30dc0575-1555-40e4-802a-150e76338671"
+          "095b8b1b-4a1c-4522-aaf6-0a592d385618"
         ],
         "workNode": "",
         "script": "node.ts"
@@ -68550,7 +68552,8 @@
           "version": "",
           "id": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13"
         }
-      }
+      },
+      "orti": {}
     },
     "graphs": {
       "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest": {
@@ -68724,9 +68727,7 @@
         "type": "file",
         "format": "asc",
         "path": "log.txt",
-        "channel": [
-          "30dc0575-1555-40e4-802a-150e76338671"
-        ],
+        "channel": [],
         "method": [
           "canBase",
           "canError"
@@ -68740,9 +68741,7 @@
         "filter": [
           "canBase"
         ],
-        "filterDevice": [
-          "SIMULATE_0"
-        ],
+        "filterDevice": [],
         "filterId": []
       }
     }
@@ -68752,9 +68751,9 @@
       "message": {
         "pos": {
           "x": 383,
-          "y": 191,
-          "w": 1280,
-          "h": 200
+          "y": 0,
+          "w": 2562,
+          "h": 313
         },
         "options": {
           "params": {}
@@ -68779,8 +68778,8 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 1037.5,
-          "y": 5,
+          "x": 1098,
+          "y": 167,
           "w": 853.5,
           "h": 826
         },
@@ -68797,7 +68796,7 @@
       "graph": {
         "pos": {
           "x": 853.5,
-          "y": 191,
+          "y": 0,
           "w": 853.5,
           "h": 330
         },
@@ -68813,7 +68812,7 @@
       "variable": {
         "pos": {
           "x": 420,
-          "y": 174.5,
+          "y": 0,
           "w": 989,
           "h": 400
         },
@@ -68825,7 +68824,7 @@
       "datas": {
         "pos": {
           "x": 706,
-          "y": 291.5,
+          "y": 0,
           "w": 1039,
           "h": 400
         },
@@ -68840,9 +68839,9 @@
       },
       "trace": {
         "pos": {
-          "x": 422.5,
-          "y": 62,
-          "w": 700,
+          "x": 654.5,
+          "y": 167,
+          "w": 1014,
           "h": 400
         },
         "title": "trace",
@@ -68854,6 +68853,18 @@
           },
           "name": "Main"
         }
+      },
+      "hardware": {
+        "pos": {
+          "x": 1098,
+          "y": 167,
+          "w": 1098,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
       }
     },
     "example": {

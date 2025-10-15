@@ -39,6 +39,13 @@ export class KVASER_CAN extends CanBase {
   id: string
   log: CanLOG
   timeOffset = 0
+  periodIds: Record<
+    number,
+    {
+      msg: CanMessage
+      taskId: string[]
+    }
+  > = {}
   private readAbort = new AbortController()
   pendingBaseCmds = new Map<
     string,
@@ -60,6 +67,46 @@ export class KVASER_CAN extends CanBase {
   >()
 
   rejectMap = new Map<number, Function>()
+  startPeriodSend(message: CanMessage, period: number, duration?: number): string {
+    const taskId: string = KV.StartPeriodSend(
+      this.id,
+      {
+        id: message.id,
+        extendId: message.msgType.idType == CAN_ID_TYPE.EXTENDED,
+        remoteFrame: message.msgType.remote,
+        brs: message.msgType.brs,
+        canfd: message.msgType.canfd,
+        data: [...message.data]
+      },
+      period / 1000,
+      duration || 0
+    )
+    if (this.periodIds[message.id]) {
+      this.periodIds[message.id].taskId.push(taskId)
+    } else {
+      this.periodIds[message.id] = {
+        msg: message,
+        taskId: [taskId]
+      }
+    }
+
+    return taskId
+  }
+  stopPeriodSend(taskId: string): void {
+    const target = Object.values(this.periodIds).find((item) => item.taskId.includes(taskId))
+    if (target) {
+      KV.StopPeriodSend(taskId)
+      this.periodIds[target.msg.id].taskId = this.periodIds[target.msg.id].taskId.filter(
+        (item) => item != taskId
+      )
+      if (this.periodIds[target.msg.id].taskId.length == 0) {
+        delete this.periodIds[target.msg.id]
+      }
+    }
+  }
+  changePeriodData(taskId: string, data: Buffer): void {
+    KV.ChangeData(taskId, [...data])
+  }
   constructor(info: CanBaseInfo) {
     super()
     this.info = info
@@ -196,7 +243,8 @@ export class KVASER_CAN extends CanBase {
         for (let i = 0; i < dlc.value(); i++) {
           buf[i] = data.getitem(i)
         }
-        const cmdId = this.getReadBaseId(id.value(), msgType)
+        const canid = id.value()
+        const cmdId = this.getReadBaseId(canid, msgType)
         if (flagVal & KV.canMSG_TXACK) {
           //tx confirm
           const items = this.pendingBaseCmds.get(cmdId)
@@ -208,7 +256,7 @@ export class KVASER_CAN extends CanBase {
             }
             const message: CanMessage = {
               dir: 'OUT',
-              id: id.value(),
+              id: canid,
               data: buf,
               ts: ts,
               msgType: msgType,
@@ -219,7 +267,24 @@ export class KVASER_CAN extends CanBase {
             this.log.canBase(message)
             this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
             item.resolve(ts)
+          } else {
+            const period = this.periodIds[canid]
+            if (period) {
+              const message: CanMessage = {
+                dir: 'OUT',
+                id: canid,
+                data: buf,
+                ts: ts,
+                msgType: msgType,
+                device: this.info.name,
+                database: period.msg.database,
+                name: period.msg.name
+              }
+              this.log.canBase(message)
+              this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
+            }
           }
+
           setImmediate(this.callback.bind(this))
           return
         } else if (flagVal & KV.canMSG_ERROR_FRAME) {
@@ -376,6 +441,12 @@ export class KVASER_CAN extends CanBase {
       KV.FreeTSFN(this.id)
       this.event.emit('close', msg)
       this._close()
+      for (const item of Object.values(this.periodIds)) {
+        for (const taskId of item.taskId) {
+          KV.StopPeriodSend(taskId)
+        }
+      }
+      this.periodIds = {}
     }
   }
   writeBase(

@@ -72,9 +72,9 @@
           {
             "trigger": {
               "type": "periodic",
-              "period": 1
+              "period": 5
             },
-            "name": "",
+            "name": "5ms",
             "id": "1",
             "channel": "030b067c-a10c-464e-b54f-d442b525becc",
             "type": "canfd",
@@ -90,7 +90,8 @@
               "88"
             ],
             "_X_ROW_KEY": "row_24",
-            "brs": true
+            "brs": true,
+            "uuid": "row_16"
           },
           {
             "trigger": {
@@ -104,7 +105,8 @@
             "dlc": 15,
             "data": [],
             "_X_ROW_KEY": "row_25",
-            "brs": true
+            "brs": true,
+            "uuid": "row_17"
           },
           {
             "trigger": {
@@ -118,7 +120,8 @@
             "dlc": 15,
             "data": [],
             "_X_ROW_KEY": "row_26",
-            "brs": true
+            "brs": true,
+            "uuid": "row_18"
           }
         ]
       }
@@ -138,7 +141,8 @@
     },
     "database": {
       "lin": {},
-      "can": {}
+      "can": {},
+      "orti": {}
     },
     "graphs": {},
     "guages": {
@@ -188,7 +192,25 @@
     "vars": {},
     "datas": {},
     "panels": {},
-    "logs": {}
+    "logs": {},
+    "traces": {
+      "trace": {
+        "id": "",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [
+          "KVASER_0"
+        ],
+        "filterId": []
+      }
+    }
   },
   "project": {
     "wins": {
@@ -196,8 +218,8 @@
         "pos": {
           "x": 383,
           "y": 219,
-          "w": 1280,
-          "h": 200
+          "w": 2585,
+          "h": 275
         },
         "options": {
           "params": {}
@@ -209,8 +231,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 110,
-          "y": 81,
+          "x": 106,
+          "y": 46,
           "w": 802,
           "h": 601
         },
@@ -233,8 +255,8 @@
       },
       "c24115ee-7080-4573-a216-af88cea85085_ia": {
         "pos": {
-          "x": 463,
-          "y": 400,
+          "x": 577,
+          "y": 520,
           "w": 1041,
           "h": 400
         },
@@ -250,30 +272,19 @@
       },
       "trace": {
         "pos": {
-          "x": 37,
-          "y": 0,
+          "x": 966,
+          "y": 34,
           "w": 965,
-          "h": 400
+          "h": 457
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {}
-      },
-      "gauge": {
-        "pos": {
-          "x": 676,
-          "y": 0,
-          "w": 1196,
-          "h": 400
-        },
-        "title": "gauge",
-        "label": "Gauge",
-        "id": "gauge",
         "options": {
           "params": {
-            "edit-index": "gauge"
-          }
+            "edit-index": "trace"
+          },
+          "name": "Trace"
         }
       }
     },

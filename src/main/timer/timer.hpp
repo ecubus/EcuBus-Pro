@@ -149,26 +149,15 @@ private:
                 break;
             }
 
-            try {
-                CanMessage msgCopy;
-                {   // 复制当前 message，避免发送时数据被修改
-                    std::lock_guard<std::mutex> guard(dataLock_);
-                    msgCopy = message_;
-                }
-
-                bus_->send(msgCopy);
-            } catch (const std::exception& e) {
-                std::cerr << "[CyclicTask] Exception: " << e.what() << std::endl;
-
-                if (!onError_) {
-                    stop();
-                    throw;
-                }
-                if (!onError_(e)) {
-                    stop();
-                    break;
-                }
+           
+            CanMessage msgCopy;
+            {   // 复制当前 message，避免发送时数据被修改
+                std::lock_guard<std::mutex> guard(dataLock_);
+                msgCopy = message_;
             }
+
+            bus_->send(msgCopy);
+           
 
 #ifdef _WIN32
             if (hTimer_ && hStopEvent_) {

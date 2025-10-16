@@ -127,6 +127,10 @@ Record File用于决定将TRACE数据写入到本地文件中，写入的数据�
 ![recordFile](record.png)
 
 
+### 保存
+
+当ORTI相关信息配置好后，点击右上角保存按钮，保存ORTI配置信息。
+
 
 ## 查看OS的Trace数据和自动生成的系统变量
 

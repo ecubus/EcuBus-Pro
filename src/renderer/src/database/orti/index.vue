@@ -248,6 +248,8 @@
                 <el-option label="230400" value="230400" />
                 <el-option label="460800" value="460800" />
                 <el-option label="921600" value="921600" />
+                <el-option label="2000000" value="2000000" />
+                <el-option label="4000000" value="4000000" />
               </el-select>
             </el-form-item>
 

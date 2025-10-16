@@ -459,7 +459,14 @@ const coreConfigGridOptions = ref<VxeGridProps>({
   editConfig: {
     trigger: 'click',
     mode: 'cell',
-    showStatus: true
+    showStatus: true,
+    beforeEditMethod: ({ row, column }) => {
+      // Only allow editing activeInterval for Task (type=0)
+      if (column.field === 'activeInterval' && row.type !== 0) {
+        return false
+      }
+      return true
+    }
   },
   toolbarConfig: {
     slots: {
@@ -498,6 +505,23 @@ const coreConfigGridOptions = ref<VxeGridProps>({
       slots: { edit: 'edit_type' },
       formatter: ({ cellValue }) => {
         return cellValue === 0 ? 'Task' : cellValue === 1 ? 'ISR' : cellValue
+      }
+    },
+
+    {
+      align: 'center',
+      field: 'activeInterval',
+      title: 'Active Interval(us)',
+      width: 150,
+      editRender: {
+        name: 'input',
+        attrs: { type: 'number', min: 0 }
+      },
+      formatter: ({ row, cellValue }) => {
+        if (row.type !== 0) {
+          return '-'
+        }
+        return cellValue !== undefined ? cellValue : ''
       }
     },
     {

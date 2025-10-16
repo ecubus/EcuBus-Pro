@@ -268,6 +268,7 @@ export interface ORTIFile {
     type: number
     name: string
     color: string
+    activeInterval?: number
   }[]
   resourceConfigs: {
     coreId: number

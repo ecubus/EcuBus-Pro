@@ -22,6 +22,11 @@ OSEK OS追踪是通过外部接口实时获取OSEK OS的运行状态，并将其
 
 1. 设置Name
 2. 设置CPU真正的运行频率（取决于你的timestamp格式，如果你的timestamp已经是us，那么CPU频率可以是1）
+3. 设置对象颜色
+4. 设置周期任务的理论激活时间间隔（Active Interval，单位为us，仅适用于Task）
+
+> [!NOTE]
+> Active Interval(us) 只能为 Task 类型配置，ISR 不支持此配置项
 
 ![task](task.png)
 
@@ -60,11 +65,11 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 | 字段 | 长度 | 说明 |
 |------|------|------|
 | frame header | 1 byte | 帧头 (0x5A) |
-| index | 4 bytes | 事件索引（MSB） |
-| timestamp | 4 bytes | 时间戳（MSB） |
+| index | 4 bytes | 事件索引（LSB） |
+| timestamp | 4 bytes | 时间戳（LSB） |
 | type | 1 byte | 事件类型 |
-| type id | 2 bytes | 对象ID（MSB） |
-| type status | 2 bytes | 状态/参数（MSB） |
+| type id | 2 bytes | 对象ID（LSB） |
+| type status | 2 bytes | 状态/参数（LSB） |
 | coreID | 1 byte | 核心ID |
 | CRC8 | 1 byte | CRC8校验码 |
 

@@ -80,13 +80,12 @@ type TaskTableRow = {
   activationIntervalMin: number | string
   activationIntervalMax: number | string
   activationIntervalAvg: number | string
-  startIntervalMin: number | string
-  startIntervalMax: number | string
-  startIntervalAvg: number | string
   delayTimeMin: number | string
   delayTimeMax: number | string
   delayTimeAvg: number | string
   taskLost: number | string
+  jitterMax: number | string
+  jitterMin: number | string
   jitter: number | string
 }
 
@@ -186,13 +185,12 @@ const getColumns = (type: CategoryType) => {
         { field: 'activationIntervalMin', title: 'Act Int Min (μs)', width: 140 },
         { field: 'activationIntervalMax', title: 'Act Int Max (μs)', width: 140 },
         { field: 'activationIntervalAvg', title: 'Act Int Avg (μs)', width: 140 },
-        { field: 'startIntervalMin', title: 'Start Int Min (μs)', width: 140 },
-        { field: 'startIntervalMax', title: 'Start Int Max (μs)', width: 140 },
-        { field: 'startIntervalAvg', title: 'Start Int Avg (μs)', width: 140 },
         { field: 'delayTimeMin', title: 'Delay Min (μs)', width: 130 },
         { field: 'delayTimeMax', title: 'Delay Max (μs)', width: 130 },
         { field: 'delayTimeAvg', title: 'Delay Avg (μs)', width: 130 },
         { field: 'taskLost', title: 'Task Lost (%)', width: 120 },
+        { field: 'jitterMax', title: 'Jitter Max (%)', width: 120 },
+        { field: 'jitterMin', title: 'Jitter Min (%)', width: 120 },
         { field: 'jitter', title: 'Jitter (%)', width: 120 }
       ]
     case 'isr':
@@ -290,6 +288,150 @@ const formatValue = (value: number | string): string => {
   return value
 }
 
+// 映射metric名称到字段名
+const metricMap: Record<string, string> = {
+  LoadPercent: 'loadPercent',
+  TotalTime: 'totalTime',
+  Status: 'status',
+  ActiveCount: 'activeCount',
+  StartCount: 'startCount',
+  ExecutionTimeMin: 'executionTimeMin',
+  ExecutionTimeMax: 'executionTimeMax',
+  ExecutionTimeAvg: 'executionTimeAvg',
+  ActivationIntervalMin: 'activationIntervalMin',
+  ActivationIntervalMax: 'activationIntervalMax',
+  ActivationIntervalAvg: 'activationIntervalAvg',
+  DelayTimeMin: 'delayTimeMin',
+  DelayTimeMax: 'delayTimeMax',
+  DelayTimeAvg: 'delayTimeAvg',
+  TaskLost: 'taskLost',
+  JitterMax: 'jitterMax',
+  JitterMin: 'jitterMin',
+  Jitter: 'jitter',
+  RunCount: 'runCount',
+  CallIntervalMin: 'callIntervalMin',
+  CallIntervalMax: 'callIntervalMax',
+  CallIntervalAvg: 'callIntervalAvg',
+  AcquireCount: 'acquireCount',
+  ReleaseCount: 'releaseCount',
+  Count: 'count',
+  LastStatus: 'lastStatus',
+  LastTriggerTime: 'lastTriggerTime'
+}
+
+// 待更新的数据存储
+const pendingUpdates = new Map<
+  string,
+  { value: number | string; parsed: ReturnType<typeof parseVarId> }
+>()
+let rafId: number | null = null
+
+// 批量更新数据
+const flushUpdates = () => {
+  rafId = null
+
+  if (isPaused.value || pendingUpdates.size === 0) {
+    pendingUpdates.clear()
+    return
+  }
+
+  // 批量处理所有待更新的数据
+  pendingUpdates.forEach(({ value, parsed }, key) => {
+    if (!parsed) return
+
+    const { type, key: itemKey, metric } = parsed
+
+    // 查找对应的category
+    const category = categoryData.value.find((c) => c.type === type)
+    if (!category) return
+
+    // 查找行数据（应该已经由onMounted初始化）
+    let row = category.tableData.find((r) => r.id === itemKey)
+    if (!row) {
+      // 如果没找到，说明可能是动态添加的，创建新行
+      row = {
+        id: itemKey,
+        name: itemKey
+      }
+
+      // 根据类型初始化不同字段
+      switch (type) {
+        case 'cpu':
+          Object.assign(row, {
+            coreId: 0,
+            loadPercent: '--',
+            executionTime: '--',
+            totalTime: '--'
+          })
+          break
+        case 'task':
+          Object.assign(row, {
+            status: '--',
+            activeCount: 0,
+            startCount: 0,
+            executionTimeMin: '--',
+            executionTimeMax: '--',
+            executionTimeAvg: '--',
+            activationIntervalMin: '--',
+            activationIntervalMax: '--',
+            activationIntervalAvg: '--',
+            delayTimeMin: '--',
+            delayTimeMax: '--',
+            delayTimeAvg: '--',
+            taskLost: '--',
+            jitterMax: '--',
+            jitterMin: '--',
+            jitter: '--'
+          })
+          break
+        case 'isr':
+          Object.assign(row, {
+            status: '--',
+            runCount: 0,
+            executionTimeMin: '--',
+            executionTimeMax: '--',
+            executionTimeAvg: '--',
+            callIntervalMin: '--',
+            callIntervalMax: '--',
+            callIntervalAvg: '--'
+          })
+          break
+        case 'resource':
+          Object.assign(row, {
+            status: '--',
+            acquireCount: 0,
+            releaseCount: 0
+          })
+          break
+        case 'service':
+          Object.assign(row, {
+            count: 0,
+            lastStatus: '--'
+          })
+          break
+        case 'hook':
+          Object.assign(row, {
+            count: 0,
+            lastStatus: '--',
+            lastTriggerTime: '--'
+          })
+          break
+      }
+
+      category.tableData.push(row)
+    }
+
+    // 更新对应的metric值
+    const fieldName = metricMap[metric!]
+    if (fieldName && row) {
+      row[fieldName] = formatValue(value)
+    }
+  })
+
+  // 清空待更新数据
+  pendingUpdates.clear()
+}
+
 // 数据更新处理
 function dataUpdate({
   key,
@@ -307,133 +449,25 @@ function dataUpdate({
 
   if (!parsed) return
 
-  const { type, key: itemKey, metric } = parsed
-
-  // 查找对应的category
-  const category = categoryData.value.find((c) => c.type === type)
-  if (!category) return
-
-  // 查找行数据（应该已经由onMounted初始化）
-  let row = category.tableData.find((r) => r.id === itemKey)
-  if (!row) {
-    // 如果没找到，说明可能是动态添加的，创建新行
-    row = {
-      id: itemKey,
-      name: itemKey
-    }
-
-    // 根据类型初始化不同字段
-    switch (type) {
-      case 'cpu':
-        Object.assign(row, {
-          coreId: 0,
-          loadPercent: '--',
-          executionTime: '--',
-          totalTime: '--'
-        })
-        break
-      case 'task':
-        Object.assign(row, {
-          status: '--',
-          activeCount: 0,
-          startCount: 0,
-          executionTimeMin: '--',
-          executionTimeMax: '--',
-          executionTimeAvg: '--',
-          activationIntervalMin: '--',
-          activationIntervalMax: '--',
-          activationIntervalAvg: '--',
-          startIntervalMin: '--',
-          startIntervalMax: '--',
-          startIntervalAvg: '--',
-          delayTimeMin: '--',
-          delayTimeMax: '--',
-          delayTimeAvg: '--',
-          taskLost: '--',
-          jitter: '--'
-        })
-        break
-      case 'isr':
-        Object.assign(row, {
-          status: '--',
-          runCount: 0,
-          executionTimeMin: '--',
-          executionTimeMax: '--',
-          executionTimeAvg: '--',
-          callIntervalMin: '--',
-          callIntervalMax: '--',
-          callIntervalAvg: '--'
-        })
-        break
-      case 'resource':
-        Object.assign(row, {
-          status: '--',
-          acquireCount: 0,
-          releaseCount: 0
-        })
-        break
-      case 'service':
-        Object.assign(row, {
-          count: 0,
-          lastStatus: '--'
-        })
-        break
-      case 'hook':
-        Object.assign(row, {
-          count: 0,
-          lastStatus: '--',
-          lastTriggerTime: '--'
-        })
-        break
-    }
-
-    category.tableData.push(row)
-  }
-
-  // 更新对应的metric值
   const value = latestData[1].value
 
-  // 映射metric名称到字段名
-  const metricMap: Record<string, string> = {
-    LoadPercent: 'loadPercent',
-    TotalTime: 'totalTime',
-    Status: 'status',
-    ActiveCount: 'activeCount',
-    StartCount: 'startCount',
-    ExecutionTimeMin: 'executionTimeMin',
-    ExecutionTimeMax: 'executionTimeMax',
-    ExecutionTimeAvg: 'executionTimeAvg',
-    ActivationIntervalMin: 'activationIntervalMin',
-    ActivationIntervalMax: 'activationIntervalMax',
-    ActivationIntervalAvg: 'activationIntervalAvg',
-    StartIntervalMin: 'startIntervalMin',
-    StartIntervalMax: 'startIntervalMax',
-    StartIntervalAvg: 'startIntervalAvg',
-    DelayTimeMin: 'delayTimeMin',
-    DelayTimeMax: 'delayTimeMax',
-    DelayTimeAvg: 'delayTimeAvg',
-    TaskLost: 'taskLost',
-    Jitter: 'jitter',
-    RunCount: 'runCount',
-    CallIntervalMin: 'callIntervalMin',
-    CallIntervalMax: 'callIntervalMax',
-    CallIntervalAvg: 'callIntervalAvg',
-    AcquireCount: 'acquireCount',
-    ReleaseCount: 'releaseCount',
-    Count: 'count',
-    LastStatus: 'lastStatus',
-    LastTriggerTime: 'lastTriggerTime'
-  }
+  // 存储待更新的数据
+  pendingUpdates.set(key, { value, parsed })
 
-  const fieldName = metricMap[metric!]
-  if (fieldName && row) {
-    row[fieldName] = formatValue(value)
+  // 如果还没有调度 RAF，则调度一个
+  if (rafId === null) {
+    rafId = requestAnimationFrame(flushUpdates)
   }
 }
 watch(globalStart, (newVal) => {
   isPaused.value = false
   if (newVal) {
     initializeData()
+  } else {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
+    }
   }
 })
 
@@ -449,6 +483,15 @@ const cleanupEventListeners = () => {
 // 初始化数据
 const initializeData = () => {
   if (!orti.value) return
+
+  // 取消待执行的 RAF
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+
+  // 清空待更新数据
+  pendingUpdates.clear()
 
   // 清理旧数据
   categoryData.value.forEach((category) => {
@@ -523,13 +566,12 @@ const initializeData = () => {
             activationIntervalMin: '--',
             activationIntervalMax: '--',
             activationIntervalAvg: '--',
-            startIntervalMin: '--',
-            startIntervalMax: '--',
-            startIntervalAvg: '--',
             delayTimeMin: '--',
             delayTimeMax: '--',
             delayTimeAvg: '--',
             taskLost: '--',
+            jitterMax: '--',
+            jitterMin: '--',
             jitter: '--'
           }
           const keys = [
@@ -542,13 +584,12 @@ const initializeData = () => {
             'ActivationIntervalMin',
             'ActivationIntervalMax',
             'ActivationIntervalAvg',
-            'StartIntervalMin',
-            'StartIntervalMax',
-            'StartIntervalAvg',
             'DelayTimeMin',
             'DelayTimeMax',
             'DelayTimeAvg',
             'TaskLost',
+            'JitterMax',
+            'JitterMin',
             'Jitter'
           ]
           keys.forEach((xkey) => {
@@ -673,6 +714,15 @@ watchEffect(() => {
 })
 
 onUnmounted(() => {
+  // 取消待执行的 RAF
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+
+  // 清空待更新数据
+  pendingUpdates.clear()
+
   // 解除所有事件监听
   cleanupEventListeners()
 })

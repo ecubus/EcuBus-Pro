@@ -759,7 +759,8 @@
               "coreId": 0,
               "type": 0,
               "color": "rgb(153,233,173)",
-              "_X_ROW_KEY": "row_40"
+              "_X_ROW_KEY": "row_40",
+              "activeInterval": "5000"
             },
             {
               "id": 1,
@@ -767,7 +768,8 @@
               "coreId": 0,
               "type": 0,
               "color": "rgb(183,38,227)",
-              "_X_ROW_KEY": "row_41"
+              "_X_ROW_KEY": "row_41",
+              "activeInterval": "20000"
             },
             {
               "id": 2,
@@ -791,7 +793,8 @@
               "coreId": 0,
               "type": 0,
               "color": "rgb(195,93,128)",
-              "_X_ROW_KEY": "row_44"
+              "_X_ROW_KEY": "row_44",
+              "activeInterval": "10000"
             },
             {
               "id": 5,
@@ -799,7 +802,8 @@
               "coreId": 0,
               "type": 0,
               "color": "rgb(59,244,77)",
-              "_X_ROW_KEY": "row_45"
+              "_X_ROW_KEY": "row_45",
+              "activeInterval": "100000"
             },
             {
               "id": 6,
@@ -1805,8 +1809,8 @@
         "name": "Status_5ms",
         "color": "#253d9a",
         "yAxis": {
-          "min": 0,
-          "max": 5,
+          "min": -0.30000000000000004,
+          "max": 4.7,
           "splitLine": {
             "show": false
           },
@@ -1877,8 +1881,8 @@
         "name": "Status",
         "color": "#b41839",
         "yAxis": {
-          "min": 0,
-          "max": 1
+          "min": -0.24307950592000038,
+          "max": 1.1230795059199994
         },
         "bindValue": {
           "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status",
@@ -2453,8 +2457,8 @@
       },
       "graph": {
         "pos": {
-          "x": 291,
-          "y": 556,
+          "x": 99,
+          "y": 501,
           "w": 2269,
           "h": 577
         },

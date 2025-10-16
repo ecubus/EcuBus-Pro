@@ -207,24 +207,6 @@ export function getAllSysVar(
         unit: 'us',
         desc: '任务激活间隔平均时间'
       },
-      StartIntervalMin: {
-        type: 'number',
-        min: 0,
-        unit: 'us',
-        desc: '任务开始间隔最小时间'
-      },
-      StartIntervalMax: {
-        type: 'number',
-        min: 0,
-        unit: 'us',
-        desc: '任务开始间隔最大时间'
-      },
-      StartIntervalAvg: {
-        type: 'number',
-        min: 0,
-        unit: 'us',
-        desc: '任务开始间隔平均时间'
-      },
       ExecutionTimeMin: {
         type: 'number',
         min: 0,
@@ -274,12 +256,20 @@ export function getAllSysVar(
         unit: '%',
         desc: '(Task被激活次数-Task运行次数)/Task被激活次数'
       },
+      JitterMax: {
+        type: 'number',
+        unit: '%',
+        desc: '最大Jitter值（当前激活间隔-理论激活间隔）/理论激活间隔，基于绝对值比较'
+      },
+      JitterMin: {
+        type: 'number',
+        unit: '%',
+        desc: '最小Jitter值（当前激活间隔-理论激活间隔）/理论激活间隔，基于绝对值比较'
+      },
       Jitter: {
         type: 'number',
-        min: 0,
-        max: 100,
         unit: '%',
-        desc: '（实际任务开始间隔时间-实际激活间隔时间）/实际激活间隔时间'
+        desc: '当前Jitter值（当前激活间隔-理论激活间隔）/理论激活间隔'
       }
     }
 

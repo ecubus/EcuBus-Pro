@@ -1,4 +1,5 @@
 import { OsEvent, TaskType, TaskStatus, IsrStatus, ResourceStatus } from 'nodeCan/osEvent'
+import type { ORTIFile } from '../database/ortiParse'
 
 // 时间窗口配置 - 记录每个时间点的执行时间片段
 interface TimeWindow {
@@ -12,7 +13,7 @@ interface TaskState {
   coreId: number
   currentStatus: TaskStatus
   activeCount: number
-
+  fakeActiveInterval?: number
   startCount: number
 
   lastActiveTime?: number
@@ -22,11 +23,12 @@ interface TaskState {
   activationIntervalCount: number
   activationIntervalMin: number
   activationIntervalMax: number
+  activationIntervalCurrent: number
 
-  startIntervalSum: number
-  startIntervalCount: number
-  startIntervalMin: number
-  startIntervalMax: number
+  // Jitter统计
+  jitterMax: number
+  jitterMin: number
+  currentJitter: number
 
   delayTimeSum: number
   delayTimeCount: number
@@ -126,6 +128,7 @@ export default class OsStatistics {
   constructor(
     private id: string,
     private cpuFreq: number,
+    private orti: ORTIFile,
     windowDurationMs: number = 5000
   ) {
     // 将窗口时长转换为CPU cycles
@@ -150,21 +153,28 @@ export default class OsStatistics {
   }
 
   private initTaskState(id: number, coreId: number, status: TaskStatus): TaskState {
+    //fake active interval
+    const fakeActiveInterval = this.orti.coreConfigs.find(
+      (c) => c.id === id && c.type === TaskType.TASK && c.coreId === coreId
+    )?.activeInterval
+
     return {
       id,
       coreId,
       currentStatus: status,
       activeCount: 0,
-
       startCount: 0,
+
       activationIntervalSum: 0,
       activationIntervalCount: 0,
       activationIntervalMin: Number.MAX_VALUE,
       activationIntervalMax: 0,
-      startIntervalSum: 0,
-      startIntervalCount: 0,
-      startIntervalMin: Number.MAX_VALUE,
-      startIntervalMax: 0,
+      activationIntervalCurrent: 0,
+      fakeActiveInterval: Number(fakeActiveInterval) * this.cpuFreq,
+
+      jitterMax: 0,
+      jitterMin: 0,
+      currentJitter: 0,
 
       delayTimeSum: 0,
       delayTimeCount: 0,
@@ -342,6 +352,7 @@ export default class OsStatistics {
 
         if (task.lastActiveTime !== undefined) {
           const interval = event.ts - task.lastActiveTime
+          task.activationIntervalCurrent = interval
           const stats = this.updateRunningStats(
             task.activationIntervalSum,
             task.activationIntervalCount,
@@ -353,6 +364,31 @@ export default class OsStatistics {
           task.activationIntervalCount = stats.count
           task.activationIntervalMin = stats.min
           task.activationIntervalMax = stats.max
+
+          // 计算当前jitter
+          if (task.fakeActiveInterval && task.fakeActiveInterval > 0) {
+            const jitter = (interval - task.fakeActiveInterval) / task.fakeActiveInterval
+            task.currentJitter = jitter
+
+            // 比较绝对值来更新最大最小jitter
+            const absJitter = Math.abs(jitter)
+            const absMax = Math.abs(task.jitterMax)
+            const absMin = Math.abs(task.jitterMin)
+
+            if (task.activationIntervalCount === 1) {
+              // 第一次计算，直接赋值
+              task.jitterMax = jitter
+              task.jitterMin = jitter
+            } else {
+              // 比较绝对值
+              if (absJitter > absMax) {
+                task.jitterMax = jitter
+              }
+              if (absJitter < absMin || task.jitterMin === 0) {
+                task.jitterMin = jitter
+              }
+            }
+          }
         }
         task.lastActiveTime = event.ts
         break
@@ -378,21 +414,6 @@ export default class OsStatistics {
             task.delayTimeMax = stats.max
           }
 
-          // 计算START间隔
-          if (task.lastStartTime !== undefined) {
-            const interval = event.ts - task.lastStartTime
-            const stats = this.updateRunningStats(
-              task.startIntervalSum,
-              task.startIntervalCount,
-              task.startIntervalMin,
-              task.startIntervalMax,
-              interval
-            )
-            task.startIntervalSum = stats.sum
-            task.startIntervalCount = stats.count
-            task.startIntervalMin = stats.min
-            task.startIntervalMax = stats.max
-          }
           task.lastStartTime = event.ts
           task.hasStartedInCurrentCycle = true
         }
@@ -509,13 +530,6 @@ export default class OsStatistics {
       task.activationIntervalCount > 0
         ? task.activationIntervalSum / task.activationIntervalCount
         : 0
-    const avgStartInterval =
-      task.startIntervalCount > 0 ? task.startIntervalSum / task.startIntervalCount : 0
-
-    const avgJitter =
-      avgActivationInterval > 0
-        ? (Math.abs(avgStartInterval - avgActivationInterval) / avgActivationInterval) * 100
-        : 0
 
     const delayStats = this.formatTimeStats(
       task.delayTimeSum,
@@ -555,26 +569,6 @@ export default class OsStatistics {
     result.push({
       id: `OsTrace.${key}.ActivationIntervalAvg`,
       value: { value: activationStats.avg / this.cpuFreq, rawValue: activationStats.avg }
-    })
-
-    const startStats = this.formatTimeStats(
-      task.startIntervalSum,
-      task.startIntervalCount,
-      task.startIntervalMin,
-      task.startIntervalMax
-    )
-
-    result.push({
-      id: `OsTrace.${key}.StartIntervalMin`,
-      value: { value: startStats.min / this.cpuFreq, rawValue: startStats.min }
-    })
-    result.push({
-      id: `OsTrace.${key}.StartIntervalMax`,
-      value: { value: startStats.max / this.cpuFreq, rawValue: startStats.max }
-    })
-    result.push({
-      id: `OsTrace.${key}.StartIntervalAvg`,
-      value: { value: startStats.avg / this.cpuFreq, rawValue: startStats.avg }
     })
 
     // 任务执行时间统计（不包括被中断的时间）
@@ -619,10 +613,25 @@ export default class OsStatistics {
       id: `OsTrace.${key}.TaskLost`,
       value: { value: Number(TaskLost.toFixed(2)), rawValue: TaskLost }
     })
-    result.push({
-      id: `OsTrace.${key}.Jitter`,
-      value: { value: Number(avgJitter.toFixed(2)), rawValue: avgJitter }
-    })
+
+    // Jitter统计：当前interval/理论interval的偏差
+    if (task.fakeActiveInterval && task.fakeActiveInterval > 0) {
+      result.push({
+        id: `OsTrace.${key}.JitterMax`,
+        value: { value: Number((task.jitterMax * 100).toFixed(2)), rawValue: task.jitterMax }
+      })
+      result.push({
+        id: `OsTrace.${key}.JitterMin`,
+        value: { value: Number((task.jitterMin * 100).toFixed(2)), rawValue: task.jitterMin }
+      })
+      result.push({
+        id: `OsTrace.${key}.Jitter`,
+        value: {
+          value: Number((task.currentJitter * 100).toFixed(2)),
+          rawValue: task.currentJitter
+        }
+      })
+    }
 
     return result
   }

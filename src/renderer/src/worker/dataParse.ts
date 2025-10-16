@@ -319,7 +319,7 @@ if (isWorker) {
         osStatistics.clear()
         //create osStatistics
         for (const key of Object.keys(database.orti)) {
-          const s = new OsStatistics(key, database.orti[key].cpuFreq)
+          const s = new OsStatistics(key, database.orti[key].cpuFreq, database.orti[key])
           for (const item of database.orti[key].coreConfigs) {
             if (item.type == TaskType.TASK) {
               if (item.isIdle || item.name.toLowerCase().includes('idle')) {

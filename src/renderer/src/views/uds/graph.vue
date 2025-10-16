@@ -312,6 +312,7 @@ const handleEditCancel = () => {
   editingNode.value = null
 }
 const globalStart = useGlobalStart()
+
 const updateTime = () => {
   if (isPaused.value) {
     return
@@ -328,20 +329,21 @@ const updateTime = () => {
     }
   })
 
-  const ts = (Date.now() - window.startTime) / 1000
-  if (ts > maxX) {
-    maxX = ts
-  }
+  // const ts = (Date.now() - window.startTime) / 1000
+  // if (ts > maxX) {
+  //   maxX = ts
+  // }
 
+  maxX = parseFloat(maxX.toFixed(2))
   time.value = maxX
 
   // 实现10秒滑动窗口：当时间超过10秒时，只显示最近10秒
-  const WINDOW_SIZE = 10 // 10秒窗口
+  const WINDOW_SIZE = 8 // 5秒窗口
   let minX = 0
   let displayMaxX = maxX
 
   if (maxX > WINDOW_SIZE) {
-    maxX = Math.floor(maxX)
+    // 不使用Math.floor，让x轴平滑移动
     minX = maxX - WINDOW_SIZE
     displayMaxX = maxX
   } else {
@@ -349,13 +351,26 @@ const updateTime = () => {
     displayMaxX = WINDOW_SIZE
   }
 
+  // 只在x轴范围真正改变时才更新图表
+  // 使用更小的阈值来判断是否需要更新（0.1秒）
+  const newMinX = minX
+  const newMaxX = displayMaxX + 2
+
+  // 使用批量更新减少重绘次数
   enabledCharts.value.forEach((c) => {
-    chartInstances[c.id].setOption({
-      xAxis: {
-        min: minX,
-        max: displayMaxX + 5
-      }
-    })
+    // 缓存 x 轴的 min 值，供数据清理使用
+    cachedXAxisMin[c.id] = newMinX
+
+    chartInstances[c.id].setOption(
+      {
+        xAxis: {
+          min: newMinX,
+          max: newMaxX
+        }
+      },
+      false,
+      true
+    ) // 第三个参数lazyUpdate设为true，延迟更新
   })
 }
 watch(globalStart, (val) => {
@@ -364,9 +379,12 @@ watch(globalStart, (val) => {
     Object.keys(chartDataCache).forEach((key) => {
       chartDataCache[key] = []
       chartTimeIndex[key] = new Map()
+      cachedXAxisMin[key] = 0
     })
+
     //clear all charts data and set start to 0
     enabledCharts.value.forEach((c) => {
+      cachedXAxisMin[c.id] = 0
       chartInstances[c.id].setOption({
         series: {
           data: [],
@@ -384,7 +402,7 @@ watch(globalStart, (val) => {
     if (timer) {
       clearInterval(timer)
     }
-    timer = setInterval(updateTime, 500)
+    timer = setInterval(updateTime, 100)
   } else {
     enabledCharts.value.forEach((c) => {
       chartInstances[c.id].setOption({
@@ -452,6 +470,39 @@ const chartDataCache: Record<string, (number | string)[][]> = {}
 const TIME_BUCKET_SIZE = 0.1 // 100ms
 const chartTimeIndex: Record<string, Map<number, number>> = {}
 const layout = inject('layout') as Layout
+
+// 添加批量更新机制
+const pendingUpdates: Record<string, boolean> = {}
+let updateScheduled = false
+// 缓存 x 轴范围，避免频繁调用 getOption
+const cachedXAxisMin: Record<string, number> = {}
+
+function scheduleBatchUpdate() {
+  if (updateScheduled) return
+  updateScheduled = true
+
+  requestAnimationFrame(() => {
+    Object.keys(pendingUpdates).forEach((key) => {
+      const chart = chartInstances[key]
+      if (chart && chartDataCache[key]) {
+        chart.setOption(
+          {
+            series: {
+              data: chartDataCache[key]
+            }
+          },
+          false,
+          true
+        ) // notMerge=false, lazyUpdate=true
+      }
+    })
+
+    // 清空待更新列表
+    Object.keys(pendingUpdates).forEach((key) => delete pendingUpdates[key])
+    updateScheduled = false
+  })
+}
+
 function dataUpdate({
   key,
   values
@@ -459,7 +510,7 @@ function dataUpdate({
   key: string
   values: [number, { value: number | string; rawValue: number }][]
 }) {
-  if (isPaused.value) {
+  if (isPaused.value || !globalStart.value) {
     return
   }
 
@@ -474,31 +525,35 @@ function dataUpdate({
   }
 
   // 添加新数据并更新时间索引
-  const startIndex = chartDataCache[key].length
-  const newData = values.map((v) => [
-    v[0],
-    typeof v[1].value === 'number' ? v[1].value : v[1].rawValue
-  ])
+  const cache = chartDataCache[key]
+  const startIndex = cache.length
 
-  // 更新时间索引：记录每个时间桶的第一个数据索引
-  newData.forEach((point, i) => {
-    const timeBucket = Math.floor((point[0] as number) / TIME_BUCKET_SIZE)
+  // 优化：合并 map 和 forEach，一次遍历完成数据转换和索引更新
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i]
+    const point: (number | string)[] = [
+      v[0],
+      typeof v[1].value === 'number' ? v[1].value : v[1].rawValue
+    ]
+
+    // 直接 push 比 concat 更快（避免创建新数组）
+    cache.push(point)
+
+    // 同时更新时间索引
+    const timeBucket = Math.floor((v[0] as number) / TIME_BUCKET_SIZE)
     if (!chartTimeIndex[key].has(timeBucket)) {
       chartTimeIndex[key].set(timeBucket, startIndex + i)
     }
-  })
-
-  chartDataCache[key] = chartDataCache[key].concat(newData)
+  }
 
   // 性能优化：只有当数据量超过阈值时才进行清理，避免频繁操作
   const MAX_POINTS = 2000 // 最大保留点数
-  if (chartDataCache[key].length > MAX_POINTS) {
-    // 获取当前x轴的最小值，删除所有小于 (minX - bufferTime) 的数据点
-    const currentOption = chart.getOption() as any
-    const xAxis = currentOption.xAxis?.[0]
-    if (xAxis && xAxis.min !== undefined) {
-      const bufferTime = 5
-      const minX = xAxis.min - bufferTime
+  if (cache.length > MAX_POINTS) {
+    // 优化：使用缓存的 x 轴最小值，避免调用 getOption
+    const xAxisMin = cachedXAxisMin[key]
+    if (xAxisMin !== undefined) {
+      const bufferTime = 10
+      const minX = xAxisMin - bufferTime
 
       // 使用时间索引快速定位删除位置 O(1)
       const targetBucket = Math.floor(minX / TIME_BUCKET_SIZE)
@@ -513,46 +568,42 @@ function dataUpdate({
       }
 
       if (firstValidIndex > 0) {
-        // 删除数据
-        chartDataCache[key].splice(0, firstValidIndex)
+        // 优化：使用 slice 创建新数组比 splice 删除大量元素更快
+        chartDataCache[key] = cache.slice(firstValidIndex)
 
-        // 清理失效的时间索引桶，并更新剩余索引
-        const bucketsToDelete: number[] = []
+        // 优化：直接创建新 Map，比遍历删除更快
+        const newTimeIndex = new Map<number, number>()
         chartTimeIndex[key].forEach((index, bucket) => {
-          if (index < firstValidIndex) {
-            bucketsToDelete.push(bucket)
-          } else {
-            chartTimeIndex[key].set(bucket, index - firstValidIndex)
+          if (index >= firstValidIndex) {
+            newTimeIndex.set(bucket, index - firstValidIndex)
           }
         })
-        bucketsToDelete.forEach((bucket) => chartTimeIndex[key].delete(bucket))
+        chartTimeIndex[key] = newTimeIndex
       }
     } else {
       // 如果无法获取x轴信息，则保留最新的1500个点
-      const deleteCount = chartDataCache[key].length - 1500
-      if (deleteCount > 0) {
-        chartDataCache[key].splice(0, deleteCount)
+      const keepCount = 1500
+      if (cache.length > keepCount) {
+        const deleteCount = cache.length - keepCount
 
-        // 更新时间索引
-        const bucketsToDelete: number[] = []
+        // 优化：直接取最后 N 个元素，比 splice 快
+        chartDataCache[key] = cache.slice(deleteCount)
+
+        // 优化：直接创建新 Map
+        const newTimeIndex = new Map<number, number>()
         chartTimeIndex[key].forEach((index, bucket) => {
-          if (index < deleteCount) {
-            bucketsToDelete.push(bucket)
-          } else {
-            chartTimeIndex[key].set(bucket, index - deleteCount)
+          if (index >= deleteCount) {
+            newTimeIndex.set(bucket, index - deleteCount)
           }
         })
-        bucketsToDelete.forEach((bucket) => chartTimeIndex[key].delete(bucket))
+        chartTimeIndex[key] = newTimeIndex
       }
     }
   }
 
-  // 更新图表
-  chart.setOption({
-    series: {
-      data: chartDataCache[key]
-    }
-  })
+  // 标记需要更新，并调度批量更新
+  pendingUpdates[key] = true
+  scheduleBatchUpdate()
 }
 
 const enabledCharts = computed(() => {
@@ -843,9 +894,10 @@ const getChartOption = (
       },
 
       axisLabel: {
-        show: isLast
+        show: isLast,
         // interval:1,
-        // formatter: (value: number) => Number.isInteger(value) ? value.toFixed(0) : ''
+        formatter: (value: number) =>
+          Number.isInteger(value) ? value.toFixed(0) : value.toFixed(2)
       },
       axisTick: {
         show: isLast,
@@ -984,7 +1036,7 @@ onMounted(() => {
     })
   })
   if (globalStart.value) {
-    timer = setInterval(updateTime, 500)
+    timer = setInterval(updateTime, 100)
   }
   layout.on('show', reszie)
 })
@@ -1051,6 +1103,7 @@ onUnmounted(() => {
   Object.keys(chartDataCache).forEach((key) => {
     delete chartDataCache[key]
     delete chartTimeIndex[key]
+    delete cachedXAxisMin[key]
   })
   //detach
   filteredTreeData.value.forEach((key) => {
@@ -1111,6 +1164,7 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   // 删除数据缓存和时间索引
   delete chartDataCache[data.id]
   delete chartTimeIndex[data.id]
+  delete cachedXAxisMin[data.id]
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]

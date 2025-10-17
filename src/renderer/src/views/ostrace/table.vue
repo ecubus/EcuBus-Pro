@@ -14,6 +14,21 @@
             </el-button>
           </el-tooltip>
         </el-button-group>
+        <el-divider direction="vertical" />
+        <el-tooltip
+          effect="light"
+          :content="showWarning ? 'Hide Warning' : 'Show Warning'"
+          placement="bottom"
+        >
+          <el-switch
+            v-model="showWarning"
+            size="small"
+            inline-prompt
+            active-text="⚠"
+            inactive-text=""
+            style="--el-switch-on-color: var(--el-color-warning); margin-left: 8px"
+          />
+        </el-tooltip>
       </div>
       <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
       </span>
@@ -55,6 +70,7 @@ import { useDataStore } from '@r/stores/data'
 import { TaskType } from 'nodeCan/osEvent'
 
 const isPaused = ref(false)
+const showWarning = ref(false)
 const activeTab = ref<CategoryType>('cpu')
 
 const props = defineProps<{
@@ -175,23 +191,23 @@ const getColumns = (type: CategoryType) => {
       ]
     case 'task':
       return [
-        { field: 'name', title: 'Name', minWidth: 150 },
+        { field: 'name', title: 'Name', minWidth: 100 },
         { field: 'status', title: 'Status', width: 100 },
-        { field: 'activeCount', title: 'Active Count', width: 120 },
-        { field: 'startCount', title: 'Start Count', width: 120 },
-        { field: 'executionTimeMin', title: 'Exec Min (μs)', width: 120 },
-        { field: 'executionTimeMax', title: 'Exec Max (μs)', width: 120 },
-        { field: 'executionTimeAvg', title: 'Exec Avg (μs)', width: 120 },
-        { field: 'activationIntervalMin', title: 'Act Int Min (μs)', width: 140 },
-        { field: 'activationIntervalMax', title: 'Act Int Max (μs)', width: 140 },
-        { field: 'activationIntervalAvg', title: 'Act Int Avg (μs)', width: 140 },
-        { field: 'delayTimeMin', title: 'Delay Min (μs)', width: 130 },
-        { field: 'delayTimeMax', title: 'Delay Max (μs)', width: 130 },
-        { field: 'delayTimeAvg', title: 'Delay Avg (μs)', width: 130 },
-        { field: 'taskLost', title: 'Task Lost (%)', width: 120 },
-        { field: 'jitterMax', title: 'Jitter Max (%)', width: 120 },
-        { field: 'jitterMin', title: 'Jitter Min (%)', width: 120 },
-        { field: 'jitter', title: 'Jitter (%)', width: 120 }
+        { field: 'activeCount', title: 'Active Count', width: 100 },
+        { field: 'startCount', title: 'Start Count', width: 100 },
+        { field: 'executionTimeMin', title: 'Exec Min (μs)', width: 100 },
+        { field: 'executionTimeMax', title: 'Exec Max (μs)', width: 100 },
+        { field: 'executionTimeAvg', title: 'Exec Avg (μs)', width: 100 },
+        { field: 'activationIntervalMin', title: 'Act Int Min (μs)', width: 100 },
+        { field: 'activationIntervalMax', title: 'Act Int Max (μs)', width: 100 },
+        { field: 'activationIntervalAvg', title: 'Act Int Avg (μs)', width: 100 },
+        { field: 'delayTimeMin', title: 'Delay Min (μs)', width: 100 },
+        { field: 'delayTimeMax', title: 'Delay Max (μs)', width: 100 },
+        { field: 'delayTimeAvg', title: 'Delay Avg (μs)', width: 100 },
+        { field: 'taskLost', title: 'Task Lost (%)', width: 100 },
+        { field: 'jitterMax', title: 'Jitter Max (%)', width: 100 },
+        { field: 'jitterMin', title: 'Jitter Min (%)', width: 100 },
+        { field: 'jitter', title: 'Jitter (%)', width: 80 }
       ]
     case 'isr':
       return [
@@ -230,6 +246,57 @@ const getColumns = (type: CategoryType) => {
   }
 }
 
+// 判断单元格是否需要报警
+const getCellClassName = (val: any): string => {
+  // 如果warning开关关闭，不显示任何报警
+  if (!showWarning.value) {
+    return ''
+  }
+
+  const field = val.column.field
+
+  const value = val.row[field]
+
+  // 跳过非数字值
+  if (value === '--' || value === undefined || value === null) {
+    return ''
+  }
+
+  const numValue = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(numValue)) {
+    return ''
+  }
+
+  // CPU Load > 70%
+  if (field === 'loadPercent' && numValue > 70) {
+    return 'cell-warning'
+  }
+
+  // Task相关报警
+
+  // Delay > 1ms (1000μs)
+  if (field === 'delayTimeMax' && numValue > 1000) {
+    return 'cell-warning'
+  }
+
+  // TaskLost > 1%
+  if (field === 'taskLost' && numValue > 1) {
+    return 'cell-warning'
+  }
+
+  // Jitter > 1%
+  if (field === 'jitter' && numValue > 1) {
+    return 'cell-warning'
+  }
+
+  //jitterMax > 1%
+  if (field === 'jitterMax' && numValue > 1) {
+    return 'cell-warning'
+  }
+
+  return ''
+}
+
 const getGridOptions = (type: CategoryType): VxeGridProps => {
   return {
     size: 'mini',
@@ -246,6 +313,7 @@ const getGridOptions = (type: CategoryType): VxeGridProps => {
     rowConfig: {
       keyField: 'id'
     },
+    cellClassName: (val) => getCellClassName(val),
     align: 'center',
     scrollX: {
       enabled: true
@@ -770,5 +838,10 @@ onUnmounted(() => {
   .el-tabs__content {
     padding: 0px !important;
   }
+}
+</style>
+<style lang="scss" scoped>
+::v-deep(.vxe-table .vxe-body--column.cell-warning) {
+  background-color: var(--el-color-warning-light-3);
 }
 </style>

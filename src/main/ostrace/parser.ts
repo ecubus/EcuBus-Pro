@@ -90,11 +90,12 @@ export class OsTraceParser {
       const block = this.leftBuffer.subarray(FRAME_HEADER_SIZE, FRAME_LENGTH)
 
       // Parse the block
-      const currentIndex = block.readUInt8(0)
-      const rawTimestamp32 = block.readUInt32LE(1)
-      const type = block.readUInt8(5)
-      const typeId = block.readUInt16LE(6)
-      const typeStatus = block.readUInt16LE(8)
+
+      const rawTimestamp32 = block.readUInt32LE(0)
+      const typeId = block.readUInt16LE(4)
+      const typeStatus = block.readUInt16LE(6)
+      const currentIndex = block.readUInt8(8)
+      const type = block.readUInt8(9)
       const coreID = block.readUInt8(10)
       const receivedCRC = block.readUInt8(11)
 

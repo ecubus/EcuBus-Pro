@@ -201,7 +201,7 @@ export class DOIP {
   ) {
     this.eth = base.device
 
-    if (this.tester.doipVersion == 3) {
+    if (Number(this.tester.doipVersion) == 3) {
       this.version = 3
       this.inverseVersion = 0xfc
     }

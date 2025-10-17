@@ -64,12 +64,12 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 
 | 字段 | 长度 | 说明 |
 |------|------|------|
-| frame header | 4 bytes | 帧头 (0x5A5B5C5D) |
-| index | 1 byte | 事件索引（0-255循环） |
+| frame header | 4 bytes | 帧头 (05D5C5B5A) |
 | timestamp | 4 bytes | 时间戳（LSB） |
-| type | 1 byte | 事件类型 |
 | type id | 2 bytes | 对象ID（LSB） |
 | type status | 2 bytes | 状态/参数（LSB） |
+| index | 1 byte | 事件索引（0-255循环） |
+| type | 1 byte | 事件类型 |
 | coreID | 1 byte | 核心ID |
 | CRC8/Reserved | 1 byte | CRC8校验码或保留字节 |
 

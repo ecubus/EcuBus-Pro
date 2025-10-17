@@ -662,7 +662,15 @@ export default class OsStatistics {
       }
       const isrStack = this.runningIsrStackOnCore.get(event.coreId)!
 
-      // Check if there's an ISR already running (nested interrupt scenario)
+      // 检查同一个ISR是否已经在栈中（自己嵌套自己的异常情况）
+      const existingIndexInStack = isrStack.indexOf(key)
+      if (existingIndexInStack !== -1) {
+        // 检测到同一个ISR嵌套自己，这是异常情况，直接跳过这个事件
+
+        return []
+      }
+
+      // 正常的嵌套中断场景：检查是否有其他ISR正在运行
       if (isrStack.length > 0) {
         // Pause the currently running ISR (at the top of the stack)
         const runningIsrKey = isrStack[isrStack.length - 1]

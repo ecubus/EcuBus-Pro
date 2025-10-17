@@ -384,6 +384,15 @@ watch(globalStart, (val) => {
 
     //clear all charts data and set start to 0
     enabledCharts.value.forEach((c) => {
+      //reset datazoom
+      chartInstances[c.id].setOption({
+        dataZoom: [
+          {
+            start: 0,
+            end: 100
+          }
+        ]
+      })
       cachedXAxisMin[c.id] = 0
       chartInstances[c.id].setOption({
         series: {

@@ -1781,11 +1781,11 @@
             }
           ],
           "recordFile": {
-            "enable": true,
+            "enable": false,
             "name": "test.csv"
           },
           "connector": {
-            "type": "BinaryFile",
+            "type": "CSVFile",
             "device": "",
             "options": {
               "baudRate": "",
@@ -1795,7 +1795,7 @@
               "bitRate": "",
               "ipAddress": "",
               "port": "",
-              "file": "a.bin"
+              "file": "test.csv"
             }
           }
         }
@@ -1809,8 +1809,8 @@
         "name": "Status_5ms",
         "color": "#253d9a",
         "yAxis": {
-          "min": -0.30000000000000004,
-          "max": 4.7,
+          "min": -1.3,
+          "max": 5.7,
           "splitLine": {
             "show": false
           },
@@ -1874,35 +1874,50 @@
           "symbol": "circle"
         }
       },
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status": {
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent": {
         "type": "variable",
         "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status",
-        "name": "Status",
-        "color": "#b41839",
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
+        "name": "LoadPercent",
+        "color": "#4c5e1c",
         "yAxis": {
-          "min": -0.24307950592000038,
-          "max": 1.1230795059199994
+          "min": -6,
+          "max": 94,
+          "unit": "%",
+          "splitLine": {
+            "show": false
+          },
+          "name": "LoadPercent"
         },
         "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.ISR.1_0_0.Status",
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent",
           "variableType": "system",
-          "variableName": "Status",
-          "variableFullName": "OsTrace.Os_Trace.ISR.SYS_TIMER_CORE0.Status",
-          "variableValueType": "number",
-          "stringRange": [
-            {
-              "name": "Start",
-              "value": 0
-            },
-            {
-              "name": "Stop",
-              "value": 1
-            }
-          ]
+          "variableName": "LoadPercent",
+          "variableFullName": "OsTrace.Os_Trace.Core0.LoadPercent",
+          "variableValueType": "number"
         },
         "graph": {
           "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "tooltip": {
+          "show": true
+        },
+        "series": {
+          "showSymbol": true,
+          "symbolSize": 6,
+          "symbol": "circle"
         }
       }
     },
@@ -2457,8 +2472,8 @@
       },
       "graph": {
         "pos": {
-          "x": 99,
-          "y": 501,
+          "x": 156,
+          "y": 376,
           "w": 2269,
           "h": 577
         },

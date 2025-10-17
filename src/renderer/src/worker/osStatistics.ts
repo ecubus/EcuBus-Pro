@@ -320,10 +320,17 @@ export default class OsStatistics {
     }
 
     // 计算实际的时间窗口大小
-    // 在刚启动时，实际窗口可能小于 WINDOW_DURATION
     const actualWindowDuration = currentTime - earliestTimestamp
 
-    // 使用实际窗口大小作为分母，避免除以 0
+    // 设置最小窗口阈值为100ms对应的cycles，避免刚开始时窗口过小导致计算异常
+    // 但又能快速反映实际负载情况
+    const minWindowDuration = 1 * 1000 * this.cpuFreq // 1ms
+
+    // 避免除以0或过小的窗口
+    if (actualWindowDuration < minWindowDuration) {
+      // 窗口太小时，直接返回0，等待更多数据
+      return 0
+    }
 
     const loadPercent = (totalExecTime / actualWindowDuration) * 100
 

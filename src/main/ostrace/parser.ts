@@ -4,11 +4,11 @@ import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
 import { Transform, TransformCallback } from 'stream'
 
 /*
-|1 byte frame header (0x5A)|4byte index (MSB) |4byte timestamp (MSB) |1 byte type|2byte type id(MSB)|2byte type status(MSB)|1byte coreID|1byte CRC8|
+|4 byte frame header (0x5A5B5C5D)|1byte index |4byte timestamp (LSB) |1 byte type|2byte type id(LSB)|2byte type status(LSB)|1byte coreID|1byte CRC8/Reserved|
 */
-const FRAME_HEADER = 0x5a
-const FRAME_HEADER_SIZE = 1
-const DATA_LENGTH = 15
+const FRAME_HEADER = Buffer.from([0x5a, 0x5b, 0x5c, 0x5d])
+const FRAME_HEADER_SIZE = 4
+const DATA_LENGTH = 12
 const FRAME_LENGTH = FRAME_HEADER_SIZE + DATA_LENGTH
 const crc8 = CRC.buildInCrc('CRC8')!
 const EVENT_LENGTH_WATERMARK = 2000
@@ -30,7 +30,8 @@ export class OsTraceParser {
 
   constructor(
     private orti: ORTIFile,
-    private callbacks: ParseCallbacks
+    private callbacks: ParseCallbacks,
+    private checkCRC = false
   ) {}
 
   getRealTs(ts: number) {
@@ -53,8 +54,19 @@ export class OsTraceParser {
 
     // Process frames - always search for frame header
     while (this.leftBuffer.length > 0 && !this.closeFlag) {
-      // Search for frame header from the beginning of buffer
-      const headerIndex = this.leftBuffer.indexOf(FRAME_HEADER)
+      // Search for 4-byte frame header from the beginning of buffer
+      let headerIndex = -1
+      for (let i = 0; i <= this.leftBuffer.length - FRAME_HEADER_SIZE; i++) {
+        if (
+          this.leftBuffer[i] === FRAME_HEADER[0] &&
+          this.leftBuffer[i + 1] === FRAME_HEADER[1] &&
+          this.leftBuffer[i + 2] === FRAME_HEADER[2] &&
+          this.leftBuffer[i + 3] === FRAME_HEADER[3]
+        ) {
+          headerIndex = i
+          break
+        }
+      }
 
       // If no frame header found, discard all data and wait for more
       if (headerIndex === -1) {
@@ -74,27 +86,39 @@ export class OsTraceParser {
         break
       }
 
-      // Extract one frame (skip header byte, get data)
+      // Extract one frame (skip header bytes, get data)
       const block = this.leftBuffer.subarray(FRAME_HEADER_SIZE, FRAME_LENGTH)
 
       // Parse the block
-      const currentIndex32 = block.readUInt32LE(0)
-      const rawTimestamp32 = block.readUInt32LE(4)
-      const type = block.readUInt8(8)
-      const typeId = block.readUInt16LE(9)
-      const typeStatus = block.readUInt16LE(11)
-      const coreID = block.readUInt8(13)
-      const receivedCRC = block.readUInt8(14)
+      const currentIndex = block.readUInt8(0)
+      const rawTimestamp32 = block.readUInt32LE(1)
+      const type = block.readUInt8(5)
+      const typeId = block.readUInt16LE(6)
+      const typeStatus = block.readUInt16LE(8)
+      const coreID = block.readUInt8(10)
+      const receivedCRC = block.readUInt8(11)
 
-      // Calculate CRC on first 14 bytes
-      const calculatedCRC = crc8.compute(block.subarray(0, 14))
+      // Validate frame based on checkCRC flag
+      let isValidFrame = true
+      if (this.checkCRC) {
+        // Calculate CRC on first 11 bytes (index + timestamp + type + typeId + typeStatus + coreID)
+        const calculatedCRC = crc8.compute(block.subarray(0, 11))
+        if (calculatedCRC !== receivedCRC) {
+          this.callbacks.onError(
+            `CRC mismatch! Expected: ${calculatedCRC}, Received: ${receivedCRC}, Index: ${currentIndex}`
+          )
+          isValidFrame = false
+        }
+      } else {
+        // When CRC is disabled, the last byte is reserved but still present in the frame
+        // Validate by checking if type is in valid range (0-5)
+        if (type > 5) {
+          this.callbacks.onError(`Invalid type value: ${type}, Index: ${currentIndex}`)
+          isValidFrame = false
+        }
+      }
 
-      // Check CRC
-      if (calculatedCRC !== receivedCRC) {
-        this.callbacks.onError(
-          `CRC mismatch! Expected: ${calculatedCRC}, Received: ${receivedCRC}, Index: ${currentIndex32}`
-        )
-
+      if (!isValidFrame) {
         // Skip this entire frame and search for next frame header
         this.leftBuffer = this.leftBuffer.subarray(1)
         continue
@@ -105,15 +129,15 @@ export class OsTraceParser {
 
       // Check index continuity
       if (this.index == undefined) {
-        this.index = currentIndex32
+        this.index = currentIndex
       } else {
-        const expectedIndex32 = ((this.index + 1) & 0xffff_ffff) >>> 0
-        if (currentIndex32 !== expectedIndex32) {
+        const expectedIndex = ((this.index + 1) & 0xff) >>> 0
+        if (currentIndex !== expectedIndex) {
           this.callbacks.onError(
-            `Index mismatch! Expected: ${expectedIndex32}, Received: ${currentIndex32}`
+            `Index mismatch! Expected: ${expectedIndex}, Received: ${currentIndex}`
           )
         }
-        this.index = currentIndex32
+        this.index = currentIndex
       }
 
       // Detect timestamp overflow using raw timestamp (not divided by frequency)
@@ -126,7 +150,7 @@ export class OsTraceParser {
       const rawTs = this.getRealTs(rawTimestamp32)
       const realTs = rawTs / this.orti.cpuFreq
       const osEvent: OsEvent = {
-        index: currentIndex32,
+        index: currentIndex,
         database: this.orti.id,
         type: type,
         id: typeId,
@@ -197,9 +221,9 @@ export class OsTraceParser {
 export class BinaryParserStream extends Transform {
   private parser: OsTraceParser
 
-  constructor(orti: ORTIFile, callbacks: ParseCallbacks) {
+  constructor(orti: ORTIFile, callbacks: ParseCallbacks, checkCRC = false) {
     super({ objectMode: true })
-    this.parser = new OsTraceParser(orti, callbacks)
+    this.parser = new OsTraceParser(orti, callbacks, checkCRC)
   }
 
   _transform(chunk: Buffer, encoding: string, callback: (error?: Error | null) => void) {
@@ -218,9 +242,9 @@ export class BinaryParserStream extends Transform {
 export class CsvParserStream extends Transform {
   private parser: OsTraceParser
 
-  constructor(orti: ORTIFile, callbacks: ParseCallbacks) {
+  constructor(orti: ORTIFile, callbacks: ParseCallbacks, checkCRC = false) {
     super({ objectMode: true, encoding: 'utf-8' })
-    this.parser = new OsTraceParser(orti, callbacks)
+    this.parser = new OsTraceParser(orti, callbacks, checkCRC)
   }
 
   _transform(chunk: string, encoding: string, callback: (error?: Error | null) => void) {

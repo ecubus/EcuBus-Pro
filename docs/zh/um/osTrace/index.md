@@ -60,21 +60,25 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 - **Stop Bits**: 停止位（1、1.5、2）
 - **Parity**: 校验位（None、Even、Odd、Mark、Space）
 
-**数据格式：** 16字节二进制数据（大端序）
+**数据格式：** 16字节二进制数据（小端序）
 
 | 字段 | 长度 | 说明 |
 |------|------|------|
-| frame header | 1 byte | 帧头 (0x5A) |
-| index | 4 bytes | 事件索引（LSB） |
+| frame header | 4 bytes | 帧头 (0x5A5B5C5D) |
+| index | 1 byte | 事件索引（0-255循环） |
 | timestamp | 4 bytes | 时间戳（LSB） |
 | type | 1 byte | 事件类型 |
 | type id | 2 bytes | 对象ID（LSB） |
 | type status | 2 bytes | 状态/参数（LSB） |
 | coreID | 1 byte | 核心ID |
-| CRC8 | 1 byte | CRC8校验码 |
+| CRC8/Reserved | 1 byte | CRC8校验码或保留字节 |
+
 
 > [!NOTE]
-> CRC8校验码是对前14字节数据计算得出
+> - 数据帧总长度固定为16字节
+> - CRC8校验码是对数据部分的11字节计算得出（不包含帧头和CRC字节本身，包含：index、timestamp、type、type id、type status、coreID）
+> - 当CRC校验开启时，使用最后1字节作为CRC8校验码
+> - 当CRC校验关闭时，最后1字节作为保留字节（Reserved），系统会通过验证type字段（有效值：0-5）来判断帧的有效性
 
 ![serialPort](serialPort.png)
 
@@ -108,7 +112,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 
 **字段说明：**
 - **timestamp**: 时间戳(tick)
-- **type**: 事件类型（0=TASK, 1=ISR, 2=RESOURCE, 3=SERVICE, 4=HOOK, 5=SPINLOCK）
+- **type**: 事件类型
 - **id**: 对象ID
 - **status**: 状态值
 

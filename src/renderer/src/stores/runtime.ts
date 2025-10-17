@@ -23,7 +23,8 @@ export type TestTree = {
 }
 
 export type PluginState = {
-  plugins: Map<string, Plugin>
+  plugins: Record<string, Plugin>
+  pluginsEanbled: Record<string, boolean>
   loaded: boolean
   loading: boolean
   error: string | null
@@ -54,7 +55,8 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     globalStart: false,
     rearrangeWindows: false,
     pluginState: {
-      plugins: new Map(),
+      pluginsEanbled: (window.store.get('pluginsEanbled') as Record<string, boolean>) || {},
+      plugins: {},
       loaded: false,
       loading: false,
       error: null

@@ -55,7 +55,6 @@ export interface PluginTabConfig {
 // 扩展现有 Tab 的配置
 export interface PluginTabExtension {
   targetTab: string // 目标 tab 名称（如 'home', 'hardware' 等）
-  position?: number | 'start' | 'end' // 插入位置，默认 'end'
   items: PluginItemConfig[]
 }
 
@@ -72,15 +71,7 @@ export interface PluginManifest {
   extensions?: PluginTabExtension[]
 }
 
-// 插件处理器接口
-export interface PluginHandlers {
-  [handlerName: string]: (...args: any[]) => void | Promise<void>
-}
-
 // 完整的插件定义
 export interface Plugin {
   manifest: PluginManifest
-  handlers: PluginHandlers
-  components?: Record<string, Component>
-  enabled: boolean // 插件是否启用
 }

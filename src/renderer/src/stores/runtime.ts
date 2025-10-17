@@ -2,11 +2,12 @@
 import { defineStore } from 'pinia'
 import { toRef } from 'vue'
 import type {
-  Plugin,
+  EcuBusPlugin,
   PluginManifest,
   PluginTabConfig,
   PluginTabExtension
 } from '@r/plugin/tabPluginTypes'
+import { cloneDeep } from 'lodash'
 
 export type TestTree = {
   label: string
@@ -23,7 +24,7 @@ export type TestTree = {
 }
 
 export type PluginState = {
-  plugins: Record<string, Plugin>
+  plugins: Map<string, EcuBusPlugin>
   pluginsEanbled: Record<string, boolean>
   loaded: boolean
   loading: boolean
@@ -56,45 +57,12 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     rearrangeWindows: false,
     pluginState: {
       pluginsEanbled: (window.store.get('pluginsEanbled') as Record<string, boolean>) || {},
-      plugins: {},
+      plugins: new Map(),
       loaded: false,
       loading: false,
       error: null
     }
   }),
-
-  getters: {
-    // 获取所有插件
-    allPlugins: (state) => Array.from(state.pluginState.plugins.values()),
-
-    // 获取已启用的插件
-    enabledPlugins: (state) =>
-      Array.from(state.pluginState.plugins.values()).filter((p) => p.enabled),
-
-    // 获取插件数量
-    pluginCount: (state) => state.pluginState.plugins.size,
-
-    // 获取已启用插件数量
-    enabledPluginCount: (state) =>
-      Array.from(state.pluginState.plugins.values()).filter((p) => p.enabled).length,
-
-    // 获取所有新增的 tabs（仅启用的插件）
-    newTabs: (state) => {
-      const tabs: PluginTabConfig[] = []
-      for (const plugin of state.pluginState.plugins.values()) {
-        if (plugin.enabled && plugin.manifest.tabs) {
-          tabs.push(...plugin.manifest.tabs)
-        }
-      }
-      return tabs
-    },
-
-    // 获取插件加载状态
-    pluginsLoaded: (state) => state.pluginState.loaded,
-
-    // 获取插件加载中状态
-    pluginsLoading: (state) => state.pluginState.loading
-  },
 
   actions: {
     setCanPeriod(key: string, value: boolean) {
@@ -115,7 +83,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     /**
      * 注册插件
      */
-    registerPlugin(plugin: Plugin) {
+    registerPlugin(plugin: EcuBusPlugin) {
       const { id } = plugin.manifest
 
       this.pluginState.plugins.set(id, plugin)
@@ -134,7 +102,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     /**
      * 获取特定插件
      */
-    getPlugin(pluginId: string): Plugin | undefined {
+    getPlugin(pluginId: string): EcuBusPlugin | undefined {
       return this.pluginState.plugins.get(pluginId)
     },
 
@@ -145,7 +113,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
       const extensions: PluginTabExtension[] = []
 
       for (const plugin of this.pluginState.plugins.values()) {
-        if (plugin.enabled && plugin.manifest.extensions) {
+        if (this.pluginState.pluginsEanbled[plugin.manifest.id] && plugin.manifest.extensions) {
           const tabExtensions = plugin.manifest.extensions.filter(
             (ext) => ext.targetTab === tabName
           )
@@ -156,17 +124,45 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
       return extensions
     },
 
+    getPluginStats() {
+      const allPlugins = this.pluginState.plugins
+      const enabledCount = Object.values(this.pluginState.pluginsEanbled).filter(Boolean).length
+      const enabledPlugins: EcuBusPlugin[] = []
+      for (const plugin of allPlugins.values()) {
+        if (this.pluginState.pluginsEanbled[plugin.manifest.id]) {
+          enabledPlugins.push(plugin)
+        }
+      }
+      const newTabs: PluginTabConfig[] = []
+      for (const plugin of enabledPlugins) {
+        if (plugin.manifest.tabs?.length && plugin.manifest.tabs.length > 0) {
+          newTabs.push(...plugin.manifest.tabs)
+        }
+      }
+      const allExtensions: PluginTabExtension[] = []
+      for (const plugin of enabledPlugins) {
+        if (plugin.manifest.extensions?.length && plugin.manifest.extensions.length > 0) {
+          allExtensions.push(...plugin.manifest.extensions)
+        }
+      }
+
+      return {
+        total: allPlugins.size,
+        enabled: enabledCount,
+        newTabs: newTabs.length,
+        extensions: allExtensions
+      }
+    },
+
     /**
      * 启用插件
      */
     enablePlugin(pluginId: string) {
       const plugin = this.pluginState.plugins.get(pluginId)
       if (plugin) {
-        plugin.enabled = true
-        console.log(`Plugin ${pluginId} enabled`)
-        return true
+        this.pluginState.pluginsEanbled[pluginId] = true
+        window.store.set('pluginsEanbled', cloneDeep(this.pluginState.pluginsEanbled))
       }
-      return false
     },
 
     /**
@@ -175,59 +171,18 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     disablePlugin(pluginId: string) {
       const plugin = this.pluginState.plugins.get(pluginId)
       if (plugin) {
-        plugin.enabled = false
-        console.log(`Plugin ${pluginId} disabled`)
+        this.pluginState.pluginsEanbled[pluginId] = false
+        window.store.set('pluginsEanbled', cloneDeep(this.pluginState.pluginsEanbled))
+
         return true
       }
       return false
     },
 
     /**
-     * 切换插件启用状态
-     */
-    togglePlugin(pluginId: string) {
-      const plugin = this.pluginState.plugins.get(pluginId)
-      if (plugin) {
-        const newState = !plugin.enabled
-        plugin.enabled = newState
-        // 强制更新 Map 以触发响应式
-        this.pluginState.plugins = new Map(this.pluginState.plugins)
-        console.log(`Plugin ${pluginId} ${newState ? 'enabled' : 'disabled'}`)
-        return newState
-      }
-      return false
-    },
-
-    /**
-     * 调用插件处理器
-     */
-    async callPluginHandler(pluginId: string, handlerName: string, ...args: any[]) {
-      const plugin = this.pluginState.plugins.get(pluginId)
-
-      if (!plugin) {
-        console.error(`Plugin ${pluginId} not found`)
-        return
-      }
-
-      const handler = plugin.handlers[handlerName]
-
-      if (!handler) {
-        console.error(`Handler ${handlerName} not found in plugin ${pluginId}`)
-        return
-      }
-
-      try {
-        return await handler(...args)
-      } catch (error) {
-        console.error(`Error calling handler ${handlerName} in plugin ${pluginId}:`, error)
-        throw error
-      }
-    },
-
-    /**
      * 从目录加载插件
      */
-    async loadPluginFromDirectory(pluginDir: string): Promise<Plugin | null> {
+    async loadPluginFromDirectory(pluginDir: string): Promise<EcuBusPlugin | null> {
       try {
         const manifestPath = `${pluginDir}/manifest.json`
 
@@ -238,20 +193,18 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
         )
         const manifest: PluginManifest = JSON.parse(manifestContent)
 
-        // 尝试加载处理器
-        let handlers = {}
-        try {
-          const handlersPath = `${pluginDir}/handlers.js`
-          const handlersModule = await import(/* @vite-ignore */ handlersPath)
-          handlers = handlersModule.default || handlersModule
-        } catch (error) {
-          console.warn(`No handlers found for plugin ${manifest.id}, using empty handlers`)
-        }
+        // // 尝试加载处理器
+        // let handlers = {}
+        // try {
+        //   const handlersPath = `${pluginDir}/handlers.js`
+        //   const handlersModule = await import(/* @vite-ignore */ handlersPath)
+        //   handlers = handlersModule.default || handlersModule
+        // } catch (error) {
+        //   console.warn(`No handlers found for plugin ${manifest.id}, using empty handlers`)
+        // }
 
-        const plugin: Plugin = {
-          manifest,
-          handlers,
-          enabled: true // 默认启用
+        const plugin: EcuBusPlugin = {
+          manifest
         }
 
         this.registerPlugin(plugin)

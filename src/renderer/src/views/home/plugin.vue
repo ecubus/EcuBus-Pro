@@ -31,7 +31,9 @@
           <div class="stat-content">
             <Icon :icon="checkIcon" class="stat-icon success" />
             <div>
-              <div class="stat-value">{{ pluginStats.enabled }}</div>
+              <div class="stat-value">
+                {{ Object.values(pluginStats.enabled).filter(Boolean).length }}
+              </div>
               <div class="stat-label">Enabled</div>
             </div>
           </div>
@@ -49,7 +51,7 @@
           <div class="stat-content">
             <Icon :icon="extensionIcon" class="stat-icon warning" />
             <div>
-              <div class="stat-value">{{ pluginStats.extensions }}</div>
+              <div class="stat-value">{{ pluginStats.extensions.length }}</div>
               <div class="stat-label">Extensions</div>
             </div>
           </div>
@@ -83,11 +85,11 @@
             </div>
             <div class="plugin-actions">
               <el-switch
-                :model-value="plugin.enabled"
+                :model-value="enabledPlugins[plugin.manifest.id]"
                 size="default"
-                :active-text="plugin.enabled ? 'Enabled' : ''"
-                :inactive-text="!plugin.enabled ? 'Disabled' : ''"
-                @change="togglePlugin(plugin.manifest.id)"
+                active-text="Enabled"
+                inactive-text="Disabled"
+                @change="togglePlugin(plugin.manifest.id, $event as boolean)"
               />
               <el-button
                 type="danger"
@@ -172,6 +174,7 @@ import extensionIcon from '@iconify/icons-mdi/puzzle-plus'
 import emptyIcon from '@iconify/icons-mdi/package-variant'
 import authorIcon from '@iconify/icons-mdi/account'
 import { useRuntimeStore } from '@r/stores/runtime'
+import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '@r/plugin/tabPluginTypes'
 
 const props = defineProps<{
   height: number
@@ -183,42 +186,23 @@ const pluginDir = ref('')
 
 // 插件列表
 const plugins = computed(() => {
-  return runtime.allPlugins
+  return Array.from(runtime.pluginState.plugins.values())
 })
 
 // 已启用的插件列表
-const enabledPlugins = computed(() => {
-  return runtime.enabledPlugins
-})
+const enabledPlugins = ref<Record<string, boolean>>(runtime.pluginState.pluginsEanbled)
 
 // 插件统计
 const pluginStats = computed(() => {
-  const allPlugins = runtime.allPlugins
-  const enabledCount = runtime.enabledPluginCount
-  const newTabs = runtime.newTabs
-  const allExtensions = enabledPlugins.value.reduce((acc, p) => {
-    return acc + (p.manifest.extensions?.length || 0)
-  }, 0)
-
-  return {
-    total: allPlugins.length,
-    enabled: enabledCount,
-    newTabs: newTabs.length,
-    extensions: allExtensions
-  }
+  return runtime.getPluginStats()
 })
 
 // 切换插件启用状态
-function togglePlugin(pluginId: string) {
-  try {
-    const result = runtime.togglePlugin(pluginId)
-    const plugin = runtime.getPlugin(pluginId)
-    if (plugin) {
-      ElMessage.success(`Plugin "${plugin.manifest.name}" ${result ? 'enabled' : 'disabled'}`)
-    }
-  } catch (error) {
-    console.error('Failed to toggle plugin:', error)
-    ElMessage.error('Failed to toggle plugin')
+function togglePlugin(pluginId: string, value: boolean) {
+  if (value) {
+    runtime.enablePlugin(pluginId)
+  } else {
+    runtime.disablePlugin(pluginId)
   }
 }
 

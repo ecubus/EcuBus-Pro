@@ -285,6 +285,15 @@
                   }"
                 />
               </el-tab-pane>
+              <el-tab-pane label="plugin">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="pluginIcon" />
+                    <span>Plugin</span>
+                  </span>
+                </template>
+                <plugin-manager :height="height - 170" />
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -422,6 +431,8 @@ import general from './general.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
+import pluginIcon from '@iconify/icons-mdi/puzzle'
+import pluginManager from './plugin.vue'
 
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)

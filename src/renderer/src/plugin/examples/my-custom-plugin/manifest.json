@@ -1,0 +1,80 @@
+{
+  "id": "my-custom-plugin",
+  "name": "My Custom Plugin",
+  "version": "1.0.0",
+  "description": "示例插件 - 展示如何添加新 tab 和扩展现有 tab",
+  "author": "Your Name",
+  "tabs": [
+    {
+      "name": "custom",
+      "label": "Custom",
+      "icon": "mdi:puzzle",
+      "items": [
+        {
+          "type": "button",
+          "id": "custom-action-1",
+          "label": "Custom Action",
+          "icon": "mdi:rocket-launch",
+          "onClick": "handleCustomAction"
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "dropdown",
+          "id": "custom-dropdown-1",
+          "label": "Custom Menu",
+          "icon": "mdi:menu",
+          "items": [
+            {
+              "command": "action1",
+              "label": "Action 1",
+              "icon": "mdi:numeric-1-circle"
+            },
+            {
+              "command": "action2",
+              "label": "Action 2",
+              "icon": "mdi:numeric-2-circle"
+            }
+          ],
+          "onCommand": "handleCustomCommand"
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "targetTab": "home",
+      "position": "end",
+      "items": [
+        {
+          "type": "divider"
+        },
+        {
+          "type": "button",
+          "id": "plugin-home-button",
+          "label": "Plugin Button",
+          "icon": "mdi:puzzle",
+          "onClick": "handleHomeExtension"
+        }
+      ]
+    },
+    {
+      "targetTab": "other",
+      "position": "start",
+      "items": [
+        {
+          "type": "button",
+          "id": "plugin-other-button",
+          "label": "Plugin Tool",
+          "icon": "mdi:tools",
+          "onClick": "handleOtherExtension"
+        },
+        {
+          "type": "divider"
+        }
+      ]
+    }
+  ]
+}
+

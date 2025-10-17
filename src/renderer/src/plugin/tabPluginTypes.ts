@@ -72,6 +72,6 @@ export interface PluginManifest {
 }
 
 // 完整的插件定义
-export interface Plugin {
+export interface EcuBusPlugin {
   manifest: PluginManifest
 }

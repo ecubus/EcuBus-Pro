@@ -1782,7 +1782,7 @@
           ],
           "recordFile": {
             "enable": false,
-            "name": "test.csv"
+            "name": "test1.csv"
           },
           "connector": {
             "type": "BinaryFile",
@@ -1809,8 +1809,8 @@
         "name": "Status_5ms",
         "color": "#253d9a",
         "yAxis": {
-          "min": -2.523412813896095,
-          "max": 6.923412813896094,
+          "min": -2.46234932645194,
+          "max": 6.984476301340255,
           "splitLine": {
             "show": false
           },
@@ -1915,6 +1915,53 @@
           "show": true
         },
         "series": {
+          "showSymbol": true,
+          "symbolSize": 6,
+          "symbol": "circle"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax",
+        "name": "DelayTimeMax",
+        "color": "#0994b8",
+        "yAxis": {
+          "min": 0,
+          "max": 5000,
+          "unit": "us",
+          "splitLine": {
+            "show": false
+          },
+          "name": "DelayTimeMax"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.DelayTimeMax",
+          "variableType": "system",
+          "variableName": "DelayTimeMax",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.DelayTimeMax",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "tooltip": {
+          "show": true
+        },
+        "series": {
+          "step": false,
           "showSymbol": true,
           "symbolSize": 6,
           "symbol": "circle"
@@ -2425,7 +2472,22 @@
     },
     "panels": {},
     "logs": {},
-    "traces": {}
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [],
+        "filterId": []
+      }
+    }
   },
   "project": {
     "wins": {
@@ -2447,10 +2509,10 @@
       },
       "1712396f-dfa8-4dd7-82bb-c046ae3b927d_trace": {
         "pos": {
-          "x": 3,
-          "y": 0.000030517578125,
+          "x": 202,
+          "y": 0,
           "w": 1707,
-          "h": 380
+          "h": 538
         },
         "title": "osTrace",
         "label": "OSTrace",
@@ -2472,10 +2534,10 @@
       },
       "graph": {
         "pos": {
-          "x": 0,
-          "y": 380,
+          "x": 834,
+          "y": 291,
           "w": 1707,
-          "h": 380
+          "h": 512
         },
         "title": "graph",
         "label": "Line",
@@ -2485,12 +2547,12 @@
             "edit-index": "graph"
           }
         },
-        "hide": true
+        "hide": false
       },
       "variable": {
         "pos": {
-          "x": 980,
-          "y": 356,
+          "x": 950,
+          "y": 291,
           "w": 600,
           "h": 400
         },
@@ -2509,8 +2571,8 @@
       },
       "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
         "pos": {
-          "x": 503.5,
-          "y": 180,
+          "x": 950,
+          "y": 291,
           "w": 700,
           "h": 400
         },
@@ -2523,14 +2585,14 @@
           },
           "name": "Os_Trace"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 493.5,
-          "y": 102,
+          "x": 90,
+          "y": 291,
           "w": 877,
-          "h": 400
+          "h": 586
         },
         "title": "trace",
         "label": "Trace",

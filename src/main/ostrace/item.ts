@@ -124,7 +124,7 @@ export default class TraceItem {
       }
       logFile = path.resolve(logFile)
     }
-    this.log = new OsTraceLOG(this.orti.name, logFile)
+    this.log = new OsTraceLOG(this.orti.name, this.orti.recordFile?.enable ? logFile : undefined)
     this.systemTs = getTsUs()
   }
 

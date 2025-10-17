@@ -1919,10 +1919,6 @@ export class UtilClass {
     }
   }
   private async canMsg(msg: CanMessage) {
-    await this.event.emit(`can.${msg.id}` as any, msg)
-    await this.event.emit('can' as any, msg)
-    //signal emit
-
     if (msg.device) {
       const device = Object.values(global.dataSet.devices).find(
         (device) => device.canDevice && device.canDevice.name == msg.device
@@ -1945,13 +1941,11 @@ export class UtilClass {
         }
       }
     }
+    await this.event.emit(`can.${msg.id}` as any, msg)
+    await this.event.emit('can' as any, msg)
+    //signal emit
   }
   private async linMsg(msg: LinMsg) {
-    await this.event.emit(`lin.${msg.frameId}` as any, msg)
-    if (msg.database && msg.name) {
-      await this.event.emit(`lin.${msg.database}.${msg.name}` as any, msg)
-    }
-    await this.event.emit('lin' as any, msg)
     //signal emit
     if (msg.device) {
       const device = Object.values(global.dataSet.devices).find(
@@ -1990,6 +1984,8 @@ export class UtilClass {
         }
       }
     }
+    await this.event.emit(`lin.${msg.frameId}` as any, msg)
+    await this.event.emit('lin' as any, msg)
   }
   private async someipMsg(data: SomeipMessage) {
     let someipMsg: SomeipMessageBase

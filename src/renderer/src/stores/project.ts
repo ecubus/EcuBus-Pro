@@ -25,7 +25,7 @@ export interface Project {
       layoutType?: 'bottom' | 'top' | 'left' | 'right'
       options: {
         name?: string
-        params: Record<string, string>
+        params: Record<string, any>
       }
       isMax?: boolean
       hide?: boolean

@@ -655,10 +655,6 @@ const OsTraceDropdown = {
 
 // 将插件配置转换为内部 TabItem 格式
 function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin): TabItem | null {
-  if (item.type === 'divider') {
-    return { type: 'divider' }
-  }
-
   if (item.type === 'button') {
     return {
       type: 'button',
@@ -672,12 +668,26 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
       handlerName: item.onClick,
       onClick: () => {
         if (item.onClick) {
-          layoutMaster.addWin('plugin', plugin.manifest.id, {
-            params: {
-              'edit-index': plugin.manifest.id,
-              plugin: plugin
-            }
-          })
+          if (item.entry) {
+            layoutMaster.addWin('plugin', plugin.manifest.id, {
+              name: item.label,
+              params: {
+                'edit-index': plugin.manifest.id,
+                pluginId: plugin.manifest.id,
+                item: item,
+                isPlugin: true
+              }
+            })
+          } else {
+            ElMessageBox({
+              title: 'Plugin Error',
+              message: `This plugin does not have an entry point in the extension ${item.label}`,
+              type: 'error',
+              showCancelButton: false,
+              showConfirmButton: false,
+              center: true
+            })
+          }
         }
       }
     }
@@ -741,8 +751,8 @@ function loadIconify(iconName: string): any {
 
 // 合并插件的 tabs 和 items（直接从 plugin store 获取）
 function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
-  const result = [...baseTabs]
-  console.log('mergePluginTabs', pluginStore)
+  const result = cloneDeep(baseTabs)
+
   // 只有在插件加载完成时才合并
   if (pluginStore.loaded) {
     const enabledPlugins = pluginStore.getEnabledPlugins()
@@ -794,7 +804,7 @@ function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
 }
 
 // 基础 Tabs 配置数据
-const baseTabsConfig: TabConfig[] = [
+const baseTabsConfig: Ref<TabConfig[]> = ref([
   {
     name: 'home',
     label: 'Home',
@@ -980,11 +990,11 @@ const baseTabsConfig: TabConfig[] = [
       }
     ]
   }
-]
+])
 
 // 最终的 tabs 配置（合并插件）
 const tabsConfig = computed<TabConfig[]>(() => {
-  return mergePluginTabs(cloneDeep(baseTabsConfig))
+  return mergePluginTabs(baseTabsConfig.value)
 })
 
 function openTrace(command: string, key?: string) {

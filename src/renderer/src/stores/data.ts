@@ -27,7 +27,8 @@ export const useDataStore = defineStore('useDataStore', {
     datas: {},
     panels: {},
     logs: {},
-    traces: {}
+    traces: {},
+    pluginData: {}
   }),
   actions: {
     globalRun(type: 'start' | 'stop') {
@@ -165,7 +166,8 @@ export const useDataStore = defineStore('useDataStore', {
         datas: this.datas,
         panels: this.panels,
         logs: this.logs,
-        traces: this.traces
+        traces: this.traces,
+        pluginData: this.pluginData
       }
     }
   }

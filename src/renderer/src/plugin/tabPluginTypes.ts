@@ -16,6 +16,7 @@ export interface PluginButtonConfig {
   style?: string
   // 点击事件处理器名称，会映射到插件注册的处理函数
   onClick?: string
+  entry?: string
 }
 
 // 插件中的下拉菜单配置
@@ -25,6 +26,7 @@ export interface PluginDropdownConfig {
   label: string
   icon?: string
   iconSize?: string
+  entry?: string
   // 下拉菜单项
   items: Array<{
     command: string
@@ -37,12 +39,7 @@ export interface PluginDropdownConfig {
   onCommand?: string
 }
 
-// 插件中的分隔符配置
-export interface PluginDividerConfig {
-  type: 'divider'
-}
-
-export type PluginItemConfig = PluginButtonConfig | PluginDropdownConfig | PluginDividerConfig
+export type PluginItemConfig = PluginButtonConfig | PluginDropdownConfig
 
 // 插件 Tab 配置
 export interface PluginTabConfig {
@@ -65,7 +62,6 @@ export interface PluginManifest {
   version: string // 插件版本
   description?: string // 插件描述
   author?: string // 作者
-  render?: string // 渲染页面
   tabs?: PluginTabConfig[]
   extensions?: PluginTabExtension[]
 }
@@ -74,4 +70,5 @@ export interface PluginManifest {
 export interface EcuBusPlugin {
   manifest: PluginManifest
   path: string
+  disabled?: boolean
 }

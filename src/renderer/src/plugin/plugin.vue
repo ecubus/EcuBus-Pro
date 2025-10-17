@@ -3,29 +3,37 @@
     <!--D:\code\app-template\dist\index.html  -->
     <WujieVue
       name="A"
-      :url="`file:///${props.plugin.manifest.render}`"
+      :url="`file:///${props.item.entry}`"
       :fetch="customFetch"
       :plugins="plugins"
+      :props="{ ...props, initData: dataStore.pluginData[props.pluginId] }"
     ></WujieVue>
   </div>
 </template>
 
 <script setup lang="ts">
 import { toRef } from 'vue'
-import { EcuBusPlugin } from './tabPluginTypes'
+import { EcuBusPlugin, PluginItemConfig } from './tabPluginTypes'
+import { useDataStore } from '@r/stores/data'
+import { usePluginStore } from '@r/stores/plugin'
 
+const dataStore = useDataStore()
 const props = defineProps<{
   editIndex: string
-  plugin: EcuBusPlugin
+  pluginId: string
+  item: PluginItemConfig
   width: number
   height: number
 }>()
+
+const plguinStore = usePluginStore()
+const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')
 const width = toRef(props, 'width')
 const height = toRef(props, 'height')
 const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
 
-const basePath = props.plugin.path
+const basePath = plugin.path
 const importMap = {
   imports: {
     vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,

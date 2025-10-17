@@ -2425,7 +2425,8 @@
     },
     "panels": {},
     "logs": {},
-    "traces": {}
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -2542,6 +2543,33 @@
           "name": "Trace"
         },
         "hide": false
+      },
+      "simple-plugin": {
+        "pos": {
+          "x": 276.5,
+          "y": 181,
+          "w": 700,
+          "h": 400
+        },
+        "title": "plugin",
+        "label": "Plugin",
+        "id": "simple-plugin",
+        "options": {
+          "params": {
+            "edit-index": "simple-plugin",
+            "pluginId": "simple-plugin",
+            "item": {
+              "type": "button",
+              "id": "simple-test-helper",
+              "label": "Test Helper",
+              "icon": "mdi:help-circle",
+              "onClick": "showTestHelp",
+              "entry": "index.html"
+            },
+            "isPlugin": true
+          },
+          "name": "Test Helper"
+        }
       }
     }
   }

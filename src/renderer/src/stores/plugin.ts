@@ -122,16 +122,6 @@ export const usePluginStore = defineStore('usePluginStore', {
         )
         const manifest: PluginManifest = JSON.parse(manifestContent)
 
-        // // 尝试加载处理器
-        // let handlers = {}
-        // try {
-        //   const handlersPath = `${pluginDir}/handlers.js`
-        //   const handlersModule = await import(/* @vite-ignore */ handlersPath)
-        //   handlers = handlersModule.default || handlersModule
-        // } catch (error) {
-        //   console.warn(`No handlers found for plugin ${manifest.id}, using empty handlers`)
-        // }
-
         const plugin: EcuBusPlugin = {
           manifest,
           path: pluginDir

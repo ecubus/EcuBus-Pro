@@ -15,6 +15,15 @@ ipcMain.handle('ipc-glob', async (event, ...args) => {
   return glob(par, ...args)
 })
 
+ipcMain.handle('ipc-open-path', async (event, targetPath: string) => {
+  try {
+    await shell.openPath(targetPath)
+    return true
+  } catch (error) {
+    console.error(`Failed to open path ${targetPath}:`, error)
+    throw error
+  }
+})
 ipcMain.handle('ipc-fs-readFile', async (event, ...args) => {
   return fsP.readFile(args[0], 'utf-8')
 })
@@ -42,3 +51,13 @@ ipcMain.handle('ipc-fs-stat', async (event, ...args) => {
   return fsP.stat(args[0])
 })
 
+// 递归删除目录
+ipcMain.handle('ipc-fs-rmdir', async (event, dirPath: string) => {
+  try {
+    await fsP.rm(dirPath, { recursive: true, force: true })
+    return true
+  } catch (error) {
+    console.error(`Failed to remove directory ${dirPath}:`, error)
+    throw error
+  }
+})

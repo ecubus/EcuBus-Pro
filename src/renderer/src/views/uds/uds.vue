@@ -2,426 +2,54 @@
   <div>
     <div class="demo-tabs" :class="{ tablePin: pined }">
       <el-tabs v-model="activeMenu" type="border-card">
-        <!-- <el-tab-pane name="_home">
-          <template #label>
-            <img :src="logo" style="width: 35px;padding-left:5px;padding-right:5px; -webkit-app-region: drag" />
-          </template>
-
-</el-tab-pane> -->
-        <el-tab-pane name="home">
+        <el-tab-pane v-for="tab in tabsConfig" :key="tab.name" :name="tab.name">
           <template #label>
             <span class="lr">
-              <Icon :icon="homeIcon" style="font-size: 16px" />
-              <span>Home</span>
+              <Icon :icon="tab.icon" style="font-size: 16px" />
+              <span>{{ tab.label }}</span>
             </span>
           </template>
           <div style="display: flex; gap: 5px; padding: 15px">
-            <div
-              class="grid mingird"
-              :class="{
-                girdenable: !globalStart,
-                girddisable: globalStart
-              }"
-              style="color: var(--el-color-success)"
-              @click="dataBase.globalRun('start')"
-            >
-              <Icon :icon="lightIcon" style="font-size: 32px" />
-              <span>Start</span>
-            </div>
-            <div
-              class="grid mingird"
-              :class="{
-                girdenable: globalStart,
-                girddisable: !globalStart
-              }"
-              style="color: var(--el-color-danger)"
-              @click="dataBase.globalRun('stop')"
-            >
-              <Icon :icon="stopIcon" style="font-size: 32px" />
-              <span>Stop</span>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click.stop="openTrace('trace')">
-              <Icon :icon="logIcon" style="font-size: 24px" />
-              <el-dropdown @command="openTrace">
-                <span class="lr">
-                  Trace
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item command="trace">
-                      <div
-                        style="display: flex; align-items: center; justify-content: space-between"
-                      >
-                        <span>{{ dataBase.traces['trace']?.name || 'Trace' }}</span>
-                        <el-divider direction="vertical" />
+            <template v-for="(item, index) in tab.items" :key="index">
+              <!-- 分隔符 -->
+              <el-divider
+                v-if="item.type === 'divider'"
+                direction="vertical"
+                style="height: 54px"
+              />
 
-                        <el-button link>
-                          <el-icon @click.stop="openTrace('addTrace')"
-                            ><CirclePlusFilled
-                          /></el-icon>
-                        </el-button>
-                      </div>
-                    </el-dropdown-item>
-                    <template v-for="(item, key) in dataBase.traces" :key="key">
-                      <el-dropdown-item v-if="key != 'trace'" :command="key">
-                        <div style="display: flex; align-items: center; width: 100%">
-                          {{ item.name || `Trace` }}
-                          <el-divider direction="vertical" />
+              <!-- 普通按钮 -->
+              <div
+                v-else-if="item.type === 'button'"
+                class="grid girdenable"
+                :class="[item.class, item.minWidth ? 'mingird' : '']"
+                :style="item.style"
+                @click="item.onClick"
+              >
+                <Icon :icon="item.icon" :style="{ fontSize: item.iconSize || '24px' }" />
+                <span>{{ item.label }}</span>
+              </div>
 
-                          <el-button link type="danger">
-                            <el-icon @click.stop="openTrace('deletaTrace', key)"
-                              ><Delete
-                            /></el-icon>
-                          </el-button>
-                        </div>
-                      </el-dropdown-item>
-                    </template>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable">
-              <Icon :icon="graphIcon" style="font-size: 24px" />
-              <el-dropdown @command="openGraph">
-                <span class="lr">
-                  Graph
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item command="graph">
-                      <Icon :icon="lineIcon" style="margin-right: 5px" />
-                      Line</el-dropdown-item
-                    >
-                    <el-dropdown-item command="gauge">
-                      <Icon :icon="gaugeIcon" style="margin-right: 5px" />
-                      Gauge</el-dropdown-item
-                    >
-                    <el-dropdown-item command="datas">
-                      <Icon :icon="dataIcon" style="margin-right: 5px" />
-                      Datas</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <div class="grid girdenable">
-              <Icon :icon="panelIcon1" style="font-size: 24px" />
-              <el-dropdown @command="openPanel">
-                <span class="lr">
-                  Panel
-
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item command="panel" icon="CirclePlusFilled">
-                      Add Panel</el-dropdown-item
-                    >
-
-                    <el-dropdown-item
-                      v-for="(item, index) in Object.values(dataBase.panels)"
-                      :key="item.id"
-                      divider
-                      :command="item.id"
-                      :divided="index == 0"
-                    >
-                      <div
-                        style="
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          width: 100%;
-                        "
-                      >
-                        <div style="display: flex; align-items: center">
-                          <Icon :icon="panelIcon1" style="margin-right: 5px" />
-                          <span style="display: flex; align-items: center">{{ item.name }}</span>
-                          <el-divider direction="vertical" />
-                          <el-button-group>
-                            <el-button link type="warning">
-                              <el-icon @click.stop="editPanel(item.id)"><Edit /></el-icon>
-                            </el-button>
-                            <el-button link type="danger">
-                              <el-icon @click.stop="deletePanel(item.id)"><Delete /></el-icon>
-                            </el-button>
-                          </el-button-group>
-                        </div>
-                      </div>
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click="handleSelect(['message'])">
-              <Icon :icon="msgIcon" style="font-size: 24px" />
-              <span>Message</span>
-            </div>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane name="hardware">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="hardware" style="font-size: 16px" />
-              <span>Hardware</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable" @click="handleSelect(['hardware'])">
-              <Icon :icon="deviceIcon" style="font-size: 24px" />
-              <span>Devices</span>
-            </div>
-            <div class="grid girdenable" @click="handleSelect(['network'])">
-              <Icon :icon="networkNode" style="font-size: 24px" />
-              <span>Network</span>
-            </div>
-            <div class="grid girdenable">
-              <Icon :icon="interIcon" style="font-size: 24px" />
-              <el-dropdown @command="openIA">
-                <span class="lr">
-                  Interact
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item v-for="(item, key) in dataBase.ia" :key="key" :command="key"
-                      >{{ item.name }}
-                    </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.ia).length == 0" disabled
-                      >No Interaction</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane name="diag">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="diagIcon" style="font-size: 16px" />
-              <span>Diagnostics</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable" @click="handleSelect(['tester'])">
-              <Icon :icon="textFields" style="font-size: 24px" />
-              <span>UDS Tester</span>
-            </div>
-            <div class="grid girdenable">
-              <Icon :icon="diagServiceIcon" style="font-size: 24px" />
-              <el-dropdown @command="openService">
-                <span class="lr">
-                  Services
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item
-                      v-for="(item, key) in dataBase.tester"
-                      :key="key"
-                      :command="key"
-                      >{{ item.name }}
-                    </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.tester).length == 0" disabled
-                      >No Tester</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <div class="grid girdenable">
-              <Icon :icon="stepIcon" style="font-size: 24px" />
-              <el-dropdown @command="openSequence">
-                <span class="lr">
-                  Sequence
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item
-                      v-for="(item, key) in dataBase.tester"
-                      :key="key"
-                      :command="key"
-                      >{{ item.name }}
-                    </el-dropdown-item>
-                    <el-dropdown-item v-if="Object.keys(dataBase.tester).length == 0" disabled
-                      >No Tester</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane name="soa">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="soaIcon" style="font-size: 16px" />
-              <span>SOA</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable" @click="handleSelect(['soa'])">
-              <Icon :icon="soaConfigIcon" style="font-size: 24px" />
-              <span>SOA Config</span>
-            </div>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane name="test">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="testConfig" style="font-size: 16px" />
-              <span>Test</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable" @click="handleSelect(['test'])">
-              <Icon :icon="testConfig" style="font-size: 18px; height: 24px" />
-              <span>Test Setup</span>
-            </div>
-            <!-- <div class="grid girdenable">
-              <Icon :icon="testConfigIcon" style="font-size: 18px;height: 24px; " />
-              <el-dropdown @command="openDatabase">
-                <span class="lr">
-                  Test Config
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                  
-                    <el-dropdown-item divider v-for="item, index in dataBase.tests" :command="item.id" :key="item.id"
-                     >
-                      <Icon :icon="testConfigIcon" style="margin-right: 5px;" />{{ item.name }}
-
-                    </el-dropdown-item>
-                    <el-dropdown-item :icon="testConfigIcon" v-if="Object.keys(dataBase.tests).length == 0" disabled>No Test Config</el-dropdown-item>
-
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div> -->
-          </div>
-        </el-tab-pane>
-
-        <!-- <el-tab-pane label="">
-        <template #label>
-          <span class="lr">
-            <Icon :icon="toolIcon" style="font-size: 16px; " />
-            <span>Tools</span>
-          </span>
-        </template>
-        <div style="display:flex;gap:5px;padding:15px">
-          <div class="grid girdenable" @click="handleSelect(['tester'])">
-            <Icon :icon="textFields" style="font-size: 24px; " />
-            <span>UDS Tester</span>
-          </div>
-     
-        </div>
-      </el-tab-pane> -->
-        <el-tab-pane name="other">
-          <template #label>
-            <span class="lr">
-              <Icon :icon="userIcon" style="font-size: 16px" />
-              <span>Others</span>
-            </span>
-          </template>
-          <div style="display: flex; gap: 5px; padding: 15px">
-            <div class="grid girdenable">
-              <Icon :icon="dataBaseIcon" style="font-size: 24px" />
-              <el-dropdown @command="openDatabase">
-                <span class="lr">
-                  Database
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <!-- <el-dropdown-item v-for="item, key in dataBase.database" :command="key" :key="key">{{ item.name }}
-                      </el-dropdown-item> -->
-                    <el-dropdown-item icon="CirclePlusFilled" command="addLin"
-                      >Add Lin (LDF)
-                    </el-dropdown-item>
-                    <el-dropdown-item icon="CirclePlusFilled" command="addCan"
-                      >Add CAN (DBC)
-                    </el-dropdown-item>
-                    <el-dropdown-item icon="CirclePlusFilled" command="addOrti"
-                      >Add OS (ORTI)
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      v-for="(item, index) in dataBaseList"
-                      :key="item.url"
-                      divider
-                      :command="item.url"
-                      :disabled="item.disabled"
-                      :divided="index == 0"
-                    >
-                      <Icon :icon="dataBaseIcon" style="margin-right: 5px" />{{ item.url }}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <div class="grid girdenable" @click="handleSelect(['variable'])">
-              <Icon :icon="varIcon" style="font-size: 24px" />
-              <span>Variables</span>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-
-            <div class="grid girdenable">
-              <Icon :icon="osTraceIcon" style="font-size: 24px" />
-              <el-dropdown @command="openOsTrace">
-                <span class="lr">
-                  OS Info
-                  <el-icon class="el-icon--right">
-                    <arrow-down />
-                  </el-icon>
-                </span>
-                <template #dropdown>
-                  <el-dropdown-menu size="small">
-                    <el-dropdown-item
-                      v-for="(item, key) in dataBase.database.orti"
-                      :key="key"
-                      :command="key"
-                      >{{ item.name }}
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      v-if="Object.keys(dataBase.database.orti).length == 0"
-                      disabled
-                      >No ORTI File<br />Add In Database</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <el-divider direction="vertical" style="height: 54px" />
-            <div class="grid girdenable" @click="openApi()">
-              <Icon :icon="apiIcon" style="font-size: 24px" />
-              <span>Script Api</span>
-            </div>
-            <div class="grid girdenable" @click="openPackage()">
-              <Icon :icon="packageIcon" style="font-size: 24px" />
-              <span>Packages</span>
-            </div>
+              <!-- 下拉菜单 -->
+              <div
+                v-else-if="item.type === 'dropdown'"
+                class="grid girdenable"
+                @click="item.onClick"
+              >
+                <Icon :icon="item.icon" :style="{ fontSize: item.iconSize || '24px' }" />
+                <el-dropdown @command="item.onCommand">
+                  <span class="lr">
+                    {{ item.label }}
+                    <el-icon class="el-icon--right">
+                      <arrow-down />
+                    </el-icon>
+                  </span>
+                  <template #dropdown>
+                    <component :is="item.dropdownContent" :item="item" />
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -700,7 +328,8 @@ import {
   ref,
   toRef,
   watch,
-  watchEffect
+  watchEffect,
+  h
 } from 'vue'
 import type { Component, Ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
@@ -737,7 +366,15 @@ import { cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import * as joint from '@joint/core'
 import { UDSView } from './components/udsView'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  ElMessage,
+  ElMessageBox,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElDivider,
+  ElButton,
+  ElIcon
+} from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
 import ldfParse from '@r/database/ldfParse'
@@ -754,6 +391,32 @@ import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
 import soaConfigIcon from '@iconify/icons-material-symbols/linked-services'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
+import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
+import type { PluginItemConfig, PluginTabConfig } from '@r/plugin/tabPluginTypes'
+
+// TypeScript 接口定义
+interface TabItem {
+  type: 'button' | 'dropdown' | 'divider'
+  label?: string
+  icon?: any
+  iconSize?: string
+  class?: any
+  style?: any
+  minWidth?: boolean
+  onClick?: () => void
+  onCommand?: (command: string) => void
+  dropdownContent?: Component
+  // 插件相关
+  pluginId?: string // 插件 ID
+  handlerName?: string // 处理器名称
+}
+
+interface TabConfig {
+  name: string
+  label: string
+  icon: any
+  items: TabItem[]
+}
 
 const activeMenu = ref('')
 const pined = ref(true)
@@ -761,16 +424,572 @@ const { width, height } = useWindowSize()
 const graph = new joint.dia.Graph()
 const dataBase = useDataStore()
 const project = useProjectStore()
+const runtime = useRuntimeStore()
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
 const globalStart = useGlobalStart()
-const runtime = useRuntimeStore()
 
 provide('udsView', udsView)
 
 function firstByteUpper(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+// 下拉菜单组件定义
+const TraceDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        h(ElDropdownItem, { command: 'trace' }, () =>
+          h(
+            'div',
+            { style: 'display: flex; align-items: center; justify-content: space-between' },
+            [
+              h('span', dataBase.traces['trace']?.name || 'Trace'),
+              h(ElDivider, { direction: 'vertical' }),
+              h(ElButton, { link: true }, () =>
+                h(
+                  ElIcon,
+                  {
+                    onClick: (e) => {
+                      e.stopPropagation()
+                      openTrace('addTrace')
+                    }
+                  },
+                  () => h(CirclePlusFilled)
+                )
+              )
+            ]
+          )
+        ),
+        ...Object.entries(dataBase.traces)
+          .filter(([key]) => key !== 'trace')
+          .map(([key, item]) =>
+            h(ElDropdownItem, { command: key }, () =>
+              h('div', { style: 'display: flex; align-items: center; width: 100%' }, [
+                h('span', (item as any).name || 'Trace'),
+                h(ElDivider, { direction: 'vertical' }),
+                h(ElButton, { link: true, type: 'danger' }, () =>
+                  h(
+                    ElIcon,
+                    {
+                      onClick: (e) => {
+                        e.stopPropagation()
+                        openTrace('deletaTrace', key)
+                      }
+                    },
+                    () => h(Delete)
+                  )
+                )
+              ])
+            )
+          )
+      ])
+  }
+}
+
+const GraphDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        h(ElDropdownItem, { command: 'graph' }, () => [
+          h(Icon, { icon: lineIcon, style: 'margin-right: 5px' }),
+          'Line'
+        ]),
+        h(ElDropdownItem, { command: 'gauge' }, () => [
+          h(Icon, { icon: gaugeIcon, style: 'margin-right: 5px' }),
+          'Gauge'
+        ]),
+        h(ElDropdownItem, { command: 'datas' }, () => [
+          h(Icon, { icon: dataIcon, style: 'margin-right: 5px' }),
+          'Datas'
+        ])
+      ])
+  }
+}
+
+const PanelDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        h(ElDropdownItem, { command: 'panel', icon: CirclePlusFilled }, () => 'Add Panel'),
+        ...Object.values(dataBase.panels).map((item: any, index) =>
+          h(
+            ElDropdownItem,
+            { key: item.id, divider: true, command: item.id, divided: index === 0 },
+            () =>
+              h(
+                'div',
+                {
+                  style:
+                    'display: flex; align-items: center; justify-content: space-between; width: 100%;'
+                },
+                [
+                  h('div', { style: 'display: flex; align-items: center' }, [
+                    h(Icon, { icon: panelIcon1, style: 'margin-right: 5px' }),
+                    h('span', { style: 'display: flex; align-items: center' }, item.name),
+                    h(ElDivider, { direction: 'vertical' }),
+                    h('div', [
+                      h(ElButton, { link: true, type: 'warning' }, () =>
+                        h(
+                          ElIcon,
+                          {
+                            onClick: (e) => {
+                              e.stopPropagation()
+                              editPanel(item.id)
+                            }
+                          },
+                          () => h(Edit)
+                        )
+                      ),
+                      h(ElButton, { link: true, type: 'danger' }, () =>
+                        h(
+                          ElIcon,
+                          {
+                            onClick: (e) => {
+                              e.stopPropagation()
+                              deletePanel(item.id)
+                            }
+                          },
+                          () => h(Delete)
+                        )
+                      )
+                    ])
+                  ])
+                ]
+              )
+          )
+        )
+      ])
+  }
+}
+
+const InteractDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        ...Object.entries(dataBase.ia).map(([key, item]) =>
+          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+        ),
+        ...(Object.keys(dataBase.ia).length === 0
+          ? [h(ElDropdownItem, { disabled: true }, () => 'No Interaction')]
+          : [])
+      ])
+  }
+}
+
+const ServiceDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        ...Object.entries(dataBase.tester).map(([key, item]) =>
+          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+        ),
+        ...(Object.keys(dataBase.tester).length === 0
+          ? [h(ElDropdownItem, { disabled: true }, () => 'No Tester')]
+          : [])
+      ])
+  }
+}
+
+const SequenceDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        ...Object.entries(dataBase.tester).map(([key, item]) =>
+          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+        ),
+        ...(Object.keys(dataBase.tester).length === 0
+          ? [h(ElDropdownItem, { disabled: true }, () => 'No Tester')]
+          : [])
+      ])
+  }
+}
+
+const DatabaseDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () => 'Add Lin (LDF)'),
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addCan' }, () => 'Add CAN (DBC)'),
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addOrti' }, () => 'Add OS (ORTI)'),
+        ...dataBaseList.value.map((item, index) =>
+          h(
+            ElDropdownItem,
+            {
+              key: item.url,
+              divider: true,
+              command: item.url,
+              disabled: item.disabled,
+              divided: index === 0
+            },
+            () => [h(Icon, { icon: dataBaseIcon, style: 'margin-right: 5px' }), item.url]
+          )
+        )
+      ])
+  }
+}
+
+const OsTraceDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        ...Object.entries(dataBase.database.orti).map(([key, item]) =>
+          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+        ),
+        ...(Object.keys(dataBase.database.orti).length === 0
+          ? [
+              h(ElDropdownItem, { disabled: true }, () => [
+                'No ORTI File',
+                h('br'),
+                'Add In Database'
+              ])
+            ]
+          : [])
+      ])
+  }
+}
+
+// 将插件配置转换为内部 TabItem 格式
+function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): TabItem | null {
+  if (item.type === 'divider') {
+    return { type: 'divider' }
+  }
+
+  if (item.type === 'button') {
+    return {
+      type: 'button',
+      label: item.label,
+      icon: item.icon ? loadIconify(item.icon) : undefined,
+      iconSize: item.iconSize,
+      class: item.class,
+      style: item.style,
+      minWidth: item.minWidth,
+      pluginId,
+      handlerName: item.onClick,
+      onClick: () => {
+        if (item.onClick) {
+          runtime.callPluginHandler(pluginId, item.onClick)
+        }
+      }
+    }
+  }
+
+  if (item.type === 'dropdown') {
+    // 创建动态下拉菜单组件
+    const PluginDropdown = {
+      setup() {
+        return () =>
+          h(ElDropdownMenu, { size: 'small' }, () =>
+            item.items.map((menuItem) =>
+              h(
+                ElDropdownItem,
+                {
+                  key: menuItem.command,
+                  command: menuItem.command,
+                  disabled: menuItem.disabled,
+                  divided: menuItem.divided
+                },
+                () => [
+                  menuItem.icon
+                    ? h(Icon, { icon: loadIconify(menuItem.icon), style: 'margin-right: 5px' })
+                    : null,
+                  menuItem.label
+                ]
+              )
+            )
+          )
+      }
+    }
+
+    return {
+      type: 'dropdown',
+      label: item.label,
+      icon: item.icon ? loadIconify(item.icon) : undefined,
+      iconSize: item.iconSize,
+      pluginId,
+      handlerName: item.onCommand,
+      onCommand: (command: string) => {
+        if (item.onCommand) {
+          runtime.callPluginHandler(pluginId, item.onCommand, command)
+        }
+      },
+      dropdownContent: PluginDropdown
+    }
+  }
+
+  return null
+}
+
+// 动态加载 iconify 图标
+function loadIconify(iconName: string): any {
+  // 如果是简单的字符串，尝试从已导入的图标中查找
+  // 或者返回字符串让 Icon 组件自行处理
+  return iconName
+}
+console.log('runtime.pluginsLoaded', runtime.pluginsLoaded)
+// 合并插件的 tabs 和 items（直接从 runtime store 获取）
+function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
+  const result = [...baseTabs]
+  console.log('runtime.pluginsLoaded', runtime.pluginsLoaded)
+  // 只有在插件加载完成时才合并
+  if (runtime.pluginsLoaded) {
+    // 1. 添加插件新增的 tabs（仅启用的插件）
+    const newTabs = runtime.newTabs
+    console.log('newTabs', newTabs)
+    // 将插件 tabs 转换为内部格式，并直接追加
+    for (const pluginTab of newTabs) {
+      const tabConfig: TabConfig = {
+        name: pluginTab.name,
+        label: pluginTab.label,
+        icon: pluginTab.icon ? loadIconify(pluginTab.icon) : userIcon,
+        items: []
+      }
+
+      // 转换插件 items
+      for (const item of pluginTab.items) {
+        // 找到插件 ID（仅查找启用的插件）
+        const plugin = runtime.enabledPlugins.find((p) =>
+          p.manifest.tabs?.some((t) => t.name === pluginTab.name)
+        )
+        if (plugin) {
+          const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
+          if (convertedItem) {
+            tabConfig.items.push(convertedItem)
+          }
+        }
+      }
+
+      // 直接追加到结果数组
+      result.push(tabConfig)
+    }
+
+    // 2. 扩展现有的 tabs（仅启用的插件）
+    for (const tab of result) {
+      const extensions = runtime.getTabExtensions(tab.name)
+
+      for (const extension of extensions) {
+        // 找到对应的插件
+        const plugin = runtime.enabledPlugins.find((p) =>
+          p.manifest.extensions?.some((e) => e === extension)
+        )
+
+        if (!plugin) continue
+
+        const convertedItems: TabItem[] = []
+        for (const item of extension.items) {
+          const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
+          if (convertedItem) {
+            convertedItems.push(convertedItem)
+          }
+        }
+
+        tab.items.push(...convertedItems)
+      }
+    }
+  }
+
+  return result
+}
+
+// 基础 Tabs 配置数据
+const baseTabsConfig: TabConfig[] = [
+  {
+    name: 'home',
+    label: 'Home',
+    icon: homeIcon,
+    items: [
+      {
+        type: 'button',
+        label: 'Start',
+        icon: lightIcon,
+        iconSize: '32px',
+        minWidth: true,
+        class: {
+          girdenable: !globalStart.value,
+          girddisable: globalStart.value
+        },
+        style: 'color: var(--el-color-success)',
+        onClick: () => dataBase.globalRun('start')
+      },
+      {
+        type: 'button',
+        label: 'Stop',
+        icon: stopIcon,
+        iconSize: '32px',
+        minWidth: true,
+        class: {
+          girdenable: globalStart.value,
+          girddisable: !globalStart.value
+        },
+        style: 'color: var(--el-color-danger)',
+        onClick: () => dataBase.globalRun('stop')
+      },
+      { type: 'divider' },
+      {
+        type: 'dropdown',
+        label: 'Trace',
+        icon: logIcon,
+        onClick: () => openTrace('trace'),
+        onCommand: openTrace,
+        dropdownContent: TraceDropdown
+      },
+      { type: 'divider' },
+      {
+        type: 'dropdown',
+        label: 'Graph',
+        icon: graphIcon,
+        onCommand: openGraph,
+        dropdownContent: GraphDropdown
+      },
+      {
+        type: 'dropdown',
+        label: 'Panel',
+        icon: panelIcon1,
+        onCommand: openPanel,
+        dropdownContent: PanelDropdown
+      },
+      { type: 'divider' },
+      {
+        type: 'button',
+        label: 'Message',
+        icon: msgIcon,
+        onClick: () => handleSelect(['message'])
+      }
+    ]
+  },
+  {
+    name: 'hardware',
+    label: 'Hardware',
+    icon: hardware,
+    items: [
+      {
+        type: 'button',
+        label: 'Devices',
+        icon: deviceIcon,
+        onClick: () => handleSelect(['hardware'])
+      },
+      {
+        type: 'button',
+        label: 'Network',
+        icon: networkNode,
+        onClick: () => handleSelect(['network'])
+      },
+      {
+        type: 'dropdown',
+        label: 'Interact',
+        icon: interIcon,
+        onCommand: openIA,
+        dropdownContent: InteractDropdown
+      }
+    ]
+  },
+  {
+    name: 'diag',
+    label: 'Diagnostics',
+    icon: diagIcon,
+    items: [
+      {
+        type: 'button',
+        label: 'UDS Tester',
+        icon: textFields,
+        onClick: () => handleSelect(['tester'])
+      },
+      {
+        type: 'dropdown',
+        label: 'Services',
+        icon: diagServiceIcon,
+        onCommand: openService,
+        dropdownContent: ServiceDropdown
+      },
+      {
+        type: 'dropdown',
+        label: 'Sequence',
+        icon: stepIcon,
+        onCommand: openSequence,
+        dropdownContent: SequenceDropdown
+      }
+    ]
+  },
+  {
+    name: 'soa',
+    label: 'SOA',
+    icon: soaIcon,
+    items: [
+      {
+        type: 'button',
+        label: 'SOA Config',
+        icon: soaConfigIcon,
+        onClick: () => handleSelect(['soa'])
+      }
+    ]
+  },
+  {
+    name: 'test',
+    label: 'Test',
+    icon: testConfig,
+    items: [
+      {
+        type: 'button',
+        label: 'Test Setup',
+        icon: testConfig,
+        iconSize: '18px',
+        onClick: () => handleSelect(['test'])
+      }
+    ]
+  },
+  {
+    name: 'other',
+    label: 'Others',
+    icon: userIcon,
+    items: [
+      {
+        type: 'dropdown',
+        label: 'Database',
+        icon: dataBaseIcon,
+        onCommand: openDatabase,
+        dropdownContent: DatabaseDropdown
+      },
+      {
+        type: 'button',
+        label: 'Variables',
+        icon: varIcon,
+        onClick: () => handleSelect(['variable'])
+      },
+      { type: 'divider' },
+      {
+        type: 'dropdown',
+        label: 'OS Info',
+        icon: osTraceIcon,
+        onCommand: openOsTrace,
+        dropdownContent: OsTraceDropdown
+      },
+      { type: 'divider' },
+      {
+        type: 'button',
+        label: 'Script Api',
+        icon: apiIcon,
+        onClick: openApi
+      },
+      {
+        type: 'button',
+        label: 'Packages',
+        icon: packageIcon,
+        onClick: openPackage
+      }
+    ]
+  }
+]
+
+// 最终的 tabs 配置（合并插件）
+const tabsConfig = computed<TabConfig[]>(() => {
+  // 明确访问响应式依赖，确保 computed 能正确追踪
+  const pluginsLoaded = runtime.pluginsLoaded
+  const enabledPlugins = runtime.enabledPlugins
+
+  return mergePluginTabs(cloneDeep(baseTabsConfig))
+})
+
 function openTrace(command: string, key?: string) {
   if (command == 'trace') {
     layoutMaster.addWin('trace', 'trace', {
@@ -1070,7 +1289,7 @@ function openOsTrace(index: string) {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (pined.value) {
     activeMenu.value = 'home'
   }

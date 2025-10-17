@@ -21,12 +21,13 @@ import { ElMessage, ElNotification } from 'element-plus'
 import { useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
 import { useWindowSize } from '@vueuse/core'
-import { useGlobalStart } from './stores/runtime'
+import { useGlobalStart, useRuntimeStore } from './stores/runtime'
 import { useDark } from '@vueuse/core'
 import { VxeUI } from 'vxe-table'
 
 const data = useDataStore()
 const project = useProjectStore()
+const runtime = useRuntimeStore()
 const { width, height } = useWindowSize()
 const globalStart = useGlobalStart()
 const isDark = useDark()
@@ -37,11 +38,13 @@ watch(isDark, (value) => {
   VxeUI.setTheme(value ? 'dark' : 'default')
 })
 
-onMounted(() => {
+onMounted(async () => {
   // Set initial theme
   if (isDark.value) {
     VxeUI.setTheme('dark')
   }
+
+  await runtime.loadAllPlugins()
 })
 
 if (window.params.id) {
@@ -147,4 +150,3 @@ body {
   right: 0;
 }
 </style>
-

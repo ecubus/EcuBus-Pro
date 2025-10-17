@@ -1,0 +1,23 @@
+{
+  "id": "simple-plugin",
+  "name": "Simple Plugin",
+  "version": "1.0.0",
+  "description": "一个简单的插件示例，只扩展现有 tab",
+  "author": "Your Name",
+  "extensions": [
+    {
+      "targetTab": "test",
+      "position": "end",
+      "items": [
+        {
+          "type": "button",
+          "id": "simple-test-helper",
+          "label": "Test Helper",
+          "icon": "mdi:help-circle",
+          "onClick": "showTestHelp"
+        }
+      ]
+    }
+  ]
+}
+

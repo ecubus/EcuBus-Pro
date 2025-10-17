@@ -393,7 +393,7 @@ import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
-import type { PluginItemConfig, PluginTabConfig } from '@r/plugin/tabPluginTypes'
+import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '@r/plugin/tabPluginTypes'
 
 // TypeScript 接口定义
 interface TabItem {
@@ -654,7 +654,7 @@ const OsTraceDropdown = {
 }
 
 // 将插件配置转换为内部 TabItem 格式
-function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): TabItem | null {
+function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin): TabItem | null {
   if (item.type === 'divider') {
     return { type: 'divider' }
   }
@@ -668,12 +668,16 @@ function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): T
       class: item.class,
       style: item.style,
       minWidth: item.minWidth,
-      pluginId,
+      pluginId: plugin.manifest.id,
       handlerName: item.onClick,
       onClick: () => {
         if (item.onClick) {
-          console.log(`Plugin ${pluginId} button clicked, handler: ${item.onClick}`)
-          ElMessage.warning('Plugin handler system not yet implemented')
+          layoutMaster.addWin('plugin', plugin.manifest.id, {
+            params: {
+              'edit-index': plugin.manifest.id,
+              plugin: plugin
+            }
+          })
         }
       }
     }
@@ -711,11 +715,13 @@ function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): T
       label: item.label,
       icon: item.icon ? loadIconify(item.icon) : undefined,
       iconSize: item.iconSize,
-      pluginId,
+      pluginId: plugin.manifest.id,
       handlerName: item.onCommand,
       onCommand: (command: string) => {
         if (item.onCommand) {
-          console.log(`Plugin ${pluginId} dropdown command: ${command}, handler: ${item.onCommand}`)
+          console.log(
+            `Plugin ${plugin.manifest.id} dropdown command: ${command}, handler: ${item.onCommand}`
+          )
           ElMessage.warning('Plugin handler system not yet implemented')
         }
       },
@@ -753,7 +759,7 @@ function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
 
         // 转换插件 items
         for (const item of tab.items || []) {
-          const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
+          const convertedItem = convertPluginItemToTabItem(item, plugin)
           if (convertedItem) {
             tabConfig.items.push(convertedItem)
           }
@@ -772,7 +778,7 @@ function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
         if (targetTab) {
           const convertedItems: TabItem[] = []
           for (const item of extension.items) {
-            const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
+            const convertedItem = convertPluginItemToTabItem(item, plugin)
             if (convertedItem) {
               convertedItems.push(convertedItem)
             }

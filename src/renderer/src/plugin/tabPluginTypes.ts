@@ -65,13 +65,13 @@ export interface PluginManifest {
   version: string // 插件版本
   description?: string // 插件描述
   author?: string // 作者
-  // 新增的 tabs
+  render?: string // 渲染页面
   tabs?: PluginTabConfig[]
-  // 扩展现有 tabs
   extensions?: PluginTabExtension[]
 }
 
 // 完整的插件定义
 export interface EcuBusPlugin {
   manifest: PluginManifest
+  path: string
 }

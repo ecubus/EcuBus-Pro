@@ -133,7 +133,8 @@ export const usePluginStore = defineStore('usePluginStore', {
         // }
 
         const plugin: EcuBusPlugin = {
-          manifest
+          manifest,
+          path: pluginDir
         }
 
         this.registerPlugin(plugin)
@@ -162,7 +163,7 @@ export const usePluginStore = defineStore('usePluginStore', {
       )
 
       await Promise.all(loadPromises)
-      console.log('loadPluginsFromDirectories', this.loaded)
+
       this.loaded = true
       this.loading = false
     },
@@ -198,8 +199,6 @@ export const usePluginStore = defineStore('usePluginStore', {
         this.error = String(error)
         this.loaded = true
       }
-
-      console.log('this.loaded', this.loaded)
     },
 
     /**
@@ -252,7 +251,6 @@ export const usePluginStore = defineStore('usePluginStore', {
         // 删除插件目录
         await window.electron.ipcRenderer.invoke('ipc-fs-rmdir', pluginDir)
 
-        console.log(`Plugin ${pluginId} uninstalled successfully`)
         return true
       } catch (error) {
         console.error(`Failed to uninstall plugin ${pluginId}:`, error)

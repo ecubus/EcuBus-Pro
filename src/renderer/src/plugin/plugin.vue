@@ -1,16 +1,22 @@
 <template>
   <div>
     <!--D:\code\app-template\dist\index.html  -->
-    <WujieVue name="A" url="file:///index.html" :fetch="customFetch" :plugins="plugins"></WujieVue>
+    <WujieVue
+      name="A"
+      :url="`file:///${props.plugin.manifest.render}`"
+      :fetch="customFetch"
+      :plugins="plugins"
+    ></WujieVue>
   </div>
 </template>
 
 <script setup lang="ts">
 import { toRef } from 'vue'
+import { EcuBusPlugin } from './tabPluginTypes'
 
 const props = defineProps<{
   editIndex: string
-
+  plugin: EcuBusPlugin
   width: number
   height: number
 }>()
@@ -19,7 +25,7 @@ const width = toRef(props, 'width')
 const height = toRef(props, 'height')
 const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
 
-const basePath = 'D:/code/ecubus-plugin-template/dist'
+const basePath = props.plugin.path
 const importMap = {
   imports: {
     vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,

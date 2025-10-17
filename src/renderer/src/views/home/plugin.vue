@@ -32,7 +32,7 @@
             <Icon :icon="checkIcon" class="stat-icon success" />
             <div>
               <div class="stat-value">
-                {{ Object.values(pluginStats.enabled).filter(Boolean).length }}
+                {{ pluginStats.enabled }}
               </div>
               <div class="stat-label">Enabled</div>
             </div>
@@ -125,15 +125,6 @@
                 >Adds <strong>{{ plugin.manifest.tabs.length }}</strong> new
                 {{ plugin.manifest.tabs.length === 1 ? 'tab' : 'tabs' }}</span
               >
-              <el-popover placement="bottom" :width="300" trigger="hover">
-                <template #reference>
-                  <el-icon class="info-icon"><InfoFilled /></el-icon>
-                </template>
-                <div v-for="tab in plugin.manifest.tabs" :key="tab.name" class="tab-info">
-                  <Icon v-if="tab.icon" :icon="tab.icon" style="margin-right: 5px" />
-                  <strong>{{ tab.label }}</strong> ({{ tab.name }})
-                </div>
-              </el-popover>
             </div>
 
             <div
@@ -145,15 +136,6 @@
                 >Extends <strong>{{ plugin.manifest.extensions.length }}</strong>
                 {{ plugin.manifest.extensions.length === 1 ? 'tab' : 'tabs' }}</span
               >
-              <el-popover placement="bottom" :width="300" trigger="hover">
-                <template #reference>
-                  <el-icon class="info-icon"><InfoFilled /></el-icon>
-                </template>
-                <div v-for="(ext, idx) in plugin.manifest.extensions" :key="idx" class="ext-info">
-                  <strong>{{ ext.targetTab }}</strong> ({{ ext.items.length }}
-                  {{ ext.items.length === 1 ? 'item' : 'items' }})
-                </div>
-              </el-popover>
             </div>
           </div>
         </el-card>
@@ -173,36 +155,36 @@ import tabIcon from '@iconify/icons-mdi/tab'
 import extensionIcon from '@iconify/icons-mdi/puzzle-plus'
 import emptyIcon from '@iconify/icons-mdi/package-variant'
 import authorIcon from '@iconify/icons-mdi/account'
-import { useRuntimeStore } from '@r/stores/runtime'
+import { usePluginStore } from '@r/stores/plugin'
 import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '@r/plugin/tabPluginTypes'
 
 const props = defineProps<{
   height: number
 }>()
 
-const runtime = useRuntimeStore()
+const pluginStore = usePluginStore()
 const loading = ref(false)
 const pluginDir = ref('')
 
 // 插件列表
 const plugins = computed(() => {
-  return Array.from(runtime.pluginState.plugins.values())
+  return Array.from(pluginStore.plugins.values())
 })
 
 // 已启用的插件列表
-const enabledPlugins = ref<Record<string, boolean>>(runtime.pluginState.pluginsEanbled)
+const enabledPlugins = ref<Record<string, boolean>>(pluginStore.pluginsEanbled)
 
 // 插件统计
 const pluginStats = computed(() => {
-  return runtime.getPluginStats()
+  return pluginStore.getPluginStats()
 })
 
 // 切换插件启用状态
 function togglePlugin(pluginId: string, value: boolean) {
   if (value) {
-    runtime.enablePlugin(pluginId)
+    pluginStore.enablePlugin(pluginId)
   } else {
-    runtime.disablePlugin(pluginId)
+    pluginStore.disablePlugin(pluginId)
   }
 }
 
@@ -222,14 +204,10 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
 
     if (confirmed) {
       loading.value = true
-      await runtime.uninstallPlugin(pluginId)
-      ElMessage.success(`Plugin "${pluginName}" has been uninstalled successfully`)
+      await pluginStore.uninstallPlugin(pluginId)
     }
   } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('Failed to uninstall plugin:', error)
-      ElMessage.error(`Failed to uninstall plugin: ${error.message || error}`)
-    }
+    null
   } finally {
     loading.value = false
   }
@@ -239,14 +217,12 @@ async function uninstallPlugin(pluginId: string, pluginName: string) {
 async function refreshPlugins() {
   loading.value = true
   try {
-    // 使用 runtime store 的刷新方法
-    await runtime.refreshPlugins()
+    // 使用 plugin store 的刷新方法
+    await pluginStore.refreshPlugins()
 
     const pluginCount = plugins.value.length
-    ElMessage.success(`Successfully reloaded ${pluginCount} plugin(s)`)
   } catch (error) {
-    console.error('Failed to refresh plugins:', error)
-    ElMessage.error('Failed to refresh plugins')
+    null
   } finally {
     loading.value = false
   }
@@ -261,8 +237,7 @@ async function openPluginDir() {
       await window.electron.ipcRenderer.invoke('ipc-open-path', dir)
     }
   } catch (error) {
-    console.error('Failed to open plugin directory:', error)
-    ElMessage.error('Failed to open plugin directory')
+    null
   }
 }
 
@@ -395,7 +370,6 @@ onMounted(async () => {
 }
 
 .plugin-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 

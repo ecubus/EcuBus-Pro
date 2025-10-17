@@ -390,6 +390,7 @@ import data from '@iconify/icons-ep/full-screen'
 import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
 import soaConfigIcon from '@iconify/icons-material-symbols/linked-services'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
+import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
 import type { PluginItemConfig, PluginTabConfig } from '@r/plugin/tabPluginTypes'
@@ -404,6 +405,7 @@ interface TabItem {
   style?: any
   minWidth?: boolean
   onClick?: () => void
+
   onCommand?: (command: string) => void
   dropdownContent?: Component
   // 插件相关
@@ -425,6 +427,7 @@ const graph = new joint.dia.Graph()
 const dataBase = useDataStore()
 const project = useProjectStore()
 const runtime = useRuntimeStore()
+const pluginStore = usePluginStore()
 const layoutMaster = new Layout()
 const udsView = new UDSView(graph, layoutMaster)
 const globalStart = useGlobalStart()
@@ -669,7 +672,8 @@ function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): T
       handlerName: item.onClick,
       onClick: () => {
         if (item.onClick) {
-          runtime.callPluginHandler(pluginId, item.onClick)
+          console.log(`Plugin ${pluginId} button clicked, handler: ${item.onClick}`)
+          ElMessage.warning('Plugin handler system not yet implemented')
         }
       }
     }
@@ -711,7 +715,8 @@ function convertPluginItemToTabItem(item: PluginItemConfig, pluginId: string): T
       handlerName: item.onCommand,
       onCommand: (command: string) => {
         if (item.onCommand) {
-          runtime.callPluginHandler(pluginId, item.onCommand, command)
+          console.log(`Plugin ${pluginId} dropdown command: ${command}, handler: ${item.onCommand}`)
+          ElMessage.warning('Plugin handler system not yet implemented')
         }
       },
       dropdownContent: PluginDropdown
@@ -727,64 +732,54 @@ function loadIconify(iconName: string): any {
   // 或者返回字符串让 Icon 组件自行处理
   return iconName
 }
-console.log('runtime.pluginsLoaded', runtime.pluginsLoaded)
-// 合并插件的 tabs 和 items（直接从 runtime store 获取）
+
+// 合并插件的 tabs 和 items（直接从 plugin store 获取）
 function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
   const result = [...baseTabs]
-  console.log('runtime.pluginsLoaded', runtime.pluginsLoaded)
+  console.log('mergePluginTabs', pluginStore)
   // 只有在插件加载完成时才合并
-  if (runtime.pluginsLoaded) {
-    // 1. 添加插件新增的 tabs（仅启用的插件）
-    const newTabs = runtime.newTabs
-    console.log('newTabs', newTabs)
-    // 将插件 tabs 转换为内部格式，并直接追加
-    for (const pluginTab of newTabs) {
-      const tabConfig: TabConfig = {
-        name: pluginTab.name,
-        label: pluginTab.label,
-        icon: pluginTab.icon ? loadIconify(pluginTab.icon) : userIcon,
-        items: []
-      }
+  if (pluginStore.loaded) {
+    const enabledPlugins = pluginStore.getEnabledPlugins()
 
-      // 转换插件 items
-      for (const item of pluginTab.items) {
-        // 找到插件 ID（仅查找启用的插件）
-        const plugin = runtime.enabledPlugins.find((p) =>
-          p.manifest.tabs?.some((t) => t.name === pluginTab.name)
-        )
-        if (plugin) {
+    // 1. 添加插件新增的 tabs（仅启用的插件）
+    for (const plugin of enabledPlugins) {
+      for (const tab of plugin.manifest.tabs || []) {
+        const tabConfig: TabConfig = {
+          name: tab.name,
+          label: tab.label,
+          icon: tab.icon ? loadIconify(tab.icon) : userIcon,
+          items: []
+        }
+
+        // 转换插件 items
+        for (const item of tab.items || []) {
           const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
           if (convertedItem) {
             tabConfig.items.push(convertedItem)
           }
         }
-      }
 
-      // 直接追加到结果数组
-      result.push(tabConfig)
+        result.push(tabConfig)
+      }
     }
 
     // 2. 扩展现有的 tabs（仅启用的插件）
-    for (const tab of result) {
-      const extensions = runtime.getTabExtensions(tab.name)
+    for (const plugin of enabledPlugins) {
+      for (const extension of plugin.manifest.extensions || []) {
+        // 找到要扩展的目标 tab
+        const targetTab = result.find((tab) => tab.name === extension.targetTab)
 
-      for (const extension of extensions) {
-        // 找到对应的插件
-        const plugin = runtime.enabledPlugins.find((p) =>
-          p.manifest.extensions?.some((e) => e === extension)
-        )
-
-        if (!plugin) continue
-
-        const convertedItems: TabItem[] = []
-        for (const item of extension.items) {
-          const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
-          if (convertedItem) {
-            convertedItems.push(convertedItem)
+        if (targetTab) {
+          const convertedItems: TabItem[] = []
+          for (const item of extension.items) {
+            const convertedItem = convertPluginItemToTabItem(item, plugin.manifest.id)
+            if (convertedItem) {
+              convertedItems.push(convertedItem)
+            }
           }
-        }
 
-        tab.items.push(...convertedItems)
+          targetTab.items.push(...convertedItems)
+        }
       }
     }
   }
@@ -983,10 +978,6 @@ const baseTabsConfig: TabConfig[] = [
 
 // 最终的 tabs 配置（合并插件）
 const tabsConfig = computed<TabConfig[]>(() => {
-  // 明确访问响应式依赖，确保 computed 能正确追踪
-  const pluginsLoaded = runtime.pluginsLoaded
-  const enabledPlugins = runtime.enabledPlugins
-
   return mergePluginTabs(cloneDeep(baseTabsConfig))
 })
 

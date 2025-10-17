@@ -1,13 +1,6 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
 import { toRef } from 'vue'
-import type {
-  EcuBusPlugin,
-  PluginManifest,
-  PluginTabConfig,
-  PluginTabExtension
-} from '@r/plugin/tabPluginTypes'
-import { cloneDeep } from 'lodash'
 
 export type TestTree = {
   label: string
@@ -23,14 +16,6 @@ export type TestTree = {
   parent?: TestTree
 }
 
-export type PluginState = {
-  plugins: Map<string, EcuBusPlugin>
-  pluginsEanbled: Record<string, boolean>
-  loaded: boolean
-  loading: boolean
-  error: string | null
-}
-
 export type RunTimeStatus = {
   testStates: {
     tData: TestTree[]
@@ -42,7 +27,6 @@ export type RunTimeStatus = {
   canPeriods: Record<string, boolean>
   someipPeriods: Record<string, boolean>
   rearrangeWindows: boolean
-  pluginState: PluginState
 }
 
 export const useRuntimeStore = defineStore('useRuntimeStore', {
@@ -54,14 +38,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     canPeriods: {},
     someipPeriods: {},
     globalStart: false,
-    rearrangeWindows: false,
-    pluginState: {
-      pluginsEanbled: (window.store.get('pluginsEanbled') as Record<string, boolean>) || {},
-      plugins: new Map(),
-      loaded: false,
-      loading: false,
-      error: null
-    }
+    rearrangeWindows: false
   }),
 
   actions: {
@@ -76,259 +53,6 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     removeSomeipPeriod(key: string) {
       delete this.someipPeriods[key]
-    },
-
-    // 插件相关的 actions
-
-    /**
-     * 注册插件
-     */
-    registerPlugin(plugin: EcuBusPlugin) {
-      const { id } = plugin.manifest
-
-      this.pluginState.plugins.set(id, plugin)
-    },
-
-    /**
-     * 卸载插件
-     */
-    unregisterPlugin(pluginId: string) {
-      if (this.pluginState.plugins.delete(pluginId)) {
-        return true
-      }
-      return false
-    },
-
-    /**
-     * 获取特定插件
-     */
-    getPlugin(pluginId: string): EcuBusPlugin | undefined {
-      return this.pluginState.plugins.get(pluginId)
-    },
-
-    /**
-     * 获取对特定 tab 的所有扩展（仅启用的插件）
-     */
-    getTabExtensions(tabName: string): PluginTabExtension[] {
-      const extensions: PluginTabExtension[] = []
-
-      for (const plugin of this.pluginState.plugins.values()) {
-        if (this.pluginState.pluginsEanbled[plugin.manifest.id] && plugin.manifest.extensions) {
-          const tabExtensions = plugin.manifest.extensions.filter(
-            (ext) => ext.targetTab === tabName
-          )
-          extensions.push(...tabExtensions)
-        }
-      }
-
-      return extensions
-    },
-
-    getPluginStats() {
-      const allPlugins = this.pluginState.plugins
-      const enabledCount = Object.values(this.pluginState.pluginsEanbled).filter(Boolean).length
-      const enabledPlugins: EcuBusPlugin[] = []
-      for (const plugin of allPlugins.values()) {
-        if (this.pluginState.pluginsEanbled[plugin.manifest.id]) {
-          enabledPlugins.push(plugin)
-        }
-      }
-      const newTabs: PluginTabConfig[] = []
-      for (const plugin of enabledPlugins) {
-        if (plugin.manifest.tabs?.length && plugin.manifest.tabs.length > 0) {
-          newTabs.push(...plugin.manifest.tabs)
-        }
-      }
-      const allExtensions: PluginTabExtension[] = []
-      for (const plugin of enabledPlugins) {
-        if (plugin.manifest.extensions?.length && plugin.manifest.extensions.length > 0) {
-          allExtensions.push(...plugin.manifest.extensions)
-        }
-      }
-
-      return {
-        total: allPlugins.size,
-        enabled: enabledCount,
-        newTabs: newTabs.length,
-        extensions: allExtensions
-      }
-    },
-
-    /**
-     * 启用插件
-     */
-    enablePlugin(pluginId: string) {
-      const plugin = this.pluginState.plugins.get(pluginId)
-      if (plugin) {
-        this.pluginState.pluginsEanbled[pluginId] = true
-        window.store.set('pluginsEanbled', cloneDeep(this.pluginState.pluginsEanbled))
-      }
-    },
-
-    /**
-     * 禁用插件
-     */
-    disablePlugin(pluginId: string) {
-      const plugin = this.pluginState.plugins.get(pluginId)
-      if (plugin) {
-        this.pluginState.pluginsEanbled[pluginId] = false
-        window.store.set('pluginsEanbled', cloneDeep(this.pluginState.pluginsEanbled))
-
-        return true
-      }
-      return false
-    },
-
-    /**
-     * 从目录加载插件
-     */
-    async loadPluginFromDirectory(pluginDir: string): Promise<EcuBusPlugin | null> {
-      try {
-        const manifestPath = `${pluginDir}/manifest.json`
-
-        // 加载清单
-        const manifestContent = await window.electron.ipcRenderer.invoke(
-          'ipc-fs-readFile',
-          manifestPath
-        )
-        const manifest: PluginManifest = JSON.parse(manifestContent)
-
-        // // 尝试加载处理器
-        // let handlers = {}
-        // try {
-        //   const handlersPath = `${pluginDir}/handlers.js`
-        //   const handlersModule = await import(/* @vite-ignore */ handlersPath)
-        //   handlers = handlersModule.default || handlersModule
-        // } catch (error) {
-        //   console.warn(`No handlers found for plugin ${manifest.id}, using empty handlers`)
-        // }
-
-        const plugin: EcuBusPlugin = {
-          manifest
-        }
-
-        this.registerPlugin(plugin)
-        return plugin
-      } catch (error) {
-        const errorMsg = `Failed to load plugin from directory ${pluginDir}: ${error}`
-        console.error(errorMsg)
-        this.pluginState.error = errorMsg
-        return null
-      }
-    },
-
-    /**
-     * 批量加载插件目录
-     */
-    async loadPluginsFromDirectories(pluginDirs: string[]) {
-      this.pluginState.loading = true
-      this.pluginState.loaded = false
-      this.pluginState.error = null
-
-      const loadPromises = pluginDirs.map((dir) =>
-        this.loadPluginFromDirectory(dir).catch((error) => {
-          console.error(`Failed to load plugin from ${dir}:`, error)
-          return null
-        })
-      )
-
-      await Promise.all(loadPromises)
-
-      this.pluginState.loaded = true
-      this.pluginState.loading = false
-    },
-
-    /**
-     * 加载所有插件
-     */
-    async loadAllPlugins() {
-      try {
-        // 获取插件目录
-        const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
-
-        if (!pluginsDir) {
-          this.pluginState.loaded = true
-          return
-        }
-
-        // 获取所有插件子目录
-        const pluginDirs = await window.electron.ipcRenderer.invoke(
-          'ipc-list-plugin-dirs',
-          pluginsDir
-        )
-
-        if (!pluginDirs || pluginDirs.length === 0) {
-          this.pluginState.loaded = true
-          return
-        }
-
-        // 加载所有插件
-
-        await this.loadPluginsFromDirectories(pluginDirs)
-      } catch (error) {
-        this.pluginState.error = String(error)
-        this.pluginState.loaded = true
-      }
-
-      console.log('this.pluginState.loaded', this.pluginState.loaded)
-    },
-
-    /**
-     * 刷新插件（清空并重新加载）
-     */
-    async refreshPlugins() {
-      this.pluginState.plugins.clear()
-      this.pluginState.loaded = false
-      this.pluginState.error = null
-      await this.loadAllPlugins()
-    },
-
-    /**
-     * 清空所有插件
-     */
-    clearPlugins() {
-      this.pluginState.plugins.clear()
-      this.pluginState.loaded = false
-      this.pluginState.error = null
-    },
-
-    /**
-     * 卸载插件（从磁盘删除）
-     */
-    async uninstallPlugin(pluginId: string): Promise<boolean> {
-      try {
-        const plugin = this.pluginState.plugins.get(pluginId)
-        if (!plugin) {
-          throw new Error(`Plugin ${pluginId} not found`)
-        }
-
-        // 获取插件目录
-        const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
-        if (!pluginsDir) {
-          throw new Error('Failed to get plugins directory')
-        }
-
-        const pluginDir = `${pluginsDir}/${pluginId}`
-
-        // 检查目录是否存在
-        const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', pluginDir)
-        if (!exists) {
-          throw new Error(`Plugin directory not found: ${pluginDir}`)
-        }
-
-        // 从内存中删除
-        this.pluginState.plugins.delete(pluginId)
-        this.pluginState.plugins = new Map(this.pluginState.plugins)
-
-        // 删除插件目录
-        await window.electron.ipcRenderer.invoke('ipc-fs-rmdir', pluginDir)
-
-        console.log(`Plugin ${pluginId} uninstalled successfully`)
-        return true
-      } catch (error) {
-        console.error(`Failed to uninstall plugin ${pluginId}:`, error)
-        throw error
-      }
     }
   }
 })

@@ -738,8 +738,8 @@ export class OsTraceLOG {
         return false
       })
 
-      // 获取当前时间作为时间戳后缀 (格式: YYYYMMDDHHmm)
-      const timestamp = dayjs().format('YYYYMMDDHHmm')
+      // 获取当前时间作为时间戳后缀 (格式: YYYYMMDDHHmmss)
+      const timestamp = dayjs().format('YYYYMMDDHHmmss')
 
       const parsedPath = path.parse(writerToFile)
       const fileWithSuffix = path.format({

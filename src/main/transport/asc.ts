@@ -246,7 +246,8 @@ class FileTransport extends winston.transports.File {
 export default (filePath: string, devices: string[], method: string[]) => {
   const now = new Date()
   const keys = Object.keys(global.dataSet.devices)
-  const timestamp = dayjs().format('YYYYMMDDHHmm')
+  // 获取当前时间作为时间戳后缀 (格式: YYYYMMDDHHmmss)
+  const timestamp = dayjs().format('YYYYMMDDHHmmss')
 
   const parsedPath = path.parse(filePath)
   const fileWithSuffix = path.format({

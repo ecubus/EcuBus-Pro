@@ -19,6 +19,7 @@
           effect="light"
           :content="showWarning ? 'Hide Warning' : 'Show Warning'"
           placement="bottom"
+          :show-after="500"
         >
           <el-switch
             v-model="showWarning"
@@ -29,9 +30,13 @@
             style="--el-switch-on-color: var(--el-color-warning); margin-left: 8px"
           />
         </el-tooltip>
+        <el-divider direction="vertical" />
+        <el-tooltip effect="light" content="Export to Excel" placement="bottom" :show-after="500">
+          <el-button link @click="exportToExcel">
+            <Icon icon="mdi:microsoft-excel" style="font-size: 16px" />
+          </el-button>
+        </el-tooltip>
       </div>
-      <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
-      </span>
     </div>
 
     <div class="main">
@@ -68,9 +73,11 @@ import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useDataStore } from '@r/stores/data'
 import { TaskType } from 'nodeCan/osEvent'
+import ExcelJS from 'exceljs'
+import { ElLoading } from 'element-plus'
 
 const isPaused = ref(false)
-const showWarning = ref(false)
+const showWarning = ref(true)
 const activeTab = ref<CategoryType>('cpu')
 
 const props = defineProps<{
@@ -780,6 +787,77 @@ const initializeData = () => {
 watchEffect(() => {
   initializeData()
 })
+
+// Export to Excel function
+const exportToExcel = async () => {
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: 'Exporting to Excel...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+
+  try {
+    const workbook = new ExcelJS.Workbook()
+
+    // Export each category as a separate sheet
+    categoryData.value.forEach((category) => {
+      const worksheet = workbook.addWorksheet(category.label)
+
+      // Get columns for this category
+      const columns = getColumns(category.type)
+
+      // Define worksheet columns
+      worksheet.columns = columns.map((col) => ({
+        header: col.title,
+        key: col.field,
+        width: (col.width || col.minWidth || 100) / 8 // Convert px to Excel width units
+      }))
+
+      // Add data rows
+      category.tableData.forEach((row) => {
+        const rowData: any = {}
+        columns.forEach((col) => {
+          rowData[col.field] = row[col.field]
+        })
+        worksheet.addRow(rowData)
+      })
+
+      // Style the header row
+      worksheet.getRow(1).font = { bold: true }
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      }
+
+      // Apply alignment to all cells
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' }
+        })
+      })
+    })
+
+    // Generate and download the file
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+    a.download = `ostrace_data_${timestamp}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+  } catch (error) {
+    console.error('Error exporting to Excel:', error)
+  } finally {
+    loadingInstance.close()
+  }
+}
 
 onUnmounted(() => {
   // 取消待执行的 RAF

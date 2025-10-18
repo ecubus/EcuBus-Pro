@@ -12,6 +12,7 @@ interface TaskState {
   id: number
   coreId: number
   currentStatus: TaskStatus
+  previousStatus?: TaskStatus // 用于状态转换验证
   activeCount: number
   fakeActiveInterval?: number
   startCount: number
@@ -102,6 +103,12 @@ interface VarResult {
     value: number | string
     rawValue: number
   }
+  error?: {
+    data: string
+    name: string
+    id: string
+    ts: number
+  }
 }
 export default class OsStatistics {
   // 内部状态（用于事件处理）
@@ -125,6 +132,43 @@ export default class OsStatistics {
   // Stack to track nested ISRs on each core (for ISR preemption scenarios)
   private runningIsrStackOnCore: Map<number, string[]> = new Map()
 
+  // 合法的状态转换映射（基于ARTI规范）
+  // 格式: 当前状态 -> 允许的下一个状态集合
+  private readonly VALID_TASK_TRANSITIONS: Map<TaskStatus, Set<TaskStatus>>
+
+  private initValidTransitions(): Map<TaskStatus, Set<TaskStatus>> {
+    const transitions = new Map<TaskStatus, Set<TaskStatus>>()
+
+    // Suspended -> Ready (通过 Activate 事件)
+    // Ready状态后只能通过Start进入Running
+    transitions.set(TaskStatus.ACTIVE, new Set([TaskStatus.START]))
+
+    // Ready -> Running (通过 Start 事件)
+    // Running状态后可以被Preempt(抢占)、Wait(等待)或Terminate(终止)
+    transitions.set(
+      TaskStatus.START,
+      new Set([TaskStatus.PREEMPT, TaskStatus.WAIT, TaskStatus.TERMINATE])
+    )
+
+    // Running -> Ready (通过 Preempt 事件)
+    // 被抢占后回到Ready状态，只能通过Start重新进入Running
+    transitions.set(TaskStatus.PREEMPT, new Set([TaskStatus.START]))
+
+    // Running -> Waiting (通过 Wait 事件)
+    // Waiting状态后可以Release(释放)回Ready，或被Terminate终止
+    transitions.set(TaskStatus.WAIT, new Set([TaskStatus.RELEASE, TaskStatus.TERMINATE]))
+
+    // Waiting -> Ready (通过 Release 事件)
+    // Release后回到Ready状态，只能通过Start进入Running
+    transitions.set(TaskStatus.RELEASE, new Set([TaskStatus.START]))
+
+    // Running -> Suspended (通过 Terminate 事件)
+    // Terminate后回到Suspended状态，只能通过Activate重新激活
+    transitions.set(TaskStatus.TERMINATE, new Set([TaskStatus.ACTIVE]))
+
+    return transitions
+  }
+
   constructor(
     private id: string,
     private cpuFreq: number,
@@ -133,6 +177,7 @@ export default class OsStatistics {
   ) {
     // 将窗口时长转换为CPU cycles
     this.WINDOW_DURATION = windowDurationMs * 1000 * cpuFreq
+    this.VALID_TASK_TRANSITIONS = this.initValidTransitions()
     this.reset()
   }
 
@@ -162,6 +207,7 @@ export default class OsStatistics {
       id,
       coreId,
       currentStatus: status,
+      previousStatus: undefined,
       activeCount: 0,
       startCount: 0,
 
@@ -222,6 +268,34 @@ export default class OsStatistics {
       min: Math.min(min, newValue),
       max: Math.max(max, newValue)
     }
+  }
+
+  /**
+   * 验证任务状态转换是否合法
+   * @returns 如果状态转换非法，返回错误信息；否则返回 null
+   */
+  private validateTaskStateTransition(
+    currentStatus: TaskStatus,
+    newStatus: TaskStatus,
+    event: OsEvent
+  ): string | null {
+    // 状态相同，不是真正的转换，跳过验证
+    if (currentStatus === newStatus) {
+      return null
+    }
+
+    const validNextStates = this.VALID_TASK_TRANSITIONS.get(currentStatus)
+    if (!validNextStates) {
+      // 未知的当前状态
+      return `Unknown current state: ${TaskStatus[currentStatus]}`
+    }
+
+    if (!validNextStates.has(newStatus)) {
+      // 非法的状态转换
+      return `Invalid state transition: ${TaskStatus[currentStatus]} -> ${TaskStatus[newStatus]} at timestamp ${event.ts}`
+    }
+
+    return null
   }
 
   markIdleTask(taskId: number, coreId: number): void {
@@ -342,13 +416,39 @@ export default class OsStatistics {
   private processTaskEvent(event: OsEvent): VarResult[] {
     const key = this.getKey(event.type, event.id, event.coreId)
     const status = event.status as TaskStatus
+    const result: VarResult[] = []
 
-    if (!this.tasks.has(key)) {
+    // 检查是否是第一次接收到该任务的事件
+    const isFirstEvent = !this.tasks.has(key)
+
+    if (isFirstEvent) {
+      // 第一次创建时，直接初始化，无需验证
       this.tasks.set(key, this.initTaskState(event.id, event.coreId, status))
+    } else {
+      // 已存在的任务，需要验证状态转换
+      const task = this.tasks.get(key)!
+
+      // 验证状态转换（使用当前状态作为转换起点）
+      const transitionError = this.validateTaskStateTransition(task.currentStatus, status, event)
+      if (transitionError) {
+        result.push({
+          id: '',
+          value: { value: 0, rawValue: 0 },
+          error: {
+            data: `${transitionError} [Previous: ${TaskStatus[task.previousStatus || task.currentStatus]}]`,
+            name: '',
+            id: `Task.${event.id}_${event.coreId}`,
+            ts: event.ts
+          }
+        })
+      }
+
+      // 更新状态（保存前一个状态用于调试）
+      task.previousStatus = task.currentStatus
+      task.currentStatus = status
     }
 
     const task = this.tasks.get(key)!
-    task.currentStatus = status
 
     switch (status) {
       case TaskStatus.ACTIVE:
@@ -524,8 +624,9 @@ export default class OsStatistics {
         break
     }
 
-    // 立即更新统计结果
-    const result = this.updateTaskStatistics(key, task)
+    // 立即更新统计结果并合并状态转换错误信息
+    const statsResult = this.updateTaskStatistics(key, task)
+    result.push(...statsResult)
 
     return result
   }

@@ -729,8 +729,7 @@ export class OsTraceLOG {
         const d = info.data || {}
         const method = info.message.method
         if (method === 'osEvent') {
-          const d = info.message.data || {}
-
+          const d = (info.message.data as OsEvent) || {}
           info[Symbol.for('message')] = `${d.ts},${d.type},${d.id},${d.status}`
           return info
         }

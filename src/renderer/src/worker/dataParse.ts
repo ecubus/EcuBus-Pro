@@ -174,6 +174,16 @@ function parseORTIData(raw: any) {
       if (osStat) {
         const pr = osStat.processEvent(osEvent)
         for (const item of pr) {
+          if (item.error) {
+            list.push({
+              message: {
+                method: 'osError',
+                error: item.error,
+                ts: ts
+              }
+            })
+            continue
+          }
           if (!result[item.id]) {
             result[item.id] = []
           }

@@ -329,16 +329,16 @@ const updateTime = () => {
     }
   })
 
-  // const ts = (Date.now() - window.startTime) / 1000
-  // if (ts > maxX) {
-  //   maxX = ts
-  // }
+  const ts = (Date.now() - window.startTime) / 1000
+  if (ts > maxX) {
+    maxX = ts
+  }
 
   maxX = parseFloat(maxX.toFixed(2))
   time.value = maxX
 
-  // 实现10秒滑动窗口：当时间超过10秒时，只显示最近10秒
-  const WINDOW_SIZE = 8 // 5秒窗口
+  // 实现滑动窗口：当时间超过设定值时，x轴随时间移动
+  const WINDOW_SIZE = 10 // 10秒窗口
   let minX = 0
   let displayMaxX = maxX
 
@@ -351,12 +351,11 @@ const updateTime = () => {
     displayMaxX = WINDOW_SIZE
   }
 
-  // 只在x轴范围真正改变时才更新图表
-  // 使用更小的阈值来判断是否需要更新（0.1秒）
+  // x轴范围设置
   const newMinX = minX
-  const newMaxX = displayMaxX + 2
+  const newMaxX = displayMaxX
 
-  // 使用批量更新减少重绘次数
+  // 更新所有图表的x轴，让其随时间移动
   enabledCharts.value.forEach((c) => {
     // 缓存 x 轴的 min 值，供数据清理使用
     cachedXAxisMin[c.id] = newMinX
@@ -369,8 +368,8 @@ const updateTime = () => {
         }
       },
       false,
-      true
-    ) // 第三个参数lazyUpdate设为true，延迟更新
+      false
+    ) // notMerge=false, lazyUpdate=false 立即更新
   })
 }
 watch(globalStart, (val) => {

@@ -221,7 +221,7 @@ function othersFeature(command: string) {
     })
       .then(({ value }) => {
         trace.value.name = value
-        layout.changeWinName(props.editIndex, trace.value.name)
+        layout?.changeWinName(props.editIndex, trace.value.name)
       })
       .catch(() => {
         null
@@ -1061,13 +1061,13 @@ const trace = ref<TraceItem>(
   )
 )
 
-const layout = inject('layout') as Layout
+const layout = inject('layout') as Layout | undefined
 
 watch(
   trace,
   (newVal) => {
     database.traces[props.editIndex] = newVal
-    layout.changeWinName(props.editIndex, newVal.name)
+    layout?.changeWinName(props.editIndex, newVal.name)
   },
   {
     deep: true
@@ -1086,7 +1086,7 @@ onBeforeMount(() => {
   if (trace.value.filterId == undefined) {
     trace.value.filterId = []
   }
-  layout.changeWinName(props.editIndex, trace.value.name)
+  layout?.changeWinName(props.editIndex, trace.value.name)
 })
 onMounted(() => {
   timer = setInterval(() => {

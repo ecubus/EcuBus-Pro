@@ -14,6 +14,8 @@ import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
 import { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
 import { OsEvent } from './share/osEvent'
+import path from 'path'
+import dayjs from 'dayjs'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -735,8 +737,19 @@ export class OsTraceLOG {
         }
         return false
       })
+
+      // 获取当前时间作为时间戳后缀 (格式: YYYYMMDDHHmm)
+      const timestamp = dayjs().format('YYYYMMDDHHmm')
+
+      const parsedPath = path.parse(writerToFile)
+      const fileWithSuffix = path.format({
+        dir: parsedPath.dir,
+        name: parsedPath.name + '_' + timestamp,
+        ext: parsedPath.ext
+      })
+
       const fileTransport = new transports.File({
-        filename: writerToFile,
+        filename: fileWithSuffix,
         level: 'info',
         options: {
           options: { flags: 'w' }

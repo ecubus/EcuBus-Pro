@@ -57,6 +57,11 @@ export class OsTraceParser {
     // Process frames - always search for frame header
     // Limit processing to maxFrames to avoid blocking
     while (this.leftBuffer.length > 0 && !this.closeFlag) {
+      // Need at least 4 bytes to search for frame header
+      if (this.leftBuffer.length < FRAME_HEADER_SIZE) {
+        break
+      }
+
       // Search for 4-byte frame header from the beginning of buffer
       let headerIndex = -1
       for (let i = 0; i <= this.leftBuffer.length - FRAME_HEADER_SIZE; i++) {

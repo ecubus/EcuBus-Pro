@@ -804,7 +804,7 @@ function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
 }
 
 // 基础 Tabs 配置数据
-const baseTabsConfig: Ref<TabConfig[]> = ref([
+const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'home',
     label: 'Home',

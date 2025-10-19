@@ -2,11 +2,12 @@
   <div>
     <!--D:\code\app-template\dist\index.html  -->
     <WujieVue
-      name="A"
+      :name="editIndex"
       :url="`file:///${props.item.entry}`"
       :fetch="customFetch"
       :plugins="plugins"
-      :props="{ ...props, initData: dataStore.pluginData[props.pluginId] }"
+      :props="{ ...props, modelValue: dataStore.pluginData[props.pluginId] }"
+      :load-error="loadError"
     ></WujieVue>
   </div>
 </template>
@@ -16,6 +17,7 @@ import { toRef } from 'vue'
 import { EcuBusPlugin, PluginItemConfig } from './tabPluginTypes'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
+import { ElMessageBox } from 'element-plus'
 
 const dataStore = useDataStore()
 const props = defineProps<{
@@ -73,6 +75,17 @@ const plugins = [
 const customFetch = (url: string, options?: RequestInit) => {
   url = url.replace('file:///', 'local-resource:///' + basePath + '/')
   return window.fetch(url, options)
+}
+const loadError = (url: string, e: Error) => {
+  ElMessageBox({
+    title: 'Load Error',
+    message: e.message,
+    type: 'error',
+    appendTo: `#win${props.editIndex}`,
+    showCancelButton: false,
+    showConfirmButton: false,
+    center: true
+  })
 }
 </script>
 

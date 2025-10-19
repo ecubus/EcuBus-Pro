@@ -25,7 +25,8 @@ import { useGlobalStart } from './stores/runtime'
 import { usePluginStore } from './stores/plugin'
 import { useDark } from '@vueuse/core'
 import { VxeUI } from 'vxe-table'
-
+import { bus } from 'wujie'
+import log from 'electron-log'
 const data = useDataStore()
 const project = useProjectStore()
 const pluginStore = usePluginStore()
@@ -33,6 +34,27 @@ const { width, height } = useWindowSize()
 const globalStart = useGlobalStart()
 const isDark = useDark()
 const params = ref<any>({})
+
+bus.$on('update:modelValue', (pluginId: string, id: string, data: any) => {
+  log.info('plugin data update', {
+    pluginId,
+    id,
+    data
+  })
+  if (pluginId == id) {
+    //single data
+    data.pluginData[pluginId] = data
+  } else {
+    //multi data
+    if (data.pluginData[pluginId]) {
+      data.pluginData[pluginId][id] = data
+    } else {
+      data.pluginData[pluginId] = {
+        [id]: data
+      }
+    }
+  }
+})
 
 // Watch for dark theme changes
 watch(isDark, (value) => {

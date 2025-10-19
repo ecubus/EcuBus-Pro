@@ -5,7 +5,7 @@
   "main": "./out/main/index.js",
   "author": "frankie.zengfu@gmail.com",
   "homepage": "https://app.whyengineer.com",
-  "license": "license.txt",
+  "license": "Apache-2.0",
   "ecubusPro": {
     "vendor": {
       "win32": [

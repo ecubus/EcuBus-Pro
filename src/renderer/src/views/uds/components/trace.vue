@@ -221,7 +221,7 @@ function othersFeature(command: string) {
     })
       .then(({ value }) => {
         trace.value.name = value
-        layout.changeWinName(props.editIndex, trace.value.name)
+        layout?.changeWinName(props.editIndex, trace.value.name)
       })
       .catch(() => {
         null
@@ -321,7 +321,7 @@ interface OsEventLog {
 
 interface OsErrorLog {
   method: 'osError'
-  error: string
+  error: string | { data: string; name: string; id: string; ts: number }
   ts: number
 }
 
@@ -707,17 +707,31 @@ function logDisplay({ values }: { values: LogItem[] }) {
         msgType: 'OS Event'
       })
     } else if (val.message.method == 'osError') {
-      insertData({
-        method: val.message.method,
-        name: '',
-        data: val.message.error,
-        ts: (val.message.ts / 1000000).toFixed(6),
-        id: 'osError',
-        len: 0,
-        device: val.label,
-        channel: val.instance,
-        msgType: 'OS Error'
-      })
+      if (typeof val.message.error == 'string') {
+        insertData({
+          method: val.message.method,
+          name: '',
+          data: val.message.error,
+          ts: (val.message.ts / 1000000).toFixed(6),
+          id: 'osError',
+          len: 0,
+          device: val.label,
+          channel: val.instance,
+          msgType: 'OS Error'
+        })
+      } else {
+        insertData({
+          method: val.message.method,
+          name: '',
+          data: val.message.error.data,
+          ts: (val.message.ts / 1000000).toFixed(6),
+          id: val.message.error.id,
+          len: 0,
+          device: val.label,
+          channel: val.instance,
+          msgType: 'OS Error'
+        })
+      }
     }
   }
 }
@@ -1061,13 +1075,13 @@ const trace = ref<TraceItem>(
   )
 )
 
-const layout = inject('layout') as Layout
+const layout = inject('layout') as Layout | undefined
 
 watch(
   trace,
   (newVal) => {
     database.traces[props.editIndex] = newVal
-    layout.changeWinName(props.editIndex, newVal.name)
+    layout?.changeWinName(props.editIndex, newVal.name)
   },
   {
     deep: true
@@ -1086,7 +1100,7 @@ onBeforeMount(() => {
   if (trace.value.filterId == undefined) {
     trace.value.filterId = []
   }
-  layout.changeWinName(props.editIndex, trace.value.name)
+  layout?.changeWinName(props.editIndex, trace.value.name)
 })
 onMounted(() => {
   timer = setInterval(() => {

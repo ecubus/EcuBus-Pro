@@ -1782,10 +1782,10 @@
           ],
           "recordFile": {
             "enable": false,
-            "name": "test.csv"
+            "name": "test1.csv"
           },
           "connector": {
-            "type": "BinaryFile",
+            "type": "CSVFile",
             "device": "",
             "options": {
               "baudRate": "",
@@ -1795,85 +1795,13 @@
               "bitRate": "",
               "ipAddress": "",
               "port": "",
-              "file": "a.bin"
+              "file": "test4.csv"
             }
           }
         }
       }
     },
     "graphs": {
-      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.Status": {
-        "type": "variable",
-        "enable": true,
-        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.Status",
-        "name": "Status_5ms",
-        "color": "#253d9a",
-        "yAxis": {
-          "min": -2.523412813896095,
-          "max": 6.923412813896094,
-          "splitLine": {
-            "show": false
-          },
-          "name": "Status_5ms"
-        },
-        "bindValue": {
-          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_0_0.Status",
-          "variableType": "system",
-          "variableName": "Status",
-          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_5ms.Status",
-          "variableValueType": "number",
-          "stringRange": [
-            {
-              "name": "Active",
-              "value": 0
-            },
-            {
-              "name": "Start",
-              "value": 1
-            },
-            {
-              "name": "Suspended",
-              "value": 2
-            },
-            {
-              "name": "Release",
-              "value": 3
-            },
-            {
-              "name": "Preempt",
-              "value": 4
-            },
-            {
-              "name": "Terminate",
-              "value": 5
-            }
-          ]
-        },
-        "graph": {
-          "id": "graph"
-        },
-        "xAxis": {
-          "splitLine": {
-            "show": false,
-            "lineStyle": {
-              "type": "dashed"
-            }
-          },
-          "axisPointer": {
-            "show": false
-          }
-        },
-        "disZoom": false,
-        "tooltip": {
-          "show": true
-        },
-        "series": {
-          "step": "end",
-          "showSymbol": true,
-          "symbolSize": 6,
-          "symbol": "circle"
-        }
-      },
       "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Core0.LoadPercent": {
         "type": "variable",
         "enable": true,
@@ -1918,6 +1846,120 @@
           "showSymbol": true,
           "symbolSize": 6,
           "symbol": "circle"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status",
+        "name": "Status",
+        "color": "#05889f",
+        "yAxis": {
+          "min": 0,
+          "max": 5,
+          "splitLine": {
+            "show": false
+          },
+          "name": "Status"
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.Status",
+          "variableType": "system",
+          "variableName": "Status",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand1.Status",
+          "variableValueType": "number",
+          "stringRange": [
+            {
+              "name": "Active",
+              "value": 0
+            },
+            {
+              "name": "Start",
+              "value": 1
+            },
+            {
+              "name": "Wait",
+              "value": 2
+            },
+            {
+              "name": "Release",
+              "value": 3
+            },
+            {
+              "name": "Preempt",
+              "value": 4
+            },
+            {
+              "name": "Terminate",
+              "value": 5
+            }
+          ]
+        },
+        "graph": {
+          "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "tooltip": {
+          "show": true
+        },
+        "series": {
+          "step": "end",
+          "showSymbol": true,
+          "symbolSize": 6,
+          "symbol": "circle"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.StartCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.StartCount",
+        "name": "StartCount",
+        "color": "#dd15e0",
+        "yAxis": {
+          "min": -8.589999999999993,
+          "max": 27.41000000000002
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.StartCount",
+          "variableType": "system",
+          "variableName": "StartCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand1.StartCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
+        }
+      },
+      "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ActiveCount": {
+        "type": "variable",
+        "enable": true,
+        "id": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ActiveCount",
+        "name": "ActiveCount",
+        "color": "#ae8b74",
+        "yAxis": {
+          "min": -2.6271999999999878,
+          "max": 10.332800000000013
+        },
+        "bindValue": {
+          "variableId": "OsTrace.1712396f-dfa8-4dd7-82bb-c046ae3b927d.Task.0_7_0.ActiveCount",
+          "variableType": "system",
+          "variableName": "ActiveCount",
+          "variableFullName": "OsTrace.Os_Trace.Task.OsTask_Rand1.ActiveCount",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
         }
       }
     },
@@ -2425,8 +2467,22 @@
     },
     "panels": {},
     "logs": {},
-    "traces": {},
-    "pluginData": {}
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [],
+        "filterId": []
+      }
+    }
   },
   "project": {
     "wins": {
@@ -2448,9 +2504,9 @@
       },
       "1712396f-dfa8-4dd7-82bb-c046ae3b927d_trace": {
         "pos": {
-          "x": 3,
-          "y": 0.000030517578125,
-          "w": 1707,
+          "x": 282,
+          "y": 18,
+          "w": 1245.5,
           "h": 380
         },
         "title": "osTrace",
@@ -2473,10 +2529,10 @@
       },
       "graph": {
         "pos": {
-          "x": 0,
-          "y": 380,
-          "w": 1707,
-          "h": 380
+          "x": 150.5,
+          "y": 226,
+          "w": 1651.5,
+          "h": 533
         },
         "title": "graph",
         "label": "Line",
@@ -2486,12 +2542,12 @@
             "edit-index": "graph"
           }
         },
-        "hide": true
+        "hide": false
       },
       "variable": {
         "pos": {
-          "x": 980,
-          "y": 356,
+          "x": 950,
+          "y": 291,
           "w": 600,
           "h": 400
         },
@@ -2510,10 +2566,10 @@
       },
       "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
         "pos": {
-          "x": 503.5,
-          "y": 180,
-          "w": 700,
-          "h": 400
+          "x": 0,
+          "y": 380,
+          "w": 853.5,
+          "h": 414
         },
         "title": "orti",
         "label": "ORTI",
@@ -2524,14 +2580,14 @@
           },
           "name": "Os_Trace"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
-          "x": 493.5,
-          "y": 102,
-          "w": 877,
-          "h": 400
+          "x": 156.5,
+          "y": 0,
+          "w": 1511.5,
+          "h": 554
         },
         "title": "trace",
         "label": "Trace",

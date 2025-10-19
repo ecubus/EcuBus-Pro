@@ -54,7 +54,9 @@ export default class TraceItem {
           autoOpen: true
         })
         this.serialPort.on('data', (data: Buffer) => {
-          this.parser!.parseBinaryData(data)
+          // Use synchronous parsing for serial port - no async issues
+          // For serial port, process all available frames (no limit needed as data comes in small chunks)
+          this.parser!.parseBinaryDataSync(data, Number.MAX_SAFE_INTEGER)
         })
       } else if (
         this.orti.connector.type === 'BinaryFile' ||
@@ -124,7 +126,7 @@ export default class TraceItem {
       }
       logFile = path.resolve(logFile)
     }
-    this.log = new OsTraceLOG(this.orti.name, logFile)
+    this.log = new OsTraceLOG(this.orti.name, this.orti.recordFile?.enable ? logFile : undefined)
     this.systemTs = getTsUs()
   }
 

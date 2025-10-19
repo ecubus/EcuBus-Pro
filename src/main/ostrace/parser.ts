@@ -48,12 +48,20 @@ export class OsTraceParser {
     this.flushFlag = true
   }
 
-  async parseBinaryData(data: Buffer) {
+  // Synchronous core function for parsing binary data
+  // Returns: { processedEvents, hasMore } - hasMore indicates if there's more data to process
+  parseBinaryDataSync(data: Buffer, maxFrames: number): boolean {
     // Append new data to leftover buffer
     this.leftBuffer = Buffer.concat([this.leftBuffer, data])
 
     // Process frames - always search for frame header
+    // Limit processing to maxFrames to avoid blocking
     while (this.leftBuffer.length > 0 && !this.closeFlag) {
+      // Need at least 4 bytes to search for frame header
+      if (this.leftBuffer.length < FRAME_HEADER_SIZE) {
+        break
+      }
+
       // Search for 4-byte frame header from the beginning of buffer
       let headerIndex = -1
       for (let i = 0; i <= this.leftBuffer.length - FRAME_HEADER_SIZE; i++) {
@@ -132,10 +140,10 @@ export class OsTraceParser {
       if (this.index == undefined) {
         this.index = currentIndex
       } else {
-        const expectedIndex = ((this.index + 1) & 0xff) >>> 0
-        if (currentIndex !== expectedIndex) {
+        const expectedIndex = (this.index + 1) & 0xff
+        if (currentIndex != expectedIndex) {
           this.callbacks.onError(
-            `Index mismatch! Expected: ${expectedIndex}, Received: ${currentIndex}`
+            `Index mismatch! Expected: ${expectedIndex}, Received: ${currentIndex}, Block: ${block.toString('hex')}`
           )
         }
         this.index = currentIndex
@@ -164,9 +172,30 @@ export class OsTraceParser {
       // Notify via callback
       this.callbacks.onEvent(osEvent, realTs)
 
-      if (this.callbacks.getEventLength() >= EVENT_LENGTH_WATERMARK) {
-        await this.delay(50)
+      if (this.callbacks.getEventLength() >= maxFrames) {
+        break
       }
+    }
+
+    // Check if there's potentially more data to process
+    const hasMore = this.leftBuffer.length >= FRAME_LENGTH
+
+    return hasMore
+  }
+
+  // Async wrapper for stream usage
+  async parseBinaryData(data: Buffer) {
+    // First call with new data
+    let result = this.parseBinaryDataSync(data, EVENT_LENGTH_WATERMARK)
+
+    // Continue processing if there's more data in buffer
+    while (result && !this.closeFlag) {
+      // Check if we need to yield to prevent blocking
+
+      await this.delay(50)
+
+      // Process more frames from the leftBuffer (pass empty buffer since data is already in leftBuffer)
+      result = this.parseBinaryDataSync(Buffer.alloc(0), EVENT_LENGTH_WATERMARK)
     }
   }
 
@@ -236,6 +265,14 @@ export class BinaryParserStream extends Transform {
       .catch((error) => {
         callback(error as Error)
       })
+  }
+  _destroy(error: Error | null, callback: (error?: Error | null) => void) {
+    this.parser.close()
+    callback(error)
+  }
+  _flush(callback: TransformCallback): void {
+    this.parser.flush()
+    callback()
   }
 }
 

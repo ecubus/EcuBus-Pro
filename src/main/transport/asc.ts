@@ -1,6 +1,8 @@
 import { CanMessage } from 'nodeCan/can'
 import winston, { format } from 'winston'
 import Transport from 'winston-transport'
+import dayjs from 'dayjs'
+import path from 'path'
 
 // LogData interface matching the one from trace.vue
 
@@ -244,11 +246,19 @@ class FileTransport extends winston.transports.File {
 export default (filePath: string, devices: string[], method: string[]) => {
   const now = new Date()
   const keys = Object.keys(global.dataSet.devices)
+  // 获取当前时间作为时间戳后缀 (格式: YYYYMMDDHHmmss)
+  const timestamp = dayjs().format('YYYYMMDDHHmmss')
 
+  const parsedPath = path.parse(filePath)
+  const fileWithSuffix = path.format({
+    dir: parsedPath.dir,
+    name: parsedPath.name + '_' + timestamp,
+    ext: parsedPath.ext
+  })
   return new FileTransport(
     {
       format: ascFormat(method, keys, now.getTime()),
-      filename: filePath,
+      filename: fileWithSuffix,
       options: {
         flags: 'w'
       },

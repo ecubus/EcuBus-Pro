@@ -373,7 +373,8 @@
           <el-alert type="info" :closable="false" show-icon style="margin-top: 20px">
             <template #title>
               The trace data will be recorded to the specified file in CSV format with raw data
-              columns: <strong>timestamp, type, id, status</strong> (no header).
+              columns: <strong>timestamp, type, id, status</strong> (no header). A timestamp
+              (YYYYMMDDHHmmss) will be automatically appended to the filename.
             </template>
           </el-alert>
         </el-form>

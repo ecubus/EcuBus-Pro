@@ -39,6 +39,18 @@
             <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">
               <el-input v-model="formData.path" placeholder="Log file Path" />
             </el-form-item>
+            <el-alert
+              v-if="formData.type == 'file'"
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 15px"
+            >
+              <template #title>
+                A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename.
+              </template>
+            </el-alert>
+
             <el-form-item label="Record Types" prop="method">
               <div>
                 <el-checkbox

@@ -131,7 +131,7 @@ export class KvaserLin extends LinBase {
       frameId: id,
       data: Buffer.from(msgx),
       direction: (flags & 3) == 1 ? LinDirection.SEND : LinDirection.RECV,
-
+      device: this.info.name,
       checksumType: id == 0x3c || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
       checksum: msgInfo.checkSum,
       database: this.info.database

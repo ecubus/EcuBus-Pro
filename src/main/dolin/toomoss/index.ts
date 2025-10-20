@@ -183,7 +183,8 @@ export class ToomossLin extends LinBase {
           msg.linMsg.CheckType == 0 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
         checksum: msg.linMsg.Check,
         ts: ts,
-        database: this.info.database
+        database: this.info.database,
+        device: this.info.name
       }
 
       //mstStandard

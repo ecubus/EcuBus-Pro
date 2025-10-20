@@ -132,6 +132,10 @@ const rules = ref({
     {
       validator: (rule, value, callback) => {
         if (value) {
+          if (value.includes('.')) {
+            callback(new Error("Name cannot contain '.'"))
+            return
+          }
           for (const key of Object.keys(database.database.lin)) {
             if (database.database.lin[key].name == value && key != props.editIndex) {
               callback(new Error('The database name already exists'))
@@ -174,4 +178,3 @@ const ruleFormRef = ref()
   margin: 20px;
 }
 </style>
-

@@ -1337,10 +1337,10 @@ export class UtilClass {
   /**
    * Registers an event listener for CAN messages.
    *
-   * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+   * @param id - The CAN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all CAN messages.
    * @param fc - The callback function to be invoked when a CAN message is received.
    */
-  OnCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>) {
+  OnCan(id: number | string | true, fc: (msg: CanMessage) => void | Promise<void>) {
     if (id === true) {
       this.event.on('can' as any, fc)
     } else {
@@ -1480,7 +1480,7 @@ export class UtilClass {
   /**
    * Registers an event listener for CAN messages that will be invoked once.
    *
-   * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
+   * @param id - The CAN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all CAN messages.
    * @param fc - The callback function to be invoked when a CAN message is received.
    */
   OnCanOnce(id: number | true, fc: (msg: CanMessage) => void | Promise<void>) {
@@ -1919,6 +1919,8 @@ export class UtilClass {
     }
   }
   private async canMsg(msg: CanMessage) {
+    //signal emit
+    let dbName: string | undefined
     if (msg.device) {
       const device = Object.values(global.dataSet.devices).find(
         (device) => device.canDevice && device.canDevice.name == msg.device
@@ -1926,6 +1928,7 @@ export class UtilClass {
       if (device && device.canDevice!.database) {
         const db = global.dataSet.database.can[device.canDevice!.database]
         if (db) {
+          dbName = db.name
           const message = db.messages[msg.id]
           if (message) {
             //apply message to signal
@@ -1942,11 +1945,14 @@ export class UtilClass {
       }
     }
     await this.event.emit(`can.${msg.id}` as any, msg)
+    if (dbName && msg.name) {
+      await this.event.emit(`can.${dbName}.${msg.name}` as any, msg)
+    }
     await this.event.emit('can' as any, msg)
-    //signal emit
   }
   private async linMsg(msg: LinMsg) {
     //signal emit
+    let dbName: string | undefined
     if (msg.device) {
       const device = Object.values(global.dataSet.devices).find(
         (device) => device.linDevice && device.linDevice.name == msg.device
@@ -1955,6 +1961,7 @@ export class UtilClass {
         const db = global.dataSet.database.lin[device.linDevice!.database]
 
         if (db) {
+          dbName = db.name
           if (!msg.name) {
             for (const frame of Object.values(db.frames)) {
               if (frame.id === msg.frameId) {
@@ -1985,6 +1992,9 @@ export class UtilClass {
       }
     }
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
+    if (dbName && msg.name) {
+      await this.event.emit(`lin.${dbName}.${msg.name}` as any, msg)
+    }
     await this.event.emit('lin' as any, msg)
   }
   private async someipMsg(data: SomeipMessage) {

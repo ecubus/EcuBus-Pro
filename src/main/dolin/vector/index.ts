@@ -226,7 +226,8 @@ export class VectorLin extends LinBase {
               ? LinChecksumType.CLASSIC
               : LinChecksumType.ENHANCED),
           checksum: recvMsg.linMsg.crc,
-          database: this.info.database
+          database: this.info.database,
+          device: this.info.name
         }
 
         let error = false

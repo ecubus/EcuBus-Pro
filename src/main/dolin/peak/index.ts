@@ -139,6 +139,7 @@ export class PeakLin extends LinBase {
         }
 
         const msg: LinMsg = {
+          device: this.info.name,
           frameId: recvMsg.FrameId & 0x3f,
           data: data,
           direction:

@@ -210,8 +210,9 @@ export class LinCable extends LinBase {
           const data = Buffer.from(line.slice(1), 'hex')
           const ret = data[0]
           const msg = {
+            ...this.pendingPromise.sendMsg,
             ts: ts,
-            ...this.pendingPromise.sendMsg
+            device: this.info.name
           }
           if (ret == 0) {
             //ok, but not real ok
@@ -362,6 +363,7 @@ export class LinCable extends LinBase {
               data: Buffer.alloc(0),
               checksum: 0,
               ts: ts,
+              device: this.info.name,
               direction: LinDirection.RECV,
               checksumType:
                 id == 0x3c || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED

@@ -36,7 +36,9 @@ jobs:
         run: npm run build:win
       - uses: actions/upload-artifact@v4
         with:
-          name: artifact
-          path: |
-            dist/win-unpacked
-            dist/*.exe
+          name: ecubus-portable
+          path: dist/win-unpacked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ecubus-installer
+          path: dist/*.exe

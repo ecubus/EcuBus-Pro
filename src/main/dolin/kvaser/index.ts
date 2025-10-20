@@ -163,6 +163,7 @@ export class KvaserLin extends LinBase {
     if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == msg.frameId) {
       this.pendingPromise.sendMsg.data = msg.data
       this.pendingPromise.sendMsg.ts = ts
+      this.pendingPromise.sendMsg.device = msg.device
       if (flags & 0xf8) {
         handle()
         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)

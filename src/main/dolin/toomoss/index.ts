@@ -196,6 +196,7 @@ export class ToomossLin extends LinBase {
         if (msg.linMsg.MsgType == 8 || msg.linMsg.MsgType == 9) {
           this.pendingPromise.sendMsg.data = msg.linMsg.Data
           this.pendingPromise.sendMsg.ts = ts
+          this.pendingPromise.sendMsg.device = rmsg.name
           this.log.linBase(this.pendingPromise.sendMsg)
           this.event.emit(`${rmsg.frameId}`, this.pendingPromise.sendMsg)
           this.pendingPromise.resolve(this.pendingPromise.sendMsg)

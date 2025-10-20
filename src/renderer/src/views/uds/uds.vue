@@ -668,7 +668,8 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
       handlerName: item.onClick,
       onClick: () => {
         if (item.onClick) {
-          if (item.entry) {
+          const isDev = process.env.NODE_ENV === 'development'
+          if (item.entry || isDev) {
             layoutMaster.addWin('plugin', plugin.manifest.id, {
               name: item.label,
               params: {

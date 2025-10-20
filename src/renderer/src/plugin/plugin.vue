@@ -3,22 +3,23 @@
     <!--D:\code\app-template\dist\index.html  -->
     <WujieVue
       :name="editIndex"
-      :url="`file:///${props.item.entry}`"
-      :fetch="customFetch"
-      :plugins="plugins"
-      :props="{ ...props, modelValue: dataStore.pluginData[props.pluginId] }"
+      :url="entry"
+      :fetch="isDev ? undefined : customFetch"
+      :plugins="isDev ? undefined : plugins"
+      :props="{ ...props, modelValue: cloneDeep(dataStore.pluginData[props.pluginId]) }"
       :load-error="loadError"
     ></WujieVue>
   </div>
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { onUnmounted, toRef } from 'vue'
 import { EcuBusPlugin, PluginItemConfig } from './tabPluginTypes'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
 import { ElMessageBox } from 'element-plus'
-
+import { destroyApp } from 'wujie'
+import { cloneDeep } from 'lodash'
 const dataStore = useDataStore()
 const props = defineProps<{
   editIndex: string
@@ -28,6 +29,8 @@ const props = defineProps<{
   height: number
 }>()
 
+const isDev = process.env.NODE_ENV === 'development'
+const entry = isDev ? `http://localhost:5173/` : `file:///${props.item.entry}`
 const plguinStore = usePluginStore()
 const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')
@@ -87,6 +90,10 @@ const loadError = (url: string, e: Error) => {
     center: true
   })
 }
+
+onUnmounted(() => {
+  destroyApp(props.editIndex)
+})
 </script>
 
 <style scoped></style>

@@ -4,13 +4,7 @@
       "path": "."
     },
     {
-      "path": "C:/Users/frank/AppData/Roaming/ecubuspro/plugins"
-    },
-    {
-      "path": "../app-template"
-    },
-    {
-      "path": "../ecubus-plugin-sdk"
+      "path": "../ecubus-plugin-template"
     }
   ],
   "settings": {

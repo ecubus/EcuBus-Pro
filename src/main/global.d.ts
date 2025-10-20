@@ -7,7 +7,7 @@ import { VarItem } from 'src/preload/data'
 import { BrowserWindow } from 'electron'
 import { IntervalHistogram } from 'node:perf_hooks'
 import type { DataSet } from 'src/preload/data'
-
+import type { Script } from 'vm'
 type VarUpdateItem = {
   name: string
   value: number | string | number[]
@@ -27,6 +27,7 @@ declare global {
   var startTs: number
   var vars: Record<string, VarItem>
   var mainWindow: BrowserWindow
+  var vms: Record<string, Script>
   var toomossDeviceHandles:
     | Map<
         number,

@@ -19,7 +19,7 @@ export default defineConfig({
       external: ['vue']
     },
     // 输出目录
-    outDir: resolve(__dirname, 'dist/plugin-sdk'),
+    outDir: resolve(__dirname, 'src/renderer/src/plugin-sdk/dist'),
     // 清空输出目录
     emptyOutDir: true,
     // 生成sourcemap
@@ -36,7 +36,7 @@ export default defineConfig({
     // 生成.d.ts类型声明文件
     dts({
       tsconfigPath: resolve(__dirname, 'tsconfig.sdk.json'),
-      outDir: resolve(__dirname, 'dist/plugin-sdk'),
+      outDir: resolve(__dirname, 'src/renderer/src/plugin-sdk/dist'),
       rollupTypes: true,
       copyDtsFiles: false,
       logLevel: 'error',

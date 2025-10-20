@@ -53,3 +53,12 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
     return []
   }
 })
+
+ipcMain.handle('callServerMethod', async (event, ...arg) => {
+  // const [pluginId, id, method, ...params] = arg
+  // const plugin = plugins.find((p) => p.id === pluginId)
+  // if (plugin) {
+  //   return plugin.callServerMethod(method, ...params)
+  // }
+  // return null
+})

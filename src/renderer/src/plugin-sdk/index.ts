@@ -11,7 +11,7 @@ watch(data, (newVal: any) => {
   })
 })
 
-export default function useData() {
+export function useData() {
   return data
 }
 export const eventBus = window.parent.logBus

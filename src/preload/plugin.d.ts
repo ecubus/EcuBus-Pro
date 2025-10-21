@@ -70,6 +70,7 @@ export interface PluginManifest {
   description?: string // 插件描述
   author?: string // 作者
   render?: string // 渲染页面
+  mainEntry?: string // 主入口
   tabs?: PluginTabConfig[]
   extensions?: PluginTabExtension[]
 }

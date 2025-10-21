@@ -6,7 +6,7 @@
       :url="entry"
       :fetch="isDev ? undefined : customFetch"
       :plugins="isDev ? undefined : plugins"
-      :props="{ ...props, modelValue: cloneDeep(dataStore.pluginData[props.pluginId]) }"
+      :props="{ ...props, modelValue: data }"
       :load-error="loadError"
     ></WujieVue>
   </div>
@@ -29,6 +29,11 @@ const props = defineProps<{
   height: number
 }>()
 
+const data = cloneDeep(
+  props.editIndex == props.pluginId
+    ? dataStore.pluginData[props.pluginId]
+    : dataStore.pluginData[props.pluginId][props.editIndex]
+)
 const isDev = process.env.NODE_ENV === 'development'
 const entry = isDev ? `http://localhost:5173/` : `file:///${props.item.entry}`
 const plguinStore = usePluginStore()

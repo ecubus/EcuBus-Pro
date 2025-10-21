@@ -801,6 +801,8 @@ export class PluginLOG {
   pluginEvent(event: string, data: any) {
     this.log.info({
       method: 'pluginEvent',
+      id: this.pluginId,
+      event: event,
       data: data
     })
   }

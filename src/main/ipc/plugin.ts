@@ -2,6 +2,7 @@ import { ipcMain, app, shell } from 'electron'
 import runtimeDom from '../../../resources/lib/js/runtime-dom.esm-browser.min.js?asset&asarUnpack'
 import path from 'path'
 import fs from 'fs'
+import PluginClient from '../pluginCilent'
 
 const libPath = path.dirname(runtimeDom)
 
@@ -54,11 +55,35 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
   }
 })
 
-ipcMain.handle('callServerMethod', async (event, ...arg) => {
-  // const [pluginId, id, method, ...params] = arg
-  // const plugin = plugins.find((p) => p.id === pluginId)
-  // if (plugin) {
-  //   return plugin.callServerMethod(method, ...params)
-  // }
-  // return null
+const plugins: Record<string, PluginClient> = {}
+
+ipcMain.handle(
+  'ipc-plugin-create',
+  async (event, pluginId: string, pluginDir: string, mainEntry: string) => {
+    if (plugins[pluginId]) {
+      await plugins[pluginId].close()
+    }
+    const mainEntryPath = path.join(pluginDir, mainEntry)
+    if (fs.existsSync(mainEntryPath)) {
+      plugins[pluginId] = new PluginClient(pluginId, mainEntryPath)
+      console.log('plugin created', pluginId)
+    } else {
+      throw new Error(`Main entry file not found: ${mainEntryPath}`)
+    }
+  }
+)
+
+ipcMain.handle('ipc-plugin-close', async (event, pluginId) => {
+  if (plugins[pluginId]) {
+    await plugins[pluginId].close()
+    delete plugins[pluginId]
+  }
+})
+
+ipcMain.handle('ipc-plugin-exec', async (event, { pluginId, id }, method, ...params) => {
+  if (!plugins[pluginId]) {
+    throw new Error(`Plugin ${pluginId} not found`)
+  }
+
+  return await plugins[pluginId].exec(method, [...params])
 })

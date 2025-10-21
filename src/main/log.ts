@@ -806,4 +806,17 @@ export class PluginLOG {
       data: data
     })
   }
+
+  error(msg: string, data?: any) {
+    this.log.error({
+      method: 'pluginError',
+      id: this.pluginId,
+      msg: msg,
+      data: data
+    })
+  }
+
+  close(): void {
+    this.log.close()
+  }
 }

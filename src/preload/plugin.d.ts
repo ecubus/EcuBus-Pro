@@ -14,12 +14,12 @@ export interface PluginButtonConfig {
   id: string // 唯一标识
   label: string
   icon?: string // iconify 图标名称
-  iconSize?: string
-  minWidth?: boolean
+
   class?: Record<string, boolean>
   style?: string
   // 点击事件处理器名称，会映射到插件注册的处理函数
   onClick?: string
+  entry?: string
 }
 
 // 插件中的下拉菜单配置
@@ -28,7 +28,7 @@ export interface PluginDropdownConfig {
   id: string // 唯一标识
   label: string
   icon?: string
-  iconSize?: string
+
   // 下拉菜单项
   items: Array<{
     command: string
@@ -39,14 +39,10 @@ export interface PluginDropdownConfig {
   }>
   // 命令处理器名称
   onCommand?: string
+  entry?: string
 }
 
-// 插件中的分隔符配置
-export interface PluginDividerConfig {
-  type: 'divider'
-}
-
-export type PluginItemConfig = PluginButtonConfig | PluginDropdownConfig | PluginDividerConfig
+export type PluginItemConfig = PluginButtonConfig | PluginDropdownConfig
 
 // 插件 Tab 配置
 export interface PluginTabConfig {
@@ -79,4 +75,5 @@ export interface PluginManifest {
 export interface EcuBusPlugin {
   manifest: PluginManifest
   path: string
+  mainStatus?: string
 }

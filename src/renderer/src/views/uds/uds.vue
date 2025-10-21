@@ -26,7 +26,7 @@
                 :style="item.style"
                 @click="item.onClick"
               >
-                <Icon :icon="item.icon" :style="{ fontSize: item.iconSize || '24px' }" />
+                <Icon :icon="item.icon" :style="{ fontSize: '22px' }" />
                 <span>{{ item.label }}</span>
               </div>
 
@@ -36,7 +36,7 @@
                 class="grid girdenable"
                 @click="item.onClick"
               >
-                <Icon :icon="item.icon" :style="{ fontSize: item.iconSize || '24px' }" />
+                <Icon :icon="item.icon" :style="{ fontSize: '22px' }" />
                 <el-dropdown @command="item.onCommand">
                   <span class="lr">
                     {{ item.label }}
@@ -393,15 +393,15 @@ import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
-import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '@r/plugin/tabPluginTypes'
+import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '../../../../preload/plugin'
 
 // TypeScript 接口定义
 interface TabItem {
   type: 'button' | 'dropdown' | 'divider'
   label?: string
   icon?: any
-  iconSize?: string
   class?: any
+
   style?: any
   minWidth?: boolean
   onClick?: () => void
@@ -660,10 +660,10 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
       type: 'button',
       label: item.label,
       icon: item.icon ? loadIconify(item.icon) : undefined,
-      iconSize: item.iconSize,
+
       class: item.class,
       style: item.style,
-      minWidth: item.minWidth,
+
       pluginId: plugin.manifest.id,
       handlerName: item.onClick,
       onClick: () => {
@@ -711,7 +711,10 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
                 },
                 () => [
                   menuItem.icon
-                    ? h(Icon, { icon: loadIconify(menuItem.icon), style: 'margin-right: 5px' })
+                    ? h(Icon, {
+                        icon: loadIconify(menuItem.icon),
+                        style: 'margin-right: 5px; font-size: 20px'
+                      })
                     : null,
                   menuItem.label
                 ]
@@ -725,7 +728,7 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
       type: 'dropdown',
       label: item.label,
       icon: item.icon ? loadIconify(item.icon) : undefined,
-      iconSize: item.iconSize,
+
       pluginId: plugin.manifest.id,
       handlerName: item.onCommand,
       onCommand: (command: string) => {

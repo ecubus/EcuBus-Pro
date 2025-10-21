@@ -125,7 +125,7 @@
     "vxe-pc-ui": "^4.2.53",
     "vxe-table": "^4.16.11",
     "winston": "^3.17.0",
-    "workerpool": "github:frankie-zeng/workerpool#24f9e85",
+    "workerpool": "github:frankie-zeng/workerpool#465f31",
     "wujie-vue3": "^1.0.29",
     "xterm": "^5.3.0"
   },

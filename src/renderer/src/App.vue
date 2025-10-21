@@ -69,8 +69,6 @@ onMounted(async () => {
   if (isDark.value) {
     VxeUI.setTheme('dark')
   }
-
-  await pluginStore.loadAllPlugins()
 })
 
 if (window.params.id) {

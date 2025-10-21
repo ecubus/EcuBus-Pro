@@ -433,7 +433,7 @@ import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import pluginManager from './plugin.vue'
-
+import { usePluginStore } from '@r/stores/plugin'
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
 const hasUpdate = ref(false)
@@ -454,7 +454,10 @@ const recentHeight = computed(() => {
 const infoHeight = computed(() => {
   return height.value - 235 - 80 - 220 + 'px' // Reduced by 120px to make room for ads
 })
-
+const pluginStore = usePluginStore()
+pluginStore.loadAllPlugins().catch((e) => {
+  log.error(e)
+})
 const hasNotify = computed(() => {
   return hasUpdate.value
 })

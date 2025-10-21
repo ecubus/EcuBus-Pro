@@ -7,8 +7,23 @@
           <p>Manage your EcuBus Pro plugins</p>
         </div>
         <div class="header-actions">
-          <el-button type="primary" :icon="Refresh" :loading="loading" @click="refreshPlugins">
+          <el-button
+            type="primary"
+            :icon="Refresh"
+            plain
+            :loading="loading"
+            @click="refreshPlugins"
+          >
             Refresh Plugins
+          </el-button>
+          <el-button
+            type="success"
+            :icon="FolderAdd"
+            plain
+            :loading="loading"
+            @click="loadCustomPlugin"
+          >
+            Load Plugin From Custom Path
           </el-button>
           <el-button :icon="FolderOpened" @click="openPluginDir"> Open Plugin Directory </el-button>
         </div>
@@ -148,7 +163,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
-import { Refresh, FolderOpened, InfoFilled, Delete } from '@element-plus/icons-vue'
+import { Refresh, FolderOpened, InfoFilled, Delete, FolderAdd } from '@element-plus/icons-vue'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import checkIcon from '@iconify/icons-mdi/check-circle'
 import tabIcon from '@iconify/icons-mdi/tab'
@@ -156,7 +171,7 @@ import extensionIcon from '@iconify/icons-mdi/puzzle-plus'
 import emptyIcon from '@iconify/icons-mdi/package-variant'
 import authorIcon from '@iconify/icons-mdi/account'
 import { usePluginStore } from '@r/stores/plugin'
-import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '@r/plugin/tabPluginTypes'
+import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '../../../../preload/plugin'
 
 const props = defineProps<{
   height: number
@@ -238,6 +253,22 @@ async function openPluginDir() {
     }
   } catch (error) {
     null
+  }
+}
+
+// 手动加载插件
+async function loadCustomPlugin() {
+  loading.value = true
+  try {
+    await pluginStore.loadPluginFromCustomPath()
+  } catch (error: any) {
+    ElMessageBox({
+      title: 'Failed to load plugin',
+      message: error.message || 'Unknown error',
+      type: 'error'
+    })
+  } finally {
+    loading.value = false
   }
 }
 

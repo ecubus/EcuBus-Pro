@@ -5,7 +5,7 @@ import type {
   PluginManifest,
   PluginTabConfig,
   PluginTabExtension
-} from '@r/plugin/tabPluginTypes'
+} from '../../../preload/plugin'
 import { cloneDeep } from 'lodash'
 
 export type PluginState = {
@@ -121,10 +121,23 @@ export const usePluginStore = defineStore('usePluginStore', {
           manifestPath
         )
         const manifest: PluginManifest = JSON.parse(manifestContent)
-
         const plugin: EcuBusPlugin = {
           manifest,
           path: pluginDir
+        }
+
+        if (manifest.mainEntry) {
+          try {
+            await window.electron.ipcRenderer.invoke(
+              'ipc-plugin-create',
+              manifest.id,
+              pluginDir,
+              manifest.mainEntry
+            )
+            plugin.mainStatus = 'running'
+          } catch (error) {
+            plugin.mainStatus = 'error'
+          }
         }
 
         this.registerPlugin(plugin)
@@ -133,7 +146,7 @@ export const usePluginStore = defineStore('usePluginStore', {
         const errorMsg = `Failed to load plugin from directory ${pluginDir}: ${error}`
         console.error(errorMsg)
         this.error = errorMsg
-        return null
+        throw new Error(errorMsg)
       }
     },
 
@@ -214,36 +227,65 @@ export const usePluginStore = defineStore('usePluginStore', {
      * 卸载插件（从磁盘删除）
      */
     async uninstallPlugin(pluginId: string): Promise<boolean> {
-      try {
-        const plugin = this.plugins.get(pluginId)
-        if (!plugin) {
-          throw new Error(`Plugin ${pluginId} not found`)
-        }
+      const plugin = this.plugins.get(pluginId)
+      if (!plugin) {
+        throw new Error(`Plugin ${pluginId} not found`)
+      }
 
-        // 获取插件目录
-        const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
-        if (!pluginsDir) {
-          throw new Error('Failed to get plugins directory')
-        }
+      await window.electron.ipcRenderer.invoke('ipc-plugin-close', pluginId)
 
-        const pluginDir = `${pluginsDir}/${pluginId}`
+      // 获取插件目录
+      const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
+      if (!pluginsDir) {
+        throw new Error('Failed to get plugins directory')
+      }
 
-        // 检查目录是否存在
-        const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', pluginDir)
-        if (!exists) {
-          throw new Error(`Plugin directory not found: ${pluginDir}`)
-        }
+      const pluginDir = `${pluginsDir}/${pluginId}`
 
-        // 从内存中删除
-        this.plugins.delete(pluginId)
-        this.plugins = new Map(this.plugins)
+      // 检查目录是否存在
 
-        // 删除插件目录
+      const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', pluginDir)
+      if (exists) {
         await window.electron.ipcRenderer.invoke('ipc-fs-rmdir', pluginDir)
+      }
 
-        return true
+      // 从内存中删除
+      this.plugins.delete(pluginId)
+      this.plugins = new Map(this.plugins)
+
+      return true
+    },
+
+    /**
+     * 手动加载插件路径
+     */
+    async loadPluginFromCustomPath(): Promise<boolean> {
+      try {
+        // 打开文件夹选择对话框
+        const selectedPath = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+          title: 'Select Plugin Folder',
+          properties: ['openDirectory']
+        })
+
+        if (!selectedPath || selectedPath.canceled) {
+          return false // 用户取消了选择
+        }
+
+        // 尝试加载插件
+        const plugin = await this.loadPluginFromDirectory(selectedPath.filePaths[0])
+
+        if (plugin) {
+          // 检查插件是否已经存在
+          if (!this.pluginsEanbled[plugin.manifest.id]) {
+            // 默认启用新加载的插件
+            this.enablePlugin(plugin.manifest.id)
+          }
+          return true
+        }
+
+        return false
       } catch (error) {
-        console.error(`Failed to uninstall plugin ${pluginId}:`, error)
+        this.error = String(error)
         throw error
       }
     }

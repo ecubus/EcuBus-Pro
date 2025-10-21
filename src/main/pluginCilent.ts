@@ -22,18 +22,12 @@ export default class PluginClient {
       maxWorkers: 1,
       workerType: 'thread',
       emitStdStreams: false,
-      workerTerminateTimeout: 0,
+      workerTerminateTimeout: 1000,
       workerThreadOpts: {
-        stderr: true,
-        stdout: true,
+        stderr: false,
+        stdout: false,
         execArgv: execArgv,
         workerData: global.dataSet
-      },
-
-      onTerminateWorker: (v: any) => {
-        if (!this.selfStop) {
-          global.sysLog.error('worker terminated unexpectedly')
-        }
       }
     })
     const d = (this.pool as any)._getWorker()
@@ -41,18 +35,6 @@ export default class PluginClient {
     d.worker.globalOn = (payload: any) => {
       this.eventHandler(payload)
     }
-
-    d.worker.stdout.on('data', (data: any) => {
-      if (!this.selfStop) {
-        global.scriptLog.info(data.toString())
-      }
-    })
-
-    d.worker.stderr.on('data', (data: any) => {
-      if (!this.selfStop) {
-        global.sysLog.error(data.toString())
-      }
-    })
   }
 
   eventHandler(payload: any) {
@@ -89,6 +71,23 @@ export default class PluginClient {
           reject(e)
         })
     })
+  }
+
+  async close(): Promise<void> {
+    this.log.close()
+    this.selfStop = true
+
+    try {
+      this.worker?.worker?.terminate()
+    } catch (e) {
+      null
+    }
+
+    try {
+      await this.pool.terminate(true)
+    } catch (e) {
+      null
+    }
   }
 
   // 检查worker是否健康

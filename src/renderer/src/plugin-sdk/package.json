@@ -1,7 +1,7 @@
 {
-  "name": "@plugin-sdk",
+  "name": "@ecubus-pro/renderer-plugin-sdk",
   "version": "0.0.0",
-  "description": "EcuBus Pro plugin SDK runtime helpers",
+  "description": "EcuBus Pro renderer plugin SDK",
   "type": "module",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

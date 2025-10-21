@@ -1,0 +1,10 @@
+{
+  "name": "@ecubus-pro/main-plugin-sdk",
+  "version": "0.0.0",
+  "description": "EcuBus Pro main plugin SDK",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false
+}
+

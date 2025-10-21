@@ -786,3 +786,22 @@ export class OsTraceLOG {
     })
   }
 }
+
+export class PluginLOG {
+  log: Logger
+
+  constructor(public pluginId: string) {
+    const et1 = externalTransport.map((t) => t.t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(format.json(), ...externalFormat)
+    })
+  }
+
+  pluginEvent(event: string, data: any) {
+    this.log.info({
+      method: 'pluginEvent',
+      data: data
+    })
+  }
+}

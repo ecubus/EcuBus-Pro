@@ -159,10 +159,10 @@ class MyCustomPlugin {
 
 module.exports = {
     entry: {
-        uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',
+        // uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',
         crc:path.resolve(__dirname,'src/main/worker') + '/crc.ts',
-        cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
-        utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
+        // cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
+        // utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
     },
     output: {
         path: path.resolve(__dirname,'dist'),
@@ -199,7 +199,7 @@ module.exports = {
                 use: [{
                     loader: 'ts-loader',
                     options: {
-                        configFile: "tsconfig.worker.json",
+                        configFile: path.resolve(__dirname,"tsconfig.worker.json"),
                         compilerOptions: {
                             sourceMap: true
                         }

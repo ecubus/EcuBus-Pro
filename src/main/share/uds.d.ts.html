@@ -1458,10 +1458,10 @@ declare class UtilClass {
     /**
      * Registers an event listener for CAN messages.
      *
-     * @param id - The CAN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all CAN messages.
+     * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
      * @param fc - The callback function to be invoked when a CAN message is received.
      */
-    OnCan(id: number | string | true, fc: (msg: CanMessage) => void | Promise<void>): void;
+    OnCan(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;
     /**
      * Registers an event listener for signal updates from CAN/LIN databases.
      * The signal will be emitted whenever the specified signal value changes.
@@ -1567,7 +1567,7 @@ declare class UtilClass {
     /**
      * Registers an event listener for CAN messages that will be invoked once.
      *
-     * @param id - The CAN message ID or ${databaseName}.${frameName} to listen for. If `true`, listens for all CAN messages.
+     * @param id - The CAN message ID to listen for. If `true`, listens for all CAN messages.
      * @param fc - The callback function to be invoked when a CAN message is received.
      */
     OnCanOnce(id: number | true, fc: (msg: CanMessage) => void | Promise<void>): void;

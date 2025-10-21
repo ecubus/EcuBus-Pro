@@ -18,7 +18,7 @@ export const eventBus = window.parent.logBus
 
 export function callServerMethod(method: string, ...params: any[]) {
   window.parent.electron.ipcRenderer.invoke(
-    'callServerMethod',
+    'ipc-plugin-exec',
     { pluginId: window.$wujie?.props?.pluginId, id: window.$wujie?.props?.editIndex },
     method,
     ...params

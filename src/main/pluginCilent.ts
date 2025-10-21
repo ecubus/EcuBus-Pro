@@ -1,10 +1,7 @@
-import { assign, cloneDeep } from 'lodash'
-import { Sequence, ServiceItem } from './share/uds'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import workerpool, { Pool } from 'workerpool'
 import { PluginLOG } from './log'
-import { formatError } from 'nodeCan/can'
 
 export default class PluginClient {
   pool: Pool
@@ -14,13 +11,10 @@ export default class PluginClient {
 
   constructor(
     private id: string,
-    private env: {
-      PROJECT_ROOT: string
-      PROJECT_NAME: string
-    },
-    private jsFilePath: string
+
+    jsFilePath: string
   ) {
-    this.log = new PluginLOG(id)
+    this.log = new PluginLOG(this.id)
     const execArgv = ['--enable-source-maps']
 
     this.pool = workerpool.pool(jsFilePath, {
@@ -32,7 +26,6 @@ export default class PluginClient {
       workerThreadOpts: {
         stderr: true,
         stdout: true,
-        env: this.env,
         execArgv: execArgv,
         workerData: global.dataSet
       },
@@ -68,7 +61,7 @@ export default class PluginClient {
     this.log.pluginEvent(event, data)
   }
 
-  async exec(name: string, method: string, param: any[]): Promise<ServiceItem[]> {
+  async exec(method: string, ...params: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
       const pendingProcess = Object.values(this.worker.processing)
       const promiseList = []
@@ -80,7 +73,7 @@ export default class PluginClient {
       Promise.all(promiseList)
         .then(() => {
           this.pool
-            .exec(`${name}.${method}`, param, {
+            .exec(method, ...params, {
               on: (payload: any) => {
                 this.eventHandler(payload)
               }
@@ -89,11 +82,11 @@ export default class PluginClient {
               resolve(value)
             })
             .catch((e: any) => {
-              reject(formatError(e))
+              reject(e)
             })
         })
         .catch((e: any) => {
-          reject(formatError(e))
+          reject(e)
         })
     })
   }

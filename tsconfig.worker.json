@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "composite": false,
+    "composite": true,
     "target": "esnext",
     "module": "esnext",
     "sourceMap": false,
@@ -31,6 +31,6 @@
     "src/renderer/src/database/ldf/*.ts"
   ],
   "exclude": [
-    "src/main/workerClient.ts"
+    "src/main/pluginCilent.ts"
   ]
 }

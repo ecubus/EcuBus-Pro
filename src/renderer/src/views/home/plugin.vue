@@ -7,25 +7,45 @@
           <p>Manage your EcuBus Pro plugins</p>
         </div>
         <div class="header-actions">
-          <el-button
-            type="primary"
-            :icon="Refresh"
-            plain
-            :loading="loading"
-            @click="refreshPlugins"
-          >
-            Refresh Plugins
-          </el-button>
-          <el-button
-            type="success"
-            :icon="FolderAdd"
-            plain
-            :loading="loading"
-            @click="loadCustomPlugin"
-          >
-            Load Plugin From Custom Path
-          </el-button>
-          <el-button :icon="FolderOpened" @click="openPluginDir"> Open Plugin Directory </el-button>
+          <div>
+            <el-button
+              type="primary"
+              :icon="Refresh"
+              plain
+              style="width: 200px"
+              :loading="loading"
+              @click="refreshPlugins"
+            >
+              Refresh Plugins
+            </el-button>
+          </div>
+          <div>
+            <el-button
+              type="success"
+              :icon="FolderAdd"
+              plain
+              :loading="loading"
+              style="width: 200px"
+              @click="loadCustomPlugin"
+            >
+              Load Plugin For Dev
+            </el-button>
+          </div>
+          <div>
+            <el-button
+              type="primary"
+              style="width: 200px"
+              :icon="ShoppingBag"
+              @click="showMarketplace = true"
+            >
+              Plugin Marketplace
+            </el-button>
+          </div>
+          <div>
+            <el-button style="width: 200px" :icon="FolderOpened" @click="openPluginDir">
+              Open Plugin Directory
+            </el-button>
+          </div>
         </div>
       </div>
 
@@ -156,6 +176,11 @@
         </el-card>
       </div>
     </el-scrollbar>
+
+    <!-- Plugin Marketplace Dialog -->
+    <el-dialog v-model="showMarketplace" align-center width="900px" :close-on-click-modal="false">
+      <PluginMarketplace @install="handleMarketplaceInstall" />
+    </el-dialog>
   </div>
 </template>
 
@@ -163,7 +188,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
-import { Refresh, FolderOpened, InfoFilled, Delete, FolderAdd } from '@element-plus/icons-vue'
+import {
+  Refresh,
+  FolderOpened,
+  InfoFilled,
+  Delete,
+  FolderAdd,
+  ShoppingBag
+} from '@element-plus/icons-vue'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import checkIcon from '@iconify/icons-mdi/check-circle'
 import tabIcon from '@iconify/icons-mdi/tab'
@@ -172,6 +204,7 @@ import emptyIcon from '@iconify/icons-mdi/package-variant'
 import authorIcon from '@iconify/icons-mdi/account'
 import { usePluginStore } from '@r/stores/plugin'
 import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '../../../../preload/plugin'
+import PluginMarketplace from './PluginMarketplace.vue'
 
 const props = defineProps<{
   height: number
@@ -180,6 +213,7 @@ const props = defineProps<{
 const pluginStore = usePluginStore()
 const loading = ref(false)
 const pluginDir = ref('')
+const showMarketplace = ref(false)
 
 // 插件列表
 const plugins = computed(() => {
@@ -272,6 +306,31 @@ async function loadCustomPlugin() {
   }
 }
 
+// 从插件市场安装插件
+async function handleMarketplaceInstall(plugin: { url: string; manifest: any; fileName: string }) {
+  try {
+    ElMessage.info(`Downloading plugin: ${plugin.manifest.name}...`)
+
+    // Call IPC to download and install plugin
+    await window.electron.ipcRenderer.invoke('ipc-install-plugin-from-url', {
+      url: plugin.url,
+      fileName: plugin.fileName,
+      manifest: plugin.manifest
+    })
+
+    ElMessage.success(`Plugin "${plugin.manifest.name}" installed successfully!`)
+
+    // Refresh plugin list
+    await refreshPlugins()
+
+    // Close marketplace dialog
+    showMarketplace.value = false
+  } catch (error: any) {
+    ElMessage.error(error.message || 'Failed to install plugin')
+    console.error('Install plugin error:', error)
+  }
+}
+
 // 初始化
 onMounted(async () => {
   const dir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
@@ -293,6 +352,11 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  gap: 16px;
+}
+
+.header-info {
+  text-align: center;
 }
 
 .header-info h2 {
@@ -310,6 +374,8 @@ onMounted(async () => {
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
 }
 

@@ -24,6 +24,7 @@ import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { build as buildFunc } from './build'
 import { getAllSysVar } from '../main/share/sysVar'
 import { cloneDeep } from 'lodash'
+import { pluginMain } from './plugin'
 
 // import async_hooks from 'async_hooks';
 
@@ -231,19 +232,19 @@ const myFormat = format.printf(({ level, message, label, timestamp }) => {
         // 使用特殊标记来跳过这条日志
         return null
       }
-    } else if (msg.method.endsWith('udsSystem')) {
+    } else if (msg.method && msg.method.endsWith('udsSystem')) {
       const data = msg.data as { ts: number; msg?: string }
       msg = `${data.msg || 'error'}`
-    } else if (msg.method.endsWith('udsError')) {
+    } else if (msg.method && msg.method.endsWith('udsError')) {
       const data = msg.data as { ts: number; msg?: string }
       msg = `${data.msg || 'error'}`
       fn = colors.red
-    } else if (msg.method.endsWith('udsScript')) {
+    } else if (msg.method && msg.method.endsWith('udsScript')) {
       const data = msg.data as { ts: number; msg?: string }
       msg = `${data.msg || 'error'}`
     } else {
-      //不打印
-      return false
+      // 对于其他对象，使用 JSON.stringify
+      msg = JSON.stringify(msg, null, 2)
     }
   } else if (typeof msg === 'string') {
     msg = msg.trim()
@@ -344,6 +345,29 @@ build.action(async (project, file, options) => {
     await buildFunc(projectPath, projectName, data, file, options.test)
   } catch (e: any) {
     sysLog.error(e.message || 'failed to run test config')
+    exit(1)
+  }
+})
+
+//plugin command
+const plugin = program.command('plugin').description('manage plugins')
+plugin.argument('<plugin-dir>', 'Path to the plugin directory containing manifest.json')
+plugin.option(
+  '--accessKey <key>',
+  'Access key for authentication or get from environment variable ECUBUS_ACCESS_KEY'
+)
+plugin.option(
+  '--accessSecret <secret>',
+  'Access secret for authentication or get from environment variable ECUBUS_ACCESS_SECRET'
+)
+addLoggingOption(plugin)
+plugin.action(async (pluginDir, options) => {
+  createLog(options.logLevel, options.logFile)
+  try {
+    await pluginMain(pluginDir, options)
+  } catch (e: any) {
+    console.trace(e)
+    sysLog.error(e.message || 'failed to upload plugin')
     exit(1)
   }
 })

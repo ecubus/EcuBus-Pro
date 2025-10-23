@@ -64,9 +64,10 @@ export interface PluginManifest {
   name: string // 插件名称
   version: string // 插件版本
   description?: string // 插件描述
-  author?: string // 作者
-  render?: string // 渲染页面
+  author: string // 作者
   mainEntry?: string // 主入口
+  icon: string
+  readme: string
   tabs?: PluginTabConfig[]
   extensions?: PluginTabExtension[]
 }

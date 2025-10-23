@@ -248,6 +248,17 @@
           </div>
         </template>
       </el-tab-pane>
+      <el-tab-pane name="pluginMarketplace">
+        <template #label>
+          <div class="menu-item">
+            <Icon :icon="pluginIcon" />
+            <span>Plugin</span>
+          </div>
+        </template>
+        <div class="marketplaceMenu">
+          <PluginMarketplace :height="height" />
+        </div>
+      </el-tab-pane>
       <el-tab-pane name="user">
         <template #label>
           <div class="menu-item">
@@ -338,6 +349,7 @@
           </el-tab-pane>
         </el-tabs>
       </el-tab-pane>
+
       <!-- <el-tab-pane name="setting">
                 <template #label>
                     <div class="menu-item">
@@ -415,7 +427,7 @@ import policyIcon from '@iconify/icons-material-symbols/assignment'
 import policy from './policy.vue'
 import { useProjectList, useProjectStore } from '@r/stores/project'
 import { version, ecubusPro } from './../../../../../package.json'
-import { version as elVer } from 'element-plus'
+import { version as elVer, ElMessage } from 'element-plus'
 import log from 'electron-log/renderer'
 import newVue from './new.vue'
 import { useRouter } from 'vue-router'
@@ -433,6 +445,7 @@ import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import pluginManager from './plugin.vue'
+import PluginMarketplace from './PluginMarketplace.vue'
 import { usePluginStore } from '@r/stores/plugin'
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
@@ -658,6 +671,11 @@ onMounted(() => {
 }
 
 .newMenu {
+  width: v-bind(width-120 + 'px');
+  height: v-bind(height-35 + 'px');
+}
+
+.marketplaceMenu {
   width: v-bind(width-120 + 'px');
   height: v-bind(height-35 + 'px');
 }

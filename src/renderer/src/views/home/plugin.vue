@@ -31,16 +31,7 @@
               Load Plugin For Dev
             </el-button>
           </div>
-          <div>
-            <el-button
-              type="primary"
-              style="width: 200px"
-              :icon="ShoppingBag"
-              @click="showMarketplace = true"
-            >
-              Plugin Marketplace
-            </el-button>
-          </div>
+
           <div>
             <el-button style="width: 200px" :icon="FolderOpened" @click="openPluginDir">
               Open Plugin Directory
@@ -178,9 +169,9 @@
     </el-scrollbar>
 
     <!-- Plugin Marketplace Dialog -->
-    <el-dialog v-model="showMarketplace" align-center width="900px" :close-on-click-modal="false">
+    <!-- <el-dialog v-model="showMarketplace" align-center width="900px" :close-on-click-modal="false">
       <PluginMarketplace @install="handleMarketplaceInstall" />
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -204,7 +195,7 @@ import emptyIcon from '@iconify/icons-mdi/package-variant'
 import authorIcon from '@iconify/icons-mdi/account'
 import { usePluginStore } from '@r/stores/plugin'
 import { EcuBusPlugin, PluginTabConfig, PluginTabExtension } from '../../../../preload/plugin'
-import PluginMarketplace from './PluginMarketplace.vue'
+// import PluginMarketplace from './PluginMarketplace.vue'
 
 const props = defineProps<{
   height: number
@@ -213,7 +204,7 @@ const props = defineProps<{
 const pluginStore = usePluginStore()
 const loading = ref(false)
 const pluginDir = ref('')
-const showMarketplace = ref(false)
+// const showMarketplace = ref(false)
 
 // 插件列表
 const plugins = computed(() => {
@@ -307,29 +298,6 @@ async function loadCustomPlugin() {
 }
 
 // 从插件市场安装插件
-async function handleMarketplaceInstall(plugin: { url: string; manifest: any; fileName: string }) {
-  try {
-    ElMessage.info(`Downloading plugin: ${plugin.manifest.name}...`)
-
-    // Call IPC to download and install plugin
-    await window.electron.ipcRenderer.invoke('ipc-install-plugin-from-url', {
-      url: plugin.url,
-      fileName: plugin.fileName,
-      manifest: plugin.manifest
-    })
-
-    ElMessage.success(`Plugin "${plugin.manifest.name}" installed successfully!`)
-
-    // Refresh plugin list
-    await refreshPlugins()
-
-    // Close marketplace dialog
-    showMarketplace.value = false
-  } catch (error: any) {
-    ElMessage.error(error.message || 'Failed to install plugin')
-    console.error('Install plugin error:', error)
-  }
-}
 
 // 初始化
 onMounted(async () => {

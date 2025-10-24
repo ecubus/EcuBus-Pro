@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { onUnmounted, toRef } from 'vue'
-import { EcuBusPlugin, PluginItemConfig } from './tabPluginTypes'
+import { PluginItemConfig } from 'src/preload/plugin'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
 import { ElMessageBox } from 'element-plus'

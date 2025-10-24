@@ -322,8 +322,7 @@ test.action(async (project, name, options) => {
       options.testNamePattern
     )
   } catch (e: any) {
-    console.trace(e)
-    console.error(e.message || 'failed to run test config')
+    sysLog.error(e.message || 'failed to run test config')
     exit(1)
   }
   //打印还有哪些pending的promise
@@ -366,7 +365,6 @@ plugin.action(async (pluginDir, options) => {
   try {
     await pluginMain(pluginDir, options)
   } catch (e: any) {
-    console.trace(e)
     sysLog.error(e.message || 'failed to upload plugin')
     exit(1)
   }

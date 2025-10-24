@@ -206,7 +206,7 @@ async function uploadResource(
       JSON.stringify({
         name: manifest.name,
         description: manifest.description,
-        author: manifest.author
+        author: username
       })
     )
   }
@@ -276,6 +276,9 @@ export async function pluginMain(pluginDir: string, options: UploadOptions): Pro
     sysLog.debug('Getting user information...')
     const userInfo = await getUserInfo(options)
     sysLog.info(`Logged in as: ${userInfo.name}`)
+    if (manifest.author != userInfo.name) {
+      throw new Error(`Plugin author ${manifest.author} does not match user ${userInfo.name}`)
+    }
 
     // Clean up old temp files first
     await cleanupTempFiles()

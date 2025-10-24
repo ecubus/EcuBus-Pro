@@ -200,8 +200,15 @@ async function uploadResource(
 
   formData.append('fullFilePath', `plugins/${manifest.id}/${type}${ext}`)
 
-  if (type === 'json' && manifest.description) {
-    formData.append('description', manifest.description)
+  if (type === 'json') {
+    formData.append(
+      'description',
+      JSON.stringify({
+        name: manifest.name,
+        description: manifest.description,
+        author: manifest.author
+      })
+    )
   }
 
   try {
@@ -313,6 +320,11 @@ export async function pluginMain(pluginDir: string, options: UploadOptions): Pro
     sysLog.info('Uploading readme...')
     await uploadResource(readmePath, userInfo.name, options, manifest, 'readme')
     sysLog.info('✓ Readme uploaded successfully')
+
+    // 5. Upload manifest.json
+    sysLog.info('Uploading manifest.json...')
+    await uploadResource(manifestPath, userInfo.name, options, manifest, 'json')
+    sysLog.info('✓ Manifest.json uploaded successfully')
   } catch (error) {
     // Clean up on error
     await cleanupTempFiles()

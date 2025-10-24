@@ -5,6 +5,7 @@ import fsP from 'fs/promises'
 import { PluginManifest } from 'src/preload/plugin'
 import AdmZip from 'adm-zip'
 import os from 'os'
+import axios from 'axios'
 
 interface UploadOptions {
   accessKey?: string
@@ -78,18 +79,8 @@ async function getUserInfo(options: UploadOptions): Promise<UserInfo> {
   const userinfoEndpoint = `https://door.whyengineer.com/api/user?accessKey=${options.accessKey}&accessSecret=${options.accessSecret}`
 
   try {
-    const response = await fetch(userinfoEndpoint, {
-      method: 'GET'
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(
-        `Failed to get user info: ${response.status} ${response.statusText} - ${errorText}`
-      )
-    }
-
-    const userInfo = await response.json()
+    const response = await axios.get(userinfoEndpoint)
+    const userInfo = response.data
 
     if (!userInfo.name) {
       throw new Error('User info does not contain name field')
@@ -97,98 +88,57 @@ async function getUserInfo(options: UploadOptions): Promise<UserInfo> {
 
     return userInfo
   } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        `Failed to get user info: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+      )
+    }
     throw new Error(`Failed to get user info: ${error.message}`)
   }
 }
 
 /**
- * Check if a resource already exists
- * Returns the resource data if it exists, null otherwise
+ * Delete a resource by calling local server API
+ * Returns true if deleted or not found (404), throws error if permission denied (403)
  */
-async function checkResource(resourceId: string, options: UploadOptions): Promise<any | null> {
-  const getResourceEndpoint = `https://door.whyengineer.com/api/get-resource?id=${encodeURIComponent(resourceId)}&accessKey=${options.accessKey}&accessSecret=${options.accessSecret}`
+async function deleteResource(resourceId: string, options: UploadOptions): Promise<boolean> {
+  const deleteEndpoint = 'https://app.whyengineer.com/resources/api/delete-resource'
 
   try {
-    const response = await fetch(getResourceEndpoint, {
-      method: 'GET'
+    const response = await axios.post(deleteEndpoint, {
+      accessKey: options.accessKey,
+      accessSecret: options.accessSecret,
+      resourceId: resourceId
     })
 
-    if (!response.ok) {
-      // If 404, resource doesn't exist
-      if (response.status === 404) {
-        return null
-      }
-      const errorText = await response.text()
-      throw new Error(
-        `Failed to check resource: ${response.status} ${response.statusText} - ${errorText}`
-      )
-    }
+    const result = response.data
 
-    const result = await response.json()
-
-    // Check if the API returned an error status
-    if (result.status === 'error') {
-      // If the error is "not found", return null
-      if (result.msg && result.msg.toLowerCase().includes('not found')) {
-        return null
-      }
-      throw new Error(`API error: ${result.msg || 'Unknown error'}`)
-    }
-
-    return result
-  } catch (error: any) {
-    // If error is about not found, return null
-    if (error.message.includes('not found') || error.message.includes('404')) {
-      return null
-    }
-    throw error
-  }
-}
-
-/**
- * Delete a resource
- */
-async function deleteResource(params: any, options: UploadOptions): Promise<void> {
-  const deleteEndpoint = `https://door.whyengineer.com/api/delete-resource?accessKey=${options.accessKey}&accessSecret=${options.accessSecret}`
-
-  try {
-    const response = await fetch(deleteEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        owner: 'ecubus',
-        name: '/resources/plugins/app-template/zip',
-        createdTime: '2025-10-23T14:53:54Z',
-        user: 'frankie',
-        provider: 'oss',
-        application: 'app-built-in',
-        tag: '1.0.0',
-        parent: 'app-template',
-        fileName: 'zip',
-        fileType: '',
-        fileFormat: '',
-        fileSize: 12025,
-        url: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/resources/plugins/app-template/zip',
-        description: ''
-      })
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(
-        `Failed to delete resource: ${response.status} ${response.statusText} - ${errorText}`
-      )
-    }
-
-    const result = await response.json()
-    sysLog.debug(result)
-    // Check if the API returned an error status
-    if (result.status === 'error') {
+    if (result.status === 'ok') {
+      sysLog.debug('Resource deleted successfully')
+      return true
+    } else {
       throw new Error(`API error: ${result.msg || 'Unknown error'}`)
     }
   } catch (error: any) {
+    // Handle 404 - resource doesn't exist, that's fine
+    if (error.response && error.response.status === 404) {
+      sysLog.debug('Resource not found (404), skipping delete')
+      return false
+    }
+
+    // Handle 403 - permission denied, throw error
+    if (error.response && error.response.status === 403) {
+      const errorMsg =
+        error.response.data?.msg || 'Permission denied: Resource belongs to another user'
+      throw new Error(errorMsg)
+    }
+
+    // Other errors
+    if (error.response) {
+      throw new Error(
+        `Failed to delete resource: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+      )
+    }
     throw new Error(`Failed to delete resource: ${error.message}`)
   }
 }
@@ -205,33 +155,34 @@ async function uploadResource(
 ): Promise<any> {
   const uploadEndpoint = `https://door.whyengineer.com/api/upload-resource?accessKey=${options.accessKey}&accessSecret=${options.accessSecret}`
 
+  const ext = path.extname(file)
   // Construct resource ID (owner/name format)
-  const resourceId = `ecubus//plugins/${manifest.id}/${type}`
+  const resourceId = `ecubus//resources/plugins/${manifest.id}/${type}${ext}`
 
-  // Check if resource already exists
-  sysLog.debug(`Checking if resource exists: ${resourceId}`)
-  //   const existingResource = await checkResource(resourceId, options)
-  const existingResource = true
-
-  if (existingResource) {
-    // Extract user from existing resource
-    // const existingUser = existingResource.data?.user || existingResource.user
-
-    // if (existingUser && existingUser !== username) {
-    //   throw new Error(
-    //     `ID '${manifest.id}' already exists and belongs to another user`
-    //   )
-    // }
-
-    // Same user, delete the existing resource
-    sysLog.debug(`Resource exists, deleting before upload...`)
-    await deleteResource(resourceId, options)
+  // Try to delete existing resource before upload
+  // - If 404: resource doesn't exist, continue
+  // - If 403: permission denied (belongs to another user), throw error
+  // - If success: resource deleted, continue
+  try {
+    sysLog.debug(`Attempting to delete existing resource: ${resourceId}`)
+    const deleted = await deleteResource(resourceId, options)
+    if (deleted) {
+      sysLog.debug('Existing resource deleted successfully')
+    } else {
+      sysLog.debug('No existing resource found, proceeding with upload')
+    }
+  } catch (error: any) {
+    // If it's a permission denied error (403), re-throw it to stop the upload
+    if (error.message.includes('Permission denied')) {
+      throw new Error(`Cannot upload plugin '${manifest.id}': ${error.message}`)
+    }
+    // For other errors, log and continue (might be network issues, etc.)
+    sysLog.warn(`Warning during resource deletion: ${error.message}`)
   }
 
   // Read file content
   const fileBuffer = await fsP.readFile(file)
   const fileName = path.basename(file)
-  const ext = path.extname(file)
 
   // Create FormData with native API
   const formData = new FormData()
@@ -254,18 +205,13 @@ async function uploadResource(
   }
 
   try {
-    const response = await fetch(uploadEndpoint, {
-      method: 'POST',
-      body: formData
+    const response = await axios.post(uploadEndpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`)
-    }
-
-    // Only call response.json() once, as the body can only be read once
-    const result = await response.json()
+    const result = response.data
 
     // Check if the API returned an error status
     if (result.status === 'error') {
@@ -274,6 +220,11 @@ async function uploadResource(
 
     return result
   } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        `Upload failed: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+      )
+    }
     throw new Error(`Upload failed: ${error.message}`)
   }
 }

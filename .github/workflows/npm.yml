@@ -33,18 +33,18 @@ jobs:
       
       - name: Build SDK packages
         run: npm run build:sdk
-        
-      - name: Publish renderer-plugin-sdk
-        working-directory: ./src/renderer/src/plugin-sdk
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Build main-plugin-sdk
         run: npm run worker:js
       
+      - name: Publish renderer-plugin-sdk
+        working-directory: ./src/renderer/src/plugin-sdk
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
       - name: Publish main-plugin-sdk
         working-directory: ./src/main/plugin-sdk
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

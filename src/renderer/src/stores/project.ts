@@ -75,7 +75,7 @@ export const useProjectList = defineStore('projectList', {
     }
   }
 })
-const historyLimit = (window.store.get('historyLimit') as number) || 20
+
 function printNestedKeys(obj: any, prefix = '') {
   for (const key in obj) {
     // 构建当前key的完整路径
@@ -228,7 +228,7 @@ export const useProjectStore = defineStore('project', {
         pined: pined,
         lastOpenTime: Date.now()
       })
-
+      const historyLimit = (window.store.get('historyLimit') as number) || 20
       if (projectList.projectList.length > historyLimit) {
         projectList.projectList.pop()
       }

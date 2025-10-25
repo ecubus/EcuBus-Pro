@@ -78,3 +78,18 @@ export interface EcuBusPlugin {
   path: string
   mainStatus?: string
 }
+
+// 远程插件信息（从 API 获取）
+export interface RemotePluginInfo {
+  id: string // 插件 ID（对应 parent 字段）
+  name?: string // 插件名称
+  description?: string // 插件描述
+  author?: string // 作者
+  version: string // 版本号（对应 tag 字段）
+  icon?: string // 图标 URL
+  readme?: string // README 文件 URL
+  zipUrl?: string // 插件 ZIP 包 URL
+  manifestUrl?: string // manifest.json URL
+  createdTime: string // 创建时间
+  user: string // 上传用户
+}

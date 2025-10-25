@@ -32,9 +32,9 @@
 
             <div
               v-for="plugin in validPlugins"
-              :key="plugin.resource.name"
+              :key="plugin.id"
               class="plugin-list-item"
-              :class="{ selected: selectedPlugin?.resource.name === plugin.resource.name }"
+              :class="{ selected: selectedPlugin?.id === plugin.id }"
               @click="handlePluginSelect(plugin)"
             >
               <div class="plugin-list-icon">
@@ -42,36 +42,32 @@
               </div>
               <div class="plugin-list-info">
                 <div class="plugin-list-name">
-                  {{ plugin.manifest.name }}
+                  {{ plugin.name }}
                   <span
-                    v-if="getPluginStatus(plugin.manifest.id, plugin.manifest.version).canUpgrade"
+                    v-if="getPluginStatus(plugin.id, plugin.version).canUpgrade"
                     class="upgrade-badge"
                   >
                     ⬆️
                   </span>
                   <span
-                    v-else-if="
-                      getPluginStatus(plugin.manifest.id, plugin.manifest.version).installed
-                    "
+                    v-else-if="getPluginStatus(plugin.id, plugin.version).installed"
                     class="installed-badge"
                   >
                     ✓
                   </span>
                 </div>
-                <div v-if="plugin.manifest.description" class="plugin-list-brief">
-                  {{ plugin.manifest.description }}
+                <div v-if="plugin.description" class="plugin-list-brief">
+                  {{ plugin.description }}
                 </div>
                 <div class="plugin-list-meta">
-                  <span v-if="plugin.manifest.author" class="plugin-list-author">
-                    {{ plugin.manifest.author }}
+                  <span v-if="plugin.author" class="plugin-list-author">
+                    {{ plugin.author }}
                   </span>
                   <span
-                    v-if="getPluginStatus(plugin.manifest.id, plugin.manifest.version).installed"
+                    v-if="getPluginStatus(plugin.id, plugin.version).installed"
                     class="plugin-list-version"
                   >
-                    v{{
-                      getPluginStatus(plugin.manifest.id, plugin.manifest.version).installedVersion
-                    }}
+                    v{{ getPluginStatus(plugin.id, plugin.version).installedVersion }}
                   </span>
                 </div>
               </div>
@@ -90,90 +86,77 @@
                 <img :src="selectedPlugin.icon" alt="Plugin Icon" class="detail-icon-img" />
               </div>
               <div class="detail-title-section">
-                <h2>{{ selectedPlugin.manifest.name }}</h2>
-                <p class="detail-description">{{ selectedPlugin.manifest.description }}</p>
-                <p class="detail-id">{{ selectedPlugin.manifest.id }}</p>
+                <h2>{{ selectedPlugin.name }}</h2>
+                <p class="detail-description">{{ selectedPlugin.description }}</p>
+                <p class="detail-id">{{ selectedPlugin.id }}</p>
+              </div>
+              <!-- Current Version in Top Right -->
+              <div
+                v-if="getPluginStatus(selectedPlugin.id, selectedPlugin.version).installed"
+                class="current-version-badge"
+              >
+                v{{ getPluginStatus(selectedPlugin.id, selectedPlugin.version).installedVersion }}
               </div>
             </div>
 
-            <!-- Install/Upgrade Button -->
-            <el-button
-              :type="
-                getPluginStatus(selectedPlugin.manifest.id, selectedPlugin.manifest.version)
-                  .canUpgrade
-                  ? 'warning'
-                  : 'primary'
-              "
-              :disabled="isButtonDisabled(selectedPlugin)"
-              style="width: 100%; margin-bottom: 20px"
-              @click="installPlugin(selectedPlugin)"
-            >
-              {{ getButtonText(selectedPlugin) }}
-            </el-button>
+            <!-- Action Buttons Row -->
+            <div class="action-buttons-row">
+              <el-button
+                type="primary"
+                plain
+                :disabled="isButtonDisabled(selectedPlugin)"
+                @click="installPlugin(selectedPlugin)"
+              >
+                {{ getButtonText(selectedPlugin) }}
+              </el-button>
 
-            <!-- Version Info for Installed Plugins -->
+              <template v-if="getPluginStatus(selectedPlugin.id, selectedPlugin.version).installed">
+                <el-button
+                  type="primary"
+                  plain
+                  :disabled="installingPlugins.has(selectedPlugin.id)"
+                  @click="togglePluginStatus(selectedPlugin.id)"
+                >
+                  {{ pluginStore.pluginsEanbled[selectedPlugin.id] ? 'Disable' : 'Enable' }}
+                </el-button>
+
+                <el-button
+                  type="primary"
+                  plain
+                  :disabled="installingPlugins.has(selectedPlugin.id)"
+                  @click="uninstallPlugin(selectedPlugin)"
+                >
+                  Uninstall
+                </el-button>
+              </template>
+            </div>
+
+            <!-- Upgrade Info for Installed Plugins -->
             <div
-              v-if="
-                getPluginStatus(selectedPlugin.manifest.id, selectedPlugin.manifest.version)
-                  .installed
-              "
+              v-if="getPluginStatus(selectedPlugin.id, selectedPlugin.version).canUpgrade"
               class="version-info"
             >
-              <span class="current-version">
-                Current: v{{
-                  getPluginStatus(selectedPlugin.manifest.id, selectedPlugin.manifest.version)
-                    .installedVersion
-                }}
-              </span>
-              <span
-                v-if="
-                  getPluginStatus(selectedPlugin.manifest.id, selectedPlugin.manifest.version)
-                    .canUpgrade
-                "
-                class="arrow"
-              >
-                →
-              </span>
-              <span
-                v-if="
-                  getPluginStatus(selectedPlugin.manifest.id, selectedPlugin.manifest.version)
-                    .canUpgrade
-                "
-                class="new-version"
-              >
-                New: v{{ selectedPlugin.manifest.version }}
-              </span>
+              <span class="upgrade-label">🔔 New version available:</span>
+              <span class="new-version"> v{{ selectedPlugin.version }} </span>
             </div>
 
             <!-- Plugin Metadata -->
             <div class="plugin-metadata">
               <div class="metadata-row">
                 <span class="metadata-label">Version:</span>
-                <span class="metadata-value">{{ selectedPlugin.manifest.version }}</span>
+                <span class="metadata-value">{{ selectedPlugin.version }}</span>
               </div>
-              <div v-if="selectedPlugin.manifest.author" class="metadata-row">
+              <div v-if="selectedPlugin.author" class="metadata-row">
                 <span class="metadata-label">Author:</span>
-                <span class="metadata-value">{{ selectedPlugin.manifest.author }}</span>
+                <span class="metadata-value">{{ selectedPlugin.author }}</span>
               </div>
               <div class="metadata-row">
                 <span class="metadata-label">Published:</span>
-                <span class="metadata-value">{{
-                  formatDate(selectedPlugin.resource.createdTime)
-                }}</span>
+                <span class="metadata-value">{{ formatDate(selectedPlugin.createdTime) }}</span>
               </div>
               <div class="metadata-row">
-                <span class="metadata-label">Size:</span>
-                <span class="metadata-value">{{
-                  formatFileSize(selectedPlugin.resource.fileSize)
-                }}</span>
-              </div>
-              <div v-if="selectedPlugin.manifest.tabs?.length" class="metadata-row">
-                <span class="metadata-label">Tabs:</span>
-                <span class="metadata-value">{{ selectedPlugin.manifest.tabs.length }}</span>
-              </div>
-              <div v-if="selectedPlugin.manifest.extensions?.length" class="metadata-row">
-                <span class="metadata-label">Extensions:</span>
-                <span class="metadata-value">{{ selectedPlugin.manifest.extensions.length }}</span>
+                <span class="metadata-label">User:</span>
+                <span class="metadata-value">{{ selectedPlugin.user }}</span>
               </div>
             </div>
 
@@ -195,49 +178,23 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
-import { ElRow, ElCol, ElCard, ElButton, ElDivider, ElScrollbar, ElMessage } from 'element-plus'
+import {
+  ElRow,
+  ElCol,
+  ElCard,
+  ElButton,
+  ElDivider,
+  ElScrollbar,
+  ElNotification,
+  ElMessageBox
+} from 'element-plus'
 import { Marked } from 'marked'
 import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
+import type { RemotePluginInfo } from 'src/preload/plugin'
 
-interface ResourceData {
-  owner: string
-  name: string
-  createdTime: string
-  user: string
-  provider: string
-  application: string
-  tag: string
-  parent: string
-  fileName: string
-  fileType: string
-  fileFormat: string
-  fileSize: number
-  url: string
-  description: string
-}
-
-interface ApiResponse {
-  status: string
-  msg: string
-  data: ResourceData[]
-}
-
-interface PluginManifest {
-  id: string
-  name: string
-  version: string
-  description?: string
-  author?: string
-  tabs?: any[]
-  extensions?: any[]
-  readme?: string
-}
-
-interface ValidPlugin {
-  resource: ResourceData
-  manifest: PluginManifest
-  icon: string
+interface PluginWithReadme extends RemotePluginInfo {
+  readmeContent?: string
 }
 
 const props = defineProps<{
@@ -252,42 +209,16 @@ interface PluginStatus {
 
 const loading = ref(false)
 const error = ref<string | null>(null)
-const plugins = ref<ResourceData[]>([])
+const plugins = ref<PluginWithReadme[]>([])
 const installingPlugins = ref<Set<string>>(new Set())
-const selectedPlugin = ref<ValidPlugin | null>(null)
+const selectedPlugin = ref<PluginWithReadme | null>(null)
 const readmeHeight = computed(() => props.height - 35 - 40 - 121 - 200)
 const pluginStore = usePluginStore()
 let marked: Marked
 
-// Filter and parse valid plugins
-const validPlugins = computed<ValidPlugin[]>(() => {
-  const valid: ValidPlugin[] = []
-
-  for (const resource of plugins.value) {
-    // Only process .zip files with description
-    if (resource.fileFormat !== '.zip' || !resource.description) {
-      continue
-    }
-
-    try {
-      // Try to parse manifest from description
-      const manifest = JSON.parse(resource.description) as PluginManifest
-
-      // Validate manifest has required fields
-      if (manifest.id && manifest.name && manifest.version) {
-        valid.push({
-          resource,
-          manifest,
-          icon: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png'
-        })
-      }
-    } catch (e) {
-      // Skip resources with invalid JSON in description
-      continue
-    }
-  }
-
-  return valid
+// All plugins are already validated by the backend
+const validPlugins = computed<PluginWithReadme[]>(() => {
+  return plugins.value
 })
 
 // Check plugin installation status
@@ -325,15 +256,15 @@ function compareVersions(v1: string, v2: string): number {
 }
 
 // Get button text based on plugin status
-function getButtonText(plugin: ValidPlugin): string {
-  const status = getPluginStatus(plugin.manifest.id, plugin.manifest.version)
+function getButtonText(plugin: PluginWithReadme): string {
+  const status = getPluginStatus(plugin.id, plugin.version)
 
-  if (installingPlugins.value.has(plugin.manifest.id)) {
+  if (installingPlugins.value.has(plugin.id)) {
     return status.canUpgrade ? 'Upgrading...' : 'Installing...'
   }
 
   if (status.canUpgrade) {
-    return `Upgrade to ${plugin.manifest.version}`
+    return `Upgrade to ${plugin.version}`
   }
 
   if (status.installed) {
@@ -344,16 +275,16 @@ function getButtonText(plugin: ValidPlugin): string {
 }
 
 // Check if button should be disabled
-function isButtonDisabled(plugin: ValidPlugin): boolean {
-  const status = getPluginStatus(plugin.manifest.id, plugin.manifest.version)
-  return installingPlugins.value.has(plugin.manifest.id) || (status.installed && !status.canUpgrade)
+function isButtonDisabled(plugin: PluginWithReadme): boolean {
+  const status = getPluginStatus(plugin.id, plugin.version)
+  return installingPlugins.value.has(plugin.id) || (status.installed && !status.canUpgrade)
 }
 
 // Render README markdown
 const renderedReadme = computed(() => {
   if (!selectedPlugin.value) return ''
 
-  const readme = selectedPlugin.value.manifest.readme
+  const readme = selectedPlugin.value.readmeContent
   if (!readme) {
     return '<p class="no-readme">No README available for this plugin.</p>'
   }
@@ -361,9 +292,21 @@ const renderedReadme = computed(() => {
   return marked.parse(readme) as string
 })
 
-// Handle plugin selection
-function handlePluginSelect(plugin: ValidPlugin) {
+// Handle plugin selection and fetch README
+async function handlePluginSelect(plugin: PluginWithReadme) {
   selectedPlugin.value = plugin
+
+  // Fetch README content if not already loaded
+  if (plugin.readme && !plugin.readmeContent) {
+    try {
+      const response = await fetch(plugin.readme)
+      if (response.ok) {
+        plugin.readmeContent = await response.text()
+      }
+    } catch (e) {
+      console.error('Failed to load README:', e)
+    }
+  }
 }
 
 async function fetchPlugins() {
@@ -371,47 +314,13 @@ async function fetchPlugins() {
   error.value = null
 
   try {
-    // const response = await fetch('https://app.whyengineer.com/resources/api/get-resources')
+    // Use the new IPC handle to get remote plugins
+    const remotePlugins = (await window.electron.ipcRenderer.invoke(
+      'ipc-get-remote-plugins'
+    )) as RemotePluginInfo[]
 
-    // if (!response.ok) {
-    //   throw new Error(`Failed to fetch plugins: ${response.statusText}`)
-    // }
-
-    // const data: ApiResponse = await response.json()
-
-    const data = {
-      status: 'ok',
-      msg: '',
-      sub: '',
-      name: '',
-      data: [
-        {
-          owner: 'ecubus',
-          name: '/resources/resource/ecubus/frankie/log_data_2025-10-18T00-56-10.zip',
-          createdTime: '2025-10-22T14:32:56Z',
-          user: 'frankie',
-          provider: 'oss',
-          application: 'app-built-in',
-          tag: 'custom',
-          parent: 'ResourceListPage',
-          fileName: 'log_data_2025-10-18T00-56-10.zip',
-          fileType: 'application',
-          fileFormat: '.zip',
-          fileSize: 198179,
-          url: 'https://ecubus.oss-cn-chengdu.aliyuncs.com/resources/resource/ecubus/frankie/log_data_2025-10-18T00-56-10.zip',
-          description:
-            '{"id":"ecubus.frankie.log_data","name":"Log Data","version":"1.0.0","description":"Advanced log data analysis plugin","author":"Frankie","tabs":[],"extensions":[],"readme":"# Log Data Plugin\\n\\nThis is a plugin for EcuBus Pro that provides advanced log data analysis capabilities.\\n\\n## Features\\n\\n- 📊 Real-time log monitoring\\n- 🔍 Advanced search and filtering\\n- 📈 Data visualization\\n- 💾 Export to multiple formats\\n\\n## Installation\\n\\nClick the Install button above to add this plugin to your EcuBus Pro installation.\\n\\n## Usage\\n\\nAfter installation, you can access the plugin from the main menu.\\n\\n## Requirements\\n\\n- EcuBus Pro v1.0.0 or higher\\n\\n## Support\\n\\nFor issues and feature requests, please contact the author."}'
-        }
-      ],
-      data2: null,
-      data3: null
-    }
-
-    if (data.status !== 'ok') {
-      throw new Error(data.msg || 'Failed to load plugins')
-    }
-
-    plugins.value = data.data || []
+    plugins.value = remotePlugins
+    console.log(`Loaded ${plugins.value.length} plugins from marketplace`)
   } catch (e: any) {
     error.value = e.message || 'Failed to load plugins from marketplace'
     console.error('Error fetching plugins:', e)
@@ -420,70 +329,58 @@ async function fetchPlugins() {
   }
 }
 
-async function installPlugin(plugin: ValidPlugin) {
-  const status = getPluginStatus(plugin.manifest.id, plugin.manifest.version)
-  installingPlugins.value.add(plugin.manifest.id)
+async function installPlugin(plugin: PluginWithReadme) {
+  const status = getPluginStatus(plugin.id, plugin.version)
+  installingPlugins.value.add(plugin.id)
 
   try {
-    // Download plugin zip file
-    const response = await fetch(plugin.resource.url)
-    if (!response.ok) {
-      throw new Error(`Failed to download plugin: ${response.statusText}`)
+    if (!plugin.zipUrl) {
+      throw new Error('Plugin zip URL not available')
     }
 
-    const arrayBuffer = await response.arrayBuffer()
-    const buffer = new Uint8Array(arrayBuffer)
-
-    // Get plugins directory
-    const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
-    if (!pluginsDir) {
-      throw new Error('Failed to get plugins directory')
-    }
-
-    const pluginDir = `${pluginsDir}/${plugin.manifest.id}`
-
-    // If upgrading, remove old version first
+    // If upgrading, disable the plugin first
     if (status.canUpgrade) {
-      const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', pluginDir)
-      if (exists) {
-        // Disable and close plugin before removing
-        pluginStore.disablePlugin(plugin.manifest.id)
-        await window.electron.ipcRenderer.invoke('ipc-plugin-close', plugin.manifest.id)
-        await window.electron.ipcRenderer.invoke('ipc-fs-rmdir', pluginDir)
-      }
+      pluginStore.disablePlugin(plugin.id)
     }
 
-    // Save zip file temporarily
-    const tempZipPath = `${pluginsDir}/${plugin.manifest.id}.zip`
-    await window.electron.ipcRenderer.invoke('ipc-fs-writeFile', tempZipPath, buffer)
+    // Call backend to install/upgrade plugin
+    const result = await window.electron.ipcRenderer.invoke(
+      'ipc-install-remote-plugin',
+      plugin.id,
+      plugin.zipUrl,
+      status.canUpgrade
+    )
 
-    // TODO: Need to implement unzip functionality
-    // For now, show a message that manual extraction is needed
-    ElMessage.warning({
-      message: `Plugin downloaded to ${tempZipPath}. Please manually extract it to ${pluginDir}`,
-      duration: 5000
-    })
+    if (!result.success) {
+      throw new Error(result.message)
+    }
 
-    // Refresh plugins list
-    await pluginStore.refreshPlugins()
+    // Only load the newly installed/upgraded plugin from its directory
+    if (result.pluginDir) {
+      await pluginStore.loadPluginFromDirectory(result.pluginDir)
+    }
 
     // Enable the plugin if it's a new installation
     if (!status.installed) {
-      pluginStore.enablePlugin(plugin.manifest.id)
+      pluginStore.enablePlugin(plugin.id)
+    } else if (status.canUpgrade) {
+      // Re-enable after upgrade
+      pluginStore.enablePlugin(plugin.id)
     }
 
-    ElMessage.success({
+    ElNotification.success({
       message: status.canUpgrade
-        ? `Plugin ${plugin.manifest.name} upgraded successfully!`
-        : `Plugin ${plugin.manifest.name} installed successfully!`
+        ? `Plugin ${plugin.name} upgraded to v${plugin.version} successfully!`
+        : `Plugin ${plugin.name} v${plugin.version} installed successfully!`,
+      position: 'bottom-right'
     })
   } catch (error: any) {
-    ElMessage.error({
-      message: `Failed to install plugin: ${error.message || 'Unknown error'}`
+    ElNotification.error({
+      message: `Failed to install plugin: ${error.message || 'Unknown error'}`,
+      position: 'bottom-right'
     })
-    console.error('Plugin installation error:', error)
   } finally {
-    installingPlugins.value.delete(plugin.manifest.id)
+    installingPlugins.value.delete(plugin.id)
   }
 }
 
@@ -496,10 +393,64 @@ function formatDate(dateStr: string): string {
   }
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+// Toggle plugin enable/disable status
+function togglePluginStatus(pluginId: string) {
+  const isEnabled = pluginStore.pluginsEanbled[pluginId]
+
+  if (isEnabled) {
+    pluginStore.disablePlugin(pluginId)
+    ElNotification.success({
+      message: 'Plugin disabled successfully',
+      position: 'bottom-right'
+    })
+  } else {
+    pluginStore.enablePlugin(pluginId)
+    ElNotification.success({
+      message: 'Plugin enabled successfully',
+      position: 'bottom-right'
+    })
+  }
+}
+
+// Uninstall plugin
+async function uninstallPlugin(plugin: PluginWithReadme) {
+  try {
+    await ElMessageBox.confirm(
+      `Are you sure you want to uninstall "${plugin.name}"? This action cannot be undone.`,
+      'Confirm Uninstall',
+      {
+        confirmButtonText: 'Uninstall',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }
+    )
+  } catch {
+    // User cancelled
+    return
+  }
+
+  installingPlugins.value.add(plugin.id)
+
+  try {
+    await pluginStore.uninstallPlugin(plugin.id)
+
+    ElNotification.success({
+      message: `Plugin ${plugin.name} uninstalled successfully!`,
+      position: 'bottom-right'
+    })
+
+    // Clear selection if uninstalled plugin was selected
+    if (selectedPlugin.value?.id === plugin.id) {
+      selectedPlugin.value = null
+    }
+  } catch (error: any) {
+    ElNotification.error({
+      message: `Failed to uninstall plugin: ${error.message || 'Unknown error'}`,
+      position: 'bottom-right'
+    })
+  } finally {
+    installingPlugins.value.delete(plugin.id)
+  }
 }
 
 onMounted(() => {
@@ -740,6 +691,7 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .detail-description {
@@ -777,6 +729,19 @@ onMounted(() => {
   margin: 0;
   font-size: 14px;
   color: var(--el-text-color-secondary);
+  font-family: monospace;
+}
+
+.current-version-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
   font-family: monospace;
 }
 
@@ -818,33 +783,38 @@ onMounted(() => {
   padding: 40px 0;
 }
 
+/* Action Buttons Row */
+.action-buttons-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: flex-start;
+}
+
 /* Version Info */
 .version-info {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: var(--el-fill-color-lighter);
+  padding: 12px 16px;
+  background: var(--el-color-warning-light-9);
+  border: 1px solid var(--el-color-warning-light-7);
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
   justify-content: center;
 }
 
-.current-version {
-  color: var(--el-text-color-secondary);
-  font-family: monospace;
-}
-
-.arrow {
-  color: var(--el-color-warning);
-  font-weight: bold;
+.upgrade-label {
+  color: var(--el-color-warning-dark-2);
+  font-weight: 500;
 }
 
 .new-version {
   color: var(--el-color-warning);
-  font-weight: 600;
+  font-weight: 700;
   font-family: monospace;
+  font-size: 16px;
 }
 </style>
 

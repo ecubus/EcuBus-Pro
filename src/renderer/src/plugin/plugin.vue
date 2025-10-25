@@ -34,8 +34,11 @@ const data = cloneDeep(
     ? dataStore.pluginData[props.pluginId]
     : dataStore.pluginData[props.pluginId][props.editIndex]
 )
+
+console.log(props)
 const isDev = process.env.NODE_ENV === 'development'
-const entry = isDev ? `http://localhost:5173/` : `file:///${props.item.entry}`
+
+const entry = isDev ? `http://localhost:5174/` : `file:///${props.item.entry}`
 const plguinStore = usePluginStore()
 const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')

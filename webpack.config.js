@@ -47,7 +47,10 @@ class MyCustomPlugin {
 
        
         if(process.platform=='win32'){
-            fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+            //check sa.node exists
+            if(fs.existsSync(path.resolve(__dirname,'dist','sa.node'))){
+                fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+            }
         }
         // //copy precision_timer.node
         // fs.copyFileSync(path.resolve(__dirname,'dist','precision_timer.node'),path.resolve(__dirname,'resources','lib','js','precision_timer.node'))

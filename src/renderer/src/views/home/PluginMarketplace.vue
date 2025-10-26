@@ -19,8 +19,27 @@
       <el-col :span="8">
         <el-card class="plugin-list-panel">
           <div class="marketplace-header">
-            <h3>Plugin Marketplace</h3>
-            <p>{{ validPlugins.length }} plugins available</p>
+            <div class="marketplace-header-text">
+              <h3>Plugin Marketplace</h3>
+              <p>{{ validPlugins.length }} plugins available</p>
+            </div>
+            <el-dropdown trigger="click" @command="handleManualCommand">
+              <el-button type="primary" size="small" plain>
+                <el-icon><More /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="install">
+                    <el-icon><Upload /></el-icon>
+                    Install from ZIP
+                  </el-dropdown-item>
+                  <el-dropdown-item command="load-path">
+                    <el-icon><FolderOpened /></el-icon>
+                    Load from Path
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
           <el-divider></el-divider>
 
@@ -117,7 +136,7 @@
                   :disabled="installingPlugins.has(selectedPlugin.id)"
                   @click="togglePluginStatus(selectedPlugin.id)"
                 >
-                  {{ pluginStore.pluginsEanbled[selectedPlugin.id] ? 'Disable' : 'Enable' }}
+                  {{ pluginStore.pluginsDisabled[selectedPlugin.id] ? 'Disable' : 'Enable' }}
                 </el-button>
 
                 <el-button
@@ -154,10 +173,6 @@
                 <span class="metadata-label">Published:</span>
                 <span class="metadata-value">{{ formatDate(selectedPlugin.createdTime) }}</span>
               </div>
-              <div class="metadata-row">
-                <span class="metadata-label">User:</span>
-                <span class="metadata-value">{{ selectedPlugin.user }}</span>
-              </div>
             </div>
 
             <!-- README -->
@@ -186,8 +201,13 @@ import {
   ElDivider,
   ElScrollbar,
   ElNotification,
-  ElMessageBox
+  ElMessageBox,
+  ElDropdown,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElIcon
 } from 'element-plus'
+import { More, Upload, FolderOpened } from '@element-plus/icons-vue'
 import { Marked } from 'marked'
 import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
@@ -394,17 +414,17 @@ function formatDate(dateStr: string): string {
 }
 
 // Toggle plugin enable/disable status
-function togglePluginStatus(pluginId: string) {
-  const isEnabled = pluginStore.pluginsEanbled[pluginId]
+async function togglePluginStatus(pluginId: string) {
+  const isEnabled = !pluginStore.pluginsDisabled[pluginId]
 
   if (isEnabled) {
-    pluginStore.disablePlugin(pluginId)
+    await pluginStore.disablePlugin(pluginId)
     ElNotification.success({
       message: 'Plugin disabled successfully',
       position: 'bottom-right'
     })
   } else {
-    pluginStore.enablePlugin(pluginId)
+    await pluginStore.enablePlugin(pluginId)
     ElNotification.success({
       message: 'Plugin enabled successfully',
       position: 'bottom-right'
@@ -450,6 +470,89 @@ async function uninstallPlugin(plugin: PluginWithReadme) {
     })
   } finally {
     installingPlugins.value.delete(plugin.id)
+  }
+}
+
+// Handle manual commands
+async function handleManualCommand(command: string) {
+  if (command === 'install') {
+    // Manual install from ZIP file
+    const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+      title: 'Select Plugin Package',
+      filters: [{ name: 'ZIP Package', extensions: ['zip'] }],
+      properties: ['openFile']
+    })
+
+    if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+      return
+    }
+
+    const filePath = result.filePaths[0]
+    installingPlugins.value.add('manual-install')
+
+    try {
+      const installResult = await window.electron.ipcRenderer.invoke(
+        'ipc-install-plugin-from-zip',
+        filePath
+      )
+
+      if (!installResult.success) {
+        throw new Error(installResult.message)
+      }
+
+      // Load the newly installed plugin
+      if (installResult.pluginDir) {
+        await pluginStore.loadPluginFromDirectory(installResult.pluginDir)
+      }
+
+      // Enable the plugin
+      if (installResult.pluginId) {
+        pluginStore.enablePlugin(installResult.pluginId)
+      }
+
+      ElNotification.success({
+        message: 'Plugin installed successfully from ZIP file!',
+        position: 'bottom-right'
+      })
+
+      // Refresh the plugin list if needed
+      await fetchPlugins()
+    } catch (error: any) {
+      ElNotification.error({
+        message: `Failed to install plugin: ${error.message || 'Unknown error'}`,
+        position: 'bottom-right'
+      })
+    } finally {
+      installingPlugins.value.delete('manual-install')
+    }
+  } else if (command === 'load-path') {
+    // Manual load from path
+    const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+      title: 'Select Plugin Directory',
+      properties: ['openDirectory']
+    })
+
+    if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+      return
+    }
+
+    const dirPath = result.filePaths[0]
+
+    try {
+      const plugin = await pluginStore.loadPluginFromDirectory(dirPath)
+
+      await pluginStore.enablePlugin(plugin.manifest.id)
+
+      ElNotification.success({
+        message: 'Plugin loaded successfully from path!',
+        position: 'bottom-right'
+      })
+    } catch (error: any) {
+      ElNotification.error({
+        message: `Failed to load plugin: ${error.message || 'Unknown error'}`,
+        position: 'bottom-right'
+      })
+    }
   }
 }
 
@@ -530,17 +633,25 @@ onMounted(() => {
 /* Left Panel - Plugin List */
 
 .marketplace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.marketplace-header-text {
+  flex: 1;
   text-align: left;
 }
 
-.marketplace-header h3 {
+.marketplace-header-text h3 {
   margin: 0 0 4px 0;
   font-size: 18px;
   font-weight: 600;
   color: var(--el-text-color-primary);
 }
 
-.marketplace-header p {
+.marketplace-header-text p {
   margin: 0;
   font-size: 13px;
   color: var(--el-text-color-secondary);

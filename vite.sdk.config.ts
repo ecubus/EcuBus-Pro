@@ -1,6 +1,8 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import { copyFileSync, mkdirSync } from 'fs'
+import { dirname } from 'path'
 
 export default defineConfig({
   // 禁止复制 public 目录（库模式不需要静态资源）
@@ -42,6 +44,25 @@ export default defineConfig({
       logLevel: 'error',
       // 内联打包 mitt 的类型定义
       bundledPackages: ['mitt']
-    })
+    }),
+    // 自动复制生成的文件到 resources 目录
+    {
+      name: 'copy-sdk-to-resources',
+      closeBundle() {
+        const sourceFile = resolve(__dirname, 'src/renderer/src/plugin-sdk/dist/index.mjs')
+        const targetFile = resolve(__dirname, 'resources/lib/js/sdk.mjs')
+        const targetDir = dirname(targetFile)
+
+        try {
+          // 确保目标目录存在
+          mkdirSync(targetDir, { recursive: true })
+          // 复制文件
+          copyFileSync(sourceFile, targetFile)
+          console.log(`✓ SDK 已复制到: ${targetFile}`)
+        } catch (error) {
+          console.error('复制 SDK 文件失败:', error)
+        }
+      }
+    }
   ]
 })

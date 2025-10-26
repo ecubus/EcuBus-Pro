@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash'
 
 export type PluginState = {
   plugins: Map<string, EcuBusPlugin>
-  pluginsEanbled: Record<string, boolean>
+  pluginsDisabled: Record<string, boolean>
   loaded: boolean
   loading: boolean
   error: string | null
@@ -18,7 +18,7 @@ export type PluginState = {
 
 export const usePluginStore = defineStore('usePluginStore', {
   state: (): PluginState => ({
-    pluginsEanbled: (window.store.get('pluginsEanbled') as Record<string, boolean>) || {},
+    pluginsDisabled: (window.store.get('pluginsDisabled') as Record<string, boolean>) || {},
     plugins: new Map(),
     loaded: false,
     loading: false,
@@ -54,7 +54,7 @@ export const usePluginStore = defineStore('usePluginStore', {
 
     getEnabledPlugins(): EcuBusPlugin[] {
       return Array.from(this.plugins.values()).filter(
-        (plugin) => this.pluginsEanbled[plugin.manifest.id]
+        (plugin) => !this.pluginsDisabled[plugin.manifest.id]
       )
     },
 
@@ -86,23 +86,34 @@ export const usePluginStore = defineStore('usePluginStore', {
     /**
      * 启用插件
      */
-    enablePlugin(pluginId: string) {
+    async enablePlugin(pluginId: string) {
       const plugin = this.plugins.get(pluginId)
       if (plugin) {
-        this.pluginsEanbled[pluginId] = true
-        window.store.set('pluginsEanbled', cloneDeep(this.pluginsEanbled))
+        if (plugin.manifest.mainEntry) {
+          await window.electron.ipcRenderer.invoke(
+            'ipc-plugin-create',
+            pluginId,
+            plugin.path,
+            plugin.manifest.mainEntry
+          )
+        }
+        this.pluginsDisabled[pluginId] = false
+        window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
       }
     },
 
     /**
      * 禁用插件
      */
-    disablePlugin(pluginId: string) {
+    async disablePlugin(pluginId: string) {
       const plugin = this.plugins.get(pluginId)
       if (plugin) {
-        this.pluginsEanbled[pluginId] = false
-        window.store.set('pluginsEanbled', cloneDeep(this.pluginsEanbled))
-
+        if (plugin.manifest.mainEntry) {
+          await window.electron.ipcRenderer.invoke('ipc-plugin-close', pluginId)
+        }
+        this.pluginsDisabled[pluginId] = true
+        window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
+        plugin.mainStatus = 'stopped'
         return true
       }
       return false
@@ -111,43 +122,21 @@ export const usePluginStore = defineStore('usePluginStore', {
     /**
      * 从目录加载插件
      */
-    async loadPluginFromDirectory(pluginDir: string): Promise<EcuBusPlugin | null> {
-      try {
-        const manifestPath = `${pluginDir}/manifest.json`
+    async loadPluginFromDirectory(pluginDir: string): Promise<EcuBusPlugin> {
+      const manifestPath = `${pluginDir}/manifest.json`
 
-        // 加载清单
-        const manifestContent = await window.electron.ipcRenderer.invoke(
-          'ipc-fs-readFile',
-          manifestPath
-        )
-        const manifest: PluginManifest = JSON.parse(manifestContent)
-        const plugin: EcuBusPlugin = {
-          manifest,
-          path: pluginDir
-        }
-
-        if (manifest.mainEntry) {
-          try {
-            await window.electron.ipcRenderer.invoke(
-              'ipc-plugin-create',
-              manifest.id,
-              pluginDir,
-              manifest.mainEntry
-            )
-            plugin.mainStatus = 'running'
-          } catch (error) {
-            plugin.mainStatus = 'error'
-          }
-        }
-
-        this.registerPlugin(plugin)
-        return plugin
-      } catch (error) {
-        const errorMsg = `Failed to load plugin from directory ${pluginDir}: ${error}`
-        console.error(errorMsg)
-        this.error = errorMsg
-        throw new Error(errorMsg)
+      // 加载清单
+      const manifestContent = await window.electron.ipcRenderer.invoke(
+        'ipc-fs-readFile',
+        manifestPath
+      )
+      const manifest: PluginManifest = JSON.parse(manifestContent)
+      const plugin: EcuBusPlugin = {
+        manifest,
+        path: pluginDir
       }
+      this.registerPlugin(plugin)
+      return plugin
     },
 
     /**
@@ -276,9 +265,9 @@ export const usePluginStore = defineStore('usePluginStore', {
 
         if (plugin) {
           // 检查插件是否已经存在
-          if (!this.pluginsEanbled[plugin.manifest.id]) {
+          if (!this.pluginsDisabled[plugin.manifest.id]) {
             // 默认启用新加载的插件
-            this.enablePlugin(plugin.manifest.id)
+            await this.enablePlugin(plugin.manifest.id)
           }
           return true
         }

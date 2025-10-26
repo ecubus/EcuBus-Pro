@@ -35,10 +35,9 @@ const data = cloneDeep(
     : dataStore.pluginData[props.pluginId][props.editIndex]
 )
 
-console.log(props)
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = props.item.entry?.startsWith('http')
 
-const entry = isDev ? `http://localhost:5174/` : `file:///${props.item.entry}`
+const entry = isDev ? props.item.entry : `file:///${props.item.entry}`
 const plguinStore = usePluginStore()
 const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')
@@ -52,7 +51,8 @@ const importMap = {
     vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,
     '@vue/shared': `local-resource:///${libPath}/shared.esm-bundler.min.js`,
     'element-plus': `local-resource:///${libPath}/elementplus.index.full.min.mjs`,
-    '@element-plus/icons-vue': `local-resource:///${libPath}/elementplus.icon.min.js`
+    '@element-plus/icons-vue': `local-resource:///${libPath}/elementplus.icon.min.js`,
+    '@ecubus-pro/renderer-plugin-sdk': `local-resource:///${libPath}/sdk.mjs`
   }
 }
 const plugins = [

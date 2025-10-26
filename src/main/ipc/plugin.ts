@@ -59,6 +59,72 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
 
 const plugins: Record<string, PluginClient> = {}
 
+// 辅助函数：获取插件目录
+function getPluginsDirectory(): string {
+  const userDataPath = app.getPath('userData')
+  return path.join(userDataPath, 'plugins')
+}
+
+// 辅助函数：确保插件目录存在
+async function ensurePluginsDirectory(): Promise<string> {
+  const pluginsDir = getPluginsDirectory()
+  if (!fs.existsSync(pluginsDir)) {
+    await fsPromises.mkdir(pluginsDir, { recursive: true })
+  }
+  return pluginsDir
+}
+
+// 辅助函数：关闭并删除已安装的插件
+async function closeAndRemovePlugin(pluginId: string, pluginDir: string): Promise<void> {
+  // 关闭插件
+  if (plugins[pluginId]) {
+    await plugins[pluginId].close()
+    delete plugins[pluginId]
+  }
+
+  // 删除旧目录
+  if (fs.existsSync(pluginDir)) {
+    await fsPromises.rm(pluginDir, { recursive: true, force: true })
+  }
+}
+
+// 辅助函数：验证 manifest.json 是否存在
+function validateManifest(pluginDir: string): void {
+  const manifestPath = path.join(pluginDir, 'manifest.json')
+  if (!fs.existsSync(manifestPath)) {
+    throw new Error('manifest.json not found in extracted plugin')
+  }
+}
+
+// 辅助函数：从 ZIP 文件中提取并安装插件
+async function installPluginFromZip(
+  zip: AdmZip,
+  pluginId: string,
+  shouldUpgrade: boolean
+): Promise<{ pluginDir: string; pluginId: string }> {
+  const pluginsDir = await ensurePluginsDirectory()
+  const pluginDir = path.join(pluginsDir, pluginId)
+
+  try {
+    // 如果是升级或已存在，先关闭并删除旧版本
+    if (shouldUpgrade || fs.existsSync(pluginDir)) {
+      await closeAndRemovePlugin(pluginId, pluginDir)
+    }
+
+    // 解压 ZIP 文件到插件目录
+    zip.extractAllTo(pluginDir, true)
+
+    // 验证 manifest.json 是否存在
+    validateManifest(pluginDir)
+
+    return { pluginDir, pluginId }
+  } catch (error) {
+    // 清理失败的安装
+    await fsPromises.rm(pluginDir, { recursive: true, force: true }).catch(() => {})
+    throw error
+  }
+}
+
 ipcMain.handle(
   'ipc-plugin-create',
   async (event, pluginId: string, pluginDir: string, mainEntry: string) => {
@@ -182,31 +248,11 @@ ipcMain.handle(
   'ipc-install-remote-plugin',
   async (event, pluginId: string, zipUrl: string, shouldUpgrade: boolean) => {
     try {
-      // 获取插件目录
-      const userDataPath = app.getPath('userData')
-      const pluginsDir = path.join(userDataPath, 'plugins')
-
-      // 确保插件目录存在
-      if (!fs.existsSync(pluginsDir)) {
-        await fsPromises.mkdir(pluginsDir, { recursive: true })
-      }
-
-      const pluginDir = path.join(pluginsDir, pluginId)
+      const pluginsDir = await ensurePluginsDirectory()
       const tempZipPath = path.join(pluginsDir, `${pluginId}.zip`)
 
       try {
-        // 如果是升级，先关闭并删除旧版本
-        if (shouldUpgrade && fs.existsSync(pluginDir)) {
-          // 关闭插件
-          if (plugins[pluginId]) {
-            await plugins[pluginId].close()
-            delete plugins[pluginId]
-          }
-
-          // 删除旧目录
-          await fsPromises.rm(pluginDir, { recursive: true, force: true })
-        }
-
+        // 下载 ZIP 文件
         const response = await axios.get(zipUrl, {
           responseType: 'arraybuffer'
         })
@@ -214,14 +260,9 @@ ipcMain.handle(
         // 保存到临时文件
         await fsPromises.writeFile(tempZipPath, Buffer.from(response.data))
 
+        // 创建 ZIP 对象并安装
         const zip = new AdmZip(tempZipPath)
-        zip.extractAllTo(pluginDir, true)
-
-        // 验证 manifest.json 是否存在
-        const manifestPath = path.join(pluginDir, 'manifest.json')
-        if (!fs.existsSync(manifestPath)) {
-          throw new Error('manifest.json not found in extracted plugin')
-        }
+        const result = await installPluginFromZip(zip, pluginId, shouldUpgrade)
 
         // 删除临时 ZIP 文件
         await fsPromises.unlink(tempZipPath)
@@ -231,15 +272,12 @@ ipcMain.handle(
           message: shouldUpgrade
             ? `Plugin ${pluginId} upgraded successfully`
             : `Plugin ${pluginId} installed successfully`,
-          pluginDir
+          pluginDir: result.pluginDir
         }
       } catch (error) {
-        // 清理失败的安装
+        // 清理失败的安装 - 删除临时 ZIP 文件
         if (fs.existsSync(tempZipPath)) {
           await fsPromises.unlink(tempZipPath).catch(() => {})
-        }
-        if (fs.existsSync(pluginDir)) {
-          await fsPromises.rm(pluginDir, { recursive: true, force: true }).catch(() => {})
         }
         throw error
       }
@@ -251,3 +289,51 @@ ipcMain.handle(
     }
   }
 )
+
+// 从本地 ZIP 文件安装插件
+ipcMain.handle('ipc-install-plugin-from-zip', async (event, zipFilePath: string) => {
+  try {
+    // 验证文件是否存在
+    if (!fs.existsSync(zipFilePath)) {
+      throw new Error('ZIP file not found')
+    }
+
+    // 读取 ZIP 文件并提取 manifest.json 来获取插件 ID
+    const zip = new AdmZip(zipFilePath)
+    const manifestEntry = zip.getEntry('manifest.json')
+
+    if (!manifestEntry) {
+      throw new Error('manifest.json not found in ZIP file')
+    }
+
+    const manifestContent = manifestEntry.getData().toString('utf8')
+    const manifest = JSON.parse(manifestContent)
+    const pluginId = manifest.id
+
+    if (!pluginId) {
+      throw new Error('Plugin ID not found in manifest.json')
+    }
+
+    // 检查插件是否已安装
+    const pluginsDir = getPluginsDirectory()
+    const pluginDir = path.join(pluginsDir, pluginId)
+    const shouldUpgrade = fs.existsSync(pluginDir)
+
+    // 使用公共函数安装插件
+    const result = await installPluginFromZip(zip, pluginId, shouldUpgrade)
+
+    return {
+      success: true,
+      message: shouldUpgrade
+        ? `Plugin ${pluginId} upgraded successfully`
+        : `Plugin ${pluginId} installed successfully`,
+      pluginDir: result.pluginDir,
+      pluginId: result.pluginId
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Failed to install plugin: ${error.message || 'Unknown error'}`
+    }
+  }
+})

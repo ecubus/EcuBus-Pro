@@ -57,7 +57,12 @@
               @click="handlePluginSelect(plugin)"
             >
               <div class="plugin-list-icon">
-                <img :src="getIconUrl(plugin)" alt="Plugin Icon" class="plugin-list-icon-img" />
+                <el-image
+                  :src="getIconUrl(plugin)"
+                  alt="Plugin Icon"
+                  class="plugin-list-icon-img"
+                  fit="scale-down"
+                />
               </div>
               <div class="plugin-list-info">
                 <div class="plugin-list-name">
@@ -116,7 +121,12 @@
             <!-- Plugin Header -->
             <div class="detail-header">
               <div class="detail-icon">
-                <img :src="getIconUrl(selectedPlugin)" alt="Plugin Icon" class="detail-icon-img" />
+                <el-image
+                  :src="getIconUrl(selectedPlugin)"
+                  alt="Plugin Icon"
+                  class="detail-icon-img"
+                  fit="scale-down"
+                />
               </div>
               <div class="detail-title-section">
                 <h2>{{ selectedPlugin.name }}</h2>
@@ -236,7 +246,8 @@ import {
   ElDropdown,
   ElDropdownMenu,
   ElDropdownItem,
-  ElIcon
+  ElIcon,
+  ElImage
 } from 'element-plus'
 import { More, Upload, FolderOpened } from '@element-plus/icons-vue'
 import { Marked } from 'marked'

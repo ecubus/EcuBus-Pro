@@ -53,7 +53,7 @@ dataParseWorker.onmessage = (event) => {
   }
 }
 
-window.serviceDetail = window.electron.ipcRenderer.sendSync('ipc-service-detail')
+window.serviceDetail = window.electron?.ipcRenderer.sendSync('ipc-service-detail')
 window.electron.ipcRenderer.on('ipc-log', (event, data) => {
   const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
   let currentGroup: { method: string; data: any[] } | null = null

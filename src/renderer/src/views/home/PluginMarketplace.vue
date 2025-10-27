@@ -57,13 +57,27 @@
               @click="handlePluginSelect(plugin)"
             >
               <div class="plugin-list-icon">
-                <img :src="plugin.icon" alt="Plugin Icon" class="plugin-list-icon-img" />
+                <img :src="getIconUrl(plugin)" alt="Plugin Icon" class="plugin-list-icon-img" />
               </div>
               <div class="plugin-list-info">
                 <div class="plugin-list-name">
                   {{ plugin.name }}
                   <span
-                    v-if="getPluginStatus(plugin.id, plugin.version).canUpgrade"
+                    v-if="plugin.isTemporary"
+                    class="temporary-badge"
+                    title="Temporarily loaded (will be removed on restart)"
+                  >
+                    ⏳
+                  </span>
+                  <span
+                    v-else-if="plugin.isLocalOnly"
+                    class="local-only-badge"
+                    title="Local plugin only"
+                  >
+                    📁
+                  </span>
+                  <span
+                    v-else-if="getPluginStatus(plugin.id, plugin.version).canUpgrade"
                     class="upgrade-badge"
                   >
                     ⬆️
@@ -102,7 +116,7 @@
             <!-- Plugin Header -->
             <div class="detail-header">
               <div class="detail-icon">
-                <img :src="selectedPlugin.icon" alt="Plugin Icon" class="detail-icon-img" />
+                <img :src="getIconUrl(selectedPlugin)" alt="Plugin Icon" class="detail-icon-img" />
               </div>
               <div class="detail-title-section">
                 <h2>{{ selectedPlugin.name }}</h2>
@@ -120,7 +134,9 @@
 
             <!-- Action Buttons Row -->
             <div class="action-buttons-row">
+              <!-- Only show Install button for remote plugins -->
               <el-button
+                v-if="!selectedPlugin.isLocalOnly"
                 type="primary"
                 plain
                 :disabled="isButtonDisabled(selectedPlugin)"
@@ -136,13 +152,18 @@
                   :disabled="installingPlugins.has(selectedPlugin.id)"
                   @click="togglePluginStatus(selectedPlugin.id)"
                 >
-                  {{ pluginStore.pluginsDisabled[selectedPlugin.id] ? 'Disable' : 'Enable' }}
+                  {{ pluginStore.pluginsDisabled[selectedPlugin.id] ? 'Enable' : 'Disable' }}
                 </el-button>
 
                 <el-button
                   type="primary"
                   plain
-                  :disabled="installingPlugins.has(selectedPlugin.id)"
+                  :disabled="installingPlugins.has(selectedPlugin.id) || selectedPlugin.isTemporary"
+                  :title="
+                    selectedPlugin.isTemporary
+                      ? 'Temporary plugins cannot be uninstalled (will be removed on restart)'
+                      : ''
+                  "
                   @click="uninstallPlugin(selectedPlugin)"
                 >
                   Uninstall
@@ -172,6 +193,16 @@
               <div class="metadata-row">
                 <span class="metadata-label">Published:</span>
                 <span class="metadata-value">{{ formatDate(selectedPlugin.createdTime) }}</span>
+              </div>
+              <div v-if="installedPluginInfo?.manifest.tabs?.length" class="metadata-row">
+                <span class="metadata-label">New Tabs:</span>
+                <span class="metadata-value">{{ installedPluginInfo.manifest.tabs.length }}</span>
+              </div>
+              <div v-if="installedPluginInfo?.manifest.extensions?.length" class="metadata-row">
+                <span class="metadata-label">Extensions:</span>
+                <span class="metadata-value">
+                  {{ installedPluginInfo.manifest.extensions.map((e) => e.targetTab).join(', ') }}
+                </span>
               </div>
             </div>
 
@@ -215,6 +246,8 @@ import type { RemotePluginInfo } from 'src/preload/plugin'
 
 interface PluginWithReadme extends RemotePluginInfo {
   readmeContent?: string
+  isLocalOnly?: boolean // Flag for locally installed plugins not in remote list
+  isTemporary?: boolean // Flag for temporarily loaded plugins from custom path
 }
 
 const props = defineProps<{
@@ -234,11 +267,110 @@ const installingPlugins = ref<Set<string>>(new Set())
 const selectedPlugin = ref<PluginWithReadme | null>(null)
 const readmeHeight = computed(() => props.height - 35 - 40 - 121 - 200)
 const pluginStore = usePluginStore()
+const temporaryPlugins = ref<Set<string>>(new Set()) // Store IDs of temporary plugins
 let marked: Marked
+let pluginsDir = '' // Cache the plugins directory
 
-// All plugins are already validated by the backend
+// Initialize plugins directory
+async function initPluginsDir() {
+  try {
+    pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
+  } catch {
+    pluginsDir = ''
+  }
+}
+
+// Check if a plugin is temporarily loaded (not in standard plugins directory)
+function isPluginTemporary(pluginPath: string): boolean {
+  if (!pluginsDir) return true
+
+  // Normalize paths for comparison
+  const normalizedPluginPath = pluginPath.toLowerCase().replace(/\\/g, '/')
+  const normalizedPluginsDir = pluginsDir.toLowerCase().replace(/\\/g, '/')
+
+  return !normalizedPluginPath.startsWith(normalizedPluginsDir)
+}
+
+// Update temporary plugins set
+function updateTemporaryPlugins() {
+  const tempSet = new Set<string>()
+  for (const [pluginId, plugin] of pluginStore.plugins.entries()) {
+    if (isPluginTemporary(plugin.path)) {
+      tempSet.add(pluginId)
+    }
+  }
+  temporaryPlugins.value = tempSet
+}
+
+// Convert local icon path to local-resource URL
+function getIconUrl(plugin: PluginWithReadme): string {
+  if (!plugin.icon) return ''
+
+  // Check if it's already a URL (http/https/data)
+  const reIsAbsolute = /[\w+\-+]+:\/\//
+  if (reIsAbsolute.test(plugin.icon)) {
+    return plugin.icon
+  }
+
+  // For local plugins, get the full path
+  const installedPlugin = pluginStore.getPlugin(plugin.id)
+  if (installedPlugin && installedPlugin.path) {
+    // Build full file path
+    const fullPath = installedPlugin.path + '\\' + plugin.icon
+    // Normalize to forward slashes
+    const normalizedPath = fullPath.replace(/\\/g, '/')
+    // Use triple slash after protocol
+    return 'local-resource:///' + normalizedPath
+  }
+
+  return plugin.icon
+}
+
+// Merge remote plugins with locally installed plugins
 const validPlugins = computed<PluginWithReadme[]>(() => {
-  return plugins.value
+  const remotePlugins = plugins.value
+  const localPlugins = Array.from(pluginStore.plugins.values())
+
+  // Create a map of remote plugins by ID for quick lookup
+  const remotePluginMap = new Map<string, PluginWithReadme>()
+  remotePlugins.forEach((plugin) => {
+    remotePluginMap.set(plugin.id, plugin)
+  })
+
+  // Add local-only plugins (not in remote list)
+  const allPlugins = [...remotePlugins]
+
+  localPlugins.forEach((localPlugin) => {
+    const pluginId = localPlugin.manifest.id
+    const isTemporary = temporaryPlugins.value.has(pluginId)
+
+    // If plugin is not in remote list, add it as a local-only plugin
+    if (!remotePluginMap.has(pluginId)) {
+      const localPluginInfo: PluginWithReadme = {
+        id: pluginId,
+        name: localPlugin.manifest.name,
+        version: localPlugin.manifest.version,
+        description: localPlugin.manifest.description || '',
+        author: localPlugin.manifest.author || 'Unknown',
+        icon:
+          localPlugin.manifest.icon ||
+          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="40"%3E?%3C/text%3E%3C/svg%3E',
+        zipUrl: '',
+        readme: '',
+        createdTime: new Date().toISOString(),
+        user: 'local',
+        isLocalOnly: true, // Mark as local-only plugin
+        isTemporary // Mark if temporarily loaded from custom path
+      }
+      allPlugins.push(localPluginInfo)
+    } else if (isTemporary) {
+      // If plugin exists in remote list but is temporarily loaded, mark it
+      const remotePlugin = remotePluginMap.get(pluginId)!
+      remotePlugin.isTemporary = true
+    }
+  })
+
+  return allPlugins
 })
 
 // Check plugin installation status
@@ -300,6 +432,13 @@ function isButtonDisabled(plugin: PluginWithReadme): boolean {
   return installingPlugins.value.has(plugin.id) || (status.installed && !status.canUpgrade)
 }
 
+// Get installed plugin manifest info
+const installedPluginInfo = computed(() => {
+  if (!selectedPlugin.value) return null
+  const installedPlugin = pluginStore.getPlugin(selectedPlugin.value.id)
+  return installedPlugin
+})
+
 // Render README markdown
 const renderedReadme = computed(() => {
   if (!selectedPlugin.value) return ''
@@ -340,10 +479,12 @@ async function fetchPlugins() {
     )) as RemotePluginInfo[]
 
     plugins.value = remotePlugins
-    console.log(`Loaded ${plugins.value.length} plugins from marketplace`)
+    // console.log(`Loaded ${plugins.value.length} plugins from marketplace`)
   } catch (e: any) {
-    error.value = e.message || 'Failed to load plugins from marketplace'
-    console.error('Error fetching plugins:', e)
+    ElNotification.error({
+      message: `Failed to load plugins from marketplace: ${e.message || 'Unknown error'}`,
+      position: 'bottom-right'
+    })
   } finally {
     loading.value = false
   }
@@ -387,6 +528,9 @@ async function installPlugin(plugin: PluginWithReadme) {
       // Re-enable after upgrade
       pluginStore.enablePlugin(plugin.id)
     }
+
+    // Update temporary plugins list (this is an installed plugin, not temporary)
+    updateTemporaryPlugins()
 
     ElNotification.success({
       message: status.canUpgrade
@@ -515,8 +659,8 @@ async function handleManualCommand(command: string) {
         position: 'bottom-right'
       })
 
-      // Refresh the plugin list if needed
-      await fetchPlugins()
+      // Update temporary plugins list (this is an installed plugin, not temporary)
+      updateTemporaryPlugins()
     } catch (error: any) {
       ElNotification.error({
         message: `Failed to install plugin: ${error.message || 'Unknown error'}`,
@@ -543,6 +687,9 @@ async function handleManualCommand(command: string) {
 
       await pluginStore.enablePlugin(plugin.manifest.id)
 
+      // Update temporary plugins list (this is a temporary plugin)
+      updateTemporaryPlugins()
+
       ElNotification.success({
         message: 'Plugin loaded successfully from path!',
         position: 'bottom-right'
@@ -556,8 +703,10 @@ async function handleManualCommand(command: string) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   marked = new Marked()
+  await initPluginsDir()
+  updateTemporaryPlugins()
   fetchPlugins()
 })
 </script>
@@ -734,9 +883,24 @@ onMounted(() => {
   font-size: 14px;
 }
 
+.local-only-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.temporary-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--el-color-warning);
+}
+
 .plugin-list-icon-img {
   width: 64px;
   height: 64px;
+  overflow: hidden;
 }
 
 .plugin-list-brief {

@@ -457,7 +457,7 @@ export class Layout {
           this.removeWin(l.id)
           continue
         }
-        if (!pluginStore.pluginsEanbled[plugin.manifest.id]) {
+        if (pluginStore.pluginsDisabled[plugin.manifest.id]) {
           this.removeWin(l.id)
           continue
         }

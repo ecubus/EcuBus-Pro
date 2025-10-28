@@ -40,11 +40,13 @@ jobs:
       - name: Publish renderer-plugin-sdk
         working-directory: ./src/renderer/src/plugin-sdk
         run: npm publish --access public
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Publish main-plugin-sdk
         working-directory: ./src/main/plugin-sdk
         run: npm publish --access public
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

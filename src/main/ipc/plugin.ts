@@ -7,6 +7,7 @@ import PluginClient from '../pluginCilent'
 import axios from 'axios'
 import { RemotePluginInfo } from 'src/preload/plugin'
 import AdmZip from 'adm-zip'
+import { DataSet } from 'src/preload/data'
 
 const libPath = path.dirname(runtimeDom)
 
@@ -59,6 +60,24 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
 
 const plugins: Record<string, PluginClient> = {}
 
+export async function startPlugins(data: DataSet) {
+  for (const entry of Object.values(plugins)) {
+    try {
+      await entry.exec('start', data)
+    } catch (error) {
+      null
+    }
+  }
+}
+export async function stopPlugins() {
+  for (const entry of Object.values(plugins)) {
+    try {
+      await entry.exec('stop')
+    } catch (error) {
+      null
+    }
+  }
+}
 // 辅助函数：获取插件目录
 function getPluginsDirectory(): string {
   const userDataPath = app.getPath('userData')

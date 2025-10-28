@@ -2,6 +2,7 @@
 //@ts-ignore
 import workerpool, { Pool } from 'workerpool'
 import { PluginLOG } from './log'
+import path from 'path'
 
 export default class PluginClient {
   pool: Pool
@@ -11,12 +12,11 @@ export default class PluginClient {
 
   constructor(
     private id: string,
-
     jsFilePath: string
   ) {
     this.log = new PluginLOG(this.id)
     const execArgv = ['--enable-source-maps']
-
+    const pluginPath = path.dirname(jsFilePath)
     this.pool = workerpool.pool(jsFilePath, {
       minWorkers: 1,
       maxWorkers: 1,
@@ -27,7 +27,9 @@ export default class PluginClient {
         stderr: false,
         stdout: false,
         execArgv: execArgv,
-        workerData: global.dataSet
+        workerData: {
+          pluginPath: pluginPath
+        }
       }
     })
     const d = (this.pool as any)._getWorker()
@@ -87,21 +89,6 @@ export default class PluginClient {
       await this.pool.terminate(true)
     } catch (e) {
       null
-    }
-  }
-
-  // 检查worker是否健康
-  isHealthy(): boolean {
-    return !this.selfStop && this.pool && this.worker
-  }
-
-  // 获取worker状态信息
-  getWorkerStatus(): { healthy: boolean; selfStop: boolean; hasPool: boolean; hasWorker: boolean } {
-    return {
-      healthy: this.isHealthy(),
-      selfStop: this.selfStop,
-      hasPool: !!this.pool,
-      hasWorker: !!this.worker
     }
   }
 }

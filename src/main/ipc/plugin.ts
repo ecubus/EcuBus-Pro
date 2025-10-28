@@ -8,6 +8,7 @@ import axios from 'axios'
 import { RemotePluginInfo } from 'src/preload/plugin'
 import AdmZip from 'adm-zip'
 import { DataSet } from 'src/preload/data'
+import { log } from 'electron-log'
 
 const libPath = path.dirname(runtimeDom)
 
@@ -153,7 +154,7 @@ ipcMain.handle(
     const mainEntryPath = path.join(pluginDir, mainEntry)
     if (fs.existsSync(mainEntryPath)) {
       plugins[pluginId] = new PluginClient(pluginId, mainEntryPath)
-      console.log('plugin created', pluginId)
+      log('plugin created', pluginId)
     } else {
       throw new Error(`Main entry file not found: ${mainEntryPath}`)
     }
@@ -163,6 +164,7 @@ ipcMain.handle(
 ipcMain.handle('ipc-plugin-close', async (event, pluginId) => {
   if (plugins[pluginId]) {
     await plugins[pluginId].close()
+    log('plugin closed', pluginId)
     delete plugins[pluginId]
   }
 })

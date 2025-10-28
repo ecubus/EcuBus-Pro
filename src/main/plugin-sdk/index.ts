@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import workerpool from 'workerpool'
-import { workerData } from 'node:worker_threads'
+import { workerData, isMainThread } from 'worker_threads'
 import { DataSet } from 'src/preload/data'
 
 type ServiceMap = {
@@ -11,18 +11,27 @@ type ServiceMap = {
 }
 
 export function registerService<K extends keyof ServiceMap>(name: K, func: ServiceMap[K]) {
-  workerpool.worker({
-    [name]: func
-  })
+  if (!isMainThread) {
+    workerpool.worker({
+      [name]: func
+    })
+  } else {
+    exports[name] = func
+  }
 }
 
 export function emitEvent(name: string, data: any) {
-  workerpool.workerEmit({
-    event: name,
-    data: data
-  })
+  if (!isMainThread) {
+    workerpool.workerEmit({
+      event: name,
+      data: data
+    })
+  }
 }
 
-export function getPluginPath() {
-  return workerData.pluginPath
+export function getPluginPath(): string {
+  if (isMainThread) {
+    return __dirname
+  }
+  return workerData?.pluginPath || ''
 }

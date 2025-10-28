@@ -3,6 +3,7 @@
 import workerpool, { Pool } from 'workerpool'
 import { PluginLOG } from './log'
 import path from 'path'
+import { error, log } from 'electron-log'
 
 export default class PluginClient {
   pool: Pool
@@ -30,6 +31,9 @@ export default class PluginClient {
         workerData: {
           pluginPath: pluginPath
         }
+      },
+      onTerminateWorker: (v: any) => {
+        error('plugin worker terminated', v)
       }
     })
     const d = (this.pool as any)._getWorker()

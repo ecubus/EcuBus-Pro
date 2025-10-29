@@ -297,7 +297,7 @@ function parseSetVar(data: any) {
 function parsePluginEvent(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
-    const val = item.message.data
+    const val = item.message
     result[`${val.method}.${val.id}.${val.event}`] = val.data
   }
   return result
@@ -306,7 +306,7 @@ function parsePluginEvent(data: any) {
 function parsePluginError(data: any) {
   const result: Record<string, any> = {}
   for (const item of data) {
-    const val = item.message.data
+    const val = item.message
     result[`${val.method}.${val.id}`] = {
       msg: val.msg,
       data: val.data

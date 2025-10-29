@@ -590,7 +590,6 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       })
       lastTs = now
     }, 200)
-    logQ.startTimer()
   }
 
   global.startTs = getTsUs()

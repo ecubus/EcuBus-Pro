@@ -12,7 +12,9 @@ class LogQueue {
   private constructor(
     public win: BrowserWindow[] = [],
     private period = 100
-  ) {}
+  ) {
+    this.startTimer()
+  }
 
   static getInstance(): LogQueue {
     if (LogQueue.instance === null) {

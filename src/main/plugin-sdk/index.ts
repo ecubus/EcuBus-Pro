@@ -30,8 +30,5 @@ export function emitEvent(name: string, data: any) {
 }
 
 export function getPluginPath(): string {
-  if (isMainThread) {
-    return __dirname
-  }
   return workerData?.pluginPath || ''
 }

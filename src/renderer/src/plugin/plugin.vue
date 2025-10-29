@@ -5,7 +5,7 @@
       :name="editIndex"
       :url="entry"
       :fetch="isDev ? undefined : customFetch"
-      :plugins="isDev ? undefined : plugins"
+      :plugins="plugins"
       :props="{ ...props, modelValue: data }"
       :load-error="loadError"
     ></WujieVue>
@@ -20,6 +20,7 @@ import { usePluginStore } from '@r/stores/plugin'
 import { ElMessageBox } from 'element-plus'
 import { destroyApp } from 'wujie'
 import { cloneDeep } from 'lodash'
+import { InstanceofPlugin } from 'wujie-polyfill'
 const dataStore = useDataStore()
 const props = defineProps<{
   editIndex: string
@@ -70,6 +71,15 @@ const plugins = [
         }
       }
     ],
+    jsLoader: (code) => {
+      // 替换popper.js内计算偏左侧偏移量
+      const codes = code.replace(
+        'left: elementRect.left - parentRect.left',
+        'left: fixed ? elementRect.left : elementRect.left - parentRect.left'
+      )
+      // 替换popper.js内右侧偏移量
+      return codes.replace('popper.right > data.boundaries.right', 'false')
+    },
 
     htmlLoader: (code) => {
       const reHref = /href="\.\/([^"]*)"/g
@@ -80,8 +90,13 @@ const plugins = [
       return code
     },
 
-    cssExcludes: [/element-plus/]
-  }
+    cssExcludes: [/element-plus/],
+    cssBeforeLoaders: [
+      // 强制使子应用body定位是relative
+      { content: 'body{position: relative !important}' }
+    ]
+  },
+  InstanceofPlugin()
 ]
 const customFetch = (url: string, options?: RequestInit) => {
   url = url.replace('file:///', 'local-resource:///' + basePath + '/')

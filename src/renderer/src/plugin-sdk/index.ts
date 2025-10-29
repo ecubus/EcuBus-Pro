@@ -24,3 +24,19 @@ export function callServerMethod(method: string, ...params: any[]): Promise<any>
     ...params
   )
 }
+
+export function addPluginEventListen(event: string, callback: (data: any) => void) {
+  eventBus.on(`pluginEvent.${window.$wujie?.props?.pluginId}.${event}`, callback)
+}
+
+export function removePluginEventListen(event: string, callback: (data: any) => void) {
+  eventBus.off(`pluginEvent.${window.$wujie?.props?.pluginId}.${event}`, callback)
+}
+
+export function addPluginErrorListen(callback: (data: { msg: string; data?: any }) => void) {
+  eventBus.on(`pluginError.${window.$wujie?.props?.pluginId}`, callback)
+}
+
+export function removePluginErrorListen(callback: (data: { event: string; data: any }) => void) {
+  eventBus.off(`*pluginError.${window.$wujie?.props?.pluginId}`, callback)
+}

@@ -294,6 +294,26 @@ function parseSetVar(data: any) {
   return result
 }
 
+function parsePluginEvent(data: any) {
+  const result: Record<string, any> = {}
+  for (const item of data) {
+    const val = item.message.data
+    result[`${val.method}.${val.id}.${val.event}`] = val.data
+  }
+  return result
+}
+
+function parsePluginError(data: any) {
+  const result: Record<string, any> = {}
+  for (const item of data) {
+    const val = item.message.data
+    result[`${val.method}.${val.id}`] = {
+      msg: val.msg,
+      data: val.data
+    }
+  }
+  return result
+}
 // Export functions for both testing and worker usage
 export { parseLinData, initDataBase, parseCanData }
 
@@ -372,6 +392,20 @@ if (isWorker) {
       }
       case 'osEvent': {
         const result = parseORTIData(data)
+        if (result) {
+          self.postMessage(result)
+        }
+        break
+      }
+      case 'pluginEvent': {
+        const result = parsePluginEvent(data)
+        if (result) {
+          self.postMessage(result)
+        }
+        break
+      }
+      case 'pluginError': {
+        const result = parsePluginError(data)
         if (result) {
           self.postMessage(result)
         }

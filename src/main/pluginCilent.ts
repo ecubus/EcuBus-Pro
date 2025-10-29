@@ -34,6 +34,7 @@ export default class PluginClient {
       },
       onTerminateWorker: (v: any) => {
         error('plugin worker terminated', v)
+        this.log.error('plugin worker terminated', v)
       }
     })
     const d = (this.pool as any)._getWorker()

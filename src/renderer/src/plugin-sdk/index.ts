@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { reactive, watch } from 'vue'
+export { showOpenDialog, showSaveDialog } from './dialog'
+
+// ============ 插件数据和方法 ============
 
 const data = reactive<any>(window.$wujie?.props?.modelValue ?? {})
 

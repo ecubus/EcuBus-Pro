@@ -37,6 +37,10 @@
                     <el-icon><FolderOpened /></el-icon>
                     Load from Path
                   </el-dropdown-item>
+                  <el-dropdown-item command="dev-plugin" divided>
+                    <el-icon><DocumentAdd /></el-icon>
+                    Dev Plugin
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -204,21 +208,21 @@
                 <span class="metadata-label">Published:</span>
                 <span class="metadata-value">{{ formatDate(selectedPlugin.createdTime) }}</span>
               </div>
-              <div v-if="installedPluginInfo?.manifest.tabs?.length" class="metadata-row">
+              <div v-if="selectedPlugin.manifestContent?.tabs?.length" class="metadata-row">
                 <span class="metadata-label">New Tabs:</span>
-                <span class="metadata-value">{{ installedPluginInfo.manifest.tabs.length }}</span>
+                <span class="metadata-value">{{ selectedPlugin.manifestContent.tabs.length }}</span>
               </div>
-              <div v-if="installedPluginInfo?.manifest.extensions?.length" class="metadata-row">
+              <div v-if="selectedPlugin.manifestContent?.extensions?.length" class="metadata-row">
                 <span class="metadata-label">Extensions:</span>
                 <span class="metadata-value">
-                  {{ installedPluginInfo.manifest.extensions.map((e) => e.targetTab).join(', ') }}
+                  {{ selectedPlugin.manifestContent.extensions.map((e) => e.targetTab).join(', ') }}
                 </span>
               </div>
             </div>
 
             <!-- README -->
-            <div class="readme-section">
-              <div class="readme" v-html="renderedReadme"></div>
+            <div id="pluginReadme" class="readme-section">
+              <div class="readme" @click="handleReadmeClick($event)" v-html="renderedReadme"></div>
             </div>
           </div>
 
@@ -249,14 +253,15 @@ import {
   ElIcon,
   ElImage
 } from 'element-plus'
-import { More, Upload, FolderOpened } from '@element-plus/icons-vue'
+import { More, Upload, FolderOpened, DocumentAdd } from '@element-plus/icons-vue'
 import { Marked } from 'marked'
 import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
-import type { RemotePluginInfo } from 'src/preload/plugin'
+import type { PluginManifest, RemotePluginInfo } from 'src/preload/plugin'
 
 interface PluginWithReadme extends RemotePluginInfo {
   readmeContent?: string
+  manifestContent?: PluginManifest
   isLocalOnly?: boolean // Flag for locally installed plugins not in remote list
   isTemporary?: boolean // Flag for temporarily loaded plugins from custom path
 }
@@ -469,12 +474,18 @@ async function handlePluginSelect(plugin: PluginWithReadme) {
   // Fetch README content if not already loaded
   if (plugin.readme && !plugin.readmeContent) {
     try {
-      const response = await fetch(plugin.readme)
-      if (response.ok) {
-        plugin.readmeContent = await response.text()
-      }
+      const response = await window.electron.ipcRenderer.invoke('ipc-axios-get', plugin.readme)
+      plugin.readmeContent = response
     } catch (e) {
       console.error('Failed to load README:', e)
+    }
+  }
+  if (plugin.manifestUrl && !plugin.manifestContent) {
+    try {
+      const response = await window.electron.ipcRenderer.invoke('ipc-axios-get', plugin.manifestUrl)
+      plugin.manifestContent = response
+    } catch (e) {
+      console.error('Failed to load manifest:', e)
     }
   }
 }
@@ -711,6 +722,19 @@ async function handleManualCommand(command: string) {
         position: 'bottom-right'
       })
     }
+  } else if (command === 'dev-plugin') {
+    // Open plugin development documentation URL
+    const devUrl = 'https://app.whyengineer.com/docs/um/uds/buildInScript.html'
+    window.electron.ipcRenderer.send('ipc-open-link', devUrl)
+  }
+}
+
+function handleReadmeClick(e: MouseEvent) {
+  if ((e.target as HTMLElement).tagName == 'A') {
+    e.preventDefault()
+    // Get href
+    const href = (e.target as HTMLElement).getAttribute('href')
+    window.electron.ipcRenderer.send('ipc-open-link', href)
   }
 }
 

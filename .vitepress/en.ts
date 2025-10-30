@@ -208,6 +208,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: 'Comp Test', link: '/docs/dev/test' },
         { text: 'Addon', link: '/docs/dev/addon' },
+        { text: 'Plugin', link: '/docs/dev/plugin' },
         { text: 'Feature Request Process', link: '/docs/dev/feature' },
         { text: 'Releases Note', link: '/docs/dev/releases_note' }
       ]

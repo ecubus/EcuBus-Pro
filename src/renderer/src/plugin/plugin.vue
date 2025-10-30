@@ -6,14 +6,14 @@
       :url="entry"
       :fetch="isDev ? undefined : customFetch"
       :plugins="plugins"
-      :props="{ ...props, modelValue: data }"
+      :props="{ ...props, modelValue: data, isDark: darkValue }"
       :load-error="loadError"
     ></WujieVue>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, toRef } from 'vue'
+import { onUnmounted, toRef, unref } from 'vue'
 import { PluginItemConfig } from 'src/preload/plugin'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
@@ -21,6 +21,7 @@ import { ElMessageBox } from 'element-plus'
 import { destroyApp } from 'wujie'
 import { cloneDeep } from 'lodash'
 import { InstanceofPlugin } from 'wujie-polyfill'
+import { useDark } from '@vueuse/core'
 const dataStore = useDataStore()
 const props = defineProps<{
   editIndex: string
@@ -39,14 +40,18 @@ const data = cloneDeep(
 const isDev = props.item.entry?.startsWith('http')
 
 const entry = isDev ? props.item.entry : `file:///${props.item.entry}`
+const entryBase = props.item.entry?.split('/').slice(0, -1).join('/')
+
 const plguinStore = usePluginStore()
 const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')
 const width = toRef(props, 'width')
 const height = toRef(props, 'height')
 const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
-
+const isDark = useDark()
+const darkValue = unref(isDark)
 const basePath = plugin.path
+
 const importMap = {
   imports: {
     vue: `local-resource:///${libPath}/runtime-dom.esm-browser.min.js`,
@@ -62,6 +67,9 @@ const plugins = [
       {
         callback(appWindow) {
           appWindow.document.head.innerHTML += `<link rel="stylesheet" href="local-resource:///${libPath}/element.css">`
+          if (darkValue) {
+            appWindow.document.head.innerHTML += `<link rel="stylesheet" href="local-resource:///${libPath}/element.dark.css">`
+          }
         }
       },
       {
@@ -82,11 +90,15 @@ const plugins = [
     },
 
     htmlLoader: (code) => {
+      if (darkValue) {
+        //add class dark to html
+        code = code.replace('<html ', '<html class="dark" ')
+      }
+
       const reHref = /href="\.\/([^"]*)"/g
       const reSrc = /src="\.\/([^"]*)"/g
-      code = code.replace(reHref, 'href="local-resource:///' + basePath + '/$1"')
-      code = code.replace(reSrc, 'src="local-resource:///' + basePath + '/$1"')
-
+      code = code.replace(reHref, 'href="local-resource:///' + basePath + '/' + entryBase + '/$1"')
+      code = code.replace(reSrc, 'src="local-resource:///' + basePath + '/' + entryBase + '/$1"')
       return code
     },
 

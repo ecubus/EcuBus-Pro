@@ -58,4 +58,3 @@ Define encoding information here. Signal encoding can be edited in the Signals t
 
 View the real-time LDF file content. You can copy the LDF content from here once all errors are resolved.
 ![alt text](image-17.png)
-

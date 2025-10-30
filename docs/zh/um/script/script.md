@@ -1,35 +1,36 @@
-# Script
+# 脚本（Script）
 
-The script based on TypeScript/JavaScript in node.js environment. we use `ts` to do syntax check and use esbuild to build the script, the build script is in the `.ScriptBuild` folder.
+脚本运行于 Node.js 环境，基于 TypeScript/JavaScript。我们使用 `ts` 进行语法检查，
+使用 esbuild 构建脚本，构建脚本位于 `.ScriptBuild` 目录。
 
-## Editor
+## 编辑器（Editor）
 
-Vscode is recommended to edit the script, you can install the `TypeScript` extension to get the syntax check and intellisense.
+推荐使用 VS Code 编辑脚本；安装 `TypeScript` 扩展可获得语法检查与智能提示。
 ![alt text](script1.gif)
 
 > [!TIP]
-> We also plan to provide a vscode extension to let you build the script in vscode directly.
+> 我们计划提供 VS Code 扩展，以便在 VS Code 中直接构建脚本。
 
-## Build Script
+## 构建脚本（Build Script）
 
 ![alt text](image.png)
-you can get the build error info in `Message` window if there is any error in the script.
+如果脚本存在错误，可在 `Message` 窗口查看构建错误信息。
 ![alt text](image-1.png)
 
-## Script API
+## 脚本 API（Script API）
 
-You can open the `API` window to get the API info.
+你可以打开 `API` 窗口查看 API 信息。
 ![alt text](image-2.png)
 
-or check this online documentation [API](https://app.whyengineer.com/scriptApi/index.html)
+或者查看在线文档：[API](https://app.whyengineer.com/scriptApi/index.html)
 
-## Script Usage
+## 脚本用法（Script Usage）
 
-### Node.js Ability
+### Node.js 能力（Node.js Ability）
 
-#### Init
+#### Init（初始化）
 
-Init function is the entry of the script, it will be called when the script is loaded.
+初始化函数是脚本入口，脚本加载时会被调用。
 
 ```typescript
 Util.Init(() => {
@@ -37,9 +38,10 @@ Util.Init(() => {
 })
 ```
 
-#### Timer
+#### Timer（定时器）
 
-Timer is node.js built-in feature, you can use it to do some periodical work. more details about the timer, please refer to [Timer](https://nodejs.org/api/timers.html)
+定时器是 Node.js 的内置特性，可用于周期性任务。更多信息参见
+[Timer](https://nodejs.org/api/timers.html)。
 
 ```typescript
 // periodical output can message
@@ -54,9 +56,9 @@ clearInterval(timer)
 timer.refresh()
 ```
 
-#### OnKey
+#### OnKey（按键）
 
-listen to the key event, you can use it to do some work when the key is pressed.
+监听按键事件，可在按键被按下时执行任务。
 
 ```typescript
 // listen to the key event
@@ -65,9 +67,9 @@ Util.OnKey('s', () => {
 })
 ```
 
-#### OnCan
+#### OnCan（CAN 消息）
 
-listen to the can message, you can use it to do some work when the can message is received.
+监听 CAN 消息，你可以在收到 CAN 消息时执行一些任务。
 
 ```typescript
 // listen to the can message
@@ -80,26 +82,25 @@ Util.OnCan(true, (msg) => {
 })
 ```
 
-#### On
+#### On（UDS 事件）
 
-listen to the uds message.
-`<tester name>.<service item name>.recv` is used to listen to the uds message received.
-`<tester name>.<service item name>.send` is used to listen to the uds message send.
+监听 UDS 相关事件。
+`<tester name>.<service item name>.recv` 用于监听收到的 UDS 消息；
+`<tester name>.<service item name>.send` 用于监听发送的 UDS 消息。
 
 ```typescript
-// listen to the uds message
+// 监听 UDS 报文
 Util.On('Can.DiagRequest.recv', (msg) => {
-  //receive diag response
+  // 接收诊断响应
 })
 Util.On('Can.DiagRequest.send', (msg) => {
-  //receive diag request
+  // 接收诊断请求
 })
 ```
 
+## 示例（Example）
 
-## Example
-
-::: details Send 10 CAN messages on script initialization, then send one more message after 30s delay {open}
+::: details 脚本初始化时发送 10 条 CAN 消息，30 秒后再发送 1 条  {open}
 
 ```typescript
 async function sendCanMessage(msgId: number, targetId: number, dataPattern: string) {
@@ -148,6 +149,5 @@ Util.Init(async () => {
     }, 30000); // 延时 30 秒
 })
 ```
+
 :::
-
-

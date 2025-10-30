@@ -32,4 +32,3 @@ Value tables define the mapping between raw values and their corresponding meani
 View and inspect all DBC attributes.
 
 ![alt text](image-21.png)
-

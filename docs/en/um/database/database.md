@@ -6,6 +6,5 @@ Data transform depending on the database information. Added database system to h
 
 ## Supported Databases
 
-- [LIN LDF](./ldf)
-- [CAN DBC](./dbc)
-
+- [LIN LDF](./ldf/ldf)
+- [CAN DBC](./dbc/dbc)

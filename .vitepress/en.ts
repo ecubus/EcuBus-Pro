@@ -10,7 +10,33 @@ export const en = defineConfig({
 
   themeConfig: {
     nav: nav(),
-    sidebar: sidebar()
+    sidebar: sidebar(),
+    editLink: {
+      pattern: 'https://github.com/ecubus/EcuBus-Pro/edit/master/:path',
+      text: 'Edit this page on GitHub'
+    },
+    docFooter: {
+      prev: 'Previous',
+      next: 'Next'
+    },
+    outline: {
+      label: 'Page Navigation',
+      level: [2, 4]
+    },
+    lastUpdated: {
+      text: 'Last Updated',
+      formatOptions: {
+        dateStyle: 'short',
+        timeStyle: 'medium'
+      }
+    },
+    langMenuLabel: 'Language',
+    returnToTopLabel: 'Return to Top',
+    sidebarMenuLabel: 'Menu',
+    darkModeSwitchLabel: 'Theme',
+    lightModeSwitchTitle: 'Switch to Light Mode',
+    darkModeSwitchTitle: 'Switch to Dark Mode',
+    skipToContentLabel: 'Skip to Content'
   }
 })
 
@@ -77,15 +103,15 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           items: [
             {
               text: 'Build In Script',
-              link: '/docs/um/uds/buildInScript.md'
+              link: '/docs/um/uds/buildInScript/buildInScript.md'
             },
             {
               text: 'Tester Present',
-              link: '/docs/um/uds/testerPresent.md'
+              link: '/docs/um/uds/testerPresent/testerPresent.md'
             },
             {
               text: 'UDS -> C Code',
-              link: '/docs/um/uds/udscode.md'
+              link: '/docs/um/uds/udscode/udscode.md'
             },
             {
               text: 'UDS Bootloader Implementation Guide',
@@ -96,11 +122,13 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: 'Trace', link: '/docs/um/trace/trace.md' },
         { text: 'Graph', link: '/docs/um/graph/graph.md' },
         { text: 'Variable', link: '/docs/um/var/var.md' },
-        { text: 'CLI', link: '/docs/um/cli.md' },
+        { text: 'CLI', link: '/docs/um/cli/cli.md' },
         {
           text: 'Script',
-          link: '/docs/um/script',
-          items: [{ text: 'Use External Package', link: '/docs/um/script/scriptSerialPort' }]
+          link: '/docs/um/script/script.md',
+          items: [
+            { text: 'Use External Package', link: '/docs/um/script/SerialPort/scriptSerialPort.md' }
+          ]
         },
         {
           text: 'Test',
@@ -108,10 +136,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         {
           text: 'Database',
-          link: '/docs/um/database',
+          link: '/docs/um/database/database.md',
           items: [
-            { text: 'LIN LDF', link: '/docs/um/ldf' },
-            { text: 'CAN DBC', link: '/docs/um/dbc' }
+            { text: 'LIN LDF', link: '/docs/um/database/ldf/ldf.md' },
+            { text: 'CAN DBC', link: '/docs/um/database/dbc/dbc.md' }
           ]
         },
         {

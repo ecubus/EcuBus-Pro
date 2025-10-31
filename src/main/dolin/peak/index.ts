@@ -139,6 +139,7 @@ export class PeakLin extends LinBase {
         }
 
         const msg: LinMsg = {
+          device: this.info.name,
           frameId: recvMsg.FrameId & 0x3f,
           data: data,
           direction:
@@ -193,6 +194,7 @@ export class PeakLin extends LinBase {
         if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
           this.pendingPromise.sendMsg.data = msg.data
           this.pendingPromise.sendMsg.ts = ts
+          this.pendingPromise.sendMsg.device = msg.device
           if (recvMsg.ErrorFlags != 0) {
             handle()
             this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)

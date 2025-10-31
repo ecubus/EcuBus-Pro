@@ -131,7 +131,7 @@ export class KvaserLin extends LinBase {
       frameId: id,
       data: Buffer.from(msgx),
       direction: (flags & 3) == 1 ? LinDirection.SEND : LinDirection.RECV,
-
+      device: this.info.name,
       checksumType: id == 0x3c || id == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
       checksum: msgInfo.checkSum,
       database: this.info.database
@@ -163,6 +163,7 @@ export class KvaserLin extends LinBase {
     if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == msg.frameId) {
       this.pendingPromise.sendMsg.data = msg.data
       this.pendingPromise.sendMsg.ts = ts
+      this.pendingPromise.sendMsg.device = msg.device
       if (flags & 0xf8) {
         handle()
         this.log.error(ts, error.join(', '), this.pendingPromise.sendMsg)

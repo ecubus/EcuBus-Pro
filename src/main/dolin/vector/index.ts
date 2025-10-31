@@ -226,7 +226,8 @@ export class VectorLin extends LinBase {
               ? LinChecksumType.CLASSIC
               : LinChecksumType.ENHANCED),
           checksum: recvMsg.linMsg.crc,
-          database: this.info.database
+          database: this.info.database,
+          device: this.info.name
         }
 
         let error = false
@@ -240,6 +241,7 @@ export class VectorLin extends LinBase {
         if (this.pendingPromise && this.pendingPromise.sendMsg.frameId == (msg.frameId & 0x3f)) {
           this.pendingPromise.sendMsg.data = msg.data
           this.pendingPromise.sendMsg.ts = ts
+          this.pendingPromise.sendMsg.device = msg.device
 
           if (error) {
             this.log.error(ts, 'checksum error', this.pendingPromise.sendMsg)

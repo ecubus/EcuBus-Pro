@@ -86,7 +86,7 @@ export const usePluginStore = defineStore('usePluginStore', {
     /**
      * 启用插件
      */
-    async enablePlugin(pluginId: string) {
+    async enablePlugin(pluginId: string, store = true) {
       const plugin = this.plugins.get(pluginId)
       if (plugin) {
         if (plugin.manifest.mainEntry) {
@@ -97,22 +97,27 @@ export const usePluginStore = defineStore('usePluginStore', {
             plugin.manifest.mainEntry
           )
         }
-        this.pluginsDisabled[pluginId] = false
-        window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
+
+        if (store) {
+          this.pluginsDisabled[pluginId] = false
+          window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
+        }
       }
     },
 
     /**
      * 禁用插件
      */
-    async disablePlugin(pluginId: string) {
+    async disablePlugin(pluginId: string, store = true) {
       const plugin = this.plugins.get(pluginId)
       if (plugin) {
         if (plugin.manifest.mainEntry) {
           await window.electron.ipcRenderer.invoke('ipc-plugin-close', pluginId)
         }
-        this.pluginsDisabled[pluginId] = true
-        window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
+        if (store) {
+          this.pluginsDisabled[pluginId] = true
+          window.store.set('pluginsDisabled', cloneDeep(this.pluginsDisabled))
+        }
         plugin.mainStatus = 'stopped'
         return true
       }
@@ -185,22 +190,25 @@ export const usePluginStore = defineStore('usePluginStore', {
         }
 
         // 加载所有插件
-
         await this.loadPluginsFromDirectories(pluginDirs)
+
+        // 自动启用未被禁用的插件
+        const enablePromises: Promise<void>[] = []
+        for (const plugin of this.plugins.values()) {
+          const pluginId = plugin.manifest.id
+          const isDisabled = this.pluginsDisabled[pluginId] === true
+          if (!isDisabled) {
+            enablePromises.push(this.enablePlugin(pluginId, false))
+          }
+        }
+        await Promise.all(enablePromises)
+
+        this.loaded = true
+        this.loading = false
       } catch (error) {
         this.error = String(error)
         this.loaded = true
       }
-    },
-
-    /**
-     * 刷新插件（清空并重新加载）
-     */
-    async refreshPlugins() {
-      this.plugins.clear()
-      this.loaded = false
-      this.error = null
-      await this.loadAllPlugins()
     },
 
     /**
@@ -264,11 +272,9 @@ export const usePluginStore = defineStore('usePluginStore', {
         const plugin = await this.loadPluginFromDirectory(selectedPath.filePaths[0])
 
         if (plugin) {
-          // 检查插件是否已经存在
-          if (!this.pluginsDisabled[plugin.manifest.id]) {
-            // 默认启用新加载的插件
-            await this.enablePlugin(plugin.manifest.id)
-          }
+          // 默认启用新加载的插件
+          await this.enablePlugin(plugin.manifest.id, false)
+
           return true
         }
 

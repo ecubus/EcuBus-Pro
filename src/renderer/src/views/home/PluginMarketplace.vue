@@ -742,7 +742,7 @@ async function handleManualCommand(command: string) {
     }
   } else if (command === 'dev-plugin') {
     // Open plugin development documentation URL
-    const devUrl = 'https://app.whyengineer.com/docs/um/uds/buildInScript.html'
+    const devUrl = 'https://app.whyengineer.com/docs/dev/plugin.html'
     window.electron.ipcRenderer.send('ipc-open-link', devUrl)
   }
 }

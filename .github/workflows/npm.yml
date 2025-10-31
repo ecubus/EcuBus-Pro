@@ -5,7 +5,7 @@ name: Publish Plugin SDK
 
 on:
   push:
-    branches: [master, plugin]
+    branches: [master]
     paths:
       - 'src/main/plugin-sdk/**'
       - 'src/renderer/src/plugin-sdk/**'

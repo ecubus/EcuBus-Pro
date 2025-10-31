@@ -79,18 +79,36 @@ function addLocalBaseUrl() {
   const reIsAbsolute = /[\w+\-+]+:\/\//
   return {
     walkTokens: (token: any) => {
-      if (!['link', 'image'].includes(token.type)) {
+      // Markdown links/images
+      if (['link', 'image'].includes(token.type)) {
+        const tempToken = token
+        if (reIsAbsolute.test(tempToken.href)) {
+          return
+        }
+        if (tempToken.href.startsWith('http')) {
+          return
+        }
+        tempToken.href = 'https://ecubus.oss-cn-chengdu.aliyuncs.com/app/' + tempToken.href
         return
       }
-      const tempToken = token
-      if (reIsAbsolute.test(tempToken.href)) {
-        // the URL is absolute, do not touch it
-        return
+      // Raw HTML <img> tags inside markdown
+      if (token.type === 'html' && typeof token.text === 'string') {
+        const html: string = token.text
+        const replaced = html.replace(
+          /<img\s+([^>]*?)src=("|')([^"']+)(\2)([^>]*)>/gi,
+          (_m, pre, q, src, _q2, post) => {
+            if (reIsAbsolute.test(src) || /^data:/i.test(src)) {
+              return `<img ${pre}src=${q}${src}${q}${post}>`
+            }
+            if (src.startsWith('http')) {
+              return `<img ${pre}src=${q}${src}${q}${post}>`
+            }
+            const newSrc = 'https://ecubus.oss-cn-chengdu.aliyuncs.com/app/' + src
+            return `<img ${pre}src=${q}${newSrc}${q}${post}>`
+          }
+        )
+        token.text = replaced
       }
-      if (tempToken.href.startsWith('http')) {
-        return
-      }
-      tempToken.href = 'https://ecubus.oss-cn-chengdu.aliyuncs.com/app/' + tempToken.href
     }
   } as MarkedExtension
 }
@@ -205,4 +223,3 @@ function cancelUpdate() {
   /* background-color: red; */
 }
 </style>
-

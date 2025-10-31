@@ -5,7 +5,8 @@
         <el-tab-pane v-for="tab in tabsConfig" :key="tab.name" :name="tab.name">
           <template #label>
             <span class="lr">
-              <Icon :icon="tab.icon" style="font-size: 16px" />
+              <img v-if="isImgIcon(tab.icon)" :src="tab.icon" style="width: 16px; height: 16px" />
+              <Icon v-else :icon="tab.icon" style="font-size: 16px" />
               <span>{{ tab.label }}</span>
             </span>
           </template>
@@ -26,7 +27,13 @@
                 :style="item.style"
                 @click="item.onClick"
               >
-                <Icon :icon="item.icon" :style="{ fontSize: '22px' }" />
+                <el-image
+                  v-if="isImgIcon(item.icon)"
+                  :src="item.icon"
+                  style="width: 22px; height: 22px"
+                  fit="scale-down"
+                />
+                <Icon v-else :icon="item.icon" :style="{ fontSize: '22px' }" />
                 <span>{{ item.label }}</span>
               </div>
 
@@ -36,7 +43,13 @@
                 class="grid girdenable"
                 @click="item.onClick"
               >
-                <Icon :icon="item.icon" :style="{ fontSize: '22px' }" />
+                <el-image
+                  v-if="isImgIcon(item.icon)"
+                  :src="item.icon"
+                  style="width: 22px; height: 22px"
+                  fit="scale-down"
+                />
+                <Icon v-else :icon="item.icon" :style="{ fontSize: '22px' }" />
                 <el-dropdown @command="item.onCommand">
                   <span class="lr">
                     {{ item.label }}
@@ -659,7 +672,7 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
     return {
       type: 'button',
       label: item.label,
-      icon: item.icon ? loadIconify(item.icon) : undefined,
+      icon: item.icon ? resolvePluginIcon(plugin, item.icon) : undefined,
 
       class: item.class,
       style: item.style,
@@ -709,15 +722,20 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
                   disabled: menuItem.disabled,
                   divided: menuItem.divided
                 },
-                () => [
-                  menuItem.icon
-                    ? h(Icon, {
-                        icon: loadIconify(menuItem.icon),
-                        style: 'margin-right: 5px; font-size: 20px'
-                      })
-                    : null,
-                  menuItem.label
-                ]
+                () => {
+                  const resolved = menuItem.icon
+                    ? resolvePluginIcon(plugin, menuItem.icon)
+                    : undefined
+                  const iconVNode = resolved
+                    ? isImgIcon(resolved)
+                      ? h('img', {
+                          src: resolved,
+                          style: 'margin-right: 5px; width: 20px; height: 20px; object-fit: contain'
+                        })
+                      : h(Icon, { icon: resolved, style: 'margin-right: 5px; font-size: 20px' })
+                    : null
+                  return [iconVNode, menuItem.label]
+                }
               )
             )
           )
@@ -727,7 +745,7 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
     return {
       type: 'dropdown',
       label: item.label,
-      icon: item.icon ? loadIconify(item.icon) : undefined,
+      icon: item.icon ? resolvePluginIcon(plugin, item.icon) : undefined,
 
       pluginId: plugin.manifest.id,
       handlerName: item.onCommand,
@@ -752,6 +770,36 @@ function loadIconify(iconName: string): any {
   // 或者返回字符串让 Icon 组件自行处理
   return iconName
 }
+// 解析插件图标：相对路径转为本地资源 URL，其它保持原样
+function resolvePluginIcon(plugin: EcuBusPlugin, icon?: string): any {
+  if (!icon) return undefined
+  const reIsAbsolute = /[\w+\-+]+:\/\//
+  if (reIsAbsolute.test(icon) || icon.startsWith('data:')) {
+    return icon
+  }
+  const looksLikePath = icon.includes('/') || icon.includes('\\') || /\.[a-zA-Z0-9]+$/.test(icon)
+  if (looksLikePath) {
+    const installed = pluginStore.getPlugin(plugin.manifest.id)
+    if (installed?.path) {
+      const fullPath = installed.path + '\\' + icon
+      const normalized = fullPath.replace(/\\/g, '/')
+      return 'local-resource:///' + normalized
+    }
+  }
+  return icon
+}
+function isImgIcon(icon: any): boolean {
+  return (
+    typeof icon === 'string' &&
+    (icon.startsWith('local-resource:///') ||
+      icon.startsWith('http://') ||
+      icon.startsWith('https://') ||
+      icon.startsWith('data:') ||
+      icon.includes('/') ||
+      icon.includes('\\') ||
+      /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(icon))
+  )
+}
 
 // 合并插件的 tabs 和 items（直接从 plugin store 获取）
 function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
@@ -767,7 +815,7 @@ function mergePluginTabs(baseTabs: TabConfig[]): TabConfig[] {
         const tabConfig: TabConfig = {
           name: tab.name,
           label: tab.label,
-          icon: tab.icon ? loadIconify(tab.icon) : userIcon,
+          icon: tab.icon ? resolvePluginIcon(plugin, tab.icon) : userIcon,
           items: []
         }
 

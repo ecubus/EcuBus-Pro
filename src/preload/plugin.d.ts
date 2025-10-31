@@ -68,6 +68,8 @@ export interface PluginManifest {
   mainEntry?: string // 主入口
   icon: string
   readme: string
+  // 可选：需要被额外打包进 zip 的文件或目录（相对插件根目录或绝对路径）
+  files?: string[]
   tabs?: PluginTabConfig[]
   extensions?: PluginTabExtension[]
 }

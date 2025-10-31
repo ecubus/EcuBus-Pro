@@ -254,11 +254,11 @@ import {
   ElImage
 } from 'element-plus'
 import { More, Upload, FolderOpened, DocumentAdd } from '@element-plus/icons-vue'
-import { Marked } from 'marked'
+import { Marked, MarkedExtension, Token, Tokens } from 'marked'
 import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
 import type { PluginManifest, RemotePluginInfo } from 'src/preload/plugin'
-
+import { cloneDeep } from 'lodash'
 interface PluginWithReadme extends RemotePluginInfo {
   readmeContent?: string
   manifestContent?: PluginManifest
@@ -469,21 +469,39 @@ const renderedReadme = computed(() => {
 
 // Handle plugin selection and fetch README
 async function handlePluginSelect(plugin: PluginWithReadme) {
-  selectedPlugin.value = plugin
+  selectedPlugin.value = cloneDeep(plugin)
 
   // Fetch README content if not already loaded
   if (plugin.readme && !plugin.readmeContent) {
     try {
       const response = await window.electron.ipcRenderer.invoke('ipc-axios-get', plugin.readme)
-      plugin.readmeContent = response
+      selectedPlugin.value.readmeContent = response
     } catch (e) {
       console.error('Failed to load README:', e)
+    }
+  }
+  // For locally installed plugins (including loaded from custom path), try to read README from disk
+  if (!plugin.readmeContent) {
+    const installed = pluginStore.getPlugin(plugin.id)
+
+    if (installed && installed.manifest?.readme) {
+      try {
+        // Set base path for resolving relative assets in README
+        window.readmePath = installed.path
+        // Build absolute path if manifest.readme is relative
+        const readmePath = window.path.join(installed.path, installed.manifest.readme)
+
+        const content = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', readmePath)
+        selectedPlugin.value.readmeContent = content
+      } catch (e) {
+        console.error('Failed to load local README:', e)
+      }
     }
   }
   if (plugin.manifestUrl && !plugin.manifestContent) {
     try {
       const response = await window.electron.ipcRenderer.invoke('ipc-axios-get', plugin.manifestUrl)
-      plugin.manifestContent = response
+      selectedPlugin.value.manifestContent = response
     } catch (e) {
       console.error('Failed to load manifest:', e)
     }
@@ -738,8 +756,53 @@ function handleReadmeClick(e: MouseEvent) {
   }
 }
 
+// Rewrite relative links/images in README to local-resource URLs based on the selected plugin path
+function addLocalBaseUrl() {
+  const reIsAbsolute = /[\w+\-+]+:\/\//
+  return {
+    walkTokens: (token: Token) => {
+      // Handle Markdown links and images
+      if (['link', 'image'].includes((token as any).type)) {
+        const tempToken = token as Tokens.Image | Tokens.Link
+        if (reIsAbsolute.test(tempToken.href)) {
+          return
+        }
+        if (!window.readmePath) return
+        const fullPath = window.readmePath + '\\' + tempToken.href
+        const normalizedPath = fullPath.replace(/\\/g, '/')
+        tempToken.href = 'local-resource:///' + normalizedPath
+        return
+      }
+      // Handle raw HTML <img src="..."> inside markdown
+      if ((token as any).type === 'html' && typeof (token as any).text === 'string') {
+        if (!window.readmePath) return
+        const html = (token as any).text as string
+        const replaced = html.replace(
+          /<img\s+([^>]*?)src=("|')([^"']+)(\2)([^>]*)>/gi,
+          (_m, pre, q, src, _q2, post) => {
+            if (
+              reIsAbsolute.test(src) ||
+              /^data:/i.test(src) ||
+              src.startsWith('local-resource:///')
+            ) {
+              return `<img ${pre}src=${q}${src}${q}${post}>`
+            }
+            const fullPath = (window as any).readmePath + '\\' + src
+            const normalizedPath = fullPath.replace(/\\/g, '/')
+            const newSrc = 'local-resource:///' + normalizedPath
+            return `<img ${pre}src=${q}${newSrc}${q}${post}>`
+          }
+        )
+        ;(token as any).text = replaced
+      }
+    }
+  } as MarkedExtension
+}
+
 onMounted(async () => {
   marked = new Marked()
+  // Ensure relative links and images in README resolve correctly for local plugins
+  marked.use(addLocalBaseUrl())
   await initPluginsDir()
   updateTemporaryPlugins()
   fetchPlugins()

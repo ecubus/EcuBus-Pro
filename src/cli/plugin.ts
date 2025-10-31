@@ -41,6 +41,39 @@ async function createPluginZip(pluginDir: string, manifest: PluginManifest): Pro
     throw new Error('dist folder not found')
   }
 
+  // Add extra files or folders from manifest.files
+  if (Array.isArray((manifest as any).files) && (manifest as any).files.length > 0) {
+    for (const rawEntry of (manifest as any).files as string[]) {
+      if (!rawEntry || typeof rawEntry !== 'string') continue
+
+      // Resolve to absolute path; support relative to pluginDir
+      const entryPath = path.isAbsolute(rawEntry) ? rawEntry : path.join(pluginDir, rawEntry)
+
+      if (!fs.existsSync(entryPath)) {
+        sysLog.warn(`Extra file not found, skip: ${entryPath}`)
+        continue
+      }
+
+      const stat = fs.statSync(entryPath)
+
+      // Compute target path inside zip: preserve path relative to pluginDir
+      const relativeToRoot = path.relative(pluginDir, entryPath)
+      const destPathInZip = relativeToRoot.replace(/\\/g, '/')
+
+      if (stat.isDirectory()) {
+        zip.addLocalFolder(entryPath, destPathInZip)
+      } else if (stat.isFile()) {
+        // Ensure folder structure by specifying a target path
+        zip.addLocalFile(
+          entryPath,
+          path.dirname(destPathInZip) === '.' ? '' : path.dirname(destPathInZip)
+        )
+      } else {
+        sysLog.warn(`Unsupported extra path type, skip: ${entryPath}`)
+      }
+    }
+  }
+
   // Create temp directory
   const tempDir = path.join(os.tmpdir(), 'ecubus-plugin-upload')
   if (!fs.existsSync(tempDir)) {

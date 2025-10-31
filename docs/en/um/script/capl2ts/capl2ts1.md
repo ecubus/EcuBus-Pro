@@ -1,17 +1,17 @@
-# 监听信号的变化，输出时间间隔
+# Monitor signal changes and print time intervals
 
 > [!INFO]
-> CAPL脚本由三少提供
+> CAPL script provided by Sanshao
 
 ## CAPL
 
 ```capl
 variables
 {
-  long lastValue;         // 上一次信号值
-  long lastTime;          // 上一次跳变时间
+  long lastValue;         // previous signal value
+  long lastTime;          // previous transition time
   long jumpCount = 0;
-  long tm[9];// 
+  long tm[9];// time array
 }
 on start
 {
@@ -21,7 +21,7 @@ on start
   jumpCount = 0;
 }
 
-// 信号跳变事件
+// signal transition event
 on signal_update EngState
 {
    long nowtime;
@@ -38,14 +38,12 @@ on signal_update EngState
     lastTime = nowtime;
     lastValue = $EngState;
     
-    write("跳变时间，%d",interval);
+    write("Transition interval: %d",interval);
   }
 }
 ```
 
-
-
-## EcuBus-Pro脚本
+## EcuBus-Pro Script
 
 ```typescript
 let lastValue: number|undefined;
@@ -57,14 +55,14 @@ Util.Init(() => {
     lastTime= new Date().getTime();
 })
 
-// 信号跳变事件
+// signal transition event
 Uitl.OnSignal('Model3CAN.VCLEFT_liftgateLatchRequest',({rawValue,physValue}) => {
     if(rawValue != lastValue){
         const nowTime = new Date().getTime();
         const interval = nowTime - lastTime;
         lastTime = nowTime;
         lastValue = rawValue;
-        console.log(`跳变时间，${interval}ms`);
+        console.log(`Transition interval: ${interval}ms`);
     }
 })
 ```

@@ -7,7 +7,6 @@ const pkg = require('../package.json')
 export const en = defineConfig({
   lang: 'en-US',
   description: 'A powerful automotive ECU development tool',
-
   themeConfig: {
     nav: nav(),
     sidebar: sidebar(),
@@ -79,6 +78,9 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: 'CAN', link: '/docs/um/can/can.md' },
         { text: 'LIN', link: '/docs/um/lin/lin.md' },
+        { text: 'PWM', link: '/docs/um/pwm/pwm.md' },
+        { text: 'Network', items: [{ text: 'Logger', link: '/docs/um/network/logger.md' }] },
+        { text: 'CLI', link: '/docs/um/cli/cli.md' },
         {
           text: 'Ethernet',
           items: [
@@ -93,10 +95,6 @@ function sidebar(): DefaultTheme.SidebarItem[] {
               ]
             }
           ]
-        },
-        {
-          text: 'PWM',
-          link: '/docs/um/pwm/pwm.md'
         },
         {
           text: 'Diagnostic',
@@ -122,7 +120,6 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: 'Trace', link: '/docs/um/trace/trace.md' },
         { text: 'Graph', link: '/docs/um/graph/graph.md' },
         { text: 'Variable', link: '/docs/um/var/var.md' },
-        { text: 'CLI', link: '/docs/um/cli/cli.md' },
         {
           text: 'Script',
           link: '/docs/um/script/script.md',

@@ -2,7 +2,6 @@
 
 通过配置日志记录器，可以把相关的所有Trace数据到其他地方，解决UI界面Trace窗口数据存储有限的问题。
 
-
 ## 如何添加日志记录器
 
 通过`Hardware->Network`点开网络配置界面，在`Loggers`中添加日志记录器。
@@ -30,9 +29,6 @@
   * ETH, 记录Ethernet报文
   * UDS, 记录PWM报文
 
-
 ## 写入文件的Demo
 
 ![looger](./../../../media/um/network/logger.gif)
-
-

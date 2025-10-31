@@ -9,7 +9,7 @@ EcuBus-Pro 给出的答案是：使用 `Typescript` 编写脚本。EcuBus-Pro �
 
 > 因为EcuBus-Pro脚本使用TypeScript作为开发语言，所以会根据TypeScript类型进行自动提示
 
-![信号的自动提示](./../../../media/um/script/tip1.gif)
+![信号的自动提示](./../../../../media/um/script/tip1.gif)
 
 ## CAPL vs EcuBus-Pro 脚本语法对比表
 
@@ -26,11 +26,9 @@ EcuBus-Pro 给出的答案是：使用 `Typescript` 编写脚本。EcuBus-Pro �
 | **事件回调**     | `on key 'a' { ... }`                          | `Util.OnKey('a', () => { ... });`                         |
 | **变量监听**     | `on envVar EnvChecksumError { ... }`          | `Util.OnVar('EnvChecksumError', () => { ... });`          |
 
-
-
 ## 示例
 
 > 示例持续完善中，欢迎大家一起贡献示例
+
 1. [监听信号的变化，输出时间间隔](./capl2ts1.md)
 2. [监听变量的变化，发生Lin信号,手动设置错误的CheckSum](./capl2ts2.md)
-

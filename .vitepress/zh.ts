@@ -80,18 +80,46 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
         { text: 'PWM', link: '/zh/docs/um/pwm/pwm' },
         { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
-        { text: 'CLI', link: '/zh/docs/um/cli/cli.md' },
-        { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] },
-        { text: 'SOME/IP', link: '/zh/docs/um/someip/index' },
+        { text: 'CLI', link: '/zh/docs/um/cli/cli' },
+        {
+          text: 'Ethernet',
+          items: [
+            {
+              text: 'DoIP',
+              link: '/zh/docs/um/doip/doip',
+              items: [
+                {
+                  text: 'VIN Request Behavior',
+                  link: '/zh/docs/um/doip/vin'
+                }
+              ]
+            }
+          ]
+        },
         {
           text: '诊断',
           items: [
-            { text: '内建脚本', link: '/zh/docs/um/uds/buildInScript/buildInScript' },
-            { text: 'Tester Present', link: '/zh/docs/um/uds/testerPresent/testerPresent' },
-            { text: 'UDS转C代码', link: '/zh/docs/um/uds/udscode/udscode' },
-            { text: 'UDS Bootloader实现指南', link: '/zh/docs/um/uds/example/example' }
+            {
+              text: '内建脚本',
+              link: '/zh/docs/um/uds/buildInScript/buildInScript'
+            },
+            {
+              text: 'Tester Present',
+              link: '/zh/docs/um/uds/testerPresent/testerPresent'
+            },
+            {
+              text: 'UDS转C代码',
+              link: '/zh/docs/um/uds/udscode/udscode'
+            },
+            {
+              text: 'UDS Bootloader实现指南',
+              link: '/zh/docs/um/uds/example/example'
+            }
           ]
         },
+        { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] },
+        { text: 'SOME/IP', link: '/zh/docs/um/someip/index' },
+
         { text: 'OSEK OS追踪', link: '/zh/docs/um/osTrace/index' },
         {
           text: '数据库',
@@ -101,6 +129,40 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           ]
         }
       ]
+    },
+    { text: 'Trace', link: '/zh/docs/um/trace/trace' },
+    { text: 'Graph', link: '/zh/docs/um/graph/graph' },
+    { text: 'Variable', link: '/zh/docs/um/var/var' },
+    {
+      text: '脚本',
+      link: '/zh/docs/um/script/script',
+      items: [
+        { text: 'Use External Package', link: 'zh/docs/um/script/SerialPort/scriptSerialPort' }
+      ]
+    },
+    {
+      text: '测试',
+      link: '/zh/docs/um/test/test'
+    },
+    {
+      text: '数据库',
+      link: '/zh/docs/um/database/database',
+      items: [
+        { text: 'LIN LDF', link: '/zh/docs/um/database/ldf/ldf' },
+        { text: 'CAN DBC', link: '/zh/docs/um/database/dbc/dbc' }
+      ]
+    },
+    {
+      text: '面板',
+      link: '/zh/docs/um/panel/index'
+    },
+    {
+      text: '设置',
+      items: [{ text: '通用', link: '/zh/docs/um/setting/general' }]
+    },
+    {
+      text: '常见问题',
+      link: '/zh/docs/faq/index'
     },
     {
       text: '示例',

@@ -3,7 +3,9 @@
 > 感谢Alex提供示例
 
 ## CAPL分析
+
 给到的CAPL示例如下：
+
 ```ts
 on envVar EnvChecksumError  
 {
@@ -31,6 +33,7 @@ on envVar EnvChecksumError
    - `output(frmAC_1)` 发送带有错误CheckSum的Lin消息
 
 > [!NOTE]
+
 > - **技术要点**：Lin总线的CheckSum机制是保证数据完整性的重要手段。通过故意设置错误的CheckSum，可以测试接收节点的错误处理能力。
 > - **测试设备**：这里我们选择[LinCable](https://app.whyengineer.com/zh/docs/um/hardware/lincable.html)作为测试设备，因为它可以灵活的注入各种LIN错误。
 
@@ -42,9 +45,10 @@ on envVar EnvChecksumError
 
 > **操作路径**：Others → Variable → Add Variable
 
-![创建变量](./../../../media/um/script/var1.png)
+![创建变量](./../../../../media/um/script/var1.png)
 
 **变量配置要点**：
+
 - **变量名称**：`EnvChecksumError`（需与CAPL脚本中的变量名保持一致）
 - **变量类型**：整型（Integer）
 - **初始值**：0（表示正常状态）
@@ -54,14 +58,14 @@ on envVar EnvChecksumError
 
 创建完成后，可以在变量列表中查看和管理已创建的变量：
 
-![查看变量](./../../../media/um/script/var2.png)
+![查看变量](./../../../../media/um/script/var2.png)
 
 在变量列表中，您可以：
+
 - 查看变量的当前值
 - 修改变量配置
 - 删除不需要的变量
 - 导出/导入变量配置
-
 
 ## 用户界面控制面板配置
 
@@ -71,9 +75,10 @@ on envVar EnvChecksumError
 
 > **操作路径**：Home → Panel → Add Panel
 
-![创建面板](./../../../media/um/script/var3.png)
+![创建面板](./../../../../media/um/script/var3.png)
 
 **面板设计建议**：
+
 - 使用**开关按钮**或**切换按钮**来控制0/1状态
 - 按钮文字设置为"发送CheckSum错误帧"等描述性文字
 - 合理布局，确保操作直观易懂
@@ -82,9 +87,10 @@ on envVar EnvChecksumError
 
 创建面板控件后，需要将其与环境变量进行绑定，建立控件与变量之间的双向数据关联。
 
-![绑定变量](./../../../media/um/script/var4.png)
+![绑定变量](./../../../../media/um/script/var4.png)
 
 **绑定配置**：
+
 - **目标变量**：选择之前创建的 `EnvChecksumError` 变量
 - **控件类型**：布尔型开关（Boolean Switch）
 - **映射关系**：OFF=0（正常），ON=1（触发错误）
@@ -93,9 +99,10 @@ on envVar EnvChecksumError
 
 配置完成后，可以预览最终的用户界面效果：
 
-![查看面板](./../../../media/um/script/var5.png)
+![查看面板](./../../../../media/um/script/var5.png)
 
 **界面特点**：
+
 - 实时显示当前变量状态
 - 支持一键切换操作
 - 直观的视觉反馈
@@ -128,16 +135,19 @@ Util.OnVar("EnvChecksumError", ({ value }) => {
 ### 脚本详细解析
 
 **1. 变量监听机制**
+
 ```typescript
 Util.OnVar("EnvChecksumError", ({ value }) => {
     // 回调函数，当变量值改变时触发
 });
 ```
+
 - `Util.OnVar()` 是EcuBus-Pro提供的变量监听API
 - 支持解构赋值语法，直接获取 `value` 参数
 - 回调函数在变量值发生变化时自动触发
 
 **2. Lin消息构造**
+
 ```typescript
 const msg: LinMsg = {
     frameId: 0x3c,              // Lin帧ID（十六进制）
@@ -170,4 +180,4 @@ const msg: LinMsg = {
 
 完成所有配置后，就可以运行测试了。通过界面上的开关按钮控制变量值，观察Lin消息的发送情况。
 
-![运行](./../../../media/um/script/var1.gif)
+![运行](./../../../../media/um/script/var1.gif)

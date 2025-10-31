@@ -51,7 +51,7 @@ ecb_cli pnpm install package_name
 
 #### 示例（pnpm）
 
-![alt text](./../script/pnpm.gif)
+![alt text](./../script/SerialPort/pnpm.gif)
 
 ### Test 命令
 

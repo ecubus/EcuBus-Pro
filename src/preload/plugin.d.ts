@@ -1,0 +1,97 @@
+/**
+ * Tab 插件系统类型定义
+ */
+
+// 现有的 Tab 位置类型
+export type TabPos = 'home' | 'hardware' | 'diag' | 'soa' | 'test' | 'other'
+
+// 扩展：允许插件添加自定义 Tab
+export type TabName = TabPos | string
+
+// 插件中的按钮配置
+export interface PluginButtonConfig {
+  type: 'button'
+  id: string // 唯一标识
+  label: string
+  icon?: string // iconify 图标名称
+
+  class?: Record<string, boolean>
+  style?: string
+  // 点击事件处理器名称，会映射到插件注册的处理函数
+  onClick?: string
+  entry?: string
+}
+
+// 插件中的下拉菜单配置
+export interface PluginDropdownConfig {
+  type: 'dropdown'
+  id: string // 唯一标识
+  label: string
+  icon?: string
+
+  // 下拉菜单项
+  items: Array<{
+    command: string
+    label: string
+    icon?: string
+    disabled?: boolean
+    divided?: boolean
+  }>
+  // 命令处理器名称
+  onCommand?: string
+  entry?: string
+}
+
+export type PluginItemConfig = PluginButtonConfig | PluginDropdownConfig
+
+// 插件 Tab 配置
+export interface PluginTabConfig {
+  name: string // tab 名称（唯一标识）
+  label: string // 显示标签
+  icon?: string // iconify 图标名称
+  items: PluginItemConfig[] // Tab 中的项目列表
+}
+
+// 扩展现有 Tab 的配置
+export interface PluginTabExtension {
+  targetTab: string // 目标 tab 名称（如 'home', 'hardware' 等）
+  items: PluginItemConfig[]
+}
+
+// 插件清单配置
+export interface PluginManifest {
+  id: string // 插件唯一标识
+  name: string // 插件名称
+  version: string // 插件版本
+  description?: string // 插件描述
+  author: string // 作者
+  mainEntry?: string // 主入口
+  icon: string
+  readme: string
+  // 可选：需要被额外打包进 zip 的文件或目录（相对插件根目录或绝对路径）
+  files?: string[]
+  tabs?: PluginTabConfig[]
+  extensions?: PluginTabExtension[]
+}
+
+// 完整的插件定义
+export interface EcuBusPlugin {
+  manifest: PluginManifest
+  path: string
+  mainStatus?: string
+}
+
+// 远程插件信息（从 API 获取）
+export interface RemotePluginInfo {
+  id: string // 插件 ID（对应 parent 字段）
+  name?: string // 插件名称
+  description?: string // 插件描述
+  author?: string // 作者
+  version: string // 版本号（对应 tag 字段）
+  icon?: string // 图标 URL
+  readme?: string // README 文件 URL
+  zipUrl?: string // 插件 ZIP 包 URL
+  manifestUrl?: string // manifest.json URL
+  createdTime: string // 创建时间
+  user: string // 上传用户
+}

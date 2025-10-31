@@ -50,6 +50,12 @@ function registerLocalResourceProtocol() {
       const fileUrl = /^[a-zA-Z]:\//.test(normalizedPath)
         ? `file:///${normalizedPath}`
         : `file://${normalizedPath}`
+
+      if (fileUrl.endsWith('.map')) {
+        //404
+        return new Response(null, { status: 404 })
+      }
+
       return net.fetch(fileUrl)
     } catch (error) {
       log.error('ERROR: registerLocalResourceProtocol:', error)

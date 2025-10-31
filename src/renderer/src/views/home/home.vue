@@ -248,6 +248,17 @@
           </div>
         </template>
       </el-tab-pane>
+      <el-tab-pane name="pluginMarketplace">
+        <template #label>
+          <div class="menu-item">
+            <Icon :icon="pluginIcon" />
+            <span>Plugin</span>
+          </div>
+        </template>
+        <div class="marketplaceMenu">
+          <PluginMarketplace :height="height" />
+        </div>
+      </el-tab-pane>
       <el-tab-pane name="user">
         <template #label>
           <div class="menu-item">
@@ -285,6 +296,15 @@
                   }"
                 />
               </el-tab-pane>
+              <!-- <el-tab-pane label="plugin">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="pluginIcon" />
+                    <span>Plugin</span>
+                  </span>
+                </template>
+                <plugin-manager :height="height - 170" />
+              </el-tab-pane> -->
             </el-tabs>
           </el-tab-pane>
 
@@ -329,6 +349,7 @@
           </el-tab-pane>
         </el-tabs>
       </el-tab-pane>
+
       <!-- <el-tab-pane name="setting">
                 <template #label>
                     <div class="menu-item">
@@ -406,7 +427,7 @@ import policyIcon from '@iconify/icons-material-symbols/assignment'
 import policy from './policy.vue'
 import { useProjectList, useProjectStore } from '@r/stores/project'
 import { version, ecubusPro } from './../../../../../package.json'
-import { version as elVer } from 'element-plus'
+import { version as elVer, ElMessage } from 'element-plus'
 import log from 'electron-log/renderer'
 import newVue from './new.vue'
 import { useRouter } from 'vue-router'
@@ -422,7 +443,9 @@ import general from './general.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
-
+import pluginIcon from '@iconify/icons-mdi/puzzle'
+import PluginMarketplace from './PluginMarketplace.vue'
+import { usePluginStore } from '@r/stores/plugin'
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
 const hasUpdate = ref(false)
@@ -443,7 +466,10 @@ const recentHeight = computed(() => {
 const infoHeight = computed(() => {
   return height.value - 235 - 80 - 220 + 'px' // Reduced by 120px to make room for ads
 })
-
+const pluginStore = usePluginStore()
+pluginStore.loadAllPlugins().catch((e) => {
+  log.error(e)
+})
 const hasNotify = computed(() => {
   return hasUpdate.value
 })
@@ -644,6 +670,11 @@ onMounted(() => {
 }
 
 .newMenu {
+  width: v-bind(width-120 + 'px');
+  height: v-bind(height-35 + 'px');
+}
+
+.marketplaceMenu {
   width: v-bind(width-120 + 'px');
   height: v-bind(height-35 + 'px');
 }

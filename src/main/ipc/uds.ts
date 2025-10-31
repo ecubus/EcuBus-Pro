@@ -77,6 +77,7 @@ import {
 } from '../vsomeip'
 
 import TraceItem from '../ostrace/item'
+import { startPlugins, stopPlugins } from './plugin'
 
 const libPath = path.dirname(dllLib)
 
@@ -553,19 +554,8 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     ortiMap.set(key, traceItem)
   }
 
-  //doip connect list
-  // const list=doipConnectList.map((e)=>{
-  //     return e.connect()
-  // })
-  // Promise.allSettled(list).then((e) => {
-  //     for (const [index, r] of e.entries()) {
-  //         if (r.status == 'rejected') {
-
-  //             sysLog.warn(`Tester(${doipConnectList[index].tester.name})-Addr(${doipConnectList[index].addr.ethAddr?.name}) ${r.reason.toString()}, send diag will retry`)
-
-  //         }
-  //     }
-  // })
+  //plugins
+  await startPlugins(data)
 
   monitor = monitorEventLoopDelay({ resolution: 100 })
   monitor.enable()
@@ -600,7 +590,6 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       })
       lastTs = now
     }, 200)
-    logQ.startTimer()
   }
 
   global.startTs = getTsUs()
@@ -703,6 +692,7 @@ interface timerType {
 const timerMap = new Map<string, timerType>()
 
 export function globalStop(emit = false) {
+  stopPlugins()
   //clear all timer
   logQ.stopTimer()
   clearTimeout(timer)

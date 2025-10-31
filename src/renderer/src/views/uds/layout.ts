@@ -27,6 +27,8 @@ import dataIcon from '@iconify/icons-mdi/data-usage'
 import panelIcon1 from '@iconify/icons-mdi/solar-panel'
 import soaIcon from '@iconify/icons-material-symbols/linked-services'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
+import pluginIcon from '@iconify/icons-mdi/puzzle'
+import { usePluginStore } from '@r/stores/plugin'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -342,6 +344,17 @@ export const layoutMap: Record<string, LayoutItem> = {
     key: 'OSTrace',
     component: defineAsyncComponent(() => import('../ostrace/table.vue')),
     icon: osTraceIcon
+  },
+  plugin: {
+    i: 'Plugin',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'Plugin',
+    key: 'Plugin',
+    component: defineAsyncComponent(() => import('../../plugin/plugin.vue')),
+    icon: pluginIcon
   }
   // script: {
   //   i: 'Script',
@@ -436,6 +449,20 @@ export class Layout {
       }
     }
     for (const l of Object.values(this.data.project.wins)) {
+      if (l.options.params && l.options.params.isPlugin) {
+        //check plugin exist and enable
+        const pluginStore = usePluginStore()
+        const plugin = pluginStore.getPlugin(l.options.params.pluginId)
+        if (!plugin) {
+          this.removeWin(l.id)
+          continue
+        }
+        if (pluginStore.pluginsDisabled[plugin.manifest.id]) {
+          this.removeWin(l.id)
+          continue
+        }
+        //
+      }
       await this.addWin(l.title, l.id, { name: l.options.name, params: l.options.params }, false)
     }
     for (const l of Object.values(this.data.project.wins)) {

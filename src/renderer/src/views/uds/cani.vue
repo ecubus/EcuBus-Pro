@@ -782,7 +782,7 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
       id: frameInfo.id.toString(16), // 转换为16进制字符串
       channel: channel,
       type: type,
-      dlc: frameInfo.length,
+      dlc: getDlcByLen(frameInfo.length, frameInfo.canfd),
       data: new Array(frameInfo.length).fill('00') // 初始化数据为全0
     })
   }

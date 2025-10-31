@@ -651,7 +651,17 @@ const OsTraceDropdown = {
     return () =>
       h(ElDropdownMenu, { size: 'small' }, () => [
         ...Object.entries(dataBase.database.orti).map(([key, item]) =>
-          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+          h('div', {}, [
+            h(ElDropdownItem, { key, command: key }, () => (item as any).name + ' Statistics'),
+            h(
+              ElDropdownItem,
+              {
+                key,
+                command: `${key}_TimeLine`
+              },
+              () => (item as any).name + ' Timeline'
+            )
+          ])
         ),
         ...(Object.keys(dataBase.database.orti).length === 0
           ? [
@@ -1340,12 +1350,23 @@ function openApi() {
 }
 
 function openOsTrace(index: string) {
-  layoutMaster.addWin('osTrace', `${index}_trace`, {
-    name: dataBase.database.orti[index].name,
-    params: {
-      'edit-index': `${index}_trace`
-    }
-  })
+  if (index.endsWith('_TimeLine')) {
+    index = index.replace('_TimeLine', '')
+    console.log(index)
+    layoutMaster.addWin('osTime', `${index}_time`, {
+      name: dataBase.database.orti[index].name,
+      params: {
+        'edit-index': `${index}_time`
+      }
+    })
+  } else {
+    layoutMaster.addWin('osTrace', `${index}_trace`, {
+      name: dataBase.database.orti[index].name,
+      params: {
+        'edit-index': `${index}_trace`
+      }
+    })
+  }
 }
 
 onMounted(async () => {

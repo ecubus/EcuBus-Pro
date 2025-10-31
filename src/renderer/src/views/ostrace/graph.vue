@@ -182,7 +182,7 @@ const props = defineProps<{
 }>()
 
 const dataStore = useDataStore()
-const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_trace', '')])
+const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_time', '')])
 const height = computed(() => props.height - 19)
 
 const charid = computed(() => `${props.editIndex}_graph`)

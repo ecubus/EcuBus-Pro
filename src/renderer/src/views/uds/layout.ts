@@ -340,9 +340,20 @@ export const layoutMap: Record<string, LayoutItem> = {
     y: 0,
     w: 700,
     h: 400,
-    label: 'OSTrace',
+    label: 'OS Statistics',
     key: 'OSTrace',
     component: defineAsyncComponent(() => import('../ostrace/table.vue')),
+    icon: osTraceIcon
+  },
+  osTime: {
+    i: 'OS TimeLine',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'OSTime',
+    key: 'OSTime',
+    component: defineAsyncComponent(() => import('../ostrace/graph.vue')),
     icon: osTraceIcon
   },
   plugin: {

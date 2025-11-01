@@ -43,9 +43,6 @@ void LoadDll(const char* path) {
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
 extern Napi::String JSxlGetErrorString(const Napi::CallbackInfo &info);
-extern Napi::Value StartPeriodSend(const Napi::CallbackInfo &info);
-extern void StopPeriodSend(const Napi::CallbackInfo &info);
-extern void ChangeData(const Napi::CallbackInfo &info);
 
 
 do {
@@ -64,27 +61,6 @@ do {
 
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("JSxlGetErrorString", JSxlGetErrorString);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
-
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StartPeriodSend", StartPeriodSend);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
-
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StopPeriodSend", StopPeriodSend);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-	pd
-  }));
-} while (0);
-
-do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("ChangeData", ChangeData);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
 	pd
   }));

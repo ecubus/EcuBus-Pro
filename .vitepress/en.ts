@@ -96,6 +96,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
             }
           ]
         },
+        { text: 'SOME/IP', link: '/docs/um/someip/index.md' },
+        { text: 'OSEK OS Tracking', link: '/docs/um/osTrace/index.md' },
         {
           text: 'Diagnostic',
           items: [
@@ -124,7 +126,11 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           text: 'Script',
           link: '/docs/um/script/script.md',
           items: [
-            { text: 'Use External Package', link: '/docs/um/script/SerialPort/scriptSerialPort.md' }
+            {
+              text: 'Use External Package',
+              link: '/docs/um/script/SerialPort/scriptSerialPort.md'
+            },
+            { text: 'CAPL->TS', link: '/docs/um/script/capl2ts/capl2ts.md' }
           ]
         },
         {
@@ -145,96 +151,103 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         {
           text: 'Setting',
-          items: [{ text: 'General', link: '/docs/um/setting/general' }]
+          items: [{ text: 'General', link: '/docs/um/setting/general.md' }]
         },
         {
           text: 'FAQ',
-          link: '/docs/faq/index'
+          link: '/docs/faq/index.md'
         }
       ]
     },
     {
       text: 'Example',
+      base: '/examples/',
       items: [
         {
           text: 'CAN',
           items: [
-            { text: 'CAN Basic', link: '/examples/can/readme' },
-            { text: 'NXP UDS Bootloader', link: '/examples/nxp_bootloader/readme' },
-            { text: 'CAN High-Precision Timer', link: '/examples/can_timer/readme' }
+            { text: 'CAN Basic', link: 'can/readme' },
+            { text: 'CAN High-Precision Timer', link: 'can_timer/readme.md' },
+            { text: 'NXP UDS Bootloader', link: 'nxp_bootloader/readme.md' }
           ],
           collapsed: true
         },
         {
           text: 'LIN',
           items: [
-            { text: 'LIN General', link: '/examples/lin/readme' },
-            { text: 'LIN TP', link: '/examples/lin_tp/readme' },
-            { text: 'LIN Conformance Test', link: '/examples/lin_conformance_test/readme' },
-            { text: 'LIN SAE J2602 Test', link: '/examples/lin_j2602_test/readme' },
-            { text: 'LIN UDS', link: '/examples/NSUC1612_LIN_OTA/readme' },
-            { text: 'LIN Auto Addressing', link: '/examples/lin_aa/readme' }
+            { text: 'LIN General', link: 'lin/readme.md' },
+            { text: 'LIN TP', link: 'lin_tp/readme.md' },
+            { text: 'LIN Conformance Test', link: 'lin_conformance_test/readme.md' },
+            { text: 'LIN SAE J2602 Test', link: 'lin_j2602_test/readme.md' },
+            { text: 'LIN OTA', link: 'NSUC1612_LIN_OTA/readme.md' },
+            { text: 'LIN Auto Addressing', link: 'lin_aa/readme.md' }
           ],
           collapsed: true
         },
         {
           text: 'DOIP',
           items: [
-            { text: 'DoIP Tester', link: '/examples/doip/readme' },
-            { text: 'DoIP Simulate Entity', link: '/examples/doip_sim_entity/readme' },
-            { text: 'DoIP Gateway', link: '/examples/doip_gateway/readme' }
+            { text: 'DoIP Tester', link: 'doip/readme.md' },
+            { text: 'DoIP Simulate Entity', link: 'doip_sim_entity/readme.md' },
+            { text: 'DoIP Gateway', link: 'doip_gateway/readme.md' }
           ],
           collapsed: true
         },
         {
           text: 'UDS',
           items: [
-            { text: 'UDS Hex/S19 File', link: '/examples/uds_hex_s19_file/readme' },
-            { text: 'UDS Binary File', link: '/examples/uds_bin_file/readme' },
-            { text: 'Secure Access dll', link: '/examples/secure_access_dll/readme' },
-            { text: 'UDS Code Generate', link: '/examples/uds_generate_code/readme' },
-            { text: 'UDS Authentication Service(0x29)', link: '/examples/uds_0x29/readme' },
-            { text: 'UDS Security Access(0x27)', link: '/examples/uds_0x27/readme' },
-            { text: 'UDS DoIP Large File', link: '/examples/uds_doip_large_file/readme' }
+            { text: 'UDS Hex/S19 File', link: 'uds_hex_s19_file/readme.md' },
+            { text: 'UDS Binary File', link: 'uds_bin_file/readme.md' },
+            { text: 'Secure Access dll', link: 'secure_access_dll/readme.md' },
+            { text: 'UDS Code Generate', link: 'uds_generate_code/readme.md' },
+            { text: 'UDS Authentication Service(0x29)', link: 'uds_0x29/readme.md' },
+            { text: 'UDS Security Access(0x27)', link: 'uds_0x27/readme.md' },
+            { text: 'UDS DoIP Large File', link: 'uds_doip_large_file/readme.md' }
           ],
           collapsed: true
         },
         {
           text: 'Test',
-          items: [{ text: 'Test Simple', link: '/examples/test_simple/readme' }],
+          items: [{ text: 'Test Simple', link: 'test_simple/readme.md' }],
           collapsed: true
         },
         {
           text: 'Panel',
-          link: '/examples/panel/readme'
+          link: 'panel/readme.md',
+          collapsed: true
         },
         {
           text: 'SOME/IP',
-          items: [{ text: 'Request/Response', link: '/examples/someip/readme' }],
+          items: [{ text: 'Request/Response', link: 'someip/readme.md' }],
           collapsed: true
         }
       ]
     },
     {
+      text: 'Development Docs',
+      collapsed: true,
+      items: [{ text: 'How to Development Docs', link: '/docs/dev/doc.md' }]
+    },
+    {
       text: 'Developer Manual',
       collapsed: true,
       items: [
-        { text: 'Arch', link: '/docs/dev/arch' },
+        { text: 'Arch', link: '/docs/dev/arch.md' },
         {
           text: 'Setup',
-          link: '/docs/dev/setup',
+          link: '/docs/dev/setup.md',
           items: [
             {
               text: 'Learning Resources',
-              link: '/docs/dev/jslearn'
+              link: '/docs/dev/jslearn.md'
             },
-            { text: 'Dev New Adapter', link: '/docs/dev/adapter' }
+            { text: 'Dev New Adapter', link: '/docs/dev/adapter.md' }
           ]
         },
-        { text: 'Comp Test', link: '/docs/dev/test' },
-        { text: 'Addon', link: '/docs/dev/addon' },
-        { text: 'Feature Request Process', link: '/docs/dev/feature' },
-        { text: 'Releases Note', link: '/docs/dev/releases_note' }
+        { text: 'Comp Test', link: '/docs/dev/test.md' },
+        { text: 'Addon', link: '/docs/dev/addon.md' },
+        { text: 'Feature Request Process', link: '/docs/dev/feature.md' },
+        { text: 'Releases Note', link: '/docs/dev/releases_note.md' }
       ]
     }
   ]

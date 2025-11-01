@@ -214,4 +214,3 @@ The script works in conjunction with the sequence defined in the ECB file, which
 3. JobFunction0 to prepare download
 4. JobFunction1 to transfer data
 5. Final verification and reset
-

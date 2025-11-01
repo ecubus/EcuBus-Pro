@@ -2,8 +2,6 @@
 
 This example demonstrates a simple program execution panel in EcuBus-Pro, including status indication and message display.
 
-
-
 ## Features Demonstrated
 
 1. **Program Execution Control**

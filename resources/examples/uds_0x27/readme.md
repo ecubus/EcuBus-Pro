@@ -7,8 +7,3 @@ This example demonstrates how to use the [buildInScript](https://app.whyengineer
 How to build the DLL?
 
 you can see the example [Secure Access DLL Example](https://app.whyengineer.com/examples/secure_access_dll/readme.html)
-
-
-
-
-

@@ -80,22 +80,24 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: 'LIN', link: '/zh/docs/um/lin/lin' },
         { text: 'PWM', link: '/zh/docs/um/pwm/pwm' },
         { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
-        { text: 'CLI', link: '/zh/docs/um/cli/cli' },
+        { text: '命令行', link: '/zh/docs/um/cli/cli' },
         {
-          text: 'Ethernet',
+          text: '以太网',
           items: [
             {
               text: 'DoIP',
               link: '/zh/docs/um/doip/doip',
               items: [
                 {
-                  text: 'VIN Request Behavior',
+                  text: 'VIN请求行为',
                   link: '/zh/docs/um/doip/vin'
                 }
               ]
             }
           ]
         },
+        { text: 'SOME/IP', link: '/zh/docs/um/someip/index' },
+        { text: 'OSEK OS Trace', link: '/zh/docs/um/osTrace/index' },
         {
           text: '诊断',
           items: [
@@ -104,7 +106,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
               link: '/zh/docs/um/uds/buildInScript/buildInScript'
             },
             {
-              text: 'Tester Present',
+              text: '会话保持',
               link: '/zh/docs/um/uds/testerPresent/testerPresent'
             },
             {
@@ -117,52 +119,42 @@ function sidebar(): DefaultTheme.SidebarItem[] {
             }
           ]
         },
-        { text: '脚本', items: [{ text: 'CAPL->TS', link: '/zh/docs/um/script/capl2ts' }] },
-        { text: 'SOME/IP', link: '/zh/docs/um/someip/index' },
-
-        { text: 'OSEK OS追踪', link: '/zh/docs/um/osTrace/index' },
+        { text: 'Trace', link: '/zh/docs/um/trace/trace' },
+        { text: '图表', link: '/zh/docs/um/graph/graph' },
+        { text: '变量', link: '/zh/docs/um/var/var' },
+        {
+          text: '脚本',
+          link: '/zh/docs/um/script/script',
+          items: [
+            { text: '使用外部包', link: '/zh/docs/um/script/SerialPort/scriptSerialPort' },
+            { text: 'CAPL转为TS', link: '/zh/docs/um/script/capl2ts/capl2ts' }
+          ]
+        },
+        {
+          text: '测试',
+          link: '/zh/docs/um/test/test'
+        },
         {
           text: '数据库',
+          link: '/zh/docs/um/database/database',
           items: [
-            { text: 'LIN LDF', link: 'zh/docs/um/ldf/ldf.md' },
-            { text: 'CAN DBC', link: 'zh/docs/um/dbc/dbc.md' }
+            { text: 'LIN LDF', link: '/zh/docs/um/database/ldf/ldf' },
+            { text: 'CAN DBC', link: '/zh/docs/um/database/dbc/dbc' }
           ]
+        },
+        {
+          text: '面板',
+          link: '/zh/docs/um/panel/index'
+        },
+        {
+          text: '设置',
+          items: [{ text: '通用', link: '/zh/docs/um/setting/general' }]
+        },
+        {
+          text: '常见问题',
+          link: '/zh/docs/faq/index'
         }
       ]
-    },
-    { text: 'Trace', link: '/zh/docs/um/trace/trace' },
-    { text: 'Graph', link: '/zh/docs/um/graph/graph' },
-    { text: 'Variable', link: '/zh/docs/um/var/var' },
-    {
-      text: '脚本',
-      link: '/zh/docs/um/script/script',
-      items: [
-        { text: 'Use External Package', link: 'zh/docs/um/script/SerialPort/scriptSerialPort' }
-      ]
-    },
-    {
-      text: '测试',
-      link: '/zh/docs/um/test/test'
-    },
-    {
-      text: '数据库',
-      link: '/zh/docs/um/database/database',
-      items: [
-        { text: 'LIN LDF', link: '/zh/docs/um/database/ldf/ldf' },
-        { text: 'CAN DBC', link: '/zh/docs/um/database/dbc/dbc' }
-      ]
-    },
-    {
-      text: '面板',
-      link: '/zh/docs/um/panel/index'
-    },
-    {
-      text: '设置',
-      items: [{ text: '通用', link: '/zh/docs/um/setting/general' }]
-    },
-    {
-      text: '常见问题',
-      link: '/zh/docs/faq/index'
     },
     {
       text: '示例',
@@ -170,33 +162,90 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       items: [
         {
           text: 'CAN',
-          items: [{ text: 'CAN高精度定时器', link: 'can_timer/readme.md' }],
-          collapsed: false
+          items: [
+            { text: 'CAN基础功能', link: 'can/readme' },
+            { text: 'CAN高精度定时器', link: 'can_timer/readme' },
+            { text: 'NXP UDS Bootloader', link: 'nxp_bootloader/readme' }
+          ],
+          collapsed: true
         },
         {
           text: 'LIN',
           items: [
-            { text: 'LIN一致性测试', link: 'lin_conformance_test/readme.md' },
-            { text: 'LIN UDS', link: 'NSUC1612_LIN_OTA/readme.md' },
+            { text: 'LIN基本功能', link: 'lin/readme' },
+            { text: 'LIN TP', link: 'lin_tp/readme' },
+            { text: 'LIN一致性测试', link: 'lin_conformance_test/readme' },
+            { text: 'LIN SAE J2602 Test', link: 'lin_j2602_test/readme' },
+            { text: 'LIN OTA', link: 'NSUC1612_LIN_OTA/readme.md' },
             { text: 'LIN 自动寻址', link: 'lin_aa/readme.md' }
           ],
-          collapsed: false
+          collapsed: true
+        },
+        {
+          text: 'DOIP',
+          items: [
+            { text: 'DoIP Tester', link: 'doip/readme' },
+            { text: 'DoIP Simulate Entity', link: 'doip_sim_entity/readme' },
+            { text: 'DoIP Gateway', link: 'doip_gateway/readme' }
+          ],
+          collapsed: true
         },
         {
           text: 'UDS',
-          items: [{ text: 'UDS DoIP 大文件传输', link: 'uds_doip_large_file/readme.md' }],
-          collapsed: false
+          items: [
+            { text: 'UDS Hex/S19 文件', link: 'uds_hex_s19_file/readme' },
+            { text: 'UDS Binary 文件', link: 'uds_bin_file/readme' },
+            { text: '用于安全访问的dll', link: 'secure_access_dll/readme' },
+            { text: 'UDS 代码生成', link: 'uds_generate_code/readme' },
+            { text: 'UDS 认证服务(0x29)', link: 'uds_0x29/readme' },
+            { text: 'UDS 安全访问(0x27)', link: 'uds_0x27/readme' },
+            { text: 'UDS DoIP 大文件传输', link: 'uds_doip_large_file/readme' }
+          ],
+          collapsed: true
+        },
+        {
+          text: 'Test',
+          items: [{ text: 'Test Simple', link: 'test_simple/readme' }],
+          collapsed: true
+        },
+        {
+          text: 'Panel',
+          link: 'panel/readme',
+          collapsed: true
         },
         {
           text: 'SOME/IP',
           items: [{ text: '请求/响应', link: 'someip/readme.md' }],
-          collapsed: false
+          collapsed: true
         }
       ]
     },
     {
       text: '开发文档',
-      items: [{ text: '如何开发文档', link: '/zh/docs/dev/doc' }]
+      collapsed: true,
+      items: [{ text: '如何开发文档', link: '/zh/docs/dev/doc.md' }]
+    },
+    {
+      text: '开发者手册',
+      collapsed: true,
+      items: [
+        { text: '架构', link: '/zh/docs/dev/arch.md' },
+        {
+          text: '安装/配置',
+          link: '/zh/docs/dev/setup.md',
+          items: [
+            {
+              text: '学习资源',
+              link: '/zh/docs/dev/jslearn.md'
+            },
+            { text: '开发新适配器', link: '/zh/docs/dev/adapter.md' }
+          ]
+        },
+        { text: '组件测试', link: '/zh/docs/dev/test.md' },
+        { text: '插件开发', link: '/zh/docs/dev/addon.md' },
+        { text: '功能请求流程', link: '/zh/docs/dev/feature.md' },
+        { text: '发布说明', link: '/zh/docs/dev/releases_note.md' }
+      ]
     }
   ]
 }

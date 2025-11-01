@@ -1,9 +1,7 @@
 # Setup
 
-
 If you are not familiar with JavaScript/Typescript,
 you can get some learning resources from [JavaScript/Typescript Learning Resources](./jslearn.md)
-
 
 ## Detail Windows Setup Guide
 
@@ -76,4 +74,3 @@ npm run build:win
 ## Get From Github Action
 
 you also can get detail setup steps from [Github Action](https://github.com/ecubus/EcuBus-Pro/tree/master/.github/workflows)
-

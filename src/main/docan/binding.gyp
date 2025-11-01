@@ -228,8 +228,7 @@
                 ['OS=="win"', {
                     'include_dirs': [
                         './toomoss/inc',
-                        "<!@(node -p \"require('node-addon-api').include\")",
-                        "./../timer"
+                        "<!@(node -p \"require('node-addon-api').include\")"
                     ],
                     'configurations': { },
                     'defines': [
@@ -282,8 +281,7 @@
             ['OS=="win"', {
                 'include_dirs': [
                     './vector/inc',
-                    "<!@(node -p \"require('node-addon-api').include\")",
-                    "./../timer"
+                    "<!@(node -p \"require('node-addon-api').include\")"
                 ],
                 'configurations': { },
                 'defines': [

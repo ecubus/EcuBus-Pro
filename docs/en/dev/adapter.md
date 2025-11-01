@@ -5,13 +5,12 @@
 ## Reference Pull Request
 
 You may be able to get some reference from these PRs:
--  [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can 
 
+- [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can
 
 ## Step by Step Guide
 
 You can get detail steps from [Step by Step Guide](./adapter/detail.md)
-
 
 ## Prerequisites
 
@@ -19,10 +18,13 @@ You can get detail steps from [Step by Step Guide](./adapter/detail.md)
 - [napi](https://nodejs.org/api/n-api.html) - Node.js Native API
 - [swig](https://www.swig.org/) - Simplified Wrapper and Interface Generator
 
+---
+
 ## Create Adapter Folder
 
 Create your adapter in the following directory:
-```
+
+```text
 src/main/docan/${adapter_name}
 ```
 
@@ -30,7 +32,7 @@ src/main/docan/${adapter_name}
 
 Each adapter directory should follow this structure:
 
-```
+```text
 ${adapter_name}/
 ├── index.ts           # Main adapter implementation file
 ├── swig/             # SWIG interface definitions
@@ -40,6 +42,8 @@ ${adapter_name}/
 ├── inc/              # C/C++ header files
 └── lib/              # Third-party library files
 ```
+
+---
 
 ## SWIG Interface Implementation
 
@@ -101,14 +105,14 @@ Create a build script to generate the SWIG wrapper:
 swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i 
 ```
 
-### Key Points for SWIG Implementation:
+### Key Points for SWIG Implementation
 
 1. **Type Mapping**
    - Use `%typemap` for C/C++ to JavaScript type conversion
    - Handle buffers and pointers properly
    - Consider endianness for binary data
 
-2. **Header Inclusion**
+2. **Header Inclusion
    - Include system and library headers
    - Use `%header %{ ... %}` for C/C++ code
    - Use `%include` for SWIG interfaces
@@ -123,7 +127,7 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
    - Register callbacks if needed
    - Initialize global variables
 
-### Common SWIG Directives:
+### Common SWIG Directives
 
 ```swig
 %module name          // Define module name
@@ -133,6 +137,8 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
 %pointer_class(...)   // Define pointer class
 %array_class(...)     // Define array class
 ```
+
+---
 
 ## Base Class Implementation
 
@@ -159,6 +165,8 @@ Each adapter class must implement the following static methods:
 - `getLibVersion()`: Returns the library version information
 - `getDefaultBitrate()`: Returns the default bitrate configuration
 
+---
+
 ## Implementation Steps
 
 1. Create adapter directory structure
@@ -171,7 +179,9 @@ Each adapter class must implement the following static methods:
 8. Add proper cleanup in close() method
 9. Implement proper error propagation
 
-## Example
+---
+
+## Example: KVASER_CAN Adapter
 
 Reference implementation from the `kvaser` adapter:
 
@@ -209,6 +219,8 @@ export class KVASER_CAN extends CanBase {
   // ... other methods
 }
 ```
+
+adapter
 
 ## Testing
 
@@ -264,6 +276,7 @@ describe('adapter test', () => {
 Implement the following test cases:
 
 1. **Basic Operations**
+
    ```typescript
    test('basic operations', async () => {
      // Test adapter initialization
@@ -281,6 +294,7 @@ Implement the following test cases:
    ```
 
 2. **Message Transmission**
+
    ```typescript
    test('message transmission', async () => {
      // Test single frame transmission
@@ -309,6 +323,7 @@ Implement the following test cases:
    ```
 
 3. **Multi-frame Transmission**
+
    ```typescript
    test('multi-frame transmission', async () => {
      const list = []
@@ -333,6 +348,7 @@ Implement the following test cases:
    ```
 
 4. **Error Handling**
+
    ```typescript
    test('error handling', async () => {
      // Test invalid parameters
@@ -363,6 +379,7 @@ Implement the following test cases:
    ```
 
 5. **Event Handling**
+
    ```typescript
    test('event handling', async () => {
      const messageHandler = jest.fn()
@@ -406,6 +423,7 @@ vitest test/docan/${adapter_name}.test.ts
 ```
 
 Remember to:
+
 - Test on different platforms if your adapter supports multiple platforms
 - Test with different hardware configurations
 - Test error conditions and recovery scenarios
@@ -415,50 +433,48 @@ Remember to:
 - Test concurrent operations
 - Test timeout handling
 
+---
 
 ## Add In UI
 
 1. edit vendor in  `src/main/share/can.ts`
-```typescript
-export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' | 'toomoss'| 'your_adapter_name'
-```
+
+   ```typescript
+   export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' |  'toomoss'| 'your_adapter_name'
+   ```
 
 2. add device in `src/main/docan/can.ts`
-you should edit these functions:
-  - `openCanDevice`
-  - `getCanVersion`
-  - `getCanDevices`
-  - `canClean`
-
+   you should edit these functions:
+     - `openCanDevice`
+     - `getCanVersion`
+     - `getCanDevices`
+     - `canClean`
 
 3. add device in `src/renderer/src/views/uds/components/hardware.vue`
 
-```typescript
-function buildTree() {
-  const t: tree[] = []
-  const zlg: tree = {
-    label: 'ZLG',
-    vendor: 'zlg',
-    append: false,
-    id: 'ZLG',
-    children: []
-  }
-  t.push(zlg)
-  addSubTree('zlg', zlg)
-  // add your device here
-  const your_device: tree = {
-    label: 'your_device_name',
-    vendor: 'your_adapter_name',
-    append: false,
-    id: 'your_device_id',
-    children: []
-  }
-  t.push(your_device)
-  addSubTree('your_adapter_name', your_device)
-}
-```
+   ```typescript
+   function buildTree() {
+     const t: tree[] = []
+     const zlg: tree = {
+       label: 'ZLG',
+       vendor: 'zlg',
+       append: false,
+       id: 'ZLG',
+       children: []
+     }
+     t.push(zlg)
+     addSubTree('zlg', zlg)
+     // add your device here
+     const your_device: tree = {
+       label: 'your_device_name',
+       vendor: 'your_adapter_name',
+       append: false,
+       id: 'your_device_id',
+       children: []
+     }
+     t.push(your_device)
+     addSubTree('your_adapter_name', your_device)
+   }
+   ```
 
 4. then almost done, you can config your device in `Device` window
-
-
-

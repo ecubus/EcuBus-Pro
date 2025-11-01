@@ -8,13 +8,14 @@
 ## 概述
 
 示例包含：
+
 - 使用LIN-TP进行通信
 - 加载动态库安全访问密钥生成
 - 在`tester.ts`中计算固件CRC校验和
 
 ## 文件结构
 
-```
+```text
 NSUC1612_LIN_OTA/
 ├── NSUC1612_LIN_OTA.ecb     # 主项目配置文件
 ├── tester.ts                # TypeScript 测试脚本

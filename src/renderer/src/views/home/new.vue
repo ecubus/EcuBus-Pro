@@ -125,21 +125,38 @@ function addLocalBaseUrl() {
   const reIsAbsolute = /[\w+\-+]+:\/\//
   return {
     walkTokens: (token: Token) => {
-      if (!['link', 'image'].includes(token.type)) {
+      // Markdown link/image tokens
+      if (['link', 'image'].includes(token.type)) {
+        const tempToken = token as Tokens.Image | Tokens.Link
+        if (reIsAbsolute.test(tempToken.href)) {
+          return
+        }
+        const fullPath = (window as any).readmePath + '\\' + tempToken.href
+        const normalizedPath = fullPath.replace(/\\/g, '/')
+        tempToken.href = 'local-resource:///' + normalizedPath
         return
       }
-      const tempToken = token as Tokens.Image | Tokens.Link
-      if (reIsAbsolute.test(tempToken.href)) {
-        // the URL is absolute, do not touch it
-        return
+      // Raw HTML <img> tags inside markdown
+      if ((token as any).type === 'html' && typeof (token as any).text === 'string') {
+        const html = (token as any).text as string
+        const replaced = html.replace(
+          /<img\s+([^>]*?)src=("|')([^"']+)(\2)([^>]*)>/gi,
+          (_m, pre, q, src, _q2, post) => {
+            if (
+              reIsAbsolute.test(src) ||
+              /^data:/i.test(src) ||
+              src.startsWith('local-resource:///')
+            ) {
+              return `<img ${pre}src=${q}${src}${q}${post}>`
+            }
+            const fullPath = (window as any).readmePath + '\\' + src
+            const normalizedPath = fullPath.replace(/\\/g, '/')
+            const newSrc = 'local-resource:///' + normalizedPath
+            return `<img ${pre}src=${q}${newSrc}${q}${post}>`
+          }
+        )
+        ;(token as any).text = replaced
       }
-      // Build full file path
-      const fullPath = window.readmePath + '\\' + tempToken.href
-      // Normalize to forward slashes
-      const normalizedPath = fullPath.replace(/\\/g, '/')
-      // Use triple slash after protocol to avoid browser parsing issues with drive letters
-      // local-resource:///D:/path instead of local-resource://D:/path
-      tempToken.href = 'local-resource:///' + normalizedPath
     }
   } as MarkedExtension
 }

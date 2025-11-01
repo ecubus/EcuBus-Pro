@@ -39,5 +39,11 @@ declare global {
     MonacoEnvironment: any
     readmePath: string
     params: Record<string, string>
+    $wujie: {
+      bus: (typeof import('wujie'))['bus']
+      shadowRoot?: ShadowRoot
+      props?: { [key: string]: any }
+      location?: Object
+    }
   }
 }

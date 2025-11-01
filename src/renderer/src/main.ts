@@ -32,6 +32,8 @@ import { Layout } from './views/uds/layout'
 import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
+import wujieVue from 'wujie-vue3'
+
 const channel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
@@ -51,8 +53,8 @@ dataParseWorker.onmessage = (event) => {
   }
 }
 
-window.serviceDetail = window.electron.ipcRenderer.sendSync('ipc-service-detail')
-window.electron.ipcRenderer.on('ipc-log', (event, data) => {
+window.serviceDetail = window.electron?.ipcRenderer.sendSync('ipc-service-detail')
+window.electron?.ipcRenderer.on('ipc-log', (event, data) => {
   const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
   let currentGroup: { method: string; data: any[] } | null = null
 
@@ -115,6 +117,7 @@ app.use(VxeTooltip)
 app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
+app.use(wujieVue)
 
 const dataStore = useDataStore()
 const projectStore = useProjectStore()

@@ -40,14 +40,17 @@ class MyCustomPlugin {
       // 当Webpack完成构建过程后执行
       compiler.hooks.done.tap('MyCustomPlugin',async  (stats) => {
        
-        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map']
+        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','plugin.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map','plugin.js.map']
         for(const js of jsList){
             fs.copyFileSync(path.resolve(__dirname,'dist',js),path.resolve(__dirname,'resources','lib','js',js))
         }
 
        
         if(process.platform=='win32'){
-            fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+            //check sa.node exists
+            if(fs.existsSync(path.resolve(__dirname,'dist','sa.node'))){
+                fs.copyFileSync(path.resolve(__dirname,'dist','sa.node'),path.resolve(__dirname,'resources','lib','js','sa.node'))
+            }
         }
         // //copy precision_timer.node
         // fs.copyFileSync(path.resolve(__dirname,'dist','precision_timer.node'),path.resolve(__dirname,'resources','lib','js','precision_timer.node'))
@@ -148,6 +151,14 @@ class MyCustomPlugin {
         //bundle utli.d.ts
         const utliFile=path.resolve(__dirname,'dist','src/main/worker','utli.d.ts')
         await bundleDts(utliFile,path.resolve(__dirname,'src','main','share','utli.d.ts.html'))
+        
+        //bundle plugin.d.ts
+        const pluginFile=path.resolve(__dirname,'dist','src/main/plugin-sdk','index.d.ts')
+        await bundleDts(pluginFile,path.resolve(__dirname,'src','main','plugin-sdk','dist','index.d.ts'))
+        
+        //copy plugin.js to plugin-sdk dist directory
+        fs.copyFileSync(path.resolve(__dirname,'dist','plugin.js'),path.resolve(__dirname,'src','main','plugin-sdk','dist','index.js'))
+        
         // fs.writeFileSync(path.resolve(__dirname,'src','share','cryptoExt.d.ts.html'),v[0])
         console.log('构建过程完成！');
 
@@ -163,6 +174,7 @@ module.exports = {
         crc:path.resolve(__dirname,'src/main/worker') + '/crc.ts',
         cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
         utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
+        plugin:path.resolve(__dirname,'src/main/plugin-sdk') + '/index.ts',
     },
     output: {
         path: path.resolve(__dirname,'dist'),

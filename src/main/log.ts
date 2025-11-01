@@ -4,16 +4,16 @@ import type { Format } from 'logform'
 import Transport from 'winston-transport'
 import { CAN_ERROR_ID, CanAddr, CanMessage, CanMsgType, getTsUs } from './share/can'
 import EventEmitter from 'events'
-import { Sequence, ServiceItem } from './share/uds'
+import type { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
-import { LinMsg } from './share/lin'
-import { TestEvent } from 'node:test/reporters'
+import type { LinMsg } from './share/lin'
+import type { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
 import { SomeipMessageType } from './share/someip/index'
-import { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
-import { OsEvent } from './share/osEvent'
+import type { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
+import type { OsEvent } from './share/osEvent'
 import path from 'path'
 import dayjs from 'dayjs'
 
@@ -784,5 +784,39 @@ export class OsTraceLOG {
       error: msg,
       ts: ts
     })
+  }
+}
+
+export class PluginLOG {
+  log: Logger
+
+  constructor(public pluginId: string) {
+    const et1 = externalTransport.map((t) => t.t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(format.json(), ...externalFormat)
+    })
+  }
+
+  pluginEvent(event: string, data: any) {
+    this.log.info({
+      method: 'pluginEvent',
+      id: this.pluginId,
+      event: event,
+      data: data
+    })
+  }
+
+  error(msg: string, data?: any) {
+    this.log.error({
+      method: 'pluginError',
+      id: this.pluginId,
+      msg: msg,
+      data: data
+    })
+  }
+
+  close(): void {
+    this.log.close()
   }
 }

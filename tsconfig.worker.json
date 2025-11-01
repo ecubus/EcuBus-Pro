@@ -29,5 +29,8 @@
     "src/main/worker/*.ts",
     "src/renderer/src/database/dbc/*.ts",
     "src/renderer/src/database/ldf/*.ts"
+  ],
+  "exclude": [
+    "src/main/pluginCilent.ts"
   ]
 }

@@ -193,4 +193,5 @@ export interface DataSet {
   panels: Record<string, PanelItem>
   logs: Record<string, LogItem>
   traces: Record<string, TraceItem>
+  pluginData: Record<string, any>
 }

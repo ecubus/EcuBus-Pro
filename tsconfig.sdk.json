@@ -1,0 +1,20 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": [
+    "src/renderer/src/plugin-sdk/**/*.ts",
+    "src/preload/*.d.ts",
+  ],
+  "compilerOptions": {
+    "composite": false,
+    "baseUrl": ".",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@r/*": [
+        "src/renderer/src/*"
+      ]
+    }
+  }
+}

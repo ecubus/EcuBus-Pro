@@ -16,28 +16,55 @@
 
 <script setup lang="ts">
 import HeaderView from '@r/views/header/header.vue'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
 import { useWindowSize } from '@vueuse/core'
 import { useGlobalStart } from './stores/runtime'
+import { usePluginStore } from './stores/plugin'
 import { useDark } from '@vueuse/core'
 import { VxeUI } from 'vxe-table'
-
+import { bus } from 'wujie'
+import log from 'electron-log'
 const data = useDataStore()
 const project = useProjectStore()
+const pluginStore = usePluginStore()
 const { width, height } = useWindowSize()
 const globalStart = useGlobalStart()
 const isDark = useDark()
 const params = ref<any>({})
+
+bus.$on(
+  'update:modelValue',
+  ({ pluginId, id, data: val }: { pluginId: string; id: string; data: any }) => {
+    log.info('plugin data update', {
+      pluginId,
+      id,
+      val
+    })
+    if (pluginId == id) {
+      //single data
+      data.pluginData[pluginId] = val
+    } else {
+      //multi data
+      if (data.pluginData[pluginId]) {
+        data.pluginData[pluginId][id] = val
+      } else {
+        data.pluginData[pluginId] = {
+          [id]: val
+        }
+      }
+    }
+  }
+)
 
 // Watch for dark theme changes
 watch(isDark, (value) => {
   VxeUI.setTheme(value ? 'dark' : 'default')
 })
 
-onMounted(() => {
+onMounted(async () => {
   // Set initial theme
   if (isDark.value) {
     VxeUI.setTheme('dark')
@@ -58,6 +85,10 @@ data.$subscribe(() => {
 
 window.electron.ipcRenderer.on('ipc-global-stop', () => {
   globalStart.value = false
+})
+
+onUnmounted(() => {
+  bus.$clear()
 })
 </script>
 <style lang="scss">
@@ -91,9 +122,11 @@ body {
     &:not(:last-child):not(:only-child) {
       border-right: 1px solid var(--el-bg-color) !important;
     }
+
     &:not(:first-child):not(:only-child) {
       border-left: 1px solid var(--el-bg-color) !important;
     }
+
     &:only-child {
       border: none !important;
     }
@@ -147,4 +180,3 @@ body {
   right: 0;
 }
 </style>
-

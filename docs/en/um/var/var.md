@@ -1,17 +1,15 @@
 # Variable System
 
 ## Overview
+
 The Variable System is a powerful feature that allows users to create, manage, and use dynamic values throughout the Ecubus Pro platform. Variables function like virtual signals flowing through the internal system, carrying information between different components and nodes. These virtual signals can be captured, transformed, and routed to create flexible and interconnected systems where changes in one area can automatically propagate to others.
 ![VarArch](./image-4.png)
+
 ## Features
 
 * Set/Get variable in [Script](./../script/script.md) or [Detail API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)
 * Show variable In [Graph](./../graph/graph.md)
 * Default System Variable
-
-
-
-
 
 ## System Variables
 
@@ -45,7 +43,6 @@ For each connected CAN device, the system automatically creates a set of statist
 
 ![system var](./image-2.png)
 
-
 ## User Variables
 
 User variables are custom variables that you can create, modify, and delete based on your specific needs. These variables can be used across the application to store values, track states, and create dynamic workflows.
@@ -65,21 +62,21 @@ To create a new user variable:
 1. Navigate to the **User Variables** tab in the Variable Manager
 2. Click the "Add Variable" button (file icon)
 3. Fill in the variable details:
-   - **Namespace**: (Optional) Group your variables logically
-   - **Name**: Unique identifier for the variable (letters, numbers, and underscores only)
-   - **Description**: (Optional) Additional information about the variable's purpose
-   - **Data Type**: Select Number, String, or Array
-   - **Initial Value**: The starting value for the variable
-   - For Number type:
-     - **Minimum**: Optional lower bound
-     - **Maximum**: Optional upper bound
-     - **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
+
+   * **Namespace**: (Optional) Group your variables logically
+   * **Name**: Unique identifier for the variable (letters, numbers, and underscores only)
+   * **Description**: (Optional) Additional information about the variable's purpose
+   * **Data Type**: Select Number, String, or Array
+   * **Initial Value**: The starting value for the variable
+   * For Number type:
+   * **Minimum**: Optional lower bound
+   * **Maximum**: Optional upper bound
+   * **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
 
 ![User Variables Interface](./image-3.png)
 ![UsrVar](./image-1.png)
 
-
-## Example 
+## Example
 
 Use Graph-Line to record `BusLoad` and `FrameFreq`
 

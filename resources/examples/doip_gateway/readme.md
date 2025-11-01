@@ -5,6 +5,7 @@ This example demonstrates how to implement a DoIP to CAN gateway that bridges co
 ## Architecture Overview
 
 The example simulates a DoIP gateway that:
+
 1. Registers as a DoIP virtual entity - see the [example](./../doip_sim_entity/readme.md) for details on virtual entity registration
 2. Receives DoIP diagnostic requests from Ethernet testers
 3. Forwards requests to CAN bus via CANTP
@@ -17,9 +18,10 @@ The example simulates a DoIP gateway that:
 ### Device Configuration
 
 Configure the network topology with:
+
 - **Eth**: Ethernet connection for DoIP communication
 - **Can**: CAN bus connection for ECU communication
-- **Devices**: 
+- **Devices**:
   - `SIMULATE_0`: Simulates the DoIP interface
   - `PEAK_1`: CAN interface for ECU communication
 
@@ -60,10 +62,10 @@ Util.On("Tester_can_0.*.recv", async (resp) => {
 ```
 
 **Key Features:**
+
 - **DoIP Entity Registration**: Registers a virtual entity with logical address 100
 - **Request Forwarding**: Converts DoIP requests to CAN diagnostic requests
 - **Response Bridging**: Forwards CAN responses back to DoIP tester
-
 
 ## Using Python Client As Other Tester
 
@@ -95,6 +97,7 @@ doip_client.close()
 ```
 
 **Prerequisites for Python client:**
+
 ```bash
 pip install udsoncan doipclient
 ```
@@ -105,5 +108,3 @@ pip install udsoncan doipclient
 2. **Monitor traffic**: Use the built-in trace window to view all frames
 3. **Alternative monitoring**: Use Wireshark to capture network traffic
 4. **Test with Python**: Run `python client.py` to send test requests
-
-

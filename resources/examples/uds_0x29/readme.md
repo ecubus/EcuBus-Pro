@@ -21,7 +21,6 @@ Traditional security approaches using 0x27 had significant vulnerabilities - onc
 2. **Certificate Authority Control**: Suppliers must request certificates from OEMs, removing self-signing capabilities
 3. **Time-Limited Access**: Certificates have expiration dates, unlike permanent keys
 
-
 ### ACR (Challenge Response) Overview
 
 This mode is similar to 0x27 but uses asymmetric cryptography and server-generated challenges to prevent replay attacks. However, it's not widely recommended by AUTOSAR DCM.
@@ -53,6 +52,7 @@ Terminates the authentication session and resets server state.
 Initiates unidirectional certificate verification where the server validates the client.
 
 **Request Parameters:**
+
 1. `communicationConfiguration` (1 byte) - Must be 0x00
 2. `lengthOfCertificateClient` (2 bytes) - Certificate length  
 3. `certificateClient` (variable) - Client certificate data
@@ -62,6 +62,7 @@ Initiates unidirectional certificate verification where the server validates the
 ![Verify Certificate Request](media/verify_request.png)
 
 **Response Parameters:**
+
 1. `returnValue` (1 byte) - Operation result code
 2. `lengthOfChallengeServer` (2 bytes) - Server challenge length
 3. `challengeServer` (variable) - Server-generated challenge
@@ -75,6 +76,7 @@ Initiates unidirectional certificate verification where the server validates the
 Proves that the client possesses the private key corresponding to the certificate.
 
 **Request Parameters:**
+
 1. `lengthOfProofOfOwnershipClient` (2 bytes)
 2. `proofOfOwnershipClient` (variable) - Digital signature of server challenge
 3. `lengthOfEphemeralPublicKeyClient` (2 bytes)  
@@ -88,6 +90,7 @@ The server verifies the client's digital signature using the certificate's publi
 ![Proof Verification](media/proof_verify.png)
 
 **Response Parameters:**
+
 1. `returnValue` (1 byte) - Verification result
 2. `lengthOfSessionKeyInfo` (2 bytes) - Session key information length
 3. `sessionKeyInfo` (variable) - Derived session key data
@@ -114,12 +117,15 @@ Initiates APCE mode configuration.
 Generate the necessary certificates using OpenSSL:
 
 ### 1. Generate Root CA Private Key
+
 ```bash
 openssl genrsa -out ca.key 4096
 ```
 
 ### 2. Create Root CA Certificate
+
 Create a configuration file `req.cnf`:
+
 ```ini
 [ req ]
 default_bits = 4096
@@ -141,6 +147,7 @@ basicConstraints=critical,CA:TRUE
 ```
 
 Generate the CA certificate:
+
 ```bash
 openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
 ```
@@ -148,6 +155,7 @@ openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
 ![Certificate Generated](media/cert_generated.png)
 
 ### 3. Generate Client Certificate
+
 ```bash
 # Generate client private key
 openssl genrsa -out client.key 4096
@@ -172,15 +180,16 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -CAcre
 ## Key Exchange Algorithm (ECDH/DH)
 
 ECDH (Elliptic Curve Diffie-Hellman) enables two parties to establish a shared secret over an insecure channel. The algorithm works based on the property:
-
 **(a × G) × b = (b × G) × a**
 
 Where:
+
 - `a` and `b` are private keys
 - `G` is the generator point
 - `×` represents elliptic curve point multiplication
 
-**ECDH Process:**
+**ECDH Process:*
+
 1. Alice generates: <span v-pre>`{alicePrivKey, alicePubKey = alicePrivKey × G}`</span>
 2. Bob generates: <span v-pre>`{bobPrivKey, bobPubKey = bobPrivKey × G}`</span>  
 3. They exchange public keys over insecure channel
@@ -195,12 +204,15 @@ Where:
 ## EcuBus-Pro Implementation
 
 ### 1. Configure Authentication Sequence
+
 ![EcuBus Configuration](media/ecubus_config.png)
 
 ### 2. Configure Tester Script
+
 ![Tester Script Configuration](media/tester_script.png)
 
 **tester.ts:**
+
 ```typescript
 import { DiagRequest } from "ECB"
 import fs from 'fs/promises'
@@ -230,9 +242,11 @@ Util.Init(async ()=>{
 ```
 
 ### 3. Configure ECU Simulator
+
 ![ECU Node Configuration](media/ecu_node.png)
 
 **ecu.ts:**
+
 ```typescript
 import { DiagResponse } from "ECB"
 
@@ -336,4 +350,3 @@ Util.On("Tester_can_0.proofOfOwnership.send",async (req)=>{
 ```
 
 ![Verify Signature](media/verify_sign.png)
-

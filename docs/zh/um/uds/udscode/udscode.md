@@ -57,75 +57,65 @@ export interface ProjectInfo {
 
 #### **数学运算**
 
-<span v-pre>
-* `{{add a b}}` - 加法
-* `{{subtract a b}}` - 减法
-* `{{multiply a b}}` - 乘法
-* `{{divide a b}}` - 除法
-* `{{abs num}}` - 绝对值
-* `{{ceil num}}` - 向上取整
-* `{{floor num}}` - 向下取整
-* `{{modulo a b}}` - 取余
-* `{{avg array}}` - 平均值
-* `{{sum array}}` - 求和
-</span>
+* <span v-pre>`{{add a b}}`</span> - 加法
+* <span v-pre>`{{subtract a b}}`</span> - 减法
+* <span v-pre>`{{multiply a b}}`</span> - 乘法
+* <span v-pre>`{{divide a b}}`</span> - 除法
+* <span v-pre>`{{abs num}}`</span> - 绝对值
+* <span v-pre>`{{ceil num}}`</span> - 向上取整
+* <span v-pre>`{{floor num}}`</span> - 向下取整
+* <span v-pre>`{{modulo a b}}`</span> - 取余
+* <span v-pre>`{{avg array}}`</span> - 平均值
+* <span v-pre>`{{sum array}}`</span> - 求和
 
 #### **字符串处理**
 
-<span v-pre>
-* `{{camelcase str}}` - 转为 camelCase
-* `{{capitalize str}}` - 首字母大写
-* `{{uppercase str}}` - 转为大写
-* `{{lowercase str}}` - 转为小写
-* `{{dashcase str}}` - 转为 dash-case
-* `{{snakecase str}}` - 转为 snake_case
-* `{{dotcase str}}` - 转为 dot.case
-* `{{append str suffix}}` - 追加后缀
-* `{{prepend str prefix}}` - 前置前缀
-* `{{trim str}}` - 移除空白
-* `{{replace str old new}}` - 文本替换
-</span>
+* <span v-pre>`{{camelcase str}}`</span> - 转为 camelCase
+* <span v-pre>`{{capitalize str}}`</span> - 首字母大写
+* <span v-pre>`{{uppercase str}}`</span> - 转为大写
+* <span v-pre>`{{lowercase str}}`</span> - 转为小写
+* <span v-pre>`{{dashcase str}}`</span> - 转为 dash-case
+* <span v-pre>`{{snakecase str}}`</span> - 转为 snake_case
+* <span v-pre>`{{dotcase str}}`</span> - 转为 dot.case
+* <span v-pre>`{{append str suffix}}`</span> - 追加后缀
+* <span v-pre>`{{prepend str prefix}}`</span> - 前置前缀
+* <span v-pre>`{{trim str}}`</span> - 移除空白
+* <span v-pre>`{{replace str old new}}`</span> - 文本替换
 
 #### **数组操作**
 
-<span v-pre>
-* `{{first array n}}` - 取前 n 项
-* `{{last array n}}` - 取后 n 项
-* `{{after array n}}` - 取索引 n 之后的项目
-* `{{before array n}}` - 取索引 n 之前的项目
-* `{{join array separator}}` - 连接数组元素
-* `{{arrayify value}}` - 转为数组
-* `{{#forEach array}}...{{/forEach}}` - 遍历数组
-* `{{#eachIndex array}}...{{/eachIndex}}` - 带索引遍历
-</span>
+* <span v-pre>`{{first array n}}`</span> - 取前 n 项
+* <span v-pre>`{{last array n}}`</span> - 取后 n 项
+* <span v-pre>`{{after array n}}`</span> - 取索引 n 之后的项目
+* <span v-pre>`{{before array n}}`</span> - 取索引 n 之前的项目
+* <span v-pre>`{{join array separator}}`</span> - 连接数组元素
+* <span v-pre>`{{arrayify value}}`</span> - 转为数组
+* <span v-pre>`{{#forEach array}}...{{/forEach}}`</span> - 遍历数组
+* <span v-pre>`{{#eachIndex array}}...{{/eachIndex}}`</span> - 带索引遍历
 
 #### **比较与逻辑**
 
-<span v-pre>
-* `{{eq a b}}` - 等于
-* `{{ne a b}}` - 不等于
-* `{{gt a b}}` - 大于
-* `{{lt a b}}` - 小于
-* `{{gte a b}}` - 大于等于
-* `{{lte a b}}` - 小于等于
-* `{{isString val}}` - 是否字符串
-* `{{isNumber val}}` - 是否数字
-* `{{isArray val}}` - 是否数组
-* `{{isDefined val}}` - 是否已定义
-* `{{isUndefined val}}` - 是否未定义
-</span>
+* <span v-pre>`{{eq a b}}`</span> - 等于
+* <span v-pre>`{{ne a b}}`</span> - 不等于
+* <span v-pre>`{{gt a b}}`</span> - 大于
+* <span v-pre>`{{lt a b}}`</span> - 小于
+* <span v-pre>`{{gte a b}}`</span> - 大于等于
+* <span v-pre>`{{lte a b}}`</span> - 小于等于
+* <span v-pre>`{{isString val}}`</span> - 是否字符串
+* <span v-pre>`{{isNumber val}}`</span> - 是否数字
+* <span v-pre>`{{isArray val}}`</span> - 是否数组
+* <span v-pre>`{{isDefined val}}`</span> - 是否已定义
+* <span v-pre>`{{isUndefined val}}`</span> - 是否未定义
 
 #### **实用函数**
 
-<span v-pre>
-* `{{setVar name value}}` - 设置变量
-* `{{jsonParse str}}` - 解析 JSON 字符串
-* `{{jsonStringify obj}}` - 转为 JSON
-* `{{times n}}...{{/times}}` - 重复 n 次
-* `{{range start end}}...{{/range}}` - 从 start 到 end 循环
-* `{{logFile message}}` - 调试输出
-* `{{error message}}` - 抛出错误
-</span>
+* <span v-pre>`{{setVar name value}}`</span> - 设置变量
+* <span v-pre>`{{jsonParse str}}`</span> - 解析 JSON 字符串
+* <span v-pre>`{{jsonStringify obj}}`</span> - 转为 JSON
+* <span v-pre>`{{times n}}...{{/times}}`</span> - 重复 n 次
+* <span v-pre>`{{range start end}}...{{/range}}`</span> - 从 start 到 end 循环
+* <span v-pre>`{{logFile message}}`</span> - 调试输出
+* <span v-pre>`{{error message}}`</span> - 抛出错误
 
 ### 模板示例
 

@@ -13,6 +13,7 @@
 ## 核心创新：流式读取 vs 传统方式
 
 ### 传统方式（之前的示例）
+
 ```typescript
 // 旧方式：一次性将整个文件加载到内存
 const hexStr = await fsP.readFile(hexFile, 'utf8')
@@ -23,12 +24,14 @@ for (const [addr, data] of map) {
 ```
 
 **局限性：**
+
 - ❌ 大文件的高内存消耗
 - ❌ 多 GB 文件存在内存不足的风险
 - ❌ 大文件启动时间较慢
 - ❌ 无法处理超过可用 RAM 大小的文件
 
 ### 流式方式（本示例）
+
 ```typescript
 // 新方式：打开文件句柄进行流式读取
 fHandle = await fsP.open(hexFile, 'r')
@@ -39,6 +42,7 @@ const { bytesRead } = await fHandle.read(data)
 ```
 
 **优势：**
+
 - ✅ **内存高效**：一次只加载小块数据
 - ✅ **可扩展**：可处理任意大小的文件（GB+）
 - ✅ **快速启动**：立即开始传输
@@ -170,7 +174,6 @@ Util.Register('Tester.JobFunction1', async () => {
 | **传统方式** | ~1GB RAM | ~4GB RAM | ~10GB RAM |
 | **流式方式** | ~4KB RAM | ~4KB RAM | ~4KB RAM |
 
-
 ## 使用场景
 
 这种流式方法适用于：
@@ -180,6 +183,5 @@ Util.Register('Tester.JobFunction1', async () => {
 - **软件部署**：嵌入式系统
 - **数据记录**：诊断信息传输
 - **任何需要内存高效大文件传输的场景**
-
 
 这种实现相比传统方法有显著改进，能够在资源受限的环境中可靠地传输超大文件。

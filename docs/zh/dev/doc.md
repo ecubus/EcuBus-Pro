@@ -6,7 +6,7 @@
 
 ## 项目结构
 
-```
+```text
 docs/
 ├── en/          # 英文文档
 │   ├── about/   # 关于页面
@@ -53,7 +53,7 @@ npm run docs:build
 
 中文和英文文档应保持相同的结构：
 
-```
+```text
 docs/zh/dev/adapter.md  ↔  docs/en/dev/adapter.md
 docs/zh/um/can/can.md   ↔  docs/en/um/can/can.md
 ```
@@ -69,7 +69,7 @@ docs/zh/um/can/can.md   ↔  docs/en/um/can/can.md
 
 #### 目录结构建议
 
-```
+```text
 docs/zh/
 ├── about/           # 关于页面
 │   ├── contact.md   # 联系方式
@@ -94,9 +94,7 @@ docs/zh/
 - 文件名应具有描述性
 - 避免使用空格和特殊字符
 
-```
+```text
 ✅ 正确：can-bus-guide.md
 ❌ 错误：CAN Bus Guide.md
 ```
-
-

@@ -12,7 +12,8 @@ The example implements a large file transfer sequence using the following UDS se
 
 ## Key Innovation: Streaming vs Traditional Approach
 
-### Traditional Approach (Previous Examples)
+### Traditional Approach (Previous Examples
+
 ```typescript
 // OLD: Loads entire file into memory at once
 const hexStr = await fsP.readFile(hexFile, 'utf8')
@@ -23,12 +24,14 @@ for (const [addr, data] of map) {
 ```
 
 **Limitations:**
+
 - ❌ High memory consumption for large files
 - ❌ Risk of out-of-memory errors with multi-GB files
 - ❌ Slower startup time for large files
 - ❌ Cannot handle files larger than available RAM
 
 ### Streaming Approach (This Example)
+
 ```typescript
 // NEW: Opens file handle for streaming reads
 fHandle = await fsP.open(hexFile, 'r')
@@ -39,6 +42,7 @@ const { bytesRead } = await fHandle.read(data)
 ```
 
 **Advantages:**
+
 - ✅ **Memory Efficient**: Only loads small chunks at a time
 - ✅ **Scalable**: Can handle files of any size (GB+)
 - ✅ **Fast Startup**: Begins transfer immediately
@@ -163,14 +167,12 @@ Util.Register('Tester.JobFunction1', async () => {
 })
 ```
 
-
 ## Memory Usage Comparison
 
 | Approach | 1GB File | 4GB File | 10GB File |
 |----------|----------|----------|-----------|
 | **Traditional** | ~1GB RAM | ~4GB RAM | ~10GB RAM |
 | **Streaming** | ~4KB RAM | ~4KB RAM | ~4KB RAM |
-
 
 ## Use Cases
 

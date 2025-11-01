@@ -41,17 +41,12 @@ The Canvas currently supports four major categories of components:
 
 More component types will be added in future updates, such as dashboard gauges to simulate a car instrument panel.
 
-
-
 ### Display Functionality
 
 After configuring your components, users can view and interact with them in the display mode:
 
 ![Display Mode](./base1.gif)
 
-
 ## Panel Example
 
 [Led Control Panel Example](../../../examples/panel/readme.md)
-
-

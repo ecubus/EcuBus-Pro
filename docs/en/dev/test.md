@@ -1,6 +1,6 @@
 # Test
 
-The test of the project is based on the `Vitest` framework. Get more information about the `Vitest` framework [here](https://vitest.dev/).
+The test of the project is based on the `Vitest` framework. Get more information about the `Vitest` framework [vitest](https://vitest.dev/).
 
 ## Test Code
 
@@ -31,4 +31,3 @@ Stop test when failed
 ```bash
 npx vitest --bail=1
 ```
-

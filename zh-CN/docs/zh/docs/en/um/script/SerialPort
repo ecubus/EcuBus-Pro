@@ -1,32 +1,32 @@
-# Use External Packages
+# 使用外部软件包
 
-Since EcuBus-Pro script is based on Node.js, you can use any Node.js package in your script. There are two ways to install packages:
+由于EcuadBus-Pro 脚本基于 Node.js，您可以在脚本中使用任意Node.js 包。 有两种方法可以安装软件包：
 
-## Method 1: Using Package Manager Interface
+## 方法1：使用软件包管理器接口
 
-When using a project for the first time, you need to initialize the package.json file before installing packages.
+当首次使用项目时，您需要先初始化 package.json 文件才能安装软件包。
 
-EcuBus-Pro provides a graphical package manager interface for easy installation, management, and uninstallation of packages.
+EcuadBus-Pro 提供一个图形软件包管理界面，以方便安装、管理和卸载软件包。
 
-1. For new projects, you'll see a message "No package.json found" and an "Initialize package.json" button. Click this button to create a new package.json file.
+1. 对于新项目，您将看到一条消息“未找到package.json”和“初始化package.json”按钮。 点击此按钮创建一个新的 package.json 文件。
 
 2. Click on the "Packages" option in the left navigation bar of the main interface
    ![Package Manager](package.png)
 
-3. In the Package Manager interface:
-   - Enter the name of the package you want to install
-   - Select the installation type (Dependencies or Dev Dependencies)
-   - Click the "Install" button
+3. 在软件包管理器界面：
+   - 输入您想要安装的软件包名称
+   - 选择安装类型 (依赖关系或开发依赖关系)
+   - 点击“安装”按钮
 
-4. You can view and manage installed packages in the "Installed Packages" section at the bottom
+4. 您可以在底部的“安装包”部分查看和管理已安装的软件包
 
-## Method 2: Using EcuBus-Pro CLI
+## 方法2：利用EcuBus-Pro CLI
 
-You can also install packages using the `pnpm` command in the EcuBus-Pro CLI. See [EcuBus-Pro CLI](cli.md) for more details.
+您也可以在 EcuadBus-Pro CLI 中使用 `pnpm` 命令安装软件包。 详见[EcuBus-Pro CLI](cli.md)。
 
-### Install via CLI
+### 通过 CLI 安装
 
-Install the `serialport` package in your project root directory.
+在您的项目根目录中安装 "serialport" 包。
 
 ```bash
 ecb_cli pnpm install serialport
@@ -34,12 +34,12 @@ ecb_cli pnpm install serialport
 
 ![Installation Process](pnpm.gif)
 
-## Usage Example
+## 用法示例
 
-Here is an example of how to use the `serialport` package in your script.
-For more information about the `serialport` package, please refer to the [serialport website](https://serialport.io/).
+这是如何在脚本中使用 "serialport" 包的一个例子。
+欲了解更多关于 `serialport` 包的信息，请参阅[serialport] (https://serialport.io/)。
 
-### Code Example
+### 代码示例
 
 ```typescript
 import { SerialPort } from 'serialport'
@@ -59,7 +59,7 @@ SerialPort.list()
   })
 ```
 
-### Running Result
+### 运行结果
 
-![Running Result](serialPort.gif)
+![运行结果](serialPort.gif)
 

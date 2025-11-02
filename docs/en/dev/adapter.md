@@ -112,7 +112,7 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
    - Handle buffers and pointers properly
    - Consider endianness for binary data
 
-2. **Header Inclusion
+2. **Header Inclusion**
    - Include system and library headers
    - Use `%header %{ ... %}` for C/C++ code
    - Use `%include` for SWIG interfaces

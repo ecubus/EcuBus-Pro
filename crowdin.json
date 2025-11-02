@@ -1,0 +1,33 @@
+{
+  "project_id": "",
+  "api_token": "",
+  "base_path": ".",
+  "base_url": "https://api.crowdin.com",
+  "preserve_hierarchy": true,
+  "files": [
+    {
+      "source": "docs/en/**/*.md",
+      "translation": "docs/%locale%/%original_path%",
+      "skip_untranslated_strings": false,
+      "skip_untranslated_files": false,
+      "export_only_approved": false,
+      "type": "markdown",
+      "first_line_contains_header": true,
+      "scheme": "identifier,source_phrase,context,translation,occurrences",
+      "update_option": "update_as_unapproved",
+      "escape_quotes": 3,
+      "excluded_target_languages": []
+    }
+  ],
+  "excluded_target_languages": [],
+  "included_source_languages": ["en"],
+  "export_only_approved": false,
+  "auto_approve_imported": false,
+  "pseudo_localization": {
+    "enabled": false
+  },
+  "skip_download": false,
+  "skip_untranslated_strings": false,
+  "skip_untranslated_files": false,
+  "exclude_ignored_strings": false
+}

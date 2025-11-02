@@ -1,51 +1,91 @@
-# 安装
+# 赞助商
 
-You can download the latest version of `EcuBus-Pro` from the [github releases page](https://github.com/ecubus/EcuBus-Pro/releases)
-Or from our CDN page if you are in 中国❤️:<CustomComponent/>
+`EcuBus-Pro`项目是个人开源项目，它们的开发需要您的帮助。
 
-> [!TIP]
-> Linux, macOS 版本只能从发布页面下载，Arch Linux可以通过 AUR 仓库安装。
+如果你想支持开发\`EcuBus-Pro'，你会被鼓励捐赠！
 
-> [!提示]
-> Windows 的最小版本是 Windows 10，但我们推荐了 Windows 11。
+请随时联系我们更多关于赞助的详细信息。
 
-## Windows 安装指南
+[联系我们](./contact.md)
 
-![Alt 文本](../../media/about/image.png)
+## 支付方式
 
-### 您可以为每个人或为自己选择
+### Github Sponsor
 
-![Alt 文本](../../media/about/image-1.png)
+<iframe src="https://github.com/sponsors/frankie-zeng/card" title="Sponsor frankie-zeng" height="225" width="600" style="border: 0;"></iframe>
 
-### 打开`EcuBus-Pro`时你可以看到详细信息
+### Paypal
 
-![Alt 文本](../../media/about/image-2.png)
+![alt text](../../media/about/paypal.png)
+[Become a sponsor](https://paypal.me/zengfrankie)
 
-## 自动更新
+### OpenCollective
 
-`EcuBus-Pro`将在您打开它时检查最新版本，如果有新版本，它将促使您更新。
-![Alt 文本](../../media/about/update1.png)
+[Become a sponsor](https://opencollective.com/ecubus)
 
-- 您可以看到详细的更新信息，点击“开始更新”按钮进行更新。
-  ![Alt 文本](../../media/about/update2.png)
+### WeChat
 
-- 将显示更新进度, 请稍候.
-  ![Alt 文本](../../media/about/update3.png)
+![wechat](../../media/about/wechat.jpg){width=200px}
 
-- 更新完成后，您可以点击 "重启" 按钮重新启动 "EcuadBus-Pro"。
+### Alipay
 
-## Arch Linux 安装指南
+![alipay](../../media/about/alipay.jpg){width=200px}
 
-通过 [AUR 仓库](https://aur.archlinux.org/packages/ecubus-pro) 或 [自托管仓库](https://github.com/taotieren/aur-repo) 安装。
+## 赞助者级别
 
-```bash
-# AUR
-yay -Syu ecubus-pro
-# OR self-hosted
-sudo pacman -Syu ecubus-pro
-```
+### 每月5美元
 
-<script setup>
-import CustomComponent from './../../component/download.vue'
-</script>
+:hot_bever: - 每月为我买一杯咖啡。
+
+您将在您的个人资料上获得一个赞助者徽章！
+
+### 每月10美元
+
+🙏 - 非常感谢你！ 为了赞助我，你会收到：
+
+所有以前的等级奖励
+是Discord频道的会员资格被标记为赞助者
+在我的个人网站上将你的名字添加到支持者部分
+
+### 每月20美元
+
+🍨 - 非常感谢！ 为了赞助我，你会收到：
+
+所有以前的等级奖励
+处理更高优先级的问题
+
+### 每月50美元
+
+🐹 - 非常感谢！ 为了赞助我，你会收到：
+
+所有以前的等级奖励
+审查您的脚本并提供改进建议
+
+### 每月200美元
+
+:horse_face - 非常感谢！ 这是很多钱。 为了赞助我，你会收到：
+
+所有以前的等级奖励
+添加一个徽标并链接到README。 d 我的主要开放源码项目
+一对一技术咨询服务，见技术支助
+
+### 每月500美元
+
+🐬 - 您是否真的要花这笔钱？ 为了赞助我，你会收到：
+
+所有以前的等级奖励
+添加一个大的徽标并链接到我的主要开源项目的网站
+
+### 每月1000美元
+
+❤️ - 你有这笔钱要花多少？ 为了在这个不可思议的层次上赞助我，你会收到：
+
+所有以前的等级奖励
+请联系我讨论你想要为这一级别做些什么！
+
+---
+
+## 支持者
+
+<!--@include: ./../../share/support.md-->
 

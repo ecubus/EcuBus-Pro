@@ -1,51 +1,91 @@
-# Install
+# Sponsoring
 
-You can download the latest version of `EcuBus-Pro` from the [github releases page](https://github.com/ecubus/EcuBus-Pro/releases)
-Or from our CDN page if you are in 中国❤️:<CustomComponent/>
+The `EcuBus-Pro` projects are personal open-source projects, their development need your help.
 
-> [!TIP]
-> Linux, macOS version can only be downloaded from the Release page, Arch Linux can be installed via AUR repository.
+If you would like to support the development of `EcuBus-Pro`, you are encouraged to donate!
 
-> [!TIP]
-> The minimum version of Windows is Windows 10, but we recommend Windows 11.
+Feel free to contact us for more details on sponsorship.
 
-## Windows Install Guide
+[Contact us](./contact.md)
 
-![alt text](../../media/about/image.png)
+## Payment Methods
 
-### You can decide for everyone or just for yourself
+### Github Sponsor
 
-![alt text](../../media/about/image-1.png)
+<iframe src="https://github.com/sponsors/frankie-zeng/card" title="Sponsor frankie-zeng" height="225" width="600" style="border: 0;"></iframe>
 
-### You can see the detail information when open the `EcuBus-Pro`
+### Paypal
 
-![alt text](../../media/about/image-2.png)
+![alt text](../../media/about/paypal.png)
+[Become a sponsor](https://paypal.me/zengfrankie)
 
-## Auto Update
+### OpenCollective
 
-`EcuBus-Pro` will check the latest version when you open it, if there is a new version, it will prompt you to update.
-![alt text](../../media/about/update1.png)
+[Become a sponsor](https://opencollective.com/ecubus)
 
-- You can see the detail update information, click the `start to update` button to update.
-  ![alt text](../../media/about/update2.png)
+### WeChat
 
-- Will display the update progress, please wait for a moment.
-  ![alt text](../../media/about/update3.png)
+![wechat](../../media/about/wechat.jpg){width=200px}
 
-- After the update is complete, you can click the `restart` button to restart the `EcuBus-Pro`.
+### Alipay
 
-## Arch Linux Install Guide
+![alipay](../../media/about/alipay.jpg){width=200px}
 
-Install via [AUR repository](https://aur.archlinux.org/packages/ecubus-pro) or [self-hosted repository](https://github.com/taotieren/aur-repo).
+## Sponsor tiers
 
-```bash
-# AUR
-yay -Syu ecubus-pro
-# OR self-hosted
-sudo pacman -Syu ecubus-pro
-```
+### $5 a month
 
-<script setup>
-import CustomComponent from './../../component/download.vue'
-</script>
+☕️ - Buy me a coffee every month.
+
+You will receive a Sponsor badge on your profile!
+
+### $10 a month
+
+🙏 - Thank you so much! For sponsoring me you'll receive:
+
+All previous tier rewards
+Membership in Discord channel is marked as sponsor
+Add your name to the backers section on my personal website
+
+### $20 a month
+
+🍨 - Thank you so much! For sponsoring me you'll receive:
+
+All previous tier rewards
+Handling Issues with higher priority
+
+### $50 a month
+
+🐹 - Thank you so much! For sponsoring me you'll receive:
+
+All previous tier rewards
+Review your script and provide suggestions for improvement
+
+### $200 a month
+
+🐴 - Thank you so much! That's a lot of money. For sponsoring me you'll receive:
+
+All previous tier rewards
+Add a logo and link to the README.md of my major open source projects
+One-to-one technical consulting service, see Technical Support
+
+### $500 a month
+
+🐬 - Should you really be spending this much? For sponsoring me you'll receive:
+
+All previous tier rewards
+Add a large logo and link to the websites of my major open source projects
+
+### $1000 a month
+
+❤️ - How do you have this much money to spend? For sponsoring me on this incredible tier, you'll receive:
+
+All previous tier rewards
+Please contact me to discuss what you want for this tier!
+
+---
+
+## Supporters
+
+<!--@include: ./../../share/support.md-->
 

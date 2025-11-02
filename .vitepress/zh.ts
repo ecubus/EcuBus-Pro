@@ -242,7 +242,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           ]
         },
         { text: '组件测试', link: '/zh/docs/dev/test.md' },
-        { text: '插件开发', link: '/zh/docs/dev/addon.md' },
+        { text: 'Addon开发', link: '/zh/docs/dev/addon.md' },
+        { text: '如何开发文档', link: '/zh/docs/dev/doc.md' },
         { text: '功能请求流程', link: '/zh/docs/dev/feature.md' },
         { text: '发布说明', link: '/zh/docs/dev/releases_note.md' }
       ]

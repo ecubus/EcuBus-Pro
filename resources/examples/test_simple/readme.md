@@ -1,9 +1,11 @@
 # Test Simple
 
 About test framework, see UM [Test](../../../docs/um/test/test.md)
+
 - Interface: `CAN`
 - Vendor Device: `Simulate`
 - Test Script: test.ts
+
 ```typescript
 import { describe, test, assert, CanMessage, DiagResponse, DiagRequest } from 'ECB'
 
@@ -84,29 +86,36 @@ describe('UDS Test', () => {
   })
 })
 ```
+
 - CAN-IA
   - ID (1), press a to send
   - ID (2), press b to send
 ![alt text](image.png)
 
 ## Test Features
+
 This test example demonstrates:
+
 1. **CAN Message Testing**: Wait for specific CAN messages and verify their properties
 2. **UDS Diagnostic Testing**: Send UDS diagnostic requests and validate responses
 3. **Test Utilities**: Reusable functions for message handling with timeout support
 
 ## Example Success
+
 For CAN tests:
+
 - Press 'a' in `Wait for a specific CAN message with ID 0x1`
 - Press 'b' in `Wait for any CAN message, and verify its ID is 0x2`
 
 For UDS tests:
+
 - The DiagnosticSessionControl160 test will automatically send the diagnostic request and wait for the expected response
 
 ![alt text](ok.gif)
 ![alt text](image-1.png)
 
 ## Example Fail
+
 Don't press any key, will timeout in `Wait can frame`
 ![alt text](fail.gif)
 ![alt text](image-2.png)

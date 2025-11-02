@@ -90,6 +90,7 @@ for (const [addr, data] of map) {
 Both `HexMemoryMap` and `S19MemoryMap` provide identical interfaces, making it easy to switch between formats or support both in the same application.
 
 More details can be found in the API documentation:
+
 - [HexMemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/HexMemoryMap.html)
 - [S19MemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/S19MemoryMap.html)
 
@@ -235,4 +236,3 @@ The ECU simulation provides a complete test environment for the programming sequ
 ## Demo
 
 ![alt text](demo.gif)
-

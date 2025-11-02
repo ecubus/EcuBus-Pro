@@ -31,7 +31,7 @@ git clone https://github.com/doip/doip-custom-simulation.git
 
 ### Build
 
-```
+```bash
 cd doip-custom-simulation
 
 .\gradlew.bat build
@@ -46,7 +46,7 @@ cd doip-custom-simulation
 
 ### Generate dist
 
-```
+```bash
 .\gradlew.bat installDist
 ```
 
@@ -54,7 +54,7 @@ cd doip-custom-simulation
 
 \*.properties file is the configuration file, you can modify it to change the configuration.
 
-```
+```bash
 cd build\install\doip-custom-simulation
 
 java "-Dlog4j.configurationFile=log4j2.xml" -jar libs/doip-custom-simulation-2.0.0.jar gateway.properties
@@ -84,4 +84,3 @@ log from doip-custom-simulation:
 
 Start the sequence and open the trace window to view all frames. Alternatively, use Wireshark to capture these frames.
 ![trace](trace.png)
-

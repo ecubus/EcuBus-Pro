@@ -30,16 +30,13 @@ OSEK OS追踪是通过外部接口实时获取OSEK OS的运行状态，并将其
 
 ![task](task.png)
 
-
 ### Resource
 
 ![resource](resource.png)
 
-
 ### Service
 
 ![service](service.png)
-
 
 ### Hook
 
@@ -54,6 +51,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 通过串口实时接收OS Trace数据
 
 **配置项：**
+
 - **Device**: 选择串口设备（如COM1、/dev/ttyUSB0等）
 - **Baud Rate**: 波特率（如115200、921600等）
 - **Data Bits**: 数据位（5、6、7、8）
@@ -73,8 +71,8 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 | coreID | 1 byte | 核心ID |
 | CRC8/Reserved | 1 byte | CRC8校验码或保留字节 |
 
-
 > [!NOTE]
+>
 > - 数据帧总长度固定为16字节
 > - CRC8校验码是对数据部分的11字节计算得出（不包含帧头和CRC字节本身，包含：index、timestamp、type、type id、type status、coreID）
 > - 当CRC校验开启时，使用最后1字节作为CRC8校验码
@@ -87,6 +85,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 从二进制文件读取OS Trace数据，数据格式与串口相同（16字节二进制数据）
 
 **配置项：**
+
 - **File**: 选择二进制文件路径（支持相对路径）
 
 **数据格式：** 与串口相同，16字节二进制数据
@@ -96,6 +95,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 从CSV文件读取OS Trace数据
 
 **配置项：**
+
 - **File**: 选择CSV文件路径（支持相对路径）
 
 **数据格式：** CSV格式，每行一个事件
@@ -111,6 +111,7 @@ Connector用于决定你是从哪里获取TRACE数据，目前支持以下几种
 ```
 
 **字段说明：**
+
 - **timestamp**: 时间戳(tick)
 - **type**: 事件类型
 - **id**: 对象ID
@@ -130,18 +131,15 @@ Record File用于决定将TRACE数据写入到本地文件中，写入的数据�
 
 ![recordFile](record.png)
 
-
 ### 保存
 
 当ORTI相关信息配置好后，点击右上角保存按钮，保存ORTI配置信息。
-
 
 ## 查看OS的Trace数据和自动生成的系统变量
 
 OS的发生过来的数据可以用过`Trace`窗口进行查看
 
 ![trace](trace.png)
-
 
 当配置好ORTI后，ORTI的数据会自动生成为内置系统变量，可以通过`Others->Variables->System Variables`查看
 
@@ -165,10 +163,3 @@ OS的统计信息可以通过`Others->Os Info->对于的ORTI文件名`查看
 
 效果展示：
 ![demo](demo.png)
-
-
-
-
-
-
-

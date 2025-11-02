@@ -1,5 +1,5 @@
 # UDS Generate Code Example
-
+<!-- markdownlint-disable MD033 -->
 This example demonstrates how to use EcuBus-Pro's [UDS code generation](https://app.whyengineer.com/docs/um/uds/udscode.html) system with Handlebars templates.The `uds.hbs` template generates C code for DCM (Diagnostic Communication Manager) configuration based on your UDS service definitions.
 
 ## Template File Analysis: `uds.hbs`
@@ -7,27 +7,33 @@ This example demonstrates how to use EcuBus-Pro's [UDS code generation](https://
 ### Template Structure Overview
 
 The template generates C code with two main configuration arrays:
+
 1. `Dcm[]` - Main service configuration array
 2. `DcmRoutineControlConfig[]` - Routine control specific configuration
 
 ### Detailed Code Analysis
 
 #### 1. License Header
+
 ```handlebars
 /**
 * Open Source License
 * ... (license text)
 */
 ```
+
 Static license header that will be included in all generated files.
 
 #### 2. Include Statement
+
 ```handlebars
 #include "Dcm.h"
 ```
+
 Standard C include for DCM functionality.
 
 #### 3. Service Count Calculation
+
 ```handlebars
 {{logFile 'Calculate active service type except JobFunction'~}}
 {{setVar 'serviceNum' 0~}}
@@ -40,6 +46,7 @@ Standard C include for DCM functionality.
 ```
 
 **Line-by-line explanation:**
+
 - <span v-pre>`{{logFile 'Calculate active service type except JobFunction'~}}`</span> - Debug output to log file
 - <span v-pre>`{{setVar 'serviceNum' 0~}}`</span> - Initialize counter variable to 0
 - <span v-pre>`{{#each tester.allServiceList~}}`</span> - Iterate through all services in the tester
@@ -50,16 +57,19 @@ Standard C include for DCM functionality.
 - <span v-pre>`#define SUPPORTED_SERVICE_NUM {{@root.serviceNum}}`</span> - Generate C macro with total count
 
 #### 4. Main DCM Configuration Array
+
 ```handlebars
 DcmConfig_t Dcm[]={
 {{#each tester.allServiceList}}
 ```
 
 **Explanation:**
+
 - `DcmConfig_t Dcm[]={` - Start C array declaration
 - <span v-pre>`{{#each tester.allServiceList}}`</span> - Loop through all UDS services
 
 ##### 4.1 Session Control Service (0x10)
+
 ```handlebars
 {{#if (eq @key '0x10')}}
     /* Diagnostic Session Control (0x10) */
@@ -73,6 +83,7 @@ DcmConfig_t Dcm[]={
 ```
 
 **Explanation:**
+
 - <span v-pre>`{{#if (eq @key '0x10')}}`</span> - Check if current service ID equals 0x10 (Session Control)
 - Generates DCM configuration for Session Control service
 - Enables multiple session types using bitwise OR
@@ -80,6 +91,7 @@ DcmConfig_t Dcm[]={
 - Assigns callback function
 
 ##### 4.2 Read Data by Identifier Service (0x22)
+
 ```handlebars
 {{#if (eq @key '0x22')}}
     /* Read Data by Identifier (0x22) */
@@ -93,10 +105,12 @@ DcmConfig_t Dcm[]={
 ```
 
 **Explanation:**
+
 - <span v-pre>`{{#if (eq @key '0x22')}}`</span> - Check for service ID 0x22 (Read Data by Identifier)
 - Similar structure to Session Control but with different callback function
 
 ##### 4.3 Routine Control Service (0x31)
+
 ```handlebars
 {{#if (eq @key '0x31')}}
     /* RoutineControl (0x31) */
@@ -110,10 +124,12 @@ DcmConfig_t Dcm[]={
 ```
 
 **Explanation:**
+
 - <span v-pre>`{{#if (eq @key '0x31')}}`</span> - Check for service ID 0x31 (Routine Control)
 - Configures Routine Control service with appropriate callback
 
 #### 5. Routine Control Specific Configuration
+
 ```handlebars
 DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
 {{#each (get tester.allServiceList '0x31')}}
@@ -129,6 +145,7 @@ DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
 ```
 
 **Line-by-line explanation:**
+
 - `DcmRoutineControlConfig_t DcmRoutineControlConfig[]={` - Start routine control config array
 - <span v-pre>`{{#each (get tester.allServiceList '0x31')}}`</span> - Loop through all 0x31 (Routine Control) services
 - <span v-pre>`/* {{name}} */`</span> - Generate comment with service name
@@ -144,21 +161,25 @@ DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
 ## Helper Methods Used
 
 ### Data Access Helpers
+
 - <span v-pre>`{{get object property}}`</span> - Access object property safely
 - <span v-pre>`{{first array}}`</span> - Get first element of array
 - <span v-pre>`{{filter array value property='name'}}`</span> - Filter array by property value
 
 ### Logic Helpers
+
 - <span v-pre>`{{#if condition}}...{{else}}...{{/if}}`</span> - Conditional logic
 - <span v-pre>`{{eq a b}}`</span> - Equality comparison
 - <span v-pre>`{{not condition}}`</span> - Logical NOT
 
 ### Utility Helpers
+
 - <span v-pre>`{{setVar name value}}`</span> - Set template variable
 - <span v-pre>`{{add a b}}`</span> - Mathematical addition
 - <span v-pre>`{{logFile message}}`</span> - Debug logging
 
 ### Iteration Helpers
+
 - <span v-pre>`{{#each array}}...{{/each}}`</span> - Loop through array elements
 - <span v-pre>`{{@key}}`</span> - Current key in iteration
 - <span v-pre>`{{@root}}`</span> - Access root context
@@ -248,5 +269,4 @@ DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
     },
 };
 ```
-
-
+<!-- markdownlint-enable MD033 -->

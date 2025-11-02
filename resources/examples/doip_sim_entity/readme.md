@@ -34,11 +34,7 @@ Address information need same as your register entity
 - Simulate By: choose `sim_entity`, the node name.
 ![alt text](image-2.png)
 
-
-
-
 ## Execution
 
 Start the sequence and open the trace window to view all frames. Alternatively, use Wireshark to capture these frames.
 ![trace](image.png)
-

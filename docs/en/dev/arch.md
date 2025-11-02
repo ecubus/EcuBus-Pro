@@ -1,7 +1,7 @@
 # Architecture
 
 The architecture of the project is based on the `Electron` framework, which is a popular framework for building cross-platform desktop applications with JavaScript, HTML, and CSS.
-More information about the `Electron` framework can be found [here](https://www.electronjs.org/).
+More information about the `Electron` framework can be found [electronjs](https://www.electronjs.org/).
 
 ## Technology Stack
 
@@ -18,4 +18,3 @@ More information about the `Electron` framework can be found [here](https://www.
 - `swig` - The template engine for the project.
 
 We use [Electron-Vite](https://electron-vite.org/) to combine these stack together, which is a template for building `Electron` applications with `Vite`.
-

@@ -113,7 +113,7 @@
     "mitt": "^3.0.1",
     "path-browserify": "^1.0.1",
     "pinia": "^3.0.2",
-    "pixi.js": "^8.14.0",
+    "pixi.js-legacy": "^5.3.3",
     "python-shell": "^5.0.0",
     "serialport": "^13.0.0",
     "sortablejs": "^1.15.2",

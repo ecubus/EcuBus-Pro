@@ -51,8 +51,6 @@
             :show-tooltip="false"
             class="blue-slider"
             style="width: 200px; height: 20px"
-            @input="handleTimeSpanChange($event, false)"
-            @change="handleTimeSpanChange($event, true)"
           />
           <span style="font-size: 12px; color: var(--el-text-color-regular); margin-right: 10px">
             Time: {{ time }}s
@@ -98,34 +96,24 @@
                 </div>
               </div>
             </div>
-            <div class="controls-hint">
-              <div class="hint-item">
-                <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to
-                zoom
-              </div>
-              <div class="hint-item">
-                <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" />/
-                <kbd>Drag</kbd> to shift
-              </div>
+          </div>
+          <div class="controls-hint">
+            <div class="hint-item">
+              <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to zoom
+            </div>
+            <div class="hint-item">
+              <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" />/
+              <kbd>Drag</kbd> to shift
             </div>
           </div>
         </div>
         <div :id="`Shift-${charid}`" class="shift"></div>
         <!-- DOM-based separator lines with higher z-index -->
-        <div
-          v-for="(separator, index) in separatorPositions"
-          :key="`separator-${index}`"
-          class="separator-line"
-          :style="{
-            top: separator.y + 'px',
-            left: 0,
-            width: width + 4 + 'px'
-          }"
-        ></div>
+
         <div class="right">
-          <canvas :id="charid" :width="width - leftWidth - 1" :height="height"></canvas>
+          <canvas :id="charid"></canvas>
           <!-- Custom scrollbar overlay -->
-          <div v-show="scrollbarThumbWidth > 0" class="custom-scrollbar">
+          <!-- <div v-show="scrollbarThumbWidth > 0" class="custom-scrollbar">
             <div class="scrollbar-track">
               <div
                 class="scrollbar-thumb"
@@ -136,7 +124,7 @@
                 @mousedown="handleScrollbarMouseDown"
               ></div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -164,11 +152,23 @@ import { useDataStore } from '@r/stores/data'
 import saveIcon from '@iconify/icons-material-symbols/save'
 // import testdata from './blocks.json'
 import { useGlobalStart } from '@r/stores/runtime'
-import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
+// import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
 import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType, VisibleBlock } from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
 import { ElLoading } from 'element-plus'
 import DataHandlerWorker from './dataHandler.ts?worker'
+import { TimeGraphContainer } from './timeline/time-graph-container'
+import { TimeGraphUnitController } from './timeline/time-graph-unit-controller'
+import { TimeGraphChartGrid } from './timeline/layer/time-graph-chart-grid'
+import { TimeGraphChart, TimeGraphChartProviders } from './timeline/layer/time-graph-chart'
+import { TimeGraphChartArrows } from './timeline/layer/time-graph-chart-arrows'
+import { TimeGraphChartSelectionRange } from './timeline/layer/time-graph-chart-selection-range'
+import { TimeGraphChartCursors } from './timeline/layer/time-graph-chart-cursors'
+import { TimeGraphRangeEventsLayer } from './timeline/layer/time-graph-range-events-layer'
+import { TimeGraphRowController } from './timeline/time-graph-row-controller'
+import { TimelineChart } from './timeline/time-graph-model'
+import { TimeGraphStateStyle } from './timeline/components/time-graph-state'
+// import { TestDataProvider } from './test-data-provider'
 const dataHandlerWorker = new DataHandlerWorker()
 dataHandlerWorker.onmessage = (event) => {
   console.log('dataHandlerWorker', event.data)
@@ -190,15 +190,15 @@ const charid = computed(() => `${props.editIndex}_graph`)
 const width = computed(() => props.width)
 
 const time = ref(0)
-let pixiRenderer: PixiGraphRenderer | null = null
+
 let timer: ReturnType<typeof setInterval> | null = null
 
 // Scrollbar state
 const scrollbarPosition = ref(0) // 0-100 percentage
 const scrollbarThumbWidth = ref(0) // percentage of total width
-let isScrollbarDragging = false
-let scrollbarDragStartX = 0
-let scrollbarDragStartPosition = 0
+const isScrollbarDragging = false
+const scrollbarDragStartX = 0
+const scrollbarDragStartPosition = 0
 
 // Time span slider control (logarithmic scale from 10us to 50s)
 const MIN_TIME_SPAN = 0.00001 // 10 microseconds in seconds
@@ -233,20 +233,20 @@ function formatTimeSpan(span: number): string {
   }
 }
 
-// Handle time span change from slider
-function handleTimeSpanChange(value: number, refresh: boolean) {
-  const newSpan = sliderValueToTimeSpan(value)
-  timeSpan.value = newSpan
+// // Handle time span change from slider
+// function handleTimeSpanChange(value: number, refresh: boolean) {
+//   const newSpan = sliderValueToTimeSpan(value)
+//   timeSpan.value = newSpan
 
-  if (pixiRenderer) {
-    // Keep minX fixed, only adjust maxX
-    const newMinX = pixiRenderer.viewport.minX
-    const newMaxX = newMinX + newSpan
-    if (refresh) {
-      pixiRenderer.updateViewport(newMinX, newMaxX)
-    }
-  }
-}
+//   if (pixiRenderer) {
+//     // Keep minX fixed, only adjust maxX
+//     const newMinX = pixiRenderer.viewport.minX
+//     const newMaxX = newMinX + newSpan
+//     if (refresh) {
+//       pixiRenderer.updateViewport(newMinX, newMaxX)
+//     }
+//   }
+// }
 
 // 更新时间显示的函数
 const updateTime = () => {
@@ -276,9 +276,9 @@ const updateTime = () => {
   minX = Math.floor(minX)
 
   // Update viewport range
-  if (pixiRenderer) {
-    // pixiRenderer.updateViewport(minX, maxX)
-  }
+  // if (pixiRenderer) {
+  //   // pixiRenderer.updateViewport(minX, maxX)
+  // }
 }
 const globalStart = useGlobalStart()
 
@@ -303,15 +303,15 @@ async function loadOfflineTrace() {
       )
       visibleBlocks = res.blocks
 
-      if (pixiRenderer) {
-        pixiRenderer.setBlocks(visibleBlocks)
-        const startTs = visibleBlocks[0].start
-        const span = MAX_TIME_SPAN
+      // if (pixiRenderer) {
+      //   pixiRenderer.setBlocks(visibleBlocks)
+      //   const startTs = visibleBlocks[0].start
+      //   const span = MAX_TIME_SPAN
 
-        timeSpan.value = span
-        timeSpanSliderValue.value = timeSpanToSliderValue(span)
-        handleTimeSpanChange(timeSpanSliderValue.value, true)
-      }
+      //   timeSpan.value = span
+      //   timeSpanSliderValue.value = timeSpanToSliderValue(span)
+      //   handleTimeSpanChange(timeSpanSliderValue.value, true)
+      // }
     }
   } catch (error) {
     console.error(error)
@@ -373,143 +373,295 @@ const totalButtons = computed(() => {
   return coreConfigs.value.reduce((total, core) => total + core.buttons.length, 0)
 })
 
-const buttonHeight = computed(() => {
-  // buttonHeight is the absolute height of each button including border
-  const availableHeight = height.value - 45
-  return availableHeight / totalButtons.value
-})
-
-// Computed property for separator line positions
-const separatorPositions = computed(() => {
-  const positions: Array<{ y: number }> = []
-  let currentY = 0
-
-  for (let i = 0; i < coreConfigs.value.length - 1; i++) {
-    const core = coreConfigs.value[i]
-
-    currentY += buttonHeight.value * core.buttons.length
-    positions.push({ y: currentY }) // Align with button borders
-  }
-  //add bottom line - total buttons with borders between them
-  const totalWithBorders = totalButtons.value * buttonHeight.value
-  positions.push({ y: totalWithBorders })
-  return positions
-})
+const buttonHeight = 30
 
 let visibleBlocks: VisibleBlock[] = []
+const graphWidth = computed(() => width.value - leftWidth.value - 1)
+const graphHeight = computed(() => height.value - 45)
+// function updateTimeLine() {
+//   if (!pixiRenderer) return
 
-function updateTimeLine() {
-  if (!pixiRenderer) return
+//   const currentTimeX = time.value
+//   // pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
+// }
 
-  const currentTimeX = time.value
-  // pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
+// watch([() => globalStart.value, () => time.value], () => {
+//   updateTimeLine()
+// })
+
+// const testDataProvider = new TestDataProvider(graphWidth.value);
+// let timeGraph = testDataProvider.getData({});
+const unitController = new TimeGraphUnitController(BigInt(1000))
+unitController.worldRenderFactor = 3
+unitController.numberTranslator = (theNumber: bigint) => {
+  let num = theNumber.toString()
+  if (num.length > 6) {
+    num = num.slice(0, -6) + ':' + num.slice(-6)
+  }
+  if (num.length > 3) {
+    num = num.slice(0, -3) + ':' + num.slice(-3)
+  }
+  return num
 }
-
-watch([() => globalStart.value, () => time.value], () => {
-  updateTimeLine()
-})
-
+const styleMap = new Map<string, TimeGraphStateStyle>()
+let timeGraphChartContainer: TimeGraphContainer | null = null
+let rowController: TimeGraphRowController | null = null
+let timeGraphChart: TimeGraphChart | null = null
 async function initPixiGraph() {
   const canvas = document.getElementById(charid.value) as HTMLCanvasElement
   if (!canvas) return
-
-  const config: GraphConfig = {
-    width: width.value,
-    height: height.value,
-    leftWidth: leftWidth.value,
-    totalButtons: totalButtons.value,
-    buttonHeight: buttonHeight.value,
-    coreConfigs: coreConfigs.value,
-    maxTimeSpan: MAX_TIME_SPAN
-  }
-
-  try {
-    pixiRenderer = await PixiGraphRenderer.create(canvas, config)
-
-    // Calculate scrollbar thumb width based on viewport
-    const updateScrollbarThumbWidth = () => {
-      if (pixiRenderer) {
-        const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-        const visibleRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-        if (totalRange > 0) {
-          scrollbarThumbWidth.value = Math.max(5, Math.min(100, (visibleRange / totalRange) * 100))
+  timeGraphChartContainer = new TimeGraphContainer(
+    {
+      id: charid.value,
+      height: graphHeight.value,
+      width: graphWidth.value,
+      backgroundColor: 0xffffff
+    },
+    unitController,
+    canvas
+  )
+  const providers: TimeGraphChartProviders = {
+    rowProvider: () => {
+      return {
+        rowIds: [1, 2, 3]
+      }
+    },
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
+      const newRange: TimelineChart.TimeGraphRange = range
+      const newResolution: number = resolution * 0.1
+      // timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
+      // console.log(timeGraph);
+      return {
+        rows: [
+          {
+            id: 1,
+            name: 'Row 1',
+            range: {
+              start: BigInt(0),
+              end: BigInt(50)
+            },
+            data: {
+              type: 'CPU',
+              hasStates: true
+            },
+            states: [
+              {
+                id: '1',
+                range: {
+                  start: BigInt(3),
+                  end: BigInt(35)
+                },
+                label: 'State 1',
+                data: {
+                  value: 4,
+                  style: {}
+                }
+              }
+            ],
+            annotations: [],
+            prevPossibleState: BigInt(0),
+            nextPossibleState: BigInt(0)
+          },
+          {
+            id: 2,
+            name: 'Row 1',
+            range: {
+              start: BigInt(0),
+              end: BigInt(50)
+            },
+            data: {
+              type: 'CPU',
+              hasStates: true
+            },
+            states: [
+              {
+                id: 'el_2_0',
+                range: {
+                  start: BigInt(0),
+                  end: BigInt(500)
+                },
+                label: 'State 1',
+                data: {
+                  value: 4,
+                  style: {}
+                }
+              }
+            ],
+            annotations: [],
+            prevPossibleState: BigInt(0),
+            nextPossibleState: BigInt(0)
+          }
+        ],
+        range: newRange,
+        resolution: newResolution
+      }
+    },
+    stateStyleProvider: (model: TimelineChart.TimeGraphState) => {
+      const styles: TimeGraphStateStyle[] = [
+        {
+          color: 0x11ad1b,
+          height: buttonHeight * 0.8
+        },
+        {
+          color: 0xbc2f00,
+          height: buttonHeight * 0.7
+        },
+        {
+          color: 0xccbf5d,
+          height: buttonHeight * 0.6
+        }
+      ]
+      let style: TimeGraphStateStyle | undefined = styles[0]
+      if (model.data && model.data.value) {
+        const val = model.data.value
+        style = styleMap.get(val)
+        if (!style) {
+          style = styles[styleMap.size % styles.length]
+          styleMap.set(val, style)
         }
       }
-    }
 
-    // Set scale change callback
-    pixiRenderer.setOnScaleChange((scale: number) => {
-      timeSpan.value = scale
-      timeSpanSliderValue.value = timeSpanToSliderValue(scale)
-      updateScrollbarThumbWidth()
-    })
-
-    // Set pan percentage change callback
-    pixiRenderer.setOnPanPercentageChange((percentage: number) => {
-      updateScrollbarThumbWidth()
-      if (!isScrollbarDragging) {
-        scrollbarPosition.value = percentage
+      return {
+        color: style.color,
+        height: style.height,
+        borderWidth: model.selected ? 1 : 0,
+        minWidthForLabels: 100
       }
-    })
-
-    pixiRenderer.setBlocks(visibleBlocks)
-    // pixiRenderer.updateViewport(7, 10)
-
-    // Initialize time span from viewport
-    const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-    timeSpan.value = initialSpan
-    timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
-    handleTimeSpanChange(timeSpanSliderValue.value, true)
-
-    // Initialize scrollbar
-    updateScrollbarThumbWidth()
-  } catch (error) {
-    console.error('Failed to initialize Pixi renderer:', error)
+    },
+    rowStyleProvider: (row?: TimelineChart.TimeGraphRowModel) => {
+      return {
+        backgroundColor: 0xe0ddcf,
+        backgroundOpacity: row?.selected ? 0.6 : 0,
+        lineColor: row?.data && row?.data.hasStates ? 0xdddddd : 0xaa4444,
+        lineThickness: row?.data && row?.data.hasStates ? 1 : 3
+      }
+    },
+    rowAnnotationStyleProvider: (annotation: TimelineChart.TimeGraphAnnotation) => {
+      return {
+        color: annotation.data?.color,
+        size: 7 * (annotation.data && annotation.data.height ? annotation.data.height : 1.0),
+        symbol: annotation.data?.symbol,
+        verticalAlign: annotation.data?.verticalAlign,
+        opacity: annotation.data?.opacity
+      }
+    }
   }
+
+  // const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', buttonHeight.value)
+
+  rowController = new TimeGraphRowController(buttonHeight, graphHeight.value)
+
+  timeGraphChart = new TimeGraphChart('timeGraphChart', providers, rowController)
+  // const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
+  const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', {
+    color: 0xff0000
+  })
+  const timeGraphChartCursors = new TimeGraphChartCursors(
+    'chart-cursors',
+    timeGraphChart,
+    rowController,
+    { color: 0xff0000 }
+  )
+  const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
+    'timeGraphChartRangeEvents',
+    providers
+  )
+
+  timeGraphChartContainer.addLayers([
+    timeGraphChart,
+    timeGraphSelectionRange,
+    timeGraphChartCursors,
+    timeGraphChartRangeEvents
+  ])
+  // timeGraphChartArrows.addArrows([], [1,2,3]);
+
+  // try {
+  //   pixiRenderer = await PixiGraphRenderer.create(canvas, config)
+
+  //   // Calculate scrollbar thumb width based on viewport
+  //   const updateScrollbarThumbWidth = () => {
+  //     if (pixiRenderer) {
+  //       const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
+  //       const visibleRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+  //       if (totalRange > 0) {
+  //         scrollbarThumbWidth.value = Math.max(5, Math.min(100, (visibleRange / totalRange) * 100))
+  //       }
+  //     }
+  //   }
+
+  //   // Set scale change callback
+  //   pixiRenderer.setOnScaleChange((scale: number) => {
+  //     timeSpan.value = scale
+  //     timeSpanSliderValue.value = timeSpanToSliderValue(scale)
+  //     updateScrollbarThumbWidth()
+  //   })
+
+  //   // Set pan percentage change callback
+  //   pixiRenderer.setOnPanPercentageChange((percentage: number) => {
+  //     updateScrollbarThumbWidth()
+  //     if (!isScrollbarDragging) {
+  //       scrollbarPosition.value = percentage
+  //     }
+  //   })
+
+  //   pixiRenderer.setBlocks(visibleBlocks)
+  //   // pixiRenderer.updateViewport(7, 10)
+
+  //   // Initialize time span from viewport
+  //   const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+  //   timeSpan.value = initialSpan
+  //   timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
+  //   handleTimeSpanChange(timeSpanSliderValue.value, true)
+
+  //   // Initialize scrollbar
+  //   updateScrollbarThumbWidth()
+  // } catch (error) {
+  //   console.error('Failed to initialize Pixi renderer:', error)
+  // }
 }
 
 // Scrollbar mouse handlers
-const handleScrollbarMouseDown = (event: MouseEvent) => {
-  isScrollbarDragging = true
-  scrollbarDragStartX = event.clientX
-  scrollbarDragStartPosition = scrollbarPosition.value
+// const handleScrollbarMouseDown = (event: MouseEvent) => {
+//   isScrollbarDragging = true
+//   scrollbarDragStartX = event.clientX
+//   scrollbarDragStartPosition = scrollbarPosition.value
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isScrollbarDragging || !pixiRenderer) return
+//   const handleMouseMove = (e: MouseEvent) => {
+//     if (!isScrollbarDragging || !pixiRenderer) return
 
-    const canvas = document.getElementById(charid.value) as HTMLCanvasElement
-    if (!canvas) return
+//     const canvas = document.getElementById(charid.value) as HTMLCanvasElement
+//     if (!canvas) return
 
-    const canvasRect = canvas.getBoundingClientRect()
-    const canvasWidth = canvasRect.width
-    const deltaX = e.clientX - scrollbarDragStartX
-    const deltaPercentage = (deltaX / canvasWidth) * 100
+//     const canvasRect = canvas.getBoundingClientRect()
+//     const canvasWidth = canvasRect.width
+//     const deltaX = e.clientX - scrollbarDragStartX
+//     const deltaPercentage = (deltaX / canvasWidth) * 100
 
-    let newPosition = scrollbarDragStartPosition + deltaPercentage
+//     let newPosition = scrollbarDragStartPosition + deltaPercentage
 
-    // Clamp position to valid range considering thumb width
-    newPosition = Math.max(0, Math.min(100 - scrollbarThumbWidth.value, newPosition))
+//     // Clamp position to valid range considering thumb width
+//     newPosition = Math.max(0, Math.min(100 - scrollbarThumbWidth.value, newPosition))
 
-    scrollbarPosition.value = newPosition
+//     scrollbarPosition.value = newPosition
 
-    // Update renderer viewport based on scrollbar position
-    const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-    const viewportRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-    const newMinX = pixiRenderer.viewport.minTs + (newPosition / 100) * totalRange
-    const newMaxX = newMinX + viewportRange
+//     // Update renderer viewport based on scrollbar position
+//     const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
+//     const viewportRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
+//     const newMinX = pixiRenderer.viewport.minTs + (newPosition / 100) * totalRange
+//     const newMaxX = newMinX + viewportRange
 
-    pixiRenderer.updateViewport(newMinX, newMaxX)
-  }
+//     pixiRenderer.updateViewport(newMinX, newMaxX)
+//   }
 
-  const handleMouseUp = () => {
-    isScrollbarDragging = false
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('mouseup', handleMouseUp)
-  }
+//   const handleMouseUp = () => {
+//     isScrollbarDragging = false
+//     document.removeEventListener('mousemove', handleMouseMove)
+//     document.removeEventListener('mouseup', handleMouseUp)
+//   }
 
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', handleMouseUp)
-}
+//   document.addEventListener('mousemove', handleMouseMove)
+//   document.addEventListener('mouseup', handleMouseUp)
+// }
 
 // Example usage (commented out):
 // To add a new core: addCore(2, 'Core 2', [{ name: 'NewTask', color: '#e67e22' }])
@@ -562,38 +714,18 @@ onMounted(() => {
   }
 })
 
-watch(
-  [
-    () => width.value,
-    () => leftWidth.value,
-    () => totalButtons.value,
-    () => buttonHeight.value,
-    () => coreConfigs.value
-  ],
-  () => {
-    // Update pixi renderer after resize
-    nextTick(() => {
-      if (pixiRenderer) {
-        pixiRenderer.updateConfig({
-          width: width.value,
-          height: height.value,
-          leftWidth: leftWidth.value,
-          totalButtons: totalButtons.value,
-          buttonHeight: buttonHeight.value,
-          coreConfigs: coreConfigs.value
-        })
-        updateTimeLine()
-      }
-    })
-  }
-)
+watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
+  // rowController!.rowHeight = val1[2];
+  timeGraphChartContainer?.updateCanvas(val1[0], val1[1])
+  // timeGraphChart!.update();
+})
 
 onBeforeUnmount(() => {
   // Cleanup pixi renderer
-  if (pixiRenderer) {
-    pixiRenderer.destroy()
-    pixiRenderer = null
-  }
+  // if (pixiRenderer) {
+  //   pixiRenderer.destroy()
+  //   pixiRenderer = null
+  // }
 })
 onUnmounted(() => {
   dataHandlerWorker.terminate()
@@ -672,9 +804,11 @@ onUnmounted(() => {
 }
 
 .core-container {
+  overflow-y: hidden;
+  height: v-bind(graphHeight + 'px');
   display: flex;
   flex-direction: column;
-  height: 100%;
+
   overflow: hidden;
 }
 

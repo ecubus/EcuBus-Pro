@@ -2482,7 +2482,8 @@
         "filterDevice": [],
         "filterId": []
       }
-    }
+    },
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -2501,48 +2502,6 @@
         "id": "message",
         "layoutType": "bottom",
         "hide": true
-      },
-      "1712396f-dfa8-4dd7-82bb-c046ae3b927d_trace": {
-        "pos": {
-          "x": 282,
-          "y": 18,
-          "w": 1245.5,
-          "h": 380
-        },
-        "title": "osTrace",
-        "label": "OSTrace",
-        "id": "1712396f-dfa8-4dd7-82bb-c046ae3b927d_trace",
-        "options": {
-          "params": {
-            "edit-index": "1712396f-dfa8-4dd7-82bb-c046ae3b927d_trace"
-          },
-          "name": "Os_Trace"
-        },
-        "hide": false,
-        "backupPos": {
-          "x": 3,
-          "y": 0.000030517578125,
-          "w": 1707,
-          "h": 380
-        },
-        "isMax": false
-      },
-      "graph": {
-        "pos": {
-          "x": 150.5,
-          "y": 226,
-          "w": 1651.5,
-          "h": 533
-        },
-        "title": "graph",
-        "label": "Line",
-        "id": "graph",
-        "options": {
-          "params": {
-            "edit-index": "graph"
-          }
-        },
-        "hide": false
       },
       "variable": {
         "pos": {
@@ -2563,69 +2522,6 @@
           "h": 400
         },
         "isMax": false
-      },
-      "1712396f-dfa8-4dd7-82bb-c046ae3b927d": {
-        "pos": {
-          "x": 0,
-          "y": 380,
-          "w": 853.5,
-          "h": 414
-        },
-        "title": "orti",
-        "label": "ORTI",
-        "id": "1712396f-dfa8-4dd7-82bb-c046ae3b927d",
-        "options": {
-          "params": {
-            "edit-index": "1712396f-dfa8-4dd7-82bb-c046ae3b927d"
-          },
-          "name": "Os_Trace"
-        },
-        "hide": false
-      },
-      "trace": {
-        "pos": {
-          "x": 156.5,
-          "y": 0,
-          "w": 1511.5,
-          "h": 554
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {
-          "params": {
-            "edit-index": "trace"
-          },
-          "name": "Trace"
-        },
-        "hide": false
-      },
-      "simple-plugin": {
-        "pos": {
-          "x": 276.5,
-          "y": 181,
-          "w": 700,
-          "h": 400
-        },
-        "title": "plugin",
-        "label": "Plugin",
-        "id": "simple-plugin",
-        "options": {
-          "params": {
-            "edit-index": "simple-plugin",
-            "pluginId": "simple-plugin",
-            "item": {
-              "type": "button",
-              "id": "simple-test-helper",
-              "label": "Test Helper",
-              "icon": "mdi:help-circle",
-              "onClick": "showTestHelp",
-              "entry": "index.html"
-            },
-            "isPlugin": true
-          },
-          "name": "Test Helper"
-        }
       }
     }
   }

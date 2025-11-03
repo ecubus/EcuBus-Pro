@@ -42,6 +42,13 @@ export class VECTOR_CAN extends CanBase {
   private channelMask = 0
   private PermissionMask = new VECTOR.XLACCESS()
   private PortHandle = new VECTOR.XLPORTHANDLE()
+  periodIds: Record<
+    number,
+    {
+      msg: CanMessage
+      taskId: string[]
+    }
+  > = {}
   startTime = getTsUs() //启动时间
   tsOffset: number | undefined //偏移时间
   private readAbort = new AbortController() //创建一个控制器对象，用来中止一个或多个Web请求
@@ -228,9 +235,51 @@ export class VECTOR_CAN extends CanBase {
       //创建线程安全函数
       this.PortHandle.value(), //设备句柄
       this.id,
-      this.callback.bind(this) //标准CAN帧回调函数
+      this.callback.bind(this), //标准CAN帧回调函数
+      this.channelMask,
+      this.info.canfd
     )
     this.attachCanMessage(this.busloadCb)
+  }
+  startPeriodSend(message: CanMessage, period: number, duration?: number): string {
+    const taskId: string = VECTOR.StartPeriodSend(
+      this.id,
+      {
+        id: message.id,
+        extendId: message.msgType.idType == CAN_ID_TYPE.EXTENDED,
+        remoteFrame: message.msgType.remote,
+        brs: message.msgType.brs,
+        canfd: message.msgType.canfd,
+        data: [...message.data]
+      },
+      period / 1000,
+      duration || 0
+    )
+    if (this.periodIds[message.id]) {
+      this.periodIds[message.id].taskId.push(taskId)
+    } else {
+      this.periodIds[message.id] = {
+        msg: message,
+        taskId: [taskId]
+      }
+    }
+
+    return taskId
+  }
+  stopPeriodSend(taskId: string): void {
+    const target = Object.values(this.periodIds).find((item) => item.taskId.includes(taskId))
+    if (target) {
+      VECTOR.StopPeriodSend(taskId)
+      this.periodIds[target.msg.id].taskId = this.periodIds[target.msg.id].taskId.filter(
+        (item) => item != taskId
+      )
+      if (this.periodIds[target.msg.id].taskId.length == 0) {
+        delete this.periodIds[target.msg.id]
+      }
+    }
+  }
+  changePeriodData(taskId: string, data: Buffer): void {
+    VECTOR.ChangeData(taskId, [...data])
   }
   static dllLoaded = false
   static driverLoad = false
@@ -281,6 +330,22 @@ export class VECTOR_CAN extends CanBase {
         this.log.canBase(message)
         this.event.emit(this.getReadBaseId(frame.canId, message.msgType), message)
         item.resolve(ts)
+      } else {
+        const period = this.periodIds[frame.canId]
+        if (period) {
+          const message: CanMessage = {
+            dir: 'OUT',
+            id: frame.canId,
+            data: frame.data,
+            ts: ts,
+            msgType: frame.msgType,
+            device: this.info.name,
+            database: period.msg.database,
+            name: period.msg.name
+          }
+          this.log.canBase(message)
+          this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
+        }
       }
     } else {
       //非回传帧

@@ -281,6 +281,7 @@
             ['OS=="win"', {
                 'include_dirs': [
                     './vector/inc',
+                    "./../timer",
                     "<!@(node -p \"require('node-addon-api').include\")"
                 ],
                 'configurations': { },

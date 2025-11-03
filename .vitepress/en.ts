@@ -150,6 +150,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           link: '/docs/um/panel/index.md'
         },
         {
+          text: 'Plugin',
+          link: '/docs/um/plugin/plugin.md'
+        },
+        {
           text: 'Setting',
           items: [{ text: 'General', link: '/docs/um/setting/general.md' }]
         },
@@ -246,7 +250,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: 'Comp Test', link: '/docs/dev/test.md' },
         { text: 'Addon', link: '/docs/dev/addon.md' },
-        { text: 'Plugin', link: '/docs/dev/plugin.md' },        
+        { text: 'Plugin', link: '/docs/dev/plugin.md' },
         { text: 'Feature Request Process', link: '/docs/dev/feature.md' },
         { text: 'Releases Note', link: '/docs/dev/releases_note.md' }
       ]

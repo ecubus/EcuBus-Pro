@@ -391,17 +391,17 @@ const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
 
 const unitController = new TimeGraphUnitController(BigInt(1000))
-unitController.worldRenderFactor = 3
-unitController.numberTranslator = (theNumber: bigint) => {
-  let num = theNumber.toString()
-  if (num.length > 6) {
-    num = num.slice(0, -6) + ':' + num.slice(-6)
-  }
-  if (num.length > 3) {
-    num = num.slice(0, -3) + ':' + num.slice(-3)
-  }
-  return num
-}
+// unitController.worldRenderFactor = 3
+// unitController.numberTranslator = (theNumber: bigint) => {
+//   let num = theNumber.toString()
+//   if (num.length > 6) {
+//     num = num.slice(0, -6) + ':' + num.slice(-6)
+//   }
+//   if (num.length > 3) {
+//     num = num.slice(0, -3) + ':' + num.slice(-3)
+//   }
+//   return num
+// }
 
 let timeGraphChartContainer: TimeGraphContainer | null = null
 let rowController: TimeGraphRowController | null = null
@@ -652,6 +652,7 @@ async function initPixiGraph() {
     timeGraphChartCursors,
     timeGraphChartRangeEvents
   ])
+  const yUnitController = new TimeGraphUnitController(BigInt(1))
   verticalScrollContainer = new TimeGraphContainer(
     {
       width: 10,
@@ -659,7 +660,7 @@ async function initPixiGraph() {
       id: charid.value + '_vscroll',
       backgroundColor: 0xffffff
     },
-    unitController
+    yUnitController
   )
   vscrollLayer = new TimeGraphVerticalScrollbar(
     `timeGraphVerticalScrollbar-${charid.value}`,
@@ -713,6 +714,7 @@ watch(
     }
   }
 )
+let testTimer
 // Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
   // Wait for DOM to be ready
@@ -732,6 +734,14 @@ onMounted(() => {
   if (globalStart.value) {
     timer = setInterval(updateTime, 500)
   }
+  // testTimer = setInterval(() => {
+  //   unitController.absoluteRange = unitController.absoluteRange + BigInt(10)
+  //   unitController.viewRange = {
+  //     start: unitController.absoluteRange - BigInt(1000),
+  //     end: unitController.absoluteRange
+  //   }
+  //   // vscrollLayer?.update(true)
+  // }, 100)
 })
 
 watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
@@ -760,6 +770,11 @@ watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
 })
 
 onBeforeUnmount(() => {
+  if (testTimer) {
+    clearInterval(testTimer)
+    testTimer = null
+  }
+
   verticalScrollContainer?.destroy()
   verticalScrollContainer = null
   timeGraphChartContainer?.destroy()

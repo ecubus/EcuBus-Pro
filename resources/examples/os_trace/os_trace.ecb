@@ -2522,6 +2522,23 @@
           "h": 400
         },
         "isMax": false
+      },
+      "1712396f-dfa8-4dd7-82bb-c046ae3b927d_time": {
+        "pos": {
+          "x": 402,
+          "y": 67,
+          "w": 700,
+          "h": 566
+        },
+        "title": "osTime",
+        "label": "OSTime",
+        "id": "1712396f-dfa8-4dd7-82bb-c046ae3b927d_time",
+        "options": {
+          "params": {
+            "edit-index": "1712396f-dfa8-4dd7-82bb-c046ae3b927d_time"
+          },
+          "name": "Os_Trace"
+        }
       }
     }
   }

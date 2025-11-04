@@ -9,14 +9,14 @@ import { TimeGraphChartLayer } from './time-graph-chart-layer'
 import { TimeGraphRowController } from '../time-graph-row-controller'
 
 export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
-  protected navigatorHandle: TimeGraphVerticalScrollbarHandle
-  protected navigatorBackground: TimeGraphVerticalScrollbarBackground
+  protected navigatorHandle!: TimeGraphVerticalScrollbarHandle
+  protected navigatorBackground!: TimeGraphVerticalScrollbarBackground
   protected selectionRange?: TimeGraphRectangle
-  private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void }
-  private _verticalOffsetChangedHandler: () => void
-  private _totalHeightChangedHandler: () => void
+  private _contextMenuHandler!: { (e: MouseEvent): void; (event: Event): void }
+  private _verticalOffsetChangedHandler!: () => void
+  private _totalHeightChangedHandler!: () => void
 
-  protected factor: number
+  protected factor!: number
 
   constructor(
     id: string,
@@ -39,7 +39,7 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
     )
     this.addChild(this.navigatorBackground)
     this.addChild(this.navigatorHandle)
-    this._contextMenuHandler = (e: MouseEvent): void => {
+    this._contextMenuHandler = (e: MouseEvent | Event): void => {
       e.preventDefault()
     }
     this.onCanvasEvent('contextmenu', this._contextMenuHandler)
@@ -84,12 +84,12 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
 }
 
 export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
-  protected mouseIsDown: boolean
-  protected mouseStartY: number
-  protected oldVerticalOffset: number
+  protected mouseIsDown!: boolean
+  protected mouseStartY!: number
+  protected oldVerticalOffset!: number
 
-  protected height: number
-  protected position: TimeGraphElementPosition
+  protected height!: number
+  protected position!: TimeGraphElementPosition
   private _moveEndHandler
 
   constructor(

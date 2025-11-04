@@ -59,7 +59,7 @@
       </div>
       <div class="main">
         <div class="left">
-          <div class="core-container">
+          <div ref="leftContainerRef" class="core-container">
             <!-- Dynamic Core Sections -->
             <div v-for="core in coreConfigs" :key="core.id" class="core-section">
               <div class="core-label-vertical">
@@ -111,21 +111,13 @@
         <!-- DOM-based separator lines with higher z-index -->
 
         <div class="right">
-          <canvas :id="charid"></canvas>
-          <!-- Custom scrollbar overlay -->
-          <!-- <div v-show="scrollbarThumbWidth > 0" class="custom-scrollbar">
-            <div class="scrollbar-track">
-              <div
-                class="scrollbar-thumb"
-                :style="{
-                  left: scrollbarPosition + '%',
-                  width: scrollbarThumbWidth + '%'
-                }"
-                @mousedown="handleScrollbarMouseDown"
-              ></div>
-            </div>
-          </div> -->
+          <div style="display: flex; justify-content: center">
+            <canvas :id="charid"></canvas>
+            <div :id="`main-vscroll-${charid}`"></div>
+          </div>
+          <div :id="`main-navi-${charid}`"></div>
         </div>
+        <div class="divider"></div>
       </div>
     </div>
   </div>
@@ -144,7 +136,8 @@ import {
   watch,
   nextTick,
   watchEffect,
-  onBeforeUnmount
+  onBeforeUnmount,
+  defineExpose
 } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
@@ -168,6 +161,8 @@ import { TimeGraphRangeEventsLayer } from './timeline/layer/time-graph-range-eve
 import { TimeGraphRowController } from './timeline/time-graph-row-controller'
 import { TimelineChart } from './timeline/time-graph-model'
 import { TimeGraphStateStyle } from './timeline/components/time-graph-state'
+import { TimeGraphVerticalScrollbar } from './timeline/layer/time-graph-vertical-scrollbar'
+import { TimeGraphNavigator } from './timeline/layer/time-graph-navigator'
 // import { TestDataProvider } from './test-data-provider'
 const dataHandlerWorker = new DataHandlerWorker()
 dataHandlerWorker.onmessage = (event) => {
@@ -337,7 +332,7 @@ const coreConfigs = computed(() => {
   const configs: {
     id: number
     name: string
-    buttons: Array<{ name: string; color: string; id: number; type: number }>
+    buttons: Array<{ name: string; color: string; id: string; numberId: number }>
   }[] = []
   for (const task of orti.value.coreConfigs) {
     //check if core is already in configs
@@ -350,8 +345,8 @@ const coreConfigs = computed(() => {
           {
             name: task.name,
             color: task.color,
-            id: task.id,
-            type: task.type
+            id: `${task.coreId}_${task.id}_${task.type}`,
+            numberId: Number(task.coreId) * 1000000 + Number(task.id) * 1000 + Number(task.type) * 1
           }
         ]
       })
@@ -360,37 +355,41 @@ const coreConfigs = computed(() => {
       core.buttons.push({
         name: task.name,
         color: task.color,
-        id: task.id,
-        type: task.type
+        id: `${task.coreId}_${task.id}_${task.type}`,
+        numberId: Number(task.coreId) * 1000000 + Number(task.id) * 1000 + Number(task.type) * 1
       })
     }
   }
   return configs
 })
 
-// Computed property for total button count across all cores
-const totalButtons = computed(() => {
-  return coreConfigs.value.reduce((total, core) => total + core.buttons.length, 0)
+const coreConfigIds = computed(() => {
+  const ids: number[] = []
+  for (const core of coreConfigs.value) {
+    for (const button of core.buttons) {
+      ids.push(button.numberId)
+    }
+  }
+
+  return ids
 })
 
 const buttonHeight = 30
 
+// Ref for the left container (which contains core-container)
+const leftContainerRef = ref<HTMLElement | null>(null)
+
+// API methods to control y-axis offset
+const setYOffset = (offset: number) => {
+  if (leftContainerRef.value) {
+    leftContainerRef.value.scrollTop = offset
+  }
+}
+
 let visibleBlocks: VisibleBlock[] = []
-const graphWidth = computed(() => width.value - leftWidth.value - 1)
+const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
-// function updateTimeLine() {
-//   if (!pixiRenderer) return
 
-//   const currentTimeX = time.value
-//   // pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
-// }
-
-// watch([() => globalStart.value, () => time.value], () => {
-//   updateTimeLine()
-// })
-
-// const testDataProvider = new TestDataProvider(graphWidth.value);
-// let timeGraph = testDataProvider.getData({});
 const unitController = new TimeGraphUnitController(BigInt(1000))
 unitController.worldRenderFactor = 3
 unitController.numberTranslator = (theNumber: bigint) => {
@@ -403,11 +402,19 @@ unitController.numberTranslator = (theNumber: bigint) => {
   }
   return num
 }
-const styleMap = new Map<string, TimeGraphStateStyle>()
+
 let timeGraphChartContainer: TimeGraphContainer | null = null
 let rowController: TimeGraphRowController | null = null
 let timeGraphChart: TimeGraphChart | null = null
+
 async function initPixiGraph() {
+  if (timeGraphChartContainer) {
+    timeGraphChartContainer.destroy()
+    timeGraphChartContainer = null
+  }
+  if (rowController) {
+    rowController.removeVerticalOffsetChangedHandler(setYOffset)
+  }
   const canvas = document.getElementById(charid.value) as HTMLCanvasElement
   if (!canvas) return
   timeGraphChartContainer = new TimeGraphContainer(
@@ -423,7 +430,7 @@ async function initPixiGraph() {
   const providers: TimeGraphChartProviders = {
     rowProvider: () => {
       return {
-        rowIds: [1, 2, 3]
+        rowIds: coreConfigIds.value
       }
     },
     dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
@@ -434,11 +441,11 @@ async function initPixiGraph() {
       return {
         rows: [
           {
-            id: 1,
+            id: 0,
             name: 'Row 1',
             range: {
               start: BigInt(0),
-              end: BigInt(50)
+              end: BigInt(57)
             },
             data: {
               type: 'CPU',
@@ -446,10 +453,10 @@ async function initPixiGraph() {
             },
             states: [
               {
-                id: '1',
+                id: '0_0_0',
                 range: {
                   start: BigInt(3),
-                  end: BigInt(35)
+                  end: BigInt(55)
                 },
                 label: 'State 1',
                 data: {
@@ -463,7 +470,7 @@ async function initPixiGraph() {
             nextPossibleState: BigInt(0)
           },
           {
-            id: 2,
+            id: 1000,
             name: 'Row 1',
             range: {
               start: BigInt(0),
@@ -475,10 +482,68 @@ async function initPixiGraph() {
             },
             states: [
               {
-                id: 'el_2_0',
+                id: '0_1_0',
                 range: {
                   start: BigInt(0),
-                  end: BigInt(500)
+                  end: BigInt(600)
+                },
+                label: 'State 1',
+                data: {
+                  value: 4,
+                  style: {}
+                }
+              }
+            ],
+            annotations: [],
+            prevPossibleState: BigInt(0),
+            nextPossibleState: BigInt(0)
+          },
+          {
+            id: 3000,
+            name: 'Row 1',
+            range: {
+              start: BigInt(0),
+              end: BigInt(50)
+            },
+            data: {
+              type: 'CPU',
+              hasStates: true
+            },
+            states: [
+              {
+                id: '0_1_0',
+                range: {
+                  start: BigInt(0),
+                  end: BigInt(600)
+                },
+                label: 'State 1',
+                data: {
+                  value: 4,
+                  style: {}
+                }
+              }
+            ],
+            annotations: [],
+            prevPossibleState: BigInt(0),
+            nextPossibleState: BigInt(0)
+          },
+          {
+            id: 4000,
+            name: 'Row 1',
+            range: {
+              start: BigInt(0),
+              end: BigInt(50)
+            },
+            data: {
+              type: 'CPU',
+              hasStates: true
+            },
+            states: [
+              {
+                id: '0_1_0',
+                range: {
+                  start: BigInt(0),
+                  end: BigInt(100)
                 },
                 label: 'State 1',
                 data: {
@@ -497,33 +562,30 @@ async function initPixiGraph() {
       }
     },
     stateStyleProvider: (model: TimelineChart.TimeGraphState) => {
-      const styles: TimeGraphStateStyle[] = [
-        {
-          color: 0x11ad1b,
-          height: buttonHeight * 0.8
-        },
-        {
-          color: 0xbc2f00,
-          height: buttonHeight * 0.7
-        },
-        {
-          color: 0xccbf5d,
-          height: buttonHeight * 0.6
+      const stringColor2number = (color: string) => {
+        //rbg(xx,xx,xx)
+        const rgb = color.match(/rgb\((\d+),(\d+),(\d+)\)/)
+        if (rgb) {
+          return parseInt(rgb[1]) * 65536 + parseInt(rgb[2]) * 256 + parseInt(rgb[3])
         }
-      ]
-      let style: TimeGraphStateStyle | undefined = styles[0]
-      if (model.data && model.data.value) {
-        const val = model.data.value
-        style = styleMap.get(val)
-        if (!style) {
-          style = styles[styleMap.size % styles.length]
-          styleMap.set(val, style)
-        }
+        return parseInt(color.replace('#', ''), 16)
       }
 
+      for (const core of coreConfigs.value) {
+        for (const button of core.buttons) {
+          if (button.id === model.id) {
+            return {
+              color: stringColor2number(button.color),
+              height: buttonHeight,
+              borderWidth: model.selected ? 1 : 0,
+              minWidthForLabels: 100
+            }
+          }
+        }
+      }
       return {
-        color: style.color,
-        height: style.height,
+        color: 0x000000,
+        height: buttonHeight,
         borderWidth: model.selected ? 1 : 0,
         minWidthForLabels: 100
       }
@@ -549,13 +611,20 @@ async function initPixiGraph() {
 
   // const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', buttonHeight.value)
 
-  rowController = new TimeGraphRowController(buttonHeight, graphHeight.value)
+  rowController = new TimeGraphRowController(
+    buttonHeight,
+    buttonHeight * coreConfigIds.value.length
+  )
+  rowController.onVerticalOffsetChangedHandler(setYOffset)
 
-  timeGraphChart = new TimeGraphChart('timeGraphChart', providers, rowController)
+  timeGraphChart = new TimeGraphChart(`timeGraphChart-${charid.value}`, providers, rowController)
   // const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
-  const timeGraphSelectionRange = new TimeGraphChartSelectionRange('chart-selection-range', {
-    color: 0xff0000
-  })
+  const timeGraphSelectionRange = new TimeGraphChartSelectionRange(
+    `chart-selection-range-${charid.value}`,
+    {
+      color: 0xff0000
+    }
+  )
   const timeGraphChartCursors = new TimeGraphChartCursors(
     'chart-cursors',
     timeGraphChart,
@@ -563,7 +632,7 @@ async function initPixiGraph() {
     { color: 0xff0000 }
   )
   const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
-    'timeGraphChartRangeEvents',
+    `timeGraphChartRangeEvents-${charid.value}`,
     providers
   )
 
@@ -573,100 +642,41 @@ async function initPixiGraph() {
     timeGraphChartCursors,
     timeGraphChartRangeEvents
   ])
-  // timeGraphChartArrows.addArrows([], [1,2,3]);
-
-  // try {
-  //   pixiRenderer = await PixiGraphRenderer.create(canvas, config)
-
-  //   // Calculate scrollbar thumb width based on viewport
-  //   const updateScrollbarThumbWidth = () => {
-  //     if (pixiRenderer) {
-  //       const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-  //       const visibleRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-  //       if (totalRange > 0) {
-  //         scrollbarThumbWidth.value = Math.max(5, Math.min(100, (visibleRange / totalRange) * 100))
-  //       }
-  //     }
-  //   }
-
-  //   // Set scale change callback
-  //   pixiRenderer.setOnScaleChange((scale: number) => {
-  //     timeSpan.value = scale
-  //     timeSpanSliderValue.value = timeSpanToSliderValue(scale)
-  //     updateScrollbarThumbWidth()
-  //   })
-
-  //   // Set pan percentage change callback
-  //   pixiRenderer.setOnPanPercentageChange((percentage: number) => {
-  //     updateScrollbarThumbWidth()
-  //     if (!isScrollbarDragging) {
-  //       scrollbarPosition.value = percentage
-  //     }
-  //   })
-
-  //   pixiRenderer.setBlocks(visibleBlocks)
-  //   // pixiRenderer.updateViewport(7, 10)
-
-  //   // Initialize time span from viewport
-  //   const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-  //   timeSpan.value = initialSpan
-  //   timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
-  //   handleTimeSpanChange(timeSpanSliderValue.value, true)
-
-  //   // Initialize scrollbar
-  //   updateScrollbarThumbWidth()
-  // } catch (error) {
-  //   console.error('Failed to initialize Pixi renderer:', error)
+  const verticalScrollContainer = new TimeGraphContainer(
+    {
+      width: 10,
+      height: graphHeight.value,
+      id: charid.value + '_vscroll',
+      backgroundColor: 0xffffff
+    },
+    unitController
+  )
+  const vscroll = new TimeGraphVerticalScrollbar(
+    `timeGraphVerticalScrollbar-${charid.value}`,
+    rowController
+  )
+  verticalScrollContainer.addLayers([vscroll])
+  const vscrollElement = document.getElementById(`main-vscroll-${charid.value}`) as HTMLElement
+  if (vscrollElement) {
+    vscrollElement.appendChild(verticalScrollContainer.canvas)
+  }
+  // //
+  // const naviContainer = new TimeGraphContainer(
+  //   {
+  //     width: graphWidth.value,
+  //     height: 10,
+  //     id: `navi-${charid.value}`,
+  //     backgroundColor: 0xffffff
+  //   },
+  //   unitController
+  // )
+  // const navi = new TimeGraphNavigator(`timeGraphNavigator-${charid.value}`)
+  // naviContainer.addLayers([navi])
+  // const naviElement = document.getElementById(`main-navi-${charid.value}`) as HTMLElement
+  // if (naviElement) {
+  //   naviElement.appendChild(naviContainer.canvas)
   // }
 }
-
-// Scrollbar mouse handlers
-// const handleScrollbarMouseDown = (event: MouseEvent) => {
-//   isScrollbarDragging = true
-//   scrollbarDragStartX = event.clientX
-//   scrollbarDragStartPosition = scrollbarPosition.value
-
-//   const handleMouseMove = (e: MouseEvent) => {
-//     if (!isScrollbarDragging || !pixiRenderer) return
-
-//     const canvas = document.getElementById(charid.value) as HTMLCanvasElement
-//     if (!canvas) return
-
-//     const canvasRect = canvas.getBoundingClientRect()
-//     const canvasWidth = canvasRect.width
-//     const deltaX = e.clientX - scrollbarDragStartX
-//     const deltaPercentage = (deltaX / canvasWidth) * 100
-
-//     let newPosition = scrollbarDragStartPosition + deltaPercentage
-
-//     // Clamp position to valid range considering thumb width
-//     newPosition = Math.max(0, Math.min(100 - scrollbarThumbWidth.value, newPosition))
-
-//     scrollbarPosition.value = newPosition
-
-//     // Update renderer viewport based on scrollbar position
-//     const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-//     const viewportRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-//     const newMinX = pixiRenderer.viewport.minTs + (newPosition / 100) * totalRange
-//     const newMaxX = newMinX + viewportRange
-
-//     pixiRenderer.updateViewport(newMinX, newMaxX)
-//   }
-
-//   const handleMouseUp = () => {
-//     isScrollbarDragging = false
-//     document.removeEventListener('mousemove', handleMouseMove)
-//     document.removeEventListener('mouseup', handleMouseUp)
-//   }
-
-//   document.addEventListener('mousemove', handleMouseMove)
-//   document.addEventListener('mouseup', handleMouseUp)
-// }
-
-// Example usage (commented out):
-// To add a new core: addCore(2, 'Core 2', [{ name: 'NewTask', color: '#e67e22' }])
-// To remove a core: removeCore(1)
-// To add button to existing core: addButtonToCore(0, { name: 'NewButton', color: '#8e44ad' })
 
 // Arrow click handler - shared function for both left and right arrows
 const handleArrowClick = (
@@ -721,11 +731,9 @@ watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
 })
 
 onBeforeUnmount(() => {
-  // Cleanup pixi renderer
-  // if (pixiRenderer) {
-  //   pixiRenderer.destroy()
-  //   pixiRenderer = null
-  // }
+  if (rowController) {
+    rowController.removeVerticalOffsetChangedHandler(setYOffset)
+  }
 })
 onUnmounted(() => {
   dataHandlerWorker.terminate()
@@ -835,6 +843,16 @@ onUnmounted(() => {
   color: var(--el-text-color-primary);
   transform: rotate(180deg);
   white-space: nowrap;
+}
+
+.divider {
+  position: absolute;
+  left: 0;
+  top: v-bind(height-45 + 'px');
+  width: v-bind(width + 'px');
+  height: 1px;
+  background-color: var(--el-border-color);
+  z-index: 1000;
 }
 
 .button-group {

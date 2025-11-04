@@ -406,11 +406,21 @@ unitController.numberTranslator = (theNumber: bigint) => {
 let timeGraphChartContainer: TimeGraphContainer | null = null
 let rowController: TimeGraphRowController | null = null
 let timeGraphChart: TimeGraphChart | null = null
+let verticalScrollContainer: TimeGraphContainer | null = null
+let vscrollLayer: TimeGraphVerticalScrollbar | null = null
 
 async function initPixiGraph() {
   if (timeGraphChartContainer) {
     timeGraphChartContainer.destroy()
     timeGraphChartContainer = null
+  }
+  if (vscrollLayer) {
+    vscrollLayer.destroy()
+    vscrollLayer = null
+  }
+  if (verticalScrollContainer) {
+    verticalScrollContainer.destroy()
+    verticalScrollContainer = null
   }
   if (rowController) {
     rowController.removeVerticalOffsetChangedHandler(setYOffset)
@@ -642,7 +652,7 @@ async function initPixiGraph() {
     timeGraphChartCursors,
     timeGraphChartRangeEvents
   ])
-  const verticalScrollContainer = new TimeGraphContainer(
+  verticalScrollContainer = new TimeGraphContainer(
     {
       width: 10,
       height: graphHeight.value,
@@ -651,11 +661,11 @@ async function initPixiGraph() {
     },
     unitController
   )
-  const vscroll = new TimeGraphVerticalScrollbar(
+  vscrollLayer = new TimeGraphVerticalScrollbar(
     `timeGraphVerticalScrollbar-${charid.value}`,
     rowController
   )
-  verticalScrollContainer.addLayers([vscroll])
+  verticalScrollContainer.addLayers([vscrollLayer])
   const vscrollElement = document.getElementById(`main-vscroll-${charid.value}`) as HTMLElement
   if (vscrollElement) {
     vscrollElement.appendChild(verticalScrollContainer.canvas)
@@ -727,10 +737,38 @@ onMounted(() => {
 watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
   // rowController!.rowHeight = val1[2];
   timeGraphChartContainer?.updateCanvas(val1[0], val1[1])
+
+  verticalScrollContainer?.updateCanvas(10, val1[1])
+  // if(rowController){
+  //   rowController.verticalOffset=0
+  // }
+  if (vscrollLayer) {
+    vscrollLayer.update(true)
+  }
+  verticalScrollContainer?.updateCanvas(10, val1[1])
+  // nextTick(() => {
+  //   if(rowController){
+
+  //     vscrollLayer = new TimeGraphVerticalScrollbar(
+  //       `timeGraphVerticalScrollbar-${charid.value}`,
+  //       rowController
+  //     )
+  //     verticalScrollContainer?.addLayers([vscrollLayer])
+  //   }
+  // })
   // timeGraphChart!.update();
 })
 
 onBeforeUnmount(() => {
+  verticalScrollContainer?.destroy()
+  verticalScrollContainer = null
+  timeGraphChartContainer?.destroy()
+  timeGraphChartContainer = null
+
+  if (vscrollLayer) {
+    vscrollLayer.destroy()
+    vscrollLayer = null
+  }
   if (rowController) {
     rowController.removeVerticalOffsetChangedHandler(setYOffset)
   }

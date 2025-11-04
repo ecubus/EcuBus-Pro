@@ -64,7 +64,22 @@ export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
     }
   }
 
-  update() {
+  update(updateFactor: boolean = false) {
+    //fix height change issue
+    if (updateFactor) {
+      this.updateFactor()
+      this.navigatorHandle.updateFactor(this.factor)
+      this.navigatorBackground.updateFactor(this.factor)
+      if (
+        this.rowController.totalHeight - this.rowController.verticalOffset <=
+        this.stateController.canvasDisplayHeight
+      ) {
+        this.rowController.verticalOffset = Math.max(
+          0,
+          this.rowController.totalHeight - this.stateController.canvasDisplayHeight
+        )
+      }
+    }
     this.navigatorHandle.clear()
     this.navigatorHandle.render()
     this.navigatorBackground.clear()

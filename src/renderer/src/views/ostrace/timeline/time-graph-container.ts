@@ -116,7 +116,6 @@ export class TimeGraphContainer {
 
     this.layers.forEach((l) => l.update(opts))
   }
-
   addLayers(layers: TimeGraphLayer[]) {
     layers.forEach((layer) => this.addLayer(layer))
   }

@@ -48,10 +48,10 @@ export interface TimeGraphParentComponent {
 
 export abstract class TimeGraphComponent<T> {
   protected _displayObject: PIXI.Graphics
-  protected _model: T
-  protected _options: TimeGraphComponentOptions
+  protected _model!: T
+  protected _options!: TimeGraphComponentOptions
 
-  protected graphicsData: PIXI.GraphicsData
+  protected graphicsData!: PIXI.GraphicsData
 
   constructor(
     protected _id: string,

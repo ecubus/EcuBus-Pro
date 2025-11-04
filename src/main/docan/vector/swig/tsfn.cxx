@@ -15,9 +15,6 @@ class VectorBus : public BusABC {
       : portHandle_(portHandle), channelMask_(channelMask), canfd_(canfd) {}
     
     void send(const CanMessage& msg) override {
-      printf("[VectorBus::send] CAN ID: 0x%X, DLC: %zu, canfd: %d\n", 
-             msg.arbitration_id, msg.data.size(), msg.canfd);
-      fflush(stdout);
       unsigned int canId = msg.arbitration_id;
       unsigned int flag = 0;      
       if (canfd_) {        
@@ -68,14 +65,8 @@ class VectorBus : public BusABC {
         
         unsigned int messageCount = 1;
         unsigned int cntSent = 1;
-        XLstatus status = xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
-        if (status != XL_SUCCESS) {
-          printf("[VectorBus::send] xlCanTransmitEx failed: 0x%08X, cntSent: %u\n", status, cntSent);
-          fflush(stdout);
-        } else {
-          printf("[VectorBus::send] xlCanTransmitEx success, cntSent: %u\n", cntSent);
-          fflush(stdout);
-        }
+        xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
+        
       } else {
         // Standard CAN message using xlCanTransmit
         XLevent       xlEvent;
@@ -103,14 +94,8 @@ class VectorBus : public BusABC {
         }
         
         unsigned int cntSent = 1;
-        XLstatus status = xlCanTransmit(portHandle_, channelMask_, &cntSent, &xlEvent);
-        if (status != XL_SUCCESS) {
-          printf("[VectorBus::send] xlCanTransmit failed: 0x%08X, cntSent: %u\n", status, cntSent);
-          fflush(stdout);
-        } else {
-          printf("[VectorBus::send] xlCanTransmit success, cntSent: %u\n", cntSent);
-          fflush(stdout);
-        }
+        xlCanTransmit(portHandle_, channelMask_, &cntSent, &xlEvent);
+        
       }
     }
     

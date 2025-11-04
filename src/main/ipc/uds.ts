@@ -694,7 +694,7 @@ const timerMap = new Map<string, timerType>()
 export function globalStop(emit = false) {
   stopPlugins()
   //clear all timer
-  logQ.stopTimer()
+
   clearTimeout(timer)
   udsTesterMap.forEach((value) => {
     value.close()

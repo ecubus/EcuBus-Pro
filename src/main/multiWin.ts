@@ -29,7 +29,7 @@ class LogQueue {
       this.mainWin = win
     }
   }
-  startTimer() {
+  protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
         this.mainWin!.webContents.send('ipc-log', this.list)
@@ -37,7 +37,7 @@ class LogQueue {
       }
     }, this.period)
   }
-  stopTimer() {
+  protected stopTimer() {
     clearInterval(this.timer)
     this.list = []
   }

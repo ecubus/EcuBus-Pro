@@ -31,12 +31,12 @@
             </el-button>
           </el-tooltip>
 
-          <el-divider direction="vertical"></el-divider>
+          <!-- <el-divider direction="vertical"></el-divider>
           <el-tooltip effect="light" content="Save Trace To File" placement="bottom">
             <el-button link type="primary">
               <Icon :icon="saveIcon" />
             </el-button>
-          </el-tooltip>
+          </el-tooltip> -->
         </el-button-group>
         <!-- 滚动控制 -->
         <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
@@ -101,10 +101,10 @@
             <div class="hint-item">
               <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to zoom
             </div>
-            <div class="hint-item">
+            <!-- <div class="hint-item">
               <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" />/
               <kbd>Drag</kbd> to shift
-            </div>
+            </div> -->
           </div>
         </div>
         <div :id="`Shift-${charid}`" class="shift"></div>
@@ -115,6 +115,7 @@
             <canvas :id="charid"></canvas>
             <div :id="`main-vscroll-${charid}`"></div>
           </div>
+          <div :id="`main-timer-${charid}`"></div>
           <div :id="`main-navi-${charid}`"></div>
         </div>
         <div class="divider"></div>
@@ -163,10 +164,49 @@ import { TimelineChart } from './timeline/time-graph-model'
 import { TimeGraphStateStyle } from './timeline/components/time-graph-state'
 import { TimeGraphVerticalScrollbar } from './timeline/layer/time-graph-vertical-scrollbar'
 import { TimeGraphNavigator } from './timeline/layer/time-graph-navigator'
+import { TimeGraphAxisCursors } from './timeline/layer/time-graph-axis-cursors'
+import { TimeGraphAxis } from './timeline/layer/time-graph-axis'
+import { cloneDeep } from 'lodash'
 // import { TestDataProvider } from './test-data-provider'
 const dataHandlerWorker = new DataHandlerWorker()
+let offlineLoading: any = null
+const workerRowIds = ref<number[]>([])
+let pendingDataResolve:
+  | (
+      | undefined
+      | ((data: {
+          rows: TimelineChart.TimeGraphRowModel[]
+          range: TimelineChart.TimeGraphRange
+          resolution: number
+        }) => void)
+    )
+  | null = null
 dataHandlerWorker.onmessage = (event) => {
-  console.log('dataHandlerWorker', event.data)
+  const msg = event.data
+  if (!msg || !msg.type) return
+  if (msg.type === 'loaded') {
+    if (offlineLoading) {
+      offlineLoading.close()
+      offlineLoading = null
+    }
+    workerRowIds.value = msg.payload.rowIds || []
+
+    unitController.absoluteRange = BigInt(msg.payload.totalLength || 0)
+    unitController.viewRange = {
+      start: BigInt(0),
+      end: BigInt(msg.payload.totalLength || 0)
+    }
+    if (rowController) {
+      rowController.totalHeight = buttonHeight * workerRowIds.value.length
+    }
+    // console.log('unitController.absoluteRange', unitController.absoluteRange)
+    // initPixiGraph(unitController.absoluteRange)
+  } else if (msg.type === 'data') {
+    console.log('msg.payload', msg.payload)
+    const resolver = pendingDataResolve
+    pendingDataResolve = null
+    if (resolver) resolver(msg.payload)
+  }
 }
 const isPaused = ref(false)
 const leftWidth = ref(200)
@@ -280,39 +320,22 @@ const globalStart = useGlobalStart()
 const project = useProjectStore()
 
 async function loadOfflineTrace() {
-  const loading = ElLoading.service({ fullscreen: true })
-  visibleBlocks = []
-  try {
-    const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      defaultPath: project.projectInfo.path,
-      title: 'Offline Trace File',
-      properties: ['openFile'],
-      filters: [{ name: 'excel', extensions: ['xlsx'] }]
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.csv,text/csv'
+  input.style.display = 'none'
+  document.body.appendChild(input)
+  input.onchange = () => {
+    const file = input.files && input.files[0]
+    document.body.removeChild(input)
+    if (!file) return
+    offlineLoading = ElLoading.service({ fullscreen: true })
+    dataHandlerWorker.postMessage({
+      type: 'loadCsv',
+      payload: { file, cpuFreq: orti.value.cpuFreq }
     })
-    const file = r.filePaths[0]
-    if (file) {
-      const res = await window.electron.ipcRenderer.invoke(
-        'ipc-ostrace-parse-excel',
-        file,
-        orti.value.cpuFreq
-      )
-      visibleBlocks = res.blocks
-
-      // if (pixiRenderer) {
-      //   pixiRenderer.setBlocks(visibleBlocks)
-      //   const startTs = visibleBlocks[0].start
-      //   const span = MAX_TIME_SPAN
-
-      //   timeSpan.value = span
-      //   timeSpanSliderValue.value = timeSpanToSliderValue(span)
-      //   handleTimeSpanChange(timeSpanSliderValue.value, true)
-      // }
-    }
-  } catch (error) {
-    console.error(error)
-  } finally {
-    loading.close()
   }
+  input.click()
 }
 // 确保定时器时间间隔与graph.vue保持一致
 watch(globalStart, (val) => {
@@ -363,17 +386,6 @@ const coreConfigs = computed(() => {
   return configs
 })
 
-const coreConfigIds = computed(() => {
-  const ids: number[] = []
-  for (const core of coreConfigs.value) {
-    for (const button of core.buttons) {
-      ids.push(button.numberId)
-    }
-  }
-
-  return ids
-})
-
 const buttonHeight = 30
 
 // Ref for the left container (which contains core-container)
@@ -386,30 +398,109 @@ const setYOffset = (offset: number) => {
   }
 }
 
-let visibleBlocks: VisibleBlock[] = []
+const visibleBlocks: VisibleBlock[] = []
 const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
-
 const unitController = new TimeGraphUnitController(BigInt(1000))
-// unitController.worldRenderFactor = 3
-// unitController.numberTranslator = (theNumber: bigint) => {
-//   let num = theNumber.toString()
-//   if (num.length > 6) {
-//     num = num.slice(0, -6) + ':' + num.slice(-6)
-//   }
-//   if (num.length > 3) {
-//     num = num.slice(0, -3) + ':' + num.slice(-3)
-//   }
-//   return num
-// }
+unitController.worldRenderFactor = 1
+unitController.numberTranslator = (theNumber: bigint) => {
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
+
+  const span = unitController.viewRangeLength
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    // scale remainder to the requested decimal places
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    // trim trailing zeros for cleaner labels
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  // Decide unit based on current view span; input is microseconds (us)
+  if (span >= MICRO_IN_S) {
+    // seconds, keep up to milliseconds precision
+    return formatWithUnit(theNumber, MICRO_IN_S, 3, 's')
+  } else if (span >= MICRO_IN_MS) {
+    // milliseconds, keep up to microseconds precision (3 decimals)
+    return formatWithUnit(theNumber, MICRO_IN_MS, 3, 'ms')
+  }
+  // default: microseconds
+  return `${theNumber.toString()}us`
+}
 
 let timeGraphChartContainer: TimeGraphContainer | null = null
 let rowController: TimeGraphRowController | null = null
 let timeGraphChart: TimeGraphChart | null = null
 let verticalScrollContainer: TimeGraphContainer | null = null
 let vscrollLayer: TimeGraphVerticalScrollbar | null = null
+let timeGraphAxisContainer: TimeGraphContainer | null = null
+let timeAxisLayer: TimeGraphAxis | null = null
+let naviLayer: TimeGraphNavigator | null = null
+let naviContainer: TimeGraphContainer | null = null
+function colorStringToNumber(color: string): number {
+  if (!color) return 0x000000
+  const trimmed = color.trim()
+  const rgb = trimmed.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i)
+  if (rgb) {
+    const r = parseInt(rgb[1], 10)
+    const g = parseInt(rgb[2], 10)
+    const b = parseInt(rgb[3], 10)
+    return (r << 16) + (g << 8) + b
+  }
+  const hex = trimmed.startsWith('#') ? trimmed.slice(1) : trimmed
+  if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+    return parseInt(hex, 16)
+  }
+  // Fallback black if unparsable
+  return 0x000000
+}
+function getCssVar(varName: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+}
+function getColorFromCssVar(cssVar: string, fallback: string): number {
+  const value = getCssVar(cssVar) || fallback
+  return colorStringToNumber(value)
+}
+const styleConfig = {
+  // Canvas and layer backgrounds (Element Plus vars)
+  chartBackgroundColor: getColorFromCssVar('--el-bg-color', '#ffffff'),
+  vscrollWidth: 10,
+  vscrollBackgroundColor: getColorFromCssVar('--el-color-info-light-7', '#ffffff'),
+  axisHeight: 20,
+  axisBackgroundColor: getColorFromCssVar('--el-bg-color', '#ffffff'),
+  axisColor: getColorFromCssVar('--el-text-color-primary', '#303133'),
+  axisVerticalAlign: 'top' as 'top' | 'bottom',
+  navigatorHeight: 18,
+  navigatorBackgroundColor: getColorFromCssVar('--el-color-info-light-7', '#ffffff'),
 
-async function initPixiGraph() {
+  // Interaction layers
+  selectionRangeColor: getColorFromCssVar('--el-color-primary', '#409EFF'),
+  cursorsColor: getColorFromCssVar('--el-color-primary', '#409EFF'),
+
+  // Row styles
+  rowBackgroundColor: getColorFromCssVar('--el-fill-color-lighter', '#f5f7fa'),
+  rowBackgroundOpacitySelected: 0.6,
+  rowLineColorHasStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
+  rowLineColorNoStates: getColorFromCssVar('--el-color-danger', '#F56C6C'),
+  rowLineThicknessHasStates: 1,
+  rowLineThicknessNoStates: 3
+}
+function destroyGraph() {
   if (timeGraphChartContainer) {
     timeGraphChartContainer.destroy()
     timeGraphChartContainer = null
@@ -425,6 +516,18 @@ async function initPixiGraph() {
   if (rowController) {
     rowController.removeVerticalOffsetChangedHandler(setYOffset)
   }
+  if (timeAxisLayer) {
+    timeAxisLayer.destroy()
+    timeAxisLayer = null
+  }
+  if (timeGraphAxisContainer) {
+    timeGraphAxisContainer.destroy()
+    timeGraphAxisContainer = null
+  }
+}
+async function initPixiGraph() {
+  destroyGraph()
+
   const canvas = document.getElementById(charid.value) as HTMLCanvasElement
   if (!canvas) return
   timeGraphChartContainer = new TimeGraphContainer(
@@ -432,7 +535,7 @@ async function initPixiGraph() {
       id: charid.value,
       height: graphHeight.value,
       width: graphWidth.value,
-      backgroundColor: 0xffffff
+      backgroundColor: styleConfig.chartBackgroundColor
     },
     unitController,
     canvas
@@ -440,136 +543,22 @@ async function initPixiGraph() {
   const providers: TimeGraphChartProviders = {
     rowProvider: () => {
       return {
-        rowIds: coreConfigIds.value
+        rowIds: workerRowIds.value
       }
     },
     dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
-      const newRange: TimelineChart.TimeGraphRange = range
-      const newResolution: number = resolution * 0.1
-      // timeGraph = testDataProvider.getData({ range: newRange, resolution: newResolution });
-      // console.log(timeGraph);
-      return {
-        rows: [
-          {
-            id: 0,
-            name: 'Row 1',
-            range: {
-              start: BigInt(0),
-              end: BigInt(57)
-            },
-            data: {
-              type: 'CPU',
-              hasStates: true
-            },
-            states: [
-              {
-                id: '0_0_0',
-                range: {
-                  start: BigInt(3),
-                  end: BigInt(55)
-                },
-                label: 'State 1',
-                data: {
-                  value: 4,
-                  style: {}
-                }
-              }
-            ],
-            annotations: [],
-            prevPossibleState: BigInt(0),
-            nextPossibleState: BigInt(0)
-          },
-          {
-            id: 1000,
-            name: 'Row 1',
-            range: {
-              start: BigInt(0),
-              end: BigInt(50)
-            },
-            data: {
-              type: 'CPU',
-              hasStates: true
-            },
-            states: [
-              {
-                id: '0_1_0',
-                range: {
-                  start: BigInt(0),
-                  end: BigInt(600)
-                },
-                label: 'State 1',
-                data: {
-                  value: 4,
-                  style: {}
-                }
-              }
-            ],
-            annotations: [],
-            prevPossibleState: BigInt(0),
-            nextPossibleState: BigInt(0)
-          },
-          {
-            id: 3000,
-            name: 'Row 1',
-            range: {
-              start: BigInt(0),
-              end: BigInt(50)
-            },
-            data: {
-              type: 'CPU',
-              hasStates: true
-            },
-            states: [
-              {
-                id: '0_1_0',
-                range: {
-                  start: BigInt(0),
-                  end: BigInt(600)
-                },
-                label: 'State 1',
-                data: {
-                  value: 4,
-                  style: {}
-                }
-              }
-            ],
-            annotations: [],
-            prevPossibleState: BigInt(0),
-            nextPossibleState: BigInt(0)
-          },
-          {
-            id: 4000,
-            name: 'Row 1',
-            range: {
-              start: BigInt(0),
-              end: BigInt(50)
-            },
-            data: {
-              type: 'CPU',
-              hasStates: true
-            },
-            states: [
-              {
-                id: '0_1_0',
-                range: {
-                  start: BigInt(0),
-                  end: BigInt(100)
-                },
-                label: 'State 1',
-                data: {
-                  value: 4,
-                  style: {}
-                }
-              }
-            ],
-            annotations: [],
-            prevPossibleState: BigInt(0),
-            nextPossibleState: BigInt(0)
-          }
-        ],
-        range: newRange,
-        resolution: newResolution
-      }
+      return new Promise<{
+        rows: TimelineChart.TimeGraphRowModel[]
+        range: TimelineChart.TimeGraphRange
+        resolution: number
+      }>((resolve) => {
+        pendingDataResolve = resolve
+
+        dataHandlerWorker.postMessage({
+          type: 'getData',
+          payload: { range, resolution, rowIds: cloneDeep(workerRowIds.value) }
+        })
+      })
     },
     stateStyleProvider: (model: TimelineChart.TimeGraphState) => {
       const stringColor2number = (color: string) => {
@@ -602,10 +591,16 @@ async function initPixiGraph() {
     },
     rowStyleProvider: (row?: TimelineChart.TimeGraphRowModel) => {
       return {
-        backgroundColor: 0xe0ddcf,
-        backgroundOpacity: row?.selected ? 0.6 : 0,
-        lineColor: row?.data && row?.data.hasStates ? 0xdddddd : 0xaa4444,
-        lineThickness: row?.data && row?.data.hasStates ? 1 : 3
+        backgroundColor: styleConfig.rowBackgroundColor,
+        backgroundOpacity: row?.selected ? styleConfig.rowBackgroundOpacitySelected : 0,
+        lineColor:
+          row?.data && row?.data.hasStates
+            ? styleConfig.rowLineColorHasStates
+            : styleConfig.rowLineColorNoStates,
+        lineThickness:
+          row?.data && row?.data.hasStates
+            ? styleConfig.rowLineThicknessHasStates
+            : styleConfig.rowLineThicknessNoStates
       }
     },
     rowAnnotationStyleProvider: (annotation: TimelineChart.TimeGraphAnnotation) => {
@@ -621,10 +616,7 @@ async function initPixiGraph() {
 
   // const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', buttonHeight.value)
 
-  rowController = new TimeGraphRowController(
-    buttonHeight,
-    buttonHeight * coreConfigIds.value.length
-  )
+  rowController = new TimeGraphRowController(buttonHeight, buttonHeight * workerRowIds.value.length)
   rowController.onVerticalOffsetChangedHandler(setYOffset)
 
   timeGraphChart = new TimeGraphChart(`timeGraphChart-${charid.value}`, providers, rowController)
@@ -632,14 +624,14 @@ async function initPixiGraph() {
   const timeGraphSelectionRange = new TimeGraphChartSelectionRange(
     `chart-selection-range-${charid.value}`,
     {
-      color: 0xff0000
+      color: styleConfig.selectionRangeColor
     }
   )
   const timeGraphChartCursors = new TimeGraphChartCursors(
-    'chart-cursors',
+    `chart-cursors-${charid.value}`,
     timeGraphChart,
     rowController,
-    { color: 0xff0000 }
+    { color: styleConfig.cursorsColor }
   )
   const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
     `timeGraphChartRangeEvents-${charid.value}`,
@@ -655,10 +647,10 @@ async function initPixiGraph() {
   const yUnitController = new TimeGraphUnitController(BigInt(1))
   verticalScrollContainer = new TimeGraphContainer(
     {
-      width: 10,
+      width: styleConfig.vscrollWidth,
       height: graphHeight.value,
       id: charid.value + '_vscroll',
-      backgroundColor: 0xffffff
+      backgroundColor: styleConfig.vscrollBackgroundColor
     },
     yUnitController
   )
@@ -671,22 +663,42 @@ async function initPixiGraph() {
   if (vscrollElement) {
     vscrollElement.appendChild(verticalScrollContainer.canvas)
   }
-  // //
-  // const naviContainer = new TimeGraphContainer(
-  //   {
-  //     width: graphWidth.value,
-  //     height: 10,
-  //     id: `navi-${charid.value}`,
-  //     backgroundColor: 0xffffff
-  //   },
-  //   unitController
-  // )
-  // const navi = new TimeGraphNavigator(`timeGraphNavigator-${charid.value}`)
-  // naviContainer.addLayers([navi])
-  // const naviElement = document.getElementById(`main-navi-${charid.value}`) as HTMLElement
-  // if (naviElement) {
-  //   naviElement.appendChild(naviContainer.canvas)
-  // }
+
+  // time axis
+  timeGraphAxisContainer = new TimeGraphContainer(
+    {
+      width: graphWidth.value,
+      height: styleConfig.axisHeight,
+      id: `main-timer-${charid.value}`,
+      backgroundColor: styleConfig.axisBackgroundColor
+    },
+    unitController
+  )
+  const timerElement = document.getElementById(`main-timer-${charid.value}`) as HTMLElement
+  if (timerElement) {
+    timerElement.appendChild(timeGraphAxisContainer.canvas)
+
+    timeAxisLayer = new TimeGraphAxis(`timeGraphAxis-${charid.value}`, {
+      color: styleConfig.axisColor,
+      verticalAlign: styleConfig.axisVerticalAlign
+    })
+    timeGraphAxisContainer.addLayers([timeAxisLayer])
+  }
+  naviContainer = new TimeGraphContainer(
+    {
+      width: graphWidth.value,
+      height: styleConfig.navigatorHeight,
+      id: `main-navi-${charid.value}`,
+      backgroundColor: styleConfig.navigatorBackgroundColor
+    },
+    unitController
+  )
+  const naviElement = document.getElementById(`main-navi-${charid.value}`) as HTMLElement
+  if (naviElement) {
+    naviElement.appendChild(naviContainer.canvas)
+  }
+  naviLayer = new TimeGraphNavigator(`timeGraphNavigator-${charid.value}`)
+  naviContainer.addLayers([naviLayer])
 }
 
 // Arrow click handler - shared function for both left and right arrows
@@ -747,48 +759,19 @@ onMounted(() => {
 watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
   // rowController!.rowHeight = val1[2];
   timeGraphChartContainer?.updateCanvas(val1[0], val1[1])
-
-  verticalScrollContainer?.updateCanvas(10, val1[1])
-  // if(rowController){
-  //   rowController.verticalOffset=0
-  // }
-  if (vscrollLayer) {
-    vscrollLayer.update(true)
-  }
-  verticalScrollContainer?.updateCanvas(10, val1[1])
-  // nextTick(() => {
-  //   if(rowController){
-
-  //     vscrollLayer = new TimeGraphVerticalScrollbar(
-  //       `timeGraphVerticalScrollbar-${charid.value}`,
-  //       rowController
-  //     )
-  //     verticalScrollContainer?.addLayers([vscrollLayer])
-  //   }
-  // })
-  // timeGraphChart!.update();
+  verticalScrollContainer?.updateCanvas(styleConfig.vscrollWidth, val1[1])
+  vscrollLayer?.update(true)
+  verticalScrollContainer?.updateCanvas(styleConfig.vscrollWidth, val1[1])
+  timeGraphAxisContainer?.updateCanvas(val1[0], styleConfig.axisHeight)
+  naviContainer?.updateCanvas(val1[0], styleConfig.navigatorHeight)
 })
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
   if (testTimer) {
     clearInterval(testTimer)
     testTimer = null
   }
-
-  verticalScrollContainer?.destroy()
-  verticalScrollContainer = null
-  timeGraphChartContainer?.destroy()
-  timeGraphChartContainer = null
-
-  if (vscrollLayer) {
-    vscrollLayer.destroy()
-    vscrollLayer = null
-  }
-  if (rowController) {
-    rowController.removeVerticalOffsetChangedHandler(setYOffset)
-  }
-})
-onUnmounted(() => {
+  destroyGraph()
   dataHandlerWorker.terminate()
   // 清除定时器
   if (timer) {

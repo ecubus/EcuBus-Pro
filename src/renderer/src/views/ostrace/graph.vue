@@ -167,7 +167,7 @@ import { TimeGraphNavigator } from './timeline/layer/time-graph-navigator'
 import { TimeGraphAxisCursors } from './timeline/layer/time-graph-axis-cursors'
 import { TimeGraphAxis } from './timeline/layer/time-graph-axis'
 import { cloneDeep } from 'lodash'
-// import { TestDataProvider } from './test-data-provider'
+
 const dataHandlerWorker = new DataHandlerWorker()
 let offlineLoading: any = null
 const workerRowIds = ref<number[]>([])
@@ -202,7 +202,6 @@ dataHandlerWorker.onmessage = (event) => {
     // console.log('unitController.absoluteRange', unitController.absoluteRange)
     // initPixiGraph(unitController.absoluteRange)
   } else if (msg.type === 'data') {
-    console.log('msg.payload', msg.payload)
     const resolver = pendingDataResolve
     pendingDataResolve = null
     if (resolver) resolver(msg.payload)
@@ -225,7 +224,7 @@ const charid = computed(() => `${props.editIndex}_graph`)
 const width = computed(() => props.width)
 
 const time = ref(0)
-
+const styleMap = new Map<string, TimeGraphStateStyle>()
 let timer: ReturnType<typeof setInterval> | null = null
 
 // Scrollbar state
@@ -324,6 +323,7 @@ async function loadOfflineTrace() {
   input.type = 'file'
   input.accept = '.csv,text/csv'
   input.style.display = 'none'
+
   document.body.appendChild(input)
   input.onchange = () => {
     const file = input.files && input.files[0]
@@ -332,7 +332,11 @@ async function loadOfflineTrace() {
     offlineLoading = ElLoading.service({ fullscreen: true })
     dataHandlerWorker.postMessage({
       type: 'loadCsv',
-      payload: { file, cpuFreq: orti.value.cpuFreq }
+      payload: {
+        file,
+        cpuFreq: orti.value.cpuFreq,
+        coreConfigs: cloneDeep(coreConfigs.value)
+      }
     })
   }
   input.click()
@@ -496,9 +500,9 @@ const styleConfig = {
   rowBackgroundColor: getColorFromCssVar('--el-fill-color-lighter', '#f5f7fa'),
   rowBackgroundOpacitySelected: 0.6,
   rowLineColorHasStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
-  rowLineColorNoStates: getColorFromCssVar('--el-color-danger', '#F56C6C'),
+  rowLineColorNoStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
   rowLineThicknessHasStates: 1,
-  rowLineThicknessNoStates: 3
+  rowLineThicknessNoStates: 1
 }
 function destroyGraph() {
   if (timeGraphChartContainer) {
@@ -552,6 +556,7 @@ async function initPixiGraph() {
         range: TimelineChart.TimeGraphRange
         resolution: number
       }>((resolve) => {
+        console.log('getData', range, resolution, workerRowIds.value)
         pendingDataResolve = resolve
 
         dataHandlerWorker.postMessage({
@@ -569,22 +574,29 @@ async function initPixiGraph() {
         }
         return parseInt(color.replace('#', ''), 16)
       }
-
-      for (const core of coreConfigs.value) {
-        for (const button of core.buttons) {
-          if (button.id === model.id) {
-            return {
-              color: stringColor2number(button.color),
-              height: buttonHeight,
-              borderWidth: model.selected ? 1 : 0,
-              minWidthForLabels: 100
-            }
+      const data = model.data as OsEvent
+      const id = `${data.coreId}_${data.id}_${data.type}`
+      const style: TimeGraphStateStyle =
+        styleMap.get(id) ||
+        ({
+          color: 0x000000,
+          height: buttonHeight * 0.9
+        } as TimeGraphStateStyle)
+      if (!styleMap.has(id)) {
+        const data = model.data as OsEvent
+        const id = `${data.coreId}_${data.id}_${data.type}`
+        const core = coreConfigs.value.find((c) => c.id === data.coreId)
+        if (core) {
+          const button = core.buttons.find((b) => b.id === id)
+          if (button) {
+            style.color = stringColor2number(button.color)
           }
         }
+        styleMap.set(id, style)
       }
       return {
-        color: 0x000000,
-        height: buttonHeight,
+        color: style.color,
+        height: style.height,
         borderWidth: model.selected ? 1 : 0,
         minWidthForLabels: 100
       }

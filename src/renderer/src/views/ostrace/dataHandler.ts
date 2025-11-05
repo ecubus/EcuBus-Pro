@@ -5,7 +5,7 @@
   - Responds to messages: loadCsv, getRowIds, getData
 */
 
-import { OsEvent, TaskType, parseInfo } from 'nodeCan/osEvent'
+import { OsEvent, TaskType, TaskStatus, IsrStatus, parseInfo } from 'nodeCan/osEvent'
 import { TimelineChart } from './timeline/time-graph-model'
 
 type CsvRow = Partial<OsEvent>
@@ -21,12 +21,11 @@ function trimQuotes(s: string): string {
   return s.replace(/^\s*"/, '').replace(/"\s*$/, '').trim()
 }
 
-function convertTsToUs(rawTs: number, cpuFreq?: number): number {
-  if (!cpuFreq || cpuFreq <= 0) return rawTs
-  return Math.floor((rawTs / cpuFreq) * 1_000_000)
+function convertTsToUs(rawTs: number, cpuFreq: number): number {
+  return Math.floor(rawTs / cpuFreq)
 }
 
-function parseCsv(content: string, cpuFreq?: number): OsEvent[] {
+function parseCsv(content: string, cpuFreq: number): OsEvent[] {
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0)
   if (lines.length === 0) return []
   const events: OsEvent[] = []
@@ -62,15 +61,15 @@ class OfflineDataProvider {
   private totalLength: bigint = BigInt(0)
   private perActor: Map<number, OsEvent[]> = new Map()
   private actorNames: Map<number, string> = new Map()
+  private coreConfigs: Array<{
+    id: number
+    name: string
+    buttons: Array<{ name: string; color: string; id: string; numberId: number }>
+  }> = []
 
   constructor() {}
 
-  loadCsv(text: string) {
-    this.events = parseCsv(text)
-    this.buildIndexes()
-  }
-
-  private buildIndexes() {
+  public buildIndexes() {
     this.perActor.clear()
     this.actorNames.clear()
     if (this.events.length === 0) {
@@ -81,13 +80,15 @@ class OfflineDataProvider {
     let minTs = this.events[0].ts
     let maxTs = this.events[0].ts
     for (const e of this.events) {
-      if (e.ts < minTs) minTs = e.ts
-      if (e.ts > maxTs) maxTs = e.ts
-      const rid = makeRowId(e.coreId, e.id, e.type)
-      if (!this.perActor.has(rid)) this.perActor.set(rid, [])
-      this.perActor.get(rid)!.push(e)
-      if (!this.actorNames.has(rid)) {
-        this.actorNames.set(rid, `${TaskType[e.type]}_${e.id}`)
+      if (e.type === TaskType.TASK || e.type == TaskType.ISR) {
+        if (e.ts < minTs) minTs = e.ts
+        if (e.ts > maxTs) maxTs = e.ts
+        const rid = makeRowId(e.coreId, e.id, e.type)
+        if (!this.perActor.has(rid)) this.perActor.set(rid, [])
+        this.perActor.get(rid)!.push(e)
+        if (!this.actorNames.has(rid)) {
+          this.actorNames.set(rid, `${TaskType[e.type]}_${e.id}`)
+        }
       }
     }
     // ensure each actor events are sorted
@@ -97,8 +98,29 @@ class OfflineDataProvider {
     this.totalLength = BigInt(maxTs) - this.absoluteStart
   }
 
+  setCoreConfigs(
+    coreConfigs: Array<{
+      id: number
+      name: string
+      buttons: Array<{ name: string; color: string; id: string; numberId: number }>
+    }>
+  ) {
+    this.coreConfigs = coreConfigs
+  }
+
   getRowIds(): number[] {
-    return Array.from(this.perActor.keys()).sort((a, b) => a - b)
+    // If coreConfigs is provided, use it to determine the order
+
+    const orderedRowIds: number[] = []
+    // Collect rowIds in the order of coreConfigs
+    for (const core of this.coreConfigs) {
+      for (const button of core.buttons) {
+        if (this.perActor.has(button.numberId)) {
+          orderedRowIds.push(button.numberId)
+        }
+      }
+    }
+    return orderedRowIds
   }
 
   getTotalLength(): bigint {
@@ -132,9 +154,23 @@ class OfflineDataProvider {
       for (let i = 0; i < evts.length; i++) {
         const cur = evts[i]
         const next = evts[i + 1]
+
+        // For TASK: only create state when status is START and next event exists
+        if (cur.type === TaskType.TASK) {
+          if (cur.status !== TaskStatus.START || !next) continue
+        }
+        // For ISR: only create state when status is START and next event is STOP
+        else if (cur.type === TaskType.ISR) {
+          if (cur.status !== IsrStatus.START || !next || next.status !== IsrStatus.STOP) continue
+        }
+        // For other types, skip (or keep original logic if needed)
+        else {
+          continue
+        }
+
         const start = BigInt(cur.ts) - this.absoluteStart
-        const end = BigInt(next ? next.ts : lastTs) - this.absoluteStart
-        if (end <= start) continue
+        const end = BigInt(next.ts) - this.absoluteStart
+
         // Filter by visible range and simple coarse resolution
         if (!(end > range.start && start < range.end)) continue
         if (Number(end - start) * (1 / resolution) <= 1) continue
@@ -143,7 +179,7 @@ class OfflineDataProvider {
           id: `${cur.coreId}_${cur.id}_${cur.type}_${cur.ts}`,
           label: parseInfo(cur.type, cur.status),
           range: { start, end },
-          data: { value: cur.status, style: {} }
+          data: { ...cur, style: {} }
         } as unknown as TimelineChart.TimeGraphState)
 
         if (i === 0) prevPossibleState = start
@@ -174,7 +210,15 @@ const provider = new OfflineDataProvider()
 type InMsg =
   | {
       type: 'loadCsv'
-      payload: { text?: string; file?: File; filePath?: string; cpuFreq?: number }
+      payload: {
+        file: File
+        cpuFreq: number
+        coreConfigs: Array<{
+          id: number
+          name: string
+          buttons: Array<{ name: string; color: string; id: string; numberId: number }>
+        }>
+      }
     }
   | { type: 'getRowIds' }
   | {
@@ -202,14 +246,14 @@ function respond(msg: OutMsg) {
 
 async function parseCsvStream(
   stream: ReadableStream<Uint8Array>,
-  cpuFreq?: number
+  cpuFreq: number
 ): Promise<OsEvent[]> {
   const decoder = new TextDecoder()
   const reader = stream.getReader()
   const { value, done } = await reader.read()
   if (done || !value) return []
   let buffer = decoder.decode(value, { stream: true })
-  const headerParsed = true // always headerless
+
   const events: OsEvent[] = []
 
   const flushLines = (chunk: string, final = false) => {
@@ -263,19 +307,22 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
   try {
     const msg = e.data
     if (msg.type === 'loadCsv') {
-      const { file, cpuFreq } = msg.payload
+      const { file, cpuFreq, coreConfigs } = msg.payload
       if (file && typeof file.stream === 'function') {
-        console.log('file', file)
+        console.log('cpuFreq', cpuFreq)
         const events = await parseCsvStream(file.stream(), cpuFreq)
-        console.log('events', events)
+
         // build into provider
         ;(provider as any).events = events
         ;(provider as any).buildIndexes()
+        // Set coreConfigs to ensure rowIds order matches graph buttons
+        if (coreConfigs) {
+          provider.setCoreConfigs(coreConfigs)
+        }
       } else {
         throw new Error('loadCsv requires text, file, or filePath')
       }
-      console.log('provider.getRowIds()', provider.getRowIds())
-      console.log('provider.getTotalLength()', provider.getTotalLength())
+      console.log('xxxxxxxxxxxx')
       respond({
         type: 'loaded',
         payload: { rowIds: provider.getRowIds(), totalLength: provider.getTotalLength() }
@@ -287,7 +334,6 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       return
     }
     if (msg.type === 'getData') {
-      console.log('getData', msg.payload)
       const { rows, range, resolution } = provider.getData(msg.payload)
       respond({ type: 'data', payload: { rows, range, resolution } })
       return

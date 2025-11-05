@@ -175,11 +175,14 @@ class OfflineDataProvider {
         if (!(end > range.start && start < range.end)) continue
         if (Number(end - start) * (1 / resolution) <= 1) continue
 
+        const durationUs = Number(end - start)
+        const durationLabel =
+          durationUs >= 1000 ? `${(durationUs / 1000).toFixed(1)}ms` : `${durationUs}us`
         states.push({
           id: `${cur.coreId}_${cur.id}_${cur.type}_${cur.ts}`,
-          label: parseInfo(cur.type, cur.status),
+          label: `${durationLabel}`,
           range: { start, end },
-          data: { ...cur, style: {} }
+          data: { cur, next, style: {} }
         } as unknown as TimelineChart.TimeGraphState)
 
         if (i === 0) prevPossibleState = start
@@ -225,6 +228,14 @@ type InMsg =
       type: 'getData'
       payload: { range?: TimelineChart.TimeGraphRange; resolution?: number; rowIds?: number[] }
     }
+  | {
+      type: 'findState'
+      payload: {
+        direction: 'left' | 'right'
+        rowId: number
+        cursor?: bigint
+      }
+    }
 
 type OutMsg =
   | { type: 'loaded'; payload: { rowIds: number[]; totalLength: bigint } }
@@ -238,6 +249,10 @@ type OutMsg =
       }
     }
   | { type: 'error'; payload: { message: string } }
+  | {
+      type: 'foundState'
+      payload: { id?: string; start?: bigint }
+    }
 
 function respond(msg: OutMsg) {
   // @ts-ignore – worker global
@@ -322,7 +337,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       } else {
         throw new Error('loadCsv requires text, file, or filePath')
       }
-      console.log('xxxxxxxxxxxx')
+
       respond({
         type: 'loaded',
         payload: { rowIds: provider.getRowIds(), totalLength: provider.getTotalLength() }
@@ -336,6 +351,68 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
     if (msg.type === 'getData') {
       const { rows, range, resolution } = provider.getData(msg.payload)
       respond({ type: 'data', payload: { rows, range, resolution } })
+      return
+    }
+    if (msg.type === 'findState') {
+      const { direction, rowId, cursor } = msg.payload
+      const evts = (provider as any).perActor.get(rowId) as OsEvent[] | undefined
+      if (!evts || evts.length === 0) {
+        respond({ type: 'foundState', payload: {} })
+        return
+      }
+      const absoluteStart = (provider as any).absoluteStart as bigint
+      // Build START markers only (TASK START, ISR START)
+      const starts: { id: string; start: bigint }[] = []
+      for (let i = 0; i < evts.length; i++) {
+        const cur = evts[i]
+        if (cur.type === TaskType.TASK) {
+          if (cur.status !== TaskStatus.START) continue
+        } else if (cur.type === TaskType.ISR) {
+          if (cur.status !== IsrStatus.START) continue
+        } else {
+          continue
+        }
+        const start = BigInt(cur.ts) - absoluteStart
+        const id = `${cur.coreId}_${cur.id}_${cur.type}_${cur.ts}`
+        starts.push({ id, start })
+      }
+      if (starts.length === 0) {
+        respond({ type: 'foundState', payload: {} })
+        return
+      }
+      const curPos =
+        cursor !== undefined
+          ? cursor
+          : direction === 'left'
+            ? starts[starts.length - 1].start
+            : starts[0].start
+      let found: { id: string; start: bigint } | undefined
+      if (direction === 'left') {
+        for (let i = starts.length - 1; i >= 0; i--) {
+          const s = starts[i]
+          if (s.start < curPos) {
+            found = s
+            break
+          }
+        }
+        // if none strictly less, fall back to first start
+        if (!found) found = starts[0]
+      } else {
+        for (let i = 0; i < starts.length; i++) {
+          const s = starts[i]
+          if (s.start > curPos) {
+            found = s
+            break
+          }
+        }
+        // if none greater, fall back to last start
+        if (!found) found = starts[starts.length - 1]
+      }
+      if (found) {
+        respond({ type: 'foundState', payload: { id: found.id, start: found.start } })
+      } else {
+        respond({ type: 'foundState', payload: {} })
+      }
       return
     }
   } catch (err: any) {

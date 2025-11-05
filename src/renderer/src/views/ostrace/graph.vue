@@ -30,14 +30,13 @@
               <Icon :icon="addIcon" />
             </el-button>
           </el-tooltip>
-
-          <!-- <el-divider direction="vertical"></el-divider>
-          <el-tooltip effect="light" content="Save Trace To File" placement="bottom">
-            <el-button link type="primary">
-              <Icon :icon="saveIcon" />
-            </el-button>
-          </el-tooltip> -->
         </el-button-group>
+        <el-divider direction="vertical"></el-divider>
+        <el-tooltip effect="light" content="Remove Selection" placement="bottom">
+          <el-button link type="primary" :disabled="!selectStart" @click="removeSelection">
+            <Icon :icon="removeIcon" />
+          </el-button>
+        </el-tooltip>
         <!-- 滚动控制 -->
         <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
           <span style="font-size: 12px; color: var(--el-text-color-regular); min-width: 80px">
@@ -117,6 +116,12 @@
           </div>
           <div :id="`main-timer-${charid}`"></div>
           <div :id="`main-navi-${charid}`"></div>
+          <div v-if="selectStart" class="selection-cursor" :style="selectStartStyle">
+            <div class="selection-cursor-label">{{ selectStartText }}</div>
+          </div>
+          <div v-if="selectEnd" class="selection-cursor" :style="selectEndStyle">
+            <div class="selection-cursor-label">{{ selectEndText }}</div>
+          </div>
         </div>
         <div class="divider"></div>
       </div>
@@ -127,7 +132,7 @@
 import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
-
+import removeIcon from '@iconify/icons-material-symbols/remove'
 import {
   ref,
   onMounted,
@@ -181,6 +186,9 @@ let pendingDataResolve:
         }) => void)
     )
   | null = null
+let pendingFindStateResolve:
+  | (undefined | ((data: { id?: string; start?: bigint }) => void))
+  | null = null
 dataHandlerWorker.onmessage = (event) => {
   const msg = event.data
   if (!msg || !msg.type) return
@@ -204,6 +212,10 @@ dataHandlerWorker.onmessage = (event) => {
   } else if (msg.type === 'data') {
     const resolver = pendingDataResolve
     pendingDataResolve = null
+    if (resolver) resolver(msg.payload)
+  } else if (msg.type === 'foundState') {
+    const resolver = pendingFindStateResolve
+    pendingFindStateResolve = null
     if (resolver) resolver(msg.payload)
   }
 }
@@ -390,7 +402,7 @@ const coreConfigs = computed(() => {
   return configs
 })
 
-const buttonHeight = 30
+const buttonHeight = 32
 
 // Ref for the left container (which contains core-container)
 const leftContainerRef = ref<HTMLElement | null>(null)
@@ -407,7 +419,8 @@ const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
 const unitController = new TimeGraphUnitController(BigInt(1000))
 unitController.worldRenderFactor = 1
-unitController.numberTranslator = (theNumber: bigint) => {
+
+function formatTimeLabel(theNumber: bigint): string {
   const MICRO_IN_MS = BigInt(1000)
   const MICRO_IN_S = BigInt(1000_000)
 
@@ -424,28 +437,24 @@ unitController.numberTranslator = (theNumber: bigint) => {
     if (fractionDigits <= 0 || remainder === BigInt(0)) {
       return `${intPart.toString()}${suffix}`
     }
-    // scale remainder to the requested decimal places
     const scale = BigInt(10) ** BigInt(fractionDigits)
     const dec = (remainder * scale) / divisor
     let decStr = dec.toString().padStart(fractionDigits, '0')
-    // trim trailing zeros for cleaner labels
     decStr = decStr.replace(/0+$/g, '')
     return decStr.length > 0
       ? `${intPart.toString()}.${decStr}${suffix}`
       : `${intPart.toString()}${suffix}`
   }
 
-  // Decide unit based on current view span; input is microseconds (us)
   if (span >= MICRO_IN_S) {
-    // seconds, keep up to milliseconds precision
     return formatWithUnit(theNumber, MICRO_IN_S, 3, 's')
   } else if (span >= MICRO_IN_MS) {
-    // milliseconds, keep up to microseconds precision (3 decimals)
     return formatWithUnit(theNumber, MICRO_IN_MS, 3, 'ms')
   }
-  // default: microseconds
   return `${theNumber.toString()}us`
 }
+
+unitController.numberTranslator = (theNumber: bigint) => formatTimeLabel(theNumber)
 
 let timeGraphChartContainer: TimeGraphContainer | null = null
 let rowController: TimeGraphRowController | null = null
@@ -505,6 +514,8 @@ const styleConfig = {
   rowLineThicknessNoStates: 1
 }
 function destroyGraph() {
+  unitController.removeSelectionRangeChangedHandler(onSelectionRangeChange)
+  unitController.removeViewRangeChangedHandler(removeSelection)
   if (timeGraphChartContainer) {
     timeGraphChartContainer.destroy()
     timeGraphChartContainer = null
@@ -574,8 +585,9 @@ async function initPixiGraph() {
         }
         return parseInt(color.replace('#', ''), 16)
       }
-      const data = model.data as OsEvent
-      const id = `${data.coreId}_${data.id}_${data.type}`
+      const data = model.data as { cur: OsEvent; next: OsEvent }
+
+      const id = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
       const style: TimeGraphStateStyle =
         styleMap.get(id) ||
         ({
@@ -583,9 +595,9 @@ async function initPixiGraph() {
           height: buttonHeight * 0.9
         } as TimeGraphStateStyle)
       if (!styleMap.has(id)) {
-        const data = model.data as OsEvent
-        const id = `${data.coreId}_${data.id}_${data.type}`
-        const core = coreConfigs.value.find((c) => c.id === data.coreId)
+        const data = model.data as { cur: OsEvent; next: OsEvent }
+        const id = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
+        const core = coreConfigs.value.find((c) => c.id === data.cur.coreId)
         if (core) {
           const button = core.buttons.find((b) => b.id === id)
           if (button) {
@@ -645,16 +657,16 @@ async function initPixiGraph() {
     rowController,
     { color: styleConfig.cursorsColor }
   )
-  const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
-    `timeGraphChartRangeEvents-${charid.value}`,
-    providers
-  )
+  // const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
+  //   `timeGraphChartRangeEvents-${charid.value}`,
+  //   providers
+  // )
 
   timeGraphChartContainer.addLayers([
     timeGraphChart,
     timeGraphSelectionRange,
-    timeGraphChartCursors,
-    timeGraphChartRangeEvents
+    timeGraphChartCursors
+    // timeGraphChartRangeEvents
   ])
   const yUnitController = new TimeGraphUnitController(BigInt(1))
   verticalScrollContainer = new TimeGraphContainer(
@@ -714,15 +726,67 @@ async function initPixiGraph() {
 }
 
 // Arrow click handler - shared function for both left and right arrows
-const handleArrowClick = (
+const handleArrowClick = async (
   direction: 'left' | 'right',
   coreId: number,
   buttonIndex: number,
   buttonName: string
 ) => {
-  console.log(
-    `Arrow clicked: ${direction}, Core: ${coreId}, Button Index: ${buttonIndex}, Button Name: ${buttonName}`
-  )
+  // 1) Resolve target row id from core/button
+  const core = coreConfigs.value.find((c) => c.id === coreId)
+  const button = core?.buttons?.[buttonIndex]
+  if (!button) return
+  const targetRowId = button.numberId
+
+  // 2) Find row index in current chart
+  const rowIndex = workerRowIds.value.indexOf(targetRowId)
+  if (rowIndex < 0 || !timeGraphChart) return
+
+  // 3) Ensure the row is at least selected and visible
+  timeGraphChart.selectAndReveal(rowIndex)
+
+  // 4) Ask worker to find the next/prev state by id
+  const currentCursor = unitController.selectionRange
+    ? unitController.selectionRange.end
+    : undefined
+  const workerPromise = new Promise<{ id?: string; start?: bigint }>((resolve) => {
+    pendingFindStateResolve = resolve
+  })
+  dataHandlerWorker.postMessage({
+    type: 'findState',
+    payload: { direction, rowId: targetRowId, cursor: currentCursor }
+  })
+  const found = await workerPromise
+  if (!found || found.start === undefined) return
+  const newPos: bigint = found.start
+
+  // 5) Ensure view includes the new position (prefer centering around it)
+  {
+    const { start: vStart, end: vEnd } = unitController.viewRange
+    if (newPos < vStart || newPos > vEnd) {
+      const windowLen = unitController.viewRangeLength
+      const half = windowLen / BigInt(2)
+      let start = newPos > half ? newPos - half : BigInt(0)
+      let end = start + windowLen
+      if (end > unitController.absoluteRange) {
+        end = unitController.absoluteRange
+        start = end - windowLen
+        if (start < 0) start = BigInt(0)
+      }
+      unitController.viewRange = { start, end }
+    }
+  }
+
+  // 6) Now set selection so it is guaranteed inside view range
+  unitController.selectionRange = { start: newPos, end: newPos }
+
+  // 7) Highlight the state using the chart by id
+  if (found.id) {
+    const stateComp = timeGraphChart.getStateById(found.id)
+    if (stateComp) {
+      timeGraphChart.selectState(stateComp.model)
+    }
+  }
 }
 
 // 监听暂停/恢复状态
@@ -738,12 +802,72 @@ watch(
     }
   }
 )
+const selectStart = ref<bigint | undefined>(undefined)
+const selectEnd = ref<bigint | undefined>(undefined)
+const selectStartText = computed(() => {
+  if (!selectStart.value) return ''
+  return formatTimeLabel(selectStart.value)
+})
+const selectEndText = computed(() => {
+  if (!selectEnd.value) return ''
+  const endStr = formatTimeLabel(selectEnd.value)
+  if (selectStart.value === undefined) return endStr
+  const delta = selectEnd.value - selectStart.value
+  const sign = delta >= 0n ? '+' : '-'
+  const abs = delta >= 0n ? delta : -delta
+  const diffStr = formatTimeLabel(abs)
+  return `${endStr} (${sign}${diffStr})`
+})
+const getCursorLeftPx = (timeVal: bigint): number => {
+  const view = unitController.viewRange
+  const viewLen = unitController.viewRangeLength
+  if (viewLen === BigInt(0)) return 0
+  const axisCanvas = timeGraphAxisContainer?.canvas as HTMLCanvasElement | undefined
+  const widthPx = axisCanvas ? axisCanvas.clientWidth : graphWidth.value
+  const clamped = timeVal < view.start ? view.start : timeVal > view.end ? view.end : timeVal
+  const dx = Number(clamped - view.start) / Number(viewLen)
+  return Math.round(dx * widthPx)
+}
+const selectStartStyle = computed(() => {
+  if (!selectStart.value) return {}
+  const x = getCursorLeftPx(selectStart.value)
+  return {
+    left: x + 'px'
+  }
+})
+const selectEndStyle = computed(() => {
+  if (!selectEnd.value) return {}
+  const x = getCursorLeftPx(selectEnd.value)
+  return {
+    left: x + 'px'
+  }
+})
+function onSelectionRangeChange(selectionRange?: TimelineChart.TimeGraphRange) {
+  if (selectionRange) {
+    selectStart.value = selectionRange.start
+    if (selectionRange.end != selectionRange.start) {
+      selectEnd.value = selectionRange.end
+    } else {
+      selectEnd.value = undefined
+    }
+  } else {
+    selectStart.value = undefined
+    selectEnd.value = undefined
+  }
+}
+function removeSelection() {
+  selectStart.value = undefined
+  selectEnd.value = undefined
+  unitController.selectionRange = undefined
+}
 let testTimer
 // Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
   // Wait for DOM to be ready
   nextTick(async () => {
     await initPixiGraph()
+    unitController.onSelectionRangeChange(onSelectionRangeChange)
+    unitController.onViewRangeChanged(removeSelection)
   })
 
   window.jQuery(`#Shift-${charid.value}`).resizable({
@@ -776,6 +900,7 @@ watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
   verticalScrollContainer?.updateCanvas(styleConfig.vscrollWidth, val1[1])
   timeGraphAxisContainer?.updateCanvas(val1[0], styleConfig.axisHeight)
   naviContainer?.updateCanvas(val1[0], styleConfig.navigatorHeight)
+  removeSelection()
 })
 
 onUnmounted(() => {
@@ -846,6 +971,30 @@ onUnmounted(() => {
   z-index: 1;
   overflow: hidden;
   /* 改为 hidden 以防止滚动条影响画布 */
+}
+
+.selection-cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.selection-cursor-label {
+  position: absolute;
+  bottom: 0;
+  transform: translate(-50%, 0);
+  padding: 0 6px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 2px;
+  font-size: 10px;
+  background: var(--el-bg-color-overlay);
+  color: var(--el-text-color-primary);
+  border: 1px solid var(--el-border-color);
+  white-space: nowrap;
 }
 
 .border-bottom {

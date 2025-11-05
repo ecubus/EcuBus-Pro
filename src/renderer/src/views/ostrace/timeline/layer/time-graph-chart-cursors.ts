@@ -99,6 +99,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
       ) {
         return
       }
+
       const extendSelection = event.data.originalEvent.shiftKey && this.stage.cursor === 'crosshair'
       this.mouseSelecting = true
       this.stage.cursor = 'crosshair'

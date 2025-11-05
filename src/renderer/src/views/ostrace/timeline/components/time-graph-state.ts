@@ -86,7 +86,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     const { fontName, fontStyle } =
       TimeGraphStateComponent.fontController.getFont(
         this._options.color ? this._options.color : 0,
-        this._options.height - 2
+        this._options.height - 8
       ) || TimeGraphStateComponent.fontController.getDefaultFont()
     const position = {
       x:
@@ -97,7 +97,7 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
     }
     const displayWidth = this._options.displayWidth ? this._options.displayWidth : 0
     const labelText = this.model.label
-    const textPadding = 0.5
+    const textPadding = 1
     if (displayWidth < 3) {
       this.removeLabel()
       return
@@ -107,9 +107,11 @@ export class TimeGraphStateComponent extends TimeGraphComponent<TimelineChart.Ti
       const metrics = PIXI.TextMetrics.measureText(this.model.label, fontStyle)
       // Round the text width up just to be sure that it will fit in the state
       const textWidth = Math.ceil((metrics.width * SCALING_FACTOR) / this.scaleFactor)
+      // Use a fixed text height based on the font size for vertical centering
+      const textHeight = Number(fontStyle.fontSize) - 4
 
       let textObjX = position.x + textPadding
-      const textObjY = position.y + textPadding
+      const textObjY = position.y + Math.max(0, (this._options.height - textHeight) / 2)
       let displayLabel = ''
 
       if (displayWidth > textWidth) {

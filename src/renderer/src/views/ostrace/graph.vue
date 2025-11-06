@@ -151,7 +151,15 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 // import testdata from './blocks.json'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 // import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
-import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType, VisibleBlock } from 'nodeCan/osEvent'
+import {
+  IsrStatus,
+  OsEvent,
+  parseInfo,
+  TaskStatus,
+  TaskType,
+  taskTypeRecord,
+  VisibleBlock
+} from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
 import { ElLoading } from 'element-plus'
 import DataHandlerWorker from './dataHandler.ts?worker'
@@ -337,7 +345,7 @@ const coreConfigs = computed(() => {
     if (!core) {
       configs.push({
         id: task.coreId,
-        name: task.name,
+        name: `Core ${task.coreId}`,
         buttons: [
           {
             name: task.name,
@@ -442,7 +450,7 @@ const styleConfig = {
   cursorsColor: getColorFromCssVar('--el-color-primary', '#409EFF'),
 
   // Row styles
-  rowBackgroundColor: getColorFromCssVar('--el-fill-color-lighter', '#f5f7fa'),
+  rowBackgroundColor: getColorFromCssVar('--el-color-warning-light-7', '#f5f7fa'),
   rowBackgroundOpacitySelected: 0.6,
   rowLineColorHasStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
   rowLineColorNoStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
@@ -709,7 +717,7 @@ const handleArrowClick = async (
   const currentCursor = unitController.selectionRange
     ? unitController.selectionRange.end
     : undefined
-  const workerPromise = new Promise<{ id?: string; start?: bigint }>((resolve) => {
+  const workerPromise = new Promise<{ id?: string; start?: bigint; event?: OsEvent }>((resolve) => {
     pendingFindStateResolve = resolve
   })
   dataHandlerWorker.postMessage({
@@ -720,6 +728,14 @@ const handleArrowClick = async (
   if (!found || found.start === undefined) return
   const newPos: bigint = found.start
 
+  if (linkTrace.value) {
+    const event = found.event as OsEvent
+
+    if (event) {
+      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts / 1000000).toFixed(6)}`
+      runtimeStore.setTraceLinkId(key)
+    }
+  }
   // 5) Ensure view includes the new position (prefer centering around it)
   {
     const { start: vStart, end: vEnd } = unitController.viewRange
@@ -734,10 +750,6 @@ const handleArrowClick = async (
         if (start < 0) start = BigInt(0)
       }
       unitController.viewRange = { start, end }
-
-      if (linkTrace.value) {
-        // runtimeStore.setTraceLinkId(linkTrace.value)
-      }
     }
   }
 

@@ -239,7 +239,7 @@ type OutMsg =
   | { type: 'error'; payload: { message: string } }
   | {
       type: 'foundState'
-      payload: { id?: string; start?: bigint }
+      payload: { id?: string; start?: bigint; event?: OsEvent }
     }
 
 function respond(msg: OutMsg) {
@@ -329,6 +329,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
               ts: event.ts,
               data: {
                 ...event,
+                ts: event.ts * cpuFreq,
                 database: database,
                 index: index
               }
@@ -356,7 +357,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       }
       const absoluteStart = provider.getAbsoluteStart()
       // Build START markers only (TASK START, ISR START)
-      const starts: { id: string; start: bigint }[] = []
+      const starts: { id: string; start: bigint; event: OsEvent }[] = []
       for (let i = 0; i < evts.length; i++) {
         const cur = evts[i]
         if (cur.type === TaskType.TASK) {
@@ -368,7 +369,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
         }
         const start = BigInt(cur.ts) - absoluteStart
         const id = `${cur.coreId}_${cur.id}_${cur.type}_${cur.ts}`
-        starts.push({ id, start })
+        starts.push({ id, start, event: cur })
       }
       if (starts.length === 0) {
         respond({ type: 'foundState', payload: {} })
@@ -380,7 +381,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
           : direction === 'left'
             ? starts[starts.length - 1].start
             : starts[0].start
-      let found: { id: string; start: bigint } | undefined
+      let found: { id: string; start: bigint; event: OsEvent } | undefined
       if (direction === 'left') {
         for (let i = starts.length - 1; i >= 0; i--) {
           const s = starts[i]
@@ -403,7 +404,10 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
         if (!found) found = starts[starts.length - 1]
       }
       if (found) {
-        respond({ type: 'foundState', payload: { id: found.id, start: found.start } })
+        respond({
+          type: 'foundState',
+          payload: { id: found.id, start: found.start, event: found.event }
+        })
       } else {
         respond({ type: 'foundState', payload: {} })
       }

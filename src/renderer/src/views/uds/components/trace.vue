@@ -392,14 +392,6 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-watch(globalStart, (val) => {
-  if (val) {
-    clearLog('Start Trace')
-    isPaused.value = false
-    logData = []
-  }
-})
-
 const maxLogCount = 50000
 const showLogCount = 1000
 
@@ -408,7 +400,10 @@ watch(
   () => runtimeStore.traceLinkId,
   (val) => {
     if (val) {
-      grid.scrollToRowkey(val)
+      isPaused.value = true
+      nextTick(() => {
+        grid.scrollToRowkey(val)
+      })
     }
   }
 )
@@ -483,7 +478,6 @@ function logDisplay({ values }: { values: LogItem[] }) {
       data.key = `${data.channel}-${data.device}-${data.id}`
     } else {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.ts}`
-      console.log('data.key: ', data.key)
     }
     logData.push(data)
   }
@@ -1216,8 +1210,16 @@ onMounted(() => {
               .trim()
             break
         }
+        let backgroundColor: string | undefined = undefined
+
+        if (row.key === runtimeStore.traceLinkId && !globalStart.value) {
+          backgroundColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--el-color-primary')
+            .trim()
+        }
         return {
-          color: color
+          color: backgroundColor ? 'white' : color,
+          backgroundColor: backgroundColor
         }
       }
     }
@@ -1231,6 +1233,9 @@ onMounted(() => {
     } else {
       scrollY = v
     }
+  })
+  grid.on('click', (v) => {
+    runtimeStore.setTraceLinkId('')
   })
 })
 watch([tableWidth, tableHeight], () => {

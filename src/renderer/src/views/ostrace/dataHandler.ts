@@ -8,8 +8,6 @@
 import { OsEvent, TaskType, TaskStatus, IsrStatus, parseInfo } from 'nodeCan/osEvent'
 import { TimelineChart } from './timeline/time-graph-model'
 
-type CsvRow = Partial<OsEvent>
-
 function toNumberSafe(v: any): number {
   if (v === undefined || v === null || v === '') return 0
   const n = Number(v)
@@ -25,41 +23,15 @@ function convertTsToUs(rawTs: number, cpuFreq: number): number {
   return Math.floor(rawTs / cpuFreq)
 }
 
-function parseCsv(content: string, cpuFreq: number): OsEvent[] {
-  const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0)
-  if (lines.length === 0) return []
-  const events: OsEvent[] = []
-  for (let i = 0; i < lines.length; i++) {
-    const raw = lines[i]
-    if (!raw) continue
-    const cols = raw.split(',')
-    if (cols.length < 4) continue
-    const ts = toNumberSafe(trimQuotes(cols[0]))
-    const type = toNumberSafe(trimQuotes(cols[1])) as TaskType
-    const id = toNumberSafe(trimQuotes(cols[2]))
-    const status = toNumberSafe(trimQuotes(cols[3]))
-    const evt: OsEvent = {
-      type,
-      id,
-      status,
-      coreId: 0,
-      ts: convertTsToUs(ts, cpuFreq),
-      comment: ''
-    }
-    events.push(evt)
-  }
-  return events.sort((a, b) => a.ts - b.ts)
-}
-
 function makeRowId(coreId: number, id: number, type: number): number {
   return Number(coreId) * 1000000 + Number(id) * 1000 + Number(type)
 }
 
 class OfflineDataProvider {
-  private events: OsEvent[] = []
+  events: OsEvent[] = []
   private absoluteStart: bigint = BigInt(0)
   private totalLength: bigint = BigInt(0)
-  private perActor: Map<number, OsEvent[]> = new Map()
+  perActor: Map<number, OsEvent[]> = new Map()
   private actorNames: Map<number, string> = new Map()
   private coreConfigs: Array<{
     id: number
@@ -91,8 +63,6 @@ class OfflineDataProvider {
         }
       }
     }
-    // ensure each actor events are sorted
-    for (const arr of this.perActor.values()) arr.sort((a, b) => a.ts - b.ts)
 
     this.absoluteStart = BigInt(minTs)
     this.totalLength = BigInt(maxTs) - this.absoluteStart
@@ -125,6 +95,10 @@ class OfflineDataProvider {
 
   getTotalLength(): bigint {
     return this.totalLength
+  }
+
+  getAbsoluteStart(): bigint {
+    return this.absoluteStart
   }
 
   getData(opts: { range?: TimelineChart.TimeGraphRange; resolution?: number; rowIds?: number[] }): {
@@ -215,6 +189,7 @@ type InMsg =
       type: 'loadCsv'
       payload: {
         file: File
+        database: string
         cpuFreq: number
         coreConfigs: Array<{
           id: number
@@ -238,7 +213,20 @@ type InMsg =
     }
 
 type OutMsg =
-  | { type: 'loaded'; payload: { rowIds: number[]; totalLength: bigint } }
+  | {
+      type: 'loaded'
+      payload: {
+        rowIds: number[]
+        start: bigint
+        totalLength: bigint
+        events: {
+          message: {
+            ts: number
+            data: OsEvent
+          }
+        }[]
+      }
+    }
   | { type: 'rowIds'; payload: { rowIds: number[] } }
   | {
       type: 'data'
@@ -309,27 +297,19 @@ async function parseCsvStream(
   return events.sort((a, b) => a.ts - b.ts)
 }
 
-function filePathToFileURL(path: string): string {
-  // Normalize Windows path to file URL
-  if (path.startsWith('file://')) return path
-  let p = path.replace(/\\/g, '/')
-  if (!p.startsWith('/')) p = '/' + p
-  return 'file://' + p
-}
-
 // @ts-ignore – worker global
 self.onmessage = async (e: MessageEvent<InMsg>) => {
   try {
     const msg = e.data
     if (msg.type === 'loadCsv') {
-      const { file, cpuFreq, coreConfigs } = msg.payload
+      const { file, cpuFreq, coreConfigs, database } = msg.payload
+      let events: OsEvent[] = []
       if (file && typeof file.stream === 'function') {
-        console.log('cpuFreq', cpuFreq)
-        const events = await parseCsvStream(file.stream(), cpuFreq)
+        events = await parseCsvStream(file.stream(), cpuFreq)
 
         // build into provider
-        ;(provider as any).events = events
-        ;(provider as any).buildIndexes()
+        provider.events = events
+        provider.buildIndexes()
         // Set coreConfigs to ensure rowIds order matches graph buttons
         if (coreConfigs) {
           provider.setCoreConfigs(coreConfigs)
@@ -340,7 +320,21 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
 
       respond({
         type: 'loaded',
-        payload: { rowIds: provider.getRowIds(), totalLength: provider.getTotalLength() }
+        payload: {
+          rowIds: provider.getRowIds(),
+          totalLength: provider.getTotalLength(),
+          start: provider.getAbsoluteStart(),
+          events: events.map((event, index) => ({
+            message: {
+              ts: event.ts,
+              data: {
+                ...event,
+                database: database,
+                index: index
+              }
+            }
+          }))
+        }
       })
       return
     }
@@ -355,12 +349,12 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
     }
     if (msg.type === 'findState') {
       const { direction, rowId, cursor } = msg.payload
-      const evts = (provider as any).perActor.get(rowId) as OsEvent[] | undefined
+      const evts = provider.perActor.get(rowId) as OsEvent[] | undefined
       if (!evts || evts.length === 0) {
         respond({ type: 'foundState', payload: {} })
         return
       }
-      const absoluteStart = (provider as any).absoluteStart as bigint
+      const absoluteStart = provider.getAbsoluteStart()
       // Build START markers only (TASK START, ISR START)
       const starts: { id: string; start: bigint }[] = []
       for (let i = 0; i < evts.length; i++) {

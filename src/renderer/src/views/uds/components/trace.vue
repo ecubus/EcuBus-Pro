@@ -157,7 +157,7 @@ import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading, ElMessageBox } from 'element-plus'
-import { useGlobalStart } from '@r/stores/runtime'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import {
   SomeipMessageType,
   SomeipMessageTypeMap,
@@ -392,8 +392,26 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-const maxLogCount = 20000
+watch(globalStart, (val) => {
+  if (val) {
+    clearLog('Start Trace')
+    isPaused.value = false
+    logData = []
+  }
+})
+
+const maxLogCount = 50000
 const showLogCount = 1000
+
+const runtimeStore = useRuntimeStore()
+watch(
+  () => runtimeStore.traceLinkId,
+  (val) => {
+    if (val) {
+      grid.scrollToRowkey(val)
+    }
+  }
+)
 
 function insertData2(data: LogData[]) {
   if (isOverwrite.value) {
@@ -424,9 +442,12 @@ function insertData2(data: LogData[]) {
   } else {
     allLogData.push(...data)
   }
-  if (allLogData.length > maxLogCount) {
-    const excessRows = allLogData.length - maxLogCount
-    allLogData.splice(0, excessRows)
+
+  if (globalStart.value) {
+    if (allLogData.length > maxLogCount) {
+      const excessRows = allLogData.length - maxLogCount
+      allLogData.splice(0, excessRows)
+    }
   }
 
   // 根据暂停状态决定加载多少数据
@@ -442,7 +463,6 @@ function insertData2(data: LogData[]) {
   }
 }
 
-let uid = 0
 let logData: LogData[] = []
 let timer: any = null
 function logDisplay({ values }: { values: LogItem[] }) {
@@ -462,7 +482,8 @@ function logDisplay({ values }: { values: LogItem[] }) {
     if (isOverwrite.value) {
       data.key = `${data.channel}-${data.device}-${data.id}`
     } else {
-      data.key = uid++
+      data.key = `${data.channel}-${data.device}-${data.id}-${data.ts}`
+      console.log('data.key: ', data.key)
     }
     logData.push(data)
   }

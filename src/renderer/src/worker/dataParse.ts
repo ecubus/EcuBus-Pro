@@ -136,6 +136,7 @@ function parseORTIData(raw: any) {
 
   for (const rawEvent of raw) {
     const osEvent: OsEvent = rawEvent.message.data
+
     const ts = rawEvent.message.ts
     const db = findDb(osEvent.database)
 
@@ -202,7 +203,9 @@ function parseORTIData(raw: any) {
       message: {
         method: 'osEvent',
         data: eventData
-      }
+      },
+      label: db?.name,
+      instance: db?.name
     })
   }
 

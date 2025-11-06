@@ -127,9 +127,9 @@ export class TimeGraphUnitController {
     if (newRange.start < 0) {
       this._viewRange.start = BigInt(0)
     }
-    if (this._viewRange.end > this.absoluteRange) {
-      this._viewRange.end = this.absoluteRange
-    }
+    // if (this._viewRange.end > this.absoluteRange) {
+    //   this._viewRange.end = this.absoluteRange
+    // }
     this.handleViewRangeChange(oldRange)
   }
 

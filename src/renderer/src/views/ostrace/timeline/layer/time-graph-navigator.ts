@@ -9,6 +9,7 @@ import { TimeGraphRectangle } from '../components/time-graph-rectangle'
 import { TimeGraphLayer } from './time-graph-layer'
 import { TimelineChart } from '../time-graph-model'
 import { BIMath } from '../bigint-utils'
+import { getColorFromCssVar } from '../color'
 
 export class TimeGraphNavigator extends TimeGraphLayer {
   protected navigatorHandle: TimeGraphNavigatorHandle
@@ -48,7 +49,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 
     if (this.unitController.selectionRange) {
       const selectionOpts: TimeGraphStyledRect = {
-        color: 0xb7b799,
+        color: getColorFromCssVar('--el-color-primary', '#303133'),
         height: this.stateController.canvasDisplayHeight,
         opacity: 0.5,
         position: {
@@ -159,7 +160,7 @@ export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
       height: 20,
       position,
       width,
-      color: 0x777769
+      color: getColorFromCssVar('--el-color-info-light-5', '#303133')
     })
   }
 }

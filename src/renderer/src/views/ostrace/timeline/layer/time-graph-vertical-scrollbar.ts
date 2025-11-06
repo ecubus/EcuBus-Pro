@@ -7,6 +7,7 @@ import { TimeGraphStateController } from '../time-graph-state-controller'
 import { TimeGraphRectangle } from '../components/time-graph-rectangle'
 import { TimeGraphChartLayer } from './time-graph-chart-layer'
 import { TimeGraphRowController } from '../time-graph-row-controller'
+import { getColorFromCssVar } from '../color'
 
 export class TimeGraphVerticalScrollbar extends TimeGraphChartLayer {
   protected navigatorHandle!: TimeGraphVerticalScrollbarHandle
@@ -166,7 +167,7 @@ export class TimeGraphVerticalScrollbarHandle extends TimeGraphComponent<null> {
       height: this.height,
       position: this.position,
       width: 10,
-      color: 0x777769
+      color: getColorFromCssVar('--el-color-info-light-5', '#303133')
     })
   }
 }

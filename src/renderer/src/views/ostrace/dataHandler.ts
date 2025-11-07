@@ -104,9 +104,37 @@ class OfflineDataProvider {
       }
     }
 
-    // Update totalLength: last event has the max timestamp since timestamps are always increasing
-    const maxTs = newEvents[newEvents.length - 1].ts
-    this.totalLength = BigInt(maxTs) - this.absoluteStart
+    // Limit to 100,000 events, remove oldest from front if exceeded
+    const MAX_EVENTS = 100000
+    if (this.events.length > MAX_EVENTS) {
+      const removeCount = this.events.length - MAX_EVENTS
+      const removedEvents = this.events.splice(0, removeCount)
+
+      // Remove deleted events from perActor maps
+      // Since timestamps are always increasing, removed events are at the front of each array
+      const removedEventSet = new Set(removedEvents)
+      for (const [rid, evts] of this.perActor.entries()) {
+        // Find the first event that is not in removedEventSet
+        let startIdx = evts.length // Default to length if all events are removed
+        for (let i = 0; i < evts.length; i++) {
+          if (!removedEventSet.has(evts[i])) {
+            startIdx = i
+            break
+          }
+        }
+        // If all events are removed, delete the entry
+        if (startIdx >= evts.length) {
+          this.perActor.delete(rid)
+        } else {
+          // Keep all events from startIdx onwards
+          this.perActor.set(rid, evts.slice(startIdx))
+        }
+      }
+    } else {
+      // Update totalLength: last event has the max timestamp since timestamps are always increasing
+      const maxTs = newEvents[newEvents.length - 1].ts
+      this.totalLength = BigInt(maxTs) - this.absoluteStart
+    }
   }
 
   setCoreConfigs(
@@ -194,6 +222,8 @@ class OfflineDataProvider {
     const resolution = opts.resolution ?? Math.max(1, Number(this.totalLength) / 1000)
 
     // Convert range to absolute timestamps for binary search
+    // In runtime mode, absoluteStart is the offset from absoluteStartNumber,
+    // and events.ts are also offsets, so this calculation is correct
     const rangeStartTs = Number(this.absoluteStart + range.start)
     const rangeEndTs = Number(this.absoluteStart + range.end)
 
@@ -253,6 +283,9 @@ class OfflineDataProvider {
           continue
         }
 
+        // Calculate state start/end relative to absoluteStart
+        // In runtime mode, both cur.ts and this.absoluteStart are offsets from absoluteStartNumber,
+        // so the subtraction gives the correct relative position
         const start = BigInt(cur.ts) - this.absoluteStart
         const end = BigInt(next.ts) - this.absoluteStart
 
@@ -485,8 +518,8 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
     if (msg.type === 'getRowIds') {
       //reset
       isRuntime = true
-      provider.events = []
 
+      provider.events = []
       provider.setCoreConfigs(msg.payload.coreConfigs)
       provider.buildIndexes()
       respond({ type: 'rowIds', payload: { rowIds: provider.rowids } })

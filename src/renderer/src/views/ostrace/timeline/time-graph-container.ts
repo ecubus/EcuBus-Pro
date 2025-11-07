@@ -58,8 +58,8 @@ export class TimeGraphContainer {
       sharedTicker: true,
       antialias: true,
       resolution: ratio,
-      autoDensity: true
-      // forceCanvas: noWebgl2
+      autoDensity: true,
+      forceCanvas: noWebgl2
     })
 
     this.stage = this.application.stage

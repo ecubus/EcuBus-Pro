@@ -63,6 +63,7 @@ const VISIBLE_ROW_BUFFER = 3 // number of buffer rows above and below visible ra
 const FINE_RESOLUTION_FACTOR = 1 // fine resolution factor or default to disable coarse update
 const EXCLUDED = 4 // EXCLUDED filter expression property key
 
+const debounceTime = 400
 export class TimeGraphChart extends TimeGraphChartLayer {
   protected rowIds: number[] = [] // complete ordered list of rowIds
   protected rowComponents: Map<number, TimeGraphRow> = new Map() // map of rowId to row component
@@ -112,11 +113,14 @@ export class TimeGraphChart extends TimeGraphChartLayer {
   private _allRowIds: number[] = [] // full ordered list of row ids including excluded rows
   private _excludedRows: Map<number, TimelineChart.TimeGraphRange> = new Map() // known excluded rows after filtering
 
-  private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400)
-  private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400)
+  private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), debounceTime)
+  private _debouncedMaybeFetchNewDataFine = debounce(
+    () => this.maybeFetchNewData(false, true),
+    debounceTime
+  )
   private _debouncedMaybeFetchNewDataFineFullSearch = debounce(
     () => this.maybeFetchNewData(false, true, true),
-    400
+    debounceTime
   )
 
   private _fetchingRows = false

@@ -261,7 +261,6 @@ const linkTrace = ref(true)
 const dataStore = useDataStore()
 const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_time', '')])
 const height = computed(() => props.height - 25)
-
 const charid = computed(() => `${props.editIndex}_graph`)
 
 const width = computed(() => props.width)
@@ -269,6 +268,7 @@ const width = computed(() => props.width)
 const time = ref(0)
 const styleMap = new Map<string, TimeGraphStateStyle>()
 let timer: ReturnType<typeof setInterval> | null = null
+const timerInterval = 500
 
 // 更新时间显示的函数
 const updateTime = () => {
@@ -292,13 +292,12 @@ const updateTime = () => {
   // startOffset = BigInt(Math.floor(Math.max(0,(maxX - 5)) * 1000000))
   // const middle = BigInt(Math.floor(Math.min(5,maxX) * 1000000))
 
-  unitController.absoluteRange = BigInt(Math.floor((maxX + 1) * 1000000))
-  nextTick(() => {
-    unitController.viewRange = {
-      start: BigInt(Math.floor((maxX - 0.001) * 1000000)),
-      end: BigInt(Math.floor((maxX + 0.001) * 1000000))
-    }
-  })
+  unitController.absoluteRange = BigInt(Math.floor((maxX + 3) * 1000000))
+
+  unitController.viewRange = {
+    start: BigInt(Math.floor((maxX - 0.4 - 0.1) * 1000000)),
+    end: BigInt(Math.floor((maxX - 0.4 + 0.1) * 1000000))
+  }
 }
 const globalStart = useGlobalStart()
 
@@ -328,19 +327,22 @@ async function loadOfflineTrace() {
   }
   input.click()
 }
+function startFunc() {
+  dataHandlerWorker.postMessage({
+    type: 'getRowIds',
+    payload: {
+      coreConfigs: cloneDeep(coreConfigs.value)
+    }
+  })
+  isPaused.value = false
+  // 启动定时器更新时间，使用500ms间隔
+  if (timer) clearInterval(timer)
+  timer = setInterval(updateTime, timerInterval)
+}
 // 确保定时器时间间隔与graph.vue保持一致
 watch(globalStart, (val) => {
   if (val) {
-    dataHandlerWorker.postMessage({
-      type: 'getRowIds',
-      payload: {
-        coreConfigs: cloneDeep(coreConfigs.value)
-      }
-    })
-    isPaused.value = false
-    // 启动定时器更新时间，使用500ms间隔
-    if (timer) clearInterval(timer)
-    timer = setInterval(updateTime, 500)
+    startFunc()
   } else if (timer) {
     clearInterval(timer)
     timer = null
@@ -399,7 +401,7 @@ const runtimeStore = useRuntimeStore()
 const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
 const unitController = new TimeGraphUnitController(BigInt(0))
-unitController.worldRenderFactor = 1
+unitController.worldRenderFactor = 20
 
 function formatTimeLabel(theNumber: bigint): string {
   theNumber = theNumber + startOffset
@@ -887,7 +889,7 @@ watch(
       timer = null
     } else if (!paused && globalStart.value) {
       if (timer) clearInterval(timer)
-      timer = setInterval(updateTime, 500)
+      timer = setInterval(updateTime, timerInterval)
     }
   }
 )
@@ -977,6 +979,10 @@ function logDisplay({
   }
   // Don't process logs when paused
   if (isPaused.value) return
+
+  if (workerRowIds.value.length === 0) {
+    return
+  }
   //filter by instance
   const filteredValues = values.filter((value) => value.instance === orti.value.name)
   const events = filteredValues.map((value) => value.message.data.raw)
@@ -1011,7 +1017,7 @@ onMounted(() => {
   })
 
   if (globalStart.value) {
-    timer = setInterval(updateTime, 500)
+    startFunc()
   }
   window.logBus.on('osEvent', logDisplay)
 })
@@ -1292,10 +1298,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--el-text-color-regular);
   background: var(--el-bg-color-overlay);
-  padding: 4px 8px;
+  padding: 2px 2px;
   border-radius: 4px;
   height: 37px;
   overflow-y: auto;

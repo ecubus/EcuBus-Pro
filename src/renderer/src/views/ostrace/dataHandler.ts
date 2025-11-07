@@ -131,7 +131,8 @@ class OfflineDataProvider {
 
         // For TASK: only create state when status is START and next event exists
         if (cur.type === TaskType.TASK) {
-          if (cur.status !== TaskStatus.START || !next) continue
+          if ((cur.status !== TaskStatus.START && cur.status !== TaskStatus.ACTIVE) || !next)
+            continue
         }
         // For ISR: only create state when status is START and next event is STOP
         else if (cur.type === TaskType.ISR) {
@@ -150,11 +151,18 @@ class OfflineDataProvider {
         if (Number(end - start) * (1 / resolution) <= 1) continue
 
         const durationUs = Number(end - start)
-        const durationLabel =
-          durationUs >= 1000 ? `${(durationUs / 1000).toFixed(1)}ms` : `${durationUs}us`
+        let durationLabel: string | undefined = undefined
+
+        if (cur.type === TaskType.TASK && cur.status === TaskStatus.ACTIVE) {
+          durationLabel = undefined
+        } else {
+          durationLabel =
+            durationUs >= 1000 ? `${(durationUs / 1000).toFixed(1)}ms` : `${durationUs}us`
+        }
+
         states.push({
           id: `${cur.coreId}_${cur.id}_${cur.type}_${cur.ts}`,
-          label: `${durationLabel}`,
+          label: durationLabel,
           range: { start, end },
           data: { cur, next, style: {} }
         } as unknown as TimelineChart.TimeGraphState)

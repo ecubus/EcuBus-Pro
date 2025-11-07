@@ -91,12 +91,12 @@
             </div>
           </div>
           <div class="controls-hint">
-            <div class="hint-item">
+            <!-- <div class="hint-item">
               <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to zoom
-            </div>
-            <!-- <div class="hint-item" v-if="toolTipInfo">
-              {{ toolTipInfo.cur.status }} -> {{ toolTipInfo.next.status }}
             </div> -->
+            <div v-if="toolTipInfo" class="hint-item">
+              {{ formattedTooltip }}
+            </div>
           </div>
         </div>
         <div :id="`Shift-${charid}`" class="shift"></div>
@@ -155,8 +155,12 @@ import {
   IsrStatus,
   OsEvent,
   parseInfo,
+  ResourceStatus,
+  SpinlockStatus,
   TaskStatus,
   TaskType,
+  isrStatusRecord,
+  taskStatusRecord,
   taskTypeRecord,
   VisibleBlock
 } from 'nodeCan/osEvent'
@@ -487,11 +491,104 @@ function destroyGraph() {
 const toolTipInfo = ref<{
   cur: OsEvent
   next: OsEvent
-  pos: {
-    x: number
-    y: number
-  }
 } | null>(null)
+
+// 获取状态 label
+function getStatusLabel(type: TaskType, status: number): string {
+  switch (type) {
+    case TaskType.TASK:
+      return taskStatusRecord[status as TaskStatus] || `Status ${status}`
+    case TaskType.ISR:
+      return isrStatusRecord[status as IsrStatus] || `Status ${status}`
+    case TaskType.SPINLOCK:
+      return status === SpinlockStatus.LOCKED ? 'Locked' : 'Unlocked'
+    case TaskType.RESOURCE:
+      return status === ResourceStatus.START ? 'Start' : 'Stop'
+    case TaskType.HOOK:
+      return `Hook ${status}`
+    case TaskType.SERVICE:
+      return `Service ${status}`
+    case TaskType.LINE:
+      return 'Line'
+    default:
+      return `Status ${status}`
+  }
+}
+
+// 获取任务/ISR等的名字
+function getEventName(event: OsEvent): string {
+  const buttonId = `${event.coreId}_${event.id}_${event.type}`
+  const core = coreConfigs.value.find((c) => c.id === event.coreId)
+  if (core) {
+    const button = core.buttons.find((b) => b.id === buttonId)
+    if (button) {
+      return button.name
+    }
+  }
+  return `ID ${event.id}`
+}
+
+// 格式化 tooltip 信息
+function formatTooltipInfo(event: OsEvent, showName: boolean = true): string {
+  const typeLabel = taskTypeRecord[event.type] || `Type ${event.type}`
+  const statusLabel = getStatusLabel(event.type, event.status)
+  const timeLabel = formatTimeLabel(BigInt(event.ts))
+  if (showName) {
+    const name = getEventName(event)
+    return `${name} (${typeLabel}: ${statusLabel}) @ ${timeLabel}`
+  }
+  return `(${typeLabel}: ${statusLabel}) @ ${timeLabel}`
+}
+
+// 格式化时间差值（不需要加上 startOffset）
+function formatTimeDelta(delta: bigint): string {
+  const absDelta = delta >= 0n ? delta : -delta
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  // 根据差值大小选择合适的单位
+  if (absDelta >= MICRO_IN_S) {
+    return formatWithUnit(absDelta, MICRO_IN_S, 3, 's')
+  } else if (absDelta >= MICRO_IN_MS) {
+    return formatWithUnit(absDelta, MICRO_IN_MS, 3, 'ms')
+  }
+  return `${absDelta.toString()}us`
+}
+
+// 格式化完整的 tooltip 信息，包括差值
+const formattedTooltip = computed(() => {
+  if (!toolTipInfo.value) return ''
+  const cur = toolTipInfo.value.cur
+  const next = toolTipInfo.value.next
+  const curText = formatTooltipInfo(cur, true)
+  const nextText = formatTooltipInfo(next, false)
+
+  // 计算时间差值
+  const delta = BigInt(next.ts) - BigInt(cur.ts)
+  const deltaLabel = formatTimeDelta(delta)
+
+  return `${curText} -> ${nextText} (Δ: ${deltaLabel})`
+})
 async function initPixiGraph() {
   destroyGraph()
 
@@ -537,25 +634,30 @@ async function initPixiGraph() {
         return parseInt(color.replace('#', ''), 16)
       }
       const data = model.data as { cur: OsEvent; next: OsEvent }
-
-      const id = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
+      const key = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
+      const rid = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}_${data.cur.status}`
       const style: TimeGraphStateStyle =
-        styleMap.get(id) ||
+        styleMap.get(rid) ||
         ({
           color: 0x000000,
           height: buttonHeight * 0.9
         } as TimeGraphStateStyle)
-      if (!styleMap.has(id)) {
+      if (!styleMap.has(rid)) {
         const data = model.data as { cur: OsEvent; next: OsEvent }
-        const id = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
+
         const core = coreConfigs.value.find((c) => c.id === data.cur.coreId)
         if (core) {
-          const button = core.buttons.find((b) => b.id === id)
+          const button = core.buttons.find((b) => b.id === key)
           if (button) {
             style.color = stringColor2number(button.color)
+            if (data.cur.type === TaskType.TASK) {
+              if (data.cur.status === TaskStatus.ACTIVE) {
+                style.height = buttonHeight * 0.2
+              }
+            }
           }
         }
-        styleMap.set(id, style)
+        styleMap.set(rid, style)
       }
       return {
         color: style.color,
@@ -607,11 +709,7 @@ async function initPixiGraph() {
       if (!globalStart.value) {
         toolTipInfo.value = {
           cur: el.model.data.cur,
-          next: el.model.data.next,
-          pos: {
-            x: (el as any).position.x,
-            y: (el as any).position.y
-          }
+          next: el.model.data.next
         }
       } else {
         toolTipInfo.value = null
@@ -760,6 +858,10 @@ const handleArrowClick = async (
   if (found.id) {
     const stateComp = timeGraphChart.getStateById(found.id)
     if (stateComp) {
+      toolTipInfo.value = {
+        cur: stateComp.model.data!.cur,
+        next: stateComp.model.data!.next
+      }
       timeGraphChart.selectState(stateComp.model)
     }
   }
@@ -819,7 +921,6 @@ const selectEndStyle = computed(() => {
   }
 })
 function onSelectionRangeChange(selectionRange?: TimelineChart.TimeGraphRange) {
-  toolTipInfo.value = null
   if (!globalStart.value) {
     if (selectionRange) {
       selectStart.value = selectionRange.start
@@ -1150,10 +1251,8 @@ onUnmounted(() => {
   background: var(--el-bg-color-overlay);
   padding: 4px 8px;
   border-radius: 4px;
-  /* border: 1px solid var(--el-border-color-light); */
-  margin-top: 4px;
-  max-height: 40px;
-  overflow: hidden;
+  height: 37px;
+  overflow-y: auto;
 }
 
 .hint-item {

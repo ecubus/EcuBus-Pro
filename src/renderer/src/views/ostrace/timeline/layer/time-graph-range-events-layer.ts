@@ -4,10 +4,10 @@ import { TimeGraphChartProviders } from './time-graph-chart'
 import { TimeGraphViewportLayer } from './time-graph-viewport-layer'
 
 export class TimeGraphRangeEventsLayer extends TimeGraphViewportLayer {
-  protected rangeEvents: Map<TimelineChart.TimeGraphAnnotation, TimeGraphRectangle>
+  protected rangeEvents!: Map<TimelineChart.TimeGraphAnnotation, TimeGraphRectangle>
   protected providers: TimeGraphChartProviders
 
-  private _worldRangeUpdateHandler: {
+  private _worldRangeUpdateHandler!: {
     (): void
     (worldRange: TimelineChart.TimeGraphRange): void
     (worldRange: TimelineChart.TimeGraphRange): void

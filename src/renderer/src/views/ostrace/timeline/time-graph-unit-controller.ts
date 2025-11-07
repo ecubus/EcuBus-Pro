@@ -86,12 +86,12 @@ export class TimeGraphUnitController {
     }
   }
 
-  onSelectionRangeChange(handler: (selectionRange: TimelineChart.TimeGraphRange) => void) {
+  onSelectionRangeChange(handler: (selectionRange?: TimelineChart.TimeGraphRange) => void) {
     this.selectionRangeChangedHandlers.push(handler)
   }
 
   removeSelectionRangeChangedHandler(
-    handler: (selectionRange: TimelineChart.TimeGraphRange) => void
+    handler: (selectionRange?: TimelineChart.TimeGraphRange) => void
   ) {
     const index = this.selectionRangeChangedHandlers.indexOf(handler)
     if (index > -1) {

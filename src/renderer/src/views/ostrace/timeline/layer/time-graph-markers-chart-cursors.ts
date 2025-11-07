@@ -4,7 +4,7 @@ import { TimeGraphChartCursors } from './time-graph-chart-cursors'
 export class TimeGraphMarkersChartCursors extends TimeGraphChartCursors {
   protected afterAddToContainer() {
     super.afterAddToContainer()
-    this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
+    this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler as any)
     this._keyboardShortcutKeyDownHandler = (event: KeyboardEvent) => {
       switch (event.key) {
         case ',':
@@ -17,7 +17,7 @@ export class TimeGraphMarkersChartCursors extends TimeGraphChartCursors {
           return
       }
     }
-    this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
+    this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler as any)
   }
 
   protected selectClosestStateAndMakeSelectionRange = (direction: 'next' | 'prev') => {

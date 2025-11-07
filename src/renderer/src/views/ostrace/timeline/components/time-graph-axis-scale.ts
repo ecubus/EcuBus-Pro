@@ -18,9 +18,9 @@ export interface TimeGraphAxisStyle extends TimeGraphStyledRect {
 import { BIMath } from '../bigint-utils'
 
 export class TimeGraphAxisScale extends TimeGraphComponent<null> {
-  protected mouseStartY: number
-  protected mouseStartX: number
-  protected oldViewRange: TimelineChart.TimeGraphRange
+  protected mouseStartY!: number
+  protected mouseStartX!: number
+  protected oldViewRange!: TimelineChart.TimeGraphRange
   protected mouseIsDown: boolean = false
   protected labels: PIXI.Text[]
 

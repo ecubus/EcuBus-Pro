@@ -107,8 +107,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
       ev.preventDefault()
       return false
     })
-    this.onCanvasEvent('mousewheel', this._mouseWheelHandler)
-    this.onCanvasEvent('wheel', this._mouseWheelHandler)
+    this.onCanvasEvent('mousewheel', this._mouseWheelHandler as any)
+    this.onCanvasEvent('wheel', this._mouseWheelHandler as any)
     this.scaleComponent = new TimeGraphAxisScale(
       this.id + '_scale',
       this.getOptions(),
@@ -135,8 +135,8 @@ export class TimeGraphAxis extends TimeGraphLayer {
       this.unitController.removeSelectionRangeChangedHandler(this._updateHandler)
     }
     if (this._mouseWheelHandler) {
-      this.removeOnCanvasEvent('mousewheel', this._mouseWheelHandler)
-      this.removeOnCanvasEvent('wheel', this._mouseWheelHandler)
+      this.removeOnCanvasEvent('mousewheel', this._mouseWheelHandler as any)
+      this.removeOnCanvasEvent('wheel', this._mouseWheelHandler as any)
     }
     if (this._keyDownHandler) {
       document.removeEventListener('keydown', this._keyDownHandler)

@@ -6,7 +6,7 @@ export class TimeGraphAxisCursors extends TimeGraphLayer {
   protected firstCursor?: TimeGraphAxisCursor
   protected secondCursor?: TimeGraphAxisCursor
   protected color: number = 0x0000ff
-  private _updateHandler: {
+  private _updateHandler!: {
     (): void
     (viewRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void

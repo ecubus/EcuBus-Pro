@@ -5,9 +5,9 @@ import { TimeGraphRowController } from '../time-graph-row-controller'
 import { TimeGraphChartLayer } from './time-graph-chart-layer'
 
 export class TimeGraphChartArrows extends TimeGraphChartLayer {
-  protected arrows: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>
+  protected arrows!: Map<TimelineChart.TimeGraphArrow, TimeGraphArrowComponent>
   protected rowIds: number[] = []
-  private _updateHandler: {
+  private _updateHandler!: {
     (): void
     (worldRange: TimelineChart.TimeGraphRange): void
     (worldRange: TimelineChart.TimeGraphRange): void

@@ -1137,7 +1137,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
   }
 
   getStateById(id: string): TimeGraphStateComponent | undefined {
-    let state = undefined
+    let state: TimeGraphStateComponent | undefined
     for (const rowComponent of this.rowComponents.values()) {
       state = rowComponent.getStateById(id)
       if (state) {

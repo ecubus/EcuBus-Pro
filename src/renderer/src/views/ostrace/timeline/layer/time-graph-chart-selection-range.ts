@@ -5,7 +5,7 @@ import { TimeGraphViewportLayer } from './time-graph-viewport-layer'
 export class TimeGraphChartSelectionRange extends TimeGraphViewportLayer {
   protected selectionRange?: TimeGraphRectangle
   protected color: number = 0x0000ff
-  private _updateHandler: {
+  private _updateHandler!: {
     (): void
     (selectionRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void

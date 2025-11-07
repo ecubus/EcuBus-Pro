@@ -7,11 +7,11 @@ import { TimeGraphStateController } from '../time-graph-state-controller'
 export type TimeGraphLayerOptions = {}
 
 export abstract class TimeGraphLayer {
-  private canvas: HTMLCanvasElement
-  protected stateController: TimeGraphStateController
-  protected unitController: TimeGraphUnitController
+  private canvas!: HTMLCanvasElement
+  protected stateController!: TimeGraphStateController
+  protected unitController!: TimeGraphUnitController
   protected children: TimeGraphComponent<any>[]
-  protected stage: PIXI.Container
+  protected stage!: PIXI.Container
   protected layer: PIXI.Container
   private childContainer: PIXI.Container | undefined
 

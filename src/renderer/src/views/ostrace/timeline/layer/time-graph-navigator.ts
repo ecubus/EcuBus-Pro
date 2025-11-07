@@ -12,17 +12,17 @@ import { BIMath } from '../bigint-utils'
 import { getColorFromCssVar } from '../color'
 
 export class TimeGraphNavigator extends TimeGraphLayer {
-  protected navigatorHandle: TimeGraphNavigatorHandle
-  protected navigatorBackground: TimeGraphNavigatorBackground
+  protected navigatorHandle!: TimeGraphNavigatorHandle
+  protected navigatorBackground!: TimeGraphNavigatorBackground
   protected selectionRange?: TimeGraphRectangle
-  private _updateHandler: {
+  private _updateHandler!: {
     (): void
     (viewRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void
     (viewRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void
   }
-  private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void }
+  private _contextMenuHandler!: { (e: MouseEvent): void; (event: Event): void }
 
   afterAddToContainer() {
     this._updateHandler = (): void => this.update()
@@ -36,7 +36,7 @@ export class TimeGraphNavigator extends TimeGraphLayer {
     this.navigatorHandle = new TimeGraphNavigatorHandle(this.unitController, this.stateController)
     this.addChild(this.navigatorHandle)
     this.unitController.onSelectionRangeChange(this._updateHandler)
-    this._contextMenuHandler = (e: MouseEvent): void => {
+    this._contextMenuHandler = (e: MouseEvent | Event): void => {
       e.preventDefault()
     }
     this.onCanvasEvent('contextmenu', this._contextMenuHandler)
@@ -90,9 +90,9 @@ export class TimeGraphNavigator extends TimeGraphLayer {
 }
 
 export class TimeGraphNavigatorHandle extends TimeGraphComponent<null> {
-  protected mouseIsDown: boolean
-  protected mouseStartX: number
-  protected oldViewStart: bigint
+  protected mouseIsDown!: boolean
+  protected mouseStartX!: number
+  protected oldViewStart!: bigint
   private _moveEndHandler: () => void
 
   constructor(

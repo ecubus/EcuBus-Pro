@@ -18,7 +18,7 @@ export class TimeGraphStateController {
 
   private _scaleFactor: number
 
-  protected _zoomFactor: number
+  protected _zoomFactor!: number
   protected _initialZoomFactor: number
   protected _positionOffset: {
     x: number

@@ -10,26 +10,26 @@ import { BIMath } from '../bigint-utils'
 export class TimeGraphChartCursors extends TimeGraphChartLayer {
   protected mouseSelecting: boolean = false
   protected mouseButtons: number = 0
-  protected shiftKeyDown: boolean
+  protected shiftKeyDown!: boolean
   protected firstCursor?: TimeGraphCursor
   protected secondCursor?: TimeGraphCursor
   protected color: number = 0x0000ff
 
-  private _stageMouseDownHandler: Function
-  private _stageMouseMoveHandler: Function
-  private _stageMouseUpHandler: Function
+  private _stageMouseDownHandler!: Function
+  private _stageMouseMoveHandler!: Function
+  private _stageMouseUpHandler!: Function
 
-  private _updateHandler: {
+  private _updateHandler!: {
     (): void
     (viewRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void
     (viewRange: TimelineChart.TimeGraphRange): void
     (selectionRange: TimelineChart.TimeGraphRange): void
   }
-  private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void }
-  private _cursorKeyDownHandler: (event: KeyboardEvent) => void
-  private _cursorKeyUpHandler: (event: KeyboardEvent) => void
-  protected _keyboardShortcutKeyDownHandler: (event: KeyboardEvent) => void
+  private _mouseDownHandler!: (event: MouseEvent) => void
+  private _cursorKeyDownHandler!: (event: KeyboardEvent) => void
+  private _cursorKeyUpHandler!: (event: KeyboardEvent) => void
+  protected _keyboardShortcutKeyDownHandler!: (event: KeyboardEvent) => void
 
   constructor(
     id: string,
@@ -84,9 +84,9 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
       }
     }
 
-    this.onCanvasEvent('keydown', this._cursorKeyDownHandler)
-    this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
-    this.onCanvasEvent('keyup', this._cursorKeyUpHandler)
+    this.onCanvasEvent('keydown', this._cursorKeyDownHandler as any)
+    this.onCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler as any)
+    this.onCanvasEvent('keyup', this._cursorKeyUpHandler as any)
 
     this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
       this.mouseButtons = event.data.buttons
@@ -178,7 +178,7 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
         document.addEventListener('mouseup', mouseUpListener)
       }
     }
-    this.onCanvasEvent('mousedown', this._mouseDownHandler)
+    this.onCanvasEvent('mousedown', this._mouseDownHandler as any)
     this.stateController.onWorldRender(this._updateHandler)
     this.unitController.onSelectionRangeChange(this._updateHandler)
     this.stateController.onScaleFactorChange(this._updateHandler)
@@ -342,16 +342,16 @@ export class TimeGraphChartCursors extends TimeGraphChartLayer {
       this.unitController.removeSelectionRangeChangedHandler(this._updateHandler)
     }
     if (this._mouseDownHandler) {
-      this.removeOnCanvasEvent('mousedown', this._mouseDownHandler)
+      this.removeOnCanvasEvent('mousedown', this._mouseDownHandler as any)
     }
     if (this._cursorKeyDownHandler) {
-      this.removeOnCanvasEvent('keydown', this._cursorKeyDownHandler)
+      this.removeOnCanvasEvent('keydown', this._cursorKeyDownHandler as any)
     }
     if (this._keyboardShortcutKeyDownHandler) {
-      this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler)
+      this.removeOnCanvasEvent('keydown', this._keyboardShortcutKeyDownHandler as any)
     }
     if (this._cursorKeyUpHandler) {
-      this.removeOnCanvasEvent('mousedown', this._cursorKeyUpHandler)
+      this.removeOnCanvasEvent('mousedown', this._cursorKeyUpHandler as any)
     }
     if (this.stage) {
       this.stage.off('mousedown', this._stageMouseDownHandler)

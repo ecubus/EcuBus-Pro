@@ -8,6 +8,7 @@
 import { OsEvent, TaskType, TaskStatus, IsrStatus, parseInfo } from 'nodeCan/osEvent'
 import { TimelineChart } from './timeline/time-graph-model'
 
+let isRuntime = false
 function toNumberSafe(v: any): number {
   if (v === undefined || v === null || v === '') return 0
   const n = Number(v)
@@ -29,6 +30,8 @@ function makeRowId(coreId: number, id: number, type: number): number {
 
 class OfflineDataProvider {
   events: OsEvent[] = []
+  rowids: number[] = []
+  private absoluteStartNumber: number = 0
   private absoluteStart: bigint = BigInt(0)
   private totalLength: bigint = BigInt(0)
   perActor: Map<number, OsEvent[]> = new Map()
@@ -44,6 +47,7 @@ class OfflineDataProvider {
   public buildIndexes() {
     this.perActor.clear()
     this.actorNames.clear()
+    this.buildRowIds()
     if (this.events.length === 0) {
       this.absoluteStart = BigInt(0)
       this.totalLength = BigInt(0)
@@ -68,6 +72,43 @@ class OfflineDataProvider {
     this.totalLength = BigInt(maxTs) - this.absoluteStart
   }
 
+  public appendEvents(newEvents: OsEvent[], cpuFreq: number) {
+    if (newEvents.length === 0) return
+
+    // In runtime mode, set absoluteStart to the first event's timestamp if it's the first batch
+    if (isRuntime && this.events.length === 0 && newEvents.length > 0) {
+      const firstTs = Math.floor(newEvents[0].ts / cpuFreq)
+      this.absoluteStartNumber = firstTs
+    }
+
+    //handle ts
+    for (const e of newEvents) {
+      e.ts = Math.floor(e.ts / cpuFreq)
+      // If runtime mode, subtract absoluteStart as offset
+      if (isRuntime) {
+        e.ts = e.ts - this.absoluteStartNumber
+      }
+      this.events.push(e)
+    }
+    // Since timestamps are always increasing, we can directly append without sorting
+
+    // Only process new events to update indexes incrementally
+    for (const e of newEvents) {
+      if (e.type === TaskType.TASK || e.type === TaskType.ISR) {
+        const rid = makeRowId(e.coreId, e.id, e.type)
+        if (!this.perActor.has(rid)) {
+          this.perActor.set(rid, [])
+          this.actorNames.set(rid, `${TaskType[e.type]}_${e.id}`)
+        }
+        this.perActor.get(rid)!.push(e)
+      }
+    }
+
+    // Update totalLength: last event has the max timestamp since timestamps are always increasing
+    const maxTs = newEvents[newEvents.length - 1].ts
+    this.totalLength = BigInt(maxTs) - this.absoluteStart
+  }
+
   setCoreConfigs(
     coreConfigs: Array<{
       id: number
@@ -78,19 +119,17 @@ class OfflineDataProvider {
     this.coreConfigs = coreConfigs
   }
 
-  getRowIds(): number[] {
+  buildRowIds() {
     // If coreConfigs is provided, use it to determine the order
 
     const orderedRowIds: number[] = []
     // Collect rowIds in the order of coreConfigs
     for (const core of this.coreConfigs) {
       for (const button of core.buttons) {
-        if (this.perActor.has(button.numberId)) {
-          orderedRowIds.push(button.numberId)
-        }
+        orderedRowIds.push(button.numberId)
       }
     }
-    return orderedRowIds
+    this.rowids = orderedRowIds
   }
 
   getTotalLength(): bigint {
@@ -101,7 +140,51 @@ class OfflineDataProvider {
     return this.absoluteStart
   }
 
-  getData(opts: { range?: TimelineChart.TimeGraphRange; resolution?: number; rowIds?: number[] }): {
+  /**
+   * Binary search to find the first event index where ts >= targetTs
+   * Since ts is always increasing, we can use binary search
+   */
+  private binarySearchFirst(evts: OsEvent[], targetTs: number): number {
+    let left = 0
+    let right = evts.length - 1
+    let result = evts.length
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2)
+      if (evts[mid].ts >= targetTs) {
+        result = mid
+        right = mid - 1
+      } else {
+        left = mid + 1
+      }
+    }
+
+    return result
+  }
+
+  /**
+   * Binary search to find the last event index where ts <= targetTs
+   * Since ts is always increasing, we can use binary search
+   */
+  private binarySearchLast(evts: OsEvent[], targetTs: number): number {
+    let left = 0
+    let right = evts.length - 1
+    let result = -1
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2)
+      if (evts[mid].ts <= targetTs) {
+        result = mid
+        left = mid + 1
+      } else {
+        right = mid - 1
+      }
+    }
+
+    return result
+  }
+
+  getData(opts: { range?: TimelineChart.TimeGraphRange; resolution?: number }): {
     rows: TimelineChart.TimeGraphRowModel[]
     range: TimelineChart.TimeGraphRange
     resolution: number
@@ -109,23 +192,50 @@ class OfflineDataProvider {
     const range =
       opts.range || ({ start: BigInt(0), end: this.totalLength } as TimelineChart.TimeGraphRange)
     const resolution = opts.resolution ?? Math.max(1, Number(this.totalLength) / 1000)
-    const targetRowIds = (
-      opts.rowIds && opts.rowIds.length ? opts.rowIds : this.getRowIds()
-    ).filter((id) => this.perActor.has(id))
+
+    // Convert range to absolute timestamps for binary search
+    const rangeStartTs = Number(this.absoluteStart + range.start)
+    const rangeEndTs = Number(this.absoluteStart + range.end)
 
     const rows: TimelineChart.TimeGraphRowModel[] = []
-    for (const rowId of targetRowIds) {
+    for (const rowId of this.rowids) {
       const evts = this.perActor.get(rowId)!
       if (!evts || evts.length === 0) continue
       const firstTs = evts[0].ts
       const lastTs = evts[evts.length - 1].ts
       const name = this.actorNames.get(rowId) || `${rowId}`
 
+      // Use binary search to find the range of events to process
+      const startIdx = this.binarySearchFirst(evts, rangeStartTs)
+      const endIdx = this.binarySearchLast(evts, rangeEndTs)
+
+      // If no events in range, skip this row
+      if (startIdx >= evts.length || endIdx < 0 || startIdx > endIdx) {
+        rows.push({
+          id: rowId,
+          name,
+          range: {
+            start: BigInt(0),
+            end: BigInt(lastTs - firstTs)
+          },
+          data: { type: 'OFFLINE', hasStates: false },
+          states: [],
+          annotations: [],
+          prevPossibleState: BigInt(0),
+          nextPossibleState: BigInt(lastTs) - this.absoluteStart
+        })
+        continue
+      }
+
       const states: TimelineChart.TimeGraphState[] = []
       let prevPossibleState = BigInt(0)
       let nextPossibleState = BigInt(lastTs) - this.absoluteStart
 
-      for (let i = 0; i < evts.length; i++) {
+      // Only iterate through events in the range (need to check one before startIdx for states that span the range)
+      const processStartIdx = Math.max(0, startIdx - 1)
+      const processEndIdx = Math.min(evts.length - 1, endIdx + 1)
+
+      for (let i = processStartIdx; i < processEndIdx; i++) {
         const cur = evts[i]
         const next = evts[i + 1]
 
@@ -206,10 +316,19 @@ type InMsg =
         }>
       }
     }
-  | { type: 'getRowIds' }
+  | {
+      type: 'getRowIds'
+      payload: {
+        coreConfigs: Array<{
+          id: number
+          name: string
+          buttons: Array<{ name: string; color: string; id: string; numberId: number }>
+        }>
+      }
+    }
   | {
       type: 'getData'
-      payload: { range?: TimelineChart.TimeGraphRange; resolution?: number; rowIds?: number[] }
+      payload: { range?: TimelineChart.TimeGraphRange; resolution?: number }
     }
   | {
       type: 'findState'
@@ -217,6 +336,13 @@ type InMsg =
         direction: 'left' | 'right'
         rowId: number
         cursor?: bigint
+      }
+    }
+  | {
+      type: 'updateEvents'
+      payload: {
+        cpuFreq: number
+        events: OsEvent[]
       }
     }
 
@@ -248,6 +374,13 @@ type OutMsg =
   | {
       type: 'foundState'
       payload: { id?: string; start?: bigint; event?: OsEvent }
+    }
+  | {
+      type: 'updated'
+      payload: {
+        start: bigint
+        totalLength: bigint
+      }
     }
 
 function respond(msg: OutMsg) {
@@ -310,6 +443,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
   try {
     const msg = e.data
     if (msg.type === 'loadCsv') {
+      isRuntime = false
       const { file, cpuFreq, coreConfigs, database } = msg.payload
       let events: OsEvent[] = []
       if (file && typeof file.stream === 'function') {
@@ -317,11 +451,12 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
 
         // build into provider
         provider.events = events
-        provider.buildIndexes()
+
         // Set coreConfigs to ensure rowIds order matches graph buttons
         if (coreConfigs) {
           provider.setCoreConfigs(coreConfigs)
         }
+        provider.buildIndexes()
       } else {
         throw new Error('loadCsv requires text, file, or filePath')
       }
@@ -329,7 +464,7 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       respond({
         type: 'loaded',
         payload: {
-          rowIds: provider.getRowIds(),
+          rowIds: provider.rowids,
           totalLength: provider.getTotalLength(),
           start: provider.getAbsoluteStart(),
           events: events.map((event, index) => ({
@@ -348,7 +483,13 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       return
     }
     if (msg.type === 'getRowIds') {
-      respond({ type: 'rowIds', payload: { rowIds: provider.getRowIds() } })
+      //reset
+      isRuntime = true
+      provider.events = []
+
+      provider.setCoreConfigs(msg.payload.coreConfigs)
+      provider.buildIndexes()
+      respond({ type: 'rowIds', payload: { rowIds: provider.rowids } })
       return
     }
     if (msg.type === 'getData') {
@@ -421,7 +562,20 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       }
       return
     }
+    if (msg.type === 'updateEvents') {
+      const { events, cpuFreq } = msg.payload
+      provider.appendEvents(events, cpuFreq)
+      // respond({
+      //   type: 'updated',
+      //   payload: {
+      //     totalLength: provider.getTotalLength(),
+      //     start: provider.getAbsoluteStart()
+      //   }
+      // })
+      return
+    }
   } catch (err: any) {
+    console.error('onmessage error', err)
     respond({ type: 'error', payload: { message: err?.message || String(err) } })
   }
 }

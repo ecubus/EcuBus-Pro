@@ -144,7 +144,8 @@ function parseORTIData(raw: any) {
       name: '',
       ts: ts,
       data: `Index:${osEvent.index} Time:${osEvent.ts} Core:${osEvent.coreId} ${getStatusDescription(osEvent.type, osEvent.status)}`,
-      id: getID(osEvent.type, osEvent.id, osEvent.coreId)
+      id: getID(osEvent.type, osEvent.id, osEvent.coreId),
+      raw: osEvent
     }
     if (db) {
       const timestampInSeconds = parseFloat(((ts || 0) / 1000000).toFixed(6))

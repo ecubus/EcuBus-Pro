@@ -7,16 +7,6 @@ export enum TaskStatus {
   TERMINATE = 5
 }
 
-export interface VisibleBlock {
-  type: TaskType
-  id: number
-  start: number
-  end?: number
-  coreId: number
-  status: number
-  endStatus?: number
-}
-
 export interface TaskEvent {
   status: TaskStatus
   taskId: number

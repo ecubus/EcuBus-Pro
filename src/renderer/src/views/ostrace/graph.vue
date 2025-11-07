@@ -49,6 +49,11 @@
             <Icon :icon="cursorIcon" />
           </el-button>
         </el-tooltip>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+          <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
+            Time: {{ time }}s
+          </span>
+        </div>
       </div>
       <div class="main">
         <div class="left">
@@ -161,8 +166,7 @@ import {
   TaskType,
   isrStatusRecord,
   taskStatusRecord,
-  taskTypeRecord,
-  VisibleBlock
+  taskTypeRecord
 } from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
 import { ElLoading } from 'element-plus'
@@ -187,7 +191,9 @@ import { getColorFromCssVar } from './timeline/color'
 
 const dataHandlerWorker = new DataHandlerWorker()
 let startOffset: bigint = 0n
+let startOffsetNumber: number = 0
 let offlineLoading: any = null
+let lastEventTs: number = 0
 const workerRowIds = ref<number[]>([])
 let pendingDataResolve:
   | (
@@ -220,6 +226,7 @@ dataHandlerWorker.onmessage = (event) => {
     workerRowIds.value = msg.payload.rowIds || []
     startOffset = BigInt(msg.payload.start || 0)
     unitController.absoluteRange = BigInt(msg.payload.totalLength || 0)
+
     unitController.viewRange = {
       start: BigInt(0),
       end: BigInt(msg.payload.totalLength || 0)
@@ -231,8 +238,6 @@ dataHandlerWorker.onmessage = (event) => {
       offlineLoading.close()
       offlineLoading = null
     }
-    // console.log('unitController.absoluteRange', unitController.absoluteRange)
-    // initPixiGraph(unitController.absoluteRange)
   } else if (msg.type === 'data') {
     const resolver = pendingDataResolve
     pendingDataResolve = null
@@ -241,6 +246,8 @@ dataHandlerWorker.onmessage = (event) => {
     const resolver = pendingFindStateResolve
     pendingFindStateResolve = null
     if (resolver) resolver(msg.payload)
+  } else if (msg.type === 'rowIds') {
+    workerRowIds.value = msg.payload.rowIds
   }
 }
 const isPaused = ref(false)
@@ -268,13 +275,7 @@ const updateTime = () => {
   if (isPaused.value) return
 
   // 更新x轴范围和时间
-  let maxX = 5
-  let minX = 0
-
-  const lastBlock = visibleBlocks.at(-1)
-  if (lastBlock && lastBlock.end) {
-    maxX = lastBlock.end
-  }
+  let maxX = lastEventTs / 1000000
 
   // 使用当前时间更新time值
   const ts = (Date.now() - window.startTime) / 1000
@@ -287,13 +288,17 @@ const updateTime = () => {
   time.value = maxX
 
   // 计算x轴范围
-  maxX = Math.ceil(maxX) + 5
-  minX = Math.floor(minX)
 
-  // Update viewport range
-  // if (pixiRenderer) {
-  //   // pixiRenderer.updateViewport(minX, maxX)
-  // }
+  // startOffset = BigInt(Math.floor(Math.max(0,(maxX - 5)) * 1000000))
+  // const middle = BigInt(Math.floor(Math.min(5,maxX) * 1000000))
+
+  unitController.absoluteRange = BigInt(Math.floor((maxX + 1) * 1000000))
+  nextTick(() => {
+    unitController.viewRange = {
+      start: BigInt(Math.floor((maxX - 0.001) * 1000000)),
+      end: BigInt(Math.floor((maxX + 0.001) * 1000000))
+    }
+  })
 }
 const globalStart = useGlobalStart()
 
@@ -326,6 +331,12 @@ async function loadOfflineTrace() {
 // 确保定时器时间间隔与graph.vue保持一致
 watch(globalStart, (val) => {
   if (val) {
+    dataHandlerWorker.postMessage({
+      type: 'getRowIds',
+      payload: {
+        coreConfigs: cloneDeep(coreConfigs.value)
+      }
+    })
     isPaused.value = false
     // 启动定时器更新时间，使用500ms间隔
     if (timer) clearInterval(timer)
@@ -384,10 +395,10 @@ const setYOffset = (offset: number) => {
   }
 }
 const runtimeStore = useRuntimeStore()
-const visibleBlocks: VisibleBlock[] = []
+
 const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
-const unitController = new TimeGraphUnitController(BigInt(1000))
+const unitController = new TimeGraphUnitController(BigInt(0))
 unitController.worldRenderFactor = 1
 
 function formatTimeLabel(theNumber: bigint): string {
@@ -589,7 +600,7 @@ const formattedTooltip = computed(() => {
 
   return `${curText} -> ${nextText} (Δ: ${deltaLabel})`
 })
-async function initPixiGraph() {
+function initPixiGraph() {
   destroyGraph()
 
   const canvas = document.getElementById(charid.value) as HTMLCanvasElement
@@ -620,7 +631,7 @@ async function initPixiGraph() {
 
         dataHandlerWorker.postMessage({
           type: 'getData',
-          payload: { range, resolution, rowIds: cloneDeep(workerRowIds.value) }
+          payload: { range, resolution }
         })
       })
     },
@@ -830,7 +841,7 @@ const handleArrowClick = async (
     const event = found.event as OsEvent
 
     if (event) {
-      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts / 1000000).toFixed(6)}`
+      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${((event.ts + startOffsetNumber) / 1000000).toFixed(6)}`
       runtimeStore.setTraceLinkId(key)
     }
   }
@@ -943,15 +954,52 @@ function removeSelection() {
   selectEnd.value = undefined
   unitController.selectionRange = undefined
 }
-let testTimer
+function logDisplay({
+  values
+}: {
+  values: {
+    label: string
+    instance: string
+    message: {
+      method: 'osEvent'
+      data: {
+        data: string
+        id: string //TASK.7_0
+        name: string
+        ts: number
+        raw: OsEvent
+      }
+    }
+  }[]
+}) {
+  if (!globalStart.value) {
+    return
+  }
+  // Don't process logs when paused
+  if (isPaused.value) return
+  //filter by instance
+  const filteredValues = values.filter((value) => value.instance === orti.value.name)
+  const events = filteredValues.map((value) => value.message.data.raw)
+  // send to worker
+  dataHandlerWorker.postMessage({
+    type: 'updateEvents',
+    payload: {
+      events: events,
+      cpuFreq: orti.value.cpuFreq
+    }
+  })
+  if (startOffsetNumber === 0) {
+    startOffsetNumber = filteredValues[0].message.data.ts
+  }
+  lastEventTs = filteredValues.at(-1)?.message.data.ts || 0
+}
 // Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
   // Wait for DOM to be ready
-  nextTick(async () => {
-    await initPixiGraph()
-    unitController.onSelectionRangeChange(onSelectionRangeChange)
-    unitController.onViewRangeChanged(removeSelection)
-  })
+
+  initPixiGraph()
+  unitController.onSelectionRangeChange(onSelectionRangeChange)
+  unitController.onViewRangeChanged(removeSelection)
 
   window.jQuery(`#Shift-${charid.value}`).resizable({
     handles: 'e',
@@ -965,14 +1013,7 @@ onMounted(() => {
   if (globalStart.value) {
     timer = setInterval(updateTime, 500)
   }
-  // testTimer = setInterval(() => {
-  //   unitController.absoluteRange = unitController.absoluteRange + BigInt(10)
-  //   unitController.viewRange = {
-  //     start: unitController.absoluteRange - BigInt(1000),
-  //     end: unitController.absoluteRange
-  //   }
-  //   // vscrollLayer?.update(true)
-  // }, 100)
+  window.logBus.on('osEvent', logDisplay)
 })
 
 watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
@@ -987,10 +1028,15 @@ watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
 })
 
 onUnmounted(() => {
-  if (testTimer) {
-    clearInterval(testTimer)
-    testTimer = null
+  window.logBus.off('osEvent', logDisplay)
+  //clear
+  if (pendingDataResolve) {
+    pendingDataResolve({ rows: [], range: { start: 0n, end: 0n }, resolution: 1 })
   }
+  if (pendingFindStateResolve) {
+    pendingFindStateResolve({ id: undefined, start: undefined })
+  }
+
   destroyGraph()
   dataHandlerWorker.terminate()
   // 清除定时器

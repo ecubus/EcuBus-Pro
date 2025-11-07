@@ -977,12 +977,10 @@ function logDisplay({
   if (!globalStart.value) {
     return
   }
+
   // Don't process logs when paused
   if (isPaused.value) return
 
-  if (workerRowIds.value.length === 0) {
-    return
-  }
   //filter by instance
   const filteredValues = values.filter((value) => value.instance === orti.value.name)
   const events = filteredValues.map((value) => value.message.data.raw)

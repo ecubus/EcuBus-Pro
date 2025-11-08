@@ -400,7 +400,9 @@ watch(
   () => runtimeStore.traceLinkId,
   (val) => {
     if (val) {
-      isPaused.value = true
+      if (globalStart.value) {
+        isPaused.value = true
+      }
       nextTick(() => {
         grid.scrollToRowkey(val)
 

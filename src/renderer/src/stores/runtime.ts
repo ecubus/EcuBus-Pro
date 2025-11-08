@@ -28,6 +28,7 @@ export type RunTimeStatus = {
   someipPeriods: Record<string, boolean>
   rearrangeWindows: boolean
   traceLinkId: string
+  traceLinkIdBack: string
 }
 
 export const useRuntimeStore = defineStore('useRuntimeStore', {
@@ -40,7 +41,8 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     someipPeriods: {},
     globalStart: false,
     rearrangeWindows: false,
-    traceLinkId: ''
+    traceLinkId: '',
+    traceLinkIdBack: ''
   }),
 
   actions: {
@@ -58,6 +60,9 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     setTraceLinkId(id: string) {
       this.traceLinkId = id
+    },
+    setTraceLinkIdBack(id: string) {
+      this.traceLinkIdBack = id
     }
   }
 })

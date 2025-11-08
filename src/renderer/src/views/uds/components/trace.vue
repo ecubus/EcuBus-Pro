@@ -403,6 +403,8 @@ watch(
       isPaused.value = true
       nextTick(() => {
         grid.scrollToRowkey(val)
+
+        grid.setCurrentRow(val)
       })
     }
   }
@@ -1139,6 +1141,7 @@ onMounted(() => {
     data: [],
     columns: columes.value,
     config: {
+      HIGHLIGHT_SELECTED_ROW: true,
       WIDTH: tableWidth.value,
       HEIGHT: tableHeight.value,
       DISABLED: true,
@@ -1210,16 +1213,9 @@ onMounted(() => {
               .trim()
             break
         }
-        let backgroundColor: string | undefined = undefined
 
-        if (row.key === runtimeStore.traceLinkId && !globalStart.value) {
-          backgroundColor = getComputedStyle(document.documentElement)
-            .getPropertyValue('--el-color-primary')
-            .trim()
-        }
         return {
-          color: backgroundColor ? 'white' : color,
-          backgroundColor: backgroundColor
+          color: color
         }
       }
     }
@@ -1235,7 +1231,13 @@ onMounted(() => {
     }
   })
   grid.on('click', (v) => {
-    runtimeStore.setTraceLinkId('')
+    // runtimeStore.setTraceLinkId('')
+    const row = grid.getCurrentRow()
+    if (row && row.rowKey == runtimeStore.traceLinkId) {
+      runtimeStore.setTraceLinkId('')
+    } else {
+      runtimeStore.setTraceLinkIdBack(row?.rowKey || '')
+    }
   })
 })
 watch([tableWidth, tableHeight], () => {

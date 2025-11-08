@@ -63,7 +63,7 @@ const VISIBLE_ROW_BUFFER = 3 // number of buffer rows above and below visible ra
 const FINE_RESOLUTION_FACTOR = 1 // fine resolution factor or default to disable coarse update
 const EXCLUDED = 4 // EXCLUDED filter expression property key
 
-const debounceTime = 400
+const debounceTime = 100
 export class TimeGraphChart extends TimeGraphChartLayer {
   protected rowIds: number[] = [] // complete ordered list of rowIds
   protected rowComponents: Map<number, TimeGraphRow> = new Map() // map of rowId to row component

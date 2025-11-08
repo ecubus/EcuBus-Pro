@@ -229,8 +229,25 @@ class OfflineDataProvider {
 
     const rows: TimelineChart.TimeGraphRowModel[] = []
     for (const rowId of this.rowids) {
-      const evts = this.perActor.get(rowId)!
-      if (!evts || evts.length === 0) continue
+      const evts = this.perActor.get(rowId)
+      if (!evts || evts.length === 0) {
+        // Create empty row for rowId that has no events, similar to reference implementation
+        const name = this.actorNames.get(rowId) || `${rowId}`
+        rows.push({
+          id: rowId,
+          name,
+          range: {
+            start: BigInt(0),
+            end: BigInt(0)
+          },
+          data: { type: 'OFFLINE', hasStates: false },
+          states: [],
+          annotations: [],
+          prevPossibleState: BigInt(0),
+          nextPossibleState: this.totalLength
+        })
+        continue
+      }
       const firstTs = evts[0].ts
       const lastTs = evts[evts.length - 1].ts
       const name = this.actorNames.get(rowId) || `${rowId}`
@@ -468,7 +485,7 @@ async function parseCsvStream(
     flushLines(buffer)
   }
   if (buffer.length) flushLines(buffer, true)
-  return events.sort((a, b) => a.ts - b.ts)
+  return events
 }
 
 // @ts-ignore – worker global

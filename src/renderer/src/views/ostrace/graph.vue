@@ -222,7 +222,7 @@ dataHandlerWorker.onmessage = (event) => {
         data: msg.payload.events
       })
     }
-
+    startOffsetNumber = 0
     workerRowIds.value = msg.payload.rowIds || []
     startOffset = BigInt(msg.payload.start || 0)
     unitController.absoluteRange = BigInt(msg.payload.totalLength || 0)
@@ -248,6 +248,9 @@ dataHandlerWorker.onmessage = (event) => {
     if (resolver) resolver(msg.payload)
   } else if (msg.type === 'rowIds') {
     workerRowIds.value = msg.payload.rowIds
+    if (rowController) {
+      rowController.totalHeight = buttonHeight * workerRowIds.value.length
+    }
   }
 }
 const isPaused = ref(false)
@@ -268,7 +271,7 @@ const width = computed(() => props.width)
 const time = ref(0)
 const styleMap = new Map<string, TimeGraphStateStyle>()
 let timer: ReturnType<typeof setInterval> | null = null
-const timerInterval = 500
+const timerInterval = 200
 
 // 更新时间显示的函数
 const updateTime = () => {
@@ -328,6 +331,7 @@ async function loadOfflineTrace() {
   input.click()
 }
 function startFunc() {
+  startOffsetNumber = 0
   dataHandlerWorker.postMessage({
     type: 'getRowIds',
     payload: {
@@ -356,6 +360,7 @@ const coreConfigs = computed(() => {
     name: string
     buttons: Array<{ name: string; color: string; id: string; numberId: number }>
   }[] = []
+
   for (const task of orti.value.coreConfigs) {
     //check if core is already in configs
     const core = configs.find((c) => c.id === task.coreId)
@@ -724,6 +729,12 @@ function initPixiGraph() {
           cur: el.model.data.cur,
           next: el.model.data.next
         }
+        // Set traceLinkId when clicking on a state
+        if (linkTrace.value && el.model.data.cur) {
+          const event = el.model.data.cur as OsEvent
+          const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${((event.ts + startOffsetNumber) / 1000000).toFixed(6)}`
+          runtimeStore.setTraceLinkId(key)
+        }
       } else {
         toolTipInfo.value = null
       }
@@ -803,7 +814,86 @@ function initPixiGraph() {
   naviLayer = new TimeGraphNavigator(`timeGraphNavigator-${charid.value}`)
   naviContainer.addLayers([naviLayer])
 }
+watch(
+  () => runtimeStore.traceLinkIdBack,
+  (linkId) => {
+    if (!linkId || !timeGraphChart) return
 
+    // Parse linkId format: instance-instance-TaskType.id_coreId-time
+    // Example: Os_Trace_high-Os_Trace_high-Task.2_0-0.549969
+    const parts = linkId.split('-')
+    if (parts.length < 4) return
+
+    const instance = parts[0]
+    const taskTypePart = parts[2] // TaskType.id_coreId
+    const timeStr = parts[3] // time in seconds
+
+    // Check if instance matches current orti
+    if (instance !== orti.value.name) return
+
+    // Parse taskType.id_coreId
+    const taskTypeMatch = taskTypePart.match(/^(.+)\.(\d+)_(\d+)$/)
+    if (!taskTypeMatch) return
+
+    const taskTypeName = taskTypeMatch[1] // e.g., "Task"
+    const taskId = parseInt(taskTypeMatch[2])
+    const coreId = parseInt(taskTypeMatch[3])
+    const timeSeconds = parseFloat(timeStr)
+
+    // Find taskType from name
+    const taskType = Object.entries(taskTypeRecord).find(([_, name]) => name === taskTypeName)?.[0]
+    if (!taskType) return
+
+    // Find corresponding button/rowId
+    const core = coreConfigs.value.find((c) => c.id === coreId)
+    if (!core) return
+
+    const button = core.buttons.find((b) => {
+      const [bCoreId, bId, bType] = b.id.split('_')
+      return (
+        parseInt(bCoreId) === coreId &&
+        parseInt(bId) === taskId &&
+        parseInt(bType) === parseInt(taskType)
+      )
+    })
+    if (!button) return
+
+    const targetRowId = button.numberId
+    const rowIndex = workerRowIds.value.indexOf(targetRowId)
+    if (rowIndex < 0) return
+
+    // Ensure row is visible (scroll to row)
+    timeGraphChart.selectAndReveal(rowIndex)
+
+    // Convert time to microseconds (bigint)
+    // traceLinkId contains absolute time in seconds: (event.ts + startOffsetNumber) / 1000000
+    // So we need to convert back to relative time by subtracting startOffsetNumber
+    const absoluteTimeUs = Math.floor(timeSeconds * 1000000)
+    const relativeTimeUs = absoluteTimeUs - startOffsetNumber
+    const targetTimeUs = BigInt(Math.max(0, relativeTimeUs))
+
+    // Get current view range width to keep it unchanged
+    const currentViewRange = unitController.viewRange
+    const viewWidth = currentViewRange.end - currentViewRange.start
+
+    // Calculate new view range centered on target time, keeping width unchanged
+    const half = viewWidth / BigInt(2)
+    let newStart = targetTimeUs > half ? targetTimeUs - half : BigInt(0)
+    let newEnd = newStart + viewWidth
+
+    // Clamp to absolute range
+    if (newEnd > unitController.absoluteRange) {
+      newEnd = unitController.absoluteRange
+      newStart = newEnd > viewWidth ? newEnd - viewWidth : BigInt(0)
+    }
+
+    // Update view range (move to target time, keep width)
+    unitController.viewRange = { start: newStart, end: newEnd }
+
+    // Set selection at target time
+    unitController.selectionRange = { start: targetTimeUs, end: targetTimeUs }
+  }
+)
 // Arrow click handler - shared function for both left and right arrows
 const handleArrowClick = async (
   direction: 'left' | 'right',
@@ -993,6 +1083,7 @@ function logDisplay({
     }
   })
   if (startOffsetNumber === 0) {
+    startOffset = BigInt(filteredValues[0].message.data.ts)
     startOffsetNumber = filteredValues[0].message.data.ts
   }
   lastEventTs = filteredValues.at(-1)?.message.data.ts || 0

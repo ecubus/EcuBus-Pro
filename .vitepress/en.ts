@@ -228,11 +228,6 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: 'Development Docs',
-      collapsed: true,
-      items: [{ text: 'How to Development Docs', link: '/docs/dev/doc.md' }]
-    },
-    {
       text: 'Developer Manual',
       collapsed: true,
       items: [
@@ -251,6 +246,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         { text: 'Comp Test', link: '/docs/dev/test.md' },
         { text: 'Addon', link: '/docs/dev/addon.md' },
         { text: 'Plugin', link: '/docs/dev/plugin.md' },
+        { text: 'How to Development Docs', link: '/docs/dev/doc.md' },
         { text: 'Feature Request Process', link: '/docs/dev/feature.md' },
         { text: 'Releases Note', link: '/docs/dev/releases_note.md' }
       ]

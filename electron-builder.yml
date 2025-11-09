@@ -41,7 +41,9 @@ nsis:
   guid: 98123fde-012f-5ff3-8b50-881449dac91a
   include: build/installer.nsh
 linux:
-  target: deb
+  target:
+    - target: deb
+    - target: rpm
   icon: ./build/icon.icns
   executableName: ecubuspro
   description: EcuBus-Pro

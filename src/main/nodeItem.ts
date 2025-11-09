@@ -114,9 +114,12 @@ export class NodeClass {
     this.boundCb = this.cb.bind(this)
 
     if (nodeItem.script) {
-      const outDir = path.join(this.projectPath, '.ScriptBuild')
-      const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
-      const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+      let jsPath = nodeItem.script
+      if (!path.isAbsolute(jsPath)) {
+        const outDir = path.join(this.projectPath, '.ScriptBuild')
+        const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
+        jsPath = path.join(outDir, scriptNameNoExt + '.js')
+      }
       if (fs.existsSync(jsPath)) {
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
         if (this.testOptions) {
@@ -1253,7 +1256,7 @@ export class NodeClass {
       this.udsTesterMap.delete(data.name)
     }
   }
-  close() {
+  close(fakeClose = false) {
     for (const c of this.nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {
@@ -1277,7 +1280,7 @@ export class NodeClass {
     this.lintp.length = 0 // 清空数组
 
     // 清理 UdsTester 事件处理器
-    if (this.pool) {
+    if (this.pool && !fakeClose) {
       // UdsTester 没有 unregisterHandler 方法，直接停止即可
       this.pool.stop()
     }

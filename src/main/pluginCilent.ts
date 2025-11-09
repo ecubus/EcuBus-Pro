@@ -45,7 +45,9 @@ export default class PluginClient {
   async exec(method: string, ...params: any[]): Promise<any> {
     return this.nodeItem.pool?.exec('plugin', method, params)
   }
-
+  stop() {
+    this.nodeItem.close(true)
+  }
   close() {
     this.log.close()
     this.nodeItem.close()

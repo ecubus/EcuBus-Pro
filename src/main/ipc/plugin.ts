@@ -98,7 +98,7 @@ export async function startPlugins(
 
 export function stopPlugins() {
   for (const entry of Object.values(plugins)) {
-    entry.close()
+    entry.stop()
   }
   //clear plugins
   plugins = {}

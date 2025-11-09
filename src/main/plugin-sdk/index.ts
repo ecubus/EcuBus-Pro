@@ -16,7 +16,7 @@ type ServiceMap = {
 export function registerService<K extends keyof ServiceMap>(name: K, func: ServiceMap[K]) {
   if (!isMainThread) {
     workerpool.worker({
-      [name]: func
+      [`plugin.${name}`]: func
     })
   } else {
     exports[name] = func

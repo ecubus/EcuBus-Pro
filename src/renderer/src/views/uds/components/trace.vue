@@ -454,7 +454,7 @@ function insertData2(data: LogData[]) {
           const existingLog = allLogData[idx]
           const currentTime = item.ts
           const previousTime = existingLog.ts
-          const deltaMs = (currentTime - previousTime) * 1000 // Convert to milliseconds
+          const deltaMs = (currentTime - previousTime) / 1000 // Convert to milliseconds
 
           // Store previous timestamp and delta time
           item.previousTs = existingLog.ts

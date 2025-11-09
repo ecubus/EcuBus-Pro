@@ -95,6 +95,10 @@ export default class TraceItem {
 
               break
             }
+            case 'offsetTs': {
+              this.offsetTs = message.data
+              break
+            }
             case 'error': {
               const ts = getTsUs() - this.systemTs
               this.log.error(ts, message.data)
@@ -129,7 +133,9 @@ export default class TraceItem {
     this.log = new OsTraceLOG(this.orti.name, this.orti.recordFile?.enable ? logFile : undefined)
     this.systemTs = getTsUs()
   }
-
+  getOffsetTs() {
+    return this.offsetTs
+  }
   async close() {
     this.log?.close()
     this.closeFlag = true

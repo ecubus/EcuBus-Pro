@@ -136,6 +136,7 @@ function parseORTIData(raw: any) {
 
   for (const rawEvent of raw) {
     const osEvent: OsEvent = rawEvent.message.data
+
     const ts = rawEvent.message.ts
     const db = findDb(osEvent.database)
 
@@ -143,7 +144,8 @@ function parseORTIData(raw: any) {
       name: '',
       ts: ts,
       data: `Index:${osEvent.index} Time:${osEvent.ts} Core:${osEvent.coreId} ${getStatusDescription(osEvent.type, osEvent.status)}`,
-      id: getID(osEvent.type, osEvent.id, osEvent.coreId)
+      id: getID(osEvent.type, osEvent.id, osEvent.coreId),
+      raw: osEvent
     }
     if (db) {
       const timestampInSeconds = parseFloat(((ts || 0) / 1000000).toFixed(6))
@@ -202,7 +204,9 @@ function parseORTIData(raw: any) {
       message: {
         method: 'osEvent',
         data: eventData
-      }
+      },
+      label: db?.name,
+      instance: db?.name
     })
   }
 

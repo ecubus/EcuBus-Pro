@@ -6,7 +6,7 @@
           display: flex;
           align-items: center;
           padding: 0 5px;
-
+          height: 25px;
           border-bottom: solid 1px var(--el-border-color);
         "
       >
@@ -24,44 +24,40 @@
           </el-tooltip>
         </el-button-group>
         <el-divider direction="vertical"></el-divider>
-        <el-button-group>
-          <el-tooltip effect="light" content="Load Off-Line Trace File" placement="bottom">
-            <el-button link type="primary" :disabled="globalStart" @click="loadOfflineTrace">
-              <Icon :icon="addIcon" />
-            </el-button>
-          </el-tooltip>
 
-          <el-divider direction="vertical"></el-divider>
-          <el-tooltip effect="light" content="Save Trace To File" placement="bottom">
-            <el-button link type="primary">
-              <Icon :icon="saveIcon" />
-            </el-button>
-          </el-tooltip>
-        </el-button-group>
-        <!-- 滚动控制 -->
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
-          <span style="font-size: 12px; color: var(--el-text-color-regular); min-width: 80px">
-            Span: {{ formatTimeSpan(timeSpan) }}
-          </span>
-          <el-slider
-            v-model="timeSpanSliderValue"
-            :min="0"
-            :max="100"
+        <el-tooltip effect="light" content="Load Off-Line Trace File" placement="bottom">
+          <el-button link type="primary" :disabled="globalStart" @click="loadOfflineTrace">
+            <Icon :icon="addIcon" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip
+          effect="light"
+          content="Load offline data into a new trace window and link"
+          placement="bottom"
+        >
+          <el-checkbox
+            v-model="linkTrace"
             size="small"
-            :show-tooltip="false"
-            class="blue-slider"
-            style="width: 200px; height: 20px"
-            @input="handleTimeSpanChange($event, false)"
-            @change="handleTimeSpanChange($event, true)"
+            label="Link Trace"
+            style="margin-left: 10px"
           />
-          <span style="font-size: 12px; color: var(--el-text-color-regular); margin-right: 10px">
+        </el-tooltip>
+
+        <el-divider direction="vertical"></el-divider>
+        <el-tooltip effect="light" content="Remove Selection" placement="bottom">
+          <el-button link type="primary" :disabled="!selectStart" @click="removeSelection">
+            <Icon :icon="cursorIcon" />
+          </el-button>
+        </el-tooltip>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+          <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
             Time: {{ time }}s
           </span>
         </div>
       </div>
       <div class="main">
         <div class="left">
-          <div class="core-container">
+          <div ref="leftContainerRef" class="core-container">
             <!-- Dynamic Core Sections -->
             <div v-for="core in coreConfigs" :key="core.id" class="core-section">
               <div class="core-label-vertical">
@@ -98,46 +94,40 @@
                 </div>
               </div>
             </div>
-            <div class="controls-hint">
-              <div class="hint-item">
-                <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to
-                zoom
-              </div>
-              <div class="hint-item">
-                <kbd>Alt</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" />/
-                <kbd>Drag</kbd> to shift
-              </div>
+          </div>
+          <div class="controls-hint">
+            <!-- <div class="hint-item">
+              <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to zoom
+            </div> -->
+            <div v-if="toolTipInfo" class="hint-item">
+              {{ formattedTooltip }}
             </div>
           </div>
         </div>
         <div :id="`Shift-${charid}`" class="shift"></div>
         <!-- DOM-based separator lines with higher z-index -->
-        <div
-          v-for="(separator, index) in separatorPositions"
-          :key="`separator-${index}`"
-          class="separator-line"
-          :style="{
-            top: separator.y + 'px',
-            left: 0,
-            width: width + 4 + 'px'
-          }"
-        ></div>
+
         <div class="right">
-          <canvas :id="charid" :width="width - leftWidth - 1" :height="height"></canvas>
-          <!-- Custom scrollbar overlay -->
-          <div v-show="scrollbarThumbWidth > 0" class="custom-scrollbar">
-            <div class="scrollbar-track">
-              <div
-                class="scrollbar-thumb"
-                :style="{
-                  left: scrollbarPosition + '%',
-                  width: scrollbarThumbWidth + '%'
-                }"
-                @mousedown="handleScrollbarMouseDown"
-              ></div>
-            </div>
+          <div style="display: flex; justify-content: center">
+            <canvas :id="charid"></canvas>
+            <div :id="`main-vscroll-${charid}`"></div>
+          </div>
+          <div
+            :id="`main-timer-${charid}`"
+            :style="{ height: styleConfig.axisHeight + 'px' }"
+          ></div>
+          <div
+            :id="`main-navi-${charid}`"
+            :style="{ height: styleConfig.navigatorHeight + 'px' }"
+          ></div>
+          <div v-if="selectStart" class="selection-cursor" :style="selectStartStyle">
+            <div class="selection-cursor-label">{{ selectStartText }}</div>
+          </div>
+          <div v-if="selectEnd" class="selection-cursor" :style="selectEndStyle">
+            <div class="selection-cursor-label">{{ selectEndText }}</div>
           </div>
         </div>
+        <div class="divider"></div>
       </div>
     </div>
   </div>
@@ -146,7 +136,7 @@
 import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
-
+import cursorIcon from '@iconify/icons-ph/cursor-text-bold'
 import {
   ref,
   onMounted,
@@ -156,22 +146,117 @@ import {
   watch,
   nextTick,
   watchEffect,
-  onBeforeUnmount
+  onBeforeUnmount,
+  defineExpose
 } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDataStore } from '@r/stores/data'
 
 import saveIcon from '@iconify/icons-material-symbols/save'
 // import testdata from './blocks.json'
-import { useGlobalStart } from '@r/stores/runtime'
-import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
-import { IsrStatus, OsEvent, parseInfo, TaskStatus, TaskType, VisibleBlock } from 'nodeCan/osEvent'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
+// import { PixiGraphRenderer, type GraphConfig } from './PixiGraphRenderer'
+import {
+  IsrStatus,
+  OsEvent,
+  parseInfo,
+  ResourceStatus,
+  SpinlockStatus,
+  TaskStatus,
+  TaskType,
+  isrStatusRecord,
+  taskStatusRecord,
+  taskTypeRecord
+} from 'nodeCan/osEvent'
 import { useProjectStore } from '@r/stores/project'
 import { ElLoading } from 'element-plus'
 import DataHandlerWorker from './dataHandler.ts?worker'
+import { TimeGraphContainer } from './timeline/time-graph-container'
+import { TimeGraphUnitController } from './timeline/time-graph-unit-controller'
+import { TimeGraphChartGrid } from './timeline/layer/time-graph-chart-grid'
+import { TimeGraphChart, TimeGraphChartProviders } from './timeline/layer/time-graph-chart'
+import { TimeGraphChartArrows } from './timeline/layer/time-graph-chart-arrows'
+import { TimeGraphChartSelectionRange } from './timeline/layer/time-graph-chart-selection-range'
+import { TimeGraphChartCursors } from './timeline/layer/time-graph-chart-cursors'
+import { TimeGraphRangeEventsLayer } from './timeline/layer/time-graph-range-events-layer'
+import { TimeGraphRowController } from './timeline/time-graph-row-controller'
+import { TimelineChart } from './timeline/time-graph-model'
+import { TimeGraphStateStyle } from './timeline/components/time-graph-state'
+import { TimeGraphVerticalScrollbar } from './timeline/layer/time-graph-vertical-scrollbar'
+import { TimeGraphNavigator } from './timeline/layer/time-graph-navigator'
+import { TimeGraphAxisCursors } from './timeline/layer/time-graph-axis-cursors'
+import { TimeGraphAxis } from './timeline/layer/time-graph-axis'
+import { cloneDeep, method } from 'lodash'
+import { getColorFromCssVar } from './timeline/color'
+
 const dataHandlerWorker = new DataHandlerWorker()
+let startOffset: bigint = 0n
+let startOffset1: bigint = 0n
+let startOffsetNumber: number = 0
+let offlineLoading: any = null
+let lastEventTs: number = 0
+const workerRowIds = ref<number[]>([])
+let pendingDataResolve:
+  | (
+      | undefined
+      | ((data: {
+          rows: TimelineChart.TimeGraphRowModel[]
+          range: TimelineChart.TimeGraphRange
+          resolution: number
+        }) => void)
+    )
+  | null = null
+let pendingFindStateResolve:
+  | (
+      | undefined
+      | ((data: { id?: string; start?: bigint; event?: OsEvent; nextEvent?: OsEvent }) => void)
+    )
+  | null = null
 dataHandlerWorker.onmessage = (event) => {
-  console.log('dataHandlerWorker', event.data)
+  const msg = event.data
+  if (!msg || !msg.type) return
+  if (msg.type === 'loaded') {
+    if (linkTrace.value) {
+      window.dataParseWorker.postMessage({
+        method: 'initDataBase',
+        data: cloneDeep(dataStore.database)
+      })
+      window.dataParseWorker.postMessage({
+        method: 'osEvent',
+        data: msg.payload.events
+      })
+    }
+    startOffsetNumber = 0
+    workerRowIds.value = msg.payload.rowIds || []
+    startOffset = BigInt(msg.payload.start || 0)
+    startOffset1 = startOffset
+    unitController.absoluteRange = BigInt(msg.payload.totalLength || 0)
+
+    unitController.viewRange = {
+      start: BigInt(0),
+      end: BigInt(msg.payload.totalLength || 0)
+    }
+    if (rowController) {
+      rowController.totalHeight = buttonHeight * workerRowIds.value.length
+    }
+    if (offlineLoading) {
+      offlineLoading.close()
+      offlineLoading = null
+    }
+  } else if (msg.type === 'data') {
+    const resolver = pendingDataResolve
+    pendingDataResolve = null
+    if (resolver) resolver(msg.payload)
+  } else if (msg.type === 'foundState') {
+    const resolver = pendingFindStateResolve
+    pendingFindStateResolve = null
+    if (resolver) resolver(msg.payload)
+  } else if (msg.type === 'rowIds') {
+    workerRowIds.value = msg.payload.rowIds
+    if (rowController) {
+      rowController.totalHeight = buttonHeight * workerRowIds.value.length
+    }
+  }
 }
 const isPaused = ref(false)
 const leftWidth = ref(200)
@@ -180,86 +265,25 @@ const props = defineProps<{
   width: number
   editIndex: string
 }>()
-
+const linkTrace = ref(true)
 const dataStore = useDataStore()
-const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_trace', '')])
-const height = computed(() => props.height - 19)
-
+const orti = computed(() => dataStore.database.orti[props.editIndex.replace('_time', '')])
+const height = computed(() => props.height - 25)
 const charid = computed(() => `${props.editIndex}_graph`)
 
 const width = computed(() => props.width)
 
 const time = ref(0)
-let pixiRenderer: PixiGraphRenderer | null = null
+const styleMap = new Map<string, TimeGraphStateStyle>()
 let timer: ReturnType<typeof setInterval> | null = null
-
-// Scrollbar state
-const scrollbarPosition = ref(0) // 0-100 percentage
-const scrollbarThumbWidth = ref(0) // percentage of total width
-let isScrollbarDragging = false
-let scrollbarDragStartX = 0
-let scrollbarDragStartPosition = 0
-
-// Time span slider control (logarithmic scale from 10us to 50s)
-const MIN_TIME_SPAN = 0.00001 // 10 microseconds in seconds
-const MAX_TIME_SPAN = 5 // 20 seconds maximum
-const timeSpanSliderValue = ref(100) // 0-100 slider value
-const timeSpan = ref(0.01) // Default 10ms time span
-
-// Convert slider value (0-100) to time span (10us to 100s) using logarithmic scale
-function sliderValueToTimeSpan(value: number): number {
-  const minLog = Math.log10(MIN_TIME_SPAN)
-  const maxLog = Math.log10(MAX_TIME_SPAN)
-  const logValue = minLog + (value / 100) * (maxLog - minLog)
-  return Math.pow(10, logValue)
-}
-
-// Convert time span back to slider value
-function timeSpanToSliderValue(span: number): number {
-  const minLog = Math.log10(MIN_TIME_SPAN)
-  const maxLog = Math.log10(MAX_TIME_SPAN)
-  const logSpan = Math.log10(span)
-  return ((logSpan - minLog) / (maxLog - minLog)) * 100
-}
-
-// Format time span for display
-function formatTimeSpan(span: number): string {
-  if (span >= 1) {
-    return `${span.toFixed(2)}s`
-  } else if (span >= 0.001) {
-    return `${(span * 1000).toFixed(2)}ms`
-  } else {
-    return `${(span * 1000000).toFixed(1)}μs`
-  }
-}
-
-// Handle time span change from slider
-function handleTimeSpanChange(value: number, refresh: boolean) {
-  const newSpan = sliderValueToTimeSpan(value)
-  timeSpan.value = newSpan
-
-  if (pixiRenderer) {
-    // Keep minX fixed, only adjust maxX
-    const newMinX = pixiRenderer.viewport.minX
-    const newMaxX = newMinX + newSpan
-    if (refresh) {
-      pixiRenderer.updateViewport(newMinX, newMaxX)
-    }
-  }
-}
+const timerInterval = 200
 
 // 更新时间显示的函数
 const updateTime = () => {
   if (isPaused.value) return
 
   // 更新x轴范围和时间
-  let maxX = 5
-  let minX = 0
-
-  const lastBlock = visibleBlocks.at(-1)
-  if (lastBlock && lastBlock.end) {
-    maxX = lastBlock.end
-  }
+  let maxX = lastEventTs / 1000000
 
   // 使用当前时间更新time值
   const ts = (Date.now() - window.startTime) / 1000
@@ -272,12 +296,15 @@ const updateTime = () => {
   time.value = maxX
 
   // 计算x轴范围
-  maxX = Math.ceil(maxX) + 5
-  minX = Math.floor(minX)
+  maxX -= startOffsetNumber / 1000000
+  // startOffset = BigInt(Math.floor(Math.max(0,(maxX - 5)) * 1000000))
+  // const middle = BigInt(Math.floor(Math.min(5,maxX) * 1000000))
 
-  // Update viewport range
-  if (pixiRenderer) {
-    // pixiRenderer.updateViewport(minX, maxX)
+  unitController.absoluteRange = BigInt(Math.floor((maxX + 3) * 1000000))
+
+  unitController.viewRange = {
+    start: BigInt(Math.floor((maxX - 0.4 - 0.1) * 1000000)),
+    end: BigInt(Math.floor((maxX - 0.4 + 0.1) * 1000000))
   }
 }
 const globalStart = useGlobalStart()
@@ -285,47 +312,51 @@ const globalStart = useGlobalStart()
 const project = useProjectStore()
 
 async function loadOfflineTrace() {
-  const loading = ElLoading.service({ fullscreen: true })
-  visibleBlocks = []
-  try {
-    const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      defaultPath: project.projectInfo.path,
-      title: 'Offline Trace File',
-      properties: ['openFile'],
-      filters: [{ name: 'excel', extensions: ['xlsx'] }]
-    })
-    const file = r.filePaths[0]
-    if (file) {
-      const res = await window.electron.ipcRenderer.invoke(
-        'ipc-ostrace-parse-excel',
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.csv,text/csv'
+  input.style.display = 'none'
+
+  document.body.appendChild(input)
+  input.onchange = () => {
+    const file = input.files && input.files[0]
+    document.body.removeChild(input)
+    if (!file) return
+    offlineLoading = ElLoading.service({ fullscreen: true })
+    dataHandlerWorker.postMessage({
+      type: 'loadCsv',
+      payload: {
         file,
-        orti.value.cpuFreq
-      )
-      visibleBlocks = res.blocks
-
-      if (pixiRenderer) {
-        pixiRenderer.setBlocks(visibleBlocks)
-        const startTs = visibleBlocks[0].start
-        const span = MAX_TIME_SPAN
-
-        timeSpan.value = span
-        timeSpanSliderValue.value = timeSpanToSliderValue(span)
-        handleTimeSpanChange(timeSpanSliderValue.value, true)
+        cpuFreq: orti.value.cpuFreq,
+        coreConfigs: cloneDeep(coreConfigs.value),
+        database: orti.value.id
       }
-    }
-  } catch (error) {
-    console.error(error)
-  } finally {
-    loading.close()
+    })
   }
+  input.click()
+}
+function startFunc() {
+  lastEventTs = 0
+  startOffsetNumber = 0
+  startOffset = BigInt(0)
+  startOffset1 = startOffset
+  unitController.absoluteRange = BigInt(0)
+
+  dataHandlerWorker.postMessage({
+    type: 'getRowIds',
+    payload: {
+      coreConfigs: cloneDeep(coreConfigs.value)
+    }
+  })
+  isPaused.value = false
+  // 启动定时器更新时间，使用500ms间隔
+  if (timer) clearInterval(timer)
+  timer = setInterval(updateTime, timerInterval)
 }
 // 确保定时器时间间隔与graph.vue保持一致
 watch(globalStart, (val) => {
   if (val) {
-    isPaused.value = false
-    // 启动定时器更新时间，使用500ms间隔
-    if (timer) clearInterval(timer)
-    timer = setInterval(updateTime, 500)
+    startFunc()
   } else if (timer) {
     clearInterval(timer)
     timer = null
@@ -337,21 +368,22 @@ const coreConfigs = computed(() => {
   const configs: {
     id: number
     name: string
-    buttons: Array<{ name: string; color: string; id: number; type: number }>
+    buttons: Array<{ name: string; color: string; id: string; numberId: number }>
   }[] = []
+
   for (const task of orti.value.coreConfigs) {
     //check if core is already in configs
     const core = configs.find((c) => c.id === task.coreId)
     if (!core) {
       configs.push({
         id: task.coreId,
-        name: task.name,
+        name: `Core ${task.coreId}`,
         buttons: [
           {
             name: task.name,
             color: task.color,
-            id: task.id,
-            type: task.type
+            id: `${task.coreId}_${task.id}_${task.type}`,
+            numberId: Number(task.coreId) * 1000000 + Number(task.id) * 1000 + Number(task.type) * 1
           }
         ]
       })
@@ -360,172 +392,650 @@ const coreConfigs = computed(() => {
       core.buttons.push({
         name: task.name,
         color: task.color,
-        id: task.id,
-        type: task.type
+        id: `${task.coreId}_${task.id}_${task.type}`,
+        numberId: Number(task.coreId) * 1000000 + Number(task.id) * 1000 + Number(task.type) * 1
       })
     }
   }
   return configs
 })
 
-// Computed property for total button count across all cores
-const totalButtons = computed(() => {
-  return coreConfigs.value.reduce((total, core) => total + core.buttons.length, 0)
-})
+const buttonHeight = 32
 
-const buttonHeight = computed(() => {
-  // buttonHeight is the absolute height of each button including border
-  const availableHeight = height.value - 45
-  return availableHeight / totalButtons.value
-})
+// Ref for the left container (which contains core-container)
+const leftContainerRef = ref<HTMLElement | null>(null)
 
-// Computed property for separator line positions
-const separatorPositions = computed(() => {
-  const positions: Array<{ y: number }> = []
-  let currentY = 0
-
-  for (let i = 0; i < coreConfigs.value.length - 1; i++) {
-    const core = coreConfigs.value[i]
-
-    currentY += buttonHeight.value * core.buttons.length
-    positions.push({ y: currentY }) // Align with button borders
+// API methods to control y-axis offset
+const setYOffset = (offset: number) => {
+  if (leftContainerRef.value) {
+    leftContainerRef.value.scrollTop = offset
   }
-  //add bottom line - total buttons with borders between them
-  const totalWithBorders = totalButtons.value * buttonHeight.value
-  positions.push({ y: totalWithBorders })
-  return positions
-})
+}
+const runtimeStore = useRuntimeStore()
 
-let visibleBlocks: VisibleBlock[] = []
+const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
+const graphHeight = computed(() => height.value - 45)
+const unitController = new TimeGraphUnitController(BigInt(0))
+unitController.worldRenderFactor = 20
 
-function updateTimeLine() {
-  if (!pixiRenderer) return
+function formatTimeLabel(theNumber: bigint): string {
+  theNumber = theNumber + startOffset
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
 
-  const currentTimeX = time.value
-  // pixiRenderer.updateTimeline(currentTimeX, globalStart.value)
+  const span = unitController.viewRangeLength
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  if (span >= MICRO_IN_S) {
+    return formatWithUnit(theNumber, MICRO_IN_S, 3, 's')
+  } else if (span >= MICRO_IN_MS) {
+    return formatWithUnit(theNumber, MICRO_IN_MS, 3, 'ms')
+  }
+  return `${theNumber.toString()}us`
 }
 
-watch([() => globalStart.value, () => time.value], () => {
-  updateTimeLine()
-})
+unitController.numberTranslator = (theNumber: bigint) => formatTimeLabel(theNumber)
 
-async function initPixiGraph() {
+let timeGraphChartContainer: TimeGraphContainer | null = null
+let rowController: TimeGraphRowController | null = null
+let timeGraphChart: TimeGraphChart | null = null
+let verticalScrollContainer: TimeGraphContainer | null = null
+let vscrollLayer: TimeGraphVerticalScrollbar | null = null
+let timeGraphAxisContainer: TimeGraphContainer | null = null
+let timeAxisLayer: TimeGraphAxis | null = null
+let naviLayer: TimeGraphNavigator | null = null
+let naviContainer: TimeGraphContainer | null = null
+
+const styleConfig = {
+  // Canvas and layer backgrounds (Element Plus vars)
+  chartBackgroundColor: getColorFromCssVar('--el-bg-color', '#ffffff'),
+  vscrollWidth: 10,
+  vscrollBackgroundColor: getColorFromCssVar('--el-color-white', '#ffffff'),
+  axisHeight: 23,
+  axisBackgroundColor: getColorFromCssVar('--el-bg-color', '#ffffff'),
+  axisColor: getColorFromCssVar('--el-color-black', '#303133'),
+  axisVerticalAlign: 'top' as 'top' | 'bottom',
+  navigatorHeight: 18,
+  navigatorBackgroundColor: getColorFromCssVar('--el-color-white', '#ffffff'),
+
+  // Interaction layers
+  selectionRangeColor: getColorFromCssVar('--el-color-primary', '#409EFF'),
+  cursorsColor: getColorFromCssVar('--el-color-primary', '#409EFF'),
+
+  // Row styles
+  rowBackgroundColor: getColorFromCssVar('--el-color-warning-light-7', '#f5f7fa'),
+  rowBackgroundOpacitySelected: 0.6,
+  rowLineColorHasStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
+  rowLineColorNoStates: getColorFromCssVar('--el-border-color', '#dcdfe6'),
+  rowLineThicknessHasStates: 1,
+  rowLineThicknessNoStates: 1
+}
+function destroyGraph() {
+  unitController.removeSelectionRangeChangedHandler(onSelectionRangeChange)
+  unitController.removeViewRangeChangedHandler(removeSelection)
+  if (timeGraphChartContainer) {
+    timeGraphChartContainer.destroy()
+    timeGraphChartContainer = null
+  }
+  if (vscrollLayer) {
+    vscrollLayer.destroy()
+    vscrollLayer = null
+  }
+  if (verticalScrollContainer) {
+    verticalScrollContainer.destroy()
+    verticalScrollContainer = null
+  }
+  if (rowController) {
+    rowController.removeVerticalOffsetChangedHandler(setYOffset)
+  }
+  if (timeAxisLayer) {
+    timeAxisLayer.destroy()
+    timeAxisLayer = null
+  }
+  if (timeGraphAxisContainer) {
+    timeGraphAxisContainer.destroy()
+    timeGraphAxisContainer = null
+  }
+}
+const toolTipInfo = ref<{
+  cur: OsEvent
+  next: OsEvent
+} | null>(null)
+
+// 获取状态 label
+function getStatusLabel(type: TaskType, status: number): string {
+  switch (type) {
+    case TaskType.TASK:
+      return taskStatusRecord[status as TaskStatus] || `Status ${status}`
+    case TaskType.ISR:
+      return isrStatusRecord[status as IsrStatus] || `Status ${status}`
+    case TaskType.SPINLOCK:
+      return status === SpinlockStatus.LOCKED ? 'Locked' : 'Unlocked'
+    case TaskType.RESOURCE:
+      return status === ResourceStatus.START ? 'Start' : 'Stop'
+    case TaskType.HOOK:
+      return `Hook ${status}`
+    case TaskType.SERVICE:
+      return `Service ${status}`
+    case TaskType.LINE:
+      return 'Line'
+    default:
+      return `Status ${status}`
+  }
+}
+
+// 获取任务/ISR等的名字
+function getEventName(event: OsEvent): string {
+  const buttonId = `${event.coreId}_${event.id}_${event.type}`
+  const core = coreConfigs.value.find((c) => c.id === event.coreId)
+  if (core) {
+    const button = core.buttons.find((b) => b.id === buttonId)
+    if (button) {
+      return button.name
+    }
+  }
+  return `ID ${event.id}`
+}
+
+// 格式化 tooltip 中的时间（处理 loadCsv 和 runtime 模式的差异）
+function formatTooltipTime(eventTs: number): string {
+  // In loadCsv mode (startOffsetNumber === 0), event.ts is already absolute time
+  // In runtime mode, event.ts is relative time, need to add startOffset
+  const absoluteTime = startOffsetNumber === 0 ? BigInt(eventTs) : BigInt(eventTs) + startOffset
+
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
+  const span = unitController.viewRangeLength
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  if (span >= MICRO_IN_S) {
+    return formatWithUnit(absoluteTime, MICRO_IN_S, 3, 's')
+  } else if (span >= MICRO_IN_MS) {
+    return formatWithUnit(absoluteTime, MICRO_IN_MS, 3, 'ms')
+  }
+  return `${absoluteTime.toString()}us`
+}
+
+// 格式化 tooltip 信息
+function formatTooltipInfo(event: OsEvent, showName: boolean = true): string {
+  const typeLabel = taskTypeRecord[event.type] || `Type ${event.type}`
+  const statusLabel = getStatusLabel(event.type, event.status)
+  const timeLabel = formatTooltipTime(event.ts)
+  if (showName) {
+    const name = getEventName(event)
+    return `${name} (${typeLabel}: ${statusLabel}) @ ${timeLabel}`
+  }
+  return `(${typeLabel}: ${statusLabel}) @ ${timeLabel}`
+}
+
+// 格式化时间差值（不需要加上 startOffset）
+function formatTimeDelta(delta: bigint): string {
+  const absDelta = delta >= 0n ? delta : -delta
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  // 根据差值大小选择合适的单位
+  if (absDelta >= MICRO_IN_S) {
+    return formatWithUnit(absDelta, MICRO_IN_S, 3, 's')
+  } else if (absDelta >= MICRO_IN_MS) {
+    return formatWithUnit(absDelta, MICRO_IN_MS, 3, 'ms')
+  }
+  return `${absDelta.toString()}us`
+}
+
+// 格式化完整的 tooltip 信息，包括差值
+const formattedTooltip = computed(() => {
+  if (!toolTipInfo.value) return ''
+  const cur = toolTipInfo.value.cur
+  const next = toolTipInfo.value.next
+  const curText = formatTooltipInfo(cur, true)
+  const nextText = formatTooltipInfo(next, false)
+
+  // 计算时间差值
+  const delta = BigInt(next.ts) - BigInt(cur.ts)
+  const deltaLabel = formatTimeDelta(delta)
+
+  return `${curText} -> ${nextText} (Δ: ${deltaLabel})`
+})
+function initPixiGraph() {
+  destroyGraph()
+
   const canvas = document.getElementById(charid.value) as HTMLCanvasElement
   if (!canvas) return
+  timeGraphChartContainer = new TimeGraphContainer(
+    {
+      id: charid.value,
+      height: graphHeight.value,
+      width: graphWidth.value,
+      backgroundColor: styleConfig.chartBackgroundColor
+    },
+    unitController,
+    canvas
+  )
+  const providers: TimeGraphChartProviders = {
+    rowProvider: () => {
+      return {
+        rowIds: workerRowIds.value
+      }
+    },
+    dataProvider: (range: TimelineChart.TimeGraphRange, resolution: number) => {
+      return new Promise<{
+        rows: TimelineChart.TimeGraphRowModel[]
+        range: TimelineChart.TimeGraphRange
+        resolution: number
+      }>((resolve) => {
+        pendingDataResolve = resolve
 
-  const config: GraphConfig = {
-    width: width.value,
-    height: height.value,
-    leftWidth: leftWidth.value,
-    totalButtons: totalButtons.value,
-    buttonHeight: buttonHeight.value,
-    coreConfigs: coreConfigs.value,
-    maxTimeSpan: MAX_TIME_SPAN
-  }
-
-  try {
-    pixiRenderer = await PixiGraphRenderer.create(canvas, config)
-
-    // Calculate scrollbar thumb width based on viewport
-    const updateScrollbarThumbWidth = () => {
-      if (pixiRenderer) {
-        const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-        const visibleRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-        if (totalRange > 0) {
-          scrollbarThumbWidth.value = Math.max(5, Math.min(100, (visibleRange / totalRange) * 100))
+        dataHandlerWorker.postMessage({
+          type: 'getData',
+          payload: { range, resolution }
+        })
+      })
+    },
+    stateStyleProvider: (model: TimelineChart.TimeGraphState) => {
+      const stringColor2number = (color: string) => {
+        //rbg(xx,xx,xx)
+        const rgb = color.match(/rgb\((\d+),(\d+),(\d+)\)/)
+        if (rgb) {
+          return parseInt(rgb[1]) * 65536 + parseInt(rgb[2]) * 256 + parseInt(rgb[3])
         }
+        return parseInt(color.replace('#', ''), 16)
+      }
+      const data = model.data as { cur: OsEvent; next: OsEvent }
+      const key = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}`
+      const rid = `${data.cur.coreId}_${data.cur.id}_${data.cur.type}_${data.cur.status}`
+      const style: TimeGraphStateStyle =
+        styleMap.get(rid) ||
+        ({
+          color: 0x000000,
+          height: buttonHeight * 0.9
+        } as TimeGraphStateStyle)
+      if (!styleMap.has(rid)) {
+        const data = model.data as { cur: OsEvent; next: OsEvent }
+
+        const core = coreConfigs.value.find((c) => c.id === data.cur.coreId)
+        if (core) {
+          const button = core.buttons.find((b) => b.id === key)
+          if (button) {
+            style.color = stringColor2number(button.color)
+            if (data.cur.type === TaskType.TASK) {
+              if (data.cur.status === TaskStatus.ACTIVE) {
+                style.height = buttonHeight * 0.2
+              }
+            }
+          }
+        }
+        styleMap.set(rid, style)
+      }
+      return {
+        color: style.color,
+        height: style.height,
+        borderWidth: model.selected ? 1 : 0,
+        minWidthForLabels: 100
+      }
+    },
+    rowStyleProvider: (row?: TimelineChart.TimeGraphRowModel) => {
+      return {
+        backgroundColor: styleConfig.rowBackgroundColor,
+        backgroundOpacity: row?.selected ? styleConfig.rowBackgroundOpacitySelected : 0,
+        lineColor:
+          row?.data && row?.data.hasStates
+            ? styleConfig.rowLineColorHasStates
+            : styleConfig.rowLineColorNoStates,
+        lineThickness:
+          row?.data && row?.data.hasStates
+            ? styleConfig.rowLineThicknessHasStates
+            : styleConfig.rowLineThicknessNoStates
+      }
+    },
+    rowAnnotationStyleProvider: (annotation: TimelineChart.TimeGraphAnnotation) => {
+      return {
+        color: annotation.data?.color,
+        size: 7 * (annotation.data && annotation.data.height ? annotation.data.height : 1.0),
+        symbol: annotation.data?.symbol,
+        verticalAlign: annotation.data?.verticalAlign,
+        opacity: annotation.data?.opacity
       }
     }
+  }
 
-    // Set scale change callback
-    pixiRenderer.setOnScaleChange((scale: number) => {
-      timeSpan.value = scale
-      timeSpanSliderValue.value = timeSpanToSliderValue(scale)
-      updateScrollbarThumbWidth()
-    })
+  // const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', buttonHeight.value)
 
-    // Set pan percentage change callback
-    pixiRenderer.setOnPanPercentageChange((percentage: number) => {
-      updateScrollbarThumbWidth()
-      if (!isScrollbarDragging) {
-        scrollbarPosition.value = percentage
+  rowController = new TimeGraphRowController(buttonHeight, buttonHeight * workerRowIds.value.length)
+  rowController.onVerticalOffsetChangedHandler(setYOffset)
+
+  timeGraphChart = new TimeGraphChart(`timeGraphChart-${charid.value}`, providers, rowController)
+  // const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
+  const timeGraphSelectionRange = new TimeGraphChartSelectionRange(
+    `chart-selection-range-${charid.value}`,
+    {
+      color: styleConfig.selectionRangeColor
+    }
+  )
+  timeGraphChart.registerMouseInteractions({
+    click: (el) => {
+      if (!globalStart.value) {
+        toolTipInfo.value = {
+          cur: el.model.data.cur,
+          next: el.model.data.next
+        }
+        // Set traceLinkId when clicking on a state
+        if (linkTrace.value && el.model.data.cur) {
+          const event = el.model.data.cur as OsEvent
+          const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts + startOffsetNumber).toFixed(0)}`
+          runtimeStore.setTraceLinkId(key)
+        }
+      } else {
+        toolTipInfo.value = null
       }
+    }
+  })
+  const timeGraphChartCursors = new TimeGraphChartCursors(
+    `chart-cursors-${charid.value}`,
+    timeGraphChart,
+    rowController,
+    { color: styleConfig.cursorsColor }
+  )
+  // const timeGraphChartRangeEvents = new TimeGraphRangeEventsLayer(
+  //   `timeGraphChartRangeEvents-${charid.value}`,
+  //   providers
+  // )
+
+  timeGraphChartContainer.addLayers([
+    timeGraphChart,
+    timeGraphSelectionRange,
+    timeGraphChartCursors
+    // timeGraphChartRangeEvents
+  ])
+  const yUnitController = new TimeGraphUnitController(BigInt(1))
+  verticalScrollContainer = new TimeGraphContainer(
+    {
+      width: styleConfig.vscrollWidth,
+      height: graphHeight.value,
+      id: charid.value + '_vscroll',
+      backgroundColor: styleConfig.vscrollBackgroundColor
+    },
+    yUnitController
+  )
+  vscrollLayer = new TimeGraphVerticalScrollbar(
+    `timeGraphVerticalScrollbar-${charid.value}`,
+    rowController
+  )
+  verticalScrollContainer.addLayers([vscrollLayer])
+  const vscrollElement = document.getElementById(`main-vscroll-${charid.value}`) as HTMLElement
+  if (vscrollElement) {
+    vscrollElement.appendChild(verticalScrollContainer.canvas)
+  }
+
+  // time axis
+  timeGraphAxisContainer = new TimeGraphContainer(
+    {
+      width: graphWidth.value,
+      height: styleConfig.axisHeight,
+      id: `main-timer-${charid.value}`,
+      backgroundColor: styleConfig.axisBackgroundColor
+    },
+    unitController
+  )
+  const timerElement = document.getElementById(`main-timer-${charid.value}`) as HTMLElement
+  if (timerElement) {
+    timerElement.appendChild(timeGraphAxisContainer.canvas)
+
+    timeAxisLayer = new TimeGraphAxis(`timeGraphAxis-${charid.value}`, {
+      lineColor: styleConfig.axisColor,
+
+      verticalAlign: styleConfig.axisVerticalAlign
     })
-
-    pixiRenderer.setBlocks(visibleBlocks)
-    // pixiRenderer.updateViewport(7, 10)
-
-    // Initialize time span from viewport
-    const initialSpan = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-    timeSpan.value = initialSpan
-    timeSpanSliderValue.value = timeSpanToSliderValue(initialSpan)
-    handleTimeSpanChange(timeSpanSliderValue.value, true)
-
-    // Initialize scrollbar
-    updateScrollbarThumbWidth()
-  } catch (error) {
-    console.error('Failed to initialize Pixi renderer:', error)
+    timeGraphAxisContainer.addLayers([timeAxisLayer])
   }
+  naviContainer = new TimeGraphContainer(
+    {
+      width: graphWidth.value,
+      height: styleConfig.navigatorHeight,
+      id: `main-navi-${charid.value}`,
+      backgroundColor: styleConfig.navigatorBackgroundColor
+    },
+    unitController
+  )
+  const naviElement = document.getElementById(`main-navi-${charid.value}`) as HTMLElement
+  if (naviElement) {
+    naviElement.appendChild(naviContainer.canvas)
+  }
+  naviLayer = new TimeGraphNavigator(`timeGraphNavigator-${charid.value}`)
+  naviContainer.addLayers([naviLayer])
 }
+watch(
+  () => runtimeStore.traceLinkIdBack,
+  (linkId) => {
+    if (!linkId || !timeGraphChart) return
 
-// Scrollbar mouse handlers
-const handleScrollbarMouseDown = (event: MouseEvent) => {
-  isScrollbarDragging = true
-  scrollbarDragStartX = event.clientX
-  scrollbarDragStartPosition = scrollbarPosition.value
+    // Parse linkId format: instance-instance-TaskType.id_coreId-time
+    // Example: Os_Trace_high-Os_Trace_high-Task.2_0-0.549969
+    const parts = linkId.split('-')
+    if (parts.length < 4) return
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isScrollbarDragging || !pixiRenderer) return
+    const instance = parts[0]
+    const taskTypePart = parts[2] // TaskType.id_coreId
+    const timeStr = parts[3] // time in seconds
 
-    const canvas = document.getElementById(charid.value) as HTMLCanvasElement
-    if (!canvas) return
+    // Check if instance matches current orti
+    if (instance !== orti.value.name) return
 
-    const canvasRect = canvas.getBoundingClientRect()
-    const canvasWidth = canvasRect.width
-    const deltaX = e.clientX - scrollbarDragStartX
-    const deltaPercentage = (deltaX / canvasWidth) * 100
+    // Parse taskType.id_coreId
+    const taskTypeMatch = taskTypePart.match(/^(.+)\.(\d+)_(\d+)$/)
+    if (!taskTypeMatch) return
 
-    let newPosition = scrollbarDragStartPosition + deltaPercentage
+    const taskTypeName = taskTypeMatch[1] // e.g., "Task"
+    const taskId = parseInt(taskTypeMatch[2])
+    const coreId = parseInt(taskTypeMatch[3])
+    const timeUs = parseFloat(timeStr)
 
-    // Clamp position to valid range considering thumb width
-    newPosition = Math.max(0, Math.min(100 - scrollbarThumbWidth.value, newPosition))
+    // Find taskType from name
+    const taskType = Object.entries(taskTypeRecord).find(([_, name]) => name === taskTypeName)?.[0]
+    if (!taskType) return
 
-    scrollbarPosition.value = newPosition
+    // Find corresponding button/rowId
+    const core = coreConfigs.value.find((c) => c.id === coreId)
+    if (!core) return
 
-    // Update renderer viewport based on scrollbar position
-    const totalRange = pixiRenderer.viewport.maxTs - pixiRenderer.viewport.minTs
-    const viewportRange = pixiRenderer.viewport.maxX - pixiRenderer.viewport.minX
-    const newMinX = pixiRenderer.viewport.minTs + (newPosition / 100) * totalRange
-    const newMaxX = newMinX + viewportRange
+    const button = core.buttons.find((b) => {
+      const [bCoreId, bId, bType] = b.id.split('_')
+      return (
+        parseInt(bCoreId) === coreId &&
+        parseInt(bId) === taskId &&
+        parseInt(bType) === parseInt(taskType)
+      )
+    })
+    if (!button) return
 
-    pixiRenderer.updateViewport(newMinX, newMaxX)
+    const targetRowId = button.numberId
+    const rowIndex = workerRowIds.value.indexOf(targetRowId)
+    if (rowIndex < 0) return
+
+    // Ensure row is visible (scroll to row)
+    timeGraphChart.selectAndReveal(rowIndex)
+
+    // Convert time to microseconds (bigint)
+    // traceLinkId contains absolute time in seconds: (event.ts + startOffsetNumber) / 1000000
+    // So we need to convert back to relative time by subtracting startOffsetNumber
+    const absoluteTimeUs = Math.floor(timeUs)
+    const relativeTimeUs = absoluteTimeUs - startOffsetNumber
+
+    const targetTimeUs = BigInt(Math.max(0, relativeTimeUs)) - startOffset1
+
+    // Get current view range width to keep it unchanged
+    const currentViewRange = unitController.viewRange
+    const viewWidth = currentViewRange.end - currentViewRange.start
+
+    // Calculate new view range centered on target time, keeping width unchanged
+    const half = viewWidth / BigInt(2)
+    let newStart = targetTimeUs > half ? targetTimeUs - half : BigInt(0)
+    let newEnd = newStart + viewWidth
+
+    // Clamp to absolute range
+    if (newEnd > unitController.absoluteRange) {
+      newEnd = unitController.absoluteRange
+      newStart = newEnd > viewWidth ? newEnd - viewWidth : BigInt(0)
+    }
+
+    // Update view range (move to target time, keep width)
+    unitController.viewRange = { start: newStart, end: newEnd }
+
+    // Set selection at target time
+    unitController.selectionRange = { start: targetTimeUs, end: targetTimeUs }
   }
-
-  const handleMouseUp = () => {
-    isScrollbarDragging = false
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('mouseup', handleMouseUp)
-  }
-
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', handleMouseUp)
-}
-
-// Example usage (commented out):
-// To add a new core: addCore(2, 'Core 2', [{ name: 'NewTask', color: '#e67e22' }])
-// To remove a core: removeCore(1)
-// To add button to existing core: addButtonToCore(0, { name: 'NewButton', color: '#8e44ad' })
-
+)
 // Arrow click handler - shared function for both left and right arrows
-const handleArrowClick = (
+const handleArrowClick = async (
   direction: 'left' | 'right',
   coreId: number,
   buttonIndex: number,
   buttonName: string
 ) => {
-  console.log(
-    `Arrow clicked: ${direction}, Core: ${coreId}, Button Index: ${buttonIndex}, Button Name: ${buttonName}`
-  )
+  // 1) Resolve target row id from core/button
+  const core = coreConfigs.value.find((c) => c.id === coreId)
+  const button = core?.buttons?.[buttonIndex]
+  if (!button) return
+  const targetRowId = button.numberId
+
+  // 2) Find row index in current chart
+  const rowIndex = workerRowIds.value.indexOf(targetRowId)
+  if (rowIndex < 0 || !timeGraphChart) return
+
+  // 3) Ensure the row is at least selected and visible
+  timeGraphChart.selectAndReveal(rowIndex)
+
+  // 4) Ask worker to find the next/prev state by id
+  const currentCursor = unitController.selectionRange
+    ? unitController.selectionRange.end
+    : undefined
+  const workerPromise = new Promise<{
+    id?: string
+    start?: bigint
+    event?: OsEvent
+    nextEvent?: OsEvent
+  }>((resolve) => {
+    pendingFindStateResolve = resolve
+  })
+  dataHandlerWorker.postMessage({
+    type: 'findState',
+    payload: { direction, rowId: targetRowId, cursor: currentCursor }
+  })
+  const found = await workerPromise
+  if (!found || found.start === undefined) return
+  const newPos: bigint = found.start
+
+  if (linkTrace.value) {
+    const event = found.event as OsEvent
+
+    if (event) {
+      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts + startOffsetNumber).toFixed(0)}`
+      runtimeStore.setTraceLinkId(key)
+    }
+  }
+  // 5) Ensure view includes the new position (prefer centering around it)
+  {
+    const { start: vStart, end: vEnd } = unitController.viewRange
+    if (newPos < vStart || newPos > vEnd) {
+      const windowLen = unitController.viewRangeLength
+      const half = windowLen / BigInt(2)
+      let start = newPos > half ? newPos - half : BigInt(0)
+      let end = start + windowLen
+      if (end > unitController.absoluteRange) {
+        end = unitController.absoluteRange
+        start = end - windowLen
+        if (start < 0) start = BigInt(0)
+      }
+      unitController.viewRange = { start, end }
+    }
+  }
+
+  // 6) Now set selection so it is guaranteed inside view range
+  unitController.selectionRange = { start: newPos, end: newPos }
+
+  // 7) Highlight the state using the chart by id and update tooltip
+  if (found.id) {
+    const stateComp = timeGraphChart.getStateById(found.id)
+    if (stateComp) {
+      toolTipInfo.value = {
+        cur: stateComp.model.data!.cur,
+        next: stateComp.model.data!.next
+      }
+      timeGraphChart.selectState(stateComp.model)
+    } else if (found.event) {
+      // If state component not found but event exists, use event and nextEvent from worker
+      const nextEvent = found.nextEvent || found.event
+      toolTipInfo.value = {
+        cur: found.event,
+        next: nextEvent
+      }
+    }
+  } else if (found.event) {
+    // If no id but event exists, use event and nextEvent from worker
+    const nextEvent = found.nextEvent || found.event
+    toolTipInfo.value = {
+      cur: found.event,
+      next: nextEvent
+    }
+  }
 }
 
 // 监听暂停/恢复状态
@@ -537,16 +1047,122 @@ watch(
       timer = null
     } else if (!paused && globalStart.value) {
       if (timer) clearInterval(timer)
-      timer = setInterval(updateTime, 500)
+      timer = setInterval(updateTime, timerInterval)
     }
   }
 )
+const selectStart = ref<bigint | undefined>(undefined)
+const selectEnd = ref<bigint | undefined>(undefined)
+const selectStartText = computed(() => {
+  if (!selectStart.value) return ''
+  return formatTimeLabel(selectStart.value)
+})
+const selectEndText = computed(() => {
+  if (!selectEnd.value) return ''
+  const endStr = formatTimeLabel(selectEnd.value)
+  if (selectStart.value === undefined) return endStr
+  const delta = selectEnd.value - selectStart.value
+  const sign = delta >= 0n ? '+' : '-'
+  const abs = delta >= 0n ? delta : -delta
+  const diffStr = formatTimeDelta(abs)
+  return `${endStr} (${sign}${diffStr})`
+})
+const getCursorLeftPx = (timeVal: bigint): number => {
+  const view = unitController.viewRange
+  const viewLen = unitController.viewRangeLength
+  if (viewLen === BigInt(0)) return 0
+  const axisCanvas = timeGraphAxisContainer?.canvas as HTMLCanvasElement | undefined
+  const widthPx = axisCanvas ? axisCanvas.clientWidth : graphWidth.value
+  const clamped = timeVal < view.start ? view.start : timeVal > view.end ? view.end : timeVal
+  const dx = Number(clamped - view.start) / Number(viewLen)
+  return Math.round(dx * widthPx)
+}
+const selectStartStyle = computed(() => {
+  if (!selectStart.value) return {}
+  const x = getCursorLeftPx(selectStart.value)
+  return {
+    left: x + 'px'
+  }
+})
+const selectEndStyle = computed(() => {
+  if (!selectEnd.value) return {}
+  const x = getCursorLeftPx(selectEnd.value)
+  return {
+    left: x + 'px'
+  }
+})
+function onSelectionRangeChange(selectionRange?: TimelineChart.TimeGraphRange) {
+  if (!globalStart.value) {
+    if (selectionRange) {
+      selectStart.value = selectionRange.start
+      if (selectionRange.end != selectionRange.start) {
+        selectEnd.value = selectionRange.end
+      } else {
+        selectEnd.value = undefined
+      }
+    } else {
+      selectStart.value = undefined
+      selectEnd.value = undefined
+    }
+  } else {
+    selectStart.value = undefined
+    selectEnd.value = undefined
+  }
+}
+function removeSelection() {
+  selectStart.value = undefined
+  selectEnd.value = undefined
+  unitController.selectionRange = undefined
+}
+function logDisplay({
+  values
+}: {
+  values: {
+    label: string
+    instance: string
+    message: {
+      method: 'osEvent'
+      data: {
+        data: string
+        id: string //TASK.7_0
+        name: string
+        ts: number
+        raw: OsEvent
+      }
+    }
+  }[]
+}) {
+  if (!globalStart.value) {
+    return
+  }
+
+  // Don't process logs when paused
+  if (isPaused.value) return
+
+  //filter by instance
+  const filteredValues = values.filter((value) => value.instance === orti.value.name)
+  const events = filteredValues.map((value) => value.message.data.raw)
+  // send to worker
+  dataHandlerWorker.postMessage({
+    type: 'updateEvents',
+    payload: {
+      events: events,
+      cpuFreq: orti.value.cpuFreq
+    }
+  })
+  if (startOffsetNumber === 0) {
+    startOffset = BigInt(filteredValues[0].message.data.ts)
+    startOffsetNumber = filteredValues[0].message.data.ts
+  }
+  lastEventTs = filteredValues.at(-1)?.message.data.ts || 0
+}
 // Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
   // Wait for DOM to be ready
-  nextTick(async () => {
-    await initPixiGraph()
-  })
+
+  initPixiGraph()
+  unitController.onSelectionRangeChange(onSelectionRangeChange)
+  unitController.onViewRangeChanged(removeSelection)
 
   window.jQuery(`#Shift-${charid.value}`).resizable({
     handles: 'e',
@@ -558,44 +1174,33 @@ onMounted(() => {
   })
 
   if (globalStart.value) {
-    timer = setInterval(updateTime, 500)
+    startFunc()
   }
+  window.logBus.on('osEvent', logDisplay)
 })
 
-watch(
-  [
-    () => width.value,
-    () => leftWidth.value,
-    () => totalButtons.value,
-    () => buttonHeight.value,
-    () => coreConfigs.value
-  ],
-  () => {
-    // Update pixi renderer after resize
-    nextTick(() => {
-      if (pixiRenderer) {
-        pixiRenderer.updateConfig({
-          width: width.value,
-          height: height.value,
-          leftWidth: leftWidth.value,
-          totalButtons: totalButtons.value,
-          buttonHeight: buttonHeight.value,
-          coreConfigs: coreConfigs.value
-        })
-        updateTimeLine()
-      }
-    })
-  }
-)
-
-onBeforeUnmount(() => {
-  // Cleanup pixi renderer
-  if (pixiRenderer) {
-    pixiRenderer.destroy()
-    pixiRenderer = null
-  }
+watch([() => graphWidth.value, () => graphHeight.value], (val1) => {
+  // rowController!.rowHeight = val1[2];
+  timeGraphChartContainer?.updateCanvas(val1[0], val1[1])
+  verticalScrollContainer?.updateCanvas(styleConfig.vscrollWidth, val1[1])
+  vscrollLayer?.update(true)
+  verticalScrollContainer?.updateCanvas(styleConfig.vscrollWidth, val1[1])
+  timeGraphAxisContainer?.updateCanvas(val1[0], styleConfig.axisHeight)
+  naviContainer?.updateCanvas(val1[0], styleConfig.navigatorHeight)
+  removeSelection()
 })
+
 onUnmounted(() => {
+  window.logBus.off('osEvent', logDisplay)
+  //clear
+  if (pendingDataResolve) {
+    pendingDataResolve({ rows: [], range: { start: 0n, end: 0n }, resolution: 1 })
+  }
+  if (pendingFindStateResolve) {
+    pendingFindStateResolve({ id: undefined, start: undefined })
+  }
+
+  destroyGraph()
   dataHandlerWorker.terminate()
   // 清除定时器
   if (timer) {
@@ -660,6 +1265,30 @@ onUnmounted(() => {
   /* 改为 hidden 以防止滚动条影响画布 */
 }
 
+.selection-cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.selection-cursor-label {
+  position: absolute;
+  bottom: 0;
+  transform: translate(-50%, 0);
+  padding: 0 6px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 2px;
+  font-size: 10px;
+  background: var(--el-bg-color-overlay);
+  color: var(--el-text-color-primary);
+  border: 1px solid var(--el-border-color);
+  white-space: nowrap;
+}
+
 .border-bottom {
   border-bottom: solid 1px var(--el-border-color);
   background-color: var(--el-background-color);
@@ -672,9 +1301,11 @@ onUnmounted(() => {
 }
 
 .core-container {
+  overflow-y: hidden;
+  height: v-bind(graphHeight + 'px');
   display: flex;
   flex-direction: column;
-  height: 100%;
+
   overflow: hidden;
 }
 
@@ -701,6 +1332,16 @@ onUnmounted(() => {
   color: var(--el-text-color-primary);
   transform: rotate(180deg);
   white-space: nowrap;
+}
+
+.divider {
+  position: absolute;
+  left: 0;
+  top: v-bind(height-45 + 'px');
+  width: v-bind(width + 'px');
+  height: 1px;
+  background-color: var(--el-border-color);
+  z-index: 1000;
 }
 
 .button-group {
@@ -814,15 +1455,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--el-text-color-regular);
   background: var(--el-bg-color-overlay);
-  padding: 4px 8px;
+  padding: 2px 2px;
   border-radius: 4px;
-  /* border: 1px solid var(--el-border-color-light); */
-  margin-top: 4px;
-  max-height: 40px;
-  overflow: hidden;
+  height: 37px;
+  overflow-y: auto;
 }
 
 .hint-item {
@@ -846,45 +1485,6 @@ onUnmounted(() => {
   font-size: 12px;
   color: var(--el-text-color-regular);
 }
-
-.custom-scrollbar {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  right: 0;
-  height: 12px;
-  z-index: 1001;
-  pointer-events: none;
-}
-
-.scrollbar-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.05);
-  border-top: 1px solid var(--el-border-color-lighter);
-  pointer-events: auto;
-}
-
-.scrollbar-thumb {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: var(--el-color-primary);
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-  cursor: pointer;
-  border-radius: 2px;
-  pointer-events: auto;
-}
-
-.scrollbar-thumb:hover {
-  opacity: 0.8;
-}
-
-.scrollbar-thumb:active {
-  opacity: 1;
-}
 </style>
 
 <style>
@@ -903,17 +1503,6 @@ onUnmounted(() => {
   &.node-menu {
     padding: 0 !important;
     background: var(--el-bg-color) !important;
-  }
-}
-
-.blue-slider {
-  .el-slider__runway {
-    .el-slider__button-wrapper {
-      .el-slider__button {
-        height: 14px !important;
-        width: 14px !important;
-      }
-    }
   }
 }
 </style>

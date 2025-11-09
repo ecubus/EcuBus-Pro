@@ -157,7 +157,7 @@ import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading, ElMessageBox } from 'element-plus'
-import { useGlobalStart } from '@r/stores/runtime'
+import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import {
   SomeipMessageType,
   SomeipMessageTypeMap,
@@ -172,7 +172,7 @@ let allLogData: LogData[] = []
 interface LogData {
   dir?: 'Tx' | 'Rx' | '--'
   data: string
-  ts: string
+  ts: number
   id: string
   key?: string | number
   dlc?: number
@@ -185,7 +185,7 @@ interface LogData {
   seqIndex?: number
   children?: LogData[] | { name: string; data: string }[]
   deltaTime?: string
-  previousTs?: string
+  previousTs?: number
 }
 const isOverwrite = ref(false)
 function toggleOverwrite() {
@@ -392,8 +392,55 @@ function CanMsgType2Str(msgType: CanMsgType) {
   return str
 }
 
-const maxLogCount = 20000
+const maxLogCount = 50000
 const showLogCount = 1000
+
+const runtimeStore = useRuntimeStore()
+watch(
+  () => runtimeStore.traceLinkId,
+  (val) => {
+    if (val) {
+      isPaused.value = true
+
+      nextTick(() => {
+        //Os_Trace_high-Os_Trace_high-Service.114_0-5302048
+        // 使用 getCellValue 检查是否成功找到行，如果没找到，尝试对最后的数字部分做 +1 和 -1 处理浮点数累计误差
+        let targetKey = val
+        const cellValue = grid.getCellValue(val, 'key')
+        if (cellValue !== val) {
+          // 解析 traceLinkId 格式：Os_Trace_high-Os_Trace_high-Service.114_0-5302048
+          const parts = val.split('-')
+          if (parts.length > 0) {
+            const lastPart = parts[parts.length - 1]
+            const number = parseInt(lastPart, 10)
+
+            if (!isNaN(number)) {
+              // 尝试 +1
+              const tryKey1 = parts.slice(0, -1).join('-') + '-' + (number + 1).toString()
+              const cellValue1 = grid.getCellValue(tryKey1, 'key')
+              if (cellValue1 === tryKey1) {
+                targetKey = tryKey1
+              } else {
+                // 尝试 -1
+                const tryKey2 = parts.slice(0, -1).join('-') + '-' + (number - 1).toString()
+                const cellValue2 = grid.getCellValue(tryKey2, 'key')
+                if (cellValue2 === tryKey2) {
+                  targetKey = tryKey2
+                }
+              }
+            }
+          }
+        }
+
+        // 找到正确的 key 后再执行滚动和设置当前行
+        if (targetKey) {
+          grid.scrollToRowkey(targetKey)
+          grid.setCurrentRow(targetKey)
+        }
+      })
+    }
+  }
+)
 
 function insertData2(data: LogData[]) {
   if (isOverwrite.value) {
@@ -405,8 +452,8 @@ function insertData2(data: LogData[]) {
           // Overwrite the existing log entry
           // Calculate delta time
           const existingLog = allLogData[idx]
-          const currentTime = parseFloat(item.ts)
-          const previousTime = parseFloat(existingLog.ts)
+          const currentTime = item.ts
+          const previousTime = existingLog.ts
           const deltaMs = (currentTime - previousTime) * 1000 // Convert to milliseconds
 
           // Store previous timestamp and delta time
@@ -424,9 +471,12 @@ function insertData2(data: LogData[]) {
   } else {
     allLogData.push(...data)
   }
-  if (allLogData.length > maxLogCount) {
-    const excessRows = allLogData.length - maxLogCount
-    allLogData.splice(0, excessRows)
+
+  if (globalStart.value) {
+    if (allLogData.length > maxLogCount) {
+      const excessRows = allLogData.length - maxLogCount
+      allLogData.splice(0, excessRows)
+    }
   }
 
   // 根据暂停状态决定加载多少数据
@@ -442,7 +492,6 @@ function insertData2(data: LogData[]) {
   }
 }
 
-let uid = 0
 let logData: LogData[] = []
 let timer: any = null
 function logDisplay({ values }: { values: LogItem[] }) {
@@ -462,8 +511,9 @@ function logDisplay({ values }: { values: LogItem[] }) {
     if (isOverwrite.value) {
       data.key = `${data.channel}-${data.device}-${data.id}`
     } else {
-      data.key = uid++
+      data.key = `${data.channel}-${data.device}-${data.id}-${data.ts.toFixed(0)}`
     }
+    console.log('data.key', data.key)
     logData.push(data)
   }
   for (const val of vals) {
@@ -478,7 +528,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
-        ts: ((val.message.data.ts || 0) / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: '0x' + val.message.data.id.toString(16),
         dlc: getDlcByLen(val.message.data.data.length, val.message.data.msgType.canfd),
         len: val.message.data.data.length,
@@ -493,7 +543,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts,
         id: `${val.message.data.local}=>${val.message.data.remote}`,
         dlc: val.message.data.data.length,
         len: val.message.data.data.length,
@@ -507,7 +557,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
         data: data2str(val.message.data.data),
-        ts: ((val.message.data.ts || 0) / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: '0x' + val.message.data.frameId.toString(16),
         len: val.message.data.data.length,
         device: val.label,
@@ -528,7 +578,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         dir: 'Tx',
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: testerName,
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
@@ -554,7 +604,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         dir: 'Rx',
         name: testerName,
         data: `${data2str(val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0))}`.trim(),
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: testerName,
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
@@ -569,7 +619,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: 'canError',
         len: 0,
         device: val.label,
@@ -586,7 +636,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           method: method,
           name: val.message.data.data.name,
           data: val.message.data.msg,
-          ts: (val.message.data.ts / 1000000).toFixed(6),
+          ts: val.message.data.ts!,
           id: '0x' + val.message.data.data.frameId?.toString(16),
           len: val.message.data.data.data.length,
           dlc: val.message.data.data.data.length,
@@ -600,7 +650,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           method: val.message.method,
           name: '',
           data: val.message.data.msg,
-          ts: (val.message.data.ts / 1000000).toFixed(6),
+          ts: val.message.data.ts!,
           id: 'linError',
           len: 0,
           device: val.label,
@@ -613,7 +663,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: 'linEvent',
         len: 0,
         device: val.label,
@@ -625,7 +675,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: 'udsScript',
         len: 0,
         device: val.label,
@@ -637,7 +687,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         name: '',
         data: val.message.data.msg,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: 'udsSystem',
         len: 0,
         device: val.label,
@@ -672,7 +722,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
         name: `Client:0x${val.message.data.client.toString(16).padStart(4, '0')} Session:0x${val.message.data.session.toString(16).padStart(4, '0')}`,
         data: data2str(val.message.data.payload),
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: `SID:0x${val.message.data.service.toString(16).padStart(4, '0')} IID:0x${val.message.data.instance.toString(16).padStart(4, '0')} MID:0x${val.message.data.method.toString(16).padStart(4, '0')}`,
         len: val.message.data.payload.length,
         dlc: val.message.data.payload.length,
@@ -686,7 +736,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
       insertData({
         method: val.message.method,
         data: `Service:0x${val.message.data.info.service.toString(16).padStart(4, '0')} Instance:0x${val.message.data.info.instance.toString(16).padStart(4, '0')} Available:${val.message.data.info.available}`,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         id: '',
         len: 0,
         device: val.label,
@@ -698,7 +748,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         method: val.message.method,
 
         data: val.message.data.data,
-        ts: (val.message.data.ts / 1000000).toFixed(6),
+        ts: val.message.data.ts!,
         name: val.message.data.name,
         id: val.message.data.id,
         len: 0,
@@ -712,7 +762,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           method: val.message.method,
           name: '',
           data: val.message.error,
-          ts: (val.message.ts / 1000000).toFixed(6),
+          ts: val.message.ts!,
           id: 'osError',
           len: 0,
           device: val.label,
@@ -724,7 +774,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           method: val.message.method,
           name: '',
           data: val.message.error.data,
-          ts: (val.message.ts / 1000000).toFixed(6),
+          ts: val.message.ts!,
           id: val.message.error.id,
           len: 0,
           device: val.label,
@@ -873,11 +923,11 @@ function saveAll(command: string) {
     // 添加数据
     let startTime = 0
     if (allLogData.length > 0) {
-      startTime = parseFloat(allLogData[0].ts)
+      startTime = allLogData[0].ts
     }
 
     allLogData.forEach((log) => {
-      const timestamp = parseFloat(log.ts)
+      const timestamp = log.ts
       const relativeTime = timestamp - startTime
 
       // 格式化通道号
@@ -1023,9 +1073,9 @@ const columes: Ref<Column[]> = ref([
     width: 200,
     formatter: (row) => {
       if (isOverwrite.value && row.row.deltaTime) {
-        return `${row.row.ts} ${row.row.deltaTime}`
+        return `${(row.row.ts / 1000000).toFixed(6)} ${row.row.deltaTime}`
       }
-      return row.row.ts
+      return (row.row.ts / 1000000).toFixed(6)
     }
   },
   { key: 'name', title: 'Name', width: 200 },
@@ -1124,6 +1174,7 @@ onMounted(() => {
     data: [],
     columns: columes.value,
     config: {
+      HIGHLIGHT_SELECTED_ROW: true,
       WIDTH: tableWidth.value,
       HEIGHT: tableHeight.value,
       DISABLED: true,
@@ -1195,6 +1246,7 @@ onMounted(() => {
               .trim()
             break
         }
+
         return {
           color: color
         }
@@ -1209,6 +1261,15 @@ onMounted(() => {
       }
     } else {
       scrollY = v
+    }
+  })
+  grid.on('click', (v) => {
+    // runtimeStore.setTraceLinkId('')
+    const row = grid.getCurrentRow()
+    if (row && row.rowKey == runtimeStore.traceLinkId) {
+      runtimeStore.setTraceLinkId('')
+    } else {
+      runtimeStore.setTraceLinkIdBack(row?.rowKey || '')
     }
   })
 })

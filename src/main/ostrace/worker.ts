@@ -115,6 +115,7 @@ class OsTraceWorker {
     if (this.offsetTs == undefined) {
       const ts = getTsUs() - this.systemTs
       this.offsetTs = realTs - ts
+      parentPort?.postMessage({ type: 'offsetTs', data: this.offsetTs })
     }
 
     // Add to queue for timed playback

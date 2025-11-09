@@ -1093,6 +1093,7 @@ function deleteDatabase() {
       })
       layout.removeWin(props.editIndex, true)
       layout.removeWin(`${props.editIndex}_trace`, true)
+      layout.removeWin(`${props.editIndex}_time`, true)
     })
     .catch(null)
 }

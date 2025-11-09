@@ -128,8 +128,7 @@ export default class UdsTester {
         stderr: true,
         stdout: true,
         env: this.env,
-        execArgv: execArgv,
-        workerData: global.dataSet
+        execArgv: execArgv
       },
 
       onTerminateWorker: (v: any) => {
@@ -389,7 +388,12 @@ export default class UdsTester {
     }
   }
   async start(projectPath: string, testerName?: string, testControl?: Record<number, boolean>) {
-    await this.pool.exec('__start', [this.serviceMap, testerName, testControl])
+    await this.pool.exec('__start', [
+      cloneDeep(global.dataSet),
+      this.serviceMap,
+      testerName,
+      testControl
+    ])
     await this.workerEmit('__varFc', null)
   }
 

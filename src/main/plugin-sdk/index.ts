@@ -4,6 +4,9 @@ import workerpool from 'workerpool'
 import { workerData, isMainThread } from 'worker_threads'
 import { DataSet } from 'src/preload/data'
 
+// Re-export all worker capabilities
+export * from '../worker'
+
 type ServiceMap = {
   [key: string]: any
   start: (globalData: DataSet) => void

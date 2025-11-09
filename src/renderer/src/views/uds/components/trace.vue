@@ -513,7 +513,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
     } else {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.ts.toFixed(0)}`
     }
-    console.log('data.key', data.key)
+
     logData.push(data)
   }
   for (const val of vals) {

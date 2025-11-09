@@ -191,6 +191,7 @@ import { getColorFromCssVar } from './timeline/color'
 
 const dataHandlerWorker = new DataHandlerWorker()
 let startOffset: bigint = 0n
+let startOffset1: bigint = 0n
 let startOffsetNumber: number = 0
 let offlineLoading: any = null
 let lastEventTs: number = 0
@@ -206,7 +207,10 @@ let pendingDataResolve:
     )
   | null = null
 let pendingFindStateResolve:
-  | (undefined | ((data: { id?: string; start?: bigint }) => void))
+  | (
+      | undefined
+      | ((data: { id?: string; start?: bigint; event?: OsEvent; nextEvent?: OsEvent }) => void)
+    )
   | null = null
 dataHandlerWorker.onmessage = (event) => {
   const msg = event.data
@@ -225,6 +229,7 @@ dataHandlerWorker.onmessage = (event) => {
     startOffsetNumber = 0
     workerRowIds.value = msg.payload.rowIds || []
     startOffset = BigInt(msg.payload.start || 0)
+    startOffset1 = startOffset
     unitController.absoluteRange = BigInt(msg.payload.totalLength || 0)
 
     unitController.viewRange = {
@@ -291,7 +296,7 @@ const updateTime = () => {
   time.value = maxX
 
   // 计算x轴范围
-
+  maxX -= startOffsetNumber / 1000000
   // startOffset = BigInt(Math.floor(Math.max(0,(maxX - 5)) * 1000000))
   // const middle = BigInt(Math.floor(Math.min(5,maxX) * 1000000))
 
@@ -331,7 +336,12 @@ async function loadOfflineTrace() {
   input.click()
 }
 function startFunc() {
+  lastEventTs = 0
   startOffsetNumber = 0
+  startOffset = BigInt(0)
+  startOffset1 = startOffset
+  unitController.absoluteRange = BigInt(0)
+
   dataHandlerWorker.postMessage({
     type: 'getRowIds',
     payload: {
@@ -546,11 +556,49 @@ function getEventName(event: OsEvent): string {
   return `ID ${event.id}`
 }
 
+// 格式化 tooltip 中的时间（处理 loadCsv 和 runtime 模式的差异）
+function formatTooltipTime(eventTs: number): string {
+  // In loadCsv mode (startOffsetNumber === 0), event.ts is already absolute time
+  // In runtime mode, event.ts is relative time, need to add startOffset
+  const absoluteTime = startOffsetNumber === 0 ? BigInt(eventTs) : BigInt(eventTs) + startOffset
+
+  const MICRO_IN_MS = BigInt(1000)
+  const MICRO_IN_S = BigInt(1000_000)
+  const span = unitController.viewRangeLength
+
+  const formatWithUnit = (
+    value: bigint,
+    divisor: bigint,
+    fractionDigits: number,
+    suffix: string
+  ) => {
+    const intPart = value / divisor
+    const remainder = value % divisor
+    if (fractionDigits <= 0 || remainder === BigInt(0)) {
+      return `${intPart.toString()}${suffix}`
+    }
+    const scale = BigInt(10) ** BigInt(fractionDigits)
+    const dec = (remainder * scale) / divisor
+    let decStr = dec.toString().padStart(fractionDigits, '0')
+    decStr = decStr.replace(/0+$/g, '')
+    return decStr.length > 0
+      ? `${intPart.toString()}.${decStr}${suffix}`
+      : `${intPart.toString()}${suffix}`
+  }
+
+  if (span >= MICRO_IN_S) {
+    return formatWithUnit(absoluteTime, MICRO_IN_S, 3, 's')
+  } else if (span >= MICRO_IN_MS) {
+    return formatWithUnit(absoluteTime, MICRO_IN_MS, 3, 'ms')
+  }
+  return `${absoluteTime.toString()}us`
+}
+
 // 格式化 tooltip 信息
 function formatTooltipInfo(event: OsEvent, showName: boolean = true): string {
   const typeLabel = taskTypeRecord[event.type] || `Type ${event.type}`
   const statusLabel = getStatusLabel(event.type, event.status)
-  const timeLabel = formatTimeLabel(BigInt(event.ts))
+  const timeLabel = formatTooltipTime(event.ts)
   if (showName) {
     const name = getEventName(event)
     return `${name} (${typeLabel}: ${statusLabel}) @ ${timeLabel}`
@@ -732,7 +780,7 @@ function initPixiGraph() {
         // Set traceLinkId when clicking on a state
         if (linkTrace.value && el.model.data.cur) {
           const event = el.model.data.cur as OsEvent
-          const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${((event.ts + startOffsetNumber) / 1000000).toFixed(6)}`
+          const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts + startOffsetNumber).toFixed(0)}`
           runtimeStore.setTraceLinkId(key)
         }
       } else {
@@ -838,7 +886,7 @@ watch(
     const taskTypeName = taskTypeMatch[1] // e.g., "Task"
     const taskId = parseInt(taskTypeMatch[2])
     const coreId = parseInt(taskTypeMatch[3])
-    const timeSeconds = parseFloat(timeStr)
+    const timeUs = parseFloat(timeStr)
 
     // Find taskType from name
     const taskType = Object.entries(taskTypeRecord).find(([_, name]) => name === taskTypeName)?.[0]
@@ -868,9 +916,10 @@ watch(
     // Convert time to microseconds (bigint)
     // traceLinkId contains absolute time in seconds: (event.ts + startOffsetNumber) / 1000000
     // So we need to convert back to relative time by subtracting startOffsetNumber
-    const absoluteTimeUs = Math.floor(timeSeconds * 1000000)
+    const absoluteTimeUs = Math.floor(timeUs)
     const relativeTimeUs = absoluteTimeUs - startOffsetNumber
-    const targetTimeUs = BigInt(Math.max(0, relativeTimeUs))
+
+    const targetTimeUs = BigInt(Math.max(0, relativeTimeUs)) - startOffset1
 
     // Get current view range width to keep it unchanged
     const currentViewRange = unitController.viewRange
@@ -918,7 +967,12 @@ const handleArrowClick = async (
   const currentCursor = unitController.selectionRange
     ? unitController.selectionRange.end
     : undefined
-  const workerPromise = new Promise<{ id?: string; start?: bigint; event?: OsEvent }>((resolve) => {
+  const workerPromise = new Promise<{
+    id?: string
+    start?: bigint
+    event?: OsEvent
+    nextEvent?: OsEvent
+  }>((resolve) => {
     pendingFindStateResolve = resolve
   })
   dataHandlerWorker.postMessage({
@@ -933,7 +987,7 @@ const handleArrowClick = async (
     const event = found.event as OsEvent
 
     if (event) {
-      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${((event.ts + startOffsetNumber) / 1000000).toFixed(6)}`
+      const key = `${orti.value.name}-${orti.value.name}-${taskTypeRecord[event.type]}.${event.id}_${event.coreId}-${(event.ts + startOffsetNumber).toFixed(0)}`
       runtimeStore.setTraceLinkId(key)
     }
   }
@@ -957,7 +1011,7 @@ const handleArrowClick = async (
   // 6) Now set selection so it is guaranteed inside view range
   unitController.selectionRange = { start: newPos, end: newPos }
 
-  // 7) Highlight the state using the chart by id
+  // 7) Highlight the state using the chart by id and update tooltip
   if (found.id) {
     const stateComp = timeGraphChart.getStateById(found.id)
     if (stateComp) {
@@ -966,6 +1020,20 @@ const handleArrowClick = async (
         next: stateComp.model.data!.next
       }
       timeGraphChart.selectState(stateComp.model)
+    } else if (found.event) {
+      // If state component not found but event exists, use event and nextEvent from worker
+      const nextEvent = found.nextEvent || found.event
+      toolTipInfo.value = {
+        cur: found.event,
+        next: nextEvent
+      }
+    }
+  } else if (found.event) {
+    // If no id but event exists, use event and nextEvent from worker
+    const nextEvent = found.nextEvent || found.event
+    toolTipInfo.value = {
+      cur: found.event,
+      next: nextEvent
     }
   }
 }
@@ -996,7 +1064,7 @@ const selectEndText = computed(() => {
   const delta = selectEnd.value - selectStart.value
   const sign = delta >= 0n ? '+' : '-'
   const abs = delta >= 0n ? delta : -delta
-  const diffStr = formatTimeLabel(abs)
+  const diffStr = formatTimeDelta(abs)
   return `${endStr} (${sign}${diffStr})`
 })
 const getCursorLeftPx = (timeVal: bigint): number => {

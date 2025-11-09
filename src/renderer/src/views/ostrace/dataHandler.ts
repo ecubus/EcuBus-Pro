@@ -603,9 +603,26 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
         if (!found) found = starts[starts.length - 1]
       }
       if (found) {
+        // Find next event after found event
+        let nextEvent: OsEvent | undefined
+        const foundIndex = evts.findIndex(
+          (e) =>
+            e.ts === found.event.ts &&
+            e.coreId === found.event.coreId &&
+            e.id === found.event.id &&
+            e.type === found.event.type
+        )
+        if (foundIndex >= 0 && foundIndex < evts.length - 1) {
+          nextEvent = evts[foundIndex + 1]
+        }
         respond({
           type: 'foundState',
-          payload: { id: found.id, start: found.start, event: found.event }
+          payload: {
+            id: found.id,
+            start: found.start,
+            event: found.event,
+            nextEvent: nextEvent
+          } as any
         })
       } else {
         respond({ type: 'foundState', payload: {} })

@@ -2509,10 +2509,10 @@
       },
       "trace": {
         "pos": {
-          "x": 760,
+          "x": 0,
           "y": 0,
-          "w": 700,
-          "h": 400
+          "w": 1707,
+          "h": 380
         },
         "title": "trace",
         "label": "Trace",
@@ -2522,6 +2522,23 @@
             "edit-index": "trace"
           },
           "name": "Trace"
+        }
+      },
+      "2eedf160-00ab-4d28-bd83-c28870d737d1_time": {
+        "pos": {
+          "x": 0,
+          "y": 380,
+          "w": 1707,
+          "h": 380
+        },
+        "title": "osTime",
+        "label": "OSTime",
+        "id": "2eedf160-00ab-4d28-bd83-c28870d737d1_time",
+        "options": {
+          "params": {
+            "edit-index": "2eedf160-00ab-4d28-bd83-c28870d737d1_time"
+          },
+          "name": "Os_Trace_high"
         }
       }
     }

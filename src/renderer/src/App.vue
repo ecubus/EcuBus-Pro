@@ -27,7 +27,7 @@ import { useDark } from '@vueuse/core'
 import { VxeUI } from 'vxe-table'
 import { bus } from 'wujie'
 import log from 'electron-log'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, merge } from 'lodash'
 const data = useDataStore()
 const project = useProjectStore()
 const pluginStore = usePluginStore()
@@ -41,8 +41,8 @@ let isExternalUpdate = false
 bus.$on('update:dataStore', (newStore: DataSet) => {
   // 使用 $patch 批量更新 store（Pinia 推荐方式）
   isExternalUpdate = true
-  data.$patch(() => {
-    return newStore
+  data.$patch((state) => {
+    merge(state, newStore)
   })
 })
 
@@ -52,7 +52,6 @@ data.$subscribe((mutation, state) => {
     isExternalUpdate = false
     return
   }
-  console.log('mainEmit')
   bus.$emit('update:dataStore:fromMain', cloneDeep(data.getData()))
 })
 

@@ -196,8 +196,7 @@ ipcMain.handle('ipc-plugin-exec', async (event, { pluginId, id }, method, ...par
   if (!plugins[pluginId]) {
     throw new Error(`Plugin ${pluginId} not found`)
   }
-
-  return await plugins[pluginId].exec(method, [...params])
+  return await plugins[pluginId].exec(method, ...params)
 })
 
 // 资源 API 返回的数据结构

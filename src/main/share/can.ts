@@ -213,8 +213,7 @@ export interface CanInterAction {
   data: string[]
 }
 export function formatError(error: Error) {
-  // Get error stack
-  const stack = error.stack || ''
+  const stack = error?.stack || ''
 
   // Get first stack line (usually contains error location)
   const locationLine = stack.split('\n')[1] || ''

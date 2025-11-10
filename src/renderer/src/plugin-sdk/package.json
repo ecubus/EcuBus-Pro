@@ -1,6 +1,6 @@
 {
   "name": "@ecubus-pro/renderer-plugin-sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "EcuBus Pro renderer plugin SDK",
   "type": "module",
   "module": "./dist/index.mjs",

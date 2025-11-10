@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { merge } from 'lodash'
 import { DataSet } from 'src/preload/data'
 import { reactive, watch } from 'vue'
-import { isEqual } from 'lodash'
+
 export { showOpenDialog, showSaveDialog } from './dialog'
+export type { DataSet } from 'src/preload/data'
 
 // ============ 模拟 Pinia 的 useDataStore ============
 let isExternalUpdate = false
@@ -18,7 +20,6 @@ watch(
       return
     }
     if (window.$wujie?.bus) {
-      console.log('pluginEmit')
       window.$wujie.bus.$emit('update:dataStore', newVal)
     }
   },
@@ -30,7 +31,7 @@ if (window.$wujie?.bus) {
   window.$wujie.bus.$on('update:dataStore:fromMain', (newStore: any) => {
     // 使用 isEqual 比较，只有真正变化时才更新，避免不必要的 watch 触发
     isExternalUpdate = true
-    Object.assign(dataStore, newStore || {})
+    merge(dataStore, newStore)
   })
 }
 
@@ -40,7 +41,12 @@ export function useData() {
 }
 
 export const eventBus = window.parent.logBus
-
+export function getPluginId() {
+  return window.$wujie?.props?.pluginId
+}
+export function getEditIndex() {
+  return window.$wujie?.props?.editIndex
+}
 export function callServerMethod(method: string, ...params: any[]): Promise<any> {
   return window.parent.electron.ipcRenderer.invoke(
     'ipc-plugin-exec',

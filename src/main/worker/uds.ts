@@ -2055,7 +2055,7 @@ export class UtilClass {
     if (item) {
       if (resp) {
         if (resp.err) {
-          item.reject(resp.err)
+          item.reject(new Error(resp.err))
         } else {
           item.resolve(resp.data)
         }

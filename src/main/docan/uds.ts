@@ -1266,6 +1266,7 @@ declare global {
 }
 export * from './uds'
 export * from './crc'
+export * from './secureAccess'
 export * from './cryptoExt'
 export * from './utli'
     `

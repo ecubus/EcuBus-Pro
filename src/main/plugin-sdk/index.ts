@@ -5,7 +5,10 @@ import { workerData, isMainThread } from 'worker_threads'
 import { DataSet } from 'src/preload/data'
 
 // Re-export all worker capabilities
-export * from '../worker'
+export * from '../worker/uds'
+export * from '../worker/crc'
+export * from '../worker/cryptoExt'
+export * from '../worker/utli'
 
 type ServiceMap = {
   [key: string]: any

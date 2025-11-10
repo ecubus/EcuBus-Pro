@@ -1256,7 +1256,7 @@ export class NodeClass {
       this.udsTesterMap.delete(data.name)
     }
   }
-  close(fakeClose = false) {
+  close() {
     for (const c of this.nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {
@@ -1280,7 +1280,7 @@ export class NodeClass {
     this.lintp.length = 0 // 清空数组
 
     // 清理 UdsTester 事件处理器
-    if (this.pool && !fakeClose) {
+    if (this.pool) {
       // UdsTester 没有 unregisterHandler 方法，直接停止即可
       this.pool.stop()
     }

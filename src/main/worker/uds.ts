@@ -25,7 +25,7 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
 import { CAN_ID_TYPE, CanMessage } from '../share/can'
-import SecureAccessDll from './secureAccess'
+// import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
 import {
   LinMsg,
@@ -35,7 +35,7 @@ import {
   getFrameData
 } from '../share/lin'
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
-export { SecureAccessDll }
+// export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
 export type { LinMsg, LinCableErrorInject }

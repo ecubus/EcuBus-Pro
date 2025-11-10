@@ -13,6 +13,7 @@ import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
+import { error } from 'electron-log'
 
 type HandlerMap = {
   output: (data: any) => Promise<number>
@@ -132,6 +133,7 @@ export default class UdsTester {
       },
 
       onTerminateWorker: (v: any) => {
+        error('worker terminated unexpectedly', v)
         if (!this.selfStop) {
           this.log.systemMsg('worker terminated unexpectedly', this.ts, 'error')
         }
@@ -395,6 +397,9 @@ export default class UdsTester {
       testControl
     ])
     await this.workerEmit('__varFc', null)
+  }
+  async stopEmit() {
+    await this.workerEmit('__end', [])
   }
 
   async exec(name: string, method: string, param: any[]): Promise<ServiceItem[]> {

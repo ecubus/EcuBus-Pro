@@ -66,7 +66,7 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
   }
 })
 
-let plugins: Record<string, PluginClient> = {}
+const plugins: Record<string, PluginClient> = {}
 
 export async function startPlugins(
   channleList: string[],
@@ -100,8 +100,6 @@ export function stopPlugins() {
   for (const entry of Object.values(plugins)) {
     entry.stop()
   }
-  //clear plugins
-  plugins = {}
 }
 
 // 辅助函数：获取插件目录

@@ -40,7 +40,7 @@ class MyCustomPlugin {
       // 当Webpack完成构建过程后执行
       compiler.hooks.done.tap('MyCustomPlugin',async  (stats) => {
        
-        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','plugin.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map','plugin.js.map']
+        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','plugin.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map','plugin.js.map','secureAccess.js']
         for(const js of jsList){
             fs.copyFileSync(path.resolve(__dirname,'dist',js),path.resolve(__dirname,'resources','lib','js',js))
         }
@@ -148,6 +148,10 @@ class MyCustomPlugin {
         // }],)
         await bundleDts(cryptoFile,path.resolve(__dirname,'src','main','share','cryptoExt.d.ts.html'))
 
+        //bundle secureAccess.d.ts
+        const secureAccessFile=path.resolve(__dirname,'dist','src/main/worker','secureAccess','index.d.ts')
+        await bundleDts(secureAccessFile,path.resolve(__dirname,'src','main','share','secureAccess.d.ts.html'))
+
         //bundle utli.d.ts
         const utliFile=path.resolve(__dirname,'dist','src/main/worker','utli.d.ts')
         await bundleDts(utliFile,path.resolve(__dirname,'src','main','share','utli.d.ts.html'))
@@ -157,7 +161,7 @@ class MyCustomPlugin {
         await bundleDts(pluginFile,path.resolve(__dirname,'src','main','plugin-sdk','dist','index.d.ts'))
         
         //copy plugin.js to plugin-sdk dist directory
-        fs.copyFileSync(path.resolve(__dirname,'dist','plugin.js'),path.resolve(__dirname,'src','main','plugin-sdk','dist','index.js'))
+        fs.copyFileSync(path.resolve(__dirname,'dist','plugin.js'),path.resolve(__dirname,'src','main','plugin-sdk','dist','index.cjs'))
         
         // fs.writeFileSync(path.resolve(__dirname,'src','share','cryptoExt.d.ts.html'),v[0])
         console.log('构建过程完成！');
@@ -173,6 +177,7 @@ module.exports = {
         uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',
         crc:path.resolve(__dirname,'src/main/worker') + '/crc.ts',
         cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
+        secureAccess:path.resolve(__dirname,'src/main/worker') + '/secureAccess/index.ts',
         utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
         plugin:path.resolve(__dirname,'src/main/plugin-sdk') + '/index.ts',
     },

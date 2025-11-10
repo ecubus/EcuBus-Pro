@@ -46,7 +46,7 @@ export default class PluginClient {
     return this.nodeItem.pool?.exec('plugin', method, params)
   }
   stop() {
-    this.nodeItem.close(true)
+    this.nodeItem.pool?.stopEmit()
   }
   close() {
     this.log.close()

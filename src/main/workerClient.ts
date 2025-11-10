@@ -31,6 +31,7 @@ type HandlerMap = {
   linApi: (data: linApiStartSch | linApiStopSch) => void
   pwmApi: (data: pwmApiSetDuty) => void
   canApi: (data: any) => void
+  pluginEvent: (data: { name: string; data: any }) => void
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'

@@ -29,8 +29,11 @@ export function registerService<K extends keyof ServiceMap>(name: K, func: Servi
 export function emitEvent(name: string, data: any) {
   if (!isMainThread) {
     workerpool.workerEmit({
-      event: name,
-      data: data
+      event: 'pluginEvent',
+      data: {
+        name,
+        data
+      }
     })
   }
 }

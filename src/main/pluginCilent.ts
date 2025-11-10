@@ -33,13 +33,14 @@ export default class PluginClient {
         pluginPath,
         name
       )
+      this.nodeItem.pool?.registerHandler('pluginEvent', this.eventHandler.bind(this))
     }
   }
 
-  eventHandler(payload: any) {
-    const event = payload.event
+  eventHandler(payload: { name: string; data: any }) {
+    const name = payload.name
     const data = payload.data
-    this.log.pluginEvent(event, data)
+    this.log.pluginEvent(name, data)
   }
 
   async exec(method: string, ...params: any[]): Promise<any> {

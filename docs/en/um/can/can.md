@@ -7,18 +7,19 @@ CAN/CAN-FD is an industry-standard vehicle bus protocol designed for reliable EC
 
 Supported Hardware:
 
-| Manufacturer | Protocols |
-|--------|-------------------|
-| PEAK | CAN, CAN-FD |
-| KVASER | CAN, CAN-FD |
-| ZLG | CAN, CAN-FD |
-| Toomoss | CAN, CAN-FD |
-| VECTOR | CAN, CAN-FD |
-| SLCAN | CAN, CAN-FD |
+| Manufacturer | Protocols   |
+| ------------ | ----------- |
+| PEAK         | CAN, CAN-FD |
+| KVASER       | CAN, CAN-FD |
+| ZLG          | CAN, CAN-FD |
+| Toomoss      | CAN, CAN-FD |
+| VECTOR       | CAN, CAN-FD |
+| SLCAN        | CAN, CAN-FD |
 
 ## SLCAN Special
 
-SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw](https://github.com/normaldotcom/canable-fw), and communication based on USB-ACM. 
+SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw](https://github.com/normaldotcom/canable-fw), and communication based on USB-ACM.
+
 > [!NOTE]
 > This firmware currently does not provide any ACK/NACK feedback for serial commands.
 
@@ -29,19 +30,19 @@ Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schne
 ### Linux gs_usb
 
 Linux kernels 3.7 and above have merged the `gs_usb` driver.
-Check if the `gs_usb` module is enabled using 
+Check if the `gs_usb` module is enabled using
 
 ```bash
 lsmod | grep gs_usb
 ```
 
-If it's not loaded, use 
+If it's not loaded, use
 
 ```bash
 sudo modprobe gs_usb
 ```
 
-To remove it, use 
+To remove it, use
 
 ```bash
 sudo rmmod gs_usb
@@ -95,8 +96,6 @@ The baud rate setting is used to configure the baud rate of the CAN bus.
 Click the `Bit Timing` button to open the bit timing configuration window.
 ![alt text](image-8.png)
 ![alt text](image-9.png)
-
-
 
 ## Interactive Mode and Node Scripts
 

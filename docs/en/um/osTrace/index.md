@@ -157,6 +157,9 @@ You can use the cursor to check the timestamp in the graph, or view the differen
 
 OS timeline can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Timeline`.
 
+> [!NOTE]
+> Currently, only tasks and ISRs can be viewed in the timeline.
+
 ![timeline](timeline.png)
 
 ### RealTime Trace

@@ -93,6 +93,7 @@ export const usePluginStore = defineStore('usePluginStore', {
           await window.electron.ipcRenderer.invoke(
             'ipc-plugin-create',
             pluginId,
+            plugin.manifest.name,
             plugin.path,
             plugin.manifest.mainEntry
           )

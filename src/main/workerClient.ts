@@ -13,6 +13,7 @@ import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
+import { error } from 'electron-log'
 
 type HandlerMap = {
   output: (data: any) => Promise<number>
@@ -30,6 +31,7 @@ type HandlerMap = {
   linApi: (data: linApiStartSch | linApiStopSch) => void
   pwmApi: (data: pwmApiSetDuty) => void
   canApi: (data: any) => void
+  pluginEvent: (data: { name: string; data: any }) => void
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'
@@ -128,11 +130,11 @@ export default class UdsTester {
         stderr: true,
         stdout: true,
         env: this.env,
-        execArgv: execArgv,
-        workerData: global.dataSet
+        execArgv: execArgv
       },
 
       onTerminateWorker: (v: any) => {
+        error('worker terminated unexpectedly', v)
         if (!this.selfStop) {
           this.log.systemMsg('worker terminated unexpectedly', this.ts, 'error')
         }
@@ -389,8 +391,16 @@ export default class UdsTester {
     }
   }
   async start(projectPath: string, testerName?: string, testControl?: Record<number, boolean>) {
-    await this.pool.exec('__start', [this.serviceMap, testerName, testControl])
+    await this.pool.exec('__start', [
+      cloneDeep(global.dataSet),
+      this.serviceMap,
+      testerName,
+      testControl
+    ])
     await this.workerEmit('__varFc', null)
+  }
+  async stopEmit() {
+    await this.workerEmit('__end', [])
   }
 
   async exec(name: string, method: string, param: any[]): Promise<ServiceItem[]> {

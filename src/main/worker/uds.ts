@@ -25,7 +25,7 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
 import { CAN_ID_TYPE, CanMessage } from '../share/can'
-import SecureAccessDll from './secureAccess'
+// import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
 import {
   LinMsg,
@@ -35,7 +35,7 @@ import {
   getFrameData
 } from '../share/lin'
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
-export { SecureAccessDll }
+// export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
 export type { LinMsg, LinCableErrorInject }
@@ -408,13 +408,13 @@ export function after(fn: () => void | Promise<void>) {
 import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
 import { DataSet, VarItem } from 'src/preload/data'
-import { workerData } from 'node:worker_threads'
+
 import { getMessageData, writeMessageData } from 'src/renderer/src/database/dbc/calc'
 import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
-global.dataSet = workerData as DataSet
+
 const selfDescribe = process.env.ONLY == 'true' ? nodeDescribe.only : nodeDescribe
 const selfTest = process.env.ONLY == 'true' ? nodeTest.only : nodeTest
 // export { selfDescribe as describe }
@@ -1862,10 +1862,12 @@ export class UtilClass {
     }
   }
   private start(
+    dataSet: DataSet,
     val: Record<string, ServiceItem>,
     testerName?: string,
     testControl?: Record<number, boolean>
   ) {
+    global.dataSet = dataSet
     // process.chdir(projectPath)
     this.testerName = testerName
     global.vars = {}
@@ -2053,7 +2055,7 @@ export class UtilClass {
     if (item) {
       if (resp) {
         if (resp.err) {
-          item.reject(resp.err)
+          item.reject(new Error(resp.err))
         } else {
           item.resolve(resp.data)
         }

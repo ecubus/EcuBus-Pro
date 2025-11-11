@@ -454,7 +454,7 @@ function insertData2(data: LogData[]) {
           const existingLog = allLogData[idx]
           const currentTime = item.ts
           const previousTime = existingLog.ts
-          const deltaMs = (currentTime - previousTime) * 1000 // Convert to milliseconds
+          const deltaMs = (currentTime - previousTime) / 1000 // Convert to milliseconds
 
           // Store previous timestamp and delta time
           item.previousTs = existingLog.ts
@@ -513,7 +513,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
     } else {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.ts.toFixed(0)}`
     }
-    console.log('data.key', data.key)
+
     logData.push(data)
   }
   for (const val of vals) {

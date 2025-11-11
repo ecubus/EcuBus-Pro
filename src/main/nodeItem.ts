@@ -73,7 +73,7 @@ class TestTransport extends Transport {
   }
 }
 export class NodeClass {
-  private pool?: UdsTester
+  pool?: UdsTester
   private cantp: CAN_TP[] = []
   private lintp: LIN_TP[] = []
   private linBaseId: string[] = []
@@ -84,6 +84,13 @@ export class NodeClass {
   private startTs = 0
   private boundCb: (frame: CanMessage | LinMsg | SomeipMessage) => void
   private udsTesterMap = new Map<string, UDSTesterMain>()
+  private canBaseMap: Map<string, CanBase> = new Map()
+  private linBaseMap: Map<string, LinBase> = new Map()
+  private doips: DOIP[] = []
+  private ethBaseMap: Map<string, EthBaseInfo> = new Map()
+  private pwmBaseMap: Map<string, PwmBase> = new Map()
+  private someipMap: Map<string, VSomeIP_Client> = new Map()
+  private testers: Record<string, TesterInfo> = {}
   freeEvent: {
     doip: DOIP
     id: string
@@ -94,15 +101,8 @@ export class NodeClass {
   logs: TestLog[] = []
   constructor(
     public nodeItem: NodeItem,
-    private canBaseMap: Map<string, CanBase>,
-    private linBaseMap: Map<string, LinBase>,
-    private doips: DOIP[],
-    private ethBaseMap: Map<string, EthBaseInfo>,
-    private pwmBaseMap: Map<string, PwmBase>,
-    private someipMap: Map<string, VSomeIP_Client>,
     private projectPath: string,
     private projectName: string,
-    private testers: Record<string, TesterInfo>,
     private testOptions?:
       | {
           testOnly?: boolean
@@ -113,43 +113,13 @@ export class NodeClass {
     this.varLog = new VarLOG(nodeItem.id)
     this.boundCb = this.cb.bind(this)
 
-    for (const c of nodeItem.channel) {
-      const baseItem = this.canBaseMap.get(c)
-      if (baseItem) {
-        this.canBaseId.push(c)
-        baseItem.attachCanMessage(this.boundCb)
-        continue
-      }
-      const linBaseItem = this.linBaseMap.get(c)
-      if (linBaseItem) {
-        linBaseItem.attachLinMessage(this.boundCb)
-        this.linBaseId.push(c)
-        if (nodeItem.workNode) {
-          const db = linBaseItem.setupEntry(nodeItem.workNode)
-          if (db) {
-            linBaseItem.registerNode(db, nodeItem.workNode)
-          }
-        }
-        continue
-      }
-      const ethBaseItem = this.ethBaseMap.get(c)
-      if (ethBaseItem) {
-        this.ethBaseId.push(c)
-      }
-      const pwmBaseItem = this.pwmBaseMap.get(c)
-      if (pwmBaseItem) {
-        this.pwmBaseId.push(c)
-      }
-      const someipBaseItem = this.someipMap.get(c)
-      if (someipBaseItem) {
-        this.someipBaseId.push(c)
-        someipBaseItem.attachLinMessage(this.boundCb)
-      }
-    }
     if (nodeItem.script) {
-      const outDir = path.join(this.projectPath, '.ScriptBuild')
-      const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
-      const jsPath = path.join(outDir, scriptNameNoExt + '.js')
+      let jsPath = nodeItem.script
+      if (!path.isAbsolute(jsPath)) {
+        const outDir = path.join(this.projectPath, '.ScriptBuild')
+        const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
+        jsPath = path.join(outDir, scriptNameNoExt + '.js')
+      }
       if (fs.existsSync(jsPath)) {
         this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
         if (this.testOptions) {
@@ -189,185 +159,228 @@ export class NodeClass {
             'info'
           )
         }
-        this.pool.registerHandler('output', this.sendFrame.bind(this))
-        this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
-        this.pool.registerHandler('setSignal', setSignal)
-        this.pool.registerHandler('varApi', this.varApi.bind(this))
-        this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
-        this.pool.registerHandler('linApi', this.linApi.bind(this))
-        this.pool.registerHandler('canApi', this.canApi.bind(this))
-        this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
-        this.pool.registerHandler('pwmApi', this.pwmApi.bind(this))
+      }
+    }
+  }
+  init(
+    nodeItem: NodeItem,
+    canBaseMap: Map<string, CanBase>,
+    linBaseMap: Map<string, LinBase>,
+    doips: DOIP[],
+    ethBaseMap: Map<string, EthBaseInfo>,
+    pwmBaseMap: Map<string, PwmBase>,
+    someipMap: Map<string, VSomeIP_Client>,
+    testers: Record<string, TesterInfo>
+  ) {
+    this.canBaseMap = canBaseMap
+    this.linBaseMap = linBaseMap
+    this.doips = doips
+    this.ethBaseMap = ethBaseMap
+    this.pwmBaseMap = pwmBaseMap
+    this.someipMap = someipMap
+    this.testers = testers
+    for (const c of nodeItem.channel) {
+      const baseItem = this.canBaseMap.get(c)
+      if (baseItem) {
+        this.canBaseId.push(c)
+        baseItem.attachCanMessage(this.boundCb)
+        continue
+      }
+      const linBaseItem = this.linBaseMap.get(c)
+      if (linBaseItem) {
+        linBaseItem.attachLinMessage(this.boundCb)
+        this.linBaseId.push(c)
+        if (nodeItem.workNode) {
+          const db = linBaseItem.setupEntry(nodeItem.workNode)
+          if (db) {
+            linBaseItem.registerNode(db, nodeItem.workNode)
+          }
+        }
+        continue
+      }
+      const ethBaseItem = this.ethBaseMap.get(c)
+      if (ethBaseItem) {
+        this.ethBaseId.push(c)
+      }
+      const pwmBaseItem = this.pwmBaseMap.get(c)
+      if (pwmBaseItem) {
+        this.pwmBaseId.push(c)
+      }
+      const someipBaseItem = this.someipMap.get(c)
+      if (someipBaseItem) {
+        this.someipBaseId.push(c)
+        someipBaseItem.attachLinMessage(this.boundCb)
+      }
+    }
+    if (this.pool) {
+      this.pool.registerHandler('output', this.sendFrame.bind(this))
+      this.pool.registerHandler('sendDiag', this.sendDiag.bind(this))
+      this.pool.registerHandler('setSignal', setSignal)
+      this.pool.registerHandler('varApi', this.varApi.bind(this))
+      this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
+      this.pool.registerHandler('linApi', this.linApi.bind(this))
+      this.pool.registerHandler('canApi', this.canApi.bind(this))
+      this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
+      this.pool.registerHandler('pwmApi', this.pwmApi.bind(this))
 
-        //cantp
-        for (const tester of Object.values(this.testers)) {
-          if (tester.address.length > 0) {
-            for (const c of nodeItem.channel) {
-              const canBaseItem = this.canBaseMap.get(c)
-              if (canBaseItem && tester.type == 'can') {
-                const tp = new CAN_TP(canBaseItem, nodeItem.id)
-                for (const [index, addr] of tester.address.entries()) {
-                  if (addr.type == 'can' && addr.canAddr) {
-                    const idT = tp.getReadId(addr.canAddr, tester.simulateBy != nodeItem.id)
-                    tp.event.on(idT, (data) => {
+      //cantp
+      for (const tester of Object.values(this.testers)) {
+        if (tester.address.length > 0) {
+          for (const c of nodeItem.channel) {
+            const canBaseItem = this.canBaseMap.get(c)
+            if (canBaseItem && tester.type == 'can') {
+              const tp = new CAN_TP(canBaseItem, nodeItem.id)
+              for (const [index, addr] of tester.address.entries()) {
+                if (addr.type == 'can' && addr.canAddr) {
+                  const idT = tp.getReadId(addr.canAddr, tester.simulateBy != nodeItem.id)
+                  tp.event.on(idT, (data) => {
+                    if (data instanceof CanTpError) {
+                      //TODO:
+                    } else {
+                      if (data.addr.uuid != this.nodeItem.id) {
+                        const item = findService(tester, data.data, true)
+                        if (item) {
+                          try {
+                            applyBuffer(item, data.data, true)
+                            this.pool?.triggerSend(tester.name, item, addr, data.ts).catch((e) => {
+                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                            })
+                          } catch (e: any) {
+                            this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                          }
+                        }
+                      }
+                    }
+                  })
+                  if (index == 0) {
+                    const idR = tp.getReadId(
+                      swapAddr(addr.canAddr),
+                      tester.simulateBy != nodeItem.id
+                    )
+                    tp.event.on(idR, (data) => {
                       if (data instanceof CanTpError) {
                         //TODO:
                       } else {
                         if (data.addr.uuid != this.nodeItem.id) {
-                          const item = findService(tester, data.data, true)
+                          const item = findService(tester, data.data, false)
                           if (item) {
                             try {
-                              applyBuffer(item, data.data, true)
-                              this.pool
-                                ?.triggerSend(tester.name, item, addr, data.ts)
-                                .catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                            } catch (e: any) {
-                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                            }
-                          }
-                        }
-                      }
-                    })
-                    if (index == 0) {
-                      const idR = tp.getReadId(
-                        swapAddr(addr.canAddr),
-                        tester.simulateBy != nodeItem.id
-                      )
-                      tp.event.on(idR, (data) => {
-                        if (data instanceof CanTpError) {
-                          //TODO:
-                        } else {
-                          if (data.addr.uuid != this.nodeItem.id) {
-                            const item = findService(tester, data.data, false)
-                            if (item) {
-                              try {
-                                applyBuffer(item, data.data, false)
-                                this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                              } catch (e: any) {
+                              applyBuffer(item, data.data, false)
+                              this.pool?.triggerRecv(tester.name, item, data.ts).catch((e) => {
                                 this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                              }
+                              })
+                            } catch (e: any) {
+                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
                             }
                           }
                         }
-                      })
-                    }
+                      }
+                    })
                   }
                 }
-                this.cantp.push(tp)
               }
-              const linBaseItem = this.linBaseMap.get(c)
-              if (linBaseItem && tester.type == 'lin') {
-                const tp = new LIN_TP(linBaseItem, tester.simulateBy != nodeItem.id)
+              this.cantp.push(tp)
+            }
+            const linBaseItem = this.linBaseMap.get(c)
+            if (linBaseItem && tester.type == 'lin') {
+              const tp = new LIN_TP(linBaseItem, tester.simulateBy != nodeItem.id)
+              for (const addr of tester.address) {
+                if (addr.type == 'lin' && addr.linAddr) {
+                  const idT = tp.getReadId(LinMode.MASTER, addr.linAddr)
+                  tp.event.on(idT, (data) => {
+                    if (data instanceof LinTpError) {
+                      //TODO:
+                    } else {
+                      if (data.addr.uuid != this.nodeItem.id) {
+                        const item = findService(tester, data.data, true)
+                        if (item) {
+                          try {
+                            applyBuffer(item, data.data, true)
+                            this.pool?.triggerSend(tester.name, item, addr, data.ts).catch((e) => {
+                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                            })
+                          } catch (e: any) {
+                            this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                          }
+                        }
+                      }
+                    }
+                  })
+                  const idR = tp.getReadId(LinMode.SLAVE, addr.linAddr)
+                  tp.event.on(idR, (data) => {
+                    if (data instanceof LinTpError) {
+                      //TODO:
+                    } else {
+                      if (data.addr.uuid != this.nodeItem.id) {
+                        const item = findService(tester, data.data, false)
+                        if (item) {
+                          try {
+                            applyBuffer(item, data.data, false)
+                            this.pool?.triggerRecv(tester.name, item, data.ts, addr).catch((e) => {
+                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                            })
+                          } catch (e: any) {
+                            this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                          }
+                        }
+                      }
+                    }
+                  })
+                }
+              }
+              this.lintp.push(tp)
+            }
+            const ethBaseItem = this.ethBaseMap.get(c)
+            if (ethBaseItem && tester.type == 'eth') {
+              const baseItem = this.doips.find((d) => d.base.id == ethBaseItem.id)
+              if (baseItem) {
+                if (tester.simulateBy == nodeItem.id) {
+                  baseItem.registerEntity(true, this.log)
+                }
                 for (const addr of tester.address) {
-                  if (addr.type == 'lin' && addr.linAddr) {
-                    const idT = tp.getReadId(LinMode.MASTER, addr.linAddr)
-                    tp.event.on(idT, (data) => {
-                      if (data instanceof LinTpError) {
+                  if (addr.type == 'eth' && addr.ethAddr) {
+                    const idT = baseItem.getId(addr.ethAddr, 'client')
+
+                    const cbT = (data: { data: Buffer; ts: number } | DoipError) => {
+                      if (data instanceof DoipError) {
                         //TODO:
                       } else {
-                        if (data.addr.uuid != this.nodeItem.id) {
-                          const item = findService(tester, data.data, true)
-                          if (item) {
-                            try {
-                              applyBuffer(item, data.data, true)
-                              this.pool
-                                ?.triggerSend(tester.name, item, addr, data.ts)
-                                .catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                            } catch (e: any) {
+                        const item = findService(tester, data.data, true)
+                        if (item) {
+                          try {
+                            applyBuffer(item, data.data, true)
+                            this.pool?.triggerSend(tester.name, item, addr, data.ts).catch((e) => {
                               this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                            }
+                            })
+                          } catch (e: any) {
+                            this.log?.scriptMsg(e.toString(), data.ts, 'error')
                           }
                         }
                       }
-                    })
-                    const idR = tp.getReadId(LinMode.SLAVE, addr.linAddr)
-                    tp.event.on(idR, (data) => {
-                      if (data instanceof LinTpError) {
-                        //TODO:
-                      } else {
-                        if (data.addr.uuid != this.nodeItem.id) {
-                          const item = findService(tester, data.data, false)
-                          if (item) {
-                            try {
-                              applyBuffer(item, data.data, false)
-                              this.pool
-                                ?.triggerRecv(tester.name, item, data.ts, addr)
-                                .catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                            } catch (e: any) {
-                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                            }
-                          }
-                        }
-                      }
-                    })
-                  }
-                }
-                this.lintp.push(tp)
-              }
-              const ethBaseItem = this.ethBaseMap.get(c)
-              if (ethBaseItem && tester.type == 'eth') {
-                const baseItem = this.doips.find((d) => d.base.id == ethBaseItem.id)
-                if (baseItem) {
-                  if (tester.simulateBy == nodeItem.id) {
-                    baseItem.registerEntity(true, this.log)
-                  }
-                  for (const addr of tester.address) {
-                    if (addr.type == 'eth' && addr.ethAddr) {
-                      const idT = baseItem.getId(addr.ethAddr, 'client')
-
-                      const cbT = (data: { data: Buffer; ts: number } | DoipError) => {
-                        if (data instanceof DoipError) {
-                          //TODO:
-                        } else {
-                          const item = findService(tester, data.data, true)
-                          if (item) {
-                            try {
-                              applyBuffer(item, data.data, true)
-                              this.pool
-                                ?.triggerSend(tester.name, item, addr, data.ts)
-                                .catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                            } catch (e: any) {
-                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                            }
-                          }
-                        }
-                      }
-                      baseItem.event.on(idT, cbT)
-                      this.freeEvent.push({ doip: baseItem, id: idT, cb: cbT })
-
-                      const idR = baseItem.getId(addr.ethAddr, 'server')
-                      const cbR = (data: { data: Buffer; ts: number } | DoipError) => {
-                        if (data instanceof DoipError) {
-                          //TODO:
-                        } else {
-                          const item = findService(tester, data.data, false)
-                          if (item) {
-                            try {
-                              applyBuffer(item, data.data, false)
-                              this.pool
-                                ?.triggerRecv(tester.name, item, data.ts, addr)
-                                .catch((e) => {
-                                  this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                                })
-                            } catch (e: any) {
-                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
-                            }
-                          }
-                        }
-                      }
-                      baseItem.event.on(idR, cbR)
-                      this.freeEvent.push({ doip: baseItem, id: idR, cb: cbR })
                     }
+                    baseItem.event.on(idT, cbT)
+                    this.freeEvent.push({ doip: baseItem, id: idT, cb: cbT })
+
+                    const idR = baseItem.getId(addr.ethAddr, 'server')
+                    const cbR = (data: { data: Buffer; ts: number } | DoipError) => {
+                      if (data instanceof DoipError) {
+                        //TODO:
+                      } else {
+                        const item = findService(tester, data.data, false)
+                        if (item) {
+                          try {
+                            applyBuffer(item, data.data, false)
+                            this.pool?.triggerRecv(tester.name, item, data.ts, addr).catch((e) => {
+                              this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                            })
+                          } catch (e: any) {
+                            this.log?.scriptMsg(e.toString(), data.ts, 'error')
+                          }
+                        }
+                      }
+                    }
+                    baseItem.event.on(idR, cbR)
+                    this.freeEvent.push({ doip: baseItem, id: idR, cb: cbR })
                   }
                 }
               }

@@ -186,20 +186,15 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
 
   const node = new NodeClass(
     test,
-    canBaseMap,
-    linBaseMap,
-    doips,
-    ethBaseMap,
-    pwmBaseMap,
-    someipMap,
+
     projectPath,
     projectName,
-    testers,
     {
       id: test.id,
       testOnly: false
     }
   )
+  node.init(test, canBaseMap, linBaseMap, doips, ethBaseMap, pwmBaseMap, someipMap, testers)
   await node.start(testControl)
   testMap.set(test.id, node)
   try {
@@ -305,11 +300,13 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     value.close()
   })
   testMap.clear()
+  const channleList: string[] = []
   let rounterInit = false
   try {
     for (const key in data.devices) {
       const device = data.devices[key]
       if (device.type == 'can' && device.canDevice) {
+        channleList.push(device.canDevice.id)
         const canDevice = device.canDevice
         activeKey = canDevice.name
         const canBase = openCanDevice(canDevice)
@@ -344,10 +341,12 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
           })
         }
       } else if (device.type == 'eth' && device.ethDevice) {
+        channleList.push(device.ethDevice.id)
         const ethDevice = device.ethDevice
         activeKey = ethDevice.name
         ethBaseMap.set(key, ethDevice)
       } else if (device.type == 'lin' && device.linDevice) {
+        channleList.push(device.linDevice.id)
         const linDevice = device.linDevice
         activeKey = linDevice.name
         const linBase = openLinDevice(linDevice)
@@ -363,6 +362,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
           linBaseMap.set(key, linBase)
         }
       } else if (device.type == 'pwm' && device.pwmDevice) {
+        channleList.push(device.pwmDevice.id)
         const pwmDevice = device.pwmDevice
         activeKey = pwmDevice.name
         const pwmBase = createPwmDevice(pwmDevice)
@@ -378,6 +378,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
           pwmBaseMap.set(key, pwmBase)
         }
       } else if (device.type == 'someip' && device.someipDevice) {
+        channleList.push(device.someipDevice.id)
         const val = device.someipDevice
         const file = await generateConfigFile(val, projectInfo.path, data.devices)
         if (rounterInit == false) {
@@ -526,7 +527,8 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     if (node.isTest) {
       continue
     }
-    const nodeItem = new NodeClass(
+    const nodeItem = new NodeClass(node, projectInfo.path, projectInfo.name)
+    nodeItem.init(
       node,
       canBaseMap,
       linBaseMap,
@@ -534,8 +536,6 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       ethBaseMap,
       pwmBaseMap,
       someipMap,
-      projectInfo.path,
-      projectInfo.name,
       data.tester
     )
     try {
@@ -555,7 +555,16 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
   }
 
   //plugins
-  await startPlugins(data)
+  await startPlugins(
+    channleList,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    pwmBaseMap,
+    someipMap,
+    data.tester
+  )
 
   monitor = monitorEventLoopDelay({ resolution: 100 })
   monitor.enable()

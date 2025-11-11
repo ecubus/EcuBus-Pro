@@ -16,9 +16,9 @@
 
 <script setup lang="ts">
 import HeaderView from '@r/views/header/header.vue'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { ElMessage, ElNotification } from 'element-plus'
-import { useDataStore } from './stores/data'
+import { DataSet, useDataStore } from './stores/data'
 import { useProjectStore } from './stores/project'
 import { useWindowSize } from '@vueuse/core'
 import { useGlobalStart } from './stores/runtime'
@@ -27,6 +27,7 @@ import { useDark } from '@vueuse/core'
 import { VxeUI } from 'vxe-table'
 import { bus } from 'wujie'
 import log from 'electron-log'
+import { cloneDeep, assign } from 'lodash'
 const data = useDataStore()
 const project = useProjectStore()
 const pluginStore = usePluginStore()
@@ -35,29 +36,24 @@ const globalStart = useGlobalStart()
 const isDark = useDark()
 const params = ref<any>({})
 
-bus.$on(
-  'update:modelValue',
-  ({ pluginId, id, data: val }: { pluginId: string; id: string; data: any }) => {
-    log.info('plugin data update', {
-      pluginId,
-      id,
-      val
-    })
-    if (pluginId == id) {
-      //single data
-      data.pluginData[pluginId] = val
-    } else {
-      //multi data
-      if (data.pluginData[pluginId]) {
-        data.pluginData[pluginId][id] = val
-      } else {
-        data.pluginData[pluginId] = {
-          [id]: val
-        }
-      }
-    }
+let isExternalUpdate = false
+// 监听插件对 store 的修改，同步到主应用
+bus.$on('update:dataStore', (newStore: DataSet) => {
+  // 使用 $patch 批量更新 store（Pinia 推荐方式）
+  isExternalUpdate = true
+  data.$patch((state) => {
+    assign(state, newStore)
+  })
+})
+
+// 监听主应用 store 的变化，同步到插件
+data.$subscribe((mutation, state) => {
+  if (isExternalUpdate) {
+    isExternalUpdate = false
+    return
   }
-)
+  bus.$emit('update:dataStore:fromMain', cloneDeep(data.getData()))
+})
 
 // Watch for dark theme changes
 watch(isDark, (value) => {

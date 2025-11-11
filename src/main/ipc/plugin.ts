@@ -9,6 +9,13 @@ import { RemotePluginInfo } from 'src/preload/plugin'
 import AdmZip from 'adm-zip'
 import { DataSet } from 'src/preload/data'
 import { log } from 'electron-log'
+import { CanBase } from '../docan/base'
+import LinBase from '../dolin/base'
+import { DOIP } from '../doip'
+import { EthBaseInfo } from 'nodeCan/doip'
+import PwmBase from '../pwm/base'
+import { VSomeIP_Client } from '../vsomeip'
+import { TesterInfo } from 'nodeCan/tester'
 
 const libPath = path.dirname(runtimeDom)
 
@@ -61,24 +68,40 @@ ipcMain.handle('ipc-list-plugin-dirs', async (event, pluginsDir: string) => {
 
 const plugins: Record<string, PluginClient> = {}
 
-export async function startPlugins(data: DataSet) {
+export async function startPlugins(
+  channleList: string[],
+  canBaseMap: Map<string, CanBase>,
+  linBaseMap: Map<string, LinBase>,
+  doips: DOIP[],
+  ethBaseMap: Map<string, EthBaseInfo>,
+  pwmBaseMap: Map<string, PwmBase>,
+  someipMap: Map<string, VSomeIP_Client>,
+  testers: Record<string, TesterInfo>
+) {
   for (const entry of Object.values(plugins)) {
-    try {
-      await entry.exec('start', data)
-    } catch (error) {
-      null
-    }
+    const node = entry.nodeItem
+    node.nodeItem.channel = channleList
+
+    entry.nodeItem.init(
+      node.nodeItem,
+      canBaseMap,
+      linBaseMap,
+      doips,
+      ethBaseMap,
+      pwmBaseMap,
+      someipMap,
+      testers
+    )
+    await entry.nodeItem.start()
   }
 }
-export async function stopPlugins() {
+
+export function stopPlugins() {
   for (const entry of Object.values(plugins)) {
-    try {
-      await entry.exec('stop')
-    } catch (error) {
-      null
-    }
+    entry.stop()
   }
 }
+
 // 辅助函数：获取插件目录
 function getPluginsDirectory(): string {
   const userDataPath = app.getPath('userData')
@@ -147,13 +170,13 @@ async function installPluginFromZip(
 
 ipcMain.handle(
   'ipc-plugin-create',
-  async (event, pluginId: string, pluginDir: string, mainEntry: string) => {
+  async (event, pluginId: string, pluginName: string, pluginDir: string, mainEntry: string) => {
     if (plugins[pluginId]) {
       await plugins[pluginId].close()
     }
     const mainEntryPath = path.join(pluginDir, mainEntry)
     if (fs.existsSync(mainEntryPath)) {
-      plugins[pluginId] = new PluginClient(pluginId, mainEntryPath)
+      plugins[pluginId] = new PluginClient(pluginName, pluginId, mainEntryPath)
       log('plugin created', pluginId)
     } else {
       throw new Error(`Main entry file not found: ${mainEntryPath}`)
@@ -173,8 +196,7 @@ ipcMain.handle('ipc-plugin-exec', async (event, { pluginId, id }, method, ...par
   if (!plugins[pluginId]) {
     throw new Error(`Plugin ${pluginId} not found`)
   }
-
-  return await plugins[pluginId].exec(method, [...params])
+  return await plugins[pluginId].exec(method, ...params)
 })
 
 // 资源 API 返回的数据结构

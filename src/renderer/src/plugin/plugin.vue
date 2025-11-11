@@ -6,7 +6,7 @@
       :url="entry"
       :fetch="isDev ? undefined : customFetch"
       :plugins="plugins"
-      :props="{ ...props, modelValue: data, isDark: darkValue }"
+      :props="{ ...props, isDark: darkValue, dataStore: cloneDeep(dataStore.getData()) }"
       :load-error="loadError"
     ></WujieVue>
   </div>
@@ -30,12 +30,6 @@ const props = defineProps<{
   width: number
   height: number
 }>()
-
-const data = cloneDeep(
-  props.editIndex == props.pluginId
-    ? dataStore.pluginData[props.pluginId]
-    : dataStore.pluginData[props.pluginId][props.editIndex]
-)
 
 const isDev = props.item.entry?.startsWith('http')
 

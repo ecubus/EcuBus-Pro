@@ -4,6 +4,12 @@ import workerpool from 'workerpool'
 import { workerData, isMainThread } from 'worker_threads'
 import { DataSet } from 'src/preload/data'
 
+// Re-export all worker capabilities
+export * from '../worker/uds'
+export * from '../worker/crc'
+export * from '../worker/cryptoExt'
+export * from '../worker/utli'
+
 type ServiceMap = {
   [key: string]: any
   start: (globalData: DataSet) => void
@@ -13,7 +19,7 @@ type ServiceMap = {
 export function registerService<K extends keyof ServiceMap>(name: K, func: ServiceMap[K]) {
   if (!isMainThread) {
     workerpool.worker({
-      [name]: func
+      [`plugin.${name}`]: func
     })
   } else {
     exports[name] = func
@@ -23,8 +29,11 @@ export function registerService<K extends keyof ServiceMap>(name: K, func: Servi
 export function emitEvent(name: string, data: any) {
   if (!isMainThread) {
     workerpool.workerEmit({
-      event: name,
-      data: data
+      event: 'pluginEvent',
+      data: {
+        name,
+        data
+      }
     })
   }
 }

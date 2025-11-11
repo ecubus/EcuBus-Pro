@@ -4,96 +4,53 @@ import workerpool, { Pool } from 'workerpool'
 import { PluginLOG } from './log'
 import path from 'path'
 import { error, log } from 'electron-log'
+import { NodeClass } from './nodeItem'
 
 export default class PluginClient {
-  pool: Pool
+  nodeItem: NodeClass
   worker: any
   selfStop = false
   log: PluginLOG
 
   constructor(
+    private name: string,
     private id: string,
-    jsFilePath: string
+    jsFilePath: string,
+    nodeItem?: NodeClass
   ) {
     this.log = new PluginLOG(this.id)
-    const execArgv = ['--enable-source-maps']
-    const pluginPath = path.dirname(jsFilePath)
-    this.pool = workerpool.pool(jsFilePath, {
-      minWorkers: 1,
-      maxWorkers: 1,
-      workerType: 'thread',
-      emitStdStreams: false,
-      workerTerminateTimeout: 1000,
-      workerThreadOpts: {
-        stderr: false,
-        stdout: false,
-        execArgv: execArgv,
-        workerData: {
-          pluginPath: pluginPath
-        }
-      },
-      onTerminateWorker: (v: any) => {
-        error('plugin worker terminated', v)
-        this.log.error('plugin worker terminated', v)
-      }
-    })
-    const d = (this.pool as any)._getWorker()
-    this.worker = d
-    d.worker.globalOn = (payload: any) => {
-      this.eventHandler(payload)
+    if (nodeItem) {
+      this.nodeItem = nodeItem
+    } else {
+      const pluginPath = path.dirname(jsFilePath)
+      this.nodeItem = new NodeClass(
+        {
+          id: this.id,
+          name: this.name,
+          channel: [],
+          script: jsFilePath
+        },
+        pluginPath,
+        name
+      )
+      this.nodeItem.pool?.registerHandler('pluginEvent', this.eventHandler.bind(this))
     }
   }
 
-  eventHandler(payload: any) {
-    const event = payload.event
+  eventHandler(payload: { name: string; data: any }) {
+    const name = payload.name
     const data = payload.data
-    this.log.pluginEvent(event, data)
+    this.log.pluginEvent(name, data)
   }
 
   async exec(method: string, ...params: any[]): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const pendingProcess = Object.values(this.worker.processing)
-      const promiseList = []
-      if (pendingProcess.length > 0) {
-        // reject(new Error(`function ${method} not finished, async function need call with await`))
-        // return
-        promiseList.push(...pendingProcess.map((p: any) => p.resolver))
-      }
-      Promise.all(promiseList)
-        .then(() => {
-          this.pool
-            .exec(method, ...params, {
-              on: (payload: any) => {
-                this.eventHandler(payload)
-              }
-            })
-            .then((value: any) => {
-              resolve(value)
-            })
-            .catch((e: any) => {
-              reject(e)
-            })
-        })
-        .catch((e: any) => {
-          reject(e)
-        })
-    })
+    return this.nodeItem.pool?.exec('plugin', method, params)
   }
-
-  async close(): Promise<void> {
+  stop() {
+    this.nodeItem.pool?.stopEmit()
+  }
+  close() {
     this.log.close()
-    this.selfStop = true
-
-    try {
-      this.worker?.worker?.terminate()
-    } catch (e) {
-      null
-    }
-
-    try {
-      await this.pool.terminate(true)
-    } catch (e) {
-      null
-    }
+    this.nodeItem.close()
   }
 }

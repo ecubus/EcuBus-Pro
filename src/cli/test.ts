@@ -58,20 +58,16 @@ export default async function main(
 
   const node = new NodeClass(
     testItem,
-    canBaseMap,
-    linBaseMap,
-    doips,
-    ethBaseMap,
-    pwmBaseMap,
-    someipMap,
+
     projectPath,
     projectName,
-    data.tester,
+
     {
       testOnly: true,
       id: testItem.id
     }
   )
+  node.init(testItem, canBaseMap, linBaseMap, doips, ethBaseMap, pwmBaseMap, someipMap, data.tester)
   //surpress log this stage
   node.log!.log.silent = true
 
@@ -95,7 +91,10 @@ export default async function main(
   }
   node.close()
 
-  const node1 = new NodeClass(
+  const node1 = new NodeClass(testItem, projectPath, projectName, {
+    id: testItem.id
+  })
+  node1.init(
     testItem,
     canBaseMap,
     linBaseMap,
@@ -103,14 +102,8 @@ export default async function main(
     ethBaseMap,
     pwmBaseMap,
     someipMap,
-    projectPath,
-    projectName,
-    data.tester,
-    {
-      id: testItem.id
-    }
+    data.tester
   )
-
   // Generate EnableObj and isSingleRun based on pattern (matching test.vue logic)
   const EnableObj: Record<number, boolean> = {}
   let isSingleRun: string[] | undefined = undefined

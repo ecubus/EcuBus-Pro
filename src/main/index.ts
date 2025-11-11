@@ -173,6 +173,7 @@ function createWindow(): void {
   })
 
   ipcMain.on('close', (event, id) => {
+    logQ.stopTimer()
     if (id) {
       closeWindow(id)
     } else {

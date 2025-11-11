@@ -37,7 +37,7 @@ class LogQueue {
       }
     }, this.period)
   }
-  protected stopTimer() {
+  stopTimer() {
     clearInterval(this.timer)
     this.list = []
   }

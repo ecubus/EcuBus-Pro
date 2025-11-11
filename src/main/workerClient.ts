@@ -226,14 +226,18 @@ export default class UdsTester {
   }
   private async workerEmit(method: string, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.pool
-        .exec('__on', [method, data], {
-          on: (payload: any) => {
-            this.eventHandler(payload, resolve, reject)
-          }
-        })
-        .then(resolve)
-        .catch(reject)
+      if (Object.keys(this.worker.processing).length > 0) {
+        this.worker.exec('__on', [method, data]).then(resolve).catch(reject)
+      } else {
+        this.pool
+          .exec('__on', [method, data], {
+            on: (payload: any) => {
+              this.eventHandler(payload, resolve, reject)
+            }
+          })
+          .then(resolve)
+          .catch(reject)
+      }
     })
   }
   eventHandler(payload: any, resolve: any, reject: any) {

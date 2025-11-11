@@ -8,16 +8,15 @@ EcuBus-Pro provides a powerful and flexible testing framework for automotive ECU
 
 ## Key Features
 
-### Config 
+### Config
 
 Monitor test execution with a user-friendly interface showing real-time results
 ![alt text](image.png)
 ![alt text](image-2.png)
 
-
 ### TypeScript-Based Test Framework
 
-Write tests using familiar TypeScript syntax with built-in testing utilities. See [Srcipt](./../script.md). 
+Write tests using familiar TypeScript syntax with built-in testing utilities. See [Srcipt](./../script.md).
 
 Reused the node.js [test runner](https://nodejs.org/docs/latest/api/test.html)
 
@@ -53,12 +52,10 @@ describe('Test Suite 2', () => {
 })
 ```
 
-### Detailed Test Reports 
+### Detailed Test Reports
 
 Generate comprehensive test reports with timing and pass/fail information
 
 ![alt text](image-3.png)
 
 ![alt text](image-1.png)
-
-

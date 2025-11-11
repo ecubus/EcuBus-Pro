@@ -7,9 +7,9 @@ The Variable System is a powerful feature that allows users to create, manage, a
 
 ## Features
 
-* Set/Get variable in [Script](./../script/script.md) or [Detail API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)
-* Show variable In [Graph](./../graph/graph.md)
-* Default System Variable
+- Set/Get variable in [Script](./../script/script.md) or [Detail API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)
+- Show variable In [Graph](./../graph/graph.md)
+- Default System Variable
 
 ## System Variables
 
@@ -19,11 +19,11 @@ System variables are pre-defined variables that provide real-time information ab
 
 The system provides performance monitoring variables that help track the application's event loop performance:
 
-| Variable ID | Description | Unit |
-|-------------|-------------|------|
-| `EventLoopDelay.min` | Minimum event loop delay - lower values indicate better performance | ms |
-| `EventLoopDelay.max` | Maximum event loop delay - higher values indicate potential performance issues | ms |
-| `EventLoopDelay.avg` | Average event loop delay - a good balance between performance and stability | ms |
+| Variable ID          | Description                                                                    | Unit |
+| -------------------- | ------------------------------------------------------------------------------ | ---- |
+| `EventLoopDelay.min` | Minimum event loop delay - lower values indicate better performance            | ms   |
+| `EventLoopDelay.max` | Maximum event loop delay - higher values indicate potential performance issues | ms   |
+| `EventLoopDelay.avg` | Average event loop delay - a good balance between performance and stability    | ms   |
 
 These variables are essential for monitoring the responsiveness and performance of the application. High event loop delay values may indicate processing bottlenecks that could affect system responsiveness.
 
@@ -31,15 +31,15 @@ These variables are essential for monitoring the responsiveness and performance 
 
 For each connected CAN device, the system automatically creates a set of statistics variables:
 
-| Variable ID Pattern | Description | Unit |
-|---------------------|-------------|------|
-| `Statistics.{deviceName}.BusLoad` | Current bus load for the specified device | % |
-| `Statistics.{deviceName}.BusLoadMin` | Minimum bus load recorded | % |
-| `Statistics.{deviceName}.BusLoadMax` | Maximum bus load recorded | % |
-| `Statistics.{deviceName}.BusLoadAvg` | Average bus load | % |
-| `Statistics.{deviceName}.FrameSentFreq` | Frequency of frames sent | f/s |
-| `Statistics.{deviceName}.FrameRecvFreq` | Frequency of frames received | f/s |
-| `Statistics.{deviceName}.FrameFreq` | Overall frame frequency | f/s |
+| Variable ID Pattern                     | Description                               | Unit |
+| --------------------------------------- | ----------------------------------------- | ---- |
+| `Statistics.{deviceName}.BusLoad`       | Current bus load for the specified device | %    |
+| `Statistics.{deviceName}.BusLoadMin`    | Minimum bus load recorded                 | %    |
+| `Statistics.{deviceName}.BusLoadMax`    | Maximum bus load recorded                 | %    |
+| `Statistics.{deviceName}.BusLoadAvg`    | Average bus load                          | %    |
+| `Statistics.{deviceName}.FrameSentFreq` | Frequency of frames sent                  | f/s  |
+| `Statistics.{deviceName}.FrameRecvFreq` | Frequency of frames received              | f/s  |
+| `Statistics.{deviceName}.FrameFreq`     | Overall frame frequency                   | f/s  |
 
 ![system var](./image-2.png)
 
@@ -51,9 +51,9 @@ User variables are custom variables that you can create, modify, and delete base
 
 User variables support the following data types:
 
-* **Number**: Numerical values with optional min/max bounds and unit specification
-* **String**: Text values for storing names, messages, or any alphanumeric content
-* **Array**: Collections of values organized in a list format
+- **Number**: Numerical values with optional min/max bounds and unit specification
+- **String**: Text values for storing names, messages, or any alphanumeric content
+- **Array**: Collections of values organized in a list format
 
 ### Creating User Variables
 
@@ -63,15 +63,15 @@ To create a new user variable:
 2. Click the "Add Variable" button (file icon)
 3. Fill in the variable details:
 
-   * **Namespace**: (Optional) Group your variables logically
-   * **Name**: Unique identifier for the variable (letters, numbers, and underscores only)
-   * **Description**: (Optional) Additional information about the variable's purpose
-   * **Data Type**: Select Number, String, or Array
-   * **Initial Value**: The starting value for the variable
-   * For Number type:
-   * **Minimum**: Optional lower bound
-   * **Maximum**: Optional upper bound
-   * **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
+   - **Namespace**: (Optional) Group your variables logically
+   - **Name**: Unique identifier for the variable (letters, numbers, and underscores only)
+   - **Description**: (Optional) Additional information about the variable's purpose
+   - **Data Type**: Select Number, String, or Array
+   - **Initial Value**: The starting value for the variable
+   - For Number type:
+   - **Minimum**: Optional lower bound
+   - **Maximum**: Optional upper bound
+   - **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
 
 ![User Variables Interface](./image-3.png)
 ![UsrVar](./image-1.png)

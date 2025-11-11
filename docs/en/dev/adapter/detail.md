@@ -18,7 +18,7 @@ zlg_wrap.cxx: Generated Javascript code
 buffer.i, buffer1.i: Buffer interfaces, generally unchanged  
 tsfn.cxx: Thread-safe file, entry point for CAN transmission/reception threads  
 zlg.node: Compiled node module, can be used in .ts files  
-![1](1.png)
+   ![1](1.png)
 2. Following this process requires mastering basic JavaScript/Typescript syntax knowledge. For users who only know C/C++, a quick way to learn Typescript is through the [TypeScript Tutorial](../jslearn) on the rookie tutorial website. Spending 1-2 days following each example in the tutorial will help you master basic syntax and language features. For more advanced applications and implementation methods, you can look up materials when writing actual related code.
 3. For SWIG, we only need to know that it is a cross-language compiler that can create wrappers for driver API C/C++ declarations, allowing Typescript and other languages to access these declarations. SWIG is very powerful and complex, but we can temporarily ignore other functions and only understand SWIG's working principle through a simple example, such as referring to this [SWIG Introduction and Getting Started Guide](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
 
@@ -63,10 +63,10 @@ The process of implementing vector driver following zlg is as follows:
    │  └vector_wrap.cxx
    ```
 
-   Replace the .h files and .lib with vector files, keep other files unchanged for now, and rename all files to vector.
+    Replace the .h files and .lib with vector files, keep other files unchanged for now, and rename all files to vector.
 
 2. Modify the SWIG interface file vector.i, replace the module name and included header files with vector's, temporarily disable all various pointer_class, array_class, etc., because these definitions and mappings come from .h files, and the new vxlapi.h may not contain them. Add them later if needed, ensuring that .i does not contain original zlgcan.h content.  
-   Keep other thread-safe functions like CreateTSFN unchanged.
+Keep other thread-safe functions like CreateTSFN unchanged.
 
    ```plain
    %module vector
@@ -89,9 +89,9 @@ The process of implementing vector driver following zlg is as follows:
     swig -I"./../inc" -c++ -javascript -napi -v ./vector.i 
     ```
 
-   Execute the above command in cmd under the .\docan\vector\swig directory, which will generate vector_wrap.cxx from the vxlapi.h header file in the inc directory.  
-   ![2](2.png)  
-   If cmd reports an error, it means some code in vxlapi.h cannot be converted to .cxx and needs to be disabled or modified according to the prompts until .cxx is successfully generated. At this point, ts files can actually use vector_wrap.cxx to access Lib APIs, but for cross-platform compatibility, further generation of .node modules is needed.
+    Execute the above command in cmd under the .\docan\vector\swig directory, which will generate vector_wrap.cxx from the vxlapi.h header file in the inc directory.  
+    ![2](2.png)  
+    If cmd reports an error, it means some code in vxlapi.h cannot be converted to .cxx and needs to be disabled or modified according to the prompts until .cxx is successfully generated. At this point, ts files can actually use vector_wrap.cxx to access Lib APIs, but for cross-platform compatibility, further generation of .node modules is needed.
 
 4. Modify the safe thread tsfn.cxx file, replace include zlgcan.h, which also has implementation functions about ZLG API, temporarily disable them, replace them later, ensuring that .cxx does not contain original zlgcan.h content.
 
@@ -108,7 +108,7 @@ The process of implementing vector driver following zlg is as follows:
    ```
 
 5. At this step, the programs in the swig directory no longer contain the original ZLG code content, so you can build vector.node. Modify .\docan\binding.gyp, following 'target_name': 'zlg', add 'target_name': 'vector' content, and disable build instructions for other devices, so that npx node-gyp rebuild won't repeatedly build peak, kvaser and other drivers every time.  
-   'target_name': 'vector' needs to specify the correct paths for vxlapi64.lib and vector_wrap.cxx, tsfn.cxx.
+'target_name': 'vector' needs to specify the correct paths for vxlapi64.lib and vector_wrap.cxx, tsfn.cxx.
 
 ```json
 # 'target_name': 'peak',
@@ -174,7 +174,7 @@ npx node-gyp rebuild
     ...
     ```
 
-   The constructor method in index.ts inherits from CanBaseInfo, which includes information for device selection in the Electron UI, and by overriding the getValidDevices method, the list of available devices is also added to the UI dropdown.
+    The constructor method in index.ts inherits from CanBaseInfo, which includes information for device selection in the Electron UI, and by overriding the getValidDevices method, the list of available devices is also added to the UI dropdown.
 
     ```ts
       //New constructor method
@@ -182,26 +182,26 @@ npx node-gyp rebuild
         super()
         this.id = info.id //Current subclass uses = property in parent class
         this.info = info
-    
+
         const devices = VECTOR_CAN.getValidDevices() //Method to get device list
-    
+
         const target = devices.find((item) => item.handle == info.handle) //Get handle in device list == handle selected in dropdown
         if (!target) {
           throw new Error('Invalid handle') //Invalid handle, invalid device
         }
-    
+
         this.event = new EventEmitter() //Create an EventEmitter object, then use its methods to emit and listen to events
         this.log = new CanLOG('VECTOR', info.name, this.event) //
-    
+
         //'0:0' = Which bus: channel index
         this.index = parseInt(info.handle.split(':')[1]) //Channel index: :0
         this.deviceType = parseInt(info.handle.split('_')[0]) //Device type in parent class: XL_HWTYPE_VN1611
         this.deviceIndex = parseInt(info.handle.split('_')[2]) //Channel index: _0
     ```
 
-   After adding device initialization code in index.ts, you can directly debug index.ts, but since the parameters ultimately used are passed from the UI selection, ensuring correct parameter passing of info is also crucial.  
-   Create vector.test.ts under .\test\docan following zlg.test.ts. By debugging .test.ts files to debug index.ts files, you can simulate different parameter settings in the UI. As long as .test.ts testing passes, Electron's UI parameter passing will also be ensured to be correct.  
-   Add the following configuration in vscode's launch.json to debug .test.ts:
+    After adding device initialization code in index.ts, you can directly debug index.ts, but since the parameters ultimately used are passed from the UI selection, ensuring correct parameter passing of info is also crucial.  
+    Create vector.test.ts under .\test\docan following zlg.test.ts. By debugging .test.ts files to debug index.ts files, you can simulate different parameter settings in the UI. As long as .test.ts testing passes, Electron's UI parameter passing will also be ensured to be correct.  
+    Add the following configuration in vscode's launch.json to debug .test.ts:
 
     ```json
     {
@@ -231,7 +231,7 @@ npx node-gyp rebuild
     })
     ```
 
-   Go to index.ts to implement this method. For example, vector's API for getting device information is xlGetDriverConfig. For the data types required by API parameters, you can directly use those in vxlapi.h.
+    Go to index.ts to implement this method. For example, vector's API for getting device information is xlGetDriverConfig. For the data types required by API parameters, you can directly use those in vxlapi.h.
 
     ```ts
       static override getValidDevices(): CanDevice[] {
@@ -255,10 +255,10 @@ npx node-gyp rebuild
       }
     ```
 
-   If console.log(devices) prints correct device information in the terminal, it means .ts can correctly access .Lib API, and all previous conversion steps are correct.  
-   ![4](4.png)
+    If console.log(devices) prints correct device information in the terminal, it means .ts can correctly access .Lib API, and all previous conversion steps are correct.  
+    ![4](4.png)
 
-   If .Lib doesn't have an API for getting device information, you can use other APIs for simple testing to test whether .Lib is correctly used by .ts. If you can't access APIs or APIs error during debugging, you need to go back to previous steps and check if there were errors when generating .cxx and .node. For getValidDevices, you can follow .\zlg\index.ts and return a fixed identifier and handle based on device characteristics.
+    If .Lib doesn't have an API for getting device information, you can use other APIs for simple testing to test whether .Lib is correctly used by .ts. If you can't access APIs or APIs error during debugging, you need to go back to previous steps and check if there were errors when generating .cxx and .node. For getValidDevices, you can follow .\zlg\index.ts and return a fixed identifier and handle based on device characteristics.
 
     ```ts
       static override getValidDevices(): CanDevice[] {
@@ -303,19 +303,19 @@ npx node-gyp rebuild
       })
     ```
 
-   In index.ts, the passed parameter info index will determine which device channel returned by getValidDevices to use. After channel matching, other initialization functions will be further executed.
+    In index.ts, the passed parameter info index will determine which device channel returned by getValidDevices to use. After channel matching, other initialization functions will be further executed.
 
     ```ts
       constructor(info: CanBaseInfo) {
         const devices = VECTOR_CAN.getValidDevices() //Method to get device list
         this.index = parseInt(info.handle.split(':')[1]) //Channel index: :0
-    
+
         const DrvConfig = new VECTOR.XL_DRIVER_CONFIG()
         let xlStatus = VECTOR.xlGetDriverConfig(DrvConfig) //Get/print hardware configuration g_xlDrvConfig
-    
+
         const channles = VECTOR.CHANNEL_CONFIG.frompointer(DrvConfig.channel) //Channel configuration
         this.channelConfig = channles.getitem(this.index) //Channel number
-    
+
         // Channel mask calculation
         this.channelMask = VECTOR.xlGetChannelMask(
           this.channelConfig.hwType,
@@ -334,21 +334,21 @@ npx node-gyp rebuild
         )
     ```
 
-   ![5](5.png)
+    ![5](5.png)
 
-   Different devices have vastly different initialization processes, which won't be described here. Add them to the constructor method according to actual situations. For CAN transmission/reception functions, you can first implement them in the constructor, ensure that transmission/reception are normal, then port the sending function to _writeBase, receiving function to callback, callbackFd, and implement other methods like close, getError, etc. in the same way. Also test transmission/reception in vector.test.ts.
+    Different devices have vastly different initialization processes, which won't be described here. Add them to the constructor method according to actual situations. For CAN transmission/reception functions, you can first implement them in the constructor, ensure that transmission/reception are normal, then port the sending function to _writeBase, receiving function to callback, callbackFd, and implement other methods like close, getError, etc. in the same way. Also test transmission/reception in vector.test.ts.
 
     ```ts
       test.skip('write multi frame', async () => {
-    
+
       test('read frame', async () => {
-    
+
       test('write frame can-fd', async () => {
     ```
 
-   ![6](6.png)
+    ![6](6.png)  
 
-   Finally, tsfn.cxx also has some API implementations, just replace the original corresponding functionality implementations.
+    Finally, tsfn.cxx also has some API implementations, just replace the original corresponding functionality implementations.
 
 4. Many .Lib API parameters must use specific data types, otherwise errors occur. TypeScript doesn't have such rich basic types, so you need to re-encapsulate vxlapi.h types in vector.i for .ts use. The following are common situations:
 

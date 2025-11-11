@@ -9,19 +9,17 @@ Through the top menu bar, select `Hardware`, then click the `+` button on the ri
 ![Add LIN Device](../../../media/um/lin/device.png)
 
 Supported Hardware:
-
-| Manufacturer      | Protocols | Abilities                                                                          |
-| ----------------- | --------- | ---------------------------------------------------------------------------------- |
-| `EcuBus LinCable` | LIN       | Supports error injection, can perform conformance testing, and supports PWM output |
-| PEAK              | LIN       |                                                                                    |
-| KVASER            | LIN       |                                                                                    |
-| Toomoss           | LIN       | Support 12v voltage output/input, 5v voltage output                                |
-| VECTOR            | LIN       |                                                                                    |
+| Manufacturer | Protocols | Abilities |
+|--------|-------------------| -- |
+| `EcuBus LinCable` | LIN | Supports error injection, can perform conformance testing, and supports PWM output |
+| PEAK | LIN | |
+| KVASER | LIN | |
+| Toomoss | LIN| Support 12v voltage output/input, 5v voltage output   |
+| VECTOR | LIN | |
 
 ## Configure Device
 
 After clicking add device, you will be required to input device settings:
-
 1. Custom device name
 2. Device channel
 3. Working mode, Master or Slave
@@ -32,6 +30,7 @@ After clicking add device, you will be required to input device settings:
 > Some features described below may require importing a LIN Description File (LDF). For more information about LDF, see the [database documentation](./../ldf).
 
 ![LIN Device Configuration](../../../media/um/lin/config.png)
+ 
 
 ## Schedule Table Management
 
@@ -42,21 +41,19 @@ After clicking add device, you will be required to input device settings:
 Schedule table management allows periodic execution of a specific schedule table from the LDF database.
 
 ### Add LIN Interaction
-
-- Open the Network interface
-- Click the `+` button under the `Interaction` tab in the `Lin` network on the left side of Network to add an interaction
-  ![LIN Schedule Table Addition](../../../media/um/lin/image.png)
+   - Open the Network interface
+   - Click the `+` button under the `Interaction` tab in the `Lin` network on the left side of Network to add an interaction
+     ![LIN Schedule Table Addition](../../../media/um/lin/image.png)
 
 ### Open LIN Interaction
-
-- Open interaction configuration
-  ![LIN Device Configuration](../../../media/um/lin/configIA.png)
-- Configure the LIN device connected to the interaction
-  ![LIN Interaction Device Connection](../../../media/um/lin/connect.png)
-- Select the LIN device you want to connect
-  ![Select LIN Device](../../../media/um/lin/connect1.png)
-- View and manage existing schedule tables. You can temporarily skip a frame in a schedule table by turning off Active.
-  ![Open LIN Schedule Table](../../../media/um/lin/image-1.png)
+  - Open interaction configuration
+    ![LIN Device Configuration](../../../media/um/lin/configIA.png)
+  - Configure the LIN device connected to the interaction
+    ![LIN Interaction Device Connection](../../../media/um/lin/connect.png)
+  - Select the LIN device you want to connect
+    ![Select LIN Device](../../../media/um/lin/connect1.png)
+  - View and manage existing schedule tables. You can temporarily skip a frame in a schedule table by turning off Active.
+     ![Open LIN Schedule Table](../../../media/um/lin/image-1.png)
 
 ## Node Simulation & Signal Editing
 

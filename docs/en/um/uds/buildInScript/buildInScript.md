@@ -1,4 +1,4 @@
-# Build In Script
+﻿# Build In Script
 
 The Built-In Script system provides pre-configured diagnostic services for common UDS operations. This documentation covers the available built-in scripts and their functionality.
 

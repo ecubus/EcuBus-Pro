@@ -87,10 +87,5 @@ Please contact me to discuss what you want for this tier!
 
 ## Supporters
 
-| Date | Supporter | Method | Amount | Comment |
-| --- | --- | --- | --- | --- |
-| 2025-03-25 | 胖胖的风笛 | WeChat | ¥20 | 一杯coffee |
-| 2025-05-06 | **刚 | AliPay | ¥9.9 | 感谢作者开源 |
-| 2025-05-14 | 悦动思行 | WeChat | ¥20 | 请楼主一杯奶茶 |
-| 2025-7-19 | 算法行者 | WeChat | ¥20 | 支持开源精神 请大佬喝杯奶茶 |
+<!--@include: ./../../share/support.md-->
 

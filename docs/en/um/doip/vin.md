@@ -13,7 +13,6 @@ we support 4 VIN request methods:
 
 > [!NOTE]
 > This method is only setup Request Address.
->
 
 ![alt text](image.png)
 ![alt text](image-1.png)
@@ -24,7 +23,6 @@ without UDP request, connect directly to the tcp server, see [[#82](https://gith
 
 > [!NOTE]
 > This method is only setup Request Address.
->
 
 ![alt text](image-2.png)
 

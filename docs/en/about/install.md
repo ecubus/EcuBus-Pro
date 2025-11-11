@@ -4,7 +4,7 @@ You can download the latest version of `EcuBus-Pro` from the [github releases pa
 Or from our CDN page if you are in 中国❤️:<CustomComponent/>
 
 > [!TIP]
-> Right now we only support Windows version of EcuBus-Pro, we will support Linux version in the future.
+> Linux, macOS version can only be downloaded from the Release page, Arch Linux can be installed via AUR repository.
 
 > [!TIP]
 > The minimum version of Windows is Windows 10, but we recommend Windows 11.
@@ -33,6 +33,17 @@ Or from our CDN page if you are in 中国❤️:<CustomComponent/>
   ![alt text](../../media/about/update3.png)
 
 - After the update is complete, you can click the `restart` button to restart the `EcuBus-Pro`.
+
+## Arch Linux Install Guide
+
+Install via [AUR repository](https://aur.archlinux.org/packages/ecubus-pro) or [self-hosted repository](https://github.com/taotieren/aur-repo).
+
+```bash
+# AUR
+yay -Syu ecubus-pro
+# OR self-hosted
+sudo pacman -Syu ecubus-pro
+```
 
 <script setup>
 import CustomComponent from './../../component/download.vue'

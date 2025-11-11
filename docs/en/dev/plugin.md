@@ -51,11 +51,13 @@ npm run dev
 ```
 
 This command will:
+
 - Start the renderer process development server at `http://localhost:5173/` with Hot Module Replacement (HMR)
 - Watch and automatically rebuild main process code when files change
 
 > [!NOTE]
 > you need change the `manifest.json` file to point to the correct renderer process URL.
+>
 > ```json
 > {
 >   "extensions": [{
@@ -64,6 +66,7 @@ This command will:
 >     }]
 >   }]
 > }
+> ```
 
 ### Load Your Plugin in EcuBus-Pro
 
@@ -140,6 +143,7 @@ graph TB
 ```
 
 #### Main Process
+
 - **Environment**: Node.js
 - **Location**: `src/main/index.ts`
 - **Capabilities**:
@@ -151,6 +155,7 @@ graph TB
   - Network requests
 
 #### Renderer Process
+
 - **Environment**: Browser (Chromium)
 - **Location**: `src/renderer/`
 - **Capabilities**:
@@ -167,11 +172,13 @@ graph TB
 
 The main process and renderer process communicate through a secure API:
 
-**Main → Renderer**: 
+**Main → Renderer**:
+
 - Services (renderer calls, main responds)
 - Events (main emits, renderer listens)
 
 **Renderer → Main**:
+
 - Service calls (async RPC-style)
 
 #### Communication Architecture
@@ -199,6 +206,7 @@ sequenceDiagram
 #### Example: Complete Communication Flow
 
 **Main Process** (`src/main/index.ts`):
+
 ```typescript
 import { registerService, emitEvent, getPluginPath } from '@ecubus-pro/main-plugin-sdk'
 
@@ -223,6 +231,7 @@ console.log('Plugin installed at:', pluginPath)
 ```
 
 **Renderer Process** (`src/renderer/App.vue`):
+
 ```vue
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
@@ -262,7 +271,6 @@ onUnmounted(() => {
 </script>
 ```
 
-
 ### 3. Plugin Manifest
 
 The `manifest.json` file is the plugin's configuration file that defines metadata and extension points.
@@ -301,17 +309,17 @@ The `manifest.json` file is the plugin's configuration file that defines metadat
 
 ### Manifest Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Unique identifier for your plugin (lowercase, no spaces) |
-| `name` | string | Yes | Display name shown in EcuBus |
-| `version` | string | Yes | Semantic version number (e.g., "1.0.0") |
-| `description` | string | No | Short description of plugin functionality |
-| `author` | string | No | Plugin author name |
-| `mainEntry` | string | Yes | Path to main process entry file (relative to plugin root) |
-| `icon` | string | No | Path to plugin icon (PNG recommended) |
-| `readme` | string | No | Path to README file |
-| `extensions` | array | Yes | Array of extension points |
+| Field         | Type   | Required | Description                                                                                                                |
+| ------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `id`          | string | Yes      | Unique identifier for your plugin (lowercase, no spaces)                                                |
+| `name`        | string | Yes      | Display name shown in EcuBus                                                                                               |
+| `version`     | string | Yes      | Semantic version number (e.g., "1.0.0") |
+| `description` | string | No       | Short description of plugin functionality                                                                                  |
+| `author`      | string | No       | Plugin author name                                                                                                         |
+| `mainEntry`   | string | Yes      | Path to main process entry file (relative to plugin root)                                               |
+| `icon`        | string | No       | Path to plugin icon (PNG recommended)                                                                   |
+| `readme`      | string | No       | Path to README file                                                                                                        |
+| `extensions`  | array  | Yes      | Array of extension points                                                                                                  |
 
 ### Extension Configuration
 
@@ -334,6 +342,7 @@ Each extension defines where and how your plugin appears in EcuBus:
 ```
 
 **Available Target Tabs**:
+
 - `test` - Test & Diagnostics tab
 - `can` - CAN Bus tab
 - `lin` - LIN Bus tab
@@ -344,11 +353,10 @@ Each extension defines where and how your plugin appears in EcuBus:
 Use Iconify icons in the format `collection:icon-name`. Browse available icons at [iconify.design](https://iconify.design/)
 
 Examples:
+
 - `mdi:rocket` - Material Design Icons
 - `lucide:settings` - Lucide icons
 - `carbon:settings` - Carbon icons
-
-
 
 ## Getting Help
 
@@ -378,6 +386,6 @@ You now have all the knowledge needed to create powerful EcuBus plugins! Start w
 
 ---
 
-*Last updated: October 2025*
-*Plugin SDK Version: 0.0.4+*
+_Last updated: October 2025_
+_Plugin SDK Version: 0.0.4+_
 

@@ -146,40 +146,40 @@ OSEK OS 轨迹是一个强大的功能，您可以通过外部接口实时检索
 
 ## 查看操作系统统计
 
-OS statistics can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Statistics`.
+操作系统统计数据可以通过 "Other s->Os Info->[[对应ORTI 文件名称] Statistics"查看。
 
 ![statistics](info.png)
 
-You can use the cursor to check the timestamp in the graph, or view the difference between two cursors.
+您可以使用光标查看图形中的时间戳，或者查看两个光标之间的差异。
 
-## View OS Timeline
+## 查看操作系统时间表
 
-OS timeline can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Timeline`.
+操作系统时间线可以通过“Others->Os Info->[对应ORTI文件名称]Timeline”查看。
 
-Timelien is drawn with `pixi.js` accelerated by GPU.
+定时器由 GPU 加速使用 '像素.js' 绘制。
 
-> [!NOTE]
-> Currently, only tasks and ISRs can be viewed in the timeline.
+> [!注意]
+> 目前只有任务和ISR可以按时查看。
 
 ![timeline](timeline.png)
 
-### RealTime Trace
+### 实时跟踪
 
-Real-time trace is supported while the application is running.
+应用程序运行时支持实时跟踪。
 
 ![realTime](rt.gif)
 
-### Offline Analysis
+### 离线分析
 
-You can open a previously saved CSV record file to view the OS timeline in offline mode.
+您可以打开之前保存的 CSV 记录文件来在离线模式下查看操作系统的时间线。
 ![offline](offline.png)
 
-> [!NOTE]
-> If `Link Trace` is enabled and the trace window is open, offline events will also be appended to the trace window.
+> [!注意]
+> 如果启用了“链接追踪”并打开了跟踪窗口，离线事件也将被附加到跟踪窗口。
 
-### Link Trace
+### 链接轨迹
 
-Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events.
+链接跟踪可以将时间轴中的事件链接到跟踪窗口中的事件， 让用户更容易查看事件之间的关系。
 ![link](link.gif)
 
 ## 自定义特定变量信息视图

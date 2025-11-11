@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { merge } from 'lodash'
+import { assign } from 'lodash'
 import { DataSet } from 'src/preload/data'
 import { reactive, watch } from 'vue'
 
@@ -31,7 +31,7 @@ if (window.$wujie?.bus) {
   window.$wujie.bus.$on('update:dataStore:fromMain', (newStore: any) => {
     // 使用 isEqual 比较，只有真正变化时才更新，避免不必要的 watch 触发
     isExternalUpdate = true
-    merge(dataStore, newStore)
+    assign(dataStore, newStore)
   })
 }
 

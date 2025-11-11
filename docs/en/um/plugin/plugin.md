@@ -33,7 +33,6 @@ Plugins can extend existing tabs with additional functionality:
 - Provide specialized tools for specific tabs
 ![tab-extensions](./image-1.png)
 
-
 ### Development Support
 
 Developing plugins is very convenient. See the [Plugin Development Guide](../../dev/plugin.md) for details.

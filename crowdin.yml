@@ -1,9 +1,10 @@
 files:
-  - source: docs/en/**/*.md
+  - source: /docs/en/**/*.md
     translation: /docs/%two_letters_code%/**/%original_file_name%
     type: markdown
-
-languages_mapping:
-  two_letters_code:
-    'zh-CN': 'zh'
-    'en-US': 'en'
+    skip_untranslated_strings: true
+    skip_untranslated_files: false
+  - source: /docs/en/**/*.{png,jpg,jpeg,gif,svg}
+    translation: /docs/%two_letters_code%/**/%original_file_name%
+    type: images
+    update_option: update_as_unapproved

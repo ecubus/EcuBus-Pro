@@ -3,8 +3,6 @@
 import { useData, useRoute } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import Twikoo from '../../docs/component/Twikoo.vue'
-import 'viewerjs/dist/viewer.css'
-import Viewer from 'viewerjs'
 import { onMounted, computed } from 'vue'
 import { version } from '../../package.json'
 const { Layout } = DefaultTheme
@@ -38,21 +36,6 @@ function getVerion() {
 }
 
 onMounted(() => {
-  //viewer.js all class="featureImg" elements
-  const images = document.querySelectorAll('.featureImg')
-  const viewerContainer = document.createElement('div')
-  viewerContainer.style.display = 'none'
-  document.body.appendChild(viewerContainer)
-  images.forEach((img) => viewerContainer.appendChild(img.cloneNode(true)))
-  const viewer = new Viewer(viewerContainer, {
-    inline: false,
-    zoomRatio: 0.1
-  })
-  images.forEach((img, index) => {
-    img.addEventListener('click', () => {
-      viewer.view(index)
-    })
-  })
   getVerion()
 })
 </script>

@@ -146,9 +146,40 @@ After configuring the ORTI, the ORTI data will be automatically generated as bui
 
 ## View OS Statistics
 
-OS statistics can be viewed through `Others->Os Info->Corresponding ORTI File Name`.
+OS statistics can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Statistics`.
 
 ![statistics](info.png)
+
+You can use the cursor to check the timestamp in the graph, or view the difference between two cursors.
+
+
+## View OS Timeline
+
+OS timeline can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Timeline`.
+
+![timeline](timeline.png)
+
+### RealTime Trace
+
+Real-time trace is supported while the application is running.
+
+![realTime](rt.gif)
+
+### Offline Analysis
+
+You can open a previously saved CSV record file to view the OS timeline in offline mode.
+![offline](offline.png)
+
+> [!NOTE]
+> If `Link Trace` is enabled and the trace window is open, offline events will also be appended to the trace window.
+
+
+### Link Trace
+
+Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events. 
+![link](link.gif)
+
+
 
 ## Custom View of Specific Variable Information
 

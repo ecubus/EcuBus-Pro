@@ -5,7 +5,6 @@ At **EcuBus**, we've worked with a wide range of hardware devices from various v
 That’s why we’re excited to announce **EcuBus Hardware** — our own line of purpose-built devices, designed from the ground up to deliver the **exceptional capabilities** we’ve always envisioned.
 
 ## Why EcuBus Hardware?
-
 - **Optimized for EcuBus-Pro**: Seamless compatibility with our software, ensuring stable and powerful performance out of the box.
 
 - **Next-Level Features**: We’re building hardware that unlocks features simply not possible with off-the-shelf devices.
@@ -15,8 +14,9 @@ That’s why we’re excited to announce **EcuBus Hardware** — our own line of
 - **Reliable & Future-Proof**: Engineered to keep up with evolving protocols and demanding environments.
 
 ## Our Vision
-
 We’re not just creating another hardware product. We’re building tools that empower developers, testers, and engineers to go beyond the limits of traditional solutions — delivering an **amazing** experience that truly makes a difference.
+
+
 
 ## Hardware List
 

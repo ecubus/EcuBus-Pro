@@ -1,4 +1,4 @@
-# Tester Present
+﻿# Tester Present
 
 Tester Present (Service ID 0x3E) is a diagnostic service used to indicate to an ECU that a diagnostic client (tester) is still present and the diagnostic session should remain active.
 

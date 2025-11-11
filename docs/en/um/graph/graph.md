@@ -3,9 +3,9 @@
 The graph signal feature allows you to visualize the data flow between signals in a graphical format. This feature is especially useful for understanding the relationship between signals and for debugging complex signal interactions.
 ![alt text](image.png)
 
-- **Line**
-- **Gauge**
-- **Data**
+* **Line**
+* **Gauge**
+* **Data**
 
 ## Adding Signals
 

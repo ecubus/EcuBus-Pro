@@ -309,7 +309,7 @@ const getGridOptions = (type: CategoryType): VxeGridProps => {
     size: 'mini',
     border: true,
     showOverflow: true,
-    height: height.value - 60, // 减去 toolbar(40px) 和 tabs header(约50px)
+    height: height.value - 66, // 减去 toolbar(40px) 和 tabs header(约50px)
     columnConfig: {
       resizable: true
     },

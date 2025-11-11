@@ -96,11 +96,24 @@
             </div>
           </div>
           <div class="controls-hint">
-            <!-- <div class="hint-item">
-              <kbd>Ctrl</kbd> + <Icon :icon="'material-symbols:mouse'" class="mouse-icon" /> to zoom
-            </div> -->
-            <div v-if="toolTipInfo" class="hint-item">
-              {{ formattedTooltip }}
+            <div class="hint-item">
+              <el-tooltip effect="light" placement="top">
+                <template #content>
+                  <div class="tooltip-content">
+                    <div>
+                      <kbd>Ctrl</kbd> + <Icon :icon="mouseIcon" class="mouse-icon-inline" />: Zoom
+                    </div>
+                    <div>
+                      <kbd>Shift</kbd> + <Icon :icon="mouseIcon" class="mouse-icon-inline" />: Pan
+                      horizontally
+                    </div>
+                  </div>
+                </template>
+                <span class="help-icon">
+                  <Icon :icon="helpOutlineIcon" />
+                </span>
+              </el-tooltip>
+              <span v-if="toolTipInfo">{{ formattedTooltip }}</span>
             </div>
           </div>
         </div>
@@ -137,6 +150,8 @@ import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
 import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
 import cursorIcon from '@iconify/icons-ph/cursor-text-bold'
+import mouseIcon from '@iconify/icons-material-symbols/mouse'
+import helpOutlineIcon from '@iconify/icons-material-symbols/help-outline'
 import {
   ref,
   onMounted,
@@ -1454,11 +1469,12 @@ onUnmounted(() => {
 .controls-hint {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
   font-size: 10px;
   color: var(--el-text-color-regular);
   background: var(--el-bg-color-overlay);
-  padding: 2px 2px;
+  padding: 2px 4px;
   border-radius: 4px;
   height: 37px;
   overflow-y: auto;
@@ -1467,6 +1483,7 @@ onUnmounted(() => {
 .hint-item {
   display: flex;
   align-items: center;
+  flex: 1;
   gap: 4px;
 }
 
@@ -1484,6 +1501,51 @@ onUnmounted(() => {
 .mouse-icon {
   font-size: 12px;
   color: var(--el-text-color-regular);
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  color: var(--el-text-color-regular);
+  font-size: 16px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.help-icon:hover {
+  opacity: 1;
+  color: var(--el-color-primary);
+  transform: scale(1.1);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.tooltip-content kbd {
+  background: var(--el-fill-color-light);
+  border: 1px solid var(--el-border-color);
+  border-radius: 2px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: monospace;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  line-height: 1;
+}
+
+.mouse-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  vertical-align: middle;
+  margin: 0 2px;
 }
 </style>
 

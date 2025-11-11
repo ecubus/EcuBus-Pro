@@ -44,7 +44,7 @@ efficient, and optimized for monorepos. More details can be found in the
 EcuBus-Pro CLI, so you can use the `pnpm` command to install the dependencies
 of your project.
 
-*run pnpm via CLI.*
+_run pnpm via CLI._
 
 ```bash
 ecb_cli pnpm -h
@@ -60,7 +60,7 @@ ecb_cli pnpm install package_name
 
 ### Test command
 
-*run test via CLI.*
+_run test via CLI._
 
 ```bash
 ecb_cli test -h

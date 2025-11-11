@@ -1,4 +1,36 @@
 # EcuBus-Pro Release Notes
+
+## 0.8.56
+Changes from v0.8.55 to v0.8.56:
+
+* [feat]:add auto build script when start 
+* [bug]:fix uds TesterPresent can't set 0x80 
+* [bug]:fix can dbc value undefined issue 
+* [feat]:add can statistics sentCnt and recvCnt 
+* [feat]:add high precision timer
+---
+
+## 0.8.55
+Changes from v0.8.54 to v0.8.55:
+
+* [feat]:add archLinux build in https://github.com/ecubus/EcuBus-Pro/pull/197 by @taotieren
+* [bug]:fix api runUdsSeq can run correnct sequence bug 
+* [feat]:base someip feature ok, [Detail](https://app.whyengineer.com/zh/docs/um/someip/)
+* [api]:add getSignal api 
+* [api]:add onSignal API
+---
+
+
+## 0.8.54
+Changes from v0.8.53 to v0.8.54:
+
+* [update] add display version info for candle in https://github.com/ecubus/EcuBus-Pro/pull/194 by @RCSN
+* [bug]:fix script build doesn't copy *.node
+* [bug]:fix the log clearing process, which casue some init log been cleared 
+* [demo]:add NSUC1612_LIN_OTA demo 
+* [bug]:fix crc error
+---
+
 ## 0.8.53
 Changes from v0.8.52 to v0.8.53:
 

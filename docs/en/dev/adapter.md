@@ -400,7 +400,7 @@ Implement the following test cases:
    })
    ```
 
-### 3. Test Configuration
+### 3) Test Configuration
 
 Make sure to test with different configurations:
 
@@ -445,10 +445,10 @@ Remember to:
 
 2. add device in `src/main/docan/can.ts`
    you should edit these functions:
-     - `openCanDevice`
-     - `getCanVersion`
-     - `getCanDevices`
-     - `canClean`
+   - `openCanDevice`
+   - `getCanVersion`
+   - `getCanDevices`
+   - `canClean`
 
 3. add device in `src/renderer/src/views/uds/components/hardware.vue`
 

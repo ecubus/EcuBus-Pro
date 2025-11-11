@@ -18,7 +18,6 @@ we support 4 VIN request methods:
 ![alt text](image.png)
 ![alt text](image-1.png)
 
-
 ## Omit VIN, tcp connect directly
 
 without UDP request, connect directly to the tcp server, see [[#82](https://github.com/ecubus/EcuBus-Pro/issues/82)]
@@ -37,4 +36,3 @@ without UDP request, connect directly to the tcp server, see [[#82](https://gith
 ## Multicast VIN Request (UDP6)
 
 unsupported yet.
-

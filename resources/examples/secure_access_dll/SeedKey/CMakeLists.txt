@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+# 设置运行时库为静态链接，避免依赖 vcruntime140d.dll、ucrtbased.dll 等
+# MultiThreaded = /MT (Release), MultiThreadedDebug = /MTd (Debug)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 # set 64-bit build, only support 64-bit build
 set(CMAKE_GENERATOR_PLATFORM x64)
 

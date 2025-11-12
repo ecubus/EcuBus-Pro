@@ -8,7 +8,7 @@ OSEK OS Trace is a powerful feature that allows you to retrieve the runtime stat
 ## Import ORTI File
 
 Import ORTI files by clicking `Others->Database->Add OS(ORTI)`. You can also view already imported ORTI files.
-![orti](orti.png)
+![orti](./../../../media/um/osTrace/orti.png)
 
 ## Configure ORTI
 
@@ -27,19 +27,19 @@ After successfully importing the ORTI file, you can see the configuration inform
 > [!NOTE]
 > Active Interval (us) can only be configured for Task types. ISR does not support this configuration item.
 
-![task](task.png)
+![task](./../../../media/um/osTrace/task.png)
 
 ### Resource
 
-![resource](resource.png)
+![resource](./../../../media/um/osTrace/resource.png)
 
 ### Service
 
-![service](service.png)
+![service](./../../../media/um/osTrace/service.png)
 
 ### Hook
 
-![hook](hook.png)
+![hook](./../../../media/um/osTrace/hook.png)
 
 ### Connector Configuration
 
@@ -59,16 +59,16 @@ Receive OS Trace data in real-time through a serial port.
 
 **Data Format:** 16-byte binary data (little-endian)
 
-| Field | Length | Description |
-|------|------|------|
-| frame header | 4 bytes | Frame header (05D5C5B5A) |
-| timestamp | 4 bytes | Timestamp (LSB) |
-| type id | 2 bytes | Object ID (LSB) |
-| type status | 2 bytes | Status/Parameter (LSB) |
-| index | 1 byte | Event index (0-255 cyclic) |
-| type | 1 byte | Event type |
-| coreID | 1 byte | Core ID |
-| CRC8/Reserved | 1 byte | CRC8 checksum or reserved byte |
+| Field         | Length  | Description                                   |
+| ------------- | ------- | --------------------------------------------- |
+| frame header  | 4 bytes | Frame header (05D5C5B5A)   |
+| timestamp     | 4 bytes | Timestamp (LSB)            |
+| type id       | 2 bytes | Object ID (LSB)            |
+| type status   | 2 bytes | Status/Parameter (LSB)     |
+| index         | 1 byte  | Event index (0-255 cyclic) |
+| type          | 1 byte  | Event type                                    |
+| coreID        | 1 byte  | Core ID                                       |
+| CRC8/Reserved | 1 byte  | CRC8 checksum or reserved byte                |
 
 > [!NOTE]
 >
@@ -77,7 +77,7 @@ Receive OS Trace data in real-time through a serial port.
 > - When CRC verification is enabled, the last byte is used as the CRC8 checksum
 > - When CRC verification is disabled, the last byte is used as a reserved byte (Reserved), and the system validates the frame validity by checking the type field (valid values: 0-5)
 
-![serialPort](serialPort.png)
+![serialPort](./../../../media/um/osTrace/serialPort.png)
 
 #### Binary File (BinaryFile)
 
@@ -128,7 +128,7 @@ Record File determines where TRACE data is written to local files. The written d
 > [!NOTE]
 > One event per line, format: timestamp,type,id,status. The timestamp unit is tick.
 
-![recordFile](record.png)
+![recordFile](./../../../media/um/osTrace/record.png)
 
 ### Save
 
@@ -138,20 +138,19 @@ After configuring the ORTI-related information, click the save button in the upp
 
 The data sent by the OS can be viewed through the `Trace` window.
 
-![trace](trace.png)
+![trace](./../../../media/um/osTrace/trace.png)
 
 After configuring the ORTI, the ORTI data will be automatically generated as built-in system variables, which can be viewed through `Others->Variables->System Variables`.
 
-![var](var.png)
+![var](./../../../media/um/osTrace/var.png)
 
 ## View OS Statistics
 
 OS statistics can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Statistics`.
 
-![statistics](info.png)
+![statistics](./../../../media/um/osTrace/info.png)
 
 You can use the cursor to check the timestamp in the graph, or view the difference between two cursors.
-
 
 ## View OS Timeline
 
@@ -162,39 +161,36 @@ Timelien is drawn with `pixi.js` accelerated by GPU.
 > [!NOTE]
 > Currently, only tasks and ISRs can be viewed in the timeline.
 
-![timeline](timeline.png)
+![timeline](./../../../media/um/osTrace/timeline.png)
 
 ### RealTime Trace
 
 Real-time trace is supported while the application is running.
 
-![realTime](rt.gif)
+![realTime](./../../../media/um/osTrace/rt.gif)
 
 ### Offline Analysis
 
 You can open a previously saved CSV record file to view the OS timeline in offline mode.
-![offline](offline.png)
+![offline](./../../../media/um/osTrace/offline.png)
 
 > [!NOTE]
 > If `Link Trace` is enabled and the trace window is open, offline events will also be appended to the trace window.
 
-
 ### Link Trace
 
-Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events. 
-![link](link.gif)
-
-
+Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events.
+![link](./../../../media/um/osTrace/link.gif)
 
 ## Custom View of Specific Variable Information
 
 Users can select components such as **LINE, Gauge, Data** to display these variables according to their needs.
 
 For example: If users want to view the real-time runtime status of 5msTask and SystemTick ISR, click `Home->Graph->Line`, then click `Add Variables` at the top.
-![addVar](addLinVar.png)
+![addVar](./../../../media/um/osTrace/addLinVar.png)
 
 Select `5msTask->Status` and `SystemTick ISR->Status`, then click `Add` to see the real-time runtime status of 5msTask and SystemTick ISR.
-![addLine](addVar2.png)
+![addLine](./../../../media/um/osTrace/addVar2.png)
 
 Result Preview:
-![demo](demo.png)
+![demo](./../../../media/um/osTrace/demo.png)

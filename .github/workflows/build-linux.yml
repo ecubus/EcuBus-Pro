@@ -31,6 +31,8 @@ jobs:
         run: npm run api
       - name: Build cli
         run: npm run cli:build:linux
+      - name: Build sdk
+        run: npm run build:sdk
       - name: Build APP
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

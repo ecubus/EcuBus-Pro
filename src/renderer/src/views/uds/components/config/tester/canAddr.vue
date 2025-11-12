@@ -330,6 +330,9 @@ const idCheck = (rule: any, value: any, callback: any) => {
         }
       }
       if (rule.field == 'canIdTx') {
+        if (Number.isNaN(Number(value))) {
+          callback(new Error('HEX should start with 0x'))
+        }
         if (Number(value) == Number(data.value.canIdRx)) {
           callback(new Error("CAN-ID TX can't be equal to CAN-ID RX"))
         }
@@ -341,6 +344,9 @@ const idCheck = (rule: any, value: any, callback: any) => {
         }
       }
       if (rule.field == 'canIdRx') {
+        if (Number.isNaN(Number(value))) {
+          callback(new Error('HEX should start with 0x'))
+        }
         if (Number(value) == Number(data.value.canIdTx)) {
           callback(new Error("CAN-ID RX can't be equal to CAN-ID TX"))
         }
@@ -364,6 +370,9 @@ const addrCheck = (rule: any, value: any, callback: any) => {
       callback(new Error('value must be 0~0xFF'))
     }
     if (rule.field == 'SA') {
+      if (Number.isNaN(Number(value))) {
+        callback(new Error('HEX should start with 0x'))
+      }
       if (Number(value) == Number(data.value.TA)) {
         callback(new Error("SA can't be equal to TA"))
       }
@@ -375,6 +384,9 @@ const addrCheck = (rule: any, value: any, callback: any) => {
       }
     }
     if (rule.field == 'TA') {
+      if (Number.isNaN(Number(value))) {
+        callback(new Error('HEX should start with 0x'))
+      }
       if (Number(value) == Number(data.value.SA)) {
         callback(new Error("TA can't be equal to SA"))
       }
@@ -394,6 +406,9 @@ const addrCheck = (rule: any, value: any, callback: any) => {
 const addrAeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED) {
     if (value) {
+      if (Number.isNaN(Number(value))) {
+        callback(new Error('HEX should start with 0x'))
+      }
       if (Number(value) < 0 || Number(value) > 0xff) {
         callback(new Error('value must be 0~0xFF'))
       }
@@ -529,4 +544,3 @@ defineExpose({
   gap: 4px;
 }
 </style>
-

@@ -59,16 +59,16 @@ Receive OS Trace data in real-time through a serial port.
 
 **Data Format:** 16-byte binary data (little-endian)
 
-| Field         | Length  | Description                                   |
-| ------------- | ------- | --------------------------------------------- |
-| frame header  | 4 bytes | Frame header (05D5C5B5A)   |
-| timestamp     | 4 bytes | Timestamp (LSB)            |
-| type id       | 2 bytes | Object ID (LSB)            |
-| type status   | 2 bytes | Status/Parameter (LSB)     |
-| index         | 1 byte  | Event index (0-255 cyclic) |
-| type          | 1 byte  | Event type                                    |
-| coreID        | 1 byte  | Core ID                                       |
-| CRC8/Reserved | 1 byte  | CRC8 checksum or reserved byte                |
+| Field | Length | Description |
+|------|------|------|
+| frame header | 4 bytes | Frame header (05D5C5B5A) |
+| timestamp | 4 bytes | Timestamp (LSB) |
+| type id | 2 bytes | Object ID (LSB) |
+| type status | 2 bytes | Status/Parameter (LSB) |
+| index | 1 byte | Event index (0-255 cyclic) |
+| type | 1 byte | Event type |
+| coreID | 1 byte | Core ID |
+| CRC8/Reserved | 1 byte | CRC8 checksum or reserved byte |
 
 > [!NOTE]
 >
@@ -152,6 +152,7 @@ OS statistics can be viewed through `Others->Os Info->[Corresponding ORTI File N
 
 You can use the cursor to check the timestamp in the graph, or view the difference between two cursors.
 
+
 ## View OS Timeline
 
 OS timeline can be viewed through `Others->Os Info->[Corresponding ORTI File Name] Timeline`.
@@ -177,10 +178,13 @@ You can open a previously saved CSV record file to view the OS timeline in offli
 > [!NOTE]
 > If `Link Trace` is enabled and the trace window is open, offline events will also be appended to the trace window.
 
+
 ### Link Trace
 
-Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events.
+Link Trace can link the events in the timeline to the events in the trace window, making it easier for users to view the relationship between events. 
 ![link](./../../../media/um/osTrace/link.gif)
+
+
 
 ## Custom View of Specific Variable Information
 

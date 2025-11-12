@@ -1921,6 +1921,8 @@ export class UtilClass {
     }
   }
   private async canMsg(msg: CanMessage) {
+    // Convert Buffer objects if needed
+    msg.data = Buffer.from(msg.data)
     //signal emit
     let dbName: string | undefined
     if (msg.device) {
@@ -1953,6 +1955,8 @@ export class UtilClass {
     await this.event.emit('can' as any, msg)
   }
   private async linMsg(msg: LinMsg) {
+    // Convert Buffer objects if needed
+    msg.data = Buffer.from(msg.data)
     //signal emit
     let dbName: string | undefined
     if (msg.device) {

@@ -290,54 +290,64 @@ export default class UdsTester {
           if (result instanceof Promise) {
             result
               .then((r) => {
-                this.worker
-                  .exec('__eventDone', [
-                    id,
-                    {
-                      data: r
-                    }
-                  ])
-                  .catch(reject)
+                if (id !== undefined) {
+                  this.worker
+                    .exec('__eventDone', [
+                      id,
+                      {
+                        data: r
+                      }
+                    ])
+                    .catch(reject)
+                }
               })
               .catch((e) => {
-                this.worker
-                  .exec('__eventDone', [
-                    id,
-                    {
-                      err: e.toString()
-                    }
-                  ])
-                  .catch(reject)
+                if (id !== undefined) {
+                  this.worker
+                    .exec('__eventDone', [
+                      id,
+                      {
+                        err: e.toString()
+                      }
+                    ])
+                    .catch(reject)
+                }
               })
           } else {
+            if (id !== undefined) {
+              this.worker
+                .exec('__eventDone', [
+                  id,
+                  {
+                    data: result
+                  }
+                ])
+                .catch(reject)
+            }
+          }
+        } catch (e) {
+          if (id !== undefined) {
             this.worker
               .exec('__eventDone', [
                 id,
                 {
-                  data: result
+                  err: e instanceof Error ? e.toString() : 'Unknown error'
                 }
               ])
               .catch(reject)
           }
-        } catch (e) {
+        }
+      } else {
+        if (id !== undefined) {
           this.worker
             .exec('__eventDone', [
               id,
               {
-                err: e instanceof Error ? e.toString() : 'Unknown error'
+                err: `API ${event} can't be used in this ${this.env.MODE} mode`
               }
             ])
             .catch(reject)
         }
-      } else {
-        this.worker
-          .exec('__eventDone', [
-            id,
-            {
-              err: `API ${event} can't be used in this ${this.env.MODE} mode`
-            }
-          ])
-          .catch(reject)
       }
     }
   }

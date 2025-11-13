@@ -288,8 +288,9 @@ class OfflineDataProvider {
 
         // For TASK: only create state when status is START and next event exists
         if (cur.type === TaskType.TASK) {
-          if ((cur.status !== TaskStatus.START && cur.status !== TaskStatus.ACTIVE) || !next)
+          if (cur.status == TaskStatus.TERMINATE || cur.status == TaskStatus.WAIT) {
             continue
+          }
         }
         // For ISR: only create state when status is START and next event is STOP
         else if (cur.type === TaskType.ISR) {
@@ -313,7 +314,7 @@ class OfflineDataProvider {
         const durationUs = Number(end - start)
         let durationLabel: string | undefined = undefined
 
-        if (cur.type === TaskType.TASK && cur.status === TaskStatus.ACTIVE) {
+        if (cur.type === TaskType.TASK && cur.status != TaskStatus.START) {
           durationLabel = undefined
         } else {
           durationLabel =

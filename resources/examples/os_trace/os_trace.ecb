@@ -2540,23 +2540,6 @@
           },
           "name": "Os_Trace_high"
         }
-      },
-      "2eedf160-00ab-4d28-bd83-c28870d737d1": {
-        "pos": {
-          "x": 930,
-          "y": 366.5,
-          "w": 700,
-          "h": 400
-        },
-        "title": "orti",
-        "label": "ORTI",
-        "id": "2eedf160-00ab-4d28-bd83-c28870d737d1",
-        "options": {
-          "params": {
-            "edit-index": "2eedf160-00ab-4d28-bd83-c28870d737d1"
-          },
-          "name": "Os_Trace_high"
-        }
       }
     }
   }

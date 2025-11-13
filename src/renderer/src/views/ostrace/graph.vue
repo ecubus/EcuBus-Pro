@@ -721,7 +721,8 @@ function initPixiGraph() {
         styleMap.get(rid) ||
         ({
           color: 0x000000,
-          height: buttonHeight * 0.9
+          height: buttonHeight * 0.9,
+          opacity: 1
         } as TimeGraphStateStyle)
       if (!styleMap.has(rid)) {
         const data = model.data as { cur: OsEvent; next: OsEvent }
@@ -732,8 +733,10 @@ function initPixiGraph() {
           if (button) {
             style.color = stringColor2number(button.color)
             if (data.cur.type === TaskType.TASK) {
-              if (data.cur.status === TaskStatus.ACTIVE) {
+              if (data.cur.status === TaskStatus.ACTIVE || data.cur.status === TaskStatus.RELEASE) {
                 style.height = buttonHeight * 0.2
+              } else if (data.cur.status === TaskStatus.PREEMPT) {
+                style.opacity = 0.3
               }
             }
           }
@@ -741,6 +744,7 @@ function initPixiGraph() {
         styleMap.set(rid, style)
       }
       return {
+        opacity: style.opacity,
         color: style.color,
         height: style.height,
         borderWidth: model.selected ? 1 : 0,

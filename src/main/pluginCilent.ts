@@ -13,7 +13,7 @@ export default class PluginClient {
   log: PluginLOG
 
   constructor(
-    private name: string,
+    public name: string,
     private id: string,
     jsFilePath: string,
     nodeItem?: NodeClass
@@ -47,6 +47,7 @@ export default class PluginClient {
     return this.nodeItem.pool?.exec('plugin', method, params)
   }
   stop() {
+    this.nodeItem.pool?.clearHandlers()
     this.nodeItem.pool?.stopEmit()
   }
   close() {

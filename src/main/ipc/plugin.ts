@@ -92,7 +92,11 @@ export async function startPlugins(
       someipMap,
       testers
     )
-    await entry.nodeItem.start()
+    try {
+      await entry.nodeItem.start()
+    } catch (error) {
+      global.sysLog.error(`Failed to start plugin: ${entry.name}`, error)
+    }
   }
 }
 

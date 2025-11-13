@@ -343,7 +343,7 @@ export default class UdsTester {
             .exec('__eventDone', [
               id,
               {
-                err: `API ${event} can't be used in this ${this.env.MODE} mode`
+                err: `API ${event} can't be used in this ${this.env.MODE} mode, or application is not started`
               }
             ])
             .catch(reject)
@@ -353,6 +353,10 @@ export default class UdsTester {
   }
   registerHandler<T extends keyof HandlerMap>(id: T, handler: HandlerMap[T]): void {
     this.eventHandlerMap[id] = handler
+  }
+
+  clearHandlers() {
+    this.eventHandlerMap = {}
   }
   // async triggerPreSend(serviceName: string) {
   //   if (this.tester) {

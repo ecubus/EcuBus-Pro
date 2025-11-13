@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assign } from 'lodash'
 import { DataSet } from 'src/preload/data'
-import { reactive, watch } from 'vue'
+import { reactive, watch, ref } from 'vue'
 
 export { showOpenDialog, showSaveDialog } from './dialog'
 export type { DataSet } from 'src/preload/data'
@@ -38,6 +38,22 @@ if (window.$wujie?.bus) {
 // 模拟 Pinia 的 useDataStore，返回整个 dataSet
 export function useData() {
   return dataStore
+}
+
+// ============ useGlobalStart ============
+// 创建响应式的 globalStart（模拟 Pinia store）
+const globalStart = ref<boolean>(window.$wujie?.props?.globalStart ?? false)
+
+// 监听主应用发送的 globalStart 更新事件
+if (window.$wujie?.bus) {
+  window.$wujie.bus.$on('update:globalStart:fromMain', (newValue: boolean) => {
+    globalStart.value = newValue
+  })
+}
+
+// 模拟 Pinia 的 useGlobalStart，返回响应式的 globalStart ref
+export function useGlobalStart() {
+  return globalStart
 }
 
 export const eventBus = window.parent.logBus

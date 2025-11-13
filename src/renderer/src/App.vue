@@ -55,6 +55,14 @@ data.$subscribe((mutation, state) => {
   bus.$emit('update:dataStore:fromMain', cloneDeep(data.getData()))
 })
 
+// 监听 globalStart 的变化，同步到插件
+watch(
+  () => globalStart.value,
+  (newValue) => {
+    bus.$emit('update:globalStart:fromMain', newValue)
+  }
+)
+
 // Watch for dark theme changes
 watch(isDark, (value) => {
   VxeUI.setTheme(value ? 'dark' : 'default')

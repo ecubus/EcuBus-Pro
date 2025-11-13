@@ -6,7 +6,12 @@
       :url="entry"
       :fetch="isDev ? undefined : customFetch"
       :plugins="plugins"
-      :props="{ ...props, isDark: darkValue, dataStore: cloneDeep(dataStore.getData()) }"
+      :props="{
+        ...props,
+        isDark: darkValue,
+        dataStore: cloneDeep(dataStore.getData()),
+        globalStart: globalStartValue
+      }"
       :load-error="loadError"
     ></WujieVue>
   </div>
@@ -17,12 +22,14 @@ import { onUnmounted, toRef, unref } from 'vue'
 import { PluginItemConfig } from 'src/preload/plugin'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
+import { useGlobalStart } from '@r/stores/runtime'
 import { ElMessageBox } from 'element-plus'
 import { destroyApp } from 'wujie'
 import { cloneDeep } from 'lodash'
 import { InstanceofPlugin } from 'wujie-polyfill'
 import { useDark } from '@vueuse/core'
 const dataStore = useDataStore()
+const globalStartRef = useGlobalStart()
 const props = defineProps<{
   editIndex: string
   pluginId: string
@@ -44,6 +51,7 @@ const height = toRef(props, 'height')
 const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
 const isDark = useDark()
 const darkValue = unref(isDark)
+const globalStartValue = unref(globalStartRef)
 const basePath = plugin.path
 
 const importMap = {

@@ -131,19 +131,6 @@ export default class UdsTester {
         stdout: true,
         env: this.env,
         execArgv: execArgv
-      },
-
-      onTerminateWorker: (v: any) => {
-        error('worker terminated unexpectedly', v)
-        if (!this.selfStop) {
-          this.log.systemMsg('worker terminated unexpectedly', this.ts, 'error')
-        }
-        if (this.getInfoPromise) {
-          this.getInfoPromise.reject(new Error('worker terminated'))
-        }
-        // 避免在已经停止的情况下重复调用stop
-
-        this.stop(true)
       }
     })
     const d = (this.pool as any)._getWorker()
@@ -154,6 +141,17 @@ export default class UdsTester {
         () => {},
         () => {}
       )
+    }
+    d.errorHandler = (error: any) => {
+      if (!this.selfStop) {
+        this.log.systemMsg(`worker terminated by error: ${formatError(error)}`, this.ts, 'error')
+        // global.sysLog.error(`worker terminated unexpectedly: ${this.id}`, v)
+      }
+      if (this.getInfoPromise) {
+        this.getInfoPromise.reject(new Error('worker terminated'))
+      }
+
+      this.stop(true)
     }
 
     d.worker.stdout.on('data', (data: any) => {
@@ -226,6 +224,10 @@ export default class UdsTester {
   }
   private async workerEmit(method: string, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
+      if (this.worker.terminated) {
+        resolve(false)
+        return
+      }
       if (Object.keys(this.worker.processing).length > 0) {
         this.worker.exec('__on', [method, data]).then(resolve).catch(reject)
       } else {
@@ -418,6 +420,9 @@ export default class UdsTester {
     await this.workerEmit('__varFc', null)
   }
   async stopEmit() {
+    if (this.worker.terminated) {
+      return
+    }
     await this.workerEmit('__end', [])
   }
 

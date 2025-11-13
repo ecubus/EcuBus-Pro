@@ -48,6 +48,7 @@ export default class PluginClient {
   }
   stop() {
     this.nodeItem.pool?.clearHandlers()
+    this.nodeItem.pool?.registerHandler('pluginEvent', this.eventHandler.bind(this))
     this.nodeItem.pool?.stopEmit()
   }
   close() {

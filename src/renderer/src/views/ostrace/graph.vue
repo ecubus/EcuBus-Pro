@@ -11,7 +11,12 @@
         "
       >
         <el-button-group>
-          <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="isPaused ? 'Resume' : 'Pause'"
+            placement="bottom"
+            :show-after="500"
+          >
             <el-button
               :type="isPaused ? 'success' : 'warning'"
               link
@@ -25,7 +30,12 @@
         </el-button-group>
         <el-divider direction="vertical"></el-divider>
 
-        <el-tooltip effect="light" content="Load Off-Line Trace File" placement="bottom">
+        <el-tooltip
+          effect="light"
+          content="Load Off-Line Trace File"
+          placement="bottom"
+          :show-after="500"
+        >
           <el-button link type="primary" :disabled="globalStart" @click="loadOfflineTrace">
             <Icon :icon="addIcon" />
           </el-button>
@@ -34,6 +44,7 @@
           effect="light"
           content="Load offline data into a new trace window and link"
           placement="bottom"
+          :show-after="500"
         >
           <el-checkbox
             v-model="linkTrace"
@@ -44,11 +55,31 @@
         </el-tooltip>
 
         <el-divider direction="vertical"></el-divider>
-        <el-tooltip effect="light" content="Remove Selection" placement="bottom">
+        <el-tooltip effect="light" content="Remove Selection" placement="bottom" :show-after="500">
           <el-button link type="primary" :disabled="!selectStart" @click="removeSelection">
             <Icon :icon="cursorIcon" />
           </el-button>
         </el-tooltip>
+        <el-divider direction="vertical"></el-divider>
+        <div style="display: flex; align-items: center; gap: 4px">
+          <el-tooltip effect="light" content="Trigger Mode" placement="bottom" :show-after="500">
+            <el-button
+              link
+              type="primary"
+              :class="{ 'trigger-active': triggerEnabled }"
+              @click="showTriggerDialog = true"
+            >
+              <Icon :icon="triggerIcon" />
+              <span v-if="triggerTaskName" style="margin: 0 4px; font-size: 12px">
+                {{ triggerTaskName }}
+              </span>
+              <Icon
+                v-if="triggerTaskName"
+                :icon="triggerMode === 'single' ? lightningIcon : loopIcon"
+              />
+            </el-button>
+          </el-tooltip>
+        </div>
         <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
           <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
             Time: {{ time }}s
@@ -76,7 +107,7 @@
                 >
                   <div class="button-content">
                     <div
-                      v-show="!globalStart"
+                      v-show="isPaused"
                       class="arrow-left"
                       @click.stop="handleArrowClick('left', core.id, buttonIndex, button.name)"
                     >
@@ -84,7 +115,7 @@
                     </div>
                     <span class="button-text">{{ button.name }}</span>
                     <div
-                      v-show="!globalStart"
+                      v-show="isPaused"
                       class="arrow-right"
                       @click.stop="handleArrowClick('right', core.id, buttonIndex, button.name)"
                     >
@@ -97,7 +128,7 @@
           </div>
           <div class="controls-hint">
             <div class="hint-item">
-              <el-tooltip effect="light" placement="top">
+              <el-tooltip effect="light" placement="top" :show-after="500">
                 <template #content>
                   <div class="tooltip-content">
                     <div>
@@ -143,6 +174,71 @@
         <div class="divider"></div>
       </div>
     </div>
+    <!-- Trigger Configuration Dialog -->
+    <el-dialog
+      v-model="showTriggerDialog"
+      title="Trigger Configuration"
+      width="500px"
+      align-center
+      :append-to="`#win${editIndex}`"
+      :close-on-click-modal="false"
+    >
+      <el-form label-width="120px" size="small">
+        <el-form-item label="Enable Trigger">
+          <el-switch v-model="triggerEnabled" />
+        </el-form-item>
+
+        <el-form-item label="Trigger Source">
+          <el-select
+            v-model="triggerSourceType"
+            placeholder="Select Type"
+            style="width: 100%"
+            :disabled="!triggerEnabled"
+            @change="onTriggerSourceTypeChange"
+          >
+            <el-option label="TASK" :value="TaskType.TASK" />
+            <el-option label="ISR" :value="TaskType.ISR" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Task/ISR">
+          <el-select
+            v-model="triggerSourceTaskId"
+            placeholder="Select Task/ISR"
+            style="width: 100%"
+            :disabled="!triggerEnabled"
+            @change="onTriggerSourceTaskChange"
+          >
+            <el-option
+              v-for="task in availableTasks"
+              :key="`${task.coreId}_${task.id}_${task.type}`"
+              :label="`${task.name} (Core ${task.coreId})`"
+              :value="`${task.coreId}_${task.id}_${task.type}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Status">
+          <el-select
+            v-model="triggerSourceStatus"
+            placeholder="Select Status"
+            style="width: 100%"
+            :disabled="!triggerEnabled"
+          >
+            <el-option
+              v-for="(label, status) in availableStatuses"
+              :key="status"
+              :label="label"
+              :value="Number(status)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Trigger Mode">
+          <el-radio-group v-model="triggerMode" :disabled="!triggerEnabled">
+            <el-radio label="single">Single (Pause on trigger)</el-radio>
+            <el-radio label="continue">Continue (Move view on trigger)</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script lang="ts" setup>
@@ -152,6 +248,9 @@ import addIcon from '@iconify/icons-material-symbols/add-circle-outline'
 import cursorIcon from '@iconify/icons-ph/cursor-text-bold'
 import mouseIcon from '@iconify/icons-material-symbols/mouse'
 import helpOutlineIcon from '@iconify/icons-material-symbols/help-outline'
+import triggerIcon from '@iconify/icons-material-symbols/radio-button-checked'
+import lightningIcon from '@iconify/icons-material-symbols/bolt'
+import loopIcon from '@iconify/icons-material-symbols/autorenew'
 import {
   ref,
   onMounted,
@@ -210,6 +309,8 @@ let startOffset1: bigint = 0n
 let startOffsetNumber: number = 0
 let offlineLoading: any = null
 let lastEventTs: number = 0
+
+let pendingTriggerTime: bigint[] = []
 const workerRowIds = ref<number[]>([])
 let pendingDataResolve:
   | (
@@ -262,6 +363,9 @@ dataHandlerWorker.onmessage = (event) => {
     const resolver = pendingDataResolve
     pendingDataResolve = null
     if (resolver) resolver(msg.payload)
+  } else if (msg.type === 'triggerTime') {
+    // 处理触发时间（worker 检测到触发时立即发送）
+    pendingTriggerTime.push(BigInt(msg.payload.triggerTime))
   } else if (msg.type === 'foundState') {
     const resolver = pendingFindStateResolve
     pendingFindStateResolve = null
@@ -274,6 +378,12 @@ dataHandlerWorker.onmessage = (event) => {
   }
 }
 const isPaused = ref(false)
+const triggerEnabled = ref(false)
+const showTriggerDialog = ref(false)
+const triggerSourceType = ref<TaskType>(TaskType.TASK)
+const triggerSourceTaskId = ref<string | null>(null)
+const triggerSourceStatus = ref<number | null>(null)
+const triggerMode = ref<'single' | 'continue'>('single')
 const leftWidth = ref(200)
 const props = defineProps<{
   height: number
@@ -321,6 +431,28 @@ const updateTime = () => {
     start: BigInt(Math.floor((maxX - 0.4 - 0.1) * 1000000)),
     end: BigInt(Math.floor((maxX - 0.4 + 0.1) * 1000000))
   }
+
+  if (triggerEnabled.value) {
+    const firstOne = pendingTriggerTime[0]
+    if (firstOne) {
+      if (firstOne <= BigInt(Math.floor((maxX - 0.4) * 1000000))) {
+        pendingTriggerTime.shift()
+        if (triggerMode.value === 'single') {
+          isPaused.value = true
+        }
+        unitController.viewRange = {
+          start: firstOne - 100000n,
+          end: firstOne + 100000n
+        }
+
+        unitController.selectionRange = {
+          start: firstOne,
+          end: firstOne
+        }
+        selectStart.value = firstOne
+      }
+    }
+  }
 }
 const globalStart = useGlobalStart()
 
@@ -356,7 +488,7 @@ function startFunc() {
   startOffset = BigInt(0)
   startOffset1 = startOffset
   unitController.absoluteRange = BigInt(0)
-
+  pendingTriggerTime = []
   dataHandlerWorker.postMessage({
     type: 'getRowIds',
     payload: {
@@ -535,6 +667,96 @@ const toolTipInfo = ref<{
   cur: OsEvent
   next: OsEvent
 } | null>(null)
+
+// 获取可用的任务/ISR 列表
+const availableTasks = computed(() => {
+  if (triggerSourceType.value === null) return []
+  const tasks: Array<{ coreId: number; id: number; type: TaskType; name: string }> = []
+  for (const task of orti.value.coreConfigs) {
+    if (task.type === triggerSourceType.value) {
+      tasks.push({
+        coreId: task.coreId,
+        id: task.id,
+        type: task.type,
+        name: task.name
+      })
+    }
+  }
+  return tasks
+})
+
+// 获取可用的状态列表
+const availableStatuses = computed(() => {
+  if (triggerSourceType.value === TaskType.TASK) {
+    return taskStatusRecord
+  } else if (triggerSourceType.value === TaskType.ISR) {
+    return isrStatusRecord
+  }
+  return {}
+})
+
+// 当触发源类型改变时，重置任务和状态选择
+function onTriggerSourceTypeChange() {
+  triggerSourceTaskId.value = null
+  triggerSourceStatus.value = null
+}
+
+// 当触发源任务改变时，重置状态选择
+function onTriggerSourceTaskChange() {
+  triggerSourceStatus.value = null
+}
+
+// 获取当前触发的任务名称
+const triggerTaskName = computed(() => {
+  if (!triggerEnabled.value || !triggerSourceTaskId.value || triggerSourceStatus.value === null) {
+    return ''
+  }
+  const task = availableTasks.value.find(
+    (t) => `${t.coreId}_${t.id}_${t.type}` === triggerSourceTaskId.value
+  )
+  if (!task) return ''
+  const statusLabel =
+    triggerSourceType.value === TaskType.TASK
+      ? taskStatusRecord[triggerSourceStatus.value as TaskStatus]
+      : isrStatusRecord[triggerSourceStatus.value as IsrStatus]
+  return `${task.name} (${statusLabel})`
+})
+
+// 更新 worker 中的 trigger 配置
+function updateTriggerConfig() {
+  if (
+    !triggerEnabled.value ||
+    triggerSourceType.value === null ||
+    triggerSourceTaskId.value === null ||
+    triggerSourceStatus.value === null
+  ) {
+    dataHandlerWorker.postMessage({
+      type: 'setTriggerConfig',
+      payload: {
+        enabled: false,
+        type: null,
+        coreId: null,
+        id: null,
+        status: null
+      }
+    })
+    return
+  }
+
+  // 解析选中的任务 ID (格式: "coreId_id_type")
+  const [coreId, id] = triggerSourceTaskId.value.split('_').map(Number)
+  pendingTriggerTime = []
+  dataHandlerWorker.postMessage({
+    type: 'setTriggerConfig',
+    payload: {
+      enabled: true,
+      type: triggerSourceType.value,
+      coreId: coreId,
+      id: id,
+      status: triggerSourceStatus.value
+    }
+  })
+}
 
 // 获取状态 label
 function getStatusLabel(type: TaskType, status: number): string {
@@ -1061,6 +1283,7 @@ const handleArrowClick = async (
 watch(
   () => isPaused.value,
   (paused) => {
+    pendingTriggerTime = []
     if (paused && timer) {
       clearInterval(timer)
       timer = null
@@ -1161,7 +1384,8 @@ function logDisplay({
   //filter by instance
   const filteredValues = values.filter((value) => value.instance === orti.value.name)
   const events = filteredValues.map((value) => value.message.data.raw)
-  // send to worker
+
+  // send to worker (trigger 检测在 worker 中处理)
   dataHandlerWorker.postMessage({
     type: 'updateEvents',
     payload: {
@@ -1175,6 +1399,16 @@ function logDisplay({
   }
   lastEventTs = filteredValues.at(-1)?.message.data.ts || 0
 }
+
+// 监听 trigger 配置变化，更新 worker
+watch(
+  [triggerEnabled, triggerSourceType, triggerSourceTaskId, triggerSourceStatus],
+  () => {
+    updateTriggerConfig()
+  },
+  { deep: true }
+)
+
 // Zoom and pan functionality is now handled by PixiGraphRenderer
 onMounted(() => {
   // Wait for DOM to be ready
@@ -1233,6 +1467,12 @@ onUnmounted(() => {
   box-shadow: inset 0 0 4px var(--el-color-info-light-5);
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.trigger-active {
+  box-shadow: inset 0 0 4px var(--el-color-primary-light-5);
+  border-radius: 4px;
+  background-color: rgba(64, 158, 255, 0.1);
 }
 
 .main {

@@ -41,6 +41,19 @@ class OfflineDataProvider {
     name: string
     buttons: Array<{ name: string; color: string; id: string; numberId: number }>
   }> = []
+  private triggerConfig: {
+    enabled: boolean
+    type: TaskType | null
+    coreId: number | null
+    id: number | null
+    status: number | null
+  } = {
+    enabled: false,
+    type: null,
+    coreId: null,
+    id: null,
+    status: null
+  }
 
   constructor() {}
 
@@ -89,6 +102,19 @@ class OfflineDataProvider {
         e.ts = e.ts - this.absoluteStartNumber
       }
       this.events.push(e)
+
+      // 检查新事件是否有触发，找到后立即发送消息
+      if (this.triggerConfig.enabled) {
+        if (this.checkTrigger(e)) {
+          // 计算绝对时间
+
+          // 立即发送触发时间消息
+          respond({
+            type: 'triggerTime',
+            payload: { triggerTime: e.ts }
+          })
+        }
+      }
     }
     // Since timestamps are always increasing, we can directly append without sorting
 
@@ -210,6 +236,34 @@ class OfflineDataProvider {
     }
 
     return result
+  }
+
+  setTriggerConfig(config: {
+    enabled: boolean
+    type: TaskType | null
+    coreId: number | null
+    id: number | null
+    status: number | null
+  }) {
+    this.triggerConfig = config
+  }
+
+  checkTrigger(event: OsEvent): boolean {
+    if (!this.triggerConfig.enabled) return false
+    if (
+      this.triggerConfig.type === null ||
+      this.triggerConfig.coreId === null ||
+      this.triggerConfig.id === null ||
+      this.triggerConfig.status === null
+    ) {
+      return false
+    }
+    return (
+      event.type === this.triggerConfig.type &&
+      event.coreId === this.triggerConfig.coreId &&
+      event.id === this.triggerConfig.id &&
+      event.status === this.triggerConfig.status
+    )
   }
 
   getData(opts: { range?: TimelineChart.TimeGraphRange; resolution?: number }): {
@@ -396,6 +450,16 @@ type InMsg =
         events: OsEvent[]
       }
     }
+  | {
+      type: 'setTriggerConfig'
+      payload: {
+        enabled: boolean
+        type: TaskType | null
+        coreId: number | null
+        id: number | null
+        status: number | null
+      }
+    }
 
 type OutMsg =
   | {
@@ -422,6 +486,10 @@ type OutMsg =
       }
     }
   | { type: 'error'; payload: { message: string } }
+  | {
+      type: 'triggerTime'
+      payload: { triggerTime: number }
+    }
   | {
       type: 'foundState'
       payload: { id?: string; start?: bigint; event?: OsEvent }
@@ -640,6 +708,10 @@ self.onmessage = async (e: MessageEvent<InMsg>) => {
       //     start: provider.getAbsoluteStart()
       //   }
       // })
+      return
+    }
+    if (msg.type === 'setTriggerConfig') {
+      provider.setTriggerConfig(msg.payload)
       return
     }
   } catch (err: any) {

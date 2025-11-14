@@ -107,7 +107,7 @@
                 >
                   <div class="button-content">
                     <div
-                      v-show="isPaused"
+                      v-show="isPaused || !globalStart"
                       class="arrow-left"
                       @click.stop="handleArrowClick('left', core.id, buttonIndex, button.name)"
                     >
@@ -115,7 +115,7 @@
                     </div>
                     <span class="button-text">{{ button.name }}</span>
                     <div
-                      v-show="isPaused"
+                      v-show="isPaused || !globalStart"
                       class="arrow-right"
                       @click.stop="handleArrowClick('right', core.id, buttonIndex, button.name)"
                     >
@@ -955,10 +955,9 @@ function initPixiGraph() {
           if (button) {
             style.color = stringColor2number(button.color)
             if (data.cur.type === TaskType.TASK) {
-              if (data.cur.status === TaskStatus.ACTIVE || data.cur.status === TaskStatus.RELEASE) {
+              if (data.cur.status != TaskStatus.START) {
                 style.height = buttonHeight * 0.2
-              } else if (data.cur.status === TaskStatus.PREEMPT) {
-                style.opacity = 0.3
+                style.opacity = 0.8
               }
             }
           }
@@ -1715,7 +1714,7 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: center;
   gap: 2px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--el-text-color-regular);
   background: var(--el-bg-color-overlay);
   padding: 2px 4px;
@@ -1736,7 +1735,7 @@ onUnmounted(() => {
   border: 1px solid var(--el-border-color);
   border-radius: 2px;
   padding: 1px 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-family: monospace;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   line-height: 1;
@@ -1778,7 +1777,7 @@ onUnmounted(() => {
   border: 1px solid var(--el-border-color);
   border-radius: 2px;
   padding: 1px 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-family: monospace;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   line-height: 1;

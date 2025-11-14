@@ -956,8 +956,12 @@ function initPixiGraph() {
             style.color = stringColor2number(button.color)
             if (data.cur.type === TaskType.TASK) {
               if (data.cur.status != TaskStatus.START) {
-                style.height = buttonHeight * 0.2
+                style.height = buttonHeight * 0.4
                 style.opacity = 0.8
+                if (data.cur.status == TaskStatus.WAIT) {
+                  style.opacity = 0.5
+                  style.height = buttonHeight * 0.2
+                }
               }
             }
           }

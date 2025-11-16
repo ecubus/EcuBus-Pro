@@ -22,8 +22,8 @@ export interface ParseCallbacks {
 export class OsTraceParser {
   private leftBuffer: Buffer = Buffer.alloc(0)
   private leftCsvBuffer: string = ''
-  private index?: number
-  private lastRawTimestamp?: number
+  private indexByCore: Map<number, number> = new Map()
+  private lastRawTimestampByCore: Map<number, number> = new Map()
   private tsOverflow = 0
   private closeFlag = false
   private flushFlag = false
@@ -136,24 +136,26 @@ export class OsTraceParser {
       // Valid frame found - remove the entire frame from buffer
       this.leftBuffer = this.leftBuffer.subarray(FRAME_LENGTH)
 
-      // Check index continuity
-      if (this.index == undefined) {
-        this.index = currentIndex
+      // Check index continuity per core
+      const coreIndex = this.indexByCore.get(coreID)
+      if (coreIndex == undefined) {
+        this.indexByCore.set(coreID, currentIndex)
       } else {
-        const expectedIndex = (this.index + 1) & 0xff
+        const expectedIndex = (coreIndex + 1) & 0xff
         if (currentIndex != expectedIndex) {
           this.callbacks.onError(
-            `Index mismatch! Expected: ${expectedIndex}, Received: ${currentIndex}, Block: ${block.toString('hex')}`
+            `Index mismatch on core ${coreID}! Expected: ${expectedIndex}, Received: ${currentIndex}, Block: ${block.toString('hex')}`
           )
         }
-        this.index = currentIndex
+        this.indexByCore.set(coreID, currentIndex)
       }
 
-      // Detect timestamp overflow using raw timestamp (not divided by frequency)
-      if (this.lastRawTimestamp != undefined && rawTimestamp32 < this.lastRawTimestamp) {
+      // Detect timestamp overflow using raw timestamp (not divided by frequency) per core
+      const coreLastRawTimestamp = this.lastRawTimestampByCore.get(coreID)
+      if (coreLastRawTimestamp != undefined && rawTimestamp32 < coreLastRawTimestamp) {
         this.tsOverflow++
       }
-      this.lastRawTimestamp = rawTimestamp32
+      this.lastRawTimestampByCore.set(coreID, rawTimestamp32)
 
       // Convert to OsEvent using unified structure - use raw timestamp with overflow
       const rawTs = this.getRealTs(rawTimestamp32)
@@ -216,26 +218,25 @@ export class OsTraceParser {
       }
       if (!line.trim()) continue // Skip empty lines
 
-      const [timestamp, type, id, status] = line.split(',')
+      const [timestamp, type, id, status, coreIDU] = line.split(',')
 
       // Validate data before parsing
       if (!timestamp || !type || !id || !status) continue
-      if (this.index == undefined) {
-        this.index = 0
-      }
+      const coreID = parseInt(coreIDU || '0')
+      const coreIndex = this.indexByCore.get(coreID)
+      const currentIndex = coreIndex == undefined ? 0 : (coreIndex + 1) & 0xff
+      this.indexByCore.set(coreID, currentIndex)
       const osEvent: OsEvent = {
-        index: this.index,
+        index: currentIndex,
         database: this.orti.id,
         type: parseInt(type),
         id: parseInt(id),
         status: parseInt(status),
-        coreId: 0,
+        coreId: coreID,
         ts: parseInt(timestamp),
         comment: ''
       }
       const realTs = osEvent.ts / this.orti.cpuFreq
-
-      this.index++
 
       // Notify via callback
       this.callbacks.onEvent(osEvent, realTs)

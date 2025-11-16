@@ -1352,7 +1352,6 @@ function openApi() {
 function openOsTrace(index: string) {
   if (index.endsWith('_TimeLine')) {
     index = index.replace('_TimeLine', '')
-    console.log(index)
     layoutMaster.addWin('osTime', `${index}_time`, {
       name: dataBase.database.orti[index].name,
       params: {

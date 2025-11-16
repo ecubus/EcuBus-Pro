@@ -113,7 +113,9 @@
                     >
                       <Icon :icon="'material-symbols:chevron-left'" />
                     </div>
-                    <span class="button-text">{{ button.name }}</span>
+                    <span class="button-text" :style="{ width: buttonTextMaxWidth + 'px' }">{{
+                      button.name
+                    }}</span>
                     <div
                       v-show="isPaused || !globalStart"
                       class="arrow-right"
@@ -176,6 +178,7 @@
     </div>
     <!-- Trigger Configuration Dialog -->
     <el-dialog
+      v-if="showTriggerDialog"
       v-model="showTriggerDialog"
       title="Trigger Configuration"
       width="500px"
@@ -562,6 +565,19 @@ const runtimeStore = useRuntimeStore()
 
 const graphWidth = computed(() => width.value - leftWidth.value - 1 - 10)
 const graphHeight = computed(() => height.value - 45)
+
+// 计算文本区域的最大宽度：leftWidth - core-label(24px) - button borders(40px) - content padding(48px)
+// 箭头是绝对定位的，不占用布局空间，但文本需要避免延伸到箭头下方，所以再减去箭头空间(40px)
+const buttonTextMaxWidth = computed(() => {
+  const coreLabelWidth = 24 // core-label-vertical 的宽度
+  const buttonBorderWidth = 40 // button-item 左右 border 各 20px
+  const contentPadding = 0 // button-content 左右 padding 各 24px
+  const arrowSpace = 40 // 左右箭头各占 20px 空间，确保文本不延伸到箭头下方
+  return Math.max(
+    0,
+    leftWidth.value - coreLabelWidth - buttonBorderWidth - contentPadding - arrowSpace
+  )
+})
 const unitController = new TimeGraphUnitController(BigInt(0))
 unitController.worldRenderFactor = 20
 
@@ -1002,8 +1018,8 @@ function initPixiGraph() {
   }
 
   // const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', buttonHeight.value)
-
-  rowController = new TimeGraphRowController(buttonHeight, buttonHeight * workerRowIds.value.length)
+  const buttonsNums = coreConfigs.value.reduce((acc, core) => acc + core.buttons.length, 0)
+  rowController = new TimeGraphRowController(buttonHeight, buttonHeight * buttonsNums)
   rowController.onVerticalOffsetChangedHandler(setYOffset)
 
   timeGraphChart = new TimeGraphChart(`timeGraphChart-${charid.value}`, providers, rowController)
@@ -1574,6 +1590,11 @@ onUnmounted(() => {
 .core-section {
   display: flex;
   flex-direction: row;
+  border-bottom: 1px solid var(--el-color-info-dark-2);
+}
+
+.core-section:last-child {
+  border-bottom: none;
 }
 
 .core-label-vertical {
@@ -1653,12 +1674,11 @@ onUnmounted(() => {
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 0 8px;
+  padding: 0 4px;
   position: relative;
 }
 
 .button-text {
-  flex: 1;
   text-align: center;
   font-size: 12px;
   font-weight: 500;
@@ -1666,6 +1686,7 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0 auto;
 }
 
 .arrow-left,

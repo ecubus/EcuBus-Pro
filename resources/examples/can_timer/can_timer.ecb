@@ -74,7 +74,7 @@
               "type": "periodic",
               "period": 10
             },
-            "name": "10ms",
+            "name": "10ms-1",
             "id": "1",
             "channel": "030b067c-a10c-464e-b54f-d442b525becc",
             "type": "canfd",
@@ -92,6 +92,45 @@
             "_X_ROW_KEY": "row_24",
             "brs": true,
             "uuid": "row_16"
+          },
+          {
+            "uuid": "36a07124-b132-495c-811a-00374d1e2a17",
+            "trigger": {
+              "type": "periodic",
+              "period": 10
+            },
+            "name": "10ms-2",
+            "id": "2",
+            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "type": "can",
+            "dlc": 8,
+            "data": []
+          },
+          {
+            "uuid": "079f4bc7-dd62-4eec-a12e-8e6ca51f5b7c",
+            "trigger": {
+              "type": "periodic",
+              "period": 10
+            },
+            "name": "10ms-3",
+            "id": "3",
+            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "type": "can",
+            "dlc": 8,
+            "data": []
+          },
+          {
+            "uuid": "09923f55-059a-4ae8-b6b1-274f5df3c6cf",
+            "trigger": {
+              "type": "periodic",
+              "period": 10
+            },
+            "name": "10ms-4",
+            "id": "4",
+            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "type": "can",
+            "dlc": 8,
+            "data": []
           }
         ]
       }
@@ -119,46 +158,85 @@
         "type": "variable",
         "enable": true,
         "id": "4d8399e2-5b51-46f5-9e30-546568335847",
-        "name": "DIFF",
-        "color": "rgb(254, 0, 42)",
+        "name": "DIFF1",
+        "color": "#68aff0",
         "yAxis": {
-          "min": 8.2,
-          "max": 11.8,
-          "unit": "ms",
-          "splitLine": {
-            "show": false
-          },
-          "name": "DIFF"
+          "min": 5,
+          "max": 15,
+          "unit": "ms"
         },
         "bindValue": {
           "variableId": "4d8399e2-5b51-46f5-9e30-546568335847",
           "variableType": "user",
-          "variableName": "DIFF",
-          "variableFullName": "DIFF",
+          "variableName": "DIFF1",
+          "variableFullName": "DIFF1",
           "variableValueType": "number"
         },
         "graph": {
           "id": "graph"
+        }
+      },
+      "dcc5d8bf-fe22-4055-a52d-706bf16df049": {
+        "type": "variable",
+        "enable": true,
+        "id": "dcc5d8bf-fe22-4055-a52d-706bf16df049",
+        "name": "DIFF2",
+        "color": "#7541d0",
+        "yAxis": {
+          "min": 5,
+          "max": 15
         },
-        "xAxis": {
-          "splitLine": {
-            "show": false,
-            "lineStyle": {
-              "type": "dashed"
-            }
-          },
-          "axisPointer": {
-            "show": false
-          }
+        "bindValue": {
+          "variableId": "dcc5d8bf-fe22-4055-a52d-706bf16df049",
+          "variableType": "user",
+          "variableName": "DIFF2",
+          "variableFullName": "DIFF2",
+          "variableValueType": "number"
         },
-        "disZoom": false,
-        "tooltip": {
-          "show": true
+        "graph": {
+          "id": "graph"
+        }
+      },
+      "ef803f48-577d-4c24-b771-311eb30b3e93": {
+        "type": "variable",
+        "enable": true,
+        "id": "ef803f48-577d-4c24-b771-311eb30b3e93",
+        "name": "DIFF3",
+        "color": "#3c0158",
+        "yAxis": {
+          "min": 5,
+          "max": 15
         },
-        "series": {
-          "showSymbol": false,
-          "symbolSize": 6,
-          "symbol": "circle"
+        "bindValue": {
+          "variableId": "ef803f48-577d-4c24-b771-311eb30b3e93",
+          "variableType": "user",
+          "variableName": "DIFF3",
+          "variableFullName": "DIFF3",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
+        }
+      },
+      "a0cd7fb9-f286-49b5-b2ee-0a027f489c53": {
+        "type": "variable",
+        "enable": true,
+        "id": "a0cd7fb9-f286-49b5-b2ee-0a027f489c53",
+        "name": "DIFF4",
+        "color": "#f11cba",
+        "yAxis": {
+          "min": 5,
+          "max": 15
+        },
+        "bindValue": {
+          "variableId": "a0cd7fb9-f286-49b5-b2ee-0a027f489c53",
+          "variableType": "user",
+          "variableName": "DIFF4",
+          "variableFullName": "DIFF4",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
         }
       }
     },
@@ -208,7 +286,7 @@
     },
     "vars": {
       "4d8399e2-5b51-46f5-9e30-546568335847": {
-        "name": "DIFF",
+        "name": "DIFF1",
         "desc": "",
         "type": "user",
         "value": {
@@ -219,6 +297,42 @@
           "unit": "ms"
         },
         "id": "4d8399e2-5b51-46f5-9e30-546568335847"
+      },
+      "dcc5d8bf-fe22-4055-a52d-706bf16df049": {
+        "name": "DIFF2",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 5,
+          "max": 15
+        },
+        "id": "dcc5d8bf-fe22-4055-a52d-706bf16df049"
+      },
+      "ef803f48-577d-4c24-b771-311eb30b3e93": {
+        "name": "DIFF3",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 5,
+          "max": 15
+        },
+        "id": "ef803f48-577d-4c24-b771-311eb30b3e93"
+      },
+      "a0cd7fb9-f286-49b5-b2ee-0a027f489c53": {
+        "name": "DIFF4",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": "5",
+          "min": 5,
+          "max": 15
+        },
+        "id": "a0cd7fb9-f286-49b5-b2ee-0a027f489c53"
       }
     },
     "datas": {},
@@ -275,8 +389,8 @@
       },
       "c24115ee-7080-4573-a216-af88cea85085_ia": {
         "pos": {
-          "x": 286,
-          "y": 491,
+          "x": 30,
+          "y": 240,
           "w": 1057,
           "h": 400
         },
@@ -309,10 +423,10 @@
       },
       "graph": {
         "pos": {
-          "x": 1424,
-          "y": 429,
+          "x": 1275,
+          "y": 25,
           "w": 1070,
-          "h": 400
+          "h": 882
         },
         "title": "graph",
         "label": "Line",
@@ -322,6 +436,18 @@
             "edit-index": "graph"
           }
         }
+      },
+      "variable": {
+        "pos": {
+          "x": 1404,
+          "y": 462,
+          "w": 1042,
+          "h": 400
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
+        "options": {}
       }
     },
     "example": {

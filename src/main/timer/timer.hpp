@@ -8,6 +8,7 @@
 #include <vector>
 #include <chrono>
 #include <stdexcept>
+#include <cstdio>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,6 +20,8 @@
 #include <unistd.h>
 #include <cstring>
 #include <cerrno>
+#include <pthread.h>
+#include <sched.h>
 #endif
 
 // CAN 消息结构
@@ -62,8 +65,16 @@ public:
             throw std::invalid_argument("period cannot be smaller than 1 ms");
 
 #ifdef _WIN32
-        // 设置系统定时器精度为1ms
-        timeBeginPeriod(1);
+        // 设置系统定时器精度为最高（0.5ms）
+        // 注意：这会增加功耗，但提高精度
+        TIMECAPS tc;
+        if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) {
+            // 使用系统支持的最小分辨率
+            timeBeginPeriod(tc.wPeriodMin);
+        } else {
+            // 回退到 1ms
+            timeBeginPeriod(1);
+        }
         
         // 创建停止事件
         hStopEvent_ = CreateEventW(NULL, TRUE, FALSE, NULL);
@@ -111,7 +122,14 @@ public:
             CloseHandle(hStopEvent_);
             hStopEvent_ = NULL;
         }
-        timeEndPeriod(1);
+        
+        // 恢复系统定时器精度
+        TIMECAPS tc;
+        if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) {
+            timeEndPeriod(tc.wPeriodMin);
+        } else {
+            timeEndPeriod(1);
+        }
 #else
         if (timerfd_ >= 0) {
             close(timerfd_);
@@ -166,11 +184,22 @@ public:
         thread_ = std::thread(&CyclicSendTask::run, this);
 
 #ifdef _WIN32
-        // 设置较高优先级（不需要 TIME_CRITICAL，因为使用系统定时器）
-        SetThreadPriority(thread_.native_handle(), THREAD_PRIORITY_ABOVE_NORMAL);
+        // 设置高优先级，在高系统负载下仍能保持精度
+        // TIME_CRITICAL 确保在系统忙碌时不被普通进程抢占
+        SetThreadPriority(thread_.native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
+        
+        // 可选：设置 CPU 亲和性，避免线程在不同 CPU 间迁移
+        // DWORD_PTR affinityMask = 1;  // 绑定到 CPU 0
+        // SetThreadAffinityMask(thread_.native_handle(), affinityMask);
 #else
-        // Linux 下可选设置较高优先级
-        // 不设置实时优先级也能保持良好精度
+        // Linux 下设置实时优先级，提高在高负载下的稳定性
+        // 需要适当的权限（CAP_SYS_NICE）
+        struct sched_param sch_params;
+        sch_params.sched_priority = sched_get_priority_max(SCHED_FIFO);
+        if (pthread_setschedparam(thread_.native_handle(), SCHED_FIFO, &sch_params) != 0) {
+            // 如果设置失败（权限不足），继续运行但精度可能降低
+            // 可以选择记录警告日志
+        }
 #endif
     }
 

@@ -322,7 +322,7 @@ const updateTime = () => {
   Object.values(chartDataCache).forEach((v) => {
     const lastOne = v[v.length - 1]
     if (lastOne) {
-      const val = lastOne[0] as number
+      const val = (lastOne[0] as number) / 1000000
       if (val > maxX) {
         maxX = val
       }
@@ -521,7 +521,6 @@ function dataUpdate({
   if (isPaused.value || !globalStart.value) {
     return
   }
-
   // 获取对应的echarts实例
   const chart = chartInstances[key]
   if (!chart) return

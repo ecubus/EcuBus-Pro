@@ -2379,42 +2379,29 @@ export function getSignal(signal: SignalName): {
  * @category Variable
  * @param {keyof VariableMap} name - The variable name
  * @param {number|number[]|string} value - The value to set, can be single number or array
- * @returns {Promise<void>} - Returns a promise that resolves when value is set
+ * @returns {void} - Returns nothing
  *
  * @example
  * ```ts
  * // Set single value signal
- * await setVar('var2', 123);
+ * setVar('var2', 123);
  *
  * // Set array value signal
- * await setVar('namespace.var1', [1, 2, 3, 4]);
+ * setVar('namespace.var1', [1, 2, 3, 4]);
  * ```
  */
-export async function setVar<T extends keyof VariableMap>(
-  name: T,
-  value: VariableMap[T]
-): Promise<void> {
-  const p: Promise<void> = new Promise((resolve, reject) => {
-    const { found, target } = setVarMain(name, value)
-    if (found && target) {
-      workerpool.workerEmit({
-        id: id,
-        event: 'varApi',
-        data: {
-          method: 'setVar',
-          name,
-          value
-        }
-      })
-      emitMap.set(id, { resolve, reject })
-
-      id++
-    } else {
-      reject(new Error(`var ${name} not found`))
-    }
-  })
-
-  return await p
+export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]) {
+  const { found, target } = setVarMain(name, value)
+  if (found && target) {
+    workerpool.workerEmit({
+      event: 'varApi',
+      data: {
+        method: 'setVar',
+        name,
+        value
+      }
+    })
+  }
 }
 
 /**

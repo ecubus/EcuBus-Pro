@@ -72,9 +72,9 @@
           {
             "trigger": {
               "type": "periodic",
-              "period": 5
+              "period": 10
             },
-            "name": "5ms",
+            "name": "10ms",
             "id": "1",
             "channel": "030b067c-a10c-464e-b54f-d442b525becc",
             "type": "canfd",
@@ -92,36 +92,6 @@
             "_X_ROW_KEY": "row_24",
             "brs": true,
             "uuid": "row_16"
-          },
-          {
-            "trigger": {
-              "type": "periodic",
-              "period": 3
-            },
-            "name": "",
-            "id": "2",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
-            "type": "canfd",
-            "dlc": 15,
-            "data": [],
-            "_X_ROW_KEY": "row_25",
-            "brs": true,
-            "uuid": "row_17"
-          },
-          {
-            "trigger": {
-              "type": "periodic",
-              "period": 1
-            },
-            "name": "",
-            "id": "3",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
-            "type": "canfd",
-            "dlc": 15,
-            "data": [],
-            "_X_ROW_KEY": "row_26",
-            "brs": true,
-            "uuid": "row_18"
           }
         ]
       }
@@ -133,7 +103,7 @@
         "name": "Node 1",
         "id": "a788d03f-f4d2-4294-a2fe-2fc86cecd1ce",
         "channel": [
-          "eb8321b1-b3a4-43bc-a363-af51c21a2eb9"
+          "030b067c-a10c-464e-b54f-d442b525becc"
         ],
         "workNode": "",
         "script": "ecu.ts"
@@ -144,7 +114,54 @@
       "can": {},
       "orti": {}
     },
-    "graphs": {},
+    "graphs": {
+      "4d8399e2-5b51-46f5-9e30-546568335847": {
+        "type": "variable",
+        "enable": true,
+        "id": "4d8399e2-5b51-46f5-9e30-546568335847",
+        "name": "DIFF",
+        "color": "rgb(254, 0, 42)",
+        "yAxis": {
+          "min": 8.2,
+          "max": 11.8,
+          "unit": "ms",
+          "splitLine": {
+            "show": false
+          },
+          "name": "DIFF"
+        },
+        "bindValue": {
+          "variableId": "4d8399e2-5b51-46f5-9e30-546568335847",
+          "variableType": "user",
+          "variableName": "DIFF",
+          "variableFullName": "DIFF",
+          "variableValueType": "number"
+        },
+        "graph": {
+          "id": "graph"
+        },
+        "xAxis": {
+          "splitLine": {
+            "show": false,
+            "lineStyle": {
+              "type": "dashed"
+            }
+          },
+          "axisPointer": {
+            "show": false
+          }
+        },
+        "disZoom": false,
+        "tooltip": {
+          "show": true
+        },
+        "series": {
+          "showSymbol": false,
+          "symbolSize": 6,
+          "symbol": "circle"
+        }
+      }
+    },
     "guages": {
       "Statistics.030b067c-a10c-464e-b54f-d442b525becc.BusLoad": {
         "type": "variable",
@@ -189,7 +206,21 @@
         }
       }
     },
-    "vars": {},
+    "vars": {
+      "4d8399e2-5b51-46f5-9e30-546568335847": {
+        "name": "DIFF",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 5,
+          "max": 15,
+          "unit": "ms"
+        },
+        "id": "4d8399e2-5b51-46f5-9e30-546568335847"
+      }
+    },
     "datas": {},
     "panels": {},
     "logs": {},
@@ -210,7 +241,8 @@
         ],
         "filterId": []
       }
-    }
+    },
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -229,18 +261,6 @@
         "id": "message",
         "layoutType": "bottom"
       },
-      "hardware": {
-        "pos": {
-          "x": 106,
-          "y": 46,
-          "w": 802,
-          "h": 601
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
-        "options": {}
-      },
       "network": {
         "pos": {
           "x": 1625,
@@ -255,9 +275,9 @@
       },
       "c24115ee-7080-4573-a216-af88cea85085_ia": {
         "pos": {
-          "x": 577,
-          "y": 520,
-          "w": 1041,
+          "x": 286,
+          "y": 491,
+          "w": 1057,
           "h": 400
         },
         "title": "cani",
@@ -285,6 +305,22 @@
             "edit-index": "trace"
           },
           "name": "Trace"
+        }
+      },
+      "graph": {
+        "pos": {
+          "x": 1424,
+          "y": 429,
+          "w": 1070,
+          "h": 400
+        },
+        "title": "graph",
+        "label": "Line",
+        "id": "graph",
+        "options": {
+          "params": {
+            "edit-index": "graph"
+          }
         }
       }
     },

@@ -1,5 +1,13 @@
-import { CAN_ID_TYPE, CanMessage, output } from 'ECB'
+import { setVar } from 'ECB'
 
-Util.Init(() => {})
-
-Util.End(() => {})
+let t1: number | undefined
+Util.OnCan(1, (msg) => {
+  const t = msg.ts
+  if (!t1) {
+    t1 = t
+  } else {
+    const diff = (t - t1) / 1000
+    setVar('DIFF', diff)
+    t1 = t
+  }
+})

@@ -112,7 +112,7 @@ export class NodeClass {
   ) {
     this.varLog = new VarLOG(nodeItem.id)
     this.boundCb = this.cb.bind(this)
-
+    this.startTs = getTsUs()
     if (nodeItem.script) {
       let jsPath = nodeItem.script
       if (!path.isAbsolute(jsPath)) {
@@ -152,7 +152,6 @@ export class NodeClass {
           this.testOptions
         )
         if (this.testOptions) {
-          this.startTs = getTsUs()
           this.log?.systemMsg(
             `----- Test Config ${this.nodeItem.name} starting -----`,
             getTsUs(),

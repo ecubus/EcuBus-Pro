@@ -1,179 +1,372 @@
-#ifndef CYCLIC_SEND_TASK_H
-#define CYCLIC_SEND_TASK_H
+#ifndef CYCLIC_SEND_TASK_HPP
+#define CYCLIC_SEND_TASK_HPP
 
 #include <thread>
-#include <vector>
 #include <atomic>
-#include <functional>
 #include <mutex>
+#include <functional>
+#include <vector>
 #include <chrono>
-#include <iostream>
-#include <optional>
 #include <stdexcept>
-#include <cstring>
-#include <condition_variable>
 
 #ifdef _WIN32
 #include <windows.h>
+#include <timeapi.h>
+#pragma comment(lib, "winmm.lib")
+#else
+#include <sys/timerfd.h>
+#include <sys/select.h>
+#include <unistd.h>
+#include <cstring>
+#include <cerrno>
 #endif
 
-// ================================================================
-// CAN message definition
-// ================================================================
+// CAN 消息结构
 struct CanMessage {
-    uint32_t arbitration_id;       // CAN ID
-    bool extendId;
-    bool remoteFrame;
-    bool brs;
-    bool canfd;
-    std::vector<uint8_t> data;     // message payload
+    uint32_t arbitration_id;
+    std::vector<uint8_t> data;
+    bool extendId = false;
+    bool remoteFrame = false;
+    bool brs = false;
+    bool canfd = false;
 };
 
-// ================================================================
-// Abstract Bus interface
-// ================================================================
 class BusABC {
 public:
-    virtual ~BusABC() = default;
     virtual void send(const CanMessage& msg) = 0;
+    virtual ~BusABC() = default;
 };
 
-// ================================================================
-// Thread-based cyclic send task
-// ================================================================
-class ThreadBasedCyclicSendTask {
+class CyclicSendTask {
 public:
     using OnErrorCallback = std::function<bool(const std::exception&)>;
 
-    ThreadBasedCyclicSendTask(
+    CyclicSendTask(
         BusABC* bus,
         const CanMessage& message,
         double periodSec,
-        double durationSec = 0.0,
         OnErrorCallback onError = nullptr,
         bool autostart = true)
         : bus_(bus),
           message_(message),
-          period_(periodSec),
-          duration_(durationSec > 0 ? std::optional<double>(durationSec) : std::nullopt),
+          periodSec_(periodSec),
           onError_(onError)
+#ifdef _WIN32
+          , hTimer_(NULL)
+          , hStopEvent_(NULL)
+#else
+          , timerfd_(-1)
+#endif
     {
         if (periodSec < 0.001)
             throw std::invalid_argument("period cannot be smaller than 1 ms");
 
 #ifdef _WIN32
-        hTimer_ = CreateWaitableTimer(NULL, FALSE, NULL);
-        hStopEvent_ = CreateEvent(NULL, TRUE, FALSE, NULL); // Manual reset event
-        if (!hTimer_ || !hStopEvent_) {
-            throw std::runtime_error("Failed to create Windows synchronization objects");
+        // 设置系统定时器精度为1ms
+        timeBeginPeriod(1);
+        
+        // 创建停止事件
+        hStopEvent_ = CreateEventW(NULL, TRUE, FALSE, NULL);
+        if (hStopEvent_ == NULL) {
+            throw std::runtime_error("Failed to create stop event");
+        }
+        
+        // 创建高精度 Waitable Timer
+        hTimer_ = CreateWaitableTimerExW(
+            NULL, 
+            NULL,
+            CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+            TIMER_ALL_ACCESS
+        );
+        
+        if (hTimer_ == NULL) {
+            // 如果高精度失败，尝试普通版本
+            hTimer_ = CreateWaitableTimerW(NULL, FALSE, NULL);
+            if (hTimer_ == NULL) {
+                CloseHandle(hStopEvent_);
+                throw std::runtime_error("Failed to create waitable timer");
+            }
+        }
+#else
+        // 创建 Linux timerfd (阻塞模式)
+        timerfd_ = timerfd_create(CLOCK_MONOTONIC, 0);
+        if (timerfd_ < 0) {
+            throw std::runtime_error("Failed to create timerfd");
         }
 #endif
+
         if (autostart)
             start();
     }
 
-    ~ThreadBasedCyclicSendTask() {
+    ~CyclicSendTask() {
         stop();
+        
 #ifdef _WIN32
-        if (hTimer_) CloseHandle(hTimer_);
-        if (hStopEvent_) CloseHandle(hStopEvent_);
+        if (hTimer_ != NULL) {
+            CloseHandle(hTimer_);
+            hTimer_ = NULL;
+        }
+        if (hStopEvent_ != NULL) {
+            CloseHandle(hStopEvent_);
+            hStopEvent_ = NULL;
+        }
+        timeEndPeriod(1);
+#else
+        if (timerfd_ >= 0) {
+            close(timerfd_);
+            timerfd_ = -1;
+        }
 #endif
     }
 
     // 启动周期任务
     void start() {
-        stopped_ = false;
-#ifdef _WIN32
-        if (hStopEvent_) ResetEvent(hStopEvent_); // 重置停止事件
-#endif
+        if (!stopped_.exchange(false)) {
+            return; // 已经在运行
+        }
+
         if (thread_.joinable())
             thread_.join();
-        thread_ = std::thread(&ThreadBasedCyclicSendTask::run, this);
-        
-        // 设置线程为高优先级，确保精确的周期性发送
+
 #ifdef _WIN32
-        SetThreadPriority(thread_.native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
+        // 重置停止事件
+        ResetEvent(hStopEvent_);
+        
+        // 配置 Windows Waitable Timer
+        // 使用单次触发模式（period=0），在 run() 中手动重设，以补偿发送耗时
+        LARGE_INTEGER dueTime;
+        // 负值表示相对时间，单位是100纳秒
+        dueTime.QuadPart = -static_cast<LONGLONG>(periodSec_ * 10000000.0);
+        
+        // period=0 表示单次触发，不自动重复
+        if (!SetWaitableTimer(hTimer_, &dueTime, 0, NULL, NULL, FALSE)) {
+            stopped_ = true;
+            throw std::runtime_error("Failed to set waitable timer");
+        }
+#else
+        // 配置 Linux timerfd
+        // 使用单次触发模式（interval=0），在 run() 中手动重设，以补偿发送耗时
+        struct itimerspec spec;
+        memset(&spec, 0, sizeof(spec));
+        
+        long long period_ns = static_cast<long long>(periodSec_ * 1000000000.0);
+        spec.it_value.tv_sec = period_ns / 1000000000;
+        spec.it_value.tv_nsec = period_ns % 1000000000;
+        // interval=0 表示单次触发，不自动重复
+        spec.it_interval.tv_sec = 0;
+        spec.it_interval.tv_nsec = 0;
+        
+        if (timerfd_settime(timerfd_, 0, &spec, NULL) < 0) {
+            stopped_ = true;
+            throw std::runtime_error("Failed to set timerfd");
+        }
+#endif
+
+        thread_ = std::thread(&CyclicSendTask::run, this);
+
+#ifdef _WIN32
+        // 设置较高优先级（不需要 TIME_CRITICAL，因为使用系统定时器）
+        SetThreadPriority(thread_.native_handle(), THREAD_PRIORITY_ABOVE_NORMAL);
+#else
+        // Linux 下可选设置较高优先级
+        // 不设置实时优先级也能保持良好精度
 #endif
     }
 
     // 停止周期任务
     void stop() {
+        if (stopped_) {
+            return; // 已经停止
+        }
+        
         stopped_ = true;
+        
 #ifdef _WIN32
-        if (hTimer_) CancelWaitableTimer(hTimer_);
-        if (hStopEvent_) SetEvent(hStopEvent_); // 立刻唤醒等待线程
+        // 设置停止事件，唤醒等待的线程
+        if (hStopEvent_ != NULL) {
+            SetEvent(hStopEvent_);
+        }
 #else
-        cv_.notify_all(); // 立刻唤醒等待线程
+        // Linux: 向 timerfd 写入数据来唤醒（实际上我们用 stopped_ 标志）
+        // 为了立即停止，可以关闭并重新创建 timerfd，但这里用标志更简单
 #endif
+        
         if (thread_.joinable()) {
             thread_.join();
         }
+        
+#ifdef _WIN32
+        // 取消定时器
+        if (hTimer_ != NULL) {
+            CancelWaitableTimer(hTimer_);
+        }
+#else
+        // Linux: 停止 timerfd
+        if (timerfd_ >= 0) {
+            struct itimerspec spec;
+            memset(&spec, 0, sizeof(spec));
+            timerfd_settime(timerfd_, 0, &spec, NULL);
+        }
+#endif
     }
 
-    // ================================================================
-    // 动态修改内部CAN数据（线程安全）
-    // ================================================================
+    // 动态修改 CAN 数据（线程安全）
     void modifyData(const std::vector<uint8_t>& newData) {
         std::lock_guard<std::mutex> guard(dataLock_);
         message_.data = newData;
     }
 
+    // 修改整个消息
+    void modifyMessage(const CanMessage& newMessage) {
+        std::lock_guard<std::mutex> guard(dataLock_);
+        message_ = newMessage;
+    }
+
+    // 获取当前周期（秒）
+    double getPeriod() const {
+        return periodSec_;
+    }
+
+    // 是否正在运行
+    bool isRunning() const {
+        return !stopped_;
+    }
+
 private:
     void run() {
         using namespace std::chrono;
-        auto nextDueTime = steady_clock::now();
-        auto endTime = duration_ ? steady_clock::now() + duration<double>(duration_.value()) : time_point<steady_clock>::max();
-
-        #ifdef _WIN32
-        // 设置定时器为周期性触发
-        if (hTimer_) {
-            LARGE_INTEGER liDueTime;
-            // 不要立即触发定时器（0 会导致立即信号，配合下面的立即发送会产生紧邻的两次发送）
-            // 我们希望：启动时先发送一次，然后定时器在 periodMs 毫秒后第一次触发。
-            LONG periodMs = static_cast<LONG>(period_ * 1000.0);
-            if (periodMs <= 0) periodMs = 1; // 保底，避免传 0 给 SetWaitableTimer
-
-            // SetWaitableTimer 的 due time 以 100 纳秒为单位，负数表示相对时间
-            liDueTime.QuadPart = -static_cast<LONGLONG>(periodMs) * 10000LL; // 等待 periodMs 毫秒后首次触发
-
-            if (!SetWaitableTimer(hTimer_, &liDueTime, periodMs, NULL, NULL, FALSE)) {
-                std::cerr << "[CyclicTask] SetWaitableTimer failed: " << GetLastError() << std::endl;
-                return;
-            }
-        }
-#endif
-
+        
+        // 记录期望的下次触发时间
+        auto nextTriggerTime = high_resolution_clock::now() + 
+                               duration_cast<high_resolution_clock::duration>(
+                                   duration<double>(periodSec_));
+        
         while (!stopped_) {
-            if (steady_clock::now() >= endTime) {
-                stop();
+#ifdef _WIN32
+            // Windows: 同时等待定时器和停止事件
+            HANDLE handles[2] = {hTimer_, hStopEvent_};
+            DWORD result = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
+            
+            if (result == WAIT_OBJECT_0) {
+                // 定时器触发
+                if (stopped_) break;
+            } else if (result == WAIT_OBJECT_0 + 1) {
+                // 停止事件触发
+                break;
+            } else {
+                // 等待失败
                 break;
             }
-
-           
-            CanMessage msgCopy;
-            {   // 复制当前 message，避免发送时数据被修改
-                std::lock_guard<std::mutex> guard(dataLock_);
-                msgCopy = message_;
+#else
+            // Linux: 使用 select 实现超时等待，便于响应 stopped_ 标志
+            fd_set readfds;
+            FD_ZERO(&readfds);
+            FD_SET(timerfd_, &readfds);
+            
+            struct timeval timeout;
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 100000;  // 100ms 超时，用于检查 stopped_
+            
+            int ret = select(timerfd_ + 1, &readfds, NULL, NULL, &timeout);
+            
+            if (stopped_) {
+                break;
             }
-
-            bus_->send(msgCopy);
-           
-
-#ifdef _WIN32
-            if (hTimer_ && hStopEvent_) {
-                HANDLE handles[2] = {hTimer_, hStopEvent_};
-                DWORD result = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
-                if (result == WAIT_OBJECT_0 + 1) {
-                    // Stop event signaled, exit immediately
-                    break;
+            
+            if (ret > 0 && FD_ISSET(timerfd_, &readfds)) {
+                // 定时器触发，读取数据
+                uint64_t expirations;
+                ssize_t bytesRead = read(timerfd_, &expirations, sizeof(expirations));
+                
+                if (bytesRead < 0) {
+                    if (errno != EAGAIN && errno != EINTR) {
+                        break;
+                    }
+                    continue;
                 }
-                // result == WAIT_OBJECT_0 means timer signaled, continue to next iteration
+                
+                // 如果 expirations > 1，说明错过了一些周期
+                if (expirations > 1 && onError_) {
+                    try {
+                        std::runtime_error err("Missed cycles detected");
+                        onError_(err);
+                    } catch (...) {}
+                }
+            } else if (ret < 0 && errno != EINTR) {
+                // select 错误
+                break;
+            } else {
+                // 超时或中断，继续循环检查 stopped_
+                continue;
+            }
+#endif
+
+            // 发送消息
+            try {
+                CanMessage msgCopy;
+                {
+                    std::lock_guard<std::mutex> guard(dataLock_);
+                    msgCopy = message_;
+                }
+                bus_->send(msgCopy);
+            }
+            catch (const std::exception& e) {
+                if (onError_ && !onError_(e)) {
+                    break; // 错误处理函数返回 false，停止任务
+                }
+            }
+            
+#ifdef _WIN32
+            // Windows: 重新设置定时器到精确的下次触发时间，补偿发送耗时
+            auto now = high_resolution_clock::now();
+            nextTriggerTime += duration_cast<high_resolution_clock::duration>(
+                duration<double>(periodSec_));
+            
+            auto timeUntilNext = duration_cast<duration<double>>(nextTriggerTime - now);
+            
+            // 如果已经超时，立即设置为下一个周期
+            if (timeUntilNext.count() <= 0) {
+                nextTriggerTime = now + duration_cast<high_resolution_clock::duration>(
+                    duration<double>(periodSec_));
+                timeUntilNext = duration<double>(periodSec_);
+            }
+            
+            // 重新设置定时器（单次模式）
+            LARGE_INTEGER dueTime;
+            dueTime.QuadPart = -static_cast<LONGLONG>(timeUntilNext.count() * 10000000.0);
+            
+            if (!SetWaitableTimer(hTimer_, &dueTime, 0, NULL, NULL, FALSE)) {
+                break; // 设置失败，退出
             }
 #else
-            nextDueTime += std::chrono::duration_cast<steady_clock::duration>(duration<double>(period_));
-            std::unique_lock<std::mutex> lock(cvMutex_);
-            cv_.wait_until(lock, nextDueTime, [this]() { return stopped_.load(); });
-            if (stopped_) break;
+            // Linux: 重新设置 timerfd 到精确的下次触发时间，补偿发送耗时
+            auto now = high_resolution_clock::now();
+            nextTriggerTime += duration_cast<high_resolution_clock::duration>(
+                duration<double>(periodSec_));
+            
+            auto timeUntilNext = duration_cast<duration<double>>(nextTriggerTime - now);
+            
+            // 如果已经超时，立即设置为下一个周期
+            if (timeUntilNext.count() <= 0) {
+                nextTriggerTime = now + duration_cast<high_resolution_clock::duration>(
+                    duration<double>(periodSec_));
+                timeUntilNext = duration<double>(periodSec_);
+            }
+            
+            // 重新设置 timerfd（单次模式）
+            struct itimerspec spec;
+            memset(&spec, 0, sizeof(spec));
+            
+            long long wait_ns = static_cast<long long>(timeUntilNext.count() * 1000000000.0);
+            spec.it_value.tv_sec = wait_ns / 1000000000;
+            spec.it_value.tv_nsec = wait_ns % 1000000000;
+            spec.it_interval.tv_sec = 0;
+            spec.it_interval.tv_nsec = 0;
+            
+            if (timerfd_settime(timerfd_, 0, &spec, NULL) < 0) {
+                break; // 设置失败，退出
+            }
 #endif
         }
     }
@@ -181,21 +374,19 @@ private:
 private:
     BusABC* bus_;
     CanMessage message_;
-    double period_;
-    std::optional<double> duration_;
+    double periodSec_;
     OnErrorCallback onError_;
+    
     std::thread thread_;
     std::atomic<bool> stopped_{true};
-
-    std::mutex dataLock_; // 🔒 用于保护 message 修改
-
+    std::mutex dataLock_; // 保护 message_ 的修改
+    
 #ifdef _WIN32
-    HANDLE hTimer_{nullptr};
-    HANDLE hStopEvent_{nullptr}; // 用于立刻停止线程
+    HANDLE hTimer_;      // Windows Waitable Timer 句柄
+    HANDLE hStopEvent_;  // Windows 停止事件句柄
 #else
-    std::mutex cvMutex_; // 用于条件变量
-    std::condition_variable cv_; // 用于可中断的等待
+    int timerfd_;        // Linux timerfd 文件描述符
 #endif
 };
 
-#endif // CYCLIC_SEND_TASK_H
+#endif // CYCLIC_SEND_TASK_HPP

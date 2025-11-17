@@ -281,6 +281,19 @@
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
+              <el-form-item label="Major Version">
+                <el-input v-model="formData.major" placeholder="0" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Minor Version">
+                <el-input v-model="formData.minor" placeholder="0" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8"> </el-col>
+          </el-form-item>
+          <el-form-item label-width="0">
+            <el-col :span="8">
               <el-form-item label="Channel">
                 <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
                   <el-option

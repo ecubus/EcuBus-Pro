@@ -81,6 +81,8 @@ export interface SomeipAction {
   messageType: SomeipMessageType
   params: Param[]
   respParams: Param[]
+  major?: number
+  minor?: number
 }
 
 export interface SomeipInter {

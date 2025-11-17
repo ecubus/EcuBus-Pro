@@ -208,7 +208,7 @@ export class NodeClass {
       const someipBaseItem = this.someipMap.get(c)
       if (someipBaseItem) {
         this.someipBaseId.push(c)
-        someipBaseItem.attachLinMessage(this.boundCb)
+        someipBaseItem.attachSomeipMessage(this.boundCb)
       }
     }
     if (this.pool) {

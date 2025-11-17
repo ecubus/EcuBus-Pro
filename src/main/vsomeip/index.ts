@@ -213,7 +213,7 @@ export class VSomeIP_Client {
       }
     })
   }
-  attachLinMessage(cb: (msg: SomeipMessage) => void) {
+  attachSomeipMessage(cb: (msg: SomeipMessage) => void) {
     this.event.on('someip-frame', cb)
   }
   init() {
@@ -294,7 +294,13 @@ export class VSomeIP_Client {
   private getKey16(service: number, instance: number) {
     return instance.toString(16).padStart(4, '0') + '.' + service.toString(16).padStart(4, '0')
   }
-  async requestService(service: number, instance: number, timeout: number = 1000) {
+  async requestService(
+    service: number,
+    instance: number,
+    major: number = 0,
+    minor: number = 0,
+    timeout: number = 1000
+  ) {
     return new Promise((resolve, reject) => {
       if (this.state != 0) {
         reject('SomeIP is not registered')
@@ -309,7 +315,7 @@ export class VSomeIP_Client {
             reject('Request service timeout')
           }, timeout)
         })
-        this.send('requestService', { service, instance })
+        this.send('requestService', { service, instance, major, minor })
       } else {
         resolve(true)
       }

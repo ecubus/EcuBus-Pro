@@ -38,8 +38,8 @@ process.on('message', (message: any) => {
       instance?.app.request_service(
         Number(data.service),
         Number(data.instance),
-        data.major ? Number(data.major) : 0xff,
-        data.minor ? Number(data.minor) : 0xffffff
+        data.major ? Number(data.major) : 0,
+        data.minor ? Number(data.minor) : 0
       )
       break
     }

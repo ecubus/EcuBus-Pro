@@ -1195,13 +1195,19 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
       client: 0,
       session: 0,
       returnCode: 0,
-      protocolVersion: ia.protocolVersion != undefined ? ia.protocolVersion : 1,
-      interfaceVersion: ia.interfaceVersion != undefined ? ia.interfaceVersion : 0,
+      protocolVersion: ia.protocolVersion != undefined ? Number(ia.protocolVersion) : 1,
+      interfaceVersion: ia.interfaceVersion != undefined ? Number(ia.interfaceVersion) : 0,
       ts: 0,
       reliable: ia.reliable,
       sending: true
     }
-    await base.requestService(Number(ia.serviceId), Number(ia.instanceId), 1000)
+    await base.requestService(
+      Number(ia.serviceId),
+      Number(ia.instanceId),
+      Number(ia.major || 0),
+      Number(ia.minor || 0),
+      1000
+    )
     await base.sendRequest(msg)
   } else {
     sysLog.error(`someip device not found`)

@@ -1,82 +1,82 @@
-# CAN 总线
+# CAN
 
-CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可靠的 ECU（电子控制单元）通信而设计。
+CAN/CAN-FD是一项行业标准的汽车公共汽车协议，旨在在汽车应用中可靠的ECU通信。
 
 > [!IMPORTANT]
-> 本节描述的某些功能可能需要CAN DBC文件。有关DBC文件的更多信息，请参阅我们的 [database documentation](../dbc)。
+> 本节描述的一些功能可能需要 CAN DBC 文件。 欲了解更多关于 DBC 文件的信息，请参阅我们的 [数据库文档](../dbc)。
 
-## 支持的硬件
+支持的硬件：
 
-| 设备制造商 | 支持的协议 |
-| ------- | ----------- |
-| PEAK    | CAN, CAN-FD |
-| KVASER  | CAN, CAN-FD |
-| ZLG     | CAN, CAN-FD |
-| Toomoss | CAN, CAN-FD |
-| VECTOR  | CAN, CAN-FD |
-| SLCAN   | CAN, CAN-FD |
+| 制造商    | Protocols   |
+| ------ | ----------- |
+| 染料     | CAN, CAN-FD |
+| 克瓦塞尔   | CAN, CAN-FD |
+| ZLG    | CAN, CAN-FD |
+| Toomos | CAN, CAN-FD |
+| 镜头     | CAN, CAN-FD |
+| SLCAN  | CAN, CAN-FD |
 
-## SLCAN 特别说明
+## SLCAN Special
 
-SLCAN 是一种低成本的开源解决方案，其固件源自 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于 USB-ACM（抽象控制模型）。
+SLCAN是一个低成本的开放源代码解决方案，其固件源自 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于USB-ACM。
 
-> [!NOTE]
-> 该固件目前不为串行命令提供任何 ACK/NACK（确认/未确认）反馈。
+> [!注意]
+> 此固件目前没有为串行命令提供任何ACK/NACK反馈。
 
-## GS_USB
+## USB_USB
 
-基于 usbfs 或 WinUSB WCID 的 Windows/Linux/Mac CAN 驱动程序，适用于 Geschwister Schneider USB/CAN 设备和 candleLight USB CAN 接口。
+基于 Geschwister Schneider USB/CAN 设备和 candleLight USB CAN 接口的 Windows/Linux/Mac CAN 驱动程序或WinUSB WCID 驱动程序。
 
 ### Linux gs_usb
 
-Linux 内核 3.7 以上是合并了 `gs_usb` 驱动
-查看是否启用 `gs_usb` 模块使用 
+Linux 内核3.7及以上已合并了 `gs_bank` 驱动程序。
+检查是否使用 `gs_bank` 模块启用
 
 ```bash
-lsmod | grep gs_usb
-``` 
+lsomd | grep gs_usb
+```
 
-如果没有加载可以使用 
+如果未加载，请使用
 
 ```bash
 sudo modprobe gs_usb
 ```
 
-如果想移除的话可以用 
+要删除它，请使用
 
 ```bash
-sudo rmmod gs_usb
-``` 
-
-配置开机自动加载
-
-```bash
-echo "gs_usb" | sudo tee /etc/modules-load.d/gs_usb.conf
+sudo rmod gs_usb
 ```
 
-非 root 权限用户使用需要添加对应的用户组
-
-使用 `devadm` 监听设备连接，来获取准确的设备路径：
+配置启动时自动加载：
 
 ```bash
-sudo devadm monitor --property
+echo "gs_bank" | sudo tee /etc/modules-load.d/gs_blaw.conf
 ```
 
-检查设备所属组，假设是 `ttyUSB0`,以实际接入设备为准：
+非根用户需要相应的用户组成员。
+
+使用 `devadm` 来监视设备连接并获取精确的设备路径：
+
+```bash
+sudo devadm 监视器 --property
+```
+
+检查设备组所有权。 假设`ttyUSB0` (实际设备可能不同):
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
 ```
 
-- Arch Linux：应返回 `uucp`
+- Arch Linux：应该返回 `uucp`
 
 ```bash
 sudo usermod -aG uucp $USER
 newgrp uucp
 ```
 
-- Debian/Ubuntu：应返回 `dialout`
-- Fedora/RHEL：应返回 `dialout`
+- Debian/Ubuntu: 应该返回 `dialout`
+- Fedora/RHEL：返回 `dialout`
 
 ```bash
 sudo usermod -aG dialout $USER
@@ -85,49 +85,44 @@ newgrp dialout
 
 ## 设备配置
 
-出于演示目的，我们将使用一个模拟设备。您可以在设备设置中配置波特率和采样点。
+为了演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
 
-![设备配置示意图](image.png)
+![Alt 文本](image.png)
 
 ### 波特率设置
 
-波特率设置用于配置 CAN 总线的通信速率。
+波特率设置用于配置CAN 公共汽车的波特率。
 
-点击 `Bit Timing`（位时序）按钮打开位时序配置窗口：
+点击 "Bit Timing" 按钮打开位计时设置窗口。
+![替代文本](image-8.png)
+![替代文本](image-9.png)
 
-![位时序配置窗口](image-8.png)
+## 交互模式和节点脚本
 
-![位时序详细设置](image-9.png)
+EcuBus-Pro 公司提供两种主要方法来进行CAN 通信：
 
-## 交互模式与节点脚本
+- 互动模式：手动帧传输
+- 节点脚本：使用自定义脚本进行自动通信
 
-EcuBus-Pro 提供两种主要的 CAN 通信方法：
-
-- **交互模式**：采用手动方式发送报文
-- **节点脚本**：使用自定义脚本收发报文
-
-![通信模式选择界面](image-1.png)
+![Alt 文本](image-1.png)
 
 ### 交互模式
 
-可以为每个报文配置周期性发送或手动触发（单次触发或按键触发）。
+每个帧都可以用于定期传输或手动触发(单射击或键盘)。
+![Alt 文本](image-2.png)
 
-![报文配置界面](image-2.png)
+您可以通过两种方式添加帧：
 
-您可以通过两种方式添加报文：
-
-- 手动配置
-- 从 DBC 数据库导入
-
-![报文添加方式](image-3.png)
+- 手动帧配置
+- 从 DBC 数据库
+  导入[Alt text](image-3.png)
 
 ### 节点脚本
 
-节点可以配置 UDS（统一诊断服务）功能（作为测试器）和自定义脚本。
+节点可以使用 UDS 功能 (测试器) 和自定义脚本进行配置。
+![Alt 文本](image-4.png)
 
-![alt text](image-4.png)
-
-以下是一个用于周期性信号更新的脚本示例：
+定期信号更新的示例脚本：
 
 ```typescript
 import { setSignal } from 'ECB'
@@ -140,18 +135,19 @@ setInterval(() => {
 
 ## 诊断操作
 
-1. **测试器配置**
+1. **Tester 配置**
 
-   - 配置寻址方式
+   - 配置地址
    - 设置诊断参数
-       ![alt text](image-5.png)
+     ![Alt text](image-5.png)
 
 2. **诊断服务**
 
    - 配置诊断服务
-   - 创建调度表和序列
-    ![alt text](image-6.png)
+   - 创建schedule表和序列
+     ![Alt text](image-6.png)
 
-3. **消息监控**
-   - 在跟踪窗口中查看发送和接收的消息
-     ![alt text](image-7.png)
+3. **消息监视**
+   - 在跟踪窗口
+     查看已发送和收到的消息。[备用文本](image-7.png)
+

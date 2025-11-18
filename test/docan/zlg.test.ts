@@ -15,6 +15,29 @@ import { CanTp } from 'src/main/docan/cantp'
 const dllPath = path.join(__dirname, '../../resources/lib')
 ZLG_CAN.loadDllPath(dllPath)
 
+describe('zlg device availability test', () => {
+  test('should include USBCANFD-400U devices', () => {
+    const devices = ZLG_CAN.getValidDevices()
+    const usbcanfd400u = devices.filter((d) => d.label.includes('USBCANFD_400U'))
+    // USBCANFD-400U has 4 channels × 2 device indexes = 8 devices
+    equal(usbcanfd400u.length, 8, 'USBCANFD-400U should have 8 device entries (4 channels × 2 indexes)')
+  })
+
+  test('should include USBCAN2 (USBCAN-II) devices', () => {
+    const devices = ZLG_CAN.getValidDevices()
+    const usbcan2 = devices.filter((d) => d.label.includes('USBCAN2'))
+    // USBCAN2 has 2 channels × 2 device indexes = 4 devices
+    equal(usbcan2.length, 4, 'USBCAN2 should have 4 device entries (2 channels × 2 indexes)')
+  })
+
+  test('should include USBCAN-2E-U devices', () => {
+    const devices = ZLG_CAN.getValidDevices()
+    const usbcan2eu = devices.filter((d) => d.label.includes('USBCAN_2E_U'))
+    // USBCAN-2E-U has 2 channels × 2 device indexes = 4 devices
+    equal(usbcan2eu.length, 4, 'USBCAN-2E-U should have 4 device entries (2 channels × 2 indexes)')
+  })
+})
+
 describe('zlg test', () => {
   let client!: ZLG_CAN
   beforeAll(() => {

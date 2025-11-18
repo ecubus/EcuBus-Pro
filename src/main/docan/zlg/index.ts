@@ -383,6 +383,89 @@ export class ZLG_CAN extends CanBase {
           label: 'ZCAN_USBCAN_E_MINI_INDEX_1_CHANNEL_0',
           id: 'ZCAN_USBCAN_E_MINI_INDEX_1_CHANNEL_0',
           handle: `${ZLG.ZCAN_USBCAN_E_U}_1_0`
+        },
+        //USBCAN2 (USBCAN-II)
+        {
+          label: 'ZCAN_USBCAN2_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCAN2_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN2}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCAN2_INDEX_0_CHANNEL_1',
+          id: 'ZCAN_USBCAN2_INDEX_0_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCAN2}_0_1`
+        },
+        {
+          label: 'ZCAN_USBCAN2_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCAN2_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN2}_1_0`
+        },
+        {
+          label: 'ZCAN_USBCAN2_INDEX_1_CHANNEL_1',
+          id: 'ZCAN_USBCAN2_INDEX_1_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCAN2}_1_1`
+        },
+        //USBCAN-2E-U
+        {
+          label: 'ZCAN_USBCAN_2E_U_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCAN_2E_U_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN_2E_U}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCAN_2E_U_INDEX_0_CHANNEL_1',
+          id: 'ZCAN_USBCAN_2E_U_INDEX_0_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCAN_2E_U}_0_1`
+        },
+        {
+          label: 'ZCAN_USBCAN_2E_U_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCAN_2E_U_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCAN_2E_U}_1_0`
+        },
+        {
+          label: 'ZCAN_USBCAN_2E_U_INDEX_1_CHANNEL_1',
+          id: 'ZCAN_USBCAN_2E_U_INDEX_1_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCAN_2E_U}_1_1`
+        },
+        //USBCANFD-400U
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_0_0`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_1',
+          id: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_0_1`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_2',
+          id: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_2',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_0_2`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_3',
+          id: 'ZCAN_USBCANFD_400U_INDEX_0_CHANNEL_3',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_0_3`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_0',
+          id: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_0',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_1_0`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_1',
+          id: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_1',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_1_1`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_2',
+          id: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_2',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_1_2`
+        },
+        {
+          label: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_3',
+          id: 'ZCAN_USBCANFD_400U_INDEX_1_CHANNEL_3',
+          handle: `${ZLG.ZCAN_USBCANFD_400U}_1_3`
         }
       ]
       return zcanArray

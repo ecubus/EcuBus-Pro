@@ -1,7 +1,17 @@
 files:
-  - source: /docs/en/**/*.md
-    translation: /docs/%two_letters_code%/**/%original_file_name%
+  - source: docs/en/**/*.md
+    translation: docs/%two_letters_code%/**/%original_file_name%
     type: markdown
-  - source: /resources/examples/*/readme.md
-    translation: /resources/examples/*/readme.%two_letters_code%.md
+    excluded_target_languages:
+      - en
+    languages_mapping:
+      two_letters_code:
+        zh-CN: zh
+  - source: resources/examples/*/readme.md
+    translation: /%original_path%/readme.%two_letters_code%.md
     type: markdown
+    excluded_target_languages:
+      - en
+    languages_mapping:
+      two_letters_code:
+        zh-CN: zh

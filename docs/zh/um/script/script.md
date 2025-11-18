@@ -1,106 +1,102 @@
-# 脚本（Script）
+# 脚本
 
-脚本运行于 Node.js 环境，基于 TypeScript/JavaScript。我们使用 `ts` 进行语法检查，
-使用 esbuild 构建脚本，构建脚本位于 `.ScriptBuild` 目录。
+基于 Node.js 环境中的 TypeScript/JavaScript 的脚本。 我们使用 `ts` 进行语法检查，并使用 esbuild来生成脚本，构建脚本在 `.ScriptBuild` 文件夹中。
 
-## 编辑器（Editor）
+## 编辑器
 
-推荐使用 VS Code 编辑脚本；安装 `TypeScript` 扩展可获得语法检查与智能提示。
-![alt text](script1.gif)
+建议使用 Vscode 来编辑脚本，您可以安装 `TypeScript` 扩展来获取语法检查和智能化。
+![Alt 文本](script1.gif)
 
 > [!TIP]
-> 我们计划提供 VS Code 扩展，以便在 VS Code 中直接构建脚本。
+> 我们还计划提供 vscode 扩展，让您直接在 vscode 中构建脚本。
 
-## 构建脚本（Build Script）
+## 构建脚本
 
-![alt text](image.png)
-如果脚本存在错误，可在 `Message` 窗口查看构建错误信息。
-![alt text](image-1.png)
+![Alt text](image.png)
+如果脚本中存在任何错误，您可以获取`Message`窗口中的构建错误信息。
+![Alt 文本](image-1.png)
 
-## 脚本 API（Script API）
+## Script API
 
-你可以打开 `API` 窗口查看 API 信息。
-![alt text](image-2.png)
+您可以打开 `API` 窗口来获取 API 信息。
+![Alt 文本](image-2.png)
 
-或者查看在线文档：[API](https://app.whyengineer.com/scriptApi/index.html)
+或检查此在线文档 [API](https://app.whyengineer.com/scriptApi/index.html)
 
-## 脚本用法（Script Usage）
+## 脚本使用
 
-### Node.js 能力（Node.js Ability）
+### Node.js 能力
 
-#### Init（初始化）
+#### Init
 
-初始化函数是脚本入口，脚本加载时会被调用。
+Init 函数是脚本的条目，将在脚本加载时调用。
 
 ```typescript
-Util.Init(() => {
+Util.Init(() => own
   console.log('Init')
 })
 ```
 
-#### Timer（定时器）
+#### 定时器
 
-定时器是 Node.js 的内置特性，可用于周期性任务。更多信息参见
-[Timer](https://nodejs.org/api/timers.html)。
+计时器是 node.js 内置功能，您可以使用它来做一些定期工作。 更多关于计时器的详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
 
 ```typescript
-// periodical output can message
-let timer = setInterval(() => {
+// 周期性输出可以消息
+让计时器= setInterval(() => Power
   outputCan(canMsg)
 }, 1000)
 
-// stop the timer
-clearInterval(timer)
+// 停止计时器
+clearInterval(计时器)
 
-//refresh the timer
-timer.refresh()
+//刷新计时器
+计时器。 efresh ()
 ```
 
-#### OnKey（按键）
+#### OnKey
 
-监听按键事件，可在按键被按下时执行任务。
+聆听密钥事件，您可以在按键时使用它来做一些工作。
 
 ```typescript
-// listen to the key event
-Util.OnKey('s', () => {
+// 聆听密钥事件
+Util.OnKey('s', () => Power
   outputCan(canMsg)
 })
 ```
 
-#### OnCan（CAN 消息）
+#### OnCan
 
-监听 CAN 消息，你可以在收到 CAN 消息时执行一些任务。
+聆听可以发送的消息，您可以在收到消息时使用它来完成一些工作。
 
 ```typescript
-// listen to the can message
+// 监听CAN消息
 Util.OnCan(0x1, (msg) => {
   console.log(msg)
 })
-// listen all can message
+// 监听所有CAN消息
 Util.OnCan(true, (msg) => {
   console.log(msg)
 })
 ```
 
-#### On（UDS 事件）
+#### 开启
 
-监听 UDS 相关事件。
-`<tester name>.<service item name>.recv` 用于监听收到的 UDS 消息；
-`<tester name>.<service item name>.send` 用于监听发送的 UDS 消息。
+听听完问答。 <tester name>。<service item name>.recv`用于监听收到的 uds消息。 <tester name>。<service item name>.send`被用来监听uds消息发送。
 
 ```typescript
-// 监听 UDS 报文
+// 监听UDS消息
 Util.On('Can.DiagRequest.recv', (msg) => {
-  // 接收诊断响应
+  //接收诊断响应
 })
 Util.On('Can.DiagRequest.send', (msg) => {
-  // 接收诊断请求
+  //接收诊断请求
 })
 ```
 
-## 示例（Example）
+## 示例
 
-::: details 脚本初始化时发送 10 条 CAN 消息，30 秒后再发送 1 条  {open}
+:::details 在脚本初始化时发送10条CAN消息，然后在30秒延迟后再发送一条消息{open}
 
 ```typescript
 async function sendCanMessage(msgId: number, targetId: number, dataPattern: string) {

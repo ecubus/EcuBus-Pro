@@ -4,11 +4,13 @@ PWM device supports outputting PWM signal, also with ICU (Input Capture Unit) fu
 
 Supported Hardware:
 
-| Manufacturer | Protocols                             |
-| ------------ | ------------------------------------- |
-| ECUBUS       | PWM, ICU (ongoing) |
+| Manufacturer | Protocols |
+|--------|-------------------|
+| ECUBUS | PWM, ICU (ongoing) |
+
 
 ![pwm](image.png)
+
 
 ## PWM Interaction
 
@@ -16,11 +18,11 @@ Open PWM IA through `Network` window. IA Ability:
 
 - Set PWM duty cycle (multiple devices supported)
 - Quikc Presets:
-  - 0%
-  - 25%
-  - 50%
-  - 75%
-  - 100%
+    - 0%
+    - 25%
+    - 50%
+    - 75%
+    - 100%
 
 ![pwm](ia.png)
 

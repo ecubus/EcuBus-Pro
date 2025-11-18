@@ -1,29 +1,30 @@
-﻿# Tester Present（会话保持）
+# 测试者存在
 
-Tester Present（服务 ID 0x3E）是一种诊断服务，用于指示 ECU：诊断客户端（测试器）仍然在线，从而保持诊断会话处于活动状态。
+Tester Present(Service ID 0x3E) 是一种诊断服务，用来向ECU表明诊断客户(测试者)仍然存在，诊断会话应继续有效。
 
-Tester Present 的主要目的：
+参加考试的主要目的是：
 
-- 通过周期性发送消息，维持非默认诊断会话为激活状态
-- 防止诊断会话超时（S3 超时）
-- 保持诊断设备与 ECU 之间的通信
+- 定期发送消息以保持非默认诊断会话激活
+- 防止诊断会话超时(S3 超时)
+- 保持测试员与 ECU 之间的通信
 
-> [!NOTE]
-> 当前 Tester Present 仅支持 CAN。
+> [!注意]
+> 测试存在仅支持CAN。
 
 ## 配置
 
-在 EcuBus-Pro 中，可在 `UDS Tester` 窗口配置 Tester Present：
-![Tester Present Configuration](./images/tester_present.png)
+在 Ecuadus Pro，Tester Present 可以在 `UDS Tester` 窗口中配置：
 
-### S3 Time [M]
+![Tester present Configuration](./images/tester_present.png)
 
-S3 Time 表示 S3 Client 超时时间，即两次 Tester Present 消息之间允许的最大间隔。
+### S3 时间 [M]
 
-### Tester Present Address [M]
+S3时间意味着S3客户端超时，这是测试者显示消息之间的最大时间。
 
-Tester Present 消息的地址，可配置为物理地址或功能地址。
+### 测试仪当前地址 [M]
 
-### From Speical Serivce [O]
+测试者当前消息的地址，可以设置为实际地址或功能地址。
 
-Tester Present 的默认消息为 `0x3E 0x00`；若需要使用特殊服务，可在服务列表中选择一个。
+### 来自Speical Serivce [O]
+
+Tester Present的默认消息是 `0x3E 0x00` ，如果你想要使用特殊服务，你可以从服务列表中选择一个。

@@ -1,34 +1,34 @@
-# 日志记录器
+# Logger
 
-通过配置日志记录器，可以把相关的所有Trace数据到其他地方，解决UI界面Trace窗口数据存储有限的问题。
+通过配置日志，您可以将所有相关的跟踪数据导出到别处，解决UI中追踪窗口的有限存储能力。
 
-## 如何添加日志记录器
+## 如何添加记录器
 
-通过`Hardware->Network`点开网络配置界面，在`Loggers`中添加日志记录器。
+通过 `硬件-> Network` 打开网络配置，然后在 `Loggers` 下添加一个记录器。
 
-![looger](./../../../media/um/network/network.png)
+![记录器](./../../../media/um/network/network.png)
 
-## 配置日志记录器
+## 配置记录器
 
-鼠标放到对应的日志记录器上，点击`✏️`按钮，可以编辑日志记录器。
+悬停在目标记录器上，然后点击`✏️`按钮进行编辑。
 
-![configLogger](./../../../media/um/network/configLogger.png)
-![configLogger1](./../../../media/um/network/configLogger1.png)
+![配置记录器](./../../../media/um/network/configLogger.png)
+![配置记录器1](./../../../media/um/network/configLogger1.png)
 
-* Transport
-  * File，数据报文写入到文件中,需要选择对应的文件路径
-  * Socket，数据报文写入到Socket中（暂时不支持）
-* Format
-  * ASC, Vector ASC Format, `ASC格式为流模式写入`
-  * CSV, 逗号分隔的文本格式 (暂时不支持)
-  * BLF，Vector BLF Format (暂时不支持)
-* Record Types, 选择要记录的报文类型
+- 运输
+  - 文件: 将帧写入到文件; 选择目标路径
+  - Socket: 将帧写入套接字(不支持)
+- 格式
+  - ASC：矢量ASC格式，`ASC是在串流模式下写入的`
+  - CSV: 逗号分隔的文本格式(不支持)
+  - BLF：矢量BLF格式 (不支持)
+- 记录类型：选择要记录的框架类型
 
-  * CAN, 记录CAN报文
-  * LIN, 记录LIN报文
-  * ETH, 记录Ethernet报文
-  * UDS, 记录PWM报文
+  - CAN：记录 CAN 帧
+  - 行：记录 LIN 帧
+  - ETH：记录以太网帧
+  - UDS：记录 PW
 
-## 写入文件的Demo
+## 降级：写入文件
 
-![looger](./../../../media/um/network/logger.gif)
+![记录器](./../../../media/um/network/logger.gif)

@@ -8,18 +8,18 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 ### Hardware and Communication Setup
 
-- Configure the Hardware>Device interface as follows, select Leaf V3. Other CAN card configurations are similar, just ensure the baud rate is at 500K.
-
++ Configure the Hardware>Device interface as follows, select Leaf V3. Other CAN card configurations are similar, just ensure the baud rate is at 500K.
+  
 > [!NOTE]
 > All Supported CAN Devices: [CAN Devices](./../../can/can.md)
 
 ![Hardware Device Configuration](images/01-hardware-device-config.png)
 
-- You can select the corresponding sampling point according to actual conditions.
++ You can select the corresponding sampling point according to actual conditions.
 
 ![Sampling Point Configuration](images/02-sampling-point-config.png)
 
-- Set the addressing mode. The S32K144 official CAN UDS Bootloader example uses Normal fixed addressing, configured as follows.
++ Set the addressing mode. The S32K144 official CAN UDS Bootloader example uses Normal fixed addressing, configured as follows.
 
 ![Addressing Mode Configuration](images/03-addressing-mode-config.png)
 
@@ -27,71 +27,71 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 #### DiagnosticSessionControl (Diagnostic Session Control) ($10) Service
 
-- Configuration for entering extended session:
++ Configuration for entering extended session:
 
 ![Extended Session Configuration](images/04-extended-session-config.png)
 
-- Configuration for entering programming session:
++ Configuration for entering programming session:
 
 ![Programming Session Configuration](images/05-programming-session-config.png)
 
 #### ECUReset (ECU Reset) ($11) Service
 
-- Hardware reset configuration is as follows, using hardware reset here.
++ Hardware reset configuration is as follows, using hardware reset here.
 
 ![Hardware Reset Configuration](images/06-hardware-reset-config.png)
 
 #### SecurityAccess (Security Access) ($27) Service
 
-- Seed request configuration is as follows. You need to enter the Response interface and change the securitySeed length to 128bit, otherwise you cannot receive the complete seed data replied by the MCU.
++ Seed request configuration is as follows. You need to enter the Response interface and change the securitySeed length to 128bit, otherwise you cannot receive the complete seed data replied by the MCU.
 
 ![Security Seed Request Configuration](images/07-security-seed-request-config.png)
 
-- Key response configuration is as follows. The data segment will have its size changed to 128bit in the script and filled with the calculated key.
++ Key response configuration is as follows. The data segment will have its size changed to 128bit in the script and filled with the calculated key.
 
 ![Security Key Response Configuration](images/08-security-key-response-config.png)
 
 #### CommunicationControl (Communication Control) ($28) Service
 
-- Disable network management messages and normal message transceivers, configured as follows.
++ Disable network management messages and normal message transceivers, configured as follows.
 
 ![Communication Control Configuration](images/09-communication-control-config.png)
 
 #### WriteDataByIdentifier (Write Data By Identifier) ($2E) Service
 
-- Write to specified DID. The S32K144 official CAN UDS Bootloader example uses 0xF15A, configured as follows:
++ Write to specified DID. The S32K144 official CAN UDS Bootloader example uses 0xF15A, configured as follows:
 
 ![Write Data By Identifier Configuration](images/10-write-data-by-identifier-config.png)
 
 #### RoutineControl (Routine Control) ($31) Service
 
-- Routine with routineID 0x0202 is used to notify the MCU to perform CRC verification, configured as follows:
++ Routine with routineID 0x0202 is used to notify the MCU to perform CRC verification, configured as follows:
 
 ![Routine Control Configuration](images/11-routine-control-crc-config.png)
 
-- Routine with routineID 0xFF00 is used to notify the MCU to perform Flash erase, configured as follows.
++ Routine with routineID 0xFF00 is used to notify the MCU to perform Flash erase, configured as follows.
 
 ![Flash Erase Configuration](images/12-routine-control-flash-erase-config.png)
 
-- Routine with routineID 0xFF01 is used to notify the MCU to perform firmware verification, configured as follows:
++ Routine with routineID 0xFF01 is used to notify the MCU to perform firmware verification, configured as follows:
 
 ![Firmware Verification Configuration](images/13-routine-control-firmware-check-config.png)
 
 #### RequestDownload (Request Download) ($34) Service
 
-- Request download configuration is as follows. The storage address and storage space will be assigned in the script during actual use.
++ Request download configuration is as follows. The storage address and storage space will be assigned in the script during actual use.
 
 ![Request Download Configuration](images/14-request-download-config.png)
 
 #### TransferData (Transfer Data) ($36) Service
 
-- Transfer data configuration is as follows. During actual use, it will be repeatedly called and assigned values in the script.
++ Transfer data configuration is as follows. During actual use, it will be repeatedly called and assigned values in the script.
 
 ![Transfer Data Configuration](images/15-transfer-data-config.png)
 
 #### RequestTransferExit (Request Transfer Exit) ($37) Service
 
-- Stop transfer configuration is as follows.
++ Stop transfer configuration is as follows.
 
 ![Request Transfer Exit Configuration](images/16-request-transfer-exit-config.png)
 
@@ -138,15 +138,15 @@ It is mainly divided into three phases:
 
 ### Development Environment Setup
 
-- Create a new ts file in the project directory;
++ Create a new ts file in the project directory;
 
 ![Create New TS File](images/19-create-ts-file.png)
 
-- Place the files needed for upgrade in the project directory;
++ Place the files needed for upgrade in the project directory;
 
 ![Place Files in Project Directory](images/20-place-upgrade-files.png)
 
-- Load the script file in UDS Tester and open VS Code for script writing;
++ Load the script file in UDS Tester and open VS Code for script writing;
 
 ![Load Script File in UDS Tester](images/21-load-script-vscode.png)
 
@@ -346,4 +346,4 @@ Util.Register('S32K144_CAN_UDS_Bootloader.JobFunction1', () => {
 
 ---
 
-_This example serves as a foundation for implementing UDS bootloaders in automotive applications. Customize the configuration and scripts according to your specific project requirements._
+*This example serves as a foundation for implementing UDS bootloaders in automotive applications. Customize the configuration and scripts according to your specific project requirements.*

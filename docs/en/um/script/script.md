@@ -98,7 +98,7 @@ Util.On('Can.DiagRequest.send', (msg) => {
 
 ## Example
 
-::: details Send 10 CAN messages on script initialization, then send one more message after 30s delay {open}
+:::details Send 10 CAN messages on script initialization, then send one more message after 30s delay {open}
 
 ```typescript
 async function sendCanMessage(msgId: number, targetId: number, dataPattern: string) {

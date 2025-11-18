@@ -1,34 +1,34 @@
 # CAN DBC
 
-EcuBus-Pro支持解析大多数CAN DBC文件。若遇到无法正确解析的DBC文件，请在我们的[Github Issues](https://github.com/ecubus/EcuBus-Pro/issues)页面提交问题报告。
+EcuBus-Pro 支持解析大部分CAN DBC文件。 如果你遇到无法正确解析的 DBC 文件，请在我们的 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面报告这个问题。
 
-该应用程序为消息和信号提供了高效的搜索界面。
+应用程序提供了一个高效的信息和信号搜索接口。
 
-> [!NOTE]
-> 目前，EcuBus-Pro仅支持查看DBC文件，不支持编辑功能。使用前请确保您的DBC文件格式正确无误。
+> [!注意]
+> 目前仅支持查看 DBC 文件，不支持编辑。 请确保您的 DBC 文件在使用前格式正确。
 
-## Select a DBC File
+## 选择一个 DBC 文件
 
-![alt text](image-18.png)
+![Alt 文本](image-18.png)
 
-## Overview
+## 概览
 
-DBC 视图器提供关于以下方面详尽的信息：
+DBC 查看器提供有关以下方面的全面信息：
 
 - 网络节点
-- 报文
+- 留言
 - 信号
 
-![alt text](image-19.png)
+![Alt 文本](image-19.png)
 
 ## Value Tables
 
-Value tables定义了原始值与其对应含义之间的映射关系。
+值表定义了原始值和相应含义之间的映射。
 
-![alt text](image-20.png)
+![Alt 文本](image-20.png)
 
 ## Attributes
 
-查看并检查所有DBC属性。
+查看和检查所有 DBC 属性。
 
-![alt text](image-21.png)
+![Alt 文本](image-21.png)

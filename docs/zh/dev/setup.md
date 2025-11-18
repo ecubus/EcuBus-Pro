@@ -1,22 +1,22 @@
-# 安装/配置
+# 设置
 
-如果您不熟悉 JavaScript/TypeScript，
-您可以从 [JavaScript/TypeScript 学习资源](./jslearn.md) 获取一些学习资料。
+如果您不熟悉JavaScript/类型，
+您可以从[JavaScript/类型学习资源](./jslearn.md) 获取一些学习资源
 
-## 详细 Windows 安装/配置指南
+## 详细Windows设置指南
 
-您可以从 [详细 Windows 设置指南](./detialSetup.md) 获取详细的设置步骤。
+您可以从 [详细窗口安装指南] (./detialSetup.md ) 获取详细设置步骤
 
-## 前置要求
+## 必备条件
 
 - Node.js (v22)
 - npm
-- Node-gyp
+- 节点健身房
 
 ## 安装步骤
 
 ```bash
-git clone https://github.com/ecubus/EcuBus-Pro.git
+git 克隆https://github.com/ecubus/EcuadBus-Pro.git
 ```
 
 ```bash
@@ -32,45 +32,45 @@ npm install
 ### 构建文档
 
 ```bash
-npm run docs:build
+npm 运行文档：build...
 ```
 
-### 构建原生模块
+### 构建本机模块
 
 ```bash
-npm run native
+npm 运行本机
 ```
 
-### 构建 Worker
+### 构建工人
 
 ```bash
-npm run worker
+npm 运行工人
 ```
 
-### 构建 API
+### 生成 API
 
 ```bash
-npm run api
+npm 运行 api
 ```
 
-### 构建 CLI (Windows)
+### 构建CLI (Windows)
 
 ```bash
-npm run cli:build:win
+npm 运行客户端:build:win
 ```
 
-### 运行开发环境
+### 运行开发
 
 ```bash
-npm run dev
+npm 运行dev
 ```
 
 ### 构建应用程序 (Windows)
 
 ```bash
-npm run build:win
+npm 运行构建:win
 ```
 
-## 从 Github Action 获取
+## 从 Github 操作
 
-您也可以从 [Github Action](https://github.com/ecubus/EcuBus-Pro/tree/master/.github/workflows) 获取详细的设置步骤。
+您也可以从 [Github Action](https://github.com/ecubus/EcuBus-Pro/tree/master/.github/workflows) 获取详细设置步骤

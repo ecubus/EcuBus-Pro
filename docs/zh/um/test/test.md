@@ -1,52 +1,52 @@
-# EcuBus-Pro 测试架构
+# Ecuadus Bus-Pro 测试结构
 
-## 概述
+## 概览
 
-EcuBus-Pro 提供强大且灵活的测试框架，用于汽车 ECU 的开发与验证。该测试架构支持开发者为总线通信创建、执行与监控自动化测试，从而确保车载系统行为的可靠性与一致性。
+Ecuadus Bus-Pro为自动ECU的发展和验证提供了一个强有力和灵活的测试框架。 测试架构允许开发者创建、执行和监视汽车通信自动化测试，确保汽车系统的可靠和一贯行为。
 
-![测试架构示意](image-4.png)
+![Alt 文本](image-4.png)
 
-## 关键特性
+## 关键功能
 
-### 配置（Config）
+### 配置
 
-通过友好的界面监控测试执行并实时展示结果。
-![配置界面](image.png)
-![执行监控](image-2.png)
+使用方便的接口监视测试执行情况，显示实时结果
+![备用文本](image.png)
+![Alt text](image-2.png)
 
-### 基于 TypeScript 的测试框架
+### 基于类型脚本的测试框架
 
-使用熟悉的 TypeScript 语法与内置测试工具编写测试。详见 [Script](./../script.md)。
+使用熟悉的 TypeScript 语法和内置测试工具编写测试。 见 [Srcipt](./../script.md)。
 
-复用 Node.js 的 [test runner](https://nodejs.org/docs/latest/api/test.html)。
+重用了 Node.js [测试运行器](https://nodejs.org/docs/latest/api/test.html)
 
 #### 示例
 
 ```typescript
- describe('Test Suite', () => {
+ describe('测试套件', () => {
 
 
-  test('Wait for a specific CAN message with ID 0x1', async () => {
+  test('等待 ID 为 0x1 的特定 CAN 消息', async () => {
     await TestWaitForMessage(0x1, 3000)
     assert(true)
   })
 
-  // Test case that waits for any CAN message and verifies its ID is 0x2
-  test('Wait for any CAN message, and verify its ID is 0x2', async () => {
+  // 等待任何 CAN 消息并验证其 ID 为 0x2 的测试用例
+  test('等待任何 CAN 消息，并验证其 ID 为 0x2', async () => {
     const msg = await TestWaitForMessage(true, 3000)
     assert(msg.id == 0x2)
   })
 
-  // Skipped test case that would otherwise pass immediately
-  test.skip('Skip test example', async () => {
+  // 被跳过的测试用例，否则会立即通过
+  test.skip('跳过测试示例', async () => {
     assert(true)
   })
 })
 
-// Second test suite
-describe('Test Suite 2', () => {
-  // Simple test case that passes immediately
-  test('Fail test example', () => {
+// 第二个测试套件
+describe('测试套件 2', () => {
+  // 立即通过的简单测试用例
+  test('失败测试示例', () => {
     assert(false)
   })
 })
@@ -54,8 +54,8 @@ describe('Test Suite 2', () => {
 
 ### 详细测试报告
 
-生成包含时序与通过/失败信息的完整测试报告。
+生成带有时间和传输/失败信息的全面测试报告
 
-![报告示例1](image-3.png)
+![Alt 文本](image-3.png)
 
-![报告示例2](image-1.png)
+![Alt 文本](image-1.png)

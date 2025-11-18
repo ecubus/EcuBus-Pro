@@ -135,7 +135,7 @@
         <span v-else>{{ row.desc }}</span>
       </template>
     </el-table-column>
-    <el-table-column fixed="right" label="Operations" width="180" align="center">
+    <el-table-column fixed="right" label="Operations" width="200" align="center">
       <template #header>
         <div>
           <el-dropdown :disabled="props.disabled">

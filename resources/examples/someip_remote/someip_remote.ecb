@@ -83,7 +83,28 @@
             "instanceId": "0x2222",
             "methodId": "0x3333",
             "channel": "721ea2b9-12cd-494a-b448-e3514fb0d96d",
-            "params": [],
+            "params": [
+              {
+                "id": "959689b6-efcd-4f2c-9e1a-ed591a55d03a",
+                "name": "param1",
+                "desc": "",
+                "phyValue": "hello",
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    104,
+                    101,
+                    108,
+                    108,
+                    111
+                  ]
+                },
+                "bitLen": 40,
+                "type": "ASCII",
+                "deletable": true,
+                "editable": true
+              }
+            ],
             "respParams": [],
             "_X_ROW_KEY": "row_26",
             "protocolVersion": "",
@@ -143,7 +164,7 @@
         "pos": {
           "x": 243,
           "y": 48,
-          "w": 1044,
+          "w": 1387,
           "h": 400
         },
         "title": "someipi",

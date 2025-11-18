@@ -331,7 +331,7 @@
               v-model="formData.params"
               :parent-id="editIndex"
               sid=""
-              service-id="0x10"
+              service-id="Job"
             />
           </el-tab-pane>
           <el-tab-pane
@@ -345,7 +345,7 @@
               v-model="formData.respParams"
               :parent-id="editIndex"
               sid=""
-              service-id="0x10"
+              service-id="Job"
             />
           </el-tab-pane>
         </el-tabs>

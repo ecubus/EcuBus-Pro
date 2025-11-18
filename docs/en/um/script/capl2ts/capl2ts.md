@@ -16,15 +16,15 @@ EcuBus-Pro’s answer is to write scripts with `TypeScript`. EcuBus-Pro scripts 
 > [!INFO]
 > Continuously updated. For more script APIs, see the [API](https://app.whyengineer.com/scriptApi/index.html)
 
-| Feature          | CAPL Example                                   | EcuBus-Pro Script Example (TypeScript)                    |
-| ---------------- | ---------------------------------------------- | --------------------------------------------------------- |
-| **Type checking** | Weak typing, no compile-time checks            | Strong typing, IDE hints + compile-time checks            |
-| **Libraries & extensions** | Built into the Vector environment           | NPM ecosystem with abundant third-party libraries         |
-| **Variable declaration** | `int counter = 0;`                           | `let counter: number = 0;`                                |
-| **Print logs**   | `write("Hello CAPL");`                         | `console.log("Hello EcuBus-Pro");`                       |
-| **Message receive event** | `on message CAN1.MyMsg{  write("Received");}` | `Util.OnCan(0x1, (msg) => {  console.log("Received");});` |
-| **Event callback** | `on key 'a' { ... }`                           | `Util.OnKey('a', () => { ... });`                         |
-| **Variable watch** | `on envVar EnvChecksumError { ... }`           | `Util.OnVar('EnvChecksumError', () => { ... });`          |
+| Feature                                        | CAPL Example                                  | EcuBus-Pro Script Example (TypeScript) |
+| ---------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
+| **Type checking**                              | Weak typing, no compile-time checks           | Strong typing, IDE hints + compile-time checks            |
+| **Libraries & extensions** | Built into the Vector environment             | NPM ecosystem with abundant third-party libraries         |
+| **Variable declaration**                       | `int counter = 0;`                            | `let counter: number = 0;`                                |
+| **Print logs**                                 | `write("Hello CAPL");`                        | `console.log("Hello EcuBus-Pro");`                        |
+| **Message receive event**                      | `on message CAN1.MyMsg{  write("Received");}` | `Util.OnCan(0x1, (msg) => {  console.log("Received");});` |
+| **Event callback**                             | `on key 'a' { ... }`                          | `Util.OnKey('a', () => { ... });`                         |
+| **Variable watch**                             | `on envVar EnvChecksumError { ... }`          | `Util.OnVar('EnvChecksumError', () => { ... });`          |
 
 ## Examples
 

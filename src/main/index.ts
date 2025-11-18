@@ -9,6 +9,7 @@ import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
+import { initMainI18n } from './i18n'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
 
@@ -213,7 +214,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -225,6 +226,15 @@ app.whenReady().then(() => {
   })
 
   registerLocalResourceProtocol()
+
+  // 初始化主进程 i18n
+  try {
+    const savedLang = store.get('language', 'en') as string
+    await initMainI18n(savedLang)
+    log.info(`Main process i18n initialized with language: ${savedLang}`)
+  } catch (error) {
+    log.error('Failed to initialize main process i18n:', error)
+  }
 
   createWindow()
 

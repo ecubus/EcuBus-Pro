@@ -33,6 +33,7 @@ import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
+import { initRendererI18n, i18nPlugin } from './i18n'
 
 const channel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')
@@ -118,6 +119,11 @@ app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
 app.use(wujieVue)
+
+// 初始化 i18n（同步）
+const savedLang = window.electron?.ipcRenderer.sendSync('electron-store-get', 'language') || 'en'
+initRendererI18n(savedLang)
+app.use(i18nPlugin)
 
 const dataStore = useDataStore()
 const projectStore = useProjectStore()

@@ -1,0 +1,14 @@
+{
+  "general": {
+  
+    "language": "Language",
+    "uiZoom": "UI Zoom",
+    "theme": "Theme",
+    "uiZoomTooltip": "Adjust the overall UI scaling of the application",
+    "themeTooltip": "Choose between light and dark theme"
+
+  
+  }
+  
+}
+

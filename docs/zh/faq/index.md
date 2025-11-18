@@ -1,43 +1,43 @@
-# 常见问题（FAQ）
+# 常见问题
 
-## 如何将 UDS 消息长度配置为 8 字节？
+## 如何配置 UDS 消息长度到 8 字节？
 
-:::: details 答复
-在 UDS Tester -> Tp Base -> Padding Enable 中启用填充（Padding）。你也可以设置自定义的 Padding Value，默认值为 0x00。
+:::details 答案
+您可以通过 UDS 测试器 -> Tp 基础 -> 填充启用来启用填充。 您也可以设置自己的填充值，默认为0x00。
 ![1](./1.png)
-::::
+:::
 
-## ZLG 打开设备提示 Set baud rate failed？
+## ZLG 调试，conditioning Puntary Pete 波特率失败？
 
-:::: details 答复
-这是一个已知问题，请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
-::::
+:::details 答案
+这是一个已知问题,请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
+:::
 
-## 使用 Sequencer 通过 LIN（ID 0x3C，NAD 0x55）发送 UDS 服务后，为什么不再发送 ID 0x3D 的 LIN 报文让从站响应？
+## 当使用序列器发送UDS服务时，使用ID0x3C和NAD 0x55在LIN上方， 为什么不发送ID为 0x3D 的 LIN 消息，然后从此从作者处回复？
 
-:::: details 答复
-这是由于 LIN 调度表（schedule table）的实现方式所致。你需要先启动任意一个调度表。
-![2](./2.png)
-然后再发送 ID 0x3D 的 LIN 报文。
+:::details 答案
+这是因为执行了林中时间表表。 您应该先开始任何计划表。
+！[2](./2.png)
+然后您可以通过ID 0x3D 发送LIN 消息。
 ![3](./3.png)
-::::
+:::
 
-## 如何计算报文的 CRC 值？
+## 如何计算消息的 CRC 值？
 
-:::: details 答复
-可在脚本中使用内置的 [CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API 计算 CRC。该 API 支持多种 CRC 算法（CRC8、CRC16、CRC32），并可配置参数。
+:::details 答案
+您可以使用脚本中内置的 [CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC 值。 API 支持各种带有可配置参数的 CRC 算法，包括CRC8、CRC16和CR32。
 
-::::
+:::
 
-## 如何为周期性报文实现循环计数？
+## 如何执行周期消息计数循环？
 
-:::: details 答复
+:::details 答案
 
-**如果有数据库，且希望周期性更新信号数值：**
+**如果您有数据库并希望定期更新信号值：**
 
-1. 先将该报文配置为周期性发送。
-2. 使用 [OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API 监听该报文的收发。
-3. 使用 [setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API 更新信号数值。
+1. 首先，您需要定期配置信息。
+2. 然后你就不再使用 [OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API来监听发送/接收的消息。
+3. 使用 [setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API 来更新信号值。
 
 ```ts
 import { setSignal } from 'ECB'
@@ -50,9 +50,9 @@ Util.OnCan(0x142, (data) => {
 
 ![demo](./loop.gif)
 
-**无数据库：**
+**没有数据库：**
 
-1. 直接使用 [output](https://app.whyengineer.com/scriptApi/functions/output.html) API 输出你需要的任意报文数据。
+1. 只需使用 [output](https://app.whyengineer.com/scriptApi/functions/output.html) API才能输出您想要的任何值。
 
 ```ts
 import { output,CanMessage,CAN_ID_TYPE} from 'ECB'

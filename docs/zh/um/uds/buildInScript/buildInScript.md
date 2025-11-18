@@ -1,157 +1,158 @@
-﻿# 内置脚本
+# 在脚本中生成
 
-内置脚本系统为常见 UDS 操作提供预配置的诊断服务。本文档介绍可用的内置脚本及其功能。
+内置脚本系统为共同的UDS操作提供预先配置的诊断服务。 此文档涵盖可用的内置脚本及其功能。
 
-## 支持的内置脚本
+## 支持内置脚本
 
 ### [SecureAccessGenerateKeyEx](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyEx)
 
-此脚本用于在 SecurityAccess 流程中生成密钥。参见 [GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
+此脚本用于生成安全访问过程的密钥。 请参阅 [GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
-  const unsigned char* ipSeedArray,
-  unsigned int iSeedArraySize,
-  const unsigned int iSecurityLevel,
-  const char* ipVariant,
-  unsigned char* iopKeyArray,
-  unsigned int iMaxKeyArraySize,
-  unsigned int& oActualKeyArraySize
-);
+  const unigned char* ipSeedAray,  
+  未签名的 iSeedAraySize, 
+  conster 未签名的 iSecurityLevel,  
+  const char* ipVariant, 
+  unigned char* KeyAray,  
+  未签名的 iMaxKeyAraySize, 
+  未签名的 int& oActualKeyArraySize 
+;
 ```
 
 ![GenerateKeyEx](./images/GenerateKeyEx.png)
 
-#### GenerateKeyEx接口参数
+#### 参数 - SecureAccessGenerateKeyEx
 
 - **dllFile**
-  - DLL 文件路径。该 DLL 必须为 64 位，并且包含 GenerateKeyEx 函数。
+
+  - DLL 文件路径，DLL 必须是64位 DLL 文件并包含GenerateKeyEx 函数。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
-  const unsigned char* ipSeedArray,
-  unsigned int iSeedArraySize,
-  const unsigned int iSecurityLevel,
-  const char* ipVariant,
-  unsigned char* iopKeyArray,
-  unsigned int iMaxKeyArraySize,
-  unsigned int& oActualKeyArraySize
-);
+  const unigned char* ipSeedAray,  
+  未签名的 iSeedAraySize, 
+  conster 未签名的 iSecurityLevel,  
+  const char* ipVariant, 
+  unigned char* KeyAray,  
+  未签名的 iMaxKeyAraySize, 
+  未签名的 int& oActualKeyArraySize 
+;
 ```
 
-- **requestSeed**
-  - 种子请求子功能，取值为 1,3,5,7,9,11,13,15
-  - 默认：0x01
+- **请求种子**
+  - 请求种子职能分别1,3,3,5,7,9,11,13,15
+  - 默认值： 0x01
 
 - **sendKey**
-  - 发送密钥子功能，取值为 2,4,6,8,10,12,14,16
-  - 默认：0x02
+  - 派遣关键分职能，2 4,6,8,810,12,14,16
+  - 默认值： 0x02
 
-- **securityLevel**
-  - 要解锁的目标安全等级
+- **安全级别**
+  - 安全等级更改为
 
-- **variant**
-  - 安全访问流程的变体(或者说是目标ECU的名称)
+- **变量**
+  - 安全存取处理的变体(诊断接收器ECU的名称)
 
 - **maxKeyArraySize**
-  - Key 数组的最大长度
+  - 最大键数组大小
 
 - **securityAccessDataRecord**
-  - 在安全访问过程的请求 Seed 阶段，诊断请求中包含的安全访问数据记录通过 RequestSeed 子功能传输至 ECU
+  - 请求种子图请求中的安全访问数据记录，数据将在请求种子函数中发送到ECU。
 
 ### [SecureAccessGenerateKeyExOpt](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyExOpt)
 
-此脚本用于在 SecurityAccess 流程中生成密钥。参见 [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
+此脚本用于生成安全访问过程的密钥。 请参阅 [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ![GenerateKeyExOpt](./images/GenerateKeyExOpt.png)
 
-#### GenerateKeyExOpt接口参数
+#### 参数 - SecureAccessGenerateKeyExOpt
 
 - **dllFile**
-  - DLL 文件路径。该 DLL 必须为 64 位，并且包含 GenerateKeyExOpt 函数。
+  - DLL 文件路径，DLL 必须是64位 DLL 文件并包含GenerateKeyExOpt 函数。
 
 ```c
-VKeyGenResultExOpt GenerateKeyExOpt (
-  const unsigned char* ipSeedArray,
-  unsigned int iSeedArraySize,
-  const unsigned int iSecurityLevel,
-  const char* ipVariant,
-  const char* ipOptions,
-  unsigned char* iopKeyArray,
-  unsigned int iMaxKeyArraySize,
-  unsigned int& oActualKeyArraySize
-);
+VKeyGenResultExOpt GenerateKeyExOpt ( 
+  const unigned char* ipSeedArray,  
+  unsigned int iSeedArraySize, 
+  委托未签名的 iSecurityLevel,  
+  const char* ipVariant,  
+  const char* ipOptions, 
+  unigned char* KeyiARay,  
+  未签名的 iMaxKeyAraySize,  
+  未签名的 int& oActualKeyAraySize 
+;
 ```
 
-- **requestSeed**
-  - 种子请求子功能，取值为 1,3,5,7,9,11,13,15
-  - 默认：0x01
+- **请求种子**
+  - 请求种子职能分别1,3,3,5,7,9,11,13,15
+  - 默认值： 0x01
 
 - **sendKey**
-  - 发送密钥子功能，取值为 2,4,6,8,10,12,14,16
-  - 默认：0x02
+  - 派遣关键分职能，2 4,6,8,810,12,14,16
+  - 默认值： 0x02
 
-- **securityLevel**
-  - 要解锁的目标安全等级
+- **安全级别**
+  - 安全等级更改为
 
-- **variant**
-  - 安全访问流程的变体(或者说是目标ECU的名称)
+- **变量**
+  - 安全存取处理的变体(诊断接收器ECU的名称)
 
-- **options**
-  - 安全访问流程的可选参数
+- **选项**
+  - 安全准入程序的各种选择
 
 - **maxKeyArraySize**
-  - Key 数组的最大长度
+  - 最大键数组大小
 
 - **securityAccessDataRecord**
-  - 在安全访问过程的请求 Seed 阶段，诊断请求中包含的安全访问数据记录通过 RequestSeed 子功能传输至 ECU
+  - 请求种子图请求中的安全访问数据记录，数据将在请求种子函数中发送到ECU。
 
 ### [RequestDownloadBin](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/RequestDownloadBin)
 
-一个组合服务，通过组合 UDS 服务 0x34（RequestDownload）、0x36（TransferData）与 0x37（TransferExit）,完成完整的Bin文件下载流程。
+一个处理完整的二进制下载过程的合并服务，通过管弦乐队服务 0x34 (RequestDownload), 0x36 (TransferData), 和 0x37 (TransferExit).
 
 ![RequestDownloadBin](./images/RequestDownloadBin.png)
 
 #### 描述
 
-此脚本将二进制文件下载到 ECU 的流程自动化：
+此脚本通过以下方式自动下载二进制文件到 ECU 的过程：
 
-1. 发起下载请求
-2. 按合适的分片大小传输数据
-3. 完成传输
+1. 正在启动下载请求
+2. 正在将数据传输到合适的数据块中
+3. 完成转让过程
 
-#### Bin文件下载参数
+#### 参数 - 请求DownloadBin
 
-- **dataFormatIdentifier**（8 位）
-  - 待传输数据的格式标识
-  - 默认：0x00
+- **dataFormatIdentifier** (8-bit)
+  - 要传输的数据的格式标识符
+  - 默认值： 0x00
 
-- **addressAndLengthFormatIdentifier**（8 位）
-  - 指定内存地址与长度的格式
-  - 默认：0x44(地址 4 字节，长度 4 字节)
+- **addressAndLengthFormatIdentifier** (8-bit)
+  - 指定内存地址和长度的格式
+  - 默认值： 0x44 (地址4字节，长度4字节)
 
-- **memoryAddress**（取决于 addressAndLengthFormatIdentifier）
-  - 下载的目标内存地址
-  - 默认：0x00000000
+- **memoryAddress** (依赖地址AndLengthFormatIdentifier)
+  - 下载目标内存地址
+  - 默认值： 0x000000
 
 - **binFile**
-  - 待下载的二进制文件，内存大小会自动根据文件调整
+  - 要下载的二进制文件将自动更改内存大小
 
 ## 创建自定义脚本
 
-可以创建自定义脚本以扩展诊断系统功能。你可以创建并保存自己的脚本，供后续复用。
+可以创建自定义脚本来扩展诊断系统的功能。 您可以创建和保存您自己的脚本，并在未来使用它。
 
-创建步骤如下：
+这是如何创建您自己的脚本：
 
 ### 脚本结构
 
-1. **目录准备**
-   - 在 `${App Install Path}/resources/app.asar.unpacked/resources/buildInScript/` 下创建新目录
-   - 按脚本功能命名（例如 `MyCustomScript`）
+1. **目录设置**
+   - 在 `${App Install Path}/resources/app.asar.unpacked/resources/buildInScript/` 下创建一个新目录
+   - 根据你的脚本函数命名它(如：`MyCustomScript`)
 
-2. **必需文件**
-   - `plugin.json`：配置文件
-   - `index.js`：实现文件
+2. **必填文件**
+   - `plugin.json`: 配置文件
+   - `index.js`: 实现文件
 
 ### plugin.json 配置
 
@@ -207,19 +208,19 @@ Util.Init(() => {
 });
 ```
 
-### 最佳实践
+### 最佳做法
 
 1. **参数定义**
-   - 在 plugin.json 中清晰定义参数结构
-   - 支持合适的数据类型（NUM、HEX、ASCII、BUFFER、FILE）
-   - 设置合理的位长度与可编辑性
+   - 在 plugin.json 中定义清晰的参数结构
+   - 支持适当的数据类型(NUM, HEX, ASCII, BUFFER, FILE)
+   - 设置适当的位长度和可编辑
 
 2. **响应处理**
-   - 定义期望的响应参数
-   - 实现响应校验
-   - 处理不同的响应场景
+   - 定义预期响应参数
+   - 执行响应验证
+   - 处理不同的应对方案
 
-### 示例：简单计数脚本
+### 示例：简单的计数脚本
 
 ```javascript
 // index.js

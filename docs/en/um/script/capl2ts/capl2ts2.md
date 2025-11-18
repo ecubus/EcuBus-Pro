@@ -162,13 +162,13 @@ const msg: LinMsg = {
 
 #### 3. Key parameter descriptions
 
-| Parameter      | Description          | Example                                          |
-| -------------- | -------------------- | ------------------------------------------------ |
-| `frameId`      | LIN frame identifier | `0x3c` (60)                   |
-| `direction`    | Message direction    | `LinDirection.SEND`                              |
-| `data`         | Data payload         | 8-byte data array                                |
-| `checksumType` | Checksum type        | `CLASSIC` or `ENHANCED`                          |
-| `checkSum`     | Manual checksum      | `3` (intentionally incorrect) |
+| Parameter | Description | Example |
+|------|------|--------|
+| `frameId` | LIN frame identifier | `0x3c` (60) |
+| `direction` | Message direction | `LinDirection.SEND` |
+| `data` | Data payload | 8-byte data array |
+| `checksumType` | Checksum type | `CLASSIC` or `ENHANCED` |
+| `checkSum` | Manual checksum | `3` (intentionally incorrect) |
 
 #### 4. Error injection principle
 

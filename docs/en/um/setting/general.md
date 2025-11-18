@@ -6,6 +6,7 @@ Used to switch between light and dark themes.
 ![alt text](image-1.png)
 
 ---
+
 ![alt text](image-2.png)
 
 ## UI Zoom

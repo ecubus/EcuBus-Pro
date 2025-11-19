@@ -16,10 +16,10 @@ import { SomeipMessage, SomeipInfo, ServiceConfig } from '../share/someip'
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
 export function startRouterCounter(configFilePath: string, quiet: boolean = true): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolvePromise, reject) => {
     // Check if routing manager is already running
     if (routingManagerProcess) {
-      resolve()
+      resolvePromise()
       return
     }
     const lockFile = path.join(os.tmpdir(), 'vsomeip.lck')
@@ -34,20 +34,22 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
     }
 
     // Spawn routing manager process
-    routingManagerProcess = spawn(
-      routingmanager,
-      quiet ? ['-q', '-c', configFilePath] : ['-c', configFilePath],
-      {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        detached: false
-      }
-    )
+    routingManagerProcess = fork(resolve(__dirname, 'vsomeip.js'))
+
+    let resolved = false
 
     // Handle process events
+    routingManagerProcess.on('message', (msg: any) => {
+      if (msg.id === 0 && msg.data === 'initRouter') {
+        resolved = true
+        resolvePromise()
+      }
+    })
+
     routingManagerProcess.on('error', (error) => {
       sysLog.error(`start routing manager failed: ${error}`)
       routingManagerProcess = null
-      reject(error)
+      if (!resolved) reject(error)
     })
 
     routingManagerProcess.on('exit', (code, signal) => {
@@ -56,16 +58,16 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
         sysLog.error(`routing manager exited unexpectedly with code: ${code}, signal: ${signal}`)
         routingManagerProcess = null
       }
+      if (!resolved) reject(new Error(`Routing manager exited with code ${code}`))
     })
 
-    // Wait a bit for the process to start
-    setTimeout(() => {
-      if (routingManagerProcess && !routingManagerProcess.killed) {
-        resolve()
-      } else {
-        reject(new Error('Routing manager failed to start'))
+    routingManagerProcess.send({
+      id: 0,
+      method: 'initRouter',
+      data: {
+        configFilePath
       }
-    }, 100)
+    })
   })
 }
 

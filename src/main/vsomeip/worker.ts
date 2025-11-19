@@ -29,6 +29,23 @@ process.on('message', (message: any) => {
 
       break
     }
+    case 'initRouter': {
+      response.data = 'initRouter'
+      instance = new client(
+        'routingmanagerd',
+        data.configFilePath,
+        (val) => {
+          process.send!({
+            event: val
+          })
+        },
+        { router: true }
+      )
+      instance.init()
+      instance.start()
+
+      break
+    }
     case 'stop': {
       instance?.stop()
       instance = null

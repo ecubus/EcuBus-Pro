@@ -11,13 +11,13 @@ SWIG 的作用是将驱动 API C/C++ 语言转换为 Javascript，使其他语�
 
 Node-gyp 构建已转换为 Javascript 和 Lib的节点模块以进行跨平台分配。
 
-The role of each file:  
-zlg.i: SWIG interface file, defines how C/C++ is converted to Javascript standards  
-s.bat: Script to convert C/C++ code to Javascript code, used to generate zlg_wrap.cxx  
-zlg_wrap.cxx: Generated Javascript code  
-buffer.i, buffer1.i: Buffer interfaces, generally unchanged  
-tsfn.cxx: Thread-safe file, entry point for CAN transmission/reception threads  
-zlg.node: Compiled node module, can be used in .ts files  
+各文件的作用：  
+zlg.i：SWIG接口文件，定义了C/C++如何转换为Javascript标准  
+s.bat：将C/C++代码转换为Javascript代码的脚本，用于生成zlg_wrap.cxx  
+zlg_wrap.cxx：生成的Javascript代码  
+buffer.i, buffer1.i：缓冲区接口，通常保持不变  
+tsfn.cxx：线程安全文件，CAN收发线程的入口点  
+zlg.node：编译后的node模块，可在.ts文件中使用  
 ![1](../../../media/dev/adapter/1.png)
 2. 遵循此进程需要掌握基本的 JavaScript/类型语法知识。 对于仅知道C/C++的用户来说，快速学习打字的方法是通过 [TypeScript 教程](../jslearn) 在 rookie 教程网站。 跟随教程中的每个示例花费1-2天将帮助您掌握基本语法和语言功能。 对于更高级的应用程序和执行方法，您可以在编写实际相关代码时查找材料。
 3. 对于SWIG，我们只需要知道它是一个跨语言的编译器，可以为驱动 API C/C++ 声明创建包装器。 允许打字稿和其他语言访问这些声明。 SWIG 非常强大和复杂，但我们可以暂时忽略其他功能，只能通过一个简单的例子理解SWIG的工作原则。 比如引用这个 [SWIG Introduction and Getting Started Guide](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
@@ -91,7 +91,7 @@ zlg.node: Compiled node module, can be used in .ts files
 
    在 cmd 中执行上述命令。\docan\vector\swig目录下，该目录将生成vxlapi.h 页眉文件的 vector_wrawraw.cxx 。  
    ![2](../../../media/dev/adapter/2.png)  
-   If cmd reports an error, it means some code in vxlapi.h cannot be converted to .cxx and needs to be disabled or modified according to the prompts until .cxx is successfully generated. 在这一点上，各种文件实际上可以使用 vector_wrawraw.cxx 访问 Lib API，但要实现跨平台兼容，需要进一步生成 .node 模块。
+   如果cmd报错，说明vxlapi.h中的某些代码无法转换为.cxx，需要根据提示禁用或修改，直到成功生成.cxx文件。 在这一点上，各种文件实际上可以使用 vector_wrawraw.cxx 访问 Lib API，但要实现跨平台兼容，需要进一步生成 .node 模块。
 
 4. 修改安全线程的 tsfn.cxx 文件，替换包含 zlgcan 文件。 也有关于ZLG API的实现功能，暂时禁用它们，稍后替换它们，确保.cxx不包含原始zlgcan.h 内容。
 

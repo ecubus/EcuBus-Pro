@@ -1,4 +1,4 @@
-﻿# Vehicle Identification Request Behavior
+# Vehicle Identification Request Behavior
 
 we support 4 VIN request methods:
 
@@ -7,7 +7,7 @@ we support 4 VIN request methods:
 3. Broadcast VIN Request (UDP4)
 4. Multicast VIN Request (UDP6)
 
-![alt text](../../../media/um/doip/image-5.png)
+![alt text](image-5.png)
 
 ## Unicast VIN Request
 
@@ -15,8 +15,8 @@ we support 4 VIN request methods:
 > This method is only setup Request Address.
 >
 
-![alt text](../../../media/um/doip/image.png)
-![alt text](../../../media/um/doip/image-1.png)
+![alt text](image.png)
+![alt text](image-1.png)
 
 ## Omit VIN, tcp connect directly
 
@@ -26,12 +26,12 @@ without UDP request, connect directly to the tcp server, see [[#82](https://gith
 > This method is only setup Request Address.
 >
 
-![alt text](../../../media/um/doip/image-2.png)
+![alt text](image-2.png)
 
 ## Broadcast VIN Request (UDP4)
 
-![alt text](../../../media/um/doip/image-3.png)
-![alt text](../../../media/um/doip/image-4.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
 
 ## Multicast VIN Request (UDP6)
 

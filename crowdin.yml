@@ -2,10 +2,6 @@ files:
   - source: /docs/en/**/*.md
     translation: /docs/%two_letters_code%/**/%original_file_name%
     type: markdown
-    excluded_target_languages:
-      - en
   - source: /resources/examples/*/readme.md
     translation: /%original_path%/readme.%two_letters_code%.md
     type: markdown
-    excluded_target_languages:
-      - en

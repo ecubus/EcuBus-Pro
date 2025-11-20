@@ -18,7 +18,7 @@
 :::details 答案
 这是因为执行了林中时间表表。 您应该先开始任何计划表。
 ![2](../../media/faq/2.png)
-Then you can send the LIN message with ID 0x3D.
+然后您可以发送ID为0x3D的LIN报文。
 ![3](../../media/faq/3.png)
 :::
 

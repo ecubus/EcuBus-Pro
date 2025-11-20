@@ -1,8 +1,8 @@
-# Trace
+﻿# Trace
 
 The Trace window provides an interface for viewing and exporting data. Users can save data through buttons on the toolbar for further analysis or archival purposes.
 
-![alt text](image.png)
+![alt text](../../../media/um/trace/image.png)
 
 >[!INFO]
 > Currently, Trace has a maximum storage capacity of 50,000 entries. When this limit is exceeded, the oldest data will be automatically deleted.
@@ -10,10 +10,10 @@ The Trace window provides an interface for viewing and exporting data. Users can
 ## Overwrite Mode
 
 Use below button to switch between overwrite mode and scroll mode.
-![alt text](image-5.png)
+![alt text](../../../media/um/trace/image-5.png)
 
 In overwrite mode, the Trace window will overwrite the oldest data when the maximum storage capacity is exceeded.
-![ow](ow.gif)
+![ow](../../../media/um/trace/ow.gif)
 
 ## Filter
 
@@ -23,11 +23,11 @@ The Trace window supports filtering by device, signal name, and signal value.
 > [!NOTE]
 > Selecting all devices or no devices has the same effect.
 
-![alt text](image-3.png)
+![alt text](../../../media/um/trace/image-3.png)
 
 ## Filter By Message Type
 
-![alt text](image-4.png)
+![alt text](../../../media/um/trace/image-4.png)
 
 * CAN - Receive CAN-related data
 * LIN - Receive LIN-related data
@@ -62,8 +62,8 @@ When the corresponding hardware channel is bound to a [database](../database.md)
 
 ## LIN Signal Display
 
-![lin](image-1.png)
+![lin](../../../media/um/trace/image-1.png)
 
 ## CAN Signal Display
 
-![can](image-2.png)
+![can](../../../media/um/trace/image-2.png)

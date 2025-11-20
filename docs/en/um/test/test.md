@@ -1,18 +1,18 @@
-# EcuBus-Pro Testing Architecture
+﻿# EcuBus-Pro Testing Architecture
 
 ## Overview
 
 EcuBus-Pro provides a powerful and flexible testing framework for automotive ECU development and validation. The testing architecture allows developers to create, execute, and monitor automated tests for Bus communications, ensuring reliable and consistent behavior of automotive systems.
 
-![alt text](image-4.png)
+![alt text](../../../media/um/test/image-4.png)
 
 ## Key Features
 
 ### Config
 
 Monitor test execution with a user-friendly interface showing real-time results
-![alt text](image.png)
-![alt text](image-2.png)
+![alt text](../../../media/um/test/image.png)
+![alt text](../../../media/um/test/image-2.png)
 
 ### TypeScript-Based Test Framework
 
@@ -56,6 +56,6 @@ describe('Test Suite 2', () => {
 
 Generate comprehensive test reports with timing and pass/fail information
 
-![alt text](image-3.png)
+![alt text](../../../media/um/test/image-3.png)
 
-![alt text](image-1.png)
+![alt text](../../../media/um/test/image-1.png)

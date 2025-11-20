@@ -20,7 +20,7 @@ VKeyGenResultEx GenerateKeyEx (
 );
 ```
 
-![GenerateKeyEx](./images/GenerateKeyEx.png)
+![GenerateKeyEx](../../../../media/um/uds/buildInScript/images/GenerateKeyEx.png)
 
 #### Parameters - SecureAccessGenerateKeyEx
 
@@ -64,7 +64,7 @@ VKeyGenResultEx GenerateKeyEx (
 
 This script is used to generate a key for the security access process. see [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
 
-![GenerateKeyExOpt](./images/GenerateKeyExOpt.png)
+![GenerateKeyExOpt](../../../../media/um/uds/buildInScript/images/GenerateKeyExOpt.png)
 
 #### Parameters - SecureAccessGenerateKeyExOpt
 
@@ -111,7 +111,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 
 A combined service that handles the complete binary download process by orchestrating UDS services 0x34 (RequestDownload), 0x36 (TransferData), and 0x37 (TransferExit).
 
-![RequestDownloadBin](./images/RequestDownloadBin.png)
+![RequestDownloadBin](../../../../media/um/uds/buildInScript/images/RequestDownloadBin.png)
 
 #### Description
 

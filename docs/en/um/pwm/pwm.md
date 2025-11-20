@@ -1,4 +1,4 @@
-# PWM
+﻿# PWM
 
 PWM device supports outputting PWM signal, also with ICU (Input Capture Unit) function.
 
@@ -9,7 +9,7 @@ Supported Hardware:
 | ECUBUS | PWM, ICU (ongoing) |
 
 
-![pwm](image.png)
+![pwm](../../../media/um/pwm/image.png)
 
 
 ## PWM Interaction
@@ -24,6 +24,6 @@ Open PWM IA through `Network` window. IA Ability:
     - 75%
     - 100%
 
-![pwm](ia.png)
+![pwm](../../../media/um/pwm/ia.png)
 
 

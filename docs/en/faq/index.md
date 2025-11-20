@@ -1,10 +1,10 @@
-# FAQ
+﻿# FAQ
 
 ## How to configure UDS message length to 8 bytes?
 
 ::: details Answer
 You can enable padding by going to UDS Tester -> Tp Base -> Padding Enable. You can also set your own Padding Value, which defaults to 0x00.
-![1](./1.png)
+![1](../../media/faq/1.png)
 :::
 
 ## ZLG 打开设备提示 Set baud rate failed?
@@ -17,9 +17,9 @@ You can enable padding by going to UDS Tester -> Tp Base -> Padding Enable. You 
 
 ::: details Answer
 This is due to the implementation of the lin schedule table. You should start any schedule table first.
-![2](./2.png)
+![2](../../media/faq/2.png)
 Then you can send the LIN message with ID 0x3D.
-![3](./3.png)
+![3](../../media/faq/3.png)
 :::
 
 ## How to calculate the CRC value of a message?
@@ -48,7 +48,7 @@ Util.OnCan(0x142, (data) => {
 })
 ```
 
-![demo](./loop.gif)
+![demo](../../media/faq/loop.gif)
 
 **Without database:**
 

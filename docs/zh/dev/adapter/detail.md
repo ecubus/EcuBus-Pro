@@ -1,34 +1,34 @@
 # 如何开发新适配器
 
-EcuaduBus-Pro 目前支持许多主流的 CAN 通信箱，但您可能有来自不同制造商的其他CAN 箱，具有不同的模型和接口。 从官方网站[如何开发新的适配器](../adapter)，您可以向EcuadBus-Pro 添加基本驱动程序进行适应。  
-为此目的，我在现有基础上添加了一些矢量驱动器。 由于这是我第一次从事这些技术的工作，下面记录的步骤仅供参考。
+EcuBus-Pro 目前支持许多主流 CAN 通信盒，但您可能拥有来自不同制造商、型号和接口的其他 CAN 盒。 按照官方网站上的开发流程[如何开发新适配器](../adapter)，您可以为 EcuBus-Pro 添加底层驱动程序进行适配。  
+为此，我在现有基础上添加了一些 Vector 驱动程序。 由于这是我第一次使用这些技术，以下步骤仅供参考。
 
-## 1. 基本知识
+## 1. 必备基础知识
 
-1. 根据手动步骤使用ZLG CAN框作为示例。 CAN box 驱动程序和 Electron 客户端之间的交互原则大致如下：CAN box lib 库 + 。 头文件 + .i 接口文件使用 SWIG 生成 zlg_wrawraw.cxxx, 。 xx 文件通过node-gyp编译成zlg.node ，在导入.node, 设备初始化，CAN 传输/接收以及其他函数在索引中实现。 s，并最终用于Electron的基础实现和 zlg.test.ts 测试。
+1. 根据手册步骤，以 ZLG CAN 盒为例，CAN 盒驱动程序与 Electron 客户端之间的交互原理大致如下：CAN 盒 lib 库 + .h 头文件 + .i 接口文件使用 SWIG 生成 zlg_wrap.cxx，.cxx 文件通过 node-gyp 编译成 zlg.node，导入 .node 后，在 index.ts 中实现设备初始化、CAN 发送/接收等功能，最后用于 Electron 的 base.ts 接口实现和 zlg.test.ts 测试。
 
-SWIG 的作用是将驱动 API C/C++ 语言转换为 Javascript，使其他语言能够访问此 API 声明并呼叫Lib 接口。
+SWIG 的作用是将驱动程序 API C/C++ 语言转换为 Javascript，使其他语言能够访问这些 API 声明并调用 Lib 接口。
 
-Node-gyp 构建已转换为 Javascript 和 Lib的节点模块以进行跨平台分配。
+Node-gyp 将已转换为 Javascript 的 C/C++ API 和 Lib 构建成 node 模块，以便跨平台分发。
 
 各文件的作用：  
-zlg.i：SWIG接口文件，定义了C/C++如何转换为Javascript标准  
-s.bat：将C/C++代码转换为Javascript代码的脚本，用于生成zlg_wrap.cxx  
-zlg_wrap.cxx：生成的Javascript代码  
-buffer.i, buffer1.i：缓冲区接口，通常保持不变  
-tsfn.cxx：线程安全文件，CAN收发线程的入口点  
-zlg.node：编译后的node模块，可在.ts文件中使用  
+zlg.i: SWIG 接口文件，定义 C/C++ 如何转换为 Javascript 标准  
+s.bat: 将 C/C++ 代码转换为 Javascript 代码的脚本，用于生成 zlg_wrap.cxx  
+zlg_wrap.cxx: 生成的 Javascript 代码  
+buffer.i, buffer1.i: 缓冲区接口，通常不变  
+tsfn.cxx: 线程安全文件，CAN 发送/接收线程的入口点  
+zlg.node: 编译后的 node 模块，可在 .ts 文件中使用  
 ![1](../../../media/dev/adapter/1.png)
-2. 遵循此进程需要掌握基本的 JavaScript/类型语法知识。 对于仅知道C/C++的用户来说，快速学习打字的方法是通过 [TypeScript 教程](../jslearn) 在 rookie 教程网站。 跟随教程中的每个示例花费1-2天将帮助您掌握基本语法和语言功能。 对于更高级的应用程序和执行方法，您可以在编写实际相关代码时查找材料。
-3. 对于SWIG，我们只需要知道它是一个跨语言的编译器，可以为驱动 API C/C++ 声明创建包装器。 允许打字稿和其他语言访问这些声明。 SWIG 非常强大和复杂，但我们可以暂时忽略其他功能，只能通过一个简单的例子理解SWIG的工作原则。 比如引用这个 [SWIG Introduction and Getting Started Guide](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
+2. 按照此流程需要掌握基本的 JavaScript/Typescript 语法知识。 对于仅了解 C/C++ 的用户，快速学习 Typescript 的方法是通过菜鸟教程网站上的 [TypeScript 教程](../jslearn)。 花费 1-2 天时间跟随教程中的每个示例，将帮助您掌握基本语法和语言特性。 对于更高级的应用和实现方法，您可以在编写实际相关代码时查找资料。
+3. 对于 SWIG，我们只需要知道它是一个跨语言编译器，可以为驱动程序 API C/C++ 声明创建包装器，允许 Typescript 和其他语言访问这些声明。 SWIG 非常强大且复杂，但我们可以暂时忽略其他功能，仅通过一个简单示例了解 SWIG 的工作原理，例如参考这篇 [SWIG 介绍与入门指南](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
 
-## 2. 更换和构建
+## 2. 替换与构建
 
-由于上述基本知识，基于现有驱动程序添加新的 CAN 框驱动程序变得更加简单。 最好的方法是模仿和逐渐取代现有的程序。 如果您已经在其他语言中安装了开发出来的新的 CAN 框驱动程序， 您只需要将设备初始化、CAN 传输/接收和其他函数转换为打字语言。 转换工作可由大赦国际进行。  
-如果您之前没有实现一个 CAN 框驱动程序，您可以引用CAN 框制造商提供的官方示例， 它也实现了各种语言的 API 进程，并且同样将它们转换为打字脚本。  
-兹尔格之后执行矢量驱动程序的过程如下：
+有了上述基础知识，基于现有驱动程序添加新的 CAN 盒驱动程序就变得简单多了。 最佳方法是模仿并逐步替换现有程序。 如果您已有用其他语言实现的已开发的新 CAN 盒驱动程序，只需将设备初始化、CAN 发送/接收等功能转换为 Typescript 语言。 转换工作可以由 AI 完成。  
+如果您之前没有实现过 CAN 盒驱动程序，可以参考 CAN 盒制造商提供的官方示例，这些示例也有用各种语言实现的 API 流程，同样将它们转换为 Typescript。  
+按照 zlg 实现 vector 驱动程序的过程如下：
 
-1. 复制.\docan\zlg目录下的文件夹并创建矢量文件夹
+1. 复制 .\docan\zlg 目录下的文件夹并创建 vector 文件夹
 
    ```text
    <\zlg>  
@@ -63,37 +63,37 @@ zlg.node：编译后的node模块，可在.ts文件中使用
    │  └vector_wrap.cxx
    ```
 
-   用矢量文件替换.h 和 .lib 文件，保持其它文件目前的不变，并将所有文件重命名为矢量。
+   将 .h 文件和 .lib 替换为 vector 文件，暂时保持其他文件不变，并将所有文件重命名为 vector。
 
-2. 修改 SWIG 接口接口文件vector.i, 用矢量替换模块名称和包含头文件，暂时禁用所有 pointer_class，array_class等。 因为这些定义和映射来自.h 文件，新的 vxlapi.h 可能不包含它们。 如果需要，稍后添加它们，确保.i 不包含原始zlgcan.h 内容。  
-   保持其他线程安全函数，如CreateTSFN保持不变。
+2. 修改 SWIG 接口文件 vector.i，将模块名和包含的头文件替换为 vector 的，暂时禁用所有各种 pointer_class、array_class 等，因为这些定义和映射来自 .h 文件，新的 vxlapi.h 可能不包含它们。 如果需要，稍后添加它们，确保 .i 不包含原始 zlgcan.h 内容。  
+   保持其他线程安全函数如 CreateTSFN 不变。
 
    ```plain
-   %module向量
+   %module vector
    ...
-   %header %@
+   %header %{
    ...
    #include "vxlapi.h"
    ...
-   // %array_class(uint32_t, U32Aray);
+   // %array_class(uint32_t, U32Array);
    // %array_class(BYTE, ByteArray);
-   // %arrray_class(ZCAN_Receive_Data, receiveDataArray);
+   // %array_class(ZCAN_Receive_Data, ReceiveDataArray);
    // %array_class(ZCAN_ReceiveFD_Data, ReceiveFDDataArray);
-   . .
+   ...
    %}
    ```
 
-3. 将矢量的 s.bat 更改为
+3. 将 vector 的 s.bat 更改为：
 
     ```bat
-    滑动-I"./../inc" -c++ -javascript -napi -v ./vector.i 
+    swig -I"./../inc" -c++ -javascript -napi -v ./vector.i 
     ```
 
-   在 cmd 中执行上述命令。\docan\vector\swig目录下，该目录将生成vxlapi.h 页眉文件的 vector_wrawraw.cxx 。  
+   在 .\docan\vector\swig 目录下的 cmd 中执行上述命令，这将从 inc 目录中的 vxlapi.h 头文件生成 vector_wrap.cxx。  
    ![2](../../../media/dev/adapter/2.png)  
-   如果cmd报错，说明vxlapi.h中的某些代码无法转换为.cxx，需要根据提示禁用或修改，直到成功生成.cxx文件。 在这一点上，各种文件实际上可以使用 vector_wrawraw.cxx 访问 Lib API，但要实现跨平台兼容，需要进一步生成 .node 模块。
+   如果cmd报告错误，意味着vxlapi.h中的某些代码无法转换为.cxx，需要根据提示禁用或修改，直到成功生成.cxx。 此时，ts 文件实际上可以使用 vector_wrap.cxx 访问 Lib API，但为了跨平台兼容性，需要进一步生成 .node 模块。
 
-4. 修改安全线程的 tsfn.cxx 文件，替换包含 zlgcan 文件。 也有关于ZLG API的实现功能，暂时禁用它们，稍后替换它们，确保.cxx不包含原始zlgcan.h 内容。
+4. 修改安全线程 tsfn.cxx 文件，替换 include zlgcan.h，该文件也有关于 ZLG API 的实现函数，暂时禁用它们，稍后替换，确保 .cxx 不包含原始 zlgcan.h 内容。
 
    ```plain
    #include "vxlapi.h"
@@ -107,8 +107,8 @@ zlg.node：编译后的node模块，可在.ts文件中使用
 
    ```
 
-5. 在这个步骤中，滑动目录中的程序不再包含原始的 ZLG 代码内容，因此您可以构建矢量节点。 修改 .\docan\binding. 输入“target_name”之后：'zlg'，添加'target_name'：'vector' contents，并禁用其他设备的构建指令。 这样npx node-gyp 重建不会每次重复建造峰值、 kvaser 和其他司机。  
-   'target_name': 'vector' 需要指定 vxlapi64.lib 和 vector_wraw.cxxx, tsfn.cxx 的正确路径。
+5. 在此步骤，swig 目录中的程序不再包含原始 ZLG 代码内容，因此可以构建 vector.node。 修改 .\docan\binding.gyp，在 'target_name': 'zlg' 之后添加 'target_name': 'vector' 内容，并禁用其他设备的构建指令，这样 npx node-gyp rebuild 就不会每次都重复构建 peak、kvaser 和其他驱动程序。  
+   'target_name': 'vector' 需要为 vxlapi64.lib 和 vector_wrap.cxx、tsfn.cxx 指定正确的路径。
 
 ```json
 # 'target_name': 'peak',
@@ -150,20 +150,20 @@ zlg.node：编译后的node模块，可在.ts文件中使用
 }
 ```
 
-在终端中执行 npx node-gyp 重建，这将产生矢量。节点在 \docan\building\R弹性。 此刻，C/C++ 和 Lib 已被编译并编入节点模块，可被种子文件使用。 如果构建失败，根据错误进行修改。
+在终端中执行 npx node-gyp rebuild，这将在 \docan\build\Release 下生成 vector.node。 此时，C/C++ 和 Lib 已被编译并构建成可供 ts 文件使用的 Node 模块。 如果构建失败，请根据错误提示进行修改。
 
 ```plain
 cd src/main/docan
-npx node-gyp 重建
+npx node-gyp rebuild
 ```
 
 ![3](../../../media/dev/adapter/3.png)
 
 ---
 
-## 3. 端口和测试
+## 3. 移植与测试
 
-1. CAN设备初始化和传输/接收功能都实现在 index.ts 文件中。 更改原始导入 ZLG 以导入 VECTOR，将所有 ZLG 实现方法更改为VECTOR 实现方法。 简单替换已足够，VECTOR中不存在的所有方法都可以暂时禁用。 导入之前生成的矢量节点后，您可以使用所有矢量API。
+1. CAN 设备初始化和发送/接收功能均在 index.ts 文件中实现。 将原来的 import ZLG 改为 import VECTOR，将所有 ZLG 实现方法改为 VECTOR 实现方法。 暂时简单替换即可，VECTOR 中不存在的所有方法可以暂时禁用。 导入之前生成的 vector.node 后，就可以使用所有 vector API。
 
     ```plain
     import VECTOR from './../build/Release/vector.node'
@@ -174,34 +174,34 @@ npx node-gyp 重建
     ...
     ```
 
-   索引中的构造器方法。 s 继承自 CanBaseInfo，其中包括在 Electron UI 中选择设备的信息。 通过覆盖 getValidDevices 方法，可用设备列表也被添加到UI 下拉菜单中。
+   index.ts 中的构造函数方法继承自 CanBaseInfo，其中包括 Electron UI 中设备选择的信息，通过重写 getValidDevices 方法，可用设备列表也会添加到 UI 下拉列表中。
 
     ```ts
-      //New constructor method
+      //新构造函数方法
       constructor(info: CanBaseInfo) {
         super()
-        this.id = info.id //Current subclass uses = property in parent class
+        this.id = info.id //当前子类使用 = 父类中的属性
         this.info = info
     
-        const devices = VECTOR_CAN.getValidDevices() //Method to get device list
+        const devices = VECTOR_CAN.getValidDevices() //获取设备列表的方法
     
-        const target = devices.find((item) => item.handle == info.handle) //Get handle in device list == handle selected in dropdown
+        const target = devices.find((item) => item.handle == info.handle) //获取设备列表中的 handle == 下拉列表中选中的 handle
         if (!target) {
-          throw new Error('Invalid handle') //Invalid handle, invalid device
+          throw new Error('Invalid handle') //无效句柄，无效设备
         }
     
-        this.event = new EventEmitter() //Create an EventEmitter object, then use its methods to emit and listen to events
+        this.event = new EventEmitter() //创建一个 EventEmitter 对象，然后使用其方法发出和监听事件
         this.log = new CanLOG('VECTOR', info.name, this.event) //
     
-        //'0:0' = Which bus: channel index
-        this.index = parseInt(info.handle.split(':')[1]) //Channel index: :0
-        this.deviceType = parseInt(info.handle.split('_')[0]) //Device type in parent class: XL_HWTYPE_VN1611
-        this.deviceIndex = parseInt(info.handle.split('_')[2]) //Channel index: _0
+        //'0:0' = 哪个总线：通道索引
+        this.index = parseInt(info.handle.split(':')[1]) //通道索引：:0
+        this.deviceType = parseInt(info.handle.split('_')[0]) //父类中的设备类型：XL_HWTYPE_VN1611
+        this.deviceIndex = parseInt(info.handle.split('_')[2]) //通道索引：_0
     ```
 
-   在索引中添加设备初始化代码后，您可以直接调试索引。 s，但由于最终使用的参数是从UI选择传递的，确保正确的参数传递信息也是至关重要的。  
-   在下面创建 vector.test.ts. 下面的\t请\docan 跟随zlg.test.ts. 通过调试.test.ts文件来调试索引文件, 你可以模拟UI中不同的参数设置。 只要.test.ts 测试通行证，Electron的UI参数通过也将确保正确。  
-   在 vscode的 launch.json 中添加以下配置来调试.test：
+   在 index.ts 中添加设备初始化代码后，可以直接调试 index.ts，但由于最终使用的参数是从 UI 选择传递的，确保正确传递 info 参数也很重要。  
+   在 .\test\docan 目录下参照 zlg.test.ts 创建 vector.test.ts。 通过调试 .test.ts 文件来调试 index.ts 文件，你可以在 UI 中模拟不同的参数设置。 只要 .test.ts 测试通过，Electron 的 UI 参数传递也将确保正确。  
+   在 vscode 的 launch.json 中添加以下配置来调试 .test.ts：
 
     ```json
     {
@@ -217,7 +217,7 @@ npx node-gyp 重建
     },
     ```
 
-2. 下面是如何调试索引的一个例子。 如果Lib 有一个用于查询设备信息的API，您可以首先实现 getValidDevices 功能。 在 vector.test.ts 中创建一个新的测试以实现getValidDevices 方法，并暂时禁用其他关于CAN 传输/接收的测试。
+2. 以下是如何调试 index.ts 的示例。 如果 Lib 有查询设备信息的 API，你可以先实现 getValidDevices 函数。 在 vector.test.ts 中创建一个新测试来实现 getValidDevices 方法，并暂时禁用其他关于 CAN 发送/接收的测试。
 
     ```ts
     import { VECTOR_CAN } from '../../src/main/docan/vector'
@@ -231,7 +231,7 @@ npx node-gyp 重建
     })
     ```
 
-   跳转到索引以实现此方法。 例如，矢量获取设备信息的API是 xlGetDriverConfig。 对于API参数所需的数据类型，您可以直接使用 vxlapi.h 中的数据。
+   转到 index.ts 实现此方法。 例如，vector 获取设备信息的 API 是 xlGetDriverConfig。 对于 API 参数所需的数据类型，你可以直接使用 vxlapi.h 中的那些。
 
     ```ts
       static override getValidDevices(): CanDevice[] {
@@ -255,10 +255,10 @@ npx node-gyp 重建
       }
     ```
 
-   如果在终端中打印正确的设备信息，它意味着.ts可以正确访问 .Lib API，所有以前的转换步骤都是正确的。  
+   如果 console.log(devices) 在终端中打印出正确的设备信息，则说明 .ts 可以正确访问 .Lib API，并且之前的所有转换步骤都是正确的。  
    ![4](../../../media/dev/adapter/4.png)
 
-   如果.Lib没有获取设备信息的API，您可以使用其他API进行简单测试以测试是否。 ib 正确使用 .ts。 如果您在调试过程中无法访问 API 或 API 错误， 您需要回到先前的步骤并检查生成时是否有错误。 xx 和 .node。 对于getValidDevices，您可以按照.\zlg\index.ts返回一个固定标识符并根据设备特性进行处理。
+   如果 .Lib 没有获取设备信息的 API，你可以使用其他 API 进行简单测试，以测试 .Lib 是否被 .ts 正确使用。 如果在调试期间无法访问 API 或 API 出错，你需要返回之前的步骤，检查生成 .cxx 和 .node 时是否存在错误。 对于 getValidDevices，你可以参照 .\zlg\index.ts，根据设备特性返回固定的标识符和句柄。
 
     ```ts
       static override getValidDevices(): CanDevice[] {
@@ -271,39 +271,39 @@ npx node-gyp 重建
             },
     ```
 
-3. .LibAPI后可以在.ts中正确使用，请在vector.test中创建矢量设备初始化测试。 这里设定的参数将与信息一起传递到构造函数方法。
+3. 在 .ts 中可以正确使用 .Lib API 后，在 vector.test.ts 中为 vector 设备初始化创建一个测试。 此处设置的参数将与 info 一起传递给构造函数方法。
 
     ```ts
-    描述('矢量测试', () => *
-      let client! VECTOR_CAN
-      preall(() => Power
-        client = new VECTOR_CAN(*
+    describe('vector test', () => {
+      let client!: VECTOR_CAN
+      beforeAll(() => {
+        client = new VECTOR_CAN({
           handle: '3:3',
-          名: 'test',
+          name: 'test',
           id: 'VECTOR_3_#CAN',
-          供应商: 'vector',
-          可以: true
-          比特率:
+          vendor: 'vector',
+          canfd: true,
+          bitrate: {
             sjw: 1,
-            时间Seg1: 13,
-            时间Seg2: 2,
-            预缩放: 10,
+            timeSeg1: 13,
+            timeSeg2: 2,
+            preScaler: 10,
             freq: 500000,
-            时钟: '80'
+            clock: '80'
           },
-          bitratefdd：vol.
-            sjw：1。
+          bitratefd: {
+            sjw: 1,
             timeSeg1: 7,
-            时间Seg2: 2,
-            预缩放: 4,
-            频率： 2000000，
-            时钟: '80'
+            timeSeg2: 2,
+            preScaler: 4,
+            freq: 2000000,
+            clock: '80'
           }
         })
-    })
+      })
     ```
 
-   在 index.ts 中，传递的参数信息索引将确定通过getValidDevices 返回的设备通道。 在频道匹配后，将进一步执行其他初始化功能。
+   在 index.ts 中，传递的参数 info 索引将决定使用 getValidDevices 返回的哪个设备通道。 通道匹配后，将进一步执行其他初始化函数。
 
     ```ts
       constructor(info: CanBaseInfo) {
@@ -336,40 +336,40 @@ npx node-gyp 重建
 
    ![5](../../../media/dev/adapter/5.png)
 
-   不同的设备具有截然不同的初始化过程，这里不会被描述。 根据实际情况将它们添加到构造器方法中。 对于CAN 传输/接收功能，您可以首先在构造器中实现它们，确保传输/接收正常， 然后将发送函数移植到 _writeBase，接收函数以回调，回调，并执行其他方法，如关闭，getError等。 同样的方式。 也在vector.test中测试传输/接收。
+   不同设备的初始化过程差异很大，此处不再赘述。 根据实际情况将它们添加到构造函数方法中。 对于 CAN 发送/接收函数，你可以先在构造函数中实现它们，确保发送/接收正常，然后将发送函数移植到 _writeBase，接收函数移植到 callback、callbackFd，并以相同方式实现其他方法如 close、getError 等。 同时在 vector.test.ts 中测试发送/接收。
 
     ```ts
-      test.skip('write multi frame', async () => Power
+      test.skip('write multi frame', async () => {
     
-      test('read frame', async () => Power
+      test('read frame', async () => {
     
-      test('write framecan-fd', async () =>
+      test('write frame can-fd', async () => {
     ```
 
    ![6](../../../media/dev/adapter/6.png)
 
-   最后，tsfn.cxx 也有一些API实现，而只是替换原始相应的功能实现。
+   最后，tsfn.cxx 也有一些 API 实现，只需替换原有的相应功能实现即可。
 
-4. 许多.Lib API 参数必须使用特定的数据类型，否则发生错误。 TypeScript 没有这种丰富的基本类型，因此您需要重新封装vxlapi.h 类型的矢量.i 中的.ts 使用。 以下是常见情况：
+4. 许多 .Lib API 参数必须使用特定的数据类型，否则会出现错误。 TypeScript 没有如此丰富的基础类型，因此你需要在 vector.i 中重新封装 vxlapi.h 类型以供 .ts 使用。 以下是常见情况：
 
 参数是指针类型，需要定义指针类：
 
 ```plain
 vxlapi.h
-    typef XLlong XLportHandle;
-vector.
+    typedef XLlong XLportHandle;
+vector.i
     %pointer_class(XLportHandle, XLPORTHANDLE)
-    %pointer_class(未签名, UINT32)
-    %pointer_class(无符号短，UINT16)
-索引。 s
+    %pointer_class(unsigned int, UINT32)
+    %pointer_class(unsigned short, UINT16)
+index.ts
     private PortHandle = new VECTOR.XLPORTHANDLE()
-    this.PortHandle ASt(),
+    this.PortHandle.cast(),
     const cntSent = new VECTOR.UINT32()
-    cntSent.assignment(1)
+    cntSent.assign(1)
     cntSent.cast()
 ```
 
-参数是数组结构指针类型，需要定义数组类别：
+参数是数组结构指针类型，需要定义数组类：
 
 ```plain
 vxlapi.h
@@ -384,7 +384,7 @@ index.ts
     xlStatus = VECTOR.xlCanReceive(this.PortHandle.value(), frames.cast())
 ```
 
-CAN 传输/接收接口参数具有多个结构类型，需要定义访问数组类别：
+CAN 发送/接收接口参数有多种结构类型，需要定义数组类来访问：
 
 ```plain
 vxlapi.h
@@ -416,7 +416,7 @@ index.ts
     }
 ```
 
-vxlapi.h的一些结构需要提取：
+vxlapi.h 中的某些结构体具有联合体，需要提取：
 
 ```plain
 typedef struct {
@@ -435,7 +435,7 @@ typedef struct {
 } XLcanTxEvent;
 ```
 
-例如，成员canMsg 需要重新定义为 XL_CAN_TX_MSG_UNION，否则.ts 无法访问它：
+例如，成员 canMsg 需要重新定义为 XL_CAN_TX_MSG_UNION，否则 .ts 无法访问它：
 
 ```plain
 typedef union {
@@ -453,6 +453,6 @@ typedef struct {
 } XLcanTxEvent;
 ```
 
-每次您修改 vxlapi.h 和 vector.i 时，您需要重新运行 s。 在 npx node-gyp 重建以重新生成 .node 以确保它在 .ts 中生效。
+每次修改 vxlapi.h 和 vector.i 后，都需要重新运行 s.bat 和 npx node-gyp rebuild 以重新生成 .node，确保其在 .ts 中生效。
 
-在vector.test.ts 测试通行证后，添加到UI中提及[在UI中添加](../adapter#add-in-ui)，此处不作描述。
+vector.test.ts 测试通过后，参照 [Add In UI](../adapter#add-in-ui) 添加到 UI，此处不再赘述。

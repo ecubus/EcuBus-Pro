@@ -47,7 +47,8 @@ export default class VSomeIP_Client {
   constructor(
     public name: string,
     configFilePath: string,
-    cb: (callbackData: VsomeipCallbackData) => void
+    cb: (callbackData: VsomeipCallbackData) => void,
+    private options: { router?: boolean } = {}
   ) {
     this.rtm = vsomeip.runtime.get()
     this.app = this.rtm.create_application(name, configFilePath)
@@ -81,9 +82,11 @@ export default class VSomeIP_Client {
     if (!result) {
       throw new Error('Failed to initialize application')
     } else {
-      this.cb.registerStateHandler(this.cbId)
-      this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId)
-      this.cb.registerAvailabilityHandler(0xffff, 0xffff, this.cbId)
+      if (!this.options.router) {
+        this.cb.registerStateHandler(this.cbId)
+        this.cb.registerMessageHandler(0xffff, 0xffff, 0xffff, this.cbId)
+        this.cb.registerAvailabilityHandler(0xffff, 0xffff, this.cbId)
+      }
     }
   }
   start() {

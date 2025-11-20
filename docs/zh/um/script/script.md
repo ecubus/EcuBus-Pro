@@ -13,7 +13,7 @@
 ## 构建脚本
 
 ![alt text](../../../media/um/script/image.png)
-you can get the build error info in `Message` window if there is any error in the script.
+如果脚本中有任何错误，您可以在`Message`窗口中获取构建错误信息。
 ![alt text](../../../media/um/script/image-1.png)
 
 ## Script API
@@ -83,8 +83,8 @@ Util.OnCan(true, (msg) => {
 #### On
 
 监听诊断消息。
-`${tester name}.${  service item name}.recv` is used to listen to the uds message received.
-`${tester name}.${service item name}.send` is used to listen to the uds message send.
+`${tester name}.${service item name}.recv` is used to listen to the uds message received.
+`${tester name}.${service item name}.send` 用于监听发送的UDS消息。
 
 ```typescript
 // listen to the uds message

@@ -24,7 +24,7 @@ npx virtest/docan/candle.test.ts --t "test name"
 npm 运行测试
 ```
 
-![alt text](../../media/dev/image.png)
+![替代文本](../../media/dev/image.png)
 
 失败时停止测试
 

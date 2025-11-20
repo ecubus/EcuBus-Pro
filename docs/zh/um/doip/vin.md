@@ -7,15 +7,15 @@
 3. 广播 VIN 请求 (UDP4)
 4. 多播VIN 请求 (UDP6)
 
-![alt text](../../../media/um/doip/image-5.png)
+![替代文本](../../../media/um/doip/image-5.png)
 
 ## Unicast VIN 请求
 
 > [!注意]
 > 此方法只是设置请求地址。
 
-![alt text](../../../media/um/doip/image.png)
-![alt text](../../../media/um/doip/image-1.png)
+![替代文本](../../../media/um/doip/image.png)
+![替代文本](../../../media/um/doip/image-1.png)
 
 ## 省略VIN，直接连接
 
@@ -24,12 +24,12 @@
 > [!注意]
 > 此方法只是设置请求地址。
 
-![alt text](../../../media/um/doip/image-2.png)
+![替代文本](../../../media/um/doip/image-2.png)
 
 ## 广播 VIN 请求 (UDP4)
 
-![alt text](../../../media/um/doip/image-3.png)
-![alt text](../../../media/um/doip/image-4.png)
+![替代文本](../../../media/um/doip/image-3.png)
+![替代文本](../../../media/um/doip/image-4.png)
 
 ## 多播VIN 请求 (UDP6)
 

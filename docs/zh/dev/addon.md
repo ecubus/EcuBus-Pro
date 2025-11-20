@@ -1,33 +1,33 @@
-# Addon
+# 插件
 
-`Node.js`访问dll/so 库需要附加组件，这个文档将向您显示如何写入安装附加组件.
+`Node.js` 访问 dll/so 库需要插件，本文档将向您展示如何编写设置插件。
 
 > [!TIP]
-> 请确保您已安装了 `node-gyp`
+> 确保您已安装 `node-gyp`
 
-还需要`node-addon-api`
+还需要 `node-addon-api`
 
-## 测试节点健身器
+## 测试 Node-gyp
 
 ```bash
 cd src/main/docan
-npx node-gyp 重建
+npx node-gyp rebuild
 ```
 
 您将看到以下输出：
 
 ```bash
-健身信息确定
+gyp info ok
 ```
 
 ## SWIG
 
-`SWIG`是一个软件开发工具，它将以C和C++写成的程序与各种高级编程语言连接起来。
-更多关于 `SWIG` [swig](https://github.com/swig/swig)
+`SWIG` 是一个软件开发工具，可将用 C 和 C++ 编写的程序与多种高级编程语言连接起来。
+有关 `SWIG` 的更多信息 [swig](https://github.com/swig/swig)
 
-`所有wap代码都应该由 SWIG` 生成
+`所有包装代码都应由 SWIG 生成`
 
-您可以看到示例代码：
+您可以查看示例代码：
 
-- src/main/docan/pe/swig/supe.i
+- src/main/docan/peak/swig/peak.i
 - src/main/docan/kavser/swig/kvaser.i

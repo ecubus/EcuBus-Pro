@@ -1,4 +1,4 @@
-﻿# Build In Script
+# Build In Script
 
 The Built-In Script system provides pre-configured diagnostic services for common UDS operations. This documentation covers the available built-in scripts and their functionality.
 
@@ -20,7 +20,7 @@ VKeyGenResultEx GenerateKeyEx (
 );
 ```
 
-![GenerateKeyEx](../../../../media/um/uds/buildInScript/images/GenerateKeyEx.png)
+![GenerateKeyEx](./images/GenerateKeyEx.png)
 
 #### Parameters - SecureAccessGenerateKeyEx
 
@@ -64,7 +64,7 @@ VKeyGenResultEx GenerateKeyEx (
 
 This script is used to generate a key for the security access process. see [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
 
-![GenerateKeyExOpt](../../../../media/um/uds/buildInScript/images/GenerateKeyExOpt.png)
+![GenerateKeyExOpt](./images/GenerateKeyExOpt.png)
 
 #### Parameters - SecureAccessGenerateKeyExOpt
 
@@ -111,7 +111,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 
 A combined service that handles the complete binary download process by orchestrating UDS services 0x34 (RequestDownload), 0x36 (TransferData), and 0x37 (TransferExit).
 
-![RequestDownloadBin](../../../../media/um/uds/buildInScript/images/RequestDownloadBin.png)
+![RequestDownloadBin](./images/RequestDownloadBin.png)
 
 #### Description
 

@@ -11,7 +11,7 @@ EcuBus-Pro provides a graphical package manager interface for easy installation,
 1. For new projects, you'll see a message "No package.json found" and an "Initialize package.json" button. Click this button to create a new package.json file.
 
 2. Click on the "Packages" option in the left navigation bar of the main interface
-  ![Package Manager](package.png)
+   ![Package Manager](package.png)
 
 3. In the Package Manager interface:
    - Enter the name of the package you want to install

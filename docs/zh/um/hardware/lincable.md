@@ -2,71 +2,65 @@
 import LinCableProductPage from '../../../component/LinCableProductPage.vue'
 </script>
 
-# EcuadBus LinCable - USB to LIN Adapter for Automotive Development
+# EcuBus LinCable – 用于汽车开发的 USB 转 LIN 适配器
 
 <LinCableProductPage />
 
-EcuadBus LinCable 适配器，可以通过
-USB Type-C无缝连接LIN网络到计算机。 支持单个LIN频道。
+EcuBus LinCable 适配器可通过 USB Type-C 将 LIN 网络无缝连接到计算机。 支持单 LIN 通道。
 
-**Board 尺寸：** 59毫米(高度) × 19毫米(长度)
+**板卡尺寸：** 59mm（高）× 19mm（长）
 
-## 图表
+## 示意图
 
 ![lincable-diagram](../../../media/um/hardware/linCable.png)
 
-## LIN协议支持
+## LIN 协议支持
 
-LinCable 完全支持LIN 2.0、2.1、2.2A 和 SAE J2602标准，提供了
-与多种汽车LIN设备和网络兼容。 支持的波特率
-包括19200、10400、9600和2400bps，使LinCable 既适合旧应用，也适合
-现代LIN应用。
+LinCable 完全支持 LIN 2.0、2.1、2.2A 和 SAE J2602 标准，提供与各种汽车 LIN 设备和网络的兼容性。 支持的波特率包括 19200、10400、9600 和 2400 bps，使 LinCable 适用于传统和现代 LIN 应用。
 
 ## PWM 输出能力
 
-LinCable 包含先进的 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车开发和测试的多功能工具。 PWM输出功能使得
-能够准确控制各种汽车应用的数字信号。
+LinCable 包含高级 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车开发和测试的多功能工具。 PWM 输出功能能够为各种汽车应用提供精确的数字信号控制。
 
-### PWM 输出规范
+### PWM 输出规格
 
-- **Frequency Range**: 1 Hz - 20KHz 高精度
-- **义务周期控制**：0%到100%，分辨率为0.1%。
-- **输出电压**：高层等于 VBAT 输入电压，低层等于 0V
-- **频道计数** ：单声道输出频道
-- **频率精度**：±0.1% 典型的
+- **频率范围**：1 Hz 至 20KHz，高精度
+- **占空比控制**：0% 至 100%，0.1% 分辨率
+- **输出电压**：高电平等于 VBAT 输入电压，低电平等于 0V
+- **通道数量**：单 PWM 输出通道
+- **频率精度**：±0.1%（典型值）
 
 ## 电源控制
 
-支持IUT 电源控制，最大电流2A，最大电压 18V
+支持 IUT 电源控制，最大电流 2A，最大电压 18V
 
-## 故障注入和配套测试
+## 故障注入与一致性测试
 
-使用内置的高级故障注入能力，LinCable 允许工程师模拟
-各种错误条件并进行全面的符合性测试。 这对于在开发和质量保证期间验证 LIN 节点和网络的稳健性和可靠性至关重要。
+LinCable 内置高级故障注入功能，允许工程师模拟各种错误条件并执行全面的一致性测试。 这对于在开发和质量保证期间验证 LIN 节点和网络的鲁棒性和可靠性至关重要。
 
-> 跟随ISO/DIS 17987-6
+> 遵循 ISO/DIS 17987-6
 
 ---
 
-### 断开字段/分隔符长度控制
+### Break 字段/分隔符长度控制
 
-- **Break Length Length**: 可调整的间歇字段长度从 13 到 26 bits (默认：13 bit)
-- **打断分隔符长度**: 可配置分隔符长度从 0 到 14.6 位(默认: 1 位)
+- **Break 长度**：可调节 Break 字段长度从 13 到 26 位（默认：13 位）
+- **Break 分隔符长度**：可配置分隔符长度从 0 到 14.6 位（默认：1 位）
 
-### 字节间距控制
+### 字节间间隔控制
 
-- **header Interbyte Space**: 控制同步字节和标识符字段之间的间距 (0-14位, 默认: 0)
-- \*\*Data Interbyte Space \*\*: 个别控制每个数据字节之间的间距 (0-4bits 每个字节)
+- **报头字节间间隔**：控制同步字节和标识符字段之间的间隔（0-14 位，默认：0）
+- **数据字节间间隔**：单独控制每个数据字节之间的间隔（每字节 0-4 位）
 
-### 同步/ID字段自定义
+### 同步/PID 字段定制
 
-- **同步值覆盖**：自定义同步字节值或完全禁用同步传输(默认：0x55，false methods master 不发送同步数据)
-- **PID Override**: 自定义受保护的标识符 (PID) 值或禁用 PID 传输(默认: getPID(frameId), false means master 不发送pid)
+- **同步值覆盖**：自定义同步字节值或完全禁用同步传输（默认：0x55，false 表示主机不发送同步值）
+- **PID 覆盖**：自定义受保护标识符（PID）值或禁用 PID 传输（默认：getPID(frameId)，false 表示主机不发送 pid）
 
-### Bitlevel 喷射故障
+### 位级故障注入
 
-- **Precise Bit Manipulation**: 在从中断字段开始的任何特定位置注入故障
-- **位值控制**：强制特定位到高(1)或低(0) 状态
+- **精确位操作**：从 Break 字段开始在任何特定位位置注入故障
+- **位值控制**：强制特定位为高（1）或低（0）状态
 
 ### 校验和覆盖
 
@@ -74,28 +68,17 @@ LinCable 包含先进的 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车�
 
 ---
 
-> 更多详情请访问 [Lin Conformance 测试示例](https://app.whyengineer.com/examples/lin_conformance_test/readme.html)。
+> 有关更多详细信息，请参阅 [LIN 一致性测试示例](https://app.whyengineer.com/examples/lin_conformance_test/readme.html)。
 
-## 跨平台和软件集成
+## 跨平台与软件集成
 
-LinCable 完全兼容Windows、 macOS和Linux 操作系统(USB-ACM 驱动程序)。 它将
-与**EcuBus-Pro** 软件套装无缝地整合，并且还支持第三方汽车
-开发工具。 一个完整的 SDK 和 API 用于自定义应用程序
-开发。
+LinCable 完全兼容 Windows、macOS 和 Linux 操作系统（USB-ACM 驱动程序）。 它与 **EcuBus-Pro** 软件套件无缝集成，并支持第三方汽车开发工具。 提供了全面的 SDK 和 API，用于自定义应用程序开发。
 
-## 为次要发展开放通信协议
+## 用于二次开发的开放通信协议
 
-LinCable 提供了一个开放的通信协议，使用户能够进行二级开发
-并根据他们的具体要求定制。 协议文件整理完善，
-包含全面的API。 允许开发者将LinCable 整合到他们自己的应用程序
-或创建专门汽车测试场景的自定义解决方案。 此开放结构
-确保了高级用户的灵活性和扩展性，他们需要的功能超过
-标准功能。
+LinCable 提供开放的通信协议，使用户能够根据其特定需求进行二次开发和定制。 该协议文档完善，包含全面的 API，允许开发人员将 LinCable 集成到自己的应用程序中，或为专门的汽车测试场景创建自定义解决方案。 这种开放架构确保了需要超越标准功能的定制功能的高级用户的灵活性和可扩展性。
 
 ## DFU 固件更新支持
 
-LinCable 支持设备固件更新 (DFU) 功能，使用户能够轻松更新
-设备固件到最新版本或安装自定义固件。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持更新，而无需更换硬件。 DFU过程是直截了当的，可以通过
-EcuBus-Pro软件或专用DFU工具来完成。 为固件
-更新提供可靠和安全的方法。
+LinCable 支持设备固件更新（DFU）功能，允许用户轻松将设备固件更新到最新版本或安装自定义固件。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持最新状态，而无需更换硬件。 DFU 过程简单明了，可以通过 EcuBus-Pro 软件或专用 DFU 工具执行，为固件更新提供了可靠且安全的方法。
 

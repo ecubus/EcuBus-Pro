@@ -1217,7 +1217,7 @@ async function openDatabase(testerIndex: string) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
       title: 'Open Database File',
-      properties: ['openFile '],
+      properties: ['openFile'],
       filters: [{ name: `Database File`, extensions: [fileExtMap[type]] }]
     })
     const file = r.filePaths[0]

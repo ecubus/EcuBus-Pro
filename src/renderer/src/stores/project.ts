@@ -144,7 +144,7 @@ export const useProjectStore = defineStore('project', {
       {
         const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
           title: 'Open Project',
-          properties: ['openFile '],
+          properties: ['openFile'],
           filters: [{ name: 'EcuBus-Pro', extensions: ['ecb'] }]
         })
         const file = r.filePaths[0]

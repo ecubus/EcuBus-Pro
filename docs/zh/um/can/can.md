@@ -87,15 +87,15 @@ newgrp dialout
 
 为了演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
 
-![alt text](../../../media/um/can/image.png)
+![替代文本](../../../media/um/can/image.png)
 
 ### 波特率设置
 
 波特率设置用于配置CAN 公共汽车的波特率。
 
 点击 "Bit Timing" 按钮打开位计时设置窗口。
-![alt text](../../../media/um/can/image-8.png)
-![alt text](../../../media/um/can/image-9.png)
+![替代文本](../../../media/um/can/image-8.png)
+![替代文本](../../../media/um/can/image-9.png)
 
 ## 交互模式和节点脚本
 
@@ -104,23 +104,23 @@ EcuBus-Pro 公司提供两种主要方法来进行CAN 通信：
 - 互动模式：手动帧传输
 - 节点脚本：使用自定义脚本进行自动通信
 
-![alt text](../../../media/um/can/image-1.png)
+![替代文本](../../../media/um/can/image-1.png)
 
 ### 交互模式
 
 每个帧都可以用于定期传输或手动触发(单射击或键盘)。
-![alt text](../../../media/um/can/image-2.png)
+![替代文本](../../../media/um/can/image-2.png)
 
 您可以通过两种方式添加帧：
 
 - 手动帧配置
-- Import from DBC database
-  ![alt text](../../../media/um/can/image-3.png)
+- 从DBC数据库导入
+  ![替代文本](../../../media/um/can/image-3.png)
 
 ### 节点脚本
 
 节点可以使用 UDS 功能 (测试器) 和自定义脚本进行配置。
-![alt text](../../../media/um/can/image-4.png)
+![替代文本](../../../media/um/can/image-4.png)
 
 定期信号更新的示例脚本：
 
@@ -138,16 +138,16 @@ setInterval(() => {
 1. **Tester 配置**
 
    - 配置地址
-   - Set diagnostic parameters
-     ![alt text](../../../media/um/can/image-5.png)
+   - 设置诊断参数
+     ![替代文本](../../../media/um/can/image-5.png)
 
 2. **诊断服务**
 
    - 配置诊断服务
-   - Create schedule tables and sequences
-     ![alt text](../../../media/um/can/image-6.png)
+   - 创建调度表和序列
+     ![替代文本](../../../media/um/can/image-6.png)
 
 3. **消息监视**
-   - View transmitted and received messages in the trace window
-     ![alt text](../../../media/um/can/image-7.png)
+   - 在跟踪窗口中查看发送和接收的消息
+     ![替代文本](../../../media/um/can/image-7.png)
 

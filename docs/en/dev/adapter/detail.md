@@ -1,4 +1,4 @@
-﻿# How to Develop New Adapters
+# How to Develop New Adapters
 
 EcuBus-Pro currently supports many mainstream CAN communication boxes, but you may have other CAN boxes from various manufacturers with different models and interfaces. Following the development process from the official website [How to Develop New Adapters](../adapter), you can add underlying drivers to EcuBus-Pro for adaptation.  
 For this purpose, I have added some Vector drivers based on the existing foundation. Since this is my first time working with these technologies, the steps are recorded below for reference only.
@@ -18,7 +18,7 @@ zlg_wrap.cxx: Generated Javascript code
 buffer.i, buffer1.i: Buffer interfaces, generally unchanged  
 tsfn.cxx: Thread-safe file, entry point for CAN transmission/reception threads  
 zlg.node: Compiled node module, can be used in .ts files  
-   ![1](../../../media/dev/adapter/1.png)
+   ![1](1.png)
 2. Following this process requires mastering basic JavaScript/Typescript syntax knowledge. For users who only know C/C++, a quick way to learn Typescript is through the [TypeScript Tutorial](../jslearn) on the rookie tutorial website. Spending 1-2 days following each example in the tutorial will help you master basic syntax and language features. For more advanced applications and implementation methods, you can look up materials when writing actual related code.
 3. For SWIG, we only need to know that it is a cross-language compiler that can create wrappers for driver API C/C++ declarations, allowing Typescript and other languages to access these declarations. SWIG is very powerful and complex, but we can temporarily ignore other functions and only understand SWIG's working principle through a simple example, such as referring to this [SWIG Introduction and Getting Started Guide](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
 
@@ -90,7 +90,7 @@ Keep other thread-safe functions like CreateTSFN unchanged.
     ```
 
     Execute the above command in cmd under the .\docan\vector\swig directory, which will generate vector_wrap.cxx from the vxlapi.h header file in the inc directory.  
-    ![2](../../../media/dev/adapter/2.png)  
+    ![2](2.png)  
     If cmd reports an error, it means some code in vxlapi.h cannot be converted to .cxx and needs to be disabled or modified according to the prompts until .cxx is successfully generated. At this point, ts files can actually use vector_wrap.cxx to access Lib APIs, but for cross-platform compatibility, further generation of .node modules is needed.
 
 4. Modify the safe thread tsfn.cxx file, replace include zlgcan.h, which also has implementation functions about ZLG API, temporarily disable them, replace them later, ensuring that .cxx does not contain original zlgcan.h content.
@@ -157,7 +157,7 @@ cd src/main/docan
 npx node-gyp rebuild
 ```
 
-![3](../../../media/dev/adapter/3.png)
+![3](3.png)
 
 ---
 
@@ -256,7 +256,7 @@ npx node-gyp rebuild
     ```
 
     If console.log(devices) prints correct device information in the terminal, it means .ts can correctly access .Lib API, and all previous conversion steps are correct.  
-    ![4](../../../media/dev/adapter/4.png)
+    ![4](4.png)
 
     If .Lib doesn't have an API for getting device information, you can use other APIs for simple testing to test whether .Lib is correctly used by .ts. If you can't access APIs or APIs error during debugging, you need to go back to previous steps and check if there were errors when generating .cxx and .node. For getValidDevices, you can follow .\zlg\index.ts and return a fixed identifier and handle based on device characteristics.
 
@@ -334,7 +334,7 @@ npx node-gyp rebuild
         )
     ```
 
-    ![5](../../../media/dev/adapter/5.png)
+    ![5](5.png)
 
     Different devices have vastly different initialization processes, which won't be described here. Add them to the constructor method according to actual situations. For CAN transmission/reception functions, you can first implement them in the constructor, ensure that transmission/reception are normal, then port the sending function to _writeBase, receiving function to callback, callbackFd, and implement other methods like close, getError, etc. in the same way. Also test transmission/reception in vector.test.ts.
 
@@ -346,7 +346,7 @@ npx node-gyp rebuild
       test('write frame can-fd', async () => {
     ```
 
-    ![6](../../../media/dev/adapter/6.png)  
+    ![6](6.png)  
 
     Finally, tsfn.cxx also has some API implementations, just replace the original corresponding functionality implementations.
 

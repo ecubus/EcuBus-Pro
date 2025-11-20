@@ -9,7 +9,7 @@ EcuBus-Pro 支持解析大部分CAN DBC文件。 如果你遇到无法正确解�
 
 ## 选择一个 DBC 文件
 
-![alt text](../../../../media/um/database/dbc/image-18.png)
+![替代文本](../../../../media/um/database/dbc/image-18.png)
 
 ## 概览
 
@@ -19,16 +19,16 @@ DBC 查看器提供有关以下方面的全面信息：
 - 留言
 - 信号
 
-![alt text](../../../../media/um/database/dbc/image-19.png)
+![替代文本](../../../../media/um/database/dbc/image-19.png)
 
 ## Value Tables
 
 值表定义了原始值和相应含义之间的映射。
 
-![alt text](../../../../media/um/database/dbc/image-20.png)
+![替代文本](../../../../media/um/database/dbc/image-20.png)
 
 ## Attributes
 
 查看和检查所有 DBC 属性。
 
-![alt text](../../../../media/um/database/dbc/image-21.png)
+![替代文本](../../../../media/um/database/dbc/image-21.png)

@@ -83,7 +83,7 @@ Util.OnCan(true, (msg) => {
 #### On
 
 listen to the uds message.
-`${tester name}.${  service item name}.recv` is used to listen to the uds message received.
+`${tester name}.${service item name}.recv` is used to listen to the uds message received.
 `${tester name}.${service item name}.send` is used to listen to the uds message send.
 
 ```typescript

@@ -1,4 +1,4 @@
-﻿# Tester Present
+# Tester Present
 
 Tester Present (Service ID 0x3E) is a diagnostic service used to indicate to an ECU that a diagnostic client (tester) is still present and the diagnostic session should remain active.
 
@@ -15,7 +15,7 @@ The main purposes of Tester Present are:
 
 In EcuBus-Pro, Tester Present can be configured in the `UDS Tester` window:
 
-![Tester Present Configuration](../../../../media/um/uds/testerPresent/images/tester_present.png)
+![Tester Present Configuration](./images/tester_present.png)
 
 ### S3 Time [M]
 

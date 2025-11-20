@@ -3,7 +3,6 @@ import path, { resolve } from 'path'
 import fs from 'fs'
 import fsP from 'fs/promises'
 import { spawn, exec, ChildProcess } from 'child_process'
-import routingmanager from '../../../resources/lib/routingmanagerd.exe?asset&asarUnpack'
 import os from 'os'
 import { fork } from 'child_process'
 
@@ -40,6 +39,7 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
 
     // Handle process events
     routingManagerProcess.on('message', (msg: any) => {
+      console.log('routingManagerProcess message:', msg)
       if (msg.id === 0 && msg.data === 'initRouter') {
         resolved = true
         resolvePromise()

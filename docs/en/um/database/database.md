@@ -1,8 +1,8 @@
-﻿# Database
+# Database
 
 Data transform depending on the database information. Added database system to handle it.
 
-![alt text](../../../media/um/database/image-3.png)
+![alt text](image-3.png)
 
 ## Supported Databases
 

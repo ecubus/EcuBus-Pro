@@ -2,13 +2,13 @@
 <!-- markdownlint-disable MD033 -->
 
 Users can generate C code based on their configured UDS services. The code format depends on user-defined templates.
-![code](../../../../media/um/uds/udscode/images/uds-code-format.png)
+![code](./images/uds-code-format.png)
 
 ## UDS Code Generation
 
 First, users need to enable UDS code generation in the UDS Tester.
 
-![code1](../../../../media/um/uds/udscode/images/enable-code-gen.png)
+![code1](./images/enable-code-gen.png)
 
 Then users can add Template Configurations. Each template configuration contains two fields:
 
@@ -20,7 +20,7 @@ Multiple template configurations are supported. Users can add or remove template
 ## Special Properties
 
 When enabling UDS code generation, each service supports adding user-defined special properties for `code generation`.
-![code2](../../../../media/um/uds/udscode/images/special-config.png)
+![code2](./images/special-config.png)
 
 Properties are defined in Key-Value format.
 

@@ -1,43 +1,43 @@
 # 常见问题
 
-## 如何配置 UDS 消息长度到 8 字节？
+## 如何将UDS报文长度配置为8字节？
 
-:::details 答案
-您可以通过 UDS 测试器 -> Tp 基础 -> 填充启用来启用填充。 您也可以设置自己的填充值，默认为0x00。
+:::details 解答
+您可以通过UDS Tester -> Tp Base -> Padding Enable启用填充功能。 您也可以设置自己的填充值，默认为0x00。
 ![1](../../media/faq/1.png)
 :::
 
-## ZLG 调试，conditioning Puntary Pete 波特率失败？
+## ZLG打开设备提示设置波特率失败？
 
-:::details 答案
-这是一个已知问题,请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
+:::details 解答
+这是一个已知问题，请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
 :::
 
-## 当使用序列器发送UDS服务时，使用ID0x3C和NAD 0x55在LIN上方， 为什么不发送ID为 0x3D 的 LIN 消息，然后从此从作者处回复？
+## 当使用序列器通过LIN发送ID为0x3C且NAD为0x55的UDS服务时，为什么不随后发送ID为0x3D的LIN报文以供从节点响应？
 
-:::details 答案
-这是因为执行了林中时间表表。 您应该先开始任何计划表。
+:::details 解答
+这是由于LIN调度表的实现方式。 您应该首先启动任何调度表。
 ![2](../../media/faq/2.png)
 然后您可以发送ID为0x3D的LIN报文。
 ![3](../../media/faq/3.png)
 :::
 
-## 如何计算消息的 CRC 值？
+## 如何计算报文的CRC值？
 
-:::details 答案
-您可以使用脚本中内置的 [CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC 值。 API 支持各种带有可配置参数的 CRC 算法，包括CRC8、CRC16和CR32。
+:::details 解答
+您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，并具有可配置参数。
 
 :::
 
-## 如何执行周期消息计数循环？
+## 如何实现周期报文的循环计数？
 
-:::details 答案
+:::details 解答
 
 **如果您有数据库并希望定期更新信号值：**
 
-1. 首先，您需要定期配置信息。
-2. 然后你就不再使用 [OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API来监听发送/接收的消息。
-3. 使用 [setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API 来更新信号值。
+1. 首先需要将报文配置为周期性的。
+2. 然后需要使用[OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API监听报文的发送/接收。
+3. 使用[setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API更新信号值。
 
 ```ts
 import { setSignal } from 'ECB'
@@ -50,9 +50,9 @@ Util.OnCan(0x142, (data) => {
 
 ![demo](../../media/faq/loop.gif)
 
-**没有数据库：**
+**无数据库：**
 
-1. 只需使用 [output](https://app.whyengineer.com/scriptApi/functions/output.html) API才能输出您想要的任何值。
+1. 只需使用[output](https://app.whyengineer.com/scriptApi/functions/output.html) API输出具有您所需任意值的帧。
 
 ```ts
 import { output,CanMessage,CAN_ID_TYPE} from 'ECB'

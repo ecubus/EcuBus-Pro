@@ -5,21 +5,21 @@
 ## 编辑器
 
 建议使用 Vscode 来编辑脚本，您可以安装 `TypeScript` 扩展来获取语法检查和智能化。
-![Alt 文本](script1.gif)
+![alt text](../../../media/um/script/script1.gif)
 
 > [!TIP]
 > 我们还计划提供 vscode 扩展，让您直接在 vscode 中构建脚本。
 
 ## 构建脚本
 
-![Alt text](image.png)
-如果脚本中存在任何错误，您可以获取`Message`窗口中的构建错误信息。
-![Alt 文本](image-1.png)
+![alt text](../../../media/um/script/image.png)
+you can get the build error info in `Message` window if there is any error in the script.
+![alt text](../../../media/um/script/image-1.png)
 
 ## Script API
 
 您可以打开 `API` 窗口来获取 API 信息。
-![Alt 文本](image-2.png)
+![alt text](../../../media/um/script/image-2.png)
 
 或检查此在线文档 [API](https://app.whyengineer.com/scriptApi/index.html)
 
@@ -83,7 +83,8 @@ Util.OnCan(true, (msg) => {
 #### On
 
 监听诊断消息。
-`<0>.<1>.recv`用于监听收到的 uds消息。 <tester name>。<service item name>被用来监听uds消息发送。
+`${tester name}.${  service item name}.recv` is used to listen to the uds message received.
+`${tester name}.${service item name}.send` is used to listen to the uds message send.
 
 ```typescript
 // listen to the uds message

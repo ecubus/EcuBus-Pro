@@ -1,4 +1,4 @@
-﻿# CAN DBC
+# CAN DBC
 
 EcuBus-Pro supports parsing most CAN DBC files. If you encounter any DBC files that cannot be parsed correctly, please report the issue on our [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) page.
 
@@ -9,7 +9,7 @@ The application provides an efficient search interface for messages and signals.
 
 ## Select a DBC File
 
-![alt text](../../../../media/um/database/dbc/image-18.png)
+![alt text](image-18.png)
 
 ## Overview
 
@@ -19,16 +19,16 @@ The DBC viewer provides comprehensive information about:
 - Messages
 - Signals
 
-![alt text](../../../../media/um/database/dbc/image-19.png)
+![alt text](image-19.png)
 
 ## Value Tables
 
 Value tables define the mapping between raw values and their corresponding meanings.
 
-![alt text](../../../../media/um/database/dbc/image-20.png)
+![alt text](image-20.png)
 
 ## Attributes
 
 View and inspect all DBC attributes.
 
-![alt text](../../../../media/um/database/dbc/image-21.png)
+![alt text](image-21.png)

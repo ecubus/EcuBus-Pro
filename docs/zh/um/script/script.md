@@ -32,7 +32,7 @@
 Init 函数是脚本的条目，将在脚本加载时调用。
 
 ```typescript
-Util.Init(() => own
+Util.Init(() => {
   console.log('Init')
 })
 ```
@@ -42,16 +42,16 @@ Util.Init(() => own
 计时器是 node.js 内置功能，您可以使用它来做一些定期工作。 更多关于计时器的详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
 
 ```typescript
-// 周期性输出可以消息
-让计时器= setInterval(() => Power
+// periodical output can message
+let timer = setInterval(() => {
   outputCan(canMsg)
 }, 1000)
 
-// 停止计时器
-clearInterval(计时器)
+// stop the timer
+clearInterval(timer)
 
-//刷新计时器
-计时器。 efresh ()
+//refresh the timer
+timer.refresh()
 ```
 
 #### OnKey
@@ -59,8 +59,8 @@ clearInterval(计时器)
 聆听密钥事件，您可以在按键时使用它来做一些工作。
 
 ```typescript
-// 聆听密钥事件
-Util.OnKey('s', () => Power
+// listen to the key event
+Util.OnKey('s', () => {
   outputCan(canMsg)
 })
 ```
@@ -70,27 +70,28 @@ Util.OnKey('s', () => Power
 聆听可以发送的消息，您可以在收到消息时使用它来完成一些工作。
 
 ```typescript
-// 监听CAN消息
+// listen to the can message
 Util.OnCan(0x1, (msg) => {
   console.log(msg)
 })
-// 监听所有CAN消息
+// listen all can message
 Util.OnCan(true, (msg) => {
   console.log(msg)
 })
 ```
 
-#### 开启
+#### On
 
-听听完问答。 <tester name>。<service item name>.recv`用于监听收到的 uds消息。 <tester name>。<service item name>.send`被用来监听uds消息发送。
+监听诊断消息。
+`<0>.<1>.recv`用于监听收到的 uds消息。 <tester name>。<service item name>被用来监听uds消息发送。
 
 ```typescript
-// 监听UDS消息
+// listen to the uds message
 Util.On('Can.DiagRequest.recv', (msg) => {
-  //接收诊断响应
+  //receive diag response
 })
 Util.On('Can.DiagRequest.send', (msg) => {
-  //接收诊断请求
+  //receive diag request
 })
 ```
 

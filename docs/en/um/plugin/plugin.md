@@ -1,4 +1,4 @@
-# Plugin
+﻿# Plugin
 
 ## Overview
 
@@ -9,7 +9,7 @@ The Plugin system is a powerful extensibility feature that allows you to enhance
 ### Plugin Marketplace
 
 The Plugin Marketplace provides a centralized location to discover and install plugins:
-![marketplace](./image.png)
+![marketplace](../../../media/um/plugin/image.png)
 ### Extension Points
 
 Plugins can extend EcuBus-Pro in two main ways:
@@ -31,7 +31,7 @@ Plugins can extend existing tabs with additional functionality:
 - Integrate new features seamlessly into the current workflow
 - Enhance existing functionality without modifying core code
 - Provide specialized tools for specific tabs
-![tab-extensions](./image-1.png)
+![tab-extensions](../../../media/um/plugin/image-1.png)
 
 ### Development Support
 

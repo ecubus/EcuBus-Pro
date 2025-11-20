@@ -1,4 +1,4 @@
-# EcuBus-Pro CLI
+﻿# EcuBus-Pro CLI
 
 EcuBus-Pro provides a command line interface (CLI) that allows you run your
 code without the GUI. It's useful for automation, testing, and debugging. The
@@ -56,7 +56,7 @@ ecb_cli pnpm install package_name
 
 #### Example (pnpm)
 
-![alt text](./../script/SerialPort/pnpm.gif)
+![alt text](../../../media/um/script/SerialPort/pnpm.gif)
 
 ### Test command
 
@@ -91,4 +91,4 @@ ecb_cli test <project> <name> [options]
 
 #### Example (test)
 
-![alt text](test.gif)
+![alt text](../../../media/um/cli/test.gif)

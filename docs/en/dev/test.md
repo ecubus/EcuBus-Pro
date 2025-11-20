@@ -1,4 +1,4 @@
-# Test
+﻿# Test
 
 The test of the project is based on the `Vitest` framework. Get more information about the `Vitest` framework [vitest](https://vitest.dev/).
 
@@ -24,7 +24,7 @@ npx vitest test/docan/candle.test.ts --t "test name"
 npm run test
 ```
 
-![alt text](image.png)
+![alt text](../../media/dev/image.png)
 
 Stop test when failed
 

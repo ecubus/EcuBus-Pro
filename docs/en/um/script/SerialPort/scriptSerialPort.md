@@ -1,4 +1,4 @@
-﻿# Use External Packages
+# Use External Packages
 
 Since EcuBus-Pro script is based on Node.js, you can use any Node.js package in your script. There are two ways to install packages:
 
@@ -11,7 +11,7 @@ EcuBus-Pro provides a graphical package manager interface for easy installation,
 1. For new projects, you'll see a message "No package.json found" and an "Initialize package.json" button. Click this button to create a new package.json file.
 
 2. Click on the "Packages" option in the left navigation bar of the main interface
-  ![Package Manager](../../../../media/um/script/SerialPort/package.png)
+  ![Package Manager](package.png)
 
 3. In the Package Manager interface:
    - Enter the name of the package you want to install
@@ -32,7 +32,7 @@ Install the `serialport` package in your project root directory.
 ecb_cli pnpm install serialport
 ```
 
-![Installation Process](../../../../media/um/script/SerialPort/pnpm.gif)
+![Installation Process](pnpm.gif)
 
 ## Usage Example
 
@@ -61,5 +61,5 @@ SerialPort.list()
 
 ### Running Result
 
-![Running Result](../../../../media/um/script/SerialPort/serialPort.gif)
+![Running Result](serialPort.gif)
 

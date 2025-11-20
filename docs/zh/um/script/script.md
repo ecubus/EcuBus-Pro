@@ -1,35 +1,35 @@
 # 脚本
 
-基于 Node.js 环境中的 TypeScript/JavaScript 的脚本。 我们使用 `ts` 进行语法检查，并使用 esbuild来生成脚本，构建脚本在 `.ScriptBuild` 文件夹中。
+该脚本基于 node.js 环境中的 TypeScript/JavaScript。 我们使用 `ts` 进行语法检查，并使用 esbuild 构建脚本，构建脚本位于 `.ScriptBuild` 文件夹中。
 
 ## 编辑器
 
-建议使用 Vscode 来编辑脚本，您可以安装 `TypeScript` 扩展来获取语法检查和智能化。
+推荐使用 Vscode 编辑脚本，您可以安装 `TypeScript` 扩展来获得语法检查和智能感知。
 ![alt text](../../../media/um/script/script1.gif)
 
 > [!TIP]
-> 我们还计划提供 vscode 扩展，让您直接在 vscode 中构建脚本。
+> 我们还计划提供一个 vscode 扩展，让您可以直接在 vscode 中构建脚本。
 
 ## 构建脚本
 
 ![alt text](../../../media/um/script/image.png)
-如果脚本中有任何错误，您可以在`Message`窗口中获取构建错误信息。
+如果脚本中有任何错误，您可以在 `Message` 窗口中获取构建错误信息。
 ![alt text](../../../media/um/script/image-1.png)
 
-## Script API
+## 脚本 API
 
-您可以打开 `API` 窗口来获取 API 信息。
+您可以打开 `API` 窗口获取 API 信息。
 ![alt text](../../../media/um/script/image-2.png)
 
-或检查此在线文档 [API](https://app.whyengineer.com/scriptApi/index.html)
+或查看此在线文档 [API](https://app.whyengineer.com/scriptApi/index.html)
 
-## 脚本使用
+## 脚本用法
 
 ### Node.js 能力
 
-#### Init
+#### 初始化
 
-Init 函数是脚本的条目，将在脚本加载时调用。
+Init 函数是脚本的入口点，在脚本加载时会被调用。
 
 ```typescript
 Util.Init(() => {
@@ -39,7 +39,7 @@ Util.Init(() => {
 
 #### 定时器
 
-计时器是 node.js 内置功能，您可以使用它来做一些定期工作。 更多关于计时器的详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
+定时器是 node.js 的内置功能，您可以使用它来执行一些周期性工作。 有关定时器的更多详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
 
 ```typescript
 // periodical output can message
@@ -54,9 +54,9 @@ clearInterval(timer)
 timer.refresh()
 ```
 
-#### OnKey
+#### 按键事件
 
-聆听密钥事件，您可以在按键时使用它来做一些工作。
+监听按键事件，您可以使用它在按键被按下时执行某些工作。
 
 ```typescript
 // listen to the key event
@@ -65,9 +65,9 @@ Util.OnKey('s', () => {
 })
 ```
 
-#### OnCan
+#### CAN 消息事件
 
-聆听可以发送的消息，您可以在收到消息时使用它来完成一些工作。
+监听 CAN 消息，您可以使用它在接收到 CAN 消息时执行某些工作。
 
 ```typescript
 // listen to the can message
@@ -80,11 +80,11 @@ Util.OnCan(true, (msg) => {
 })
 ```
 
-#### On
+#### 监听事件
 
-监听诊断消息。
-`${tester name}.${service item name}.recv` 用于监听接收到的 UDS 消息。
-`${tester name}.${service item name}.send` 用于监听发送的UDS消息。
+监听 UDS 消息。
+`${tester name}.${service item name}.recv` 用于监听 UDS 消息的接收。
+`${tester name}.${service item name}.send` 用于监听 UDS 消息的发送。
 
 ```typescript
 // listen to the uds message
@@ -98,7 +98,7 @@ Util.On('Can.DiagRequest.send', (msg) => {
 
 ## 示例
 
-:::details 在脚本初始化时发送10条CAN消息，然后在30秒延迟后再发送一条消息{open}
+:::details 在脚本初始化时发送 10 条 CAN 消息，然后在 30 秒延迟后发送一条消息 {open}
 
 ```typescript
 async function sendCanMessage(msgId: number, targetId: number, dataPattern: string) {

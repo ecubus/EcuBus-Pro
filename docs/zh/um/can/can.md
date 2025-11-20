@@ -1,39 +1,39 @@
 # CAN
 
-CAN/CAN-FD是一项行业标准的汽车公共汽车协议，旨在在汽车应用中可靠的ECU通信。
+CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中的可靠 ECU 通信而设计。
 
 > [!IMPORTANT]
-> 本节描述的一些功能可能需要 CAN DBC 文件。 欲了解更多关于 DBC 文件的信息，请参阅我们的 [数据库文档](../dbc)。
+> 本节描述的某些功能可能需要 CAN DBC 文件。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。
 
 支持的硬件：
 
-| 制造商    | Protocols   |
-| ------ | ----------- |
-| 染料     | CAN, CAN-FD |
-| 克瓦塞尔   | CAN, CAN-FD |
-| ZLG    | CAN, CAN-FD |
-| Toomos | CAN, CAN-FD |
-| 镜头     | CAN, CAN-FD |
-| SLCAN  | CAN, CAN-FD |
+| 制造商     | 协议          |
+| ------- | ----------- |
+| PEAK    | CAN, CAN-FD |
+| KVASER  | CAN, CAN-FD |
+| ZLG     | CAN, CAN-FD |
+| Toomoss | CAN, CAN-FD |
+| VECTOR  | CAN, CAN-FD |
+| SLCAN   | CAN, CAN-FD |
 
-## SLCAN Special
+## SLCAN 特殊说明
 
-SLCAN是一个低成本的开放源代码解决方案，其固件源自 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于USB-ACM。
+SLCAN 是一种低成本的开源解决方案，固件来源于 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于 USB-ACM。
 
-> [!注意]
-> 此固件目前没有为串行命令提供任何ACK/NACK反馈。
+> [!NOTE]
+> 该固件目前不提供任何串行命令的 ACK/NACK 反馈。
 
-## USB_USB
+## GS_USB
 
-基于 Geschwister Schneider USB/CAN 设备和 candleLight USB CAN 接口的 Windows/Linux/Mac CAN 驱动程序或WinUSB WCID 驱动程序。
+基于 usbfs 或 WinUSB WCID 的 Windows/Linux/Mac CAN 驱动程序，适用于 Geschwister Schneider USB/CAN 设备和 candleLight USB CAN 接口。
 
 ### Linux gs_usb
 
-Linux 内核3.7及以上已合并了 `gs_bank` 驱动程序。
-检查是否使用 `gs_bank` 模块启用
+Linux 内核 3.7 及以上版本已合并 `gs_usb` 驱动程序。
+使用以下命令检查 `gs_usb` 模块是否启用
 
 ```bash
-lsomd | grep gs_usb
+lsmod | grep gs_usb
 ```
 
 如果未加载，请使用
@@ -42,41 +42,41 @@ lsomd | grep gs_usb
 sudo modprobe gs_usb
 ```
 
-要删除它，请使用
+要移除它，请使用
 
 ```bash
-sudo rmod gs_usb
+sudo rmmod gs_usb
 ```
 
 配置启动时自动加载：
 
 ```bash
-echo "gs_bank" | sudo tee /etc/modules-load.d/gs_blaw.conf
+echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
 ```
 
-非根用户需要相应的用户组成员。
+非 root 用户需要相应的用户组成员资格。
 
-使用 `devadm` 来监视设备连接并获取精确的设备路径：
+使用 `devadm` 监控设备连接并获取精确的设备路径：
 
 ```bash
-sudo devadm 监视器 --property
+sudo devadm monitor --property
 ```
 
-检查设备组所有权。 假设`ttyUSB0` (实际设备可能不同):
+检查设备组所有权。 假设为 `ttyUSB0`（实际设备可能不同）：
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
 ```
 
-- Arch Linux：应该返回 `uucp`
+- Arch Linux：应返回 `uucp`
 
 ```bash
 sudo usermod -aG uucp $USER
 newgrp uucp
 ```
 
-- Debian/Ubuntu: 应该返回 `dialout`
-- Fedora/RHEL：返回 `dialout`
+- Debian/Ubuntu：应返回 `dialout`
+- Fedora/RHEL：应返回 `dialout`
 
 ```bash
 sudo usermod -aG dialout $USER
@@ -85,49 +85,49 @@ newgrp dialout
 
 ## 设备配置
 
-为了演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
+为演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
 
-![替代文本](../../../media/um/can/image.png)
+![alt text](../../../media/um/can/image.png)
 
 ### 波特率设置
 
-波特率设置用于配置CAN 公共汽车的波特率。
+波特率设置用于配置 CAN 总线的波特率。
 
-点击 "Bit Timing" 按钮打开位计时设置窗口。
-![替代文本](../../../media/um/can/image-8.png)
-![替代文本](../../../media/um/can/image-9.png)
+点击 `Bit Timing` 按钮打开位时序配置窗口。
+![alt text](../../../media/um/can/image-8.png)
+![alt text](../../../media/um/can/image-9.png)
 
 ## 交互模式和节点脚本
 
-EcuBus-Pro 公司提供两种主要方法来进行CAN 通信：
+EcuBus-Pro 提供两种主要的 CAN 通信方法：
 
-- 互动模式：手动帧传输
-- 节点脚本：使用自定义脚本进行自动通信
+- 交互模式：用于手动帧传输
+- 节点脚本：用于使用自定义脚本进行自动化通信
 
-![替代文本](../../../media/um/can/image-1.png)
+![alt text](../../../media/um/can/image-1.png)
 
 ### 交互模式
 
-每个帧都可以用于定期传输或手动触发(单射击或键盘)。
-![替代文本](../../../media/um/can/image-2.png)
+每个帧可以配置为周期性传输或手动触发（单次触发或按键绑定）。
+![alt text](../../../media/um/can/image-2.png)
 
 您可以通过两种方式添加帧：
 
 - 手动帧配置
-- 从DBC数据库导入
-  ![替代文本](../../../media/um/can/image-3.png)
+- 从 DBC 数据库导入
+  ![alt text](../../../media/um/can/image-3.png)
 
 ### 节点脚本
 
-节点可以使用 UDS 功能 (测试器) 和自定义脚本进行配置。
-![替代文本](../../../media/um/can/image-4.png)
+节点可以配置 UDS 功能（测试器）和自定义脚本。
+![alt text](../../../media/um/can/image-4.png)
 
-定期信号更新的示例脚本：
+周期性信号更新的示例脚本：
 
 ```typescript
 import { setSignal } from 'ECB'
 let val = 0
-// 每秒更新信号值
+// Update signal value every second
 setInterval(() => {
   setSignal('Model3CAN.VCLEFT_liftgateLatchRequest', val++ % 5)
 }, 1000)
@@ -135,19 +135,19 @@ setInterval(() => {
 
 ## 诊断操作
 
-1. **Tester 配置**
+1. **测试器配置**
 
-   - 配置地址
+   - 配置寻址
    - 设置诊断参数
-     ![替代文本](../../../media/um/can/image-5.png)
+     ![alt text](../../../media/um/can/image-5.png)
 
 2. **诊断服务**
 
    - 配置诊断服务
    - 创建调度表和序列
-     ![替代文本](../../../media/um/can/image-6.png)
+     ![alt text](../../../media/um/can/image-6.png)
 
-3. **消息监视**
+3. **消息监控**
    - 在跟踪窗口中查看发送和接收的消息
-     ![替代文本](../../../media/um/can/image-7.png)
+     ![alt text](../../../media/um/can/image-7.png)
 

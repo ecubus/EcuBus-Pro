@@ -1,4 +1,4 @@
-﻿# UDS Bootloader Implementation Guide
+# UDS Bootloader Implementation Guide
 
 ## Overview
 
@@ -13,15 +13,15 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 > [!NOTE]
 > All Supported CAN Devices: [CAN Devices](./../../can/can.md)
 
-![Hardware Device Configuration](../../../../media/um/uds/example/images/01-hardware-device-config.png)
+![Hardware Device Configuration](images/01-hardware-device-config.png)
 
 + You can select the corresponding sampling point according to actual conditions.
 
-![Sampling Point Configuration](../../../../media/um/uds/example/images/02-sampling-point-config.png)
+![Sampling Point Configuration](images/02-sampling-point-config.png)
 
 + Set the addressing mode. The S32K144 official CAN UDS Bootloader example uses Normal fixed addressing, configured as follows.
 
-![Addressing Mode Configuration](../../../../media/um/uds/example/images/03-addressing-mode-config.png)
+![Addressing Mode Configuration](images/03-addressing-mode-config.png)
 
 ### Diagnostic Services Configuration
 
@@ -29,71 +29,71 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 + Configuration for entering extended session:
 
-![Extended Session Configuration](../../../../media/um/uds/example/images/04-extended-session-config.png)
+![Extended Session Configuration](images/04-extended-session-config.png)
 
 + Configuration for entering programming session:
 
-![Programming Session Configuration](../../../../media/um/uds/example/images/05-programming-session-config.png)
+![Programming Session Configuration](images/05-programming-session-config.png)
 
 #### ECUReset (ECU Reset) ($11) Service
 
 + Hardware reset configuration is as follows, using hardware reset here.
 
-![Hardware Reset Configuration](../../../../media/um/uds/example/images/06-hardware-reset-config.png)
+![Hardware Reset Configuration](images/06-hardware-reset-config.png)
 
 #### SecurityAccess (Security Access) ($27) Service
 
 + Seed request configuration is as follows. You need to enter the Response interface and change the securitySeed length to 128bit, otherwise you cannot receive the complete seed data replied by the MCU.
 
-![Security Seed Request Configuration](../../../../media/um/uds/example/images/07-security-seed-request-config.png)
+![Security Seed Request Configuration](images/07-security-seed-request-config.png)
 
 + Key response configuration is as follows. The data segment will have its size changed to 128bit in the script and filled with the calculated key.
 
-![Security Key Response Configuration](../../../../media/um/uds/example/images/08-security-key-response-config.png)
+![Security Key Response Configuration](images/08-security-key-response-config.png)
 
 #### CommunicationControl (Communication Control) ($28) Service
 
 + Disable network management messages and normal message transceivers, configured as follows.
 
-![Communication Control Configuration](../../../../media/um/uds/example/images/09-communication-control-config.png)
+![Communication Control Configuration](images/09-communication-control-config.png)
 
 #### WriteDataByIdentifier (Write Data By Identifier) ($2E) Service
 
 + Write to specified DID. The S32K144 official CAN UDS Bootloader example uses 0xF15A, configured as follows:
 
-![Write Data By Identifier Configuration](../../../../media/um/uds/example/images/10-write-data-by-identifier-config.png)
+![Write Data By Identifier Configuration](images/10-write-data-by-identifier-config.png)
 
 #### RoutineControl (Routine Control) ($31) Service
 
 + Routine with routineID 0x0202 is used to notify the MCU to perform CRC verification, configured as follows:
 
-![Routine Control Configuration](../../../../media/um/uds/example/images/11-routine-control-crc-config.png)
+![Routine Control Configuration](images/11-routine-control-crc-config.png)
 
 + Routine with routineID 0xFF00 is used to notify the MCU to perform Flash erase, configured as follows.
 
-![Flash Erase Configuration](../../../../media/um/uds/example/images/12-routine-control-flash-erase-config.png)
+![Flash Erase Configuration](images/12-routine-control-flash-erase-config.png)
 
 + Routine with routineID 0xFF01 is used to notify the MCU to perform firmware verification, configured as follows:
 
-![Firmware Verification Configuration](../../../../media/um/uds/example/images/13-routine-control-firmware-check-config.png)
+![Firmware Verification Configuration](images/13-routine-control-firmware-check-config.png)
 
 #### RequestDownload (Request Download) ($34) Service
 
 + Request download configuration is as follows. The storage address and storage space will be assigned in the script during actual use.
 
-![Request Download Configuration](../../../../media/um/uds/example/images/14-request-download-config.png)
+![Request Download Configuration](images/14-request-download-config.png)
 
 #### TransferData (Transfer Data) ($36) Service
 
 + Transfer data configuration is as follows. During actual use, it will be repeatedly called and assigned values in the script.
 
-![Transfer Data Configuration](../../../../media/um/uds/example/images/15-transfer-data-config.png)
+![Transfer Data Configuration](images/15-transfer-data-config.png)
 
 #### RequestTransferExit (Request Transfer Exit) ($37) Service
 
 + Stop transfer configuration is as follows.
 
-![Request Transfer Exit Configuration](../../../../media/um/uds/example/images/16-request-transfer-exit-config.png)
+![Request Transfer Exit Configuration](images/16-request-transfer-exit-config.png)
 
 #### JobFunction
 
@@ -101,13 +101,13 @@ This guide demonstrates how to implement a complete UDS (Unified Diagnostic Serv
 
 Add empty JobFunction0 and JobFunction1 to facilitate combining download-related services through scripts.
 
-![JobFunction Configuration](../../../../media/um/uds/example/images/17-job-function-config.png)
+![JobFunction Configuration](images/17-job-function-config.png)
 
 ### Sequence Configuration
 
 The entire UDS upgrade process is configured as shown in the following diagram (for reference only)：
 
-![Sequence Configuration](../../../../media/um/uds/example/images/18-sequence-config.png)
+![Sequence Configuration](images/18-sequence-config.png)
 
 It is mainly divided into three phases:
 
@@ -140,15 +140,15 @@ It is mainly divided into three phases:
 
 + Create a new ts file in the project directory;
 
-![Create New TS File](../../../../media/um/uds/example/images/19-create-ts-file.png)
+![Create New TS File](images/19-create-ts-file.png)
 
 + Place the files needed for upgrade in the project directory;
 
-![Place Files in Project Directory](../../../../media/um/uds/example/images/20-place-upgrade-files.png)
+![Place Files in Project Directory](images/20-place-upgrade-files.png)
 
 + Load the script file in UDS Tester and open VS Code for script writing;
 
-![Load Script File in UDS Tester](../../../../media/um/uds/example/images/21-load-script-vscode.png)
+![Load Script File in UDS Tester](images/21-load-script-vscode.png)
 
 ### Script Development
 

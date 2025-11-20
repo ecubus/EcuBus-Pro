@@ -1,9 +1,9 @@
-﻿# Variable System
+# Variable System
 
 ## Overview
 
 The Variable System is a powerful feature that allows users to create, manage, and use dynamic values throughout the Ecubus Pro platform. Variables function like virtual signals flowing through the internal system, carrying information between different components and nodes. These virtual signals can be captured, transformed, and routed to create flexible and interconnected systems where changes in one area can automatically propagate to others.
-![VarArch](../../../media/um/var/image-4.png)
+![VarArch](./image-4.png)
 
 ## Features
 
@@ -41,7 +41,7 @@ For each connected CAN device, the system automatically creates a set of statist
 | `Statistics.{deviceName}.FrameRecvFreq` | Frequency of frames received | f/s |
 | `Statistics.{deviceName}.FrameFreq` | Overall frame frequency | f/s |
 
-![system var](../../../media/um/var/image-2.png)
+![system var](./image-2.png)
 
 ## User Variables
 
@@ -73,8 +73,8 @@ To create a new user variable:
    * **Maximum**: Optional upper bound
    * **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
 
-![User Variables Interface](../../../media/um/var/image-3.png)
-![UsrVar](../../../media/um/var/image-1.png)
+![User Variables Interface](./image-3.png)
+![UsrVar](./image-1.png)
 
 ## Example
 
@@ -104,4 +104,4 @@ Util.OnKey('b', async () => {
 })
 ```
 
-![busload](../../../media/um/var/image.png)
+![busload](./image.png)

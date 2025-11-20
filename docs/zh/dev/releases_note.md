@@ -1,516 +1,516 @@
-# EcuadBus-Pro 版本说明
+# EcuBus-Pro 发布说明
 
 ## 0.8.56
 
-从 v.8.55 到 v0.8.56 变化：
+从 v0.8.55 到 v0.8.56 的变更：
 
-- [feat]：在启动时添加自动生成脚本
-- [bug]:fix uds TesterPress 不能设置 0x80
-- [bug]:fix can dbc 值未定义问题
-- [feat]:add can statistics sentCnt and recvCnt
-- [feat]: 添加高精度定时器
+- [功能]: 启动时添加自动构建脚本
+- [修复]: 修复 UDS TesterPresent 无法设置 0x80 的问题
+- [修复]: 修复 CAN DBC 值未定义问题
+- [功能]: 添加 CAN 统计信息 sentCnt 和 recvCnt
+- [功能]: 添加高精度定时器
 
 ---
 
 ## 0.8.55
 
-从0.8.54v.8.55变化：
+从 v0.8.54 到 v0.8.55 的变更：
 
-- [feat]由 @taotieren 在 https://github.com/ecubus/EcuBus-Pro/pull/197中添加 archLinux 版本
-- [bug]:fix api runUdsSeq 可以运行Correnct序列错误
-- [feat]:base someip 功能正确, [Detail](https://app.whyengineer.com/zh/docs/um/someip/)
-- [api]:添加 getSignal api
-- [api]:add onSignal API
+- [功能]: 在 https://github.com/ecubus/EcuBus-Pro/pull/197 中添加 archLinux 构建，由 @taotieren 贡献
+- [修复]: 修复 API runUdsSeq 无法正确运行序列的 bug
+- [功能]: SOME/IP 基础功能就绪，[详情](https://app.whyengineer.com/zh/docs/um/someip/)
+- [API]: 添加 getSignal API
+- [API]: 添加 onSignal API
 
 ---
 
 ## 0.8.54
 
-从v0.8.53变化到v0.8.54：
+从 v0.8.53 到 v0.8.54 的变更：
 
-- [update] 通过@RCSN 在 https://github.com/ecubus/EcuBus-Pro/pull/194 中添加糖果的显示版本信息
-- [bug]:fix 脚本构建不复制 \*.node
-- [bug]:fixe 日志清除过程，临时清除一些init 日志。
-- [demo]:添加 NSUC1612_LIN_OTA demo
-- [bug]:fix crc 错误
+- [更新]: 在 https://github.com/ecubus/EcuBus-Pro/pull/194 中为 Candle 添加显示版本信息，由 @RCSN 贡献
+- [修复]: 修复脚本构建未复制 \*.node 文件的问题
+- [修复]: 修复日志清除过程，该过程导致某些初始化日志被清除
+- [示例]: 添加 NSUC1612_LIN_OTA 示例
+- [修复]: 修复 CRC 错误
 
 ---
 
 ## 0.8.53
 
-从 v.8.52 到 v0.8.53 变化：
+从 v0.8.52 到 v0.8.53 的变更：
 
-- [api]: 添加电流控制api
-- [opt]选择跟踪性能。
-- [opt]选择痕迹内嵌和目录
-- [opt]:删除 uds 最大缓冲区大小限制
-- [opt]:add CAN 错误报告在 https://github.com/ecubus/EcuBus-Pro/pull/191 由 @RCSN
+- [API]: 添加 LIN 电源控制 API
+- [优化]: 优化跟踪性能
+- [优化]: 优化跟踪 UDS 实例和目录
+- [优化]: 移除 UDS 最大缓冲区大小限制
+- [优化]: 在 https://github.com/ecubus/EcuBus-Pro/pull/191 中为 Candle 设备添加 CAN 错误报告，由 @RCSN 贡献
 
 ---
 
 ## 0.8.52
 
-从v0.8.51变成v0.8.52：
+从 v0.8.51 到 v0.8.52 的变更：
 
-- [feat]: 添加文件记录器
-- [bug]:fixe esbuild在 linux 中丢失
-- [opt]:lin tp sch 方法
-- [opt]选择 ecb_cli 测试子命令
+- [功能]: 添加文件记录器
+- [修复]: 修复 Linux 中缺少 esbuild 的问题
+- [优化]: 优化 LIN TP 调度方法
+- [优化]: 优化 ecb_cli test 子命令
 
 ---
 
 ## 0.8.51
 
-从 v0.8.50 到 v0.8.51变化：
+从 v0.8.50 到 v0.8.51 的变更：
 
-- [bug]:fix dbc 摩托拉信号数据解析
-- [opt]：可选行错误显示
-- [opt]选项 lin_conformance_test 示例
-- [opt]:init sae j2602 测试示例
+- [修复]: 修复 DBC Motorola 信号数据解析
+- [优化]: 优化 LinCable 错误显示
+- [优化]: 优化 lin_conformance_test 示例
+- [优化]: 初始化 SAE J2602 测试示例
 
 ---
 
 ## 0.8.50
 
-从 v0.8.49 变化到 v0.8.50：
+从 v0.8.49 到 v0.8.50 的变更：
 
-- [opt]: 在 #3c673a4 中添加新行到每个文件中 @NiireMER。
-- [feat]：在覆盖模式下添加跟踪id过滤器和增益时间
-- [opt]在每一次之前和之后选择测试，每次和日志显示
-- [opt]:add 中文文档
-- [feat]:Pwm output by @frankie-zeng in https://github.com/ecubus/EcuadBus-Pro/pull/176
-- [opt]：添加套接字清除
-- [bug]:fix 矢量可以断开断开
-- [feat]:linCable 添加 PWM 输出能力
-- [opt]: allow不访问矢量频道
-- [bug]:fix 输入服务配置页
+- [优化]: 由 @NiiMER 在 #3c673a4 中为每个文件添加新行
+- [功能]: 在覆盖模式下添加跟踪 ID 过滤器和增量时间
+- [优化]: 优化测试 beforeEach 和 afterEach 以及日志显示
+- [优化]: 添加中文文档
+- [功能]: PWM 输出，由 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/176 中贡献
+- [优化]: 添加 socket 清除
+- [修复]: 修复 Vector CAN 时间戳不连续问题
+- [功能]: LinCable 添加 PWM 输出能力
+- [优化]: 允许不访问 Vector 通道
+- [修复]: 修复服务配置页面中的输入问题
 
 ---
 
 ## 0.8.49
 
-从v0.8.48改为v0.8.49：
+从 v0.8.48 到 v0.8.49 的变更：
 
-- [bug]:fix parseInt 返回负值
-- [bug]:fix 面板视图数据更改流
-- [opt]:allowe funcional addresses return
-- [opt]:opt ldf parse
-- [bug]:fix lin ldf 逻辑值显示错误
-- [feat]添加gs_bank(随机) 支持
+- [修复]: 修复 parseInt 返回负值问题
+- [修复]: 修复面板视图数据变更流程
+- [优化]: 允许功能地址返回
+- [优化]: 优化 LDF 解析
+- [修复]: 修复 LIN LDF 逻辑值显示错误
+- [功能]: 添加 gs_usb(Candle) 支持
 
 ---
 
 ## 0.8.48
 
-从v0.8.47变成v0.8.48：
+从 v0.8.47 到 v0.8.48 的变更：
 
-- [opt]左侧对齐
-- [bug]:fix mim leak
-- [feat]:添加 SecureAccessGenerateKeyEx 和 SecureAccessGenerateKeyExOpt buildin 脚本
-- [bug]:fix ldf/dbc 解析问题
-- [opt]网络中的测试节点
-- [opt]:opt lin ldf parse
+- [优化]: 优化消息左对齐
+- [修复]: 修复内存泄漏
+- [功能]: 添加 SecureAccessGenerateKeyEx 和 SecureAccessGenerateKeyExOpt 内置脚本
+- [修复]: 修复 LDF/DBC 解析问题
+- [优化]: 优化网络中的测试节点
+- [优化]: 优化 LIN LDF 解析
 
 ---
 
 ## 0.8.47
 
-从v0.8.46变成v0.8.47：
+从 v0.8.46 到 v0.8.47 的变更：
 
-### 高亮
+### 重点内容
 
-**[EcuBus LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)** - USB 到 LIN 汽车发展适配器 **启动** ！
+**[EcuBus LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)** – 用于汽车开发的 USB 转 LIN 适配器 **已发布**！
 
-功能：
+特性：
 
-- 故障注入和配套测试
-- 高级LIN协议支持
+- 故障注入和一致性测试
+- 高级 LIN 协议支持
 - 跨平台和软件集成
-- 为次要发展开放通信协议
+- 用于二次开发的开放通信协议
 - DFU 固件更新支持
 
-### 其他更改
+### 其他变更
 
-- [bug]:fix vector link master not receive by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/169
-- [feat]:run 单个测试大小写
-- [bug]:fix 抓取供应商失败
-- [opt]选择diff 平台供应商
-- [opt]选择slcan 时间戳和canfd
+- [修复]: 修复 Vector LIN 主节点无法接收的问题，由 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/169 中贡献
+- [功能]: 运行单个测试用例成功
+- [修复]: 修复获取供应商失败问题
+- [优化]: 优化不同平台供应商
+- [优化]: 优化 SLCAN 时间戳和 CAN FD
 
 ---
 
 ## 0.8.46
 
-从v0.8.45改为v0.8.46：
+从 v0.8.45 到 v0.8.46 的变更：
 
-- [bug]:fix fc 发送多次问题
-- [feat]:add slcan can can fd @frankie-zeng in https://github.com/ecubus/cuberBus/pull/165
-- [bug]:fix dbc 解析信号名称有intstr
-- [bug]:fix test log 重叠.
-- [bug]用测试来修复节点流控制
-- [opt]:make secureAccess work in windows only @frankie-zeng in https://github.com/ecubus/EcuBus/pull/161
-- [opt]:esbuild可执行文件bin challenging to OS by @sengulhamza in https://github.com/ecubus/ EcuBus/pull/163
+- [bug]: 修复 fc 多次发送问题
+- [feat]: 添加 slcan can can-fd @frankie-zeng 在 https://github.com/ecubus/EcuBus/pull/165
+- [bug]: 修复 dbc 解析信号名包含整数字符串
+- [bug]: 修复测试日志重叠
+- [bug]: 修复 nodeitem 流控通过 isTest
+- [opt]: 使 secureAccess 仅在 Windows 下工作 @frankie-zeng 在 https://github.com/ecubus/EcuBus/pull/161
+- [opt]: esbuild 可执行二进制文件处理到操作系统 @sengulhamza 在 https://github.com/ecubus/EcuBus/pull/163
 
 ---
 
 ## 0.8.45
 
-从v0.8.44改为v0.85：
+从 v0.8.44 到 v0.8.45 的变更：
 
-- [opt]选择测试器逻辑&func 地址
-- [api]:remove RegisterEthVirtualEnty api, 通过模拟在 UI 中进行控制
-- [bug]:fix uds 0x85 param 不能删除
-- [bug]:fix dbc calc 不匹配
-- [opt]: 启用背景Throutling
-- [feat]:添加跟踪覆盖模式 [Detail](https://app.whyengineer.com/docs/um/trace/trace.html#overwrite-mode)
-- [bug]:fix can dbc SIG_GROUP_ 无法解析问题
-- [bug]:fip 否定响应问题
-- [bug]:fix can dbc EV_ 无法解析问题
+- [opt]: 优化测试器逻辑地址和功能地址
+- [api]: 移除 RegisterEthVirtualEntity api，通过 UI 中的 simulate_by 配置控制
+- [bug]: 修复 uds 0x85 参数无法删除
+- [bug]: 修复 dbc 计算不匹配
+- [opt]: 启用 backgroundThrottling
+- [feat]: 添加跟踪覆盖模式 [详情](https://app.whyengineer.com/docs/um/trace/trace.html#overwrite-mode)
+- [bug]: 修复 can dbc SIG_GROUP_ 无法解析问题
+- [bug]: 修复 uds 否定响应问题
+- [bug]: 修复 can dbc EV_ 无法解析问题
 
 ---
 
 ## 0.8.44
 
-从v0.8.43改为v0.8.44：
+从 v0.8.43 到 v0.8.44 的变更：
 
-- [bug]:fix toomoss 可以时钟频率
-- [feat]:添加黑色主题 [Detail](https://app.whyengineer.com/docs/um/setting/general.html#theme)
-- [example]:添加面板示例 [Detail](https://app.whyengineer.com/examples/panel/readme.html)
-- [feat]: 添加带领面板的组件
-- [bug]:fix var 触发器
-- [feat]选择changeServiceApi
-- [example]:添加 0x29 示例 [Detail](https://app.whyengineer.com/examples/uds_0x29/readme.html)
-- [bug]:fix worker resp param 不是缓存的
+- [bug]: 修复 toomoss can 时钟频率问题
+- [feat]: 添加暗色主题 [详情](https://app.whyengineer.com/docs/um/setting/general.html#theme)
+- [example]: 添加面板示例 [详情](https://app.whyengineer.com/examples/panel/readme.html)
+- [feat]: 添加面板 LED 组件
+- [bug]: 修复变量触发器
+- [feat]: 优化 changeServiceApi
+- [example]: 添加 uds 0x29 示例 [详情](https://app.whyengineer.com/examples/uds_0x29/readme.html)
+- [bug]: 修复 worker 响应参数不是缓冲区
 
 ---
 
 ## 0.8.43
 
-从v0.8.42改为v0.8.43：
+从 v0.8.42 到 v0.8.43 的变更：
 
 - [feat]: 添加窗口重新排列功能
-- [bug]:fix toomoss lin 不能停止
-- [bug]:fix dbc 解析全局评论错误
+- [bug]: 修复 toomoss lin 无法停止
+- [bug]: 修复 dbc 解析全局注释错误
 - [api]: 添加 linStartScheduler/linStopScheduler api
 
 ---
 
 ## v0.8.42
 
-从v0.8.41到 v0.8.42：
+从 v0.8.41 到 v0.8.42 的变更：
 
-- [feat]:add UDS 代码生成能力
-- [bug]:fix doip tcp 客户端修复端口 TIME_WAIT 状态
-- [opt]选择 HIL 测试
-- [opt]选择多窗口
+- [feat]: 添加 UDS 代码生成能力
+- [bug]: 修复 doip tcp 客户端修复端口 TIME_WAIT 状态
+- [opt]: 优化 HIL 测试
+- [opt]: 优化多窗口
 
 ---
 
 ## v0.8.41
 
-从v0.8.40改为v0.8.41：
+从 v0.8.40 到 v0.8.41 的变更：
 
-- [feat]:add parse S19 file api
-- [bug]:fix doip tcp 日志流错误
-- [feat]:multi window
+- [feat]: 添加解析 S19 文件 api
+- [bug]: 修复 doip tcp 日志流错误
+- [feat]: 多窗口正常
 
 ---
 
 ## v0.8.40
 
-从 v0.8.39 变化到 v0.8.40：
+从 v0.8.39 到 v0.8.40 的变更：
 
-- [example]:添加 doip 网关示例
-- [bug]:fix doip 自己整理日志问题
-- [bug]:fix findService 不匹配包含服务ID问题
+- [example]: 添加 doip 网关示例
+- [bug]: 修复 doip 自身实体日志问题
+- [bug]: 修复 findService 不匹配包含服务 id 问题
 
 ---
 
 ## v0.8.39
 
-从v0.8.38改为v0.8.39：
+从 v0.8.38 到 v0.8.39 的变更：
 
-- [feat]:添加 doip 客户端ip 控制 [Detail](https://app.whyengineer.com/docs/um/doip/doip.html#tcp-udp-source-port-control)
-- [feat]:vector lin 适配器支持。 由 @hmf1235789 于 #153
+- [feat]: 添加 doip 客户端 IP 控制 [详情](https://app.whyengineer.com/docs/um/doip/doip.html#tcp-udp-source-port-control)
+- [feat]: vector lin 适配器支持。 由 @hmf1235789 在 #153
 
-## **Full Changelog**: https://github.com/ecubus/EcuBus-Pro/comparre/v0.8.38...v0.8.39
+## **完整变更日志**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.38...v0.8.39
 
 ## v0.8.38
 
-从v0.8.37变成v0.8.38：
+从 v0.8.37 到 v0.8.38 的变更：
 
-- [bug]:fix Options service param 不能保存
-- [bug]:fix tsconfig nodejs 目标版本
+- [bug]: 修复 uds 服务参数无法保存
+- [bug]: 修复 tsconfig nodejs 目标版本
 
 ---
 
 ## v0.8.37
 
-从0.8.36v到0.8.37v.8.37：
+从 v0.8.36 到 v0.8.37 的变更：
 
-- [bug]:fix LDF parse with space by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/145
-- [opt]:allowe UDS service with same subfunctions, ex: 0x31 by @frankie-zeng in https://github.com/ecubus/Bus-Pro/pull/146
-- [bug]:ZLG 设备无法被 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/144 关闭
-- [bug]：修复由 @frankie-zeng 在 https://github.com/ecubus/EcuadBus-Pro/pull/148 中检查和覆盖
-- [feat]:add doip version choose by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/150。
-- [bug]:fix kvaser 多设备
-- [feat]:添加 uds param 解析在轨迹
+- [bug]: 修复 LDF 解析带空格 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/145
+- [opt]: 允许 UDS 服务具有相同子功能，例如：0x31 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/146
+- [bug]: ZLG 设备无法关闭 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/144
+- [bug]: 修复波特率检查和覆盖 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/148
+- [feat]: 添加 doip 版本选择 @frankie-zeng 在 https://github.com/ecubus/EcuBus-Pro/pull/150
+- [bug]: 修复 kvaser 多设备
+- [feat]: 添加 uds 参数解析在跟踪中
 
-## **Full Changelog**: https://github.com/ecubus/EcuBus-Pro/comparre/v0.8.36...v0.8.37
+## **完整变更日志**: https://github.com/ecubus/EcuBus-Pro/compare/v0.8.36...v0.8.37
 
-## v.8.36
+## v0.8.36
 
-从v0.8.35改为v0.8.36：
+从 v0.8.35 到 v0.8.36 的变更：
 
-- **[feat]:vector 可以完成**
-- [feat]: 添加追踪中的设备过滤器
-- [bug]:fix can ia period 发送数据长度
-- [opt]可以选择预览率
-- [feat]:添加 kvaser 可以静音模式
-- [feat]:添加 kvaser lin 功能
+- **[feat]: vector can 完成**
+- [feat]: 添加设备过滤器在跟踪中
+- [bug]: 修复 can ia 周期发送数据长度
+- [opt]: 优化 can 波特率选择
+- [feat]: 添加 kvaser can 静默模式
+- [feat]: 添加 kvaser lin 功能
 
 ---
 
 ## v0.8.35
 
-从v0.8.34改为v0.8.35：
+从 v0.8.34 到 v0.8.35 的变更：
 
-- [feat]: pope功能
-- [feat]:addd Ops tester 模拟 by
-- [bug]:fix graph/goge 动态启用
-- [bug]:fix can dbc 解析错误
+- [功能]: 面板功能
+- [功能]: 添加UDS测试器模拟功能
+- [修复]: 修复图表/仪表动态启用
+- [修复]:修复CAN DBC解析错误
 
 ---
 
 ## v0.8.34
 
-从v0.8.33改为v0.8.34：
+从v0.8.33到v0.8.34的变更:
 
-- [bug]:fix zlg can fd 设备输入错误
-- [bug]:fix ipc get version bug, 当驱动程序未安装时将失败
+- [修复]:修复ZLG CAN-FD设备初始化错误
+- [修复]: 修复IPC获取版本错误，当驱动程序未安装时会失败
 
 ---
 
 ## v0.8.33
 
-从v0.8.32改为v0.8.33：
+从v0.8.32到v0.8.33的变更:
 
-- [bug]:fixe zlg 可以回音设备
-- [feat]：添加 dbc 浮动支持类型
+- [修复]:修复ZLG CAN设备回显
+- [功能]: 添加DBC浮点类型支持
 
 ---
 
 ## v0.8.32
 
-从v0.8.31改为v0.8.32：
+从v0.8.31到v0.8.32的变更:
 
-- [bug]:fix api diagIsPositiveResponse 错误
-- [bug]:fix lin diag 从属重置ID 错误
+- [修复]:修复API diagIsPositiveResponse错误
+- [修复]: 修复LIN诊断从站响应ID错误
 
 ---
 
 ## v0.8.31
 
-从v0.8.30 改为v0.8.31：
+从v0.8.30到v0.8.31的变更:
 
-- [bug]:fix freq 不是数字类型
+- [修复]: 修复频率不是数字类型
 
 ---
 
 ## v0.8.30
 
-从v0.8.29改为v0.8.30：
+从v0.8.29到v0.8.30的变更:
 
-- [功能]：添加数据图表完成 [详情](https://app.whyengineer.com/docs/um/graph/graph.html)
-- [feat]:添加var system ow [Detail](https://app.whyengineer.com/docs/um/var/var.html)
-- [feat]: 添加一些ZLG设备
-- [bug]:fix 脚本缓冲出站
-- [bug]:fix toomoss 可能会发生故障。
-- [feat]:添加toomoss/zlg 可以120个控制
+- [功能]:添加数据图表功能 [详情](https://app.whyengineer.com/docs/um/graph/graph.html)
+- [功能]:添加变量系统功能 [详情](https://app.whyengineer.com/docs/um/var/var.html)
+- [功能]: 添加一些ZLG设备
+- [修复]: 修复脚本缓冲区越界
+- [修复]: 修复同星CAN事件丢失
+- [功能]:添加同星/ZLG CAN 120欧姆电阻控制
 
 ---
 
 ## v0.8.29
 
-从v0.8.28改为v0.8.29：
+从v0.8.28到v0.8.29的变更:
 
-- [feat]:add can tester present #102 [Detail](https://app.whyengineer.com/docs/um/uds/testerPresent.html)
-- [bug]:fix 通道选择在 cani #107
+- [功能]:添加CAN测试器在线 #102 [详情](https://app.whyengineer.com/docs/um/uds/testerPresent.html)
+- [修复]:修复CAN接口中的通道选择 #107
 
 ---
 
 ## v0.8.28
 
-从v0.8.27改为v0.8.28：
+从v0.8.27到v0.8.28的变更:
 
-- [bug]:fix PEAK 可以预览错误
-- [bug]: fix布局最大窗口最小容量设置
+- [修复]:修复PEAK CAN波特率错误
+- [修复]: 修复布局最大窗口最小包含设置
 
 ---
 
-## v.8.27
+## v0.8.27
 
-从v0.8.26改为v0.8.27：
+从v0.8.26到v0.8.27的变更:
 
-- [bug]:fix ldf 评论 #99
-- [feat]: 添加软件包管理
+- [修复]:修复LDF注释 #99
+- [功能]: 添加包管理
 
 ---
 
 ## v0.8.26
 
-从v0.8.25改为v0.8.26：
+从v0.8.25到v0.8.26的变更:
 
-- [feat]:添加Building \*.node 和 \*.dll 副本
-- [bug]:fix pnpm 未找到
-- [opt]关闭软件时添加提示
-- [feat]: 添加图表仪功能
-- [feat]:let lin 信号物理值
-- [feat]:添加 link 编码更改
+- [功能]: 添加构建*.node和*.dll复制
+- [修复]: 修复pnpm未找到
+- [优化]: 添加关闭软件时的提示
+- [功能]: 添加图表仪表功能
+- [功能]: 优化LIN信号物理值
+- [功能]: 添加LIN编码变更
 
 ---
 
 ## v0.8.25
 
-从v0.8.24改为v0.8.25：
+从v0.8.24到v0.8.25的变更:
 
-- [feat]:添加 UI 缩放功能
-- [feat]:reface 追踪完成
-- [feat]：添加脚本结束回调
-- [feat]:添加节点绑定到 esbuild, 但仍然需要复制 .node 到 .ScriptBuilding
-- [bug]:fix toomoss lin 输出电压错误
-- [feat]:添加 link 校验和类型在跟踪窗口
-- [bug]:fix lin id 错误
-- [bug]:fix 保存项目失败
-- [bug]:fix lin Baudrate 不是数字
-- [bug]: 增加解析兼容性
-- [bug]:fixe 关闭项目无法清理数据
+- [功能]: 添加UI缩放功能
+- [功能]: 重构跟踪完成
+- [功能]: 添加脚本结束回调
+- [功能]: 为esbuild添加node-bindings，但仍需复制.node到.ScriptBuild
+- [修复]: 修复同星LIN输出电压错误
+- [功能]: 在跟踪窗口中添加LIN校验和类型
+- [修复]:修复LIN ID错误
+- [修复]: 修复保存项目失败
+- [修复]: 修复LIN波特率不是数字
+- [修复]: 提高LDF解析兼容性
+- [修复]: 修复关闭项目未清理数据
 
 ---
 
 ## v0.8.24
 
-从v0.8.23变成v0.8.24：
+从v0.8.23到v0.8.24的变更:
 
-- [feat]:添加toomoss lin
-- [dep]:update axios
+- [功能]: 添加同星LIN
+- [依赖]: 更新axios
 
 ---
 
 ## v0.8.23
 
-从v0.8.22改为v0.8.23：
+从v0.8.22到v0.8.23的变更:
 
-- [feat]:uds 序列构建脚本中
-- [feat]:添加 FILE 参数到 Ops 服务
-- [bug]:fix name 检查 linAddr
+- [功能]: UDS序列与内置脚本
+- [功能]: 为UDS服务添加FILE参数
+- [修复]: 修复linAddr中的名称检查
 
 ---
 
 ## v0.8.22
 
-从v0.8.21改为v0.8.22：
+从v0.8.21到v0.8.22的变更:
 
-- [feat]:add doip 直接连接 tcp #82
+- [功能]:添加DoIP直接TCP连接 #82
 
 ---
 
 ## v0.8.21
 
-从v0.8.20改为v0.8.21：
+从v0.8.20到v0.8.21的变更:
 
-- [bug]:fix udp 套接字关闭两次#80
-- [bug]:fix eth句柄是必需的 #81
+- [修复]:修复UDP套接字关闭两次 #80
+- [修复]:修复以太网句柄必需 #81
 
 ---
 
 ## v0.8.20
 
-从v0.8.19改为v0.8.20：
+从v0.8.19到v0.8.20的变更:
 
-- [feat]:添加 ZLG ZCAN_USBCANFD_100U 支持
-- [bug]:fix 白色屏幕
+- [功能]:添加ZLG ZCAN_USBCANFD_100U支持
+- [修复]: 修复白屏
 
 ---
 
 ## v0.8.19
 
-从v0.8.18改为v0.8.19：
+从v0.8.18到v0.8.19的变更:
 
-- [feat]:cli 测试 确定
+- [功能]: CLI测试完成
 
 ---
 
 ## v0.8.18
 
-从v0.8.17改为v0.8.18：
+从v0.8.17到v0.8.18的变更:
 
-- [feat]:test Framework ow
-- [feat]:test arch base确定
-- [refactor]: 重新计算网络节点逻辑。
-- [bug]:fix 日志序列问题
+- [功能]: 测试框架完成
+- [功能]: 测试架构基础完成
+- [重构]: 重构网络节点逻辑
+- [bug]: 修复日志顺序问题
 
 ---
 
 ## v0.8.17
 
-从v0.8.16改为v0.8.17：
+从 v0.8.16 到 v0.8.17 的变更：
 
-- [bug]:fix window 拖动错误大小
+- [bug]: 修复窗口拖拽调整大小错误
 - [feat]:添加示例 readme mermaid 支持
-- [feat]：添加十六进制解析/写脚本能力
+- [feat]:添加 hex 解析/写入脚本功能
 
 ---
 
 ## v0.8.16
 
-从v0.8.15到v0.8.16：
+从 v0.8.15 到 v0.8.16 的变更：
 
-- [opt]选择cani频道
+- [opt]:优化 cani 通道选择
 
 ---
 
 ## v0.8.15
 
-从v0.8.14改为v0.8.15：
+从 v0.8.14 到 v0.8.15 的变更：
 
-- [feat]:add can setSingal
-- [feat]:select can dbc 解析
+- [feat]:添加 can setSingal
+- [feat]:优化 can dbc 解析
 - [feat]: 添加信号更新
-- [feat]:添加prase dbc 文件
+- [feat]:添加解析 dbc 文件
 
 ---
 
 ## v0.8.14
 
-从v0.8.13改为v0.8.14：
+从 v0.8.13 到 v0.8.14 的变更：
 
-- [opt]选择ui 窗口
-- [bug]:fix diag Append，必须具有变换属性
-- [opt]工具提示时间
-- [feat]:grgh 从 link 数据库 ow
-- [feat]:添加setSignSystem api
-- [opt]选择ldf 解析兼容性
+- [opt]:优化 UI 窗口
+- [bug]:修复诊断追加，必须具有 transform 属性
+- [opt]: 优化工具提示时间
+- [feat]:从 LIN 数据库生成图形完成
+- [feat]:添加 setSignal 脚本 API
+- [opt]:优化 ldf 解析兼容性
 
 ---
 
 ## v0.8.13
 
-从v0.8.12改为v0.8.13：
+从 v0.8.12 到 v0.8.13 的变更：
 
-- [bug]:fix key 事件未关闭
-- [feat]:添加 lin
-- [feat]: 添加行数
-- [feat]: 添加浮点数
+- [bug]: 修复按键事件未关闭
+- [feat]:添加 LIN
+- [feat]:添加 LIN-TP
+- [feat]:添加基于 LIN 的 UDS
 - [feat]: 添加跟踪暂停/播放
-- [feat]:添加 lin ia
-- [opt]：添加ldf 解析空间和错误行显示
+- [feat]:添加 LIN IA
+- [opt]:添加 ldf 解析空格和错误行显示
 
 ---
 
-## v.8.12
+## v0.8.12
 
-从v0.8.11改为v0.8.12：
+从 v0.8.11 到 v0.8.12 的变更：
 
 - [feat]:添加 LDF 数据库功能
 
@@ -518,68 +518,68 @@
 
 ## v0.8.11
 
-从v0.8.10改为v0.8.11：
+从 v0.8.10 到 v0.8.11 的变更：
 
-- [feat]:添加 pnpm 能力到cli
+- [feat]:添加 CLI 的 pnpm 功能
 - [feat]:添加 ldfParse 代码
-- [bug]:fix can-ia data length!=2 issue
+- [bug]:修复 can-ia 数据长度!=2 问题
 
 ---
 
 ## v0.8.10
 
-从v0.8.9改为v0.8.10：
+从 v0.8.9 到 v0.8.10 的变更：
 
-- [bug]:fix enum 导出问题
-- [feat]: 添加脚本开钥功能
-- [feat]：添加节点串行lib 支持
+- [bug]: 修复枚举导出问题
+- [feat]:添加脚本 OnKey 功能
+- [feat]:添加 node serialport 库支持
 
 ---
 
 ## v0.8.9
 
-从v0.8.8改为v0.8.9：
+从 v0.8.8 到 v0.8.9 的变更：
 
-- [bug]:fix cli seq 不关闭
+- [bug]:修复 CLI seq 未关闭
 
 ---
 
 ## v0.8.8
 
-从v0.8.7改为v0.8.8：
+从 v0.8.7 到 v0.8.8 的变更：
 
-- [cli]:init first cli version, support seq 命令
-- [feat]:添加 cli seq 能力
-- [opt]:let can uds cc 速度
-- [bug]:fix 可以输入问题
-- [bug]:fix eid 不能输入问题
+- [cli]:初始化首个 CLI 版本，支持 seq 命令
+- [feat]:添加 CLI seq 功能
+- [opt]:优化 CAN UDS CC 速度
+- [bug]:修复 s can 输入问题
+- [bug]:修复 eid 无法输入问题
 
 ---
 
 ## v0.8.7
 
-从v0.8.6改为v0.8.7：
+从 v0.8.6 到 v0.8.7 的变更：
 
 - [example]: 添加 doip 和 doip_sim_entity 示例
 - [feat]:添加 doip 功能
-- [bug]:fix 峰sja1000 支持问题
-- [opt]对十六进制格式错误
+- [bug]:修复 peak sja1000 支持问题
+- [opt]: 优化错误格式从十进制到十六进制
 
 ---
 
 ## v0.8.6
 
-从v0.8.5到v0.8.6的变化：
+从 v0.8.5 到 v0.8.6 的变更：
 
-- [bug]:fix sa.node 锁定问题
+- [bug]:修复 sa.node 锁定问题
 
 ---
 
 ## v0.8.5
 
-从v0.8.4改为v0.8.5：
+从 v0.8.4 到 v0.8.5 的变更：
 
-- [feat]：选择发布笔记显示
-- [feet]: 添加便携式zip发布
-- [feat]: 添加dll 接口，查看 [https://app.whyengineer.com/examples/secure_access_dll/readme.html](https://app.whyengineer.com/examples/secure_access_dll/readme.html)
+- [feat]: 优化发布说明显示
+- [feet]: 添加便携式 zip 发布
+- [feat]: 添加加载 dll 接口，参见 [https://app.whyengineer.com/examples/secure_access_dll/readme.html](https://app.whyengineer.com/examples/secure_access_dll/readme.html)
 

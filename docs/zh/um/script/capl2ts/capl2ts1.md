@@ -1,49 +1,49 @@
-# 监视信号变化和打印时间间隔
+# 监控信号变化并打印时间间隔
 
 > [!INFO]
-> 验证码脚本由 Sanshao 提供
+> CAPL脚本由Sanshao提供
 
-## 验证码
+## CAPL
 
 ```capl
-变量
+variables
 {
-  long lastValue;         // 前一个信号值
-  long lastTime;          // 前一个转换时间
+  long lastValue;         // previous signal value
+  long lastTime;          // previous transition time
   long jumpCount = 0;
-  long tm[9];// 时间数组
+  long tm[9];// time array
 }
-启动时
+on start
 {
   lastValue = $EngState; 
-  获取本地时间(tm);
+  getLocalTime(tm);
   lastTime = tm[0]+tm[1]*60;
   jumpCount = 0;
 }
 
-// 信号转换事件
-信号更新时 EngState
+// signal transition event
+on signal_update EngState
 {
-   long 当前时间;
-  long 间隔;
+   long nowtime;
+  long interval;
   long tm1[9];
 
   if ($EngState != lastValue)
   {
-     获取本地时间(tm1);
+     getLocalTime(tm1);
     
-     当前时间 = tm1[0]+tm1[1]*60;
-     间隔 = 当前时间 - lastTime;
+     nowtime = tm1[0]+tm1[1]*60;
+     interval = nowtime - lastTime;
   
-    lastTime = 当前时间;
+    lastTime = nowtime;
     lastValue = $EngState;
     
-    写入("转换间隔: %d",间隔);
+    write("Transition interval: %d",interval);
   }
 }
 ```
 
-## EcuBus-Pro Script
+## EcuBus-Pro脚本
 
 ```typescript
 let lastValue: number|undefined;
@@ -51,18 +51,18 @@ let lastTime: number = 0;
 let jumpCount: number = 0;
 
 
-Util.初始化(() => {   
+Util.Init(() => {   
     lastTime= new Date().getTime();
 })
 
-// 信号转换事件
-Uitl.信号监听('Model3CAN.VCLEFT_liftgateLatchRequest',({rawValue,physValue}) => {
+// signal transition event
+Uitl.OnSignal('Model3CAN.VCLEFT_liftgateLatchRequest',({rawValue,physValue}) => {
     if(rawValue != lastValue){
-        const 当前时间 = new Date().getTime();
-        const 间隔 = 当前时间 - lastTime;
-        lastTime = 当前时间;
+        const nowTime = new Date().getTime();
+        const interval = nowTime - lastTime;
+        lastTime = nowTime;
         lastValue = rawValue;
-        console.log(`转换间隔: ${间隔}ms`);
+        console.log(`Transition interval: ${interval}ms`);
     }
 })
 ```

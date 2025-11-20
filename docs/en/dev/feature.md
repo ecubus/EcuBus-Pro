@@ -1,4 +1,4 @@
-﻿# Feature Request Process
+# Feature Request Process
 
 ## Steps
 
@@ -11,7 +11,7 @@ To ensure we prioritize features that benefit the community, new feature request
 ## How to Up-vote
 
 Add a 👍 reaction to the feature request issue.
-![alt text](../../media/dev/feature.png)
+![alt text](feature.png)
 
 ## Process
 

@@ -1,25 +1,25 @@
-﻿# Script
+# Script
 
 The script based on TypeScript/JavaScript in node.js environment. we use `ts` to do syntax check and use esbuild to build the script, the build script is in the `.ScriptBuild` folder.
 
 ## Editor
 
 Vscode is recommended to edit the script, you can install the `TypeScript` extension to get the syntax check and intellisense.
-![alt text](../../../media/um/script/script1.gif)
+![alt text](script1.gif)
 
 > [!TIP]
 > We also plan to provide a vscode extension to let you build the script in vscode directly.
 
 ## Build Script
 
-![alt text](../../../media/um/script/image.png)
+![alt text](image.png)
 you can get the build error info in `Message` window if there is any error in the script.
-![alt text](../../../media/um/script/image-1.png)
+![alt text](image-1.png)
 
 ## Script API
 
 You can open the `API` window to get the API info.
-![alt text](../../../media/um/script/image-2.png)
+![alt text](image-2.png)
 
 or check this online documentation [API](https://app.whyengineer.com/scriptApi/index.html)
 

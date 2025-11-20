@@ -4,7 +4,7 @@
 
 面板是一个灵活的拖放接口，提供了一个空白的插件，您可以在这里自由安排和连接功能组件。 像使用 LEGO 块建造一样，你可以在面板中集合各种功能来创建自定义界面：
 
-![Panel Interface](../../../media/um/panel/base.gif)
+![面板界面](../../../media/um/panel/base.gif)
 
 ## 面板能力
 
@@ -26,7 +26,7 @@
 2. **Panel Area**：用于放置和安排组件
 3. **组件属性编辑器**：用于设置组件属性，如信号绑定，变量绑定等。
 
-![Editing Interface](../../../media/um/panel/image.png)
+![编辑界面](../../../media/um/panel/image.png)
 
 ### 支持的组件
 
@@ -37,7 +37,7 @@
 - **显示组件**: 视觉呈现元素
 - **布局组件**：用于组织和结构您的接口
 
-![Component Categories](../../../media/um/panel/image1.png)
+![组件分类](../../../media/um/panel/image1.png)
 
 在今后的更新中将添加更多的组件类型，例如用于模拟汽车仪表板面的仪表盘仪器。
 
@@ -45,7 +45,7 @@
 
 在配置您的组件后，用户可以在显示模式中查看和交互：
 
-![Display Mode](../../../media/um/panel/base1.gif)
+![显示模式](../../../media/um/panel/base1.gif)
 
 ## 面板示例
 

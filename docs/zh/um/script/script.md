@@ -83,7 +83,7 @@ Util.OnCan(true, (msg) => {
 #### On
 
 监听诊断消息。
-`${tester name}.${service item name}.recv` is used to listen to the uds message received.
+`${tester name}.${service item name}.recv` 用于监听接收到的 UDS 消息。
 `${tester name}.${service item name}.send` 用于监听发送的UDS消息。
 
 ```typescript

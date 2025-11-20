@@ -121,7 +121,7 @@ struct TsfnContext {
 
 
 // Map to store cyclic send tasks by ID
-std::map<std::string, ThreadBasedCyclicSendTask*> cyclicTaskMap;
+std::map<std::string, CyclicSendTask*> cyclicTaskMap;
 std::map<std::string, VectorBus*> busMap;
 
 // Counter for generating unique task IDs
@@ -238,7 +238,6 @@ void FinalizerCallback(Napi::Env env, void *finalizeData,
 //   name: string - context name to lookup handle
 //   message: object - single message object with {id, channel?, data}
 //   period: number - period in seconds
-//   duration: number - optional duration in seconds (0 = infinite)
 // Returns: string - task ID for later modification/stopping
 // ================================================================
 Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
@@ -246,7 +245,7 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
 
   // Validate arguments
   if (info.Length() < 3) {
-    Napi::TypeError::New(env, "Expected at least 3 arguments: name, message, period")
+    Napi::TypeError::New(env, "Expected 3 arguments: name, message, period")
         .ThrowAsJavaScriptException();
     return env.Undefined();
   }
@@ -254,7 +253,6 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
   std::string name = info[0].As<Napi::String>().Utf8Value();
   Napi::Object msgObj = info[1].As<Napi::Object>();
   double period = info[2].As<Napi::Number>().DoubleValue();
-  double duration = info.Length() > 3 ? info[3].As<Napi::Number>().DoubleValue() : 0.0;
 
   // Find context by name
   auto it = tsfnContextMap.find(name);
@@ -283,20 +281,19 @@ Napi::Value StartPeriodSend(const Napi::CallbackInfo &info) {
   std::string taskId = std::to_string(taskNum);
 
   VectorBus* bus = nullptr;
-  ThreadBasedCyclicSendTask* task = nullptr;
+  CyclicSendTask* task = nullptr;
 
   try {
     // Create bus for this task
     bus = new VectorBus(context->portHandle, context->channelMask, context->canfd);
 
     // Create new cyclic task with single message
-    task = new ThreadBasedCyclicSendTask(
+    task = new CyclicSendTask(
       bus,
-      msg,  // Pass single message directly
+      msg,       // Pass single message directly
       period,
-      duration,
-      nullptr,  // onError callback
-      true      // autostart
+      nullptr,   // onError callback
+      true       // autostart
     );
 
     // Store in maps only after successful creation
@@ -379,7 +376,7 @@ void ChangeData(const Napi::CallbackInfo &info) {
     return;
   }
 
-  ThreadBasedCyclicSendTask *task = it->second;
+  CyclicSendTask *task = it->second;
 
   try {
     // Parse new data

@@ -1123,6 +1123,13 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     let taskId: string | undefined
     let newTimer: NodeJS.Timeout | undefined
     if (socket.startPeriodSend) {
+      let dataSent = send(id, false)
+      if (dataSent == undefined) {
+        dataSent = Buffer.alloc(getLenByDlc(ia.dlc, fd))
+        for (const [index, d] of ia.data.entries()) {
+          dataSent[index] = parseInt(d, 16)
+        }
+      }
       const initMsg: CanMessage = {
         id: parseInt(ia.id, 16),
         name: ia.name,
@@ -1133,7 +1140,7 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
           canfd: fd,
           remote: ia.remote || false
         },
-        data: send(id, false) || Buffer.alloc(getLenByDlc(ia.dlc, fd)),
+        data: dataSent,
         dir: 'OUT'
       }
       taskId = socket.startPeriodSend(initMsg, ia.trigger.period || 10)

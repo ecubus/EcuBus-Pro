@@ -58,6 +58,64 @@
             "_X_ROW_KEY": "row_80"
           }
         }
+      },
+      "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9": {
+        "type": "can",
+        "canDevice": {
+          "id": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+          "name": "VECTOR_2",
+          "handle": "2:2",
+          "vendor": "vector",
+          "canfd": true,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_53"
+          },
+          "bitratefd": {
+            "sjw": 1,
+            "timeSeg1": 7,
+            "timeSeg2": 2,
+            "preScaler": 4,
+            "freq": 2000000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_78"
+          }
+        }
+      },
+      "4b8d1891-a9d3-467b-8e3f-1fb530ed59ef": {
+        "type": "can",
+        "canDevice": {
+          "id": "4b8d1891-a9d3-467b-8e3f-1fb530ed59ef",
+          "name": "VECTOR_3",
+          "handle": "3:3",
+          "vendor": "vector",
+          "canfd": true,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 27,
+            "timeSeg2": 4,
+            "preScaler": 5,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_127"
+          },
+          "bitratefd": {
+            "sjw": 1,
+            "timeSeg1": 7,
+            "timeSeg2": 2,
+            "preScaler": 4,
+            "freq": 2000000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_152"
+          }
+        }
       }
     },
     "ia": {
@@ -66,7 +124,8 @@
         "type": "can",
         "id": "c24115ee-7080-4573-a216-af88cea85085",
         "devices": [
-          "030b067c-a10c-464e-b54f-d442b525becc"
+          "030b067c-a10c-464e-b54f-d442b525becc",
+          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9"
         ],
         "action": [
           {
@@ -76,7 +135,7 @@
             },
             "name": "10ms-1",
             "id": "1",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
             "type": "canfd",
             "dlc": 15,
             "data": [
@@ -101,7 +160,7 @@
             },
             "name": "10ms-2",
             "id": "2",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
             "type": "can",
             "dlc": 8,
             "data": []
@@ -114,7 +173,7 @@
             },
             "name": "10ms-3",
             "id": "3",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
             "type": "can",
             "dlc": 8,
             "data": []
@@ -127,7 +186,7 @@
             },
             "name": "10ms-4",
             "id": "4",
-            "channel": "030b067c-a10c-464e-b54f-d442b525becc",
+            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
             "type": "can",
             "dlc": 8,
             "data": []
@@ -142,7 +201,8 @@
         "name": "Node 1",
         "id": "a788d03f-f4d2-4294-a2fe-2fc86cecd1ce",
         "channel": [
-          "030b067c-a10c-464e-b54f-d442b525becc"
+          "030b067c-a10c-464e-b54f-d442b525becc",
+          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9"
         ],
         "workNode": "",
         "script": "ecu.ts"
@@ -161,8 +221,8 @@
         "name": "DIFF1",
         "color": "#68aff0",
         "yAxis": {
-          "min": 5,
-          "max": 15,
+          "min": 7.908940287999999,
+          "max": 12.091059711999998,
           "unit": "ms"
         },
         "bindValue": {
@@ -350,9 +410,7 @@
           "someipBase",
           "osTrace"
         ],
-        "filterDevice": [
-          "KVASER_0"
-        ],
+        "filterDevice": [],
         "filterId": []
       }
     },
@@ -389,8 +447,8 @@
       },
       "c24115ee-7080-4573-a216-af88cea85085_ia": {
         "pos": {
-          "x": 30,
-          "y": 240,
+          "x": 195,
+          "y": 96,
           "w": 1057,
           "h": 400
         },
@@ -406,8 +464,8 @@
       },
       "trace": {
         "pos": {
-          "x": 966,
-          "y": 34,
+          "x": 1591,
+          "y": 27,
           "w": 965,
           "h": 457
         },
@@ -437,16 +495,16 @@
           }
         }
       },
-      "variable": {
+      "hardware": {
         "pos": {
-          "x": 1404,
-          "y": 462,
-          "w": 1042,
+          "x": 1042,
+          "y": 128,
+          "w": 1298,
           "h": 400
         },
-        "title": "variable",
-        "label": "Variable",
-        "id": "variable",
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
         "options": {}
       }
     },

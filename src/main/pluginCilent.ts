@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-import workerpool, { Pool } from 'workerpool'
 import { PluginLOG } from './log'
 import path from 'path'
 import { error, log } from 'electron-log'
@@ -44,7 +41,7 @@ export default class PluginClient {
   }
 
   async exec(method: string, ...params: any[]): Promise<any> {
-    return this.nodeItem.pool?.exec('plugin', method, params)
+    return this.nodeItem.pool?.exec(`plugin.${method}`, params)
   }
   stop() {
     this.nodeItem.pool?.clearHandlers()

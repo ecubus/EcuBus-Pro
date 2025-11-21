@@ -18,9 +18,46 @@ export { CAN_ID_TYPE, CAN_ADDR_TYPE, CAN_ADDR_FORMAT } from '../share/can'
 export type { ServiceItem }
 export type { TesterInfo } from '../share/tester'
 export type { ServiceId }
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-import workerpool, { worker } from 'workerpool'
+import { parentPort, isMainThread } from 'worker_threads'
+
+const exposedMethods: Record<string, Function> = {}
+
+if (!isMainThread && parentPort) {
+  parentPort.on('message', async (msg: any) => {
+    if (msg && msg.type === 'rpc') {
+      const { id, method, params } = msg
+      try {
+        const fn = exposedMethods[method]
+        if (!fn) {
+          throw new Error(`Method ${method} not found`)
+        }
+        const result = fn(...params)
+        // 判断返回值是否是 Promise
+        if (result instanceof Promise) {
+          const resolvedResult = await result
+          parentPort?.postMessage({ type: 'rpc_response', id, result: resolvedResult })
+        } else {
+          parentPort?.postMessage({ type: 'rpc_response', id, result })
+        }
+      } catch (e: any) {
+        parentPort?.postMessage({ type: 'rpc_response', id, error: e.message || e.toString() })
+      }
+    }
+  })
+  // Register built-in methods
+  exposedMethods['methods'] = () => Object.keys(exposedMethods)
+}
+
+export function registerWorker(methods: Record<string, Function>) {
+  Object.assign(exposedMethods, methods)
+}
+
+export function workerEmit(payload: any) {
+  if (!isMainThread && parentPort) {
+    parentPort.postMessage({ type: 'event', payload })
+  }
+}
+
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
@@ -686,7 +723,7 @@ class Service {
   }
   private async asyncEmit(event: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
-      workerpool.workerEmit({
+      workerEmit({
         id: id,
         event: event,
         data: data
@@ -1263,7 +1300,7 @@ export class DiagRequest extends Service {
  * @category Util
  */
 export class UtilClass {
-  private isMain = workerpool.isMainThread
+  private isMain = isMainThread
   private event = new Emittery<EventMap>()
   private funcMap = new Map<Function, any>()
   private testerName?: string
@@ -1288,7 +1325,7 @@ export class UtilClass {
    */
   Register(jobs: JobName, func: Jobs[keyof Jobs]) {
     if (!this.isMain) {
-      workerpool.worker({
+      registerWorker({
         [jobs]: async (...args: any[]) => {
           const cargs = args.map((item) => {
             if (item instanceof Uint8Array) {
@@ -1311,6 +1348,38 @@ export class UtilClass {
         }
       })
     }
+  }
+  /**
+   * Sets a "pending transmit" handler for CAN messages used by jobs/diagnostics.
+   *
+   * This function registers a callback that will be invoked to provide new outgoing CAN message data.
+   * Meant for special use-cases where you want a job or diagnostic operation to temporarily override message transmission.
+   *
+   * @param func - Callback function that takes a CanMessage and returns a Buffer (the outgoing data) or undefined (to use default behavior). Can also return a Promise.
+   *
+   * @example
+   * ```ts
+   * Util.setTxPending(async (msg) => {
+   *   if (msg.id === 0x100) {
+   *     // Intercept outgoing message and modify payload
+   *     const newData = Buffer.from([0x01, 0x02, 0x03, 0x04]);
+   *     return newData;
+   *   }
+   *   // prevent this time transmission
+   *   return undefined;
+   * });
+   * ```
+   *
+   */
+  setTxPending(func: (msg: CanMessage) => Promise<Buffer | undefined> | Buffer | undefined) {
+    registerWorker({
+      __setTxPending: (msg: CanMessage) => {
+        return func({
+          ...msg,
+          data: Buffer.from(msg.data)
+        })
+      }
+    })
   }
   private async workerOn(event: ServiceNameAll, data: any): Promise<boolean> {
     if (this.event.listenerCount(event) > 0) {
@@ -2071,7 +2140,7 @@ export class UtilClass {
   }
   constructor() {
     if (!this.isMain) {
-      workerpool.worker({
+      registerWorker({
         __on: this.workerOn.bind(this),
         __start: this.start.bind(this),
         __eventDone: this.evnetDone.bind(this)
@@ -2246,7 +2315,7 @@ export async function output(msg: LinMsg): Promise<number>
 export async function output(msg: SomeipMessageBase): Promise<number>
 export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Promise<number> {
   const p: Promise<number> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'output',
       data: msg instanceof SomeipMessageBase ? msg.msg : msg
@@ -2288,7 +2357,7 @@ export async function setSignal(
       reject(e)
       return
     }
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'setSignal',
       data: {
@@ -2393,7 +2462,7 @@ export function getSignal(signal: SignalName): {
 export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]) {
   const { found, target } = setVarMain(name, value)
   if (found && target) {
-    workerpool.workerEmit({
+    workerEmit({
       event: 'varApi',
       data: {
         method: 'setVar',
@@ -2442,7 +2511,7 @@ export function getVar<T extends keyof VariableMap>(varName: T): VariableMap[T] 
  */
 export async function runUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'runUdsSeq',
       data: {
@@ -2473,7 +2542,7 @@ export async function runUdsSeq(seqName: UdsSeqName, device?: string): Promise<v
  */
 export async function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'stopUdsSeq',
       data: {
@@ -2516,7 +2585,7 @@ export async function* reporter(source: TestEventGenerator) {
       event.type === 'test:fail' ||
       event.type === 'test:dequeue'
     ) {
-      workerpool.workerEmit({
+      workerEmit({
         event: 'test',
         id: id,
         data: event
@@ -2598,7 +2667,7 @@ export async function linStartScheduler(
   activeCtrl?: boolean[]
 ): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'linApi',
       data: {
@@ -2636,7 +2705,7 @@ export async function linStartScheduler(
  */
 export async function linPowerCtrl(power: boolean, device?: string) {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'linApi',
       data: {
@@ -2669,7 +2738,7 @@ export async function linPowerCtrl(power: boolean, device?: string) {
  */
 export async function linStopScheduler(device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'linApi',
       data: {
@@ -2703,7 +2772,7 @@ export async function linStopScheduler(device?: string): Promise<void> {
  */
 export async function setPwmDuty(value: { duty: number; device?: string }) {
   const p: Promise<void> = new Promise((resolve, reject) => {
-    workerpool.workerEmit({
+    workerEmit({
       id: id,
       event: 'pwmApi',
       data: {

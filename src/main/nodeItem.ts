@@ -1256,6 +1256,14 @@ export class NodeClass {
     }
   }
   close() {
+    if (this.pool) {
+      //remove can
+      this.canBaseMap.forEach((base) => {
+        if (base.txPendingNode == this) {
+          base.txPendingNode = undefined
+        }
+      })
+    }
     for (const c of this.nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {
@@ -1302,7 +1310,24 @@ export class NodeClass {
   }
   async start(testControl?: Record<number, boolean>) {
     this.pool?.updateTs(0)
-    await this.pool?.start(this.projectPath, this.nodeItem.name, testControl)
+    if (this.pool) {
+      await this.pool.start(this.projectPath, this.nodeItem.name, testControl)
+      if (this.pool.methods.includes('__setTxPending')) {
+        //can
+        this.canBaseMap.forEach((base) => {
+          if (base.txPendingNode != undefined) {
+            sysLog.warn(
+              `Tx Pending has been registered by ${base.txPendingNode.nodeItem.name}, overwrite it by ${this.nodeItem.name}`
+            )
+          }
+          base.txPendingNode = this
+        })
+      }
+    }
+  }
+  async callTxPending(msg: CanMessage): Promise<Buffer | undefined> {
+    const res = await this.pool?.setTxPending(msg)
+    return res ? Buffer.from(res) : undefined
   }
   cb(frame: CanMessage | LinMsg | SomeipMessage) {
     if ('msgType' in frame) {

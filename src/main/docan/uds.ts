@@ -294,7 +294,7 @@ export class UDSTesterMain {
   }
   private async execJob(method: string, params: any[]): Promise<ServiceItem[]> {
     if (this.pool) {
-      return await this.pool.exec(this.tester.name, method, params)
+      return await this.pool.exec(`${this.tester.name}.${method}`, params)
     } else {
       throw 'Unknown method or pool not found'
     }
@@ -873,8 +873,7 @@ export class UDSTesterMain {
                       await tmpPool.start(tester.project.projectPath, tester.tester.name)
 
                       services = await tmpPool.exec(
-                        tester.tester.name,
-                        serviceDetail[s.serviceId].name,
+                        `${tester.tester.name}.${serviceDetail[s.serviceId].name}`,
                         params
                       )
                       tester.switchPool = tester.pool

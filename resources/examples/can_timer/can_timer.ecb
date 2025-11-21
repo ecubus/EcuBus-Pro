@@ -64,7 +64,7 @@
         "canDevice": {
           "id": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
           "name": "VECTOR_2",
-          "handle": "2:2",
+          "handle": "0:0",
           "vendor": "vector",
           "canfd": true,
           "database": "",
@@ -93,7 +93,7 @@
         "canDevice": {
           "id": "4b8d1891-a9d3-467b-8e3f-1fb530ed59ef",
           "name": "VECTOR_3",
-          "handle": "3:3",
+          "handle": "1:1",
           "vendor": "vector",
           "canfd": true,
           "database": "",
@@ -497,8 +497,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 1042,
-          "y": 128,
+          "x": 1058,
+          "y": 182,
           "w": 1298,
           "h": 400
         },

@@ -9,11 +9,13 @@ import {
   CanError,
   CanMessage,
   CanMsgType,
-  CAN_ID_TYPE
+  CAN_ID_TYPE,
+  getTsUs
 } from '../share/can'
 import { CanLOG } from '../log'
 import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
+import { NodeClass } from '../nodeItem'
 
 export abstract class CanBase {
   enableTesterPresent: Record<
@@ -27,7 +29,7 @@ export abstract class CanBase {
       action: () => Promise<void>
     }
   > = {}
-
+  txPendingNode?: NodeClass
   // Bus loading statistics
   private busLoadingStats = {
     startTime: 0,
@@ -340,7 +342,6 @@ export class CAN_SOCKET {
   closed = false
   id: number
   recvId: string
-  tsOffset: number | null = null
   recvBuffer: ({ data: Buffer; ts: number } | CanError)[] = []
   recvTimer: NodeJS.Timeout | null = null
   cb: any
@@ -372,16 +373,6 @@ export class CAN_SOCKET {
     return hrTime[0] * 1000000 + Math.floor(hrTime[1] / 1000)
   }
   recvHandle(val: { data: Buffer; ts: number } | CanError) {
-    // if(!(val instanceof CanError)){
-    //   const ts=val.ts
-    //   const systemTs=this.getSystemTs()
-    //   if(this.tsOffset==null){
-    //     this.tsOffset=systemTs-ts
-    //   }else{
-    //     //average
-    //     this.tsOffset=Math.floor((this.tsOffset+(systemTs-ts))/2)
-    //   }
-    // }
     if (this.pendingRecv) {
       if (this.recvTimer) {
         clearTimeout(this.recvTimer)
@@ -433,14 +424,26 @@ export class CAN_SOCKET {
         throw this.error(CAN_ERROR_ID.CAN_PARAM_ERROR)
       }
     }
+    if (this.inst.txPendingNode) {
+      const msg: CanMessage = {
+        id: this.id,
+        data: data,
+        msgType: this.msgType,
+        dir: 'OUT',
+        database: this.extra?.database,
+        name: this.extra?.name,
+        device: this.inst.info.name
+      }
+      const cdata = await this.inst.txPendingNode.callTxPending(msg)
+      console.log('cdata', cdata, msg)
+      if (cdata) {
+        data = cdata
+      } else {
+        return getTsUs() - global.startTs
+      }
+    }
     const ts = await this.inst.writeBase(this.id, this.msgType, data, this.extra)
-    // const systemTs=this.getSystemTs()
-    // if(this.tsOffset==null){
-    //   this.tsOffset=systemTs-ts
-    // }else{
-    //   //average
-    //   this.tsOffset=Math.floor((this.tsOffset+(systemTs-ts))/2)
-    // }
+
     return ts
   }
   close() {

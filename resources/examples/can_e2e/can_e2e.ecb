@@ -1,0 +1,157 @@
+{
+  "data": {
+    "devices": {
+      "f7c6f4b6-83a3-4cd1-98eb-a82fc82ebd9c": {
+        "type": "can",
+        "canDevice": {
+          "id": "f7c6f4b6-83a3-4cd1-98eb-a82fc82ebd9c",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_16"
+          }
+        }
+      }
+    },
+    "ia": {
+      "0466fb12-6563-45f4-8259-c65a72aa36fa": {
+        "name": "Can IA",
+        "type": "can",
+        "id": "0466fb12-6563-45f4-8259-c65a72aa36fa",
+        "devices": [
+          "f7c6f4b6-83a3-4cd1-98eb-a82fc82ebd9c"
+        ],
+        "action": [
+          {
+            "uuid": "02aca965-8eb4-4c66-a7e0-b3c034e8c823",
+            "trigger": {
+              "type": "periodic",
+              "period": 10
+            },
+            "name": "",
+            "id": "1",
+            "channel": "f7c6f4b6-83a3-4cd1-98eb-a82fc82ebd9c",
+            "type": "can",
+            "dlc": 8,
+            "data": []
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "05b3e2d5-8108-47e6-9968-3a6313c4ad68": {
+        "name": "Node 1",
+        "id": "05b3e2d5-8108-47e6-9968-3a6313c4ad68",
+        "channel": [
+          "f7c6f4b6-83a3-4cd1-98eb-a82fc82ebd9c"
+        ],
+        "workNode": "",
+        "script": "e2e.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2569,
+          "h": 416
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 403,
+          "y": 239,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 1164,
+          "y": 268,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "0466fb12-6563-45f4-8259-c65a72aa36fa_ia": {
+        "pos": {
+          "x": 1133,
+          "y": 39,
+          "w": 976,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "0466fb12-6563-45f4-8259-c65a72aa36fa_ia",
+        "options": {
+          "params": {
+            "edit-index": "0466fb12-6563-45f4-8259-c65a72aa36fa"
+          },
+          "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 1616,
+          "y": 282.5,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      }
+    },
+     "example": {
+      "catalog": "CAN"
+    }
+  }
+}

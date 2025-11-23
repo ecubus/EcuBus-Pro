@@ -14,6 +14,8 @@ import { SomeipMessage, SomeipInfo, ServiceConfig } from '../share/someip'
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
+let routerLog: SomeipLOG | null = null
+
 export function startRouterCounter(configFilePath: string, quiet: boolean = true): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     // Check if routing manager is already running
@@ -34,6 +36,7 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
 
     // Spawn routing manager process
     routingManagerProcess = fork(resolve(__dirname, 'vsomeip.js'))
+    routerLog = new SomeipLOG('Vsomeip', 'routingmanagerd', 'router', new EventEmitter())
 
     let resolved = false
 
@@ -44,11 +47,23 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
         resolved = true
         resolvePromise()
       }
+      const event = msg.event
+      if (event) {
+        const ts = getTsUs() - global.startTs
+        if (event.type === 'trace') {
+          const data = JSON.parse(event.data)
+          routerLog?.someipBase(Buffer.from(data.header), Buffer.from(data.data), ts)
+        }
+      }
     })
 
     routingManagerProcess.on('error', (error) => {
       sysLog.error(`start routing manager failed: ${error}`)
       routingManagerProcess = null
+      if (routerLog) {
+        routerLog.close()
+        routerLog = null
+      }
       if (!resolved) reject(error)
     })
 
@@ -57,6 +72,10 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
         // Passive exit - process crashed or was killed externally
         sysLog.error(`routing manager exited unexpectedly with code: ${code}, signal: ${signal}`)
         routingManagerProcess = null
+      }
+      if (routerLog) {
+        routerLog.close()
+        routerLog = null
       }
       if (!resolved) reject(new Error(`Routing manager exited with code ${code}`))
     })
@@ -75,6 +94,10 @@ export function stopRouterCounter() {
   if (routingManagerProcess) {
     routingManagerProcess?.kill('SIGKILL')
     routingManagerProcess = null
+  }
+  if (routerLog) {
+    routerLog.close()
+    routerLog = null
   }
 }
 

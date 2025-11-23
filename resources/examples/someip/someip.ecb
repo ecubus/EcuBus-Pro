@@ -200,14 +200,17 @@
     },
     "database": {
       "lin": {},
-      "can": {}
+      "can": {},
+      "orti": {}
     },
     "graphs": {},
     "guages": {},
     "vars": {},
     "datas": {},
     "panels": {},
-    "logs": {}
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -275,12 +278,24 @@
         "pos": {
           "x": 49.5,
           "y": 283.0000305175781,
-          "w": 700,
-          "h": 400
+          "w": 1038,
+          "h": 351.34400000000005
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
+        "options": {}
+      },
+      "hardware": {
+        "pos": {
+          "x": 553.5,
+          "y": 117.17200000000003,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
         "options": {}
       }
     },

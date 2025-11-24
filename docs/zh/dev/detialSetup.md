@@ -1,156 +1,156 @@
-# Detailed EcuBus-Pro Development Environment Setup Guide
+# EcuBus-Pro 开发环境详细设置指南
 
-This guide provides detailed instructions for setting up the EcuBus development environment. Before we begin, please prepare the following:
+本指南提供了设置 EcuBus 开发环境的详细说明。 在开始之前，请准备以下内容：
 
-1. Node.js - Download the latest version from the official website
-2. EcuBus source code - Download the latest version from GitHub
+1. Node.js - 从官方网站下载最新版本
+2. EcuBus 源代码 - 从 GitHub 下载最新版本
 
-With these prerequisites ready, we can proceed with the installation.
+准备好这些先决条件后，我们可以继续进行安装。
 
-## Step 1: Install Node.js
+## 步骤 1：安装 Node.js
 
-Follow these steps to install Node.js:
+按照以下步骤安装 Node.js：
 
 ![1](../../media/dev/detail/1.jpg)
 
-Click "Next":
+点击“下一步”：
 
 ![2](../../media/dev/detail/2.jpg)
 
-Click "Next":
+点击“下一步”：
 
 ![3](../../media/dev/detail/3.jpg)
 
-Click "Next":
+点击“下一步”：
 
 ![4](../../media/dev/detail/4.jpg)
 
-Click "Next":
+点击“下一步”：
 
 ![5](../../media/dev/detail/5.jpg)
 
-Make sure to check the box highlighted in the image above. This will automatically install Python and VS2019 required for Node.js. We recommend checking this box even if you already have these programs installed.
+确保选中上图中突出显示的复选框。 这将自动安装 Node.js 所需的 Python 和 VS2019。 即使您已经安装了这些程序，我们也建议选中此复选框。
 
 ![6](../../media/dev/detail/6.jpg)
 
-Click "Install":
+点击“安装”：
 
 ![7](../../media/dev/detail/7.jpg)
 
-Installation in progress...
+安装进行中...
 
 ![8](../../media/dev/detail/8.jpg)
 
-Click "Finish". The following screen will appear; press any key to continue:
+点击“完成”。 将出现以下屏幕；按任意键继续：
 
 ![9](../../media/dev/detail/9.jpg)
 
-Press any key to continue:
+按任意键继续：
 
 ![10](../../media/dev/detail/10.jpg)
 
-The next screen will check if your computer has Python and VS already installed. If not, it will install them. The first-time installation may take some time:
+下一个屏幕将检查您的计算机是否已安装 Python 和 VS。 如果没有，它将安装它们。 首次安装可能需要一些时间：
 
 ![11](../../media/dev/detail/11.jpg)
 
-Since my computer already had Python 3.13.3 and VS2019 installed, these were skipped:
+由于我的计算机已经安装了 Python 3.13.3 和 VS2019，因此跳过了这些步骤：
 
 ![12](../../media/dev/detail/12.jpg)
 
-Python 3.13.3 and VS2019 development environments are now installed. You can exit this screen.
+Python 3.13.3 和 VS2019 开发环境现已安装。 您可以退出此屏幕。
 
-## Step 2: Install NPM Packages
+## 步骤 2：安装 NPM 包
 
-We've completed the Node.js installation. Now let's install the NPM packages.
+我们已经完成了 Node.js 的安装。 现在让我们安装 NPM 包。
 
-Navigate to the EcuBus project directory (E:\EcuBus\EcuBus_install\EcuBus-Pro-master in this example):
+导航到 EcuBus 项目目录（在此示例中为 E:\EcuBus\EcuBus_install\EcuBus-Pro-master）：
 
 ![13](../../media/dev/detail/13.jpg)
 
-Run the `npm install` command:
+运行 `npm install` 命令：
 
 ![14](../../media/dev/detail/14.jpg)
 
-## Step 3: Compile Native Modules
+## 步骤 3：编译原生模块
 
-After the installation completes, navigate to the src/main/docan directory:
+安装完成后，导航到 src/main/docan 目录：
 
 ![15](../../media/dev/detail/15.jpg)
 
-Run the following command to compile: `npx node-gyp rebuild`
+运行以下命令进行编译：`npx node-gyp rebuild`
 
 ![16](../../media/dev/detail/16.jpg)
 
-As shown, there are 104 errors. This problem confused me for a long time. Initially, I thought it was an environment issue, but **it was actually due to the encoding format of the .h files**.
+如图所示，有 104 个错误。 这个问题困扰了我很长时间。 起初，我认为是环境问题，但**实际上是由于 .h 文件的编码格式**。
 
 ![17](../../media/dev/detail/17.jpg)
 
-Opening the toomoss folder with Notepad, we find that offline_type.h is encoded in UTF-8:
+用记事本打开 toomoss 文件夹，我们发现 offline_type.h 采用 UTF-8 编码：
 
 ![18](../../media/dev/detail/18.jpg)
 
-Change the format to UTF-8 with BOM and recompile:
+将格式更改为带 BOM 的 UTF-8 并重新编译：
 
 ![19](../../media/dev/detail/19.jpg)
 
-Now the errors are reduced to 75, with issues in the tsfn.cxx file:
+现在错误减少到 75 个，tsfn.cxx 文件存在问题：
 
 ![20](../../media/dev/detail/20.jpg)
 
-Change the tsfn.cxx file encoding to BOM format:
+将 tsfn.cxx 文件编码更改为 BOM 格式：
 
 ![21](../../media/dev/detail/21.jpg)
 
-After this change, run the compilation command again:
+进行此更改后，再次运行编译命令：
 
 ![22](../../media/dev/detail/22.jpg)
 
-Compilation now succeeds:
+编译现在成功：
 
 ![23](../../media/dev/detail/23.jpg)
 
-Problem solved!
+问题已解决！
 
-## Step 4: Compile the Dolin Module
+## 步骤 4：编译 Dolin 模块
 
-Next, navigate to the dolin folder and run the compilation command:
+接下来，导航到 dolin 文件夹并运行编译命令：
 
 ![24](../../media/dev/detail/24.jpg)
 
-We encounter errors again, likely due to file encoding issues:
+我们再次遇到错误，可能是由于文件编码问题：
 
 ![25](../../media/dev/detail/25.jpg)
 
-First, we modify the tsfn.cxx file encoding format:
+首先，我们修改 tsfn.cxx 文件编码格式：
 
 ![26](../../media/dev/detail/26.jpg)
 
-Compilation still fails with the same errors. To identify which file has format problems, open the project in VS2019 or VS2022:
+编译仍然失败，出现相同的错误。 为了确定哪个文件有格式问题，请在 VS2019 或 VS2022 中打开项目：
 
 ![27](../../media/dev/detail/27.jpg)
 
-When compiling in VS2019, we get the following error:
+在 VS2019 中编译时，我们得到以下错误：
 
 ![28](../../media/dev/detail/28.jpg)
 
-We discover that the usb2lin_ex.h file has encoding issues. After modifying it and recompiling:
+我们发现 usb2lin_ex.h 文件存在编码问题。 修改后重新编译：
 
 ![29](../../media/dev/detail/29.jpg)
 
-Error resolved!
+错误已解决！
 
-## Step 5: Launch the Application
+## 步骤 5：启动应用程序
 
-Return to the main directory and run `npm run dev`:
+返回主目录并运行 `npm run dev`：
 
 ![30](../../media/dev/detail/30.jpg)
 
-After a few moments, the EcuBus software interface will appear, indicating that the environment setup is complete.
+片刻之后，EcuBus 软件界面将出现，表明环境设置已完成。
 
 ![31](../../media/dev/detail/31.jpg)
 
-## Summary
+## 总结
 
-File encoding formats significantly impacted the compilation process. This was my first encounter with such an issue, possibly due to cross-platform compilation requirements for specific file encoding formats.
+文件编码格式对编译过程产生了显著影响。 这是我第一次遇到这样的问题，可能是由于跨平台编译对特定文件编码格式的要求。
 
-I hope this guide helps if you encounter similar problems. Thank you!
+如果您遇到类似问题，希望本指南能有所帮助。 谢谢！

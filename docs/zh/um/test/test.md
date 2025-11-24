@@ -2,7 +2,7 @@
 
 ## 概述
 
-EcuBus-Pro 为汽车 ECU 开发和验证提供了一个强大而灵活的测试框架。 该测试架构允许开发人员为总线通信创建、执行和监控自动化测试，确保汽车系统的可靠和一致行为。
+EcuBus-Pro 为汽车 ECU 开发和验证提供了一个强大而灵活的测试框架。 该测试架构允许开发人员为总线通信创建、执行和监控自动化测试，确保汽车系统的可靠和一致行为。 该测试架构允许开发人员为总线通信创建、执行和监控自动化测试，确保汽车系统的可靠和一致行为。
 
 ![alt text](../../../media/um/test/image-4.png)
 
@@ -16,7 +16,7 @@ EcuBus-Pro 为汽车 ECU 开发和验证提供了一个强大而灵活的测试�
 
 ### 基于 TypeScript 的测试框架
 
-使用熟悉的 TypeScript 语法和内置测试工具编写测试。 参见 [Srcipt](./../script.md)。
+使用熟悉的 TypeScript 语法和内置测试工具编写测试。 参见 [Srcipt](./../script.md)。 参见 [Srcipt](./../script.md)。
 
 重用了 node.js [测试运行器](https://nodejs.org/docs/latest/api/test.html)
 

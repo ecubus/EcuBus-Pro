@@ -1,106 +1,106 @@
-# Variable System
+# 变量系统
 
-## Overview
+## 概述
 
-The Variable System is a powerful feature that allows users to create, manage, and use dynamic values throughout the Ecubus Pro platform. Variables function like virtual signals flowing through the internal system, carrying information between different components and nodes. These virtual signals can be captured, transformed, and routed to create flexible and interconnected systems where changes in one area can automatically propagate to others.
+变量系统是一项强大的功能，允许用户在Ecubus Pro平台中创建、管理和使用动态值。 变量就像流经内部系统的虚拟信号，在不同组件和节点之间传递信息。 这些虚拟信号可以被捕获、转换和路由，以创建灵活且互连的系统，其中一个区域的变化可以自动传播到其他区域。
 ![VarArch](../../../media/um/var/image-4.png)
 
-## Features
+## 特性
 
-- Set/Get variable in [Script](./../script/script.md) or [Detail API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)
-- Show variable In [Graph](./../graph/graph.md)
-- Default System Variable
+- 在[脚本](./../script/script.md)或[详细API](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onVar)中设置/获取变量
+- 在[图表](./../graph/graph.md)中显示变量
+- 默认系统变量
 
-## System Variables
+## 系统变量
 
-System variables are pre-defined variables that provide real-time information about the system's performance and connected devices. These variables are automatically updated by the system and can be accessed but not modified directly by users.
+系统变量是预定义的变量，提供有关系统性能和连接设备的实时信息。 这些变量由系统自动更新，用户可以访问但不能直接修改。
 
-### Performance Monitoring Variables
+### 性能监控变量
 
-The system provides performance monitoring variables that help track the application's event loop performance:
+系统提供性能监控变量，帮助跟踪应用程序的事件循环性能：
 
-| Variable ID          | Description                                                                    | Unit |
-| -------------------- | ------------------------------------------------------------------------------ | ---- |
-| `EventLoopDelay.min` | Minimum event loop delay - lower values indicate better performance            | ms   |
-| `EventLoopDelay.max` | Maximum event loop delay - higher values indicate potential performance issues | ms   |
-| `EventLoopDelay.avg` | Average event loop delay - a good balance between performance and stability    | ms   |
+| 变量ID                 | 描述                        | 单位 |
+| -------------------- | ------------------------- | -- |
+| `EventLoopDelay.min` | 最小事件循环延迟 - 数值越低表示性能越好     | ms |
+| `EventLoopDelay.max` | 最大事件循环延迟 - 数值越高表示可能存在性能问题 | ms |
+| `EventLoopDelay.avg` | 平均事件循环延迟 - 性能和稳定性之间的良好平衡  | ms |
 
-These variables are essential for monitoring the responsiveness and performance of the application. High event loop delay values may indicate processing bottlenecks that could affect system responsiveness.
+这些变量对于监控应用程序的响应性和性能至关重要。 高事件循环延迟值可能表示处理瓶颈，可能影响系统响应性。
 
-### Device Statistics Variables
+### 设备统计变量
 
-For each connected CAN device, the system automatically creates a set of statistics variables:
+对于每个连接的CAN设备，系统会自动创建一组统计变量：
 
-| Variable ID Pattern                     | Description                               | Unit |
-| --------------------------------------- | ----------------------------------------- | ---- |
-| `Statistics.{deviceName}.BusLoad`       | Current bus load for the specified device | %    |
-| `Statistics.{deviceName}.BusLoadMin`    | Minimum bus load recorded                 | %    |
-| `Statistics.{deviceName}.BusLoadMax`    | Maximum bus load recorded                 | %    |
-| `Statistics.{deviceName}.BusLoadAvg`    | Average bus load                          | %    |
-| `Statistics.{deviceName}.FrameSentFreq` | Frequency of frames sent                  | f/s  |
-| `Statistics.{deviceName}.FrameRecvFreq` | Frequency of frames received              | f/s  |
-| `Statistics.{deviceName}.FrameFreq`     | Overall frame frequency                   | f/s  |
+| 变量ID模式                                  | 描述          | 单位  |
+| --------------------------------------- | ----------- | --- |
+| `Statistics.{deviceName}.BusLoad`       | 指定设备的当前总线负载 | %   |
+| `Statistics.{deviceName}.BusLoadMin`    | 记录的最小总线负载   | %   |
+| `Statistics.{deviceName}.BusLoadMax`    | 记录的最大总线负载   | %   |
+| `Statistics.{deviceName}.BusLoadAvg`    | 平均总线负载      | %   |
+| `Statistics.{deviceName}.FrameSentFreq` | 发送帧的频率      | f/s |
+| `Statistics.{deviceName}.FrameRecvFreq` | 接收帧的频率      | f/s |
+| `Statistics.{deviceName}.FrameFreq`     | 总体帧频率       | f/s |
 
 ![system var](../../../media/um/var/image-2.png)
 
-## User Variables
+## 用户变量
 
-User variables are custom variables that you can create, modify, and delete based on your specific needs. These variables can be used across the application to store values, track states, and create dynamic workflows.
+用户变量是根据您的特定需求可以创建、修改和删除的自定义变量。 这些变量可以在整个应用程序中使用，以存储值、跟踪状态并创建动态工作流。
 
-### Supported Data Types
+### 支持的数据类型
 
-User variables support the following data types:
+用户变量支持以下数据类型：
 
-- **Number**: Numerical values with optional min/max bounds and unit specification
-- **String**: Text values for storing names, messages, or any alphanumeric content
-- **Array**: Collections of values organized in a list format
+- **数字**：数值，具有可选的最小/最大边界和单位规格
+- **字符串**：文本值，用于存储名称、消息或任何字母数字内容
+- **数组**：以列表格式组织的值集合
 
-### Creating User Variables
+### 创建用户变量
 
-To create a new user variable:
+要创建新的用户变量：
 
-1. Navigate to the **User Variables** tab in the Variable Manager
-2. Click the "Add Variable" button (file icon)
-3. Fill in the variable details:
+1. 导航到变量管理器中的**用户变量**选项卡
+2. 点击"添加变量"按钮（文件图标）
+3. 填写变量详细信息：
 
-   - **Namespace**: (Optional) Group your variables logically
-   - **Name**: Unique identifier for the variable (letters, numbers, and underscores only)
-   - **Description**: (Optional) Additional information about the variable's purpose
-   - **Data Type**: Select Number, String, or Array
-   - **Initial Value**: The starting value for the variable
-   - For Number type:
-   - **Minimum**: Optional lower bound
-   - **Maximum**: Optional upper bound
-   - **Unit**: Optional unit of measurement (e.g., "ms", "°C", "rpm")
+   - **命名空间**：（可选）逻辑上分组您的变量
+   - **名称**：变量的唯一标识符（仅限字母、数字和下划线）
+   - **描述**：（可选）关于变量用途的附加信息
+   - **数据类型**：选择数字、字符串或数组
+   - **初始值**：变量的起始值
+   - 对于数字类型：
+   - **最小值**：可选下限
+   - **最大值**：可选上限
+   - **单位**：可选测量单位（例如"ms"、"°C"、"rpm"）
 
 ![User Variables Interface](../../../media/um/var/image-3.png)
 ![UsrVar](../../../media/um/var/image-1.png)
 
-## Example
+## 示例
 
-Use Graph-Line to record `BusLoad` and `FrameFreq`
+使用图表线条记录`BusLoad`和`FrameFreq`
 
 ```typescript
 Util.OnKey('b', async () => {
-  const pl = []
-  const start = Date.now()
-  for (let i = 0; i < 5000; i++) {
-    const msg: CanMessage = {
-      dir: 'OUT',
-      data: Buffer.alloc(8).fill(i % 255),
-      id: 1,
-      msgType: {
-        idType: CAN_ID_TYPE.STANDARD,
-        brs: false,
-        canfd: false,
-        remote: false
-      }
-    }
-    pl.push(output(msg))
-  }
-  await Promise.any(pl)
-  const end = Date.now()
-  console.log(`send ${pl.length} messages cost ${end - start}ms`)
+  const pl = []
+  const start = Date.now()
+  for (let i = 0; i < 5000; i++) {
+    const msg: CanMessage = {
+      dir: 'OUT',
+      data: Buffer.alloc(8).fill(i % 255),
+      id: 1,
+      msgType: {
+        idType: CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: false,
+        remote: false
+      }
+    }
+    pl.push(output(msg))
+  }
+  await Promise.any(pl)
+  const end = Date.now()
+  console.log(`send ${pl.length} messages cost ${end - start}ms`)
 })
 ```
 

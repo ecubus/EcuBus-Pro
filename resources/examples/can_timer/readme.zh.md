@@ -1,14 +1,14 @@
-# CAN 高精度定时器示例
+# CAN High-Precision Timer Example
 
 > [!NOTE]
-> 本示例要求 CAN 盒子具备硬件时间戳功能，以便测量接收到的 CAN 消息之间的时间间隔。
-> 此演示使用的是 **KVASER** USB 转 CAN 设备。
+> This example requires a CAN device with hardware timestamp capability to measure the time intervals between received CAN messages.
+> This demo uses a **KVASER** USB-to-CAN device.
 
-## 概述
+## Overview
 
-本示例演示如何使用硬件时间戳测量连续 CAN 消息之间的时间间隔。硬件时间戳提供微秒级精度，可以准确测量消息间隔。
+This example demonstrates how to measure the time intervals between consecutive CAN messages using hardware timestamps. The hardware timestamp provides microsecond-level precision, allowing accurate measurement of message intervals.
 
-## 代码示例
+## Code Example
 
 ```typescript
 import { setVar } from 'ECB'
@@ -26,15 +26,15 @@ Util.OnCan(1, (msg) => {
 })
 ```
 
-## 工作原理
+## How It Works
 
-1. 代码使用 `Util.OnCan` 监听通道 1 上的 CAN 消息
-2. 对于每个接收到的消息，提取硬件时间戳（`msg.ts`），单位为微秒
-3. 计算连续消息之间的时间差
-4. 将时间差转换为毫秒并存储在 `DIFF` 变量中
+1. The code listens to CAN messages on channel 1 using `Util.OnCan`
+2. For each received message, it extracts the hardware timestamp (`msg.ts`) in microseconds
+3. It calculates the time difference between consecutive messages
+4. The difference is converted to milliseconds and stored in the `DIFF` variable
 
-## 运行效果
+## Results
 
-![CAN 高精度定时器运行效果](./rt.gif)
+![CAN High-Precision Timer Results](./rt.gif)
 
-通过硬件时间戳可以准确测量接收到的 CAN 消息之间的时间间隔，精度达到微秒级别。
+Through hardware timestamps, you can accurately measure the time intervals between received CAN messages with microsecond-level precision.

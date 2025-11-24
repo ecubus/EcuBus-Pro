@@ -1,6 +1,6 @@
 # DoIP 示例
 
-本示例演示如何使用 DoIP 协议与 ECU 通信。 `EcuBus-Pro` 作为测试仪，而 `doip-custom-simulation` 作为实体（网关）运行。
+本示例演示如何使用 DoIP 协议与 ECU 通信。 `EcuBus-Pro` 作为测试仪，而 `doip-custom-simulation` 作为实体（网关）运行。 `EcuBus-Pro` 作为测试仪，而 `doip-custom-simulation` 作为实体（网关）运行。
 
 ## EcuBus-Pro 设置
 
@@ -21,7 +21,7 @@
 
 ## `doip-custom-simulation` 设置
 
-`doip-custom-simulation` 是 DoIP 协议的自定义仿真，作为实体运行。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
+`doip-custom-simulation` 是 DoIP 协议的自定义仿真，作为实体运行。 `doip-custom-simulation` 是 DoIP 协议的自定义仿真，作为实体运行。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
 
 ### 安装
 

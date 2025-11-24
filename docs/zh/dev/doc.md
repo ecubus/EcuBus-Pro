@@ -1,10 +1,10 @@
-# Developer Documentation Guide
+# 开发者文档指南
 
-## Overview
+## 概述
 
-This project uses [VitePress](https://vitepress.dev/) as the documentation system, supporting bilingual documentation in Chinese and English. Documentation is located in the `docs/` directory and written in Markdown format.
+本项目使用 [VitePress](https://vitepress.dev/) 作为文档系统，支持中英文双语文档。 文档位于 `docs/` 目录中，采用 Markdown 格式编写。
 
-## Project Structure
+## 项目结构
 
 ```text
 docs/
@@ -23,9 +23,9 @@ docs/
 └── component/   # Custom components
 ```
 
-## Development Commands
+## 开发命令
 
-### Local Development
+### 本地开发
 
 ```bash
 # Start documentation development server
@@ -38,36 +38,36 @@ npm run docs:build
 npm run docs:preview
 ```
 
-### Documentation Build
+### 文档构建
 
 ```bash
 # Build production documentation
 npm run docs:build
 ```
 
-## Writing Documentation
+## 编写文档
 
-### Multi-language Support
+### 多语言支持
 
-#### File Correspondence
+#### 文件对应关系
 
-Chinese and English documentation should maintain the same structure:
+中英文文档应保持相同的结构：
 
 ```text
 docs/zh/dev/adapter.md  ↔  docs/en/dev/adapter.md
 docs/zh/um/can/can.md   ↔  docs/en/um/can/can.md
 ```
 
-#### Translation Guidelines
+#### 翻译指南
 
-1. Create the Chinese version first
-2. Translate to English version (can be done by AI)
-3. Keep file structure consistent
-4. Ensure links and image paths are correct
+1. 先创建中文版本
+2. 翻译为英文版本（可由 AI 完成）
+3. 保持文件结构一致
+4. 确保链接和图片路径正确
 
-### Documentation Organization
+### 文档组织
 
-#### Recommended Directory Structure
+#### 推荐目录结构
 
 ```text
 docs/zh/
@@ -88,11 +88,11 @@ docs/zh/
     └── var/         # Variable management
 ```
 
-#### File Naming Conventions
+#### 文件命名规范
 
-- Use lowercase letters and hyphens
-- File names should be descriptive
-- Avoid spaces and special characters
+- 使用小写字母和连字符
+- 文件名应具有描述性
+- 避免空格和特殊字符
 
 ```text
 ✅ Correct: can-bus-guide.md

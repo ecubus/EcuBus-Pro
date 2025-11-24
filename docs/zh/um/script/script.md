@@ -1,10 +1,11 @@
 # 脚本
 
-该脚本基于 TypeScript/JavaScript，在 node.js 环境中运行。 我们使用 `ts` 进行语法检查，并使用 esbuild 构建脚本，构建脚本位于 `.ScriptBuild` 文件夹中。
+该脚本基于 TypeScript/JavaScript，在 node.js 环境中运行。 该脚本基于 TypeScript/JavaScript，在 node.js 环境中运行。 我们使用 `ts` 进行语法检查，并使用 esbuild 构建脚本，构建脚本位于 `.ScriptBuild` 文件夹中。
 
 ## 编辑器
 
 推荐使用 Vscode 编辑脚本，您可以安装 `TypeScript` 扩展来获得语法检查和智能感知。
+![alt text](../../../media/um/script/script1.gif)
 ![alt text](../../../media/um/script/script1.gif)
 
 > [!TIP]
@@ -15,10 +16,12 @@
 ![alt text](../../../media/um/script/image.png)
 如果脚本中有任何错误，您可以在 `Message` 窗口中获取构建错误信息。
 ![alt text](../../../media/um/script/image-1.png)
+![alt text](../../../media/um/script/image-1.png)
 
 ## 脚本 API
 
 您可以打开 `API` 窗口来获取 API 信息。
+![alt text](../../../media/um/script/image-2.png)
 ![alt text](../../../media/um/script/image-2.png)
 
 或查看此在线文档 [API](https://app.whyengineer.com/scriptApi/index.html)
@@ -39,7 +42,7 @@ Util.Init(() => {
 
 #### 定时器
 
-定时器是 node.js 的内置功能，您可以使用它来执行一些周期性工作。 有关定时器的更多详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
+定时器是 node.js 的内置功能，您可以使用它来执行一些周期性工作。 有关定时器的更多详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html) 有关定时器的更多详细信息，请参阅 [Timer](https://nodejs.org/api/timers.html)
 
 ```typescript
 // periodical output can message
@@ -83,7 +86,9 @@ Util.OnCan(true, (msg) => {
 #### 事件监听
 
 监听 UDS 消息。
+监听 UDS 消息。
 `${tester name}.${service item name}.recv` 用于监听接收到的 UDS 消息。
+`${tester name}.${service item name}.send` 用于监听发送的 UDS 消息。
 `${tester name}.${service item name}.send` 用于监听发送的 UDS 消息。
 
 ```typescript

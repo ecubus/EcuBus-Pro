@@ -1,11 +1,11 @@
-# LIN Master Example
+# LIN 主节点示例
 
-This example demonstrates how to use the LIN protocol to work as a LIN master and simulate a Motor2 node.
+本示例演示如何使用 LIN 协议作为 LIN 主节点并模拟 Motor2 节点。
 
-## Used Devices
+## 使用的设备
 
 PEAK
 
-## Network
+## 网络
 
 ![network](./network.png)

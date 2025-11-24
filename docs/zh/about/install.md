@@ -25,11 +25,14 @@
 
 `EcuBus-Pro` 会在您打开时检查最新版本，如果有新版本，会提示您更新。
 ![alt text](../../media/about/update1.png)
+![alt text](../../media/about/update1.png)
 
 - 您可以查看详细的更新信息，点击 `开始更新` 按钮进行更新。
   ![alt text](../../media/about/update2.png)
+  ![alt text](../../media/about/update2.png)
 
 - 将显示更新进度，请稍等片刻。
+  ![alt text](../../media/about/update3.png)
   ![alt text](../../media/about/update3.png)
 
 - 更新完成后，您可以点击 `重启` 按钮重新启动 `EcuBus-Pro`。

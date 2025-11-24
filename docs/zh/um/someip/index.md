@@ -1,79 +1,79 @@
 # SOME/IP
 
-EcuBus-Pro supports the SOME/IP protocol and can be used for developing and testing SOME/IP-enabled devices.
+EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设备。
 
-## Configuration
+## 配置
 
-> EcuBus-Pro's SOME/IP functionality is based on [vSomeIP](https://github.com/GENIVI/vsomeip). For configuration details that are unclear, please refer to the [vSomeIP Configuration Documentation](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md).
+> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不明确的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
 
-### Add SOME/IP Configuration
+### 添加 SOME/IP 配置
 
-Add SOME/IP configuration by clicking SOA->SOA Config->Add SOME/IP Configuration.
+通过点击 SOA->SOA 配置->添加 SOME/IP 配置来添加 SOME/IP 配置。
 
-![Add SOME/IP Configuration](../../../media/um/someip/add.png)
+![添加 SOME/IP 配置](../../../media/um/someip/add.png)
 
-### Configure SOME/IP
+### 配置 SOME/IP
 
-Click on the SOME/IP configuration to configure it.
+点击 SOME/IP 配置以进行配置。
 
-![SOME/IP Configuration](../../../media/um/someip/config.png)
+![SOME/IP 配置](../../../media/um/someip/config.png)
 
-#### Device Configuration
+#### 设备配置
 
-Each SOME/IP configuration must include an Ethernet device.
+每个 SOME/IP 配置必须包含一个以太网设备。
 
-#### Application Configuration
+#### 应用程序配置
 
-Each SOME/IP configuration corresponds to an application and requires an Application ID. The Application ID is the unique identifier for the application and ranges from 1-65535.
+每个 SOME/IP 配置对应一个应用程序，并需要一个应用程序 ID。 应用程序 ID 是应用程序的唯一标识符，范围为 1-65535。
 
-#### Service Discovery Configuration
+#### 服务发现配置
 
-Controls whether service discovery is enabled. If service discovery is enabled, you need to configure the service discovery-related settings.
+控制是否启用服务发现。 如果启用了服务发现，您需要配置与服务发现相关的设置。
 
 > [!TIP]
-> If service discovery is enabled, you may need to configure multicast-related settings on your computer.
+> 如果启用了服务发现，您可能需要在计算机上配置多播相关设置。
 
-#### Service Configuration
+#### 服务配置
 
-![SOME/IP Service Configuration](../../../media/um/someip/service.png)
+![SOME/IP 服务配置](../../../media/um/someip/service.png)
 
 > [!WARNING]
-> Currently, only simple services are supported. Support for events and event groups will be added in the future.
+> 目前仅支持简单服务。 未来将添加对事件和事件组的支持。
 
-Each service needs to be configured with:
+每个服务需要配置：
 
-1. Service ID - The unique identifier for the service, ranging from 1-65535
-2. Service Instance ID - The unique identifier for the service instance, ranging from 1-65535
-3. Whether to enable TCP reliable transmission and the corresponding port number
-4. Whether to enable UDP unreliable transmission and the corresponding port number
+1. 服务 ID - 服务的唯一标识符，范围为 1-65535
+2. 服务实例 ID - 服务实例的唯一标识符，范围为 1-65535
+3. 是否启用 TCP 可靠传输及相应的端口号
+4. 是否启用 UDP 不可靠传输及相应的端口号
 
-## SOME/IP Interactor
+## SOME/IP 交互器
 
-Click on the SOME/IP Interactor to quickly initiate SOME/IP requests and view the responses to SOME/IP requests.
+点击 SOME/IP 交互器可快速发起 SOME/IP 请求并查看 SOME/IP 请求的响应。
 
-![SOME/IP Interactor](../../../media/um/someip/ia.png)
+![SOME/IP 交互器](../../../media/um/someip/ia.png)
 
-### Interactor Configuration
+### 交互器配置
 
-Hover over the interactor block and click the edit button to configure the interactor.
+将鼠标悬停在交互器块上并点击编辑按钮以配置交互器。
 
-#### Connection Configuration
+#### 连接配置
 
-![SOME/IP Interactor Connection Configuration](../../../media/um/someip/connect1.png)
-![SOME/IP Interactor Connection Configuration](../../../media/um/someip/connect2.png)
+![SOME/IP 交互器连接配置](../../../media/um/someip/connect1.png)
+![SOME/IP 交互器连接配置](../../../media/um/someip/connect2.png)
 
-#### Edit Request
+#### 编辑请求
 
 > [!TIP]
-> Selecting requests from the database is not currently supported.
+> 目前不支持从数据库中选择请求。
 
-![SOME/IP Interactor Request Configuration](../../../media/um/someip/frame.png)
+![SOME/IP 交互器请求配置](../../../media/um/someip/frame.png)
 
-## SOME/IP Script
+## SOME/IP 脚本
 
-### [Util.OnSomeipMessage](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onsomeipmessage) Listen to SOME/IP Messages
+### [Util.OnSomeipMessage](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onsomeipmessage) 监听 SOME/IP 消息
 
-Listen to SOME/IP messages. When a SOME/IP message is received, the callback function will be called.
+监听 SOME/IP 消息。 当接收到 SOME/IP 消息时，将调用回调函数。
 
 ```typescript
 // Listen to all SOME/IP messages
@@ -92,9 +92,9 @@ Util.OnSomeipMessage('0034.*.*', (msg) => {
 });
 ```
 
-### [output](https://app.whyengineer.com/scriptApi/functions/output.html) Output SOME/IP Messages
+### [output](https://app.whyengineer.com/scriptApi/functions/output.html) 输出 SOME/IP 消息
 
-Output SOME/IP messages. You can output SOME/IP requests and SOME/IP responses.
+输出 SOME/IP 消息。 您可以输出 SOME/IP 请求和 SOME/IP 响应。
 
 ```typescript
 import { SomeipMessageRequest, SomeipMessageResponse, output } from 'ECB'

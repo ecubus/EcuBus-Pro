@@ -24,7 +24,7 @@
 
 ## 使用 DLL
 
-项目设置了一个模拟设备，可用于测试 dll。 一个节点项附加了脚本（`node.ts`）
+项目设置了一个模拟设备，可用于测试 dll。 一个节点项附加了脚本（`node.ts`） 一个节点项附加了脚本（`node.ts`）
 
 > [!TIP]
 > 需要 x64 平台 dll 文件
@@ -53,4 +53,4 @@ console.log(seed)
 
 ## 其他
 
-默认的 dll 包装器遵循[指南](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)，如果您想使用其他接口，可以自行构建包装器。 有关更多信息，请参阅[源代码](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess)。
+默认的 dll 包装器遵循[指南](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)，如果您想使用其他接口，可以自行构建包装器。 有关更多信息，请参阅[源代码](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess)。 有关更多信息，请参阅[源代码](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess)。

@@ -14,14 +14,16 @@ LDF 解析器支持以下 LIN 规范版本：
 
 创建新数据库时，必须为其分配唯一名称并保存。
 ![alt text](../../../../media/um/database/ldf/image-5.png)
+![alt text](../../../../media/um/database/ldf/image-5.png)
 
 ## LDF 编辑器
 
-您可以通过不同的选项卡编辑 LDF 数据库。 每个部分都实施了严格的错误检查，以确保数据完整性。
+您可以通过不同的选项卡编辑 LDF 数据库。 每个部分都实施了严格的错误检查，以确保数据完整性。 每个部分都实施了严格的错误检查，以确保数据完整性。
 
 ### 常规
 
 此选项卡显示常规数据库信息和错误通知。 在保存或使用数据库之前，必须解决所有错误。
+![alt text](../../../../media/um/database/ldf/image-6.png) 在保存或使用数据库之前，必须解决所有错误。
 ![alt text](../../../../media/um/database/ldf/image-6.png)
 
 ### 节点
@@ -56,5 +58,6 @@ LDF 解析器支持以下 LIN 规范版本：
 
 ### LDF
 
-查看实时 LDF 文件内容。 解决所有错误后，您可以从此处复制 LDF 内容。
+查看实时 LDF 文件内容。 查看实时 LDF 文件内容。 解决所有错误后，您可以从此处复制 LDF 内容。
+![alt text](../../../../media/um/database/ldf/image-17.png)
 ![alt text](../../../../media/um/database/ldf/image-17.png)

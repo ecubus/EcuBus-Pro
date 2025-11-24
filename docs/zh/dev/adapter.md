@@ -4,13 +4,13 @@
 
 ## 参考拉取请求
 
-您可以从以下 PR 中获取一些参考：
+您可以从这些 PR 中获得一些参考：
 
 - [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can
 
 ## 分步指南
 
-您可以从[分步指南](./adapter/detail.md)中获取详细步骤
+您可以从[分步指南](./adapter/detail.md)获取详细步骤
 
 ## 先决条件
 
@@ -30,7 +30,7 @@ src/main/docan/${adapter_name}
 
 ## 目录结构
 
-每个适配器目录应遵循以下结构：
+每个适配器目录应遵循此结构：
 
 ```text
 ${adapter_name}/
@@ -120,14 +120,14 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
 3. **错误处理**
    - 在类型映射中实现错误检查
    - 使用 `SWIG_exception_fail` 处理错误
-   - 仔细处理内存管理
+   - 小心处理内存管理
 
 4. **模块初始化**
    - 使用 `%init %{ ... %}` 用于设置代码
    - 如果需要，注册回调
    - 初始化全局变量
 
-### 常用 SWIG 指令
+### 常见 SWIG 指令
 
 ```swig
 %module name          // 定义模块名称
@@ -149,8 +149,8 @@ abstract class CanBase {
   abstract info: CanBaseInfo;           // 适配器基本信息
   abstract log: CanLOG;                 // 日志对象
   abstract close(): void;               // 关闭适配器
-  abstract readBase(...): Promise<...>; // 读取 CAN 消息
-  abstract writeBase(...): Promise<...>;// 写入 CAN 消息
+  abstract readBase(...): Promise<...>; // 读取 CAN 报文
+  abstract writeBase(...): Promise<...>;// 写入 CAN 报文
   abstract getReadBaseId(...): string;  // 获取读取 ID
   abstract setOption(...): void;        // 设置选项
   abstract event: EventEmitter;         // 事件发射器
@@ -220,7 +220,7 @@ export class KVASER_CAN extends CanBase {
 }
 ```
 
-适配器
+adapter
 
 ## 测试
 
@@ -444,7 +444,7 @@ vitest test/docan/${adapter_name}.test.ts
    ```
 
 2. 在 `src/main/docan/can.ts` 中添加设备
-   您应编辑以下函数：
+   您应编辑这些函数：
    - `openCanDevice`
    - `getCanVersion`
    - `getCanDevices`
@@ -477,4 +477,4 @@ vitest test/docan/${adapter_name}.test.ts
    }
    ```
 
-4. 然后几乎完成了，您可以在 `Device` 窗口中配置您的设备
+4. 然后几乎完成，您可以在 `Device` 窗口中配置您的设备

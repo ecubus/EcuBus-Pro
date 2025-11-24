@@ -1,36 +1,36 @@
-# Vehicle Identification Request Behavior
+# 车辆识别请求行为
 
-we support 4 VIN request methods:
+我们支持4种VIN请求方法：
 
-1. Unicast VIN Request
-2. Omit VIN, tcp connect directly
-3. Broadcast VIN Request (UDP4)
-4. Multicast VIN Request (UDP6)
+1. 单播VIN请求
+2. 省略VIN，直接TCP连接
+3. 广播VIN请求（UDP4）
+4. 组播VIN请求（UDP6）
 
 ![alt text](../../../media/um/doip/image-5.png)
 
-## Unicast VIN Request
+## 单播VIN请求
 
 > [!NOTE]
-> This method is only setup Request Address.
+> 此方法仅设置请求地址。
 
 ![alt text](../../../media/um/doip/image.png)
 ![alt text](../../../media/um/doip/image-1.png)
 
-## Omit VIN, tcp connect directly
+## 省略VIN，直接TCP连接
 
-without UDP request, connect directly to the tcp server, see [[#82](https://github.com/ecubus/EcuBus-Pro/issues/82)]
+无需UDP请求，直接连接到TCP服务器，请参阅[[#82](https://github.com/ecubus/EcuBus-Pro/issues/82)]
 
 > [!NOTE]
-> This method is only setup Request Address.
+> 此方法仅设置请求地址。
 
 ![alt text](../../../media/um/doip/image-2.png)
 
-## Broadcast VIN Request (UDP4)
+## 广播VIN请求（UDP4）
 
 ![alt text](../../../media/um/doip/image-3.png)
 ![alt text](../../../media/um/doip/image-4.png)
 
-## Multicast VIN Request (UDP6)
+## 组播VIN请求（UDP6）
 
-unsupported yet.
+暂不支持。

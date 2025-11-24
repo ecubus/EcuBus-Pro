@@ -3,6 +3,7 @@
 <!-- markdownlint-disable MD033 -->
 
 用户可以根据其配置的 UDS 服务生成 C 代码。 代码格式取决于用户定义的模板。
+![code](../../../../media/um/uds/udscode/images/uds-code-format.png) 代码格式取决于用户定义的模板。
 ![code](../../../../media/um/uds/udscode/images/uds-code-format.png)
 
 ## UDS 代码生成
@@ -11,16 +12,17 @@
 
 ![code1](../../../../media/um/uds/udscode/images/enable-code-gen.png)
 
-然后用户可以添加模板配置。 每个模板配置包含两个字段：
+然后用户可以添加模板配置。 然后用户可以添加模板配置。 每个模板配置包含两个字段：
 
 - **模板路径**：用户可以从本地文件系统选择模板文件。
 - **生成路径**：用户可以指定生成代码的保存路径。
 
-支持多个模板配置。 用户可以根据需要添加或移除模板配置，每个模板支持运行时预览功能。
+支持多个模板配置。 支持多个模板配置。 用户可以根据需要添加或移除模板配置，每个模板支持运行时预览功能。
 
 ## 特殊属性
 
 启用 UDS 代码生成时，每个服务支持添加用户定义的特殊属性以用于 `code generation`。
+![code2](../../../../media/um/uds/udscode/images/special-config.png)
 ![code2](../../../../media/um/uds/udscode/images/special-config.png)
 
 属性以键值对格式定义。
@@ -38,6 +40,7 @@ UDS 代码生成系统基于 [**Handlebars.js**](https://handlebarsjs.com) 模�
 
 <span v-pre>
 模板使用 Handlebars 语法，双花括号 `{{ }}` 用于表达式，`{{# }}{{/ }}` 用于块辅助方法。 系统提供对 UDS 服务数据、配置属性以及丰富辅助函数集的访问。
+</span> 系统提供对 UDS 服务数据、配置属性以及丰富辅助函数集的访问。
 </span>
 
 ### 可用数据上下文

@@ -1,6 +1,7 @@
 # 图表
 
 图表信号功能允许您以图形格式可视化信号之间的数据流。 此功能对于理解信号之间的关系以及调试复杂的信号交互特别有用。
+![alt text](../../../media/um/graph/image.png) 此功能对于理解信号之间的关系以及调试复杂的信号交互特别有用。
 ![alt text](../../../media/um/graph/image.png)
 
 - **折线**
@@ -34,4 +35,5 @@
 ## 拖拽/缩放折线图
 
 您可以通过拖动鼠标滚轮来放大/缩小图表。
+![alt text](../../../media/um/graph/graph.gif)
 ![alt text](../../../media/um/graph/graph.gif)

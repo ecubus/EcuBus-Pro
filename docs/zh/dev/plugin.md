@@ -2,7 +2,7 @@
 
 ## 简介
 
-EcuBus 提供了一个强大的插件系统，允许开发者通过自定义功能扩展应用程序的功能。 插件使用现代 Web 技术构建，包括 Vue 3、TypeScript 和 Vite，遵循类似于 Electron 的双进程架构。
+EcuBus 提供了一个强大的插件系统，允许开发者通过自定义功能扩展应用程序的功能。 插件使用现代 Web 技术构建，包括 Vue 3、TypeScript 和 Vite，遵循类似于 Electron 的双进程架构。 插件使用现代 Web 技术构建，包括 Vue 3、TypeScript 和 Vite，遵循类似于 Electron 的双进程架构。
 
 本指南将引导您了解开发、测试和发布自己的 EcuBus 插件所需的一切知识。
 
@@ -166,7 +166,7 @@ graph TB
   - 数据可视化
 
 > [!注意]
-> Vue 3 和 Element Plus 已内置到 EcuBus-Pro 中，默认已外部化。 直接使用这些库将保持您的插件包体积较小。
+> Vue 3 和 Element Plus 已内置到 EcuBus-Pro 中，默认已外部化。 直接使用这些库将保持您的插件包体积较小。 直接使用这些库将保持您的插件包体积较小。
 
 ### 2. 进程间通信
 
@@ -350,7 +350,7 @@ onUnmounted(() => {
 - （查看 EcuBus 文档获取完整列表）
 
 **图标格式**：
-使用 Iconify 图标，格式为 `collection:icon-name`。 在 [iconify.design](https://iconify.design/) 浏览可用图标
+使用 Iconify 图标，格式为 `collection:icon-name`。 在 [iconify.design](https://iconify.design/) 浏览可用图标 在 [iconify.design](https://iconify.design/) 浏览可用图标
 
 示例：
 
@@ -380,7 +380,7 @@ onUnmounted(() => {
 
 ## 结论
 
-您现在拥有创建强大 EcuBus 插件所需的所有知识！ 从模板开始，尝试示例，并构建一些令人惊叹的东西。
+您现在拥有创建强大 EcuBus 插件所需的所有知识！ 从模板开始，尝试示例，并构建一些令人惊叹的东西。 从模板开始，尝试示例，并构建一些令人惊叹的东西。
 
 **插件开发愉快！** 🚀
 

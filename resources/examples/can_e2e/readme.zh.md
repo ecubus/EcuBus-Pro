@@ -1,23 +1,23 @@
-# CAN E2E (End-to-End) Protection Example
+# CAN E2E（端到端）保护示例
 
-## Overview
+## 概述
 
-This example demonstrates how to implement End-to-End (E2E) protection for CAN messages using CRC8 checksum and sequence counter. E2E protection is a safety mechanism commonly used in automotive systems to detect message corruption, loss, or replay attacks.
+本示例演示如何使用 CRC8 校验和和序列计数器为 CAN 报文实现端到端（E2E）保护。 E2E 保护是汽车系统中常用的安全机制，用于检测报文损坏、丢失或重放攻击。
 
-## E2E Protection Mechanism
+## E2E 保护机制
 
-The example implements a simple E2E protection scheme where:
+该示例实现了一个简单的 E2E 保护方案，其中：
 
-- **Byte 6**: Contains a sequence counter (0-255, wraps around)
-- **Byte 7**: Contains a CRC8 checksum computed over bytes 0-6
+- **字节 6**：包含一个序列计数器（0-255，循环回绕）
+- **字节 7**：包含基于字节 0-6 计算出的 CRC8 校验和
 
-This ensures that:
+这确保了：
 
-1. Message sequence can be tracked (counter)
-2. Message integrity can be verified (CRC8 checksum)
-3. Missing or corrupted messages can be detected
+1. 可以跟踪报文序列（计数器）
+2. 可以验证报文完整性（CRC8 校验和）
+3. 可以检测丢失或损坏的报文
 
-## Code Example
+## 代码示例
 
 ```typescript
 import {CRC, setTxPending} from 'ECB'
@@ -35,13 +35,13 @@ setTxPending((msg)=>{
 })
 ```
 
-## How It Works
+## 工作原理
 
-1. **CRC8 Initialization**: Creates a CRC8 calculator using the built-in CRC module
-2. **Message Interception**: Uses `setTxPending` to intercept all outgoing CAN messages before transmission
-3. **E2E Protection**: For messages with ID 1 and 8-byte length:
-   - Updates byte 6 with an incrementing counter (modulo 256)
-   - Computes CRC8 checksum over bytes 0-6
-   - Writes the checksum to byte 7
-4. **Message Transmission**: Returns the modified message data for transmission
+1. **CRC8 初始化**：使用内置 CRC 模块创建 CRC8 计算器
+2. **报文拦截**：使用 `setTxPending` 在传输前拦截所有出站 CAN 报文
+3. **E2E 保护**：对于 ID 为 1 且长度为 8 字节的报文：
+   - 使用递增计数器（模 256）更新字节 6
+   - 计算字节 0-6 的 CRC8 校验和
+   - 将校验和写入字节 7
+4. **报文传输**：返回修改后的报文数据进行传输
 

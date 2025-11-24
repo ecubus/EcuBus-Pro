@@ -1,16 +1,16 @@
-# Secure Access DLL Example
+# 安全访问 DLL 示例
 
-- Interface: `CAN`
-- Vendor Device: `Simulate`
+- 接口：`CAN`
+- 供应商设备：`Simulate`
 
-## Build The DLL
+## 构建 DLL
 
-You can do it with yourself method, or you can cmake. (only support x64 platform)
-Steps are as follows:
+您可以使用自己的方法，也可以使用 cmake。 （仅支持 x64 平台）
+步骤如下：
 
-1. open vs x64_x86 cross tools command prompt terminal
+1. 打开 VS x64_x86 交叉工具命令提示符终端
 
-2. Execute the following command:
+2. 执行以下命令：
 
    ```bash
    cd SeedKey
@@ -20,14 +20,14 @@ Steps are as follows:
    cmake --build . --config Release
    ```
 
-3. `dll` folder contains the pre-built dll file.
+3. `dll` 文件夹包含预构建的 dll 文件。
 
-## Use The DLL
+## 使用 DLL
 
-The project setup a simulate device, which can be used to test the dll. A node item attach the script(`node.ts`)
+项目设置了一个模拟设备，可用于测试 dll。 一个节点项附加了脚本（`node.ts`）
 
 > [!TIP]
-> Need x64 platform dll file
+> 需要 x64 平台 dll 文件
 
 ```typescript
 import { SecureAccessDll } from 'ECB'
@@ -45,12 +45,12 @@ const seed = sa.GenerateKeyEx(
 console.log(seed)
 ```
 
-## Steps
+## 步骤
 
 ![alt text](image.png)
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 
-## Others
+## 其他
 
-The default dll warper follow the [Guide](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf), if you want to use other interface, you can build the wrapper by yourself. See the [source code](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess) for more information.
+默认的 dll 包装器遵循[指南](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)，如果您想使用其他接口，可以自行构建包装器。 有关更多信息，请参阅[源代码](https://github.com/ecubus/EcuBus-Pro/tree/master/src/main/worker/secureAccess)。

@@ -1,12 +1,12 @@
-# Build In Script
+# 内置脚本
 
-The Built-In Script system provides pre-configured diagnostic services for common UDS operations. This documentation covers the available built-in scripts and their functionality.
+内置脚本系统为常见UDS操作提供预配置的诊断服务。 本文档涵盖可用的内置脚本及其功能。
 
-## Supported Built-In Script
+## 支持的内置脚本
 
 ### [SecureAccessGenerateKeyEx](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyEx)
 
-This script is used to generate a key for the security access process. see [GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
+此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
@@ -22,11 +22,11 @@ VKeyGenResultEx GenerateKeyEx (
 
 ![GenerateKeyEx](../../../../media/um/uds/buildInScript/images/GenerateKeyEx.png)
 
-#### Parameters - SecureAccessGenerateKeyEx
+#### 参数 - SecureAccessGenerateKeyEx
 
 - **dllFile**
 
-  - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyEx function.
+  - DLL文件的路径，DLL必须是64位DLL文件并包含GenerateKeyEx函数。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
@@ -41,35 +41,35 @@ VKeyGenResultEx GenerateKeyEx (
 ```
 
 - **requestSeed**
-  - The request seed sub-function, 1,3,5,7,9,11,13,15
-  - Default: 0x01
+  - 请求种子子函数，1,3,5,7,9,11,13,15
+  - 默认值：0x01
 
 - **sendKey**
-  - The send key sub-function, 2,4,6,8,10,12,14,16
-  - Default: 0x02
+  - 发送密钥子函数，2,4,6,8,10,12,14,16
+  - 默认值：0x02
 
 - **securityLevel**
-  - The security level to be change to
+  - 要更改的安全级别
 
 - **variant**
-  - The variant of the security access process(the name of the diagnostic receptor ECU)
+  - 安全访问过程的变体（诊断接收器ECU的名称）
 
 - **maxKeyArraySize**
-  - The max key array size
+  - 最大密钥数组大小
 
 - **securityAccessDataRecord**
-  - The security access data record in request seed DiagRequest, the data will be sent to the ECU in the request seed sub-function.
+  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子函数中发送到ECU。
 
 ### [SecureAccessGenerateKeyExOpt](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyExOpt)
 
-This script is used to generate a key for the security access process. see [GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf).
+此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ![GenerateKeyExOpt](../../../../media/um/uds/buildInScript/images/GenerateKeyExOpt.png)
 
-#### Parameters - SecureAccessGenerateKeyExOpt
+#### 参数 - SecureAccessGenerateKeyExOpt
 
 - **dllFile**
-  - The path to the DLL file, the DLL must be a 64-bit DLL file and contains the GenerateKeyExOpt function.
+  - DLL文件的路径，DLL必须是64位DLL文件并包含GenerateKeyExOpt函数。
 
 ```c
 VKeyGenResultExOpt GenerateKeyExOpt ( 
@@ -85,76 +85,76 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 ```
 
 - **requestSeed**
-  - The request seed sub-function, 1,3,5,7,9,11,13,15
-  - Default: 0x01
+  - 请求种子子函数，1,3,5,7,9,11,13,15
+  - 默认值：0x01
 
 - **sendKey**
-  - The send key sub-function, 2,4,6,8,10,12,14,16
-  - Default: 0x02
+  - 发送密钥子函数，2,4,6,8,10,12,14,16
+  - 默认值：0x02
 
 - **securityLevel**
-  - The security level to be change to
+  - 要更改的安全级别
 
 - **variant**
-  - The variant of the security access process(the name of the diagnostic receptor ECU)
+  - 安全访问过程的变体（诊断接收器ECU的名称）
 
 - **options**
-  - The options of the security access process
+  - 安全访问过程的选项
 
 - **maxKeyArraySize**
-  - The max key array size
+  - 最大密钥数组大小
 
 - **securityAccessDataRecord**
-  - The security access data record in request seed DiagRequest, the data will be sent to the ECU in the request seed sub-function.
+  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子函数中发送到ECU。
 
 ### [RequestDownloadBin](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/RequestDownloadBin)
 
-A combined service that handles the complete binary download process by orchestrating UDS services 0x34 (RequestDownload), 0x36 (TransferData), and 0x37 (TransferExit).
+一个组合服务，通过编排UDS服务0x34（RequestDownload）、0x36（TransferData）和0x37（TransferExit）来处理完整的二进制下载过程。
 
 ![RequestDownloadBin](../../../../media/um/uds/buildInScript/images/RequestDownloadBin.png)
 
-#### Description
+#### 描述
 
-This script automates the process of downloading binary files to an ECU by:
+此脚本通过以下方式自动化将二进制文件下载到ECU的过程：
 
-1. Initiating the download request
-2. Transferring the data in appropriate chunks
-3. Completing the transfer process
+1. 发起下载请求
+2. 以适当的数据块传输数据
+3. 完成传输过程
 
-#### Parameters - RequestDownloadBin
+#### 参数 - RequestDownloadBin
 
-- **dataFormatIdentifier** (8-bit)
-  - Format identifier for the data to be transferred
-  - Default: 0x00
+- **dataFormatIdentifier** (8位)
+  - 要传输的数据的格式标识符
+  - 默认值：0x00
 
-- **addressAndLengthFormatIdentifier** (8-bit)
-  - Specifies the format of memory address and length
-  - Default: 0x44 (4 bytes for address, 4 bytes for length)
+- **addressAndLengthFormatIdentifier** (8位)
+  - 指定内存地址和长度的格式
+  - 默认值：0x44（4字节地址，4字节长度）
 
-- **memoryAddress** (depends on addressAndLengthFormatIdentifier)
-  - Target memory address for the download
-  - Default: 0x00000000
+- **memoryAddress** (取决于addressAndLengthFormatIdentifier)
+  - 下载的目标内存地址
+  - 默认值：0x00000000
 
 - **binFile**
-  - Binary file to be downloaded, will change memory size automatically
+  - 要下载的二进制文件，将自动更改内存大小
 
-## Creating Custom Scripts
+## 创建自定义脚本
 
-Custom scripts can be created to extend the functionality of the diagnostic system. Your can create and save your own script, and use it in the future.
+可以创建自定义脚本来扩展诊断系统的功能。 您可以创建并保存自己的脚本，并在将来使用它。
 
-Here's how to create your own script:
+以下是创建您自己的脚本的方法：
 
-### Script Structure
+### 脚本结构
 
-1. **Directory Setup**
-   - Create a new directory under `${App Install Path}/resources/app.asar.unpacked/resources/buildInScript/`
-   - Name it according to your script's function (e.g., `MyCustomScript`)
+1. **目录设置**
+   - 在 `${App Install Path}/resources/app.asar.unpacked/resources/buildInScript/` 下创建新目录
+   - 根据脚本功能命名（例如 `MyCustomScript`）
 
-2. **Required Files**
-   - `plugin.json`: Configuration file
-   - `index.js`: Implementation file
+2. **必需文件**
+   - `plugin.json`：配置文件
+   - `index.js`：实现文件
 
-### plugin.json Configuration
+### plugin.json 配置
 
 ```json
 {
@@ -182,7 +182,7 @@ Here's how to create your own script:
 }
 ```
 
-### index.js Implementation
+### index.js 实现
 
 ```javascript
 const ECB = require('../../lib/js');
@@ -208,19 +208,19 @@ Util.Init(() => {
 });
 ```
 
-### Best Practices
+### 最佳实践
 
-1. **Parameter Definition**
-   - Define clear parameter structures in plugin.json
-   - Support appropriate data types (NUM, HEX, ASCII, BUFFER, FILE)
-   - Set proper bit lengths and editability
+1. **参数定义**
+   - 在 plugin.json 中定义清晰的参数结构
+   - 支持适当的数据类型（NUM、HEX、ASCII、BUFFER、FILE）
+   - 设置适当的位长度和可编辑性
 
-2. **Response Processing**
-   - Define expected response parameters
-   - Implement response validation
-   - Handle different response scenarios
+2. **响应处理**
+   - 定义预期的响应参数
+   - 实现响应验证
+   - 处理不同的响应场景
 
-### Example: Simple Counter Script
+### 示例：简单计数器脚本
 
 ```javascript
 // index.js

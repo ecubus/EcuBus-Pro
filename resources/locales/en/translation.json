@@ -1,14 +1,117 @@
 {
   "general": {
-  
     "language": "Language",
     "uiZoom": "UI Zoom",
     "theme": "Theme",
     "uiZoomTooltip": "Adjust the overall UI scaling of the application",
     "themeTooltip": "Choose between light and dark theme"
-
-  
+  },
+  "home": {
+    "return": "Return",
+    "close": "Close",
+    "home": "Home",
+    "documents": "Documents",
+    "userManual": "User Manual",
+    "systemInformation": "System Information",
+    "module": "Module",
+    "version": "Version",
+    "advertisingPartnership": "Advertising Partnership",
+    "advertiseHere": "📢 Advertise Here",
+    "advertiseDescription": "Showcase your products and services to professional automotive engineers",
+    "contactUs": "Contact Us →",
+    "recent": "Recent",
+    "pinned": "Pinned",
+    "new": "New",
+    "open": "Open",
+    "plugin": "Plugin",
+    "setting": "Setting",
+    "general": "General",
+    "others": "Others",
+    "license": "License",
+    "update": "Update",
+    "dateFormat": {
+      "monthDay": "M/D",
+      "yearMonthDay": "YYYY/M/D"
+    }
+  },
+  "homeNew": {
+    "createEmptyProject": "Create Empty Project",
+    "createExample": "Create The Example",
+    "createExampleError": "Failed to create example",
+    "loadTemplatesError": "Failed to load templates"
+  },
+  "pluginMarketplace": {
+    "loading": "Loading plugins...",
+    "retry": "Retry",
+    "headerTitle": "Plugin Marketplace",
+    "pluginCount": "{{count}} plugins available",
+    "installFromZip": "Install from ZIP",
+    "loadFromPath": "Load from Path",
+    "devPlugin": "Dev Plugin",
+    "noPlugins": "No plugins available",
+    "pluginIconAlt": "Plugin Icon",
+    "temporaryBadgeTitle": "Temporarily loaded (will be removed on restart)",
+    "localOnlyBadgeTitle": "Local plugin only",
+    "noSelection": "Select a plugin to view details",
+    "action": {
+      "enable": "Enable",
+      "disable": "Disable",
+      "uninstall": "Uninstall"
+    },
+    "tooltips": {
+      "temporaryUninstallBlocked": "Temporary plugins cannot be uninstalled (will be removed on restart)"
+    },
+    "upgradeLabel": "🔔 New version available:",
+    "metadata": {
+      "version": "Version:",
+      "author": "Author:",
+      "published": "Published:",
+      "newTabs": "New Tabs:",
+      "extensions": "Extensions:"
+    },
+    "noReadme": "No README available for this plugin.",
+    "button": {
+      "install": "Install",
+      "installed": "Installed",
+      "installing": "Installing...",
+      "upgradeTo": "Upgrade to {{version}}",
+      "upgrading": "Upgrading..."
+    },
+    "messages": {
+      "loadFailed": "Failed to load plugins from marketplace: {{error}}",
+      "installSuccess": "Plugin {{name}} v{{version}} installed successfully!",
+      "upgradeSuccess": "Plugin {{name}} upgraded to v{{version}} successfully!",
+      "installError": "Failed to install plugin: {{error}}",
+      "zipUrlMissing": "Plugin package URL is unavailable.",
+      "disableSuccess": "Plugin disabled successfully",
+      "enableSuccess": "Plugin enabled successfully",
+      "uninstallSuccess": "Plugin {{name}} uninstalled successfully!",
+      "uninstallError": "Failed to uninstall plugin: {{error}}",
+      "installZipSuccess": "Plugin installed successfully from ZIP file!",
+      "installZipError": "Failed to install plugin: {{error}}",
+      "loadDirSuccess": "Plugin loaded successfully from path!",
+      "loadDirError": "Failed to load plugin: {{error}}"
+    },
+    "dialog": {
+      "uninstallMessage": "Are you sure you want to uninstall \"{{name}}\"? This action cannot be undone.",
+      "uninstallTitle": "Confirm Uninstall",
+      "uninstallConfirm": "Uninstall",
+      "uninstallCancel": "Cancel",
+      "selectZipTitle": "Select Plugin Package",
+      "zipFilterName": "ZIP Package",
+      "selectDirTitle": "Select Plugin Directory"
+    },
+    "devDocsUrl": "https://app.whyengineer.com/docs/dev/plugin.html"
+  },
+  "homeUpdate": {
+    "check": "Check for updates",
+    "start": "Start to update",
+    "cancel": "Cancel",
+    "install": "Exit & Install",
+    "downloadOk": "Update package download ok"
+  },
+  "common": {
+    "unknownError": "Unknown error"
   }
-  
 }
 

@@ -52,7 +52,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
 import { QuestionFilled, Moon, Sunny } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
 import { useDark } from '@vueuse/core'

@@ -1,15 +1,15 @@
-# DoIP Simulate Entity Example
+# DoIP 模拟实体示例
 
-This example demonstrates how to use the DOIP protocol to communicate with the ECU. Use script to simulate an entity and send UDS Response frame to the tester.
+本示例演示如何使用 DoIP 协议与 ECU 通信。 使用脚本模拟实体并向测试器发送 UDS 响应帧。
 
-## Device
+## 设备
 
-Use loopback channel
+使用环回通道
 ![device](device.png)
 
-## Node
+## 节点
 
-Add a node item and attach the script(`node.ts`)
+添加节点项并附加脚本(`node.ts`)
 
 ![alt text](image-1.png)
 
@@ -25,16 +25,16 @@ Util.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
 
 ```
 
-## Tester
+## 测试器
 
-Address information need same as your register entity
+地址信息需要与您注册的实体相同
 
-- Tester addr:200
-- Gateway addr:100
-- Simulate By: choose `sim_entity`, the node name.
+- 测试器地址：200
+- 网关地址：100
+- 模拟方式：选择 `sim_entity`，即节点名称。
   ![alt text](image-2.png)
 
-## Execution
+## 执行
 
-Start the sequence and open the trace window to view all frames. Alternatively, use Wireshark to capture these frames.
+启动序列并打开跟踪窗口以查看所有帧。 或者，使用 Wireshark 捕获这些帧。
 ![trace](image.png)

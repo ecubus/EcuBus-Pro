@@ -1,28 +1,27 @@
-# SOME/IP 请求/响应示例
+# SOME/IP Request/Response Demo
 
-本演示展示了如何在 EcuBus-Pro 环境中使用 SOME/IP 协议。
+This demo demonstrates how to use the SOME/IP protocol within the EcuBus-Pro environment.
 
-## 概述
+## Overview
 
-本示例展示了一个基本的 SOME/IP 设置，包括：
+This example shows a basic SOME/IP setup with:
 
-- 两个配置用于通信的 SOME/IP 设备（客户端和服务器）
-  - **客户端应用 ID**: 0x6301
-  - **服务器应用 ID**: 0x6302
+- Two SOME/IP devices configured for communication (Client and Server)
+  - **Client App ID**: 0x6301
+  - **Server App ID**: 0x6302
+- A Server provider offering a service
+  - **Service ID**: 0x1234
+  - **Instance ID**: 0x1111
+  - **Method ID**: 0x1002 (for the interactive action)
+  - **Port**: 30510 (reliable TCP connection)
 
-- 一个提供服务的服务器提供商
-  - **服务 ID**: 0x1234
-  - **实例 ID**: 0x1111
-  - **方法 ID**: 0x1002（用于交互操作）
-  - **端口**: 30510（可靠的 TCP 连接）
+## Script Behavior
 
-## 脚本行为
+The TypeScript script (`someip.ts`) implements a simple echo server:
 
-TypeScript 脚本 (`someip.ts`) 实现了一个简单的回显服务器：
+- Receives any SOME/IP request message for service 0x1234
+- Automatically generates and sends a response back to the requester
 
-- 接收服务 0x1234 的任何 SOME/IP 请求消息
-- 自动生成并向请求者发送响应
+## Network Setup
 
-## 网络设置
-
-该演示使用本地主机 (127.0.0.1) 进行测试，无需额外的网络配置即可轻松运行。两个 SOME/IP 应用程序使用不同的应用程序 ID 通过同一个以太网接口进行通信。
+The demo uses localhost (127.0.0.1) for testing, making it easy to run without additional network configuration. Both SOME/IP applications communicate over the same Ethernet interface using different application IDs.

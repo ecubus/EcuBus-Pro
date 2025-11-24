@@ -1,70 +1,70 @@
 # Trace
 
-The Trace window provides an interface for viewing and exporting data. Users can save data through buttons on the toolbar for further analysis or archival purposes.
+Trace窗口提供了一个用于查看和导出数据的界面。 用户可以通过工具栏上的按钮保存数据，以便进一步分析或存档。
 
 ![alt text](../../../media/um/trace/image.png)
 
 > [!INFO]
-> Currently, Trace has a maximum storage capacity of 50,000 entries. When this limit is exceeded, the oldest data will be automatically deleted.
+> 目前，Trace的最大存储容量为50,000条记录。 超过此限制时，最旧的数据将被自动删除。
 
-## Overwrite Mode
+## 覆盖模式
 
-Use below button to switch between overwrite mode and scroll mode.
+使用下方按钮在覆盖模式和滚动模式之间切换。
 ![alt text](../../../media/um/trace/image-5.png)
 
-In overwrite mode, the Trace window will overwrite the oldest data when the maximum storage capacity is exceeded.
+在覆盖模式下，当达到最大存储容量时，Trace窗口将覆盖最旧的数据。
 ![ow](../../../media/um/trace/ow.gif)
 
-## Filter
+## 筛选
 
-### Filter By Device
+### 按设备筛选
 
-The Trace window supports filtering by device, signal name, and signal value.
+Trace窗口支持按设备、信号名称和信号值进行筛选。
 
 > [!NOTE]
-> Selecting all devices or no devices has the same effect.
+> 选择所有设备或不选择任何设备具有相同的效果。
 
 ![alt text](../../../media/um/trace/image-3.png)
 
-## Filter By Message Type
+## 按消息类型筛选
 
 ![alt text](../../../media/um/trace/image-4.png)
 
-- CAN - Receive CAN-related data
-- LIN - Receive LIN-related data
-- UDS - Receive UDS-related data
-- ETH - Receive Ethernet-related data
+- CAN - 接收CAN相关数据
+- LIN - 接收LIN相关数据
+- UDS - 接收UDS相关数据
+- ETH - 接收以太网相关数据
 
-## Supported Export Formats
+## 支持的导出格式
 
-- Excel - Export data in Microsoft Excel format
-- ASC (ASCII) - Export data in ASCII format, compatible with various CAN analysis tools
-- [Feature Request](./../../dev/feature.md)
+- Excel - 以Microsoft Excel格式导出数据
+- ASC (ASCII) - 以ASCII格式导出数据，兼容各种CAN分析工具
+- [功能请求](./../../dev/feature.md)
 
-## Column Information
+## 列信息
 
-The Trace window typically includes the following columns:
+Trace窗口通常包含以下列：
 
-- **Timestamp**: Displays the precise time when the event occurred
-- **Name**: Represents the frame signal name that triggered the event
-- **Signal Value**: Shows the current value of the signal
-- **DIR (Direction)**: Indicates the signal direction (Tx for transmit, Rx for receive)
-- **ID**: Represents the signal identifier
-- **DLC (Data Length Code)**: Shows the data length code
-- **LEN (Length)**: Displays the actual data length
-- **Type**: Indicates the signal type (e.g., boolean, integer, float)
-- **Channel**: Shows the communication channel number
-- **Device**: Displays the device name
+- **时间戳**：显示事件发生的精确时间
+- **名称**：表示触发事件的帧信号名称
+- **信号值**：显示信号的当前值
+- **DIR (方向)**：指示信号方向（Tx表示发送，Rx表示接收）
+- **ID**：表示信号标识符
+- **DLC (数据长度代码)**：显示数据长度代码
+- **LEN (长度)**：显示实际数据长度
+- **类型**：指示信号类型（例如：布尔值、整数、浮点数）
+- **通道**：显示通信通道编号
+- **设备**：显示设备名称
 
-When the corresponding hardware channel is bound to a [database](../database.md), these column information helps users quickly understand and analyze the system's operating state.
+当对应的硬件通道绑定到[数据库](../database.md)时，这些列信息有助于用户快速理解和分析系统的运行状态。
 
 > [!INFO]
-> Signal values within frames can only be viewed when the Trace window is paused
+> 帧内的信号值只能在Trace窗口暂停时查看
 
-## LIN Signal Display
+## LIN信号显示
 
 ![lin](../../../media/um/trace/image-1.png)
 
-## CAN Signal Display
+## CAN信号显示
 
 ![can](../../../media/um/trace/image-2.png)

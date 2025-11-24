@@ -169,6 +169,8 @@ function parseORTIData(raw: any) {
       } else if (osEvent.type == TaskType.HOOK) {
         const config = db.hostConfigs.find((item) => item.id === osEvent.id)
         name = config?.name
+      } else if (osEvent.type == TaskType.RUNABLE) {
+        name = 'Runable'
       }
       eventData.name = name || ''
 

@@ -8,6 +8,7 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 ## 导入 ORTI 文件
 
 通过点击 `Others->Database->Add OS(ORTI)` 导入 ORTI 文件。 您也可以查看已导入的 ORTI 文件。
+![orti](./../../../media/um/osTrace/orti.png) 您也可以查看已导入的 ORTI 文件。
 ![orti](./../../../media/um/osTrace/orti.png)
 
 ## 配置 ORTI
@@ -20,12 +21,12 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 ### 任务/中断服务程序
 
 1. 设置名称
-2. 设置实际的 CPU 运行频率（取决于您的时间戳格式）。 如果您的时间戳已经是微秒单位，CPU 频率可以设为 1)
+2. 设置实际的 CPU 运行频率（取决于您的时间戳格式）。 设置实际的 CPU 运行频率（取决于您的时间戳格式）。 如果您的时间戳已经是微秒单位，CPU 频率可以设为 1)
 3. 设置对象颜色
 4. 设置周期性任务的理论激活间隔（激活间隔，以微秒为单位，仅适用于任务）
 
 > [!注意]
-> 激活间隔（微秒）只能为任务类型配置。 中断服务程序不支持此配置项。
+> 激活间隔（微秒）只能为任务类型配置。 中断服务程序不支持此配置项。 中断服务程序不支持此配置项。
 
 ![task](./../../../media/um/osTrace/task.png)
 
@@ -81,7 +82,7 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 
 #### 二进制文件（BinaryFile）
 
-从二进制文件读取 OS 追踪数据。 数据格式与串口相同（16 字节二进制数据）。
+从二进制文件读取 OS 追踪数据。 数据格式与串口相同（16 字节二进制数据）。 数据格式与串口相同（16 字节二进制数据）。
 
 **配置项：**
 
@@ -100,7 +101,7 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 **数据格式：** CSV 格式，每行一个事件
 
 > [!注意]
-> CSV 文件格式为：时间戳,类型,ID,状态。 不允许有表头，时间戳单位为 tick。
+> CSV 文件格式为：时间戳,类型,ID,状态。 不允许有表头，时间戳单位为 tick。 不允许有表头，时间戳单位为 tick。
 
 ```csv
 
@@ -123,10 +124,10 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 
 ### 记录文件
 
-记录文件决定了TRACE数据写入本地文件的位置。 写入的数据格式为CSV格式。
+记录文件决定了TRACE数据写入本地文件的位置。 写入的数据格式为CSV格式。 写入的数据格式为CSV格式。
 
 > [!NOTE]
-> 每行一个事件，格式：时间戳,类型,ID,状态。 时间戳单位为tick。
+> 每行一个事件，格式：时间戳,类型,ID,状态。 时间戳单位为tick。 时间戳单位为tick。
 
 ![recordFile](./../../../media/um/osTrace/record.png)
 
@@ -173,6 +174,7 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 
 可以打开先前保存的CSV记录文件，在离线模式下查看OS时间线。
 ![offline](./../../../media/um/osTrace/offline.png)
+![offline](./../../../media/um/osTrace/offline.png)
 
 > [!NOTE]
 > 如果启用了`Link Trace`并且trace窗口已打开，离线事件也会附加到trace窗口中。
@@ -181,6 +183,7 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 
 链接Trace可以将时间线中的事件与trace窗口中的事件关联起来，使用户更容易查看事件之间的关系。
 ![link](./../../../media/um/osTrace/link.gif)
+![link](./../../../media/um/osTrace/link.gif)
 
 ## 自定义查看特定变量信息
 
@@ -188,8 +191,10 @@ OSEK OS 追踪是一项强大的功能，允许您通过外部接口实时获取
 
 例如：如果用户想要查看5msTask和SystemTick ISR的实时运行状态，点击`Home->Graph->Line`，然后点击顶部的`Add Variables`。
 ![addVar](./../../../media/um/osTrace/addLinVar.png)
+![addVar](./../../../media/um/osTrace/addLinVar.png)
 
 选择`5msTask->Status`和`SystemTick ISR->Status`，然后点击`Add`即可查看5msTask和SystemTick ISR的实时运行状态。
+![addLine](./../../../media/um/osTrace/addVar2.png)
 ![addLine](./../../../media/um/osTrace/addVar2.png)
 
 结果预览：

@@ -4,7 +4,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ## 配置
 
-> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不明确的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
+> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不明确的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。 有关不明确的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
 
 ### 添加 SOME/IP 配置
 
@@ -24,11 +24,11 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 #### 应用程序配置
 
-每个 SOME/IP 配置对应一个应用程序，并需要一个应用程序 ID。 应用程序 ID 是应用程序的唯一标识符，范围为 1-65535。
+每个 SOME/IP 配置对应一个应用程序，并需要一个应用程序 ID。 应用程序 ID 是应用程序的唯一标识符，范围为 1-65535。 应用程序 ID 是应用程序的唯一标识符，范围为 1-65535。
 
 #### 服务发现配置
 
-控制是否启用服务发现。 如果启用了服务发现，您需要配置与服务发现相关的设置。
+控制是否启用服务发现。 如果启用了服务发现，您需要配置与服务发现相关的设置。 如果启用了服务发现，您需要配置与服务发现相关的设置。
 
 > [!TIP]
 > 如果启用了服务发现，您可能需要在计算机上配置多播相关设置。
@@ -38,7 +38,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 ![SOME/IP 服务配置](../../../media/um/someip/service.png)
 
 > [!WARNING]
-> 目前仅支持简单服务。 未来将添加对事件和事件组的支持。
+> 目前仅支持简单服务。 未来将添加对事件和事件组的支持。 未来将添加对事件和事件组的支持。
 
 每个服务需要配置：
 
@@ -73,7 +73,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ### [Util.OnSomeipMessage](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onsomeipmessage) 监听 SOME/IP 消息
 
-监听 SOME/IP 消息。 当接收到 SOME/IP 消息时，将调用回调函数。
+监听 SOME/IP 消息。 监听 SOME/IP 消息。 当接收到 SOME/IP 消息时，将调用回调函数。
 
 ```typescript
 // Listen to all SOME/IP messages
@@ -94,7 +94,7 @@ Util.OnSomeipMessage('0034.*.*', (msg) => {
 
 ### [output](https://app.whyengineer.com/scriptApi/functions/output.html) 输出 SOME/IP 消息
 
-输出 SOME/IP 消息。 您可以输出 SOME/IP 请求和 SOME/IP 响应。
+输出 SOME/IP 消息。 输出 SOME/IP 消息。 您可以输出 SOME/IP 请求和 SOME/IP 响应。
 
 ```typescript
 import { SomeipMessageRequest, SomeipMessageResponse, output } from 'ECB'

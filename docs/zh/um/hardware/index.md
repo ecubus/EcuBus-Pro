@@ -1,26 +1,26 @@
-# EcuBus Hardware
+# EcuBus 硬件
 
-At **EcuBus**, we've worked with a wide range of hardware devices from various vendors, integrating and adapting them to deliver seamless experiences for our users. However, through years of hands-on development, we’ve found that many existing solutions fall short — whether in flexibility, performance, or advanced feature support.
+在 **EcuBus**，我们与来自不同供应商的各种硬件设备合作，集成并适配它们，为用户提供无缝体验。 然而，通过多年的实际开发经验，我们发现许多现有解决方案存在不足——无论是在灵活性、性能还是高级功能支持方面。
 
-That’s why we’re excited to announce **EcuBus Hardware** — our own line of purpose-built devices, designed from the ground up to deliver the **exceptional capabilities** we’ve always envisioned.
+这就是为什么我们激动地宣布 **EcuBus 硬件**——我们自己的专用设备系列，从头开始设计，以提供我们一直设想的**卓越能力**。
 
-## Why EcuBus Hardware?
+## 为什么选择 EcuBus 硬件？
 
-- **Optimized for EcuBus-Pro**: Seamless compatibility with our software, ensuring stable and powerful performance out of the box.
+- **为 EcuBus-Pro 优化**：与我们的软件无缝兼容，确保开箱即用的稳定和强大性能。
 
-- **Next-Level Features**: We’re building hardware that unlocks features simply not possible with off-the-shelf devices.
+- **下一代功能**：我们正在构建能够解锁现成设备无法实现的功能的硬件。
 
-- **Developer-First Design**: Tuned for customization, extensibility, and precise control, giving engineers exactly what they need.
+- **开发者优先设计**：为定制化、可扩展性和精确控制而调优，为工程师提供他们所需的一切。
 
-- **Reliable & Future-Proof**: Engineered to keep up with evolving protocols and demanding environments.
+- **可靠且面向未来**：设计用于跟上不断发展的协议和严苛环境。
 
-## Our Vision
+## 我们的愿景
 
-We’re not just creating another hardware product. We’re building tools that empower developers, testers, and engineers to go beyond the limits of traditional solutions — delivering an **amazing** experience that truly makes a difference.
+我们不仅仅是在创建另一个硬件产品。 我们正在构建工具，赋能开发者、测试人员和工程师超越传统解决方案的限制——提供真正有所作为的**惊人**体验。
 
-## Hardware List
+## 硬件列表
 
-Choose from our specialized EcuBus hardware options:
+从我们专业的 EcuBus 硬件选项中选择：
 
 ![ecubus-hardware](../../../media/um/hardware/image.png)
 
@@ -28,7 +28,7 @@ Choose from our specialized EcuBus hardware options:
 
 ### LinCable
 
-LinCable is our most affordable LIN hardware device, providing USB to LIN connectivity. It supports powerful fault injection capabilities for LIN conformance testing. For more details, see [LinCable](./lincable.md)
+LinCable 是我们最实惠的 LIN 硬件设备，提供 USB 到 LIN 的连接。 它支持强大的故障注入功能，用于 LIN 一致性测试。 更多详情，请参阅 [LinCable](./lincable.md)
 
 
 

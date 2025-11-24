@@ -1,12 +1,12 @@
-# LIN Transport Layer Test Example
+# LIN 传输层测试示例
 
-Low-level LIN TP test that manually constructs consecutive frames and inserts functional requests in between to test protocol behavior.
+底层 LIN TP 测试，手动构建连续帧并在其间插入功能请求以测试协议行为。
 
-## Test Cases
+## 测试用例
 
-### Test 1: Physical Addressing (物理寻址)
+### 测试 1：物理寻址
 
-Basic multi-frame transmission test:
+基本多帧传输测试：
 
 ```typescript
 // First Frame: NAD=2, PCI=0x10, Length=0x11
@@ -21,9 +21,9 @@ msg5: [0x02, 0x22, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11]
 // Wait for response on frame 0x3D
 ```
 
-### Test 2: Functional Addressing Interference (功能寻址干扰测试)
+### 测试 2：功能寻址干扰测试
 
-Tests that functional requests don't interrupt ongoing physical transmission:
+测试功能请求不会中断正在进行的物理传输：
 
 ```typescript
 // Same 3-frame sequence as Test 1, but with functional frames inserted:
@@ -33,22 +33,22 @@ msg1 -> msg2 (functional) -> msg3 -> msg4 (functional) -> msg5 -> response
 msg2/msg4: [0x7E, 0x02, 0x3e, 0x80, 0xAA, 0xAA, 0xAA, 0xAA]
 ```
 
-## Frame Details
+## 帧详细信息
 
-- **Request Frame ID**: 0x3C
-- **Response Frame ID**: 0x3D
-- **Physical NAD**: 0x02 (Motor1)
-- **Functional NAD**: 0x7E (broadcast)
-- **Checksum**: Classic
-- **Timeout**: 1000ms
+- **请求帧 ID**：0x3C
+- **响应帧 ID**：0x3D
+- **物理 NAD**：0x02 (Motor1)
+- **功能 NAD**：0x7E (广播)
+- **校验和**：经典
+- **超时**：1000ms
 
-## Expected Results
+## 预期结果
 
-1. **Test 1**: ECU responds after receiving all 3 consecutive frames
-2. **Test 2**: Functional requests are ignored during physical transmission; ECU only responds to the physical sequence
+1. **测试 1**：ECU 在接收到所有 3 个连续帧后响应
+2. **测试 2**：物理传输期间忽略功能请求；ECU 仅响应物理序列
 
-## Usage
+## 使用方法
 
-1. Load `test_lin_tp.ecb`
-2. Connect LIN hardware to COM8 (19200 baud)
-3. Run tests to verify LIN TP protocol compliance
+1. 加载 `test_lin_tp.ecb`
+2. 将 LIN 硬件连接到 COM8 (19200 波特率)
+3. 运行测试以验证 LIN TP 协议合规性

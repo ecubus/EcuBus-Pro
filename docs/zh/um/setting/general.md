@@ -1,15 +1,15 @@
-# General
+# 通用
 
-## Theme
+## 主题
 
-Used to switch between light and dark themes.
+用于在浅色和深色主题之间切换。
 ![alt text](../../../media/um/setting/image-1.png)
 
 ---
 
 ![alt text](../../../media/um/setting/image-2.png)
 
-## UI Zoom
+## 界面缩放
 
-Used to adjust the UI scaling ratio. The default value is 100%, with a minimum of 50% and maximum of 200%.
+用于调整界面缩放比例。 默认值为100%，最小为50%，最大为200%。
 ![alt text](../../../media/um/setting/image.png)

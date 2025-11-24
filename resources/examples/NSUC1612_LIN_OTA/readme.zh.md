@@ -1,52 +1,52 @@
-# NSUC1612 LIN OTA 示例
+# NSUC1612 LIN OTA Example
 
-本示例演示如何在NSUC1612 ECU上使用LIN（本地互连网络）协议和LIN-UDS（基于LIN-TP的统一诊断服务）执行空中升级（OTA）固件更新。
+This example demonstrates how to perform Over-The-Air (OTA) firmware updates on an NSUC1612 ECU using LIN (Local Interconnect Network) protocol with LIN-UDS (Unified Diagnostic Services based on LIN-TP).
 
 > [!INFO]
-> NSUC1612系列 是一款集成了 4路/3路半桥驱动器的专用处理器芯片，可用于控制小功率电机。它可以驱动有> 刷直流电机、无刷直流电机、步进电机等，在汽车领域得到广泛应用。
+> The NSUC1612 series is a dedicated processor chip that integrates 4-channel/3-channel half-bridge drivers, suitable for controlling low-power motors. It can drive brushed DC motors, brushless DC motors, stepper motors, etc., and is widely used in the automotive industry.
 
-## 概述
+## Overview
 
-示例包含：
+The example includes:
 
-- 使用LIN-TP进行通信
-- 加载动态库安全访问密钥生成
-- 在`tester.ts`中计算固件CRC校验和
+- LIN-TP used for communication
+- Load dll security access key generation
+- Calculate firmware CRC checksums in `tester.ts`
 
-## 文件结构
+## Files Structure
 
 ```text
 NSUC1612_LIN_OTA/
-├── NSUC1612_LIN_OTA.ecb     # 主项目配置文件
-├── tester.ts                # TypeScript 测试脚本
-├── readme.md                # 说明文档
+├── NSUC1612_LIN_OTA.ecb     # Main project configuration
+├── tester.ts                # TypeScript test script
+├── readme.md                # This documentation
 ├── firmware/
-│   └── project_rom_boot.bin # 固件二进制文件
+│   └── project_rom_boot.bin # Firmware binary file
 ├── algorithm/
-│   └── GenerateKeyEx.dll    # 安全访问密钥生成库
+│   └── GenerateKeyEx.dll    # Security access key generation
 └── System32/
-    ├── ucrtbased.dll        # 运行时库
+    ├── ucrtbased.dll        # Runtime libraries
     └── vcruntime140d.dll
 ```
 
-## 使用方法
+## Usage
 
-1. **硬件设置**：将[LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)设备连接到COM5（或更新配置）
-2. **ECU连接**：确保NSUC1612 ECU通过LIN总线连接
-3. **运行测试**：执行测试脚本进行OTA验证
+1. **Hardware Setup**: Connect your [LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html) device to COM5 (or update the configuration)
+2. **ECU Connection**: Ensure NSUC1612 ECU is connected via LIN bus
+3. **Run the Test**: Execute the tester script to perform the OTA validation
 
-## 代码示例
+## Code Example
 
 ```typescript
-// 读取固件文件
+// Read firmware file
 const fw = path.join(process.env.PROJECT_ROOT, 'firmware', 'project_rom_boot.bin')
 const content = await fs.readFile(fw)
 
-// 计算CRC32_JAMCRC校验和
+// Calculate CRC32_JAMCRC checksum
 const crc = CRC.buildInCrc('CRC32_JAMCRC')
 const crcValue = crc.computeBuffer(content)
 
-// 创建并执行诊断服务
+// Create and execute diagnostic service
 const service = DiagRequest.from('NSUC1612_LIN_UDS_Tester.RoutineControl_routineID$F001')
 service.diagSetParameterRaw('routineControlOptionRecord', crcValue)
 await service.changeService()

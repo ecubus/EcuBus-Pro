@@ -42,6 +42,10 @@ export const en = defineConfig({
 function nav(): DefaultTheme.NavItem[] {
   return [
     {
+      text: 'FAQ',
+      link: '/docs/faq/index.md'
+    },
+    {
       text: pkg.version,
       items: [
         {
@@ -70,97 +74,94 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: 'User Manual',
+      base: '/docs/um/',
       items: [
         {
           text: 'EcuBus Hardware',
-          link: '/docs/um/hardware/index.md',
-          items: [{ text: 'LinCable', link: '/docs/um/hardware/lincable.md' }]
+          link: 'hardware/index.md',
+          items: [{ text: 'LinCable', link: 'hardware/lincable.md' }]
         },
-        { text: 'CAN', link: '/docs/um/can/can.md' },
-        { text: 'LIN', link: '/docs/um/lin/lin.md' },
-        { text: 'PWM', link: '/docs/um/pwm/pwm.md' },
-        { text: 'Network', items: [{ text: 'Logger', link: '/docs/um/network/logger.md' }] },
-        { text: 'CLI', link: '/docs/um/cli/cli.md' },
+        { text: 'CAN', link: 'can/can.md' },
+        { text: 'LIN', link: 'lin/lin.md' },
+        { text: 'PWM', link: 'pwm/pwm.md' },
+        { text: 'Network', items: [{ text: 'Logger', link: 'network/logger.md' }] },
+        { text: 'CLI', link: 'cli/cli.md' },
         {
           text: 'Ethernet',
           items: [
             {
               text: 'DoIP',
-              link: '/docs/um/doip/doip.md',
+              link: 'doip/doip.md',
               items: [
                 {
                   text: 'VIN Request Behavior',
-                  link: '/docs/um/doip/vin.md'
+                  link: 'doip/vin.md'
                 }
               ]
             }
           ]
         },
-        { text: 'E2E', link: '/docs/um/e2e/e2e.md' },
-        { text: 'SOME/IP', link: '/docs/um/someip/index.md' },
-        { text: 'OSEK OS Tracking', link: '/docs/um/osTrace/index.md' },
+        { text: 'E2E', link: 'e2e/e2e.md' },
+        { text: 'SOME/IP', link: 'someip/index.md' },
+        { text: 'OSEK OS Tracking', link: 'osTrace/index.md' },
         {
           text: 'Diagnostic',
           items: [
             {
               text: 'Build In Script',
-              link: '/docs/um/uds/buildInScript/buildInScript.md'
+              link: 'uds/buildInScript/buildInScript.md'
             },
             {
               text: 'Tester Present',
-              link: '/docs/um/uds/testerPresent/testerPresent.md'
+              link: 'uds/testerPresent/testerPresent.md'
             },
             {
               text: 'UDS -> C Code',
-              link: '/docs/um/uds/udscode/udscode.md'
+              link: 'uds/udscode/udscode.md'
             },
             {
               text: 'UDS Bootloader Implementation Guide',
-              link: '/docs/um/uds/example/example.md'
+              link: 'uds/example/example.md'
             }
           ]
         },
-        { text: 'Trace', link: '/docs/um/trace/trace.md' },
-        { text: 'Graph', link: '/docs/um/graph/graph.md' },
-        { text: 'Variable', link: '/docs/um/var/var.md' },
+        { text: 'Trace', link: 'trace/trace.md' },
+        { text: 'Graph', link: 'graph/graph.md' },
+        { text: 'Variable', link: 'var/var.md' },
         {
           text: 'Script',
-          link: '/docs/um/script/script.md',
+          link: 'script/script.md',
           items: [
             {
               text: 'Use External Package',
-              link: '/docs/um/script/SerialPort/scriptSerialPort.md'
+              link: 'script/SerialPort/scriptSerialPort.md'
             },
-            { text: 'CAPL->TS', link: '/docs/um/script/capl2ts/capl2ts.md' }
+            { text: 'CAPL->TS', link: 'script/capl2ts/capl2ts.md' }
           ]
         },
         {
           text: 'Test',
-          link: '/docs/um/test/test.md'
+          link: 'test/test.md'
         },
         {
           text: 'Database',
-          link: '/docs/um/database/database.md',
+          link: 'database/database.md',
           items: [
-            { text: 'LIN LDF', link: '/docs/um/database/ldf/ldf.md' },
-            { text: 'CAN DBC', link: '/docs/um/database/dbc/dbc.md' }
+            { text: 'LIN LDF', link: 'database/ldf/ldf.md' },
+            { text: 'CAN DBC', link: 'database/dbc/dbc.md' }
           ]
         },
         {
           text: 'Panel',
-          link: '/docs/um/panel/index.md'
+          link: 'panel/index.md'
         },
         {
           text: 'Plugin',
-          link: '/docs/um/plugin/plugin.md'
+          link: 'plugin/plugin.md'
         },
         {
           text: 'Setting',
-          items: [{ text: 'General', link: '/docs/um/setting/general.md' }]
-        },
-        {
-          text: 'FAQ',
-          link: '/docs/faq/index.md'
+          items: [{ text: 'General', link: 'setting/general.md' }]
         }
       ]
     },
@@ -171,7 +172,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
         {
           text: 'CAN',
           items: [
-            { text: 'CAN Basic', link: 'can/readme' },
+            { text: 'CAN Basic', link: 'can/readme.md' },
             { text: 'CAN High-Precision Timer', link: 'can_timer/readme.md' },
             { text: 'NXP UDS Bootloader', link: 'nxp_bootloader/readme.md' }
           ],
@@ -230,26 +231,27 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: 'Developer Manual',
+      base: '/docs/dev/',
       collapsed: true,
       items: [
-        { text: 'Arch', link: '/docs/dev/arch.md' },
+        { text: 'Arch', link: 'arch.md' },
         {
           text: 'Setup',
-          link: '/docs/dev/setup.md',
+          link: 'setup.md',
           items: [
             {
               text: 'Learning Resources',
-              link: '/docs/dev/jslearn.md'
+              link: 'jslearn.md'
             },
-            { text: 'Dev New Adapter', link: '/docs/dev/adapter.md' }
+            { text: 'Dev New Adapter', link: 'adapter.md' }
           ]
         },
-        { text: 'Comp Test', link: '/docs/dev/test.md' },
-        { text: 'Addon', link: '/docs/dev/addon.md' },
-        { text: 'Plugin', link: '/docs/dev/plugin.md' },
-        { text: 'How to Development Docs', link: '/docs/dev/doc.md' },
-        { text: 'Feature Request Process', link: '/docs/dev/feature.md' },
-        { text: 'Releases Note', link: '/docs/dev/releases_note.md' }
+        { text: 'Comp Test', link: 'test.md' },
+        { text: 'Addon', link: 'addon.md' },
+        { text: 'Plugin', link: 'plugin.md' },
+        { text: 'How to Development Docs', link: 'doc.md' },
+        { text: 'Feature Request Process', link: 'feature.md' },
+        { text: 'Releases Note', link: 'releases_note.md' }
       ]
     }
   ]

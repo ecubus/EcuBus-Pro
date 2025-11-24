@@ -1,51 +1,51 @@
-# UDS -> C Code
+# UDS -> C 代码
 
 <!-- markdownlint-disable MD033 -->
 
-Users can generate C code based on their configured UDS services. The code format depends on user-defined templates.
+用户可以根据其配置的 UDS 服务生成 C 代码。 代码格式取决于用户定义的模板。
 ![code](../../../../media/um/uds/udscode/images/uds-code-format.png)
 
-## UDS Code Generation
+## UDS 代码生成
 
-First, users need to enable UDS code generation in the UDS Tester.
+首先，用户需要在 UDS Tester 中启用 UDS 代码生成。
 
 ![code1](../../../../media/um/uds/udscode/images/enable-code-gen.png)
 
-Then users can add Template Configurations. Each template configuration contains two fields:
+然后用户可以添加模板配置。 每个模板配置包含两个字段：
 
-- **Template Path**: Users can select a template file from the local file system.
-- **Generate Path**: Users can specify the path where the generated code will be saved.
+- **模板路径**：用户可以从本地文件系统选择模板文件。
+- **生成路径**：用户可以指定生成代码的保存路径。
 
-Multiple template configurations are supported. Users can add or remove template configurations as needed, and each template supports runtime preview functionality.
+支持多个模板配置。 用户可以根据需要添加或移除模板配置，每个模板支持运行时预览功能。
 
-## Special Properties
+## 特殊属性
 
-When enabling UDS code generation, each service supports adding user-defined special properties for `code generation`.
+启用 UDS 代码生成时，每个服务支持添加用户定义的特殊属性以用于 `code generation`。
 ![code2](../../../../media/um/uds/udscode/images/special-config.png)
 
-Properties are defined in Key-Value format.
+属性以键值对格式定义。
 
-**Requirements:**
+**要求：**
 
-- Keys cannot be duplicated
-- Values must be strings
+- 键不能重复
+- 值必须是字符串
 
-## Template
+## 模板
 
-The UDS code generation system is based on [**Handlebars.js**](https://handlebarsjs.com) templating engine, enhanced with extensive custom helper methods to provide powerful code generation capabilities.
+UDS 代码生成系统基于 [**Handlebars.js**](https://handlebarsjs.com) 模板引擎，并通过大量自定义辅助方法增强，以提供强大的代码生成能力。
 
-### Template System Overview
+### 模板系统概述
 
 <span v-pre>
-Templates use Handlebars syntax with double curly braces `{{ }}` for expressions and `{{# }}{{/ }}` for block helpers. The system provides access to UDS service data, configuration properties, and a rich set of helper functions.
+模板使用 Handlebars 语法，双花括号 `{{ }}` 用于表达式，`{{# }}{{/ }}` 用于块辅助方法。 系统提供对 UDS 服务数据、配置属性以及丰富辅助函数集的访问。
 </span>
 
-### Available Data Context
+### 可用数据上下文
 
-When generating code, templates have access to:
+生成代码时，模板可以访问：
 
-- **tester:[TesterInfo](https://app.whyengineer.com/scriptApi/interfaces/TesterInfo.html)**: All configured UDS services and their properties
-- **project:ProjectInfo**: Project information, type is:
+- **tester:[TesterInfo](https://app.whyengineer.com/scriptApi/interfaces/TesterInfo.html)**：所有配置的 UDS 服务及其属性
+- **project:ProjectInfo**：项目信息，类型为：
 
 ```ts
 export interface ProjectInfo {
@@ -54,71 +54,71 @@ export interface ProjectInfo {
 }
 ```
 
-### Custom Helper Methods
+### 自定义辅助方法
 
-#### **Mathematical Operations**
+#### **数学运算**
 
-- <span v-pre>`{{add a b}}`</span> - Addition
-- <span v-pre>`{{subtract a b}}`</span> - Subtraction
-- <span v-pre>`{{multiply a b}}`</span> - Multiplication
-- <span v-pre>`{{divide a b}}`</span> - Division
-- <span v-pre>`{{abs num}}`</span> - Absolute value
-- <span v-pre>`{{ceil num}}`</span> - Round up
-- <span v-pre>`{{floor num}}`</span> - Round down
-- <span v-pre>`{{modulo a b}}`</span> - Remainder
-- <span v-pre>`{{avg array}}`</span> - Average of array
-- <span v-pre>`{{sum array}}`</span> - Sum of array
+- <span v-pre>`{{add a b}}`</span> - 加法
+- <span v-pre>`{{subtract a b}}`</span> - 减法
+- <span v-pre>`{{multiply a b}}`</span> - 乘法
+- <span v-pre>`{{divide a b}}`</span> - 除法
+- <span v-pre>`{{abs num}}`</span> - 绝对值
+- <span v-pre>`{{ceil num}}`</span> - 向上取整
+- <span v-pre>`{{floor num}}`</span> - 向下取整
+- <span v-pre>`{{modulo a b}}`</span> - 取余
+- <span v-pre>`{{avg array}}`</span> - 数组平均值
+- <span v-pre>`{{sum array}}`</span> - 数组求和
 
-#### **String Manipulation**
+#### **字符串操作**
 
-- <span v-pre>`{{camelcase str}}`</span> - Convert to camelCase
-- <span v-pre>`{{capitalize str}}`</span> - Capitalize first letter
-- <span v-pre>`{{uppercase str}}`</span> - Convert to UPPERCASE
-- <span v-pre>`{{lowercase str}}`</span> - Convert to lowercase
-- <span v-pre>`{{dashcase str}}`</span> - Convert to dash-case
-- <span v-pre>`{{snakecase str}}`</span> - Convert to snake_case
-- <span v-pre>`{{dotcase str}}`</span> - Convert to dot.case
-- <span v-pre>`{{append str suffix}}`</span> - Append suffix
-- <span v-pre>`{{prepend str prefix}}`</span> - Prepend prefix
-- <span v-pre>`{{trim str}}`</span> - Remove whitespace
-- <span v-pre>`{{replace str old new}}`</span> - Replace text
+- <span v-pre>`{{camelcase str}}`</span> - 转换为 camelCase
+- <span v-pre>`{{capitalize str}}`</span> - 首字母大写
+- <span v-pre>`{{uppercase str}}`</span> - 转换为大写
+- <span v-pre>`{{lowercase str}}`</span> - 转换为小写
+- <span v-pre>`{{dashcase str}}`</span> - 转换为 dash-case
+- <span v-pre>`{{snakecase str}}`</span> - 转换为 snake_case
+- <span v-pre>`{{dotcase str}}`</span> - 转换为 dot.case
+- <span v-pre>`{{append str suffix}}`</span> - 追加后缀
+- <span v-pre>`{{prepend str prefix}}`</span> - 前置前缀
+- <span v-pre>`{{trim str}}`</span> - 移除空白字符
+- <span v-pre>`{{replace str old new}}`</span> - 替换文本
 
-#### **Array Operations**
+#### **数组操作**
 
-- <span v-pre>`{{first array n}}`</span> - Get first n items
-- <span v-pre>`{{last array n}}`</span> - Get last n items
-- <span v-pre>`{{after array n}}`</span> - Get items after index n
-- <span v-pre>`{{before array n}}`</span> - Get items before index n
-- <span v-pre>`{{join array separator}}`</span> - Join array elements
-- <span v-pre>`{{arrayify value}}`</span> - Convert to array
-- <span v-pre>`{{#forEach array}}...{{/forEach}}`</span> - Iterate array
-- <span v-pre>`{{#eachIndex array}}...{{/eachIndex}}`</span> - Iterate with index
+- <span v-pre>`{{first array n}}`</span> - 获取前 n 项
+- <span v-pre>`{{last array n}}`</span> - 获取后 n 项
+- <span v-pre>`{{after array n}}`</span> - 获取索引 n 之后的项
+- <span v-pre>`{{before array n}}`</span> - 获取索引 n 之前的项
+- <span v-pre>`{{join array separator}}`</span> - 连接数组元素
+- <span v-pre>`{{arrayify value}}`</span> - 转换为数组
+- <span v-pre>`{{#forEach array}}...{{/forEach}}`</span> - 遍历数组
+- <span v-pre>`{{#eachIndex array}}...{{/eachIndex}}`</span> - 带索引遍历
 
-#### **Comparison & Logic**
+#### **比较与逻辑**
 
-- <span v-pre>`{{eq a b}}`</span> - Equal to
-- <span v-pre>`{{ne a b}}`</span> - Not equal to
-- <span v-pre>`{{gt a b}}`</span> - Greater than
-- <span v-pre>`{{lt a b}}`</span> - Less than
-- <span v-pre>`{{gte a b}}`</span> - Greater than or equal
-- <span v-pre>`{{lte a b}}`</span> - Less than or equal
-- <span v-pre>`{{isString val}}`</span> - Check if string
-- <span v-pre>`{{isNumber val}}`</span> - Check if number
-- <span v-pre>`{{isArray val}}`</span> - Check if array
-- <span v-pre>`{{isDefined val}}`</span> - Check if defined
-- <span v-pre>`{{isUndefined val}}`</span> - Check if undefined
+- <span v-pre>`{{eq a b}}`</span> - 等于
+- <span v-pre>`{{ne a b}}`</span> - 不等于
+- <span v-pre>`{{gt a b}}`</span> - 大于
+- <span v-pre>`{{lt a b}}`</span> - 小于
+- <span v-pre>`{{gte a b}}`</span> - 大于等于
+- <span v-pre>`{{lte a b}}`</span> - 小于等于
+- <span v-pre>`{{isString val}}`</span> - 检查是否为字符串
+- <span v-pre>`{{isNumber val}}`</span> - 检查是否为数字
+- <span v-pre>`{{isArray val}}`</span> - 检查是否为数组
+- <span v-pre>`{{isDefined val}}`</span> - 检查是否已定义
+- <span v-pre>`{{isUndefined val}}`</span> - 检查是否未定义
 
-#### **Utility Functions**
+#### **实用函数**
 
-- <span v-pre>`{{setVar name value}}`</span> - Set variable
-- <span v-pre>`{{jsonParse str}}`</span> - Parse JSON string
-- <span v-pre>`{{jsonStringify obj}}`</span> - Convert to JSON
-- <span v-pre>`{{times n}}...{{/times}}`</span> - Repeat n times
-- <span v-pre>`{{range start end}}...{{/range}}`</span> - Loop from start to end
-- <span v-pre>`{{logFile message}}`</span> - Debug output
-- <span v-pre>`{{error message}}`</span> - Throw error
+- <span v-pre>`{{setVar name value}}`</span> - 设置变量
+- <span v-pre>`{{jsonParse str}}`</span> - 解析 JSON 字符串
+- <span v-pre>`{{jsonStringify obj}}`</span> - 转换为 JSON
+- <span v-pre>`{{times n}}...{{/times}}`</span> - 重复 n 次
+- <span v-pre>`{{range start end}}...{{/range}}`</span> - 从 start 到 end 循环
+- <span v-pre>`{{logFile message}}`</span> - 调试输出
+- <span v-pre>`{{error message}}`</span> - 抛出错误
 
-### Template Example
+### 模板示例
 
 ```handlebars
 /* Generated UDS Code */
@@ -142,8 +142,8 @@ export interface ProjectInfo {
 {{/forEach}}
 ```
 
-### More Complex Example
+### 更复杂示例
 
-See the [uds_generate_code](https://app.whyengineer.com/examples/uds_generate_code/readme) example.
+请参阅 [uds_generate_code](https://app.whyengineer.com/examples/uds_generate_code/readme) 示例。
 
 <!-- markdownlint-enable MD033 -->

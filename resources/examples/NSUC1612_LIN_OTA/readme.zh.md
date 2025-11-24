@@ -1,41 +1,41 @@
-# NSUC1612 LIN OTA Example
+# NSUC1612 LIN OTA 示例
 
-This example demonstrates how to perform Over-The-Air (OTA) firmware updates on an NSUC1612 ECU using LIN (Local Interconnect Network) protocol with LIN-UDS (Unified Diagnostic Services based on LIN-TP).
+本示例演示了如何使用 LIN（本地互连网络）协议和基于 LIN-TP 的统一诊断服务（LIN-UDS）在 NSUC1612 ECU 上执行空中（OTA）固件更新。
 
 > [!INFO]
-> The NSUC1612 series is a dedicated processor chip that integrates 4-channel/3-channel half-bridge drivers, suitable for controlling low-power motors. It can drive brushed DC motors, brushless DC motors, stepper motors, etc., and is widely used in the automotive industry.
+> NSUC1612 系列是一款集成 4 通道/3 通道半桥驱动器的专用处理器芯片，适用于控制低功率电机。 它可以驱动有刷直流电机、无刷直流电机、步进电机等，并广泛应用于汽车行业。
 
-## Overview
+## 概述
 
-The example includes:
+该示例包括：
 
-- LIN-TP used for communication
-- Load dll security access key generation
-- Calculate firmware CRC checksums in `tester.ts`
+- 用于通信的 LIN-TP
+- 加载 dll 安全访问密钥生成
+- 在 `tester.ts` 中计算固件 CRC 校验和
 
-## Files Structure
+## 文件结构
 
 ```text
 NSUC1612_LIN_OTA/
-├── NSUC1612_LIN_OTA.ecb     # Main project configuration
-├── tester.ts                # TypeScript test script
-├── readme.md                # This documentation
+├── NSUC1612_LIN_OTA.ecb     # 主项目配置
+├── tester.ts                # TypeScript 测试脚本
+├── readme.md                # 本文档
 ├── firmware/
-│   └── project_rom_boot.bin # Firmware binary file
+│   └── project_rom_boot.bin # 固件二进制文件
 ├── algorithm/
-│   └── GenerateKeyEx.dll    # Security access key generation
+│   └── GenerateKeyEx.dll    # 安全访问密钥生成
 └── System32/
-    ├── ucrtbased.dll        # Runtime libraries
+    ├── ucrtbased.dll        # 运行时库
     └── vcruntime140d.dll
 ```
 
-## Usage
+## 使用方法
 
-1. **Hardware Setup**: Connect your [LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html) device to COM5 (or update the configuration)
-2. **ECU Connection**: Ensure NSUC1612 ECU is connected via LIN bus
-3. **Run the Test**: Execute the tester script to perform the OTA validation
+1. **硬件设置**：将您的 [LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html) 设备连接到 COM5（或更新配置）
+2. **ECU 连接**：确保 NSUC1612 ECU 通过 LIN 总线连接
+3. **运行测试**：执行测试脚本以执行 OTA 验证
 
-## Code Example
+## 代码示例
 
 ```typescript
 // Read firmware file

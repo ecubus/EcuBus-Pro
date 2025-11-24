@@ -1,37 +1,37 @@
-# Graph
+# 图表
 
-The graph signal feature allows you to visualize the data flow between signals in a graphical format. This feature is especially useful for understanding the relationship between signals and for debugging complex signal interactions.
+图表信号功能允许您以图形格式可视化信号之间的数据流。 此功能对于理解信号之间的关系以及调试复杂的信号交互特别有用。
 ![alt text](../../../media/um/graph/image.png)
 
-- **Line**
-- **Gauge**
-- **Data**
+- **折线**
+- **仪表**
+- **数据**
 
-## Adding Signals
+## 添加信号
 
 ![alt text](../../../media/um/graph/image-1.png)
 
-Add signal from database, which depends on [database](./../database.md).
+从数据库添加信号，这取决于[数据库](./../database.md)。
 
 ![alt text](../../../media/um/graph/image-2.png)
 
-## Add Variabls
+## 添加变量
 
 ![alt text](../../../media/um/graph/image-7.png)
 
-All valid variables from [`Variable Window`](./../var/var.md).
+来自[`变量窗口`](./../var/var.md)的所有有效变量。
 
-## Multi Signal In One Graph
+## 一个图表中的多个信号
 
 ![alt text](../../../media/um/graph/image-3.png)
 ![alt text](../../../media/um/graph/image-5.png)
 ![alt text](../../../media/um/graph/image-6.png)
 
-## Edit Signal Property
+## 编辑信号属性
 
 ![alt text](../../../media/um/graph/image-4.png)
 
-## Drag/Zoom Line Graph
+## 拖拽/缩放折线图
 
-You you zoom in/out the graph by dragging the mouse wheel.
+您可以通过拖动鼠标滚轮来放大/缩小图表。
 ![alt text](../../../media/um/graph/graph.gif)

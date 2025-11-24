@@ -2,7 +2,7 @@
 
 ## 概述
 
-本项目使用 [VitePress](https://vitepress.dev/) 作为文档系统，支持中英文双语文档。 文档位于 `docs/` 目录中，采用 Markdown 格式编写。
+本项目使用 [VitePress](https://vitepress.dev/) 作为文档系统，支持中英文双语文档。 文档位于 `docs/` 目录中，采用 Markdown 格式编写。 文档位于 `docs/` 目录中，采用 Markdown 格式编写。
 
 ## 项目结构
 

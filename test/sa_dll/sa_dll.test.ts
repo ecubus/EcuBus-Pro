@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest'
-import SecureAccessDll from './../../src/main/worker/secureAccess'
+import { SecureAccessDll } from './../../src/main/worker/secureAccess'
 import path from 'path'
 
 test('SecureAccessDllOpt', () => {
@@ -45,4 +45,3 @@ test('SecureAccessDll empty function in dll', () => {
     expect(true).toEqual(true)
   }
 })
-

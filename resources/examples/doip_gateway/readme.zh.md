@@ -1,37 +1,37 @@
-# DoIP Gateway
+# DoIP 网关
 
-This example demonstrates how to implement a DoIP to CAN gateway that bridges communication between DoIP testers and CAN-based ECUs. The gateway receives DoIP diagnostic requests and forwards them to CAN bus, then returns the CAN responses back via DoIP.
+本示例演示如何实现一个 DoIP 到 CAN 的网关，该网关桥接 DoIP 测试仪与基于 CAN 的 ECU 之间的通信。 该网关接收 DoIP 诊断请求并将其转发到 CAN 总线，然后通过 DoIP 返回 CAN 响应。
 
-## Architecture Overview
+## 架构概览
 
-The example simulates a DoIP gateway that:
+本示例模拟一个 DoIP 网关，该网关：
 
-1. Registers as a DoIP virtual entity - see the [example](./../doip_sim_entity/readme.md) for details on virtual entity registration
-2. Receives DoIP diagnostic requests from Ethernet testers
-3. Forwards requests to CAN bus via CANTP
-4. Returns CAN responses back to the DoIP tester
+1. 注册为 DoIP 虚拟实体 - 有关虚拟实体注册的详细信息，请参阅[示例](./../doip_sim_entity/readme.md)
+2. 从以太网测试仪接收 DoIP 诊断请求
+3. 通过 CANTP 将请求转发到 CAN 总线
+4. 将 CAN 响应返回给 DoIP 测试仪
 
 ![arch](image1.png)
 
-## Setup
+## 设置
 
-### Device Configuration
+### 设备配置
 
-Configure the network topology with:
+配置网络拓扑，包括：
 
-- **Eth**: Ethernet connection for DoIP communication
-- **Can**: CAN bus connection for ECU communication
-- **Devices**:
-  - `SIMULATE_0`: Simulates the DoIP interface
-  - `PEAK_1`: CAN interface for ECU communication
+- **Eth**：用于 DoIP 通信的以太网连接
+- **Can**：用于 ECU 通信的 CAN 总线连接
+- **设备**：
+  - `SIMULATE_0`：模拟 DoIP 接口
+  - `PEAK_1`：用于 ECU 通信的 CAN 接口
 
-### Node Configuration
+### 节点配置
 
-Add a node item and attach the gateway script (`node.ts`)
+添加一个节点项并附加网关脚本（`node.ts`）
 
 ![node](image.png)
 
-The gateway script implements the following functionality:
+网关脚本实现以下功能：
 
 ```typescript
 import { DiagResponse, output, RegisterEthVirtualEntity } from 'ECB'
@@ -61,15 +61,15 @@ Util.On("Tester_can_0.*.recv", async (resp) => {
 })
 ```
 
-**Key Features:**
+**关键特性：**
 
-- **DoIP Entity Registration**: Registers a virtual entity with logical address 100
-- **Request Forwarding**: Converts DoIP requests to CAN diagnostic requests
-- **Response Bridging**: Forwards CAN responses back to DoIP tester
+- **DoIP 实体注册**：注册一个逻辑地址为 100 的虚拟实体
+- **请求转发**：将 DoIP 请求转换为 CAN 诊断请求
+- **响应桥接**：将 CAN 响应转发回 DoIP 测试仪
 
-## Using Python Client As Other Tester
+## 使用 Python 客户端作为其他测试仪
 
-A Python test client (`client.py`) is provided for external testing:
+提供了一个用于外部测试的 Python 测试客户端（`client.py`）：
 
 ```python
 import udsoncan
@@ -96,15 +96,15 @@ with Client(conn, request_timeout=2) as client:
 doip_client.close()
 ```
 
-**Prerequisites for Python client:**
+**Python 客户端先决条件：**
 
 ```bash
 pip install udsoncan doipclient
 ```
 
-## Execution
+## 执行
 
-1. **Start the simulation**: Start Run in EcuBus-Pro
-2. **Monitor traffic**: Use the built-in trace window to view all frames
-3. **Alternative monitoring**: Use Wireshark to capture network traffic
-4. **Test with Python**: Run `python client.py` to send test requests
+1. **启动仿真**：在 EcuBus-Pro 中启动运行
+2. **监控流量**：使用内置跟踪窗口查看所有帧
+3. **替代监控**：使用 Wireshark 捕获网络流量
+4. **使用 Python 测试**：运行 `python client.py` 发送测试请求

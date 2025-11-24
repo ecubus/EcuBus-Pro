@@ -1,30 +1,30 @@
-# Tester Present
+# 测试仪在线
 
-Tester Present (Service ID 0x3E) is a diagnostic service used to indicate to an ECU that a diagnostic client (tester) is still present and the diagnostic session should remain active.
+测试仪在线（服务ID 0x3E）是一种诊断服务，用于向ECU表明诊断客户端（测试仪）仍然在线且诊断会话应保持活动状态。
 
-The main purposes of Tester Present are:
+测试仪在线的主要目的是：
 
-- Keep a non-default diagnostic session active by periodically sending messages
-- Prevent timeout of the diagnostic session (S3 timeout)
-- Maintain communication between tester and ECU
+- 通过定期发送消息来保持非默认诊断会话处于活动状态
+- 防止诊断会话超时（S3超时）
+- 维持测试仪与ECU之间的通信
 
 > [!NOTE]
-> Tester Present only support CAN right now.
+> 测试仪在线目前仅支持CAN。
 
-## Configuration
+## 配置
 
-In EcuBus-Pro, Tester Present can be configured in the `UDS Tester` window:
+在EcuBus-Pro中，可以在`UDS测试仪`窗口中配置测试仪在线：
 
-![Tester Present Configuration](../../../../media/um/uds/testerPresent/images/tester_present.png)
+![测试仪在线配置](../../../../media/um/uds/testerPresent/images/tester_present.png)
 
-### S3 Time [M]
+### S3时间[M]
 
-S3 Time means S3 Client timeout, it is the maximum time between Tester Present messages.
+S3时间表示S3客户端超时，它是测试仪在线消息之间的最长时间。
 
-### Tester Present Address [M]
+### 测试仪在线地址[M]
 
-The address of the Tester Present message, it can be set to a physical address or a functional address.
+测试仪在线消息的地址，可以设置为物理地址或功能地址。
 
-### From Speical Serivce [O]
+### 来自特殊服务[O]
 
-The default message of Tester Present is `0x3E 0x00`, if you want to use a special service, you can select one from the service list.
+测试仪在线的默认消息是`0x3E 0x00`，如果您想使用特殊服务，可以从服务列表中选择一个。

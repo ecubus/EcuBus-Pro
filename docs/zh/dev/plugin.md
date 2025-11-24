@@ -1,27 +1,27 @@
-# EcuBus Plugin Development Guide
+# EcuBus 插件开发指南
 
-## Introduction
+## 简介
 
-EcuBus provides a powerful plugin system that allows developers to extend the application's functionality with custom features. Plugins are built using modern web technologies including Vue 3, TypeScript, and Vite, following a two-process architecture similar to Electron.
+EcuBus 提供了一个强大的插件系统，允许开发者通过自定义功能扩展应用程序的功能。 插件使用现代 Web 技术构建，包括 Vue 3、TypeScript 和 Vite，遵循类似于 Electron 的双进程架构。
 
-This guide will walk you through everything you need to know to develop, test, and publish your own EcuBus plugins.
+本指南将引导您了解开发、测试和发布自己的 EcuBus 插件所需的一切知识。
 
-## Prerequisites
+## 先决条件
 
-Before you start developing EcuBus plugins, make sure you have:
+在开始开发 EcuBus 插件之前，请确保您具备：
 
-- **Node.js**: Version 20.19.0+ or 22.12.0+
-- **npm/pnpm/yarn**: Any modern package manager
-- **Basic knowledge of**:
+- **Node.js**：版本 20.19.0+ 或 22.12.0+
+- **npm/pnpm/yarn**：任何现代包管理器
+- **基础知识**：
   - TypeScript
-  - Vue 3 (Composition API)
-  - Node.js basics
+  - Vue 3（组合式 API）
+  - Node.js 基础知识
 
-## Quick Start
+## 快速开始
 
-### Creating a New Plugin
+### 创建新插件
 
-The fastest way to create a new plugin is using the official template:
+创建新插件的最快方法是使用官方模板：
 
 ```bash
 # Using npm
@@ -37,26 +37,26 @@ yarn create ecubus-plugin my-plugin
 bun create ecubus-plugin my-plugin
 ```
 
-Then navigate to your plugin directory and install dependencies:
+然后导航到您的插件目录并安装依赖项：
 
 ```bash
 cd my-plugin
 npm install
 ```
 
-### Start Development Server
+### 启动开发服务器
 
 ```bash
 npm run dev
 ```
 
-This command will:
+此命令将：
 
-- Start the renderer process development server at `http://localhost:5173/` with Hot Module Replacement (HMR)
-- Watch and automatically rebuild main process code when files change
+- 在 `http://localhost:5173/` 启动渲染器进程开发服务器，支持热模块替换（HMR）
+- 监视文件变化并自动重建主进程代码
 
-> [!NOTE]
-> you need change the `manifest.json` file to point to the correct renderer process URL.
+> [!注意]
+> 您需要更改 `manifest.json` 文件以指向正确的渲染器进程 URL。
 >
 > ```json
 > {
@@ -68,18 +68,18 @@ This command will:
 > }
 > ```
 
-### Load Your Plugin in EcuBus-Pro
+### 在 EcuBus-Pro 中加载您的插件
 
-1. Open EcuBus application
-2. Navigate to the `Plugin`
-3. Click `Load Local Plugin`
-4. Select your plugin directory
-5. Your plugin will displayed in the `Plugin Marketplace` list
-6. Enter project and and check your plugin extensions
+1. 打开 EcuBus 应用程序
+2. 导航到 `插件`
+3. 点击 `加载本地插件`
+4. 选择您的插件目录
+5. 您的插件将显示在 `插件市场` 列表中
+6. 进入项目并检查您的插件扩展
 
-## Project Structure
+## 项目结构
 
-A typical EcuBus plugin has the following structure:
+典型的 EcuBus 插件具有以下结构：
 
 ```
 my-plugin/
@@ -102,11 +102,11 @@ my-plugin/
 └── README.md
 ```
 
-## Core Concepts
+## 核心概念
 
-### 1. Two-Process Architecture
+### 1. 双进程架构
 
-EcuBus plugins follow a two-process architecture:
+EcuBus 插件遵循双进程架构：
 
 ```mermaid
 graph TB
@@ -142,46 +142,46 @@ graph TB
     end
 ```
 
-#### Main Process
+#### 主进程
 
-- **Environment**: Node.js
-- **Location**: `src/main/index.ts`
-- **Capabilities**:
-  - Full system access
-  - File system operations
-  - Database access
-  - Hardware device communication
-  - Heavy computation tasks
-  - Network requests
+- **环境**：Node.js
+- **位置**：`src/main/index.ts`
+- **能力**：
+  - 完整的系统访问权限
+  - 文件系统操作
+  - 数据库访问
+  - 硬件设备通信
+  - 繁重的计算任务
+  - 网络请求
 
-#### Renderer Process
+#### 渲染器进程
 
-- **Environment**: Browser (Chromium)
-- **Location**: `src/renderer/`
-- **Capabilities**:
-  - UI rendering with Vue 3
-  - User interaction handling
-  - Calling main process services
-  - Listening to main process events
-  - Data visualization
+- **环境**：浏览器（Chromium）
+- **位置**：`src/renderer/`
+- **能力**：
+  - 使用 Vue 3 进行 UI 渲染
+  - 用户交互处理
+  - 调用主进程服务
+  - 监听主进程事件
+  - 数据可视化
 
-> [!NOTE]
-> Vue 3 and Element Plus are built-in to EcuBus-Pro and externalized by default. Using these libraries directly will keep your plugin bundle size small.
+> [!注意]
+> Vue 3 和 Element Plus 已内置到 EcuBus-Pro 中，默认已外部化。 直接使用这些库将保持您的插件包体积较小。
 
-### 2. Communication Between Processes
+### 2. 进程间通信
 
-The main process and renderer process communicate through a secure API:
+主进程和渲染器进程通过安全 API 进行通信：
 
-**Main → Renderer**:
+**主进程 → 渲染器**：
 
-- Services (renderer calls, main responds)
-- Events (main emits, renderer listens)
+- 服务（渲染器调用，主进程响应）
+- 事件（主进程发出，渲染器监听）
 
-**Renderer → Main**:
+**渲染器 → 主进程**：
 
-- Service calls (async RPC-style)
+- 服务调用（异步 RPC 风格）
 
-#### Communication Architecture
+#### 通信架构
 
 ```mermaid
 sequenceDiagram
@@ -203,9 +203,9 @@ sequenceDiagram
     R->>R: useData() - shared between components
 ```
 
-#### Example: Complete Communication Flow
+#### 示例：完整通信流程
 
-**Main Process** (`src/main/index.ts`):
+**主进程**（`src/main/index.ts`）：
 
 ```typescript
 import { registerService, emitEvent, getPluginPath } from '@ecubus-pro/main-plugin-sdk'
@@ -230,7 +230,7 @@ const pluginPath = getPluginPath()
 console.log('Plugin installed at:', pluginPath)
 ```
 
-**Renderer Process** (`src/renderer/App.vue`):
+**渲染器进程** (`src/renderer/App.vue`)：
 
 ```vue
 <script setup lang="ts">
@@ -271,13 +271,13 @@ onUnmounted(() => {
 </script>
 ```
 
-### 3. Plugin Manifest
+### 3. 插件清单
 
-The `manifest.json` file is the plugin's configuration file that defines metadata and extension points.
+`manifest.json` 文件是插件的配置文件，用于定义元数据和扩展点。
 
-## Plugin Manifest Configuration
+## 插件清单配置
 
-### Basic Structure
+### 基本结构
 
 ```json
 {
@@ -307,23 +307,23 @@ The `manifest.json` file is the plugin's configuration file that defines metadat
 }
 ```
 
-### Manifest Fields
+### 清单字段
 
-| Field         | Type   | Required | Description                                                                                                                |
-| ------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `id`          | string | Yes      | Unique identifier for your plugin (lowercase, no spaces)                                                |
-| `name`        | string | Yes      | Display name shown in EcuBus                                                                                               |
-| `version`     | string | Yes      | Semantic version number (e.g., "1.0.0") |
-| `description` | string | No       | Short description of plugin functionality                                                                                  |
-| `author`      | string | No       | Plugin author name                                                                                                         |
-| `mainEntry`   | string | Yes      | Path to main process entry file (relative to plugin root)                                               |
-| `icon`        | string | No       | Path to plugin icon (PNG recommended)                                                                   |
-| `readme`      | string | No       | Path to README file                                                                                                        |
-| `extensions`  | array  | Yes      | Array of extension points                                                                                                  |
+| 字段            | 类型     | 必需 | 描述                                                |
+| ------------- | ------ | -- | ------------------------------------------------- |
+| `id`          | string | 是  | 插件的唯一标识符（小写，无空格）                                  |
+| `name`        | string | 是  | 在 EcuBus 中显示的显示名称                                 |
+| `version`     | string | 是  | 语义版本号（例如 "1.0.0"） |
+| `description` | string | 否  | 插件功能的简短描述                                         |
+| `author`      | string | 否  | 插件作者名称                                            |
+| `mainEntry`   | string | 是  | 主进程入口文件的路径（相对于插件根目录）                              |
+| `icon`        | string | 否  | 插件图标路径（推荐 PNG）                                    |
+| `readme`      | string | 否  | README 文件路径                                       |
+| `extensions`  | array  | 是  | 扩展点数组                                             |
 
-### Extension Configuration
+### 扩展配置
 
-Each extension defines where and how your plugin appears in EcuBus:
+每个扩展定义了您的插件在 EcuBus 中出现的位置和方式：
 
 ```json
 {
@@ -341,51 +341,51 @@ Each extension defines where and how your plugin appears in EcuBus:
 }
 ```
 
-**Available Target Tabs**:
+**可用目标标签页**：
 
-- `test` - Test & Diagnostics tab
-- `can` - CAN Bus tab
-- `lin` - LIN Bus tab
-- `data` - Data Analysis tab
-- (Check EcuBus documentation for full list)
+- `test` - 测试与诊断标签页
+- `can` - CAN 总线标签页
+- `lin` - LIN 总线标签页
+- `data` - 数据分析标签页
+- （查看 EcuBus 文档获取完整列表）
 
-**Icon Format**:
-Use Iconify icons in the format `collection:icon-name`. Browse available icons at [iconify.design](https://iconify.design/)
+**图标格式**：
+使用 Iconify 图标，格式为 `collection:icon-name`。 在 [iconify.design](https://iconify.design/) 浏览可用图标
 
-Examples:
+示例：
 
 - `mdi:rocket` - Material Design Icons
-- `lucide:settings` - Lucide icons
-- `carbon:settings` - Carbon icons
+- `lucide:settings` - Lucide 图标
+- `carbon:settings` - Carbon 图标
 
-## Getting Help
+## 获取帮助
 
-If you encounter issues:
+如果您遇到问题：
 
-1. Check this guide thoroughly
-2. Review the DEVELOPMENT.md in the plugin template
-3. Check EcuBus official documentation
-4. Search existing issues on GitHub
-5. Ask in community forums
-6. Submit a bug report if needed
+1. 仔细检查本指南
+2. 查看插件模板中的 DEVELOPMENT.md
+3. 查看 EcuBus 官方文档
+4. 在 GitHub 上搜索现有问题
+5. 在社区论坛中提问
+6. 如有需要，提交错误报告
 
-## Contributing
+## 贡献
 
-We welcome contributions to improve the plugin system!
+我们欢迎贡献以改进插件系统！
 
-- Submit bug reports
-- Suggest new features
-- Share example plugins
-- Improve documentation
+- 提交错误报告
+- 建议新功能
+- 分享示例插件
+- 改进文档
 
-## Conclusion
+## 结论
 
-You now have all the knowledge needed to create powerful EcuBus plugins! Start with the template, experiment with the examples, and build something amazing.
+您现在拥有创建强大 EcuBus 插件所需的所有知识！ 从模板开始，尝试示例，并构建一些令人惊叹的东西。
 
-**Happy plugin development!** 🚀
+**插件开发愉快！** 🚀
 
 ---
 
-_Last updated: October 2025_
-_Plugin SDK Version: 0.0.4+_
+_最后更新：2025 年 10 月_
+_插件 SDK 版本：0.0.4+_
 

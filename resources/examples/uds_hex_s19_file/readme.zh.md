@@ -1,22 +1,22 @@
-# UDS File Programming Example
+# UDS 文件编程示例
 
-This example demonstrates how to program hex and S-record files into an ECU using UDS (Unified Diagnostic Services) protocol. The project shows how to use `HexMemoryMap` and `S19MemoryMap` to parse Intel HEX and Motorola S-record files and program them into an ECU using block transfer.
+本示例演示如何使用 UDS（统一诊断服务）协议将十六进制和 S-record 文件编程到 ECU 中。 该项目展示了如何使用 `HexMemoryMap` 和 `S19MemoryMap` 解析 Intel HEX 和 Motorola S-record 文件，并使用块传输将它们编程到 ECU 中。
 
-## Overview
+## 概述
 
-The example implements a programming sequence using the following UDS services:
+该示例使用以下 UDS 服务实现编程序列：
 
 - RequestDownload (0x34)
 - TransferData (0x36)
 - RequestTransferExit (0x37)
 
-## Tester Config
+## 测试仪配置
 
-### Tester (tester.ts)
+### 测试仪 (tester.ts)
 
 ![alt text](image-1.png)
 
-### Service
+### 服务
 
 - 0x34
 - 0x36
@@ -24,17 +24,17 @@ The example implements a programming sequence using the following UDS services:
 
 ![alt text](image-2.png)
 
-### Sequence
+### 序列
 
 ![alt text](image-3.png)
 
-## `tester.ts` Implementation Details
+## `tester.ts` 实现细节
 
-### File Format Support
+### 文件格式支持
 
-The project supports both Intel HEX and Motorola S-record formats using `HexMemoryMap` and `S19MemoryMap`:
+该项目使用 `HexMemoryMap` 和 `S19MemoryMap` 支持 Intel HEX 和 Motorola S-record 格式：
 
-#### Intel HEX Files (.hex)
+#### Intel HEX 文件 (.hex)
 
 ```typescript
 const hexFile = path.join(process.env.PROJECT_ROOT, 'Hello_World.hex')
@@ -46,7 +46,7 @@ for (const [addr, data] of map) {
 }
 ```
 
-#### Motorola S-record Files (.s19, .srec)
+#### Motorola S-record 文件 (.s19, .srec)
 
 ```typescript
 const s19File = path.join(process.env.PROJECT_ROOT, 'Hello_World.s19')
@@ -58,7 +58,7 @@ for (const [addr, data] of map) {
 }
 ```
 
-#### Auto-Detection Example
+#### 自动检测示例
 
 ```typescript
 const filePath = process.env.FIRMWARE_FILE // Could be .hex or .s19
@@ -80,29 +80,29 @@ for (const [addr, data] of map) {
 }
 ```
 
-#### Supported File Formats
+#### 支持的文件格式
 
-| Format            | File Extensions                 | Record Types                            | Address Range                                                                                  |
-| ----------------- | ------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Intel HEX         | `.hex`                          | :00-:05 | 16-bit with extensions                                                                         |
-| Motorola S-record | `.s19`, `.srec`, `.s28`, `.s37` | S0-S9                                   | 16-bit (S1), 24-bit (S2), 32-bit (S3) |
+| 格式                | 文件扩展名                           | 记录类型                                    | 地址范围                                                                                     |
+| ----------------- | ------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Intel HEX         | `.hex`                          | :00-:05 | 16 位带扩展                                                                                  |
+| Motorola S-record | `.s19`, `.srec`, `.s28`, `.s37` | S0-S9                                   | 16 位 (S1), 24 位 (S2), 32 位 (S3) |
 
-Both `HexMemoryMap` and `S19MemoryMap` provide identical interfaces, making it easy to switch between formats or support both in the same application.
+`HexMemoryMap` 和 `S19MemoryMap` 都提供相同的接口，使得在格式之间切换或在同一应用程序中支持两种格式变得容易。
 
-More details can be found in the API documentation:
+更多详细信息可在 API 文档中找到：
 
 - [HexMemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/HexMemoryMap.html)
 - [S19MemoryMap](https://app.whyengineer.com/scriptApi/scriptApi/classes/S19MemoryMap.html)
 
-### Programming Flow
+### 编程流程
 
-The programming process is divided into two main job functions:
+编程过程分为两个主要作业功能：
 
-#### Job Function 0 (Initial Request)
+#### 作业功能 0（初始请求）
 
-- Reads the next memory block to be programmed
-- Sends RequestDownload (0x34) service with memory address and size
-- Gets maximum block size from ECU response
+- 读取下一个要编程的内存块
+- 发送 RequestDownload (0x34) 服务，包含内存地址和大小
+- 从 ECU 响应中获取最大块大小
 
 ```typescript
 const r34 = DiagRequest.from('Tester.RequestDownload520')
@@ -112,26 +112,26 @@ r34.diagSetParameterRaw('memoryAddress', memoryAddress)
 r34.diagSetParameter('memorySize', currentBlock.data.length)
 ```
 
-#### Job Function 1 (Data Transfer)
+#### 作业功能 1（数据传输）
 
-- Splits data into chunks based on maxChunkSize
-- Sends TransferData (0x36) for each chunk
-- Sends RequestTransferExit (0x37) after all chunks
-- Restarts process if more blocks exist
+- 根据 maxChunkSize 将数据分割成块
+- 为每个块发送 TransferData (0x36)
+- 在所有块之后发送 RequestTransferExit (0x37)
+- 如果存在更多块，则重新启动过程
 
-### Key Features
+### 关键特性
 
-1. **Multi-Format Support**
+1. **多格式支持**
 
-   - Intel HEX format support (:00-:05 records)
-   - Motorola S-record format support (S0-S9 records with S1/S2/S3 data)
-   - Unified interface for both formats
-   - Automatic format detection based on file extension
+   - Intel HEX 格式支持（:00-:05 记录）
+   - Motorola S-record 格式支持（S0-S9 记录，含 S1/S2/S3 数据）
+   - 两种格式的统一接口
+   - 基于文件扩展名的自动格式检测
 
-2. **Dynamic Block Size Adjustment**
+2. **动态块大小调整**
 
-   - Adjusts block size based on ECU capabilities
-   - Aligns to 8-byte boundaries for optimal transfer
+   - 根据 ECU 能力调整块大小
+   - 对齐到 8 字节边界以优化传输
 
    ```typescript
    maxChunkSize -= 2 // Account for block sequence counter
@@ -140,22 +140,22 @@ r34.diagSetParameter('memorySize', currentBlock.data.length)
    }
    ```
 
-3. **Block Sequence Counter**
+3. **块序列计数器**
 
-   - Implements 1-255 rolling counter for block tracking
+   - 实现 1-255 滚动计数器用于块跟踪
 
    ```typescript
    const blockSequenceCounter = Buffer.alloc(1)
    blockSequenceCounter.writeUInt8((i + 1) & 0xff)
    ```
 
-4. **Automatic Block Management**
-   - Queues multiple memory blocks
-   - Handles transitions between blocks automatically
-   - Restarts programming sequence for each block
-   - Works seamlessly with both HEX and S-record formats
+4. **自动块管理**
+   - 队列多个内存块
+   - 自动处理块之间的转换
+   - 为每个块重新启动编程序列
+   - 与 HEX 和 S-record 格式无缝协作
 
-## Flow Diagram
+## 流程图
 
 ```mermaid
 
@@ -180,12 +180,12 @@ end
 
 ```
 
-## ECU Simulation
+## ECU 模拟
 
-`Node 1(ecu.ts)` simulation that responds to the programming requests. The ECU side handles three main services:
+`Node 1(ecu.ts)` 模拟，响应编程请求。 ECU端处理三个主要服务：
 ![alt text](image.png)
 
-### 1. RequestDownload (0x34) Response
+### 1. 请求下载(0x34)响应
 
 ```typescript
 Util.On('Tester.RequestDownload520.send', async (req) => {
@@ -198,11 +198,11 @@ Util.On('Tester.RequestDownload520.send', async (req) => {
 })
 ```
 
-- Responds with positive response (0x74)
-- Specifies maximum block length (129 bytes)
-- Uses length format identifier 0x40
+- 以肯定响应(0x74)进行响应
+- 指定最大块长度(129字节)
+- 使用长度格式标识符0x40
 
-### 2. TransferData (0x36) Response
+### 2. 传输数据(0x36)响应
 
 ```typescript
 Util.On('Tester.TransferData540.send', async (req) => {
@@ -213,11 +213,11 @@ Util.On('Tester.TransferData540.send', async (req) => {
 })
 ```
 
-- Acknowledges each data block with positive response (0x76)
-- Echoes back the block sequence counter
-- Simulates successful data transfer
+- 以肯定响应(0x76)确认每个数据块
+- 回显块序列计数器
+- 模拟成功的数据传输
 
-### 3. RequestTransferExit (0x37) Response
+### 3. 请求传输退出(0x37)响应
 
 ```typescript
 Util.On('Tester.RequestTransferExit550.send', async (req) => {
@@ -228,11 +228,11 @@ Util.On('Tester.RequestTransferExit550.send', async (req) => {
 })
 ```
 
-- Confirms completion of transfer with positive response (0x77)
-- Simulates successful programming completion
+- 以肯定响应(0x77)确认传输完成
+- 模拟成功的编程完成
 
-The ECU simulation provides a complete test environment for the programming sequence, allowing developers to test their programming implementation without actual hardware. The simulation works identically regardless of whether the source file is in Intel HEX or Motorola S-record format.
+ECU仿真为编程序列提供了完整的测试环境，允许开发人员无需实际硬件即可测试其编程实现。 无论源文件是Intel HEX格式还是Motorola S-record格式，仿真工作方式完全相同。
 
-## Demo
+## 演示
 
 ![alt text](demo.gif)

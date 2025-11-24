@@ -4,6 +4,7 @@
 
 :::details 答案
 您可以通过进入UDS Tester -> Tp Base -> Padding Enable来启用填充。 您也可以设置自己的填充值，默认为0x00。
+![1](../../media/faq/1.png) 您也可以设置自己的填充值，默认为0x00。
 ![1](../../media/faq/1.png)
 :::
 
@@ -25,7 +26,7 @@
 ## 如何计算报文的CRC值？
 
 :::details 答案
-您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，且参数可配置。
+您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，且参数可配置。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，且参数可配置。
 
 :::
 

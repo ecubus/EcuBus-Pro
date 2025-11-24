@@ -1,62 +1,55 @@
-# LIN 一致性测试示例
+# LIN Conformance Test Example
 
-本示例展示了如何使用 EcuBus-Pro 与 LinCable，按照 ISO/DIS 17987-6 标准开展完整的 LIN 一致性测试。测试套件通过高级故障注入技术，验证 LIN 协议合规性、定时参数以及错误处理能力。
+This example demonstrates comprehensive LIN conformance testing using EcuBus-Pro and LinCable, following the ISO/DIS 17987-6 standard. The test suite validates LIN protocol compliance, timing parameters, and error handling capabilities through advanced fault injection techniques.
 
-## 概述
+## Overview
 
-该 LIN 一致性测试示例提供了一套完整的测试框架，用于依据汽车行业标准验证 LIN 网络组件。它利用 LinCable 的高级故障注入能力，模拟多种错误条件，并验证 LIN 从设备在面对错误时的正确处理。
+The LIN conformance test example provides a complete testing framework for validating LIN network components according to automotive industry standards. It leverages LinCable's advanced fault injection capabilities to simulate various error conditions and verify proper error handling in LIN slave nodes.
 
-用户可以自行修改测试脚本来完成自己的额外的测试需求。
+You can modify the test script to implement your own additional test requirements.
 
-## 使用的设备
+## Used Devices
 
-- **[EcuBus-LinCable](https://app.whyengineer.com/zh/docs/um/hardware/lincable.html)**：具备高级故障注入能力的 USB 转 LIN 适配器（进行错误注入测试时必需）
+- **[EcuBus-LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)**: USB-to-LIN adapter with advanced fault injection capabilities (required for error injection testing)
 
 > [!NOTE]
-> 故障注入测试需要使用 EcuBus-LinCable，因为它是唯一能够执行错误注入操作的设备。标准 LIN 适配器无法完成这些高级测试功能。
+> Fault injection testing requires EcuBus-LinCable as it is the only device capable of performing error injection operations. Standard LIN adapters cannot perform these advanced testing functions.
 
+## Test Database
 
-## 测试数据库
+Conformance testing relies on the LIN Description File (LDF). The LDF defines the LIN network topology, node information, signal definitions, and more.
 
-一致性的测试依赖Lin的LDF文件。LDF文件是Lin的配置文件，用于定义Lin的网络拓扑、节点信息、信号定义等。
+The test database is in the [LINdb.ldf](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_conformance_test/LINdb.ldf) file.
 
-测试数据库位于 [LINdb.ldf](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_conformance_test/LINdb.ldf) 文件。
+## User Variables
 
-## 用户变量
+Although we already have a database, we also define additional user variables to facilitate automated testing.
 
-尽管我们已经有了数据库，我们还是自定义一些额外的用户变量来辅助我们自动化测试。
-
-| 变量名 | 类型 | 默认值 | 取值范围 | 用途说明 |
-|---|---|---|---|---|
-| InitialNAD | number | 2 | 0–255 | 从节点初始 NAD（Node Address）。用于诊断寻址与配置前的通信。|
-| ConfiguredNAD | number | 2 | 0–255 | 配置后的 NAD。用于验证配置流程和后续通信是否使用期望的地址。|
-| SupplierID | number | 0x1e | 0–65535 | 供应商标识，用于一致性测试中的标识读取校验。|
-| FunctionID | number | 1 | 0–65535 | 功能标识，用于从节点身份/功能一致性相关测试。|
-| Variant | number | 0 | 0–255 | 变体号，用于区分从节点固件/配置变体的测试场景。|
-| StatusFrameName | string | "Motor1State_Cycl" | - | 状态帧名称，用于周期性读取从节点状态。与 LDF 中状态帧对应。|
-| TxFrameName | string | "Motor1_Dynamic" | - | 主机发送的帧名称（Master Transmit）。用于向从节点下发动态数据/命令。|
-| RxFrameName | string | "MotorControl" | - | 主机接收/控制帧名称（Master 请求，从机响应）。用于控制与回读配合测试。|
-| EventFrameName | string | "ETF_MotorStates" | - | 事件触发帧名称，用于事件触发与冲突消解相关测试。|
-| StatusSignalOffset | number | 40 | 0–100 | 状态位在状态帧中的比特偏移（bit）。用于定位如 `response_error` 等状态信号的位置。|
-| UnknownId | number | 1 | 0–100 | 非法/未知 ID 测试参数，用于异常帧 ID 行为及错误处理验证。|
+| Variable           | Type   | Default                                 | Range   | Description                                                                                                                                                      |
+| ------------------ | ------ | --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| InitialNAD         | number | 2                                       | 0–255   | Initial Node Address before configuration; used for diagnostics addressing and pre-configuration communication.                                  |
+| ConfiguredNAD      | number | 2                                       | 0–255   | Node Address after configuration; used to validate that configuration and subsequent communication use the expected address.                     |
+| SupplierID         | number | 0x1e                                    | 0–65535 | Supplier identifier, used in identity/consistency checks such as identifier reads.                                                               |
+| FunctionID         | number | 1                                       | 0–65535 | Function identifier for tests related to node identity/function consistency.                                                                     |
+| Variant            | number | 0                                       | 0–255   | Variant number to differentiate firmware/config variants in test scenarios.                                                                      |
+| StatusFrameName    | string | "Motor1State_Cycl" | -       | Status frame name for periodically reading slave node status, corresponding to the LDF.                                                          |
+| TxFrameName        | string | "Motor1_Dynamic"   | -       | Master transmit frame name used to send dynamic data/commands to slaves.                                                                         |
+| RxFrameName        | string | "MotorControl"                          | -       | Frame name used for master control and readback coordination.                                                                                    |
+| EventFrameName     | string | "ETF_MotorStates"  | -       | Event-triggered frame name for event and collision-resolution related tests.                                                                     |
+| StatusSignalOffset | number | 40                                      | 0–100   | Bit offset of the status field within the status frame (e.g., for locating `response_error`). |
+| UnknownId          | number | 1                                       | 0–100   | Parameter for invalid/unknown ID testing to validate error handling for abnormal frame IDs.                                                      |
 
 ![variables](./image1.png)
 
+## Test Script
 
-## 测试脚本
-
-测试脚本位于 [test.ts](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_conformance_test/test.ts) 文件。
+The test script is in the [test.ts](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_conformance_test/test.ts) file.
 
 ![test](./image.png)
 
-## 测试视频
+## Test Report
 
-<iframe style="width:100%;height:500px" src="//player.bilibili.com/player.html?isOutside=true&aid=114998168788309&bvid=BV1u2tbzQEdm&cid=31586780126&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-
-## 测试报告
-
-导出的测试报告：
+Exported test report:
 
 ![test](./report.jpg)
-
 

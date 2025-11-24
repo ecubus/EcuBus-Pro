@@ -6,7 +6,7 @@ import LinCableProductPage from '../../../component/LinCableProductPage.vue'
 
 <LinCableProductPage />
 
-EcuBus LinCable 适配器可通过 USB Type-C 将 LIN 网络无缝连接到计算机。 支持单个 LIN 通道。
+EcuBus LinCable 适配器可通过 USB Type-C 将 LIN 网络无缝连接到计算机。 支持单个 LIN 通道。 支持单个 LIN 通道。
 
 **电路板尺寸：** 59毫米（高度）× 19毫米（长度）
 
@@ -16,11 +16,11 @@ EcuBus LinCable 适配器可通过 USB Type-C 将 LIN 网络无缝连接到计�
 
 ## LIN 协议支持
 
-LinCable 完全支持 LIN 2.0、2.1、2.2A 和 SAE J2602 标准，提供与各种汽车 LIN 设备和网络的兼容性。 支持的波特率包括 19200、10400、9600 和 2400 bps，使 LinCable 适用于传统和现代 LIN 应用。
+LinCable 完全支持 LIN 2.0、2.1、2.2A 和 SAE J2602 标准，提供与各种汽车 LIN 设备和网络的兼容性。 支持的波特率包括 19200、10400、9600 和 2400 bps，使 LinCable 适用于传统和现代 LIN 应用。 支持的波特率包括 19200、10400、9600 和 2400 bps，使 LinCable 适用于传统和现代 LIN 应用。
 
 ## PWM 输出能力
 
-LinCable 包含高级 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车开发和测试的多功能工具。 PWM 输出功能能够为各种汽车应用提供精确的数字信号控制。
+LinCable 包含高级 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车开发和测试的多功能工具。 PWM 输出功能能够为各种汽车应用提供精确的数字信号控制。 PWM 输出功能能够为各种汽车应用提供精确的数字信号控制。
 
 ### PWM 输出规格
 
@@ -80,5 +80,5 @@ LinCable 提供了一个开放的通信协议，使用户能够根据其特定�
 
 ## DFU 固件更新支持
 
-LinCable 支持设备固件更新（DFU）功能，允许用户轻松将设备固件更新到最新版本或安装自定义固件。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持更新，而无需更换硬件。 DFU 过程简单明了，可以通过 EcuBus-Pro 软件或专用的 DFU 工具执行，为固件更新提供了可靠且安全的方法。
+LinCable 支持设备固件更新（DFU）功能，允许用户轻松将设备固件更新到最新版本或安装自定义固件。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持更新，而无需更换硬件。 DFU 过程简单明了，可以通过 EcuBus-Pro 软件或专用的 DFU 工具执行，为固件更新提供了可靠且安全的方法。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持更新，而无需更换硬件。 DFU 过程简单明了，可以通过 EcuBus-Pro 软件或专用的 DFU 工具执行，为固件更新提供了可靠且安全的方法。
 

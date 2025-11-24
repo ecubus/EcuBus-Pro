@@ -1,52 +1,52 @@
-# Led Control Panel Example
+# LED 控制面板示例
 
-This example demonstrates a simple program execution panel in EcuBus-Pro, including status indication and message display.
+本示例演示了 EcuBus-Pro 中的一个简单程序执行面板，包括状态指示和消息显示。
 
-## Features Demonstrated
+## 演示功能
 
-1. **Program Execution Control**
-   - A "Start" button toggles the execution of a simulated program.
-   - When started, the program runs for a random time (2-5 seconds) and then fails automatically.
+1. **程序执行控制**
+   - "启动"按钮切换模拟程序的执行。
+   - 启动后，程序运行随机时间（2-5 秒）然后自动失败。
 
-2. **Status Indication**
-   - Two large LED indicators:
-     - **Red LED**: Lights up when the program fails.
-     - **Blue LED**: Lights up when the program succeeds (not used in this demo, but present for extension).
-   - Status message area displays the current state (e.g., "Starting program execution", "Program failed after random time", "Manual stop of program execution").
+2. **状态指示**
+   - 两个大型 LED 指示灯：
+     - **红色 LED**：程序失败时亮起。
+     - **蓝色 LED**：程序成功时亮起（本演示中未使用，但为扩展而保留）。
+   - 状态消息区域显示当前状态（例如"正在启动程序执行"、"程序在随机时间后失败"、"手动停止程序执行"）。
 
-3. **Panel Layout**
-   - Includes a logo and title for easy identification.
-   - All controls and indicators are arranged in a grid for clarity.
+3. **面板布局**
+   - 包含徽标和标题以便于识别。
+   - 所有控件和指示灯均以网格形式排列，清晰明了。
 
-## Variables Used
+## 使用的变量
 
-| Variable Name                   | Type   | Purpose / Description                                                                                         |
-| ------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
-| Program.run     | number | Controls the start/stop of the program (triggered by the Start button).    |
-| Program.success | number | Indicates if the program succeeded (set to 1 on start, 0 on failure/stop). |
-| Program.failed  | number | Indicates if the program failed (set to 1 on failure, 0 otherwise).        |
-| Program.msg     | string | Displays the current status message in the panel.                                             |
+| 变量名                             | 类型     | 用途/描述                         |
+| ------------------------------- | ------ | ----------------------------- |
+| Program.run     | number | 控制程序的启动/停止（由启动按钮触发）。          |
+| Program.success | number | 指示程序是否成功（启动时设为 1，失败/停止时设为 0）。 |
+| Program.failed  | number | 指示程序是否失败（失败时设为 1，否则为 0）。      |
+| Program.msg     | string | 在面板中显示当前状态消息。                 |
 
-> More information about variables can be found in the [Variable](../../../docs/um/var/var.md) section.
+> 有关变量的更多信息，请参阅[变量](../../../docs/um/var/var.md)部分。
 
-## How It Works
+## 工作原理
 
-- Press the **Start** button to begin the program.
-- The message area will show "Starting program execution".
-- After a random interval (2-5 seconds), the program will simulate a failure:
-  - The message updates to "Program failed after random time".
-  - The red LED lights up.
-  - The Start button resets.
-- You can manually stop the program by toggling the Start button off, which will show "Manual stop of program execution".
+- 按下**启动**按钮开始程序。
+- 消息区域将显示"正在启动程序执行"。
+- 经过随机间隔（2-5 秒）后，程序将模拟失败：
+  - 消息更新为"程序在随机时间后失败"。
+  - 红色 LED 亮起。
+  - 启动按钮重置。
+- 您可以通过关闭启动按钮手动停止程序，这将显示"手动停止程序执行"。
 
-## Example Panel
+## 示例面板
 
 ![Demo](demo.gif)
 
-## Code Overview
+## 代码概览
 
-- **panel.ecb**: Defines the panel layout, variables, and UI elements.
-- **program.ts**: Handles the logic for starting, stopping, and simulating program failure.
+- **panel.ecb**：定义面板布局、变量和 UI 元素。
+- **program.ts**：处理启动、停止和模拟程序失败的逻辑。
 
 ```typescript
 import { setVar } from 'ECB'

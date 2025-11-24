@@ -1,34 +1,34 @@
-# CAPL to EcuBus-Pro Script (TypeScript)
+# CAPL 到 EcuBus-Pro 脚本（TypeScript）
 
-In the automotive testing and diagnostics domain, `CAPL (CANoe Programming Language)` has long been an important tool for developing test automation scripts. It boasts powerful capabilities and a mature user base within the `Vector CANoe` ecosystem.
-However, as test scenarios diversify, cross-platform requirements increase, and the demand for greater flexibility and maintainability grows, is there an alternative solution?
+在汽车测试和诊断领域，`CAPL（CANoe 编程语言）`长期以来一直是开发测试自动化脚本的重要工具。 它在 `Vector CANoe` 生态系统中拥有强大的功能和成熟的用户基础。
+然而，随着测试场景多样化、跨平台需求增加以及对更高灵活性和可维护性的需求增长，是否存在替代解决方案？
 
-EcuBus-Pro’s answer is to write scripts with `TypeScript`. EcuBus-Pro scripts use `TypeScript` as the development language and embrace modern software engineering practices. Compared with CAPL, `TypeScript` offers a richer ecosystem, greater extensibility, and native compatibility with DevOps workflows.
+EcuBus-Pro 的答案是使用 `TypeScript` 编写脚本。 EcuBus-Pro 脚本使用 `TypeScript` 作为开发语言，并采用现代软件工程实践。 与 CAPL 相比，`TypeScript` 提供了更丰富的生态系统、更强的可扩展性以及与 DevOps 工作流程的原生兼容性。
 
-## EcuBus-Pro Script IntelliSense
+## EcuBus-Pro 脚本智能感知
 
-> Because EcuBus-Pro scripts use TypeScript as the development language, you get type-based IntelliSense provided by the TypeScript type system.
+> 由于 EcuBus-Pro 脚本使用 TypeScript 作为开发语言，您可以获得由 TypeScript 类型系统提供的基于类型的智能感知。
 
-![Signal IntelliSense](./../../../../media/um/script/tip1.gif)
+![信号智能感知](./../../../../media/um/script/tip1.gif)
 
-## CAPL vs EcuBus-Pro Script Syntax Comparison
+## CAPL 与 EcuBus-Pro 脚本语法对比
 
 > [!INFO]
-> Continuously updated. For more script APIs, see the [API](https://app.whyengineer.com/scriptApi/index.html)
+> 持续更新中。 有关更多脚本 API，请参阅 [API](https://app.whyengineer.com/scriptApi/index.html)
 
-| Feature                                        | CAPL Example                                  | EcuBus-Pro Script Example (TypeScript) |
-| ---------------------------------------------- | --------------------------------------------- | --------------------------------------------------------- |
-| **Type checking**                              | Weak typing, no compile-time checks           | Strong typing, IDE hints + compile-time checks            |
-| **Libraries & extensions** | Built into the Vector environment             | NPM ecosystem with abundant third-party libraries         |
-| **Variable declaration**                       | `int counter = 0;`                            | `let counter: number = 0;`                                |
-| **Print logs**                                 | `write("Hello CAPL");`                        | `console.log("Hello EcuBus-Pro");`                        |
-| **Message receive event**                      | `on message CAN1.MyMsg{  write("Received");}` | `Util.OnCan(0x1, (msg) => {  console.log("Received");});` |
-| **Event callback**                             | `on key 'a' { ... }`                          | `Util.OnKey('a', () => { ... });`                         |
-| **Variable watch**                             | `on envVar EnvChecksumError { ... }`          | `Util.OnVar('EnvChecksumError', () => { ... });`          |
+| 功能         | CAPL 示例                                       | EcuBus-Pro 脚本示例（TypeScript）                               |
+| ---------- | --------------------------------------------- | --------------------------------------------------------- |
+| **类型检查**   | 弱类型，无编译时检查                                    | 强类型，IDE 提示 + 编译时检查                                        |
+| **库与扩展**   | 内置于 Vector 环境中                                | NPM 生态系统，拥有丰富的第三方库                                        |
+| **变量声明**   | `int counter = 0;`                            | `let counter: number = 0;`                                |
+| **打印日志**   | `write("Hello CAPL");`                        | `console.log("Hello EcuBus-Pro");`                        |
+| **消息接收事件** | `on message CAN1.MyMsg{  write("Received");}` | `Util.OnCan(0x1, (msg) => {  console.log("Received");});` |
+| **事件回调**   | `on key 'a' { ... }`                          | `Util.OnKey('a', () => { ... });`                         |
+| **变量监视**   | `on envVar EnvChecksumError { ... }`          | `Util.OnVar('EnvChecksumError', () => { ... });`          |
 
-## Examples
+## 示例
 
-> Examples are continuously being improved; contributions are welcome.
+> 示例正在不断完善中；欢迎贡献。
 
-1. [Monitor signal changes and print time intervals](./capl2ts1.md)
-2. [Monitor variable changes, send a LIN signal, and manually set an incorrect checksum](./capl2ts2.md)
+1. [监视信号变化并打印时间间隔](./capl2ts1.md)
+2. [监视变量变化，发送 LIN 信号，并手动设置错误的校验和](./capl2ts2.md)

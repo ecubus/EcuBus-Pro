@@ -1,57 +1,57 @@
-# How To Develop New Adapter
+# 如何开发新适配器
 
-`Lin` adapter is similar to `Can` adapter, so you can refer to the `Can` adapter for development.
+`Lin` 适配器与 `Can` 适配器类似，因此您可以参考 `Can` 适配器进行开发。
 
-## Reference Pull Request
+## 参考拉取请求
 
-You may be able to get some reference from these PRs:
+您可以从以下 PR 中获取一些参考：
 
 - [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can
 
-## Step by Step Guide
+## 分步指南
 
-You can get detail steps from [Step by Step Guide](./adapter/detail.md)
+您可以从[分步指南](./adapter/detail.md)中获取详细步骤
 
-## Prerequisites
+## 先决条件
 
-- [node-gyp](https://github.com/nodejs/node-gyp) - For building native modules
-- [napi](https://nodejs.org/api/n-api.html) - Node.js Native API
-- [swig](https://www.swig.org/) - Simplified Wrapper and Interface Generator
+- [node-gyp](https://github.com/nodejs/node-gyp) - 用于构建原生模块
+- [napi](https://nodejs.org/api/n-api.html) - Node.js 原生 API
+- [swig](https://www.swig.org/) - 简化包装器和接口生成器
 
 ---
 
-## Create Adapter Folder
+## 创建适配器文件夹
 
-Create your adapter in the following directory:
+在以下目录中创建您的适配器：
 
 ```text
 src/main/docan/${adapter_name}
 ```
 
-## Directory Structure
+## 目录结构
 
-Each adapter directory should follow this structure:
+每个适配器目录应遵循以下结构：
 
 ```text
 ${adapter_name}/
-├── index.ts           # Main adapter implementation file
-├── swig/             # SWIG interface definitions
-│   ├── ${adapter_name}.i    # Main SWIG interface file
-│   ├── buffer.i            # Buffer handling interface
-│   └── s.bat               # Build script
-├── inc/              # C/C++ header files
-└── lib/              # Third-party library files
+├── index.ts           # 主适配器实现文件
+├── swig/             # SWIG 接口定义
+│   ├── ${adapter_name}.i    # 主 SWIG 接口文件
+│   ├── buffer.i            # 缓冲区处理接口
+│   └── s.bat               # 构建脚本
+├── inc/              # C/C++ 头文件
+└── lib/              # 第三方库文件
 ```
 
 ---
 
-## SWIG Interface Implementation
+## SWIG 接口实现
 
-The SWIG interface is crucial for bridging between JavaScript/TypeScript and native C/C++ code. Here's how to implement it:
+SWIG 接口对于桥接 JavaScript/TypeScript 和原生 C/C++ 代码至关重要。 以下是实现方法：
 
-### 1. Main Interface File (${adapter_name}.i)
+### 1. 主接口文件 (${adapter_name}.i)
 
-Create a main interface file in the `swig` directory:
+在 `swig` 目录中创建主接口文件：
 
 ```swig
 %module ${adapter_name}
@@ -81,9 +81,9 @@ Create a main interface file in the `swig` directory:
 %}
 ```
 
-### 2. Buffer Interface (buffer.i)
+### 2. 缓冲区接口 (buffer.i)
 
-Create a buffer interface file for handling binary data:
+创建缓冲区接口文件以处理二进制数据：
 
 ```swig
 %typemap(in) (const size_t buffer_len,const void* buffer_data) {
@@ -97,93 +97,93 @@ Create a buffer interface file for handling binary data:
 }
 ```
 
-### 3. Build Script (s.bat)
+### 3. 构建脚本 (s.bat)
 
-Create a build script to generate the SWIG wrapper:
+创建构建脚本以生成 SWIG 包装器：
 
 ```batch
 swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i 
 ```
 
-### Key Points for SWIG Implementation
+### SWIG 实现关键点
 
-1. **Type Mapping**
-   - Use `%typemap` for C/C++ to JavaScript type conversion
-   - Handle buffers and pointers properly
-   - Consider endianness for binary data
+1. **类型映射**
+   - 使用 `%typemap` 进行 C/C++ 到 JavaScript 的类型转换
+   - 正确处理缓冲区和指针
+   - 考虑二进制数据的字节序
 
-2. **Header Inclusion**
-   - Include system and library headers
-   - Use `%header %{ ... %}` for C/C++ code
-   - Use `%include` for SWIG interfaces
+2. **头文件包含**
+   - 包含系统和库头文件
+   - 使用 `%header %{ ... %}` 用于 C/C++ 代码
+   - 使用 `%include` 用于 SWIG 接口
 
-3. **Error Handling**
-   - Implement error checking in typemaps
-   - Use `SWIG_exception_fail` for errors
-   - Handle memory management carefully
+3. **错误处理**
+   - 在类型映射中实现错误检查
+   - 使用 `SWIG_exception_fail` 处理错误
+   - 仔细处理内存管理
 
-4. **Module Initialization**
-   - Use `%init %{ ... %}` for setup code
-   - Register callbacks if needed
-   - Initialize global variables
+4. **模块初始化**
+   - 使用 `%init %{ ... %}` 用于设置代码
+   - 如果需要，注册回调
+   - 初始化全局变量
 
-### Common SWIG Directives
+### 常用 SWIG 指令
 
 ```swig
-%module name          // Define module name
-%include file         // Include SWIG interface
-%header %{ ... %}     // Include C/C++ code
-%typemap(...) ...     // Define type mapping
-%pointer_class(...)   // Define pointer class
-%array_class(...)     // Define array class
+%module name          // 定义模块名称
+%include file         // 包含 SWIG 接口
+%header %{ ... %}     // 包含 C/C++ 代码
+%typemap(...) ...     // 定义类型映射
+%pointer_class(...)   // 定义指针类
+%array_class(...)     // 定义数组类
 ```
 
 ---
 
-## Base Class Implementation
+## 基类实现
 
-All adapters must inherit from the `CanBase` abstract class and implement the following required methods:
+所有适配器必须继承自 `CanBase` 抽象类并实现以下必需方法：
 
 ```typescript
 abstract class CanBase {
-  abstract info: CanBaseInfo;           // Adapter basic information
-  abstract log: CanLOG;                 // Logging object
-  abstract close(): void;               // Close the adapter
-  abstract readBase(...): Promise<...>; // Read CAN message
-  abstract writeBase(...): Promise<...>;// Write CAN message
-  abstract getReadBaseId(...): string;  // Get read ID
-  abstract setOption(...): void;        // Set options
-  abstract event: EventEmitter;         // Event emitter
+  abstract info: CanBaseInfo;           // 适配器基本信息
+  abstract log: CanLOG;                 // 日志对象
+  abstract close(): void;               // 关闭适配器
+  abstract readBase(...): Promise<...>; // 读取 CAN 消息
+  abstract writeBase(...): Promise<...>;// 写入 CAN 消息
+  abstract getReadBaseId(...): string;  // 获取读取 ID
+  abstract setOption(...): void;        // 设置选项
+  abstract event: EventEmitter;         // 事件发射器
 }
 ```
 
-## Required Static Methods
+## 必需静态方法
 
-Each adapter class must implement the following static methods:
+每个适配器类必须实现以下静态方法：
 
-- `getValidDevices()`: Returns the list of available devices
-- `getLibVersion()`: Returns the library version information
-- `getDefaultBitrate()`: Returns the default bitrate configuration
-
----
-
-## Implementation Steps
-
-1. Create adapter directory structure
-2. Implement SWIG interface to wrap native libraries
-3. Create adapter class and inherit from `CanBase`
-4. Implement all required abstract methods
-5. Implement static methods
-6. Add error handling and logging
-7. Implement event handling mechanism
-8. Add proper cleanup in close() method
-9. Implement proper error propagation
+- `getValidDevices()`: 返回可用设备列表
+- `getLibVersion()`: 返回库版本信息
+- `getDefaultBitrate()`: 返回默认比特率配置
 
 ---
 
-## Example: KVASER_CAN Adapter
+## 实现步骤
 
-Reference implementation from the `kvaser` adapter:
+1. 创建适配器目录结构
+2. 实现 SWIG 接口以包装原生库
+3. 创建适配器类并继承自 `CanBase`
+4. 实现所有必需的抽象方法
+5. 实现静态方法
+6. 添加错误处理和日志记录
+7. 实现事件处理机制
+8. 在 close() 方法中添加适当的清理
+9. 实现适当的错误传播
+
+---
+
+## 示例：KVASER_CAN 适配器
+
+参考 `kvaser` 适配器的实现：
 
 ```typescript
 export class KVASER_CAN extends CanBase {
@@ -220,13 +220,13 @@ export class KVASER_CAN extends CanBase {
 }
 ```
 
-adapter
+适配器
 
-## Testing
+## 测试
 
-After implementing the adapter, you should create a test file(`${adapter_name}.test.ts`) in the `test/docan` directory. Here's how to implement the tests:
+实现适配器后，您应在 `test/docan` 目录中创建一个测试文件（`${adapter_name}.test.ts`）。 以下是实现测试的方法：
 
-### 1. Test Setup
+### 1. 测试设置
 
 ```typescript
 import { describe, it, beforeAll, afterAll, test } from 'vitest'
@@ -271,11 +271,11 @@ describe('adapter test', () => {
 })
 ```
 
-### 2. Test Cases
+### 2. 测试用例
 
-Implement the following test cases:
+实现以下测试用例：
 
-1. **Basic Operations**
+1. **基本操作**
 
    ```typescript
    test('basic operations', async () => {
@@ -293,7 +293,7 @@ Implement the following test cases:
    })
    ```
 
-2. **Message Transmission**
+2. **消息传输**
 
    ```typescript
    test('message transmission', async () => {
@@ -322,7 +322,7 @@ Implement the following test cases:
    })
    ```
 
-3. **Multi-frame Transmission**
+3. **多帧传输**
 
    ```typescript
    test('multi-frame transmission', async () => {
@@ -347,7 +347,7 @@ Implement the following test cases:
    })
    ```
 
-4. **Error Handling**
+4. **错误处理**
 
    ```typescript
    test('error handling', async () => {
@@ -378,7 +378,7 @@ Implement the following test cases:
    })
    ```
 
-5. **Event Handling**
+5. **事件处理**
 
    ```typescript
    test('event handling', async () => {
@@ -400,21 +400,21 @@ Implement the following test cases:
    })
    ```
 
-### 3) Test Configuration
+### 3) 测试配置
 
-Make sure to test with different configurations:
+确保使用不同的配置进行测试：
 
-- Standard CAN vs CAN FD
-- Different bitrates
-- Different message types (standard/extended)
-- Different data lengths
-- Error conditions and recovery
-- Timeout scenarios
-- Resource cleanup
+- 标准 CAN 与 CAN FD
+- 不同的比特率
+- 不同的消息类型（标准/扩展）
+- 不同的数据长度
+- 错误条件和恢复
+- 超时场景
+- 资源清理
 
-### 4. Running Tests
+### 4. 运行测试
 
-Run the tests using:
+使用以下命令运行测试：
 
 ```bash
 npm test
@@ -422,35 +422,35 @@ npm test
 vitest test/docan/${adapter_name}.test.ts
 ```
 
-Remember to:
+请记住：
 
-- Test on different platforms if your adapter supports multiple platforms
-- Test with different hardware configurations
-- Test error conditions and recovery scenarios
-- Test performance with high message rates
-- Test long-running operations for stability
-- Test resource cleanup and memory leaks
-- Test concurrent operations
-- Test timeout handling
+- 如果您的适配器支持多个平台，请在不同平台上进行测试
+- 使用不同的硬件配置进行测试
+- 测试错误条件和恢复场景
+- 在高消息速率下测试性能
+- 测试长时间运行的稳定性
+- 测试资源清理和内存泄漏
+- 测试并发操作
+- 测试超时处理
 
 ---
 
-## Add In UI
+## 在 UI 中添加
 
-1. edit vendor in  `src/main/share/can.ts`
+1. 在 `src/main/share/can.ts` 中编辑供应商
 
    ```typescript
    export type CanVendor = 'peak' | 'simulate' | 'zlg' | 'kvaser' |  'toomoss'| 'your_adapter_name'
    ```
 
-2. add device in `src/main/docan/can.ts`
-   you should edit these functions:
+2. 在 `src/main/docan/can.ts` 中添加设备
+   您应编辑以下函数：
    - `openCanDevice`
    - `getCanVersion`
    - `getCanDevices`
    - `canClean`
 
-3. add device in `src/renderer/src/views/uds/components/hardware.vue`
+3. 在 `src/renderer/src/views/uds/components/hardware.vue` 中添加设备
 
    ```typescript
    function buildTree() {
@@ -477,4 +477,4 @@ Remember to:
    }
    ```
 
-4. then almost done, you can config your device in `Device` window
+4. 然后几乎完成了，您可以在 `Device` 窗口中配置您的设备

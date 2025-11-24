@@ -1,34 +1,34 @@
 # CAN DBC
 
-EcuBus-Pro supports parsing most CAN DBC files. If you encounter any DBC files that cannot be parsed correctly, please report the issue on our [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) page.
+EcuBus-Pro 支持解析大多数 CAN DBC 文件。 如果您遇到任何无法正确解析的 DBC 文件，请在我们的 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面上报告问题。
 
-The application provides an efficient search interface for messages and signals.
+该应用程序为报文和信号提供了高效的搜索界面。
 
 > [!NOTE]
-> Currently, EcuBus-Pro only supports viewing DBC files and does not support editing. Please ensure your DBC file is correctly formatted before use.
+> 目前，EcuBus-Pro 仅支持查看 DBC 文件，不支持编辑。 请确保您的 DBC 文件在使用前格式正确。
 
-## Select a DBC File
+## 选择 DBC 文件
 
 ![alt text](../../../../media/um/database/dbc/image-18.png)
 
-## Overview
+## 概述
 
-The DBC viewer provides comprehensive information about:
+DBC 查看器提供以下方面的全面信息：
 
-- Network Nodes
-- Messages
-- Signals
+- 网络节点
+- 报文
+- 信号
 
 ![alt text](../../../../media/um/database/dbc/image-19.png)
 
-## Value Tables
+## 值表
 
-Value tables define the mapping between raw values and their corresponding meanings.
+值表定义了原始值与其对应含义之间的映射关系。
 
 ![alt text](../../../../media/um/database/dbc/image-20.png)
 
-## Attributes
+## 属性
 
-View and inspect all DBC attributes.
+查看并检查所有 DBC 属性。
 
 ![alt text](../../../../media/um/database/dbc/image-21.png)

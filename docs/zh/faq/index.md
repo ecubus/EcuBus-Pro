@@ -1,43 +1,43 @@
-# FAQ
+# 常见问题
 
-## How to configure UDS message length to 8 bytes?
+## 如何将UDS报文长度配置为8字节？
 
-:::details Answer
-You can enable padding by going to UDS Tester -> Tp Base -> Padding Enable. You can also set your own Padding Value, which defaults to 0x00.
+:::details 答案
+您可以通过进入UDS Tester -> Tp Base -> Padding Enable来启用填充。 您也可以设置自己的填充值，默认为0x00。
 ![1](../../media/faq/1.png)
 :::
 
-## ZLG 打开设备提示 Set baud rate failed?
+## ZLG打开设备提示设置波特率失败？
 
-:::details Answer
+:::details 答案
 这是一个已知问题，请将EcuBus-Pro安装在非C盘的其他磁盘分区上即可解决。
 :::
 
-## When using a sequencer to send UDS services over LIN with ID 0x3C and NAD 0x55, why not send a LIN message with ID 0x3D afterward for the slave to respond?
+## 当使用序列器通过LIN发送ID为0x3C且NAD为0x55的UDS服务时，为什么之后不发送ID为0x3D的LIN报文让从节点响应？
 
-:::details Answer
-This is due to the implementation of the lin schedule table. You should start any schedule table first.
+:::details 答案
+这是由于LIN调度表的实现方式。 您应该首先启动任何调度表。
 ![2](../../media/faq/2.png)
-Then you can send the LIN message with ID 0x3D.
+然后您可以发送ID为0x3D的LIN报文。
 ![3](../../media/faq/3.png)
 :::
 
-## How to calculate the CRC value of a message?
+## 如何计算报文的CRC值？
 
-:::details Answer
-You can calculate CRC values using the built-in [CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API in scripts. The API supports various CRC algorithms including CRC8, CRC16, and CRC32 with configurable parameters.
+:::details 答案
+您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，且参数可配置。
 
 :::
 
-## How to implement loop counting for periodic messages?
+## 如何实现周期性报文的循环计数？
 
-:::details Answer
+:::details 答案
 
-**If you has database and want update signal value periodically:**
+**如果您有数据库并希望定期更新信号值：**
 
-1. First you need config the message as periodic.
-2. Then you neen use [OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API to listen the message send/receive.
-3. Use [setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API to update signal value.
+1. 首先需要将报文配置为周期性。
+2. 然后需要使用[OnCan](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#oncan) API监听报文的发送/接收。
+3. 使用[setSignal](https://app.whyengineer.com/scriptApi/functions/setSignal.html) API更新信号值。
 
 ```ts
 import { setSignal } from 'ECB'
@@ -50,9 +50,9 @@ Util.OnCan(0x142, (data) => {
 
 ![demo](../../media/faq/loop.gif)
 
-**Without database:**
+**没有数据库：**
 
-1. Just use [output](https://app.whyengineer.com/scriptApi/functions/output.html) API to output the frame with any value you want.
+1. 只需使用[output](https://app.whyengineer.com/scriptApi/functions/output.html) API输出具有任意所需值的帧。
 
 ```ts
 import { output,CanMessage,CAN_ID_TYPE} from 'ECB'

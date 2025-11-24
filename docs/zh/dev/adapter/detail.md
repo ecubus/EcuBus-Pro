@@ -19,8 +19,9 @@ buffer.i、buffer1.i：缓冲区接口，通常不变
 tsfn.cxx：线程安全文件，CAN 发送/接收线程的入口点  
 zlg.node：编译后的 node 模块，可在 .ts 文件中使用  
 ![1](../../../media/dev/adapter/1.png)
-2. 遵循此流程需要掌握基本的 JavaScript/Typescript 语法知识。 对于仅了解 C/C++ 的用户，快速学习 Typescript 的方法是通过菜鸟教程网站上的 [TypeScript 教程](../jslearn)。 花 1-2 天时间按照教程中的每个示例操作，将帮助您掌握基本语法和语言特性。 对于更高级的应用和实现方法，您可以在编写实际相关代码时查阅资料。
-3. 对于 SWIG，我们只需要知道它是一个跨语言编译器，可以为驱动程序 API C/C++ 声明创建包装器，使 Typescript 和其他语言能够访问这些声明。 SWIG 非常强大且复杂，但我们可以暂时忽略其他功能，仅通过一个简单示例了解 SWIG 的工作原理，例如参考这篇 [SWIG 介绍与入门指南](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
+2. 遵循此流程需要掌握基本的 JavaScript/Typescript 语法知识。 遵循此流程需要掌握基本的 JavaScript/Typescript 语法知识。 对于仅了解 C/C++ 的用户，快速学习 Typescript 的方法是通过菜鸟教程网站上的 [TypeScript 教程](../jslearn)。 花 1-2 天时间按照教程中的每个示例操作，将帮助您掌握基本语法和语言特性。 对于更高级的应用和实现方法，您可以在编写实际相关代码时查阅资料。
+3. 花 1-2 天时间按照教程中的每个示例操作，将帮助您掌握基本语法和语言特性。 对于更高级的应用和实现方法，您可以在编写实际相关代码时查阅资料。
+3. 对于 SWIG，我们只需要知道它是一个跨语言编译器，可以为驱动程序 API C/C++ 声明创建包装器，使 Typescript 和其他语言能够访问这些声明。 SWIG 非常强大且复杂，但我们可以暂时忽略其他功能，仅通过一个简单示例了解 SWIG 的工作原理，例如参考这篇 [SWIG 介绍与入门指南](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG) SWIG 非常强大且复杂，但我们可以暂时忽略其他功能，仅通过一个简单示例了解 SWIG 的工作原理，例如参考这篇 [SWIG 介绍与入门指南](https://www.cnblogs.com/xiaoqi/p/17973315/SWIG)
 
 ## 2. 替换与构建
 
@@ -66,6 +67,7 @@ zlg.node：编译后的 node 模块，可在 .ts 文件中使用
    将 .h 文件和 .lib 替换为 vector 文件，暂时保持其他文件不变，并将所有文件重命名为 vector。
 
 2. 修改 SWIG 接口文件 vector.i，将模块名称和包含的头文件替换为 vector 的，暂时禁用所有各种 pointer_class、array_class 等，因为这些定义和映射来自 .h 文件，而新的 vxlapi.h 可能不包含它们。 如果需要，稍后添加它们，确保 .i 不包含原始 zlgcan.h 内容。  
+   保持其他线程安全函数（如 CreateTSFN）不变。 如果需要，稍后添加它们，确保 .i 不包含原始 zlgcan.h 内容。  
    保持其他线程安全函数（如 CreateTSFN）不变。
 
    ```plain
@@ -91,6 +93,8 @@ zlg.node：编译后的 node 模块，可在 .ts 文件中使用
 
    在 .\docan\vector\swig 目录下的 cmd 中执行上述命令，这将从 inc 目录中的 vxlapi.h 头文件生成 vector_wrap.cxx。  
    ![2](../../../media/dev/adapter/2.png)  
+   如果 cmd 报错，表示 vxlapi.h 中的某些代码无法转换为 .cxx，需要根据提示禁用或修改，直到成功生成 .cxx。 此时，ts 文件实际上可以使用 vector_wrap.cxx 访问 Lib API，但为了跨平台兼容性，需要进一步生成 .node 模块。  
+   ![2](../../../media/dev/adapter/2.png)  
    如果 cmd 报错，表示 vxlapi.h 中的某些代码无法转换为 .cxx，需要根据提示禁用或修改，直到成功生成 .cxx。 此时，ts 文件实际上可以使用 vector_wrap.cxx 访问 Lib API，但为了跨平台兼容性，需要进一步生成 .node 模块。
 
 4. 修改安全线程 tsfn.cxx 文件，替换 include zlgcan.h，该文件也有关于 ZLG API 的实现函数，暂时禁用它们，稍后替换，确保 .cxx 不包含原始 zlgcan.h 内容。
@@ -107,7 +111,8 @@ zlg.node：编译后的 node 模块，可在 .ts 文件中使用
 
    ```
 
-5. 到这一步，swig 目录中的程序不再包含原始 ZLG 代码内容，因此可以构建 vector.node。 修改 .\docan\binding.gyp，在 'target_name': 'zlg' 之后添加 'target_name': 'vector' 内容，并禁用其他设备的构建指令，这样 npx node-gyp rebuild 就不会每次都重复构建 peak、kvaser 等其他驱动程序。  
+5. 到这一步，swig 目录中的程序不再包含原始 ZLG 代码内容，因此可以构建 vector.node。 到这一步，swig 目录中的程序不再包含原始 ZLG 代码内容，因此可以构建 vector.node。 修改 .\docan\binding.gyp，在 'target_name': 'zlg' 之后添加 'target_name': 'vector' 内容，并禁用其他设备的构建指令，这样 npx node-gyp rebuild 就不会每次都重复构建 peak、kvaser 等其他驱动程序。  
+   'target_name': 'vector' 需要为 vxlapi64.lib 和 vector_wrap.cxx、tsfn.cxx 指定正确的路径。  
    'target_name': 'vector' 需要为 vxlapi64.lib 和 vector_wrap.cxx、tsfn.cxx 指定正确的路径。
 
 ```json
@@ -150,7 +155,7 @@ zlg.node：编译后的 node 模块，可在 .ts 文件中使用
 }
 ```
 
-在终端中执行 npx node-gyp rebuild，这将在 \docan\build\Release 下生成 vector.node。 此时，C/C++ 和 Lib 已编译并构建为可供 ts 文件使用的 Node 模块。 如果构建失败，请根据错误提示进行修改。
+在终端中执行 npx node-gyp rebuild，这将在 \docan\build\Release 下生成 vector.node。 此时，C/C++ 和 Lib 已编译并构建为可供 ts 文件使用的 Node 模块。 如果构建失败，请根据错误提示进行修改。 此时，C/C++ 和 Lib 已编译并构建为可供 ts 文件使用的 Node 模块。 如果构建失败，请根据错误提示进行修改。
 
 ```plain
 cd src/main/docan
@@ -256,9 +261,10 @@ npx node-gyp rebuild
     ```
 
    如果console.log(devices)在终端打印出正确的设备信息，说明.ts可以正确访问.Lib API，并且之前所有转换步骤都是正确的。  
+   ![4](../../../media/dev/adapter/4.png)  
    ![4](../../../media/dev/adapter/4.png)
 
-   如果.Lib没有获取设备信息的API，可以使用其他API进行简单测试，以测试.Lib是否被.ts正确使用。 如果在调试期间无法访问API或API出错，需要返回之前的步骤，检查生成.cxx和.node时是否有错误。 对于getValidDevices，可以按照.\zlg\index.ts并根据设备特性返回固定标识符和句柄。
+   如果.Lib没有获取设备信息的API，可以使用其他API进行简单测试，以测试.Lib是否被.ts正确使用。 如果在调试期间无法访问API或API出错，需要返回之前的步骤，检查生成.cxx和.node时是否有错误。 对于getValidDevices，可以按照.\zlg\index.ts并根据设备特性返回固定标识符和句柄。 如果在调试期间无法访问API或API出错，需要返回之前的步骤，检查生成.cxx和.node时是否有错误。 对于getValidDevices，可以按照.\zlg\index.ts并根据设备特性返回固定标识符和句柄。
 
     ```ts
       static override getValidDevices(): CanDevice[] {
@@ -271,7 +277,7 @@ npx node-gyp rebuild
             },
     ```
 
-3. 在.ts中可以正确使用.Lib API后，在vector.test.ts中为vector设备初始化创建测试。 此处设置的参数将随info一起传递给构造函数方法。
+3. 在.ts中可以正确使用.Lib API后，在vector.test.ts中为vector设备初始化创建测试。 此处设置的参数将随info一起传递给构造函数方法。 此处设置的参数将随info一起传递给构造函数方法。
 
     ```ts
     describe('vector test', () => {
@@ -303,7 +309,7 @@ npx node-gyp rebuild
       })
     ```
 
-   在index.ts中，传递的参数info索引将决定使用getValidDevices返回的哪个设备通道。 通道匹配后，将进一步执行其他初始化函数。
+   在index.ts中，传递的参数info索引将决定使用getValidDevices返回的哪个设备通道。 通道匹配后，将进一步执行其他初始化函数。 通道匹配后，将进一步执行其他初始化函数。
 
     ```ts
       constructor(info: CanBaseInfo) {
@@ -350,7 +356,7 @@ npx node-gyp rebuild
 
    最后，tsfn.cxx也有一些API实现，只需替换原有的相应功能实现。
 
-4. 许多.Lib API参数必须使用特定的数据类型，否则会出现错误。 TypeScript没有如此丰富的基础类型，因此需要在vector.i中重新封装vxlapi.h类型供.ts使用。 以下是常见情况：
+4. 许多.Lib API参数必须使用特定的数据类型，否则会出现错误。 许多.Lib API参数必须使用特定的数据类型，否则会出现错误。 TypeScript没有如此丰富的基础类型，因此需要在vector.i中重新封装vxlapi.h类型供.ts使用。 以下是常见情况： 以下是常见情况：
 
 参数是指针类型，需要定义指针类：
 

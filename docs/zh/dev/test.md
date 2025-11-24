@@ -1,24 +1,24 @@
-# Test
+# 测试
 
-The test of the project is based on the `Vitest` framework. Get more information about the `Vitest` framework [vitest](https://vitest.dev/).
+项目的测试基于 `Vitest` 框架。 获取有关 `Vitest` 框架的更多信息 [vitest](https://vitest.dev/)。
 
-## Test Code
+## 测试代码
 
-All test code is located in the `test` directory. The test code is written in `TypeScript` and uses the `Vitest` framework to run the test.
+所有测试代码都位于 `test` 目录中。 测试代码使用 `TypeScript` 编写，并使用 `Vitest` 框架运行测试。
 
-## Run Specific Test File
+## 运行特定测试文件
 
 ```bash
 npx vitest test/docan/candle.test.ts
 ```
 
-## Run Specific Test Case with pattern
+## 使用模式运行特定测试用例
 
 ```bash
 npx vitest test/docan/candle.test.ts --t "test name"
 ```
 
-## Run Test
+## 运行测试
 
 ```bash
 npm run test
@@ -26,7 +26,7 @@ npm run test
 
 ![alt text](../../media/dev/image.png)
 
-Stop test when failed
+测试失败时停止
 
 ```bash
 npx vitest --bail=1

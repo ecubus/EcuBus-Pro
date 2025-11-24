@@ -1,8 +1,8 @@
-import { CRC } from 'ECB'
+import { CRC, setTxPending } from 'ECB'
 
 let cnt = 0
 const crc8 = CRC.buildInCrc('CRC8')!
-Util.setTxPending((msg) => {
+setTxPending((msg) => {
   console.error(new Error('xxdsadasd'))
   if (msg.id == 1 && msg.data.length == 8) {
     msg.data[6] = cnt++ % 256

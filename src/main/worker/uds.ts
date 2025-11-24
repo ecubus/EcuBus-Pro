@@ -1349,38 +1349,6 @@ export class UtilClass {
       })
     }
   }
-  /**
-   * Sets a "pending transmit" handler for CAN messages used by jobs/diagnostics.
-   *
-   * This function registers a callback that will be invoked to provide new outgoing CAN message data.
-   * Meant for special use-cases where you want a job or diagnostic operation to temporarily override message transmission.
-   *
-   * @param func - Callback function that takes a CanMessage and returns a Buffer (the outgoing data) or undefined (to use default behavior). Can also return a Promise.
-   *
-   * @example
-   * ```ts
-   * Util.setTxPending(async (msg) => {
-   *   if (msg.id === 0x100) {
-   *     // Intercept outgoing message and modify payload
-   *     const newData = Buffer.from([0x01, 0x02, 0x03, 0x04]);
-   *     return newData;
-   *   }
-   *   // prevent this time transmission
-   *   return undefined;
-   * });
-   * ```
-   *
-   */
-  setTxPending(func: (msg: CanMessage) => Promise<Buffer | undefined> | Buffer | undefined) {
-    registerWorker({
-      __setTxPending: (msg: CanMessage) => {
-        return func({
-          ...msg,
-          data: Buffer.from(msg.data)
-        })
-      }
-    })
-  }
   private async workerOn(event: ServiceNameAll, data: any): Promise<boolean> {
     if (this.event.listenerCount(event) > 0) {
       await this.event.emit(event, data)
@@ -2272,6 +2240,53 @@ global.Util = Util
 Util.Init(() => {
   initPromiseResolve()
 })
+
+/**
+ * Sets a "pending transmit" handler for CAN messages used by jobs/diagnostics.
+ *
+ * Allows test frameworks or diagnostic jobs to temporarily override outgoing CAN message transmission.
+ * The provided callback is invoked before each CAN transmit.
+ *
+ * @param func - Callback taking a CanMessage and returning:
+ *   - a Buffer (to override and send as transmit data),
+ *   - msg.data (to send the message unchanged),
+ *   - undefined (to suppress/disable this transmission),
+ *   - or a Promise resolving to any of the above.
+ *
+ * @returns {void}
+ *
+ * @category E2E
+ *
+ * @example
+ * setTxPending(async (msg) => {
+ *   // E2E test: intercept message with ID 0x200
+ *   if (msg.id === 0x200) {
+ *     // Replace transmit data for E2E injection
+ *     return Buffer.from([0xE2, 0xE2, 0xCA, 0xT1]);
+ *   }
+ *   // Block this transmission (do not send)
+ *   return undefined;
+ * });
+ *
+ * @example
+ * setTxPending((msg) => {
+ *   // Only log, transmit as usual
+ *   console.log("CAN TX:", msg);
+ *   return msg.data; // will not alter data
+ * });
+ */
+export function setTxPending(
+  func: (msg: CanMessage) => Promise<Buffer | undefined> | Buffer | undefined
+) {
+  registerWorker({
+    __setTxPending: (msg: CanMessage) => {
+      return func({
+        ...msg,
+        data: Buffer.from(msg.data)
+      })
+    }
+  })
+}
 
 /**
  * Sends a CAN message

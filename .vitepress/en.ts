@@ -96,6 +96,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
             }
           ]
         },
+        { text: 'E2E', link: '/docs/um/e2e/e2e.md' },
         { text: 'SOME/IP', link: '/docs/um/someip/index.md' },
         { text: 'OSEK OS Tracking', link: '/docs/um/osTrace/index.md' },
         {

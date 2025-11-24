@@ -18,11 +18,11 @@ This ensures that:
 ## Code Example
 
 ```typescript
-import {CRC} from 'ECB'
+import {CRC, setTxPending} from 'ECB'
 
 let cnt=0;
 const crc8=CRC.buildInCrc('CRC8')!
-Util.setTxPending((msg)=>{
+setTxPending((msg)=>{
     if(msg.id==1&&msg.data.length==8){
         msg.data[6]=(cnt++)%256;
         msg.data[7]=crc8.compute(msg.data.subarray(0,7))
@@ -36,7 +36,7 @@ Util.setTxPending((msg)=>{
 ## How It Works
 
 1. **CRC8 Initialization**: Creates a CRC8 calculator using the built-in CRC module
-2. **Message Interception**: Uses `Util.setTxPending` to intercept all outgoing CAN messages before transmission
+2. **Message Interception**: Uses `setTxPending` to intercept all outgoing CAN messages before transmission
 3. **E2E Protection**: For messages with ID 1 and 8-byte length:
    - Updates byte 6 with an incrementing counter (modulo 256)
    - Computes CRC8 checksum over bytes 0-6

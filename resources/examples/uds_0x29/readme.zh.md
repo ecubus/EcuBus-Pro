@@ -1,35 +1,35 @@
-# UDS Authentication Service(0x29) Example
+# UDS 认证服务(0x29) 示例
 
-The 0x29 Authentication Service was introduced in ISO 14229-1:2020 as a modern replacement for the traditional Security Access (0x27) service. This guide demonstrates how to implement and test the 0x29 service using EcuBus-Pro, providing a more secure and certificate-based authentication mechanism for ECU access.
+0x29 认证服务在 ISO 14229-1:2020 中引入，作为传统安全访问(0x27)服务的现代替代方案。 本指南演示如何使用 EcuBus-Pro 实现和测试 0x29 服务，为 ECU 访问提供更安全、基于证书的认证机制。
 
-> Note: ISO 15765-4 has deprecated the 0x27 service, making 0x29 the recommended approach for modern automotive security implementations.
+> 注意：ISO 15765-4 已弃用 0x27 服务，使 0x29 成为现代汽车安全实施的推荐方法。
 
-## Authentication Modes
+## 认证模式
 
-The 0x29 service supports two authentication modes:
+0x29 服务支持两种认证模式：
 
-1. **APCE (Asymmetric Proof of Possession and Certificate Exchange)** - Primary mode
-2. **ACR (Asymmetric Challenge Response)** - Rarely used
+1. **APCE（非对称拥有证明和证书交换）** - 主要模式
+2. **ACR（非对称挑战响应）** - 很少使用
 
-![UDS Authentication Modes](media/uds_modes.png)
+![UDS 认证模式](media/uds_modes.png)
 
-### APCE (Certificate Exchange Verification) Overview
+### APCE（证书交换验证）概述
 
-Traditional security approaches using 0x27 had significant vulnerabilities - once a key or algorithm was compromised, any entity could access the ECU at any time. The 0x29 APCE mode addresses these issues by requiring:
+使用 0x27 的传统安全方法存在重大漏洞 - 一旦密钥或算法被泄露，任何实体都可以随时访问 ECU。 0x29 APCE 模式通过要求以下内容来解决这些问题：
 
-1. **Unique Certificates**: Unlike shared keys, each supplier has unique certificates containing identifying information, enabling accountability if compromised
-2. **Certificate Authority Control**: Suppliers must request certificates from OEMs, removing self-signing capabilities
-3. **Time-Limited Access**: Certificates have expiration dates, unlike permanent keys
+1. **唯一证书**：与共享密钥不同，每个供应商都有包含识别信息的唯一证书，如果被泄露可实现问责
+2. **证书颁发机构控制**：供应商必须向 OEM 请求证书，移除自签名能力
+3. **时间限制访问**：证书具有过期日期，不像永久密钥
 
-### ACR (Challenge Response) Overview
+### ACR（挑战响应）概述
 
-This mode is similar to 0x27 but uses asymmetric cryptography and server-generated challenges to prevent replay attacks. However, it's not widely recommended by AUTOSAR DCM.
+此模式类似于 0x27，但使用非对称加密和服务器生成的挑战来防止重放攻击。 然而，AUTOSAR DCM 并不广泛推荐使用它。
 
-![ACR Flow](media/acr_flow.png)
+![ACR 流程](media/acr_flow.png)
 
-## APCE Implementation Details
+## APCE 实现细节
 
-The APCE authentication process uses several key sub-functions:
+APCE 认证过程使用几个关键子功能：
 
 - `deAuthenticate` (0x00)
 - `verifyCertificateUnidirectional` (0x01)
@@ -37,94 +37,94 @@ The APCE authentication process uses several key sub-functions:
 - `proofOfOwnership` (0x03)
 - `authenticationConfiguration` (0x08)
 
-### deAuthenticate (Sub-function: 0x00)
+### deAuthenticate（子功能：0x00）
 
-Terminates the authentication session and resets server state.
+终止认证会话并重置服务器状态。
 
-**Request Format:**
-![DeAuthenticate Request](media/deauth_request.png)
+**请求格式：**
+![取消认证请求](media/deauth_request.png)
 
-**Response Format:**
-![DeAuthenticate Response](media/deauth_response.png)
+**响应格式：**
+![取消认证响应](media/deauth_response.png)
 
-### verifyCertificateUnidirectional (Sub-function: 0x01)
+### verifyCertificateUnidirectional（子功能：0x01）
 
-Initiates unidirectional certificate verification where the server validates the client.
+启动单向证书验证，服务器验证客户端。
 
-**Request Parameters:**
+**请求参数：**
 
-1. `communicationConfiguration` (1 byte) - Must be 0x00
-2. `lengthOfCertificateClient` (2 bytes) - Certificate length
-3. `certificateClient` (variable) - Client certificate data
-4. `lengthOfChallengeClient` (2 bytes) - Challenge length
-5. `challengeClient` (variable) - Cryptographically secure random challenge
+1. `communicationConfiguration` (1 字节) - 必须为 0x00
+2. `lengthOfCertificateClient` (2 字节) - 证书长度
+3. `certificateClient` (可变) - 客户端证书数据
+4. `lengthOfChallengeClient` (2 字节) - 挑战长度
+5. `challengeClient` (可变) - 加密安全随机挑战
 
-![Verify Certificate Request](media/verify_request.png)
+![验证证书请求](media/verify_request.png)
 
-**Response Parameters:**
+**响应参数：**
 
-1. `returnValue` (1 byte) - Operation result code
-2. `lengthOfChallengeServer` (2 bytes) - Server challenge length
-3. `challengeServer` (variable) - Server-generated challenge
-4. `lengthOfEphemeralPublicKeyServer` (2 bytes) - Server public key length
-5. `ephemeralPublicKeyServer` (variable) - Server's ephemeral ECDH/DH public key
+1. `returnValue` (1 字节) - 操作结果代码
+2. `lengthOfChallengeServer` (2 字节) - 服务器挑战长度
+3. `challengeServer` (可变) - 服务器生成的挑战
+4. `lengthOfEphemeralPublicKeyServer` (2 字节) - 服务器公钥长度
+5. `ephemeralPublicKeyServer` (可变) - 服务器的临时 ECDH/DH 公钥
 
-![Verify Certificate Response](media/verify_response.png)
+![验证证书响应](media/verify_response.png)
 
-### proofOfOwnership (Sub-function: 0x03)
+### proofOfOwnership（子功能：0x03）
 
-Proves that the client possesses the private key corresponding to the certificate.
+证明客户端拥有与证书对应的私钥。
 
-**Request Parameters:**
+**请求参数：**
 
-1. `lengthOfProofOfOwnershipClient` (2 bytes)
-2. `proofOfOwnershipClient` (variable) - Digital signature of server challenge
-3. `lengthOfEphemeralPublicKeyClient` (2 bytes)
-4. `ephemeralPublicKeyClient` (variable) - Client's ephemeral public key
+1. `lengthOfProofOfOwnershipClient` (2 字节)
+2. `proofOfOwnershipClient` (可变) - 服务器挑战的数字签名
+3. `lengthOfEphemeralPublicKeyClient` (2 字节)
+4. `ephemeralPublicKeyClient` (可变) - 客户端的临时公钥
 
-![Proof of Ownership Request](media/proof_request.png)
+![拥有证明请求](media/proof_request.png)
 
-**Verification Process:**
-The server verifies the client's digital signature using the certificate's public key:
+**验证过程：**
+服务器使用证书的公钥验证客户端的数字签名：
 
-![Proof Verification](media/proof_verify.png)
+![证明验证](media/proof_verify.png)
 
-**Response Parameters:**
+**响应参数：**
 
-1. `returnValue` (1 byte) - Verification result
-2. `lengthOfSessionKeyInfo` (2 bytes) - Session key information length
-3. `sessionKeyInfo` (variable) - Derived session key data
+1. `returnValue` (1 字节) - 验证结果
+2. `lengthOfSessionKeyInfo` (2 字节) - 会话密钥信息长度
+3. `sessionKeyInfo` (可变) - 派生的会话密钥数据
 
-![Session Key Info](media/session_key1.png)
+![会话密钥信息](media/session_key1.png)
 
-![Session Key Details](media/session_key2.png)
+![会话密钥详情](media/session_key2.png)
 
-> Note: AUTOSAR DCM currently does not support session keys:
-> ![AUTOSAR Session Key Support](media/autosar_session.png)
+> 注意：AUTOSAR DCM 目前不支持会话密钥：
+> ![AUTOSAR 会话密钥支持](media/autosar_session.png)
 
-### authenticationConfiguration (Sub-function: 0x08)
+### authenticationConfiguration（子功能：0x08）
 
-Initiates APCE mode configuration.
+启动 APCE 模式配置。
 
-**Request:**
-![Authentication Config Request](media/auth_config_request.png)
+**请求：**
+![认证配置请求](media/auth_config_request.png)
 
-**Response:**
-![Authentication Config Response](media/auth_config_response.png)
+**响应：**
+![认证配置响应](media/auth_config_response.png)
 
-## Certificate Preparation
+## 证书准备
 
-Generate the necessary certificates using OpenSSL:
+使用 OpenSSL 生成必要的证书：
 
-### 1. Generate Root CA Private Key
+### 1. 生成根 CA 私钥
 
 ```bash
 openssl genrsa -out ca.key 4096
 ```
 
-### 2. Create Root CA Certificate
+### 2. 创建根 CA 证书
 
-Create a configuration file `req.cnf`:
+创建配置文件 `req.cnf`：
 
 ```ini
 [ req ]
@@ -146,15 +146,15 @@ CN = app.whyengineer.com
 basicConstraints=critical,CA:TRUE
 ```
 
-Generate the CA certificate:
+生成 CA 证书：
 
 ```bash
 openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
 ```
 
-![Certificate Generated](media/cert_generated.png)
+![证书已生成](media/cert_generated.png)
 
-### 3. Generate Client Certificate
+### 3. 生成客户端证书
 
 ```bash
 # Generate client private key
@@ -171,47 +171,47 @@ openssl req -new -key client.key -out client.csr -config req.cnf
 openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -CAcreateserial
 ```
 
-## Return Value Codes
+## 返回值代码
 
-![Return Value Codes 1](media/return_value1.png)
+![返回值代码 1](media/return_value1.png)
 
-![Return Value Codes 2](media/return_value2.png)
+![返回值代码 2](media/return_value2.png)
 
-## Key Exchange Algorithm (ECDH/DH)
+## 密钥交换算法 (ECDH/DH)
 
-ECDH (Elliptic Curve Diffie-Hellman) enables two parties to establish a shared secret over an insecure channel. The algorithm works based on the property:
+ECDH（椭圆曲线迪菲-赫尔曼）使双方能够在非安全通道上建立共享密钥。 该算法基于以下特性工作：
 **(a × G) × b = (b × G) × a**
 
-Where:
+其中：
 
-- `a` and `b` are private keys
-- `G` is the generator point
-- `×` represents elliptic curve point multiplication
+- `a` 和 `b` 是私钥
+- `G` 是生成点
+- `×` 表示椭圆曲线点乘
 
-\*_ECDH Process:_
+**ECDH 过程：**
 
-1. Alice generates: <span v-pre>`{alicePrivKey, alicePubKey = alicePrivKey × G}`</span>
-2. Bob generates: <span v-pre>`{bobPrivKey, bobPubKey = bobPrivKey × G}`</span>
-3. They exchange public keys over insecure channel
-4. Alice computes: sharedKey = bobPubKey × alicePrivKey
-5. Bob computes: sharedKey = alicePubKey × bobPrivKey
-6. Both parties now have the same shared secret
+1. Alice 生成：<span v-pre>`{alicePrivKey, alicePubKey = alicePrivKey × G}`</span>
+2. Bob 生成：<span v-pre>`{bobPrivKey, bobPubKey = bobPrivKey × G}`</span>
+3. 他们通过非安全通道交换公钥
+4. Alice 计算：sharedKey = bobPubKey × alicePrivKey
+5. Bob 计算：sharedKey = alicePubKey × bobPrivKey
+6. 双方现在拥有相同的共享密钥
 
-## Authentication Sequence
+## 认证序列
 
-![Sequence Diagram](media/sequence_diagram.png)
+![序列图](media/sequence_diagram.png)
 
-## EcuBus-Pro Implementation
+## EcuBus-Pro 实现
 
-### 1. Configure Authentication Sequence
+### 1. 配置认证序列
 
-![EcuBus Configuration](media/ecubus_config.png)
+![EcuBus 配置](media/ecubus_config.png)
 
-### 2. Configure Tester Script
+### 2. 配置测试器脚本
 
-![Tester Script Configuration](media/tester_script.png)
+![测试器脚本配置](media/tester_script.png)
 
-**tester.ts:**
+**tester.ts：**
 
 ```typescript
 import { DiagRequest } from "ECB"
@@ -241,11 +241,11 @@ Util.Init(async ()=>{
 })
 ```
 
-### 3. Configure ECU Simulator
+### 3. 配置 ECU 模拟器
 
-![ECU Node Configuration](media/ecu_node.png)
+![ECU 节点配置](media/ecu_node.png)
 
-**ecu.ts:**
+**ecu.ts：**
 
 ```typescript
 import { DiagResponse } from "ECB"
@@ -257,9 +257,9 @@ Util.On("Tester_can_0.authenticationConfiguration.send",async (req)=>{
 })
 ```
 
-![EcuBus Demo](media/ecubus_demo.png)
+![EcuBus 演示](media/ecubus_demo.png)
 
-### 4. Certificate Verification Process
+### 4. 证书验证过程
 
 ```typescript
 Util.On("Tester_can_0.verifyCertificateUnidirectional.send",async (req)=>{
@@ -290,11 +290,11 @@ Util.On("Tester_can_0.verifyCertificateUnidirectional.send",async (req)=>{
 })
 ```
 
-![Certificate Verification 1](media/cert_verify1.png)
+![证书验证 1](media/cert_verify1.png)
 
-![Certificate Verification 2](media/cert_verify2.png)
+![证书验证 2](media/cert_verify2.png)
 
-### 5. Digital Signature Process
+### 5. 数字签名过程
 
 ```typescript
 Util.On("Tester_can_0.verifyCertificateUnidirectional.recv",async (resp)=>{
@@ -318,15 +318,15 @@ Util.On("Tester_can_0.verifyCertificateUnidirectional.recv",async (resp)=>{
 })
 ```
 
-![Signing Demo](media/sign_demo.png)
+![签名演示](media/sign_demo.png)
 
-### 6. Ownership Verification
+### 6. 所有权验证
 
-First, extract the public key from the certificate:
+首先，从证书中提取公钥：
 
-![Get Public Key](media/get_pubkey.png)
+![获取公钥](media/get_pubkey.png)
 
-Then verify the signature:
+然后验证签名：
 
 ```typescript
 Util.On("Tester_can_0.proofOfOwnership.send",async (req)=>{
@@ -349,4 +349,4 @@ Util.On("Tester_can_0.proofOfOwnership.send",async (req)=>{
 })
 ```
 
-![Verify Signature](media/verify_sign.png)
+![验证签名](media/verify_sign.png)

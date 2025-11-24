@@ -1,3 +1,3 @@
-# UDS Binary File Programming Example
+# UDS 二进制文件编程示例
 
-This example demonstrates how to program a binary file into an ECU using UDS (Unified Diagnostic Services) protocol. It will use the [buildInScript](./../../docs/um/uds/buildInScript.md) to program the binary file into the ECU.
+本示例演示如何使用 UDS（统一诊断服务）协议将二进制文件编程到 ECU 中。 它将使用 [buildInScript](./../../docs/um/uds/buildInScript.md) 将二进制文件编程到 ECU 中。

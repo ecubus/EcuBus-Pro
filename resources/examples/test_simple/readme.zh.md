@@ -1,10 +1,10 @@
-# Test Simple
+# 简单测试
 
-About test framework, see UM [Test](../../../docs/um/test/test.md)
+关于测试框架，请参阅用户手册 [测试](../../../docs/um/test/test.md)
 
-- Interface: `CAN`
-- Vendor Device: `Simulate`
-- Test Script: test.ts
+- 接口：`CAN`
+- 供应商设备：`Simulate`
+- 测试脚本：test.ts
 
 ```typescript
 import { describe, test, assert, CanMessage, DiagResponse, DiagRequest } from 'ECB'
@@ -88,34 +88,34 @@ describe('UDS Test', () => {
 ```
 
 - CAN-IA
-  - ID (1), press a to send
-  - ID (2), press b to send
+  - ID (1)，按 a 发送
+  - ID (2)，按 b 发送
     ![alt text](image.png)
 
-## Test Features
+## 测试特性
 
-This test example demonstrates:
+此测试示例演示：
 
-1. **CAN Message Testing**: Wait for specific CAN messages and verify their properties
-2. **UDS Diagnostic Testing**: Send UDS diagnostic requests and validate responses
-3. **Test Utilities**: Reusable functions for message handling with timeout support
+1. **CAN 报文测试**：等待特定 CAN 报文并验证其属性
+2. **UDS 诊断测试**：发送 UDS 诊断请求并验证响应
+3. **测试工具**：具有超时支持的可复用消息处理函数
 
-## Example Success
+## 成功示例
 
-For CAN tests:
+对于 CAN 测试：
 
-- Press 'a' in `Wait for a specific CAN message with ID 0x1`
-- Press 'b' in `Wait for any CAN message, and verify its ID is 0x2`
+- 在 `Wait for a specific CAN message with ID 0x1` 中按 'a'
+- 在 `Wait for any CAN message, and verify its ID is 0x2` 中按 'b'
 
-For UDS tests:
+对于 UDS 测试：
 
-- The DiagnosticSessionControl160 test will automatically send the diagnostic request and wait for the expected response
+- DiagnosticSessionControl160 测试将自动发送诊断请求并等待预期响应
 
 ![alt text](ok.gif)
 ![alt text](image-1.png)
 
-## Example Fail
+## 失败示例
 
-Don't press any key, will timeout in `Wait can frame`
+不按任何键，将在 `Wait can frame` 中超时
 ![alt text](fail.gif)
 ![alt text](image-2.png)

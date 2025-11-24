@@ -1,39 +1,39 @@
-# Plugin
+# 插件
 
-## Overview
+## 概述
 
-The Plugin system is a powerful extensibility feature that allows you to enhance EcuBus-Pro with custom functionality. Plugins enable developers to create and share additional features, tools, and integrations that extend the core capabilities of the application. Through the Plugin Marketplace, you can discover, install, and manage plugins to customize your EcuBus-Pro experience according to your specific needs.
+插件系统是一个强大的可扩展功能，允许您通过自定义功能增强 EcuBus-Pro。 插件使开发人员能够创建和共享额外的功能、工具和集成，以扩展应用程序的核心功能。 通过插件市场，您可以根据特定需求发现、安装和管理插件，以定制您的 EcuBus-Pro 体验。
 
-## Key Features
+## 主要功能
 
-### Plugin Marketplace
+### 插件市场
 
-The Plugin Marketplace provides a centralized location to discover and install plugins:
+插件市场提供了一个集中位置来发现和安装插件：
 ![marketplace](../../../media/um/plugin/image.png)
 
-### Extension Points
+### 扩展点
 
-Plugins can extend EcuBus-Pro in two main ways:
+插件可以通过两种主要方式扩展 EcuBus-Pro：
 
-#### Custom Tabs
+#### 自定义标签页
 
-Plugins can create entirely new tabs in the application interface:
+插件可以在应用程序界面中创建全新的标签页：
 
-- Add specialized tools and interfaces
-- Create custom workflows for specific use cases
-- Implement domain-specific functionality
-- Integrate external services or tools
+- 添加专业工具和界面
+- 为特定用例创建自定义工作流
+- 实现特定领域的功能
+- 集成外部服务或工具
 
-#### Tab Extensions
+#### 标签页扩展
 
-Plugins can extend existing tabs with additional functionality:
+插件可以通过附加功能扩展现有标签页：
 
-- Add buttons and controls to existing tabs (Test, CAN, LIN, Hardware, etc.)
-- Integrate new features seamlessly into the current workflow
-- Enhance existing functionality without modifying core code
-- Provide specialized tools for specific tabs
+- 向现有标签页（测试、CAN、LIN、硬件等）添加按钮和控件
+- 将新功能无缝集成到当前工作流中
+- 在不修改核心代码的情况下增强现有功能
+- 为特定标签页提供专业工具
   ![tab-extensions](../../../media/um/plugin/image-1.png)
 
-### Development Support
+### 开发支持
 
-Developing plugins is very convenient. See the [Plugin Development Guide](../../dev/plugin.md) for details.
+开发插件非常方便。 详情请参阅[插件开发指南](../../dev/plugin.md)。

@@ -1,52 +1,52 @@
-# Panel
+# 面板
 
-## What is Panel?
+## 什么是面板？
 
-The Panel is a flexible, drag-and-drop interface that provides a blank slate where you can freely arrange and connect functional components. Like building with LEGO blocks, you can assemble various features within the Panel to create custom interfaces:
+面板是一个灵活的可拖放界面，提供了一个空白画布，您可以在其中自由排列和连接功能组件。 就像用乐高积木搭建一样，您可以在面板内组装各种功能来创建自定义界面：
 
-![Panel Interface](../../../media/um/panel/base.gif)
+![面板界面](../../../media/um/panel/base.gif)
 
-## Panel Capabilities
+## 面板功能
 
-The Panel feature offers exceptional flexibility for quickly building various demonstrations or testing platforms:
+面板功能为快速构建各种演示或测试平台提供了卓越的灵活性：
 
-- Create conversion tools with graphical interfaces for users
-- Build testing pipelines with simple, click-based interfaces for production line workers
-- Connect components to DBC/LDF file signals, enabling UI changes to trigger corresponding signal changes, see [Database](./../database)
-- Bind components to user-defined or system variables to display or modify their values, see [Variable](./../var/var)
-- And much more to be discovered!
+- 为具有图形界面的用户创建转换工具
+- 为生产线工人构建具有简单、基于点击界面的测试流水线
+- 将组件连接到DBC/LDF文件信号，使UI更改能够触发相应的信号更改，请参阅[数据库](./../database)
+- 将组件绑定到用户定义或系统变量以显示或修改其值，请参阅[变量](./../var/var)
+- 还有更多功能等待发现！
 
-## Panel Features
+## 面板特性
 
-### Editing Functionality
+### 编辑功能
 
-The editing interface consists of three main areas:
+编辑界面包含三个主要区域：
 
-1. **Component Area**: Contains a wide range of ready-to-use components
-2. **Panel Area**: For placing and arranging components
-3. **Component Property Editor**: For setting component properties such as signal binding, variable binding, etc.
+1. **组件区域**：包含各种现成可用的组件
+2. **面板区域**：用于放置和排列组件
+3. **组件属性编辑器**：用于设置组件属性，如信号绑定、变量绑定等
 
-![Editing Interface](../../../media/um/panel/image.png)
+![编辑界面](../../../media/um/panel/image.png)
 
-### Supported Components
+### 支持的组件
 
-The Canvas currently supports four major categories of components:
+画布目前支持四大类组件：
 
-- **Interactive Components**: Buttons, inputs, and other user interaction elements
-- **SubForm Components**: Special functionality components
-- **Display Components**: Visual representation elements
-- **Layout Components**: For organizing and structuring your interface
+- **交互式组件**：按钮、输入框和其他用户交互元素
+- **子表单组件**：特殊功能组件
+- **显示组件**：视觉表示元素
+- **布局组件**：用于组织和构建界面结构
 
-![Component Categories](../../../media/um/panel/image1.png)
+![组件类别](../../../media/um/panel/image1.png)
 
-More component types will be added in future updates, such as dashboard gauges to simulate a car instrument panel.
+更多组件类型将在未来更新中添加，例如用于模拟汽车仪表板的仪表盘。
 
-### Display Functionality
+### 显示功能
 
-After configuring your components, users can view and interact with them in the display mode:
+配置组件后，用户可以在显示模式下查看并与之交互：
 
-![Display Mode](../../../media/um/panel/base1.gif)
+![显示模式](../../../media/um/panel/base1.gif)
 
-## Panel Example
+## 面板示例
 
-[Led Control Panel Example](../../../examples/panel/readme.md)
+[LED控制面板示例](../../../examples/panel/readme.md)

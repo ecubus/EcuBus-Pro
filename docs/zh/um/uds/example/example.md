@@ -2,7 +2,7 @@
 
 ## 概述
 
-本指南演示如何使用 EcuBus-Pro 和 S32K144 微控制器实现完整的 UDS（统一诊断服务）Bootloader。 该示例涵盖从初始配置到脚本实现的整个固件更新过程。
+本指南演示如何使用 EcuBus-Pro 和 S32K144 微控制器实现完整的 UDS（统一诊断服务）Bootloader。 该示例涵盖从初始配置到脚本实现的整个固件更新过程。 该示例涵盖从初始配置到脚本实现的整个固件更新过程。
 
 ## 项目配置
 
@@ -19,7 +19,7 @@
 
 ![Sampling Point Configuration](../../../../media/um/uds/example/images/02-sampling-point-config.png)
 
-- 设置寻址模式。 S32K144 官方 CAN UDS Bootloader 示例使用 Normal fixed 寻址，配置如下。
+- 设置寻址模式。 设置寻址模式。 S32K144 官方 CAN UDS Bootloader 示例使用 Normal fixed 寻址，配置如下。
 
 ![Addressing Mode Configuration](../../../../media/um/uds/example/images/03-addressing-mode-config.png)
 
@@ -43,11 +43,11 @@
 
 #### SecurityAccess（安全访问）($27) 服务
 
-- Seed 请求配置如下。 您需要进入 Response 接口并将 securitySeed 长度更改为 128 位，否则无法接收到 MCU 回复的完整 seed 数据。
+- Seed 请求配置如下。 Seed 请求配置如下。 您需要进入 Response 接口并将 securitySeed 长度更改为 128 位，否则无法接收到 MCU 回复的完整 seed 数据。
 
 ![Security Seed Request Configuration](../../../../media/um/uds/example/images/07-security-seed-request-config.png)
 
-- Key 响应配置如下。 数据段将在脚本中将其大小更改为 128 位，并填充计算出的 key。
+- Key 响应配置如下。 Key 响应配置如下。 数据段将在脚本中将其大小更改为 128 位，并填充计算出的 key。
 
 ![Security Key Response Configuration](../../../../media/um/uds/example/images/08-security-key-response-config.png)
 
@@ -59,7 +59,7 @@
 
 #### WriteDataByIdentifier（按标识符写入数据）($2E) 服务
 
-- 写入指定的 DID。 S32K144 官方 CAN UDS Bootloader 示例使用 0xF15A，配置如下：
+- 写入指定的 DID。 写入指定的 DID。 S32K144 官方 CAN UDS Bootloader 示例使用 0xF15A，配置如下：
 
 ![Write Data By Identifier Configuration](../../../../media/um/uds/example/images/10-write-data-by-identifier-config.png)
 

@@ -23,6 +23,7 @@ gyp info ok
 ## SWIG
 
 `SWIG` 是一个软件开发工具，可将用 C 和 C++ 编写的程序与多种高级编程语言连接起来。
+`SWIG` 是一个软件开发工具，可将用 C 和 C++ 编写的程序与多种高级编程语言连接起来。
 有关 `SWIG` 的更多信息 [swig](https://github.com/swig/swig)
 
 `所有包装代码都应由 SWIG 生成`

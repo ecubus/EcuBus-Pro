@@ -1,6 +1,6 @@
 # UDS 文件编程示例
 
-本示例演示如何使用 UDS（统一诊断服务）协议将十六进制和 S-record 文件编程到 ECU 中。 该项目展示了如何使用 `HexMemoryMap` 和 `S19MemoryMap` 解析 Intel HEX 和 Motorola S-record 文件，并使用块传输将它们编程到 ECU 中。
+本示例演示如何使用 UDS（统一诊断服务）协议将十六进制和 S-record 文件编程到 ECU 中。 该项目展示了如何使用 `HexMemoryMap` 和 `S19MemoryMap` 解析 Intel HEX 和 Motorola S-record 文件，并使用块传输将它们编程到 ECU 中。 该项目展示了如何使用 `HexMemoryMap` 和 `S19MemoryMap` 解析 Intel HEX 和 Motorola S-record 文件，并使用块传输将它们编程到 ECU 中。
 
 ## 概述
 
@@ -183,6 +183,7 @@ end
 ## ECU 模拟
 
 `Node 1(ecu.ts)` 模拟，响应编程请求。 ECU端处理三个主要服务：
+![alt text](image.png) ECU端处理三个主要服务：
 ![alt text](image.png)
 
 ### 1. 请求下载(0x34)响应
@@ -231,7 +232,7 @@ Util.On('Tester.RequestTransferExit550.send', async (req) => {
 - 以肯定响应(0x77)确认传输完成
 - 模拟成功的编程完成
 
-ECU仿真为编程序列提供了完整的测试环境，允许开发人员无需实际硬件即可测试其编程实现。 无论源文件是Intel HEX格式还是Motorola S-record格式，仿真工作方式完全相同。
+ECU仿真为编程序列提供了完整的测试环境，允许开发人员无需实际硬件即可测试其编程实现。 ECU仿真为编程序列提供了完整的测试环境，允许开发人员无需实际硬件即可测试其编程实现。 无论源文件是Intel HEX格式还是Motorola S-record格式，仿真工作方式完全相同。
 
 ## 演示
 

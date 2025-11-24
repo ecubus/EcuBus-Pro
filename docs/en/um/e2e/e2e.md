@@ -23,6 +23,9 @@ The `setTxPending` callback allows users to modify a message's payload just befo
 
 ## How It Works
 
+![E2E](../../../media/um/e2e/e2e.png)
+
+
 The `setTxPending` function registers a callback that intercepts all outgoing messages before transmission. The callback receives a [`CanMessage`] object and can:
 
 1. **Read** the message data (including any pre-calculated checksums or counters)

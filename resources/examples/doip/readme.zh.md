@@ -1,35 +1,35 @@
-# DoIP Example
+# DoIP 示例
 
-This example demonstrates how to use the DOIP protocol to communicate with the ECU. `EcuBus-Pro` acts as the tester, while `doip-custom-simulation` functions as the entity (Gateway).
+本示例演示如何使用 DoIP 协议与 ECU 通信。 `EcuBus-Pro` 作为测试仪，而 `doip-custom-simulation` 作为实体（网关）运行。
 
-## EcuBus-Pro Setup
+## EcuBus-Pro 设置
 
-### Device
+### 设备
 
-Use loopback channel
+使用环回通道
 ![device](image.png)
 
-### Tester
+### 测试仪
 
-Address information get from `doip-custom-simulation` gateway.properties file
+地址信息从 `doip-custom-simulation` gateway.properties 文件获取
 
-- Tester addr:20000
-- Gateway addr:57344
-- Ecu addr:57345
+- 测试仪地址：20000
+- 网关地址：57344
+- ECU 地址：57345
 
 ![addr](image-1.png)
 
-## `doip-custom-simulation` Setup
+## `doip-custom-simulation` 设置
 
-`doip-custom-simulation` is a custom simulation for the DOIP protocol, functioning as an entity. For more detailed information, visit the [doip-custom-simulation GitHub repository](https://github.com/doip/doip-custom-simulation).
+`doip-custom-simulation` 是 DoIP 协议的自定义仿真，作为实体运行。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
 
-### Install
+### 安装
 
 ```bash
 git clone https://github.com/doip/doip-custom-simulation.git
 ```
 
-### Build
+### 构建
 
 ```bash
 cd doip-custom-simulation
@@ -38,21 +38,21 @@ cd doip-custom-simulation
 ```
 
 > [!TIP]
-> Using aliyun mirror if you download gradle too slow,
-> edit gradle/wrapper/gradle-wrapper.properties file
-> update `distributionUrl` to `https\://mirrors.aliyun.com/macports/distfiles/gradle//gradle-8.1.1-bin.zip`
+> 如果下载 gradle 太慢，请使用阿里云镜像，
+> 编辑 gradle/wrapper/gradle-wrapper.properties 文件
+> 将 `distributionUrl` 更新为 `https\://mirrors.aliyun.com/macports/distfiles/gradle//gradle-8.1.1-bin.zip`
 
 ![alt text](doip-custom-simulation/image.png)
 
-### Generate dist
+### 生成发行版
 
 ```bash
 .\gradlew.bat installDist
 ```
 
-### Run
+### 运行
 
-\*.properties file is the configuration file, you can modify it to change the configuration.
+\*.properties 文件是配置文件，您可以修改它以更改配置。
 
 ```bash
 cd build\install\doip-custom-simulation
@@ -60,7 +60,7 @@ cd build\install\doip-custom-simulation
 java "-Dlog4j.configurationFile=log4j2.xml" -jar libs/doip-custom-simulation-2.0.0.jar gateway.properties
 ```
 
-log from doip-custom-simulation:
+来自 doip-custom-simulation 的日志：
 
 ```bash
 10:55:24.574 [GW:TCP-RECV-1]  TRACE  doip.simulation.standard.StandardGateway         - >>> public void onConnectionClosed(DoipTcpConnection doipTcpConnection)
@@ -80,7 +80,7 @@ log from doip-custom-simulation:
 10:59:23.792 [Thread-3    ]  TRACE  doip.library.comm.DoipTcpConnection              - <<< public void stop()
 ```
 
-## Execution
+## 执行
 
-Start the sequence and open the trace window to view all frames. Alternatively, use Wireshark to capture these frames.
+启动序列并打开跟踪窗口以查看所有帧。 或者，使用 Wireshark 捕获这些帧。
 ![trace](trace.png)

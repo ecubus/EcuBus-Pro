@@ -3,7 +3,7 @@
 CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可靠的 ECU 通信而设计。
 
 > [!IMPORTANT]
-> 本节描述的某些功能可能需要 CAN DBC 文件。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。
+> 本节描述的某些功能可能需要 CAN DBC 文件。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。
 
 支持的硬件：
 
@@ -29,6 +29,7 @@ SLCAN 是一种低成本开源解决方案，固件来源于 [canable-fw](https:
 
 ### Linux gs_usb
 
+Linux 内核 3.7 及以上版本已合并 `gs_usb` 驱动程序。
 Linux 内核 3.7 及以上版本已合并 `gs_usb` 驱动程序。
 使用以下命令检查 `gs_usb` 模块是否启用
 
@@ -62,7 +63,7 @@ echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
 sudo devadm monitor --property
 ```
 
-检查设备组所有权。 假设为 `ttyUSB0`（实际设备可能不同）：
+检查设备组所有权。 检查设备组所有权。 假设为 `ttyUSB0`（实际设备可能不同）：
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
@@ -85,7 +86,7 @@ newgrp dialout
 
 ## 设备配置
 
-出于演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
+出于演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。 您可以在设备设置中配置波特率和采样点。
 
 ![alt text](../../../media/um/can/image.png)
 
@@ -94,6 +95,8 @@ newgrp dialout
 波特率设置用于配置 CAN 总线的波特率。
 
 点击 `Bit Timing` 按钮打开位时序配置窗口。
+![alt text](../../../media/um/can/image-8.png)
+![alt text](../../../media/um/can/image-9.png)
 ![alt text](../../../media/um/can/image-8.png)
 ![alt text](../../../media/um/can/image-9.png)
 
@@ -110,6 +113,7 @@ EcuBus-Pro 提供两种主要的 CAN 通信方法：
 
 每个帧可以配置为周期性传输或手动触发（单次触发或按键绑定）。
 ![alt text](../../../media/um/can/image-2.png)
+![alt text](../../../media/um/can/image-2.png)
 
 您可以通过两种方式添加帧：
 
@@ -120,6 +124,7 @@ EcuBus-Pro 提供两种主要的 CAN 通信方法：
 ### 节点脚本
 
 节点可以配置 UDS 功能（测试器）和自定义脚本。
+![alt text](../../../media/um/can/image-4.png)
 ![alt text](../../../media/um/can/image-4.png)
 
 周期性信号更新的示例脚本：

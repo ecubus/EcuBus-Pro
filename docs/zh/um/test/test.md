@@ -1,26 +1,26 @@
-# EcuBus-Pro Testing Architecture
+# EcuBus-Pro 测试架构
 
-## Overview
+## 概述
 
-EcuBus-Pro provides a powerful and flexible testing framework for automotive ECU development and validation. The testing architecture allows developers to create, execute, and monitor automated tests for Bus communications, ensuring reliable and consistent behavior of automotive systems.
+EcuBus-Pro 为汽车 ECU 开发和验证提供了一个强大而灵活的测试框架。 该测试架构允许开发人员为总线通信创建、执行和监控自动化测试，确保汽车系统的可靠和一致行为。
 
 ![alt text](../../../media/um/test/image-4.png)
 
-## Key Features
+## 主要特性
 
-### Config
+### 配置
 
-Monitor test execution with a user-friendly interface showing real-time results
+通过显示实时结果的用户友好界面监控测试执行
 ![alt text](../../../media/um/test/image.png)
 ![alt text](../../../media/um/test/image-2.png)
 
-### TypeScript-Based Test Framework
+### 基于 TypeScript 的测试框架
 
-Write tests using familiar TypeScript syntax with built-in testing utilities. See [Srcipt](./../script.md).
+使用熟悉的 TypeScript 语法和内置测试工具编写测试。 参见 [Srcipt](./../script.md)。
 
-Reused the node.js [test runner](https://nodejs.org/docs/latest/api/test.html)
+重用了 node.js [测试运行器](https://nodejs.org/docs/latest/api/test.html)
 
-#### Example
+#### 示例
 
 ```typescript
  describe('Test Suite', () => {
@@ -52,9 +52,9 @@ describe('Test Suite 2', () => {
 })
 ```
 
-### Detailed Test Reports
+### 详细测试报告
 
-Generate comprehensive test reports with timing and pass/fail information
+生成包含时间和通过/失败信息的全面测试报告
 
 ![alt text](../../../media/um/test/image-3.png)
 

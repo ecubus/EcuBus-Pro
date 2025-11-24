@@ -4,11 +4,12 @@
 - 供应商设备：[KVASER Leaf V3](https://kvaser.com/product/leaf-v3/)
 - 测试板：[S32K344/324/314大开发板EVB评估板](https://item.taobao.com/item.htm?abbucket=19&id=740622398903&ns=1&pisk=foBIpV2TH20CwzFUG0Ew5MELoK95FawqR0tRmgHE2pppy1scPerutp56PNQ6Jvr3tQL5-pdlTU8ePLslllz43-ShxLvTury2-9WlzK0KvX3yXVKWtPrZ7-ShxUmIyo5T34GtHzkKwUQJBCKDALnpvBE6BnxXevd-pf39SFLJeUL-6VK2qYhpya39X3x223LK9ce9q3vJyap-wku64WtRAlu6g--gKeSp5xsGCHLstMTseY611BTA3FM-eOtdjWT25xNyksYegEbTQv95X3_6g6ajdasRm_d1F2EFkgQhCpvbakAf6152O1aKFFWeVIpJ10HRfdTGlTpYHVtG6M5RKwiSeHXF3QTD1uHkadB2MsQIqoj9p3QkiTzmKeIRmtf2hJgDA1IXCg-o3ENK9bi6iYt6ulZsZbX7XcDfljopZBKMv-r_fVGk9hxtlTrsOXRpjhP8flgLf&priceTId=213e363a17316432955378124eef04&skuId=5466402150063&spm=a21n57.1.item.3.3173523c0cLCx7&utparam=%7B%22aplus_abtest%22%3A%22b157c0e4b60c27af3bd36a542bb06f7a%22%7D&xxc=taobaoSearch)，或 NXP S32K344EVB。
   ![S32K344大开发板EVB评估板](doc/board.png)
+  ![S32K344大开发板EVB评估板](doc/board.png)
 - ECU 代码：[NXP Bootloader](https://community.nxp.com/t5/S32K-Knowledge-Base/Unified-bootloader-Demo/ta-p/1423099)
 
 ## 描述
 
-此示例演示了如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用程序固件。 此示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
+此示例演示了如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用程序固件。 此示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。 此示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
 
 ## CAN 配置
 
@@ -27,8 +28,8 @@
 ## 使用方法
 
 1. 下载 [NXP Bootloader](https://community.nxp.com/t5/S32K-Knowledge-Base/Unified-bootloader-Demo/ta-p/1423099)。
-   1. 下载的演示基于旧的 EcuBus 工具，该工具已弃用。 新的 EcuBus-Pro 工具具有更多功能和更好的性能。
-2. 如果您使用 `NXP S32K344EVB`，可以直接下载固件。 如果您使用 `S32K344大开发板EVB评估板`，需要修改 LPUART 引脚和 LED 引脚。
+   1. 下载的演示基于旧的 EcuBus 工具，该工具已弃用。 新的 EcuBus-Pro 工具具有更多功能和更好的性能。 新的 EcuBus-Pro 工具具有更多功能和更好的性能。
+2. 如果您使用 `NXP S32K344EVB`，可以直接下载固件。 如果您使用 `NXP S32K344EVB`，可以直接下载固件。 如果您使用 `S32K344大开发板EVB评估板`，需要修改 LPUART 引脚和 LED 引脚。
 3. 将 USB-CAN 适配器连接到计算机，并将 `KVASER Leaf V3` USB-CAN 适配器连接到 S32K344 板。
 4. 运行 Sequence-Tester_1。
 
@@ -38,7 +39,7 @@
 
 ![诊断步骤](./image.png)
 
-此示例通过 UDS 诊断协议实现固件升级。 主要步骤如下：
+此示例通过 UDS 诊断协议实现固件升级。 主要步骤如下： 主要步骤如下：
 
 1. 会话控制和通信控制
 
@@ -95,7 +96,7 @@
 
 ## 脚本实现细节
 
-bootloader.ts 脚本实现了诊断序列。 以下是每个部分的详细说明：
+bootloader.ts 脚本实现了诊断序列。 以下是每个部分的详细说明： 以下是每个部分的详细说明：
 
 ### 初始化和导入
 

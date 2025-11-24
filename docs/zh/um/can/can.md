@@ -1,128 +1,128 @@
 # CAN
 
-CAN/CAN-FD is an industry-standard vehicle bus protocol designed for reliable ECU communication in automotive applications.
+CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可靠的 ECU 通信而设计。
 
 > [!IMPORTANT]
-> Some features described in this section may require a CAN DBC file. For more information about DBC files, please refer to our [database documentation](../dbc).
+> 本节描述的某些功能可能需要 CAN DBC 文件。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。
 
-Supported Hardware:
+支持的硬件：
 
-| Manufacturer | Protocols   |
-| ------------ | ----------- |
-| PEAK         | CAN, CAN-FD |
-| KVASER       | CAN, CAN-FD |
-| ZLG          | CAN, CAN-FD |
-| Toomoss      | CAN, CAN-FD |
-| VECTOR       | CAN, CAN-FD |
-| SLCAN        | CAN, CAN-FD |
+| 制造商     | 协议          |
+| ------- | ----------- |
+| PEAK    | CAN, CAN-FD |
+| KVASER  | CAN, CAN-FD |
+| ZLG     | CAN, CAN-FD |
+| Toomoss | CAN, CAN-FD |
+| VECTOR  | CAN, CAN-FD |
+| SLCAN   | CAN, CAN-FD |
 
-## SLCAN Special
+## SLCAN 特殊说明
 
-SLCAN is a low-cost open-source solution, with firmware sourced from [canable-fw](https://github.com/normaldotcom/canable-fw), and communication based on USB-ACM.
+SLCAN 是一种低成本开源解决方案，固件来源于 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于 USB-ACM。
 
 > [!NOTE]
-> This firmware currently does not provide any ACK/NACK feedback for serial commands.
+> 此固件目前不提供串行命令的任何 ACK/NACK 反馈。
 
 ## GS_USB
 
-Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schneider USB/CAN devices and candleLight USB CAN interfaces.
+基于 usbfs 或 WinUSB WCID 的 Windows/Linux/Mac CAN 驱动程序，适用于 Geschwister Schneider USB/CAN 设备和 candleLight USB CAN 接口。
 
 ### Linux gs_usb
 
-Linux kernels 3.7 and above have merged the `gs_usb` driver.
-Check if the `gs_usb` module is enabled using
+Linux 内核 3.7 及以上版本已合并 `gs_usb` 驱动程序。
+使用以下命令检查 `gs_usb` 模块是否启用
 
 ```bash
 lsmod | grep gs_usb
 ```
 
-If it's not loaded, use
+如果未加载，请使用
 
 ```bash
 sudo modprobe gs_usb
 ```
 
-To remove it, use
+要移除它，请使用
 
 ```bash
 sudo rmmod gs_usb
 ```
 
-Configure automatic loading at startup:
+配置启动时自动加载：
 
 ```bash
 echo "gs_usb"  | sudo tee /etc/modules-load.d/gs_usb.conf
 ```
 
-Non-root users require corresponding user group membership.
+非 root 用户需要相应的用户组成员资格。
 
-Use `devadm` to monitor device connections and obtain the precise device path:
+使用 `devadm` 监控设备连接并获取精确的设备路径：
 
 ```bash
 sudo devadm monitor --property
 ```
 
-Check the device group ownership. Assuming `ttyUSB0` (actual device may vary):
+检查设备组所有权。 假设为 `ttyUSB0`（实际设备可能不同）：
 
 ```bash
 stat -c "%G" /dev/ttyUSB0
 ```
 
-- Arch Linux: Should return `uucp`
+- Arch Linux：应返回 `uucp`
 
 ```bash
 sudo usermod -aG uucp $USER
 newgrp uucp
 ```
 
-- Debian/Ubuntu: Should return `dialout`
-- Fedora/RHEL: Should return `dialout`
+- Debian/Ubuntu：应返回 `dialout`
+- Fedora/RHEL：应返回 `dialout`
 
 ```bash
 sudo usermod -aG dialout $USER
 newgrp dialout
 ```
 
-## Device Configuration
+## 设备配置
 
-For demonstration purposes, we'll use a simulated device. You can configure the baud rate and sample point in the device settings.
+出于演示目的，我们将使用模拟设备。 您可以在设备设置中配置波特率和采样点。
 
 ![alt text](../../../media/um/can/image.png)
 
-### Baud Rate Setting
+### 波特率设置
 
-The baud rate setting is used to configure the baud rate of the CAN bus.
+波特率设置用于配置 CAN 总线的波特率。
 
-Click the `Bit Timing` button to open the bit timing configuration window.
+点击 `Bit Timing` 按钮打开位时序配置窗口。
 ![alt text](../../../media/um/can/image-8.png)
 ![alt text](../../../media/um/can/image-9.png)
 
-## Interactive Mode and Node Scripts
+## 交互模式和节点脚本
 
-EcuBus-Pro offers two primary methods for CAN communication:
+EcuBus-Pro 提供两种主要的 CAN 通信方法：
 
-- Interactive Mode: For manual frame transmission
-- Node Scripts: For automated communication using custom scripts
+- 交互模式：用于手动帧传输
+- 节点脚本：使用自定义脚本进行自动化通信
 
 ![alt text](../../../media/um/can/image-1.png)
 
-### Interactive Mode
+### 交互模式
 
-Each frame can be configured for periodic transmission or manual triggering (single-shot or key-bound).
+每个帧可以配置为周期性传输或手动触发（单次触发或按键绑定）。
 ![alt text](../../../media/um/can/image-2.png)
 
-You can add frames in two ways:
+您可以通过两种方式添加帧：
 
-- Manual frame configuration
-- Import from DBC database
+- 手动帧配置
+- 从 DBC 数据库导入
   ![alt text](../../../media/um/can/image-3.png)
 
-### Node Scripts
+### 节点脚本
 
-Nodes can be configured with UDS capabilities (tester) and custom scripts.
+节点可以配置 UDS 功能（测试器）和自定义脚本。
 ![alt text](../../../media/um/can/image-4.png)
 
-Example script for periodic signal updates:
+周期性信号更新的示例脚本：
 
 ```typescript
 import { setSignal } from 'ECB'
@@ -133,21 +133,21 @@ setInterval(() => {
 }, 1000)
 ```
 
-## Diagnostic Operations
+## 诊断操作
 
-1. **Tester Configuration**
+1. **测试器配置**
 
-   - Configure addressing
-   - Set diagnostic parameters
+   - 配置寻址
+   - 设置诊断参数
      ![alt text](../../../media/um/can/image-5.png)
 
-2. **Diagnostic Services**
+2. **诊断服务**
 
-   - Configure diagnostic services
-   - Create schedule tables and sequences
+   - 配置诊断服务
+   - 创建调度表和序列
      ![alt text](../../../media/um/can/image-6.png)
 
-3. **Message Monitoring**
-   - View transmitted and received messages in the trace window
+3. **消息监控**
+   - 在跟踪窗口中查看发送和接收的消息
      ![alt text](../../../media/um/can/image-7.png)
 

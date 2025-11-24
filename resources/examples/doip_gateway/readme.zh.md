@@ -1,6 +1,6 @@
 # DoIP 网关
 
-本示例演示如何实现一个 DoIP 到 CAN 的网关，该网关桥接 DoIP 测试仪与基于 CAN 的 ECU 之间的通信。 该网关接收 DoIP 诊断请求并将其转发到 CAN 总线，然后通过 DoIP 返回 CAN 响应。
+本示例演示如何实现一个 DoIP 到 CAN 的网关，该网关桥接 DoIP 测试仪与基于 CAN 的 ECU 之间的通信。 该网关接收 DoIP 诊断请求并将其转发到 CAN 总线，然后通过 DoIP 返回 CAN 响应。 该网关接收 DoIP 诊断请求并将其转发到 CAN 总线，然后通过 DoIP 返回 CAN 响应。
 
 ## 架构概览
 

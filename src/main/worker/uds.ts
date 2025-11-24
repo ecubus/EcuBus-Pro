@@ -40,7 +40,7 @@ if (!isMainThread && parentPort) {
           parentPort?.postMessage({ type: 'rpc_response', id, result })
         }
       } catch (e: any) {
-        parentPort?.postMessage({ type: 'rpc_response', id, error: e.message || e.toString() })
+        parentPort?.postMessage({ type: 'rpc_response', id, error: e })
       }
     }
   })

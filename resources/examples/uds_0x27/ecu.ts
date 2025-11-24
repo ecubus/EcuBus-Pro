@@ -16,6 +16,6 @@ Util.On('Tester.SecurityAccess391.send', async (req) => {
   console.log(`seed key ${raw.subarray(2).toString('hex')}`)
   const resp = DiagResponse.fromDiagRequest(req)
   resp.diagSetRaw(Buffer.from([0x67, 0x2]))
+  throw new Error('test')
   await resp.outputDiag()
 })
-

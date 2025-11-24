@@ -51,7 +51,7 @@ if (process.platform == 'win32') {
 /**
  * @category UDS
  */
-export default class SecureAccessDll {
+export class SecureAccessDll {
   _ref: any
   constructor(dllPath: string) {
     this._ref = new saNode.SeedKey()
@@ -192,4 +192,3 @@ export default class SecureAccessDll {
     this._ref.LoadDLL(dllPath)
   }
 }
-

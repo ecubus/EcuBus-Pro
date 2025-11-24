@@ -139,7 +139,9 @@ export default class UdsTester {
         if (p) {
           this.pendingRequests.delete(msg.id)
           if (msg.error) {
-            p.reject(new Error(msg.error))
+            const error = new Error(msg.error.message)
+            error.stack = msg.error.stack
+            p.reject(error)
           } else {
             p.resolve(msg.result)
           }
@@ -180,7 +182,7 @@ export default class UdsTester {
             return
           }
         }
-        this.log.scriptMsg(data.toString(), this.ts)
+        this.log.scriptMsg(data.toString().replace(/\n$/, ''), this.ts)
       }
     })
 
@@ -197,7 +199,7 @@ export default class UdsTester {
             this.stop(true)
           }
         }
-        this.log.systemMsg(data.toString(), this.ts, 'error')
+        this.log.systemMsg(data.toString().replace(/\n$/, ''), this.ts, 'error')
       }
     })
 

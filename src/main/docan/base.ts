@@ -435,7 +435,6 @@ export class CAN_SOCKET {
         device: this.inst.info.name
       }
       const cdata = await this.inst.txPendingNode.callTxPending(msg)
-      console.log('cdata', cdata, msg)
       if (cdata) {
         data = cdata
       } else {

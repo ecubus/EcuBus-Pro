@@ -1,90 +1,45 @@
 <template>
-  <div>
-    <VxeGrid
-      ref="xGrid"
-      v-bind="gridOptions"
-      class="sequenceTable"
-      :height="tableHeight"
-      @menu-click="menuClick"
-    >
-      <template #default_type="{ row }">
-        <Icon
-          v-if="row.level == 'error'"
-          :icon="errorIcon"
-          style="font-size: 14px; margin-top: 8px"
-        />
-        <Icon
-          v-else-if="row.level == 'info'"
-          :icon="infoIcon"
-          style="font-size: 14px; margin-top: 8px"
-        />
-        <Icon
-          v-else-if="row.level == 'warn'"
-          :icon="warnIcon"
-          style="font-size: 14px; margin-top: 8px"
-        />
-        <Icon
-          v-else-if="row.level == 'success'"
-          :icon="successIcon"
-          style="font-size: 14px; margin-top: 8px"
-        />
-        <Icon
-          v-else-if="row.level == 'primary'"
-          :icon="primaryIcon"
-          style="font-size: 14px; margin-top: 8px"
-        />
-      </template>
-      <template #toolbar>
-        <div
-          style="
-            justify-content: flex-start;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-left: 5px;
-          "
-        >
-          <el-button-group>
-            <el-tooltip effect="light" content="Clear Message" placement="bottom">
-              <el-button type="danger" link @click="clearLog">
-                <Icon :icon="circlePlusFilled" />
-              </el-button>
-            </el-tooltip>
-          </el-button-group>
+  <div class="log-container">
+    <div class="toolbar">
+      <el-button-group>
+        <el-tooltip effect="light" content="Clear Message" placement="bottom">
+          <el-button type="danger" link @click="clearLog">
+            <Icon :icon="circlePlusFilled" />
+          </el-button>
+        </el-tooltip>
+      </el-button-group>
 
-          <el-divider direction="vertical" />
-          <el-dropdown size="small">
-            <el-button type="info" link @click="saveLog">
-              <Icon :icon="saveIcon" />
-            </el-button>
+      <el-divider direction="vertical" />
+      <el-dropdown size="small">
+        <el-button type="info" link @click="saveLog">
+          <Icon :icon="saveIcon" />
+        </el-button>
 
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>Save Message</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </template>
-      <template #message_content="{ row }">
-        <span v-html="convertMessageToHtml(row.message)"></span>
-      </template>
-    </VxeGrid>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>Save Message</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+    <div
+      ref="terminalContainer"
+      class="terminal-container"
+      :style="{ height: tableHeight + 'px' }"
+      tabindex="-1"
+    ></div>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed, toRef, watch } from 'vue'
-import { CAN_ID_TYPE, CanMsgType, getDlcByLen } from 'nodeCan/can'
-import { VxeGridProps, VxeGridPropTypes } from 'vxe-table'
-import { VxeGrid } from 'vxe-table'
+import { ref, shallowRef, onMounted, onUnmounted, computed, toRef, watch, nextTick } from 'vue'
+import { Terminal } from '@xterm/xterm'
+import { FitAddon } from '@xterm/addon-fit'
+import { CanvasAddon } from '@xterm/addon-canvas'
+import '@xterm/xterm/css/xterm.css'
+import { useDark } from '@vueuse/core'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
-import infoIcon from '@iconify/icons-material-symbols/info-outline'
-import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
-import warnIcon from '@iconify/icons-material-symbols/warning-outline-rounded'
 import saveIcon from '@iconify/icons-material-symbols/save'
-import successIcon from '@iconify/icons-material-symbols/check-circle-outline'
-import primaryIcon from '@iconify/icons-material-symbols/line-start-square-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -95,14 +50,18 @@ interface LogData {
   message: string
 }
 
-const xGrid = ref()
+const terminalContainer = ref<HTMLElement>()
+// Use shallowRef for third-party instances to avoid unnecessary reactivity overhead
+const terminal = shallowRef<Terminal>()
+const fitAddon = shallowRef<FitAddon>()
+const canvasAddon = shallowRef<CanvasAddon>()
 const globalStart = useGlobalStart()
-// const logData = ref<LogData[]>([])
+const isDark = useDark()
+const logBuffer: string[] = []
 
 function clearLog() {
-  xGrid.value?.remove().then(() => {
-    xGrid.value?.scrollTo(0, 0)
-  })
+  terminal.value?.clear()
+  logBuffer.length = 0
 }
 
 const props = withDefaults(
@@ -123,7 +82,7 @@ const props = withDefaults(
 )
 
 function getData() {
-  return xGrid.value.getTableData()
+  return logBuffer.join('\n')
 }
 
 const testId = toRef(props, 'testId')
@@ -141,129 +100,119 @@ watch(globalStart, (val) => {
 })
 const tableHeight = toRef(props, 'height')
 const project = useProjectStore()
-// Add new function to convert message text to HTML with clickable links
-function convertMessageToHtml(message: string) {
-  return message.replace(/(https?:\/\/[^\s]+|file:\/\/[^\s]+)/g, (match) => {
-    if (match.startsWith('file://')) {
-      // Remove 'file://' prefix and convert to relative path
-      const absolutePath = match.substring(7)
-      const relativePath = window.path.relative(project.projectInfo.path, absolutePath)
-      return `<strong>${relativePath}</strong>`
-    }
-    // Handle regular http/https URLs as before
-    return `<a href="${match}" target="_blank">${match}</a>`
-  })
-}
 
-const gridOptions = computed(() => {
-  const columes: VxeGridPropTypes.Columns<LogData> = []
-  for (const field of props.fields) {
-    if (field == 'time') {
-      columes.push({ field: 'time', title: 'Time', width: 120 })
-    } else if (field == 'source') {
-      columes.push({ field: 'label', title: 'Source', width: 200 })
-    } else if (field == 'message') {
-      columes.push({
-        field: 'message',
-        title: 'Message',
-        minWidth: 200,
-        align: 'left',
-        slots: { default: 'message_content' } // Add custom slot for message
-      })
+// Terminal theme based on dark mode
+const terminalTheme = computed(() => {
+  if (isDark.value) {
+    return {
+      background: '#1e1e1e',
+      foreground: '#d4d4d4',
+      cursor: 'transparent',
+      cursorAccent: 'transparent',
+      selectionBackground: '#3a3d41',
+      selectionForeground: '#ffffff',
+      black: '#000000',
+      red: '#f44747',
+      green: '#4ec9b0',
+      yellow: '#ffcc00',
+      blue: '#3794ff',
+      magenta: '#c586c0',
+      cyan: '#89ddff',
+      white: '#ffffff',
+      brightBlack: '#666666',
+      brightRed: '#f44747',
+      brightGreen: '#4ec9b0',
+      brightYellow: '#ffcc00',
+      brightBlue: '#3794ff',
+      brightMagenta: '#c586c0',
+      brightCyan: '#89ddff',
+      brightWhite: '#ffffff'
+    }
+  } else {
+    return {
+      background: '#ffffff',
+      foreground: '#333333',
+      cursor: 'transparent',
+      cursorAccent: 'transparent',
+      selectionBackground: '#add6ff',
+      selectionForeground: '#000000',
+      black: '#000000',
+      red: '#cd3131',
+      green: '#00bc00',
+      yellow: '#949800',
+      blue: '#0451a5',
+      magenta: '#bc05bc',
+      cyan: '#0598bc',
+      white: '#555555',
+      brightBlack: '#666666',
+      brightRed: '#cd3131',
+      brightGreen: '#14ce14',
+      brightYellow: '#b5ba00',
+      brightBlue: '#0451a5',
+      brightMagenta: '#bc05bc',
+      brightCyan: '#0598bc',
+      brightWhite: '#a5a5a5'
     }
   }
-  const v: VxeGridProps<LogData> = {
-    border: false,
-    size: 'mini',
-    columnConfig: {
-      resizable: true
-    },
-    showOverflow: true,
-    scrollY: {
-      enabled: true,
-      gt: 0,
-      mode: 'wheel'
-    },
-    rowConfig: {
-      isCurrent: true,
-      height: 30,
-      keyField: 'id'
-    },
-    toolbarConfig: {
-      slots: {
-        tools: 'toolbar'
-      }
-    },
-    align: 'center',
-    columns: [
-      {
-        field: 'level',
-        title: '#',
-        width: 36,
-        resizable: false,
-        editRender: {},
-        slots: { default: 'default_type' }
-      },
-      ...columes
-    ],
-    rowClassName: ({ row }) => {
-      return row.level
-    },
-    menuConfig: {
-      body: {
-        options: [
-          [
-            {
-              code: 'copyRaw',
-              name: 'Copy',
-              visible: true,
-              disabled: false,
-              prefixConfig: {
-                icon: 'vxe-icon-copy'
-              }
-            }
-          ]
-        ]
-      }
-    }
-  }
-
-  return v
 })
 
-function menuClick(val: any) {
-  switch (val.menu.code) {
-    case 'copyRaw': {
-      const data = `${val.row.label} ${val.row.message}`
-      navigator.clipboard.writeText(data)
-      break
-    }
+// Watch theme changes and update terminal
+watch(isDark, () => {
+  if (terminal.value && terminalTheme.value) {
+    terminal.value.options.theme = terminalTheme.value
   }
+})
+
+// ANSI color codes for different log levels
+const colorCodes = {
+  error: '\x1b[31m', // Red
+  warn: '\x1b[33m', // Yellow
+  info: '\x1b[36m', // Cyan
+  success: '\x1b[32m', // Green
+  primary: '\x1b[35m', // Magenta
+  reset: '\x1b[0m' // Reset
+}
+
+function writeToTerminal(time: string, label: string, level: string, message: string) {
+  if (!terminal.value) return
+
+  const color = colorCodes[level as keyof typeof colorCodes] || colorCodes.reset
+
+  let line = ''
+  if (props.fields.includes('time')) {
+    line += `${color}[${time}]${colorCodes.reset} `
+  }
+  if (props.fields.includes('source')) {
+    line += `${color}[${label}]${colorCodes.reset} `
+  }
+  if (props.fields.includes('message')) {
+    // Convert file:// paths to relative paths
+    const processedMessage = message.replace(/file:\/\/([^\s]+)/g, (match, path) => {
+      const relativePath = window.path.relative(project.projectInfo.path, path)
+      return relativePath
+    })
+    line += `${color}${processedMessage}${colorCodes.reset}`
+  }
+
+  terminal.value.writeln(line)
+  logBuffer.push(`[${time}] [${label}] ${message}`)
 }
 
 function saveLog() {
-  xGrid.value.exportData()
+  const content = logBuffer.join('\n')
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 function udsLog({ values }: { values: any[] }) {
-  const logData: {
-    time: string
-    label: string
-    level: string
-    message: string
-    id: number
-  }[] = []
   values.forEach((data) => {
-    logData.push({
-      time: new Date().toLocaleTimeString(),
-      label: data.label,
-      level: data.level,
-      message: data.message.data.msg,
-      id: cnt++
-    })
-  })
-  xGrid.value.insertAt(logData, -1).then((v: any) => {
-    xGrid.value.scrollToRow(v.row)
+    const time = new Date().toLocaleTimeString()
+    writeToTerminal(time, data.label, data.level, data.message.data.msg)
   })
 }
 
@@ -281,13 +230,7 @@ function testLog({
   }[]
 }) {
   const data = values
-  const logData: {
-    time: string
-    label: string
-    level: string
-    message: string
-    id: number
-  }[] = []
+  const time = new Date().toLocaleTimeString()
 
   for (const item of data) {
     if ((item.message.data?.data as any).name == '____ecubus_pro_test___') {
@@ -303,14 +246,12 @@ function testLog({
       if (testId.value != undefined && !testId.value.includes(key)) {
         continue
       }
-      logData.push({
-        time: new Date().toLocaleTimeString(),
-        label: item.message.data.data.name,
-        level: 'primary',
-        message: `----- Test ${item.message.data.data.name} starting -----`,
-
-        id: cnt++
-      })
+      writeToTerminal(
+        time,
+        item.message.data.data.name,
+        'primary',
+        `----- Test ${item.message.data.data.name} starting -----`
+      )
     } else if (item.message.data.type == 'test:pass') {
       const key =
         item.message.data.data.name +
@@ -321,13 +262,12 @@ function testLog({
       if (testId.value != undefined && !testId.value.includes(key)) {
         continue
       }
-      logData.push({
-        time: new Date().toLocaleTimeString(),
-        label: item.message.data.data.name,
-        level: 'success',
-        message: `----- Test ${item.message.data.data.name} passed, ${item.message.data.data.details.duration_ms}ms -----`,
-        id: cnt++
-      })
+      writeToTerminal(
+        time,
+        item.message.data.data.name,
+        'success',
+        `----- Test ${item.message.data.data.name} passed, ${item.message.data.data.details.duration_ms}ms -----`
+      )
     } else if (item.message.data.type == 'test:fail') {
       const key =
         item.message.data.data.name +
@@ -338,46 +278,95 @@ function testLog({
       if (testId.value != undefined && !testId.value.includes(key)) {
         continue
       }
-      // let file = item.message.data.data.file
-      // if (file) {
-      //   file = window.path.relative(project.projectInfo.path, file)
-      // }
-      // Extract error description and first "at" entry only
       const errorMessage = item.message.data.data.details.error.message
-
-      logData.push({
-        time: new Date().toLocaleTimeString(),
-        label: item.message.data.data.name,
-        level: 'error',
-        message: `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, details: ${errorMessage} -----`,
-        id: cnt++
-      })
+      writeToTerminal(
+        time,
+        item.message.data.data.name,
+        'error',
+        `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, details: ${errorMessage} -----`
+      )
     } else if (item.message.data.type == 'test:diagnostic') {
-      logData.push({
-        time: new Date().toLocaleTimeString(),
-        label: 'Test Diagnostic',
-        level: 'info',
-        message: item.message.data.data.message,
-        id: cnt++
-      })
+      writeToTerminal(time, 'Test Diagnostic', 'info', item.message.data.data.message)
     }
   }
-  xGrid.value.insertAt(logData, -1).then((v: any) => {
-    xGrid.value.scrollToRow(v.row)
-  })
 }
 
-let mainLog
-let cnt = 0
-onMounted(() => {
-  cnt = 0
+let mainLog: (() => void) | undefined
+let keydownHandler: ((event: KeyboardEvent) => void) | undefined
+
+onMounted(async () => {
+  await nextTick()
+
+  // Initialize terminal
+  terminal.value = new Terminal({
+    theme: terminalTheme.value,
+    fontSize: 14,
+    fontFamily: 'Consolas, "Courier New", monospace',
+    cursorBlink: false,
+    cursorStyle: 'bar',
+    cursorWidth: 1,
+    disableStdin: true,
+    convertEol: true
+  })
+
+  fitAddon.value = new FitAddon()
+  terminal.value.loadAddon(fitAddon.value)
+
+  if (terminalContainer.value) {
+    terminal.value.open(terminalContainer.value)
+
+    // Load canvas addon for better performance
+    canvasAddon.value = new CanvasAddon()
+    terminal.value.loadAddon(canvasAddon.value)
+
+    fitAddon.value.fit()
+
+    // Handle resize
+    const resizeObserver = new ResizeObserver(() => {
+      fitAddon.value?.fit()
+    })
+    resizeObserver.observe(terminalContainer.value)
+
+    // Enable keyboard shortcuts on document level
+    keydownHandler = (event: KeyboardEvent) => {
+      // Check if focus is in terminal area or if terminal has selection
+      const isInTerminal = terminalContainer.value?.contains(document.activeElement)
+      const hasSelection = terminal.value?.hasSelection()
+
+      if (!isInTerminal && !hasSelection) return
+
+      const isCtrlOrCmd = event.ctrlKey || event.metaKey
+
+      // Ctrl+C or Cmd+C to copy selection
+      if (isCtrlOrCmd && event.key === 'c') {
+        const selection = terminal.value?.getSelection()
+        if (selection) {
+          event.preventDefault()
+          event.stopPropagation()
+          navigator.clipboard.writeText(selection)
+        }
+      }
+      // Ctrl+A or Cmd+A to select all (only when focus is in terminal)
+      else if (isCtrlOrCmd && event.key === 'a' && isInTerminal) {
+        event.preventDefault()
+        event.stopPropagation()
+        terminal.value?.selectAll()
+      }
+    }
+
+    // Add listener to document to capture all keyboard events
+    document.addEventListener('keydown', keydownHandler, true)
+
+    // Auto focus terminal when clicked
+    terminalContainer.value.addEventListener('click', () => {
+      terminalContainer.value?.focus()
+    })
+  }
+
   if (props.captureSystem) {
     mainLog = window.electron.ipcRenderer.on('ipc-log-main', (event, data) => {
-      data.time = new Date().toLocaleTimeString()
-      data.id = cnt++
-      xGrid.value?.insertAt(data, -1).then((v: any) => {
-        xGrid.value.scrollToRow(v.row)
-      })
+      const time = new Date().toLocaleTimeString()
+      writeToTerminal(time, data.label, data.level, data.message)
     })
   }
   if (props.captureTest) {
@@ -389,7 +378,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (props.captureSystem) {
+  // Clean up event listeners first
+  if (props.captureSystem && mainLog) {
     mainLog()
   }
   if (props.captureTest) {
@@ -398,40 +388,52 @@ onUnmounted(() => {
   window.logBus.off(props.prefix + 'udsSystem', udsLog)
   window.logBus.off(props.prefix + 'udsScript', udsLog)
   window.logBus.off(props.prefix + 'udsWarning', udsLog)
+
+  // Remove keyboard event listener from document
+  if (keydownHandler) {
+    document.removeEventListener('keydown', keydownHandler, true)
+  }
+
+  // Safely dispose terminal (which will dispose all loaded addons)
+  if (terminal.value) {
+    terminal.value.dispose()
+  }
 })
 </script>
 
-<style>
-.info {
-  color: var(--el-color-info-dark-5);
-}
-.primary {
-  color: var(--el-color-primary);
-}
-.debug {
-  color: var(--el-color-info);
+<style scoped>
+.log-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
 
-.success {
-  color: var(--el-color-success);
+.toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  margin-left: 5px;
+  padding: 2px;
+  background-color: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color);
 }
 
-.error {
-  color: var(--el-color-danger);
+.terminal-container {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  outline: none;
+  cursor: text;
 }
 
-.warn {
-  color: var(--el-color-warning);
+:deep(.xterm) {
+  height: 100%;
+  padding: 8px;
 }
 
-/* Add styles for links in messages */
-.sequenceTable a {
-  color: var(--el-color-primary);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.sequenceTable a:hover {
-  text-decoration: underline;
+:deep(.xterm .xterm-cursor-layer) {
+  display: none !important;
 }
 </style>

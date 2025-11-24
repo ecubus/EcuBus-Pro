@@ -21,6 +21,7 @@ import fsP from 'fs/promises'
 import fs from 'fs'
 import udsHeaderStr from '../share/uds.d.ts.html?raw'
 import crcStr from '../share/crc.d.ts.html?raw'
+import secureAccessStr from '../share/secureAccess.d.ts.html?raw'
 import cryptoExtStr from '../share/cryptoExt.d.ts.html?raw'
 import utliStr from '../share/utli.d.ts.html?raw'
 import zlibStr from '../share/node/zlib.d.ts.html?raw'
@@ -851,7 +852,10 @@ export class UDSTesterMain {
               try {
                 services = await tester.execJob(s.name, params)
               } catch (e: any) {
-                if (typeof e == 'string' && e.includes('Unknown method')) {
+                if (
+                  (typeof e == 'string' && e.includes('Unknown method')) ||
+                  /Method .* not found/.test(e.message)
+                ) {
                   const buildScript = serviceDetail[s.serviceId].buildInScript
                   if (buildScript) {
                     let tmpPool: UdsTester | undefined
@@ -1274,6 +1278,7 @@ export * from './utli'
   await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
   await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
   await fsP.writeFile(path.join(vendorPath, 'utli.d.ts'), utliStr)
+  await fsP.writeFile(path.join(vendorPath, 'secureAccess.d.ts'), secureAccessStr)
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {

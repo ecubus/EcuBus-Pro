@@ -1,24 +1,24 @@
-# LIN Master Example
+# LIN 主节点示例
 
-This example demonstrates how to use the LIN protocol to work as a LIN master and simulate a Motor2 node.
+本示例演示如何使用 LIN 协议作为 LIN 主节点并模拟 Motor2 节点。
 
-## Used Devices
+## 使用的设备
 
 PEAK
 
 ## Windows
 
-- LIN IA: control lin schedule table
-- Sequence-Tester_lin_1: send diagnostic request
-- Trace: view the LIN frames
-- Network: view the LIN network coonection
+- LIN IA：控制 LIN 调度表
+- Sequence-Tester_lin_1：发送诊断请求
+- Trace：查看 LIN 帧
+- Network：查看 LIN 网络连接
 
 ![alt text](image.png)
 
-## Node Script
+## 节点脚本
 
-Motor2 will simulate the LIN node. The LIN node will send the response when receiving the request.
-On pressing the 'c' key, the LIN node will send a save configuration request.
+Motor2 将模拟 LIN 节点。 LIN 节点在接收到请求时将发送响应。
+按下 'c' 键时，LIN 节点将发送保存配置请求。
 
 ```typescript
 import {
@@ -46,6 +46,6 @@ Util.OnKey('c', async () => {
 })
 ```
 
-## Demo
+## 演示
 
 ![Demo](./demo.gif)

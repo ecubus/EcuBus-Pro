@@ -12,6 +12,7 @@
 
 在功能请求 issue 上添加 👍 反应。
 ![alt text](../../media/dev/feature.png)
+![alt text](../../media/dev/feature.png)
 
 ## 流程
 

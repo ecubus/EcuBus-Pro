@@ -1,12 +1,12 @@
 # 内置脚本
 
-内置脚本系统为常见UDS操作提供预配置的诊断服务。 本文档涵盖可用的内置脚本及其功能。
+内置脚本系统为常见UDS操作提供预配置的诊断服务。 本文档涵盖可用的内置脚本及其功能。 本文档涵盖可用的内置脚本及其功能。
 
 ## 支持的内置脚本
 
 ### [SecureAccessGenerateKeyEx](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyEx)
 
-此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
+此脚本用于为安全访问过程生成密钥。 此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyEx](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
@@ -62,7 +62,7 @@ VKeyGenResultEx GenerateKeyEx (
 
 ### [SecureAccessGenerateKeyExOpt](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyExOpt)
 
-此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
+此脚本用于为安全访问过程生成密钥。 此脚本用于为安全访问过程生成密钥。 参见[GenerateKeyExOpt](https://cdn.vector.com/cms/content/know-how/_application-notes/AN-IDG-1-017_SecurityAccess.pdf)。
 
 ![GenerateKeyExOpt](../../../../media/um/uds/buildInScript/images/GenerateKeyExOpt.png)
 
@@ -140,7 +140,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 
 ## 创建自定义脚本
 
-可以创建自定义脚本来扩展诊断系统的功能。 您可以创建并保存自己的脚本，并在将来使用它。
+可以创建自定义脚本来扩展诊断系统的功能。 您可以创建并保存自己的脚本，并在将来使用它。 您可以创建并保存自己的脚本，并在将来使用它。
 
 以下是创建您自己的脚本的方法：
 

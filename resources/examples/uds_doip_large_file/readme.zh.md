@@ -1,18 +1,18 @@
-# UDS DoIP Large File Transfer
+# UDS DoIP 大文件传输
 
-This example demonstrates how to transfer large binary files to an ECU using UDS (Unified Diagnostic Services) over DoIP with **streaming file reading**. This approach is optimized for handling very large files without loading the entire file into memory at once.
+本示例演示了如何使用 UDS（统一诊断服务）通过 DoIP 进行**流式文件读取**，将大型二进制文件传输到 ECU。 该方法经过优化，可处理非常大的文件，而无需一次性将整个文件加载到内存中。
 
-## Overview
+## 概述
 
-The example implements a large file transfer sequence using the following UDS services:
+该示例使用以下 UDS 服务实现大文件传输序列：
 
-- **RequestDownload (0x34)** - Initiates the download process
-- **TransferData (0x36)** - Transfers data chunks in sequence
-- **RequestTransferExit (0x37)** - Completes the transfer process
+- **RequestDownload (0x34)** - 启动下载过程
+- **TransferData (0x36)** - 按顺序传输数据块
+- **RequestTransferExit (0x37)** - 完成传输过程
 
-## Key Innovation: Streaming vs Traditional Approach
+## 关键创新：流式传输与传统方法对比
 
-### Traditional Approach (Previous Examples
+### 传统方法（先前示例）
 
 ```typescript
 // OLD: Loads entire file into memory at once
@@ -23,14 +23,14 @@ for (const [addr, data] of map) {
 }
 ```
 
-**Limitations:**
+**局限性：**
 
-- ❌ High memory consumption for large files
-- ❌ Risk of out-of-memory errors with multi-GB files
-- ❌ Slower startup time for large files
-- ❌ Cannot handle files larger than available RAM
+- ❌ 大文件内存消耗高
+- ❌ 多 GB 文件存在内存不足错误风险
+- ❌ 大文件启动时间较慢
+- ❌ 无法处理大于可用 RAM 的文件
 
-### Streaming Approach (This Example)
+### 流式传输方法（本示例）
 
 ```typescript
 // NEW: Opens file handle for streaming reads
@@ -41,28 +41,28 @@ const data = Buffer.alloc(maxChunkSize)
 const { bytesRead } = await fHandle.read(data)
 ```
 
-**Advantages:**
+**优势：**
 
-- ✅ **Memory Efficient**: Only loads small chunks at a time
-- ✅ **Scalable**: Can handle files of any size (GB+)
-- ✅ **Fast Startup**: Begins transfer immediately
-- ✅ **Real-time Processing**: Reads data as it's needed
-- ✅ **Lower Resource Usage**: Minimal memory footprint
+- ✅ **内存高效**：一次仅加载小块数据
+- ✅ **可扩展**：可处理任意大小（GB+）的文件
+- ✅ **快速启动**：立即开始传输
+- ✅ **实时处理**：按需读取数据
+- ✅ **资源使用率低**：内存占用极小
 
-## Architecture & Flow
+## 架构与流程
 
-![Flow Diagram](flow.png)
+![流程图](flow.png)
 
-The transfer process follows this sequence:
+传输过程遵循以下序列：
 
-1. **JobFunction0**: Initiates download request and receives ECU capabilities
-2. **"Still Need Read" Decision**: Determines if more data needs to be transferred
-3. **JobFunction1**: Performs chunked data transfer with streaming reads
-4. **Sequential Processing**: Continues until entire file is transferred
+1. **JobFunction0**：启动下载请求并接收 ECU 能力
+2. **"仍需读取"决策**：确定是否需要传输更多数据
+3. **JobFunction1**：使用流式读取执行分块数据传输
+4. **顺序处理**：持续进行直到整个文件传输完成
 
-## Implementation Details
+## 实现细节
 
-### File Streaming Setup
+### 文件流式传输设置
 
 ```typescript
 let fHandle: fsP.FileHandle | undefined
@@ -79,9 +79,9 @@ Util.End(async () => {
 })
 ```
 
-### JobFunction0 - Download Initiation
+### JobFunction0 - 下载初始化
 
-Prepares the ECU for receiving data and negotiates transfer parameters:
+准备 ECU 接收数据并协商传输参数：
 
 ```typescript
 Util.Register('Tester.JobFunction0', async () => {
@@ -111,9 +111,9 @@ Util.Register('Tester.JobFunction0', async () => {
 })
 ```
 
-### JobFunction1 - Streaming Data Transfer
+### JobFunction1 - 流式数据传输
 
-Performs the actual file transfer using streaming reads:
+使用流式读取执行实际文件传输：
 
 ```typescript
 Util.Register('Tester.JobFunction1', async () => {
@@ -167,21 +167,21 @@ Util.Register('Tester.JobFunction1', async () => {
 })
 ```
 
-## Memory Usage Comparison
+## 内存使用对比
 
-| Approach        | 1GB File                 | 4GB File                 | 10GB File                 |
-| --------------- | ------------------------ | ------------------------ | ------------------------- |
-| **Traditional** | ~1GB RAM | ~4GB RAM | ~10GB RAM |
-| **Streaming**   | ~4KB RAM | ~4KB RAM | ~4KB RAM  |
+| 方法       | 1GB 文件                   | 4GB 文件                   | 10GB 文件                   |
+| -------- | ------------------------ | ------------------------ | ------------------------- |
+| **传统**   | ~1GB RAM | ~4GB RAM | ~10GB RAM |
+| **流式传输** | ~4KB RAM | ~4KB RAM | ~4KB RAM  |
 
-## Use Cases
+## 使用场景
 
-This streaming approach is ideal for:
+这种流式传输方法非常适合：
 
-- **ECU firmware updates** with large binary files
-- **Calibration data transfer** for automotive applications
-- **Software deployment** to embedded systems
-- **Data logging** and diagnostic information transfer
-- **Any scenario** requiring memory-efficient large file transfers
+- **ECU 固件更新**，涉及大型二进制文件
+- **汽车应用的标定数据传输**
+- **嵌入式系统的软件部署**
+- **数据记录**和诊断信息传输
+- **任何需要内存高效大文件传输的场景**
 
-This implementation represents a significant improvement over traditional approaches, enabling reliable transfer of very large files in resource-constrained environments.
+该实现相比传统方法有显著改进，能够在资源受限的环境中可靠传输非常大的文件。

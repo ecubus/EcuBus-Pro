@@ -18,6 +18,11 @@ export enum IsrStatus {
   STOP = 1
 }
 
+export enum RunableStatus {
+  INVOCATION = 0,
+  TERMINATION = 1
+}
+
 export enum TaskType {
   TASK = 0,
   ISR = 1,
@@ -25,6 +30,7 @@ export enum TaskType {
   RESOURCE = 3,
   HOOK = 4,
   SERVICE = 5,
+  RUNABLE = 6,
   LINE = -1
 }
 
@@ -90,12 +96,19 @@ export const taskTypeRecord: Record<TaskType, string> = {
   [TaskType.RESOURCE]: 'Resource',
   [TaskType.HOOK]: 'Hook',
   [TaskType.SERVICE]: 'Service',
-  [TaskType.LINE]: 'Line'
+  [TaskType.LINE]: 'Line',
+  [TaskType.RUNABLE]: 'Runable'
 }
 export const isrStatusRecord: Record<IsrStatus, string> = {
   [IsrStatus.START]: 'Start',
   [IsrStatus.STOP]: 'Stop'
 }
+
+export const runableStatusRecord: Record<RunableStatus, string> = {
+  [RunableStatus.INVOCATION]: 'Invocation',
+  [RunableStatus.TERMINATION]: 'Termination'
+}
+
 export function parseInfo(type: TaskType, status: number, br?: string): string {
   let str = ''
   switch (type) {
@@ -104,6 +117,9 @@ export function parseInfo(type: TaskType, status: number, br?: string): string {
       break
     case TaskType.ISR:
       str = `ISR: ${isrStatusRecord[status as IsrStatus]}`
+      break
+    case TaskType.RUNABLE:
+      str = `Runable: ${runableStatusRecord[status as RunableStatus]}`
       break
     default:
       return ''
@@ -124,4 +140,5 @@ export interface OsEvent {
   coreId: number
   ts: number
   comment: string
+  children?: Record<number, OsEvent[]>
 }

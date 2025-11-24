@@ -5,7 +5,7 @@
   - Responds to messages: loadCsv, getRowIds, getData
 */
 
-import { OsEvent, TaskType, TaskStatus, IsrStatus, parseInfo } from 'nodeCan/osEvent'
+import { OsEvent, TaskType, TaskStatus, IsrStatus, parseInfo, RunableStatus } from 'nodeCan/osEvent'
 import { TimelineChart } from './timeline/time-graph-model'
 
 let isRuntime = false
@@ -36,6 +36,7 @@ class OfflineDataProvider {
   private totalLength: bigint = BigInt(0)
   perActor: Map<number, OsEvent[]> = new Map()
   private actorNames: Map<number, string> = new Map()
+  currentTaskByCore: Map<number, { type: TaskType; id: number } | null> = new Map()
   private coreConfigs: Array<{
     id: number
     name: string
@@ -57,9 +58,28 @@ class OfflineDataProvider {
 
   constructor() {}
 
+  /**
+   * 更新每个core当前正在运行的任务
+   */
+  private updateCurrentTask(e: OsEvent) {
+    if (e.type === TaskType.TASK) {
+      if (e.status === TaskStatus.START) {
+        // 任务开始，记录到当前core
+        this.currentTaskByCore.set(e.coreId, { type: e.type, id: e.id })
+      } else if (e.status === TaskStatus.TERMINATE) {
+        // 任务结束，清除当前core的任务（如果匹配）
+        const current = this.currentTaskByCore.get(e.coreId)
+        if (current && current.type === e.type && current.id === e.id) {
+          this.currentTaskByCore.set(e.coreId, null)
+        }
+      }
+    }
+  }
+
   public buildIndexes() {
     this.perActor.clear()
     this.actorNames.clear()
+    this.currentTaskByCore.clear()
     this.buildRowIds()
     if (this.events.length === 0) {
       this.absoluteStart = BigInt(0)
@@ -69,14 +89,30 @@ class OfflineDataProvider {
     let minTs = this.events[0].ts
     let maxTs = this.events[0].ts
     for (const e of this.events) {
+      // 更新每个core当前运行的任务
+      this.updateCurrentTask(e)
+      const rid = makeRowId(e.coreId, e.id, e.type)
       if (e.type === TaskType.TASK || e.type == TaskType.ISR) {
         if (e.ts < minTs) minTs = e.ts
         if (e.ts > maxTs) maxTs = e.ts
-        const rid = makeRowId(e.coreId, e.id, e.type)
+
         if (!this.perActor.has(rid)) this.perActor.set(rid, [])
         this.perActor.get(rid)!.push(e)
         if (!this.actorNames.has(rid)) {
           this.actorNames.set(rid, `${TaskType[e.type]}_${e.id}`)
+        }
+      } else if (e.type === TaskType.RUNABLE) {
+        const currentTask = this.currentTaskByCore.get(e.coreId)
+        if (currentTask) {
+          const lrid = makeRowId(e.coreId, currentTask.id, currentTask.type)
+          const lastEvent = this.perActor.get(lrid)!.at(-1)!
+          if (!lastEvent.children) {
+            lastEvent.children = {}
+          }
+          if (!lastEvent.children[rid]) {
+            lastEvent.children[rid] = []
+          }
+          lastEvent.children[rid].push(e)
         }
       }
     }
@@ -101,6 +137,9 @@ class OfflineDataProvider {
       if (isRuntime) {
         e.ts = e.ts - this.absoluteStartNumber
       }
+
+      // 更新每个core当前运行的任务
+      this.updateCurrentTask(e)
       this.events.push(e)
 
       // 检查新事件是否有触发，找到后立即发送消息
@@ -115,18 +154,27 @@ class OfflineDataProvider {
           })
         }
       }
-    }
-    // Since timestamps are always increasing, we can directly append without sorting
 
-    // Only process new events to update indexes incrementally
-    for (const e of newEvents) {
+      const rid = makeRowId(e.coreId, e.id, e.type)
       if (e.type === TaskType.TASK || e.type === TaskType.ISR) {
-        const rid = makeRowId(e.coreId, e.id, e.type)
         if (!this.perActor.has(rid)) {
           this.perActor.set(rid, [])
           this.actorNames.set(rid, `${TaskType[e.type]}_${e.id}`)
         }
         this.perActor.get(rid)!.push(e)
+      } else if (e.type === TaskType.RUNABLE) {
+        const currentTask = this.currentTaskByCore.get(e.coreId)
+        if (currentTask) {
+          const lrid = makeRowId(e.coreId, currentTask.id, currentTask.type)
+          const lastEvent = this.perActor.get(lrid)!.at(-1)!
+          if (!lastEvent.children) {
+            lastEvent.children = {}
+          }
+          if (!lastEvent.children[rid]) {
+            lastEvent.children[rid] = []
+          }
+          lastEvent.children[rid].push(e)
+        }
       }
     }
 
@@ -342,7 +390,7 @@ class OfflineDataProvider {
 
         // For TASK: only create state when status is START and next event exists
         if (cur.type === TaskType.TASK) {
-          if (cur.status == TaskStatus.TERMINATE) {
+          if (cur.status == TaskStatus.TERMINATE || !next) {
             continue
           }
         }
@@ -381,6 +429,25 @@ class OfflineDataProvider {
           range: { start, end },
           data: { cur, next, style: {} }
         } as unknown as TimelineChart.TimeGraphState)
+
+        if (cur.children) {
+          for (const children of Object.values(cur.children)) {
+            for (let i = 0; i < children.length; i++) {
+              const curChild = children[i]
+              const nextChild = children[i + 1]
+              if (!nextChild) {
+                continue
+              }
+              const start = BigInt(curChild.ts) - this.absoluteStart
+              const end = BigInt(nextChild.ts) - this.absoluteStart
+              states.push({
+                id: `${curChild.coreId}_${curChild.id}_${curChild.type}_${curChild.ts}`,
+                range: { start, end },
+                data: { cur: curChild, next: nextChild, style: {} }
+              } as unknown as TimelineChart.TimeGraphState)
+            }
+          }
+        }
 
         if (i === 0) prevPossibleState = start
         if (i === evts.length - 1) nextPossibleState = end

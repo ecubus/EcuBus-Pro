@@ -980,6 +980,9 @@ function initPixiGraph() {
                 }
               }
             }
+          } else if (data.cur.type === TaskType.RUNABLE) {
+            style.color = getColorFromCssVar('--el-color-white', '#ffffff')
+            style.height = buttonHeight * 0.5
           }
         }
         styleMap.set(rid, style)

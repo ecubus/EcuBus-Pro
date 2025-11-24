@@ -2,105 +2,83 @@
 import LinCableProductPage from '../../../component/LinCableProductPage.vue'
 </script>
 
-# EcuBus LinCable – USB to LIN Adapter for Automotive Development
+# EcuBus LinCable – 用于汽车开发的 USB 转 LIN 适配器
 
 <LinCableProductPage />
 
-The EcuBus LinCable adapter enables seamless connection of a LIN network to a computer via
-USB Type-C. Supporting a single LIN channel.
+EcuBus LinCable 适配器可通过 USB Type-C 将 LIN 网络无缝连接到计算机。 支持单个 LIN 通道。
 
-**Board dimensions:** 59mm (height) × 19mm (length)
+**电路板尺寸：** 59毫米（高度）× 19毫米（长度）
 
-## Diagram
+## 示意图
 
 ![lincable-diagram](../../../media/um/hardware/linCable.png)
 
-## LIN Protocol Support
+## LIN 协议支持
 
-LinCable fully supports the LIN 2.0, 2.1, 2.2A, and SAE J2602 standards, providing
-compatibility with a wide range of automotive LIN devices and networks. Supported baud rates
-include 19200, 10400, 9600, and 2400 bps, making LinCable suitable for both legacy and
-modern LIN applications.
+LinCable 完全支持 LIN 2.0、2.1、2.2A 和 SAE J2602 标准，提供与各种汽车 LIN 设备和网络的兼容性。 支持的波特率包括 19200、10400、9600 和 2400 bps，使 LinCable 适用于传统和现代 LIN 应用。
 
-## PWM Output Capability
+## PWM 输出能力
 
-LinCable includes advanced [PWM](../pwm/pwm.md) output functionality, making it
-a versatile tool for automotive development and testing. The PWM output feature enables
-precise control of digital signals for various automotive applications.
+LinCable 包含高级 [PWM](../pwm/pwm.md) 输出功能，使其成为汽车开发和测试的多功能工具。 PWM 输出功能能够为各种汽车应用提供精确的数字信号控制。
 
-### PWM Output Specifications
+### PWM 输出规格
 
-- **Frequency Range**: 1 Hz to 20KHz with high precision
-- **Duty Cycle Control**: 0% to 100% with 0.1% resolution
-- **Output Voltage**: High level equals VBAT input voltage, low level equals 0V
-- **Channel Count**: Single PWM output channel
-- **Frequency Accuracy**: ±0.1% typical
+- **频率范围**：1 Hz 至 20KHz，高精度
+- **占空比控制**：0% 至 100%，分辨率 0.1%
+- **输出电压**：高电平等于 VBAT 输入电压，低电平等于 0V
+- **通道数量**：单个 PWM 输出通道
+- **频率精度**：±0.1%（典型值）
 
-## Power Control
+## 电源控制
 
-Support IUT power control, maximum current 2A, maximum voltage 18V
+支持 IUT 电源控制，最大电流 2A，最大电压 18V
 
-## Fault Injection and Conformance Testing
+## 故障注入与一致性测试
 
-With built-in advanced fault injection capabilities, LinCable allows engineers to simulate
-various error conditions and perform comprehensive conformance testing. This is essential
-for validating the robustness and reliability of LIN nodes and networks during development
-and quality assurance.
+凭借内置的高级故障注入功能，LinCable 允许工程师模拟各种错误条件并执行全面的一致性测试。 这对于在开发和质量保证过程中验证 LIN 节点和网络的鲁棒性和可靠性至关重要。
 
-> Follow ISO/DIS 17987-6
+> 遵循 ISO/DIS 17987-6
 
 ---
 
-### Break Field/Delimiter Length Control
+### Break 字段/分隔符长度控制
 
-- **Break Length Length**: Adjustable break field length from 13 to 26 bits (default: 13 bits)
-- **Break Delimiter Length**: Configurable delimiter length from 0 to 14.6 bits (default: 1 bit)
+- **Break 长度**：可调节的 break 字段长度，从 13 到 26 位（默认：13 位）
+- **Break 分隔符长度**：可配置的分隔符长度，从 0 到 14.6 位（默认：1 位）
 
-### Inter-byte Spacing Control
+### 字节间间隔控制
 
-- **Header Inter-byte Space**: Control spacing between sync byte and identifier field (0-14 bits, default: 0)
-- **Data Inter-byte Space**: Individual control of spacing between each data byte (0-4 bits per byte)
+- **报头字节间间隔**：控制同步字节和标识符字段之间的间隔（0-14 位，默认：0）
+- **数据字节间间隔**：单独控制每个数据字节之间的间隔（每字节 0-4 位）
 
-### Sync/PID Field Customization
+### 同步/PID 字段自定义
 
-- **Sync Value Override**: Custom sync byte value or disable sync transmission entirely (default: 0x55, false means master do not send sync val)
-- **PID Override**: Custom Protected Identifier (PID) value or disable PID transmission (default: getPID(frameId), false means master do not send pid)
+- **同步值覆盖**：自定义同步字节值或完全禁用同步传输（默认：0x55，false 表示主机不发送同步值）
+- **PID 覆盖**：自定义受保护标识符（PID）值或禁用 PID 传输（默认：getPID(frameId)，false 表示主机不发送 pid）
 
-### Bit-level Fault Injection
+### 位级故障注入
 
-- **Precise Bit Manipulation**: Inject faults at any specific bit position starting from the break field
-- **Bit Value Control**: Force specific bits to high (1) or low (0) states
+- **精确位操作**：从 break 字段开始在任何特定位位置注入故障
+- **位值控制**：强制特定位为高（1）或低（0）状态
 
-### Checksum Override
+### 校验和覆盖
 
-- **Checksum Override**: Override the checksum with a custom value
+- **校验和覆盖**：用自定义值覆盖校验和
 
 ---
 
-> See [Lin Conformance Test Example](https://app.whyengineer.com/examples/lin_conformance_test/readme.html) for more details.
+> 有关更多详细信息，请参阅 [LIN 一致性测试示例](https://app.whyengineer.com/examples/lin_conformance_test/readme.html)。
 
-## Cross-Platform and Software Integration
+## 跨平台与软件集成
 
-LinCable is fully compatible with Windows, macOS, and Linux operating systems (USB-ACM driver). It integrates
-seamlessly with the **EcuBus-Pro** software suite, and also supports third-party automotive
-development tools. A comprehensive SDK and API are provided for custom application
-development.
+LinCable 与 Windows、macOS 和 Linux 操作系统完全兼容（USB-ACM 驱动程序）。 它与 **EcuBus-Pro** 软件套件无缝集成，并且还支持第三方汽车开发工具。 提供了全面的 SDK 和 API，用于自定义应用程序开发。
 
-## Open Communication Protocol for Secondary Development
+## 用于二次开发的开放通信协议
 
-LinCable provides an open communication protocol that enables users to perform secondary development
-and customization according to their specific requirements. The protocol is well-documented and
-includes comprehensive APIs, allowing developers to integrate LinCable into their own applications
-or create custom solutions for specialized automotive testing scenarios. This open architecture
-ensures flexibility and extensibility for advanced users who need tailored functionality beyond
-the standard features.
+LinCable 提供了一个开放的通信协议，使用户能够根据其特定需求进行二次开发和定制。 该协议有完善的文档记录，并包含全面的 API，允许开发人员将 LinCable 集成到他们自己的应用程序中，或为专门的汽车测试场景创建自定义解决方案。 这种开放式架构确保了高级用户的灵活性和可扩展性，这些用户需要超出标准功能的定制功能。
 
-## DFU Firmware Update Support
+## DFU 固件更新支持
 
-LinCable supports Device Firmware Update (DFU) functionality, allowing users to easily update
-the device firmware to the latest version or install custom firmware. This feature ensures that
-LinCable can be kept up-to-date with the latest improvements, bug fixes, and new features without
-requiring hardware replacement. The DFU process is straightforward and can be performed through
-the EcuBus-Pro software or dedicated DFU tools, providing a reliable and safe method for firmware
-updates.
+LinCable 支持设备固件更新（DFU）功能，允许用户轻松将设备固件更新到最新版本或安装自定义固件。 此功能确保 LinCable 可以通过最新的改进、错误修复和新功能保持更新，而无需更换硬件。 DFU 过程简单明了，可以通过 EcuBus-Pro 软件或专用的 DFU 工具执行，为固件更新提供了可靠且安全的方法。
 

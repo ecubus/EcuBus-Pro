@@ -12,7 +12,7 @@ PWM 设备支持输出 PWM 信号，同时具备 ICU（输入捕获单元）功�
 
 ## PWM 交互
 
-通过 `Network` 窗口打开 PWM IA。 IA 功能：
+通过 `Network` 窗口打开 PWM IA。 IA 功能： IA 功能：
 
 - 设置 PWM 占空比（支持多个设备）
 - 快速预设：

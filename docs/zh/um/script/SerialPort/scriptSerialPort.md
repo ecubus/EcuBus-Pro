@@ -1,45 +1,45 @@
-# Use External Packages
+# 使用外部包
 
-Since EcuBus-Pro script is based on Node.js, you can use any Node.js package in your script. There are two ways to install packages:
+由于 EcuBus-Pro 脚本基于 Node.js，您可以在脚本中使用任何 Node.js 包。 有两种安装包的方式：
 
-## Method 1: Using Package Manager Interface
+## 方法 1：使用包管理器界面
 
-When using a project for the first time, you need to initialize the package.json file before installing packages.
+首次使用项目时，您需要在安装包之前初始化 package.json 文件。
 
-EcuBus-Pro provides a graphical package manager interface for easy installation, management, and uninstallation of packages.
+EcuBus-Pro 提供了一个图形化的包管理器界面，方便安装、管理和卸载包。
 
-1. For new projects, you'll see a message "No package.json found" and an "Initialize package.json" button. Click this button to create a new package.json file.
+1. 对于新项目，您会看到一条消息“未找到 package.json”和一个“初始化 package.json”按钮。 点击此按钮以创建新的 package.json 文件。
 
-2. Click on the "Packages" option in the left navigation bar of the main interface
-   ![Package Manager](../../../../media/um/script/SerialPort/package.png)
+2. 在主界面的左侧导航栏中点击“Packages”选项
+   ![包管理器](../../../../media/um/script/SerialPort/package.png)
 
-3. In the Package Manager interface:
-   - Enter the name of the package you want to install
-   - Select the installation type (Dependencies or Dev Dependencies)
-   - Click the "Install" button
+3. 在包管理器界面中：
+   - 输入您要安装的包的名称
+   - 选择安装类型（依赖项或开发依赖项）
+   - 点击“安装”按钮
 
-4. You can view and manage installed packages in the "Installed Packages" section at the bottom
+4. 您可以在底部的“已安装包”部分查看和管理已安装的包
 
-## Method 2: Using EcuBus-Pro CLI
+## 方法 2：使用 EcuBus-Pro CLI
 
-You can also install packages using the `pnpm` command in the EcuBus-Pro CLI. See [EcuBus-Pro CLI](cli.md) for more details.
+您也可以在 EcuBus-Pro CLI 中使用 `pnpm` 命令安装包。 详情请参阅 [EcuBus-Pro CLI](cli.md)。
 
-### Install via CLI
+### 通过 CLI 安装
 
-Install the `serialport` package in your project root directory.
+在您的项目根目录中安装 `serialport` 包。
 
 ```bash
 ecb_cli pnpm install serialport
 ```
 
-![Installation Process](../../../../media/um/script/SerialPort/pnpm.gif)
+![安装过程](../../../../media/um/script/SerialPort/pnpm.gif)
 
-## Usage Example
+## 使用示例
 
-Here is an example of how to use the `serialport` package in your script.
-For more information about the `serialport` package, please refer to the [serialport website](https://serialport.io/).
+以下是如何在脚本中使用 `serialport` 包的示例。
+有关 `serialport` 包的更多信息，请参阅 [serialport 网站](https://serialport.io/)。
 
-### Code Example
+### 代码示例
 
 ```typescript
 import { SerialPort } from 'serialport'
@@ -59,7 +59,7 @@ SerialPort.list()
   })
 ```
 
-### Running Result
+### 运行结果
 
-![Running Result](../../../../media/um/script/SerialPort/serialPort.gif)
+![运行结果](../../../../media/um/script/SerialPort/serialPort.gif)
 

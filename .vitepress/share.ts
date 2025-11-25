@@ -16,6 +16,18 @@ export const shared = defineConfig({
     'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
   },
 
+  vite: {
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://app.whyengineer.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      }
+    }
+  },
+
   sitemap: {
     hostname: 'https://app.whyengineer.com'
   },

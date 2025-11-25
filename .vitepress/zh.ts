@@ -42,6 +42,10 @@ export const zh = defineConfig({
 function nav(): DefaultTheme.NavItem[] {
   return [
     {
+      text: '📦 插件市场',
+      link: '/zh/docs/plugin/index.md'
+    },
+    {
       text: '常见问题',
       link: '/zh/docs/faq/index.md'
     },

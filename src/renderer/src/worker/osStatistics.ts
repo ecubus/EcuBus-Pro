@@ -349,7 +349,8 @@ export default class OsStatistics {
       [TaskType.SERVICE]: 'Service',
       [TaskType.HOOK]: 'Hook',
       [TaskType.SPINLOCK]: 'Spinlock',
-      [TaskType.LINE]: 'Line'
+      [TaskType.LINE]: 'Line',
+      [TaskType.RUNABLE]: 'Runable'
     }
     return `${this.id}.${map[type]}.${type}_${id}_${coreId}`
   }

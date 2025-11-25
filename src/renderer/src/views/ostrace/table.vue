@@ -585,7 +585,8 @@ const initializeData = () => {
       [TaskType.SERVICE]: 'Service',
       [TaskType.HOOK]: 'Hook',
       [TaskType.SPINLOCK]: 'Spinlock',
-      [TaskType.LINE]: 'Line'
+      [TaskType.LINE]: 'Line',
+      [TaskType.RUNABLE]: 'Runable'
     }
     return `${ortiId}.${map[type]}.${type}_${id}_${coreId}`
   }

@@ -42,6 +42,14 @@ export const zh = defineConfig({
 function nav(): DefaultTheme.NavItem[] {
   return [
     {
+      text: '📦 插件市场',
+      link: '/zh/docs/plugin/index.md'
+    },
+    {
+      text: '常见问题',
+      link: '/zh/docs/faq/index.md'
+    },
+    {
       text: pkg.version,
       items: [
         {
@@ -70,95 +78,97 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: '用户手册',
+      base: '/zh/docs/um/',
       items: [
         {
           text: 'EcuBus的硬件',
-          link: '/zh/docs/um/hardware/index',
-          items: [{ text: 'LinCable', link: '/zh/docs/um/hardware/lincable' }]
+          link: 'hardware/index.md',
+          items: [{ text: 'LinCable', link: 'hardware/lincable.md' }]
         },
-        { text: 'CAN', link: '/zh/docs/um/can/can' },
-        { text: 'LIN', link: '/zh/docs/um/lin/lin' },
-        { text: 'PWM', link: '/zh/docs/um/pwm/pwm' },
-        { text: 'Network', items: [{ text: '日志记录器', link: '/zh/docs/um/network/logger' }] },
-        { text: '命令行', link: '/zh/docs/um/cli/cli' },
+        { text: 'CAN', link: 'can/can.md' },
+        { text: 'LIN', link: 'lin/lin.md' },
+        { text: 'PWM', link: 'pwm/pwm.md' },
+        { text: 'Network', items: [{ text: '日志记录器', link: 'network/logger.md' }] },
+        { text: '命令行', link: 'cli/cli.md' },
+        { text: 'E2E', link: 'e2e/e2e.md' },
         {
           text: '以太网',
           items: [
             {
               text: 'DoIP',
-              link: '/zh/docs/um/doip/doip',
+              link: 'doip/doip.md',
               items: [
                 {
                   text: 'VIN请求行为',
-                  link: '/zh/docs/um/doip/vin'
+                  link: 'doip/vin.md'
                 }
               ]
             }
           ]
         },
-        { text: 'SOME/IP', link: '/zh/docs/um/someip/index' },
-        { text: 'OSEK OS Trace', link: '/zh/docs/um/osTrace/index' },
+        { text: 'SOME/IP', link: 'someip/index.md' },
+        { text: 'OSEK OS Trace', link: 'osTrace/index.md' },
         {
           text: '诊断',
           items: [
             {
               text: '内建脚本',
-              link: '/zh/docs/um/uds/buildInScript/buildInScript'
+              link: 'uds/buildInScript/buildInScript.md'
             },
             {
               text: '会话保持',
-              link: '/zh/docs/um/uds/testerPresent/testerPresent'
+              link: 'uds/testerPresent/testerPresent.md'
             },
             {
               text: 'UDS转C代码',
-              link: '/zh/docs/um/uds/udscode/udscode'
+              link: 'uds/udscode/udscode.md'
             },
             {
               text: 'UDS Bootloader实现指南',
-              link: '/zh/docs/um/uds/example/example'
+              link: 'uds/example/example.md'
             }
           ]
         },
-        { text: 'Trace', link: '/zh/docs/um/trace/trace' },
-        { text: '图表', link: '/zh/docs/um/graph/graph' },
-        { text: '变量', link: '/zh/docs/um/var/var' },
+        { text: 'Trace', link: 'trace/trace.md' },
+        { text: '图表', link: 'graph/graph.md' },
+        { text: '变量', link: 'var/var.md' },
         {
           text: '脚本',
-          link: '/zh/docs/um/script/script',
+          link: 'script/script.md',
           items: [
-            { text: '使用外部包', link: '/zh/docs/um/script/SerialPort/scriptSerialPort' },
-            { text: 'CAPL转为TS', link: '/zh/docs/um/script/capl2ts/capl2ts' }
+            { text: '使用外部包', link: 'script/SerialPort/scriptSerialPort.md' },
+            { text: 'CAPL转为TS', link: 'script/capl2ts/capl2ts.md' }
           ]
         },
         {
           text: '测试',
-          link: '/zh/docs/um/test/test'
+          link: 'test/test.md'
         },
         {
           text: '数据库',
-          link: '/zh/docs/um/database/database',
+          link: 'database/database.md',
           items: [
-            { text: 'LIN LDF', link: '/zh/docs/um/database/ldf/ldf' },
-            { text: 'CAN DBC', link: '/zh/docs/um/database/dbc/dbc' }
+            { text: 'LIN LDF', link: 'database/ldf/ldf.md' },
+            { text: 'CAN DBC', link: 'database/dbc/dbc.md' }
           ]
         },
         {
           text: '面板',
-          link: '/zh/docs/um/panel/index'
+          link: 'panel/index.md'
+        },
+        {
+          text: '插件',
+          link: 'plugin/plugin.md'
         },
         {
           text: '设置',
-          items: [{ text: '通用', link: '/zh/docs/um/setting/general' }]
-        },
-        {
-          text: '常见问题',
-          link: '/zh/docs/faq/index'
+          items: [{ text: '通用', link: 'setting/general.md' }]
         }
       ]
     },
     {
       text: '示例',
-      base: '/zh/examples/',
+      base: 'zh/examples/',
       items: [
         {
           text: 'CAN',
@@ -227,25 +237,26 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: '开发者手册',
+      base: '/zh/docs/dev/',
       collapsed: true,
       items: [
-        { text: '架构', link: '/zh/docs/dev/arch.md' },
+        { text: '架构', link: 'arch.md' },
         {
           text: '安装/配置',
-          link: '/zh/docs/dev/setup.md',
+          link: 'setup.md',
           items: [
             {
               text: '学习资源',
-              link: '/zh/docs/dev/jslearn.md'
+              link: 'jslearn.md'
             },
-            { text: '开发新适配器', link: '/zh/docs/dev/adapter.md' }
+            { text: '开发新适配器', link: 'adapter.md' }
           ]
         },
-        { text: '组件测试', link: '/zh/docs/dev/test.md' },
-        { text: 'Addon开发', link: '/zh/docs/dev/addon.md' },
-        { text: '如何开发文档', link: '/zh/docs/dev/doc.md' },
-        { text: '功能请求流程', link: '/zh/docs/dev/feature.md' },
-        { text: '发布说明', link: '/zh/docs/dev/releases_note.md' }
+        { text: '组件测试', link: 'test.md' },
+        { text: 'Addon开发', link: 'addon.md' },
+        { text: '如何开发文档', link: 'doc.md' },
+        { text: '功能请求流程', link: 'feature.md' },
+        { text: '发布说明', link: 'releases_note.md' }
       ]
     }
   ]

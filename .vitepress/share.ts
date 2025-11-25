@@ -6,7 +6,7 @@ export const shared = defineConfig({
   description: 'A powerful automotive ECU development tool',
   ignoreDeadLinks: true,
   lastUpdated: true,
-  srcExclude: ['out', 'resources'],
+  srcExclude: ['out', 'resources/docs'],
   rewrites: {
     'docs/en/:rest*': 'docs/:rest*',
     'docs/zh/:rest*': 'zh/docs/:rest*',
@@ -14,6 +14,17 @@ export const shared = defineConfig({
     'README.zh.md': 'zh/index.md',
     'resources/examples/:qqq/:slug*.zh.md': 'zh/examples/:qqq/:slug*.md',
     'resources/examples/:pkg/:slug*': 'examples/:pkg/:slug*'
+  },
+
+  vite: {
+    server: {
+      proxy: {
+        '/resources': {
+          target: 'https://app.whyengineer.com',
+          changeOrigin: true
+        }
+      }
+    }
   },
 
   sitemap: {

@@ -140,6 +140,7 @@ export class LIN_TP implements LinTp {
   abortAllController = new AbortController()
   tpStatus: Record<string, number> = {}
   tpDataBuffer: Record<string, Buffer> = {}
+
   tpDataFc: Record<
     string,
     { bc: number; leftLen: number; curBs: number; crTimer?: NodeJS.Timeout }
@@ -203,12 +204,15 @@ export class LIN_TP implements LinTp {
   }
   async sendLinFrame(mode: LinMode, addr: LinAddr, data: Buffer, uuid: string) {
     return new Promise<{ ts: number }>((resolve, reject) => {
+      if (this.abortAllController.signal.aborted) {
+        reject(new TpError(LIN_TP_ERROR_ID.TP_BUS_CLOSED, addr))
+        return
+      }
       const abortController = new AbortController()
       const timer = setTimeout(() => {
         abortController.abort()
         reject(new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_A, addr, data))
       }, addr.nAs)
-
       const msg: LinMsg = {
         frameId: mode == LinMode.MASTER ? 0x3c : 0x3d,
         data: data,
@@ -234,6 +238,8 @@ export class LIN_TP implements LinTp {
         })
 
       this.abortAllController.signal.onabort = () => {
+        abortController.abort()
+        clearTimeout(timer)
         reject(new TpError(LIN_TP_ERROR_ID.TP_BUS_CLOSED, addr))
       }
     })
@@ -272,7 +278,6 @@ export class LIN_TP implements LinTp {
           'functional address not support multi frame'
         )
       }
-      const sendPList = []
 
       let sn = 1
       let sendLen = 0
@@ -284,14 +289,14 @@ export class LIN_TP implements LinTp {
       ])
       //ff
       const { sendData, usedLen } = this.getSendData(pci, addr, data)
-      sendPList.push(this.sendLinFrame(mode, addr, sendData, id))
+      let ts = await this.sendLinFrame(mode, addr, sendData, id)
 
       sendLen = usedLen
 
       while (sendLen < data.length) {
         const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
         const { sendData, usedLen } = this.getSendData(snData, addr, data.subarray(sendLen))
-        sendPList.push(this.sendLinFrame(mode, addr, sendData, id))
+        ts = await this.sendLinFrame(mode, addr, sendData, id)
         sendLen += usedLen
 
         sn++
@@ -303,8 +308,7 @@ export class LIN_TP implements LinTp {
         }
       }
 
-      const r = await Promise.all(sendPList)
-      return r[r.length - 1].ts
+      return ts.ts
     }
   }
 
@@ -364,18 +368,7 @@ export class LIN_TP implements LinTp {
         this.rejectMap.set(cnt, reject)
         const cmdId = this.getReadId(mode == LinMode.MASTER ? LinMode.SLAVE : LinMode.MASTER, addr)
         this.base.setPendingDiagRead(cnt, mode, addr)
-        const timer = setTimeout(() => {
-          if (this.rejectMap.has(cnt)) {
-            this.rejectMap.delete(cnt)
-            reject(new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ, addr))
-          }
-          this.base.clearPendingDiagRead(cnt)
-          if (selfStart) {
-            this.base.stopSch()
-          }
-        }, timeout)
-
-        this.event.once(cmdId, (val) => {
+        const cb = (val: { data: Buffer; ts: number } | TpError) => {
           clearTimeout(timer)
           if (this.rejectMap.has(cnt)) {
             this.base.clearPendingDiagRead(cnt)
@@ -389,7 +382,28 @@ export class LIN_TP implements LinTp {
               this.base.stopSch()
             }
           }
-        })
+        }
+        const clear = () => {
+          if (this.rejectMap.has(cnt)) {
+            this.rejectMap.delete(cnt)
+            reject(new TpError(LIN_TP_ERROR_ID.TP_TIMEOUT_UPPER_READ, addr))
+          }
+          this.base.clearPendingDiagRead(cnt)
+          if (selfStart) {
+            this.base.stopSch()
+          }
+
+          this.event.off(cmdId, cb)
+        }
+        const timer = setTimeout(() => {
+          clear()
+        }, timeout)
+
+        this.event.once(cmdId, cb)
+
+        this.abortAllController.signal.onabort = () => {
+          clear()
+        }
       }
     )
   }

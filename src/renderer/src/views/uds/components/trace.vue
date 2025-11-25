@@ -1072,10 +1072,14 @@ const columes: Ref<Column[]> = ref([
     title: 'Time',
     width: 200,
     formatter: (row) => {
-      if (isOverwrite.value && row.row.deltaTime) {
-        return `${(row.row.ts / 1000000).toFixed(6)} ${row.row.deltaTime}`
+      if (row.row.ts) {
+        if (isOverwrite.value && row.row.deltaTime) {
+          return `${(row.row.ts / 1000000).toFixed(6)} ${row.row.deltaTime}`
+        }
+        return (row.row.ts / 1000000).toFixed(6)
+      } else {
+        return ''
       }
-      return (row.row.ts / 1000000).toFixed(6)
     }
   },
   { key: 'name', title: 'Name', width: 200 },

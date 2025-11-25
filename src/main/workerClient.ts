@@ -12,6 +12,7 @@ import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
 import { error } from 'electron-log'
+import fs from 'fs'
 
 type HandlerMap = {
   output: (data: any) => Promise<number>
@@ -124,7 +125,9 @@ export default class UdsTester {
         this.env.ONLY = 'false'
       }
     }
-
+    if (!fs.existsSync(jsFilePath)) {
+      throw new Error(`script file not found`)
+    }
     this.worker = new Worker(jsFilePath, {
       workerData: this.env,
       stdout: true,

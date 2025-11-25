@@ -19,10 +19,9 @@ export const shared = defineConfig({
   vite: {
     server: {
       proxy: {
-        '/api': {
+        '/resources': {
           target: 'https://app.whyengineer.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '')
+          changeOrigin: true
         }
       }
     }

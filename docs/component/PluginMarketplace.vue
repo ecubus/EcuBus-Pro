@@ -197,7 +197,7 @@ const plugins = ref<RemotePluginInfo[]>([])
 const selectedPlugin = ref<RemotePluginInfo | null>(null)
 let marked: Marked
 
-const PLUGIN_API_ENDPOINT = '/api/resources/api/get-resources'
+const PLUGIN_API_ENDPOINT = '/resources/api/get-resources'
 
 // --- Methods ---
 

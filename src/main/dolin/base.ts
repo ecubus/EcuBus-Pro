@@ -224,6 +224,7 @@ export default abstract class LinBase {
   }
   stopSch() {
     clearTimeout(this.schTimer)
+    this.schTimer = undefined
     if (this.sch) {
       this.sch = undefined
     }
@@ -668,8 +669,10 @@ export default abstract class LinBase {
         } else {
           const q = this.queue.drain()
           q.finally(() => {
-            checkNext()
-            this.startSch(db, schName, activeMap, nextIndex)
+            if (this.schTimer) {
+              checkNext()
+              this.startSch(db, schName, activeMap, nextIndex)
+            }
           })
         }
       }, nextDelay)

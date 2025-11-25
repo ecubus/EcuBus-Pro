@@ -42,6 +42,10 @@ export const en = defineConfig({
 function nav(): DefaultTheme.NavItem[] {
   return [
     {
+      text: '📦 Plugin Marketplace',
+      link: '/docs/plugin/index.md'
+    },
+    {
       text: 'FAQ',
       link: '/docs/faq/index.md'
     },
@@ -74,6 +78,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: 'User Manual',
+      collapsed: true,
       base: '/docs/um/',
       items: [
         {

@@ -1,6 +1,7 @@
 ---
 layout: false
 ---
+
 <script setup>
 import PluginMarketplace from '../../component/PluginMarketplace.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
@@ -20,6 +21,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateHeight)
 })
 </script>
+
 <PluginMarketplace :height="containerHeight" />
 
 <style>

@@ -1,7 +1,7 @@
 # 监控信号变化并打印时间间隔
 
 > [!INFO]
-> CAPL脚本由三少提供
+> CAPL 脚本由 Sanshao 提供
 
 ## CAPL
 
@@ -43,7 +43,7 @@ on signal_update EngState
 }
 ```
 
-## EcuBus-Pro脚本
+## EcuBus-Pro 脚本
 
 ```typescript
 let lastValue: number|undefined;

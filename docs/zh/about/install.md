@@ -1,7 +1,7 @@
 # 安装
 
 您可以从 [GitHub 发布页面](https://github.com/ecubus/EcuBus-Pro/releases) 下载最新版本的 `EcuBus-Pro`
-如果您在中国❤️，也可以从我们的 CDN 页面下载：<CustomComponent/>
+如果您在中国，也可以从我们的 CDN 页面下载：<CustomComponent/>
 
 > [!TIP]
 > Linux、macOS 版本只能从发布页面下载，Arch Linux 可以通过 AUR 仓库安装。
@@ -13,20 +13,20 @@
 
 ![alt text](../../media/about/image.png)
 
-### 您可以为所有用户或仅为自己安装
+### 您可以为所有人或仅为自己决定
 
 ![alt text](../../media/about/image-1.png)
 
-### 打开 `EcuBus-Pro` 时可以看到详细信息
+### 打开 `EcuBus-Pro` 时您可以看到详细信息
 
 ![alt text](../../media/about/image-2.png)
 
 ## 自动更新
 
-`EcuBus-Pro` 会在您打开时检查最新版本，如果有新版本，会提示您更新。
+`EcuBus-Pro` 会在您打开时检查最新版本，如果有新版本，它会提示您更新。
 ![alt text](../../media/about/update1.png)
 
-- 您可以查看详细的更新信息，点击 `开始更新` 按钮进行更新。
+- 您可以看到详细的更新信息，点击 `开始更新` 按钮进行更新。
   ![alt text](../../media/about/update2.png)
 
 - 将显示更新进度，请稍等片刻。

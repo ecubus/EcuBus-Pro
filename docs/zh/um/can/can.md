@@ -1,9 +1,9 @@
 # CAN
 
-CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可靠的 ECU 通信而设计。
+CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可靠的ECU通信而设计。
 
 > [!IMPORTANT]
-> 本节描述的某些功能可能需要 CAN DBC 文件。 有关 DBC 文件的更多信息，请参阅我们的[数据库文档](../dbc)。
+> 本节描述的某些功能可能需要CAN DBC文件。 有关DBC文件的更多信息，请参阅我们的[数据库文档](../dbc)。
 
 支持的硬件：
 
@@ -21,7 +21,7 @@ CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可
 SLCAN 是一种低成本开源解决方案，固件来源于 [canable-fw](https://github.com/normaldotcom/canable-fw)，通信基于 USB-ACM。
 
 > [!NOTE]
-> 此固件目前不提供串行命令的任何 ACK/NACK 反馈。
+> 此固件目前不提供任何串行命令的 ACK/NACK 反馈。
 
 ## GS_USB
 
@@ -30,7 +30,7 @@ SLCAN 是一种低成本开源解决方案，固件来源于 [canable-fw](https:
 ### Linux gs_usb
 
 Linux 内核 3.7 及以上版本已合并 `gs_usb` 驱动程序。
-使用以下命令检查 `gs_usb` 模块是否启用
+使用以下命令检查 `gs_usb` 模块是否启用：
 
 ```bash
 lsmod | grep gs_usb
@@ -102,7 +102,7 @@ newgrp dialout
 EcuBus-Pro 提供两种主要的 CAN 通信方法：
 
 - 交互模式：用于手动帧传输
-- 节点脚本：使用自定义脚本进行自动化通信
+- 节点脚本：用于使用自定义脚本进行自动化通信
 
 ![alt text](../../../media/um/can/image-1.png)
 

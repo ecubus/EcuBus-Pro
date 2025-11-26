@@ -669,10 +669,12 @@ export default abstract class LinBase {
         } else {
           const q = this.queue.drain()
           q.finally(() => {
-            if (this.schTimer) {
-              checkNext()
-              this.startSch(db, schName, activeMap, nextIndex)
-            }
+            setImmediate(() => {
+              if (this.schTimer) {
+                checkNext()
+                this.startSch(db, schName, activeMap, nextIndex)
+              }
+            })
           })
         }
       }, nextDelay)

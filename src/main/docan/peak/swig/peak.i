@@ -101,6 +101,9 @@ cantp_msgdata_canfd* GetMsgDataCanFd(cantp_msg* msg) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
+extern Napi::Value StartPeriodSend(const Napi::CallbackInfo &info);
+extern void StopPeriodSend(const Napi::CallbackInfo &info);
+extern void ChangeData(const Napi::CallbackInfo &info);
 
 
 do {
@@ -112,6 +115,27 @@ do {
 
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("FreeTSFN", FreeTSFN);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StartPeriodSend", StartPeriodSend);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StopPeriodSend", StopPeriodSend);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("ChangeData", ChangeData);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
 	pd
   }));

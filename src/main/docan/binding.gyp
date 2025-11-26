@@ -68,7 +68,8 @@
                 ['OS=="win"', {
                     'include_dirs': [
                         './peak/inc',
-                        "<!@(node -p \"require('node-addon-api').include\")"
+                        "<!@(node -p \"require('node-addon-api').include\")",
+                        "./../timer"
                     ],
                     'configurations': { },
                     'defines': [

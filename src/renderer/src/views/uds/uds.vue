@@ -328,6 +328,7 @@
         </div>
       </div>
     </div>
+    <div class="pages"></div>
   </div>
 </template>
 
@@ -432,7 +433,7 @@ interface TabConfig {
   icon: any
   items: TabItem[]
 }
-
+const pageWidth = ref(30)
 const activeMenu = ref('')
 const pined = ref(true)
 const { width, height } = useWindowSize()
@@ -1423,7 +1424,7 @@ const bottomH = computed(() => {
   }
   return h
 })
-const contentH = computed(() => height.value - heightOffset.value - bottomH.value)
+const contentH = computed(() => height.value - heightOffset.value - bottomH.value - pageWidth.value)
 const contentW = computed(() => width.value)
 // const contentLeft = computed(() => Math.floor((width.value - contentW.value) / 2))
 layoutMaster.setWinSize(contentH.value, contentW.value)
@@ -1587,15 +1588,17 @@ watch([contentH, contentW], (val) => {
   justify-content: space-between;
 }
 
-/* .modified {
-  position: relative;
-  font-weight: 400;
-  background-color: var(--el-color-info-light-5) !important;
-} */
+.pages {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: v-bind(pageWidth + 'px');
+  background-color: red;
+}
 
 .windows {
   position: absolute;
-  bottom: v-bind(bottomH + 'px');
+  bottom: v-bind(bottomH + pageWidth + 'px');
   display: flex;
   height: 28px;
   left: 0px;

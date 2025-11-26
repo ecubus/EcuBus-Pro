@@ -13,14 +13,14 @@
 
 然后用户可以添加模板配置。 每个模板配置包含两个字段：
 
-- **模板路径**：用户可以从本地文件系统选择模板文件。
+- **模板路径**：用户可以从本地文件系统中选择模板文件。
 - **生成路径**：用户可以指定生成代码的保存路径。
 
-支持多个模板配置。 用户可以根据需要添加或移除模板配置，每个模板支持运行时预览功能。
+支持多个模板配置。 用户可以根据需要添加或删除模板配置，每个模板都支持运行时预览功能。
 
 ## 特殊属性
 
-启用 UDS 代码生成时，每个服务支持添加用户定义的特殊属性以用于 `code generation`。
+启用 UDS 代码生成时，每个服务都支持添加用户定义的特殊属性以用于 `代码生成`。
 ![code2](../../../../media/um/uds/udscode/images/special-config.png)
 
 属性以键值对格式定义。
@@ -32,19 +32,19 @@
 
 ## 模板
 
-UDS 代码生成系统基于 [**Handlebars.js**](https://handlebarsjs.com) 模板引擎，并通过大量自定义辅助方法增强，以提供强大的代码生成能力。
+UDS 代码生成系统基于 [**Handlebars.js**](https://handlebarsjs.com) 模板引擎，并通过大量自定义辅助方法进行增强，以提供强大的代码生成能力。
 
 ### 模板系统概述
 
 <span v-pre>
-模板使用 Handlebars 语法，双花括号 `{{ }}` 用于表达式，`{{# }}{{/ }}` 用于块辅助方法。 系统提供对 UDS 服务数据、配置属性以及丰富辅助函数集的访问。
+模板使用 Handlebars 语法，双花括号 `{{ }}` 用于表达式，`{{# }}{{/ }}` 用于块辅助方法。 系统提供对 UDS 服务数据、配置属性以及丰富的辅助函数集的访问。
 </span>
 
 ### 可用数据上下文
 
 生成代码时，模板可以访问：
 
-- **tester:[TesterInfo](https://app.whyengineer.com/scriptApi/interfaces/TesterInfo.html)**：所有配置的 UDS 服务及其属性
+- **tester:[TesterInfo](https://app.whyengineer.com/scriptApi/interfaces/TesterInfo.html)**：所有已配置的 UDS 服务及其属性
 - **project:ProjectInfo**：项目信息，类型为：
 
 ```ts
@@ -71,15 +71,15 @@ export interface ProjectInfo {
 
 #### **字符串操作**
 
-- <span v-pre>`{{camelcase str}}`</span> - 转换为 camelCase
+- <span v-pre>`{{camelcase str}}`</span> - 转换为驼峰命名法
 - <span v-pre>`{{capitalize str}}`</span> - 首字母大写
 - <span v-pre>`{{uppercase str}}`</span> - 转换为大写
 - <span v-pre>`{{lowercase str}}`</span> - 转换为小写
-- <span v-pre>`{{dashcase str}}`</span> - 转换为 dash-case
-- <span v-pre>`{{snakecase str}}`</span> - 转换为 snake_case
-- <span v-pre>`{{dotcase str}}`</span> - 转换为 dot.case
+- <span v-pre>`{{dashcase str}}`</span> - 转换为短横线命名法
+- <span v-pre>`{{snakecase str}}`</span> - 转换为蛇形命名法
+- <span v-pre>`{{dotcase str}}`</span> - 转换为点分命名法
 - <span v-pre>`{{append str suffix}}`</span> - 追加后缀
-- <span v-pre>`{{prepend str prefix}}`</span> - 前置前缀
+- <span v-pre>`{{prepend str prefix}}`</span> - 添加前缀
 - <span v-pre>`{{trim str}}`</span> - 移除空白字符
 - <span v-pre>`{{replace str old new}}`</span> - 替换文本
 

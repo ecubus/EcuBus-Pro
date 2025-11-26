@@ -1,6 +1,6 @@
 # 内置脚本
 
-内置脚本系统为常见UDS操作提供预配置的诊断服务。 本文档涵盖可用的内置脚本及其功能。
+内置脚本系统为常见的UDS操作提供预配置的诊断服务。 本文档涵盖可用的内置脚本及其功能。
 
 ## 支持的内置脚本
 
@@ -26,7 +26,7 @@ VKeyGenResultEx GenerateKeyEx (
 
 - **dllFile**
 
-  - DLL文件的路径，DLL必须是64位DLL文件并包含GenerateKeyEx函数。
+  - DLL文件的路径，该DLL必须是64位DLL文件并包含GenerateKeyEx函数。
 
 ```c
 VKeyGenResultEx GenerateKeyEx (
@@ -41,11 +41,11 @@ VKeyGenResultEx GenerateKeyEx (
 ```
 
 - **requestSeed**
-  - 请求种子子函数，1,3,5,7,9,11,13,15
+  - 请求种子子功能，1,3,5,7,9,11,13,15
   - 默认值：0x01
 
 - **sendKey**
-  - 发送密钥子函数，2,4,6,8,10,12,14,16
+  - 发送密钥子功能，2,4,6,8,10,12,14,16
   - 默认值：0x02
 
 - **securityLevel**
@@ -58,7 +58,7 @@ VKeyGenResultEx GenerateKeyEx (
   - 最大密钥数组大小
 
 - **securityAccessDataRecord**
-  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子函数中发送到ECU。
+  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子功能中发送到ECU。
 
 ### [SecureAccessGenerateKeyExOpt](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/SecureAccessGenerateKeyExOpt)
 
@@ -69,7 +69,7 @@ VKeyGenResultEx GenerateKeyEx (
 #### 参数 - SecureAccessGenerateKeyExOpt
 
 - **dllFile**
-  - DLL文件的路径，DLL必须是64位DLL文件并包含GenerateKeyExOpt函数。
+  - DLL文件的路径，该DLL必须是64位DLL文件并包含GenerateKeyExOpt函数。
 
 ```c
 VKeyGenResultExOpt GenerateKeyExOpt ( 
@@ -85,11 +85,11 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 ```
 
 - **requestSeed**
-  - 请求种子子函数，1,3,5,7,9,11,13,15
+  - 请求种子子功能，1,3,5,7,9,11,13,15
   - 默认值：0x01
 
 - **sendKey**
-  - 发送密钥子函数，2,4,6,8,10,12,14,16
+  - 发送密钥子功能，2,4,6,8,10,12,14,16
   - 默认值：0x02
 
 - **securityLevel**
@@ -105,7 +105,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
   - 最大密钥数组大小
 
 - **securityAccessDataRecord**
-  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子函数中发送到ECU。
+  - 请求种子DiagRequest中的安全访问数据记录，该数据将在请求种子子功能中发送到ECU。
 
 ### [RequestDownloadBin](https://github.com/ecubus/EcuBus-Pro/tree/master/resources/buildInScript/RequestDownloadBin)
 
@@ -129,7 +129,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 
 - **addressAndLengthFormatIdentifier** (8位)
   - 指定内存地址和长度的格式
-  - 默认值：0x44（4字节地址，4字节长度）
+  - 默认值：0x44（地址4字节，长度4字节）
 
 - **memoryAddress** (取决于addressAndLengthFormatIdentifier)
   - 下载的目标内存地址
@@ -142,7 +142,7 @@ VKeyGenResultExOpt GenerateKeyExOpt (
 
 可以创建自定义脚本来扩展诊断系统的功能。 您可以创建并保存自己的脚本，并在将来使用它。
 
-以下是创建您自己的脚本的方法：
+以下是创建自己的脚本的方法：
 
 ### 脚本结构
 

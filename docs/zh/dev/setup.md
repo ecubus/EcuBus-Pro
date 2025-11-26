@@ -1,11 +1,10 @@
-# 设置
+# 安装设置
 
-如果您不熟悉 JavaScript/TypeScript，
-您可以从 [JavaScript/TypeScript 学习资源](./jslearn.md) 获取一些学习资料
+如果您不熟悉 JavaScript/TypeScript，可以从 [JavaScript/TypeScript 学习资源](./jslearn.md) 获取一些学习资料。
 
-## 详细 Windows 设置指南
+## 详细 Windows 安装指南
 
-您可以从 [详细 Windows 设置指南](./detialSetup.md) 获取详细设置步骤
+您可以从 [详细 Windows 安装指南](./detialSetup.md) 获取详细的安装步骤。
 
 ## 先决条件
 
@@ -41,7 +40,7 @@ npm run docs:build
 npm run native
 ```
 
-### 构建 Worker
+### 构建工作线程
 
 ```bash
 npm run worker
@@ -73,4 +72,4 @@ npm run build:win
 
 ## 从 Github Action 获取
 
-您也可以从 [Github Action](https://github.com/ecubus/EcuBus-Pro/tree/master/.github/workflows) 获取详细设置步骤
+您也可以从 [Github Action](https://github.com/ecubus/EcuBus-Pro/tree/master/.github/workflows) 获取详细的安装步骤。

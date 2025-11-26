@@ -15,7 +15,7 @@ EcuBus 提供了一个强大的插件系统，允许开发者通过自定义功�
 - **基础知识**：
   - TypeScript
   - Vue 3（组合式 API）
-  - Node.js 基础知识
+  - Node.js 基础
 
 ## 快速开始
 
@@ -52,8 +52,8 @@ npm run dev
 
 此命令将：
 
-- 在 `http://localhost:5173/` 启动渲染器进程开发服务器，支持热模块替换（HMR）
-- 监视文件变化并自动重建主进程代码
+- 在 `http://localhost:5173/` 启动渲染器进程开发服务器，并启用热模块替换（HMR）
+- 监视并在文件更改时自动重新构建主进程代码
 
 > [!注意]
 > 您需要更改 `manifest.json` 文件以指向正确的渲染器进程 URL。
@@ -170,7 +170,7 @@ graph TB
 
 ### 2. 进程间通信
 
-主进程和渲染器进程通过安全 API 进行通信：
+主进程和渲染器进程通过安全的 API 进行通信：
 
 **主进程 → 渲染器**：
 
@@ -203,7 +203,7 @@ sequenceDiagram
     R->>R: useData() - shared between components
 ```
 
-#### 示例：完整通信流程
+#### 示例：完整的通信流程
 
 **主进程**（`src/main/index.ts`）：
 
@@ -317,13 +317,13 @@ onUnmounted(() => {
 | `description` | string | 否  | 插件功能的简短描述                                         |
 | `author`      | string | 否  | 插件作者名称                                            |
 | `mainEntry`   | string | 是  | 主进程入口文件的路径（相对于插件根目录）                              |
-| `icon`        | string | 否  | 插件图标路径（推荐 PNG）                                    |
+| `icon`        | string | 否  | 插件图标路径（推荐 PNG 格式）                                 |
 | `readme`      | string | 否  | README 文件路径                                       |
 | `extensions`  | array  | 是  | 扩展点数组                                             |
 
 ### 扩展配置
 
-每个扩展定义了您的插件在 EcuBus 中出现的位置和方式：
+每个扩展定义您的插件在 EcuBus 中出现的位置和方式：
 
 ```json
 {
@@ -367,7 +367,7 @@ onUnmounted(() => {
 3. 查看 EcuBus 官方文档
 4. 在 GitHub 上搜索现有问题
 5. 在社区论坛中提问
-6. 如有需要，提交错误报告
+6. 如果需要，提交错误报告
 
 ## 贡献
 

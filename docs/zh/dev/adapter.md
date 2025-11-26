@@ -4,7 +4,7 @@
 
 ## 参考拉取请求
 
-您可以从这些 PR 中获得一些参考：
+您可以从这些 PR 中获取一些参考：
 
 - [#137](https://github.com/ecubus/EcuBus-Pro/pull/137) - Vector Can
 
@@ -127,7 +127,7 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
    - 如果需要，注册回调
    - 初始化全局变量
 
-### 常见 SWIG 指令
+### 常用 SWIG 指令
 
 ```swig
 %module name          // 定义模块名称
@@ -147,10 +147,10 @@ swig -I"./../inc" -c++ -javascript -napi -v ./${adapter_name}.i
 ```typescript
 abstract class CanBase {
   abstract info: CanBaseInfo;           // 适配器基本信息
-  abstract log: CanLOG;                 // 日志对象
+  abstract log: CanLOG;                 // 日志记录对象
   abstract close(): void;               // 关闭适配器
-  abstract readBase(...): Promise<...>; // 读取 CAN 报文
-  abstract writeBase(...): Promise<...>;// 写入 CAN 报文
+  abstract readBase(...): Promise<...>; // 读取 CAN 消息
+  abstract writeBase(...): Promise<...>;// 写入 CAN 消息
   abstract getReadBaseId(...): string;  // 获取读取 ID
   abstract setOption(...): void;        // 设置选项
   abstract event: EventEmitter;         // 事件发射器
@@ -220,7 +220,7 @@ export class KVASER_CAN extends CanBase {
 }
 ```
 
-adapter
+适配器
 
 ## 测试
 
@@ -428,7 +428,7 @@ vitest test/docan/${adapter_name}.test.ts
 - 使用不同的硬件配置进行测试
 - 测试错误条件和恢复场景
 - 在高消息速率下测试性能
-- 测试长时间运行的稳定性
+- 测试长时间运行操作的稳定性
 - 测试资源清理和内存泄漏
 - 测试并发操作
 - 测试超时处理
@@ -444,7 +444,7 @@ vitest test/docan/${adapter_name}.test.ts
    ```
 
 2. 在 `src/main/docan/can.ts` 中添加设备
-   您应编辑这些函数：
+   您应编辑以下函数：
    - `openCanDevice`
    - `getCanVersion`
    - `getCanDevices`

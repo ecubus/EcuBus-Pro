@@ -3,7 +3,7 @@
 我们支持4种VIN请求方法：
 
 1. 单播VIN请求
-2. 省略VIN，直接TCP连接
+2. 跳过VIN，直接进行TCP连接
 3. 广播VIN请求（UDP4）
 4. 组播VIN请求（UDP6）
 
@@ -17,7 +17,7 @@
 ![alt text](../../../media/um/doip/image.png)
 ![alt text](../../../media/um/doip/image-1.png)
 
-## 省略VIN，直接TCP连接
+## 跳过VIN，直接进行TCP连接
 
 无需UDP请求，直接连接到TCP服务器，请参阅[[#82](https://github.com/ecubus/EcuBus-Pro/issues/82)]
 
@@ -33,4 +33,4 @@
 
 ## 组播VIN请求（UDP6）
 
-暂不支持。
+尚未支持。

@@ -4,7 +4,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ## 配置
 
-> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不明确的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
+> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不清楚的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
 
 ### 添加 SOME/IP 配置
 
@@ -38,24 +38,24 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 ![SOME/IP 服务配置](../../../media/um/someip/service.png)
 
 > [!WARNING]
-> 目前仅支持简单服务。 未来将添加对事件和事件组的支持。
+> 目前仅支持简单服务。 对事件和事件组的支持将在未来添加。
 
 每个服务需要配置：
 
 1. 服务 ID - 服务的唯一标识符，范围为 1-65535
 2. 服务实例 ID - 服务实例的唯一标识符，范围为 1-65535
-3. 是否启用 TCP 可靠传输及相应的端口号
-4. 是否启用 UDP 不可靠传输及相应的端口号
+3. 是否启用 TCP 可靠传输及对应的端口号
+4. 是否启用 UDP 不可靠传输及对应的端口号
 
 ## SOME/IP 交互器
 
-点击 SOME/IP 交互器可快速发起 SOME/IP 请求并查看 SOME/IP 请求的响应。
+点击 SOME/IP 交互器以快速发起 SOME/IP 请求并查看 SOME/IP 请求的响应。
 
 ![SOME/IP 交互器](../../../media/um/someip/ia.png)
 
 ### 交互器配置
 
-将鼠标悬停在交互器块上并点击编辑按钮以配置交互器。
+悬停在交互器块上并点击编辑按钮以配置交互器。
 
 #### 连接配置
 

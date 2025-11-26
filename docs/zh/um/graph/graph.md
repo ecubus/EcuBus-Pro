@@ -21,7 +21,7 @@
 
 来自[`变量窗口`](./../var/var.md)的所有有效变量。
 
-## 一个图表中的多个信号
+## 多信号同图显示
 
 ![alt text](../../../media/um/graph/image-3.png)
 ![alt text](../../../media/um/graph/image-5.png)

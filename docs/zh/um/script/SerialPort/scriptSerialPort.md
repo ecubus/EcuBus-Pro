@@ -6,19 +6,19 @@
 
 首次使用项目时，您需要在安装包之前初始化 package.json 文件。
 
-EcuBus-Pro 提供了一个图形化的包管理器界面，方便安装、管理和卸载包。
+EcuBus-Pro 提供了一个图形化的包管理器界面，用于轻松安装、管理和卸载包。
 
 1. 对于新项目，您会看到一条消息“未找到 package.json”和一个“初始化 package.json”按钮。 点击此按钮以创建新的 package.json 文件。
 
-2. 在主界面的左侧导航栏中点击“Packages”选项
-   ![包管理器](../../../../media/um/script/SerialPort/package.png)
+2. 点击主界面左侧导航栏中的“Packages”选项
+   ![Package Manager](../../../../media/um/script/SerialPort/package.png)
 
 3. 在包管理器界面中：
    - 输入您要安装的包的名称
-   - 选择安装类型（依赖项或开发依赖项）
-   - 点击“安装”按钮
+   - 选择安装类型（Dependencies 或 Dev Dependencies）
+   - 点击“Install”按钮
 
-4. 您可以在底部的“已安装包”部分查看和管理已安装的包
+4. 您可以在底部的“Installed Packages”部分查看和管理已安装的包
 
 ## 方法 2：使用 EcuBus-Pro CLI
 
@@ -32,7 +32,7 @@ EcuBus-Pro 提供了一个图形化的包管理器界面，方便安装、管理
 ecb_cli pnpm install serialport
 ```
 
-![安装过程](../../../../media/um/script/SerialPort/pnpm.gif)
+![Installation Process](../../../../media/um/script/SerialPort/pnpm.gif)
 
 ## 使用示例
 
@@ -61,5 +61,5 @@ SerialPort.list()
 
 ### 运行结果
 
-![运行结果](../../../../media/um/script/SerialPort/serialPort.gif)
+![Running Result](../../../../media/um/script/SerialPort/serialPort.gif)
 

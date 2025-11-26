@@ -1,7 +1,7 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
 import { cloneDeep, result } from 'lodash'
-import { ElMessageBox, ElProgress } from 'element-plus'
+import { ElLoading, ElMessageBox, ElProgress } from 'element-plus'
 import { useProjectStore } from './project'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { useGlobalStart } from './runtime'
@@ -125,6 +125,11 @@ export const useDataStore = defineStore('useDataStore', {
 
           checkScriptStatus()
             .then(() => {
+              const loading = ElLoading.service({
+                lock: true,
+                text: 'Loading...',
+                background: 'rgba(0, 0, 0, 0.7)'
+              })
               window.electron.ipcRenderer
                 .invoke(
                   'ipc-global-start',
@@ -137,6 +142,9 @@ export const useDataStore = defineStore('useDataStore', {
                 .catch((e: any) => {
                   globalStart.value = false
                   window.startTime = Date.now()
+                })
+                .finally(() => {
+                  loading.close()
                 })
             })
             .catch((e: any) => {

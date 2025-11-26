@@ -116,6 +116,64 @@
             "_X_ROW_KEY": "row_152"
           }
         }
+      },
+      "3e1623f4-0437-4676-a0bc-f5c6a8f7e668": {
+        "type": "can",
+        "canDevice": {
+          "id": "3e1623f4-0437-4676-a0bc-f5c6a8f7e668",
+          "name": "PEAK_4",
+          "handle": 81,
+          "vendor": "peak",
+          "canfd": true,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_19"
+          },
+          "bitratefd": {
+            "sjw": 1,
+            "timeSeg1": 7,
+            "timeSeg2": 2,
+            "preScaler": 4,
+            "freq": 2000000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_44"
+          }
+        }
+      },
+      "2351ba8d-6b5e-4855-876c-153bcd7bff24": {
+        "type": "can",
+        "canDevice": {
+          "id": "2351ba8d-6b5e-4855-876c-153bcd7bff24",
+          "name": "PEAK_5",
+          "handle": 82,
+          "vendor": "peak",
+          "canfd": true,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_58"
+          },
+          "bitratefd": {
+            "sjw": 1,
+            "timeSeg1": 7,
+            "timeSeg2": 2,
+            "preScaler": 4,
+            "freq": 2000000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_83"
+          }
+        }
       }
     },
     "ia": {
@@ -125,7 +183,8 @@
         "id": "c24115ee-7080-4573-a216-af88cea85085",
         "devices": [
           "030b067c-a10c-464e-b54f-d442b525becc",
-          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9"
+          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+          "3e1623f4-0437-4676-a0bc-f5c6a8f7e668"
         ],
         "action": [
           {
@@ -135,7 +194,7 @@
             },
             "name": "10ms-1",
             "id": "1",
-            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+            "channel": "3e1623f4-0437-4676-a0bc-f5c6a8f7e668",
             "type": "canfd",
             "dlc": 15,
             "data": [
@@ -160,10 +219,14 @@
             },
             "name": "10ms-2",
             "id": "2",
-            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+            "channel": "3e1623f4-0437-4676-a0bc-f5c6a8f7e668",
             "type": "can",
             "dlc": 8,
-            "data": []
+            "data": [
+              "11",
+              "22",
+              "33"
+            ]
           },
           {
             "uuid": "079f4bc7-dd62-4eec-a12e-8e6ca51f5b7c",
@@ -173,7 +236,7 @@
             },
             "name": "10ms-3",
             "id": "3",
-            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+            "channel": "3e1623f4-0437-4676-a0bc-f5c6a8f7e668",
             "type": "can",
             "dlc": 8,
             "data": []
@@ -186,7 +249,7 @@
             },
             "name": "10ms-4",
             "id": "4",
-            "channel": "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+            "channel": "3e1623f4-0437-4676-a0bc-f5c6a8f7e668",
             "type": "can",
             "dlc": 8,
             "data": []
@@ -202,7 +265,8 @@
         "id": "a788d03f-f4d2-4294-a2fe-2fc86cecd1ce",
         "channel": [
           "030b067c-a10c-464e-b54f-d442b525becc",
-          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9"
+          "081e964f-c8f8-4fa4-af2b-7c3cd06a9ad9",
+          "3e1623f4-0437-4676-a0bc-f5c6a8f7e668"
         ],
         "workNode": "",
         "script": "ecu.ts"
@@ -464,10 +528,10 @@
       },
       "trace": {
         "pos": {
-          "x": 1591,
-          "y": 27,
-          "w": 965,
-          "h": 457
+          "x": 713,
+          "y": 400,
+          "w": 1651,
+          "h": 530
         },
         "title": "trace",
         "label": "Trace",
@@ -481,8 +545,8 @@
       },
       "graph": {
         "pos": {
-          "x": 1275,
-          "y": 25,
+          "x": 937,
+          "y": 16,
           "w": 1070,
           "h": 882
         },

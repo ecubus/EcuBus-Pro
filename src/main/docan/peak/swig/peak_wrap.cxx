@@ -20977,6 +20977,9 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
 extern void CreateTSFN(const Napi::CallbackInfo &info);
 extern void FreeTSFN(const Napi::CallbackInfo &info);
+extern Napi::Value StartPeriodSend(const Napi::CallbackInfo &info);
+extern void StopPeriodSend(const Napi::CallbackInfo &info);
+extern void ChangeData(const Napi::CallbackInfo &info);
 
 
 do {
@@ -20988,6 +20991,27 @@ do {
 
 do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("FreeTSFN", FreeTSFN);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StartPeriodSend", StartPeriodSend);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("StopPeriodSend", StopPeriodSend);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+	pd
+  }));
+} while (0);
+
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("ChangeData", ChangeData);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
 	pd
   }));
@@ -25838,4 +25862,3 @@ fail:
 }
 
 NODE_API_MODULE(xmlpp, Init)
-

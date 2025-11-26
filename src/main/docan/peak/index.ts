@@ -378,13 +378,24 @@ export class PEAK_TP extends CanBase implements CanTp {
     }
   >()
   cnt = 0
-  startTime = getTsUs()
-  tsOffset: number | undefined
+  static startTime: number | undefined
+  static tsOffset: number | undefined
+
   // recvTpQueue = new Map<string, ({ data: Buffer, ts: number } | TpError)[]>()
   // recvTpPending = new Map<string, { resolve: (value: { data: Buffer, ts: number }) => void, reject: (reason: TpError) => void }>()
   closed = false
+  periodIds: Record<
+    number,
+    {
+      msg: CanMessage
+      taskId: string[]
+    }
+  > = {}
   constructor(baseInfo: CanBaseInfo) {
     super()
+    if (PEAK_TP.startTime == undefined) {
+      PEAK_TP.startTime = getTsUs()
+    }
     this.info = baseInfo
     this.handle = baseInfo.handle
     const devices = PEAK_TP.getValidDevices()
@@ -440,7 +451,7 @@ export class PEAK_TP extends CanBase implements CanTp {
       throw new Error('device not found')
     }
     this.log = new CanLOG('PEAK', this.info.name, this.id, this.event)
-    peak.CreateTSFN(this.handle, this.id, this.callback.bind(this))
+    peak.CreateTSFN(this.handle, this.id, this.callback.bind(this), this.info.canfd)
 
     const buf = Buffer.alloc(1)
 
@@ -485,6 +496,44 @@ export class PEAK_TP extends CanBase implements CanTp {
     const buf = Buffer.alloc(1)
     buf[0] = 1
     peak.CANTP_SetValue_2016(this.handle, peak.PCANTP_PARAMETER_RESET_HARD, buf)
+  }
+  startPeriodSend(message: CanMessage, period: number, duration?: number): string {
+    const taskId: string = peak.StartPeriodSend(
+      this.id,
+      {
+        id: message.id,
+        extendId: message.msgType.idType == CAN_ID_TYPE.EXTENDED,
+        remoteFrame: message.msgType.remote,
+        brs: message.msgType.brs,
+        canfd: message.msgType.canfd,
+        data: [...message.data]
+      },
+      period / 1000
+    )
+    if (this.periodIds[message.id]) {
+      this.periodIds[message.id].taskId.push(taskId)
+    } else {
+      this.periodIds[message.id] = {
+        msg: message,
+        taskId: [taskId]
+      }
+    }
+
+    return taskId
+  }
+  stopPeriodSend(taskId: string): void {
+    const target = Object.values(this.periodIds).find((item) => item.taskId.includes(taskId))
+    if (target) {
+      peak.StopPeriodSend(taskId)
+      const msgId = target.msg.id
+      this.periodIds[msgId].taskId = this.periodIds[msgId].taskId.filter((item) => item != taskId)
+      if (this.periodIds[msgId].taskId.length == 0) {
+        delete this.periodIds[msgId]
+      }
+    }
+  }
+  changePeriodData(taskId: string, data: Buffer): void {
+    peak.ChangeData(taskId, [...data])
   }
   static getValidDevices() {
     const devices: CanDevice[] = []
@@ -631,6 +680,13 @@ export class PEAK_TP extends CanBase implements CanTp {
         peak.FreeTSFN(this.id)
         this.event.emit('close', msg)
         this._close()
+        // Clean up periodic tasks
+        for (const item of Object.values(this.periodIds)) {
+          for (const taskId of item.taskId) {
+            peak.StopPeriodSend(taskId)
+          }
+        }
+        this.periodIds = {}
       } else {
         this.reset()
       }
@@ -657,19 +713,10 @@ export class PEAK_TP extends CanBase implements CanTp {
           peak.PCANTP_MSGTYPE_ANY
         )
         let ts = tsClass.value()
-        if (this.tsOffset == undefined) {
-          this.tsOffset = ts - (getTsUs() - this.startTime)
+        if (PEAK_TP.tsOffset == undefined) {
+          PEAK_TP.tsOffset = ts - (getTsUs() - PEAK_TP.startTime!)
         }
-        ts = ts - this.tsOffset
-        // if (result & (peak.PCANTP_STATUS_MASK_BUS)) {
-
-        //   const status = peak.CANTP_GetCanBusStatus_2016(this.handle)
-        //   if (status != peak.PCANTP_STATUS_OK) {
-        //     peak.CANTP_MsgDataFree_2016(msg.msg)
-        //     this.busErrorHandle(status)
-        //     return
-        //   }
-        // }
+        ts = ts - PEAK_TP.tsOffset
         if (!peak.CANTP_StatusIsOk_2016(result)) {
           return
         }
@@ -799,8 +846,35 @@ export class PEAK_TP extends CanBase implements CanTp {
 
                 item.resolve(ts)
                 setImmediate(this.callback.bind(this))
-                return
+              } else {
+                // Check if this is a periodic send confirmation
+                const canId = msg.canInfo.canId
+                const period = this.periodIds[canId]
+                if (period) {
+                  const message: CanMessage = {
+                    dir: 'OUT',
+                    id: canId,
+                    data: frame.data,
+                    ts: ts,
+                    msgType: {
+                      canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
+                      brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
+                      remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
+                      idType:
+                        msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
+                          ? CAN_ID_TYPE.EXTENDED
+                          : CAN_ID_TYPE.STANDARD
+                    },
+                    device: this.info.name,
+                    database: period.msg.database,
+                    name: period.msg.name
+                  }
+                  this.log.canBase(message)
+                  this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
+                }
+                setImmediate(this.callback.bind(this))
               }
+              return
             } else {
               //rx notification
               const id = `readBase-${msg.canInfo.canId}-${msg.canInfo.canMsgType}`
@@ -821,11 +895,13 @@ export class PEAK_TP extends CanBase implements CanTp {
                 device: this.info.name,
                 database: this.info.database
               }
-              //log must before emit
-              this.log.canBase(message)
-              this.event.emit(id, message)
 
-              setImmediate(this.callback.bind(this))
+              setImmediate(() => {
+                //log must before emit
+                this.log.canBase(message)
+                this.event.emit(id, message)
+                this.callback()
+              })
               return
             }
           }

@@ -154,7 +154,7 @@
         style="position: absolute; padding: 1px"
       >
         <div
-          v-show="!item.hide"
+          v-show="!item.hide && isWinInCurrentPage(item)"
           v-if="layoutMaster.getLayoutType(item.id) == undefined && !item.isExternal"
           :id="`win${item.id}`"
           class="uds-window"
@@ -260,7 +260,11 @@
     </div>
     <div class="footer">
       <div v-for="item in project.project.wins" :key="item.id">
-        <div v-if="item.layoutType == 'bottom'" :id="`win${item.id}`">
+        <div
+          v-if="item.layoutType == 'bottom'"
+          v-show="isWinInCurrentPage(item)"
+          :id="`win${item.id}`"
+        >
           <div
             class="titleBar"
             :style="{
@@ -328,7 +332,7 @@
         </div>
       </div>
     </div>
-    <div class="pages"></div>
+    <Pages />
   </div>
 </template>
 
@@ -382,12 +386,12 @@ import * as joint from '@joint/core'
 import { UDSView } from './components/udsView'
 import {
   ElMessage,
-  ElMessageBox,
   ElDropdownMenu,
   ElDropdownItem,
   ElDivider,
   ElButton,
-  ElIcon
+  ElIcon,
+  ElMessageBox
 } from 'element-plus'
 import { Layout } from './layout'
 import { useProjectStore } from '@r/stores/project'
@@ -408,6 +412,7 @@ import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
 import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '../../../../preload/plugin'
+import Pages from './pages.vue'
 
 // TypeScript 接口定义
 interface TabItem {
@@ -433,6 +438,8 @@ interface TabConfig {
   icon: any
   items: TabItem[]
 }
+
+const defaultPageId = 0
 const pageWidth = ref(30)
 const activeMenu = ref('')
 const pined = ref(true)
@@ -1298,6 +1305,12 @@ const maxWinId = toRef(layoutMaster, 'maxWinId')
 const modify = computed(() => layoutMaster.modify.value)
 provide('layout', layoutMaster)
 
+function isWinInCurrentPage(win: any) {
+  const pid = win.pageId || defaultPageId
+  const current = project.project.activePageId || defaultPageId
+  return pid === current
+}
+
 // 监听窗口重新排列
 watch(
   () => runtime.rearrangeWindows,
@@ -1305,7 +1318,8 @@ watch(
     if (shouldRearrange) {
       // 获取所有hide为false的窗口
       const visibleWindows = Object.values(project.project.wins).filter(
-        (win) => !win.hide && win.layoutType === undefined && !win.isExternal
+        (win) =>
+          !win.hide && win.layoutType === undefined && !win.isExternal && isWinInCurrentPage(win)
       )
 
       if (visibleWindows.length > 0) {
@@ -1398,7 +1412,7 @@ const handleSelect = (keyPath: string[]) => {
 
 const hideLayout = computed(() => {
   return Object.values(project.project.wins).filter(
-    (item) => item.hide && item.layoutType == undefined
+    (item) => item.hide && item.layoutType == undefined && isWinInCurrentPage(item)
   )
 })
 
@@ -1418,7 +1432,7 @@ const heightOffset = computed(() => {
 const bottomH = computed(() => {
   let h = 0
   for (const w of Object.values(project.project.wins)) {
-    if (w.layoutType == 'bottom') {
+    if (w.layoutType == 'bottom' && isWinInCurrentPage(w)) {
       h += w.pos.h
     }
   }
@@ -1593,7 +1607,45 @@ watch([contentH, contentW], (val) => {
   bottom: 0;
   width: 100%;
   height: v-bind(pageWidth + 'px');
-  background-color: red;
+  padding: 0 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background-color: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color-light);
+}
+
+.page-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-input {
+  width: 100px;
+}
+
+.page-close {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.page-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  color: var(--el-text-color-secondary);
 }
 
 .windows {

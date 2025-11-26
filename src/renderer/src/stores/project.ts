@@ -29,9 +29,15 @@ export interface Project {
       }
       isMax?: boolean
       hide?: boolean
+      pageId?: number
       isExternal?: boolean
     }
   >
+  pages: {
+    name: string
+  }[]
+
+  activePageId?: number
   example?: {
     catalog: string
   }
@@ -99,7 +105,12 @@ export const useProjectStore = defineStore('project', {
       path: ''
     },
     project: {
-      wins: {}
+      wins: {},
+      pages: [
+        {
+          name: 'Page1'
+        }
+      ]
     }
   }),
   // could also be defined as

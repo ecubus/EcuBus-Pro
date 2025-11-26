@@ -543,8 +543,9 @@ export class CAN_TP implements CanTp {
               sessionStMin = Math.max(stMin, addr.nCs || 0)
               sessionCurBs = 0
               waitFlowControl = false
-
-              await this.delay(sessionStMin, addr)
+              if (sessionStMin) {
+                await this.delay(sessionStMin, addr)
+              }
             } catch (e) {
               socket.close()
               throw e
@@ -895,4 +896,3 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
     }
   }
 }
-

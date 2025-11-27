@@ -8,4 +8,3 @@ export type Api = {
   readdir: (path: string) => Promise<Dirent[]>
   state: (path: string) => Promise<Stats>
 }
-

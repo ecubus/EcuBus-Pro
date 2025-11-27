@@ -629,4 +629,3 @@ export function multiCalc(signal: Signal) {
     return ''
   }
 }
-

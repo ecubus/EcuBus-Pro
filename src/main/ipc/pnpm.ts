@@ -132,4 +132,3 @@ ipcMain.handle('ipc-pnpm-read', async (event, ...args) => {
     throw error
   }
 })
-

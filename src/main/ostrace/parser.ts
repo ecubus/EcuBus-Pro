@@ -121,7 +121,7 @@ export class OsTraceParser {
       } else {
         // When CRC is disabled, the last byte is reserved but still present in the frame
         // Validate by checking if type is in valid range (0-5)
-        if (type > 5) {
+        if (type > 6) {
           this.callbacks.onError(`Invalid type value: ${type}, Index: ${currentIndex}`)
           isValidFrame = false
         }

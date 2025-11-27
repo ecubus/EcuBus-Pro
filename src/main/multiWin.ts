@@ -1,13 +1,25 @@
 import { is } from '@electron-toolkit/utils'
-import { app, shell, BrowserWindow, ipcMain, dialog, protocol as eProtocol, net } from 'electron'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  protocol as eProtocol,
+  net,
+  MessageChannelMain,
+  MessagePortMain
+} from 'electron'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import { sendToRenderer } from './messageChannel'
 
 class LogQueue {
   private static instance: LogQueue | null = null
   list: any[] = []
   timer: any
   mainWin: BrowserWindow | undefined
+  portMap: Map<BrowserWindow, MessagePortMain> = new Map()
 
   private constructor(
     public win: BrowserWindow[] = [],
@@ -28,11 +40,25 @@ class LogQueue {
     if (isMain) {
       this.mainWin = win
     }
+    if (!this.portMap.has(win)) {
+      const { port1, port2 } = new MessageChannelMain()
+
+      win.on('ready-to-show', () => {
+        win.webContents.postMessage('port', null, [port2])
+      })
+
+      this.portMap.set(win, port1)
+    }
   }
   protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
-        this.mainWin!.webContents.send('ipc-log', this.list)
+        this.portMap.forEach((port, win) => {
+          port.postMessage({
+            method: 'ipc-log',
+            data: this.list
+          })
+        })
         this.list = []
       }
     }, this.period)

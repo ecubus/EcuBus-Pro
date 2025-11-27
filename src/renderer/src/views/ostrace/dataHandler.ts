@@ -599,11 +599,12 @@ async function parseCsvStream(
       const type = toNumberSafe(trimQuotes(cols[1])) as TaskType
       const id = toNumberSafe(trimQuotes(cols[2]))
       const status = toNumberSafe(trimQuotes(cols[3]))
+      const coreId = toNumberSafe(trimQuotes(cols[4]))
       const evt: OsEvent = {
         type,
         id,
         status,
-        coreId: 0,
+        coreId,
         ts: convertTsToUs(ts, cpuFreq),
         comment: ''
       }

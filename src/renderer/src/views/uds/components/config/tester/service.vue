@@ -699,12 +699,14 @@ watch(
 
 function suppressChange() {
   if (model.value.serviceId.startsWith('0x')) {
-    const lastVal = model.value.params[0].value[0]
-    if (model.value.suppress) {
-      activeName.value = 'request'
-      paramSetVal(model.value.params[0], lastVal | 0x80)
-    } else {
-      paramSetVal(model.value.params[0], lastVal & 0x7f)
+    if (serviceDetail[model.value.serviceId]?.hasSubFunction) {
+      const lastVal = model.value.params[0].value[0]
+      if (model.value.suppress) {
+        activeName.value = 'request'
+        paramSetVal(model.value.params[0], lastVal | 0x80)
+      } else {
+        paramSetVal(model.value.params[0], lastVal & 0x7f)
+      }
     }
   }
   reqParamChange()

@@ -12,8 +12,20 @@ import {
 } from 'electron'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
-import { sendToRenderer } from './messageChannel'
 
+ipcMain.on('ipc-get-port', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) {
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
+    const { port1, port2 } = new MessageChannelMain()
+    logQ.portMap.set(win, port1)
+    event.sender.postMessage('port', null, [port2])
+    // port2.start()
+  }
+})
 class LogQueue {
   private static instance: LogQueue | null = null
   list: any[] = []
@@ -40,24 +52,12 @@ class LogQueue {
     if (isMain) {
       this.mainWin = win
     }
-    if (!this.portMap.has(win)) {
-      const { port1, port2 } = new MessageChannelMain()
-
-      win.on('ready-to-show', () => {
-        win.webContents.postMessage('port', null, [port2])
-      })
-
-      this.portMap.set(win, port1)
-    }
   }
   protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
         this.portMap.forEach((port, win) => {
-          port.postMessage({
-            method: 'ipc-log',
-            data: this.list
-          })
+          port.postMessage(this.list)
         })
         this.list = []
       }
@@ -143,6 +143,7 @@ ipcMain.on('ipc-close-others-windows', (event, arg) => {
 export function closeAllWindows() {
   winMap.forEach((win, key) => {
     //store pos
+
     const pos = win.getBounds()
     winPosMap.set(key, {
       x: pos?.x,
@@ -151,6 +152,10 @@ export function closeAllWindows() {
       height: pos?.height
     })
     win.close()
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
   })
 }
 
@@ -166,6 +171,10 @@ export function closeWindow(id: string) {
       height: pos?.height
     })
     win.close()
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
   }
 }
 export function minimizeWindow(id: string) {

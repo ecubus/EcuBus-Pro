@@ -516,7 +516,7 @@ export default abstract class LinBase {
             }
           }
 
-          if ((frameId || frame?.id) && (frame || eventFrame)) {
+          if ((frameId || frame?.id != undefined) && (frame || eventFrame)) {
             const data = frameData || getFrameData(db, frame)
             const id = frameId || frame.id
             const checksum =

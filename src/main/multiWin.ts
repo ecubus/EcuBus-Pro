@@ -1,13 +1,37 @@
 import { is } from '@electron-toolkit/utils'
-import { app, shell, BrowserWindow, ipcMain, dialog, protocol as eProtocol, net } from 'electron'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  protocol as eProtocol,
+  net,
+  MessageChannelMain,
+  MessagePortMain
+} from 'electron'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
+ipcMain.on('ipc-get-port', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) {
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
+    const { port1, port2 } = new MessageChannelMain()
+    logQ.portMap.set(win, port1)
+    event.sender.postMessage('port', null, [port2])
+    // port2.start()
+  }
+})
 class LogQueue {
   private static instance: LogQueue | null = null
   list: any[] = []
   timer: any
   mainWin: BrowserWindow | undefined
+  portMap: Map<BrowserWindow, MessagePortMain> = new Map()
 
   private constructor(
     public win: BrowserWindow[] = [],
@@ -32,7 +56,9 @@ class LogQueue {
   protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
-        this.mainWin!.webContents.send('ipc-log', this.list)
+        this.portMap.forEach((port, win) => {
+          port.postMessage(this.list)
+        })
         this.list = []
       }
     }, this.period)
@@ -117,6 +143,7 @@ ipcMain.on('ipc-close-others-windows', (event, arg) => {
 export function closeAllWindows() {
   winMap.forEach((win, key) => {
     //store pos
+
     const pos = win.getBounds()
     winPosMap.set(key, {
       x: pos?.x,
@@ -125,6 +152,10 @@ export function closeAllWindows() {
       height: pos?.height
     })
     win.close()
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
   })
 }
 
@@ -140,6 +171,10 @@ export function closeWindow(id: string) {
       height: pos?.height
     })
     win.close()
+    const port = logQ.portMap.get(win)
+    if (port) {
+      port.close()
+    }
   }
 }
 export function minimizeWindow(id: string) {

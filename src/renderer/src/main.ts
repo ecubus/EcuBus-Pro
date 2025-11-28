@@ -55,42 +55,22 @@ dataParseWorker.onmessage = (event) => {
 }
 
 window.serviceDetail = window.electron?.ipcRenderer.sendSync('ipc-service-detail')
-window.electron?.ipcRenderer.on('ipc-log', (event, data) => {
-  const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
-  let currentGroup: { method: string; data: any[] } | null = null
 
-  data.forEach((item: any) => {
-    const method = item.message.method
-
-    // 如果是新的method或者当前组的method不同，创建新组
-    if (!currentGroup || currentGroup.method !== method) {
-      if (currentGroup) {
-        groups.push(currentGroup)
-      }
-      currentGroup = {
-        method: method,
-        data: []
-      }
-    }
-
-    currentGroup.data.push(item)
-  })
-
-  // 添加最后一组
-  if (currentGroup) {
-    groups.push(currentGroup)
+window.onmessage = (event) => {
+  // event.source === window means the message is coming from the preload
+  // script, as opposed to from an <iframe> or other source.
+  if (event.source === window && event.data === 'port') {
+    const [port] = event.ports
+    dataParseWorker.postMessage(
+      {
+        method: 'onmessage',
+        data: port
+      },
+      [port]
+    )
   }
-
-  // 按顺序发送每个组的数据
-  groups.forEach((group) => {
-    // window.logBus.emit(group.method, undefined, group.data)
-    dataParseWorker.postMessage({
-      method: group.method,
-      data: group.data
-    })
-  })
-})
-
+}
+window.api.getPort()
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)
 VxeUI.setLanguage('en-US')

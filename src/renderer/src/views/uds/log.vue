@@ -215,7 +215,12 @@ function udsLog({ values }: { values: any[] }) {
     writeToTerminal(time, data.label, data.level, data.message.data.msg)
   })
 }
-
+function normalLog({ values }: { values: any[] }) {
+  values.forEach((data) => {
+    const time = new Date().toLocaleTimeString()
+    writeToTerminal(time, data.label, data.level, data.message.message)
+  })
+}
 function testLog({
   values
 }: {
@@ -291,7 +296,6 @@ function testLog({
   }
 }
 
-let mainLog: (() => void) | undefined
 let keydownHandler: ((event: KeyboardEvent) => void) | undefined
 
 onMounted(async () => {
@@ -364,10 +368,7 @@ onMounted(async () => {
   }
 
   if (props.captureSystem) {
-    mainLog = window.electron.ipcRenderer.on('ipc-log-main', (event, data) => {
-      const time = new Date().toLocaleTimeString()
-      writeToTerminal(time, data.label, data.level, data.message)
-    })
+    window.logBus.on('ipc-log-main', normalLog)
   }
   if (props.captureTest) {
     window.logBus.on('testInfo', testLog)
@@ -379,8 +380,8 @@ onMounted(async () => {
 
 onUnmounted(() => {
   // Clean up event listeners first
-  if (props.captureSystem && mainLog) {
-    mainLog()
+  if (props.captureSystem) {
+    window.logBus.off('ipc-log-main', normalLog)
   }
   if (props.captureTest) {
     window.logBus.off('testInfo', testLog)

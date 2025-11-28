@@ -96,13 +96,13 @@ class ElectronLog extends Transport {
   }
 
   log(info: any, callback: () => void) {
-    if (info.message?.method) {
-      this.q.list.push(info)
-    } else {
-      this.q.win.forEach((win) => {
-        win.webContents.send('ipc-log-main', info)
-      })
+    if (!info.message.method) {
+      info.message = {
+        method: 'ipc-log-main',
+        message: info.message
+      }
     }
+    this.q.list.push(info)
     callback()
   }
 }

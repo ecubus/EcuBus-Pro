@@ -7,5 +7,5 @@ export type Api = {
   writeFile: (path: string, data: string) => Promise<void>
   readdir: (path: string) => Promise<Dirent[]>
   state: (path: string) => Promise<Stats>
+  getPort: () => void
 }
-

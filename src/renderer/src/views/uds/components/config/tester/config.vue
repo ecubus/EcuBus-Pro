@@ -274,4 +274,3 @@ const tableRowClassName = (val: any) => {
   cursor: pointer;
 }
 </style>
-

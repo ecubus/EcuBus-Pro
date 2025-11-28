@@ -59,4 +59,3 @@ describe('vector lin master', () => {
     // console.log(client.read(3))
   })
 })
-

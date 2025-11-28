@@ -385,4 +385,3 @@ function copySignalName(name: string) {
   opacity: 1;
 }
 </style>
-

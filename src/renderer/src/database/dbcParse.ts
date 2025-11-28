@@ -171,4 +171,3 @@ export default function parse(text: string): DBC {
     throw new Error(`Unexpected error during parsing: ${err}`)
   }
 }
-

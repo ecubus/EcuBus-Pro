@@ -152,4 +152,3 @@ describe('vector test', () => {
     client.close()
   })
 })
-

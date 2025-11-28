@@ -21,6 +21,16 @@ path.relative = (from: string, to: string) => {
   return ipcRenderer.sendSync('ipc-path-relative', from, to)
 }
 
+const getPort = (): void => {
+  ipcRenderer.once('port', (event, ports) => {
+    const portCache = event.ports?.[0]
+    if (portCache) {
+      window.postMessage('port', '*', [portCache])
+    }
+  })
+  ipcRenderer.send('ipc-get-port')
+}
+
 // Custom APIs for renderer
 const api: Api = {
   glob: async (pattern: string | string[], options?: GlobOptionsWithFileTypesFalse) => {
@@ -37,7 +47,8 @@ const api: Api = {
   },
   state: async (path: string) => {
     return ipcRenderer.invoke('ipc-fs-stat', path)
-  }
+  },
+  getPort
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -51,4 +62,3 @@ if (process.contextIsolated) {
 } else {
   throw new Error('contextBridge is not enabled')
 }
-

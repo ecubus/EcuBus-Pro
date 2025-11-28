@@ -343,12 +343,110 @@ function collectTransferables(obj: any, list: ArrayBuffer[] = []) {
   }
   return list
 }
+let port: MessagePort
+function dataHandle(method: string, data: any) {
+  switch (method) {
+    case 'canBase': {
+      const result = parseCanData(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'udsSent':
+    case 'udsRecv': {
+      const result = parseUdsData(data, method)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'linBase': {
+      const result = parseLinData(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'setVar': {
+      const result = parseSetVar(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'osEvent': {
+      const result = parseORTIData(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'pluginEvent': {
+      const result = parsePluginEvent(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'pluginError': {
+      const result = parsePluginError(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    default: {
+      // const transferables = collectTransferables(data)
+      self.postMessage({
+        [method]: data
+      })
+      break
+    }
+  }
+}
 // Only set up worker message handler if we're in a worker context
 if (isWorker) {
   self.onmessage = (event) => {
     const { method, data } = event.data
 
     switch (method) {
+      case 'onmessage': {
+        port = data
+        port.onmessage = (event: MessageEvent<any[]>) => {
+          const data = event.data
+          const groups: { method: string; data: any[] }[] = [] // 存储所有分组，每个元素是 {method, data} 对象
+          let currentGroup: { method: string; data: any[] } | null = null
+          data.forEach((item: any) => {
+            const method = item.message.method
+
+            // 如果是新的method或者当前组的method不同，创建新组
+            if (!currentGroup || currentGroup.method !== method) {
+              if (currentGroup) {
+                groups.push(currentGroup)
+              }
+              currentGroup = {
+                method: method,
+                data: []
+              }
+            }
+
+            currentGroup.data.push(item)
+          })
+
+          // 添加最后一组
+          if (currentGroup) {
+            groups.push(currentGroup)
+          }
+
+          // 按顺序发送每个组的数据
+          groups.forEach((group) => {
+            // window.logBus.emit(group.method, undefined, group.data)
+            dataHandle(group.method, group.data)
+          })
+        }
+        break
+      }
       case 'initDataBase': {
         initDataBase(data)
         //clear osStatistics
@@ -367,64 +465,11 @@ if (isWorker) {
         }
         break
       }
-      case 'canBase': {
-        const result = parseCanData(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'udsSent':
-      case 'udsRecv': {
-        const result = parseUdsData(data, method)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'linBase': {
-        const result = parseLinData(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'setVar': {
-        const result = parseSetVar(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'osEvent': {
-        const result = parseORTIData(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'pluginEvent': {
-        const result = parsePluginEvent(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
-      case 'pluginError': {
-        const result = parsePluginError(data)
-        if (result) {
-          self.postMessage(result)
-        }
-        break
-      }
       default: {
-        const transferables = collectTransferables(data)
-        self.postMessage(
-          {
-            [method]: data
-          },
-          transferables
-        )
+        // const transferables = collectTransferables(data)
+        self.postMessage({
+          [method]: data
+        })
         break
       }
     }

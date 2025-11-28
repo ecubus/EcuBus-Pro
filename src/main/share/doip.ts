@@ -67,4 +67,3 @@ export interface EntityAddr extends VinInfo {
   furtherAction?: number
   syncStatus?: number
 }
-

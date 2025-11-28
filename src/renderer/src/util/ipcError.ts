@@ -7,4 +7,3 @@ export default function errorParse(error: Error | string) {
   }
   return msg
 }
-

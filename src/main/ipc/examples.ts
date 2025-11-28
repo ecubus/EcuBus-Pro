@@ -92,4 +92,3 @@ ipcMain.handle('ipc-create-example', async (event, ...args) => {
 ipcMain.on('ipc-open-link', (event, ...args) => {
   shell.openExternal(args[0])
 })
-

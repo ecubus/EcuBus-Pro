@@ -5,4 +5,3 @@ Util.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
   const resp = DiagResponse.fromDiagRequest(req)
   await resp.outputDiag()
 })
-

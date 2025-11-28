@@ -13,4 +13,3 @@ Util.On('Tester_can_0.*.recv', async (resp) => {
   resp.testerName = 'Tester_eth_1'
   await resp.outputDiag('SIMULATE_0', requestAddrName)
 })
-

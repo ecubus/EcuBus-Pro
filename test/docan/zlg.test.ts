@@ -20,7 +20,11 @@ describe('zlg device availability test', () => {
     const devices = ZLG_CAN.getValidDevices()
     const usbcanfd400u = devices.filter((d) => d.label.includes('USBCANFD_400U'))
     // USBCANFD-400U has 4 channels × 2 device indexes = 8 devices
-    equal(usbcanfd400u.length, 8, 'USBCANFD-400U should have 8 device entries (4 channels × 2 indexes)')
+    equal(
+      usbcanfd400u.length,
+      8,
+      'USBCANFD-400U should have 8 device entries (4 channels × 2 indexes)'
+    )
   })
 
   test('should include USBCAN2 (USBCAN-II) devices', () => {
@@ -91,4 +95,3 @@ describe('zlg test', () => {
     // client.close()
   })
 })
-

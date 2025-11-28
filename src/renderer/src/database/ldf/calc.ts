@@ -42,12 +42,12 @@ export function getPhysicalValue(
       case 'bcdValue': {
         // BCD编码：每4位表示一个十进制数字
 
-        ;(result.numVal = rawValue
+        ;((result.numVal = rawValue
           .toString()
           .split('')
           .map(Number)
           .reduce((acc, digit) => (acc << 4) | digit, 0)),
-          (result.usedEncode = encodingType)
+          (result.usedEncode = encodingType))
 
         break
       }

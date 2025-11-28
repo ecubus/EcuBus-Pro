@@ -64,4 +64,3 @@ describe('peak test', () => {
     client.close()
   })
 })
-

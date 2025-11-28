@@ -66,4 +66,3 @@ export function setVarByKey(key: string, value: number | string | number[]) {
   }
   return { found: false, target }
 }
-

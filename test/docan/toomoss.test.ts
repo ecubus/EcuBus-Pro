@@ -370,4 +370,3 @@ describe('toomoss multi send canfd', () => {
     // await delay(1000)
   })
 })
-

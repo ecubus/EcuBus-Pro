@@ -65,8 +65,8 @@ describe('DBC Parser Tests', () => {
 
     s.physValue = 1
     s1.physValue = 1
-    updateSignalPhys(s)
-    updateSignalPhys(s1)
+    updateSignalPhys(s, result)
+    updateSignalPhys(s1, result)
 
     const buf = getMessageData(result.messages[0x200])
     expect(buf).toEqual(Buffer.from([0x81, 0, 0, 0, 0, 0, 0, 0]))
@@ -76,8 +76,8 @@ describe('DBC Parser Tests', () => {
 
     ns.physValue = 1
     ns1.physValue = -116
-    updateSignalPhys(ns)
-    updateSignalPhys(ns1)
+    updateSignalPhys(ns, result)
+    updateSignalPhys(ns1, result)
 
     const buf1 = getMessageData(result.messages[12])
     expect(buf1).toEqual(Buffer.from([0x2, 0, 0, 0xc, 0, 0, 0, 0]))
@@ -283,5 +283,16 @@ describe('DBC Parser Tests', () => {
     const s = msg.signals['MCU_F_CrtSpd']
     expect(s.value).toBe(0x8002)
     expect(s.physValue).toBe(2)
+
+    const buf = getMessageData(msg)
+    // The original buffer has 0xA0 (10100000) at the end, but the DBC defines no signal for bit 63 (MSB).
+    // getMessageData reconstructs the buffer from signals, so the unmapped bit 63 becomes 0.
+    // Result is 0x20 (00100000).
+    expect(buf).toEqual(Buffer.from([0xb7, 0x1b, 0x80, 0x02, 0x80, 0, 0xb5, 0x20]))
+
+    s.physValue = 3
+    updateSignalPhys(s, result)
+    const buf1 = getMessageData(msg)
+    expect(buf1).toEqual(Buffer.from([0xb7, 0x1b, 0x80, 0x03, 0x80, 0, 0xb5, 0x20]))
   })
 })

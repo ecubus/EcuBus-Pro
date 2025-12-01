@@ -50,7 +50,7 @@ export function setSignal(data: { signal: string; value: number | number[] | str
       throw new Error(`Signal ${signalName} not found`)
     }
     if (typeof data.value === 'string') {
-      updateSignalPhys(ss)
+      updateSignalPhys(ss, db)
     } else {
       if (Array.isArray(data.value)) {
         throw new Error('Can not set array value')

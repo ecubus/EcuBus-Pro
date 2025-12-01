@@ -142,7 +142,6 @@ jobs:
           asset_path: ./resources/lib/ecb_cli
           asset_name: ecb_cli
           asset_content_type: application/octet-stream
-
       - name: Upload DEB
         uses: actions/upload-release-asset@v1
         env:
@@ -152,3 +151,12 @@ jobs:
           asset_path: ./dist/ecubuspro_${{ env.VERSION }}_amd64.deb
           asset_name: EcuBus-Pro_${{ env.VERSION }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
+      - name: Upload RPM
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.build-windows.outputs.upload_url }}
+          asset_path: ./dist/ecubuspro_${{ env.VERSION }}_amd64.rpm
+          asset_name: EcuBus-Pro_${{ env.VERSION }}_amd64.rpm
+          asset_content_type: application/x-rpm

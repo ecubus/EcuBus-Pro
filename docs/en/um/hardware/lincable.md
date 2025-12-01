@@ -100,3 +100,12 @@ requiring hardware replacement. The DFU process is straightforward and can be pe
 the EcuBus-Pro software or dedicated DFU tools, providing a reliable and safe method for firmware
 updates.
 
+## Fw Upgrade
+
+To upgrade the LinCable firmware, follow these steps:
+
+1. **Install the Plugin**: First, install the `LinCable Upgrade Tool` plugin from the [Plugin Marketplace](../plugin/plugin.md).
+
+2. **Follow Plugin README**: After installation, refer to the plugin's README documentation for detailed upgrade instructions and follow the steps provided there.
+
+

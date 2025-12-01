@@ -1,4 +1,37 @@
 # EcuBus-Pro Release Notes
+## 0.8.57
+Changes from v0.8.56 to v0.8.57:
+
+* [bug]:fix lin can sendout ID 0
+* [bug]:fix param save error when witout subfunc 
+* [opt]:opt message windows for amazing performance 
+* [opt]:refactor ecubus workerpool, all node script need rebuild
+* [example]:add can e2e example 
+* [opt]:opt cantp id check 
+* [bug]:fix script lin can data isn't buffer 
+* [bug]:fix sa dll cmake template 
+* [bug]:fix can get from database length error 
+* [feat]:update license to apache 
+* [opt]:logger file name record with timestamp 
+* [bug]:fix script can't get correct signal value 
+* [feat]:add peak period send can ability 
+* [feat]:add vector period send can ability 
+* [feat]:add kvaser period send can ability 
+* [opt]:use mitt to replace self eventbus 
+* [opt]:opt graph bigdata 
+* [opt]:opt example image display 
+* [opt]:opt graph tooltip and step control 
+* [opt]:add uuid to internal data array 
+* [bug]:fix sequence status index error 
+* [feat]:add mutli trace 
+* [feat]:add lin auto addressing examples 
+* [opt]:change precise from ms to us in trace window 
+* [bug]:fix var doesn't change in script 
+* [opt]:allow same sunfucntion with suppress
+* [feat]:add plugin ability [Detail](https://app.whyengineer.com/docs/um/plugin/plugin.html)
+* [feat]:add OSEK os trace ability [Detail](https://app.whyengineer.com/docs/um/osTrace/)
+---
+
 
 ## 0.8.56
 Changes from v0.8.55 to v0.8.56:

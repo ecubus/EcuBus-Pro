@@ -78,6 +78,7 @@ function sidebar(): DefaultTheme.SidebarItem[] {
     },
     {
       text: '用户手册',
+      collapsed: true,
       base: '/zh/docs/um/',
       items: [
         {

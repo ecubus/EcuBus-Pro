@@ -113,6 +113,6 @@ We welcome contributions! Please review our [contribution guidelines](./.github/
 
 ## License
 
-[License](./license.txt)
+[Apache License 2.0](./license.txt)
 
 

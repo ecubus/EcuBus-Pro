@@ -1,0 +1,221 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: MCU_F
+
+
+BO_ 336 MCU_F_0x150: 8 MCU_F
+ SG_ MCU_F_150_CheckSum : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ MCU_F_150_AliveCounter : 11|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ MCU_F_CrtTqVld : 13|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ MCU_F_CrtRotDir : 15|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ MCU_F_CrtSpd : 23|16@0+ (1,-32768) [-32768|32767] "rpm" Vector__XXX
+ SG_ MCU_F_CrtTq : 39|16@0+ (0.1,-3276.8) [-3276.8|3276.7] "N·m" Vector__XXX
+ SG_ MCU_F_CrtMod : 51|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ MCU_F_IninSts : 52|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ MCU_F_CrtSpdSigVld : 54|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ MCU_F_HVChkEndFlg : 55|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ MCU_F_HActvDchaSts : 57|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ MCU_F_LVPwrOffReqFlg : 58|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ MCU_F_CrtSts : 60|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ MCU_F_AlrmLamp_FS : 61|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ MCU_F_ASCFltFlg : 62|1@0+ (1,0) [0|1] "" Vector__XXX
+
+
+
+CM_ SG_ 336 MCU_F_150_CheckSum "前MCU_150_报文校验和(0x29)MCU_F_150_CheckSum";
+CM_ SG_ 336 MCU_F_150_AliveCounter "前MCU_150_报文计数器MCU_F_150_AliveCounter";
+CM_ SG_ 336 MCU_F_CrtTqVld "前驱动电机当前转矩有效位MotorFTorquevalidflag";
+CM_ SG_ 336 MCU_F_CrtRotDir "前驱动电机当前旋转方向MotorFRotingdirection";
+CM_ SG_ 336 MCU_F_CrtSpd "前驱动电机当前转速MotorFSpeed";
+CM_ SG_ 336 MCU_F_CrtTq "前驱动电机当前转矩MotorFTorque";
+CM_ SG_ 336 MCU_F_CrtMod "前驱动电机当前工作模式MotorFworkingmode";
+CM_ SG_ 336 MCU_F_IninSts "前MCU初始化状态MCUFInitState";
+CM_ SG_ 336 MCU_F_CrtSpdSigVld "前驱动电机当前转速信号有效位MotorFSpeedsignalvalidflag";
+CM_ SG_ 336 MCU_F_HVChkEndFlg "前MCU高压检测完成标志位MCUFHVCheckStates";
+CM_ SG_ 336 MCU_F_HActvDchaSts "前MCU高压主动放电状态HVActiveDischargeState";
+CM_ SG_ 336 MCU_F_LVPwrOffReqFlg "前MCU低压下电请求标志位MCUFLVPowerOffRequestFlag";
+CM_ SG_ 336 MCU_F_CrtSts "前驱动电机当前状态MotorFState";
+CM_ SG_ 336 MCU_F_AlrmLamp_FS "报警灯_前驱动电机(功能安全)";
+CM_ SG_ 336 MCU_F_ASCFltFlg "前MCU错误标志位，Inverter处于主动短路状态(ASC)";
+BA_DEF_ BO_  "NmMessage" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","NoMsgSendType","IfActive","Event","CA","CE";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "cyclic","OnChange","OnWrite","IfActive","OnChangeWithRepetition","OnWriteWithRepetition","IfActiveWithRepetition","CA","CE","Event";
+BA_DEF_ SG_  "GenSigStartValue" INT 0 0;
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 0;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 0;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 0;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_ BO_  "CANFD_BRS" ENUM  "0","1";
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_  "BusBaudateData" INT 0 10000;
+BA_DEF_  "BusBaudateOther" INT 0 10000;
+BA_DEF_ SG_  "NWM-WakeupAllowed" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 65535;
+BA_DEF_ BU_  "NmStationAddress" INT 0 63;
+BA_DEF_ BU_  "NmNode" ENUM  "no","yes";
+BA_DEF_  "NmBaseAddress" HEX 1024 1087;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_ BU_  "ECU" STRING ;
+BA_DEF_ BU_  "CANoeJitterMax" INT 0 0;
+BA_DEF_ BU_  "CANoeJitterMin" INT 0 0;
+BA_DEF_ BU_  "CANoeDrift" INT 0 0;
+BA_DEF_ BU_  "CANoeStartDelay" INT 0 0;
+BA_DEF_ SG_  "sigDespEng" STRING ;
+BA_DEF_ SG_  "sigSecLevel" STRING ;
+BA_DEF_ SG_  "sigConfig" STRING ;
+BA_DEF_ SG_  "sigExplanation" STRING ;
+BA_DEF_DEF_  "NmMessage" "No";
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "GenMsgSendType" "cyclic";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenSigSendType" "cyclic";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "CANFD_BRS" "1";
+BA_DEF_DEF_  "VFrameFormat" "StandardCAN";
+BA_DEF_DEF_  "BusBaudateData" 2;
+BA_DEF_DEF_  "BusBaudateOther" 500;
+BA_DEF_DEF_  "NWM-WakeupAllowed" "";
+BA_DEF_DEF_  "GenMsgILSupport" "Yes";
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "NmNode" "no";
+BA_DEF_DEF_  "NmBaseAddress" 1024;
+BA_DEF_DEF_  "BusType" "CAN FD";
+BA_DEF_DEF_  "NodeLayerModules" "";
+BA_DEF_DEF_  "ECU" "";
+BA_DEF_DEF_  "CANoeJitterMax" 0;
+BA_DEF_DEF_  "CANoeJitterMin" 0;
+BA_DEF_DEF_  "CANoeDrift" 0;
+BA_DEF_DEF_  "CANoeStartDelay" 0;
+BA_DEF_DEF_  "sigDespEng" "";
+BA_DEF_DEF_  "sigSecLevel" "QM";
+BA_DEF_DEF_  "sigConfig" "";
+BA_DEF_DEF_  "sigExplanation" "";
+BA_ "BusType" "CAN FD";
+BA_ "DBName" "TEST_DBC_EVBUS_Matrix_CANFD";
+BA_ "GenMsgCycleTime" BO_ 336 10;
+BA_ "VFrameFormat" BO_ 336 14;
+BA_ "sigExplanation" SG_ 336 MCU_F_150_CheckSum "";
+BA_ "sigConfig" SG_ 336 MCU_F_150_CheckSum "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_150_CheckSum "";
+BA_ "sigDespEng" SG_ 336 MCU_F_150_CheckSum "";
+BA_ "sigExplanation" SG_ 336 MCU_F_150_AliveCounter "";
+BA_ "sigConfig" SG_ 336 MCU_F_150_AliveCounter "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_150_AliveCounter "";
+BA_ "sigDespEng" SG_ 336 MCU_F_150_AliveCounter "";
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtTqVld "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtTqVld "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtTqVld "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtTqVld "";
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtRotDir "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtRotDir "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtRotDir "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtRotDir "";
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtSpd "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtSpd "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtSpd "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtSpd "";
+BA_ "GenSigStartValue" SG_ 336 MCU_F_CrtSpd 32768;
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtTq "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtTq "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtTq "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtTq "";
+BA_ "GenSigStartValue" SG_ 336 MCU_F_CrtTq 32768;
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtMod "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtMod "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtMod "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtMod "";
+BA_ "GenSigStartValue" SG_ 336 MCU_F_CrtMod 15;
+BA_ "sigExplanation" SG_ 336 MCU_F_IninSts "";
+BA_ "sigConfig" SG_ 336 MCU_F_IninSts "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_IninSts "";
+BA_ "sigDespEng" SG_ 336 MCU_F_IninSts "";
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtSpdSigVld "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtSpdSigVld "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtSpdSigVld "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtSpdSigVld "";
+BA_ "sigExplanation" SG_ 336 MCU_F_HVChkEndFlg "";
+BA_ "sigConfig" SG_ 336 MCU_F_HVChkEndFlg "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_HVChkEndFlg "";
+BA_ "sigDespEng" SG_ 336 MCU_F_HVChkEndFlg "";
+BA_ "sigExplanation" SG_ 336 MCU_F_HActvDchaSts "";
+BA_ "sigConfig" SG_ 336 MCU_F_HActvDchaSts "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_HActvDchaSts "";
+BA_ "sigDespEng" SG_ 336 MCU_F_HActvDchaSts "";
+BA_ "sigExplanation" SG_ 336 MCU_F_LVPwrOffReqFlg "";
+BA_ "sigConfig" SG_ 336 MCU_F_LVPwrOffReqFlg "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_LVPwrOffReqFlg "";
+BA_ "sigDespEng" SG_ 336 MCU_F_LVPwrOffReqFlg "";
+BA_ "sigExplanation" SG_ 336 MCU_F_CrtSts "";
+BA_ "sigConfig" SG_ 336 MCU_F_CrtSts "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_CrtSts "";
+BA_ "sigDespEng" SG_ 336 MCU_F_CrtSts "";
+BA_ "sigExplanation" SG_ 336 MCU_F_AlrmLamp_FS "";
+BA_ "sigConfig" SG_ 336 MCU_F_AlrmLamp_FS "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_AlrmLamp_FS "";
+BA_ "sigDespEng" SG_ 336 MCU_F_AlrmLamp_FS "";
+BA_ "sigExplanation" SG_ 336 MCU_F_ASCFltFlg "";
+BA_ "sigConfig" SG_ 336 MCU_F_ASCFltFlg "";
+BA_ "sigSecLevel" SG_ 336 MCU_F_ASCFltFlg "";
+BA_ "sigDespEng" SG_ 336 MCU_F_ASCFltFlg "";
+VAL_ 336 MCU_F_CrtTqVld 3 "Reserved" 2 "Invalid" 1 "Valid" 0 "Initializing" ;
+VAL_ 336 MCU_F_CrtRotDir 3 "Reserved" 2 "反转(倒车模式)" 1 "正转(前进模式)" 0 "待机状态" ;
+VAL_ 336 MCU_F_CrtSpd 65535 "Invalid" ;
+VAL_ 336 MCU_F_CrtTq 65535 "Invalid" ;
+VAL_ 336 MCU_F_CrtMod 15 "初始化" 14 "Reserved" 13 "Reserved" 12 "Reserved" 11 "Reserved" 10 "Reserved" 9 "Reserved" 8 "SPO" 7 "Reserved" 6 "Calibration Of A New EM" 5 "内部逆变器错误" 4 "Reserved" 3 "Reserved" 2 "速度控制(外部控制回路)" 1 "转矩模式" 0 "待机 ASC" ;
+VAL_ 336 MCU_F_IninSts 1 "初始化已完成" 0 "初始化未完成" ;
+VAL_ 336 MCU_F_CrtSpdSigVld 3 "Reserved" 2 "Invalid" 1 "Valid" 0 "Initializing" ;
+VAL_ 336 MCU_F_HVChkEndFlg 1 "已完成" 0 "未完成" ;
+VAL_ 336 MCU_F_HActvDchaSts 3 "放电失败" 2 "放电完成" 1 "放电中" 0 "未放电" ;
+VAL_ 336 MCU_F_LVPwrOffReqFlg 1 "已完成" 0 "未完成" ;
+VAL_ 336 MCU_F_CrtSts 3 "Reserved" 2 "发电状态" 1 "电动状态" 0 "待机状态" ;
+VAL_ 336 MCU_F_AlrmLamp_FS 1 "Enable" 0 "Disable" ;
+VAL_ 336 MCU_F_ASCFltFlg 1 "异常" 0 "正常" ;
+

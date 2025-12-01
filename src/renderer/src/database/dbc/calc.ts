@@ -307,10 +307,10 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
 
   // 所有检查都通过后，更新信号值
   signal.value = rawValue
-
+  signal.physValue = physValue
   // 更新物理值
   if (signal.values || signal.valueTable) {
-    signal.physValue = rawValue
+    // signal.physValue = rawValue
     if (signal.values) {
       signal.physValueEnum = signal.values?.find((v) => v.value === signal.value)?.label
     } else if (signal.valueTable) {
@@ -319,9 +319,6 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
         signal.physValueEnum = vt.values?.find((v) => v.value === signal.value)?.label
       }
     }
-  } else {
-    // 应用因子和偏移计算物理值
-    signal.physValue = physValue
   }
 }
 

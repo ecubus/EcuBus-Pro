@@ -21,6 +21,7 @@ describe('DBC Parser Tests', () => {
   let id200Dbc: string
   let test1Dbc: string
   let scuDbc: string
+  let testDbc1: string
   beforeAll(() => {
     dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
     dbcContentHyundaiKia = fs.readFileSync(
@@ -38,6 +39,7 @@ describe('DBC Parser Tests', () => {
     id200Dbc = fs.readFileSync(path.join(__dirname, 'ID200.dbc'), 'utf-8')
     test1Dbc = fs.readFileSync(path.join(__dirname, 'test1.dbc'), 'utf-8')
     scuDbc = fs.readFileSync(path.join(__dirname, 'SCU.dbc'), 'utf-8')
+    testDbc1 = fs.readFileSync(path.join(__dirname, 'TestDbc1.dbc'), 'utf-8')
   })
   test('scu', () => {
     const result = parse(scuDbc)
@@ -271,5 +273,15 @@ describe('DBC Parser Tests', () => {
     expect(buf).toEqual(Buffer.from([0, 0, 0, 1, 0xc0, 0, 0, 0]))
     writeMessageData(msg, Buffer.from([0, 0, 0, 0xce, 0x80, 0, 0, 0]), result)
     expect(s.value).toBe(0x674)
+  })
+
+  test('testDbc1.dbc', () => {
+    const result = parse(testDbc1)
+    expect(result).toBeDefined()
+    const msg = result.messages[0x150]
+    writeMessageData(msg, Buffer.from([0xb7, 0x1b, 0x80, 0x02, 0x80, 0, 0xb5, 0xa0]), result)
+    const s = msg.signals['MCU_F_CrtSpd']
+    expect(s.value).toBe(0x8002)
+    expect(s.physValue).toBe(2)
   })
 })

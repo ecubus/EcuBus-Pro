@@ -1,5 +1,40 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.57
+
+从 v0.8.56 到 v0.8.57 的变更：
+
+- [bug]：修复 LIN CAN 发送 ID 0
+- [bug]：修复无子功能时参数保存错误
+- [opt]：优化消息窗口以获得出色性能
+- [opt]：重构 EcuBus 工作池，所有节点脚本需重新构建
+- [example]：添加 CAN E2E 示例
+- [opt]：优化 CAN TP ID 检查
+- [bug]：修复脚本 LIN CAN 数据未缓冲
+- [bug]：修复 SA DLL CMake 模板
+- [bug]：修复从数据库获取 CAN 长度错误
+- [feat]：更新许可证为 Apache
+- [opt]：记录带时间戳的日志文件名
+- [bug]：修复脚本无法获取正确信号值
+- [feat]：添加 PEAK 周期发送 CAN 能力
+- [feat]：添加 Vector 周期发送 CAN 能力
+- [feat]：添加 Kvaser 周期发送 CAN 能力
+- [opt]：使用 mitt 替换自研事件总线
+- [opt]：优化图形大数据
+- [opt]：优化示例图像显示
+- [opt]：优化图形工具提示和步进控制
+- [opt]：向内部数据数组添加 UUID
+- [bug]：修复序列状态索引错误
+- [feat]：添加多路追踪
+- [feat]：添加 LIN 自动寻址示例
+- [opt]：在追踪窗口中将精度从毫秒改为微秒
+- [bug]：修复脚本中变量未改变
+- [opt]：允许相同子功能带抑制
+- [feat]：添加插件能力 [详情](https://app.whyengineer.com/docs/um/plugin/plugin.html)
+- [feat]：添加 OSEK OS 追踪能力 [详情](https://app.whyengineer.com/docs/um/osTrace/)
+
+---
+
 ## 0.8.56
 
 从 v0.8.55 到 v0.8.56 的变更：

@@ -35,6 +35,8 @@ class VectorBus : public BusABC {
         }
         // CAN FD message using xlCanTransmitEx
         XLcanTxEvent canTxEvt;
+        //clae
+        memset(&canTxEvt, 0, sizeof(canTxEvt));
         canTxEvt.tag = XL_CAN_EV_TAG_TX_MSG; 
         canTxEvt.tagData.canMsg.canId = canId;
         canTxEvt.tagData.canMsg.msgFlags = flag;
@@ -65,11 +67,15 @@ class VectorBus : public BusABC {
         
         unsigned int messageCount = 1;
         unsigned int cntSent = 1;
-        xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
+        XLstatus status=xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
+        printf("[VectorBus::send] xlcanTransmit failed: 0x%08x, cntsent: %u\n", status, cntSent);
+        fflush(stdout);
         
       } else {
         // Standard CAN message using xlCanTransmit
         XLevent       xlEvent;
+        //clear the event
+        memset(&xlEvent, 0, sizeof(xlEvent));
         xlEvent.tag                 = XL_TRANSMIT_MSG;
         canId = msg.arbitration_id;
         if (msg.extendId) {

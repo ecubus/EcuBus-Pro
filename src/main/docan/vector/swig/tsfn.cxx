@@ -67,9 +67,7 @@ class VectorBus : public BusABC {
         
         unsigned int messageCount = 1;
         unsigned int cntSent = 1;
-        XLstatus status=xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
-        printf("[VectorBus::send] xlcanTransmit failed: 0x%08x, cntsent: %u\n", status, cntSent);
-        fflush(stdout);
+        xlCanTransmitEx(portHandle_, channelMask_, messageCount, &cntSent, &canTxEvt);
         
       } else {
         // Standard CAN message using xlCanTransmit

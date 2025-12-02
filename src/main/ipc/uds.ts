@@ -720,10 +720,7 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
-  for (const t of exTransportList) {
-    removeTransport(t)
-  }
-  exTransportList.splice(0, exTransportList.length)
+
   //testMap
   testMap.forEach((value) => {
     value.close()
@@ -771,6 +768,11 @@ export function globalStop(emit = false) {
     value.close()
   })
   ortiMap.clear()
+
+  for (const t of exTransportList) {
+    removeTransport(t)
+  }
+  exTransportList.splice(0, exTransportList.length)
 
   if (emit) {
     BrowserWindow.getAllWindows().forEach((win) => {

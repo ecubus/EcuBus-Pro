@@ -32,7 +32,7 @@
             v-model="row.physValue"
             size="small"
             style="width: 100%"
-            @change="handlePhysValueChange(row)"
+            @change="handlePhysValueChange(row, dataStore.database.can[props.database])"
           >
             <el-option
               v-for="item in row.values"
@@ -47,7 +47,7 @@
             v-model="row.physValue"
             size="small"
             style="width: 100%"
-            @change="handlePhysValueChange(row)"
+            @change="handlePhysValueChange(row, dataStore.database.can[props.database])"
           >
             <el-option
               v-for="item in getValues(row.valueTable)"
@@ -65,7 +65,7 @@
             style="width: 100%"
             size="small"
             controls-position="right"
-            @change="handlePhysValueChange(row)"
+            @change="handlePhysValueChange(row, dataStore.database.can[props.database])"
           />
         </template>
       </template>
@@ -104,7 +104,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
-import { Message, Signal } from '@r/database/dbc/dbcVisitor'
+import { DBC, Message, Signal } from '@r/database/dbc/dbcVisitor'
 import { useDataStore } from '@r/stores/data'
 import {
   getMessageData,
@@ -282,8 +282,8 @@ function handleRawValueChange(row: Signal) {
 }
 
 // Physical value change handler
-function handlePhysValueChange(row: Signal) {
-  updateSignalPhys(row)
+function handlePhysValueChange(row: Signal, db: DBC) {
+  updateSignalPhys(row, db)
   if (message.value) {
     if (globalStart.value) {
       window.electron.ipcRenderer.send(

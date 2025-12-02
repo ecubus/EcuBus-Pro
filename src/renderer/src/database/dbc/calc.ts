@@ -102,46 +102,60 @@ export function updateSignalRaw(signal: Signal) {
     }
   }
 }
-export function updateSignalPhys(row: Signal) {
+export function updateSignalPhys(row: Signal, db: DBC) {
   if (row.physValue === undefined) return
 
   if (row.values || row.valueTable) {
-    // For enum values, directly set the phys value as raw value
-    row.value = typeof row.physValue === 'number' ? row.physValue : 0
-  } else {
-    const physValue = typeof row.physValue === 'number' ? row.physValue : 0
-    // Handle float value types
-    if (row.valueType === 1) {
-      // IEEE Float (single precision)
-      const buffer = new ArrayBuffer(4)
-      const view = new DataView(buffer)
-      view.setFloat32(0, physValue, row.isLittleEndian) // true for little-endian
-      row.value = view.getUint32(0, row.isLittleEndian)
-    } else if (row.valueType === 2) {
-      // IEEE Double (double precision)
-      const buffer = new ArrayBuffer(8)
-      const view = new DataView(buffer)
-      view.setFloat64(0, physValue, row.isLittleEndian)
-      // For simplicity, we're only using the lower 32 bits
-      // This is a limitation as JavaScript numbers can't fully represent 64-bit integers
-      row.value = view.getUint32(0, row.isLittleEndian)
-    } else {
-      // Clamp physical value to min/max if defined
-      let clampedPhysValue = physValue
-      if (row.minimum !== undefined && physValue < row.minimum) {
-        clampedPhysValue = row.minimum
-      } else if (row.maximum !== undefined && physValue > row.maximum) {
-        clampedPhysValue = row.maximum
+    // For enum values, comapre the phys value with the values or valueTable and set the raw value
+    if (row.values) {
+      const v = row.values.find((v) => v.value === row.physValue)
+      if (v) {
+        row.value = v.value
+        return
       }
-
-      // Update physical value if it was clamped
-      if (clampedPhysValue !== physValue) {
-        row.physValue = clampedPhysValue
+    } else if (row.valueTable) {
+      const vt = Object.values(db.valueTables).find((vt) => vt.name === row.valueTable)
+      if (vt) {
+        const v = vt.values.find((v) => v.value === row.physValue)
+        if (v) {
+          row.value = v.value
+          return
+        }
       }
-
-      // Calculate and set raw value
-      row.value = physToRaw(clampedPhysValue, row)
     }
+  }
+  const physValue = typeof row.physValue === 'number' ? row.physValue : 0
+  // Handle float value types
+  if (row.valueType === 1) {
+    // IEEE Float (single precision)
+    const buffer = new ArrayBuffer(4)
+    const view = new DataView(buffer)
+    view.setFloat32(0, physValue, row.isLittleEndian) // true for little-endian
+    row.value = view.getUint32(0, row.isLittleEndian)
+  } else if (row.valueType === 2) {
+    // IEEE Double (double precision)
+    const buffer = new ArrayBuffer(8)
+    const view = new DataView(buffer)
+    view.setFloat64(0, physValue, row.isLittleEndian)
+    // For simplicity, we're only using the lower 32 bits
+    // This is a limitation as JavaScript numbers can't fully represent 64-bit integers
+    row.value = view.getUint32(0, row.isLittleEndian)
+  } else {
+    // Clamp physical value to min/max if defined
+    let clampedPhysValue = physValue
+    if (row.minimum !== undefined && physValue < row.minimum) {
+      clampedPhysValue = row.minimum
+    } else if (row.maximum !== undefined && physValue > row.maximum) {
+      clampedPhysValue = row.maximum
+    }
+
+    // Update physical value if it was clamped
+    if (clampedPhysValue !== physValue) {
+      row.physValue = clampedPhysValue
+    }
+
+    // Calculate and set raw value
+    row.value = physToRaw(clampedPhysValue, row)
   }
 }
 
@@ -307,10 +321,10 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
 
   // 所有检查都通过后，更新信号值
   signal.value = rawValue
-
+  signal.physValue = physValue
   // 更新物理值
   if (signal.values || signal.valueTable) {
-    signal.physValue = rawValue
+    // signal.physValue = rawValue
     if (signal.values) {
       signal.physValueEnum = signal.values?.find((v) => v.value === signal.value)?.label
     } else if (signal.valueTable) {
@@ -319,9 +333,6 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: DBC) {
         signal.physValueEnum = vt.values?.find((v) => v.value === signal.value)?.label
       }
     }
-  } else {
-    // 应用因子和偏移计算物理值
-    signal.physValue = physValue
   }
 }
 

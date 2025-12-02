@@ -471,6 +471,8 @@ export default class UdsTester {
           this.getInfoPromise = undefined
         }
       }
+    } else if (event == 'log') {
+      this.log.systemMsg(data.data, this.ts, 'info')
     } else {
       const eventKey = event as keyof EventHandlerMap
       const handler = this.eventHandlerMap[eventKey]

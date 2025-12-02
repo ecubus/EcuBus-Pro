@@ -134,4 +134,4 @@ def get_ipc():
 
 def ecb_print(*args, **kwargs):
     text = " ".join(map(str, args))
-    _ipc.send({'type': 'event', 'payload': {'type': 'log', 'data': text}})
+    _ipc.send({'type': 'event', 'payload': {'event': 'log', 'data': text}})

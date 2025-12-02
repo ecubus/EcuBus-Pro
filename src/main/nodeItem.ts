@@ -178,6 +178,7 @@ export class NodeClass {
     this.pwmBaseMap = pwmBaseMap
     this.someipMap = someipMap
     this.testers = testers
+    this.pool?.buildServiceMap(testers)
     for (const c of nodeItem.channel) {
       const baseItem = this.canBaseMap.get(c)
       if (baseItem) {

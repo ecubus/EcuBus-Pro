@@ -106,13 +106,7 @@ export default class UdsTester {
     }
   ) {
     if (testers) {
-      for (const tester of Object.values(testers)) {
-        for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
-          for (const service of serviceList) {
-            this.serviceMap[`${tester.name}.${service.name}`] = service
-          }
-        }
-      }
+      this.buildServiceMap(testers)
     }
     this.log = log
     const execArgv = ['--enable-source-maps']
@@ -210,6 +204,17 @@ export default class UdsTester {
     globalThis.keyEvent?.on('keydown', this.cb)
     this.varCb = this.varHandle.bind(this)
     globalThis.varEvent?.on('update', this.varCb)
+  }
+  buildServiceMap(testers?: Record<string, TesterInfo>) {
+    if (testers) {
+      for (const tester of Object.values(testers)) {
+        for (const [_name, serviceList] of Object.entries(tester.allServiceList)) {
+          for (const service of serviceList) {
+            this.serviceMap[`${tester.name}.${service.name}`] = service
+          }
+        }
+      }
+    }
   }
   async getTestInfo() {
     return new Promise<TestEvent[]>((resolve, reject) => {

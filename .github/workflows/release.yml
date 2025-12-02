@@ -157,6 +157,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.build-windows.outputs.upload_url }}
-          asset_path: ./dist/ecubuspro-${{ env.VERSION }}_x86_64.rpm
+          asset_path: ./dist/ecubuspro-${{ env.VERSION }}.x86_64.rpm
           asset_name: EcuBus-Pro_${{ env.VERSION }}_x86_64.rpm
           asset_content_type: application/x-rpm

@@ -17,11 +17,8 @@ from .uds import (
 )
 
 # --- Global State ---
-_test_cnt = 0
-_test_enable_control: Dict[int, bool] = {}
 _init_done = False
 _init_promise = asyncio.Future()
-_tests: List[tuple] = []
 
 # --- Helpers ---
 
@@ -56,11 +53,11 @@ class UtilClass:
         ipc.on('__eventDone', self._event_done)
         ipc.on('methods', lambda: list(ipc.rpc_handlers.keys()))
         
-        self.event.add_listener('__canMsg', self._can_msg)
-        self.event.add_listener('__linMsg', self._lin_msg)
-        self.event.add_listener('__someipMsg', self._someip_msg)
-        self.event.add_listener('__keyDown', self._key_down)
-        self.event.add_listener('__varUpdate', self._var_update)
+        self.event.on('__canMsg', self._can_msg)
+        self.event.on('__linMsg', self._lin_msg)
+        self.event.on('__someipMsg', self._someip_msg)
+        self.event.on('__keyDown', self._key_down)
+        self.event.on('__varUpdate', self._var_update)
         
         # Default init handler
         self.Init(lambda: None)
@@ -85,16 +82,12 @@ class UtilClass:
                     return True
         return False
 
-    def _start(self, data_set: Any, val: Dict[str, Any], tester_name: str = None, test_control: Dict[str, bool] = None):
-        global _test_enable_control
+    def _start(self, data_set: Any, val: Dict[str, Any], tester_name: str = None):
         self.tester_name = tester_name
         
         for key, service_data in val.items():
             service_item = _dict_to_service_item(service_data)
             service_map[key] = service_item
-            
-        if test_control:
-             _test_enable_control.update({int(k): v for k, v in test_control.items()})
              
         if self.event.listeners('__varFc'):
              self.event.emit('__varFc')
@@ -147,26 +140,26 @@ class UtilClass:
                 sys.stderr.write(f"Init failed: {e}\n")
         
         self.event.remove_all_listeners('__varFc')
-        self.event.add_listener('__varFc', wrapper)
+        self.event.on('__varFc', wrapper)
 
     def End(self, fc: Callable[[], Awaitable[None]]):
         self.event.remove_all_listeners('__end')
-        self.event.add_listener('__end', fc)
+        self.event.on('__end', fc)
         
     def On(self, event: str, listener: Callable):
-        self.event.add_listener(event, listener)
+        self.event.on(event, listener)
         
     def Once(self, event: str, listener: Callable):
-        pass 
+        self.event.once(event, listener)
 
     def Off(self, event: str, listener: Callable):
         self.event.remove_listener(event, listener)
 
     def OnCan(self, id: Union[int, str, bool], fc: Callable):
         if id is True:
-            self.event.add_listener('can', fc)
+            self.event.on('can', fc)
         else:
-            self.event.add_listener(f"can.{id}", fc)
+            self.event.on(f"can.{id}", fc)
 
 Util = UtilClass()
 
@@ -201,66 +194,10 @@ async def runUdsSeq(seqName: str, device: str = None):
 async def stopUdsSeq(seqName: str, device: str = None):
     await get_ipc().async_emit('stopUdsSeq', {'name': seqName, 'device': device})
 
-def describe(name: str, fn: Callable[[], Awaitable[None]]):
-    # Simple wrapper. In a real runner, this would group tests.
-    # For now, we execute the definition function immediately if it's sync,
-    # or warn if async (since we can't easily await it at top level without running loop).
-    # Users usually define tests inside describe blocks.
-    if asyncio.iscoroutinefunction(fn):
-         # We can't run async describe block easily at definition time.
-         # But usually describe blocks just contain test() calls.
-         # So they should be sync.
-         pass
-    else:
-         fn()
-
-def before(fn: Callable[[], Awaitable[None]]):
-    pass # TODO: Register setup hook
-
-def after(fn: Callable[[], Awaitable[None]]):
-    pass # TODO: Register teardown hook
-
-def beforeEach(fn: Callable[[], Awaitable[None]]):
-    pass # TODO: Register before each hook
-
-def afterEach(fn: Callable[[], Awaitable[None]]):
-    pass # TODO: Register after each hook
-
-def test(name: str, fn: Callable[[], Awaitable[None]]):
-    _tests.append((name, fn))
-
-async def _run_tests():
-    global _test_cnt
-    
-    if not _init_done:
-         await _init_promise
-
-    for name, fn in _tests:
-        enabled = _test_enable_control.get(_test_cnt, False)
-        if not _test_enable_control: 
-            enabled = True
-            
-        if enabled:
-             ecb_print(f"<<< TEST START {name}>>>")
-             try:
-                 res = fn()
-                 if asyncio.iscoroutine(res):
-                     await res
-             except Exception as e:
-                 ecb_print(f"TEST FAILED {name}: {e}")
-                 import traceback
-                 traceback.print_exc()
-             finally:
-                 ecb_print(f"<<< TEST END {name}>>>")
-        
-        _test_cnt += 1
-
 def run():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     get_ipc().start(loop)
-    
-    loop.create_task(_run_tests())
     
     try:
         loop.run_forever()

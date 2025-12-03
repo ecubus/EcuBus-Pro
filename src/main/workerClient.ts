@@ -1,20 +1,17 @@
 import { assign, cloneDeep } from 'lodash'
 import { ServiceItem } from './share/uds'
-import { Worker } from 'worker_threads'
 import { UdsLOG } from './log'
 import { TesterInfo } from './share/tester'
 import { CanMessage, formatError } from './share/can'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
-import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
-import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
-import { error } from 'electron-log'
 import fs from 'fs'
-import { spawn, ChildProcess } from 'child_process'
-import path from 'path'
+import { ScriptExecutor } from './executors/scriptExecutor'
+import { NodeWorkerExecutor } from './executors/nodeWorkerExecutor'
+import { PythonProcessExecutor } from './executors/pythonProcessExecutor'
 
 type HandlerMap = {
   output: (data: any) => Promise<number>
@@ -76,9 +73,7 @@ export interface TestData {
 }
 
 export default class UdsTester {
-  worker?: Worker
-  pythonProcess?: ChildProcess
-  isPython = false
+  executor?: ScriptExecutor
   selfStop = false
   log: UdsLOG
   testEvents: TestEvent[] = []
@@ -95,7 +90,6 @@ export default class UdsTester {
     { resolve: (value: any) => void; reject: (reason?: any) => void }
   >()
   private reqId = 0
-  private pythonStdoutBuffer = ''
 
   constructor(
     private id: string,
@@ -125,17 +119,18 @@ export default class UdsTester {
 
     // 检查脚本类型
     const scriptType = options?.scriptType || (jsFilePath.endsWith('.py') ? 'python' : 'js')
-    this.isPython = scriptType === 'python'
 
     if (!fs.existsSync(jsFilePath)) {
       throw new Error(`script file not found`)
     }
 
-    if (this.isPython) {
-      this.initPythonProcess(options?.pythonPath)
+    if (scriptType === 'python') {
+      this.executor = new PythonProcessExecutor(jsFilePath, env, options?.pythonPath)
     } else {
-      this.initWorkerThread()
+      this.executor = new NodeWorkerExecutor(jsFilePath, env, testOptions)
     }
+
+    this.initExecutor()
 
     this.cb = this.keyHandle.bind(this)
     globalThis.keyEvent?.on('keydown', this.cb)
@@ -143,241 +138,71 @@ export default class UdsTester {
     globalThis.varEvent?.on('update', this.varCb)
   }
 
-  private initWorkerThread() {
-    const execArgv = ['--enable-source-maps']
-    if (this.env.MODE == 'test') {
-      execArgv.push(`--test-reporter=${pathToFileURL(reportPath).toString()}`)
-      if (this.testOptions?.testOnly) {
-        execArgv.push('--test-only')
-        this.env.ONLY = 'true'
-      } else {
-        this.env.ONLY = 'false'
-      }
-    }
-    this.worker = new Worker(this.jsFilePath, {
-      workerData: this.env,
-      stdout: true,
-      stderr: true,
-      env: this.env,
-      execArgv: execArgv
-    })
+  private initExecutor() {
+    if (!this.executor) return
 
-    this.worker.on('message', (msg: any) => {
-      if (msg && msg.type === 'rpc_response') {
-        const p = this.pendingRequests.get(msg.id)
-        if (p) {
-          this.pendingRequests.delete(msg.id)
-          if (msg.error) {
-            const error = new Error(msg.error.message)
-            error.stack = msg.error.stack
-            p.reject(error)
-          } else {
-            p.resolve(msg.result)
-          }
-        }
-      } else if (msg && msg.type === 'event') {
-        this.eventHandler(
-          msg.payload,
-          () => {},
-          () => {}
-        )
-      }
-    })
-
-    this.worker.on('error', (error) => {
-      if (!this.selfStop) {
-        this.log.systemMsg(`worker terminated by error: ${formatError(error)}`, this.ts, 'error')
-      }
-      if (this.getInfoPromise) {
-        this.getInfoPromise.reject(new Error('worker terminated'))
-      }
-      this.stop(true)
-    })
-
-    this.worker.on('exit', (code) => {
-      if (code !== 0 && !this.selfStop) {
-        this.log.systemMsg(`worker terminated with code ${code}`, this.ts, 'error')
-        this.stop(true)
-      }
-    })
-
-    this.worker.stdout.on('data', (data: any) => {
-      if (!this.selfStop) {
-        if (this.env.MODE == 'test') {
-          const testStartRegex = /^<<< TEST START .+>>>$/
-          const testEndRegex = /^<<< TEST END .+>>>$/
-          const str = data.toString().trim()
-          if (testStartRegex.test(str) || testEndRegex.test(str)) {
-            return
-          }
-        }
-        this.log.scriptMsg(data.toString().replace(/\n$/, ''), this.ts)
-      }
-    })
-
-    this.worker.stderr.on('data', (data: any) => {
-      if (!this.selfStop) {
-        if (this.env.MODE == 'test') {
-          const testStartRegex = /^<<< TEST START .+>>>$/
-          const testEndRegex = /^<<< TEST END .+>>>$/
-          const str = data.toString().trim()
-          if (testStartRegex.test(str) || testEndRegex.test(str)) {
-            return
-          }
-          if (str.includes('Util.Init function failed')) {
-            this.stop(true)
-          }
-        }
-        this.log.systemMsg(data.toString().replace(/\n$/, ''), this.ts, 'error')
-      }
-    })
-  }
-
-  private initPythonProcess(pythonPath?: string) {
-    const pythonExec = pythonPath || process.env.PYTHON_PATH || 'python'
-    const scriptPath = this.jsFilePath
-
-    const pythonLibPath = path.join(this.env.PROJECT_ROOT, 'python')
-    const envPythonPath = process.env.PYTHONPATH
-      ? `${process.env.PYTHONPATH}${path.delimiter}${pythonLibPath}`
-      : pythonLibPath
-
-    // 启动 Python 进程，使用 stdio 进行 JSON-RPC 通信
-    this.pythonProcess = spawn(pythonExec, ['-u', scriptPath], {
-      cwd: path.dirname(scriptPath),
-      env: {
-        ...process.env,
-        ...this.env,
-        PYTHONPATH: envPythonPath
-      },
-      stdio: ['pipe', 'pipe', 'pipe']
-    })
-
-    // 处理 stdout - JSON-RPC 消息（每行一个 JSON）
-    if (this.pythonProcess.stdout) {
-      this.pythonProcess.stdout.on('data', (data: Buffer) => {
-        if (!this.selfStop) {
-          this.pythonStdoutBuffer += data.toString()
-          const lines = this.pythonStdoutBuffer.split('\n')
-          // 保留最后一个不完整的行
-          this.pythonStdoutBuffer = lines.pop() || ''
-
-          for (const line of lines) {
-            const trimmedLine = line.trim()
-            if (!trimmedLine) continue
-
-            // 尝试解析 JSON-RPC 消息
-            try {
-              const msg = JSON.parse(trimmedLine, bufferReviver)
-              this.handlePythonMessage(msg)
-            } catch (e) {
-              // 如果不是 JSON，作为普通日志输出
-              if (this.env.MODE == 'test') {
-                const testStartRegex = /^<<< TEST START .+>>>$/
-                const testEndRegex = /^<<< TEST END .+>>>$/
-                if (testStartRegex.test(trimmedLine) || testEndRegex.test(trimmedLine)) {
-                  continue
-                }
-              }
-              this.log.scriptMsg(trimmedLine, this.ts)
+    this.executor.setEventHandler({
+      onMessage: (msg: any) => {
+        if (msg && msg.type === 'rpc_response') {
+          const p = this.pendingRequests.get(msg.id)
+          if (p) {
+            this.pendingRequests.delete(msg.id)
+            if (msg.error) {
+              const error = new Error(msg.error.message)
+              error.stack = msg.error.stack
+              p.reject(error)
+            } else {
+              p.resolve(msg.result)
             }
           }
+        } else if (msg && msg.type === 'event') {
+          this.eventHandler(
+            msg.payload,
+            () => {},
+            () => {}
+          )
         }
-      })
-    }
-
-    // 处理 stderr - 日志输出
-    if (this.pythonProcess.stderr) {
-      this.pythonProcess.stderr.on('data', (data: Buffer) => {
+      },
+      onLog: (data: string, type: 'info' | 'error') => {
         if (!this.selfStop) {
-          const str = data.toString().trim()
+          const str = data.trim()
           if (this.env.MODE == 'test') {
             const testStartRegex = /^<<< TEST START .+>>>$/
             const testEndRegex = /^<<< TEST END .+>>>$/
             if (testStartRegex.test(str) || testEndRegex.test(str)) {
               return
             }
-            if (str.includes('Util.Init function failed')) {
+            if (type === 'error' && str.includes('Util.Init function failed')) {
               this.stop(true)
             }
           }
-          this.log.systemMsg(str, this.ts, 'error')
+          if (type === 'info') {
+            this.log.scriptMsg(data.replace(/\n$/, ''), this.ts)
+          } else {
+            this.log.systemMsg(str, this.ts, 'error')
+          }
         }
-      })
-    }
-
-    // 处理进程错误
-    this.pythonProcess.on('error', (error) => {
-      if (!this.selfStop) {
-        this.log.systemMsg(`Python process error: ${formatError(error)}`, this.ts, 'error')
-      }
-      if (this.getInfoPromise) {
-        this.getInfoPromise.reject(new Error('Python process failed to start'))
-      }
-      this.stop(true)
-    })
-
-    // 处理进程退出
-    this.pythonProcess.on('exit', (code, signal) => {
-      if (code !== 0 && !this.selfStop) {
-        this.log.systemMsg(
-          `Python process terminated with code ${code}${signal ? `, signal ${signal}` : ''}`,
-          this.ts,
-          'error'
-        )
+      },
+      onError: (error: any) => {
+        if (!this.selfStop) {
+          this.log.systemMsg(`executor error: ${formatError(error)}`, this.ts, 'error')
+        }
+        if (this.getInfoPromise) {
+          this.getInfoPromise.reject(new Error('executor failed'))
+        }
         this.stop(true)
-      }
-    })
-
-    // 发送初始化消息
-    this.sendPythonInit()
-  }
-
-  private handlePythonMessage(msg: any) {
-    if (msg && msg.type === 'rpc_response') {
-      const p = this.pendingRequests.get(msg.id)
-      if (p) {
-        this.pendingRequests.delete(msg.id)
-        if (msg.error) {
-          const error = new Error(msg.error.message)
-          error.stack = msg.error.stack
-          p.reject(error)
-        } else {
-          p.resolve(msg.result)
+      },
+      onExit: (code: number) => {
+        if (code !== 0 && !this.selfStop) {
+          this.log.systemMsg(`executor terminated with code ${code}`, this.ts, 'error')
+          this.stop(true)
         }
       }
-    } else if (msg && msg.type === 'event') {
-      this.eventHandler(
-        msg.payload,
-        () => {},
-        () => {}
-      )
-    }
-  }
-
-  private sendPythonInit() {
-    // 发送初始化消息给 Python 脚本
-    this.sendPythonMessage({
-      type: 'init',
-      env: this.env
     })
+
+    this.executor.init()
   }
 
-  private sendPythonMessage(msg: any) {
-    if (this.pythonProcess && this.pythonProcess.stdin && !this.pythonProcess.stdin.destroyed) {
-      // JSON-RPC over stdio: 每行一个 JSON 消息，不能包含换行符
-      const jsonStr = JSON.stringify(msg)
-      if (jsonStr.includes('\n')) {
-        this.log.systemMsg(
-          'Warning: JSON message contains newline, which is not allowed',
-          this.ts,
-          'error'
-        )
-        return
-      }
-      this.pythonProcess.stdin.write(jsonStr + '\n')
-    }
-  }
   buildServiceMap(testers?: Record<string, TesterInfo>) {
     if (testers) {
       for (const tester of Object.values(testers)) {
@@ -623,10 +448,10 @@ export default class UdsTester {
         params: param
       }
 
-      if (this.isPython) {
-        this.sendPythonMessage(message)
+      if (this.executor) {
+        this.executor.postMessage(message)
       } else {
-        this.worker!.postMessage(message)
+        reject(new Error('executor not initialized'))
       }
     })
   }
@@ -656,21 +481,9 @@ export default class UdsTester {
       null
     }
 
-    if (this.isPython) {
-      // 关闭 Python 进程
-      if (this.pythonProcess) {
-        if (this.pythonProcess.stdin && !this.pythonProcess.stdin.destroyed) {
-          this.pythonProcess.stdin.end()
-        }
-        if (!this.pythonProcess.killed) {
-          this.pythonProcess.kill()
-        }
-        this.pythonProcess = undefined
-      }
-    } else {
-      // 终止 Worker Thread
+    if (this.executor) {
       try {
-        await this.worker!.terminate()
+        await this.executor.terminate()
       } catch (e) {
         null
       }
@@ -680,11 +493,7 @@ export default class UdsTester {
   // 检查worker是否健康
   isHealthy(): boolean {
     if (this.selfStop) return false
-    if (this.isPython) {
-      return !!this.pythonProcess && !this.pythonProcess.killed
-    } else {
-      return !!this.worker
-    }
+    return this.executor ? this.executor.isHealthy() : false
   }
 
   // 获取worker状态信息
@@ -693,14 +502,7 @@ export default class UdsTester {
       healthy: this.isHealthy(),
       selfStop: this.selfStop,
       hasPool: false, // Removed pool concept
-      hasWorker: this.isPython ? !!this.pythonProcess : !!this.worker
+      hasWorker: !!this.executor
     }
   }
-}
-
-function bufferReviver(key: string, value: any) {
-  if (value && value.type === 'Buffer' && Array.isArray(value.data)) {
-    return Buffer.from(value.data)
-  }
-  return value
 }

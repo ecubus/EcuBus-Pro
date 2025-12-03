@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import inspect
 from typing import Optional, Dict, Any, List, Callable, Union, Awaitable
 from pyee.asyncio import AsyncIOEventEmitter
 from copy import deepcopy
@@ -12,8 +13,12 @@ from .structs import (
     CAN_ID_TYPE, LinDirection, LinChecksumType
 )
 from .uds import (
-    Service, DiagRequest, DiagResponse, DiagJob, 
-    service_map, param_set_val_raw, ServiceItem
+    Service,
+    DiagRequest,
+    DiagResponse,
+    DiagJob,
+    service_map,
+    ServiceItem,
 )
 
 # --- Global State ---
@@ -46,6 +51,8 @@ class UtilClass:
         self.event = AsyncIOEventEmitter()
         self.tester_name: Optional[str] = None
         self.vars: Dict[str, Any] = {}
+        # store wrapped key callbacks so OffKey can remove them correctly
+        self._key_func_map: Dict[str, Dict[Callable, Callable]] = {}
         
         ipc = get_ipc()
         ipc.on('__on', self._worker_on)
@@ -174,6 +181,123 @@ class UtilClass:
             self.event.on('can', fc)
         else:
             self.event.on(f"can.{id}", fc)
+
+    def OnCanOnce(self, id: Union[int, str, bool], fc: Callable):
+        """Register a CAN listener that will be triggered only once."""
+        if id is True:
+            self.event.once('can', fc)
+        else:
+            self.event.once(f"can.{id}", fc)
+
+    def OffCan(self, id: Union[int, str, bool], fc: Callable):
+        """Unregister a CAN listener. id and callback must match the original registration."""
+        if id is True:
+            self.event.remove_listener('can', fc)
+        else:
+            self.event.remove_listener(f"can.{id}", fc)
+
+    # --- LIN event helpers (subset of TS Util.OnLin/OnLinOnce/OffLin) ---
+
+    def OnLin(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
+        """Register a LIN listener. id can be frameId (int) or name (str); True for all."""
+        if id is True:
+            self.event.on('lin', fc)
+        else:
+            self.event.on(f"lin.{id}", fc)
+
+    def OnLinOnce(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
+        """Register a LIN listener that will be triggered only once."""
+        if id is True:
+            self.event.once('lin', fc)
+        else:
+            self.event.once(f"lin.{id}", fc)
+
+    def OffLin(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
+        """Unregister a LIN listener."""
+        if id is True:
+            self.event.remove_listener('lin', fc)
+        else:
+            self.event.remove_listener(f"lin.{id}", fc)
+
+    # --- Variable event helpers (subset of TS Util.OnVar/OnVarOnce/OffVar) ---
+
+    def OnVar(self, name: str, fc: Callable[[Dict[str, Any]], Union[None, Awaitable[None]]]):
+        """Register a variable update listener. name can be concrete name or '*' wildcard."""
+        if not name:
+            return
+        event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
+        self.event.on(event_name, fc)
+
+    def OnVarOnce(self, name: str, fc: Callable[[Dict[str, Any]], Union[None, Awaitable[None]]]):
+        """Register a one-shot variable update listener."""
+        if not name:
+            return
+        event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
+        self.event.once(event_name, fc)
+
+    def OffVar(self, name: str, fc: Callable[[Dict[str, Any]], Union[None, Awaitable[None]]]):
+        """Unregister a variable update listener."""
+        if not name:
+            return
+        event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
+        self.event.remove_listener(event_name, fc)
+
+    # --- Misc helpers ---
+
+    def getTesterName(self) -> Optional[str]:
+        """Return current tester name (if any), similar to TS Util.getTesterName."""
+        return self.tester_name
+
+    # --- Key event helpers (API parity with TS Util.OnKey/OnKeyOnce/OffKey) ---
+
+    def _wrap_key_callback(self, fc: Callable) -> Callable:
+        """Allow key callbacks with 0 or 1 positional arguments.
+
+        - If user callback has no parameters: call fc() and ignore the key argument.
+        - If it has >=1 parameters: pass key through as usual.
+        """
+        try:
+            sig = inspect.signature(fc)
+            if len(sig.parameters) == 0:
+                def wrapper(_key: str):
+                    return fc()
+                return wrapper
+        except (TypeError, ValueError):
+            # Fallback: if we cannot introspect, just return original
+            return fc
+        return fc
+
+    def OnKey(self, key: str, fc: Callable[[str], Union[None, Awaitable[None]]]):
+        """Register a key-down handler. Only first char of key is used, '*' is wildcard."""
+        if not key:
+            return
+        k = key[0]
+        event_name = "keyDown*" if k == "*" else f"keyDown{k}"
+        wrapped = self._wrap_key_callback(fc)
+        # remember mapping so OffKey can remove the correct function
+        self._key_func_map.setdefault(event_name, {})[fc] = wrapped
+        self.event.on(event_name, wrapped)
+
+    def OnKeyOnce(self, key: str, fc: Callable[[str], Union[None, Awaitable[None]]]):
+        """Register a one-shot key-down handler. Only first char of key is used, '*' is wildcard."""
+        if not key:
+            return
+        k = key[0]
+        event_name = "keyDown*" if k == "*" else f"keyDown{k}"
+        wrapped = self._wrap_key_callback(fc)
+        self.event.once(event_name, wrapped)
+
+    def OffKey(self, key: str, fc: Callable[[str], Union[None, Awaitable[None]]]):
+        """Unregister a key-down handler. Only first char of key is used, '*' is wildcard."""
+        if not key:
+            return
+        k = key[0]
+        event_name = "keyDown*" if k == "*" else f"keyDown{k}"
+        wrapped = self._key_func_map.get(event_name, {}).pop(fc, None)
+        if wrapped is None:
+            # fall back to removing original if we didn't wrap
+            wrapped = fc
+        self.event.remove_listener(event_name, wrapped)
 
 Util = UtilClass()
 

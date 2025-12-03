@@ -82,15 +82,24 @@ class UtilClass:
                     return True
         return False
 
-    def _start(self, data_set: Any, val: Dict[str, Any], tester_name: str = None):
+    def _start(
+        self,
+        data_set: Any,
+        val: Dict[str, Any],
+        tester_name: str = None,
+        test_control: Any = None  # kept for compatibility with TS side, currently unused
+    ):
+        """Handle __start RPC from Node side.
+
+        Signature matches uds.ts / workerClient.ts:
+        __start(dataSet, serviceMap, testerName, testControl)
+        """
         self.tester_name = tester_name
-        
+
+        # Build Python-side service_map from plain dict sent by Node
         for key, service_data in val.items():
             service_item = _dict_to_service_item(service_data)
             service_map[key] = service_item
-             
-        if self.event.listeners('__varFc'):
-             self.event.emit('__varFc')
 
     def _event_done(self, id: int, resp: Optional[Dict[str, Any]] = None):
         get_ipc().resolve_emit(id, resp.get('data') if resp else None, resp.get('err') if resp else None)
@@ -125,7 +134,7 @@ class UtilClass:
             self.event.emit("varUpdate*", item)
 
     def Init(self, fc: Callable[[], Awaitable[None]]):
-        async def wrapper():
+        async def wrapper(*_args, **_kwargs):
             global _init_done
             try:
                 res = fc()
@@ -143,8 +152,13 @@ class UtilClass:
         self.event.on('__varFc', wrapper)
 
     def End(self, fc: Callable[[], Awaitable[None]]):
+        async def wrapper(*_args, **_kwargs):
+            res = fc()
+            if asyncio.iscoroutine(res):
+                await res
+
         self.event.remove_all_listeners('__end')
-        self.event.on('__end', fc)
+        self.event.on('__end', wrapper)
         
     def On(self, event: str, listener: Callable):
         self.event.on(event, listener)

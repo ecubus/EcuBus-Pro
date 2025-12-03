@@ -2,6 +2,7 @@ import sys
 import asyncio
 import json
 import threading
+import traceback
 from typing import Callable, Any, Dict, Optional
 from dataclasses import is_dataclass, asdict
 from enum import Enum
@@ -22,8 +23,7 @@ class IPC:
         self.rpc_handlers: Dict[str, Callable] = {}
         self.emit_map: Dict[int, asyncio.Future] = {}
         self._id_counter = 0
-        self._stdout = sys.__stdout__
-        sys.stdout = sys.stderr
+       
 
     def start(self, loop: asyncio.AbstractEventLoop):
         self.loop = loop
@@ -66,7 +66,11 @@ class IPC:
         params = msg.get('params', [])
 
         if method_name not in self.rpc_handlers:
-            self._send_response(msg_id, error=f"Method {method_name} not found")
+            # Use Error-like object for better compatibility with JS side
+            self._send_response(msg_id, error={
+                'message': f"Method {method_name} not found",
+                'stack': ''.join(traceback.format_stack())
+            })
             return
 
         try:
@@ -76,14 +80,22 @@ class IPC:
                 result = await result
             self._send_response(msg_id, result=result)
         except Exception as e:
-            # import traceback
-            # traceback.print_exc()
-            self._send_response(msg_id, error=str(e))
+            # Send structured error object similar to JS Error
+            self._send_response(msg_id, error={
+                'message': str(e),
+                'stack': traceback.format_exc()
+            })
 
     def _send_response(self, msg_id: Any, result: Any = None, error: Any = None):
         resp = {'type': 'rpc_response', 'id': msg_id}
         if error:
-            resp['error'] = error
+            # Normalize error to an object with at least a message field
+            if isinstance(error, dict):
+                if 'message' not in error:
+                    error = {**error, 'message': str(error)}
+                resp['error'] = error
+            else:
+                resp['error'] = {'message': str(error)}
         else:
             resp['result'] = result
         self.send(resp)
@@ -91,7 +103,7 @@ class IPC:
     def send(self, msg: Dict[str, Any]):
         try:
             json_str = json.dumps(msg, cls=ECBJSONEncoder)
-            print(json_str, file=self._stdout, flush=True)
+            print(json_str, file=sys.stdout, flush=True)
         except Exception as e:
              sys.stderr.write(f"IPC Send Error: {e}\n")
 

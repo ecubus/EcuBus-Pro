@@ -116,48 +116,50 @@ export class NodeClass {
     if (nodeItem.script) {
       let jsPath = nodeItem.script
       if (!path.isAbsolute(jsPath)) {
+        jsPath = path.join(this.projectPath, jsPath)
+      }
+      if (!jsPath.endsWith('.py')) {
         const outDir = path.join(this.projectPath, '.ScriptBuild')
         const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
         jsPath = path.join(outDir, scriptNameNoExt + '.js')
       }
-      if (fs.existsSync(jsPath)) {
-        this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
-        if (this.testOptions) {
-          this.log.addMethodPrefix('test-')
 
-          const testTransport = new TestTransport((info: any) => {
-            const method = info.message.method
-            if (
-              method == 'test-udsSystem' ||
-              method == 'test-udsScript' ||
-              method == 'test-udsWarning' ||
-              method == 'testInfo'
-            ) {
-              this.logs.push(info)
-            }
-          })
-          this.log.addTransport(testTransport)
-        }
-        this.pool = new UdsTester(
-          nodeItem.id,
-          {
-            PROJECT_ROOT: this.projectPath,
-            PROJECT_NAME: this.projectName,
-            MODE: this.testOptions ? 'test' : 'node',
-            NAME: nodeItem.name
-          },
-          jsPath,
-          this.log,
-          this.testers,
-          this.testOptions
+      this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
+      if (this.testOptions) {
+        this.log.addMethodPrefix('test-')
+
+        const testTransport = new TestTransport((info: any) => {
+          const method = info.message.method
+          if (
+            method == 'test-udsSystem' ||
+            method == 'test-udsScript' ||
+            method == 'test-udsWarning' ||
+            method == 'testInfo'
+          ) {
+            this.logs.push(info)
+          }
+        })
+        this.log.addTransport(testTransport)
+      }
+      this.pool = new UdsTester(
+        nodeItem.id,
+        {
+          PROJECT_ROOT: this.projectPath,
+          PROJECT_NAME: this.projectName,
+          MODE: this.testOptions ? 'test' : 'node',
+          NAME: nodeItem.name
+        },
+        jsPath,
+        this.log,
+        this.testers,
+        this.testOptions
+      )
+      if (this.testOptions) {
+        this.log?.systemMsg(
+          `----- Test Config ${this.nodeItem.name} starting -----`,
+          getTsUs(),
+          'info'
         )
-        if (this.testOptions) {
-          this.log?.systemMsg(
-            `----- Test Config ${this.nodeItem.name} starting -----`,
-            getTsUs(),
-            'info'
-          )
-        }
       }
     }
   }

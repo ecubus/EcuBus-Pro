@@ -42,22 +42,23 @@ async function delay(timeout: number) {
   return new Promise((resolve) => setTimeout(resolve, timeout))
 }
 Util.Init(async () => {
-  const InitNad = await getVar('lin_conformance_test.InitialNAD')
-  ConfiguredNAD = await getVar('lin_conformance_test.ConfiguredNAD')
-  const SupplierId = await getVar('lin_conformance_test.SupplierID')
-  const FunctionId = await getVar('lin_conformance_test.FunctionID')
+  const InitNad = getVar('lin_conformance_test.InitialNAD')
+  ConfiguredNAD = getVar('lin_conformance_test.ConfiguredNAD')
+  const SupplierId = getVar('lin_conformance_test.SupplierID')
+  const FunctionId = getVar('lin_conformance_test.FunctionID')
 
   const SupplierIdBuf = Buffer.alloc(2)
   SupplierIdBuf.writeUint16LE(SupplierId, 0)
   const FunctionIdBuf = Buffer.alloc(2)
   FunctionIdBuf.writeUint16LE(FunctionId, 0)
-  const TxFrameName = await getVar('lin_conformance_test.TxFrameName')
-  const RxFrameName = await getVar('lin_conformance_test.RxFrameName')
-  const EventFrameName = await getVar('lin_conformance_test.EventFrameName')
-  const StatusFrameName = await getVar('lin_conformance_test.StatusFrameName')
-  StatusSignalOffset = await getVar('lin_conformance_test.StatusSignalOffset')
+  const TxFrameName = getVar('lin_conformance_test.TxFrameName')
+  const RxFrameName = getVar('lin_conformance_test.RxFrameName')
+  const EventFrameName = getVar('lin_conformance_test.EventFrameName')
+  const StatusFrameName = getVar('lin_conformance_test.StatusFrameName')
+  StatusSignalOffset = getVar('lin_conformance_test.StatusSignalOffset')
 
-  const unknownId = await getVar('lin_conformance_test.UnknownId')
+  const unknownId = getVar('lin_conformance_test.UnknownId')
+  const dbName = getVar('lin_conformance_test.dbName')
 
   //AssignFrameIdRage
   FrameMap['TST_FRAME_1'] = {
@@ -104,15 +105,15 @@ Util.Init(async () => {
   }
 
   /*device specific transmit frame (IUT is publisher)*/
-  const TST_FRAME_4_Tx = await getFrameFromDB('lin', 'LINdb', TxFrameName)
+  const TST_FRAME_4_Tx = await getFrameFromDB('lin', dbName, TxFrameName)
   FrameMap['TST_FRAME_4_Tx'] = TST_FRAME_4_Tx
 
   /*device specific receive frame (IUT is subscriber)*/
-  const TST_FRAME_4_Rx = await getFrameFromDB('lin', 'LINdb', RxFrameName)
+  const TST_FRAME_4_Rx = await getFrameFromDB('lin', dbName, RxFrameName)
   FrameMap['TST_FRAME_4_Rx'] = TST_FRAME_4_Rx
 
   /*request for event triggered frame*/
-  const TST_FRAME_5 = await getFrameFromDB('lin', 'LINdb', EventFrameName)
+  const TST_FRAME_5 = await getFrameFromDB('lin', dbName, EventFrameName)
   FrameMap['TST_FRAME_5'] = TST_FRAME_5
 
   //slave response command frame, Identifier = 0x3D

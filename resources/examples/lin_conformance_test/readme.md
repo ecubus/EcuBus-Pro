@@ -38,6 +38,7 @@ Although we already have a database, we also define additional user variables to
 | EventFrameName | string | "ETF_MotorStates" | - | Event-triggered frame name for event and collision-resolution related tests. |
 | StatusSignalOffset | number | 40 | 0–100 | Bit offset of the status field within the status frame (e.g., for locating `response_error`). |
 | UnknownId | number | 1 | 0–100 | Parameter for invalid/unknown ID testing to validate error handling for abnormal frame IDs. |
+| dbName | string | "LINdb" | - | Database name for the LIN conformance test. |
 
 ![variables](./image1.png)
 

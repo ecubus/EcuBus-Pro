@@ -1131,6 +1131,10 @@ const preDefineTypes: Record<string, string> = {
 // }
 
 export async function getBuildStatus(projectPath: string, projectName: string, script: string) {
+  //if script is python, return success
+  if (script.endsWith('.py')) {
+    return 'success'
+  }
   if (path.isAbsolute(script) === false) {
     script = path.join(projectPath, script)
   }

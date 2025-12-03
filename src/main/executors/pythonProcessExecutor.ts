@@ -48,8 +48,13 @@ export class PythonProcessExecutor extends ScriptExecutor {
           if (!trimmedLine) continue
 
           try {
-            const msg = JSON.parse(trimmedLine, bufferReviver)
-            this.eventHandler?.onMessage(msg)
+            // opt ignore if the line is not a valid JSON
+            if (!trimmedLine.startsWith('{')) {
+              this.eventHandler?.onLog(trimmedLine, 'info')
+            } else {
+              const msg = JSON.parse(trimmedLine, bufferReviver)
+              this.eventHandler?.onMessage(msg)
+            }
           } catch (e) {
             this.eventHandler?.onLog(trimmedLine, 'info')
           }

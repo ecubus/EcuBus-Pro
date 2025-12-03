@@ -116,10 +116,8 @@ export default class UdsTester {
       this.buildServiceMap(testers)
     }
     this.log = log
-
     // 检查脚本类型
     const scriptType = options?.scriptType || (jsFilePath.endsWith('.py') ? 'python' : 'js')
-
     if (!fs.existsSync(jsFilePath)) {
       throw new Error(`script file not found`)
     }
@@ -297,7 +295,7 @@ export default class UdsTester {
         }
       }
     } else if (event == 'log') {
-      this.log.systemMsg(data.data, this.ts, 'info')
+      this.log.systemMsg(data, this.ts, 'info')
     } else {
       const eventKey = event as keyof EventHandlerMap
       const handler = this.eventHandlerMap[eventKey]
@@ -459,6 +457,11 @@ export default class UdsTester {
     if (this.selfStop) {
       return // 避免重复调用
     }
+    //reject all pendingRequests
+    for (const p of this.pendingRequests.values()) {
+      p.reject(new Error('worker terminated'))
+    }
+    this.pendingRequests.clear()
 
     this.selfStop = true
 

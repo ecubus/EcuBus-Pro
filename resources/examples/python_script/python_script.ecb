@@ -1,0 +1,96 @@
+{
+  "data": {
+    "devices": {
+      "6ebe169e-01de-4565-be74-7339ae4f0785": {
+        "type": "can",
+        "canDevice": {
+          "id": "6ebe169e-01de-4565-be74-7339ae4f0785",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_6"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "d0ac0280-54ac-4f72-bc21-6df97b3b482e": {
+        "name": "Node 1",
+        "id": "d0ac0280-54ac-4f72-bc21-6df97b3b482e",
+        "channel": [
+          "6ebe169e-01de-4565-be74-7339ae4f0785"
+        ],
+        "workNode": "",
+        "script": "base.py"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 1306,
+          "y": 260,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 979,
+          "y": 315.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      }
+    }
+  }
+}

@@ -118,7 +118,9 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
   const data = arg[2] as DataSet
   const entry = arg[3] as string
   const isTest = arg[4] || false
-
+  if (entry.endsWith('.py')) {
+    return []
+  }
   const result = await compileTsc(
     projectPath,
     projectName,

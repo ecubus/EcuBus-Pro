@@ -26,7 +26,6 @@ class CanMsgType:
     brs: bool
     canfd: bool
     remote: bool
-    uuid: Optional[str] = None
 
 @dataclass
 class CanMessage:
@@ -43,7 +42,6 @@ class CanMessage:
 
 @dataclass
 class CanAddr(CanMsgType):
-    name: str
     addrFormat: CAN_ADDR_FORMAT
     addrType: CAN_ADDR_TYPE
     SA: str
@@ -61,6 +59,7 @@ class CanAddr(CanMsgType):
     dlc: int
     padding: bool
     paddingValue: str
+    name: str = ''
     desc: Optional[str] = None
     nBr: Optional[int] = None
     nCs: Optional[int] = None

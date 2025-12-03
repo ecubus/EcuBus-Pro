@@ -38,6 +38,7 @@ LIN 一致性测试示例提供了一个完整的测试框架，用于根据汽�
 | EventFrameName     | string | "ETF_MotorStates"  | -       | 事件触发帧名称，用于与事件和冲突解决相关的测试。                 |
 | StatusSignalOffset | number | 40                                      | 0–100   | 状态字段在状态帧内的位偏移（例如，用于定位 `response_error`）。 |
 | UnknownId          | number | 1                                       | 0–100   | 无效/未知 ID 测试参数，用于验证异常帧 ID 的错误处理。          |
+| dbName | string | "LINdb" | - | LIN 一致性测试的数据库名称。 |
 
 ![variables](./image1.png)
 

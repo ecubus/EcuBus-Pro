@@ -629,7 +629,8 @@
           "id": "cef7a977-5aa9-4b23-8bbc-a97095c616cb"
         }
       },
-      "can": {}
+      "can": {},
+      "orti": {}
     },
     "graphs": {},
     "guages": {},
@@ -781,10 +782,26 @@
         },
         "id": "661272a5-af53-41c4-ade2-34fa84db110b",
         "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
+      },
+      "f5ef2edb-38c8-44cf-b8d5-e77b536668b3": {
+        "name": "dbName",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "LINdb",
+          "min": 0,
+          "max": 100
+        },
+        "id": "f5ef2edb-38c8-44cf-b8d5-e77b536668b3",
+        "parentId": "e29ff736-00ab-4db9-a2c9-e403b1a4a40f"
       }
     },
     "datas": {},
-    "panels": {}
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -805,10 +822,10 @@
       },
       "test": {
         "pos": {
-          "x": 484,
-          "y": 91,
+          "x": 1051,
+          "y": 116,
           "w": 957,
-          "h": 418
+          "h": 529
         },
         "title": "test",
         "label": "Test",
@@ -819,7 +836,7 @@
       "trace": {
         "pos": {
           "x": 228,
-          "y": 480,
+          "y": 287,
           "w": 1583,
           "h": 438
         },
@@ -843,13 +860,25 @@
       "hardware": {
         "pos": {
           "x": 980,
-          "y": 316.5,
+          "y": 287,
           "w": 600,
           "h": 400
         },
         "title": "hardware",
         "label": "Devices",
         "id": "hardware",
+        "options": {}
+      },
+      "variable": {
+        "pos": {
+          "x": 887,
+          "y": 16,
+          "w": 1403,
+          "h": 704
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
         "options": {}
       }
     },

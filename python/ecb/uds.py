@@ -18,7 +18,7 @@ def split_str2(s: str) -> str:
         result.append(s[i:i+2])
     return ' '.join(result)
 
-def check_service_id(service_id: str, need: List[str]) -> bool:
+def checkServiceId(service_id: str, need: List[str]) -> bool:
     if not service_id:
         return False
     if 'job' in need:
@@ -41,19 +41,19 @@ def get_param_buffer(params: List[Param]) -> bytearray:
         buffer.extend(p.value)
     return buffer
 
-def get_tx_pdu(service: ServiceItem) -> bytearray:
+def getTxPdu(service: ServiceItem) -> bytearray:
     sid = int(service.serviceId, 16) if service.serviceId.startswith('0x') else 0
     header = bytearray([sid])
     return header + get_param_buffer(service.params)
 
-def get_rx_pdu(service: ServiceItem) -> bytearray:
+def getRxPdu(service: ServiceItem) -> bytearray:
     sid = int(service.serviceId, 16) if service.serviceId.startswith('0x') else 0
     if service.isNegativeResponse:
         return bytearray([0x7f, sid, service.nrc or 0x00])
     header = bytearray([sid + 0x40])
     return header + get_param_buffer(service.respParams)
 
-def param_set_val(param: Param, val: Union[str, int, float]) -> None:
+def paramSetVal(param: Param, val: Union[str, int, float]) -> None:
     if param.type == 'NUM':
         v = int(val)
         byte_len = int(param.bitLen / 8)
@@ -109,7 +109,7 @@ def param_set_val(param: Param, val: Union[str, int, float]) -> None:
         param.phyValue = v
         param.value = bytearray(struct.pack('>d', v))
 
-def param_set_val_raw(param: Param, val: bytearray) -> None:
+def paramSetValRaw(param: Param, val: bytearray) -> None:
     byte_len = (param.bitLen + 7) // 8
     if len(val) > byte_len:
         raise ValueError(f"value length {len(val)} should less than {byte_len}")
@@ -132,7 +132,7 @@ def param_set_val_raw(param: Param, val: bytearray) -> None:
     elif param.type == 'DOUBLE':
         if len(val) >= 8: param.phyValue = struct.unpack('>d', val[:8])[0]
 
-def param_set_size(param: Param, bit_size: int) -> None:
+def paramSetSize(param: Param, bit_size: int) -> None:
     byte_len = (bit_size + 7) // 8
     min_len = min(byte_len, len(param.value))
     param.bitLen = bit_size
@@ -140,7 +140,7 @@ def param_set_size(param: Param, bit_size: int) -> None:
     new_value[:min_len] = param.value[:min_len]
     param.value = new_value
 
-def apply_buffer(service: ServiceItem, data: bytearray, is_req: bool) -> None:
+def applyBuffer(service: ServiceItem, data: bytearray, is_req: bool) -> None:
     if not data: return
     if data[0] == 0x7f:
         if not is_req:
@@ -162,11 +162,11 @@ def apply_buffer(service: ServiceItem, data: bytearray, is_req: bool) -> None:
         if offset < len(data):
             sub_data = data[offset : offset + param_len]
             if len(sub_data) < param_len: return
-            param_set_val_raw(param, sub_data)
+            paramSetValRaw(param, sub_data)
         offset += param_len
     if offset < len(data):
         param = Param(id=str(uuid4()), name='__left', type='ARRAY', value=bytearray(), phyValue='', bitLen=(len(data) - offset) * 8)
-        param_set_val_raw(param, data[offset:])
+        paramSetValRaw(param, data[offset:])
         params.append(param)
 
 # --- Service Class ---
@@ -181,68 +181,68 @@ class Service:
         self.params = self.service.params if is_request else self.service.respParams
         
     def __str__(self):
-        return get_tx_pdu(self.service).hex() if self.is_request else get_rx_pdu(self.service).hex()
+        return getTxPdu(self.service).hex() if self.is_request else getRxPdu(self.service).hex()
         
-    async def change_service(self):
+    async def changeService(self):
         await get_ipc().async_emit('set', {
             'service': self.service,
             'isRequest': self.is_request,
             'testerName': self.tester_name
         })
-        service_map[self.get_service_name()] = self.service
+        service_map[self.getServiceName()] = self.service
 
     def On(self, event: str, listener: Any):
         from .util import Util
-        Util.On(f"{self.get_service_name()}.{event}", listener)
+        Util.On(f"{self.getServiceName()}.{event}", listener)
         
     def Once(self, event: str, listener: Any):
         from .util import Util
-        Util.OnOnce(f"{self.get_service_name()}.{event}", listener)
+        Util.OnOnce(f"{self.getServiceName()}.{event}", listener)
         
     def Off(self, event: str, listener: Any):
         from .util import Util
-        Util.Off(f"{self.get_service_name()}.{event}", listener)
+        Util.Off(f"{self.getServiceName()}.{event}", listener)
         
-    def get_service_name(self) -> str:
+    def getServiceName(self) -> str:
         return f"{self.tester_name}.{self.service.name}"
         
-    def get_service_desc(self) -> Optional[str]:
+    def getServiceDesc(self) -> Optional[str]:
         return self.service.desc
         
-    def diag_get_parameter(self, param_name: str) -> Union[str, int, float]:
+    def diagGetParameter(self, param_name: str) -> Union[str, int, float]:
         param = next((p for p in self.params if p.name == param_name), None)
         if param: return param.phyValue
         raise ValueError(f"param {param_name} not found")
         
-    def diag_get_parameter_raw(self, param_name: str) -> bytearray:
+    def diagGetParameterRaw(self, param_name: str) -> bytearray:
         param = next((p for p in self.params if p.name == param_name), None)
         if param: return param.value
         raise ValueError(f"param {param_name} not found")
         
-    def diag_get_parameter_size(self, param_name: str) -> int:
+    def diagGetParameterSize(self, param_name: str) -> int:
         param = next((p for p in self.params if p.name == param_name), None)
         if param: return param.bitLen
         raise ValueError(f"param {param_name} not found")
         
-    def diag_get_parameter_names(self) -> List[str]:
+    def diagGetParameterNames(self) -> List[str]:
         return [p.name for p in self.params]
         
-    def diag_set_parameter_size(self, param_name: str, bit_len: int) -> None:
+    def diagSetParameterSize(self, param_name: str, bit_len: int) -> None:
         param = next((p for p in self.params if p.name == param_name), None)
-        if param: param_set_size(param, bit_len)
+        if param: paramSetSize(param, bit_len)
         else: raise ValueError(f"param {param_name} not found")
             
-    def diag_set_parameter(self, param_name: str, value: Union[str, int, float]) -> None:
+    def diagSetParameter(self, param_name: str, value: Union[str, int, float]) -> None:
         param = next((p for p in self.params if p.name == param_name), None)
-        if param: param_set_val(param, value)
+        if param: paramSetVal(param, value)
         else: raise ValueError(f"param {param_name} not found")
             
-    def diag_set_parameter_raw(self, param_name: str, value: bytearray) -> None:
+    def diagSetParameterRaw(self, param_name: str, value: bytearray) -> None:
         param = next((p for p in self.params if p.name == param_name), None)
-        if param: param_set_val_raw(param, value)
+        if param: paramSetValRaw(param, value)
         else: raise ValueError(f"param {param_name} not found")
             
-    async def output_diag(self, device_name: Optional[str] = None, address_name: Optional[str] = None) -> int:
+    async def outputDiag(self, device_name: Optional[str] = None, address_name: Optional[str] = None) -> int:
         ts = await get_ipc().async_emit('sendDiag', {
             'device': device_name,
             'address': address_name,
@@ -252,21 +252,21 @@ class Service:
         })
         return ts
         
-    def diag_set_raw(self, data: bytearray) -> None:
-        apply_buffer(self.service, data, self.is_request)
+    def diagSetRaw(self, data: bytearray) -> None:
+        applyBuffer(self.service, data, self.is_request)
         
-    def diag_get_raw(self) -> bytearray:
-        return get_tx_pdu(self.service) if self.is_request else get_rx_pdu(self.service)
+    def diagGetRaw(self) -> bytearray:
+        return getTxPdu(self.service) if self.is_request else getRxPdu(self.service)
 
 class DiagJob(Service):
     def __init__(self, tester_name: str, service: ServiceItem):
         super().__init__(tester_name, deepcopy(service), True)
         
     @staticmethod
-    def from_job(job_name: str) -> 'DiagJob':
+    def fromJob(job_name: str) -> 'DiagJob':
         tester_name = job_name.split('.')[0]
         service = service_map.get(job_name)
-        if service and check_service_id(service.serviceId, ['job']):
+        if service and checkServiceId(service.serviceId, ['job']):
             return DiagJob(tester_name, service)
         raise ValueError(f"job {job_name} not found")
 
@@ -275,26 +275,26 @@ class DiagResponse(Service):
         super().__init__(tester_name, deepcopy(service), False)
         self.addr = addr
         
-    def get_uds_address(self) -> Optional[UdsAddress]:
+    def getUdsAddress(self) -> Optional[UdsAddress]:
         return self.addr
         
     @staticmethod
-    def from_service(service_name: str) -> 'DiagResponse':
+    def from_(service_name: str) -> 'DiagResponse':
         tester_name = service_name.split('.')[0]
         service = service_map.get(service_name)
-        if service and check_service_id(service.serviceId, ['uds']):
+        if service and checkServiceId(service.serviceId, ['uds']):
             return DiagResponse(tester_name, service)
         raise ValueError(f"service {service_name} not found")
         
     @staticmethod
-    def from_diag_request(req: 'DiagRequest') -> 'DiagResponse':
+    def fromDiagRequest(req: 'DiagRequest') -> 'DiagResponse':
         return DiagResponse(req.tester_name, req.service)
         
-    def diag_is_positive_response(self) -> bool:
+    def diagIsPositiveResponse(self) -> bool:
         return not self.service.isNegativeResponse
         
-    def diag_get_response_code(self) -> Optional[int]:
-        if not self.diag_is_positive_response():
+    def diagGetResponseCode(self) -> Optional[int]:
+        if not self.diagIsPositiveResponse():
             return self.service.nrc
         return None
 
@@ -303,11 +303,11 @@ class DiagRequest(Service):
         super().__init__(tester_name, deepcopy(service), True)
         self.addr = addr
         
-    def get_uds_address(self) -> Optional[UdsAddress]:
+    def getUdsAddress(self) -> Optional[UdsAddress]:
         return self.addr
         
     @staticmethod
-    def from_service(service_name: str) -> 'DiagRequest':
+    def from_(service_name: str) -> 'DiagRequest':
         tester_name = service_name.split('.')[0]
         service = service_map.get(service_name)
         if service:

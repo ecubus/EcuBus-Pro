@@ -26,12 +26,16 @@ from ecb.util import run
 def init():
     print("init")    
 
+def stop(key):
+    print("stop", key)
+    Util.OffKey('s', stop)
+
 if __name__ == "__main__":
     # Register initialization callback
     Util.Init(init)
     
     # Register end callback
- 
+    Util.OnKey('s', stop)
     
     # Start the event loop and IPC
     run()

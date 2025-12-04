@@ -35,7 +35,7 @@ import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
 import { initRendererI18n, i18nPlugin } from './i18n'
 
-const channel = new BroadcastChannel('ipc-log')
+// const channel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
 const runtimeChannel = new BroadcastChannel('ipc-runtime')
@@ -46,9 +46,6 @@ window.logBus = mitt()
 window.dataParseWorker = dataParseWorker
 dataParseWorker.onmessage = (event) => {
   //main tab
-  if (window.params.id == undefined && Layout.externWinNum > 0) {
-    channel.postMessage(event.data)
-  }
   for (const key of Object.keys(event.data)) {
     window.logBus.emit(key, { key, values: event.data[key] })
   }
@@ -70,7 +67,7 @@ window.onmessage = (event) => {
     )
   }
 }
-window.api.getPort()
+
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)
 VxeUI.setLanguage('en-US')
@@ -115,15 +112,11 @@ window.params = {}
 urlParams.forEach((value, key) => {
   window.params[key] = value
 })
-
+window.api.getPort(window.params.id || 'main')
 //单向的
 if (window.params.id) {
   router.push(`/${window.params.path}`)
-  channel.onmessage = (event) => {
-    for (const key of Object.keys(event.data)) {
-      window.logBus.emit(key, { key, values: event.data[key] })
-    }
-  }
+
   dataChannel.onmessage = (event) => {
     dataStore.$patch((state) => {
       assign(state, event.data)

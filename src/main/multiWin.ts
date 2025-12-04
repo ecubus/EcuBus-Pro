@@ -13,25 +13,25 @@ import {
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
-ipcMain.on('ipc-get-port', (event) => {
-  const win = BrowserWindow.fromWebContents(event.sender)
-  if (win) {
-    const port = logQ.portMap.get(win)
-    if (port) {
-      port.close()
-    }
-    const { port1, port2 } = new MessageChannelMain()
-    logQ.portMap.set(win, port1)
-    event.sender.postMessage('port', null, [port2])
-    // port2.start()
+ipcMain.on('ipc-get-port', (event, id: string) => {
+  console.log('get-port', id)
+
+  const port = logQ.portMap.get(id)
+  if (port) {
+    port.close()
+    logQ.portMap.delete(id)
   }
+  const { port1, port2 } = new MessageChannelMain()
+  logQ.portMap.set(id, port1)
+  event.sender.postMessage('port', null, [port2])
+  // port2.start()
 })
 class LogQueue {
   private static instance: LogQueue | null = null
   list: any[] = []
   timer: any
   mainWin: BrowserWindow | undefined
-  portMap: Map<BrowserWindow, MessagePortMain> = new Map()
+  portMap: Map<string, MessagePortMain> = new Map()
 
   private constructor(
     public win: BrowserWindow[] = [],
@@ -85,6 +85,7 @@ const winMap = new Map<string, BrowserWindow>()
 const winPosMap = new Map<string, { x: number; y: number; width: number; height: number }>()
 
 ipcMain.on('ipc-open-window', (event, arg) => {
+  console.log('open', arg.id)
   if (winMap.has(arg.id)) {
     winMap.get(arg.id)?.show()
   } else {
@@ -152,9 +153,10 @@ export function closeAllWindows() {
       height: pos?.height
     })
     win.close()
-    const port = logQ.portMap.get(win)
+    const port = logQ.portMap.get(key)
     if (port) {
       port.close()
+      logQ.portMap.delete(key)
     }
   })
 }
@@ -171,9 +173,10 @@ export function closeWindow(id: string) {
       height: pos?.height
     })
     win.close()
-    const port = logQ.portMap.get(win)
+    const port = logQ.portMap.get(id)
     if (port) {
       port.close()
+      logQ.portMap.delete(id)
     }
   }
 }

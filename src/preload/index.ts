@@ -21,14 +21,14 @@ path.relative = (from: string, to: string) => {
   return ipcRenderer.sendSync('ipc-path-relative', from, to)
 }
 
-const getPort = (): void => {
+const getPort = (id: string): void => {
   ipcRenderer.once('port', (event, ports) => {
     const portCache = event.ports?.[0]
     if (portCache) {
       window.postMessage('port', '*', [portCache])
     }
   })
-  ipcRenderer.send('ipc-get-port')
+  ipcRenderer.send('ipc-get-port', id)
 }
 
 // Custom APIs for renderer

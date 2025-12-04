@@ -1,4 +1,4 @@
-import { setVar } from 'ECB'
+import { setVars, setVar } from 'ECB'
 
 let t1: number | undefined
 let t2: number | undefined
@@ -21,7 +21,9 @@ Util.OnCan(2, (msg) => {
     t2 = t
   } else {
     const diff = (t - t2) / 1000
-    setVar('DIFF2', diff)
+    setVars({
+      DIFF2: diff
+    })
     t2 = t
   }
 })

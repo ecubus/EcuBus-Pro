@@ -24,7 +24,11 @@ type HandlerMap = {
     testerName: string
   }) => Promise<number>
   setSignal: (data: { signal: string; value: number | number[] }) => void
-  varApi: (data: { method: 'setVar'; name: string; value: number | number[] | string }) => void
+  varApi: (
+    data:
+      | { method: 'setVar'; name: string; value: number | number[] | string }
+      | { method: 'setVars'; vars: Array<{ name: string; value: number | number[] | string }> }
+  ) => void
   runUdsSeq: (data: { name: string; device?: string }) => void
   stopUdsSeq: (data: { name: string; device?: string }) => void
   linApi: (data: linApiStartSch | linApiStopSch) => void

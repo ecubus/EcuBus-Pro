@@ -175,6 +175,7 @@ class FileTransport extends winston.transports.File {
   devices: string[]
   isinit = false
   initTs: number
+  closed = false
 
   constructor(opts: winston.transports.FileTransportOptions, devices: string[], initTs: number) {
     super(opts)
@@ -213,6 +214,9 @@ class FileTransport extends winston.transports.File {
   }
 
   log(info: any, callback: any) {
+    if (this.closed) {
+      return
+    }
     if (super.log) {
       if (this.isinit == false) {
         // Write initial header according to ASC spec
@@ -240,6 +244,7 @@ class FileTransport extends winston.transports.File {
     if (super.close) {
       super.close()
     }
+    this.closed = true
   }
 }
 

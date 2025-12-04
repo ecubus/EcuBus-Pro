@@ -783,11 +783,21 @@ export class NodeClass {
     }
     return info
   }
-  varApi(data: { method: 'setVar'; name: string; value: number | string | number[] }) {
+  varApi(
+    data:
+      | { method: 'setVar'; name: string; value: number | string | number[] }
+      | { method: 'setVars'; vars: Array<{ name: string; value: number | string | number[] }> }
+  ) {
+    const ts = getTsUs() - this.startTs
+
     if (data.method == 'setVar') {
-      this.varLog.setVar(data.name, data.value, getTsUs() - this.startTs)
+      this.varLog.setVar(data.name, data.value, ts)
+    } else if (data.method == 'setVars') {
+      for (const item of data.vars) {
+        this.varLog.setVar(item.name, item.value, ts)
+      }
     } else {
-      throw new Error(`invalid method ${data.method}`)
+      throw new Error(`invalid method ${data['method']}`)
     }
     return
   }

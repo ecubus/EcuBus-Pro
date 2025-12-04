@@ -2005,6 +2005,24 @@ declare function getSignal(signal: SignalName): {
  */
 declare function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]): void;
 /**
+ * Set multiple variable values at once
+ *
+ * @category Variable
+ * @param {Partial<VariableMap>} vars - An object where keys are variable names and values are the values to set
+ * @returns {void} - Returns nothing
+ *
+ * @example
+ * ```ts
+ * // Set multiple variables at once
+ * setVars({
+ *   'var1': 123,
+ *   'var2': 'hello',
+ *   'namespace.var3': [1, 2, 3, 4]
+ * });
+ * ```
+ */
+declare function setVars(vars: Partial<VariableMap>): void;
+/**
  * Get a variable value
  *
  * @category Variable
@@ -2204,5 +2222,5 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  */
 declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage;
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, stopUdsSeq, test, workerEmit };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, setVars, stopUdsSeq, test, workerEmit };
 export type { CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };

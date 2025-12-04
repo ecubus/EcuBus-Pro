@@ -2489,6 +2489,44 @@ export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[
 }
 
 /**
+ * Set multiple variable values at once
+ *
+ * @category Variable
+ * @param {Partial<VariableMap>} vars - An object where keys are variable names and values are the values to set
+ * @returns {void} - Returns nothing
+ *
+ * @example
+ * ```ts
+ * // Set multiple variables at once
+ * setVars({
+ *   'var1': 123,
+ *   'var2': 'hello',
+ *   'namespace.var3': [1, 2, 3, 4]
+ * });
+ * ```
+ */
+export function setVars(vars: Partial<VariableMap>) {
+  const updates: Array<{ name: string; value: any }> = []
+
+  for (const [name, value] of Object.entries(vars)) {
+    const { found, target } = setVarMain(name, value)
+    if (found && target) {
+      updates.push({ name, value })
+    }
+  }
+
+  if (updates.length > 0) {
+    workerEmit({
+      event: 'varApi',
+      data: {
+        method: 'setVars',
+        vars: updates
+      }
+    })
+  }
+}
+
+/**
  * Get a variable value
  *
  * @category Variable

@@ -14,8 +14,6 @@ import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
 ipcMain.on('ipc-get-port', (event, id: string) => {
-  console.log('get-port', id)
-
   const port = logQ.portMap.get(id)
   if (port) {
     port.close()
@@ -85,7 +83,6 @@ const winMap = new Map<string, BrowserWindow>()
 const winPosMap = new Map<string, { x: number; y: number; width: number; height: number }>()
 
 ipcMain.on('ipc-open-window', (event, arg) => {
-  console.log('open', arg.id)
   if (winMap.has(arg.id)) {
     winMap.get(arg.id)?.show()
   } else {

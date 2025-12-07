@@ -22,10 +22,10 @@ path.relative = (from: string, to: string) => {
 }
 
 const getPort = (id: string): void => {
-  ipcRenderer.once('port', (event, ports) => {
+  ipcRenderer.once('port', (event, id) => {
     const portCache = event.ports?.[0]
     if (portCache) {
-      window.postMessage('port', '*', [portCache])
+      window.postMessage(id, '*', [portCache])
     }
   })
   ipcRenderer.send('ipc-get-port', id)

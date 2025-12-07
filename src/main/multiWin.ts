@@ -12,16 +12,9 @@ import {
 } from 'electron'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
-
+const { port1, port2 } = new MessageChannelMain()
 ipcMain.on('ipc-get-port', (event, id: string) => {
-  const port = logQ.portMap.get(id)
-  if (port) {
-    port.close()
-    logQ.portMap.delete(id)
-  }
-  const { port1, port2 } = new MessageChannelMain()
-  logQ.portMap.set(id, port1)
-  event.sender.postMessage('port', null, [port2])
+  event.sender.postMessage('port', id, [port2])
   // port2.start()
 })
 class LogQueue {
@@ -29,7 +22,6 @@ class LogQueue {
   list: any[] = []
   timer: any
   mainWin: BrowserWindow | undefined
-  portMap: Map<string, MessagePortMain> = new Map()
 
   private constructor(
     public win: BrowserWindow[] = [],
@@ -54,9 +46,7 @@ class LogQueue {
   protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
-        this.portMap.forEach((port, win) => {
-          port.postMessage(this.list)
-        })
+        port1.postMessage(this.list)
         this.list = []
       }
     }, this.period)
@@ -150,11 +140,6 @@ export function closeAllWindows() {
       height: pos?.height
     })
     win.close()
-    const port = logQ.portMap.get(key)
-    if (port) {
-      port.close()
-      logQ.portMap.delete(key)
-    }
   })
 }
 
@@ -170,11 +155,6 @@ export function closeWindow(id: string) {
       height: pos?.height
     })
     win.close()
-    const port = logQ.portMap.get(id)
-    if (port) {
-      port.close()
-      logQ.portMap.delete(id)
-    }
   }
 }
 export function minimizeWindow(id: string) {

@@ -40,7 +40,8 @@
             "type": "can",
             "dlc": 8,
             "data": [],
-            "_X_ROW_KEY": "row_39"
+            "_X_ROW_KEY": "row_39",
+            "uuid": "row_6"
           },
           {
             "trigger": {
@@ -119,7 +120,8 @@
               "11"
             ],
             "_X_ROW_KEY": "row_40",
-            "brs": false
+            "brs": false,
+            "uuid": "row_7"
           },
           {
             "trigger": {
@@ -132,7 +134,8 @@
             "type": "can",
             "dlc": 8,
             "data": [],
-            "_X_ROW_KEY": "row_46"
+            "_X_ROW_KEY": "row_46",
+            "uuid": "row_8"
           }
         ]
       }
@@ -149,24 +152,36 @@
             "name": "Seq0",
             "services": [
               {
-                "enable": true,
+                "enable": false,
                 "checkResp": false,
                 "retryNum": 0,
                 "addressIndex": 0,
                 "failBehavior": "stop",
                 "serviceId": "9df86c3a-6a6e-40f5-bea7-195286cbd3b7",
                 "delay": 0,
-                "_X_ROW_KEY": "row_82"
+                "_X_ROW_KEY": "row_82",
+                "uuid": "row_22"
               },
               {
-                "enable": true,
+                "enable": false,
                 "checkResp": false,
                 "retryNum": 0,
                 "addressIndex": 0,
                 "failBehavior": "stop",
                 "serviceId": "3521f481-98a1-4012-9060-4f10c4880196",
                 "delay": 0,
-                "_X_ROW_KEY": "row_53"
+                "_X_ROW_KEY": "row_53",
+                "uuid": "row_23"
+              },
+              {
+                "uuid": "55fd6018-bd2a-4700-8539-d2968f1e25dd",
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "bdecc629-609a-46d6-aba6-eb1d97792bc9",
+                "delay": 50
               }
             ]
           }
@@ -454,6 +469,77 @@
               "suppress": false,
               "autoSubfunc": true
             }
+          ],
+          "RequestDownloadHex": [
+            {
+              "id": "bdecc629-609a-46d6-aba6-eb1d97792bc9",
+              "name": "RequestDownloadHex0",
+              "serviceId": "RequestDownloadHex",
+              "params": [
+                {
+                  "id": "34125303-89e5-44f8-9db1-82ced1ef37ad",
+                  "name": "dataFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "00",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  }
+                },
+                {
+                  "id": "d0d5a66b-3cd9-425c-9684-0f3ac75c8d25",
+                  "name": "addressAndLengthFormatIdentifier",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "phyValue": "0x44",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      68
+                    ]
+                  }
+                },
+                {
+                  "id": "a8098ce1-a149-4462-966e-ef4ead15e059",
+                  "name": "hexFile",
+                  "bitLen": 120,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "FILE",
+                  "phyValue": "Hello_World.hex",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      72,
+                      101,
+                      108,
+                      108,
+                      111,
+                      95,
+                      87,
+                      111,
+                      114,
+                      108,
+                      100,
+                      46,
+                      104,
+                      101,
+                      120
+                    ]
+                  }
+                }
+              ],
+              "respParams": [],
+              "suppress": false,
+              "autoSubfunc": true
+            }
           ]
         },
         "simulateBy": "5c043bd6-ddca-449a-b535-1ae865085123"
@@ -475,7 +561,8 @@
     },
     "database": {
       "lin": {},
-      "can": {}
+      "can": {},
+      "orti": {}
     },
     "graphs": {
       "Statistics.7ce31dc7-5c89-4205-ae1b-599c4604f973.BusLoad": {
@@ -542,7 +629,10 @@
     "guages": {},
     "vars": {},
     "datas": {},
-    "panels": {}
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -595,8 +685,8 @@
       },
       "tester": {
         "pos": {
-          "x": 980,
-          "y": 250.5,
+          "x": 1217,
+          "y": 31.5,
           "w": 911,
           "h": 400
         },
@@ -607,9 +697,9 @@
       },
       "f304259b-dc7d-460b-9729-4eee2d1156de_sequence": {
         "pos": {
-          "x": 144,
-          "y": 438.5,
-          "w": 700,
+          "x": 1450,
+          "y": 275.5,
+          "w": 1060,
           "h": 400
         },
         "title": "testerSequence",
@@ -620,6 +710,40 @@
             "edit-index": "f304259b-dc7d-460b-9729-4eee2d1156de"
           },
           "name": "Tester"
+        }
+      },
+      "f304259b-dc7d-460b-9729-4eee2d1156de_services": {
+        "pos": {
+          "x": 930,
+          "y": 250.5,
+          "w": 1354,
+          "h": 400
+        },
+        "title": "testerService",
+        "label": "Service",
+        "id": "f304259b-dc7d-460b-9729-4eee2d1156de_services",
+        "options": {
+          "params": {
+            "edit-index": "f304259b-dc7d-460b-9729-4eee2d1156de"
+          },
+          "name": "Tester"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 930,
+          "y": 250.5,
+          "w": 1379,
+          "h": 547
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
         }
       }
     },

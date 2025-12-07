@@ -173,10 +173,10 @@ function createWindow(): void {
   })
 
   ipcMain.on('close', (event, id) => {
-    logQ.stopTimer()
     if (id) {
       closeWindow(id)
     } else {
+      logQ.stopTimer()
       globalStop()
       // Only save bounds if window is not maximized
       store.set('windowBounds', getBounds())

@@ -34,38 +34,13 @@ import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
 
-// const channel = new BroadcastChannel('ipc-log')
+const logChannel = new BroadcastChannel('ipc-log')
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
 const runtimeChannel = new BroadcastChannel('ipc-runtime')
-
-const dataParseWorker = new DataParseWorker()
-
 window.logBus = mitt()
-window.dataParseWorker = dataParseWorker
-dataParseWorker.onmessage = (event) => {
-  //main tab
-  for (const key of Object.keys(event.data)) {
-    window.logBus.emit(key, { key, values: event.data[key] })
-  }
-}
 
 window.serviceDetail = window.electron?.ipcRenderer.sendSync('ipc-service-detail')
-
-window.onmessage = (event) => {
-  // event.source === window means the message is coming from the preload
-  // script, as opposed to from an <iframe> or other source.
-  if (event.source === window && event.data === 'port') {
-    const [port] = event.ports
-    dataParseWorker.postMessage(
-      {
-        method: 'onmessage',
-        data: port
-      },
-      [port]
-    )
-  }
-}
 
 VxeUI.use(VxeUIPluginRenderElement)
 VxeUI.setI18n('en-US', enUS)
@@ -106,11 +81,17 @@ window.params = {}
 urlParams.forEach((value, key) => {
   window.params[key] = value
 })
-window.api.getPort(window.params.id || 'main')
+const id = window.params.id || 'main'
+
 //单向的
 if (window.params.id) {
   router.push(`/${window.params.path}`)
-
+  logChannel.onmessage = (event) => {
+    //main tab
+    for (const key of Object.keys(event.data)) {
+      window.logBus.emit(key, { key, values: event.data[key] })
+    }
+  }
   dataChannel.onmessage = (event) => {
     dataStore.$patch((state) => {
       assign(state, event.data)
@@ -130,6 +111,31 @@ if (window.params.id) {
   }
   runtimeChannel.postMessage(undefined)
 } else {
+  const dataParseWorker = new DataParseWorker()
+  window.api?.getPort(id)
+
+  window.dataParseWorker = dataParseWorker
+  dataParseWorker.onmessage = (event) => {
+    logChannel.postMessage(event.data)
+    //main tab
+    for (const key of Object.keys(event.data)) {
+      window.logBus.emit(key, { key, values: event.data[key] })
+    }
+  }
+  window.onmessage = (event) => {
+    // event.source === window means the message is coming from the preload
+    // script, as opposed to from an <iframe> or other source.
+    if (event.source === window && event.data == id) {
+      const [port] = event.ports
+      dataParseWorker.postMessage(
+        {
+          method: 'onmessage',
+          data: port
+        },
+        [port]
+      )
+    }
+  }
   dataChannel.onmessage = (event) => {
     if (event.data == undefined) {
       dataChannel.postMessage(cloneDeep(dataStore.$state))

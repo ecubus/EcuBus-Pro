@@ -12,8 +12,13 @@ import {
 } from 'electron'
 import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
-const { port1, port2 } = new MessageChannelMain()
+let port: MessagePortMain | null = null
 ipcMain.on('ipc-get-port', (event, id: string) => {
+  if (port) {
+    port.close()
+  }
+  const { port1, port2 } = new MessageChannelMain()
+  port = port1
   event.sender.postMessage('port', id, [port2])
   // port2.start()
 })
@@ -46,7 +51,7 @@ class LogQueue {
   protected startTimer() {
     this.timer = setInterval(() => {
       if (this.list.length) {
-        port1.postMessage(this.list)
+        port?.postMessage(this.list)
         this.list = []
       }
     }, this.period)

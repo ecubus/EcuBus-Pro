@@ -1,0 +1,50 @@
+{
+  "service": {
+    "name": "RequestDownloadHex",
+    "fixedParam": true,
+    "buildInScript": "index.js",
+    "hasSubFunction": false,
+    "desc": "Combines services 0x34, 0x36(N), and 0x37 into one group. Supports hex files with optional handling for multiple non-contiguous hex file blocks. The address corresponds to the hex file address.",
+    "defaultParams": [
+      {
+        "param": {
+          "id": "dataFormatIdentifier",
+          "name": "dataFormatIdentifier",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "00"
+        }
+      },
+      {
+        "param": {
+          "id": "addressAndLengthFormatIdentifier",
+          "name": "addressAndLengthFormatIdentifier",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "0x44",
+          "value": {
+            "type":"Buffer",
+            "data":[68]
+          }
+        }
+      },
+      {
+        "param": {
+          "id": "hexFile",
+          "name": "hexFile",
+          "bitLen": 0,
+          "deletable": false,
+          "editable": true,
+          "type": "FILE",
+          "phyValue": ""
+        }
+      }
+    ],
+    "defaultRespParams": []
+  }
+}
+

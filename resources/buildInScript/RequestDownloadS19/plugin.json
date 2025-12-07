@@ -1,0 +1,51 @@
+{
+  "service": {
+    "name": "RequestDownloadS19",
+    "fixedParam": true,
+    "buildInScript": "index.js",
+    "hasSubFunction": false,
+    "desc": "Combines services 0x34, 0x36(N), and 0x37 into one group. Supports S19 files with optional handling for multiple non-contiguous blocks. The address corresponds to the S-record address.",
+    "defaultParams": [
+      {
+        "param": {
+          "id": "dataFormatIdentifier",
+          "name": "dataFormatIdentifier",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "00"
+        }
+      },
+      {
+        "param": {
+          "id": "addressAndLengthFormatIdentifier",
+          "name": "addressAndLengthFormatIdentifier",
+          "bitLen": 8,
+          "deletable": false,
+          "editable": true,
+          "type": "NUM",
+          "phyValue": "0x44",
+          "value": {
+            "type": "Buffer",
+            "data": [68]
+          }
+        }
+      },
+      {
+        "param": {
+          "id": "s19File",
+          "name": "s19File",
+          "bitLen": 0,
+          "deletable": false,
+          "editable": true,
+          "type": "FILE",
+          "phyValue": ""
+        }
+      }
+    ],
+    "defaultRespParams": []
+  }
+}
+
+

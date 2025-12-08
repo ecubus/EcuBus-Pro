@@ -4,6 +4,8 @@ out
 .DS_Store
 *.log*
 __pycache__ 
+.venv
+python/docs/_build
 .env.local
 build
 cache

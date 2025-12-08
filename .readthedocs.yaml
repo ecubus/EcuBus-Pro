@@ -1,0 +1,19 @@
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "3.11"
+
+sphinx:
+  configuration: python/docs/conf.py
+
+python:
+  install:
+    - method: pip
+      path: python
+    - requirements: python/docs/requirements.txt
+
+formats:
+  - htmlzip
+  - pdf

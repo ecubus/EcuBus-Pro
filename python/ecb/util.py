@@ -53,6 +53,8 @@ class UtilClass:
         self.vars: Dict[str, Any] = {}
         # store wrapped key callbacks so OffKey can remove them correctly
         self._key_func_map: Dict[str, Dict[Callable, Callable]] = {}
+        # store wrapped event callbacks so Off* can remove them correctly
+        self._event_func_map: Dict[str, Dict[Callable, Callable]] = {}
         
         ipc = get_ipc()
         ipc.on('__on', self._worker_on)
@@ -176,48 +178,62 @@ class UtilClass:
     def Off(self, event: str, listener: Callable):
         self.event.remove_listener(event, listener)
 
+    def _wrap_event_callback(self, fc: Callable) -> Callable:
+        """Allow event callbacks with 0 parameters by ignoring emitted args."""
+        try:
+            sig = inspect.signature(fc)
+            if len(sig.parameters) == 0:
+                async def wrapper(*_args, **_kwargs):
+                    res = fc()
+                    if asyncio.iscoroutine(res):
+                        await res
+                return wrapper
+        except (TypeError, ValueError):
+            return fc
+        return fc
+
     def OnCan(self, id: Union[int, str, bool], fc: Callable):
-        if id is True:
-            self.event.on('can', fc)
-        else:
-            self.event.on(f"can.{id}", fc)
+        event_name = 'can' if id is True else f"can.{id}"
+        wrapped = self._wrap_event_callback(fc)
+        self._event_func_map.setdefault(event_name, {})[fc] = wrapped
+        self.event.on(event_name, wrapped)
 
     def OnCanOnce(self, id: Union[int, str, bool], fc: Callable):
         """Register a CAN listener that will be triggered only once."""
-        if id is True:
-            self.event.once('can', fc)
-        else:
-            self.event.once(f"can.{id}", fc)
+        event_name = 'can' if id is True else f"can.{id}"
+        wrapped = self._wrap_event_callback(fc)
+        self.event.once(event_name, wrapped)
 
     def OffCan(self, id: Union[int, str, bool], fc: Callable):
         """Unregister a CAN listener. id and callback must match the original registration."""
-        if id is True:
-            self.event.remove_listener('can', fc)
-        else:
-            self.event.remove_listener(f"can.{id}", fc)
+        event_name = 'can' if id is True else f"can.{id}"
+        wrapped = self._event_func_map.get(event_name, {}).pop(fc, None)
+        if wrapped is None:
+            wrapped = fc
+        self.event.remove_listener(event_name, wrapped)
 
     # --- LIN event helpers (subset of TS Util.OnLin/OnLinOnce/OffLin) ---
 
     def OnLin(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
         """Register a LIN listener. id can be frameId (int) or name (str); True for all."""
-        if id is True:
-            self.event.on('lin', fc)
-        else:
-            self.event.on(f"lin.{id}", fc)
+        event_name = 'lin' if id is True else f"lin.{id}"
+        wrapped = self._wrap_event_callback(fc)
+        self._event_func_map.setdefault(event_name, {})[fc] = wrapped
+        self.event.on(event_name, wrapped)
 
     def OnLinOnce(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
         """Register a LIN listener that will be triggered only once."""
-        if id is True:
-            self.event.once('lin', fc)
-        else:
-            self.event.once(f"lin.{id}", fc)
+        event_name = 'lin' if id is True else f"lin.{id}"
+        wrapped = self._wrap_event_callback(fc)
+        self.event.once(event_name, wrapped)
 
     def OffLin(self, id: Union[int, str, bool], fc: Callable[[Any], Union[None, Awaitable[None]]]):
         """Unregister a LIN listener."""
-        if id is True:
-            self.event.remove_listener('lin', fc)
-        else:
-            self.event.remove_listener(f"lin.{id}", fc)
+        event_name = 'lin' if id is True else f"lin.{id}"
+        wrapped = self._event_func_map.get(event_name, {}).pop(fc, None)
+        if wrapped is None:
+            wrapped = fc
+        self.event.remove_listener(event_name, wrapped)
 
     # --- Variable event helpers (subset of TS Util.OnVar/OnVarOnce/OffVar) ---
 
@@ -226,21 +242,27 @@ class UtilClass:
         if not name:
             return
         event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
-        self.event.on(event_name, fc)
+        wrapped = self._wrap_event_callback(fc)
+        self._event_func_map.setdefault(event_name, {})[fc] = wrapped
+        self.event.on(event_name, wrapped)
 
     def OnVarOnce(self, name: str, fc: Callable[[Dict[str, Any]], Union[None, Awaitable[None]]]):
         """Register a one-shot variable update listener."""
         if not name:
             return
         event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
-        self.event.once(event_name, fc)
+        wrapped = self._wrap_event_callback(fc)
+        self.event.once(event_name, wrapped)
 
     def OffVar(self, name: str, fc: Callable[[Dict[str, Any]], Union[None, Awaitable[None]]]):
         """Unregister a variable update listener."""
         if not name:
             return
         event_name = "varUpdate*" if name == "*" else f"varUpdate{name}"
-        self.event.remove_listener(event_name, fc)
+        wrapped = self._event_func_map.get(event_name, {}).pop(fc, None)
+        if wrapped is None:
+            wrapped = fc
+        self.event.remove_listener(event_name, wrapped)
 
     # --- Misc helpers ---
 
@@ -314,14 +336,15 @@ async def setSignal(signal: str, value: Union[int, float, str, List[int]]) -> No
 def getSignal(signal: str):
     raise NotImplementedError("getSignal requires local dataset access which is not fully implemented")
 
-def setVar(name: str, value: Any):
-    get_ipc().send({
-        'type': 'event',
-        'payload': {
-            'event': 'varApi',
-            'data': {'method': 'setVar', 'name': name, 'value': value}
-        }
-    })
+async def setVar(name: str, value: Any):
+    await get_ipc().async_emit('varApi', {'method': 'setVar', 'name': name, 'value': value})
+
+async def setVars(vars: Dict[str, Any]):
+    updates = [{'name': name, 'value': value} for name, value in vars.items()]
+    if not updates:
+        return
+
+    await get_ipc().async_emit('varApi', {'method': 'setVars', 'vars': updates})
 
 def getVar(name: str) -> Any:
     return None 

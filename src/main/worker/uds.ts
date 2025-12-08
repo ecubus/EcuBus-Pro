@@ -2463,7 +2463,7 @@ export function getSignal(signal: SignalName): {
  * @category Variable
  * @param {keyof VariableMap} name - The variable name
  * @param {number|number[]|string} value - The value to set, can be single number or array
- * @returns {void} - Returns nothing
+ * @returns {Promise<void>} - Resolves after host acknowledges the update
  *
  * @example
  * ```ts
@@ -2474,10 +2474,19 @@ export function getSignal(signal: SignalName): {
  * setVar('namespace.var1', [1, 2, 3, 4]);
  * ```
  */
-export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]) {
-  const { found, target } = setVarMain(name, value)
-  if (found && target) {
+export async function setVar<T extends keyof VariableMap>(
+  name: T,
+  value: VariableMap[T]
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const { found, target } = setVarMain(name, value)
+    if (!(found && target)) {
+      reject(new Error(`Variable ${name} not found`))
+      return
+    }
+
     workerEmit({
+      id: id,
       event: 'varApi',
       data: {
         method: 'setVar',
@@ -2485,7 +2494,9 @@ export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[
         value
       }
     })
-  }
+    emitMap.set(id, { resolve, reject })
+    id++
+  })
 }
 
 /**
@@ -2493,7 +2504,7 @@ export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[
  *
  * @category Variable
  * @param {Partial<VariableMap>} vars - An object where keys are variable names and values are the values to set
- * @returns {void} - Returns nothing
+ * @returns {Promise<void>} - Resolves after host acknowledges the updates
  *
  * @example
  * ```ts
@@ -2505,25 +2516,30 @@ export function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[
  * });
  * ```
  */
-export function setVars(vars: Partial<VariableMap>) {
-  const updates: Array<{ name: string; value: any }> = []
-
-  for (const [name, value] of Object.entries(vars)) {
-    const { found, target } = setVarMain(name, value)
-    if (found && target) {
-      updates.push({ name, value })
-    }
-  }
-
-  if (updates.length > 0) {
-    workerEmit({
-      event: 'varApi',
-      data: {
-        method: 'setVars',
-        vars: updates
+export async function setVars(vars: Partial<VariableMap>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const updates: Array<{ name: string; value: any }> = []
+    for (const [name, value] of Object.entries(vars)) {
+      const { found, target } = setVarMain(name, value)
+      if (found && target) {
+        updates.push({ name, value })
       }
-    })
-  }
+    }
+    if (updates.length === 0) {
+      resolve()
+    } else {
+      workerEmit({
+        id: id,
+        event: 'varApi',
+        data: {
+          method: 'setVars',
+          vars: updates
+        }
+      })
+      emitMap.set(id, { resolve, reject })
+      id++
+    }
+  })
 }
 
 /**

@@ -102,232 +102,7 @@
       }
     },
     "datas": {},
-    "panels": {
-      "83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0": {
-        "name": "test",
-        "id": "83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0",
-        "rule": [
-          {
-            "type": "TText",
-            "title": "",
-            "field": "F4s5miwfmt8haec",
-            "style": {
-              "whiteSpace": "pre-line",
-              "width": "100%"
-            },
-            "_fc_id": "id_Fn2vmiwfmt8hafc",
-            "name": "ref_Fjzcmiwfmt8hagc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "text",
-            "props": {
-              "variable": {
-                "type": "variable",
-                "enable": true,
-                "id": "a76401db-74da-4adf-a2b3-5079743c61c1",
-                "name": "test",
-                "color": "#3e6a77",
-                "yAxis": {
-                  "min": 0,
-                  "max": 100
-                },
-                "bindValue": {
-                  "variableId": "a76401db-74da-4adf-a2b3-5079743c61c1",
-                  "variableType": "user",
-                  "variableName": "test",
-                  "variableFullName": "test",
-                  "variableValueType": "number"
-                }
-              }
-            }
-          },
-          {
-            "type": "grid",
-            "props": {
-              "rule": {
-                "layout": [
-                  {
-                    "i": "Foormiwfoi62ajc",
-                    "x": 0,
-                    "y": 0,
-                    "w": 8,
-                    "h": 1
-                  },
-                  {
-                    "i": "Fpwdmiwfoi62akc",
-                    "x": 8,
-                    "y": 0,
-                    "w": 8,
-                    "h": 1
-                  },
-                  {
-                    "i": "Fu74miwfoi62alc",
-                    "x": 16,
-                    "y": 0,
-                    "w": 8,
-                    "h": 1
-                  },
-                  {
-                    "i": "Fuxkmiwfoi62anc",
-                    "x": 8,
-                    "y": 1,
-                    "w": 8,
-                    "h": 1
-                  },
-                  {
-                    "i": "Ftb2miwfoi62aoc",
-                    "x": 16,
-                    "y": 1,
-                    "w": 8,
-                    "h": 1
-                  }
-                ],
-                "row": 24,
-                "rowHeight": 80,
-                "margin": 10,
-                "style": {},
-                "class": {},
-                "col": 1
-              }
-            },
-            "_fc_id": "id_Foqomiwfoi5yahc",
-            "name": "ref_F13mmiwfoi5yaic",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "grid",
-            "children": [
-              {
-                "type": "BButton",
-                "props": {
-                  "releaseValue": 0,
-                  "pressValue": 1,
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "4afd302d-28ac-4f76-a334-7c4c7588eb1a",
-                    "name": "button",
-                    "color": "#d10c14",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 100
-                    },
-                    "bindValue": {
-                      "variableId": "4afd302d-28ac-4f76-a334-7c4c7588eb1a",
-                      "variableType": "user",
-                      "variableName": "button",
-                      "variableFullName": "button",
-                      "variableValueType": "number"
-                    }
-                  }
-                },
-                "children": [
-                  "Button"
-                ],
-                "_fc_id": "id_Frkmmiwika5wblc",
-                "name": "ref_F7f3miwika5wbmc",
-                "field": "Fnpkmiwika5wbnc",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "BButton",
-                "slot": "Foormiwfoi62ajc"
-              }
-            ]
-          },
-          {
-            "type": "elTabs",
-            "style": {
-              "width": "100%"
-            },
-            "children": [
-              {
-                "type": "elTabPane",
-                "props": {
-                  "label": "TabPane"
-                },
-                "_fc_id": "id_F66vmiwfpx1karc",
-                "name": "ref_F99omiwfpx1kasc",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "elTabPane"
-              }
-            ],
-            "_fc_id": "id_F8q6miwfpx1kapc",
-            "name": "ref_Fzbkmiwfpx1kaqc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "elTabs"
-          },
-          {
-            "type": "subForm",
-            "field": "F8hdmiwihifjbac",
-            "title": "Group",
-            "info": "",
-            "$required": false,
-            "props": {
-              "rule": [
-                {
-                  "type": "BButton",
-                  "props": {
-                    "releaseValue": 0,
-                    "pressValue": 1,
-                    "variable": {
-                      "type": "variable",
-                      "enable": true,
-                      "id": "4afd302d-28ac-4f76-a334-7c4c7588eb1a",
-                      "name": "button",
-                      "color": "#a31c86",
-                      "yAxis": {
-                        "min": 0,
-                        "max": 100
-                      },
-                      "bindValue": {
-                        "variableId": "4afd302d-28ac-4f76-a334-7c4c7588eb1a",
-                        "variableType": "user",
-                        "variableName": "button",
-                        "variableFullName": "button",
-                        "variableValueType": "number"
-                      }
-                    }
-                  },
-                  "children": [
-                    "Button"
-                  ],
-                  "_fc_id": "id_F5bpmiwihqwebdc",
-                  "name": "ref_Fez3miwihqwebec",
-                  "field": "Fp0rmiwihqwebfc",
-                  "display": true,
-                  "hidden": false,
-                  "_fc_drag_tag": "BButton"
-                }
-              ]
-            },
-            "_fc_id": "id_F423miwihifjbbc",
-            "name": "ref_Fmiamiwihifjbcc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "subForm"
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "test"
-        }
-      }
-    },
+    "panels": {},
     "logs": {},
     "traces": {},
     "pluginData": {}
@@ -338,8 +113,8 @@
         "pos": {
           "x": 383,
           "y": 219,
-          "w": 2560,
-          "h": 589
+          "w": 1708.33,
+          "h": 290.66700000000003
         },
         "options": {
           "params": {}
@@ -353,7 +128,7 @@
       "hardware": {
         "pos": {
           "x": 1306,
-          "y": 260,
+          "y": 221,
           "w": 600,
           "h": 400
         },
@@ -366,7 +141,7 @@
       "network": {
         "pos": {
           "x": 1611,
-          "y": 237.5,
+          "y": 221,
           "w": 600,
           "h": 400
         },
@@ -379,7 +154,7 @@
       "variable": {
         "pos": {
           "x": 572,
-          "y": 266.5,
+          "y": 221,
           "w": 600,
           "h": 400
         },
@@ -392,7 +167,7 @@
       "d651bf27-1a14-40ef-9962-588c439f9c4b_ia": {
         "pos": {
           "x": 1631,
-          "y": 257.5,
+          "y": 221,
           "w": 700,
           "h": 400
         },
@@ -424,39 +199,6 @@
           "name": "Trace"
         },
         "hide": true
-      },
-      "83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0": {
-        "pos": {
-          "x": 1171,
-          "y": 26,
-          "w": 1340,
-          "h": 550
-        },
-        "title": "panel",
-        "label": "Panel",
-        "id": "83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0",
-        "options": {
-          "params": {
-            "edit-index": "83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0"
-          }
-        }
-      },
-      "p83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0": {
-        "pos": {
-          "x": 535,
-          "y": 27,
-          "w": 800,
-          "h": 550
-        },
-        "title": "panelPreview",
-        "label": "PanelPreview",
-        "id": "p83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0",
-        "options": {
-          "params": {
-            "edit-index": "p83ad6cd6-a4aa-45d2-9e3c-39d3d26365c0"
-          },
-          "name": "test"
-        }
       }
     }
   }

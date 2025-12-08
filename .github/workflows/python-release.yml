@@ -1,8 +1,8 @@
 name: Publish Python package and docs
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [master,ws]
   workflow_dispatch:
 
 permissions:

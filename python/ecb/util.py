@@ -110,6 +110,33 @@ class UtilClass:
             service_item = _dict_to_service_item(service_data)
             service_map[key] = service_item
 
+        # Mirror TS worker start: flatten dataset vars (including sys vars) and store locally
+        self.vars = {}
+        if isinstance(data_set, dict):
+            raw_vars: Dict[str, Any] = deepcopy(data_set.get('vars', {}))
+            sys_vars = data_set.get('sysVars') or data_set.get('sysvars') or {}
+            if isinstance(sys_vars, dict):
+                for v in sys_vars.values():
+                    if isinstance(v, dict) and v.get('id'):
+                        raw_vars[v['id']] = deepcopy(v)
+
+            for key, var in raw_vars.items():
+                if not isinstance(var, dict):
+                    continue
+                value_obj = var.get('value')
+                if value_obj:
+                    parent_names: List[str] = []
+                    current = var
+                    while current.get('parentId'):
+                        parent = raw_vars.get(current['parentId'])
+                        if not parent:
+                            break
+                        parent_names.insert(0, parent.get('name'))
+                        current = parent
+                    parent_names.append(var.get('name'))
+                    var['name'] = '.'.join([p for p in parent_names if p])
+                self.vars[key] = var
+
     def _event_done(self, id: int, resp: Optional[Dict[str, Any]] = None):
         get_ipc().resolve_emit(id, resp.get('data') if resp else None, resp.get('err') if resp else None)
 
@@ -139,6 +166,13 @@ class UtilClass:
     async def _var_update(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]):
         items = data if isinstance(data, list) else [data]
         for item in items:
+            # keep local cache in sync
+            name = item.get('name') if isinstance(item, dict) else None
+            value = item.get('value') if isinstance(item, dict) else None
+            if name is not None:
+                for v in self.vars.values():
+                    if isinstance(v, dict) and v.get('name') == name and isinstance(v.get('value'), dict):
+                        v['value']['value'] = value
             self.event.emit(f"varUpdate{item['name']}", item)
             self.event.emit("varUpdate*", item)
 
@@ -338,6 +372,11 @@ def getSignal(signal: str):
 
 async def setVar(name: str, value: Any):
     await get_ipc().async_emit('varApi', {'method': 'setVar', 'name': name, 'value': value})
+    # update local cache to keep getVar consistent
+    for v in Util.vars.values():
+        if isinstance(v, dict) and v.get('name') == name and isinstance(v.get('value'), dict):
+            v['value']['value'] = value
+            break
 
 async def setVars(vars: Dict[str, Any]):
     updates = [{'name': name, 'value': value} for name, value in vars.items()]
@@ -345,9 +384,45 @@ async def setVars(vars: Dict[str, Any]):
         return
 
     await get_ipc().async_emit('varApi', {'method': 'setVars', 'vars': updates})
+    # sync cache for batch updates
+    for name, value in vars.items():
+        for v in Util.vars.values():
+            if isinstance(v, dict) and v.get('name') == name and isinstance(v.get('value'), dict):
+                v['value']['value'] = value
+                break
 
 def getVar(name: str) -> Any:
-    return None 
+    """Read cached var value (mirrors TS getVar)."""
+    for var in Util.vars.values():
+        if not isinstance(var, dict):
+            continue
+        if var.get('name') != name:
+            continue
+
+        value_obj = var.get('value')
+        if not isinstance(value_obj, dict):
+            break
+
+        vtype = value_obj.get('type')
+        if vtype == 'number':
+            val = value_obj.get('value')
+            if val is None:
+                val = value_obj.get('initValue')
+            return float(val) if val is not None else None
+        if vtype == 'string':
+            val = value_obj.get('value')
+            if val is None:
+                val = value_obj.get('initValue')
+            return val or ''
+        if vtype == 'array':
+            arr = value_obj.get('value')
+            if arr is None:
+                arr = value_obj.get('initValue')
+            arr = arr or []
+            return [float(x) if x is not None else 0 for x in arr]
+        break
+
+    raise KeyError(f"var {name} not found")
 
 async def runUdsSeq(seqName: str, device: str = None):
     await get_ipc().async_emit('runUdsSeq', {'name': seqName, 'device': device})

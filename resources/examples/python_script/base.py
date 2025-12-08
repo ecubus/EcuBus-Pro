@@ -20,7 +20,7 @@ lib_path = os.path.abspath(os.path.join(current_dir, '../../../python'))
 if lib_path not in sys.path:
     sys.path.append(lib_path)
 
-from ecb import Util, output, setSignal, setVar, CanMessage
+from ecb import Util, output, setSignal, setVar, getVar, CanMessage
 from ecb.structs import CAN_ID_TYPE, CanMsgType
 from ecb.util import run
 
@@ -33,6 +33,7 @@ def stop(key):
 
 async def set_var():
     await setVar('test', 1)
+    print("set_var", getVar('test'))
 
 async def output_can(can):
     print("output_can", can)

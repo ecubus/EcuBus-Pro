@@ -3,7 +3,7 @@
 Python bindings for EcuBus Pro. Install directly from the repo root:
 
 ```bash
-pip install .
+pip install ecb
 ```
 
 ### Documentation

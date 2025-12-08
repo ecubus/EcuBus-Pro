@@ -9,16 +9,16 @@ To use this script in EcuBus-Pro:
 2. Set scriptType to 'python' in the options
 """
 
-import asyncio
-import sys
-import os
+# import asyncio
+# import sys
+# import os
 
-# Manually add ecb library path since it's not published yet
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# Path to: ecubus-pro/python
-lib_path = os.path.abspath(os.path.join(current_dir, '../../../python'))
-if lib_path not in sys.path:
-    sys.path.append(lib_path)
+# # Manually add ecb library path since it's not published yet
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# # Path to: ecubus-pro/python
+# lib_path = os.path.abspath(os.path.join(current_dir, '../../../python'))
+# if lib_path not in sys.path:
+#     sys.path.append(lib_path)
 
 from ecb import Util, output, setSignal, setVar, getVar, CanMessage
 from ecb.structs import CAN_ID_TYPE, CanMsgType

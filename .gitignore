@@ -6,6 +6,7 @@ out
 __pycache__ 
 .venv
 python/docs/_build
+python/docs/generated
 .env.local
 build
 cache

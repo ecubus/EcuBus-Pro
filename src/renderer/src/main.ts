@@ -25,7 +25,7 @@ import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
 import fcDesigner from './views/uds/panel-designer/index.js'
-
+import log from 'electron-log'
 import { useDataStore } from './stores/data'
 
 import { Layout } from './views/uds/layout'
@@ -35,6 +35,35 @@ import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
 
 const logChannel = new BroadcastChannel('ipc-log')
+const formatReason = (reason: unknown) => {
+  if (reason instanceof Error) {
+    return reason.stack ?? `${reason.name}: ${reason.message}`
+  }
+  if (typeof reason === 'object') {
+    try {
+      return JSON.stringify(reason)
+    } catch (err) {
+      return `Unserializable reason: ${String(err)}`
+    }
+  }
+  return String(reason)
+}
+
+// Global exception monitoring
+window.addEventListener('error', (event) => {
+  log.error('[GlobalError]', event.message, {
+    source: event.filename,
+    line: event.lineno,
+    column: event.colno,
+    stack: event.error?.stack
+  })
+})
+
+window.addEventListener('unhandledrejection', (event) => {
+  log.error('[UnhandledRejection]', formatReason(event.reason))
+})
+
+
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
 const runtimeChannel = new BroadcastChannel('ipc-runtime')

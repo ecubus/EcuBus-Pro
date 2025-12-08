@@ -51,7 +51,7 @@ let lastUpdateTime: Record<string, number> = {}
 
 function dataChange(field: string, value: any, rule: any, api: any, setFlag: boolean) {
   // console.log('data', field, value, rule, api, setFlag)
-  if (globalStart.value) {
+  if (globalStart.value && ruleBackMap[field]) {
     //check update here, 如果不相等，发送ipc
 
     if (dataStroe[field] !== value) {

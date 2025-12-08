@@ -46,7 +46,7 @@ import led from './rule/led'
 
 const ruleList = [
     input,select,number,radio,_switch,led,
-    subForm,
+    // subForm,
     alert, button, text, html, divider, tag, image,
     gird,tabs,tabPane,progress,slider,message
     // row, table, tabs, space, card, collapse,

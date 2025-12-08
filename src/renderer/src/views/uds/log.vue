@@ -430,7 +430,7 @@ onUnmounted(() => {
 }
 
 :deep(.xterm) {
-  height: 100%;
+  height: v-bind(tableHeight + 'px');
   padding: 8px;
 }
 

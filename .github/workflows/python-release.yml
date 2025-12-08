@@ -29,7 +29,6 @@ jobs:
         run: python -m build
 
       - name: Publish to PyPI
-        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages_dir: python/dist
@@ -58,7 +57,7 @@ jobs:
         run: sphinx-build -b html python/docs python/docs/_build/html
 
       - name: Trigger Read the Docs build
-        uses: readthedocs/actions@v3
+        uses: readthedocs/actions@v1
         with:
           token: ${{ secrets.READTHEDOCS_TOKEN }}
           project: ecubus-pro

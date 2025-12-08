@@ -4,7 +4,7 @@ const label = 'Message';
 const name = 'Message';
 
 export default {
-    menu: 'subform',
+    menu: 'aide',
     icon: msgIcon,
     label,
     name,

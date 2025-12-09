@@ -127,8 +127,8 @@
       },
       "hardware": {
         "pos": {
-          "x": 1306,
-          "y": 221,
+          "x": 526,
+          "y": 475,
           "w": 600,
           "h": 400
         },
@@ -136,7 +136,7 @@
         "label": "Devices",
         "id": "hardware",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "network": {
         "pos": {
@@ -149,7 +149,7 @@
         "label": "Network",
         "id": "network",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "variable": {
         "pos": {
@@ -162,7 +162,7 @@
         "label": "Variable",
         "id": "variable",
         "options": {},
-        "hide": true
+        "hide": false
       },
       "d651bf27-1a14-40ef-9962-588c439f9c4b_ia": {
         "pos": {
@@ -180,7 +180,7 @@
           },
           "name": "Can IA"
         },
-        "hide": true
+        "hide": false
       },
       "trace": {
         "pos": {
@@ -198,7 +198,7 @@
           },
           "name": "Trace"
         },
-        "hide": true
+        "hide": false
       }
     }
   }

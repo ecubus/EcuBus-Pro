@@ -603,7 +603,8 @@ function editScript(action: 'open' | 'edit' | 'build') {
               'ipc-create-project',
               project.projectInfo.path,
               project.projectInfo.name,
-              cloneDeep(dataBase.getData())
+              cloneDeep(dataBase.getData()),
+              data.value.script
             )
             .catch((e: any) => {
               ElMessageBox.alert(e.message, 'Error', {

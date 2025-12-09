@@ -296,6 +296,19 @@
                   }"
                 />
               </el-tab-pane>
+              <el-tab-pane label="python">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="pythonIcon" />
+                    <span>Python</span>
+                  </span>
+                </template>
+                <python
+                  :style="{
+                    height: height - 170 + 'px'
+                  }"
+                />
+              </el-tab-pane>
               <!-- <el-tab-pane label="plugin">
                 <template #label>
                   <span class="custom-tabs-label">
@@ -440,6 +453,8 @@ import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
+import pythonIcon from '@iconify/icons-material-symbols/terminal'
+import python from './python.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'

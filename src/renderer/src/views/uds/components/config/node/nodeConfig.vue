@@ -36,9 +36,10 @@
                   </el-button>
 
                   <el-button
+                    v-if="!formData.script?.endsWith('.py')"
                     size="small"
                     plain
-                    :disabled="globalStart"
+                    :disabled="globalStart || !formData.script"
                     @click="editScript('build')"
                   >
                     <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
@@ -48,52 +49,72 @@
               <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh
 
             </el-button> -->
-                  <el-button size="small" plain :disabled="globalStart" @click="editScript('edit')">
+                  <el-button
+                    size="small"
+                    plain
+                    :disabled="globalStart || !formData.script"
+                    @click="editScript('edit')"
+                  >
                     <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh /
                     Edit
                   </el-button>
                 </el-button-group>
-                <el-divider
-                  v-if="buildStatus"
-                  direction="vertical"
-                  style="height: 24px; margin-top: 5px"
-                />
-                <span
-                  v-if="buildStatus == 'danger'"
-                  style="color: var(--el-color-danger)"
-                  class="buildStatus"
-                >
-                  <Icon :icon="dangerIcon" />Build Failed
-                </span>
-                <span
-                  v-else-if="buildStatus == 'success'"
-                  style="color: var(--el-color-success)"
-                  class="buildStatus"
-                >
-                  <Icon :icon="successIcon" />Build Success
-                </span>
-                <span
-                  v-else-if="buildStatus == 'warning'"
-                  style="color: var(--el-color-warning)"
-                  class="buildStatus"
-                >
-                  <Icon :icon="buildIcon" />Need Rebuild
-                </span>
-                <span
-                  v-else-if="buildStatus == 'info'"
-                  style="color: var(--el-color-info)"
-                  class="buildStatus"
-                >
-                  <Icon :icon="buildIcon" />Need Build
-                </span>
-                <el-button v-if="buildStatus" link style="margin-top: 5px" :type="buildStatus">
-                  <Icon
-                    :icon="refreshIcon"
-                    class="icon"
-                    style="margin-right: 5px"
-                    @click="refreshBuildStatus"
+                <template v-if="!formData.script?.endsWith('.py')">
+                  <el-divider
+                    v-if="buildStatus"
+                    direction="vertical"
+                    style="height: 24px; margin-top: 5px"
                   />
-                </el-button>
+                  <span
+                    v-if="buildStatus == 'danger'"
+                    style="color: var(--el-color-danger)"
+                    class="buildStatus"
+                  >
+                    <Icon :icon="dangerIcon" />Build Failed
+                  </span>
+                  <span
+                    v-else-if="buildStatus == 'success'"
+                    style="color: var(--el-color-success)"
+                    class="buildStatus"
+                  >
+                    <Icon :icon="successIcon" />Build Success
+                  </span>
+                  <span
+                    v-else-if="buildStatus == 'warning'"
+                    style="color: var(--el-color-warning)"
+                    class="buildStatus"
+                  >
+                    <Icon :icon="buildIcon" />Need Rebuild
+                  </span>
+                  <span
+                    v-else-if="buildStatus == 'info'"
+                    style="color: var(--el-color-info)"
+                    class="buildStatus"
+                  >
+                    <Icon :icon="buildIcon" />Need Build
+                  </span>
+                  <el-button v-if="buildStatus" link style="margin-top: 5px" :type="buildStatus">
+                    <Icon
+                      :icon="refreshIcon"
+                      class="icon"
+                      style="margin-right: 5px"
+                      @click="refreshBuildStatus"
+                    />
+                  </el-button>
+                </template>
+                <template v-else>
+                  <!-- info, python script doesn't need to build -->
+                  <span
+                    style="
+                      color: var(--el-color-info);
+                      height: 24px;
+                      margin-top: 5px;
+                      margin-left: 5px;
+                    "
+                  >
+                    Python script doesn't need to build
+                  </span>
+                </template>
               </div>
 
               <!-- stop -->
@@ -219,7 +240,8 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
               'ipc-create-project',
               project.projectInfo.path,
               project.projectInfo.name,
-              cloneDeep(dataBase.getData())
+              cloneDeep(dataBase.getData()),
+              formData.value.script
             )
             .catch((e: any) => {
               ElMessageBox.alert(e.message, 'Error', {

@@ -106,9 +106,12 @@ ipcMain.handle('ipc-create-project', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
   const data = arg[2] as DataSet
+  const fileName = arg[3] as string
 
-  await createProject(projectPath, projectName, data, 'ECB')
-  await refreshProject(projectPath, projectName, data, 'ECB')
+  if (!fileName.endsWith('.py')) {
+    await createProject(projectPath, projectName, data, 'ECB')
+    await refreshProject(projectPath, projectName, data, 'ECB')
+  }
   await shell.openPath(path.join(projectPath, `${projectName}.code-workspace`))
 })
 

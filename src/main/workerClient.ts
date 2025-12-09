@@ -109,7 +109,6 @@ export default class UdsTester {
     },
     options?: {
       scriptType?: 'js' | 'python' // 脚本类型，默认为 'js'
-      pythonPath?: string // Python 可执行文件路径
     }
   ) {
     if (testers) {
@@ -123,7 +122,7 @@ export default class UdsTester {
     }
 
     if (scriptType === 'python') {
-      this.executor = new PythonProcessExecutor(jsFilePath, env, options?.pythonPath)
+      this.executor = new PythonProcessExecutor(jsFilePath, env)
     } else {
       this.executor = new NodeWorkerExecutor(jsFilePath, env, testOptions)
     }

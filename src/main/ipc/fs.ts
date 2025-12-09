@@ -28,7 +28,10 @@ function isValidUtf8(buffer: Buffer): boolean {
  * Detect and decode file content with proper encoding
  * Tries UTF-8 first, then falls back to GBK/GB2312 for Chinese encoding
  */
-function decodeFileContent(buffer: Buffer): string {
+function decodeFileContent(buffer: Buffer, forceEncoding?: string): string {
+  if (forceEncoding) {
+    return iconv.decode(buffer, forceEncoding)
+  }
   // Check for BOM markers
   if (buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
     // UTF-8 BOM
@@ -74,7 +77,7 @@ ipcMain.handle('ipc-open-path', async (event, targetPath: string) => {
 })
 ipcMain.handle('ipc-fs-readFile', async (event, ...args) => {
   const buffer = await fsP.readFile(args[0])
-  return decodeFileContent(buffer)
+  return decodeFileContent(buffer, args[1] as string)
 })
 
 ipcMain.handle('ipc-fs-writeFile', async (event, ...args) => {

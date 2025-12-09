@@ -120,7 +120,7 @@ export const useProjectStore = defineStore('project', {
     async createExampleProject(example: string) {
       const val = await this.closeProject()
       if (val) {
-        const r = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', example)
+        const r = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', example, 'utf-8')
         try {
           const rdata = JSON.parse(r)
           const data = useDataStore()
@@ -163,7 +163,7 @@ export const useProjectStore = defineStore('project', {
       }
       if (skipClose) {
         window.electron.ipcRenderer
-          .invoke('ipc-fs-readFile', file)
+          .invoke('ipc-fs-readFile', file, 'utf-8')
           .then((r) => {
             try {
               const rdata = JSON.parse(r)

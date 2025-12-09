@@ -36,12 +36,6 @@ const api: Api = {
   glob: async (pattern: string | string[], options?: GlobOptionsWithFileTypesFalse) => {
     return ipcRenderer.invoke('ipc-glob', pattern, options)
   },
-  readFile: async (path: string) => {
-    return ipcRenderer.invoke('ipc-fs-readFile', path)
-  },
-  writeFile: async (path: string, data: string) => {
-    return ipcRenderer.invoke('ipc-fs-writeFile', path, data)
-  },
   readdir: async (path: string) => {
     return ipcRenderer.invoke('ipc-fs-readdir', path)
   },

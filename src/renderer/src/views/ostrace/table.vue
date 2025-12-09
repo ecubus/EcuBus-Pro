@@ -33,7 +33,7 @@
         <el-divider direction="vertical" />
         <el-tooltip effect="light" content="Export to Excel" placement="bottom" :show-after="500">
           <el-button link @click="exportToExcel">
-            <Icon icon="mdi:microsoft-excel" style="font-size: 16px" />
+            <Icon :icon="microsoftExcelIcon" style="font-size: 16px" />
           </el-button>
         </el-tooltip>
       </div>
@@ -67,6 +67,7 @@
 <script lang="ts" setup>
 import pauseIcon from '@iconify/icons-material-symbols/pause-circle-outline'
 import playIcon from '@iconify/icons-material-symbols/play-circle-outline'
+import microsoftExcelIcon from '@iconify/icons-mdi/microsoft-excel'
 import { ref, onMounted, computed, onUnmounted, watch, nextTick, watchEffect } from 'vue'
 import { Icon } from '@iconify/vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'

@@ -111,7 +111,7 @@
                       class="arrow-left"
                       @click.stop="handleArrowClick('left', core.id, buttonIndex, button.name)"
                     >
-                      <Icon :icon="'material-symbols:chevron-left'" />
+                      <Icon :icon="chevronLeftIcon" />
                     </div>
                     <span class="button-text" :style="{ width: buttonTextMaxWidth + 'px' }">{{
                       button.name
@@ -121,7 +121,7 @@
                       class="arrow-right"
                       @click.stop="handleArrowClick('right', core.id, buttonIndex, button.name)"
                     >
-                      <Icon :icon="'material-symbols:chevron-right'" />
+                      <Icon :icon="chevronRightIcon" />
                     </div>
                   </div>
                 </div>
@@ -254,6 +254,8 @@ import helpOutlineIcon from '@iconify/icons-material-symbols/help-outline'
 import triggerIcon from '@iconify/icons-material-symbols/radio-button-checked'
 import lightningIcon from '@iconify/icons-material-symbols/bolt'
 import loopIcon from '@iconify/icons-material-symbols/autorenew'
+import chevronLeftIcon from '@iconify/icons-material-symbols/chevron-left'
+import chevronRightIcon from '@iconify/icons-material-symbols/chevron-right'
 import {
   ref,
   onMounted,

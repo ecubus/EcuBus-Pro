@@ -262,6 +262,17 @@
       <el-tab-pane name="user">
         <template #label>
           <div class="menu-item">
+            <Icon :icon="userIcon" />
+            <span>User</span>
+          </div>
+        </template>
+        <div class="userMenu">
+          <user />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="setting">
+        <template #label>
+          <div class="menu-item">
             <el-badge :hidden="!hasNotify" is-dot type="primary" class="item">
               <Icon :icon="setting" />
             </el-badge>
@@ -440,6 +451,7 @@ import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
+import user from './user.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
@@ -675,6 +687,11 @@ onMounted(() => {
 }
 
 .marketplaceMenu {
+  width: v-bind(width-120 + 'px');
+  height: v-bind(height-35 + 'px');
+}
+
+.userMenu {
   width: v-bind(width-120 + 'px');
   height: v-bind(height-35 + 'px');
 }

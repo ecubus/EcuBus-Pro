@@ -9,13 +9,11 @@ import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
+import { setupCasdoor } from './ipc/casdoor'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
 
 log.initialize()
-
-const protocol = 'ecubuspro'
-const ProtocolRegExp = new RegExp(`^${protocol}://`)
 
 // Register custom protocol as privileged before app is ready
 eProtocol.registerSchemesAsPrivileged([
@@ -30,11 +28,8 @@ eProtocol.registerSchemesAsPrivileged([
   }
 ])
 
-/* single instance */
-const gotTheLock = app.requestSingleInstanceLock()
-if (!gotTheLock) {
-  app.quit()
-}
+setupCasdoor()
+
 log.info(app.getGPUFeatureStatus())
 
 function registerLocalResourceProtocol() {
@@ -62,16 +57,6 @@ function registerLocalResourceProtocol() {
       return new Response(null, { status: 404 })
     }
   })
-}
-
-/* login */
-
-if (process.defaultApp) {
-  if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])])
-  }
-} else {
-  app.setAsDefaultProtocolClient(protocol)
 }
 
 // process.env.PYTHON_PATH=pythonPath

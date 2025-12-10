@@ -589,7 +589,8 @@ type EventMap = EventMapSend & EventMapRecv
 const emitMap = new Map<number, { resolve: any; reject: any }>()
 const serviceMap = new Map<string, ServiceItem>()
 
-let id = 0
+global.cmdId = 0
+
 /**
  * @category UDS
  */
@@ -724,12 +725,12 @@ class Service {
   private async asyncEmit(event: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
       workerEmit({
-        id: id,
+        id: global.cmdId,
         event: event,
         data: data
       })
-      emitMap.set(id, { resolve, reject })
-      id++
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
     })
   }
   /**
@@ -2331,12 +2332,12 @@ export async function output(msg: SomeipMessageBase): Promise<number>
 export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Promise<number> {
   const p: Promise<number> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'output',
       data: msg instanceof SomeipMessageBase ? msg.msg : msg
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
   return await p
 }
@@ -2373,15 +2374,15 @@ export async function setSignal(
       return
     }
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'setSignal',
       data: {
         signal,
         value
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
 
   return await p
@@ -2565,15 +2566,15 @@ export function getVar<T extends keyof VariableMap>(varName: T): VariableMap[T] 
 export async function runUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'runUdsSeq',
       data: {
         device,
         name: seqName
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
 
   return await p
@@ -2596,15 +2597,15 @@ export async function runUdsSeq(seqName: UdsSeqName, device?: string): Promise<v
 export async function stopUdsSeq(seqName: UdsSeqName, device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'stopUdsSeq',
       data: {
         device,
         name: seqName
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
 
   return await p
@@ -2640,10 +2641,10 @@ export async function* reporter(source: TestEventGenerator) {
     ) {
       workerEmit({
         event: 'test',
-        id: id,
+        id: global.cmdId,
         data: event
       })
-      id++
+      global.cmdId++
     }
   }
 }
@@ -2721,7 +2722,7 @@ export async function linStartScheduler(
 ): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'linApi',
       data: {
         method: 'startSch',
@@ -2731,8 +2732,8 @@ export async function linStartScheduler(
         slot
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
   return await p
 }
@@ -2759,7 +2760,7 @@ export async function linStartScheduler(
 export async function linPowerCtrl(power: boolean, device?: string) {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'linApi',
       data: {
         method: 'powerCtrl',
@@ -2767,8 +2768,8 @@ export async function linPowerCtrl(power: boolean, device?: string) {
         power
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
   return await p
 }
@@ -2792,15 +2793,15 @@ export async function linPowerCtrl(power: boolean, device?: string) {
 export async function linStopScheduler(device?: string): Promise<void> {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'linApi',
       data: {
         method: 'stopSch',
         device
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
   return await p
 }
@@ -2826,7 +2827,7 @@ export async function linStopScheduler(device?: string): Promise<void> {
 export async function setPwmDuty(value: { duty: number; device?: string }) {
   const p: Promise<void> = new Promise((resolve, reject) => {
     workerEmit({
-      id: id,
+      id: global.cmdId,
       event: 'pwmApi',
       data: {
         method: 'setDuty',
@@ -2834,8 +2835,8 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
         device: value.device
       }
     })
-    emitMap.set(id, { resolve, reject })
-    id++
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
   })
   return await p
 }
@@ -3003,4 +3004,15 @@ export function getFrameFromDB(
   } else {
     throw new Error(`database type ${dbType} not supported`)
   }
+}
+
+//auth
+export interface AuthenticationSessionAccountInformation {
+  id: string
+  label: string
+}
+
+export interface AuthenticationSession {
+  accessToken: string
+  accountInformation: AuthenticationSessionAccountInformation
 }

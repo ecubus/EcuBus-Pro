@@ -71,33 +71,14 @@ const loading = ref(false)
 const loginTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
 // Casdoor config - will be loaded from backend
-const casdoorConfig = ref<{
+const casdoorConfig: {
   serverUrl: string
   clientId: string
   protocol: string
-} | null>(null)
-
-async function loadCasdoorConfig() {
-  try {
-    casdoorConfig.value = await window.electron.ipcRenderer.invoke('ipc-get-casdoor-config')
-  } catch (e) {
-    console.error('Failed to load Casdoor config:', e)
-    ElMessage.error('Failed to load authentication configuration')
-  }
-}
+} = window.electron.ipcRenderer.sendSync('ipc-get-casdoor-config')
 
 async function openLogin() {
   if (loading.value) return
-
-  // Ensure config is loaded
-  if (!casdoorConfig.value) {
-    await loadCasdoorConfig()
-  }
-
-  if (!casdoorConfig.value) {
-    ElMessage.error('Authentication configuration not available')
-    return
-  }
 
   loading.value = true
 
@@ -120,25 +101,17 @@ async function openLogin() {
   }, 60000)
 
   // Construct deep link redirect URL
-  const redirectUrl = `${casdoorConfig.value.protocol}://callback`
+  const redirectUrl = `${casdoorConfig.protocol}://callback`
 
-  const signinUrl = `${casdoorConfig.value.serverUrl}/login/oauth/authorize?client_id=${casdoorConfig.value.clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${state}&noRedirect=true`
+  const signinUrl = `${casdoorConfig.serverUrl}/login/oauth/authorize?client_id=${casdoorConfig.clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${state}&noRedirect=true`
 
   window.electron.ipcRenderer.send('ipc-open-link', signinUrl)
 }
 
 async function openSignup() {
   // Ensure config is loaded
-  if (!casdoorConfig.value) {
-    await loadCasdoorConfig()
-  }
 
-  if (!casdoorConfig.value) {
-    ElMessage.error('Authentication configuration not available')
-    return
-  }
-
-  window.electron.ipcRenderer.send('ipc-open-link', `${casdoorConfig.value.serverUrl}/signup`)
+  window.electron.ipcRenderer.send('ipc-open-link', `${casdoorConfig.serverUrl}/signup`)
 }
 
 function handleLogout() {
@@ -170,12 +143,10 @@ const handleReceiveCode = async (_event, code, returnedState) => {
     // Call main process to exchange code for user info
     // clientId and clientSecret are managed securely in the main process
     const userInfo = await window.electron.ipcRenderer.invoke('ipc-get-user-info', code)
-    console.log('userInfo', userInfo)
 
     if (userInfo) {
       userStore.setUser(userInfo)
-      userStore.setToken(userInfo.token, userInfo.refreshToken)
-      ElMessage.success('Login successful')
+      // ElMessage.success('Login successful')
     }
   } catch (e) {
     console.error(e)
@@ -187,7 +158,6 @@ const handleReceiveCode = async (_event, code, returnedState) => {
 
 let v
 onMounted(async () => {
-  await loadCasdoorConfig()
   userStore.loadFromStorage()
   v = window.electron.ipcRenderer.on('receiveCode', handleReceiveCode)
 })

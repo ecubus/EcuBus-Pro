@@ -17,6 +17,10 @@ const getUserInfoUrl = `${serverUrl}/api/get-account`
 // Load OAuth credentials from environment variables (set during build)
 const clientId = (import.meta.env as any).MAIN_VITE_CLIENT_ID || ''
 const clientSecret = (import.meta.env as any).MAIN_VITE_CLIENT_SECRET || ''
+
+// Token management in main process
+let currentAccessToken: string | null = null
+let tokenRefreshTimer: NodeJS.Timeout | null = null
 function encryptToken(token: string): string {
   if (safeStorage.isEncryptionAvailable()) {
     return safeStorage.encryptString(token).toString('base64')
@@ -34,6 +38,60 @@ function decryptToken(encryptedToken: string): string {
     }
   }
   return encryptedToken
+}
+
+// Setup auto-refresh timer for access token
+function setupTokenAutoRefresh(expiresIn: number) {
+  // Clear existing timer
+  if (tokenRefreshTimer) {
+    clearTimeout(tokenRefreshTimer)
+  }
+
+  // Refresh 5 minutes before expiry (default 1 hour = 3600s, refresh after 55min)
+  const refreshBeforeExpiry = 300 // 5 minutes in seconds
+  const refreshInSeconds = Math.max(expiresIn - refreshBeforeExpiry, 60) // At least 1 minute
+
+  log.info(
+    `Access token auto-refresh scheduled in ${Math.floor(refreshInSeconds / 60)} minutes (${refreshInSeconds}s)`
+  )
+
+  tokenRefreshTimer = setTimeout(async () => {
+    log.info('Auto-refreshing access token...')
+    try {
+      const storedRefreshToken = store.get('refresh_token') as string
+      if (!storedRefreshToken) {
+        log.warn('No refresh token available for auto-refresh')
+        return
+      }
+
+      const refreshToken = decryptToken(storedRefreshToken)
+      const newTokens = await refreshAccessToken(refreshToken)
+
+      currentAccessToken = newTokens.token
+      log.info('Access token auto-refreshed successfully')
+
+      // Setup next refresh
+      if (newTokens.expiresIn) {
+        setupTokenAutoRefresh(newTokens.expiresIn)
+      }
+    } catch (error) {
+      log.error('Auto-refresh failed:', error)
+      currentAccessToken = null
+    }
+  }, refreshInSeconds * 1000)
+}
+
+function clearTokenAutoRefresh() {
+  if (tokenRefreshTimer) {
+    clearTimeout(tokenRefreshTimer)
+    tokenRefreshTimer = null
+    log.info('Token auto-refresh timer cleared')
+  }
+}
+
+// Get current valid access token
+export function getCurrentAccessToken(): string | null {
+  return currentAccessToken
 }
 
 async function fetchUserProfile(accessToken: string) {
@@ -63,19 +121,20 @@ async function getUserInfo(code: string) {
     if (data.access_token) {
       const userProfile = await fetchUserProfile(data.access_token)
 
-      // Store encrypted tokens in electron-store on main process
-      const tokens = {
-        accessToken: encryptToken(data.access_token),
-        refreshToken: encryptToken(data.refresh_token),
-        expiresIn: data.expires_in
+      // Store access token in main process memory
+      currentAccessToken = data.access_token
+
+      // Only store refresh token (encrypted on disk)
+      store.set('refresh_token', encryptToken(data.refresh_token))
+
+      // Setup auto-refresh timer
+      if (data.expires_in) {
+        setupTokenAutoRefresh(data.expires_in)
       }
-      store.set('auth_tokens', tokens)
 
       return {
-        ...userProfile,
-        token: data.access_token, // Return plain token to renderer for immediate use (in memory)
-        refreshToken: data.refresh_token,
-        expiresIn: data.expires_in
+        ...userProfile
+        // Don't return token to renderer - main process handles all authenticated requests
       }
     } else {
       throw new Error('Failed to get access token')
@@ -104,20 +163,21 @@ async function refreshAccessToken(refreshToken: string) {
     })
 
     if (data.access_token) {
-      // Update encrypted storage
-      const storedTokens = (store.get('auth_tokens') as any) || {}
-      const newTokens = {
-        accessToken: encryptToken(data.access_token),
-        refreshToken: data.refresh_token
-          ? encryptToken(data.refresh_token)
-          : storedTokens.refreshToken,
-        expiresIn: data.expires_in
+      // Update access token in memory
+      currentAccessToken = data.access_token
+
+      // Update refresh token if new one provided (Token Rotation)
+      if (data.refresh_token) {
+        store.set('refresh_token', encryptToken(data.refresh_token))
       }
-      store.set('auth_tokens', newTokens)
+
+      // Setup auto-refresh timer
+      if (data.expires_in) {
+        setupTokenAutoRefresh(data.expires_in)
+      }
 
       return {
         token: data.access_token,
-        refreshToken: data.refresh_token,
         expiresIn: data.expires_in
       }
     } else {
@@ -130,58 +190,41 @@ async function refreshAccessToken(refreshToken: string) {
 }
 
 ipcMain.handle('ipc-auto-login', async () => {
-  const storedTokens = store.get('auth_tokens') as any
-  if (!storedTokens || !storedTokens.accessToken) {
+  const storedRefreshToken = store.get('refresh_token') as string
+  if (!storedRefreshToken) {
+    log.info('No stored refresh token found')
     return null
   }
 
-  const accessToken = decryptToken(storedTokens.accessToken)
+  const refreshToken = decryptToken(storedRefreshToken)
 
   try {
-    // Try to get user profile with current access token
-    const user = await fetchUserProfile(accessToken)
+    // Use refresh token to get new access token
+    log.info('Auto-login: Using refresh token to get new access token')
+    const newTokens = await refreshAccessToken(refreshToken)
+
+    // Fetch user profile with new access token
+    const user = await fetchUserProfile(currentAccessToken!)
+
     return {
-      ...user,
-      token: accessToken,
-      refreshToken: decryptToken(storedTokens.refreshToken),
-      expiresIn: storedTokens.expiresIn
+      ...user
+      // Don't return token to renderer
     }
   } catch (error: any) {
-    log.info('Auto login with existing token failed, attempting refresh...', error.message)
-
-    // If request failed (likely 401), try to refresh token
-    const refreshToken = storedTokens.refreshToken ? decryptToken(storedTokens.refreshToken) : null
-
-    if (refreshToken) {
-      try {
-        const newTokens = await refreshAccessToken(refreshToken)
-        // Store is updated in refreshAccessToken
-
-        // Retry fetching user profile with new access token
-        const newUser = await fetchUserProfile(newTokens.token)
-
-        return {
-          ...newUser,
-          token: newTokens.token,
-          refreshToken: newTokens.refreshToken || refreshToken
-        }
-      } catch (refreshError) {
-        log.error('Auto login refresh failed', refreshError)
-        return null
-      }
-    }
+    log.error('Auto login failed:', error.message)
+    // Clear invalid refresh token and token
+    store.delete('refresh_token')
+    currentAccessToken = null
+    clearTokenAutoRefresh()
     return null
   }
 })
 
 ipcMain.handle('ipc-get-user-info', async (event, code) => {
-  // If code is not passed, try to get from store or waiting for it
-  const authCode = code || store.get('casdoor_code')
-  if (!authCode) {
-    throw new Error('No authorization code found')
+  if (!code) {
+    throw new Error('No authorization code provided')
   }
-  const userInfo = await getUserInfo(authCode)
-  store.set('userInfo', userInfo)
+  const userInfo = await getUserInfo(code)
   return userInfo
 })
 
@@ -189,9 +232,9 @@ ipcMain.handle('refreshToken', async (event, refreshToken) => {
   // Use passed refreshToken or fallback to stored secure token
   let tokenToUse = refreshToken
   if (!tokenToUse) {
-    const storedTokens = store.get('auth_tokens') as any
-    if (storedTokens && storedTokens.refreshToken) {
-      tokenToUse = decryptToken(storedTokens.refreshToken)
+    const storedRefreshToken = store.get('refresh_token') as string
+    if (storedRefreshToken) {
+      tokenToUse = decryptToken(storedRefreshToken)
     }
   }
 
@@ -201,44 +244,69 @@ ipcMain.handle('refreshToken', async (event, refreshToken) => {
 
   const newTokens = await refreshAccessToken(tokenToUse)
 
-  // Update stored user info with new tokens if available
-  const currentUserInfo = store.get('userInfo') as any
-  if (currentUserInfo) {
-    store.set('userInfo', {
-      ...currentUserInfo,
-      token: newTokens.token,
-      refreshToken: newTokens.refreshToken || currentUserInfo.refreshToken
-    })
-  }
-
   return newTokens
 })
 
-// Add handler to retrieve tokens securely if renderer needs them (e.g. reload)
-ipcMain.handle('ipc-get-stored-tokens', () => {
-  const storedTokens = store.get('auth_tokens') as any
-  if (storedTokens) {
-    return {
-      token: decryptToken(storedTokens.accessToken),
-      refreshToken: decryptToken(storedTokens.refreshToken),
-      expiresIn: storedTokens.expiresIn
-    }
-  }
-  return null
-})
-
 ipcMain.handle('ipc-logout', () => {
-  store.delete('auth_tokens')
-  store.delete('userInfo')
-  store.delete('casdoor_code')
+  store.delete('refresh_token')
+  currentAccessToken = null
+  clearTokenAutoRefresh()
+  log.info('User logged out, tokens cleared')
 })
 
-// Provide client configuration for frontend (excluding secret)
-ipcMain.handle('ipc-get-casdoor-config', () => {
-  return {
+// Provide client configuration for frontend (excluding secret) sendSync
+ipcMain.on('ipc-get-casdoor-config', (event) => {
+  event.returnValue = {
     serverUrl,
     clientId,
     protocol
+  }
+})
+
+// Handler for making authenticated API calls from renderer
+// Renderer calls this, main process adds token automatically
+ipcMain.handle('ipc-authenticated-request', async (event, url: string, options: any = {}) => {
+  if (!currentAccessToken) {
+    throw new Error('Not authenticated')
+  }
+
+  try {
+    const response = await axios({
+      url,
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${currentAccessToken}`
+      }
+    })
+    return response.data
+  } catch (error: any) {
+    // If 401, try to refresh token once and retry
+    if (error.response?.status === 401) {
+      log.info('Access token expired, attempting refresh...')
+      const storedRefreshToken = store.get('refresh_token') as string
+      if (storedRefreshToken) {
+        try {
+          const refreshToken = decryptToken(storedRefreshToken)
+          await refreshAccessToken(refreshToken)
+
+          // Retry original request with new token
+          const retryResponse = await axios({
+            url,
+            ...options,
+            headers: {
+              ...options.headers,
+              Authorization: `Bearer ${currentAccessToken}`
+            }
+          })
+          return retryResponse.data
+        } catch (refreshError) {
+          log.error('Token refresh failed:', refreshError)
+          throw refreshError
+        }
+      }
+    }
+    throw error
   }
 })
 
@@ -246,7 +314,7 @@ export function handleProtocolUrl(protocolUrl: string) {
   try {
     const params = url.parse(protocolUrl, true).query
     if (params && params.code) {
-      store.set('casdoor_code', params.code)
+      // Send code directly to renderer, no need to store
       if (global.mainWindow) {
         global.mainWindow.webContents.send('receiveCode', params.code, params.state)
       }

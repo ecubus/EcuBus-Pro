@@ -232,11 +232,6 @@ function sidebar(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: '开发文档',
-      collapsed: true,
-      items: [{ text: '如何开发文档', link: '/zh/docs/dev/doc.md' }]
-    },
-    {
       text: '开发者手册',
       base: '/zh/docs/dev/',
       collapsed: true,

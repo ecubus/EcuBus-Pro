@@ -10,8 +10,7 @@ export const useUserStore = defineStore('user', () => {
     license?: string
   }>(null)
 
-  const token = ref<string | null>(null)
-  const refreshToken = ref<string | null>(null)
+  const isLoggedIn = ref(false)
 
   function setUser(userData: any) {
     // Check if userData has the structure from Casdoor response
@@ -20,51 +19,36 @@ export const useUserStore = defineStore('user', () => {
     } else {
       user.value = userData
     }
-  }
-
-  function setToken(t: string, rt?: string) {
-    token.value = t
-    // Ideally, keep tokens only in memory in renderer.
-    // If persistence is needed across reloads, rely on main process to provide them on startup.
-    // For now, we still keep them in memory.
-    if (rt) {
-      refreshToken.value = rt
-    }
+    isLoggedIn.value = !!userData
   }
 
   async function loadFromStorage() {
     // Try auto-login via main process
-    // clientId and clientSecret are managed securely in the main process
+    // Main process manages all tokens and auto-refresh
     try {
       const userInfo = await window.electron.ipcRenderer.invoke('ipc-auto-login')
-      console.log('userInfo', userInfo)
       if (userInfo) {
         setUser(userInfo)
-        setToken(userInfo.token, userInfo.refreshToken)
       } else {
-        // If auto-login failed (e.g. no tokens or invalid), ensure state is cleared
-        token.value = null
-        refreshToken.value = null
+        // If auto-login failed, clear state
         user.value = null
+        isLoggedIn.value = false
       }
     } catch (e) {
-      console.error('Failed to load stored tokens/auto-login', e)
+      console.error('Failed to auto-login', e)
     }
   }
 
   function logout() {
     user.value = null
-    token.value = null
-    refreshToken.value = null
+    isLoggedIn.value = false
     window.electron.ipcRenderer.invoke('ipc-logout')
   }
 
   return {
     user,
-    token,
-    refreshToken,
+    isLoggedIn,
     setUser,
-    setToken,
     loadFromStorage,
     logout
   }

@@ -36,6 +36,8 @@ jobs:
       - name: Build APP
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAIN_VITE_CLIENT_ID: ${{secrets.CLIENT_ID }}
+          MAIN_VITE_CLIENT_SECRET: ${{secrets.CLIENT_SECRET }}
         run: npm run build:linux
       - uses: actions/upload-artifact@v4
         with:

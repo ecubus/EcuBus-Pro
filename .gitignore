@@ -25,3 +25,5 @@ log.txt
 tools/a.bin
 tools/a.txt
 tools/a.csv
+
+.env.development

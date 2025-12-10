@@ -41,6 +41,7 @@ const props = defineProps<{
 const isDev = props.item.entry?.startsWith('http')
 
 const entry = isDev ? props.item.entry : `file:///${props.item.entry}`
+console.log('entry', entry)
 const entryBase = props.item.entry?.split('/').slice(0, -1).join('/')
 
 const plguinStore = usePluginStore()

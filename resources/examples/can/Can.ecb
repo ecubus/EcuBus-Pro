@@ -1,23 +1,23 @@
 {
   "data": {
     "devices": {
-      "095b8b1b-4a1c-4522-aaf6-0a592d385618": {
+      "bd70eeee-d980-46f4-90ce-4c56bb145371": {
         "type": "can",
         "canDevice": {
-          "id": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
-          "name": "KVASER_0",
+          "id": "bd70eeee-d980-46f4-90ce-4c56bb145371",
+          "name": "SIMULATE_0",
           "handle": 0,
-          "vendor": "kvaser",
+          "vendor": "simulate",
           "canfd": false,
           "database": "",
           "bitrate": {
             "sjw": 1,
             "timeSeg1": 13,
             "timeSeg2": 2,
-            "preScaler": 2,
+            "preScaler": 10,
             "freq": 500000,
-            "clock": "16",
-            "_X_ROW_KEY": "row_68"
+            "clock": "80",
+            "_X_ROW_KEY": "row_334"
           }
         }
       }
@@ -28,7 +28,7 @@
         "type": "can",
         "id": "a6773bbd-db04-405f-9a23-af32b1c12e70",
         "devices": [
-          "095b8b1b-4a1c-4522-aaf6-0a592d385618"
+          "bd70eeee-d980-46f4-90ce-4c56bb145371"
         ],
         "action": [
           {
@@ -39,7 +39,7 @@
             "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
             "name": "ID142VCLEFT_liftgateStatus",
             "id": "142",
-            "channel": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
+            "channel": "bd70eeee-d980-46f4-90ce-4c56bb145371",
             "type": "can",
             "dlc": 8,
             "data": [
@@ -62,7 +62,7 @@
             },
             "name": "",
             "id": "1",
-            "channel": "095b8b1b-4a1c-4522-aaf6-0a592d385618",
+            "channel": "bd70eeee-d980-46f4-90ce-4c56bb145371",
             "type": "can",
             "dlc": 8,
             "data": [],
@@ -80,7 +80,7 @@
         "type": "can",
         "id": "a033fc39-90a2-4982-8f59-cbd28c10b638",
         "channel": [
-          "095b8b1b-4a1c-4522-aaf6-0a592d385618"
+          "bd70eeee-d980-46f4-90ce-4c56bb145371"
         ],
         "workNode": "",
         "script": "node.ts"
@@ -68725,9 +68725,11 @@
         "name": "Logger 1",
         "id": "a25272ba-254f-4db2-93ad-d56c14ad0647",
         "type": "file",
-        "format": "asc",
-        "path": "log.txt",
-        "channel": [],
+        "format": "blf",
+        "path": "log.blf",
+        "channel": [
+          "bd70eeee-d980-46f4-90ce-4c56bb145371"
+        ],
         "method": [
           "canBase",
           "canError"
@@ -68744,7 +68746,8 @@
         "filterDevice": [],
         "filterId": []
       }
-    }
+    },
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -68764,51 +68767,6 @@
         "layoutType": "bottom",
         "hide": true
       },
-      "network": {
-        "pos": {
-          "x": 0,
-          "y": 0,
-          "w": 853.5,
-          "h": 330
-        },
-        "title": "network",
-        "label": "Network",
-        "id": "network",
-        "options": {}
-      },
-      "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
-        "pos": {
-          "x": 1098,
-          "y": 167,
-          "w": 853.5,
-          "h": 826
-        },
-        "title": "cani",
-        "label": "IA",
-        "id": "a6773bbd-db04-405f-9a23-af32b1c12e70_ia",
-        "options": {
-          "params": {
-            "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
-          },
-          "name": "Can IA"
-        }
-      },
-      "graph": {
-        "pos": {
-          "x": 853.5,
-          "y": 0,
-          "w": 853.5,
-          "h": 330
-        },
-        "title": "graph",
-        "label": "Line",
-        "id": "graph",
-        "options": {
-          "params": {
-            "edit-index": "graph"
-          }
-        }
-      },
       "variable": {
         "pos": {
           "x": 420,
@@ -68821,50 +68779,46 @@
         "id": "variable",
         "options": {}
       },
-      "datas": {
-        "pos": {
-          "x": 706,
-          "y": 0,
-          "w": 1039,
-          "h": 400
-        },
-        "title": "datas",
-        "label": "Datas",
-        "id": "datas",
-        "options": {
-          "params": {
-            "edit-index": "datas"
-          }
-        }
-      },
-      "trace": {
-        "pos": {
-          "x": 654.5,
-          "y": 167,
-          "w": 1014,
-          "h": 400
-        },
-        "title": "trace",
-        "label": "Trace",
-        "id": "trace",
-        "options": {
-          "params": {
-            "edit-index": "trace"
-          },
-          "name": "Main"
-        }
-      },
       "hardware": {
         "pos": {
-          "x": 1098,
-          "y": 167,
-          "w": 1098,
+          "x": -32,
+          "y": 47,
+          "w": 558,
           "h": 400
         },
         "title": "hardware",
         "label": "Devices",
         "id": "hardware",
         "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 835,
+          "y": 60,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
+        "pos": {
+          "x": 503.5,
+          "y": 73.5,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "a6773bbd-db04-405f-9a23-af32b1c12e70_ia",
+        "options": {
+          "params": {
+            "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
+          },
+          "name": "Can IA"
+        }
       }
     },
     "example": {

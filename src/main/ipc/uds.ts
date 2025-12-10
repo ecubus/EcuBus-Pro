@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
 import ascTransport from '../transport/asc'
+import blfTransport from '../transport/blf'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
@@ -621,14 +622,17 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   const vars: Record<string, VarItem> = cloneDeep(data.vars)
   const logs = data.logs
-
   for (const log of Object.values(logs)) {
-    if (log.type == 'file' && log.format == 'asc') {
+    if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
       if (!path.isAbsolute(log.path)) {
         log.path = path.join(projectInfo.path, log.path)
       }
 
-      const id = addTransport(() => ascTransport(log.path, log.channel, log.method))
+      const id =
+        log.format === 'blf'
+          ? addTransport(() => blfTransport(log.path, log.channel, log.method, log.compression))
+          : addTransport(() => ascTransport(log.path, log.channel, log.method))
+
       exTransportList.push(id)
     }
   }

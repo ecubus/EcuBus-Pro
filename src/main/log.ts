@@ -95,7 +95,6 @@ export class CanLOG {
     for (const log of combinedLogs) {
       this.log.remove(log)
     }
-    const et2 = externalTransport.map((t) => t.t())
   }
   close() {
     this.log.close()
@@ -318,7 +317,6 @@ export class DoipLOG {
     for (const log of combinedLogs) {
       this.log.remove(log)
     }
-    const et2 = externalTransport.map((t) => t.t())
   }
   close() {
     this.log.close()

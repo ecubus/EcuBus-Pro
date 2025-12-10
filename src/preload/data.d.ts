@@ -164,6 +164,7 @@ export type LogItem = {
   path: string
   channel: string[]
   method: string[]
+  compression?: number
 }
 
 export type TraceItem = {

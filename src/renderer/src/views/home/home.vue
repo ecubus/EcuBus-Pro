@@ -270,6 +270,25 @@
       <el-tab-pane name="user">
         <template #label>
           <div class="menu-item">
+            <el-avatar
+              v-if="userStore.user?.avatar && !avatarError"
+              :size="32"
+              :src="userStore.user.avatar"
+              @error="handleAvatarError"
+            >
+              <Icon :icon="userIcon" />
+            </el-avatar>
+            <Icon v-else :icon="userIcon" />
+            <span>User</span>
+          </div>
+        </template>
+        <div class="userMenu">
+          <user />
+        </div>
+      </el-tab-pane>
+      <el-tab-pane name="setting">
+        <template #label>
+          <div class="menu-item">
             <el-badge :hidden="!hasNotify" is-dot type="primary" class="item">
               <Icon :icon="setting" />
             </el-badge>
@@ -418,7 +437,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, version as vueVersion } from 'vue'
+import { computed, nextTick, onMounted, ref, version as vueVersion, watch } from 'vue'
 import logo from '@r/assets/logo.svg'
 import { useWindowSize } from '@vueuse/core'
 import { Icon, IconifyIcon } from '@iconify/vue'
@@ -434,6 +453,7 @@ import upgrade from '@iconify/icons-material-symbols/upgrade'
 import policyIcon from '@iconify/icons-material-symbols/assignment'
 import policy from './policy.vue'
 import { useProjectList, useProjectStore } from '@r/stores/project'
+import { useUserStore } from '@r/stores/user'
 import { version, ecubusPro } from './../../../../../package.json'
 import { version as elVer, ElMessage } from 'element-plus'
 import log from 'electron-log/renderer'
@@ -448,6 +468,7 @@ import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
+import user from './user.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
@@ -461,6 +482,12 @@ const hasUpdate = ref(false)
 const { width, height } = useWindowSize()
 const project = useProjectStore()
 const data = useDataStore()
+const userStore = useUserStore()
+const avatarError = ref(false)
+
+function handleAvatarError() {
+  avatarError.value = true
+}
 const activeMenu = ref('home')
 let lastActiveMenu = 'home'
 const homeActiveMenu = ref('recent')
@@ -557,6 +584,14 @@ function mainTabChange(tab: string) {
   }
   // lastActiveMenu=tab
 }
+
+// 监听用户头像变化，重置头像错误状态
+watch(
+  () => userStore.user?.avatar,
+  () => {
+    avatarError.value = false
+  }
+)
 
 onMounted(() => {
   window.electron.ipcRenderer
@@ -690,6 +725,11 @@ onMounted(() => {
   height: v-bind(height-35 + 'px');
 }
 
+.userMenu {
+  width: v-bind(width-120 + 'px');
+  height: v-bind(height-35 + 'px');
+}
+
 .sidebar {
   padding: 20px;
   height: v-bind(height-35 + 'px');
@@ -805,6 +845,12 @@ onMounted(() => {
 
 .menu-item svg {
   font-size: 32px;
+}
+
+.menu-item .el-avatar {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 .search-input {

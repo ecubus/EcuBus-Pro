@@ -24,12 +24,12 @@
           <h3>{{ userStore.user.displayName || 'User' }}</h3>
           <p class="email">{{ userStore.user.email }}</p>
         </div>
-        <el-button type="danger" plain size="small" @click="handleLogout">Sign Out</el-button>
+        <el-button type="danger" plain @click="handleLogout">Sign Out</el-button>
       </div>
 
       <el-divider />
 
-      <div class="license-info">
+      <!-- <div class="license-info">
         <h4>License Information</h4>
         <div v-if="userStore.user.license" class="license-card active">
           <div class="license-status">
@@ -46,12 +46,12 @@
           <p>Please purchase or activate a license to unlock full features.</p>
           <el-button type="primary" link>Activate License</el-button>
         </div>
-      </div>
+      </div> -->
 
       <!-- Debug info for dev -->
       <!-- <div style="margin-top: 20px; word-break: break-all;">
-        <pre>{{ userStore.user }}</pre>
-      </div> -->
+         <pre>{{ userStore.user }}</pre>
+       </div> -->
     </div>
   </div>
 </template>
@@ -63,35 +63,82 @@ import userIcon from '@iconify/icons-material-symbols/person-outline'
 import checkCircle from '@iconify/icons-material-symbols/check-circle-outline'
 import alertCircle from '@iconify/icons-material-symbols/error-outline'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { v4 as uuidv4 } from 'uuid'
 
 const userStore = useUserStore()
 const loading = ref(false)
+const loginTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
-// Config - these should ideally be in env vars
-const serverUrl = 'https://door.whyengineer.com'
-const appName = 'ecubus-pro'
-const clientId = 'b08218683e326231940a' // Replace with actual Client ID
-const clientSecret = '1652150117d33d59e3595563a65217983c310c14' // Replace with actual Client Secret (Note: Handling secret in renderer is not ideal for security, usually handled in main or proxy)
-// Ideally, the main process should hold the secret and handle the exchange, renderer just triggers it.
-// For this example based on the query, we'll pass them to the main process via IPC.
+// Casdoor config - will be loaded from backend
+const casdoorConfig = ref<{
+  serverUrl: string
+  clientId: string
+  protocol: string
+} | null>(null)
 
-const redirectPath = '/callback' // Not used directly in Electron deep link flow usually, but part of params
-const protocol = 'ecubuspro'
+async function loadCasdoorConfig() {
+  try {
+    casdoorConfig.value = await window.electron.ipcRenderer.invoke('ipc-get-casdoor-config')
+  } catch (e) {
+    console.error('Failed to load Casdoor config:', e)
+    ElMessage.error('Failed to load authentication configuration')
+  }
+}
 
-function openLogin() {
+async function openLogin() {
+  if (loading.value) return
+
+  // Ensure config is loaded
+  if (!casdoorConfig.value) {
+    await loadCasdoorConfig()
+  }
+
+  if (!casdoorConfig.value) {
+    ElMessage.error('Authentication configuration not available')
+    return
+  }
+
   loading.value = true
 
-  // Construct deep link redirect URL
-  const redirectUrl = `${protocol}://callback`
+  // Generate and store random state for CSRF protection
+  const state = uuidv4()
+  sessionStorage.setItem('auth_state', state)
 
-  const signinUrl = `${serverUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${appName}&noRedirect=true`
+  // Clear existing timer if any
+  if (loginTimer.value) clearTimeout(loginTimer.value)
+
+  // Set timeout for 60 seconds
+  loginTimer.value = setTimeout(() => {
+    if (loading.value) {
+      loading.value = false
+      ElMessageBox.alert('Login timed out. Please try again.', 'Warning', {
+        confirmButtonText: 'OK',
+        type: 'warning'
+      })
+    }
+  }, 60000)
+
+  // Construct deep link redirect URL
+  const redirectUrl = `${casdoorConfig.value.protocol}://callback`
+
+  const signinUrl = `${casdoorConfig.value.serverUrl}/login/oauth/authorize?client_id=${casdoorConfig.value.clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=profile&state=${state}&noRedirect=true`
 
   window.electron.ipcRenderer.send('ipc-open-link', signinUrl)
 }
 
-function openSignup() {
-  window.electron.ipcRenderer.send('ipc-open-link', 'https://door.whyengineer.com/signup')
+async function openSignup() {
+  // Ensure config is loaded
+  if (!casdoorConfig.value) {
+    await loadCasdoorConfig()
+  }
+
+  if (!casdoorConfig.value) {
+    ElMessage.error('Authentication configuration not available')
+    return
+  }
+
+  window.electron.ipcRenderer.send('ipc-open-link', `${casdoorConfig.value.serverUrl}/signup`)
 }
 
 function handleLogout() {
@@ -99,18 +146,31 @@ function handleLogout() {
 }
 
 // Listen for auth code from main process
-const handleReceiveCode = async (_event, code) => {
+const handleReceiveCode = async (_event, code, returnedState) => {
+  // Clear timer when code is received
+  if (loginTimer.value) {
+    clearTimeout(loginTimer.value)
+    loginTimer.value = null
+  }
+
+  // Validate state
+  const storedState = sessionStorage.getItem('auth_state')
+  if (!storedState || storedState !== returnedState) {
+    loading.value = false
+    ElMessage.error('Security verification failed (State mismatch). Please try logging in again.')
+    sessionStorage.removeItem('auth_state')
+    return
+  }
+
+  // Clear state after successful validation
+  sessionStorage.removeItem('auth_state')
+
   try {
     loading.value = true
     // Call main process to exchange code for user info
-    // Security Note: Storing clientSecret in frontend code is generally not recommended.
-    // Better to have main process know the secret or use PKCE if supported.
-    const userInfo = await window.electron.ipcRenderer.invoke(
-      'getUserInfo',
-      clientId,
-      clientSecret,
-      code
-    )
+    // clientId and clientSecret are managed securely in the main process
+    const userInfo = await window.electron.ipcRenderer.invoke('ipc-get-user-info', code)
+    console.log('userInfo', userInfo)
 
     if (userInfo) {
       userStore.setUser(userInfo)
@@ -125,13 +185,18 @@ const handleReceiveCode = async (_event, code) => {
   }
 }
 
+let v
 onMounted(async () => {
-  window.electron.ipcRenderer.on('receiveCode', handleReceiveCode)
-  await userStore.loadFromStorage()
+  await loadCasdoorConfig()
+  userStore.loadFromStorage()
+  v = window.electron.ipcRenderer.on('receiveCode', handleReceiveCode)
 })
 
 onUnmounted(() => {
-  window.electron.ipcRenderer.removeAllListeners('receiveCode')
+  v()
+  if (loginTimer.value) {
+    clearTimeout(loginTimer.value)
+  }
 })
 </script>
 
@@ -140,6 +205,7 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -193,6 +259,9 @@ onUnmounted(() => {
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .profile-header {

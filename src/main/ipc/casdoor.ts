@@ -14,6 +14,9 @@ const authCodeUrl = `${serverUrl}/api/login/oauth/access_token`
 const refreshTokenUrl = `${serverUrl}/api/login/oauth/refresh_token`
 const getUserInfoUrl = `${serverUrl}/api/get-account`
 
+// Load OAuth credentials from environment variables (set during build)
+const clientId = (import.meta.env as any).MAIN_VITE_CLIENT_ID || ''
+const clientSecret = (import.meta.env as any).MAIN_VITE_CLIENT_SECRET || ''
 function encryptToken(token: string): string {
   if (safeStorage.isEncryptionAvailable()) {
     return safeStorage.encryptString(token).toString('base64')
@@ -33,7 +36,15 @@ function decryptToken(encryptedToken: string): string {
   return encryptedToken
 }
 
-async function getUserInfo(clientId: string, clientSecret: string, code: string) {
+async function fetchUserProfile(accessToken: string) {
+  const resp = await axios({
+    method: 'get',
+    url: `${getUserInfoUrl}?accessToken=${accessToken}`
+  })
+  return resp.data
+}
+
+async function getUserInfo(code: string) {
   try {
     const { data } = await axios({
       method: 'post',
@@ -50,10 +61,7 @@ async function getUserInfo(clientId: string, clientSecret: string, code: string)
     })
 
     if (data.access_token) {
-      const resp = await axios({
-        method: 'get',
-        url: `${getUserInfoUrl}?accessToken=${data.access_token}`
-      })
+      const userProfile = await fetchUserProfile(data.access_token)
 
       // Store encrypted tokens in electron-store on main process
       const tokens = {
@@ -64,7 +72,7 @@ async function getUserInfo(clientId: string, clientSecret: string, code: string)
       store.set('auth_tokens', tokens)
 
       return {
-        ...resp.data,
+        ...userProfile,
         token: data.access_token, // Return plain token to renderer for immediate use (in memory)
         refreshToken: data.refresh_token,
         expiresIn: data.expires_in
@@ -78,7 +86,7 @@ async function getUserInfo(clientId: string, clientSecret: string, code: string)
   }
 }
 
-async function refreshAccessToken(clientId: string, clientSecret: string, refreshToken: string) {
+async function refreshAccessToken(refreshToken: string) {
   try {
     const { data } = await axios({
       method: 'post',
@@ -121,18 +129,63 @@ async function refreshAccessToken(clientId: string, clientSecret: string, refres
   }
 }
 
-ipcMain.handle('getUserInfo', async (event, clientId, clientSecret, code) => {
+ipcMain.handle('ipc-auto-login', async () => {
+  const storedTokens = store.get('auth_tokens') as any
+  if (!storedTokens || !storedTokens.accessToken) {
+    return null
+  }
+
+  const accessToken = decryptToken(storedTokens.accessToken)
+
+  try {
+    // Try to get user profile with current access token
+    const user = await fetchUserProfile(accessToken)
+    return {
+      ...user,
+      token: accessToken,
+      refreshToken: decryptToken(storedTokens.refreshToken),
+      expiresIn: storedTokens.expiresIn
+    }
+  } catch (error: any) {
+    log.info('Auto login with existing token failed, attempting refresh...', error.message)
+
+    // If request failed (likely 401), try to refresh token
+    const refreshToken = storedTokens.refreshToken ? decryptToken(storedTokens.refreshToken) : null
+
+    if (refreshToken) {
+      try {
+        const newTokens = await refreshAccessToken(refreshToken)
+        // Store is updated in refreshAccessToken
+
+        // Retry fetching user profile with new access token
+        const newUser = await fetchUserProfile(newTokens.token)
+
+        return {
+          ...newUser,
+          token: newTokens.token,
+          refreshToken: newTokens.refreshToken || refreshToken
+        }
+      } catch (refreshError) {
+        log.error('Auto login refresh failed', refreshError)
+        return null
+      }
+    }
+    return null
+  }
+})
+
+ipcMain.handle('ipc-get-user-info', async (event, code) => {
   // If code is not passed, try to get from store or waiting for it
   const authCode = code || store.get('casdoor_code')
   if (!authCode) {
     throw new Error('No authorization code found')
   }
-  const userInfo = await getUserInfo(clientId, clientSecret, authCode)
+  const userInfo = await getUserInfo(authCode)
   store.set('userInfo', userInfo)
   return userInfo
 })
 
-ipcMain.handle('refreshToken', async (event, clientId, clientSecret, refreshToken) => {
+ipcMain.handle('refreshToken', async (event, refreshToken) => {
   // Use passed refreshToken or fallback to stored secure token
   let tokenToUse = refreshToken
   if (!tokenToUse) {
@@ -146,7 +199,7 @@ ipcMain.handle('refreshToken', async (event, clientId, clientSecret, refreshToke
     throw new Error('No refresh token provided')
   }
 
-  const newTokens = await refreshAccessToken(clientId, clientSecret, tokenToUse)
+  const newTokens = await refreshAccessToken(tokenToUse)
 
   // Update stored user info with new tokens if available
   const currentUserInfo = store.get('userInfo') as any
@@ -162,7 +215,7 @@ ipcMain.handle('refreshToken', async (event, clientId, clientSecret, refreshToke
 })
 
 // Add handler to retrieve tokens securely if renderer needs them (e.g. reload)
-ipcMain.handle('getStoredTokens', () => {
+ipcMain.handle('ipc-get-stored-tokens', () => {
   const storedTokens = store.get('auth_tokens') as any
   if (storedTokens) {
     return {
@@ -174,10 +227,19 @@ ipcMain.handle('getStoredTokens', () => {
   return null
 })
 
-ipcMain.handle('logout', () => {
+ipcMain.handle('ipc-logout', () => {
   store.delete('auth_tokens')
   store.delete('userInfo')
   store.delete('casdoor_code')
+})
+
+// Provide client configuration for frontend (excluding secret)
+ipcMain.handle('ipc-get-casdoor-config', () => {
+  return {
+    serverUrl,
+    clientId,
+    protocol
+  }
 })
 
 export function handleProtocolUrl(protocolUrl: string) {
@@ -186,7 +248,7 @@ export function handleProtocolUrl(protocolUrl: string) {
     if (params && params.code) {
       store.set('casdoor_code', params.code)
       if (global.mainWindow) {
-        global.mainWindow.webContents.send('receiveCode', params.code)
+        global.mainWindow.webContents.send('receiveCode', params.code, params.state)
       }
     }
   } catch (e) {

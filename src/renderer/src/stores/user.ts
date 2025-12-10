@@ -14,7 +14,12 @@ export const useUserStore = defineStore('user', () => {
   const refreshToken = ref<string | null>(null)
 
   function setUser(userData: any) {
-    user.value = userData
+    // Check if userData has the structure from Casdoor response
+    if (userData?.data) {
+      user.value = userData.data
+    } else {
+      user.value = userData
+    }
   }
 
   function setToken(t: string, rt?: string) {
@@ -28,17 +33,22 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function loadFromStorage() {
-    // Retrieve tokens from main process secure storage
+    // Try auto-login via main process
+    // clientId and clientSecret are managed securely in the main process
     try {
-      const tokens = await window.electron.ipcRenderer.invoke('getStoredTokens')
-      if (tokens) {
-        token.value = tokens.token
-        refreshToken.value = tokens.refreshToken
+      const userInfo = await window.electron.ipcRenderer.invoke('ipc-auto-login')
+      console.log('userInfo', userInfo)
+      if (userInfo) {
+        setUser(userInfo)
+        setToken(userInfo.token, userInfo.refreshToken)
+      } else {
+        // If auto-login failed (e.g. no tokens or invalid), ensure state is cleared
+        token.value = null
+        refreshToken.value = null
+        user.value = null
       }
-      // Also load user info if persisted (though tokens are more critical)
-      // User info could be re-fetched using the token
     } catch (e) {
-      console.error('Failed to load stored tokens', e)
+      console.error('Failed to load stored tokens/auto-login', e)
     }
   }
 
@@ -46,7 +56,7 @@ export const useUserStore = defineStore('user', () => {
     user.value = null
     token.value = null
     refreshToken.value = null
-    window.electron.ipcRenderer.invoke('logout')
+    window.electron.ipcRenderer.invoke('ipc-logout')
   }
 
   return {

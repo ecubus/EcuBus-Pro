@@ -262,7 +262,15 @@
       <el-tab-pane name="user">
         <template #label>
           <div class="menu-item">
-            <Icon :icon="userIcon" />
+            <el-avatar
+              v-if="userStore.user?.avatar && !avatarError"
+              :size="32"
+              :src="userStore.user.avatar"
+              @error="handleAvatarError"
+            >
+              <Icon :icon="userIcon" />
+            </el-avatar>
+            <Icon v-else :icon="userIcon" />
             <span>User</span>
           </div>
         </template>
@@ -421,7 +429,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, version as vueVersion } from 'vue'
+import { computed, nextTick, onMounted, ref, version as vueVersion, watch } from 'vue'
 import logo from '@r/assets/logo.svg'
 import { useWindowSize } from '@vueuse/core'
 import { Icon, IconifyIcon } from '@iconify/vue'
@@ -437,6 +445,7 @@ import upgrade from '@iconify/icons-material-symbols/upgrade'
 import policyIcon from '@iconify/icons-material-symbols/assignment'
 import policy from './policy.vue'
 import { useProjectList, useProjectStore } from '@r/stores/project'
+import { useUserStore } from '@r/stores/user'
 import { version, ecubusPro } from './../../../../../package.json'
 import { version as elVer, ElMessage } from 'element-plus'
 import log from 'electron-log/renderer'
@@ -464,6 +473,12 @@ const hasUpdate = ref(false)
 const { width, height } = useWindowSize()
 const project = useProjectStore()
 const data = useDataStore()
+const userStore = useUserStore()
+const avatarError = ref(false)
+
+function handleAvatarError() {
+  avatarError.value = true
+}
 const activeMenu = ref('home')
 let lastActiveMenu = 'home'
 const homeActiveMenu = ref('recent')
@@ -558,6 +573,14 @@ function mainTabChange(tab: string) {
   }
   // lastActiveMenu=tab
 }
+
+// 监听用户头像变化，重置头像错误状态
+watch(
+  () => userStore.user?.avatar,
+  () => {
+    avatarError.value = false
+  }
+)
 
 onMounted(() => {
   window.electron.ipcRenderer
@@ -811,6 +834,12 @@ onMounted(() => {
 
 .menu-item svg {
   font-size: 32px;
+}
+
+.menu-item .el-avatar {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 .search-input {

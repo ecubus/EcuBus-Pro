@@ -208,6 +208,7 @@
         <trace-component
           ref="traceRef"
           :height="h - 2"
+          :width="w - leftWidth - 6"
           :capture-test="true"
           :test-id="isSingleRun"
           prefix="test-"

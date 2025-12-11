@@ -15,6 +15,25 @@ export interface EthBaseInfo {
 }
 
 /**
+ * TLS configuration for DoIP v3
+ * @category DOIP
+ */
+export interface TlsConfig {
+  /** Enable TLS for TCP connection (DoIP v3) */
+  enabled: boolean
+  /** Path to CA certificate file for verifying peer */
+  ca?: string
+  /** Path to client/server certificate file */
+  cert?: string
+  /** Path to private key file */
+  key?: string
+  /** Skip certificate verification (for testing only) */
+  rejectUnauthorized?: boolean
+  /** TLS port, default is 3496 for DoIP v3 */
+  port?: number
+}
+
+/**
  * @category DOIP
  */
 export interface EthAddr {
@@ -34,6 +53,8 @@ export interface EthAddr {
   taType: 'physical' | 'functional'
   udpClientPort?: number
   tcpClientPort?: number
+  /** TLS configuration for DoIP v3 */
+  tls?: TlsConfig
 }
 
 export interface TesterAddr {

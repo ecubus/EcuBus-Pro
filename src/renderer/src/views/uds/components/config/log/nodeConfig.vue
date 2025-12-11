@@ -33,7 +33,17 @@
             <el-form-item label="Format" prop="format">
               <el-select v-model="formData.format" placeholder="Format">
                 <el-option label="ASC Format" value="asc" />
+                <el-option label="Vector BLF Format" value="blf" />
                 <el-option label="CSV Format" value="csv" disabled />
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="formData.format == 'blf'" label="Compression">
+              <el-select v-model="formData.compression" placeholder="Compression level">
+                <el-option label="Default (-1)" :value="-1" />
+                <el-option label="No compression (0)" :value="0" />
+                <el-option label="Fast (1)" :value="1" />
+                <el-option label="Balanced (6)" :value="6" />
+                <el-option label="Max (9)" :value="9" />
               </el-select>
             </el-form-item>
             <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">
@@ -137,6 +147,9 @@ const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 const methodRef = ref<Record<string, boolean>>({})
 const formData = ref(cloneDeep(dataBase.logs[editIndex.value]))
+if (formData.value.format === 'blf' && formData.value.compression === undefined) {
+  formData.value.compression = -1
+}
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (const key of Object.keys(dataBase.logs)) {
@@ -246,6 +259,15 @@ const project = useProjectStore()
 // watchEffect(() => {
 //     getUsedDb()
 // })
+
+watch(
+  () => formData.value.format,
+  (val) => {
+    if (val === 'blf' && formData.value.compression === undefined) {
+      formData.value.compression = -1
+    }
+  }
+)
 
 interface Option {
   key: string

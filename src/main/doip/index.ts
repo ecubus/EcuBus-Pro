@@ -119,6 +119,8 @@ export enum RouteCode {
   DoIP_MissAuth = 4,
   DoIP_RejectConfirm = 5,
   DoIP_UnsupportedActiveType = 6,
+  // v3: activation type requires TLS socket
+  DoIP_SecureTcpRequired = 0x07,
   DoIP_OK = 0x10,
   DoIP_AcceptedNeedConfirm = 0x11
 }
@@ -1082,6 +1084,8 @@ export class DOIP {
           }
           if (item.lastAction.payloadType == PayloadType.DoIP_RouteActivationRequest) {
             const sa = buffer.readUInt16BE(0)
+            const activeType = buffer.readUInt8(2)
+            const isTlsSocket = socket instanceof tls.TLSSocket && socket.encrypted
             if (item.state == 'init') {
               item.testerAddr = sa
               clearTimeout(item.inactiveTimer)
@@ -1095,6 +1099,23 @@ export class DOIP {
 
                 this.aliveCheck(socket, item.testerAddr)
               } else {
+                if (this.version === 3 && activeType !== 0 && !isTlsSocket) {
+                  sentData = this.getRouteActiveResponse(sa, RouteCode.DoIP_SecureTcpRequired)
+                  socket.write(sentData, () => {
+                    this.log.ipBase(
+                      'tcp',
+                      'OUT',
+                      { address: socket.localAddress, port: socket.localPort },
+                      {
+                        address: socket.remoteAddress,
+                        port: socket.remotePort
+                      },
+                      sentData as Buffer
+                    )
+                    this.closeSocket(socket)
+                  })
+                  return
+                }
                 item.state = 'register-active'
                 sentData = this.getRouteActiveResponse(sa, RouteCode.DoIP_OK)
               }
@@ -1347,8 +1368,13 @@ is in the state "Registered [Routing Active]".*/
                   data: buffer.subarray(5)
                 })
               } else {
+                let msg: string | undefined
+                if (buffer[4] == RouteCode.DoIP_SecureTcpRequired) {
+                  msg =
+                    'Routing activation denied: activation type requires secure TLS TCP DATA socket.'
+                }
                 item.pendingPromise?.reject(
-                  new DoipError(DOIP_ERROR_ID.DOIP_ROUTE_ACTIVE_ERR, Buffer.from([buffer[4]]))
+                  new DoipError(DOIP_ERROR_ID.DOIP_ROUTE_ACTIVE_ERR, Buffer.from([buffer[4]]), msg)
                 )
               }
             }

@@ -1,12 +1,27 @@
 import os from 'os'
-import { EntityAddr, EthAddr, EthBaseInfo, EthDevice, TesterAddr, VinInfo } from '../share/doip'
+import {
+  EntityAddr,
+  EthAddr,
+  EthBaseInfo,
+  EthDevice,
+  TesterAddr,
+  TlsConfig,
+  VinInfo
+} from '../share/doip'
 import net from 'net'
+import tls from 'tls'
 import dgram from 'dgram'
 import EventEmitter from 'events'
 import { random } from 'lodash'
 import { DoipLOG, UdsLOG } from '../log'
 import { TesterInfo } from '../share/tester'
 import { findService } from '../docan/uds'
+import fs from 'fs'
+
+// DoIP v3 TLS port
+const DOIP_TLS_PORT = 3496
+// DoIP default port
+const DOIP_TCP_PORT = 13400
 
 export function getEthDevices() {
   const ifaces = os.networkInterfaces()
@@ -182,6 +197,7 @@ export class DOIP {
   maxProcessSize = 40000
   private udp4Server?: dgram.Socket
   private server?: net.Server
+  private tlsServer?: tls.Server
   log: DoipLOG
   udsLog: UdsLOG
   minLne = 8
@@ -193,6 +209,7 @@ export class DOIP {
   tcpClientMap: Map<string, clientTcp> = new Map()
   eth: EthDevice
   entityMap: Map<string, EntityAddr> = new Map() //ip->entity
+  tlsConfig?: TlsConfig
 
   /* version| inverseVersion| payloadType(2)| len(4)| content */
   constructor(
@@ -258,7 +275,50 @@ export class DOIP {
     })
     this.udp4Server = udp4Server
   }
-  async registerEntity(announce = true, uLog?: UdsLOG) {
+  /**
+   * Load TLS options from TlsConfig
+   */
+  private loadTlsOptions(tlsConfig: TlsConfig): tls.TlsOptions {
+    const options: tls.TlsOptions = {}
+
+    if (tlsConfig.ca) {
+      options.ca = fs.readFileSync(tlsConfig.ca)
+    }
+    if (tlsConfig.cert) {
+      options.cert = fs.readFileSync(tlsConfig.cert)
+    }
+    if (tlsConfig.key) {
+      options.key = fs.readFileSync(tlsConfig.key)
+    }
+    if (tlsConfig.rejectUnauthorized !== undefined) {
+      options.rejectUnauthorized = tlsConfig.rejectUnauthorized
+    }
+
+    return options
+  }
+
+  /**
+   * Create a TCP/TLS server based on configuration
+   */
+  private createTcpServer(tlsConfig?: TlsConfig): net.Server | tls.Server {
+    if (tlsConfig?.enabled) {
+      const tlsOptions = this.loadTlsOptions(tlsConfig)
+      return tls.createServer(tlsOptions)
+    }
+    return net.createServer()
+  }
+
+  /**
+   * Get the server port based on TLS configuration
+   */
+  private getServerPort(tlsConfig?: TlsConfig): number {
+    if (tlsConfig?.enabled) {
+      return tlsConfig.port || DOIP_TLS_PORT
+    }
+    return DOIP_TCP_PORT
+  }
+
+  async registerEntity(announce = true, uLog?: UdsLOG, tlsConfig?: TlsConfig) {
     return new Promise<void>((resolve, reject) => {
       if (this.ethAddr != undefined) {
         reject(new DoipError(DOIP_ERROR_ID.DOIP_ENTITY_EXIST))
@@ -271,20 +331,39 @@ export class DOIP {
       }
       this.ethAddr = entity
       this.ethAddr.ip = this.eth.handle
-      this.server = net.createServer()
-      this.server.on('error', (err) => {
+      this.tlsConfig = tlsConfig
+
+      // Create TCP or TLS server based on configuration
+      const server = this.createTcpServer(tlsConfig)
+      const serverPort = this.getServerPort(tlsConfig)
+
+      if (tlsConfig?.enabled) {
+        this.tlsServer = server as tls.Server
+        this.udsLog.systemMsg(
+          `TLS server starting on port ${serverPort}`,
+          getTsUs() - this.startTs,
+          'info'
+        )
+      } else {
+        this.server = server as net.Server
+      }
+
+      server.on('error', (err) => {
         reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, err.toString()))
         this.udsLog.systemMsg(
           `tcp main server : ${err.toString()}`,
           getTsUs() - this.startTs,
           'error'
         )
-        this.server?.close()
+        server.close()
       })
 
-      this.server.on('connection', (socket) => {
+      // Use 'secureConnection' event for TLS server, 'connection' for regular TCP
+      const connectionEvent = tlsConfig?.enabled ? 'secureConnection' : 'connection'
+
+      server.on(connectionEvent, (socket: net.Socket | tls.TLSSocket) => {
         const item: tcpData = {
-          socket: socket,
+          socket: socket as net.Socket,
           state: 'init',
           recvState: 'header',
           pendingBuffer: Buffer.alloc(0),
@@ -319,14 +398,15 @@ export class DOIP {
         }
         this.connectTable.push(item)
         //a new client
+        const connType = tlsConfig?.enabled ? 'TLS' : 'TCP'
         uLog?.systemMsg(
-          `new tcp client connected, waiting route active`,
+          `new ${connType} client connected, waiting route active`,
           getTsUs() - this.startTs,
           'info'
         )
         socket.on('data', (val) => {
           item.generalTimer.refresh()
-          this.parseData(socket, item, val)
+          this.parseData(socket as net.Socket, item, val)
         })
         // socket.on('end', () => {
         //     reject(new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
@@ -340,14 +420,14 @@ export class DOIP {
           uLog?.systemMsg(`tcp server : ${err.toString()}`, getTsUs() - this.startTs, 'warn')
           //TODO:
           // this.event.emit(`server-${item.testerAddr}-${entity.logicalAddr}`,new DoipError(DOIP_ERROR_ID.DOIP_TCP_ERROR, undefined, 'tcp server close'))
-          this.closeSocket(socket)
+          this.closeSocket(socket as net.Socket)
         })
         socket.on('close', () => {
           uLog?.systemMsg(`tcp client close`, getTsUs() - this.startTs, 'warn')
-          this.closeSocket(socket)
+          this.closeSocket(socket as net.Socket)
         })
       })
-      this.server.listen(13400, this.eth.handle)
+      server.listen(serverPort, this.eth.handle)
 
       //announce entity
       const data = this.getVehicleAnnouncementResponse(entity)
@@ -490,18 +570,51 @@ export class DOIP {
         return
       }
 
-      // 创建TCP连接，使用指定的本地端口
-      const connectOptions: net.NetConnectOpts = {
-        host: ip,
-        port: 13400
-      }
+      // Check if TLS is enabled for DoIP v3
+      const useTls = addr.tls?.enabled && this.version === 3
+      const targetPort = useTls ? addr.tls?.port || DOIP_TLS_PORT : DOIP_TCP_PORT
 
-      if (addr.tcpClientPort) {
-        connectOptions.localPort = addr.tcpClientPort
-        connectOptions.localAddress = this.eth.handle
-      }
+      let socket: net.Socket | tls.TLSSocket
 
-      const socket = net.createConnection(connectOptions)
+      if (useTls) {
+        // Create TLS connection for DoIP v3
+        const tlsOptions: tls.ConnectionOptions = {
+          host: ip,
+          port: targetPort,
+          rejectUnauthorized: addr.tls?.rejectUnauthorized !== false
+        }
+
+        if (addr.tls?.ca) {
+          tlsOptions.ca = fs.readFileSync(addr.tls.ca)
+        }
+        if (addr.tls?.cert) {
+          tlsOptions.cert = fs.readFileSync(addr.tls.cert)
+        }
+        if (addr.tls?.key) {
+          tlsOptions.key = fs.readFileSync(addr.tls.key)
+        }
+
+        this.udsLog.systemMsg(
+          `Creating TLS connection to ${ip}:${targetPort}`,
+          getTsUs() - this.startTs,
+          'info'
+        )
+
+        socket = tls.connect(tlsOptions)
+      } else {
+        // Create regular TCP connection
+        const connectOptions: net.NetConnectOpts = {
+          host: ip,
+          port: targetPort
+        }
+
+        if (addr.tcpClientPort) {
+          connectOptions.localPort = addr.tcpClientPort
+          connectOptions.localAddress = this.eth.handle
+        }
+
+        socket = net.createConnection(connectOptions)
+      }
       const item: clientTcp = {
         addr: addr,
         socket,
@@ -1513,6 +1626,12 @@ is in the state "Registered [Routing Active]".*/
       this.server = undefined
     }
 
+    // 关闭TLS服务器 (DoIP v3)
+    if (this.tlsServer) {
+      this.tlsServer.close()
+      this.tlsServer = undefined
+    }
+
     // 清理 connectTable 中的所有连接
     this.connectTable.forEach((item) => {
       clearTimeout(item.inactiveTimer)
@@ -1533,6 +1652,7 @@ is in the state "Registered [Routing Active]".*/
     // 清理其他资源
     this.entityMap.clear()
     this.selfSentUdpInfo.length = 0
+    this.tlsConfig = undefined
   }
   buildMessage(payloadType: PayloadType, data: Buffer): Buffer {
     const len = data.length

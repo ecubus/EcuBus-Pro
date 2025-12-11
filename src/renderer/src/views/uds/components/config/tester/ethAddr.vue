@@ -133,6 +133,49 @@
         </el-form-item>
       </el-col>
     </el-form-item>
+    <template v-if="Number(props.version) == 3">
+      <el-divider content-position="left">TLS Settings (DoIP v3)</el-divider>
+      <el-form-item label="Enable TLS" prop="tls.enabled">
+        <el-switch v-model="tlsEnabled" @change="onTlsEnabledChange" />
+        <span class="tls-hint">Enable TLS for secure communication (port 3496)</span>
+      </el-form-item>
+      <template v-if="tlsEnabled">
+        <el-form-item label="TLS Port" prop="tls.port">
+          <el-input-number
+            v-model="data.tls!.port"
+            :min="1"
+            :max="65535"
+            :placeholder="3496"
+            controls-position="right"
+          />
+        </el-form-item>
+        <el-form-item label="CA Certificate" prop="tls.ca">
+          <el-input v-model="data.tls!.ca" placeholder="Path to CA certificate file">
+            <template #append>
+              <el-button @click="selectCertFile('ca')">Browse</el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="Client Certificate" prop="tls.cert">
+          <el-input v-model="data.tls!.cert" placeholder="Path to client certificate file">
+            <template #append>
+              <el-button @click="selectCertFile('cert')">Browse</el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="Private Key" prop="tls.key">
+          <el-input v-model="data.tls!.key" placeholder="Path to private key file">
+            <template #append>
+              <el-button @click="selectCertFile('key')">Browse</el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="Skip Verify" prop="tls.rejectUnauthorized">
+          <el-switch v-model="skipVerify" />
+          <span class="tls-hint">Skip certificate verification (for testing only)</span>
+        </el-form-item>
+      </template>
+    </template>
   </el-form>
 </template>
 
@@ -160,14 +203,82 @@ import { v4 } from 'uuid'
 import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { UdsAddress } from 'nodeCan/uds'
-import { EntityAddr, EthAddr } from 'nodeCan/doip'
+import { EntityAddr, EthAddr, TlsConfig } from 'nodeCan/doip'
 import { useGlobalStart } from '@r/stores/runtime'
+import { useProjectStore } from '@r/stores/project'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()
+const project = useProjectStore()
 const data = defineModel<EthAddr>({
   required: true
 })
+
+// TLS computed properties
+const tlsEnabled = computed({
+  get: () => data.value.tls?.enabled || false,
+  set: (val) => {
+    if (!data.value.tls) {
+      data.value.tls = {
+        enabled: val,
+        port: 3496,
+        rejectUnauthorized: true
+      }
+    } else {
+      data.value.tls.enabled = val
+    }
+  }
+})
+
+const skipVerify = computed({
+  get: () => data.value.tls?.rejectUnauthorized === false,
+  set: (val) => {
+    if (data.value.tls) {
+      data.value.tls.rejectUnauthorized = !val
+    }
+  }
+})
+
+function onTlsEnabledChange(val: boolean) {
+  if (val && !data.value.tls) {
+    data.value.tls = {
+      enabled: true,
+      port: 3496,
+      rejectUnauthorized: true
+    }
+  }
+}
+
+async function selectCertFile(type: 'ca' | 'cert' | 'key') {
+  const titles: Record<string, string> = {
+    ca: 'Select CA Certificate',
+    cert: 'Select Client Certificate',
+    key: 'Select Private Key'
+  }
+  const extensions: Record<string, string[]> = {
+    ca: ['pem', 'crt', 'cer'],
+    cert: ['pem', 'crt', 'cer'],
+    key: ['pem', 'key']
+  }
+
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: titles[type],
+    properties: ['openFile'],
+    filters: [
+      { name: 'Certificate Files', extensions: extensions[type] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePaths[0]
+  if (file && data.value.tls) {
+    if (project.projectInfo.path) {
+      data.value.tls[type] = window.path.relative(project.projectInfo.path, file)
+    } else {
+      data.value.tls[type] = file
+    }
+  }
+}
 
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
@@ -311,6 +422,7 @@ const rules: FormRules<EthAddr> = {
 
 const props = defineProps<{
   index: number
+  version?: number
   addrs: UdsAddress[]
 }>()
 
@@ -338,5 +450,11 @@ defineExpose({
   align-items: center;
   /* 垂直居中对齐 */
   gap: 4px;
+}
+
+.tls-hint {
+  margin-left: 10px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 </style>

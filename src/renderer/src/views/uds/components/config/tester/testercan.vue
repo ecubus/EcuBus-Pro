@@ -329,6 +329,7 @@
             :ref="(e) => (addrRef[index] = e)"
             v-model="data.address[index].ethAddr"
             :index="index"
+            :version="data.doipVersion"
             :addrs="data.address"
           />
         </el-tab-pane>

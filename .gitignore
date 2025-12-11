@@ -18,6 +18,7 @@ resources/examples/**/*.code-workspace
 resources/examples/**/*.html
 resources/examples/**/**/*.html
 resources/examples/**/**/*.csv
+resources/examples/**/**/*.blf
 resources/examples/**/**/*.txt
 resources/examples/**/**/*.bin
 *.bak
@@ -27,3 +28,4 @@ tools/a.txt
 tools/a.csv
 
 .env.development
+

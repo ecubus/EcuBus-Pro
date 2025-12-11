@@ -25,7 +25,7 @@
     <div
       ref="terminalContainer"
       class="terminal-container"
-      :style="{ height: tableHeight + 'px' }"
+      :style="{ height: tableHeight + 'px', width: tableWidth + 'px' }"
       tabindex="-1"
     ></div>
   </div>
@@ -67,6 +67,7 @@ function clearLog() {
 const props = withDefaults(
   defineProps<{
     height: number
+    width: number
     prefix?: string
     captureTest?: boolean
     captureSystem?: boolean
@@ -99,6 +100,7 @@ watch(globalStart, (val) => {
   }
 })
 const tableHeight = toRef(props, 'height')
+const tableWidth = toRef(props, 'width')
 const project = useProjectStore()
 
 // Terminal theme based on dark mode
@@ -162,6 +164,16 @@ watch(isDark, () => {
     terminal.value.options.theme = terminalTheme.value
   }
 })
+
+// Watch height and width changes to resize terminal
+watch(
+  () => [tableHeight.value, tableWidth.value],
+  () => {
+    nextTick(() => {
+      fitAddon.value?.fit()
+    })
+  }
+)
 
 // ANSI color codes for different log levels
 const colorCodes = {
@@ -324,12 +336,6 @@ onMounted(async () => {
     terminal.value.loadAddon(canvasAddon.value)
 
     fitAddon.value.fit()
-
-    // Handle resize
-    const resizeObserver = new ResizeObserver(() => {
-      fitAddon.value?.fit()
-    })
-    resizeObserver.observe(terminalContainer.value)
 
     // Enable keyboard shortcuts on document level
     keydownHandler = (event: KeyboardEvent) => {

@@ -215,6 +215,7 @@ class FileTransport extends winston.transports.File {
 
   log(info: any, callback: any) {
     if (this.closed) {
+      callback()
       return
     }
     if (super.log) {

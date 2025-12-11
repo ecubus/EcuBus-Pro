@@ -3,7 +3,7 @@ import path from 'path'
 import zlib from 'zlib'
 import dayjs from 'dayjs'
 import Transport from 'winston-transport'
-import { CanMessage } from 'nodeCan/can'
+import { CanMessage } from '../share/can'
 
 // ---- BLF constants ----
 const FILE_HEADER_SIZE = 144
@@ -81,24 +81,33 @@ function clampLen(len: number, max: number): number {
 }
 
 class BlfWriter {
-  private fd: number
+  private filePath: string
+  private _dest: fs.WriteStream
   private bufferParts: Buffer[] = []
   private bufferSize = 0
   private objectCount = 0
   private uncompressedSize: bigint = BigInt(FILE_HEADER_SIZE)
   private startTimeNs?: bigint
   private stopTimeNs?: bigint
-  private firstMsgTsUs?: number
   private closed = false
   private maxContainerSize: number
   private compressionLevel: number
-  private position = 0
+  private _pendingFlush = 0
 
   constructor(filePath: string, opts?: { compressionLevel?: number; maxContainerSize?: number }) {
+    this.filePath = filePath
     this.compressionLevel = opts?.compressionLevel ?? -1
     this.maxContainerSize = opts?.maxContainerSize ?? MAX_CONTAINER_SIZE_DEFAULT
-    this.fd = fs.openSync(filePath, 'w')
 
+    // Create WriteStream directly with optimized buffer size
+    // highWaterMark 256KB is sufficient for CAN logging, WriteStream handles backpressure internally
+    this._dest = fs.createWriteStream(filePath, {
+      flags: 'w',
+      highWaterMark: 256 * 1024
+    })
+    this._dest.on('error', (err) => global.sysLog.error('BLF write error:', err))
+
+    // Write initial header placeholder
     const header = this.buildHeader(
       BigInt(FILE_HEADER_SIZE),
       this.uncompressedSize,
@@ -106,8 +115,7 @@ class BlfWriter {
       undefined,
       undefined
     )
-    fs.writeSync(this.fd, header, 0, header.length, 0)
-    this.position = header.length
+    this._dest.write(header)
   }
 
   private buildHeader(
@@ -141,24 +149,20 @@ class BlfWriter {
     return header
   }
 
-  private ensureStartTimes(msgTsUs?: number) {
+  private ensureStartTimes() {
     if (!this.startTimeNs) {
       this.startTimeNs = BigInt(Date.now()) * 1_000_000n
       this.stopTimeNs = this.startTimeNs
-      this.firstMsgTsUs = msgTsUs ?? 0
-    } else if (this.firstMsgTsUs === undefined) {
-      this.firstMsgTsUs = msgTsUs ?? 0
     }
   }
 
   private computeTimestampNs(msgTsUs?: number): bigint {
-    this.ensureStartTimes(msgTsUs)
-    const baseUs = this.firstMsgTsUs ?? 0
-    const offsetUs = msgTsUs !== undefined ? Math.max(0, Math.trunc(msgTsUs - baseUs)) : 0
-    const tsNs = (this.startTimeNs ?? 0n) + BigInt(offsetUs) * 1000n
+    this.ensureStartTimes()
+    // 直接使用消息自身的时间戳，而不是相对于第一帧的偏移
+    const timestampNs = msgTsUs !== undefined ? BigInt(Math.trunc(msgTsUs)) * 1000n : 0n
+    const tsNs = (this.startTimeNs ?? 0n) + timestampNs
     this.stopTimeNs = tsNs
-    const delta = tsNs - (this.startTimeNs ?? 0n)
-    return delta >= 0n ? delta : 0n
+    return timestampNs >= 0n ? timestampNs : 0n
   }
 
   private addObject(objType: number, data: Buffer, timestampNs: bigint) {
@@ -286,50 +290,89 @@ class BlfWriter {
     this.bufferParts = tail.length ? [tail] : []
     this.bufferSize = tail.length
 
-    let method = ZLIB_DEFLATE
-    let payload: Buffer
     if (this.compressionLevel === 0) {
-      method = NO_COMPRESSION
-      payload = uncompressed
+      this._writeContainer(uncompressed, uncompressed, NO_COMPRESSION)
     } else {
-      payload = zlib.deflateSync(uncompressed, { level: this.compressionLevel })
+      // Use zlib stream for non-blocking compression
+      this._compressAndWrite(uncompressed)
     }
+  }
 
+  /**
+   * Compress data using zlib stream and write container (no PassThrough needed)
+   */
+  private _compressAndWrite(uncompressed: Buffer) {
+    this._pendingFlush++
+    const chunks: Buffer[] = []
+    const deflate = zlib.createDeflate({ level: this.compressionLevel })
+
+    // Collect compressed chunks directly
+    deflate.on('data', (chunk: Buffer) => chunks.push(chunk))
+    deflate.on('end', () => {
+      const payload = Buffer.concat(chunks)
+      this._writeContainer(uncompressed, payload, ZLIB_DEFLATE)
+      this._pendingFlush--
+    })
+    deflate.on('error', (err) => {
+      console.error('BLF compression error:', err)
+      this._pendingFlush--
+    })
+
+    // Write directly to deflate stream (no intermediate PassThrough)
+    deflate.end(uncompressed)
+  }
+
+  /**
+   * Write a log container - combine into single write for efficiency
+   */
+  private _writeContainer(uncompressed: Buffer, payload: Buffer, method: number) {
     const objSize = OBJ_HEADER_BASE_SIZE + LOG_CONTAINER_HEADER_SIZE + payload.length
-
-    const baseHeader = Buffer.alloc(OBJ_HEADER_BASE_SIZE)
-    baseHeader.write('LOBJ', 0, 'ascii')
-    baseHeader.writeUInt16LE(OBJ_HEADER_BASE_SIZE, 4)
-    baseHeader.writeUInt16LE(1, 6)
-    baseHeader.writeUInt32LE(objSize, 8)
-    baseHeader.writeUInt32LE(LOG_CONTAINER, 12)
-
-    const containerHeader = Buffer.alloc(LOG_CONTAINER_HEADER_SIZE)
-    containerHeader.writeUInt16LE(method, 0)
-    containerHeader.writeUInt32LE(uncompressed.length, 8)
-
     const padding = padData(objSize)
+    const totalSize = OBJ_HEADER_BASE_SIZE + LOG_CONTAINER_HEADER_SIZE + payload.length + padding
 
-    fs.writeSync(this.fd, baseHeader, 0, baseHeader.length, this.position)
-    this.position += baseHeader.length
-    fs.writeSync(this.fd, containerHeader, 0, containerHeader.length, this.position)
-    this.position += containerHeader.length
-    fs.writeSync(this.fd, payload, 0, payload.length, this.position)
-    this.position += payload.length
+    // Single buffer allocation + single write syscall
+    const combined = Buffer.allocUnsafe(totalSize)
+    let offset = 0
+
+    // Base header
+    combined.write('LOBJ', offset, 'ascii')
+    combined.writeUInt16LE(OBJ_HEADER_BASE_SIZE, offset + 4)
+    combined.writeUInt16LE(1, offset + 6)
+    combined.writeUInt32LE(objSize, offset + 8)
+    combined.writeUInt32LE(LOG_CONTAINER, offset + 12)
+    offset += OBJ_HEADER_BASE_SIZE
+
+    // Container header
+    combined.writeUInt16LE(method, offset)
+    combined.fill(0, offset + 2, offset + 8) // reserved bytes
+    combined.writeUInt32LE(uncompressed.length, offset + 8)
+    combined.fill(0, offset + 12, offset + LOG_CONTAINER_HEADER_SIZE) // reserved
+    offset += LOG_CONTAINER_HEADER_SIZE
+
+    // Payload
+    payload.copy(combined, offset)
+    offset += payload.length
+
+    // Padding (already zeroed by allocUnsafe is not guaranteed, but padding is small)
     if (padding) {
-      const padBuf = Buffer.alloc(padding)
-      fs.writeSync(this.fd, padBuf, 0, padding, this.position)
-      this.position += padding
+      combined.fill(0, offset, offset + padding)
     }
+
+    // Single write call - better performance
+    this._dest.write(combined)
 
     this.uncompressedSize += BigInt(
       OBJ_HEADER_BASE_SIZE + LOG_CONTAINER_HEADER_SIZE + uncompressed.length
     )
   }
 
-  stop() {
-    if (this.closed) return
+  stop(callback?: () => void) {
+    if (this.closed) {
+      callback?.()
+      return
+    }
     this.flush()
+    this.closed = true
 
     if (!this.startTimeNs) {
       const now = BigInt(Date.now()) * 1_000_000n
@@ -337,7 +380,32 @@ class BlfWriter {
       this.stopTimeNs = now
     }
 
-    const stats = fs.fstatSync(this.fd)
+    // Wait for pending compression to complete, then close
+    this._waitPendingAndClose(callback)
+  }
+
+  /**
+   * Wait for pending async compression and close stream
+   */
+  private _waitPendingAndClose(callback?: () => void) {
+    if (this._pendingFlush > 0) {
+      // Still have pending compression, check again soon
+      setImmediate(() => this._waitPendingAndClose(callback))
+      return
+    }
+
+    // End the WriteStream and update header
+    this._dest.end(() => {
+      this._updateHeader()
+      callback?.()
+    })
+  }
+
+  /**
+   * Update file header with final size/count
+   */
+  private _updateHeader() {
+    const stats = fs.statSync(this.filePath)
     const fileSize = BigInt(stats.size)
 
     const header = this.buildHeader(
@@ -347,10 +415,11 @@ class BlfWriter {
       this.startTimeNs,
       this.stopTimeNs
     )
-    fs.writeSync(this.fd, header, 0, header.length, 0)
 
-    fs.closeSync(this.fd)
-    this.closed = true
+    // Rewrite header at beginning of file
+    const fd = fs.openSync(this.filePath, 'r+')
+    fs.writeSync(fd, header, 0, header.length, 0)
+    fs.closeSync(fd)
   }
 }
 
@@ -417,13 +486,20 @@ class BlfTransport extends Transport {
     callback()
   }
 
-  close(): void {
-    if (this.closed) return
-    this.writer.stop()
-    this.closed = true
-    if (typeof super.close === 'function') {
-      super.close()
+  close(cb?: () => void): void {
+    if (this.closed) {
+      cb?.()
+      return
     }
+    this.closed = true
+    this.writer.stop(() => {
+      this.emit('flush')
+      this.emit('closed')
+      cb?.()
+      if (typeof super.close === 'function') {
+        super.close()
+      }
+    })
   }
 }
 

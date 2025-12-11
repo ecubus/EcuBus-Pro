@@ -57,15 +57,20 @@
           },
           {
             "trigger": {
-              "type": "periodic",
+              "type": "manual",
               "period": 100
             },
             "name": "",
             "id": "1",
             "channel": "bd70eeee-d980-46f4-90ce-4c56bb145371",
             "type": "can",
-            "dlc": 8,
-            "data": [],
+            "dlc": 4,
+            "data": [
+              "11",
+              "22",
+              "33",
+              "44"
+            ],
             "_X_ROW_KEY": "row_60",
             "uuid": "row_54"
           }
@@ -68733,7 +68738,8 @@
         "method": [
           "canBase",
           "canError"
-        ]
+        ],
+        "compression": 1
       }
     },
     "traces": {
@@ -68755,8 +68761,8 @@
         "pos": {
           "x": 383,
           "y": 0,
-          "w": 2562,
-          "h": 313
+          "w": 1868,
+          "h": 365
         },
         "options": {
           "params": {}
@@ -68782,7 +68788,7 @@
       "hardware": {
         "pos": {
           "x": -32,
-          "y": 47,
+          "y": 0,
           "w": 558,
           "h": 400
         },
@@ -68794,7 +68800,7 @@
       "network": {
         "pos": {
           "x": 835,
-          "y": 60,
+          "y": 0,
           "w": 600,
           "h": 400
         },
@@ -68805,8 +68811,8 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 503.5,
-          "y": 73.5,
+          "x": 950,
+          "y": 0,
           "w": 700,
           "h": 400
         },
@@ -68818,6 +68824,23 @@
             "edit-index": "a6773bbd-db04-405f-9a23-af32b1c12e70"
           },
           "name": "Can IA"
+        }
+      },
+      "trace": {
+        "pos": {
+          "x": 665.5,
+          "y": 0,
+          "w": 1517,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Main"
         }
       }
     },

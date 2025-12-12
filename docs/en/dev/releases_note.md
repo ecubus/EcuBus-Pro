@@ -1,4 +1,19 @@
 # EcuBus-Pro Release Notes
+## Unreleased
+Changes since v0.8.57:
+
+ 
+* [feat]:add logger file choose 
+* [bug]:fix cli pnpm try to found node 
+* [bug]:fix ecb file read use others encoding 
+* [feat]:remove panel group component 
+* [opt]:add hex and s19 built in uds service 
+* [feat]:add setVars api 
+* [bug]:fix vector period send failed (#256) 
+* [bug]:fix normal node can't access uds service 
+* [bug]:fix dbc file physValue calc when it has vt
+---
+
 ## 0.8.57
 Changes from v0.8.56 to v0.8.57:
 

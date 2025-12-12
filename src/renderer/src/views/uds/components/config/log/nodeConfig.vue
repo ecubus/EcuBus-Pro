@@ -47,7 +47,11 @@
               </el-select>
             </el-form-item>
             <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">
-              <el-input v-model="formData.path" placeholder="Log file Path" />
+              <el-input v-model="formData.path" placeholder="Log file Path">
+                <template #append>
+                  <el-button size="small" @click="browseFile">Browse</el-button>
+                </template>
+              </el-input>
             </el-form-item>
             <el-alert
               v-if="formData.type == 'file'"
@@ -230,6 +234,43 @@ function handleMethodChange(
   }
 }
 const project = useProjectStore()
+
+async function browseFile() {
+  const formatExtensions: Record<string, string[]> = {
+    asc: ['asc'],
+    blf: ['blf'],
+    csv: ['csv']
+  }
+
+  const formatNames: Record<string, string> = {
+    asc: 'ASC Format',
+    blf: 'Vector BLF Format',
+    csv: 'CSV Format'
+  }
+
+  const currentFormat = formData.value.format || 'asc'
+  const extensions = formatExtensions[currentFormat] || ['*']
+  const formatName = formatNames[currentFormat] || 'Log File'
+
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Select Log File',
+    properties: ['openFile'],
+    filters: [
+      { name: formatName, extensions: extensions },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+
+  const file = r.filePaths[0]
+  if (file) {
+    if (project.projectInfo.path) {
+      formData.value.path = window.path.relative(project.projectInfo.path, file)
+    } else {
+      formData.value.path = file
+    }
+  }
+}
 
 // const db = computed(() => {
 //     const list: {

@@ -19,15 +19,24 @@
   - 文件：将帧写入文件；选择目标路径
   - 套接字：将帧写入套接字（暂不支持）
 - 格式
-  - ASC：Vector ASC 格式，`ASC 以流模式写入`
+  - ASC：Vector ASC 格式
   - CSV：逗号分隔文本格式（暂不支持）
-  - BLF：Vector BLF 格式（暂不支持）
+  - BLF：Vector BLF 格式
 - 记录类型：选择要记录的帧类型
 
   - CAN：记录 CAN 帧
   - LIN：记录 LIN 帧
   - ETH：记录以太网帧
   - UDS：记录 PW
+
+## BLF 格式
+
+BLF 格式是一种用于记录 CAN 帧的二进制格式。 它受 Vector 工具支持，可用于分析 CAN 帧。
+![configLogger](./../../../media/um/network/blf.png)
+
+### 使用 CANoe 进行测试
+
+![configLogger1](./../../../media/um/network/blfincanoe.png)
 
 ## 演示：写入文件
 

@@ -255,15 +255,15 @@ export class Candle_CAN extends CanBase {
     const ts = new Candle.TS()
 
     if (!Candle.candle_dev_get_timestamp_us(this.target, ts.cast())) {
-      throw new Error('Get timestamp failed')
+      // throw new Error('Get timestamp failed')
     }
 
     if (!Candle.candle_channel_set_interfacenumber_endpoints(this.target, this.channel)) {
-      throw new Error('Set interface number endpoints failed')
+      // throw new Error('Set interface number endpoints failed')
     }
 
     if (!Candle.candle_channel_start(this.target, this.channel, flag)) {
-      throw new Error('Start channel failed')
+      // throw new Error('Start channel failed')
     }
 
     Candle.CreateTSFN(

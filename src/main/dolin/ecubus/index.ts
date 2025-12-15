@@ -65,6 +65,19 @@ export class LinCable extends LinBase {
       autoOpen: true
     })
 
+    //check path exists
+    LinCable.getValidDevices().then((devices) => {
+      let found = false
+      if (devices.find((d) => d.id == this.info.device.handle)) {
+        found = true
+      }
+      if (!found) {
+        global.sysLog.error(
+          `The port ${this.info.device.handle} isn't exists or is not a LinCable device`
+        )
+      }
+    })
+
     this.log = new LinLOG('EcuBus', info.name, this.info.device.id, this.event)
     this.startTs = getTsUs()
 

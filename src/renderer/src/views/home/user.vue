@@ -6,6 +6,35 @@
         <h2>Welcome to Ecubus Pro</h2>
         <p>Please sign in to access your account and licenses.</p>
 
+        <div class="benefits-section">
+          <h4>Why Register?</h4>
+          <div class="benefit-item">
+            <Icon :icon="supportIcon" class="benefit-icon" />
+            <div class="benefit-content">
+              <span class="benefit-title">Priority Support</span>
+              <span class="benefit-desc"
+                >Get faster technical support and bug fixes with higher priority</span
+              >
+            </div>
+          </div>
+          <div class="benefit-item">
+            <Icon :icon="pluginIcon" class="benefit-icon" />
+            <div class="benefit-content">
+              <span class="benefit-title">Plugin Development</span>
+              <span class="benefit-desc"
+                >Create and publish your own plugins to extend functionality</span
+              >
+            </div>
+          </div>
+          <div class="benefit-item">
+            <Icon :icon="moreIcon" class="benefit-icon" />
+            <div class="benefit-content">
+              <span class="benefit-title">More Features</span>
+              <span class="benefit-desc">Access exclusive features and early updates</span>
+            </div>
+          </div>
+        </div>
+
         <div class="actions">
           <el-button type="primary" size="large" :loading="loading" @click="openLogin">
             Sign In with Casdoor
@@ -62,6 +91,9 @@ import { Icon } from '@iconify/vue'
 import userIcon from '@iconify/icons-material-symbols/person-outline'
 import checkCircle from '@iconify/icons-material-symbols/check-circle-outline'
 import alertCircle from '@iconify/icons-material-symbols/error-outline'
+import supportIcon from '@iconify/icons-material-symbols/support-agent'
+import pluginIcon from '@iconify/icons-material-symbols/extension'
+import moreIcon from '@iconify/icons-material-symbols/stars-outline'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
@@ -193,16 +225,67 @@ onUnmounted(() => {
   background: var(--el-bg-color-overlay);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  max-width: 480px;
   width: 100%;
 
   h2 {
     margin: 20px 0 10px;
   }
 
-  p {
+  > p {
     color: var(--el-text-color-secondary);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+  }
+}
+
+.benefits-section {
+  text-align: left;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: var(--el-text-color-primary);
+    text-align: center;
+  }
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  .benefit-icon {
+    font-size: 24px;
+    color: var(--el-color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .benefit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .benefit-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--el-text-color-primary);
+    }
+
+    .benefit-desc {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      line-height: 1.4;
+    }
   }
 }
 

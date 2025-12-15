@@ -62,33 +62,48 @@
                 </el-scrollbar>
               </div>
 
-              <!-- Advertisement Slots -->
+              <!-- Advertisement Carousel -->
               <el-divider content-position="left"
                 ><strong>{{ $t('home.advertisingPartnership') }}</strong></el-divider
               >
-              <div class="ad-slots">
-                <div class="ad-slot premium" @click="openAdLink('ad1')">
-                  <div class="ad-icon">
-                    <Icon :icon="starIcon" />
-                  </div>
-                  <div class="ad-content">
-                    <div class="ad-title">{{ $t('home.advertiseHere') }}</div>
-                    <div class="ad-description">
-                      {{ $t('home.advertiseDescription') }}
+              <div class="ad-carousel-container">
+                <el-carousel
+                  height="150px"
+                  :interval="5000"
+                  indicator-position="outside"
+                  arrow="never"
+                >
+                  <!-- LinCable Ad -->
+                  <el-carousel-item>
+                    <div class="ad-slot lincable" @click="openAdLink('lincable')">
+                      <div class="ad-image">
+                        <img :src="lincableImg" alt="LinCable" />
+                      </div>
+                      <div class="ad-content">
+                        <div class="ad-title">EcuBus LinCable</div>
+                        <div class="ad-description">
+                          USB to LIN Adapter | Conformance Testing | Fault Injection | ISO 17987-6
+                        </div>
+                        <div class="ad-cta">Learn More →</div>
+                      </div>
                     </div>
-                    <div class="ad-cta">{{ $t('home.contactUs') }}</div>
-                  </div>
-                </div>
-                <!-- <div class="ad-slot sponsor" @click="openAdLink('ad2')">
-                  <div class="ad-icon">
-                    <Icon :icon="heartIcon" />
-                  </div>
-                  <div class="ad-content">
-                    <div class="ad-title">🤝 Partner With Us</div>
-                    <div class="ad-description">Become an official EcuBus Pro partner and serve the automotive industry together</div>
-                    <div class="ad-cta">Learn More →</div>
-                  </div>
-                </div> -->
+                  </el-carousel-item>
+                  <!-- Partner Ad -->
+                  <el-carousel-item>
+                    <div class="ad-slot premium" @click="openAdLink('ad1')">
+                      <div class="ad-icon">
+                        <Icon :icon="starIcon" />
+                      </div>
+                      <div class="ad-content">
+                        <div class="ad-title">📢 Advertise Here</div>
+                        <div class="ad-description">
+                          Showcase your products and services to professional automotive engineers
+                        </div>
+                        <div class="ad-cta">Contact Us →</div>
+                      </div>
+                    </div>
+                  </el-carousel-item>
+                </el-carousel>
               </div>
             </div>
           </div>
@@ -473,6 +488,8 @@ import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'
 import heartIcon from '@iconify/icons-material-symbols/favorite-outline'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
+import usbIcon from '@iconify/icons-mdi/usb'
+import lincableImg from '@r/assets/lincable.png'
 import PluginMarketplace from './PluginMarketplace.vue'
 import { usePluginStore } from '@r/stores/plugin'
 import { i18next } from '@r/i18n'
@@ -536,7 +553,12 @@ function openUm() {
 }
 
 function openAdLink(adId: string) {
-  if (adId === 'ad1') {
+  if (adId === 'lincable') {
+    window.electron.ipcRenderer.send(
+      'ipc-open-link',
+      'https://app.whyengineer.com/docs/um/hardware/lincable.html'
+    )
+  } else if (adId === 'ad1') {
     window.electron.ipcRenderer.send(
       'ipc-open-link',
       'https://app.whyengineer.com/docs/about/contact.html'
@@ -938,33 +960,10 @@ onMounted(() => {
   );
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.4s ease;
   min-height: 70px;
   display: flex;
   align-items: center;
   gap: 15px;
-  position: relative;
-  overflow: hidden;
-}
-
-.ad-slot::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s;
-}
-
-.ad-slot:hover::before {
-  left: 100%;
-}
-
-.ad-slot:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .ad-slot.premium {
@@ -976,11 +975,6 @@ onMounted(() => {
   );
 }
 
-.ad-slot.premium:hover {
-  border-color: var(--el-color-primary);
-  box-shadow: 0 8px 25px rgba(64, 158, 255, 0.3);
-}
-
 .ad-slot.sponsor {
   border-color: var(--el-color-success);
   background: linear-gradient(
@@ -988,11 +982,6 @@ onMounted(() => {
     var(--el-color-success-light-9) 0%,
     var(--el-color-success-light-8) 100%
   );
-}
-
-.ad-slot.sponsor:hover {
-  border-color: var(--el-color-success);
-  box-shadow: 0 8px 25px rgba(103, 194, 58, 0.3);
 }
 
 .ad-icon {
@@ -1042,5 +1031,62 @@ onMounted(() => {
 
 .ad-slot.sponsor .ad-cta {
   color: var(--el-color-success);
+}
+
+.ad-carousel-container {
+  margin: 10px;
+}
+
+.ad-carousel-container :deep(.el-carousel__container) {
+  background: transparent;
+}
+
+.ad-carousel-container :deep(.el-carousel__indicators--outside) {
+  margin-top: 0;
+}
+
+.ad-carousel-container :deep(.el-carousel__item) {
+  background: transparent;
+}
+
+.ad-carousel-container .ad-slot {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.ad-carousel-container :deep(.el-carousel__indicator--horizontal .el-carousel__button) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ad-slot.lincable {
+  border-color: #00d4aa;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(0, 212, 170, 0.2) 100%);
+}
+
+.ad-icon.lincable-icon {
+  color: #00d4aa;
+  background: rgba(0, 212, 170, 0.15);
+}
+
+.ad-slot.lincable .ad-cta {
+  color: #00d4aa;
+}
+
+.ad-image {
+  flex-shrink: 0;
+  width: 70px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
 }
 </style>

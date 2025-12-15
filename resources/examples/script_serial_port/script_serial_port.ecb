@@ -1,0 +1,63 @@
+{
+  "data": {
+    "devices": {},
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "5a805a05-8288-497d-95ab-411399d3e36f": {
+        "name": "Node 1",
+        "id": "5a805a05-8288-497d-95ab-411399d3e36f",
+        "channel": [],
+        "script": "seriaport.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "network": {
+        "pos": {
+          "x": 400,
+          "y": 113,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      }
+    },
+    "example": {
+      "catalog": "Script"
+    }
+  }
+}

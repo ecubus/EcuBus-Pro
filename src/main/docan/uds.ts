@@ -1483,8 +1483,6 @@ async function compileTscEntry(
     '--platform=node',
     '--format=cjs',
     `--alias:ECB=${relativeLibPath}`,
-    `--alias:@serialport/bindings-cpp=${relativeLibPath}/bindings-cpp`,
-    `--alias:bindings=${relativeLibPath}/node-bindings`,
     `--outdir=${outputDir}`,
     `--inject:${path.join(relativeLibPath, 'uds.js')}`,
     `--define:process.platform="${process.platform}"`,

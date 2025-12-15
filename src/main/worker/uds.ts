@@ -32,6 +32,13 @@ if (!isMainThread && parentPort) {
           throw new Error(`Method ${method} not found`)
         }
         const result = fn(...params)
+        // id === -1 means fire-and-forget, no response needed
+        if (id === -1) {
+          if (result instanceof Promise) {
+            await result // still wait for completion but don't send response
+          }
+          return
+        }
         // 判断返回值是否是 Promise
         if (result instanceof Promise) {
           const resolvedResult = await result
@@ -40,7 +47,10 @@ if (!isMainThread && parentPort) {
           parentPort?.postMessage({ type: 'rpc_response', id, result })
         }
       } catch (e: any) {
-        parentPort?.postMessage({ type: 'rpc_response', id, error: e })
+        // id === -1 means fire-and-forget, no error response needed
+        if (id !== -1) {
+          parentPort?.postMessage({ type: 'rpc_response', id, error: e })
+        }
       }
     }
   })
@@ -2119,7 +2129,36 @@ export class UtilClass {
       this.event.on('__someipMsg' as any, this.someipMsg.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
       this.event.on('__varUpdate' as any, this.varUpdate.bind(this))
+      // SerialPort event handlers
+      this.event.on('__serialPortData' as any, this.handleSerialPortData.bind(this))
+      this.event.on('__serialPortError' as any, this.handleSerialPortError.bind(this))
+      this.event.on('__serialPortClose' as any, this.handleSerialPortClose.bind(this))
     }
+  }
+
+  /** @internal */
+  private handleSerialPortData(event: SerialPortDataEvent) {
+    const port = serialPortInstances.get(event.id)
+    if (port) {
+      port.emit('data', Buffer.from(event.data))
+    }
+  }
+
+  /** @internal */
+  private handleSerialPortError(event: SerialPortErrorEvent) {
+    const port = serialPortInstances.get(event.id)
+    if (port) {
+      port.emit('error', new Error(event.error))
+    }
+  }
+
+  /** @internal */
+  private handleSerialPortClose(event: SerialPortCloseEvent) {
+    const port = serialPortInstances.get(event.id)
+    if (port) {
+      port.emit('close')
+    }
+    serialPortInstances.delete(event.id)
   }
 
   /**
@@ -2840,6 +2879,393 @@ export async function setPwmDuty(value: { duty: number; device?: string }) {
   })
   return await p
 }
+
+// ============================================================================
+// SerialPort API
+// ============================================================================
+
+/**
+ * Serial port configuration options
+ *
+ * @category SerialPort
+ */
+export interface SerialPortOptions {
+  /** Serial port path (e.g., 'COM3' on Windows, '/dev/ttyUSB0' on Linux) */
+  path: string
+  /** Baud rate (e.g., 9600, 115200) */
+  baudRate: number
+  /** Data bits: 5, 6, 7, or 8 (default: 8) */
+  dataBits?: 5 | 6 | 7 | 8
+  /** Stop bits: 1, 1.5, or 2 (default: 1) */
+  stopBits?: 1 | 1.5 | 2
+  /** Parity: 'none', 'even', 'odd', 'mark', or 'space' (default: 'none') */
+  parity?: 'none' | 'even' | 'odd' | 'mark' | 'space'
+  /** Enable RTS/CTS hardware flow control (default: false) */
+  rtscts?: boolean
+  /** Enable XON software flow control (default: false) */
+  xon?: boolean
+  /** Enable XOFF software flow control (default: false) */
+  xoff?: boolean
+}
+
+/**
+ * Serial port information returned by list()
+ *
+ * @category SerialPort
+ */
+export interface SerialPortInfo {
+  /** Port path (e.g., 'COM3', '/dev/ttyUSB0') */
+  path: string
+  /** Manufacturer name */
+  manufacturer?: string
+  /** Serial number */
+  serialNumber?: string
+  /** PNP ID (Windows) */
+  pnpId?: string
+  /** Location ID */
+  locationId?: string
+  /** Friendly name */
+  friendlyName?: string
+  /** Vendor ID */
+  vendorId?: string
+  /** Product ID */
+  productId?: string
+}
+
+/**
+ * Serial port control signals for setting
+ *
+ * @category SerialPort
+ */
+export interface SerialPortSetSignals {
+  /** Break signal */
+  brk?: boolean
+  /** Data Terminal Ready signal */
+  dtr?: boolean
+  /** Request To Send signal */
+  rts?: boolean
+}
+
+/**
+ * Serial port control signals status
+ *
+ * @category SerialPort
+ */
+export interface SerialPortSignals {
+  /** Clear To Send signal */
+  cts: boolean
+  /** Data Set Ready signal */
+  dsr: boolean
+  /** Data Carrier Detect signal */
+  dcd: boolean
+}
+
+/**
+ * Serial port data event payload
+ *
+ * @category SerialPort
+ */
+export interface SerialPortDataEvent {
+  /** Serial port ID */
+  id: string
+  /** Received data as number array */
+  data: number[]
+}
+
+/**
+ * Serial port error event payload
+ *
+ * @category SerialPort
+ */
+export interface SerialPortErrorEvent {
+  /** Serial port ID */
+  id: string
+  /** Error message */
+  error: string
+}
+
+/**
+ * Serial port close event payload
+ *
+ * @category SerialPort
+ */
+export interface SerialPortCloseEvent {
+  /** Serial port ID */
+  id: string
+}
+
+// Store SerialPortClient instances for event dispatching
+const serialPortInstances = new Map<string, SerialPortClient>()
+
+/**
+ * SerialPort client class for serial communication in worker scripts.
+ * Provides methods to open, close, read, and write serial ports.
+ * Supports multiple simultaneous serial port connections.
+ * The port ID is automatically set to the path.
+ * Extends Emittery for event-based data handling.
+ *
+ * @category SerialPort
+ *
+ * @example
+ * ```ts
+ * import { SerialPortClient } from 'ECB';
+ *
+ * // Create a serial port instance with configuration
+ * const port = new SerialPortClient({
+ *   path: 'COM3',
+ *   baudRate: 115200
+ * });
+ *
+ * // Open the port
+ * await port.open();
+ *
+ * console.log(port.id); // 'COM3'
+ *
+ * // Handle incoming data using on('data')
+ * port.on('data', (data) => {
+ *   console.log('Received:', data.toString('hex'));
+ * });
+ *
+ * // Handle errors
+ * port.on('error', (err) => {
+ *   console.error('Error:', err.message);
+ * });
+ *
+ * // Handle close event
+ * port.on('close', () => {
+ *   console.log('Port closed');
+ * });
+ *
+ * // Write data
+ * await port.write(Buffer.from([0x01, 0x02, 0x03]));
+ *
+ * // Close when done
+ * await port.close();
+ * ```
+ */
+export class SerialPortClient extends Emittery<{
+  data: Buffer
+  error: Error
+  close: undefined
+}> {
+  private _id: string
+  private _options: SerialPortOptions
+  private _isOpen: boolean = false
+
+  /**
+   * Creates a new SerialPortClient instance
+   *
+   * @param options - Serial port configuration options
+   *
+   * @example
+   * ```ts
+   * const port = new SerialPortClient({
+   *   path: 'COM3',
+   *   baudRate: 115200
+   * });
+   * ```
+   */
+  constructor(options: SerialPortOptions) {
+    super()
+    this._options = options
+    this._id = options.path
+  }
+
+  /**
+   * Get the unique identifier of this serial port instance (equals to path)
+   *
+   * @returns The serial port ID (path)
+   *
+   * @example
+   * ```ts
+   * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+   * console.log(port.id); // 'COM3'
+   * ```
+   */
+  get id(): string {
+    return this._id
+  }
+
+  /**
+   * Check if the serial port is currently open
+   *
+   * @returns True if the port is open, false otherwise
+   *
+   * @example
+   * ```ts
+   * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+   * console.log(port.isOpen); // false
+   * await port.open();
+   * console.log(port.isOpen); // true
+   * ```
+   */
+  get isOpen(): boolean {
+    return this._isOpen
+  }
+
+  /**
+   * Open the serial port
+   *
+   * @returns Promise that resolves when the port is opened
+   * @throws Error if the port is already open or if opening fails
+   *
+   * @example
+   * ```ts
+   * // Basic usage
+   * const port = new SerialPortClient({
+   *   path: 'COM3',
+   *   baudRate: 115200
+   * });
+   * await port.open();
+   *
+   * // Full configuration
+   * const port2 = new SerialPortClient({
+   *   path: '/dev/ttyUSB0',
+   *   baudRate: 9600,
+   *   dataBits: 8,
+   *   stopBits: 1,
+   *   parity: 'none',
+   *   rtscts: false,
+   *   xon: false,
+   *   xoff: false
+   * });
+   * await port2.open();
+   * ```
+   */
+  async open(): Promise<void> {
+    if (this._isOpen) {
+      throw new Error(`SerialPort '${this._id}' is already open`)
+    }
+
+    const p: Promise<void> = new Promise((resolve, reject) => {
+      workerEmit({
+        id: global.cmdId,
+        event: 'serialPortApi',
+        data: {
+          method: 'open',
+          options: this._options
+        }
+      })
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
+    })
+
+    await p
+    this._isOpen = true
+    serialPortInstances.set(this._id, this)
+  }
+
+  /**
+   * Close the serial port
+   *
+   * @returns Promise that resolves when the port is closed
+   * @throws Error if the port is not open
+   *
+   * @example
+   * ```ts
+   * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+   * await port.open();
+   * // ... do some work ...
+   * await port.close();
+   * ```
+   */
+  async close(): Promise<void> {
+    if (!this._isOpen) {
+      throw new Error(`SerialPort '${this._id}' is not open`)
+    }
+
+    const p: Promise<void> = new Promise((resolve, reject) => {
+      workerEmit({
+        id: global.cmdId,
+        event: 'serialPortApi',
+        data: {
+          method: 'close',
+          id: this._id
+        }
+      })
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
+    })
+
+    await p
+    this._isOpen = false
+    serialPortInstances.delete(this._id)
+  }
+
+  /**
+   * Write data to the serial port
+   *
+   * @param data - Data to write (Buffer or array of bytes)
+   * @returns Promise that resolves when data is written and drained
+   * @throws Error if the port is not open
+   *
+   * @example
+   * ```ts
+   * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+   * await port.open();
+   *
+   * // Write using Buffer
+   * await port.write(Buffer.from('Hello'));
+   *
+   * // Write using byte array
+   * await port.write([0x01, 0x02, 0x03, 0x04]);
+   *
+   * // Write hex string as buffer
+   * await port.write(Buffer.from('48454C4C4F', 'hex'));
+   * ```
+   */
+  async write(data: Buffer | number[]): Promise<void> {
+    if (!this._isOpen) {
+      throw new Error(`SerialPort '${this._id}' is not open`)
+    }
+
+    const p: Promise<void> = new Promise((resolve, reject) => {
+      workerEmit({
+        id: global.cmdId,
+        event: 'serialPortApi',
+        data: {
+          method: 'write',
+          id: this._id,
+          data: Buffer.isBuffer(data) ? Array.from(data) : data
+        }
+      })
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
+    })
+
+    return await p
+  }
+
+  /**
+   * List all available serial ports on the system
+   *
+   * @returns Promise that resolves with array of port information
+   *
+   * @example
+   * ```ts
+   * const ports = await SerialPortClient.list();
+   * for (const port of ports) {
+   *   console.log(`${port.path} - ${port.friendlyName || 'Unknown'}`);
+   * }
+   * ```
+   */
+  static async list(): Promise<SerialPortInfo[]> {
+    const p: Promise<SerialPortInfo[]> = new Promise((resolve, reject) => {
+      workerEmit({
+        id: global.cmdId,
+        event: 'serialPortApi',
+        data: {
+          method: 'list'
+        }
+      })
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
+    })
+
+    return await p
+  }
+}
+
 /**
  * Get a frame from database by name
  * 

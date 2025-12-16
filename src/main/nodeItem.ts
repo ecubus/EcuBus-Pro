@@ -118,9 +118,11 @@ export class NodeClass {
     this.startTs = getTsUs()
     if (nodeItem.script) {
       let jsPath = nodeItem.script
-      const outDir = path.join(this.projectPath, '.ScriptBuild')
-      const scriptNameNoExt = path.basename(nodeItem.script, '.ts')
-      jsPath = path.join(outDir, scriptNameNoExt + '.js')
+      const info = path.parse(jsPath)
+      if (info.ext == '.ts') {
+        const outDir = path.join(this.projectPath, '.ScriptBuild')
+        jsPath = path.join(outDir, info.name + '.js')
+      }
 
       this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)
       if (this.testOptions) {

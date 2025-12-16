@@ -263,6 +263,72 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <template v-if="data.doipVersion === 3">
+          <el-divider content-position="left">Server TLS (Entity Simulation)</el-divider>
+          <el-form-item label="Enable Server TLS" prop="serverTls.enabled">
+            <el-switch
+              v-model="serverTlsEnabled"
+              :disabled="globalStart"
+              @change="onServerTlsEnabledChange"
+            />
+            <span class="tls-hint">Enable TLS for entity simulation server</span>
+          </el-form-item>
+          <template v-if="serverTlsEnabled">
+            <el-form-item label="Server TLS Port" prop="serverTls.port">
+              <el-input-number
+                v-model="data.serverTls!.port"
+                :disabled="globalStart"
+                :min="1"
+                :max="65535"
+                :placeholder="3496"
+                controls-position="right"
+              />
+            </el-form-item>
+            <el-form-item label="CA Certificate" prop="serverTls.ca">
+              <el-input
+                v-model="data.serverTls!.ca"
+                :disabled="globalStart"
+                placeholder="Path to CA certificate file (to verify tester)"
+              >
+                <template #append>
+                  <el-button :disabled="globalStart" @click="selectServerCertFile('ca')"
+                    >Browse</el-button
+                  >
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="Server Certificate" prop="serverTls.cert">
+              <el-input
+                v-model="data.serverTls!.cert"
+                :disabled="globalStart"
+                placeholder="Path to server certificate file"
+              >
+                <template #append>
+                  <el-button :disabled="globalStart" @click="selectServerCertFile('cert')"
+                    >Browse</el-button
+                  >
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="Server Private Key" prop="serverTls.key">
+              <el-input
+                v-model="data.serverTls!.key"
+                :disabled="globalStart"
+                placeholder="Path to server private key file"
+              >
+                <template #append>
+                  <el-button :disabled="globalStart" @click="selectServerCertFile('key')"
+                    >Browse</el-button
+                  >
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="Require Client Cert" prop="serverTls.rejectUnauthorized">
+              <el-switch v-model="serverRequireClientCert" :disabled="globalStart" />
+              <span class="tls-hint">Require tester to provide certificate (mutual TLS)</span>
+            </el-form-item>
+          </template>
+        </template>
       </template>
       <el-divider content-position="left">
         <el-button icon="Plus" link type="primary" :disabled="globalStart" @click="addCanAddress">
@@ -487,6 +553,72 @@ const data = ref<TesterInfo>({
   enableCodeGen: false,
   generateConfigs: []
 })
+
+// Server TLS computed properties
+const serverTlsEnabled = computed({
+  get: () => data.value.serverTls?.enabled || false,
+  set: (val) => {
+    if (!data.value.serverTls) {
+      data.value.serverTls = {
+        enabled: val,
+        port: 3496,
+        rejectUnauthorized: true
+      }
+    } else {
+      data.value.serverTls.enabled = val
+    }
+  }
+})
+
+const serverRequireClientCert = computed({
+  get: () => data.value.serverTls?.rejectUnauthorized !== false,
+  set: (val) => {
+    if (data.value.serverTls) {
+      data.value.serverTls.rejectUnauthorized = val
+    }
+  }
+})
+
+function onServerTlsEnabledChange(val: boolean) {
+  if (val && !data.value.serverTls) {
+    data.value.serverTls = {
+      enabled: true,
+      port: 3496,
+      rejectUnauthorized: true
+    }
+  }
+}
+
+async function selectServerCertFile(type: 'ca' | 'cert' | 'key') {
+  const titles: Record<string, string> = {
+    ca: 'Select CA Certificate',
+    cert: 'Select Server Certificate',
+    key: 'Select Server Private Key'
+  }
+  const extensions: Record<string, string[]> = {
+    ca: ['pem', 'crt', 'cer'],
+    cert: ['pem', 'crt', 'cer'],
+    key: ['pem', 'key']
+  }
+
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: titles[type],
+    properties: ['openFile'],
+    filters: [
+      { name: 'Certificate Files', extensions: extensions[type] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePaths[0]
+  if (file && data.value.serverTls) {
+    if (project.projectInfo.path) {
+      data.value.serverTls[type] = window.path.relative(project.projectInfo.path, file)
+    } else {
+      data.value.serverTls[type] = file
+    }
+  }
+}
 
 function getAddrName(item: UdsAddress, index: number) {
   if (item.type == 'can') {
@@ -1062,6 +1194,10 @@ const onSubmit = async () => {
     dataBase.tester[editIndex.value].simulateBy = data.value.simulateBy
     dataBase.tester[editIndex.value].enableCodeGen = data.value.enableCodeGen
     dataBase.tester[editIndex.value].generateConfigs = cloneDeep(data.value.generateConfigs)
+    dataBase.tester[editIndex.value].doipVersion = data.value.doipVersion
+    dataBase.tester[editIndex.value].serverTls = data.value.serverTls
+      ? cloneDeep(data.value.serverTls)
+      : undefined
 
     emits('change', editIndex.value, data.value.name)
     return true
@@ -1206,6 +1342,12 @@ onUnmounted(() => {
 .addrError {
   color: var(--el-color-danger);
   font-weight: bold;
+}
+
+.tls-hint {
+  margin-left: 10px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 
 .buildStatus {

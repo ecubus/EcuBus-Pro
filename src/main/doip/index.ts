@@ -17,6 +17,7 @@ import { DoipLOG, UdsLOG } from '../log'
 import { TesterInfo } from '../share/tester'
 import { findService } from '../docan/uds'
 import fs from 'fs'
+import path from 'path'
 
 // DoIP v3 TLS port
 const DOIP_TLS_PORT = 3496
@@ -216,7 +217,8 @@ export class DOIP {
   /* version| inverseVersion| payloadType(2)| len(4)| content */
   constructor(
     public base: EthBaseInfo,
-    private tester: TesterInfo
+    private tester: TesterInfo,
+    private projectPath: string
   ) {
     this.eth = base.device
 
@@ -277,6 +279,20 @@ export class DOIP {
     })
     this.udp4Server = udp4Server
   }
+
+  /**
+   * Resolve a file path - if relative, resolve against project path
+   */
+  private resolvePath(filePath: string): string {
+    if (path.isAbsolute(filePath)) {
+      return filePath
+    }
+    if (this.projectPath) {
+      return path.join(this.projectPath, filePath)
+    }
+    return filePath
+  }
+
   /**
    * Load TLS options from TlsConfig
    */
@@ -284,13 +300,13 @@ export class DOIP {
     const options: tls.TlsOptions = {}
 
     if (tlsConfig.ca) {
-      options.ca = fs.readFileSync(tlsConfig.ca)
+      options.ca = fs.readFileSync(this.resolvePath(tlsConfig.ca))
     }
     if (tlsConfig.cert) {
-      options.cert = fs.readFileSync(tlsConfig.cert)
+      options.cert = fs.readFileSync(this.resolvePath(tlsConfig.cert))
     }
     if (tlsConfig.key) {
-      options.key = fs.readFileSync(tlsConfig.key)
+      options.key = fs.readFileSync(this.resolvePath(tlsConfig.key))
     }
     if (tlsConfig.rejectUnauthorized !== undefined) {
       options.rejectUnauthorized = tlsConfig.rejectUnauthorized
@@ -507,7 +523,19 @@ export class DOIP {
       )
       client.pendingPromise = undefined
     }
-    client.socket.resetAndDestroy()
+    // 在某些平台或场景下，socket 可能并不是一个真正的 TCP 套接字（例如管道），
+    // 对这类句柄调用 resetAndDestroy 会抛出 ERR_INVALID_HANDLE_TYPE（"This handle type cannot be sent"）。
+    // 为了兼容所有情况，这里优先尝试 resetAndDestroy，不支持时退回到 destroy。
+    const s = client.socket as net.Socket & { resetAndDestroy?: () => net.Socket }
+    if (typeof s.resetAndDestroy === 'function') {
+      try {
+        s.resetAndDestroy()
+      } catch {
+        s.destroy()
+      }
+    } else {
+      s.destroy()
+    }
     const key = `${client.addr.tester.testerLogicalAddr}`
     this.tcpClientMap.delete(key)
   }
@@ -586,14 +614,19 @@ export class DOIP {
           rejectUnauthorized: addr.tls?.rejectUnauthorized !== false
         }
 
+        // Skip hostname/IP verification if rejectUnauthorized is false
+        if (addr.tls?.rejectUnauthorized === false) {
+          tlsOptions.checkServerIdentity = () => undefined
+        }
+
         if (addr.tls?.ca) {
-          tlsOptions.ca = fs.readFileSync(addr.tls.ca)
+          tlsOptions.ca = fs.readFileSync(this.resolvePath(addr.tls.ca))
         }
         if (addr.tls?.cert) {
-          tlsOptions.cert = fs.readFileSync(addr.tls.cert)
+          tlsOptions.cert = fs.readFileSync(this.resolvePath(addr.tls.cert))
         }
         if (addr.tls?.key) {
-          tlsOptions.key = fs.readFileSync(addr.tls.key)
+          tlsOptions.key = fs.readFileSync(this.resolvePath(addr.tls.key))
         }
 
         this.udsLog.systemMsg(

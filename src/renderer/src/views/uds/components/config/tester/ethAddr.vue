@@ -134,7 +134,7 @@
       </el-col>
     </el-form-item>
     <template v-if="Number(props.version) == 3">
-      <el-divider content-position="left">TLS Settings (DoIP v3)</el-divider>
+      <el-divider content-position="left">TLS Settings - Tester (DoIP v3)</el-divider>
       <el-form-item label="Enable TLS" prop="tls.enabled">
         <el-switch v-model="tlsEnabled" @change="onTlsEnabledChange" />
         <span class="tls-hint">Enable TLS for secure communication (port 3496)</span>
@@ -157,14 +157,14 @@
           </el-input>
         </el-form-item>
         <el-form-item label="Client Certificate" prop="tls.cert">
-          <el-input v-model="data.tls!.cert" placeholder="Path to client certificate file">
+          <el-input v-model="data.tls!.cert" placeholder="Path to tester certificate file">
             <template #append>
               <el-button @click="selectCertFile('cert')">Browse</el-button>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item label="Private Key" prop="tls.key">
-          <el-input v-model="data.tls!.key" placeholder="Path to private key file">
+          <el-input v-model="data.tls!.key" placeholder="Path to tester private key file">
             <template #append>
               <el-button @click="selectCertFile('key')">Browse</el-button>
             </template>

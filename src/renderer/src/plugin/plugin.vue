@@ -53,7 +53,7 @@ const libPath = window.electron.ipcRenderer.sendSync('ipc-plugin-lib-path')
 const isDark = useDark()
 const darkValue = unref(isDark)
 const globalStartValue = unref(globalStartRef)
-const basePath = plugin.path
+const basePath = plugin.path.replace(/'/g, '%27')
 
 const importMap = {
   imports: {

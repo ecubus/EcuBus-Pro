@@ -300,6 +300,12 @@ export class DOIP {
   private loadTlsOptions(tlsConfig: TlsConfig): tls.TlsOptions {
     const options: tls.TlsOptions = {}
 
+    // request client certificates when "Require Client Cert" is enabled
+    const requireClientCert = tlsConfig.rejectUnauthorized !== false
+    if (requireClientCert) {
+      options.requestCert = true
+    }
+
     if (tlsConfig.ca) {
       options.ca = fs.readFileSync(this.resolvePath(tlsConfig.ca))
     }

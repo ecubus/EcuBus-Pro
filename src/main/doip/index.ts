@@ -671,7 +671,9 @@ export class DOIP {
         this.udsLog.systemMsg(`client tcp connect timeout`, getTsUs() - this.startTs, 'error')
       }, 2000)
 
-      socket.on('connect', () => {
+      const readyEvent = useTls ? 'secureConnect' : 'connect'
+
+      socket.once(readyEvent, () => {
         clearTimeout(timeout)
         // 设置socket选项
         socket.setNoDelay(true)

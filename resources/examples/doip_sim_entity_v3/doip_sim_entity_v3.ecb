@@ -1,0 +1,341 @@
+{
+  "data": {
+    "devices": {
+      "9a159bbd-c196-4a83-b866-45fa1ac1aed4": {
+        "type": "eth",
+        "ethDevice": {
+          "device": {
+            "label": "",
+            "handle": "127.0.0.1",
+            "id": "",
+            "detail": {
+              "address": "127.0.0.1",
+              "netmask": "255.0.0.0",
+              "family": "IPv4",
+              "mac": "00:00:00:00:00:00",
+              "internal": true,
+              "cidr": "127.0.0.1/8"
+            }
+          },
+          "name": "SIMULATE_0",
+          "id": "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
+          "vendor": "simulate"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {
+      "4c92bfff-29ef-424c-93f0-f8d2224668f3": {
+        "id": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
+        "name": "Tester_eth_1",
+        "type": "eth",
+        "script": "",
+        "targetDeviceId": "9a159bbd-c196-4a83-b866-45fa1ac1aed4",
+        "seqList": [
+          {
+            "name": "Seq0",
+            "services": [
+              {
+                "enable": true,
+                "checkResp": true,
+                "retryNum": 0,
+                "addressIndex": 0,
+                "failBehavior": "stop",
+                "serviceId": "e8f35a74-33e6-4114-a258-e7ef67ce2382",
+                "delay": 50,
+                "_X_ROW_KEY": "row_26",
+                "uuid": "row_7"
+              }
+            ]
+          }
+        ],
+        "address": [
+          {
+            "type": "eth",
+            "ethAddr": {
+              "name": "Addr0",
+              "entity": {
+                "vin": "ecubus-pro eth000",
+                "eid": "00-00-00-00-00-00",
+                "gid": "00-00-00-00-00-00",
+                "logicalAddr": 100,
+                "taType": "physical",
+                "virReqType": "broadcast",
+                "virReqAddr": "",
+                "entityNotFoundBehavior": "normal",
+                "nodeType": "node"
+              },
+              "tester": {
+                "testerLogicalAddr": 200,
+                "routeActiveTime": 0,
+                "createConnectDelay": "1000"
+              },
+              "virReqType": "broadcast",
+              "entityNotFoundBehavior": "normal",
+              "taType": "physical",
+              "tls": {
+                "enabled": true,
+                "port": 3496,
+                "rejectUnauthorized": false,
+                "ca": "doip-certs\\ca\\ca.crt",
+                "cert": "doip-certs\\tester\\tester.crt",
+                "key": "doip-certs\\tester\\tester.key",
+                "enableKeyLog": true
+              }
+            }
+          }
+        ],
+        "udsTime": {
+          "pTime": 2000,
+          "pExtTime": 5000,
+          "s3Time": 5000,
+          "testerPresentEnable": false
+        },
+        "allServiceList": {
+          "0x10": [
+            {
+              "id": "e8f35a74-33e6-4114-a258-e7ef67ce2382",
+              "name": "DiagnosticSessionControl160",
+              "serviceId": "0x10",
+              "params": [
+                {
+                  "id": "3cee0a56-ad97-4daa-8984-0ea29d5c7187",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "2498fd9e-5f66-4c20-b22c-7a0cee1b8324",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      1
+                    ]
+                  },
+                  "phyValue": 1
+                },
+                {
+                  "id": "d7a08c1f-ddd0-444d-bff7-8e665df5b7c2",
+                  "name": "sessionParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            },
+            {
+              "id": "de1cfb40-cfd0-47fa-9182-53a4e7b96461",
+              "name": "DiagnosticSessionControl161",
+              "serviceId": "0x10",
+              "params": [
+                {
+                  "id": "0c44a4ab-29a8-4818-b292-aa2df15f6877",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      2
+                    ]
+                  },
+                  "phyValue": 2
+                }
+              ],
+              "respParams": [
+                {
+                  "id": "fa81acf9-c8a1-4312-b0a8-4b745b707cfb",
+                  "name": "diagnosticSessionType",
+                  "bitLen": 8,
+                  "deletable": false,
+                  "editable": true,
+                  "type": "NUM",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      2
+                    ]
+                  },
+                  "phyValue": 2
+                },
+                {
+                  "id": "1067bb47-9a19-43f8-988b-423439c60905",
+                  "name": "sessionParameterRecord",
+                  "bitLen": 8,
+                  "deletable": true,
+                  "editable": true,
+                  "type": "ARRAY",
+                  "value": {
+                    "type": "Buffer",
+                    "data": [
+                      0
+                    ]
+                  },
+                  "phyValue": "00"
+                }
+              ],
+              "suppress": false,
+              "autoSubfunc": true
+            }
+          ]
+        },
+        "simulateBy": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
+        "enableCodeGen": false,
+        "generateConfigs": [
+          {
+            "tempaltePath": "qqq",
+            "generatePath": ""
+          }
+        ],
+        "doipVersion": 3,
+        "serverTls": {
+          "enabled": true,
+          "port": 3496,
+          "rejectUnauthorized": true,
+          "ca": "doip-certs\\ca\\ca.crt",
+          "cert": "doip-certs\\server\\server.crt",
+          "key": "doip-certs\\server\\server.key"
+        }
+      }
+    },
+    "subFunction": {},
+    "nodes": {
+      "aacaa592-6ccf-48cd-a8dc-a591bc89a7be": {
+        "name": "sim_entity",
+        "type": "eth",
+        "id": "aacaa592-6ccf-48cd-a8dc-a591bc89a7be",
+        "channel": [
+          "9a159bbd-c196-4a83-b866-45fa1ac1aed4"
+        ],
+        "attachTester": "4c92bfff-29ef-424c-93f0-f8d2224668f3",
+        "script": "node.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 5.3589999999999804,
+          "w": 1708.33,
+          "h": 286.615
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": true
+      },
+      "trace": {
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1574.5,
+          "h": 367.688
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {},
+        "hide": false,
+        "backupPos": {
+          "x": 0,
+          "y": 0,
+          "w": 1707,
+          "h": 287.177
+        },
+        "isMax": false
+      },
+      "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
+        "pos": {
+          "x": 1179.5,
+          "y": 0,
+          "w": 1197.5,
+          "h": 286.688
+        },
+        "title": "testerSequence",
+        "label": "Sequence",
+        "id": "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence",
+        "options": {
+          "params": {
+            "edit-index": "4c92bfff-29ef-424c-93f0-f8d2224668f3"
+          },
+          "name": "Tester_eth_1"
+        },
+        "hide": false
+      },
+      "tester": {
+        "pos": {
+          "x": 1038,
+          "y": 286.688,
+          "w": 1363.5,
+          "h": 672.688
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 980,
+          "y": 273.1925,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      }
+    },
+    "example": {
+      "catalog": "Ethernet"
+    }
+  }
+}

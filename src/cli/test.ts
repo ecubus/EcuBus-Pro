@@ -50,7 +50,7 @@ export default async function main(
   for (const tester of Object.values(data.tester)) {
     if (tester.type == 'eth') {
       for (const val of ethBaseMap.values()) {
-        const doip = new DOIP(val, tester)
+        const doip = new DOIP(val, tester, __dirname)
         doips.push(doip)
       }
     }

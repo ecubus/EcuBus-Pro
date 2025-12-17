@@ -470,7 +470,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       }
     } else if (tester.type == 'eth') {
       for (const val of ethBaseMap.values()) {
-        const doip = new DOIP(val, tester)
+        const doip = new DOIP(val, tester, projectInfo.path)
         doips.push(doip)
 
         for (const addr of tester.address) {
@@ -893,7 +893,8 @@ ipcMain.handle('ipc-run-sequence', async (event, ...arg) => {
     udsTesterMap.delete(tester.id)
     sysLog.error(`Sequence ${tester.name} ` + err.toString())
 
-    throw err
+    // Convert to plain Error to avoid IPC serialization issues with socket handles
+    throw new Error(err.message || err.toString())
   }
 })
 

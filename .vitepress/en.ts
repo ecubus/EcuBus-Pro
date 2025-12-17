@@ -101,6 +101,10 @@ function sidebar(): DefaultTheme.SidebarItem[] {
                 {
                   text: 'VIN Request Behavior',
                   link: 'doip/vin.md'
+                },
+                {
+                  text: 'DoIP v3',
+                  link: 'doip/doipv3.md'
                 }
               ]
             }
@@ -200,7 +204,8 @@ function sidebar(): DefaultTheme.SidebarItem[] {
           items: [
             { text: 'DoIP Tester', link: 'doip/readme.md' },
             { text: 'DoIP Simulate Entity', link: 'doip_sim_entity/readme.md' },
-            { text: 'DoIP Gateway', link: 'doip_gateway/readme.md' }
+            { text: 'DoIP Gateway', link: 'doip_gateway/readme.md' },
+            { text: 'DoIP v3', link: 'doip_sim_entity_v3/readme.md' }
           ],
           collapsed: true
         },

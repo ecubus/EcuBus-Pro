@@ -1,5 +1,5 @@
 import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo, ServiceId } from './uds'
-import { EntityAddr } from './doip'
+import { EntityAddr, TlsConfig } from './doip'
 
 /**
  * @category UDS
@@ -17,6 +17,8 @@ export interface TesterInfo {
   allServiceList: Partial<Record<ServiceId, ServiceItem[]>>
   //speical for doip
   doipVersion?: number
+  /** TLS configuration for DoIP v3 server (entity simulation) */
+  serverTls?: TlsConfig
   // code generate
   enableCodeGen?: boolean
   generateConfigs?: {

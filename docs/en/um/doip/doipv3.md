@@ -1,6 +1,8 @@
 # DoIP v3 (TLS Secure DoIP)
 
-DoIP v3 defined in new ISO13400-2 2019, major differenet is add TLS support:
+DoIP v3 defined in new ISO13400-2 2019, major differenet is add TLS support.
+
+![DoIP v3](../../../media/um/doip/v3-0.png)
 
 - **UDP discovery stays the same**: UDP port **13400** is still used for Vehicle Identification and announcements.
 - **Diagnostic TCP becomes TLS** (when enabled): default secure port **3496**.
@@ -10,17 +12,20 @@ DoIP v3 defined in new ISO13400-2 2019, major differenet is add TLS support:
 
 1. **Select Ethernet tester**
    - In your tester configuration, set **DOIP Version** to **DOIP V3**.
-2. **Configure VIN discovery (optional)**
-   - Configure “VIN Request method” as needed (see [Vehicle Identification Request Behavior](vin.md)).
-3. **Enable TLS on the address**
+   - Also setup **Entity Simulation** certificates if you want to simulate an entity/gateway.
+   
+2. **Enable TLS on the address**
    - Open the Ethernet address (`EthAddr`) you will use.
    - Enable **TLS Settings - Tester (DoIP v3)** → **Enable TLS**.
    - Keep **TLS Port = 3496** unless your ECU uses a different port.
-4. **Provide certificates (recommended)**
+   
+3. **Provide certificates (recommended)**
    - Set **CA Certificate** to trust the ECU/server certificate.
    - If the server requires client authentication, also set **Client Certificate** and **Private Key**.
-   - Certificate generation steps: [DoIP v3 TLS Certificates Generation Guide](doip-tls-certificates.md).
-5. Start the test and send UDS requests as usual.
+   - Test Certificate generation steps: [DoIP v3 TLS Certificates Generation Guide](doip-tls-certificates.md).
+4. Start the test and send UDS requests as usual.
+
+
 
 ## Ports and Traffic Model
 
@@ -39,6 +44,23 @@ Under **DOIP Settings**:
 
 - **DOIP V2**: TCP diagnostic connection to port **13400** (no TLS).
 - **DOIP V3**: uses DoIP v3 headers; you can optionally enable TLS for the TCP connection (recommended).
+
+### Entity Simulation TLS (DoIP v3 server)
+
+If your tester is configured to **simulate an entity/gateway** (Entity Simulation), you can enable TLS for the built-in DoIP server:
+
+- **Enable Server TLS**
+  - Starts a TLS server instead of a plain TCP server.
+- **Server TLS Port**
+  - Defaults to **3496**.
+- **CA Certificate**
+  - Trust anchor used to verify a tester certificate (when mutual TLS is used).
+- **Server Certificate / Server Private Key**
+  - The server identity presented during TLS handshake.
+- **Require Client Cert**
+  - Intended to enforce mutual TLS (tester must present a certificate).
+
+![DoIP v3 Server TLS](../../../media/um/doip/v3.png)
 
 ### Tester Address TLS Settings (DoIP v3)
 
@@ -62,33 +84,19 @@ Under the Ethernet address (`EthAddr`) when **DOIP Version = 3**:
 > [!TIP]
 > Certificate file paths can be **project-relative**. ECUBus-Pro resolves relative paths against the current project directory.
 
-### Entity Simulation TLS (DoIP v3 server)
-
-If your tester is configured to **simulate an entity/gateway** (Entity Simulation), you can enable TLS for the built-in DoIP server:
-
-- **Enable Server TLS**
-  - Starts a TLS server instead of a plain TCP server.
-- **Server TLS Port**
-  - Defaults to **3496**.
-- **CA Certificate**
-  - Trust anchor used to verify a tester certificate (when mutual TLS is used).
-- **Server Certificate / Server Private Key**
-  - The server identity presented during TLS handshake.
-- **Require Client Cert**
-  - Intended to enforce mutual TLS (tester must present a certificate).
-
-> [!NOTE]
-> Mutual TLS behavior depends on both sides being configured correctly (server CA + client cert/key). If you see handshake failures, verify that your certificate chain is correct and that both ends use the same CA.
+![DoIP v3 Usage](../../../media/um/doip/v3-1.png)
 
 
-> [!NOTE]
-> In the current implementation, **TCP Client Port** is applied to plain TCP connections. TLS connections use the system-assigned local port.
+
+
 
 ## Wireshark: Decrypt DoIP v3 TLS Using Key Log
 
 1. Enable **Enable Key Log** and set **Key Log Path** (or keep the default `logs/tls-keylog.txt`).
 2. Re-run the session so the key log file is generated.
 3. In Wireshark, set **(Pre)-Master-Secret log filename** to that keylog file.
+
+More details see wireshark official documentation: [Wireshark-TLS](https://wiki.wireshark.org/TLS#using-the-pre-master-secret)
 
 > [!WARNING]
 > TLS key logs allow decrypting captured traffic. Treat the keylog file as sensitive and do not share it publicly.

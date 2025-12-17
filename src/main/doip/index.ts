@@ -189,6 +189,7 @@ export interface clientTcp {
     reject: (err: DoipError) => void
   }
   timeout?: NodeJS.Timeout
+  keyLogFile?: fs.WriteStream
 }
 
 export class DOIP {
@@ -511,6 +512,7 @@ export class DOIP {
     }
   }
   closeClientTcp(client: clientTcp) {
+    //
     // 清理 timeout
     if (client.timeout) {
       clearTimeout(client.timeout)
@@ -535,6 +537,10 @@ export class DOIP {
       }
     } else {
       s.destroy()
+    }
+    if (client.keyLogFile) {
+      client.keyLogFile.end()
+      client.keyLogFile = undefined
     }
     const key = `${client.addr.tester.testerLogicalAddr}`
     this.tcpClientMap.delete(key)
@@ -722,6 +728,21 @@ export class DOIP {
       socket.on('data', (val) => {
         this.parseDataClient(socket, item, val)
       })
+      if (useTls) {
+        if (addr.tls?.enableKeyLog) {
+          const keyLogPath = this.resolvePath(addr.tls?.keyLogPath || 'logs/tls-keylog.txt')
+          const keyLogDir = path.dirname(keyLogPath)
+          if (!fs.existsSync(keyLogDir)) {
+            fs.mkdirSync(keyLogDir, { recursive: true })
+          }
+
+          // Create or overwrite the key log file
+          item.keyLogFile = fs.createWriteStream(keyLogPath, { flags: 'w' })
+          socket.on('keylog', (keylog) => {
+            item.keyLogFile?.write(keylog)
+          })
+        }
+      }
     })
   }
   async routeActiveRequest(client: clientTcp, activeType = 0, oemSpec?: Buffer) {

@@ -174,6 +174,19 @@
           <el-switch v-model="skipVerify" />
           <span class="tls-hint">Skip certificate verification (for testing only)</span>
         </el-form-item>
+        <el-form-item label="Enable Key Log" prop="tls.enableKeyLog">
+          <el-switch v-model="enableKeyLog" />
+          <span class="tls-hint">Enable key log for TLS communication</span>
+        </el-form-item>
+        <template v-if="enableKeyLog">
+          <el-form-item label="Key Log Path" prop="tls.keyLogPath">
+            <el-input v-model="data.tls!.keyLogPath" placeholder="logs/tls-keylog.txt">
+              <template #append>
+                <el-button @click="selectKeyLogFile">Browse</el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </template>
       </template>
     </template>
   </el-form>
@@ -239,6 +252,20 @@ const skipVerify = computed({
   }
 })
 
+const enableKeyLog = computed({
+  get: () => data.value.tls?.enableKeyLog || false,
+  set: (val: boolean) => {
+    if (!data.value.tls) {
+      data.value.tls = {
+        enabled: false,
+        port: 3496,
+        rejectUnauthorized: true
+      }
+    }
+    data.value.tls.enableKeyLog = val
+  }
+})
+
 function onTlsEnabledChange(val: boolean) {
   if (val && !data.value.tls) {
     data.value.tls = {
@@ -276,6 +303,33 @@ async function selectCertFile(type: 'ca' | 'cert' | 'key') {
       data.value.tls[type] = window.path.relative(project.projectInfo.path, file)
     } else {
       data.value.tls[type] = file
+    }
+  }
+}
+
+async function selectKeyLogFile() {
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Select Key Log File',
+    properties: ['openFile', 'createDirectory'],
+    filters: [
+      { name: 'Log/Text Files', extensions: ['log', 'txt'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  const file = r.filePaths?.[0]
+  if (file) {
+    if (!data.value.tls) {
+      data.value.tls = {
+        enabled: false,
+        port: 3496,
+        rejectUnauthorized: true
+      }
+    }
+    if (project.projectInfo.path) {
+      data.value.tls.keyLogPath = window.path.relative(project.projectInfo.path, file)
+    } else {
+      data.value.tls.keyLogPath = file
     }
   }
 }

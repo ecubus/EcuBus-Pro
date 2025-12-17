@@ -39,17 +39,6 @@
                 "enable": true,
                 "checkResp": true,
                 "retryNum": 0,
-                "addressIndex": 1,
-                "failBehavior": "stop",
-                "serviceId": "de1cfb40-cfd0-47fa-9182-53a4e7b96461",
-                "delay": 50,
-                "_X_ROW_KEY": "row_45",
-                "uuid": "row_6"
-              },
-              {
-                "enable": true,
-                "checkResp": true,
-                "retryNum": 0,
                 "addressIndex": 0,
                 "failBehavior": "stop",
                 "serviceId": "e8f35a74-33e6-4114-a258-e7ef67ce2382",
@@ -90,37 +79,8 @@
                 "rejectUnauthorized": false,
                 "ca": "doip-certs\\ca\\ca.crt",
                 "cert": "doip-certs\\tester\\tester.crt",
-                "key": "doip-certs\\tester\\tester.key"
-              }
-            }
-          },
-          {
-            "type": "eth",
-            "ethAddr": {
-              "name": "Addr1",
-              "taType": "functional",
-              "virReqType": "broadcast",
-              "virReqAddr": "",
-              "entityNotFoundBehavior": "normal",
-              "entity": {
-                "vin": "ecubus-pro eth000",
-                "eid": "00-00-00-00-00-00",
-                "gid": "00-00-00-00-00-00",
-                "nodeType": "node",
-                "logicalAddr": 101
-              },
-              "tester": {
-                "testerLogicalAddr": 200,
-                "routeActiveTime": 0,
-                "createConnectDelay": 1000
-              },
-              "tls": {
-                "enabled": true,
-                "port": 3496,
-                "rejectUnauthorized": false,
-                "ca": "doip-certs\\ca\\ca.crt",
-                "cert": "doip-certs\\tester\\tester.crt",
-                "key": "doip-certs\\tester\\tester.key"
+                "key": "doip-certs\\tester\\tester.key",
+                "enableKeyLog": true
               }
             }
           }
@@ -315,8 +275,8 @@
         "pos": {
           "x": 0,
           "y": 0,
-          "w": 853.5,
-          "h": 286.6925
+          "w": 1574.5,
+          "h": 367.688
         },
         "title": "trace",
         "label": "Trace",
@@ -333,7 +293,7 @@
       },
       "4c92bfff-29ef-424c-93f0-f8d2224668f3_sequence": {
         "pos": {
-          "x": 853.5,
+          "x": 1179.5,
           "y": 0,
           "w": 1197.5,
           "h": 286.688
@@ -351,14 +311,26 @@
       },
       "tester": {
         "pos": {
-          "x": 968,
-          "y": 236.6875,
+          "x": 1038,
+          "y": 286.688,
           "w": 1363.5,
           "h": 672.688
         },
         "title": "tester",
         "label": "UDS Tester",
         "id": "tester",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 980,
+          "y": 273.1925,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
         "options": {}
       }
     },

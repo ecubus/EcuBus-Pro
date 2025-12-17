@@ -31,6 +31,8 @@ export interface TlsConfig {
   rejectUnauthorized?: boolean
   /** TLS port, default is 3496 for DoIP v3 */
   port?: number
+  enableKeyLog?: boolean
+  keyLogPath?: string
 }
 
 /**

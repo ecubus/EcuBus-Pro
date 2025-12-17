@@ -18,7 +18,7 @@ import { cloneDeep } from 'lodash'
 import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
-import { EthAddr, EthBaseInfo, VinInfo } from './share/doip'
+import { EthAddr, EthBaseInfo, VinInfo, TlsConfig } from './share/doip'
 import { LIN_TP, TpError as LinTpError } from './dolin/lintp'
 import { LinDirection, LinMode, LinMsg } from './share/lin'
 
@@ -340,7 +340,9 @@ export class NodeClass {
               const baseItem = this.doips.find((d) => d.base.id == ethBaseItem.id)
               if (baseItem) {
                 if (tester.simulateBy == nodeItem.id) {
-                  baseItem.registerEntity(true, this.log)
+                  // Get server TLS config from tester level, resolve relative paths
+                  const serverTlsConfig = this.resolveTlsPaths(tester.serverTls)
+                  baseItem.registerEntity(true, this.log, serverTlsConfig)
                 }
                 for (const addr of tester.address) {
                   if (addr.type == 'eth' && addr.ethAddr) {
@@ -394,6 +396,27 @@ export class NodeClass {
         }
       }
     }
+  }
+  /**
+   * Resolve relative TLS certificate paths to absolute paths based on project path
+   */
+  private resolveTlsPaths(tlsConfig?: TlsConfig): TlsConfig | undefined {
+    if (!tlsConfig) return undefined
+
+    const resolved: TlsConfig = { ...tlsConfig }
+
+    // Resolve relative paths to absolute paths
+    if (resolved.ca && !path.isAbsolute(resolved.ca)) {
+      resolved.ca = path.join(this.projectPath, resolved.ca)
+    }
+    if (resolved.cert && !path.isAbsolute(resolved.cert)) {
+      resolved.cert = path.join(this.projectPath, resolved.cert)
+    }
+    if (resolved.key && !path.isAbsolute(resolved.key)) {
+      resolved.key = path.join(this.projectPath, resolved.key)
+    }
+
+    return resolved
   }
   private async _generateHtml(data: TestTree) {
     const statusIcons = {

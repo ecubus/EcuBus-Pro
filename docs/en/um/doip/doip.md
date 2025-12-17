@@ -2,6 +2,11 @@
 
 > TODO
 
+DOIP tester supports both DoIP v2 and DoIP v3.
+
+more deital about DoIP v3: [DoIP v3](doipv3.md)
+
+
 ## Tester Speical Control
 
 ### TCP/UDP Source Port Control

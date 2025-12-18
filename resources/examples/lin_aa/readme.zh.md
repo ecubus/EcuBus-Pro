@@ -30,8 +30,8 @@ Toomoss & Vector
 3. 开始前设置变量：
    - `LIN_AA.SupplierID`（十六进制字符串），例如 `7FFF` 或 `0x7FFF`
    - `LIN_AA.NadTable`（空格分隔的十六进制字节），例如 `01 02 03 04 11 aa`
-4. 设置 `LIN_AA.StartAA = 1` 以开始，`0` 以停止
-5. 在控制台中按 `c` 以十六进制打印当前的 `SupplierID` 和 `NadTable`
+4. 设置 `LIN_AA.StartAA = 1` 开始，`0` 停止
+5. 在控制台中按 `c` 以十六进制打印当前 `SupplierID` 和 `NadTable`
 
 ## 自动寻址序列
 
@@ -40,7 +40,7 @@ Toomoss & Vector
 3. 保存
 4. 完成
 
-## 参考文献
+## 参考资料
 
 - LIN 2.2 规范
 - EcuBus Pro 用户手册

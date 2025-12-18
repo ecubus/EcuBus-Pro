@@ -1,6 +1,6 @@
 # 简单测试
 
-关于测试框架，请参阅用户手册 [测试](../../../docs/um/test/test.md)
+关于测试框架，请参阅用户手册[测试](../../../docs/um/test/test.md)
 
 - 接口：`CAN`
 - 供应商设备：`Simulate`
@@ -88,34 +88,34 @@ describe('UDS Test', () => {
 ```
 
 - CAN-IA
-  - ID (1)，按 a 发送
-  - ID (2)，按 b 发送
+  - ID (1)，按a发送
+  - ID (2)，按b发送
     ![alt text](image.png)
 
 ## 测试特性
 
 此测试示例演示：
 
-1. **CAN 报文测试**：等待特定 CAN 报文并验证其属性
-2. **UDS 诊断测试**：发送 UDS 诊断请求并验证响应
-3. **测试工具**：具有超时支持的可复用消息处理函数
+1. **CAN报文测试**：等待特定CAN报文并验证其属性
+2. **UDS诊断测试**：发送UDS诊断请求并验证响应
+3. **测试工具**：具有超时支持的消息处理可重用函数
 
-## 成功示例
+## 示例成功
 
-对于 CAN 测试：
+对于CAN测试：
 
-- 在 `Wait for a specific CAN message with ID 0x1` 中按 'a'
-- 在 `Wait for any CAN message, and verify its ID is 0x2` 中按 'b'
+- 在`Wait for a specific CAN message with ID 0x1`中按'a'
+- 在`Wait for any CAN message, and verify its ID is 0x2`中按'b'
 
-对于 UDS 测试：
+对于UDS测试：
 
-- DiagnosticSessionControl160 测试将自动发送诊断请求并等待预期响应
+- DiagnosticSessionControl160测试将自动发送诊断请求并等待预期响应
 
 ![alt text](ok.gif)
 ![alt text](image-1.png)
 
-## 失败示例
+## 示例失败
 
-不按任何键，将在 `Wait can frame` 中超时
+不按任何键，将在`Wait can frame`中超时
 ![alt text](fail.gif)
 ![alt text](image-2.png)

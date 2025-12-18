@@ -8,7 +8,7 @@
 
 ## 描述
 
-此示例演示了如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用程序固件。 此示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
+本示例演示如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用固件。 本示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
 
 ## CAN 配置
 
@@ -38,7 +38,7 @@
 
 ![诊断步骤](./image.png)
 
-此示例通过 UDS 诊断协议实现固件升级。 主要步骤如下：
+本示例通过 UDS 诊断协议实现固件升级。 主要步骤如下：
 
 1. 会话控制和通信控制
 
@@ -71,21 +71,21 @@
 
 ## 固件文件
 
-此示例包含两个固件文件：
+示例包含两个固件文件：
 
 1. S32K344_FlsDrvRTD100.bin
 
    - 下载地址：0x20000010
-   - 驱动程序固件
+   - 驱动固件
 
 2. S32K344_CAN_App_RTD200.bin
    - 下载地址：0x00440200
-   - 应用程序固件
+   - 应用固件
 
 ## 注意事项
 
 1. 确保固件文件放置在项目的 bin 目录中
-2. 下载期间请勿断开连接或断电
+2. 下载过程中请勿断开连接或断电
 3. 如果下载失败，可以重试整个流程
 4. 每个固件文件都需要 CRC 验证
 
@@ -107,7 +107,7 @@ import fs from 'fs/promises'
 ```
 
 - 导入加密、CRC计算和文件操作所需的模块
-- `ECB` 提供UDS诊断通信工具
+- `ECB` 提供 UDS 诊断通信实用程序
 
 ### 配置
 
@@ -117,7 +117,7 @@ let maxChunkSize: number | undefined = undefined
 let content: undefined | Buffer = undefined
 ```
 
-- 配置CRC-16计算器用于固件验证
+- 配置用于固件验证的 CRC-16 计算器
 - 用于存储传输块大小和固件内容的变量
 
 ### 固件文件配置
@@ -150,7 +150,7 @@ Util.Init(async () => {
 })
 ```
 
-- 修改RoutineControl491服务以使用类型1（启动例程）
+- 修改 RoutineControl491 服务以使用类型 1（启动例程）
 - 更新请求和响应参数
 
 ### 安全访问处理程序
@@ -173,8 +173,8 @@ Util.On('Tester_1.SecurityAccess390.recv', async (v) => {
 ```
 
 - 处理安全访问种子-密钥交换
-- 使用AES-128-CBC根据接收到的种子计算密钥
-- 将计算出的密钥发送回ECU
+- 使用 AES-128-CBC 根据接收到的种子计算密钥
+- 将计算出的密钥发送回 ECU
 
 ### 下载过程处理程序
 
@@ -200,17 +200,17 @@ Util.Register('Tester_1.JobFunction1', () => {
 - JobFunction0：通过以下方式准备下载：
   1. 获取下一个固件文件
   2. 设置具有正确地址的下载请求
-  3. 计算并验证CRC
+  3. 计算并验证 CRC
 - JobFunction1：通过以下方式处理数据传输：
-  1. 将固件分割为适当大小的数据块
-  2. 为每个数据块创建TransferData请求
-  3. 在末尾添加RequestTransferExit
+  1. 将固件分割为适当大小的块
+  2. 为每个块创建 TransferData 请求
+  3. 在末尾添加 RequestTransferExit
   4. 在最后一个文件后触发固件验证
 
-该脚本与ECB文件中定义的序列协同工作，该序列执行：
+该脚本与 ECB 文件中定义的序列协同工作，该序列执行：
 
 1. 会话和通信控制服务
 2. 安全访问序列
-3. JobFunction0以准备下载
-4. JobFunction1以传输数据
+3. JobFunction0 准备下载
+4. JobFunction1 传输数据
 5. 最终验证和重置

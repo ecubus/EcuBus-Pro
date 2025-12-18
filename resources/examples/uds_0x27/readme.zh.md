@@ -1,6 +1,6 @@
 # UDS 0x27 安全访问 DLL 示例
 
-本示例演示如何使用 [buildInScript](https://app.whyengineer.com/docs/um/uds/buildInScript.html) SecureAccessGenerateKeyEx 和 SecureAccessGenerateKeyExOpt buildInScript 完成安全访问过程。
+本示例演示如何使用 [buildInScript](https://app.whyengineer.com/docs/um/uds/buildInScript.html) SecureAccessGenerateKeyEx 和 SecureAccessGenerateKeyExOpt buildInScript 来完成安全访问过程。
 
 ---
 

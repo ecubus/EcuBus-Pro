@@ -1,0 +1,345 @@
+{
+  "about": [
+    {
+      "text": "Introduce",
+      "link": "/"
+    },
+    {
+      "text": "Install",
+      "link": "/docs/about/install"
+    },
+    {
+      "text": "Sponsor ❤️",
+      "link": "/docs/about/sponsor"
+    },
+    {
+      "text": "Contact",
+      "link": "/docs/about/contact"
+    }
+  ],
+  "userManual": [
+    {
+      "text": "EcuBus Hardware",
+      "link": "hardware/index.md",
+      "items": [
+        {
+          "text": "LinCable",
+          "link": "hardware/lincable.md"
+        }
+      ]
+    },
+    {
+      "text": "CAN",
+      "link": "can/can.md"
+    },
+    {
+      "text": "LIN",
+      "link": "lin/lin.md"
+    },
+    {
+      "text": "PWM",
+      "link": "pwm/pwm.md"
+    },
+    {
+      "text": "Network",
+      "items": [
+        {
+          "text": "Logger",
+          "link": "network/logger.md"
+        }
+      ]
+    },
+    {
+      "text": "CLI",
+      "link": "cli/cli.md"
+    },
+    {
+      "text": "Ethernet",
+      "items": [
+        {
+          "text": "DoIP",
+          "link": "doip/doip.md",
+          "items": [
+            {
+              "text": "VIN Request Behavior",
+              "link": "doip/vin.md"
+            },
+            {
+              "text": "DoIP v3",
+              "link": "doip/doipv3.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "text": "E2E",
+      "link": "e2e/e2e.md"
+    },
+    {
+      "text": "SOME/IP",
+      "link": "someip/index.md"
+    },
+    {
+      "text": "OSEK OS Tracking",
+      "link": "osTrace/index.md"
+    },
+    {
+      "text": "Diagnostic",
+      "items": [
+        {
+          "text": "Build In Script",
+          "link": "uds/buildInScript/buildInScript.md"
+        },
+        {
+          "text": "Tester Present",
+          "link": "uds/testerPresent/testerPresent.md"
+        },
+        {
+          "text": "UDS -> C Code",
+          "link": "uds/udscode/udscode.md"
+        },
+        {
+          "text": "UDS Bootloader Implementation Guide",
+          "link": "uds/example/example.md"
+        }
+      ]
+    },
+    {
+      "text": "Trace",
+      "link": "trace/trace.md"
+    },
+    {
+      "text": "Graph",
+      "link": "graph/graph.md"
+    },
+    {
+      "text": "Variable",
+      "link": "var/var.md"
+    },
+    {
+      "text": "Script",
+      "link": "script/script.md",
+      "items": [
+        {
+          "text": "Use External Package",
+          "link": "script/SerialPort/scriptSerialPort.md"
+        },
+        {
+          "text": "CAPL->TS",
+          "link": "script/capl2ts/capl2ts.md"
+        }
+      ]
+    },
+    {
+      "text": "Test",
+      "link": "test/test.md"
+    },
+    {
+      "text": "Database",
+      "link": "database/database.md",
+      "items": [
+        {
+          "text": "LIN LDF",
+          "link": "database/ldf/ldf.md"
+        },
+        {
+          "text": "CAN DBC",
+          "link": "database/dbc/dbc.md"
+        }
+      ]
+    },
+    {
+      "text": "Panel",
+      "link": "panel/index.md"
+    },
+    {
+      "text": "Plugin",
+      "link": "plugin/plugin.md"
+    },
+    {
+      "text": "Setting",
+      "items": [
+        {
+          "text": "General",
+          "link": "setting/general.md"
+        }
+      ]
+    }
+  ],
+  "example": [
+    {
+      "text": "CAN",
+      "items": [
+        {
+          "text": "CAN Basic",
+          "link": "can/readme.md"
+        },
+        {
+          "text": "CAN High-Precision Timer",
+          "link": "can_timer/readme.md"
+        },
+        {
+          "text": "NXP UDS Bootloader",
+          "link": "nxp_bootloader/readme.md"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "text": "LIN",
+      "items": [
+        {
+          "text": "LIN General",
+          "link": "lin/readme.md"
+        },
+        {
+          "text": "LIN TP",
+          "link": "lin_tp/readme.md"
+        },
+        {
+          "text": "LIN Conformance Test",
+          "link": "lin_conformance_test/readme.md"
+        },
+        {
+          "text": "LIN SAE J2602 Test",
+          "link": "lin_j2602_test/readme.md"
+        },
+        {
+          "text": "LIN OTA",
+          "link": "NSUC1612_LIN_OTA/readme.md"
+        },
+        {
+          "text": "LIN Auto Addressing",
+          "link": "lin_aa/readme.md"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "text": "DOIP",
+      "items": [
+        {
+          "text": "DoIP Tester",
+          "link": "doip/readme.md"
+        },
+        {
+          "text": "DoIP Simulate Entity",
+          "link": "doip_sim_entity/readme.md"
+        },
+        {
+          "text": "DoIP Gateway",
+          "link": "doip_gateway/readme.md"
+        },
+        {
+          "text": "DoIP v3",
+          "link": "doip_sim_entity_v3/readme.md"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "text": "UDS",
+      "items": [
+        {
+          "text": "UDS Hex/S19 File",
+          "link": "uds_hex_s19_file/readme.md"
+        },
+        {
+          "text": "UDS Binary File",
+          "link": "uds_bin_file/readme.md"
+        },
+        {
+          "text": "Secure Access dll",
+          "link": "secure_access_dll/readme.md"
+        },
+        {
+          "text": "UDS Code Generate",
+          "link": "uds_generate_code/readme.md"
+        },
+        {
+          "text": "UDS Authentication Service(0x29)",
+          "link": "uds_0x29/readme.md"
+        },
+        {
+          "text": "UDS Security Access(0x27)",
+          "link": "uds_0x27/readme.md"
+        },
+        {
+          "text": "UDS DoIP Large File",
+          "link": "uds_doip_large_file/readme.md"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "text": "Test",
+      "items": [
+        {
+          "text": "Test Simple",
+          "link": "test_simple/readme.md"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "text": "Panel",
+      "link": "panel/readme.md",
+      "collapsed": true
+    },
+    {
+      "text": "SOME/IP",
+      "items": [
+        {
+          "text": "Request/Response",
+          "link": "someip/readme.md"
+        }
+      ],
+      "collapsed": true
+    }
+  ],
+  "developerManual": [
+    {
+      "text": "Arch",
+      "link": "arch.md"
+    },
+    {
+      "text": "Setup",
+      "link": "setup.md",
+      "items": [
+        {
+          "text": "Learning Resources",
+          "link": "jslearn.md"
+        },
+        {
+          "text": "Dev New Adapter",
+          "link": "adapter.md"
+        }
+      ]
+    },
+    {
+      "text": "Comp Test",
+      "link": "test.md"
+    },
+    {
+      "text": "Addon",
+      "link": "addon.md"
+    },
+    {
+      "text": "Plugin",
+      "link": "plugin.md"
+    },
+    {
+      "text": "How to Development Docs",
+      "link": "doc.md"
+    },
+    {
+      "text": "Feature Request Process",
+      "link": "feature.md"
+    },
+    {
+      "text": "Releases Note",
+      "link": "releases_note.md"
+    }
+  ]
+}

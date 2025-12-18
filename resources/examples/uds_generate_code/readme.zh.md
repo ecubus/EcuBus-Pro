@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD033 -->
 
-本示例演示了如何使用 EcuBus-Pro 的 [UDS 代码生成](https://app.whyengineer.com/docs/um/uds/udscode.html) 系统与 Handlebars 模板。`uds.hbs` 模板基于您的 UDS 服务定义生成 DCM（诊断通信管理器）配置的 C 代码。
+本示例演示了如何使用 EcuBus-Pro 的 [UDS 代码生成](https://app.whyengineer.com/docs/um/uds/udscode.html) 系统与 Handlebars 模板。`uds.hbs` 模板根据您的 UDS 服务定义生成 DCM（诊断通信管理器）配置的 C 代码。
 
 ## 模板文件分析：`uds.hbs`
 
@@ -68,7 +68,7 @@ DcmConfig_t Dcm[]={
 **解释：**
 
 - `DcmConfig_t Dcm[]={` - 开始 C 数组声明
-- <span v-pre>`{{#each tester.allServiceList}}`</span> - 遍历所有 UDS 服务
+- <span v-pre>`{{#each tester.allServiceList}}`</span> - 循环遍历所有 UDS 服务
 
 ##### 4.1 会话控制服务 (0x10)
 
@@ -87,7 +87,7 @@ DcmConfig_t Dcm[]={
 **解释：**
 
 - <span v-pre>`{{#if (eq @key '0x10')}}`</span> - 检查当前服务 ID 是否等于 0x10（会话控制）
-- 生成会话控制服务的 DCM 配置
+- 为会话控制服务生成 DCM 配置
 - 使用按位 OR 启用多个会话类型
 - 将安全级别设置为 NULL（无需安全）
 - 分配回调函数
@@ -128,7 +128,7 @@ DcmConfig_t Dcm[]={
 **解释：**
 
 - <span v-pre>`{{#if (eq @key '0x31')}}`</span> - 检查服务 ID 0x31（例程控制）
-- 使用适当的回调函数配置例程控制服务
+- 使用适当的回调配置例程控制服务
 
 #### 5. 例程控制特定配置
 
@@ -149,7 +149,7 @@ DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
 **逐行解释：**
 
 - `DcmRoutineControlConfig_t DcmRoutineControlConfig[]={` - 开始例程控制配置数组
-- <span v-pre>`{{#each (get tester.allServiceList '0x31')}}`</span> - 遍历所有 0x31（例程控制）服务
+- <span v-pre>`{{#each (get tester.allServiceList '0x31')}}`</span> - 循环遍历所有 0x31（例程控制）服务
 - <span v-pre>`/* {{name}} */`</span> - 生成包含服务名称的注释
 - `{` - 开始配置结构
 - <span v-pre>`.routineControlType={{get (first (filter params 'routineControlType' property='name')) 'phyValue' }},`</span> - 从参数中提取例程控制类型
@@ -188,30 +188,30 @@ DcmRoutineControlConfig_t DcmRoutineControlConfig[]={
 
 ## 使用说明
 
-1. **配置 UDS 服务**：在 EcuBus-Pro 测试器中设置您的 UDS 服务
-2. **添加模板**：选择 `uds.hbs` 模板文件
-3. **设置生成路径**：指定生成的 C 代码的输出目录
+1. **配置UDS服务**：在EcuBus-Pro测试仪中设置您的UDS服务
+2. **添加模板**：选择`uds.hbs`模板文件
+3. **设置生成路径**：指定生成的C代码的输出目录
 4. **生成代码**：运行代码生成过程
-5. **集成**：将生成的文件包含到您的 DCM 实现中
+5. **集成**：将生成的文件包含到您的DCM实现中
 
 ## 生成输出示例
 
-该模板将生成类似于以下的 C 代码：
+模板将生成类似的C代码：
 
 ```c
 /**
 * 开源许可证
 * 
-* EcuBus-Pro 基于 Apache License 2.0 的修改版本进行许可，并附加以下条件：
+* EcuBus-Pro 基于修改版的 Apache License 2.0 授权，具有以下附加条件：
 * 
-* 1. EcuBus-Pro 可用于商业用途，包括作为诊断工具或企业开发平台。若满足以下条件，必须从生产商处获取商业许可证：
+* 1. EcuBus-Pro 可商业使用，包括作为诊断工具或企业开发平台。若满足以下条件，必须从生产商处获取商业许可证：
 * 
 * a. 设备支持和许可：
 *     - EcuBus-Pro 源代码包含对一组标准 USB 设备的支持。
-*     - 如果您希望添加对专有设备的支持而不开源实现，必须从 EcuBus-Pro 获取商业许可证。
+*     - 如果您想为专有设备添加支持而不开源实现，必须从 EcuBus-Pro 获取商业许可证。
 * 
-* b. LOGO 和版权信息：在使用 EcuBus-Pro 前端的过程中，您不得移除或修改 EcuBus-Pro 控制台或应用程序中的 LOGO 或版权信息。此限制不适用于不涉及 EcuBus-Pro 前端的用途。
-*     - 前端定义：就本许可证而言，EcuBus-Pro 的“前端”包括从原始源代码运行 EcuBus-Pro 时位于 `src/renderer/` 目录中的所有组件，或使用 Electron 运行 EcuBus-Pro 时的“渲染器”组件。
+* b. LOGO 和版权信息：在使用 EcuBus-Pro 前端的过程中，您不得移除或修改 EcuBus-Pro 控制台或应用程序中的 LOGO 或版权信息。此限制不适用于不涉及 EcuBus-Pro 前端的使用。
+*     - 前端定义：就本许可证而言，EcuBus-Pro 的"前端"包括从原始源代码运行 EcuBus-Pro 时位于 `src/renderer/` 目录中的所有组件，或使用 Electron 运行 EcuBus-Pro 时的"渲染器"组件。
 * 
 * 2. 作为贡献者，您应同意：
 * 

@@ -1,25 +1,25 @@
 {
   "about": [
     {
-      "text": "Introduce",
+      "text": "介绍",
       "link": "/"
     },
     {
-      "text": "Install",
+      "text": "安装",
       "link": "/docs/about/install"
     },
     {
-      "text": "Sponsor ❤️",
+      "text": "赞助 ❤️",
       "link": "/docs/about/sponsor"
     },
     {
-      "text": "Contact",
+      "text": "联系",
       "link": "/docs/about/contact"
     }
   ],
   "userManual": [
     {
-      "text": "EcuBus Hardware",
+      "text": "EcuBus 硬件",
       "link": "hardware/index.md",
       "items": [
         {
@@ -41,10 +41,10 @@
       "link": "pwm/pwm.md"
     },
     {
-      "text": "Network",
+      "text": "网络",
       "items": [
         {
-          "text": "Logger",
+          "text": "记录器",
           "link": "network/logger.md"
         }
       ]
@@ -54,14 +54,14 @@
       "link": "cli/cli.md"
     },
     {
-      "text": "Ethernet",
+      "text": "以太网",
       "items": [
         {
           "text": "DoIP",
           "link": "doip/doip.md",
           "items": [
             {
-              "text": "VIN Request Behavior",
+              "text": "VIN 请求行为",
               "link": "doip/vin.md"
             },
             {
@@ -81,14 +81,14 @@
       "link": "someip/index.md"
     },
     {
-      "text": "OSEK OS Tracking",
+      "text": "OSEK OS 追踪",
       "link": "osTrace/index.md"
     },
     {
-      "text": "Diagnostic",
+      "text": "诊断",
       "items": [
         {
-          "text": "Build In Script",
+          "text": "内置脚本",
           "link": "uds/buildInScript/buildInScript.md"
         },
         {
@@ -96,33 +96,33 @@
           "link": "uds/testerPresent/testerPresent.md"
         },
         {
-          "text": "UDS -> C Code",
+          "text": "UDS -> C 代码",
           "link": "uds/udscode/udscode.md"
         },
         {
-          "text": "UDS Bootloader Implementation Guide",
+          "text": "UDS Bootloader 实现指南",
           "link": "uds/example/example.md"
         }
       ]
     },
     {
-      "text": "Trace",
+      "text": "追踪",
       "link": "trace/trace.md"
     },
     {
-      "text": "Graph",
+      "text": "图表",
       "link": "graph/graph.md"
     },
     {
-      "text": "Variable",
+      "text": "变量",
       "link": "var/var.md"
     },
     {
-      "text": "Script",
+      "text": "脚本",
       "link": "script/script.md",
       "items": [
         {
-          "text": "Use External Package",
+          "text": "使用外部包",
           "link": "script/SerialPort/scriptSerialPort.md"
         },
         {
@@ -132,11 +132,11 @@
       ]
     },
     {
-      "text": "Test",
+      "text": "测试",
       "link": "test/test.md"
     },
     {
-      "text": "Database",
+      "text": "数据库",
       "link": "database/database.md",
       "items": [
         {
@@ -150,18 +150,18 @@
       ]
     },
     {
-      "text": "Panel",
+      "text": "面板",
       "link": "panel/index.md"
     },
     {
-      "text": "Plugin",
+      "text": "插件",
       "link": "plugin/plugin.md"
     },
     {
-      "text": "Setting",
+      "text": "设置",
       "items": [
         {
-          "text": "General",
+          "text": "通用",
           "link": "setting/general.md"
         }
       ]
@@ -172,11 +172,11 @@
       "text": "CAN",
       "items": [
         {
-          "text": "CAN Basic",
+          "text": "CAN 基础",
           "link": "can/readme.md"
         },
         {
-          "text": "CAN High-Precision Timer",
+          "text": "CAN 高精度定时器",
           "link": "can_timer/readme.md"
         },
         {
@@ -190,7 +190,7 @@
       "text": "LIN",
       "items": [
         {
-          "text": "LIN General",
+          "text": "LIN 通用",
           "link": "lin/readme.md"
         },
         {
@@ -198,11 +198,11 @@
           "link": "lin_tp/readme.md"
         },
         {
-          "text": "LIN Conformance Test",
+          "text": "LIN 一致性测试",
           "link": "lin_conformance_test/readme.md"
         },
         {
-          "text": "LIN SAE J2602 Test",
+          "text": "LIN SAE J2602 测试",
           "link": "lin_j2602_test/readme.md"
         },
         {
@@ -210,7 +210,7 @@
           "link": "NSUC1612_LIN_OTA/readme.md"
         },
         {
-          "text": "LIN Auto Addressing",
+          "text": "LIN 自动寻址",
           "link": "lin_aa/readme.md"
         }
       ],
@@ -220,15 +220,15 @@
       "text": "DOIP",
       "items": [
         {
-          "text": "DoIP Tester",
+          "text": "DoIP 测试仪",
           "link": "doip/readme.md"
         },
         {
-          "text": "DoIP Simulate Entity",
+          "text": "DoIP 模拟实体",
           "link": "doip_sim_entity/readme.md"
         },
         {
-          "text": "DoIP Gateway",
+          "text": "DoIP 网关",
           "link": "doip_gateway/readme.md"
         },
         {
@@ -242,48 +242,48 @@
       "text": "UDS",
       "items": [
         {
-          "text": "UDS Hex/S19 File",
+          "text": "UDS Hex/S19 文件",
           "link": "uds_hex_s19_file/readme.md"
         },
         {
-          "text": "UDS Binary File",
+          "text": "UDS 二进制文件",
           "link": "uds_bin_file/readme.md"
         },
         {
-          "text": "Secure Access dll",
+          "text": "安全访问动态链接库",
           "link": "secure_access_dll/readme.md"
         },
         {
-          "text": "UDS Code Generate",
+          "text": "UDS 代码生成",
           "link": "uds_generate_code/readme.md"
         },
         {
-          "text": "UDS Authentication Service(0x29)",
+          "text": "UDS 认证服务(0x29)",
           "link": "uds_0x29/readme.md"
         },
         {
-          "text": "UDS Security Access(0x27)",
+          "text": "UDS 安全访问(0x27)",
           "link": "uds_0x27/readme.md"
         },
         {
-          "text": "UDS DoIP Large File",
+          "text": "UDS DoIP 大文件",
           "link": "uds_doip_large_file/readme.md"
         }
       ],
       "collapsed": true
     },
     {
-      "text": "Test",
+      "text": "测试",
       "items": [
         {
-          "text": "Test Simple",
+          "text": "简单测试",
           "link": "test_simple/readme.md"
         }
       ],
       "collapsed": true
     },
     {
-      "text": "Panel",
+      "text": "面板",
       "link": "panel/readme.md",
       "collapsed": true
     },
@@ -291,7 +291,7 @@
       "text": "SOME/IP",
       "items": [
         {
-          "text": "Request/Response",
+          "text": "请求/响应",
           "link": "someip/readme.md"
         }
       ],
@@ -300,25 +300,25 @@
   ],
   "developerManual": [
     {
-      "text": "Arch",
+      "text": "架构",
       "link": "arch.md"
     },
     {
-      "text": "Setup",
+      "text": "设置",
       "link": "setup.md",
       "items": [
         {
-          "text": "Learning Resources",
+          "text": "学习资源",
           "link": "jslearn.md"
         },
         {
-          "text": "Dev New Adapter",
+          "text": "开发新适配器",
           "link": "adapter.md"
         }
       ]
     },
     {
-      "text": "Comp Test",
+      "text": "集成测试",
       "link": "test.md"
     },
     {
@@ -326,19 +326,19 @@
       "link": "addon.md"
     },
     {
-      "text": "Plugin",
+      "text": "插件",
       "link": "plugin.md"
     },
     {
-      "text": "How to Development Docs",
+      "text": "如何开发文档",
       "link": "doc.md"
     },
     {
-      "text": "Feature Request Process",
+      "text": "功能请求流程",
       "link": "feature.md"
     },
     {
-      "text": "Releases Note",
+      "text": "发布说明",
       "link": "releases_note.md"
     }
   ]

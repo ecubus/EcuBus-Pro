@@ -1,24 +1,24 @@
 # NSUC1612 LIN OTA 示例
 
-本示例演示了如何使用 LIN（本地互连网络）协议和基于 LIN-TP 的统一诊断服务（LIN-UDS）在 NSUC1612 ECU 上执行空中（OTA）固件更新。
+本示例演示如何使用基于LIN-TP的LIN-UDS（统一诊断服务）协议，通过LIN（本地互连网络）在NSUC1612 ECU上执行空中固件更新。
 
 > [!INFO]
-> NSUC1612 系列是一款集成 4 通道/3 通道半桥驱动器的专用处理器芯片，适用于控制低功率电机。 它可以驱动有刷直流电机、无刷直流电机、步进电机等，并广泛应用于汽车行业。
+> NSUC1612系列是一款专用处理器芯片，集成了4通道/3通道半桥驱动器，适用于控制低功率电机。 它可以驱动有刷直流电机、无刷直流电机、步进电机等，在汽车行业广泛应用。
 
 ## 概述
 
-该示例包括：
+本示例包括：
 
-- 用于通信的 LIN-TP
-- 加载 dll 安全访问密钥生成
-- 在 `tester.ts` 中计算固件 CRC 校验和
+- 用于通信的LIN-TP
+- 加载dll安全访问密钥生成
+- 在 `tester.ts` 中计算固件CRC校验和
 
 ## 文件结构
 
 ```text
 NSUC1612_LIN_OTA/
 ├── NSUC1612_LIN_OTA.ecb     # 主项目配置
-├── tester.ts                # TypeScript 测试脚本
+├── tester.ts                # TypeScript测试脚本
 ├── readme.md                # 本文档
 ├── firmware/
 │   └── project_rom_boot.bin # 固件二进制文件
@@ -31,9 +31,9 @@ NSUC1612_LIN_OTA/
 
 ## 使用方法
 
-1. **硬件设置**：将您的 [LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html) 设备连接到 COM5（或更新配置）
-2. **ECU 连接**：确保 NSUC1612 ECU 通过 LIN 总线连接
-3. **运行测试**：执行测试脚本以执行 OTA 验证
+1. **硬件设置**：将您的[LinCable](https://app.whyengineer.com/docs/um/hardware/lincable.html)设备连接到COM5（或更新配置）
+2. **ECU连接**：确保NSUC1612 ECU通过LIN总线连接
+3. **运行测试**：执行测试脚本以执行OTA验证
 
 ## 代码示例
 

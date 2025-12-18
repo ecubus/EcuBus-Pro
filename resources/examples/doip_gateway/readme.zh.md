@@ -1,15 +1,15 @@
-# DoIP 网关
+# DoIP网关
 
-本示例演示如何实现一个 DoIP 到 CAN 的网关，该网关桥接 DoIP 测试仪与基于 CAN 的 ECU 之间的通信。 该网关接收 DoIP 诊断请求并将其转发到 CAN 总线，然后通过 DoIP 返回 CAN 响应。
+本示例演示如何实现一个DoIP到CAN网关，用于桥接DoIP测试仪与基于CAN的ECU之间的通信。 该网关接收DoIP诊断请求并将其转发到CAN总线，然后通过DoIP返回CAN响应。
 
-## 架构概览
+## 架构概述
 
-本示例模拟一个 DoIP 网关，该网关：
+本示例模拟了一个DoIP网关，该网关：
 
-1. 注册为 DoIP 虚拟实体 - 有关虚拟实体注册的详细信息，请参阅[示例](./../doip_sim_entity/readme.md)
-2. 从以太网测试仪接收 DoIP 诊断请求
-3. 通过 CANTP 将请求转发到 CAN 总线
-4. 将 CAN 响应返回给 DoIP 测试仪
+1. 注册为DoIP虚拟实体 - 有关虚拟实体注册的详细信息，请参阅[示例](./../doip_sim_entity/readme.md)
+2. 从以太网测试仪接收DoIP诊断请求
+3. 通过CANTP将请求转发到CAN总线
+4. 将CAN响应返回给DoIP测试仪
 
 ![arch](image1.png)
 
@@ -19,11 +19,11 @@
 
 配置网络拓扑，包括：
 
-- **Eth**：用于 DoIP 通信的以太网连接
-- **Can**：用于 ECU 通信的 CAN 总线连接
+- **Eth**：用于DoIP通信的以太网连接
+- **Can**：用于ECU通信的CAN总线连接
 - **设备**：
-  - `SIMULATE_0`：模拟 DoIP 接口
-  - `PEAK_1`：用于 ECU 通信的 CAN 接口
+  - `SIMULATE_0`：模拟DoIP接口
+  - `PEAK_1`：用于ECU通信的CAN接口
 
 ### 节点配置
 
@@ -63,13 +63,13 @@ Util.On("Tester_can_0.*.recv", async (resp) => {
 
 **关键特性：**
 
-- **DoIP 实体注册**：注册一个逻辑地址为 100 的虚拟实体
-- **请求转发**：将 DoIP 请求转换为 CAN 诊断请求
-- **响应桥接**：将 CAN 响应转发回 DoIP 测试仪
+- **DoIP实体注册**：注册一个逻辑地址为100的虚拟实体
+- **请求转发**：将DoIP请求转换为CAN诊断请求
+- **响应桥接**：将CAN响应转发回DoIP测试仪
 
-## 使用 Python 客户端作为其他测试仪
+## 使用Python客户端作为其他测试仪
 
-提供了一个用于外部测试的 Python 测试客户端（`client.py`）：
+提供了一个Python测试客户端（`client.py`）用于外部测试：
 
 ```python
 import udsoncan
@@ -96,7 +96,7 @@ with Client(conn, request_timeout=2) as client:
 doip_client.close()
 ```
 
-**Python 客户端先决条件：**
+**Python客户端的前提条件：**
 
 ```bash
 pip install udsoncan doipclient
@@ -104,7 +104,7 @@ pip install udsoncan doipclient
 
 ## 执行
 
-1. **启动仿真**：在 EcuBus-Pro 中启动运行
+1. **启动模拟**：在EcuBus-Pro中启动运行
 2. **监控流量**：使用内置跟踪窗口查看所有帧
-3. **替代监控**：使用 Wireshark 捕获网络流量
-4. **使用 Python 测试**：运行 `python client.py` 发送测试请求
+3. **替代监控**：使用Wireshark捕获网络流量
+4. **使用Python测试**：运行`python client.py`发送测试请求

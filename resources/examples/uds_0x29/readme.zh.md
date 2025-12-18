@@ -1,6 +1,6 @@
 # UDS 认证服务(0x29) 示例
 
-0x29 认证服务在 ISO 14229-1:2020 中引入，作为传统安全访问(0x27)服务的现代替代方案。 本指南演示如何使用 EcuBus-Pro 实现和测试 0x29 服务，为 ECU 访问提供更安全、基于证书的认证机制。
+0x29 认证服务在 ISO 14229-1:2020 中引入，作为传统安全访问(0x27)服务的现代替代方案。 本指南演示如何使用 EcuBus-Pro 实现和测试 0x29 服务，为 ECU 访问提供更安全且基于证书的认证机制。
 
 > 注意：ISO 15765-4 已弃用 0x27 服务，使 0x29 成为现代汽车安全实施的推荐方法。
 
@@ -11,21 +11,21 @@
 1. **APCE（非对称拥有证明和证书交换）** - 主要模式
 2. **ACR（非对称挑战响应）** - 很少使用
 
-![UDS 认证模式](media/uds_modes.png)
+![UDS Authentication Modes](media/uds_modes.png)
 
 ### APCE（证书交换验证）概述
 
-使用 0x27 的传统安全方法存在重大漏洞 - 一旦密钥或算法被泄露，任何实体都可以随时访问 ECU。 0x29 APCE 模式通过要求以下内容来解决这些问题：
+使用 0x27 的传统安全方法存在重大漏洞 - 一旦密钥或算法被泄露，任何实体都可以随时访问 ECU。 0x29 APCE 模式通过以下要求解决这些问题：
 
-1. **唯一证书**：与共享密钥不同，每个供应商都有包含识别信息的唯一证书，如果被泄露可实现问责
+1. **唯一证书**：与共享密钥不同，每个供应商都有包含识别信息的唯一证书，在泄露时能够追责
 2. **证书颁发机构控制**：供应商必须向 OEM 请求证书，移除自签名能力
-3. **时间限制访问**：证书具有过期日期，不像永久密钥
+3. **时间限制访问**：证书具有过期日期，不同于永久密钥
 
 ### ACR（挑战响应）概述
 
-此模式类似于 0x27，但使用非对称加密和服务器生成的挑战来防止重放攻击。 然而，AUTOSAR DCM 并不广泛推荐使用它。
+此模式类似于 0x27，但使用非对称加密和服务器生成的挑战来防止重放攻击。 但是，AUTOSAR DCM 并不广泛推荐使用。
 
-![ACR 流程](media/acr_flow.png)
+![ACR Flow](media/acr_flow.png)
 
 ## APCE 实现细节
 
@@ -42,10 +42,10 @@ APCE 认证过程使用几个关键子功能：
 终止认证会话并重置服务器状态。
 
 **请求格式：**
-![取消认证请求](media/deauth_request.png)
+![DeAuthenticate Request](media/deauth_request.png)
 
 **响应格式：**
-![取消认证响应](media/deauth_response.png)
+![DeAuthenticate Response](media/deauth_response.png)
 
 ### verifyCertificateUnidirectional（子功能：0x01）
 
@@ -59,7 +59,7 @@ APCE 认证过程使用几个关键子功能：
 4. `lengthOfChallengeClient` (2 字节) - 挑战长度
 5. `challengeClient` (可变) - 加密安全随机挑战
 
-![验证证书请求](media/verify_request.png)
+![Verify Certificate Request](media/verify_request.png)
 
 **响应参数：**
 
@@ -69,7 +69,7 @@ APCE 认证过程使用几个关键子功能：
 4. `lengthOfEphemeralPublicKeyServer` (2 字节) - 服务器公钥长度
 5. `ephemeralPublicKeyServer` (可变) - 服务器的临时 ECDH/DH 公钥
 
-![验证证书响应](media/verify_response.png)
+![Verify Certificate Response](media/verify_response.png)
 
 ### proofOfOwnership（子功能：0x03）
 
@@ -82,12 +82,12 @@ APCE 认证过程使用几个关键子功能：
 3. `lengthOfEphemeralPublicKeyClient` (2 字节)
 4. `ephemeralPublicKeyClient` (可变) - 客户端的临时公钥
 
-![拥有证明请求](media/proof_request.png)
+![Proof of Ownership Request](media/proof_request.png)
 
 **验证过程：**
 服务器使用证书的公钥验证客户端的数字签名：
 
-![证明验证](media/proof_verify.png)
+![Proof Verification](media/proof_verify.png)
 
 **响应参数：**
 
@@ -95,22 +95,22 @@ APCE 认证过程使用几个关键子功能：
 2. `lengthOfSessionKeyInfo` (2 字节) - 会话密钥信息长度
 3. `sessionKeyInfo` (可变) - 派生的会话密钥数据
 
-![会话密钥信息](media/session_key1.png)
+![Session Key Info](media/session_key1.png)
 
-![会话密钥详情](media/session_key2.png)
+![Session Key Details](media/session_key2.png)
 
 > 注意：AUTOSAR DCM 目前不支持会话密钥：
-> ![AUTOSAR 会话密钥支持](media/autosar_session.png)
+> ![AUTOSAR Session Key Support](media/autosar_session.png)
 
 ### authenticationConfiguration（子功能：0x08）
 
 启动 APCE 模式配置。
 
 **请求：**
-![认证配置请求](media/auth_config_request.png)
+![Authentication Config Request](media/auth_config_request.png)
 
 **响应：**
-![认证配置响应](media/auth_config_response.png)
+![Authentication Config Response](media/auth_config_response.png)
 
 ## 证书准备
 
@@ -152,7 +152,7 @@ basicConstraints=critical,CA:TRUE
 openssl req -x509 -new -nodes -key ca.key -days 400 -out ca.crt -config req.cnf
 ```
 
-![证书已生成](media/cert_generated.png)
+![Certificate Generated](media/cert_generated.png)
 
 ### 3. 生成客户端证书
 
@@ -173,13 +173,13 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -out client.crt -CAcre
 
 ## 返回值代码
 
-![返回值代码 1](media/return_value1.png)
+![Return Value Codes 1](media/return_value1.png)
 
-![返回值代码 2](media/return_value2.png)
+![Return Value Codes 2](media/return_value2.png)
 
 ## 密钥交换算法 (ECDH/DH)
 
-ECDH（椭圆曲线迪菲-赫尔曼）使双方能够在非安全通道上建立共享密钥。 该算法基于以下特性工作：
+ECDH（椭圆曲线迪菲-赫尔曼）使双方能够在非安全信道上建立共享密钥。 该算法基于以下特性工作：
 **(a × G) × b = (b × G) × a**
 
 其中：
@@ -188,11 +188,11 @@ ECDH（椭圆曲线迪菲-赫尔曼）使双方能够在非安全通道上建立
 - `G` 是生成点
 - `×` 表示椭圆曲线点乘
 
-**ECDH 过程：**
+\*_ECDH 过程：_
 
 1. Alice 生成：<span v-pre>`{alicePrivKey, alicePubKey = alicePrivKey × G}`</span>
 2. Bob 生成：<span v-pre>`{bobPrivKey, bobPubKey = bobPrivKey × G}`</span>
-3. 他们通过非安全通道交换公钥
+3. 双方通过非安全信道交换公钥
 4. Alice 计算：sharedKey = bobPubKey × alicePrivKey
 5. Bob 计算：sharedKey = alicePubKey × bobPrivKey
 6. 双方现在拥有相同的共享密钥

@@ -1,6 +1,6 @@
 # DoIP 示例
 
-本示例演示如何使用 DoIP 协议与 ECU 通信。 `EcuBus-Pro` 作为测试仪，而 `doip-custom-simulation` 作为实体（网关）运行。
+本示例演示如何使用 DOIP 协议与 ECU 通信。 `EcuBus-Pro` 充当测试器，而 `doip-custom-simulation` 充当实体（网关）。
 
 ## EcuBus-Pro 设置
 
@@ -9,11 +9,11 @@
 使用环回通道
 ![device](image.png)
 
-### 测试仪
+### 测试器
 
-地址信息从 `doip-custom-simulation` gateway.properties 文件获取
+地址信息从 `doip-custom-simulation` 的 gateway.properties 文件获取
 
-- 测试仪地址：20000
+- 测试器地址：20000
 - 网关地址：57344
 - ECU 地址：57345
 
@@ -21,7 +21,7 @@
 
 ## `doip-custom-simulation` 设置
 
-`doip-custom-simulation` 是 DoIP 协议的自定义仿真，作为实体运行。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
+`doip-custom-simulation` 是 DOIP 协议的定制仿真，充当实体。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
 
 ### 安装
 
@@ -44,7 +44,7 @@ cd doip-custom-simulation
 
 ![alt text](doip-custom-simulation/image.png)
 
-### 生成发行版
+### 生成 dist
 
 ```bash
 .\gradlew.bat installDist

@@ -5,7 +5,7 @@ api_token_env: CROWDIN_PERSONAL_TOKEN
 files:
   - source: /docs/en/**/*.md
     translation: /docs/%two_letters_code%/**/%original_file_name%
-  - source: /resources/examples/*/readme.md
-    translation: /resources/examples/*/readme.%two_letters_code%.md
+  - source: /resources/examples/**/readme.md
+    translation: /resources/examples/**/readme.%two_letters_code%.md
   - source: /.vitepress/en.ts
     translation: /.vitepress/%two_letters_code%.ts

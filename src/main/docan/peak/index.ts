@@ -391,6 +391,9 @@ export class PEAK_TP extends CanBase implements CanTp {
       taskId: string[]
     }
   > = {}
+  resetStartTs(): void {
+    PEAK_TP.startTime = getTsUs()
+  }
   constructor(baseInfo: CanBaseInfo) {
     super()
     if (PEAK_TP.startTime == undefined) {

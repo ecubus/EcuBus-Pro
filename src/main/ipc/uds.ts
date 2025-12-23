@@ -566,7 +566,9 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     someipMap,
     data.tester
   )
-
+  canBaseMap.forEach((base) => {
+    base.resetStartTs?.()
+  })
   monitor = monitorEventLoopDelay({ resolution: 100 })
   monitor.enable()
 
@@ -614,6 +616,35 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const data = arg[1] as DataSet
 
   global.dataSet = data
+
+  //can signal as proxy
+  Object.values(global.dataSet.database.can).forEach((db) => {
+    Object.values(db.messages).forEach((msg) => {
+      const x = (target: any, prop: string, value: any) => {
+        const ret = Reflect.set(target, prop, value)
+        if (ret) {
+          for (const [index, d] of timerMap.entries()) {
+            if (parseInt(d.ia.id, 16) == msg.id) {
+              if (d.socket.changePeriodData) {
+                const data = send(index, false)
+                if (data && data.compare(d.data!) != 0) {
+                  d.socket.changePeriodData(d.taskId!, data)
+                  d.data = data
+                }
+              }
+            }
+          }
+        }
+        return ret
+      }
+      Object.entries(msg.signals).forEach(([key, signal]) => {
+        signal
+        msg.signals[key] = new Proxy(signal, {
+          set: x
+        })
+      })
+    })
+  })
 
   global.vars = {}
 
@@ -701,6 +732,7 @@ interface timerType {
   ia: CanInterAction
   timer?: NodeJS.Timeout
   taskId?: string
+  data: Buffer | null
 }
 const timerMap = new Map<string, timerType>()
 
@@ -1075,6 +1107,17 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
       const rawsignal = message.signals[signalName]
       if (rawsignal) {
         Object.assign(rawsignal, signal)
+        for (const [index, d] of timerMap.entries()) {
+          if (parseInt(d.ia.id, 16) == message.id) {
+            if (d.socket.changePeriodData) {
+              const data = send(index, false)
+              if (data && data.compare(d.data!) != 0) {
+                d.socket.changePeriodData(d.taskId!, data)
+                d.data = data
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -1129,8 +1172,9 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     }
     let taskId: string | undefined
     let newTimer: NodeJS.Timeout | undefined
+    let dataSent: Buffer | null = null
     if (socket.startPeriodSend) {
-      let dataSent = send(id, false)
+      dataSent = send(id, false)
       if (dataSent == undefined) {
         dataSent = Buffer.alloc(getLenByDlc(ia.dlc, fd))
         for (const [index, d] of ia.data.entries()) {
@@ -1164,7 +1208,8 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
       period: ia.trigger.period || 10,
       timer: newTimer,
       taskId: taskId,
-      ia: ia
+      ia: ia,
+      data: dataSent
     })
   } else {
     sysLog.error(`can device not found`)

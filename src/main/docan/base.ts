@@ -334,6 +334,7 @@ export abstract class CanBase {
   startPeriodSend?(message: CanMessage, period: number, duration?: number): string
   stopPeriodSend?(taskId: string): void
   changePeriodData?(taskId: string, data: Buffer): void
+  resetStartTs?(): void
 }
 
 export class CAN_SOCKET {

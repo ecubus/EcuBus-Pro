@@ -258,6 +258,26 @@ export class LIN_TP implements LinTp {
     if (data.length == 0 || data.length > 4095) {
       throw new TpError(LIN_TP_ERROR_ID.TP_PARAM_ERROR, addr, data, 'data length error')
     }
+    let delay = 0
+    if (this.base.sch == undefined && this.base.info.database) {
+      //start sch
+      const db = global.dataSet.database.lin[this.base.info.database]
+      if (db) {
+        let found = false
+        for (const s of db.schTables) {
+          s.entries.forEach((e, i) => {
+            if (e.name == 'DiagnosticMasterReq') {
+              found = true
+              delay = e.delay
+            }
+          })
+          if (found) {
+            break
+          }
+        }
+      }
+    }
+    delay = Math.max(delay, addr.stMin)
     const prefixBuffer = [addr.nad]
 
     if (id == undefined) {
@@ -289,20 +309,30 @@ export class LIN_TP implements LinTp {
       ])
       //ff
       const { sendData, usedLen } = this.getSendData(pci, addr, data)
+      const t1 = Date.now()
       let ts = await this.sendLinFrame(mode, addr, sendData, id)
+      const t2 = Date.now()
+      const delta = delay - (t2 - t1)
 
+      if (delta > 0) {
+        await this.delay(delta, addr)
+      }
       sendLen = usedLen
 
       while (sendLen < data.length) {
         const snData = Buffer.from([...prefixBuffer, 0x20 | (sn & 0xf)])
         const { sendData, usedLen } = this.getSendData(snData, addr, data.subarray(sendLen))
+        const t3 = Date.now()
         ts = await this.sendLinFrame(mode, addr, sendData, id)
+        const t4 = Date.now()
+        const delta2 = delay - (t4 - t3)
+        if (delta2 > 0) {
+          await this.delay(delta2, addr)
+        }
         sendLen += usedLen
 
         sn++
-        // if (addr.stMin > 0) {
-        //   await this.delay(addr.stMin, addr)
-        // }
+
         if (sn == 0x10) {
           sn = 0
         }

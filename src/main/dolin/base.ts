@@ -605,7 +605,7 @@ export default abstract class LinBase {
                   nextIndex = 0
                   for (const s of db.schTables) {
                     s.entries.forEach((e, i) => {
-                      if (e.name == 'DiagnosticMasterReq' && s.entries.length == 1) {
+                      if (e.name == 'DiagnosticMasterReq') {
                         schName = s.name
                         nextIndex = i
                         found = true

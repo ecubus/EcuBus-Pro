@@ -16,7 +16,9 @@ import { EthBaseInfo } from 'nodeCan/doip'
 import PwmBase from '../pwm/base'
 import { VSomeIP_Client } from '../vsomeip'
 import { TesterInfo } from 'nodeCan/tester'
+import Store from 'electron-store'
 
+const store = new Store()
 const libPath = path.dirname(runtimeDom)
 
 ipcMain.on('ipc-plugin-lib-path', async (event, ...arg) => {
@@ -26,9 +28,7 @@ ipcMain.on('ipc-plugin-lib-path', async (event, ...arg) => {
 // 获取插件目录
 ipcMain.handle('ipc-get-plugins-dir', async () => {
   // 插件目录位于用户数据目录下的 plugins 文件夹
-  const userDataPath = app.getPath('userData')
-  const pluginsDir = path.join(userDataPath, 'plugins')
-
+  const pluginsDir = await getPluginsDirectory()
   // 如果目录不存在，创建它
   if (!fs.existsSync(pluginsDir)) {
     try {
@@ -39,6 +39,18 @@ ipcMain.handle('ipc-get-plugins-dir', async () => {
   }
 
   return pluginsDir
+})
+
+ipcMain.handle('ipc-open-plugin-path', async () => {
+  const pluginsDir = await getPluginsDirectory()
+  if (!fs.existsSync(pluginsDir)) {
+    try {
+      fs.mkdirSync(pluginsDir, { recursive: true })
+    } catch (error) {
+      return
+    }
+  }
+  await shell.openPath(pluginsDir)
 })
 
 // 列出插件目录下的所有子目录（按字母顺序）
@@ -109,7 +121,13 @@ export function stopPlugins() {
 // 辅助函数：获取插件目录
 function getPluginsDirectory(): string {
   const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, 'plugins')
+  let pluginsDir = path.join(userDataPath, 'plugins')
+  const pluginSettings = store.get('plugin.settings') as any
+  if (pluginSettings.downloadPath) {
+    pluginsDir = pluginSettings.downloadPath
+  }
+
+  return pluginsDir
 }
 
 // 辅助函数：确保插件目录存在

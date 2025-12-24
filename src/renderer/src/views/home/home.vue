@@ -338,15 +338,19 @@
                   }"
                 />
               </el-tab-pane>
-              <!-- <el-tab-pane label="plugin">
+              <el-tab-pane label="plugin">
                 <template #label>
                   <span class="custom-tabs-label">
                     <Icon :icon="pluginIcon" />
                     <span>Plugin</span>
                   </span>
                 </template>
-                <plugin-manager :height="height - 170" />
-              </el-tab-pane> -->
+                <plugin
+                  :style="{
+                    height: height - 170 + 'px'
+                  }"
+                />
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -483,6 +487,7 @@ import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
 import general from './general.vue'
+import plugin from './plugin.vue'
 import user from './user.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'
 import starIcon from '@iconify/icons-material-symbols/star-outline'

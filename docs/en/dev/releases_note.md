@@ -1,6 +1,19 @@
 # EcuBus-Pro Release Notes
-## Unreleased
-Changes since v0.8.57:
+
+
+## 0.8.59
+Changes from v0.8.58 to v0.8.59:
+
+ 
+* [plugin]:add custom plugin download path feature 
+* [can]:fix period timer doesn't update data 
+* [lin]:fix lin diag sch delay issue 
+* [plugin]:fix plugin has specal char path 
+* [script]:add serial port script api
+---
+
+## 0.8.58
+Changes from v0.8.57 to v0.8.58:
 
  
 * [feat]:add logger file choose 

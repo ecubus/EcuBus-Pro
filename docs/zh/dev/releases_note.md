@@ -1,8 +1,20 @@
 # EcuBus-Pro 发布说明
 
-## 未发布
+## 0.8.59
 
-自 v0.8.57 以来的变更：
+Changes from v0.8.58 to v0.8.59:
+
+- [plugin]:add custom plugin download path feature
+- [can]:fix period timer doesn't update data
+- [lin]:fix lin diag sch delay issue
+- [plugin]:fix plugin has specal char path
+- [script]:add serial port script api
+
+---
+
+## 0.8.58
+
+Changes from v0.8.57 to v0.8.58:
 
 - [feat]: 添加日志文件选择
 - [bug]:修复 cli pnpm 尝试查找 node

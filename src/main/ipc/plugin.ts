@@ -123,7 +123,7 @@ function getPluginsDirectory(): string {
   const userDataPath = app.getPath('userData')
   let pluginsDir = path.join(userDataPath, 'plugins')
   const pluginSettings = store.get('plugin.settings') as any
-  if (pluginSettings.downloadPath) {
+  if (pluginSettings && pluginSettings.downloadPath) {
     pluginsDir = pluginSettings.downloadPath
   }
 

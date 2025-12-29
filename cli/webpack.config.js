@@ -42,7 +42,7 @@ module.exports = {
     resolve: {
         alias: {
             // '@serialport/bindings-cpp': path.resolve(__dirname, '../resources/lib/js/bindings-cpp.js'),
-            // bindings: path.resolve(__dirname, '../resources/lib/js/node-bindings.js'),
+            bindings: path.resolve(__dirname, './node-bindings.js'),
         },
     },
     target: 'node',

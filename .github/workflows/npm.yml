@@ -44,5 +44,6 @@ jobs:
       
       - name: Publish main-plugin-sdk
         working-directory: ./src/main/plugin-sdk
+        run: npm publish
         continue-on-error: true
     

@@ -80,11 +80,11 @@
                         <img :src="lincableImg" alt="LinCable" />
                       </div>
                       <div class="ad-content">
-                        <div class="ad-title">EcuBus LinCable</div>
+                        <div class="ad-title">{{ $t('home.lincableTitle') }}</div>
                         <div class="ad-description">
-                          USB to LIN Adapter | Conformance Testing | Fault Injection | ISO 17987-6
+                          {{ $t('home.lincableDescription') }}
                         </div>
-                        <div class="ad-cta">Learn More →</div>
+                        <div class="ad-cta">{{ $t('home.learnMore') }}</div>
                       </div>
                     </div>
                   </el-carousel-item>
@@ -95,11 +95,11 @@
                         <Icon :icon="starIcon" />
                       </div>
                       <div class="ad-content">
-                        <div class="ad-title">📢 Advertise Here</div>
+                        <div class="ad-title">{{ $t('home.advertiseHere') }}</div>
                         <div class="ad-description">
-                          Showcase your products and services to professional automotive engineers
+                          {{ $t('home.advertiseDescription') }}
                         </div>
-                        <div class="ad-cta">Contact Us →</div>
+                        <div class="ad-cta">{{ $t('home.contactUs') }}</div>
                       </div>
                     </div>
                   </el-carousel-item>
@@ -294,7 +294,7 @@
               <Icon :icon="userIcon" />
             </el-avatar>
             <Icon v-else :icon="userIcon" />
-            <span>User</span>
+            <span>{{ $t('home.user') }}</span>
           </div>
         </template>
         <div class="userMenu">
@@ -342,7 +342,7 @@
                 <template #label>
                   <span class="custom-tabs-label">
                     <Icon :icon="pluginIcon" />
-                    <span>Plugin</span>
+                    <span>{{ $t('home.plugin') }}</span>
                   </span>
                 </template>
                 <plugin

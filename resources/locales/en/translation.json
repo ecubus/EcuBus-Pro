@@ -30,6 +30,10 @@
     "others": "Others",
     "license": "License",
     "update": "Update",
+    "user": "User",
+    "lincableTitle": "EcuBus LinCable",
+    "lincableDescription": "USB to LIN Adapter | Conformance Testing | Fault Injection | ISO 17987-6",
+    "learnMore": "Learn More →",
     "dateFormat": {
       "monthDay": "M/D",
       "yearMonthDay": "YYYY/M/D"

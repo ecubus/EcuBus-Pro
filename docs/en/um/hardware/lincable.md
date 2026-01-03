@@ -24,6 +24,42 @@ compatibility with a wide range of automotive LIN devices and networks. Supporte
 include 19200, 10400, 9600, and 2400 bps, making LinCable suitable for both legacy and
 modern LIN applications.
 
+### Custom Baud Rate Configuration
+
+LinCable supports custom baud rate configuration beyond the standard rates, allowing you to
+set any baud rate between approximately 107 bps and 2,750,000 bps. This is achieved through
+a two-stage prescaler system:
+
+- **Major Prescale**: Configurable from /2 to /256 (8 options: 0-7)
+- **Minor Prescale**: Configurable from 1 to 32
+
+The baud rate is calculated using the formula:
+```
+baudRate = 5,500,000 / (2^(prescale + 1) × bitMap)
+```
+
+This flexibility enables LinCable to work with non-standard LIN implementations and custom
+protocols that require specific baud rates not covered by the standard rates.
+
+### Runtime Baud Rate Control
+
+LinCable provides runtime baud rate control through the `linBaudRateCtrl()` API function,
+allowing you to dynamically change the baud rate during operation without reinitializing the
+device. The function automatically calculates the optimal prescale and bitMap combination
+to achieve the closest possible baud rate to your target value, and returns the actual
+baud rate achieved.
+
+**Key Features:**
+- Automatic optimization: Finds the best prescale/bitMap combination to minimize error
+- Real-time adjustment: Change baud rate on-the-fly during testing
+- Precise control: Returns the actual baud rate achieved for verification
+- Wide range: Supports baud rates from ~107 bps to 2.75 Mbps
+
+This capability is particularly useful for:
+- Testing devices with non-standard baud rates
+- Adapting to different LIN network configurations dynamically
+- Protocol development and validation
+
 ## PWM Output Capability
 
 LinCable includes advanced [PWM](../pwm/pwm.md) output functionality, making it
@@ -39,7 +75,44 @@ precise control of digital signals for various automotive applications.
 
 ## Power Control
 
-Support IUT power control, maximum current 2A, maximum voltage 18V
+LinCable provides integrated power supply control for the IUT (Item Under Test), enabling
+automated power cycling and power management during testing. This feature eliminates the
+need for external power supplies and simplifies test setups.
+
+### Power Control Specifications
+- **Maximum Current**: 2A
+- **Maximum Voltage**: 18V
+- **Control Method**: Software-controlled via API
+- **Power State**: On/Off control
+
+### Runtime Power Control API
+
+The `linPowerCtrl()` function allows you to dynamically control the IUT power supply during
+runtime. This is essential for:
+
+- **Power Cycling Tests**: Automatically power cycle devices to test recovery behavior
+- **Power-On Sequencing**: Control power-up timing for complex test scenarios
+- **Energy Management**: Turn off power when not needed to save energy
+- **Automated Testing**: Integrate power control into test sequences
+
+**API Usage:**
+```typescript
+// Turn on power
+await linPowerCtrl(true);
+
+// Turn off power
+await linPowerCtrl(false);
+
+// Control power on specific device (when multiple devices connected)
+await linPowerCtrl(true, 'Device1');
+```
+
+**Use Cases:**
+- Testing device behavior during power-on and power-off sequences
+- Validating recovery procedures after power loss
+- Implementing automated test sequences with power management
+- Reducing power consumption during idle periods
+- Simulating power supply interruptions for robustness testing
 
 ## Fault Injection and Conformance Testing
 

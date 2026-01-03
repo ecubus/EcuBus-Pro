@@ -146,6 +146,26 @@ interface CanAddr extends CanMsgType {
 }
 
 /**
+ * TLS configuration for DoIP v3
+ * @category DOIP
+ */
+interface TlsConfig {
+    /** Enable TLS for TCP connection (DoIP v3) */
+    enabled: boolean;
+    /** Path to CA certificate file for verifying peer */
+    ca?: string;
+    /** Path to client/server certificate file */
+    cert?: string;
+    /** Path to private key file */
+    key?: string;
+    /** Skip certificate verification (for testing only) */
+    rejectUnauthorized?: boolean;
+    /** TLS port, default is 3496 for DoIP v3 */
+    port?: number;
+    enableKeyLog?: boolean;
+    keyLogPath?: string;
+}
+/**
  * @category DOIP
  */
 interface EthAddr {
@@ -158,6 +178,8 @@ interface EthAddr {
     taType: 'physical' | 'functional';
     udpClientPort?: number;
     tcpClientPort?: number;
+    /** TLS configuration for DoIP v3 */
+    tls?: TlsConfig;
 }
 interface TesterAddr {
     routeActiveTime: number;
@@ -453,6 +475,8 @@ interface TesterInfo {
     simulateBy?: string;
     allServiceList: Partial<Record<ServiceId, ServiceItem[]>>;
     doipVersion?: number;
+    /** TLS configuration for DoIP v3 server (entity simulation) */
+    serverTls?: TlsConfig;
     enableCodeGen?: boolean;
     generateConfigs?: {
         tempaltePath: string;
@@ -2161,6 +2185,35 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linPowerCtrl(power: boolean, device?: string): Promise<void>;
 /**
+ * Control the baud rate of a LIN device
+ *
+ * This function calculates the optimal prescale and bitMap combination to achieve
+ * the closest possible baud rate to the target value. The calculation uses the formula:
+ * `baudRate = 5_500_000 / (2^(prescale + 1) * bitMap)`
+ *
+ * @category LIN
+ * @param {number} baudRate - The target baud rate (e.g., 19200, 9600)
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<number>} - Returns a promise that resolves with the actual baud rate achieved
+ *
+ * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
+ * @note The function automatically calculates the best combination of:
+ *       - lincableCustomBaudRatePrescale (range: 0-7, corresponding to /2, /4, /8, /16, /32, /64, /128, /256)
+ *       - lincableCustomBaudRateBitMap (range: 1-32)
+ *       to minimize the difference between target and actual baud rate.
+ *
+ * @example
+ * ```ts
+ * // Set baud rate to 19200
+ * const actualBaudRate = await linBaudRateCtrl(19200);
+ * console.log(`Actual baud rate: ${actualBaudRate}`);
+ *
+ * // Set baud rate on specific device
+ * const actualBaudRate = await linBaudRateCtrl(9600, 'Device1');
+ * ```
+ */
+declare function linBaudRateCtrl(baudRate: number, device?: string): Promise<number>;
+/**
  * Stop a LIN scheduler
  *
  * @category LIN
@@ -2521,5 +2574,5 @@ interface AuthenticationSession {
     accountInformation: AuthenticationSessionAccountInformation;
 }
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SerialPortClient, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, setVars, stopUdsSeq, test, workerEmit };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SerialPortClient, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linBaudRateCtrl, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, setVars, stopUdsSeq, test, workerEmit };
 export type { AuthenticationSession, AuthenticationSessionAccountInformation, CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, SerialPortCloseEvent, SerialPortDataEvent, SerialPortErrorEvent, SerialPortInfo, SerialPortOptions, SerialPortSetSignals, SerialPortSignals, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };

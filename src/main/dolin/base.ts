@@ -174,6 +174,9 @@ export default abstract class LinBase {
   async powerCtrl(power: boolean): Promise<void> {
     throw new Error('Power control not supported')
   }
+  async baudRateCtrl(prescale: number, bitMap: number): Promise<number> {
+    throw new Error('Baud rate control not supported')
+  }
   // abstract registerNode(nodeName:string):void
   abstract _write(msg: LinMsg): Promise<number>
   async write(m: LinMsg, opt?: LinWriteOpt): Promise<number> {

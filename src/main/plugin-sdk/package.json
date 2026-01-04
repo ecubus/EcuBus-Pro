@@ -1,6 +1,6 @@
 {
   "name": "@ecubus-pro/main-plugin-sdk",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "EcuBus Pro main plugin SDK",
   "type": "commonjs",
   "main": "./dist/index.cjs",

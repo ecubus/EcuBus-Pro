@@ -11,6 +11,10 @@
   "sideEffects": false,
   "peerDependencies": {
     "vue": ">=3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ecubus/EcuBus-Pro"
   }
 }
 

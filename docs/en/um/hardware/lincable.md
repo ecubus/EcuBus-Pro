@@ -173,7 +173,7 @@ requiring hardware replacement. The DFU process is straightforward and can be pe
 the EcuBus-Pro software or dedicated DFU tools, providing a reliable and safe method for firmware
 updates.
 
-## Fw Upgrade Guide
+## FW Upgrade Guide
 
 To upgrade the LinCable firmware, follow these steps:
 

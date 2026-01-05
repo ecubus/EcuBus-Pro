@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, toRef, unref } from 'vue'
+import { inject, onMounted, onUnmounted, toRef, unref } from 'vue'
 import { PluginItemConfig } from 'src/preload/plugin'
 import { useDataStore } from '@r/stores/data'
 import { usePluginStore } from '@r/stores/plugin'
@@ -29,6 +29,8 @@ import { cloneDeep } from 'lodash'
 import { InstanceofPlugin } from 'wujie-polyfill'
 import { useDark } from '@vueuse/core'
 import { error } from 'electron-log'
+import { Layout } from '@r/views/uds/layout'
+
 const dataStore = useDataStore()
 const globalStartRef = useGlobalStart()
 const props = defineProps<{
@@ -38,14 +40,27 @@ const props = defineProps<{
   width: number
   height: number
 }>()
-
-const isDev = props.item.entry?.startsWith('http')
-
-const entry = isDev ? props.item.entry : `file:///${props.item.entry}`
-
-const entryBase = props.item.entry?.split('/').slice(0, -1).join('/')
-
 const plguinStore = usePluginStore()
+
+const getConstItem = () => {
+  const pluginInfo = plguinStore.getPlugin(props.pluginId)
+  if (pluginInfo) {
+    const configs = pluginInfo.manifest.tabs || pluginInfo.manifest.extensions || []
+    for (const config of configs) {
+      return config.items.find((item) => item.id === props.item.id) || null
+    }
+  }
+
+  return null
+}
+const qitem = getConstItem()
+
+const isDev = qitem?.entry?.startsWith('http')
+
+const entry = isDev ? qitem?.entry : `file:///${qitem?.entry}`
+
+const entryBase = qitem?.entry?.split('/').slice(0, -1).join('/')
+
 const plugin = plguinStore.getPlugin(props.pluginId)!
 const editIndex = toRef(props, 'editIndex')
 const width = toRef(props, 'width')
@@ -55,6 +70,7 @@ const isDark = useDark()
 const darkValue = unref(isDark)
 const globalStartValue = unref(globalStartRef)
 const basePath = plugin.path.replace(/'/g, '%27')
+const layout = inject('layout') as Layout
 
 const importMap = {
   imports: {
@@ -131,6 +147,22 @@ const loadError = (url: string, e: Error) => {
   })
 }
 
+onMounted(() => {
+  if (!qitem) {
+    ElMessageBox({
+      title: 'Item Not Found',
+      message: `The item is not found in the plugin`,
+      type: 'error',
+      appendTo: `#win${props.editIndex}`,
+      showCancelButton: false,
+      showConfirmButton: true,
+      confirmButtonText: 'Close',
+      center: true
+    }).finally(() => {
+      layout.removeWin(props.editIndex, true)
+    })
+  }
+})
 onUnmounted(() => {
   destroyApp(props.editIndex)
 })

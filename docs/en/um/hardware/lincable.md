@@ -173,7 +173,7 @@ requiring hardware replacement. The DFU process is straightforward and can be pe
 the EcuBus-Pro software or dedicated DFU tools, providing a reliable and safe method for firmware
 updates.
 
-## Fw Upgrade
+## Fw Upgrade Guide
 
 To upgrade the LinCable firmware, follow these steps:
 
@@ -181,4 +181,20 @@ To upgrade the LinCable firmware, follow these steps:
 
 2. **Follow Plugin README**: After installation, refer to the plugin's README documentation for detailed upgrade instructions and follow the steps provided there.
 
+## FW Download
 
+| Version | Download Link |
+| ---- | -------- |
+| 1.2.0 | [Download Link](https://ecubus.oss-cn-chengdu.aliyuncs.com/lincable/lincalbe_1_2_0.sdfu) |
+| 1.3.0 | [Download Link](https://ecubus.oss-cn-chengdu.aliyuncs.com/lincable/lincalbe_1_3_0.sdfu) |
+
+
+## FW Release Note
+
+### 1.3.0
+
+1. add dynamic change baud rate feature
+
+### 1.2.0
+
+Frist Release

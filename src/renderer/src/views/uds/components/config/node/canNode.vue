@@ -330,15 +330,67 @@ const clockChange = (value: string) => {
 
 const configInfo: Record<CanVendor, any> = {
   ecubus: {
-    clock: false,
-    timeSeg1: false,
-    timeSeg2: false,
-    sjw: false,
-    preScaler: false,
+    clock: true,
+    timeSeg1: true,
+    timeSeg2: true,
+    sjw: true,
+    preScaler: true,
     freq: true,
     zlgSpec: false,
-    can: {},
-    canFd: {}
+    can: {
+      clock: [{ clock: '80', name: '80' }],
+      preScaler: {
+        min: 1,
+        max: 512
+      },
+      tsg1: {
+        min: 1,
+        max: 256
+      },
+      tsg2: {
+        min: 1,
+        max: 128
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      }
+    },
+    canFd: {
+      clock: [{ clock: '80', name: '80' }],
+      preScaler: {
+        min: 1,
+        max: 32
+      },
+      tsg1: {
+        min: 1,
+        max: 32
+      },
+      tsg2: {
+        min: 1,
+        max: 16
+      },
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 500000,
+        clock: '80'
+      },
+      bitratefd: {
+        sjw: 1,
+        timeSeg1: 7,
+        timeSeg2: 2,
+        preScaler: 4,
+        freq: 2000000,
+        clock: '80'
+      }
+    }
   },
   zlg: {
     clock: false,

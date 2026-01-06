@@ -370,14 +370,5 @@ We welcome contributions to improve the plugin system!
 - Share example plugins
 - Improve documentation
 
-## Conclusion
 
-You now have all the knowledge needed to create powerful EcuBus plugins! Start with the template, experiment with the examples, and build something amazing.
-
-**Happy plugin development!** 🚀
-
----
-
-*Last updated: October 2025*
-*Plugin SDK Version: 0.0.4+*
 

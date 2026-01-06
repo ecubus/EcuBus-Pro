@@ -24,7 +24,7 @@ import mitt from 'mitt'
 import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
-import fcDesigner from './views/uds/panel-designer/index.js'
+import fcDesigner from './views/uds/panel/panel-designer/index.js'
 import log from 'electron-log'
 import { useDataStore } from './stores/data'
 
@@ -63,7 +63,6 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   log.error('[UnhandledRejection]', formatReason(event.reason))
 })
-
 
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')

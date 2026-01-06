@@ -3,43 +3,43 @@
     <div v-if="!userStore.user" class="login-container">
       <div class="login-card">
         <Icon :icon="userIcon" class="user-avatar-placeholder" />
-        <h2>Welcome to Ecubus Pro</h2>
-        <p>Please sign in to access your account and licenses.</p>
+        <h2>{{ $t('user.welcome') }}</h2>
+        <p>{{ $t('user.signInPrompt') }}</p>
 
         <div class="benefits-section">
-          <h4>Why Register?</h4>
+          <h4>{{ $t('user.whyRegister') }}</h4>
           <div class="benefit-item">
             <Icon :icon="supportIcon" class="benefit-icon" />
             <div class="benefit-content">
-              <span class="benefit-title">Priority Support</span>
-              <span class="benefit-desc"
-                >Get faster technical support and bug fixes with higher priority</span
-              >
+              <span class="benefit-title">{{ $t('user.benefits.prioritySupport.title') }}</span>
+              <span class="benefit-desc">{{
+                $t('user.benefits.prioritySupport.description')
+              }}</span>
             </div>
           </div>
           <div class="benefit-item">
             <Icon :icon="pluginIcon" class="benefit-icon" />
             <div class="benefit-content">
-              <span class="benefit-title">Plugin Development</span>
-              <span class="benefit-desc"
-                >Create and publish your own plugins to extend functionality</span
-              >
+              <span class="benefit-title">{{ $t('user.benefits.pluginDevelopment.title') }}</span>
+              <span class="benefit-desc">{{
+                $t('user.benefits.pluginDevelopment.description')
+              }}</span>
             </div>
           </div>
           <div class="benefit-item">
             <Icon :icon="moreIcon" class="benefit-icon" />
             <div class="benefit-content">
-              <span class="benefit-title">More Features</span>
-              <span class="benefit-desc">Access exclusive features and early updates</span>
+              <span class="benefit-title">{{ $t('user.benefits.moreFeatures.title') }}</span>
+              <span class="benefit-desc">{{ $t('user.benefits.moreFeatures.description') }}</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
           <el-button type="primary" size="large" :loading="loading" @click="openLogin">
-            Sign In with Casdoor
+            {{ $t('user.signIn') }}
           </el-button>
-          <el-button size="large" @click="openSignup"> Create Account </el-button>
+          <el-button size="large" @click="openSignup"> {{ $t('user.createAccount') }} </el-button>
         </div>
       </div>
     </div>
@@ -50,10 +50,10 @@
           <Icon v-if="!userStore.user.avatar" :icon="userIcon" />
         </el-avatar>
         <div class="user-details">
-          <h3>{{ userStore.user.displayName || 'User' }}</h3>
+          <h3>{{ userStore.user.displayName || $t('user.userFallback') }}</h3>
           <p class="email">{{ userStore.user.email }}</p>
         </div>
-        <el-button type="danger" plain @click="handleLogout">Sign Out</el-button>
+        <el-button type="danger" plain @click="handleLogout">{{ $t('user.signOut') }}</el-button>
       </div>
 
       <el-divider />
@@ -97,6 +97,7 @@ import moreIcon from '@iconify/icons-material-symbols/stars-outline'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
+import { i18next } from '@r/i18n'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -125,10 +126,14 @@ async function openLogin() {
   loginTimer.value = setTimeout(() => {
     if (loading.value) {
       loading.value = false
-      ElMessageBox.alert('Login timed out. Please try again.', 'Warning', {
-        confirmButtonText: 'OK',
-        type: 'warning'
-      })
+      ElMessageBox.alert(
+        i18next.t('user.messages.loginTimeout'),
+        i18next.t('user.messages.warning'),
+        {
+          confirmButtonText: i18next.t('user.messages.ok'),
+          type: 'warning'
+        }
+      )
     }
   }, 60000)
 
@@ -162,7 +167,7 @@ const handleReceiveCode = async (_event, code, returnedState) => {
   const storedState = sessionStorage.getItem('auth_state')
   if (!storedState || storedState !== returnedState) {
     loading.value = false
-    ElMessage.error('Security verification failed (State mismatch). Please try logging in again.')
+    ElMessage.error(i18next.t('user.messages.securityVerificationFailed'))
     sessionStorage.removeItem('auth_state')
     return
   }
@@ -182,7 +187,7 @@ const handleReceiveCode = async (_event, code, returnedState) => {
     }
   } catch (e) {
     console.error(e)
-    ElMessage.error('Login failed')
+    ElMessage.error(i18next.t('user.messages.loginFailed'))
   } finally {
     loading.value = false
   }

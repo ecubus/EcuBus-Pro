@@ -45,6 +45,135 @@
     "createExampleError": "Failed to create example",
     "loadTemplatesError": "Failed to load templates"
   },
+  "uds": {
+    "tabs": {
+      "home": "Home",
+      "hardware": "Hardware",
+      "diagnostics": "Diagnostics",
+      "soa": "SOA",
+      "test": "Test",
+      "others": "Others"
+    },
+    "toolbar": {
+      "start": "Start",
+      "stop": "Stop",
+      "trace": "Trace",
+      "graph": "Graph",
+      "panel": "Panel",
+      "message": "Message",
+      "devices": "Devices",
+      "network": "Network",
+      "interact": "Interact",
+      "udsTester": "UDS Tester",
+      "services": "Services",
+      "sequence": "Sequence",
+      "soaConfig": "SOA Config",
+      "testSetup": "Test Setup",
+      "database": "Database",
+      "variables": "Variables",
+      "osInfo": "OS Info",
+      "scriptApi": "Script API",
+      "packages": "Packages"
+    },
+    "dropdowns": {
+      "graph": {
+        "line": "Line",
+        "gauge": "Gauge",
+        "datas": "Datas"
+      },
+      "interact": {
+        "noInteraction": "No Interaction"
+      },
+      "service": {
+        "noTester": "No Tester"
+      },
+      "sequence": {
+        "noTester": "No Tester"
+      },
+      "trace": {
+        "defaultName": "Trace"
+      },
+      "panel": {
+        "addPanel": "Add Panel"
+      },
+      "database": {
+        "addLin": "Add LIN (LDF)",
+        "addCan": "Add CAN (DBC)",
+        "addOrti": "Add OS (ORTI)",
+        "noDatabase": "No Database",
+        "openDatabaseTitle": "Open Database File",
+        "fileFilterName": "Database File"
+      },
+      "osTrace": {
+        "statistics": "{{name}} Statistics",
+        "timeline": "{{name}} Timeline",
+        "noOrtiLine1": "No ORTI File",
+        "noOrtiLine2": "Add In Database"
+      }
+    },
+    "plugin": {
+      "errorTitle": "Plugin Error",
+      "noEntry": "This plugin does not have an entry point in the extension {{label}}",
+      "handlerNotImplemented": "Plugin handler system not yet implemented"
+    },
+    "windows": {
+      "variable": "Variable",
+      "datas": "Datas",
+      "panel": "Panel",
+      "panelPreview": "Panel Preview",
+      "package": "Package",
+      "test": "Test",
+      "graph": "Line",
+      "gauge": "Gauge",
+      "network": "Network",
+      "hardware": "Devices",
+      "tester": "UDS Tester",
+      "message": "Message",
+      "testerService": "Service",
+      "testerSequence": "Sequence",
+      "trace": "Trace",
+      "cani": "IA",
+      "pwmi": "IA",
+      "lini": "IA",
+      "linPanel": "Panel",
+      "ldf": "LDF",
+      "dbc": "DBC",
+      "orti": "ORTI",
+      "soa": "SOA",
+      "someipi": "IA",
+      "osTrace": "OS Statistics",
+      "osTime": "OS Timeline",
+      "plugin": "Plugin"
+    },
+    "windowCloseConfirm": {
+      "messageWithName": "Your changes will not be saved in {{name}}, continue?",
+      "messageWithoutName": "Your changes will not be saved, continue?",
+      "title": "Warning",
+      "ok": "OK",
+      "cancel": "Cancel"
+    }
+  },
+  "pluginSettings": {
+    "downloadPathLabel": "Plugin Download Path",
+    "tooltip": {
+      "line1": "The path where plugins will be downloaded.",
+      "line2": "Path must contain only English letters, numbers,",
+      "line3": "underscores (_), and path separators (/, \\, :).",
+      "line4": "No spaces or special characters allowed."
+    },
+    "buttons": {
+      "selectPath": "Select Plugin Download Path",
+      "openPath": "Open Plugin Download Path in File Manager"
+    },
+    "dialog": {
+      "selectDirectoryTitle": "Select Plugin Download Directory"
+    },
+    "errors": {
+      "noSpaces": "Path cannot contain spaces",
+      "invalidFormat": "Path must contain only English letters, numbers, underscores, and path separators. No spaces or special characters allowed.",
+      "invalidSelectedPath": "Selected path contains invalid characters. Only English letters, numbers, underscores, and path separators are allowed."
+    }
+  },
   "pluginMarketplace": {
     "loading": "Loading plugins...",
     "retry": "Retry",
@@ -114,6 +243,36 @@
     "cancel": "Cancel",
     "install": "Exit & Install",
     "downloadOk": "Update package download ok"
+  },
+  "user": {
+    "welcome": "Welcome to Ecubus",
+    "signInPrompt": "Please sign in to access your account and licenses.",
+    "whyRegister": "Why Register?",
+    "benefits": {
+      "prioritySupport": {
+        "title": "Priority Support",
+        "description": "Get faster technical support and bug fixes with higher priority"
+      },
+      "pluginDevelopment": {
+        "title": "Plugin Development",
+        "description": "Create and publish your own plugins to extend functionality"
+      },
+      "moreFeatures": {
+        "title": "More Features",
+        "description": "Access exclusive features and early updates"
+      }
+    },
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "signOut": "Sign Out",
+    "userFallback": "User",
+    "messages": {
+      "loginTimeout": "Login timed out. Please try again.",
+      "warning": "Warning",
+      "ok": "OK",
+      "securityVerificationFailed": "Security verification failed (State mismatch). Please try logging in again.",
+      "loginFailed": "Login failed"
+    }
   },
   "common": {
     "unknownError": "Unknown error"

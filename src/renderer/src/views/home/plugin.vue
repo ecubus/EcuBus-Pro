@@ -1,17 +1,17 @@
 <template>
   <div class="plugin-settings">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="180px" @submit.prevent>
-      <el-form-item label="Plugin Download Path" prop="downloadPath">
+      <el-form-item :label="$t('pluginSettings.downloadPathLabel')" prop="downloadPath">
         <template #label>
           <div class="label-container">
-            <span>Plugin Download Path</span>
+            <span>{{ $t('pluginSettings.downloadPathLabel') }}</span>
             <el-tooltip placement="bottom" effect="light">
               <template #content>
                 <div class="tooltip-content">
-                  <div>The path where plugins will be downloaded.</div>
-                  <div>Path must contain only English letters, numbers,</div>
-                  <div>underscores (_), and path separators (/, \\, :).</div>
-                  <div>No spaces or special characters allowed.</div>
+                  <div>{{ $t('pluginSettings.tooltip.line1') }}</div>
+                  <div>{{ $t('pluginSettings.tooltip.line2') }}</div>
+                  <div>{{ $t('pluginSettings.tooltip.line3') }}</div>
+                  <div>{{ $t('pluginSettings.tooltip.line4') }}</div>
                 </div>
               </template>
               <el-icon class="question-icon"><QuestionFilled /></el-icon>
@@ -21,11 +21,15 @@
         <div class="path-input-container">
           <el-input v-model="form.downloadPath" style="width: calc(100% - 100px)" />
           <el-button-group>
-            <el-button :icon="Folder" title="Select Plugin Download Path" @click="selectPath" />
+            <el-button
+              :icon="Folder"
+              :title="$t('pluginSettings.buttons.selectPath')"
+              @click="selectPath"
+            />
             <el-button
               :icon="FolderOpened"
               :disabled="!form.downloadPath"
-              title="Open Plugin Download Path in File Manager"
+              :title="$t('pluginSettings.buttons.openPath')"
               @click="openPath"
             />
           </el-button-group>
@@ -40,6 +44,7 @@ import { ref, onMounted, watch } from 'vue'
 import { ElNotification, FormInstance, FormRules } from 'element-plus'
 import { QuestionFilled, Folder, FolderOpened } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
+import { i18next } from '@r/i18n'
 
 const formRef = ref<FormInstance>()
 const form = ref({
@@ -99,16 +104,12 @@ const rules: FormRules = {
         }
 
         if (/\s/.test(value)) {
-          callback(new Error('Path cannot contain spaces'))
+          callback(new Error(i18next.t('pluginSettings.errors.noSpaces')))
           return
         }
 
         if (!validatePathFormat(value)) {
-          callback(
-            new Error(
-              'Path must contain only English letters, numbers, underscores, and path separators. No spaces or special characters allowed.'
-            )
-          )
+          callback(new Error(i18next.t('pluginSettings.errors.invalidFormat')))
           return
         }
 
@@ -136,7 +137,7 @@ watch(
 
 async function selectPath() {
   const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-    title: 'Select Plugin Download Directory',
+    title: i18next.t('pluginSettings.dialog.selectDirectoryTitle'),
     properties: ['openDirectory']
   })
 
@@ -151,8 +152,7 @@ async function selectPath() {
     form.value.downloadPath = selectedPath
   } else {
     ElNotification.error({
-      message:
-        'Selected path contains invalid characters. Only English letters, numbers, underscores, and path separators are allowed.',
+      message: i18next.t('pluginSettings.errors.invalidSelectedPath'),
       position: 'bottom-right'
     })
   }

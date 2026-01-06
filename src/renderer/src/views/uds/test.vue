@@ -208,7 +208,6 @@
         <trace-component
           ref="traceRef"
           :height="h - 2"
-          :width="w - leftWidth - 6"
           :capture-test="true"
           :test-id="isSingleRun"
           prefix="test-"
@@ -337,7 +336,7 @@ import runningIcon from '@iconify/icons-material-symbols/pending-outline'
 import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 import errorParse from '@r/util/ipcError'
-import TraceComponent from './log.vue'
+import TraceComponent from './message.vue'
 
 const loading = ref(false)
 const traceRef = ref()

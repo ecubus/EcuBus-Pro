@@ -11,7 +11,6 @@ import { globalStop } from './ipc/uds'
 import Transport from 'winston-transport'
 import { initMainI18n } from './i18n'
 import { setupCasdoor } from './ipc/casdoor'
-import { initMainI18n } from './i18n'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
 

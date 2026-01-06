@@ -29,6 +29,7 @@ import soaIcon from '@iconify/icons-material-symbols/linked-services'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import { usePluginStore } from '@r/stores/plugin'
+import { i18next } from '@r/i18n'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]
@@ -45,6 +46,7 @@ export interface LayoutItem {
   minW?: number
   minH?: number
   label: string
+  labelKey?: string
   allowExt?: boolean
   layoutType?: 'bottom' | 'top' | 'left' | 'right'
 }
@@ -56,6 +58,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Variable',
+    labelKey: 'uds.windows.variable',
     key: 'variable',
     component: defineAsyncComponent(() => import('./variable.vue')),
     icon: varIcon
@@ -68,8 +71,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Datas',
+    labelKey: 'uds.windows.datas',
     key: 'datas',
-    component: defineAsyncComponent(() => import('./data.vue')),
+    component: defineAsyncComponent(() => import('./graph/data.vue')),
     icon: dataIcon
   },
   panel: {
@@ -80,9 +84,10 @@ export const layoutMap: Record<string, LayoutItem> = {
     h: 550,
     minW: 800,
     label: 'Panel',
+    labelKey: 'uds.windows.panel',
     minH: 550,
     key: 'panel',
-    component: defineAsyncComponent(() => import('./panel.vue')),
+    component: defineAsyncComponent(() => import('./panel/panelEditor.vue')),
     icon: panelIcon1
   },
   panelPreview: {
@@ -93,10 +98,11 @@ export const layoutMap: Record<string, LayoutItem> = {
     h: 550,
     minW: 600,
     label: 'PanelPreview',
+    labelKey: 'uds.windows.panelPreview',
     minH: 400,
     allowExt: true,
     key: 'panelPreview',
-    component: defineAsyncComponent(() => import('./panelView.vue')),
+    component: defineAsyncComponent(() => import('./panel/panelView.vue')),
     icon: panelIcon1
   },
   package: {
@@ -106,6 +112,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Package',
+    labelKey: 'uds.windows.package',
     key: 'package',
     component: defineAsyncComponent(() => import('./components/package.vue')),
     icon: packageIcon
@@ -117,6 +124,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Test',
+    labelKey: 'uds.windows.test',
     key: 'test',
     component: defineAsyncComponent(() => import('./test.vue')),
     icon: testIcon
@@ -128,8 +136,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Line',
+    labelKey: 'uds.windows.graph',
     key: 'graph',
-    component: defineAsyncComponent(() => import('./graph.vue')),
+    component: defineAsyncComponent(() => import('./graph/graph.vue')),
     icon: lineIcon
   },
   gauge: {
@@ -139,8 +148,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Gauge',
+    labelKey: 'uds.windows.gauge',
     key: 'gauge',
-    component: defineAsyncComponent(() => import('./gauge.vue')),
+    component: defineAsyncComponent(() => import('./graph/gauge.vue')),
     icon: gaugeIcon
   },
 
@@ -151,8 +161,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Network',
+    labelKey: 'uds.windows.network',
     key: 'network',
-    component: defineAsyncComponent(() => import('./components/network.vue')),
+    component: defineAsyncComponent(() => import('./network/index.vue')),
     icon: networkNode
   },
   hardware: {
@@ -162,8 +173,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'Devices',
+    labelKey: 'uds.windows.hardware',
     key: 'hardware',
-    component: defineAsyncComponent(() => import('./components/hardware.vue')),
+    component: defineAsyncComponent(() => import('./hardware/index.vue')),
     icon: deviceIcon
   },
   tester: {
@@ -173,8 +185,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 600,
     h: 400,
     label: 'UDS Tester',
+    labelKey: 'uds.windows.tester',
     key: 'tester',
-    component: defineAsyncComponent(() => import('./components/tester.vue')),
+    component: defineAsyncComponent(() => import('./tester/index.vue')),
     icon: textFields
   },
   // can: {
@@ -194,8 +207,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     h: 300,
     layoutType: 'bottom',
     label: 'Message',
+    labelKey: 'uds.windows.message',
     key: 'message',
-    component: defineAsyncComponent(() => import('./log.vue')),
+    component: defineAsyncComponent(() => import('./message.vue')),
     icon: msgIcon
   },
   testerService: {
@@ -205,8 +219,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'Service',
+    labelKey: 'uds.windows.testerService',
     key: 'testerService',
-    component: defineAsyncComponent(() => import('./components/config/tester/service.vue')),
+    component: defineAsyncComponent(() => import('./tester/service.vue')),
     icon: database
   },
   testerSequence: {
@@ -216,8 +231,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'Sequence',
+    labelKey: 'uds.windows.testerSequence',
     key: 'testerSequence',
-    component: defineAsyncComponent(() => import('./components/config/tester/sequence.vue')),
+    component: defineAsyncComponent(() => import('./tester/sequence.vue')),
     icon: stepIcon
   },
   trace: {
@@ -227,9 +243,10 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'Trace',
+    labelKey: 'uds.windows.trace',
     key: 'trace',
     allowExt: true,
-    component: defineAsyncComponent(() => import('./components/trace.vue')),
+    component: defineAsyncComponent(() => import('./trace.vue')),
     icon: logIcon
   },
   cani: {
@@ -239,9 +256,10 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'IA',
+    labelKey: 'uds.windows.cani',
     key: 'IA',
     allowExt: true,
-    component: defineAsyncComponent(() => import('./cani.vue')),
+    component: defineAsyncComponent(() => import('./ia/cani.vue')),
     icon: interIcon
   },
   pwmi: {
@@ -253,8 +271,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 350,
     label: 'IA',
+    labelKey: 'uds.windows.pwmi',
     key: 'IA',
-    component: defineAsyncComponent(() => import('./pwmi.vue')),
+    component: defineAsyncComponent(() => import('./ia/pwmi.vue')),
     icon: interIcon
   },
   lini: {
@@ -264,8 +283,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'IA',
+    labelKey: 'uds.windows.lini',
     key: 'IA',
-    component: defineAsyncComponent(() => import('./lini.vue')),
+    component: defineAsyncComponent(() => import('./ia/lini.vue')),
     icon: interIcon
   },
   linPanel: {
@@ -275,8 +295,9 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'Panel',
+    labelKey: 'uds.windows.linPanel',
     key: 'Panel',
-    component: defineAsyncComponent(() => import('./linPanel.vue')),
+    component: defineAsyncComponent(() => import('./ia/linPanel.vue')),
     icon: panelIcon
   },
   ldf: {
@@ -286,6 +307,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'LDF',
+    labelKey: 'uds.windows.ldf',
     key: 'LDF',
     component: defineAsyncComponent(() => import('../../database/ldf/index.vue')),
     icon: database
@@ -297,6 +319,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'DBC',
+    labelKey: 'uds.windows.dbc',
     key: 'DBC',
     component: defineAsyncComponent(() => import('../../database/dbc/index.vue')),
     icon: database
@@ -308,6 +331,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'ORTI',
+    labelKey: 'uds.windows.orti',
     key: 'ORTI',
     component: defineAsyncComponent(() => import('../../database/orti/index.vue')),
     icon: database
@@ -319,6 +343,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'SOA',
+    labelKey: 'uds.windows.soa',
     key: 'SOA',
     component: defineAsyncComponent(() => import('./someip/soa.vue')),
     icon: soaIcon
@@ -330,6 +355,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'IA',
+    labelKey: 'uds.windows.someipi',
     key: 'IA',
     component: defineAsyncComponent(() => import('./someip/si.vue')),
     icon: interIcon
@@ -341,6 +367,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'OS Statistics',
+    labelKey: 'uds.windows.osTrace',
     key: 'OSTrace',
     component: defineAsyncComponent(() => import('../ostrace/table.vue')),
     icon: osTraceIcon
@@ -352,6 +379,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'OSTime',
+    labelKey: 'uds.windows.osTime',
     key: 'OSTime',
     component: defineAsyncComponent(() => import('../ostrace/graph.vue')),
     icon: osTraceIcon
@@ -363,6 +391,7 @@ export const layoutMap: Record<string, LayoutItem> = {
     w: 700,
     h: 400,
     label: 'Plugin',
+    labelKey: 'uds.windows.plugin',
     key: 'Plugin',
     component: defineAsyncComponent(() => import('../../plugin/plugin.vue')),
     icon: pluginIcon
@@ -943,17 +972,16 @@ export class Layout {
       }
 
       if (this.modify.value[key] && !force) {
-        ElMessageBox.confirm(
-          `Your changes will not be saved${item.options.name ? ` in ${item.options.name}` : ``}, continue?`,
-          'Warning',
-          {
-            confirmButtonText: 'OK',
-            cancelButtonText: 'Cancel',
-            type: 'warning',
-            buttonSize: 'small',
-            appendTo: `#win${key}`
-          }
-        )
+        const message = item.options.name
+          ? i18next.t('uds.windowCloseConfirm.messageWithName', { name: item.options.name })
+          : i18next.t('uds.windowCloseConfirm.messageWithoutName')
+        ElMessageBox.confirm(message, i18next.t('uds.windowCloseConfirm.title'), {
+          confirmButtonText: i18next.t('uds.windowCloseConfirm.ok'),
+          cancelButtonText: i18next.t('uds.windowCloseConfirm.cancel'),
+          type: 'warning',
+          buttonSize: 'small',
+          appendTo: `#win${key}`
+        })
           .then(() => {
             done()
           })
@@ -1013,13 +1041,15 @@ export class Layout {
       Layout.externWinNum++
       item.isExternal = true
       delete this.winEl[key]
+      const layout = this.validLayout[item.title]
+      const baseLabel = layout?.labelKey ? i18next.t(layout.labelKey) : item.label
       window.electron.ipcRenderer.send('ipc-open-window', {
         ...item.options.params,
         id: key,
         path: item.title,
         w: item.pos.w,
         h: item.pos.h,
-        name: item.label + (item.options.name ? `-${item.options.name}` : '')
+        name: baseLabel + (item.options.name ? `-${item.options.name}` : '')
       })
     }
   }

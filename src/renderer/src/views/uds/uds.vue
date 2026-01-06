@@ -7,7 +7,7 @@
             <span class="lr">
               <img v-if="isImgIcon(tab.icon)" :src="tab.icon" style="width: 16px; height: 16px" />
               <Icon v-else :icon="tab.icon" style="font-size: 16px" />
-              <span>{{ tab.label }}</span>
+              <span>{{ tab.labelKey ? $t(tab.labelKey) : tab.label }}</span>
             </span>
           </template>
           <div style="display: flex; gap: 5px; padding: 15px">
@@ -34,7 +34,7 @@
                   fit="scale-down"
                 />
                 <Icon v-else :icon="item.icon" :style="{ fontSize: '22px' }" />
-                <span>{{ item.label }}</span>
+                <span>{{ item.labelKey ? $t(item.labelKey) : item.label }}</span>
               </div>
 
               <!-- 下拉菜单 -->
@@ -199,7 +199,10 @@
                   style="margin-right: 5px; font-size: 14px"
                 />
                 <span style="display: inline-flex; align-items: center"
-                  >{{ item.label
+                  >{{
+                    layoutMaster.validLayout[item.title]?.labelKey
+                      ? $t(layoutMaster.validLayout[item.title].labelKey!)
+                      : item.label
                   }}<span v-if="item.options.name != undefined"
                     >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
                   >
@@ -289,7 +292,10 @@
                   style="margin-right: 5px; font-size: 14px"
                 />
                 <span style="display: inline-flex; align-items: center"
-                  >{{ firstByteUpper(item.title)
+                  >{{
+                    layoutMaster.validLayout[item.title]?.labelKey
+                      ? $t(layoutMaster.validLayout[item.title].labelKey!)
+                      : firstByteUpper(item.title)
                   }}<span v-if="item.options.name != undefined"
                     >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
                   >
@@ -378,7 +384,7 @@ import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import * as joint from '@joint/core'
-import { UDSView } from './components/udsView'
+import { UDSView } from './network/udsView'
 import {
   ElMessage,
   ElMessageBox,
@@ -407,11 +413,13 @@ import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
 import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '../../../../preload/plugin'
+import { i18next } from '@r/i18n'
 
 // TypeScript 接口定义
 interface TabItem {
   type: 'button' | 'dropdown' | 'divider'
   label?: string
+  labelKey?: string
   icon?: any
   class?: any
 
@@ -429,6 +437,7 @@ interface TabItem {
 interface TabConfig {
   name: string
   label: string
+  labelKey?: string
   icon: any
   items: TabItem[]
 }
@@ -461,7 +470,10 @@ const TraceDropdown = {
             'div',
             { style: 'display: flex; align-items: center; justify-content: space-between' },
             [
-              h('span', dataBase.traces['trace']?.name || 'Trace'),
+              h(
+                'span',
+                dataBase.traces['trace']?.name || i18next.t('uds.dropdowns.trace.defaultName')
+              ),
               h(ElDivider, { direction: 'vertical' }),
               h(ElButton, { link: true }, () =>
                 h(
@@ -483,7 +495,7 @@ const TraceDropdown = {
           .map(([key, item]) =>
             h(ElDropdownItem, { command: key }, () =>
               h('div', { style: 'display: flex; align-items: center; width: 100%' }, [
-                h('span', (item as any).name || 'Trace'),
+                h('span', (item as any).name || i18next.t('uds.dropdowns.trace.defaultName')),
                 h(ElDivider, { direction: 'vertical' }),
                 h(ElButton, { link: true, type: 'danger' }, () =>
                   h(
@@ -510,15 +522,15 @@ const GraphDropdown = {
       h(ElDropdownMenu, { size: 'small' }, () => [
         h(ElDropdownItem, { command: 'graph' }, () => [
           h(Icon, { icon: lineIcon, style: 'margin-right: 5px' }),
-          'Line'
+          i18next.t('uds.dropdowns.graph.line')
         ]),
         h(ElDropdownItem, { command: 'gauge' }, () => [
           h(Icon, { icon: gaugeIcon, style: 'margin-right: 5px' }),
-          'Gauge'
+          i18next.t('uds.dropdowns.graph.gauge')
         ]),
         h(ElDropdownItem, { command: 'datas' }, () => [
           h(Icon, { icon: dataIcon, style: 'margin-right: 5px' }),
-          'Datas'
+          i18next.t('uds.dropdowns.graph.datas')
         ])
       ])
   }
@@ -528,7 +540,9 @@ const PanelDropdown = {
   setup() {
     return () =>
       h(ElDropdownMenu, { size: 'small' }, () => [
-        h(ElDropdownItem, { command: 'panel', icon: CirclePlusFilled }, () => 'Add Panel'),
+        h(ElDropdownItem, { command: 'panel', icon: CirclePlusFilled }, () =>
+          i18next.t('uds.dropdowns.panel.addPanel')
+        ),
         ...Object.values(dataBase.panels).map((item: any, index) =>
           h(
             ElDropdownItem,
@@ -588,7 +602,11 @@ const InteractDropdown = {
           h(ElDropdownItem, { key, command: key }, () => (item as any).name)
         ),
         ...(Object.keys(dataBase.ia).length === 0
-          ? [h(ElDropdownItem, { disabled: true }, () => 'No Interaction')]
+          ? [
+              h(ElDropdownItem, { disabled: true }, () =>
+                i18next.t('uds.dropdowns.interact.noInteraction')
+              )
+            ]
           : [])
       ])
   }
@@ -602,7 +620,11 @@ const ServiceDropdown = {
           h(ElDropdownItem, { key, command: key }, () => (item as any).name)
         ),
         ...(Object.keys(dataBase.tester).length === 0
-          ? [h(ElDropdownItem, { disabled: true }, () => 'No Tester')]
+          ? [
+              h(ElDropdownItem, { disabled: true }, () =>
+                i18next.t('uds.dropdowns.service.noTester')
+              )
+            ]
           : [])
       ])
   }
@@ -616,7 +638,11 @@ const SequenceDropdown = {
           h(ElDropdownItem, { key, command: key }, () => (item as any).name)
         ),
         ...(Object.keys(dataBase.tester).length === 0
-          ? [h(ElDropdownItem, { disabled: true }, () => 'No Tester')]
+          ? [
+              h(ElDropdownItem, { disabled: true }, () =>
+                i18next.t('uds.dropdowns.sequence.noTester')
+              )
+            ]
           : [])
       ])
   }
@@ -626,9 +652,15 @@ const DatabaseDropdown = {
   setup() {
     return () =>
       h(ElDropdownMenu, { size: 'small' }, () => [
-        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () => 'Add Lin (LDF)'),
-        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addCan' }, () => 'Add CAN (DBC)'),
-        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addOrti' }, () => 'Add OS (ORTI)'),
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () =>
+          i18next.t('uds.dropdowns.database.addLin')
+        ),
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addCan' }, () =>
+          i18next.t('uds.dropdowns.database.addCan')
+        ),
+        h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addOrti' }, () =>
+          i18next.t('uds.dropdowns.database.addOrti')
+        ),
         ...dataBaseList.value.map((item, index) =>
           h(
             ElDropdownItem,
@@ -652,23 +684,25 @@ const OsTraceDropdown = {
       h(ElDropdownMenu, { size: 'small' }, () => [
         ...Object.entries(dataBase.database.orti).map(([key, item]) =>
           h('div', {}, [
-            h(ElDropdownItem, { key, command: key }, () => (item as any).name + ' Statistics'),
+            h(ElDropdownItem, { key, command: key }, () =>
+              i18next.t('uds.dropdowns.osTrace.statistics', { name: (item as any).name })
+            ),
             h(
               ElDropdownItem,
               {
                 key,
                 command: `${key}_TimeLine`
               },
-              () => (item as any).name + ' Timeline'
+              () => i18next.t('uds.dropdowns.osTrace.timeline', { name: (item as any).name })
             )
           ])
         ),
         ...(Object.keys(dataBase.database.orti).length === 0
           ? [
               h(ElDropdownItem, { disabled: true }, () => [
-                'No ORTI File',
+                i18next.t('uds.dropdowns.osTrace.noOrtiLine1'),
                 h('br'),
-                'Add In Database'
+                i18next.t('uds.dropdowns.osTrace.noOrtiLine2')
               ])
             ]
           : [])
@@ -704,8 +738,8 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
             })
           } else {
             ElMessageBox({
-              title: 'Plugin Error',
-              message: `This plugin does not have an entry point in the extension ${item.label}`,
+              title: i18next.t('uds.plugin.errorTitle'),
+              message: i18next.t('uds.plugin.noEntry', { label: item.label }),
               type: 'error',
               showCancelButton: false,
               showConfirmButton: false,
@@ -764,7 +798,7 @@ function convertPluginItemToTabItem(item: PluginItemConfig, plugin: EcuBusPlugin
           console.log(
             `Plugin ${plugin.manifest.id} dropdown command: ${command}, handler: ${item.onCommand}`
           )
-          ElMessage.warning('Plugin handler system not yet implemented')
+          ElMessage.warning(i18next.t('uds.plugin.handlerNotImplemented'))
         }
       },
       dropdownContent: PluginDropdown
@@ -870,11 +904,13 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'home',
     label: 'Home',
+    labelKey: 'uds.tabs.home',
     icon: homeIcon,
     items: [
       {
         type: 'button',
         label: 'Start',
+        labelKey: 'uds.toolbar.start',
         icon: lightIcon,
         iconSize: '32px',
         minWidth: true,
@@ -888,6 +924,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'button',
         label: 'Stop',
+        labelKey: 'uds.toolbar.stop',
         icon: stopIcon,
         iconSize: '32px',
         minWidth: true,
@@ -902,6 +939,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'dropdown',
         label: 'Trace',
+        labelKey: 'uds.toolbar.trace',
         icon: logIcon,
         onClick: () => openTrace('trace'),
         onCommand: openTrace,
@@ -911,6 +949,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'dropdown',
         label: 'Graph',
+        labelKey: 'uds.toolbar.graph',
         icon: graphIcon,
         onCommand: openGraph,
         dropdownContent: GraphDropdown
@@ -918,6 +957,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'dropdown',
         label: 'Panel',
+        labelKey: 'uds.toolbar.panel',
         icon: panelIcon1,
         onCommand: openPanel,
         dropdownContent: PanelDropdown
@@ -926,6 +966,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'button',
         label: 'Message',
+        labelKey: 'uds.toolbar.message',
         icon: msgIcon,
         onClick: () => handleSelect(['message'])
       }
@@ -934,23 +975,27 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'hardware',
     label: 'Hardware',
+    labelKey: 'uds.tabs.hardware',
     icon: hardware,
     items: [
       {
         type: 'button',
         label: 'Devices',
+        labelKey: 'uds.toolbar.devices',
         icon: deviceIcon,
         onClick: () => handleSelect(['hardware'])
       },
       {
         type: 'button',
         label: 'Network',
+        labelKey: 'uds.toolbar.network',
         icon: networkNode,
         onClick: () => handleSelect(['network'])
       },
       {
         type: 'dropdown',
         label: 'Interact',
+        labelKey: 'uds.toolbar.interact',
         icon: interIcon,
         onCommand: openIA,
         dropdownContent: InteractDropdown
@@ -960,17 +1005,20 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'diag',
     label: 'Diagnostics',
+    labelKey: 'uds.tabs.diagnostics',
     icon: diagIcon,
     items: [
       {
         type: 'button',
         label: 'UDS Tester',
+        labelKey: 'uds.toolbar.udsTester',
         icon: textFields,
         onClick: () => handleSelect(['tester'])
       },
       {
         type: 'dropdown',
         label: 'Services',
+        labelKey: 'uds.toolbar.services',
         icon: diagServiceIcon,
         onCommand: openService,
         dropdownContent: ServiceDropdown
@@ -978,6 +1026,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'dropdown',
         label: 'Sequence',
+        labelKey: 'uds.toolbar.sequence',
         icon: stepIcon,
         onCommand: openSequence,
         dropdownContent: SequenceDropdown
@@ -987,11 +1036,13 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'soa',
     label: 'SOA',
+    labelKey: 'uds.tabs.soa',
     icon: soaIcon,
     items: [
       {
         type: 'button',
         label: 'SOA Config',
+        labelKey: 'uds.toolbar.soaConfig',
         icon: soaConfigIcon,
         onClick: () => handleSelect(['soa'])
       }
@@ -1000,11 +1051,13 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'test',
     label: 'Test',
+    labelKey: 'uds.tabs.test',
     icon: testConfig,
     items: [
       {
         type: 'button',
         label: 'Test Setup',
+        labelKey: 'uds.toolbar.testSetup',
         icon: testConfig,
         iconSize: '18px',
         onClick: () => handleSelect(['test'])
@@ -1014,11 +1067,13 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
   {
     name: 'other',
     label: 'Others',
+    labelKey: 'uds.tabs.others',
     icon: userIcon,
     items: [
       {
         type: 'dropdown',
         label: 'Database',
+        labelKey: 'uds.toolbar.database',
         icon: dataBaseIcon,
         onCommand: openDatabase,
         dropdownContent: DatabaseDropdown
@@ -1026,6 +1081,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'button',
         label: 'Variables',
+        labelKey: 'uds.toolbar.variables',
         icon: varIcon,
         onClick: () => handleSelect(['variable'])
       },
@@ -1033,6 +1089,7 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'dropdown',
         label: 'OS Info',
+        labelKey: 'uds.toolbar.osInfo',
         icon: osTraceIcon,
         onCommand: openOsTrace,
         dropdownContent: OsTraceDropdown
@@ -1041,12 +1098,14 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
       {
         type: 'button',
         label: 'Script Api',
+        labelKey: 'uds.toolbar.scriptApi',
         icon: apiIcon,
         onClick: openApi
       },
       {
         type: 'button',
         label: 'Packages',
+        labelKey: 'uds.toolbar.packages',
         icon: packageIcon,
         onClick: openPackage
       }
@@ -1195,7 +1254,7 @@ const dataBaseList = computed(() => {
   }
   if (list.length == 0) {
     list.push({
-      url: 'No Database',
+      url: i18next.t('uds.dropdowns.database.noDatabase'),
       disabled: true
     })
   }
@@ -1216,9 +1275,14 @@ async function openDatabase(testerIndex: string) {
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: 'Open Database File',
+      title: i18next.t('uds.dropdowns.database.openDatabaseTitle'),
       properties: ['openFile'],
-      filters: [{ name: `Database File`, extensions: [fileExtMap[type]] }]
+      filters: [
+        {
+          name: i18next.t('uds.dropdowns.database.fileFilterName'),
+          extensions: [fileExtMap[type]]
+        }
+      ]
     })
     const file = r.filePaths[0]
     if (file == undefined) {

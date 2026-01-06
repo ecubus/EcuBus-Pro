@@ -163,8 +163,38 @@ onMounted(() => {
     })
   }
 })
+// 安全销毁 wujie 应用，避免 stopIframeLoading 内部 loop/loop2 的竞态条件
+const safeDestroyApp = async (name: string) => {
+  // 1. 等待 wujie 加载队列完成（startApp promise）
+  const queue = (window as any).__WUJIE_QUEUE?.[name]
+  if (queue instanceof Promise) {
+    try {
+      await queue
+    } catch {
+      // 加载过程中的错误忽略
+    }
+  }
+
+  // 2. 等待 stopIframeLoading 内部的 loop/loop2 完成
+  //    loop2 使用 setTimeout(..., 1) 轮询，最长持续 1 秒
+  //    这里等待 100ms 通常足够让循环检测到状态变化并退出
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  // 3. 安全销毁
+  try {
+    destroyApp(name)
+  } catch (e) {
+    null
+  }
+
+  // 4. 清理队列引用
+  if ((window as any).__WUJIE_QUEUE?.[name]) {
+    delete (window as any).__WUJIE_QUEUE[name]
+  }
+}
+
 onUnmounted(() => {
-  destroyApp(props.editIndex)
+  safeDestroyApp(props.editIndex)
 })
 </script>
 

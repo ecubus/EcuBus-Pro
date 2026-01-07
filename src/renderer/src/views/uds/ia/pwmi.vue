@@ -4,18 +4,18 @@
       <!-- 设备连接Tab -->
 
       <!-- PWM控制Tab -->
-      <el-tab-pane label="PWM Control" name="control">
+      <el-tab-pane :label="i18next.t('uds.network.pwmi.tabs.pwmControl')" name="control">
         <template #label>
           <span class="tab-label">
             <Icon :icon="waveIcon" class="tab-icon" />
-            <span>Control</span>
+            <span>{{ i18next.t('uds.network.pwmi.tabs.control') }}</span>
           </span>
         </template>
         <div class="tab-content" style="margin: 20px">
           <!-- 占空比控制 -->
           <div class="duty-cycle-section">
             <div class="section-header">
-              <h4>Duty Cycle Control</h4>
+              <h4>{{ i18next.t('uds.network.pwmi.labels.dutyCycleControl') }}</h4>
               <!-- <div class="value-display">
                 <span class="value-text">{{ dutyCycle.toFixed(1) }}%</span>
               </div> -->
@@ -38,7 +38,7 @@
 
           <!-- 快速预设 -->
           <div class="presets-section">
-            <h4>Quick Presets</h4>
+            <h4>{{ i18next.t('uds.network.pwmi.labels.quickPresets') }}</h4>
             <el-button-group>
               <el-button
                 v-for="preset in dutyCyclePresets"
@@ -53,11 +53,11 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="Device Connection" name="device">
+      <el-tab-pane :label="i18next.t('uds.network.pwmi.tabs.deviceConnection')" name="device">
         <template #label>
           <span class="tab-label">
             <Icon :icon="deviceIcon" class="tab-icon" />
-            <span>Device</span>
+            <span>{{ i18next.t('uds.network.pwmi.tabs.device') }}</span>
           </span>
         </template>
         <div class="tab-content">
@@ -69,7 +69,10 @@
                 class="pwm-transfer"
                 style="text-align: left; display: inline-block"
                 :data="allDeviceLabel"
-                :titles="['Valid', 'Assigned']"
+                :titles="[
+                  i18next.t('uds.network.pwmi.transfer.valid'),
+                  i18next.t('uds.network.pwmi.transfer.assigned')
+                ]"
                 :disabled="!isConnected"
               />
             </div>
@@ -97,6 +100,7 @@ import playIcon from '@iconify/icons-material-symbols/play-arrow'
 import stopIcon from '@iconify/icons-material-symbols/stop'
 import { useGlobalStart } from '@r/stores/runtime'
 import { cloneDeep } from 'lodash'
+import { i18next } from '@r/i18n'
 
 interface PwmDevice {
   id: string

@@ -13,7 +13,7 @@
         >
           <el-input
             v-model="searchText"
-            placeholder="Search by name..."
+            :placeholder="i18next.t('uds.components.signal.placeholders.searchByName')"
             style="width: 200px"
             size="small"
             clearable
@@ -27,7 +27,11 @@
           <el-divider direction="vertical" />
           <el-tooltip
             effect="light"
-            :content="!isExpanded ? 'Collapse All' : 'Expand All'"
+            :content="
+              !isExpanded
+                ? i18next.t('uds.components.signal.tooltips.collapseAll')
+                : i18next.t('uds.components.signal.tooltips.expandAll')
+            "
             placement="bottom"
           >
             <el-button link @click="toggleExpand">
@@ -40,7 +44,11 @@
           <el-divider direction="vertical" />
           <el-tooltip
             effect="light"
-            :content="props.selectableLevel == 'signal' ? 'Add Signal' : 'Add Frame'"
+            :content="
+              props.selectableLevel == 'signal'
+                ? i18next.t('uds.components.signal.tooltips.addSignal')
+                : i18next.t('uds.components.signal.tooltips.addFrame')
+            "
             placement="bottom"
           >
             <el-button type="primary" link :disabled="!highlightedRow" @click="addSignal">
@@ -53,7 +61,7 @@
           <el-tooltip
             v-if="props.highlightId"
             effect="light"
-            content="Remove Attach Signal"
+            :content="i18next.t('uds.components.signal.tooltips.removeAttachSignal')"
             placement="bottom"
           >
             <el-button type="warning" link @click="removeSignal">
@@ -88,6 +96,7 @@ import { DBC, Signal as DbcSignal } from '@r/database/dbc/dbcVisitor'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { nextTick } from 'process'
+import { i18next } from '@r/i18n'
 
 // 在 interface TreeItem 之前添加类型定义
 type ProtocolFilter = 'all' | 'can' | 'lin'
@@ -172,10 +181,15 @@ const gridOptions = computed<VxeGridProps<TreeItem>>(() => ({
   },
   columns: [
     { field: 'type', title: '', width: 40, slots: { default: 'type' } },
-    { field: 'name', title: 'Name', minWidth: 200, treeNode: true },
-    { field: 'txNode', title: 'Tx Node', width: 120 },
-    { field: 'startBit', title: 'Start Bit', width: 100 },
-    { field: 'bitLen', title: 'Bit Length', width: 100 }
+    {
+      field: 'name',
+      title: i18next.t('uds.components.signal.table.name'),
+      minWidth: 200,
+      treeNode: true
+    },
+    { field: 'txNode', title: i18next.t('uds.components.signal.table.txNode'), width: 120 },
+    { field: 'startBit', title: i18next.t('uds.components.signal.table.startBit'), width: 100 },
+    { field: 'bitLen', title: i18next.t('uds.components.signal.table.bitLength'), width: 100 }
   ],
   data: allSignals.value
 }))

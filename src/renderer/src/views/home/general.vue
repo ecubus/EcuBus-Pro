@@ -24,7 +24,7 @@
             <span>{{ $t('general.language') }}</span>
           </div>
         </template>
-        <LanguageSwitcher />
+        <LanguageSwitcher v-model="form.language" />
       </el-form-item>
       <el-form-item>
         <template #label>
@@ -55,13 +55,14 @@ import { ref, onMounted, watch } from 'vue'
 import { QuestionFilled, Moon, Sunny } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
 import { useDark } from '@vueuse/core'
-import LanguageSwitcher from '../../components/LanguageSwitcher.vue'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 
 const isDark = useDark()
-const form = ref({
-  zoom: 100
-})
 const OldVal = window.store.get('general.settings') as any
+const form = ref({
+  zoom: OldVal?.zoom || 100,
+  language: OldVal?.language || 'en'
+})
 
 watch(
   form,

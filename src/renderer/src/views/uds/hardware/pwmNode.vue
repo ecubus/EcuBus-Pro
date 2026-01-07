@@ -9,16 +9,22 @@
     :disabled="globalStart"
     hide-required-asterisk
   >
-    <el-divider content-position="left"> Device </el-divider>
-    <el-form-item label="Name" prop="name" required>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.pwmNode.sections.device') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.pwmNode.labels.name')" prop="name" required>
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Vendor">
+    <el-form-item :label="i18next.t('uds.hardware.pwmNode.labels.vendor')">
       <el-tag>
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="device.handle" required>
+    <el-form-item
+      :label="i18next.t('uds.hardware.pwmNode.labels.device')"
+      prop="device.handle"
+      required
+    >
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
         <el-option
           v-for="item in deviceList"
@@ -49,16 +55,22 @@
             icon="RefreshRight"
             @click="getDevice(true)"
           >
-            Refresh
+            {{ i18next.t('uds.hardware.pwmNode.labels.refresh') }}
           </el-button>
         </template>
       </el-select>
     </el-form-item>
 
-    <el-divider content-position="left"> PWM Parameters </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.pwmNode.sections.pwmParameters') }}
+    </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Frequency (Hz)" prop="freq" required>
+        <el-form-item
+          :label="i18next.t('uds.hardware.pwmNode.labels.frequency')"
+          prop="freq"
+          required
+        >
           <el-input-number
             v-model="data.freq"
             controls-position="right"
@@ -70,7 +82,11 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="Initial Duty (%)" prop="initDuty" required>
+        <el-form-item
+          :label="i18next.t('uds.hardware.pwmNode.labels.initialDuty')"
+          prop="initDuty"
+          required
+        >
           <el-input-number
             v-model="data.initDuty"
             controls-position="right"
@@ -86,10 +102,16 @@
 
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Polarity">
+        <el-form-item :label="i18next.t('uds.hardware.pwmNode.labels.polarity')">
           <el-select v-model="data.polarity" style="width: 100%">
-            <el-option label="Active High" :value="true" />
-            <el-option label="Active Low" :value="false" />
+            <el-option
+              :label="i18next.t('uds.hardware.pwmNode.options.activeHigh')"
+              :value="true"
+            />
+            <el-option
+              :label="i18next.t('uds.hardware.pwmNode.options.activeLow')"
+              :value="false"
+            />
           </el-select>
         </el-form-item>
       </el-col>
@@ -108,9 +130,11 @@
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
         <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
-          Add Device
+          {{ i18next.t('uds.hardware.pwmNode.buttons.addDevice') }}
         </el-button>
-        <el-button v-else type="warning" plain @click="onSubmit"> Save Device </el-button>
+        <el-button v-else type="warning" plain @click="onSubmit">
+          {{ i18next.t('uds.hardware.pwmNode.buttons.saveDevice') }}
+        </el-button>
       </div>
     </el-form-item>
   </el-form>
@@ -137,6 +161,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { CanVendor } from 'nodeCan/can'
 import type { PwmBaseInfo, PwmDevice } from 'src/main/share/uds'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()
@@ -181,12 +206,12 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const id of Object.keys(devices.devices)) {
       const hasName = devices.devices[id].pwmDevice?.name
       if (hasName == value && id != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.hardware.pwmNode.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.hardware.pwmNode.validation.inputNodeName')))
   }
 }
 
@@ -196,21 +221,21 @@ const rules = computed(() => {
     'device.handle': [
       {
         required: true,
-        message: 'Please select device',
+        message: i18next.t('uds.hardware.pwmNode.validation.selectDevice'),
         trigger: 'change'
       }
     ],
     freq: [
       {
         required: true,
-        message: 'Please input frequency',
+        message: i18next.t('uds.hardware.pwmNode.validation.inputFrequency'),
         trigger: 'blur'
       }
     ],
     initDuty: [
       {
         required: true,
-        message: 'Please input initial duty cycle',
+        message: i18next.t('uds.hardware.pwmNode.validation.inputInitialDutyCycle'),
         trigger: 'blur'
       }
     ]

@@ -23,7 +23,11 @@
           @click="toggleSch(row.Table)"
         >
           <Icon :icon="activeSch === row.Table ? stopIcon : sendIcon" style="margin-right: 5px" />
-          {{ activeSch === row.Table ? 'Stop SCH' : 'Start SCH' }}
+          {{
+            activeSch === row.Table
+              ? i18next.t('uds.network.lini.buttons.stopSch')
+              : i18next.t('uds.network.lini.buttons.startSch')
+          }}
         </el-button>
       </template>
 
@@ -45,19 +49,23 @@
             />
           </el-button>
           <el-divider direction="vertical"></el-divider>
-          <el-tooltip effect="light" content="Edit Connect" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="i18next.t('uds.network.lini.tooltips.editConnect')"
+            placement="bottom"
+          >
             <el-button type="primary" link @click="editConnect">
               <Icon :icon="linkIcon" style="rotate: -45deg; font-size: 18px" />
             </el-button>
           </el-tooltip>
           <el-divider direction="vertical"></el-divider>
           <Icon :icon="databaseIcon" />
-          <span>Database</span>
+          <span>{{ i18next.t('uds.network.lini.labels.database') }}</span>
           <el-select
             v-model="dbName"
             disabled
             size="small"
-            placeholder="Select Database In Device"
+            :placeholder="i18next.t('uds.network.lini.placeholders.selectDatabaseInDevice')"
             clearable
             style="width: 200px"
           >
@@ -88,7 +96,7 @@
     <el-dialog
       v-if="connectV"
       v-model="connectV"
-      title="IA Device Connect"
+      :title="i18next.t('uds.network.lini.dialogs.iaDeviceConnect')"
       width="590"
       align-center
       :append-to="`#win${editIndex}_ia`"
@@ -108,7 +116,10 @@
           class="canit"
           style="text-align: left; display: inline-block"
           :data="allDeviceLabel"
-          :titles="['Valid', 'Assigned ']"
+          :titles="[
+            i18next.t('uds.network.lini.transfer.valid'),
+            i18next.t('uds.network.lini.transfer.assigned')
+          ]"
           @left-check-change="handleLeftCheckChange"
         />
       </div>
@@ -143,6 +154,7 @@ import { LinBaseInfo, LinMode } from 'nodeCan/lin'
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
 import { TransferKey } from 'element-plus'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -395,19 +407,19 @@ function getFrameId(entry: any): string {
 
 function getFrameType(entry: any): string {
   if (entry.isCommand) {
-    return 'Command'
+    return i18next.t('uds.network.lini.frameTypes.command')
   }
   const db = dataBase.database.lin[dbName.value]
   if (entry.name in db.frames) {
-    return 'Unconditional'
+    return i18next.t('uds.network.lini.frameTypes.unconditional')
   }
   if (entry.name in db.eventTriggeredFrames) {
-    return 'Event Triggered'
+    return i18next.t('uds.network.lini.frameTypes.eventTriggered')
   }
   if (entry.name in db.sporadicFrames) {
-    return 'Sporadic'
+    return i18next.t('uds.network.lini.frameTypes.sporadic')
   }
-  return 'Not supported'
+  return i18next.t('uds.network.lini.frameTypes.notSupported')
 }
 
 // // 修改处理激活状态变化的函数
@@ -444,17 +456,22 @@ const gridOptions = computed(() => {
     align: 'center',
     columns: [
       { type: 'expand', width: 46, slots: { content: 'expand_content' }, resizable: false },
-      { field: 'index', title: 'Index', width: 100, resizable: false },
+      {
+        field: 'index',
+        title: i18next.t('uds.network.lini.table.index'),
+        width: 100,
+        resizable: false
+      },
       {
         field: 'sch',
-        title: 'SCH Control',
+        title: i18next.t('uds.network.lini.table.schControl'),
         width: 200,
         resizable: false,
         slots: { default: 'default_sch' }
       },
-      { field: 'Table', title: 'Schedule Table', minWidth: 150 },
+      { field: 'Table', title: i18next.t('uds.network.lini.table.scheduleTable'), minWidth: 150 },
 
-      { field: 'length', title: 'Frame Number', minWidth: 120 }
+      { field: 'length', title: i18next.t('uds.network.lini.table.frameNumber'), minWidth: 120 }
     ],
     data: tableData.value
   }
@@ -470,19 +487,24 @@ const childGridOptions = computed(() => {
     showOverflow: true,
     align: 'center',
     columns: [
-      { field: 'index', title: 'Index', width: 100, resizable: false },
-      { field: 'Table', title: 'Frame', minWidth: 150 },
-      { field: 'FrameId', title: 'Frame ID', minWidth: 150 },
+      {
+        field: 'index',
+        title: i18next.t('uds.network.lini.table.index'),
+        width: 100,
+        resizable: false
+      },
+      { field: 'Table', title: i18next.t('uds.network.lini.table.frame'), minWidth: 150 },
+      { field: 'FrameId', title: i18next.t('uds.network.lini.table.frameId'), minWidth: 150 },
 
       {
         field: 'Active',
-        title: 'Active',
+        title: i18next.t('uds.network.lini.table.active'),
         width: 80,
         slots: { default: 'default_active' }
       },
-      { field: 'Delay', title: 'Delay (ms)', width: 100 },
-      { field: 'length', title: 'Size (bytes)', width: 100 },
-      { field: 'Type', title: 'Type', minWidth: 120 }
+      { field: 'Delay', title: i18next.t('uds.network.lini.table.delay'), width: 100 },
+      { field: 'length', title: i18next.t('uds.network.lini.table.size'), width: 100 },
+      { field: 'Type', title: i18next.t('uds.network.lini.table.type'), minWidth: 120 }
     ]
   }
   return v

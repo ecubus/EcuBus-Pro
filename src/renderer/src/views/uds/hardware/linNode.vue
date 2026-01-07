@@ -9,16 +9,22 @@
     :disabled="globalStart"
     hide-required-asterisk
   >
-    <el-divider content-position="left"> Device </el-divider>
-    <el-form-item label="Name" prop="name" required>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.linNode.sections.device') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.linNode.labels.name')" prop="name" required>
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Vendor">
+    <el-form-item :label="i18next.t('uds.hardware.linNode.labels.vendor')">
       <el-tag>
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="device.handle" required>
+    <el-form-item
+      :label="i18next.t('uds.hardware.linNode.labels.device')"
+      prop="device.handle"
+      required
+    >
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
         <el-option
           v-for="item in deviceList"
@@ -49,50 +55,66 @@
             icon="RefreshRight"
             @click="getDevice(true)"
           >
-            Refresh
+            {{ i18next.t('uds.hardware.linNode.labels.refresh') }}
           </el-button>
         </template>
       </el-select>
     </el-form-item>
     <el-form-item
       v-if="props.vendor == 'toomoss'"
-      label="Volatge Control"
+      :label="i18next.t('uds.hardware.linNode.labels.voltageControl')"
       prop="device.toomossVolt"
     >
       <el-select
         v-model="data.device.toomossVolt"
         :loading="deviceLoading"
-        placeholder="Input 12V"
+        :placeholder="i18next.t('uds.hardware.linNode.options.input12v')"
         style="width: 300px"
       >
-        <el-option label="Onput 0V" :value="0" />
-        <el-option label="Output 12V" :value="1" />
-        <el-option label="Output 5V" :value="2" />
+        <el-option :label="i18next.t('uds.hardware.linNode.options.output0v')" :value="0" />
+        <el-option :label="i18next.t('uds.hardware.linNode.options.output12v')" :value="1" />
+        <el-option :label="i18next.t('uds.hardware.linNode.options.output5v')" :value="2" />
       </el-select>
     </el-form-item>
     <el-form-item
       v-if="props.vendor == 'ecubus'"
-      label="Power Enable"
+      :label="i18next.t('uds.hardware.linNode.labels.powerEnable')"
       prop="device.lincablePowerEnable"
     >
       <el-switch v-model="data.device.lincablePowerEnable" />
     </el-form-item>
-    <el-divider content-position="left"> Lin Parameters </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.linNode.sections.linParameters') }}
+    </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Lin Mode" prop="mode" required>
+        <el-form-item
+          :label="i18next.t('uds.hardware.linNode.labels.linMode')"
+          prop="mode"
+          required
+        >
           <el-select v-model="data.mode" @change="clearDatabase">
-            <el-option label="Master" value="MASTER" />
-            <el-option label="Slave" value="SLAVE" />
+            <el-option :label="i18next.t('uds.hardware.linNode.options.master')" value="MASTER" />
+            <el-option :label="i18next.t('uds.hardware.linNode.options.slave')" value="SLAVE" />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="Baud Rate" prop="baudRate">
+        <el-form-item :label="i18next.t('uds.hardware.linNode.labels.baudRate')" prop="baudRate">
           <el-select v-model="data.baudRate" required>
-            <el-option label="9600" :value="9600" />
-            <el-option label="19200" :value="19200" />
-            <el-option label="Custom" :value="0" :disabled="props.vendor != 'ecubus'" />
+            <el-option
+              :label="i18next.t('uds.hardware.linNode.options.baudRate9600')"
+              :value="9600"
+            />
+            <el-option
+              :label="i18next.t('uds.hardware.linNode.options.baudRate19200')"
+              :value="19200"
+            />
+            <el-option
+              :label="i18next.t('uds.hardware.linNode.options.custom')"
+              :value="0"
+              :disabled="props.vendor != 'ecubus'"
+            />
           </el-select>
         </el-form-item>
       </el-col>
@@ -100,7 +122,10 @@
     <template v-if="data.baudRate == 0">
       <el-form-item label-width="0">
         <el-col :span="12">
-          <el-form-item label="MajorPrescale" prop="device.lincableCustomBaudRatePrescale">
+          <el-form-item
+            :label="i18next.t('uds.hardware.linNode.labels.majorPrescale')"
+            prop="device.lincableCustomBaudRatePrescale"
+          >
             <el-select v-model="data.device.lincableCustomBaudRatePrescale">
               <el-option label="/2" :value="0" />
               <el-option label="/4" :value="1" />
@@ -114,7 +139,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="MinorPrescale" prop="device.lincableCustomBaudRateBitMap">
+          <el-form-item
+            :label="i18next.t('uds.hardware.linNode.labels.minorPrescale')"
+            prop="device.lincableCustomBaudRateBitMap"
+          >
             <el-input-number
               v-model="data.device.lincableCustomBaudRateBitMap"
               :min="0"
@@ -127,15 +155,17 @@
         </el-col>
       </el-form-item>
 
-      <el-form-item label="BaudRate">
+      <el-form-item :label="i18next.t('uds.hardware.linNode.labels.baudRateDisplay')">
         <el-alert :type="calculatedType" :closable="false">{{ calculatedBaudRate }}</el-alert>
       </el-form-item>
     </template>
-    <el-divider content-position="left"> Database </el-divider>
-    <el-form-item label="Database" prop="database">
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.linNode.sections.database') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.linNode.labels.database')" prop="database">
       <el-select
         v-model="data.database"
-        placeholder="No Database"
+        :placeholder="i18next.t('uds.hardware.linNode.options.noDatabase')"
         clearable
         style="width: 300px"
         @change="clearDatabase"
@@ -154,9 +184,11 @@
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
         <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
-          Add Device
+          {{ i18next.t('uds.hardware.linNode.buttons.addDevice') }}
         </el-button>
-        <el-button v-else type="warning" plain @click="onSubmit"> Save Device </el-button>
+        <el-button v-else type="warning" plain @click="onSubmit">
+          {{ i18next.t('uds.hardware.linNode.buttons.saveDevice') }}
+        </el-button>
       </div>
     </el-form-item>
   </el-form>
@@ -183,6 +215,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { CanVendor } from 'nodeCan/can'
 import { LinBaseInfo, LinDevice, LinMode } from 'nodeCan/lin'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()
@@ -260,14 +293,14 @@ function getDevice(visible: boolean) {
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     for (const id of Object.keys(devices.devices)) {
-      const hasName = devices.devices[id].ethDevice?.name
+      const hasName = devices.devices[id].linDevice?.name
       if (hasName == value && id != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.hardware.linNode.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.hardware.linNode.validation.inputNodeName')))
   }
 }
 const calculatedBaudRate = ref('')
@@ -279,11 +312,11 @@ const baudRateCheck = (rule: any, value: any, callback: any) => {
     const baudRate = 5_500_000 / (majorPrescale * minorPrescale)
     calculatedBaudRate.value = `${baudRate.toFixed(1)}`
     if (baudRate > 20000 && baudRate <= 50000) {
-      calculatedBaudRate.value = `${baudRate.toFixed(1)} WARNING: This LIN PHY may not support such high speed, using this speed may cause communication abnormalities, please use with caution`
+      calculatedBaudRate.value = `${baudRate.toFixed(1)} ${i18next.t('uds.hardware.linNode.messages.baudRateWarning')}`
       calculatedType.value = 'warning'
     } else if (baudRate > 50000) {
       calculatedType.value = 'error'
-      callback(new Error(`baud rate must be <= 50000`))
+      callback(new Error(i18next.t('uds.hardware.linNode.validation.baudRateTooHigh')))
     } else {
       calculatedType.value = 'primary'
     }
@@ -299,20 +332,20 @@ const rules = computed(() => {
     'device.handle': [
       {
         required: true,
-        message: 'Please select device',
+        message: i18next.t('uds.hardware.linNode.validation.selectDevice'),
         trigger: 'change'
       }
     ],
     database: [
       {
-        message: 'Please select database',
+        message: i18next.t('uds.hardware.linNode.validation.selectDatabase'),
         trigger: 'change'
       }
     ],
     workNode: [
       {
         required: data.value.database ? true : false,
-        message: 'Please select node',
+        message: i18next.t('uds.hardware.linNode.validation.selectNode'),
         trigger: 'change'
       }
     ],

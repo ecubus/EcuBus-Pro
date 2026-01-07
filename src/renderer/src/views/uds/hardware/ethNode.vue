@@ -9,16 +9,22 @@
     :disabled="globalStart"
     hide-required-asterisk
   >
-    <el-divider content-position="left"> Device </el-divider>
-    <el-form-item label="Name" prop="name" required>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.canNode.sections.device') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.name')" prop="name" required>
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Vendor">
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.vendor')">
       <el-tag>
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="device.handle" required>
+    <el-form-item
+      :label="i18next.t('uds.hardware.canNode.labels.device')"
+      prop="device.handle"
+      required
+    >
       <el-select v-model="data.device.handle" :loading="deviceLoading" style="width: 300px">
         <el-option
           v-for="item in deviceList"
@@ -34,7 +40,7 @@
             icon="RefreshRight"
             @click="getDevice(true)"
           >
-            Refresh
+            {{ i18next.t('uds.hardware.canNode.labels.refresh') }}
           </el-button>
         </template>
       </el-select>
@@ -44,9 +50,11 @@
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
         <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
-          Add Device
+          {{ i18next.t('uds.hardware.canNode.buttons.addDevice') }}
         </el-button>
-        <el-button v-else type="warning" plain @click="onSubmit"> Save Device </el-button>
+        <el-button v-else type="warning" plain @click="onSubmit">
+          {{ i18next.t('uds.hardware.canNode.buttons.saveDevice') }}
+        </el-button>
       </div>
     </el-form-item>
   </el-form>
@@ -73,6 +81,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { EthDevice, EthBaseInfo } from 'nodeCan/doip'
 import { CanVendor } from 'nodeCan/can'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()
@@ -110,12 +119,12 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const id of Object.keys(devices.devices)) {
       const hasName = devices.devices[id].ethDevice?.name
       if (hasName == value && id != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.hardware.canNode.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.hardware.canNode.validation.inputNodeName')))
   }
 }
 
@@ -124,7 +133,7 @@ const rules: FormRules<EthBaseInfo> = {
   'device.handle': [
     {
       required: true,
-      message: 'Please select device',
+      message: i18next.t('uds.hardware.canNode.validation.selectDevice'),
       trigger: 'change'
     }
   ]

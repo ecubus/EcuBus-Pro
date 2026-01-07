@@ -26,7 +26,11 @@
                 <el-button-group>
                   <el-tooltip
                     effect="light"
-                    :content="isPaused ? 'Resume' : 'Pause'"
+                    :content="
+                      isPaused
+                        ? i18next.t('uds.graph.data.tooltips.resume')
+                        : i18next.t('uds.graph.data.tooltips.pause')
+                    "
                     placement="bottom"
                   >
                     <el-button
@@ -41,18 +45,30 @@
                 </el-button-group>
                 <el-divider direction="vertical"></el-divider>
                 <el-button-group>
-                  <el-tooltip effect="light" content="Add Variables" placement="bottom">
+                  <el-tooltip
+                    effect="light"
+                    :content="i18next.t('uds.graph.data.tooltips.addVariables')"
+                    placement="bottom"
+                  >
                     <el-button link type="primary" @click="addNode">
                       <Icon :icon="addIcon" />
                     </el-button>
                   </el-tooltip>
-                  <el-tooltip effect="light" content="Add Signals" placement="bottom">
+                  <el-tooltip
+                    effect="light"
+                    :content="i18next.t('uds.graph.data.tooltips.addSignals')"
+                    placement="bottom"
+                  >
                     <el-button link type="primary" @click="addSignal">
                       <Icon :icon="waveIcon" />
                     </el-button>
                   </el-tooltip>
                   <el-divider direction="vertical"></el-divider>
-                  <el-tooltip effect="light" content="Delete Signal" placement="bottom">
+                  <el-tooltip
+                    effect="light"
+                    :content="i18next.t('uds.graph.data.tooltips.deleteSignal')"
+                    placement="bottom"
+                  >
                     <el-button
                       link
                       type="danger"
@@ -70,7 +86,7 @@
               <span
                 style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)"
               >
-                Time: {{ time }}s
+                {{ i18next.t('uds.graph.data.labels.time', { time: time }) }}
               </span>
             </div>
           </template>
@@ -90,7 +106,7 @@
             {{ row.rawValue }}
           </template>
           <template #default_lastUpdate="{ row }">
-            {{ row.lastUpdate || '--' }}
+            {{ row.lastUpdate || i18next.t('uds.graph.data.messages.noData') }}
           </template>
         </VxeGrid>
       </div>
@@ -98,7 +114,7 @@
     <el-dialog
       v-if="signalDialogVisible"
       v-model="signalDialogVisible"
-      title="Add Signal"
+      :title="i18next.t('uds.graph.data.dialogs.addSignal')"
       width="95%"
       align-center
       :append-to="appendId"
@@ -108,7 +124,7 @@
     <el-dialog
       v-if="variableDialogVisible"
       v-model="variableDialogVisible"
-      title="Add Variable"
+      :title="i18next.t('uds.graph.data.dialogs.addVariable')"
       width="95%"
       align-center
       :append-to="appendId"
@@ -137,6 +153,7 @@ import signal from '../components/signal.vue'
 import addVar from '../components/addVar.vue'
 import { VxeGrid, VxeGridProps, VxeTableEvents } from 'vxe-table'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const isPaused = ref(false)
 
@@ -202,24 +219,39 @@ const userGridOptions = computed<VxeGridProps<TableType>>(() => ({
   columns: [
     { type: 'checkbox', width: 50 },
     { type: 'seq', width: 50, title: '#' },
-    { field: 'name', title: 'Name', minWidth: 150, slots: { default: 'default_name' } },
+    {
+      field: 'name',
+      title: i18next.t('uds.graph.data.table.name'),
+      minWidth: 150,
+      slots: { default: 'default_name' }
+    },
     {
       field: 'fullName',
-      title: 'Full Name',
+      title: i18next.t('uds.graph.data.table.fullName'),
       minWidth: 200,
       slots: { default: 'default_fullName' }
     },
-    { field: 'value', title: 'Value', minWidth: 150, slots: { default: 'default_value' } },
-    { field: 'unit', title: 'Unit', width: 100, slots: { default: 'default_unit' } },
+    {
+      field: 'value',
+      title: i18next.t('uds.graph.data.table.value'),
+      minWidth: 150,
+      slots: { default: 'default_value' }
+    },
+    {
+      field: 'unit',
+      title: i18next.t('uds.graph.data.table.unit'),
+      width: 100,
+      slots: { default: 'default_unit' }
+    },
     {
       field: 'rawValue',
-      title: 'Raw Value',
+      title: i18next.t('uds.graph.data.table.rawValue'),
       minWidth: 150,
       slots: { default: 'default_rawValue' }
     },
     {
       field: 'lastUpdate',
-      title: 'Last Update',
+      title: i18next.t('uds.graph.data.table.lastUpdate'),
       minWidth: 150,
       slots: { default: 'default_lastUpdate' }
     }
@@ -392,9 +424,9 @@ onMounted(() => {
       id: v.id,
       name: v.name,
       fullName: getFullName(v),
-      value: '--',
+      value: i18next.t('uds.graph.data.messages.noData'),
       unit: getUnit(v),
-      rawValue: '--',
+      rawValue: i18next.t('uds.graph.data.messages.noData'),
       lastUpdate: 0
     })
   }
@@ -440,12 +472,12 @@ const deleteSignal = () => {
   const count = selectedRows.value.length
   const message =
     count === 1
-      ? 'Are you sure you want to delete this signal?'
-      : `Are you sure you want to delete ${count} signals?`
+      ? i18next.t('uds.graph.data.dialogs.deleteSignalConfirm')
+      : i18next.t('uds.graph.data.dialogs.deleteSignalsConfirm', { count })
 
-  ElMessageBox.confirm(message, 'Delete Signal', {
-    confirmButtonText: 'Confirm',
-    cancelButtonText: 'Cancel',
+  ElMessageBox.confirm(message, i18next.t('uds.graph.data.dialogs.deleteSignal'), {
+    confirmButtonText: i18next.t('uds.graph.data.dialogs.confirm'),
+    cancelButtonText: i18next.t('uds.graph.data.dialogs.cancel'),
     type: 'warning',
     appendTo: appendId.value,
     buttonSize: 'small'
@@ -489,7 +521,7 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
     if (existed) {
       ElNotification({
         offset: 50,
-        message: 'Signal already exists',
+        message: i18next.t('uds.graph.data.messages.signalAlreadyExists'),
         type: 'warning',
         appendTo: appendId.value
       })
@@ -506,9 +538,9 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
       id: node.id,
       name: node.name,
       fullName: getFullName(node),
-      value: '--',
+      value: i18next.t('uds.graph.data.messages.noData'),
       unit: getUnit(node),
-      rawValue: '--',
+      rawValue: i18next.t('uds.graph.data.messages.noData'),
       lastUpdate: 0
     })
 

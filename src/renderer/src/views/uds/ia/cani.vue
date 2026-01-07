@@ -95,27 +95,47 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Edit Connect" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.network.cani.tooltips.editConnect')"
+              placement="bottom"
+            >
               <el-button type="primary" link @click="editConnect">
                 <Icon :icon="linkIcon" style="rotate: -45deg; font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Add Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.network.cani.tooltips.addFrame')"
+              placement="bottom"
+            >
               <el-button link @click="addFrame">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Select Frame from Database" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.network.cani.tooltips.selectFrameFromDatabase')"
+              placement="bottom"
+            >
               <el-button link @click="openFrameSelect">
                 <Icon :icon="databaseIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.network.cani.tooltips.editFrame')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="popoverIndex < 0" @click="editFrame">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.network.cani.tooltips.deleteFrame')"
+              placement="bottom"
+            >
               <el-button
                 link
                 type="danger"
@@ -137,13 +157,17 @@
             v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.type"
             :disabled="periodTimer[popoverIndex]"
           >
-            <el-radio value="manual">Manual</el-radio>
-            <el-radio value="periodic">Periodic</el-radio>
+            <el-radio value="manual">{{
+              i18next.t('uds.network.cani.triggerTypes.manual')
+            }}</el-radio>
+            <el-radio value="periodic">{{
+              i18next.t('uds.network.cani.triggerTypes.periodic')
+            }}</el-radio>
           </el-radio-group>
         </el-col>
 
         <el-col :span="12">
-          <div>On Key:</div>
+          <div>{{ i18next.t('uds.network.cani.labels.onKey') }}</div>
           <div>
             <el-input
               v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.onKey"
@@ -154,7 +178,7 @@
           </div>
         </el-col>
         <el-col :span="12">
-          <div>Period (ms):</div>
+          <div>{{ i18next.t('uds.network.cani.labels.period') }}</div>
           <div>
             <el-input-number
               v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.period"
@@ -175,7 +199,7 @@
     <el-dialog
       v-if="connectV"
       v-model="connectV"
-      title="IA Device Connect"
+      :title="i18next.t('uds.network.cani.dialogs.iaDeviceConnect')"
       width="590"
       align-center
       :append-to="`#win${editIndex}_ia`"
@@ -195,14 +219,21 @@
           class="canit"
           style="text-align: left; display: inline-block"
           :data="allDeviceLabel"
-          :titles="['Valid', 'Assigned ']"
+          :titles="[
+            i18next.t('uds.network.cani.transfer.valid'),
+            i18next.t('uds.network.cani.transfer.assigned')
+          ]"
         />
       </div>
     </el-dialog>
     <el-dialog
       v-if="editV && formData"
       v-model="editV"
-      :title="`Edit Frame ${dataBase.ia[editIndex].action[popoverIndex].name}`"
+      :title="
+        i18next.t('uds.network.cani.dialogs.editFrame', {
+          name: dataBase.ia[editIndex].action[popoverIndex].name
+        })
+      "
       width="90%"
       align-center
       :append-to="`#win${editIndex}_ia`"
@@ -221,13 +252,13 @@
           class="formH"
           :disabled="periodTimer[popoverIndex] == true"
         >
-          <el-form-item label="Name">
+          <el-form-item :label="i18next.t('uds.network.cani.labels.name')">
             <el-input v-model="formData.name" :disabled="formData.database != undefined" />
           </el-form-item>
-          <el-form-item label="ID">
+          <el-form-item :label="i18next.t('uds.network.cani.labels.id')">
             <el-input v-model="formData.id" @input="idChange" />
           </el-form-item>
-          <el-form-item label="Channel">
+          <el-form-item :label="i18next.t('uds.network.cani.labels.channel')">
             <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
               <el-option
                 v-for="key in dataBase.ia[editIndex].devices"
@@ -237,7 +268,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="Type">
+          <el-form-item :label="i18next.t('uds.network.cani.labels.type')">
             <el-select v-model="formData.type" size="small" style="width: 100%">
               <el-option
                 v-for="(l, v) in formData.remote ? typeMapRemote : typeMap"
@@ -249,31 +280,35 @@
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="12">
-              <el-form-item label="Remote">
+              <el-form-item :label="i18next.t('uds.network.cani.labels.remote')">
                 <el-checkbox v-model="formData.remote" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="BRS">
+              <el-form-item :label="i18next.t('uds.network.cani.labels.brs')">
                 <el-checkbox v-model="formData.brs" :disabled="!formData.type.includes('fd')" />
               </el-form-item>
             </el-col>
           </el-form-item>
-          <el-form-item label="DLC">
+          <el-form-item :label="i18next.t('uds.network.cani.labels.dlc')">
             <el-select v-model="formData.dlc" size="small" style="width: 100%">
               <el-option v-for="i in 16" :key="i" :value="i - 1"></el-option>
             </el-select>
           </el-form-item>
         </el-form>
         <el-tabs v-model="activeName">
-          <el-tab-pane v-if="formData.database" label="Signal" name="signal">
+          <el-tab-pane
+            v-if="formData.database"
+            :label="i18next.t('uds.network.cani.tabs.signal')"
+            name="signal"
+          >
             <CanISignal
               :message-id="formData.id"
               :database="formData.database"
               @change="handleDataChange"
             />
           </el-tab-pane>
-          <el-tab-pane label="Raw Data" name="raw">
+          <el-tab-pane :label="i18next.t('uds.network.cani.tabs.rawData')" name="raw">
             <div style="margin-left: 10px">
               <el-input
                 v-for="index in dlcToLen"
@@ -281,7 +316,7 @@
                 v-model="formData.data[index - 1]"
                 class="dataI"
                 :maxlength="2"
-                placeholder="00"
+                :placeholder="i18next.t('uds.network.cani.placeholders.hexByte')"
                 style="width: 65px; margin-right: 5px; margin-bottom: 5px"
                 @input="dataChange(index - 1, $event)"
                 @change="dataChangeDone"
@@ -300,7 +335,7 @@
     <el-dialog
       v-if="selectFrameVisible"
       v-model="selectFrameVisible"
-      title="Select Frame from Database"
+      :title="i18next.t('uds.network.cani.dialogs.selectFrameFromDatabase')"
       :append-to="`#win${editIndex}_ia`"
       width="600"
       align-center
@@ -353,18 +388,19 @@ import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { v4 } from 'uuid'
+import { i18next } from '@r/i18n'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
 const typeMap = {
-  can: 'CAN',
-  canfd: 'CAN FD',
-  ecan: 'Extended CAN',
-  ecanfd: 'Extended CAN FD'
+  can: i18next.t('uds.network.cani.frameTypes.can'),
+  canfd: i18next.t('uds.network.cani.frameTypes.canFd'),
+  ecan: i18next.t('uds.network.cani.frameTypes.extendedCan'),
+  ecanfd: i18next.t('uds.network.cani.frameTypes.extendedCanFd')
 }
 const typeMapRemote = {
-  can: 'CAN',
-  ecan: 'Extended CAN'
+  can: i18next.t('uds.network.cani.frameTypes.can'),
+  ecan: i18next.t('uds.network.cani.frameTypes.extendedCan')
 }
 const activeName = ref('signal')
 const connectV = ref(false)
@@ -468,41 +504,53 @@ const gridOptions = computed(() => {
       },
       {
         field: 'send',
-        title: 'Send',
+        title: i18next.t('uds.network.cani.table.send'),
         width: 100,
         resizable: false,
         slots: { default: 'default_send' }
       },
       {
         field: 'trigger',
-        title: 'Trigger',
+        title: i18next.t('uds.network.cani.table.trigger'),
         width: 200,
         resizable: false,
         slots: { default: 'default_trigger' }
       },
-      { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
+      {
+        field: 'name',
+        title: i18next.t('uds.network.cani.table.name'),
+        width: 100,
+        editRender: {},
+        slots: { edit: 'default_name' }
+      },
       {
         field: 'id',
-        title: 'ID (HEX)',
+        title: i18next.t('uds.network.cani.table.idHex'),
         minWidth: 100,
         editRender: {},
         slots: { edit: 'default_id' }
       },
       {
         field: 'channel',
-        title: 'Channel',
+        title: i18next.t('uds.network.cani.table.channel'),
         minWidth: 100,
         editRender: {},
         slots: { default: 'default_channel', edit: 'edit_channel' }
       },
       {
         field: 'type',
-        title: 'Type',
+        title: i18next.t('uds.network.cani.table.type'),
         width: 100,
         editRender: {},
         slots: { default: 'default_type1', edit: 'default_type' }
       },
-      { field: 'dlc', title: 'DLC', width: 100, editRender: {}, slots: { edit: 'default_dlc' } }
+      {
+        field: 'dlc',
+        title: i18next.t('uds.network.cani.table.dlc'),
+        width: 100,
+        editRender: {},
+        slots: { edit: 'default_dlc' }
+      }
     ],
     data:
       dataBase.ia[props.editIndex].type == 'can' ? dataBase.ia[props.editIndex]?.action || [] : []

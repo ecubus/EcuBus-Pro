@@ -16,6 +16,7 @@
 <script setup lang="ts">
 // import fcDesigner from './panel-designer/index.js'
 import En from './panel-designer/locale/en.js' // 导入英文语言包
+import ZH from './panel-designer/locale/zh-cn.js' // 导入中文语言包
 import {
   ref,
   computed,

@@ -122,6 +122,7 @@ import { ecubusPro } from '../../../../../../package.json'
 import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
 import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
 import PwmNodeVue from './pwmNode.vue'
+import { i18next } from '@r/i18n'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -156,13 +157,17 @@ function nodeClick(data: tree, node: any) {
       })
     }
     if (dataModify.value) {
-      ElMessageBox.confirm('Are you sure you want to discard your changes?', 'Warning', {
-        confirmButtonText: 'Discard',
-        cancelButtonText: 'Cancel',
-        type: 'warning',
-        buttonSize: 'small',
-        appendTo: `#win${winKey}`
-      })
+      ElMessageBox.confirm(
+        i18next.t('uds.hardware.dialogs.discardChangesMessage'),
+        i18next.t('uds.hardware.dialogs.warning'),
+        {
+          confirmButtonText: i18next.t('uds.hardware.dialogs.discard'),
+          cancelButtonText: i18next.t('uds.hardware.dialogs.cancel'),
+          type: 'warning',
+          buttonSize: 'small',
+          appendTo: `#win${winKey}`
+        }
+      )
         .then(() => {
           dataModify.value = false
           done()
@@ -177,13 +182,17 @@ function nodeClick(data: tree, node: any) {
 }
 
 function removeDevice(id: string) {
-  ElMessageBox.confirm('Are you sure to delete this device?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: `#win${winKey}`
-  })
+  ElMessageBox.confirm(
+    i18next.t('uds.hardware.dialogs.deleteDeviceMessage'),
+    i18next.t('uds.hardware.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('uds.hardware.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.hardware.dialogs.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${winKey}`
+    }
+  )
     .then(() => {
       if (id == activeTree.value?.id) {
         dataModify.value = false
@@ -205,13 +214,17 @@ function addNewDevice(node: tree) {
   }
 
   if (dataModify.value) {
-    ElMessageBox.confirm('Are you sure you want to discard your changes?', 'Warning', {
-      confirmButtonText: 'Discard',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-      buttonSize: 'small',
-      appendTo: `#win${winKey}`
-    })
+    ElMessageBox.confirm(
+      i18next.t('uds.hardware.dialogs.discardChangesMessage'),
+      i18next.t('uds.hardware.dialogs.warning'),
+      {
+        confirmButtonText: i18next.t('uds.hardware.dialogs.discard'),
+        cancelButtonText: i18next.t('uds.hardware.dialogs.cancel'),
+        type: 'warning',
+        buttonSize: 'small',
+        appendTo: `#win${winKey}`
+      }
+    )
       .then(() => {
         dataModify.value = false
         done()
@@ -257,7 +270,7 @@ const tData = ref<tree[]>([])
 
 function addSubTree(vendor: CanVendor, node: tree) {
   const canTree: tree = {
-    label: 'CAN',
+    label: i18next.t('uds.hardware.deviceTypes.can'),
     append: true,
     id: vendor + 'CAN',
     vendor: vendor,
@@ -280,7 +293,7 @@ function addSubTree(vendor: CanVendor, node: tree) {
   }
   if (vendor == 'simulate') {
     const ethTree: tree = {
-      label: 'Ethernet',
+      label: i18next.t('uds.hardware.deviceTypes.ethernet'),
       append: true,
       id: vendor + 'Eth',
       vendor: vendor,
@@ -301,7 +314,7 @@ function addSubTree(vendor: CanVendor, node: tree) {
     }
   }
   const linTree: tree = {
-    label: 'LIN',
+    label: i18next.t('uds.hardware.deviceTypes.lin'),
     append: true,
     id: vendor + 'LIN',
     vendor: vendor,
@@ -329,7 +342,7 @@ function addSubTree(vendor: CanVendor, node: tree) {
     }
   }
   const pwmTree: tree = {
-    label: 'PWM',
+    label: i18next.t('uds.hardware.deviceTypes.pwm'),
     append: true,
     id: vendor + 'PWM',
     vendor: vendor,
@@ -368,7 +381,7 @@ async function buildTree() {
 
   if (vendors.includes('ecubus')) {
     const ecubus: tree = {
-      label: 'ECUBUS',
+      label: i18next.t('uds.hardware.vendors.ecubus'),
       vendor: 'ecubus',
       append: false,
       id: 'ECUBUS',
@@ -380,7 +393,7 @@ async function buildTree() {
 
   if (vendors.includes('zlg')) {
     const zlg: tree = {
-      label: 'ZLG',
+      label: i18next.t('uds.hardware.vendors.zlg'),
       vendor: 'zlg',
       append: false,
       id: 'ZLG',
@@ -391,7 +404,7 @@ async function buildTree() {
   }
   if (vendors.includes('peak')) {
     const peak: tree = {
-      label: 'PEAK',
+      label: i18next.t('uds.hardware.vendors.peak'),
       append: false,
       id: 'PEAK',
       vendor: 'peak',
@@ -402,7 +415,7 @@ async function buildTree() {
   }
   if (vendors.includes('kvaser')) {
     const kvaser: tree = {
-      label: 'KVASER',
+      label: i18next.t('uds.hardware.vendors.kvaser'),
       vendor: 'kvaser',
       append: false,
       id: 'KVASER',
@@ -414,7 +427,7 @@ async function buildTree() {
   }
   if (vendors.includes('simulate')) {
     const simulate: tree = {
-      label: 'Simulate',
+      label: i18next.t('uds.hardware.vendors.simulate'),
       vendor: 'simulate',
       append: false,
       id: 'Simulate',
@@ -426,7 +439,7 @@ async function buildTree() {
   }
   if (vendors.includes('toomoss')) {
     const toomoss: tree = {
-      label: 'TOOMOSS',
+      label: i18next.t('uds.hardware.vendors.toomoss'),
       vendor: 'toomoss',
       append: false,
       id: 'TOOMOSS',
@@ -437,7 +450,7 @@ async function buildTree() {
   }
   if (vendors.includes('vector')) {
     const vector: tree = {
-      label: 'VECTOR',
+      label: i18next.t('uds.hardware.vendors.vector'),
       vendor: 'vector',
       append: false,
       id: 'VECTOR',
@@ -449,7 +462,7 @@ async function buildTree() {
 
   if (vendors.includes('slcan')) {
     const slcan: tree = {
-      label: 'SLCAN',
+      label: i18next.t('uds.hardware.vendors.slcan'),
       vendor: 'slcan',
       append: false,
       id: 'SLCAN',
@@ -460,7 +473,7 @@ async function buildTree() {
   }
   if (vendors.includes('candle')) {
     const candle: tree = {
-      label: 'CANDLE',
+      label: i18next.t('uds.hardware.vendors.candle'),
       vendor: 'candle',
       append: false,
       id: 'CANDLE',

@@ -9,16 +9,18 @@
     :disabled="globalStart"
     hide-required-asterisk
   >
-    <el-divider content-position="left"> Device </el-divider>
-    <el-form-item label="Name" prop="name" required>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.canNode.sections.device') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.name')" prop="name" required>
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Vendor">
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.vendor')">
       <el-tag>
         {{ props.vendor.toLocaleUpperCase() }}
       </el-tag>
     </el-form-item>
-    <el-form-item label="Device" prop="handle" required>
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.device')" prop="handle" required>
       <el-select v-model="data.handle" :loading="deviceLoading" style="width: 300px">
         <el-option
           v-for="item in deviceList"
@@ -50,49 +52,49 @@
             icon="RefreshRight"
             @click="getDevice(true)"
           >
-            Refresh
+            {{ i18next.t('uds.hardware.canNode.labels.refresh') }}
           </el-button>
         </template>
       </el-select>
     </el-form-item>
     <el-form-item
       v-if="props.vendor == 'toomoss'"
-      label="120R Res Enable"
+      :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="toomossRes"
-      placeholder="Disable"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
     >
       <el-select v-model="data.toomossRes" :loading="deviceLoading" style="width: 300px">
-        <el-option label="Enable" :value="true" />
-        <el-option label="Disable" :value="false" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.enable')" :value="true" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.disable')" :value="false" />
       </el-select>
     </el-form-item>
     <el-form-item
       v-else-if="props.vendor == 'candle'"
-      label="120R Res Enable"
+      :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="candleRes"
-      placeholder="Disable"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
     >
       <el-select v-model="data.candleRes" :loading="deviceLoading" style="width: 300px">
-        <el-option label="Enable" :value="true" />
-        <el-option label="Disable" :value="false" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.enable')" :value="true" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.disable')" :value="false" />
       </el-select>
     </el-form-item>
     <el-form-item
       v-else-if="props.vendor == 'zlg'"
-      label="120R Res Enable"
+      :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="zlgRes"
-      placeholder="Disable"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
     >
       <el-select v-model="data.zlgRes" :loading="deviceLoading" style="width: 300px">
-        <el-option label="Enable" :value="true" />
-        <el-option label="Disable" :value="false" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.enable')" :value="true" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.disable')" :value="false" />
       </el-select>
     </el-form-item>
     <el-form-item
       v-else-if="props.vendor == 'kvaser'"
-      label="Silent Mode"
+      :label="i18next.t('uds.hardware.canNode.labels.silentMode')"
       prop="silent"
-      placeholder="Disable"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
     >
       <!-- add tips, silent mode will not send any message -->
       <template #label="{ label }">
@@ -100,7 +102,7 @@
           <span style="margin-right: 2px">{{ label }}</span>
           <el-tooltip>
             <template #content>
-              Silent mode will not send any message, only receive message
+              {{ i18next.t('uds.hardware.canNode.tooltips.silentMode') }}
             </template>
 
             <el-icon>
@@ -111,22 +113,28 @@
       </template>
       <el-checkbox v-model="data.silent" />
     </el-form-item>
-    <el-divider content-position="left"> Can Parameters </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.canNode.sections.canParameters') }}
+    </el-divider>
 
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="CAN FD Enable" prop="canfd">
+        <el-form-item :label="i18next.t('uds.hardware.canNode.labels.canFdEnable')" prop="canfd">
           <el-checkbox v-model="data.canfd" @change="canFdChange" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item v-if="vendorConfigLimit.clock" label="Clock Freq (MHz)" prop="bitrate.clock">
+        <el-form-item
+          v-if="vendorConfigLimit.clock"
+          :label="i18next.t('uds.hardware.canNode.labels.clockFreq')"
+          prop="bitrate.clock"
+        >
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  If you can't find the frequency you need, you can input it manually
+                  {{ i18next.t('uds.hardware.canNode.tooltips.clockFreq') }}
                 </template>
 
                 <el-icon>
@@ -194,7 +202,9 @@
         </template>
         <template #default_time="{ row }">
           <el-tooltip effect="light" placement="bottom">
-            <template #content> Bit Timing Calculator </template>
+            <template #content>
+              {{ i18next.t('uds.hardware.canNode.tooltips.bitTimingCalculator') }}
+            </template>
             <el-button type="primary" size="small" plain @click="showCalculator(row)">
               <Icon :icon="tableIcon" />
             </el-button>
@@ -224,9 +234,16 @@
         </template>
       </vxe-grid>
     </el-form-item>
-    <el-divider content-position="left"> Database </el-divider>
-    <el-form-item label="Database" prop="database">
-      <el-select v-model="data.database" placeholder="No Database" clearable style="width: 300px">
+    <el-divider content-position="left">
+      {{ i18next.t('uds.hardware.canNode.sections.database') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.hardware.canNode.labels.database')" prop="database">
+      <el-select
+        v-model="data.database"
+        :placeholder="i18next.t('uds.hardware.canNode.options.noDatabase')"
+        clearable
+        style="width: 300px"
+      >
         <el-option
           v-for="item in dbList"
           :key="item.value"
@@ -240,9 +257,11 @@
     <el-form-item label-width="0">
       <div style="text-align: left; width: 100%">
         <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
-          Add Device
+          {{ i18next.t('uds.hardware.canNode.buttons.addDevice') }}
         </el-button>
-        <el-button v-else type="warning" plain @click="onSubmit"> Save Device </el-button>
+        <el-button v-else type="warning" plain @click="onSubmit">
+          {{ i18next.t('uds.hardware.canNode.buttons.saveDevice') }}
+        </el-button>
       </div>
     </el-form-item>
   </el-form>
@@ -280,8 +299,9 @@ import { useDataStore } from '@r/stores/data'
 import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import tableIcon from '@iconify/icons-mdi/table'
-import BitTimingCalculator from '@r/components/BitTimingCalculator.vue'
+import BitTimingCalculator from './BitTimingCalculator.vue'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   index: string
@@ -751,7 +771,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'freq',
-        title: 'Frequency (Hz)',
+        title: i18next.t('uds.hardware.canNode.table.frequency'),
         minWidth: 150,
         fixed: 'left',
         visible: configInfo[props.vendor].freq,
@@ -760,7 +780,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'timeSeg1',
-        title: 'TSEG1',
+        title: i18next.t('uds.hardware.canNode.table.tseg1'),
         width: 150,
         visible: configInfo[props.vendor].timeSeg1,
         editRender: {},
@@ -768,7 +788,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'timeSeg2',
-        title: 'TSEG2',
+        title: i18next.t('uds.hardware.canNode.table.tseg2'),
         width: 150,
         visible: configInfo[props.vendor].timeSeg2,
         editRender: {},
@@ -776,7 +796,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'sjw',
-        title: 'SJW',
+        title: i18next.t('uds.hardware.canNode.table.sjw'),
         width: 150,
         visible: configInfo[props.vendor].sjw,
         editRender: {},
@@ -784,7 +804,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'preScaler',
-        title: 'Pre Scaler',
+        title: i18next.t('uds.hardware.canNode.table.preScaler'),
         width: 150,
         visible: configInfo[props.vendor].preScaler,
         editRender: {},
@@ -792,7 +812,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'zlgSpec',
-        title: 'ZLG Spec',
+        title: i18next.t('uds.hardware.canNode.table.zlgSpec'),
         minWidth: 300,
         visible: configInfo[props.vendor].zlgSpec,
         editRender: {},
@@ -800,7 +820,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'baudrate',
-        title: 'Baudrate/Sample Point',
+        title: i18next.t('uds.hardware.canNode.table.baudrate'),
         align: 'center',
         fixed: 'right',
         minWidth: 200,
@@ -882,10 +902,10 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     const baudrate = f_clock / (nom_brp * (nom_tseg1 + nom_tseg2 + 1))
     return `${(baudrate / 1000).toFixed(0)}K / ${(sample_point * 100).toFixed(2)}%`
   } else if (props.vendor == 'simulate') {
-    return `${speed.freq / 1000}K/ (Don't care)`
+    return `${speed.freq / 1000}K/ ${i18next.t('uds.hardware.canNode.messages.dontCare')}`
   } else if (props.vendor == 'zlg') {
     if (data.value.bitrate.zlgSpec) {
-      return `ZLG (check the ZLG Baud Calculator)`
+      return i18next.t('uds.hardware.canNode.messages.zlgCheckCalculator')
     } else {
       return speed.freq ? `${speed.freq}Hz` : ''
     }
@@ -915,12 +935,12 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const id of Object.keys(devices.devices)) {
       const hasName = devices.devices[id].canDevice?.name
       if (hasName == value && id != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.hardware.canNode.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.hardware.canNode.validation.inputNodeName')))
   }
 }
 const error0 = ref(false)
@@ -930,7 +950,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
   error1.value = false
   if (props.vendor == 'peak' || props.vendor == 'kvaser' || props.vendor == 'toomoss') {
     if (data.value.bitrate.clock == undefined) {
-      callback(new Error('Please select clock'))
+      callback(new Error(i18next.t('uds.hardware.canNode.validation.selectClock')))
     }
     //must be in clockList
     // if (!clockList.value.some((item) => item.clock == data.value.bitrate.clock)) {
@@ -938,11 +958,11 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     // }
     if (data.value.bitrate.timeSeg1 + 1 < data.value.bitrate.timeSeg2) {
       error0.value = true
-      callback(new Error('normal tseg1 must be greater than tseg2-1'))
+      callback(new Error(i18next.t('uds.hardware.canNode.validation.tseg1GreaterThanTseg2')))
     }
     if (data.value.bitrate.sjw > data.value.bitrate.timeSeg2) {
       error0.value = true
-      callback(new Error('normal sjw must be less than tseg2'))
+      callback(new Error(i18next.t('uds.hardware.canNode.validation.sjwLessThanTseg2')))
     }
     //brp from 1-1024
     if (vendorConfigLimit.value.preScaler) {
@@ -953,7 +973,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         error0.value = true
         callback(
           new Error(
-            `normal prescale must be between ${vendorConfigLimit.value.preScaler.min}-${vendorConfigLimit.value.preScaler.max}`
+            i18next.t('uds.hardware.canNode.validation.prescaleBetween', {
+              min: vendorConfigLimit.value.preScaler.min,
+              max: vendorConfigLimit.value.preScaler.max
+            })
           )
         )
       }
@@ -967,7 +990,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         error0.value = true
         callback(
           new Error(
-            `normal tseg1 must be between ${vendorConfigLimit.value.tsg1.min}-${vendorConfigLimit.value.tsg1.max}`
+            i18next.t('uds.hardware.canNode.validation.tseg1Between', {
+              min: vendorConfigLimit.value.tsg1.min,
+              max: vendorConfigLimit.value.tsg1.max
+            })
           )
         )
       }
@@ -980,7 +1006,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         error0.value = true
         callback(
           new Error(
-            `normal tseg2 must be between ${vendorConfigLimit.value.tsg2.min}-${vendorConfigLimit.value.tsg2.max}`
+            i18next.t('uds.hardware.canNode.validation.tseg2Between', {
+              min: vendorConfigLimit.value.tsg2.min,
+              max: vendorConfigLimit.value.tsg2.max
+            })
           )
         )
       }
@@ -989,11 +1018,11 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     if (data.value.canfd && data.value.bitratefd) {
       if (data.value.bitratefd.timeSeg1 + 1 <= data.value.bitratefd.timeSeg2) {
         error1.value = true
-        callback(new Error('data tseg1 must be greater than tseg2-1'))
+        callback(new Error(i18next.t('uds.hardware.canNode.validation.dataTseg1GreaterThanTseg2')))
       }
       if (data.value.bitratefd.sjw > data.value.bitratefd.timeSeg2) {
         error1.value = true
-        callback(new Error('data sjw must be less than tseg2'))
+        callback(new Error(i18next.t('uds.hardware.canNode.validation.dataSjwLessThanTseg2')))
       }
       if (vendorConfigLimit.value.preScaler) {
         if (
@@ -1003,7 +1032,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           error1.value = true
           callback(
             new Error(
-              `data prescale must be between ${vendorConfigLimit.value.preScaler.min}-${vendorConfigLimit.value.preScaler.max}`
+              i18next.t('uds.hardware.canNode.validation.dataPrescaleBetween', {
+                min: vendorConfigLimit.value.preScaler.min,
+                max: vendorConfigLimit.value.preScaler.max
+              })
             )
           )
         }
@@ -1016,7 +1048,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           error1.value = true
           callback(
             new Error(
-              `data tseg1 must be between ${vendorConfigLimit.value.tsg1.min}-${vendorConfigLimit.value.tsg1.max}`
+              i18next.t('uds.hardware.canNode.validation.dataTseg1Between', {
+                min: vendorConfigLimit.value.tsg1.min,
+                max: vendorConfigLimit.value.tsg1.max
+              })
             )
           )
         }
@@ -1029,7 +1064,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           error1.value = true
           callback(
             new Error(
-              `data tseg2 must be between ${vendorConfigLimit.value.tsg2.min}-${vendorConfigLimit.value.tsg2.max}`
+              i18next.t('uds.hardware.canNode.validation.dataTseg2Between', {
+                min: vendorConfigLimit.value.tsg2.min,
+                max: vendorConfigLimit.value.tsg2.max
+              })
             )
           )
         }
@@ -1042,7 +1080,11 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
           (data.value.bitrate.timeSeg1 + data.value.bitrate.timeSeg2 + 1))
       if (calcFreq != data.value.bitrate.freq) {
         error0.value = true
-        callback(new Error(`Please input correct frequency, calculated frequency is ${calcFreq}Hz`))
+        callback(
+          new Error(
+            i18next.t('uds.hardware.canNode.validation.inputCorrectFrequency', { freq: calcFreq })
+          )
+        )
       }
       if (data.value.canfd && data.value.bitratefd) {
         const calcFreq =
@@ -1052,7 +1094,11 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         if (calcFreq != data.value.bitratefd.freq) {
           error1.value = true
           callback(
-            new Error(`Please input correct data frequency, calculated frequency is ${calcFreq}Hz`)
+            new Error(
+              i18next.t('uds.hardware.canNode.validation.inputCorrectDataFrequency', {
+                freq: calcFreq
+              })
+            )
           )
         }
       }
@@ -1067,14 +1113,14 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
             callback()
           } else {
             error1.value = true
-            callback(new Error('Please input data frequency'))
+            callback(new Error(i18next.t('uds.hardware.canNode.validation.inputDataFrequency')))
           }
         } else {
           callback()
         }
       } else {
         error0.value = true
-        callback(new Error('Please input frequency'))
+        callback(new Error(i18next.t('uds.hardware.canNode.validation.inputFrequency')))
       }
     }
   }
@@ -1086,14 +1132,14 @@ const rules: FormRules<CanBaseInfo> = {
   handle: [
     {
       required: true,
-      message: 'Please select device',
+      message: i18next.t('uds.hardware.canNode.validation.selectDevice'),
       trigger: 'change'
     }
   ],
   'bitrate.clock': {
     required: configInfo[props.vendor].clock,
     type: 'number',
-    message: 'Clock must be a number',
+    message: i18next.t('uds.hardware.canNode.validation.clockMustBeNumber'),
     transform(value: string) {
       return Number(value)
     }

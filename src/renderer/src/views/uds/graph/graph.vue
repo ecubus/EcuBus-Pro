@@ -17,7 +17,15 @@
             <Icon :icon="hideIcon" />
           </el-button>
 
-          <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="
+              isPaused
+                ? i18next.t('uds.graph.graph.tooltips.resume')
+                : i18next.t('uds.graph.graph.tooltips.pause')
+            "
+            placement="bottom"
+          >
             <el-button
               :type="isPaused ? 'success' : 'warning'"
               link
@@ -30,12 +38,20 @@
         </el-button-group>
         <el-divider direction="vertical"></el-divider>
         <el-button-group>
-          <el-tooltip effect="light" content="Add Variables" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="i18next.t('uds.graph.graph.tooltips.addVariables')"
+            placement="bottom"
+          >
             <el-button link type="primary" @click="addNode">
               <Icon :icon="addIcon" />
             </el-button>
           </el-tooltip>
-          <el-tooltip effect="light" content="Add Signals" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="i18next.t('uds.graph.graph.tooltips.addSignals')"
+            placement="bottom"
+          >
             <el-button link type="primary" @click="addSignal">
               <Icon :icon="waveIcon" />
             </el-button>
@@ -43,7 +59,7 @@
         </el-button-group>
       </div>
       <span style="margin-right: 10px; font-size: 12px; color: var(--el-text-color-regular)">
-        Time: {{ time }}s
+        {{ i18next.t('uds.graph.graph.labels.time', { time: time }) }}
       </span>
     </div>
     <div>
@@ -56,7 +72,7 @@
               node-key="id"
               :data="filteredTreeData"
               :props="defaultProps"
-              empty-text="Add"
+              :empty-text="i18next.t('uds.graph.graph.tree.emptyText')"
               @node-click="handleNodeClick"
             >
               <template #default="{ data }">
@@ -81,11 +97,11 @@
                   <div class="menu-items">
                     <div class="menu-item warning" @click="handleEdit(data, $event)">
                       <Icon :icon="editIcon" />
-                      <span>Edit</span>
+                      <span>{{ i18next.t('uds.graph.graph.menu.edit') }}</span>
                     </div>
                     <div class="menu-item danger" @click="handleDelete(data, $event)">
                       <Icon :icon="deleteIcon" />
-                      <span>Delete</span>
+                      <span>{{ i18next.t('uds.graph.graph.menu.delete') }}</span>
                     </div>
                   </div>
                 </el-popover>
@@ -129,7 +145,7 @@
     <el-dialog
       v-if="signalDialogVisible"
       v-model="signalDialogVisible"
-      title="Add Signal"
+      :title="i18next.t('uds.graph.graph.dialogs.addSignal')"
       width="95%"
       align-center
       :append-to="appendId"
@@ -139,7 +155,7 @@
     <el-dialog
       v-if="variableDialogVisible"
       v-model="variableDialogVisible"
-      title="Add Variable"
+      :title="i18next.t('uds.graph.graph.dialogs.addVariable')"
       width="95%"
       align-center
       :append-to="appendId"
@@ -150,7 +166,11 @@
     <el-dialog
       v-if="editDialogVisible && editingNode"
       v-model="editDialogVisible"
-      :title="editingNode.type === 'signal' ? 'Edit Signal' : 'Edit Variable'"
+      :title="
+        editingNode.type === 'signal'
+          ? i18next.t('uds.graph.graph.dialogs.editSignal')
+          : i18next.t('uds.graph.graph.dialogs.editVariable')
+      "
       width="500px"
       align-center
       :append-to="appendId"
@@ -192,6 +212,7 @@ import editSignal from '../components/editSignal.vue'
 import { LineSeriesOption } from 'echarts'
 import { useGlobalStart } from '@r/stores/runtime'
 import { Layout } from '../layout'
+import { i18next } from '@r/i18n'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 
@@ -865,7 +886,11 @@ const getChartOption = (
               value = stringVal.name
             }
           }
-          return `Time: ${params.data[0] * 1000}ms<br/>Value: ${typeof value === 'number' ? value.toFixed(2) : value}`
+          const timeStr = i18next.t('uds.graph.graph.tooltip.time', { time: params.data[0] * 1000 })
+          const valueStr = i18next.t('uds.graph.graph.tooltip.value', {
+            value: typeof value === 'number' ? value.toFixed(2) : value
+          })
+          return `${timeStr}<br/>${valueStr}`
         }
         return ''
       }
@@ -1137,7 +1162,7 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
     if (existed) {
       ElNotification({
         offset: 50,
-        message: 'Signal already exists',
+        message: i18next.t('uds.graph.graph.messages.signalAlreadyExists'),
         type: 'warning',
         appendTo: appendId.value
       })

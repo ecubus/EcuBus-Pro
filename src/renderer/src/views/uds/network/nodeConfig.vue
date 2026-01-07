@@ -1,7 +1,7 @@
 <template>
   <div style="display: relative">
     <el-tabs v-model="activeName" style="width: 600px">
-      <el-tab-pane label="General" name="general">
+      <el-tab-pane :label="i18next.t('uds.network.nodeConfig.tabs.general')" name="general">
         <div style="height: 270px; width: 570px; overflow-y: auto">
           <el-form
             ref="ruleFormRef"
@@ -12,12 +12,22 @@
             :disabled="globalStart"
             hide-required-asterisk
           >
-            <el-form-item label="Node Name" prop="name">
-              <el-input v-model="formData.name" placeholder="Name" />
+            <el-form-item :label="i18next.t('uds.network.nodeConfig.labels.nodeName')" prop="name">
+              <el-input
+                v-model="formData.name"
+                :placeholder="i18next.t('uds.network.nodeConfig.placeholders.name')"
+              />
             </el-form-item>
 
-            <el-form-item label="Net Node" prop="workNode">
-              <el-select v-model="formData.workNode" placeholder="Node Name" clearable>
+            <el-form-item
+              :label="i18next.t('uds.network.nodeConfig.labels.netNode')"
+              prop="workNode"
+            >
+              <el-select
+                v-model="formData.workNode"
+                :placeholder="i18next.t('uds.network.nodeConfig.placeholders.nodeName')"
+                clearable
+              >
                 <el-option
                   v-for="item in nodesName"
                   :key="item.value"
@@ -27,12 +37,16 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="Node Script File" prop="script">
+            <el-form-item
+              :label="i18next.t('uds.network.nodeConfig.labels.nodeScriptFile')"
+              prop="script"
+            >
               <el-input v-model="formData.script" clearable> </el-input>
               <div class="lr">
                 <el-button-group v-loading="buildLoading" style="margin-top: 5px">
                   <el-button size="small" plain :disabled="globalStart" @click="editScript('open')">
-                    <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
+                    <Icon :icon="newIcon" class="icon" style="margin-right: 5px" />
+                    {{ i18next.t('uds.network.nodeConfig.buttons.choose') }}
                   </el-button>
 
                   <el-button
@@ -41,7 +55,8 @@
                     :disabled="globalStart"
                     @click="editScript('build')"
                   >
-                    <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
+                    <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" />
+                    {{ i18next.t('uds.network.nodeConfig.buttons.build') }}
                   </el-button>
 
                   <!-- <el-button size="small" plain @click="editScript('refresh')">
@@ -49,8 +64,8 @@
 
             </el-button> -->
                   <el-button size="small" plain :disabled="globalStart" @click="editScript('edit')">
-                    <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh /
-                    Edit
+                    <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" />
+                    {{ i18next.t('uds.network.nodeConfig.buttons.refreshEdit') }}
                   </el-button>
                 </el-button-group>
                 <el-divider
@@ -63,28 +78,36 @@
                   style="color: var(--el-color-danger)"
                   class="buildStatus"
                 >
-                  <Icon :icon="dangerIcon" />Build Failed
+                  <Icon :icon="dangerIcon" />{{
+                    i18next.t('uds.network.nodeConfig.buildStatus.buildFailed')
+                  }}
                 </span>
                 <span
                   v-else-if="buildStatus == 'success'"
                   style="color: var(--el-color-success)"
                   class="buildStatus"
                 >
-                  <Icon :icon="successIcon" />Build Success
+                  <Icon :icon="successIcon" />{{
+                    i18next.t('uds.network.nodeConfig.buildStatus.buildSuccess')
+                  }}
                 </span>
                 <span
                   v-else-if="buildStatus == 'warning'"
                   style="color: var(--el-color-warning)"
                   class="buildStatus"
                 >
-                  <Icon :icon="buildIcon" />Need Rebuild
+                  <Icon :icon="buildIcon" />{{
+                    i18next.t('uds.network.nodeConfig.buildStatus.needRebuild')
+                  }}
                 </span>
                 <span
                   v-else-if="buildStatus == 'info'"
                   style="color: var(--el-color-info)"
                   class="buildStatus"
                 >
-                  <Icon :icon="buildIcon" />Need Build
+                  <Icon :icon="buildIcon" />{{
+                    i18next.t('uds.network.nodeConfig.buildStatus.needBuild')
+                  }}
                 </span>
                 <el-button v-if="buildStatus" link style="margin-top: 5px" :type="buildStatus">
                   <Icon
@@ -98,22 +121,27 @@
 
               <!-- stop -->
             </el-form-item>
-            <el-form-item label="Node Active" prop="disabled">
+            <el-form-item
+              :label="i18next.t('uds.network.nodeConfig.labels.nodeActive')"
+              prop="disabled"
+            >
               <el-switch
                 v-model="formData.disabled"
                 disabled
-                active-text="Disabled"
-                inactive-text="Enabled"
+                :active-text="i18next.t('uds.network.nodeConfig.options.disabled')"
+                :inactive-text="i18next.t('uds.network.nodeConfig.options.enabled')"
               />
             </el-form-item>
             <el-form-item v-if="formData.isTest">
-              <el-tag type="success">Test Node</el-tag>
+              <el-tag type="success">{{
+                i18next.t('uds.network.nodeConfig.labels.testNode')
+              }}</el-tag>
             </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Connected" name="Connected">
+      <el-tab-pane :label="i18next.t('uds.network.nodeConfig.tabs.connected')" name="Connected">
         <div
           style="
             text-align: center;
@@ -129,7 +157,10 @@
             class="canit"
             style="text-align: left; display: inline-block"
             :data="allDeviceLabel"
-            :titles="['Valid', 'Assigned ']"
+            :titles="[
+              i18next.t('uds.network.nodeConfig.transfer.valid'),
+              i18next.t('uds.network.nodeConfig.transfer.assigned')
+            ]"
           />
         </div>
       </el-tab-pane>
@@ -137,10 +168,12 @@
 
     <!-- 添加底部按钮区域 -->
     <div style="float: right; margin-right: 30px">
-      <el-button size="small" @click="handleCancel">Cancel</el-button>
-      <el-button size="small" type="primary" :disabled="globalStart" @click="handleConfirm"
-        >OK</el-button
-      >
+      <el-button size="small" @click="handleCancel">{{
+        i18next.t('uds.network.nodeConfig.buttons.cancel')
+      }}</el-button>
+      <el-button size="small" type="primary" :disabled="globalStart" @click="handleConfirm">{{
+        i18next.t('uds.network.nodeConfig.buttons.ok')
+      }}</el-button>
     </div>
   </div>
 </template>
@@ -168,6 +201,7 @@ import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
 import { udsCeil } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const activeName = ref('general')
 const props = defineProps<{
@@ -184,12 +218,12 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const key of Object.keys(dataBase.nodes)) {
       const hasName = dataBase.nodes[key].name
       if (hasName == value && key != editIndex.value) {
-        callback(new Error('The node name already exists'))
+        callback(new Error(i18next.t('uds.network.nodeConfig.validation.nodeNameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.network.nodeConfig.validation.inputNodeName')))
   }
 }
 
@@ -222,8 +256,8 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
               cloneDeep(dataBase.getData())
             )
             .catch((e: any) => {
-              ElMessageBox.alert(e.message, 'Error', {
-                confirmButtonText: 'OK',
+              ElMessageBox.alert(e.message, i18next.t('uds.network.nodeConfig.dialogs.error'), {
+                confirmButtonText: i18next.t('uds.network.nodeConfig.dialogs.ok'),
                 type: 'error',
                 buttonSize: 'small',
                 appendTo: '#tester'
@@ -256,8 +290,8 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
               }
             })
             .catch((e: any) => {
-              ElMessageBox.alert(e.message, 'Error', {
-                confirmButtonText: 'OK',
+              ElMessageBox.alert(e.message, i18next.t('uds.network.nodeConfig.dialogs.error'), {
+                confirmButtonText: i18next.t('uds.network.nodeConfig.dialogs.ok'),
                 type: 'error',
                 buttonSize: 'small',
                 appendTo: '#tester'
@@ -268,20 +302,28 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
             })
         }
       } else {
-        ElMessageBox.alert('Please save the project first', 'Warning', {
-          confirmButtonText: 'OK',
+        ElMessageBox.alert(
+          i18next.t('uds.network.nodeConfig.dialogs.saveProjectFirst'),
+          i18next.t('uds.network.nodeConfig.dialogs.warning'),
+          {
+            confirmButtonText: i18next.t('uds.network.nodeConfig.dialogs.ok'),
+            type: 'warning',
+            buttonSize: 'small',
+            appendTo: '#tester'
+          }
+        )
+      }
+    } else {
+      ElMessageBox.alert(
+        i18next.t('uds.network.nodeConfig.dialogs.selectScriptFileFirst'),
+        i18next.t('uds.network.nodeConfig.dialogs.warning'),
+        {
+          confirmButtonText: i18next.t('uds.network.nodeConfig.dialogs.ok'),
           type: 'warning',
           buttonSize: 'small',
           appendTo: '#tester'
-        })
-      }
-    } else {
-      ElMessageBox.alert('Please select the script file first', 'Warning', {
-        confirmButtonText: 'OK',
-        type: 'warning',
-        buttonSize: 'small',
-        appendTo: '#tester'
-      })
+        }
+      )
     }
   } else {
     openTs()
@@ -290,11 +332,11 @@ function editScript(action: 'open' | 'edit' | 'build' | 'refresh') {
 async function openTs() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Script File',
+    title: i18next.t('uds.network.nodeConfig.dialogs.scriptFile'),
     properties: ['openFile'],
     filters: [
-      { name: 'typescript', extensions: ['ts'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: i18next.t('uds.network.nodeConfig.dialogs.typescript'), extensions: ['ts'] },
+      { name: i18next.t('uds.network.nodeConfig.dialogs.allFiles'), extensions: ['*'] }
     ]
   })
   const file = r.filePaths[0]

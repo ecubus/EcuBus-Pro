@@ -1,7 +1,7 @@
 <template>
   <div style="display: relative">
     <el-tabs v-model="activeName" style="width: 600px">
-      <el-tab-pane label="General" name="general">
+      <el-tab-pane :label="i18next.t('uds.network.logConfig.tabs.general')" name="general">
         <div style="height: 270px; width: 570px; overflow-y: auto">
           <el-form
             ref="ruleFormRef"
@@ -12,44 +12,104 @@
             :disabled="globalStart"
             hide-required-asterisk
           >
-            <el-form-item label="Name" prop="name" required>
-              <el-input v-model="formData.name" placeholder="Name" />
+            <el-form-item
+              :label="i18next.t('uds.network.logConfig.labels.name')"
+              prop="name"
+              required
+            >
+              <el-input
+                v-model="formData.name"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.name')"
+              />
             </el-form-item>
 
-            <el-form-item label="Log Enable" prop="disabled">
+            <el-form-item
+              :label="i18next.t('uds.network.logConfig.labels.logEnable')"
+              prop="disabled"
+            >
               <el-switch
                 v-model="formData.disabled"
                 disabled
-                active-text="Disabled"
-                inactive-text="Enabled"
+                :active-text="i18next.t('uds.network.logConfig.options.disabled')"
+                :inactive-text="i18next.t('uds.network.logConfig.options.enabled')"
               />
             </el-form-item>
-            <el-form-item label="Transport" prop="type">
-              <el-select v-model="formData.type" placeholder="Transport">
-                <el-option label="File" value="file" />
-                <el-option label="Socket" value="socket" disabled />
+            <el-form-item :label="i18next.t('uds.network.logConfig.labels.transport')" prop="type">
+              <el-select
+                v-model="formData.type"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.transport')"
+              >
+                <el-option :label="i18next.t('uds.network.logConfig.options.file')" value="file" />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.socket')"
+                  value="socket"
+                  disabled
+                />
               </el-select>
             </el-form-item>
-            <el-form-item label="Format" prop="format">
-              <el-select v-model="formData.format" placeholder="Format">
-                <el-option label="ASC Format" value="asc" />
-                <el-option label="Vector BLF Format" value="blf" />
-                <el-option label="CSV Format" value="csv" disabled />
+            <el-form-item :label="i18next.t('uds.network.logConfig.labels.format')" prop="format">
+              <el-select
+                v-model="formData.format"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.format')"
+              >
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.ascFormat')"
+                  value="asc"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.blfFormat')"
+                  value="blf"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.csvFormat')"
+                  value="csv"
+                  disabled
+                />
               </el-select>
             </el-form-item>
-            <el-form-item v-if="formData.format == 'blf'" label="Compression">
-              <el-select v-model="formData.compression" placeholder="Compression level">
-                <el-option label="Default (-1)" :value="-1" />
-                <el-option label="No compression (0)" :value="0" />
-                <el-option label="Fast (1)" :value="1" />
-                <el-option label="Balanced (6)" :value="6" />
-                <el-option label="Max (9)" :value="9" />
+            <el-form-item
+              v-if="formData.format == 'blf'"
+              :label="i18next.t('uds.network.logConfig.labels.compression')"
+            >
+              <el-select
+                v-model="formData.compression"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.compressionLevel')"
+              >
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.defaultCompression')"
+                  :value="-1"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.noCompression')"
+                  :value="0"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.fastCompression')"
+                  :value="1"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.balancedCompression')"
+                  :value="6"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.logConfig.options.maxCompression')"
+                  :value="9"
+                />
               </el-select>
             </el-form-item>
-            <el-form-item v-if="formData.type == 'file'" label="File Path" prop="path">
-              <el-input v-model="formData.path" placeholder="Log file Path">
+            <el-form-item
+              v-if="formData.type == 'file'"
+              :label="i18next.t('uds.network.logConfig.labels.filePath')"
+              prop="path"
+            >
+              <el-input
+                v-model="formData.path"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.logFilePath')"
+              >
                 <template #append>
-                  <el-button size="small" @click="browseFile">Browse</el-button>
+                  <el-button size="small" @click="browseFile">{{
+                    i18next.t('uds.network.logConfig.buttons.browse')
+                  }}</el-button>
                 </template>
               </el-input>
             </el-form-item>
@@ -61,11 +121,14 @@
               style="margin-bottom: 15px"
             >
               <template #title>
-                A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename.
+                {{ i18next.t('uds.network.logConfig.messages.timestampAppended') }}
               </template>
             </el-alert>
 
-            <el-form-item label="Record Types" prop="method">
+            <el-form-item
+              :label="i18next.t('uds.network.logConfig.labels.recordTypes')"
+              prop="method"
+            >
               <div>
                 <el-checkbox
                   v-for="city in methods"
@@ -85,7 +148,7 @@
         </div>
       </el-tab-pane>
 
-      <el-tab-pane label="Connected" name="Connected">
+      <el-tab-pane :label="i18next.t('uds.network.logConfig.tabs.connected')" name="Connected">
         <div
           style="
             text-align: center;
@@ -101,7 +164,10 @@
             class="canit"
             style="text-align: left; display: inline-block"
             :data="allDeviceLabel"
-            :titles="['Valid', 'Assigned ']"
+            :titles="[
+              i18next.t('uds.network.logConfig.transfer.valid'),
+              i18next.t('uds.network.logConfig.transfer.assigned')
+            ]"
           />
         </div>
       </el-tab-pane>
@@ -109,10 +175,12 @@
 
     <!-- 添加底部按钮区域 -->
     <div style="float: right; margin-right: 30px">
-      <el-button size="small" @click="handleCancel">Cancel</el-button>
-      <el-button size="small" type="primary" :disabled="globalStart" @click="handleConfirm"
-        >OK</el-button
-      >
+      <el-button size="small" @click="handleCancel">{{
+        i18next.t('uds.network.logConfig.buttons.cancel')
+      }}</el-button>
+      <el-button size="small" type="primary" :disabled="globalStart" @click="handleConfirm">{{
+        i18next.t('uds.network.logConfig.buttons.ok')
+      }}</el-button>
     </div>
   </div>
 </template>
@@ -140,6 +208,7 @@ import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
 import { udsCeil } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const activeName = ref('general')
 const props = defineProps<{
@@ -159,36 +228,36 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const key of Object.keys(dataBase.logs)) {
       const hasName = dataBase.logs[key].name
       if (hasName == value && key != editIndex.value) {
-        callback(new Error('The log name already exists'))
+        callback(new Error(i18next.t('uds.network.logConfig.validation.logNameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.network.logConfig.validation.inputNodeName')))
   }
 }
 
 const methods = [
   {
-    label: 'CAN',
+    label: i18next.t('uds.network.logConfig.recordTypes.can'),
     value: 'CAN',
     methods: ['canBase', 'canError'],
     disabled: false
   },
   {
-    label: 'LIN',
+    label: i18next.t('uds.network.logConfig.recordTypes.lin'),
     value: 'LIN',
     methods: ['linBase', 'linError', 'linEvent'],
     disabled: true
   },
   {
-    label: 'ETH',
+    label: i18next.t('uds.network.logConfig.recordTypes.eth'),
     value: 'ETH',
     methods: ['ipBase', 'ipError'],
     disabled: true
   },
   {
-    label: 'UDS',
+    label: i18next.t('uds.network.logConfig.recordTypes.uds'),
     value: 'UDS',
     methods: ['udsSent', 'udsRecv', 'udsNegRecv', 'udsError', 'udsScript', 'udsSystem'],
     disabled: true
@@ -207,7 +276,7 @@ const rules = computed(() => {
     path: [
       {
         required: formData.value.type == 'file' ? true : false,
-        message: 'Please input log file path'
+        message: i18next.t('uds.network.logConfig.validation.inputLogFilePath')
       }
     ]
   }
@@ -243,22 +312,22 @@ async function browseFile() {
   }
 
   const formatNames: Record<string, string> = {
-    asc: 'ASC Format',
-    blf: 'Vector BLF Format',
-    csv: 'CSV Format'
+    asc: i18next.t('uds.network.logConfig.options.ascFormat'),
+    blf: i18next.t('uds.network.logConfig.options.blfFormat'),
+    csv: i18next.t('uds.network.logConfig.options.csvFormat')
   }
 
   const currentFormat = formData.value.format || 'asc'
   const extensions = formatExtensions[currentFormat] || ['*']
-  const formatName = formatNames[currentFormat] || 'Log File'
+  const formatName = formatNames[currentFormat] || i18next.t('uds.network.logConfig.dialog.logFile')
 
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Select Log File',
+    title: i18next.t('uds.network.logConfig.dialog.selectLogFile'),
     properties: ['openFile'],
     filters: [
       { name: formatName, extensions: extensions },
-      { name: 'All Files', extensions: ['*'] }
+      { name: i18next.t('uds.network.logConfig.dialog.allFiles'), extensions: ['*'] }
     ]
   })
 

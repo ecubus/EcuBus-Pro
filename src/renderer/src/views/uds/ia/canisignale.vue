@@ -85,13 +85,20 @@
       </template>
     </VxeGrid>
 
-    <el-dialog v-model="editDialogVisible" title="Edit Signal Generator" width="400px">
+    <el-dialog
+      v-model="editDialogVisible"
+      :title="i18next.t('uds.network.canisignale.dialogs.editSignalGenerator')"
+      width="400px"
+    >
       <el-form v-if="currentSignal" :model="currentSignal" label-width="100px" size="small">
-        <el-form-item label="Generator Type">
+        <el-form-item :label="i18next.t('uds.network.canisignale.labels.generatorType')">
           <el-select v-model="currentSignal.generatorType" style="width: 100%">
-            <el-option label="None" value="" />
-            <el-option label="Sine" value="sine" />
-            <el-option label="Counter" value="counter" />
+            <el-option :label="i18next.t('uds.network.canisignale.options.none')" value="" />
+            <el-option :label="i18next.t('uds.network.canisignale.options.sine')" value="sine" />
+            <el-option
+              :label="i18next.t('uds.network.canisignale.options.counter')"
+              value="counter"
+            />
           </el-select>
         </el-form-item>
       </el-form>
@@ -116,6 +123,7 @@ import {
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
 import { cloneDeep } from 'lodash'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 const props = defineProps<{
   database: string
   messageId: string
@@ -211,7 +219,7 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
     columns: [
       {
         field: 'name',
-        title: 'Name',
+        title: i18next.t('uds.network.canisignale.table.name'),
         width: 300,
         minWidth: 100,
         slots: {
@@ -227,7 +235,7 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
 
       {
         field: 'value',
-        title: 'Raw Value',
+        title: i18next.t('uds.network.canisignale.table.rawValue'),
         width: 150,
         resizable: false,
         slots: { default: 'default_raw_control' }
@@ -235,15 +243,32 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
 
       {
         field: 'physValue',
-        title: 'Phys Value',
+        title: i18next.t('uds.network.canisignale.table.physValue'),
         minWidth: 150,
         resizable: false,
         slots: { default: 'default_phys_value' }
       },
 
-      { field: 'unit', title: 'Unit', width: 80, align: 'center' },
-      { field: 'startBit', title: 'Start Bit', width: 120, align: 'center', sortable: true },
-      { field: 'length', title: 'Length', width: 100, align: 'center', sortable: true }
+      {
+        field: 'unit',
+        title: i18next.t('uds.network.canisignale.table.unit'),
+        width: 80,
+        align: 'center'
+      },
+      {
+        field: 'startBit',
+        title: i18next.t('uds.network.canisignale.table.startBit'),
+        width: 120,
+        align: 'center',
+        sortable: true
+      },
+      {
+        field: 'length',
+        title: i18next.t('uds.network.canisignale.table.length'),
+        width: 100,
+        align: 'center',
+        sortable: true
+      }
     ],
     data: signals.value
   }

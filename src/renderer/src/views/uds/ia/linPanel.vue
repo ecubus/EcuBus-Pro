@@ -13,16 +13,20 @@
           "
         >
           <Icon :icon="databaseIcon" />
-          <span>Database:</span>
-          <span style="color: var(--el-color-primary)">{{ db?.name || 'None' }}</span>
+          <span>{{ i18next.t('uds.network.linPanel.labels.database') }}</span>
+          <span style="color: var(--el-color-primary)">{{
+            db?.name || i18next.t('uds.network.linPanel.labels.none')
+          }}</span>
           <el-divider direction="vertical"></el-divider>
           <Icon :icon="nodeIcon" />
-          <span>Node:</span>
-          <span style="color: var(--el-color-primary)">{{ workNode || 'None' }}</span>
+          <span>{{ i18next.t('uds.network.linPanel.labels.node') }}</span>
+          <span style="color: var(--el-color-primary)">{{
+            workNode || i18next.t('uds.network.linPanel.labels.none')
+          }}</span>
           <el-divider direction="vertical"></el-divider>
           <el-button size="small" type="warning" link @click="resetAllSignals">
             <Icon :icon="resetIcon" />
-            Reset All
+            {{ i18next.t('uds.network.linPanel.buttons.resetAll') }}
           </el-button>
         </div>
       </template>
@@ -87,6 +91,7 @@ import { getFrameData } from 'nodeCan/lin'
 import { isEqual } from 'lodash'
 import { getPhysicalValue, getRawValue } from '@r/database/ldf/calc'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 interface SignalRow {
   name: string
@@ -274,10 +279,15 @@ const gridOptions = computed(() => {
     align: 'center',
     columns: [
       { type: 'expand', width: 46, slots: { content: 'expand_content' }, resizable: false },
-      { field: 'name', title: 'Frame', width: 200, align: 'left' },
+      {
+        field: 'name',
+        title: i18next.t('uds.network.linPanel.table.frame'),
+        width: 200,
+        align: 'left'
+      },
       {
         field: 'frameData',
-        title: 'Frame Data (Hex)',
+        title: i18next.t('uds.network.linPanel.table.frameDataHex'),
         minWidth: 200,
         slots: { default: 'frameData' },
         align: 'left'
@@ -296,15 +306,25 @@ const childGridOptions = computed(() => {
     showOverflow: true,
     align: 'center',
     columns: [
-      { field: 'name', title: 'Signal', width: 200, align: 'left' },
-      { field: 'bitLength', title: 'Bits', width: 100 },
+      {
+        field: 'name',
+        title: i18next.t('uds.network.linPanel.table.signal'),
+        width: 200,
+        align: 'left'
+      },
+      { field: 'bitLength', title: i18next.t('uds.network.linPanel.table.bits'), width: 100 },
       {
         field: 'physicalValue',
-        title: 'Physical/Logical Value',
+        title: i18next.t('uds.network.linPanel.table.physicalLogicalValue'),
         minWidth: 200,
         slots: { default: 'physical' }
       },
-      { field: 'rawValue', title: 'Raw Value', minWidth: 200, slots: { default: 'raw' } }
+      {
+        field: 'rawValue',
+        title: i18next.t('uds.network.linPanel.table.rawValue'),
+        minWidth: 200,
+        slots: { default: 'raw' }
+      }
     ]
   }
 

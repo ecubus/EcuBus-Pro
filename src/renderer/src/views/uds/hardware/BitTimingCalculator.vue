@@ -2,7 +2,12 @@
   <el-dialog
     v-if="dialogVisible"
     v-model="dialogVisible"
-    :title="`Bit Timing Configuration: ${form.bitRate} kbit/s @ ${form.clockFreq} MHz`"
+    :title="
+      i18next.t('uds.hardware.bitTimingCalculator.dialogs.title', {
+        bitRate: form.bitRate,
+        clockFreq: form.clockFreq
+      })
+    "
     width="80%"
     align-center
     append-to="#winhardware"
@@ -10,7 +15,7 @@
     :close-on-press-escape="false"
   >
     <el-table
-      empty-text="No results, try change the clock frequency"
+      :empty-text="i18next.t('uds.hardware.bitTimingCalculator.table.emptyText')"
       :data="results"
       style="width: 100%"
       border
@@ -23,24 +28,44 @@
       <el-table-column type="index" width="40" label="#" :resizable="false" align="center" />
       <el-table-column
         prop="sp"
-        label="Sample Point (%)"
+        :label="i18next.t('uds.hardware.bitTimingCalculator.table.samplePoint')"
         min-width="140"
         align="center"
         sortable
         :resizable="false"
       />
-      <el-table-column prop="t1" label="TSEG1" min-width="100" sortable :resizable="false" />
-      <el-table-column prop="t2" label="TSEG2" width="100" sortable :resizable="false" />
+      <el-table-column
+        prop="t1"
+        :label="i18next.t('uds.hardware.bitTimingCalculator.table.tseg1')"
+        min-width="100"
+        sortable
+        :resizable="false"
+      />
+      <el-table-column
+        prop="t2"
+        :label="i18next.t('uds.hardware.bitTimingCalculator.table.tseg2')"
+        width="100"
+        sortable
+        :resizable="false"
+      />
 
-      <el-table-column prop="presc" label="Prescaler" width="100" sortable :resizable="false" />
+      <el-table-column
+        prop="presc"
+        :label="i18next.t('uds.hardware.bitTimingCalculator.table.prescaler')"
+        width="100"
+        sortable
+        :resizable="false"
+      />
     </el-table>
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="primary" :disabled="!selectedRow" size="small" plain @click="onOk"
-          >OK</el-button
-        >
-        <el-button size="small" @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" :disabled="!selectedRow" size="small" plain @click="onOk">{{
+          i18next.t('uds.hardware.bitTimingCalculator.buttons.ok')
+        }}</el-button>
+        <el-button size="small" @click="dialogVisible = false">{{
+          i18next.t('uds.hardware.bitTimingCalculator.buttons.cancel')
+        }}</el-button>
       </span>
     </template>
   </el-dialog>
@@ -49,6 +74,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { CanVendor } from 'nodeCan/can'
+import { i18next } from '@r/i18n'
 
 interface CalculatorResult {
   t1: number

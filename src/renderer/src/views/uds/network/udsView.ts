@@ -17,6 +17,7 @@ import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import { useDark } from '@vueuse/core'
 import logConfig from './logConfig.vue'
+import { i18next } from '@r/i18n'
 
 export interface udsBase {
   name: string
@@ -430,7 +431,7 @@ export class udsHardware extends udsCeil {
     x = 100,
     y = 100
   ) {
-    let name = 'Device'
+    let name = i18next.t('uds.network.udsView.defaultDeviceName')
     let type = 'device'
     if (device.type == 'can' && device.canDevice) {
       name = device.canDevice.name
@@ -762,7 +763,7 @@ export class UDSView {
       ElMessageBox({
         buttonSize: 'small',
         showConfirmButton: false,
-        title: `Edit Node ${item.name}`,
+        title: i18next.t('uds.network.udsView.dialogs.editNode', { name: item.name }),
         showClose: false,
         customStyle: {
           width: '600px',
@@ -794,7 +795,7 @@ export class UDSView {
           }
         }
       } else {
-        ElMessageBox.alert('Please select a work node')
+        ElMessageBox.alert(i18next.t('uds.network.udsView.dialogs.selectWorkNode'))
       }
     })
     this.ceilMap.set(id, element)
@@ -828,7 +829,7 @@ export class UDSView {
         ElMessageBox({
           buttonSize: 'small',
           showConfirmButton: false,
-          title: `Edit Log ${item.name}`,
+          title: i18next.t('uds.network.udsView.dialogs.editLog', { name: item.name }),
           showClose: false,
           customStyle: {
             width: '600px',

@@ -1,7 +1,7 @@
 <template>
   <div class="language-switcher">
     <el-select
-      v-model="currentLanguage"
+      v-model="model"
       size="small"
       :loading="loading"
       style="width: 200px"
@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useTranslation } from 'i18next-vue'
-import { reloadRendererTranslations } from '../i18n'
+import { reloadRendererTranslations } from '../../i18n'
 
 interface LanguageInfo {
   code: string
@@ -35,7 +35,8 @@ interface LanguageInfo {
 
 const { i18next } = useTranslation()
 
-const currentLanguage = ref(i18next.language || 'en')
+// 使用 defineModel 定义 v-model
+const model = defineModel<string>({ required: true })
 const supportedLanguages = ref<LanguageInfo[]>([])
 const loading = ref(false)
 
@@ -58,10 +59,6 @@ const handleLanguageChange = (lang: string) => {
 
     // 重新加载翻译（同步）
     reloadRendererTranslations(lang)
-
-    currentLanguage.value = lang
-
-    console.log(`Language changed to: ${lang}`)
   } catch (error) {
     console.error('Failed to change language:', error)
   } finally {
@@ -71,9 +68,6 @@ const handleLanguageChange = (lang: string) => {
 
 onMounted(() => {
   loadSupportedLanguages()
-
-  // 同步当前语言状态（已在 main.ts 初始化时设置）
-  currentLanguage.value = i18next.language || 'en'
 })
 </script>
 

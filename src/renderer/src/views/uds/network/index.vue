@@ -92,6 +92,7 @@ import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
 import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
+import { i18next } from '@r/i18n'
 
 interface Tree {
   id: string
@@ -110,7 +111,7 @@ const initDone = ref(false)
 function addChild(parent: Tree) {
   const c: Tree = {
     type: 'device',
-    label: 'Devices',
+    label: i18next.t('uds.network.tree.devices'),
     canAdd: false,
     children: [],
     icon: deviceIcon,
@@ -201,7 +202,7 @@ function addChild(parent: Tree) {
   //interactive
   const i: Tree = {
     type: 'interactive',
-    label: 'Interactive',
+    label: i18next.t('uds.network.tree.interactive'),
     canAdd: true,
     children: [],
     icon: interIcon,
@@ -279,7 +280,7 @@ function addChild(parent: Tree) {
 const tData = computed(() => {
   const can: Tree = {
     type: 'can',
-    label: 'Can',
+    label: i18next.t('uds.network.tree.can'),
     canAdd: false,
     children: [],
     id: 'can',
@@ -287,7 +288,7 @@ const tData = computed(() => {
   }
   const lin: Tree = {
     type: 'lin',
-    label: 'Lin',
+    label: i18next.t('uds.network.tree.lin'),
     canAdd: false,
     icon: networkNode,
     children: [],
@@ -295,7 +296,7 @@ const tData = computed(() => {
   }
   const eth: Tree = {
     type: 'eth',
-    label: 'Ethernet',
+    label: i18next.t('uds.network.tree.ethernet'),
     canAdd: false,
     icon: networkNode,
     children: [],
@@ -303,7 +304,7 @@ const tData = computed(() => {
   }
   const node: Tree = {
     type: 'node',
-    label: 'Node',
+    label: i18next.t('uds.network.tree.node'),
     canAdd: true,
     icon: nodeIcon,
     children: [],
@@ -311,7 +312,7 @@ const tData = computed(() => {
   }
   const pwm: Tree = {
     type: 'pwm',
-    label: 'PWM',
+    label: i18next.t('uds.network.tree.pwm'),
     canAdd: false,
     icon: networkNode,
     children: [],
@@ -319,7 +320,7 @@ const tData = computed(() => {
   }
   const log: Tree = {
     type: 'log',
-    label: 'Loggers',
+    label: i18next.t('uds.network.tree.loggers'),
     canAdd: true,
     icon: fileIcon,
     children: [],
@@ -353,7 +354,7 @@ const tData = computed(() => {
   }
   const someip: Tree = {
     type: 'someip',
-    label: 'SomeIP',
+    label: i18next.t('uds.network.tree.someip'),
     canAdd: false,
     icon: soaIcon,
     children: [],
@@ -685,15 +686,19 @@ function editNode(data: Tree) {
 
 function removeNode(data: Tree) {
   treePop.value[data.id].hide()
-  ElMessageBox.confirm('This will permanently delete the node. Continue?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: '#networkMain',
-    closeOnClickModal: false,
-    closeOnPressEscape: false
-  })
+  ElMessageBox.confirm(
+    i18next.t('uds.network.dialogs.deleteNodeMessage'),
+    i18next.t('uds.network.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('uds.network.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.network.dialogs.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: '#networkMain',
+      closeOnClickModal: false,
+      closeOnPressEscape: false
+    }
+  )
     .then(() => {
       layout.removeWin(data.id)
       // if (data.type == 'can') {
@@ -727,7 +732,7 @@ function addNode(type: string, parent?: Tree) {
       // }
 
       dataBase.ia[id] = {
-        name: parent?.label + ' IA',
+        name: i18next.t('uds.network.names.iaTemplate', { label: parent?.label }),
         type: 'can',
         id: id,
         devices: devices, // Add an empty array for devices,
@@ -749,7 +754,7 @@ function addNode(type: string, parent?: Tree) {
       //lin only one device
 
       dataBase.ia[id] = {
-        name: parent?.label + ' IA',
+        name: i18next.t('uds.network.names.iaTemplate', { label: parent?.label }),
         type: 'lin',
         id: id,
         devices: devices, // Add an empty array for devices,
@@ -769,7 +774,7 @@ function addNode(type: string, parent?: Tree) {
       //   }
       // }
       dataBase.ia[id] = {
-        name: parent?.label + ' IA',
+        name: i18next.t('uds.network.names.iaTemplate', { label: parent?.label }),
         type: 'pwm',
         id: id,
         devices: devices, // Add an empty array for devices,
@@ -783,7 +788,7 @@ function addNode(type: string, parent?: Tree) {
     } else if (parent?.type == 'someip') {
       const devices: string[] = []
       dataBase.ia[id] = {
-        name: parent?.label + ' IA',
+        name: i18next.t('uds.network.names.iaTemplate', { label: parent?.label }),
         type: 'someip',
         id: id,
         devices: devices, // Add an empty array for devices,
@@ -806,7 +811,9 @@ function addNode(type: string, parent?: Tree) {
       //   }
       // }
       dataBase.nodes[id] = {
-        name: `Node ${Object.keys(dataBase.nodes).length + 1}`,
+        name: i18next.t('uds.network.names.nodeTemplate', {
+          count: Object.keys(dataBase.nodes).length + 1
+        }),
 
         id: id,
         channel: devices // Add an empty array for devices,
@@ -821,7 +828,9 @@ function addNode(type: string, parent?: Tree) {
     const id = v4()
     const devices: string[] = []
     dataBase.logs[id] = {
-      name: `Logger ${Object.keys(dataBase.logs).length + 1}`,
+      name: i18next.t('uds.network.names.loggerTemplate', {
+        count: Object.keys(dataBase.logs).length + 1
+      }),
       id: id,
       type: 'file',
       format: 'asc',

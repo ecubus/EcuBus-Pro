@@ -151,6 +151,718 @@
       "title": "Warning",
       "ok": "OK",
       "cancel": "Cancel"
+    },
+    "hardware": {
+      "dialogs": {
+        "discardChangesMessage": "Are you sure you want to discard your changes?",
+        "deleteDeviceMessage": "Are you sure to delete this device?",
+        "warning": "Warning",
+        "discard": "Discard",
+        "cancel": "Cancel",
+        "ok": "OK"
+      },
+      "deviceTypes": {
+        "can": "CAN",
+        "ethernet": "Ethernet",
+        "lin": "LIN",
+        "pwm": "PWM"
+      },
+      "vendors": {
+        "ecubus": "ECUBUS",
+        "zlg": "ZLG",
+        "peak": "PEAK",
+        "kvaser": "KVASER",
+        "simulate": "Simulate",
+        "toomoss": "TOOMOSS",
+        "vector": "VECTOR",
+        "slcan": "SLCAN",
+        "candle": "CANDLE"
+      },
+      "canNode": {
+        "sections": {
+          "device": "Device",
+          "canParameters": "Can Parameters",
+          "database": "Database"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "res120Enable": "120R Res Enable",
+          "silentMode": "Silent Mode",
+          "canFdEnable": "CAN FD Enable",
+          "clockFreq": "Clock Freq (MHz)",
+          "database": "Database"
+        },
+        "options": {
+          "enable": "Enable",
+          "disable": "Disable",
+          "noDatabase": "No Database"
+        },
+        "tooltips": {
+          "silentMode": "Silent mode will not send any message, only receive message",
+          "clockFreq": "If you can't find the frequency you need, you can input it manually",
+          "bitTimingCalculator": "Bit Timing Calculator"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "table": {
+          "frequency": "Frequency (Hz)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "sjw": "SJW",
+          "preScaler": "Pre Scaler",
+          "zlgSpec": "ZLG Spec",
+          "baudrate": "Baudrate/Sample Point"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "clockMustBeNumber": "Clock must be a number",
+          "selectClock": "Please select clock",
+          "tseg1GreaterThanTseg2": "normal tseg1 must be greater than tseg2-1",
+          "sjwLessThanTseg2": "normal sjw must be less than tseg2",
+          "prescaleBetween": "normal prescale must be between {{min}}-{{max}}",
+          "tseg1Between": "normal tseg1 must be between {{min}}-{{max}}",
+          "tseg2Between": "normal tseg2 must be between {{min}}-{{max}}",
+          "dataTseg1GreaterThanTseg2": "data tseg1 must be greater than tseg2-1",
+          "dataSjwLessThanTseg2": "data sjw must be less than tseg2",
+          "dataPrescaleBetween": "data prescale must be between {{min}}-{{max}}",
+          "dataTseg1Between": "data tseg1 must be between {{min}}-{{max}}",
+          "dataTseg2Between": "data tseg2 must be between {{min}}-{{max}}",
+          "inputCorrectFrequency": "Please input correct frequency, calculated frequency is {{freq}}Hz",
+          "inputCorrectDataFrequency": "Please input correct data frequency, calculated frequency is {{freq}}Hz",
+          "inputFrequency": "Please input frequency",
+          "inputDataFrequency": "Please input data frequency"
+        },
+        "messages": {
+          "dontCare": "(Don't care)",
+          "zlgCheckCalculator": "ZLG (check the ZLG Baud Calculator)"
+        }
+      },
+      "bitTimingCalculator": {
+        "dialogs": {
+          "title": "Bit Timing Configuration: {{bitRate}} kbit/s @ {{clockFreq}} MHz"
+        },
+        "table": {
+          "emptyText": "No results, try change the clock frequency",
+          "samplePoint": "Sample Point (%)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "prescaler": "Prescaler"
+        },
+        "buttons": {
+          "ok": "OK",
+          "cancel": "Cancel"
+        }
+      },
+      "linNode": {
+        "sections": {
+          "device": "Device",
+          "linParameters": "Lin Parameters",
+          "database": "Database"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "voltageControl": "Volatge Control",
+          "powerEnable": "Power Enable",
+          "linMode": "Lin Mode",
+          "baudRate": "Baud Rate",
+          "majorPrescale": "MajorPrescale",
+          "minorPrescale": "MinorPrescale",
+          "baudRateDisplay": "BaudRate",
+          "database": "Database"
+        },
+        "options": {
+          "input12v": "Input 12V",
+          "output0v": "Onput 0V",
+          "output12v": "Output 12V",
+          "output5v": "Output 5V",
+          "master": "Master",
+          "slave": "Slave",
+          "baudRate9600": "9600",
+          "baudRate19200": "19200",
+          "custom": "Custom",
+          "noDatabase": "No Database"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "selectDatabase": "Please select database",
+          "selectNode": "Please select node",
+          "baudRateTooHigh": "baud rate must be <= 50000"
+        },
+        "messages": {
+          "baudRateWarning": "WARNING: This LIN PHY may not support such high speed, using this speed may cause communication abnormalities, please use with caution"
+        }
+      },
+      "pwmNode": {
+        "sections": {
+          "device": "Device",
+          "pwmParameters": "PWM Parameters"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "frequency": "Frequency (Hz)",
+          "initialDuty": "Initial Duty (%)",
+          "polarity": "Polarity"
+        },
+        "options": {
+          "activeHigh": "Active High",
+          "activeLow": "Active Low"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "inputFrequency": "Please input frequency",
+          "inputInitialDutyCycle": "Please input initial duty cycle"
+        }
+      },
+      "network": {
+        "tree": {
+          "devices": "Devices",
+          "interactive": "Interactive",
+          "can": "Can",
+          "lin": "Lin",
+          "ethernet": "Ethernet",
+          "node": "Node",
+          "pwm": "PWM",
+          "loggers": "Loggers",
+          "someip": "SomeIP"
+        },
+        "dialogs": {
+          "deleteNodeMessage": "This will permanently delete the node. Continue?",
+          "warning": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "names": {
+          "nodeTemplate": "Node {{count}}",
+          "loggerTemplate": "Logger {{count}}",
+          "iaTemplate": "{{label}} IA"
+        },
+        "logConfig": {
+          "tabs": {
+            "general": "General",
+            "connected": "Connected"
+          },
+          "labels": {
+            "name": "Name",
+            "logEnable": "Log Enable",
+            "transport": "Transport",
+            "format": "Format",
+            "compression": "Compression",
+            "filePath": "File Path",
+            "recordTypes": "Record Types"
+          },
+          "placeholders": {
+            "name": "Name",
+            "transport": "Transport",
+            "format": "Format",
+            "compressionLevel": "Compression level",
+            "logFilePath": "Log file Path"
+          },
+          "options": {
+            "disabled": "Disabled",
+            "enabled": "Enabled",
+            "file": "File",
+            "socket": "Socket",
+            "ascFormat": "ASC Format",
+            "blfFormat": "Vector BLF Format",
+            "csvFormat": "CSV Format",
+            "defaultCompression": "Default (-1)",
+            "noCompression": "No compression (0)",
+            "fastCompression": "Fast (1)",
+            "balancedCompression": "Balanced (6)",
+            "maxCompression": "Max (9)"
+          },
+          "recordTypes": {
+            "can": "CAN",
+            "lin": "LIN",
+            "eth": "ETH",
+            "uds": "UDS"
+          },
+          "buttons": {
+            "browse": "Browse",
+            "cancel": "Cancel",
+            "ok": "OK"
+          },
+          "messages": {
+            "timestampAppended": "A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename."
+          },
+          "transfer": {
+            "valid": "Valid",
+            "assigned": "Assigned"
+          },
+          "validation": {
+            "logNameExists": "The log name already exists",
+            "inputNodeName": "Please input node name",
+            "inputLogFilePath": "Please input log file path"
+          },
+          "dialog": {
+            "selectLogFile": "Select Log File",
+            "allFiles": "All Files",
+            "logFile": "Log File"
+          }
+        },
+        "nodeConfig": {
+          "tabs": {
+            "general": "General",
+            "connected": "Connected"
+          },
+          "labels": {
+            "nodeName": "Node Name",
+            "netNode": "Net Node",
+            "nodeScriptFile": "Node Script File",
+            "nodeActive": "Node Active",
+            "testNode": "Test Node"
+          },
+          "placeholders": {
+            "name": "Name",
+            "nodeName": "Node Name"
+          },
+          "options": {
+            "disabled": "Disabled",
+            "enabled": "Enabled"
+          },
+          "buttons": {
+            "choose": "Choose",
+            "build": "Build",
+            "refreshEdit": "Refresh / Edit",
+            "cancel": "Cancel",
+            "ok": "OK"
+          },
+          "buildStatus": {
+            "buildFailed": "Build Failed",
+            "buildSuccess": "Build Success",
+            "needRebuild": "Need Rebuild",
+            "needBuild": "Need Build"
+          },
+          "transfer": {
+            "valid": "Valid",
+            "assigned": "Assigned"
+          },
+          "validation": {
+            "nodeNameExists": "The node name already exists",
+            "inputNodeName": "Please input node name"
+          },
+          "dialogs": {
+            "error": "Error",
+            "warning": "Warning",
+            "ok": "OK",
+            "saveProjectFirst": "Please save the project first",
+            "selectScriptFileFirst": "Please select the script file first",
+            "scriptFile": "Script File",
+            "typescript": "typescript",
+            "allFiles": "All Files"
+          }
+        },
+        "udsView": {
+          "defaultDeviceName": "Device",
+          "dialogs": {
+            "editNode": "Edit Node {{name}}",
+            "editLog": "Edit Log {{name}}",
+            "selectWorkNode": "Please select a work node"
+          }
+        },
+        "cani": {
+          "tooltips": {
+            "editConnect": "Edit Connect",
+            "addFrame": "Add Frame",
+            "selectFrameFromDatabase": "Select Frame from Database",
+            "editFrame": "Edit Frame",
+            "deleteFrame": "Delete Frame"
+          },
+          "dialogs": {
+            "iaDeviceConnect": "IA Device Connect",
+            "editFrame": "Edit Frame {{name}}",
+            "selectFrameFromDatabase": "Select Frame from Database"
+          },
+          "labels": {
+            "name": "Name",
+            "id": "ID",
+            "channel": "Channel",
+            "type": "Type",
+            "remote": "Remote",
+            "brs": "BRS",
+            "dlc": "DLC",
+            "onKey": "On Key:",
+            "period": "Period (ms):"
+          },
+          "tabs": {
+            "signal": "Signal",
+            "rawData": "Raw Data"
+          },
+          "placeholders": {
+            "hexByte": "00"
+          },
+          "table": {
+            "send": "Send",
+            "trigger": "Trigger",
+            "name": "Name",
+            "idHex": "ID (HEX)",
+            "channel": "Channel",
+            "type": "Type",
+            "dlc": "DLC"
+          },
+          "triggerTypes": {
+            "manual": "Manual",
+            "periodic": "Periodic"
+          },
+          "frameTypes": {
+            "can": "CAN",
+            "canFd": "CAN FD",
+            "extendedCan": "Extended CAN",
+            "extendedCanFd": "Extended CAN FD"
+          },
+          "transfer": {
+            "valid": "Valid",
+            "assigned": "Assigned"
+          }
+        },
+        "canisignale": {
+          "dialogs": {
+            "editSignalGenerator": "Edit Signal Generator"
+          },
+          "labels": {
+            "generatorType": "Generator Type"
+          },
+          "options": {
+            "none": "None",
+            "sine": "Sine",
+            "counter": "Counter"
+          },
+          "table": {
+            "name": "Name",
+            "rawValue": "Raw Value",
+            "physValue": "Phys Value",
+            "unit": "Unit",
+            "startBit": "Start Bit",
+            "length": "Length"
+          }
+        },
+        "lini": {
+          "buttons": {
+            "stopSch": "Stop SCH",
+            "startSch": "Start SCH"
+          },
+          "tooltips": {
+            "editConnect": "Edit Connect"
+          },
+          "labels": {
+            "database": "Database"
+          },
+          "placeholders": {
+            "selectDatabaseInDevice": "Select Database In Device"
+          },
+          "dialogs": {
+            "iaDeviceConnect": "IA Device Connect"
+          },
+          "table": {
+            "index": "Index",
+            "schControl": "SCH Control",
+            "scheduleTable": "Schedule Table",
+            "frameNumber": "Frame Number",
+            "frame": "Frame",
+            "frameId": "Frame ID",
+            "active": "Active",
+            "delay": "Delay (ms)",
+            "size": "Size (bytes)",
+            "type": "Type"
+          },
+          "frameTypes": {
+            "command": "Command",
+            "unconditional": "Unconditional",
+            "eventTriggered": "Event Triggered",
+            "sporadic": "Sporadic",
+            "notSupported": "Not supported"
+          },
+          "transfer": {
+            "valid": "Valid",
+            "assigned": "Assigned"
+          }
+        },
+        "linPanel": {
+          "labels": {
+            "database": "Database:",
+            "node": "Node:",
+            "none": "None"
+          },
+          "buttons": {
+            "resetAll": "Reset All"
+          },
+          "table": {
+            "frame": "Frame",
+            "frameDataHex": "Frame Data (Hex)",
+            "signal": "Signal",
+            "bits": "Bits",
+            "physicalLogicalValue": "Physical/Logical Value",
+            "rawValue": "Raw Value"
+          }
+        },
+        "pwmi": {
+          "tabs": {
+            "pwmControl": "PWM Control",
+            "control": "Control",
+            "deviceConnection": "Device Connection",
+            "device": "Device"
+          },
+          "labels": {
+            "dutyCycleControl": "Duty Cycle Control",
+            "quickPresets": "Quick Presets"
+          },
+          "transfer": {
+            "valid": "Valid",
+            "assigned": "Assigned"
+          }
+        }
+      },
+      "graph": {
+        "data": {
+          "tooltips": {
+            "resume": "Resume",
+            "pause": "Pause",
+            "addVariables": "Add Variables",
+            "addSignals": "Add Signals",
+            "deleteSignal": "Delete Signal"
+          },
+          "labels": {
+            "time": "Time: {{time}}s"
+          },
+          "table": {
+            "name": "Name",
+            "fullName": "Full Name",
+            "value": "Value",
+            "unit": "Unit",
+            "rawValue": "Raw Value",
+            "lastUpdate": "Last Update"
+          },
+          "dialogs": {
+            "addSignal": "Add Signal",
+            "addVariable": "Add Variable",
+            "deleteSignal": "Delete Signal",
+            "deleteSignalConfirm": "Are you sure you want to delete this signal?",
+            "deleteSignalsConfirm": "Are you sure you want to delete {{count}} signals?",
+            "confirm": "Confirm",
+            "cancel": "Cancel"
+          },
+          "messages": {
+            "signalAlreadyExists": "Signal already exists",
+            "noData": "--"
+          }
+        },
+        "gauge": {
+          "tooltips": {
+            "resume": "Resume",
+            "pause": "Pause",
+            "addVariables": "Add Variables",
+            "addSignals": "Add Signals"
+          },
+          "labels": {
+            "time": "Time: {{time}}s"
+          },
+          "tree": {
+            "emptyText": "Add"
+          },
+          "menu": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "dialogs": {
+            "addSignal": "Add Signal",
+            "addVariable": "Add Variable",
+            "editSignal": "Edit Signal"
+          },
+          "messages": {
+            "signalAlreadyExists": "Signal already exists",
+            "na": "N/A"
+          }
+        },
+        "graph": {
+          "tooltips": {
+            "resume": "Resume",
+            "pause": "Pause",
+            "addVariables": "Add Variables",
+            "addSignals": "Add Signals"
+          },
+          "labels": {
+            "time": "Time: {{time}}s"
+          },
+          "tree": {
+            "emptyText": "Add"
+          },
+          "menu": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "dialogs": {
+            "addSignal": "Add Signal",
+            "addVariable": "Add Variable",
+            "editSignal": "Edit Signal",
+            "editVariable": "Edit Variable"
+          },
+          "messages": {
+            "signalAlreadyExists": "Signal already exists"
+          },
+          "tooltip": {
+            "time": "Time: {{time}}ms",
+            "value": "Value: {{value}}"
+          }
+        }
+      },
+      "components": {
+        "addVar": {
+          "placeholders": {
+            "searchByName": "Search by name..."
+          },
+          "tooltips": {
+            "collapseAll": "Collapse All",
+            "expandAll": "Expand All",
+            "addVariable": "Add Variable",
+            "removeAttachSignal": "Remove Attach Signal"
+          },
+          "table": {
+            "name": "Name",
+            "type": "Type",
+            "initValue": "Init Value",
+            "min": "Min",
+            "max": "Max",
+            "unit": "Unit",
+            "description": "Description"
+          }
+        },
+        "editSignal": {
+          "collapse": {
+            "signalInformation": "Signal Information",
+            "variableInformation": "Variable Information"
+          },
+          "labels": {
+            "database": "Database",
+            "signalName": "Signal Name",
+            "frameId": "Frame ID",
+            "startBit": "Start Bit",
+            "bitLength": "Bit Length",
+            "variableFullName": "Variable Full Name",
+            "variableName": "Variable Name",
+            "variableType": "Variable Type",
+            "name": "Name",
+            "color": "Color",
+            "yAxis": "Y Axis",
+            "yAxisMin": "Y Axis Min",
+            "yAxisMax": "Y Axis Max",
+            "splitLine": "Split Line",
+            "disableZoom": "Disable Zoom",
+            "tooltip": "Tooltip",
+            "showTooltip": "Show Tooltip",
+            "xAxis": "X Axis",
+            "showGrid": "Show Grid",
+            "gridStyle": "Grid Style",
+            "showValue": "Show Value",
+            "series": "Series",
+            "step": "Step",
+            "showPoints": "Show Points",
+            "pointSize": "Point Size",
+            "pointStyle": "Point Style",
+            "min": "Min",
+            "max": "Max"
+          },
+          "options": {
+            "solid": "Solid",
+            "dashed": "Dashed",
+            "dotted": "Dotted",
+            "step": "Step",
+            "line": "Line",
+            "circle": "Circle",
+            "rectangle": "Rectangle",
+            "triangle": "Triangle",
+            "diamond": "Diamond"
+          },
+          "messages": {
+            "variableNotFound": "Variable {{name}} Not Found",
+            "checkVariableWindow": "Please check in Variable Window"
+          },
+          "buttons": {
+            "save": "Save",
+            "cancel": "Cancel"
+          }
+        },
+        "package": {
+          "title": "Package Manager",
+          "empty": {
+            "noPackageJson": "No package.json found",
+            "saveProjectFirst": "Please save your project first before initializing package.json",
+            "initializeFirst": "Please initialize package.json first to manage dependencies",
+            "initializeButton": "Initialize package.json"
+          },
+          "form": {
+            "enterPackageName": "Enter package name",
+            "installType": "Install type",
+            "dependencies": "Dependencies",
+            "devDependencies": "Dev Dependencies",
+            "install": "Install"
+          },
+          "terminal": {
+            "installationLog": "Installation Log",
+            "clear": "Clear"
+          },
+          "table": {
+            "installedPackages": "Installed Packages",
+            "packageName": "Package Name",
+            "version": "Version",
+            "actions": "Actions",
+            "uninstall": "Uninstall"
+          },
+          "messages": {
+            "packageJsonInitialized": "✓ package.json initialized successfully",
+            "failedToInitialize": "✗ Failed to initialize package.json: {{error}}",
+            "enterPackageName": "✗ Please enter a package name",
+            "packageInstalled": "✓ Package {{name}} installed successfully",
+            "failedToInstall": "✗ Failed to install package {{name}}: {{error}}",
+            "packageUninstalled": "✓ Package {{name}} uninstalled successfully",
+            "failedToUninstall": "✗ Failed to uninstall package {{name}}: {{error}}",
+            "failedToLoad": "✗ Failed to load package.json: {{error}}",
+            "unknownError": "Unknown error"
+          }
+        },
+        "signal": {
+          "placeholders": {
+            "searchByName": "Search by name..."
+          },
+          "tooltips": {
+            "collapseAll": "Collapse All",
+            "expandAll": "Expand All",
+            "addSignal": "Add Signal",
+            "addFrame": "Add Frame",
+            "removeAttachSignal": "Remove Attach Signal"
+          },
+          "table": {
+            "name": "Name",
+            "txNode": "Tx Node",
+            "startBit": "Start Bit",
+            "bitLength": "Bit Length"
+          }
+        }
+      }
     }
   },
   "pluginSettings": {

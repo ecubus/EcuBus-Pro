@@ -9,98 +9,132 @@
     class="hardware"
     hide-required-asterisk
   >
-    <el-form-item label="Address name" required prop="name">
+    <el-form-item :label="i18next.t('uds.tester.canAddr.labels.addressName')" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
 
-    <el-form-item label="Addr Format" required prop="addrFormat">
+    <el-form-item
+      :label="i18next.t('uds.tester.canAddr.labels.addrFormat')"
+      required
+      prop="addrFormat"
+    >
       <el-select v-model="data.addrFormat">
-        <el-option label="NORMAL" :value="CAN_ADDR_FORMAT.NORMAL" />
-        <el-option label="FIXED_NORMAL" :value="CAN_ADDR_FORMAT.FIXED_NORMAL" />
-        <el-option label="EXTENDED" :value="CAN_ADDR_FORMAT.EXTENDED" />
-        <el-option label="MIXED" :value="CAN_ADDR_FORMAT.MIXED" />
-        <el-option label="ENHANCED" :value="CAN_ADDR_FORMAT.ENHANCED" disabled />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrFormat.normal')"
+          :value="CAN_ADDR_FORMAT.NORMAL"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrFormat.fixedNormal')"
+          :value="CAN_ADDR_FORMAT.FIXED_NORMAL"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrFormat.extended')"
+          :value="CAN_ADDR_FORMAT.EXTENDED"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrFormat.mixed')"
+          :value="CAN_ADDR_FORMAT.MIXED"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrFormat.enhanced')"
+          :value="CAN_ADDR_FORMAT.ENHANCED"
+          disabled
+        />
       </el-select>
     </el-form-item>
-    <el-form-item label="Addr Type" required prop="addrType">
+    <el-form-item :label="i18next.t('uds.tester.canAddr.labels.addrType')" required prop="addrType">
       <el-select v-model="data.addrType">
-        <el-option label="ADDR_PHYSICAL" :value="CAN_ADDR_TYPE.PHYSICAL" />
-        <el-option label="ADDR_FUNCTIONAL" :value="CAN_ADDR_TYPE.FUNCTIONAL" />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrType.physical')"
+          :value="CAN_ADDR_TYPE.PHYSICAL"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.addrType.functional')"
+          :value="CAN_ADDR_TYPE.FUNCTIONAL"
+        />
       </el-select>
     </el-form-item>
-    <el-divider content-position="left"> CAN Base </el-divider>
-    <el-form-item label="CAN-ID Type" required prop="idType">
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.canAddr.sections.canBase') }}
+    </el-divider>
+    <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canIdType')" required prop="idType">
       <el-select v-model="data.idType">
-        <el-option label="STANDARD_ID" :value="CAN_ID_TYPE.STANDARD" />
-        <el-option label="EXTEND_ID" :value="CAN_ID_TYPE.EXTENDED" />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.canIdType.standard')"
+          :value="CAN_ID_TYPE.STANDARD"
+        />
+        <el-option
+          :label="i18next.t('uds.tester.canAddr.options.canIdType.extended')"
+          :value="CAN_ID_TYPE.EXTENDED"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="8">
-        <el-form-item label="CAN FD" prop="canfd">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canFd')" prop="canfd">
           <el-checkbox v-model="data.canfd" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
-        <el-form-item label="BRS" prop="brs">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.brs')" prop="brs">
           <el-checkbox v-model="data.brs" :disabled="!data.canfd" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
-        <el-form-item label="Remote" prop="remote">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.remote')" prop="remote">
           <el-checkbox v-model="data.remote" />
         </el-form-item>
       </el-col>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="8">
-        <el-form-item label="N_SA" prop="SA" required>
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nSa')" prop="SA" required>
           <el-input v-model="data.SA" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
-        <el-form-item label="N_TA" prop="TA" required>
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nTa')" prop="TA" required>
           <el-input v-model="data.TA" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
-        <el-form-item label="N_AE" prop="AE">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nAe')" prop="AE">
           <el-input v-model="data.AE" />
         </el-form-item>
       </el-col>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="CAN_ID TX" prop="canIdTx">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canIdTx')" prop="canIdTx">
           <el-input v-model="data.canIdTx" :disabled="!canidNeed" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="CAN_ID RX" prop="canIdRx">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canIdRx')" prop="canIdRx">
           <el-input v-model="data.canIdRx" :disabled="!canidNeed" />
         </el-form-item>
       </el-col>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="CAN_ID TX (calc)">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canIdTxCalc')">
           <el-input v-model="canidCalcTx" disabled />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="CAN_ID RX (calc)">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.canIdRxCalc')">
           <el-input v-model="canidCalcRx" disabled />
         </el-form-item>
       </el-col>
     </el-form-item>
-    <el-form-item label="DLC" prop="dlc">
+    <el-form-item :label="i18next.t('uds.tester.canAddr.labels.dlc')" prop="dlc">
       <template #label="{ label }">
         <span class="vm">
           <span style="margin-right: 2px">{{ label }}</span>
           <el-tooltip>
             <template #content>
-              CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8<br />
-              CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64
+              {{ i18next.t('uds.tester.canAddr.tooltips.dlcCan') }}<br />
+              {{ i18next.t('uds.tester.canAddr.tooltips.dlcCanFd') }}
             </template>
 
             <el-icon>
@@ -112,15 +146,20 @@
       <el-input-number v-model="data.dlc" :min="8" :max="15" controls-position="right" />
     </el-form-item>
 
-    <el-divider content-position="left"> TP Base </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.canAddr.sections.tpBase') }}
+    </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Padding Enable" prop="padding">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.paddingEnable')" prop="padding">
           <el-checkbox v-model="data.padding" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="Padding Value" prop="paddingValue">
+        <el-form-item
+          :label="i18next.t('uds.tester.canAddr.labels.paddingValue')"
+          prop="paddingValue"
+        >
           <el-input v-model="data.paddingValue" :disabled="!data.padding" />
         </el-form-item>
       </el-col>
@@ -128,14 +167,13 @@
 
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="nAs" prop="nAs">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nAs')" prop="nAs">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time for transmission of the CAN frame (any N-PDU) on the sender side (see ISO
-                  15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nAs') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -148,14 +186,13 @@
       </el-col>
 
       <el-col :span="12">
-        <el-form-item label="nAr" prop="nAr">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nAr')" prop="nAr">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time for transmission of the CAN frame (any N-PDU) on the receiver side (see ISO
-                  15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nAr') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -169,13 +206,13 @@
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="nCr" prop="nCr">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nCr')" prop="nCr">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until reception of the next consecutive frame N-PDU (see ISO 15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nCr') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -187,13 +224,13 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="nBs" prop="nBs">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nBs')" prop="nBs">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until reception of the next flow control N-PDU (see ISO 15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nBs') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -207,13 +244,13 @@
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="nBr" prop="nBr">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nBr')" prop="nBr">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until transmission of the next FlowControl N_PDU (see ISO 15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nBr') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -225,13 +262,13 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="nCs" prop="nCs">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nCs')" prop="nCs">
           <template #label="{ label }">
             <span class="vm">
               <span style="margin-right: 2px">{{ label }}</span>
               <el-tooltip>
                 <template #content>
-                  Time until transmission of the next ConsecutiveFrame N_PDU (see ISO 15765-2)
+                  {{ i18next.t('uds.tester.canAddr.tooltips.nCs') }}
                 </template>
                 <el-icon>
                   <InfoFilled />
@@ -245,19 +282,19 @@
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Block Size" prop="bs">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.blockSize')" prop="bs">
           <el-input v-model.number="data.bs" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="STmin" prop="stMin">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.stMin')" prop="stMin">
           <el-input v-model.number="data.stMin" />
         </el-form-item>
       </el-col>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="MAX WTF" prop="maxWTF">
+        <el-form-item :label="i18next.t('uds.tester.canAddr.labels.maxWtf')" prop="maxWTF">
           <el-input v-model.number="data.maxWTF" />
         </el-form-item>
       </el-col>
@@ -290,6 +327,7 @@ import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { UdsAddress } from 'nodeCan/uds'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()
@@ -311,7 +349,9 @@ const canidNeed = computed(() => {
 const idTypeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
     if (data.value.idType == CAN_ID_TYPE.STANDARD) {
-      callback(new Error('CAN-ID Type must be EXTENDED_ID when Addr Format is FIXED_NORMAL'))
+      callback(
+        new Error(i18next.t('uds.tester.canAddr.validation.idTypeMustBeExtendedForFixedNormal'))
+      )
     }
   }
   callback()
@@ -322,44 +362,44 @@ const idCheck = (rule: any, value: any, callback: any) => {
     if (value) {
       if (data.value.idType == CAN_ID_TYPE.STANDARD) {
         if (Number(value) < 0 || Number(value) > 0x7ff) {
-          callback(new Error('CAN-ID must be 0~0x7FF'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdStandardRange')))
         }
       } else {
         if (Number(value) < 0 || Number(value) > 0x1fffffff) {
-          callback(new Error('CAN-ID must be 0~0x1FFFFFFF'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdExtendedRange')))
         }
       }
       if (rule.field == 'canIdTx') {
         if (Number.isNaN(Number(value))) {
-          callback(new Error('HEX should start with 0x'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
         }
         if (Number(value) == Number(data.value.canIdRx)) {
-          callback(new Error("CAN-ID TX can't be equal to CAN-ID RX"))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdTxNotEqualRx')))
         }
         //all canidtx must be unique
         for (let i = 0; i < addrs.value.length; i++) {
           if (Number(value) == Number(addrs.value[i].canAddr?.canIdTx) && i != editIndex.value) {
-            callback(new Error('CAN-ID TX must be unique'))
+            callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdTxMustBeUnique')))
           }
         }
       }
       if (rule.field == 'canIdRx') {
         if (Number.isNaN(Number(value))) {
-          callback(new Error('HEX should start with 0x'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
         }
         if (Number(value) == Number(data.value.canIdTx)) {
-          callback(new Error("CAN-ID RX can't be equal to CAN-ID TX"))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdRxNotEqualTx')))
         }
 
         //all canidrx must be same，except self
         for (let i = 0; i < addrs.value.length; i++) {
           if (Number(value) != Number(addrs.value[i].canAddr?.canIdRx) && i != editIndex.value) {
-            callback(new Error('CAN-ID RX must be same'))
+            callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdRxMustBeSame')))
           }
         }
       }
     } else {
-      callback(new Error(`CAN-ID is need`))
+      callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdRequired')))
     }
   }
   callback()
@@ -367,11 +407,11 @@ const idCheck = (rule: any, value: any, callback: any) => {
 const addrCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     if (Number(value) < 0 || Number(value) > 0xff) {
-      callback(new Error('value must be 0~0xFF'))
+      callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRange')))
     }
     if (rule.field == 'SA') {
       if (Number.isNaN(Number(value))) {
-        callback(new Error('HEX should start with 0x'))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
       }
       if (Number(value) == Number(data.value.TA)) {
         callback(new Error("SA can't be equal to TA"))
@@ -379,42 +419,42 @@ const addrCheck = (rule: any, value: any, callback: any) => {
       //all sa must equal addrs[0].canAddr.SA, 排除自己
       for (let i = 0; i < addrs.value.length; i++) {
         if (Number(value) != Number(addrs.value[i].canAddr?.SA) && i != editIndex.value) {
-          callback(new Error('SA must same'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.saMustBeSame')))
         }
       }
     }
     if (rule.field == 'TA') {
       if (Number.isNaN(Number(value))) {
-        callback(new Error('HEX should start with 0x'))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
       }
       if (Number(value) == Number(data.value.SA)) {
-        callback(new Error("TA can't be equal to SA"))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.taNotEqualSa')))
       }
       //all TA must be unique, 排除自己
       for (let i = 0; i < addrs.value.length; i++) {
         if (Number(value) == Number(addrs.value[i].canAddr?.TA) && i != editIndex.value) {
-          callback(new Error('TA must unique'))
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.taMustBeUnique')))
         }
       }
     }
 
     callback()
   } else {
-    callback(new Error(`value is need`))
+    callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRequired')))
   }
 }
 const addrAeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.MIXED) {
     if (value) {
       if (Number.isNaN(Number(value))) {
-        callback(new Error('HEX should start with 0x'))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
       }
       if (Number(value) < 0 || Number(value) > 0xff) {
-        callback(new Error('value must be 0~0xFF'))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRange')))
       }
       callback()
     } else {
-      callback(new Error(`value is need`))
+      callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRequired')))
     }
   }
   callback()
@@ -424,19 +464,19 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (let i = 0; i < addrs.value.length; i++) {
       const hasName = addrs.value[i].canAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.tester.canAddr.validation.inputNodeName')))
   }
 }
 const rules: FormRules<CanAddr> = {
   name: [
     {
       required: true,
-      message: 'Please input addr name',
+      message: i18next.t('uds.tester.canAddr.validation.inputAddrName'),
       trigger: 'blur',
       validator: nameCheck
     }
@@ -447,7 +487,7 @@ const rules: FormRules<CanAddr> = {
   dlc: [
     {
       required: true,
-      message: 'Please input DLC from 0-15',
+      message: i18next.t('uds.tester.canAddr.validation.inputDlc'),
       trigger: 'blur',
       type: 'number',
       min: 8,
@@ -457,7 +497,7 @@ const rules: FormRules<CanAddr> = {
   paddingValue: [
     {
       required: true,
-      message: 'Please input padding value from 0-255',
+      message: i18next.t('uds.tester.canAddr.validation.inputPaddingValue'),
       trigger: 'blur',
       type: 'number',
       transform: (value) => Number(value),
@@ -469,14 +509,49 @@ const rules: FormRules<CanAddr> = {
   TA: [{ required: true, validator: addrCheck, trigger: 'change' }],
   AE: [{ required: false, validator: addrAeCheck, trigger: 'change' }],
   nAr: [{ required: true, message: 'Please input nAr', trigger: 'change', type: 'number' }],
-  nAs: [{ required: true, message: 'Please input nAs', trigger: 'change', type: 'number' }],
-  nBs: [{ required: true, message: 'Please input nBs', trigger: 'change', type: 'number' }],
-  nCr: [{ required: true, message: 'Please input nCr', trigger: 'change', type: 'number' }],
+  nAs: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.canAddr.validation.inputNAs'),
+      trigger: 'change',
+      type: 'number'
+    }
+  ],
+  nBs: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.canAddr.validation.inputNBs'),
+      trigger: 'change',
+      type: 'number'
+    }
+  ],
+  nCr: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.canAddr.validation.inputNCr'),
+      trigger: 'change',
+      type: 'number'
+    }
+  ],
   nBr: [{ required: false, trigger: 'change', type: 'number' }],
   nCs: [{ required: false, trigger: 'change', type: 'number' }],
-  stMin: [{ required: true, message: 'Please input stMin', type: 'number' }],
-  bs: [{ required: true, message: 'Please input bs', type: 'number' }],
-  maxWTF: [{ required: true, message: 'Please input maxWTF', type: 'number' }]
+  stMin: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.canAddr.validation.inputStMin'),
+      type: 'number'
+    }
+  ],
+  bs: [
+    { required: true, message: i18next.t('uds.tester.canAddr.validation.inputBs'), type: 'number' }
+  ],
+  maxWTF: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.canAddr.validation.inputMaxWtf'),
+      type: 'number'
+    }
+  ]
 }
 
 const canidCalcTx = computed(() => {
@@ -492,7 +567,7 @@ const canidCalcTx = computed(() => {
         .toString(16)
         .toUpperCase()
     }
-    return 'Unsupported'
+    return i18next.t('uds.tester.canAddr.messages.unsupported')
   }
 })
 
@@ -509,7 +584,7 @@ const canidCalcRx = computed(() => {
         .toString(16)
         .toUpperCase()
     }
-    return 'Unsupported'
+    return i18next.t('uds.tester.canAddr.messages.unsupported')
   }
 })
 

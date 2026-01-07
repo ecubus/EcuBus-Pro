@@ -3,7 +3,7 @@
     v-if="delayLoad"
     ref="designer"
     :config="config"
-    :locale="locale"
+    :locale="locale[targetLang]"
     :height="h"
     @save="save"
     @copy="edit"
@@ -47,7 +47,11 @@ const props = defineProps<{
 const delayLoad = ref(false)
 const h = toRef(props, 'height')
 const layout = inject('layout') as Layout
-const locale = En
+const locale = {
+  en: En,
+  zh: ZH
+}
+const targetLang: string = (window.store.get('general.settings.language') as any) || 'en'
 const config = computed(() => {
   const result: any = {
     // 配置项

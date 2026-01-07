@@ -1,18 +1,27 @@
 <template>
   <div>
     <el-form ref="formRef" :model="form" label-width="auto" style="width: 380px" size="small">
-      <el-form-item label="Database" prop="db" required>
-        <el-select v-model="form.db" placeholder="please select database" @change="dbChange">
+      <el-form-item :label="i18next.t('uds.tester.dbchoose.labels.database')" prop="db" required>
+        <el-select
+          v-model="form.db"
+          :placeholder="i18next.t('uds.tester.dbchoose.placeholders.database')"
+          @change="dbChange"
+        >
           <el-option v-for="d in dbList" :key="d.value" :label="d.label" :value="d.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="Node" prop="node" required>
-        <el-select v-model="form.node">
+      <el-form-item :label="i18next.t('uds.tester.dbchoose.labels.node')" prop="node" required>
+        <el-select
+          v-model="form.node"
+          :placeholder="i18next.t('uds.tester.dbchoose.placeholders.node')"
+        >
           <el-option v-for="d in nodeList" :key="d.value" :label="d.label" :value="d.value" />
         </el-select>
       </el-form-item>
       <div style="text-align: right; width: 380px">
-        <el-button type="primary" plain @click="loadAddr">Load</el-button>
+        <el-button type="primary" plain @click="loadAddr">
+          {{ i18next.t('uds.tester.dbchoose.actions.load') }}
+        </el-button>
       </div>
     </el-form>
   </div>
@@ -23,6 +32,7 @@ import { ElMessageBox } from 'element-plus'
 import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from 'nodeCan/lin'
 import { HardwareType, UdsAddress } from 'nodeCan/uds'
 import { computed, ref } from 'vue'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   type: HardwareType

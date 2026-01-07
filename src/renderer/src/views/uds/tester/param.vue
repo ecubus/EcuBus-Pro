@@ -14,7 +14,13 @@
         </el-icon>
       </template>
     </el-table-column>
-    <el-table-column prop="name" label="Name" width="200" align="center" show-overflow-tooltip>
+    <el-table-column
+      prop="name"
+      :label="i18next.t('uds.tester.param.table.name')"
+      width="200"
+      align="center"
+      show-overflow-tooltip
+    >
       <template #default="{ $index, row }">
         <div v-if="editIndex == $index" class="editParam">
           <el-input
@@ -37,7 +43,12 @@
         <span v-else @click="copyText(row.name)">{{ row.name }}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="type" label="Type" width="100" align="center">
+    <el-table-column
+      prop="type"
+      :label="i18next.t('uds.tester.param.table.type')"
+      width="100"
+      align="center"
+    >
       <template #default="{ row }">
         <el-tag type="primary">
           {{ row.type }}
@@ -47,7 +58,7 @@
     <el-table-column
       v-if="checkServiceId(props.serviceId, ['uds'])"
       prop="length"
-      label="Length (bit)"
+      :label="i18next.t('uds.tester.param.table.lengthBit')"
       width="165"
       align="center"
     >
@@ -76,11 +87,21 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="Value" label="Value" min-width="300" align="center">
+    <el-table-column
+      prop="Value"
+      :label="i18next.t('uds.tester.param.table.value')"
+      min-width="300"
+      align="center"
+    >
       <template #default="{ row, $index }">
         <div v-if="editIndex == $index" class="editParam">
           <template v-if="row.type == 'FILE'">
-            <el-input v-model="editValue.editValue" disabled placeholder="File Path" clearable>
+            <el-input
+              v-model="editValue.editValue"
+              disabled
+              :placeholder="i18next.t('uds.tester.param.placeholders.filePath')"
+              clearable
+            >
               <template #append>
                 <el-button :icon="Folder" @click="selectFile" />
               </template>
@@ -129,13 +150,23 @@
         }}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="desc" label="Description" align="center" min-width="200">
+    <el-table-column
+      prop="desc"
+      :label="i18next.t('uds.tester.param.table.description')"
+      align="center"
+      min-width="200"
+    >
       <template #default="{ $index, row }">
         <el-input v-if="editIndex == $index" v-model="editValue.desc" />
         <span v-else>{{ row.desc }}</span>
       </template>
     </el-table-column>
-    <el-table-column fixed="right" label="Operations" width="200" align="center">
+    <el-table-column
+      fixed="right"
+      :label="i18next.t('uds.tester.param.table.operations')"
+      width="200"
+      align="center"
+    >
       <template #header>
         <div>
           <el-dropdown :disabled="props.disabled">
@@ -147,22 +178,34 @@
                 icon="CirclePlusFilled"
                 :disabled="props.disabled"
               >
-                Add
+                {{ i18next.t('uds.tester.param.actions.add') }}
               </el-button>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="addParam('NUM')"> NUMBER </el-dropdown-item>
-                <el-dropdown-item @click="addParam('ASCII')"> ASCII </el-dropdown-item>
-                <el-dropdown-item @click="addParam('ARRAY')"> ARRAY </el-dropdown-item>
-                <el-dropdown-item @click="addParam('FLOAT')"> FLOAT </el-dropdown-item>
-                <el-dropdown-item @click="addParam('DOUBLE')"> DOUBLE </el-dropdown-item>
-                <el-dropdown-item @click="addParam('UNICODE')"> UNICODE </el-dropdown-item>
+                <el-dropdown-item @click="addParam('NUM')">
+                  {{ i18next.t('uds.tester.param.types.num') }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="addParam('ASCII')">
+                  {{ i18next.t('uds.tester.param.types.ascii') }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="addParam('ARRAY')">
+                  {{ i18next.t('uds.tester.param.types.array') }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="addParam('FLOAT')">
+                  {{ i18next.t('uds.tester.param.types.float') }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="addParam('DOUBLE')">
+                  {{ i18next.t('uds.tester.param.types.double') }}
+                </el-dropdown-item>
+                <el-dropdown-item @click="addParam('UNICODE')">
+                  {{ i18next.t('uds.tester.param.types.unicode') }}
+                </el-dropdown-item>
                 <el-dropdown-item
                   v-if="!checkServiceId(props.serviceId, ['uds'])"
                   @click="addParam('FILE')"
                 >
-                  FILE
+                  {{ i18next.t('uds.tester.param.types.file') }}
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -179,7 +222,7 @@
             :disabled="!row.editable"
             @click="editParam(row, $index)"
           >
-            Edit
+            {{ i18next.t('uds.tester.param.actions.edit') }}
           </el-button>
           <el-button
             size="small"
@@ -189,7 +232,7 @@
             :disabled="!row.deletable"
             @click="deleteParam($index)"
           >
-            Delete
+            {{ i18next.t('uds.tester.param.actions.delete') }}
           </el-button>
         </div>
         <div v-else>
@@ -200,7 +243,7 @@
             icon="FolderChecked"
             @click="saveParam($index, false)"
           >
-            Save
+            {{ i18next.t('uds.tester.param.actions.save') }}
           </el-button>
           <el-button
             size="small"
@@ -209,7 +252,7 @@
             icon="Close"
             @click="() => ((editIndex = -1), (paramError = {}))"
           >
-            Discard
+            {{ i18next.t('uds.tester.param.actions.discard') }}
           </el-button>
         </div>
       </template>
@@ -229,6 +272,7 @@ import { ElMessage } from 'element-plus'
 import { Folder } from '@element-plus/icons-vue'
 import { useProjectStore } from '@r/stores/project'
 import { error } from 'winston'
+import { i18next } from '@r/i18n'
 
 const serviceDetail = window.serviceDetail
 const paramError = ref<Record<string, string>>({})
@@ -249,7 +293,7 @@ const data = defineModel<Param[]>({
 function copyText(text: string) {
   copy(text)
   ElMessage({
-    message: 'Copied',
+    message: i18next.t('uds.tester.param.messages.copied'),
     type: 'success',
     plain: true,
     offset: 30,
@@ -269,9 +313,14 @@ const project = useProjectStore()
 async function selectFile() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Script File',
+    title: i18next.t('uds.tester.param.dialogs.scriptFile'),
     properties: ['openFile'],
-    filters: [{ name: 'All Files', extensions: ['*'] }]
+    filters: [
+      {
+        name: i18next.t('uds.tester.param.dialogs.allFiles'),
+        extensions: ['*']
+      }
+    ]
   })
   const file = r.filePaths[0]
   if (file) {
@@ -329,7 +378,7 @@ function saveParam(index: number, justValid: boolean) {
   const name = editValue.value.name
   for (const item of data.value) {
     if (item.name == name && item.id != d.id) {
-      paramError.value['name'] = 'name duplicate'
+      paramError.value['name'] = i18next.t('uds.tester.param.validation.nameDuplicate')
       error = true
       break
     }
@@ -372,11 +421,11 @@ function saveParam(index: number, justValid: boolean) {
       {
         /*multiple of 8,and <=32*/
         if (d.bitLen % 8 != 0) {
-          paramError.value['bitLen'] = 'bitLen must be multiple of 8'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLenMultipleOf8')
           error = true
         }
         if (d.bitLen > 32) {
-          paramError.value['bitLen'] = 'bitLen must be <=32'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLenMax32')
           error = true
         }
       }
@@ -386,7 +435,7 @@ function saveParam(index: number, justValid: boolean) {
     case 'UNICODE':
       {
         if (d.bitLen % 8 != 0) {
-          paramError.value['bitLen'] = 'bitLen must be multiple of 8'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLenMultipleOf8')
           error = true
         }
       }
@@ -394,7 +443,7 @@ function saveParam(index: number, justValid: boolean) {
     case 'ARRAY':
       {
         if (d.bitLen % 8 != 0) {
-          paramError.value['bitLen'] = 'bitLen must be multiple of 8'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLenMultipleOf8')
           error = true
         }
       }
@@ -402,7 +451,7 @@ function saveParam(index: number, justValid: boolean) {
     case 'FLOAT':
       {
         if (d.bitLen != 32) {
-          paramError.value['bitLen'] = 'bitLen must be 32'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLen32')
           error = true
         }
       }
@@ -410,12 +459,14 @@ function saveParam(index: number, justValid: boolean) {
     case 'DOUBLE':
       {
         if (d.bitLen != 64) {
-          paramError.value['bitLen'] = 'bitLen must be 64'
+          paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.bitLen64')
         }
       }
       break
     default:
-      paramError.value['bitLen'] = `unknown type ${d.type}`
+      paramError.value['bitLen'] = i18next.t('uds.tester.param.validation.unknownType', {
+        type: d.type
+      })
       break
   }
 
@@ -456,8 +507,9 @@ function saveParam(index: number, justValid: boolean) {
         }
 
         if (Buffer.compare(newBuffer, oldBuffer) == 0) {
-          paramError.value['value'] =
-            `The id already exists in service ${ss.name}, please change it`
+          paramError.value['value'] = i18next.t('uds.tester.param.validation.idExistsInService', {
+            name: ss.name
+          })
           error = true
           break
         }

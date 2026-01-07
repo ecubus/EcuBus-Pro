@@ -9,64 +9,117 @@
     class="hardware"
     hide-required-asterisk
   >
-    <el-form-item label="Address name" required prop="name">
+    <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.addressName')" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Address Type" required prop="taType">
+    <el-form-item
+      :label="i18next.t('uds.tester.ethAddr.labels.addressType')"
+      required
+      prop="taType"
+    >
       <el-select v-model="data.taType">
-        <el-option value="physical" label="Physical"></el-option>
-        <el-option value="functional" label="Functional"></el-option>
+        <el-option
+          value="physical"
+          :label="i18next.t('uds.tester.ethAddr.options.addressType.physical')"
+        ></el-option>
+        <el-option
+          value="functional"
+          :label="i18next.t('uds.tester.ethAddr.options.addressType.functional')"
+        ></el-option>
       </el-select>
     </el-form-item>
-    <el-divider content-position="left"> Tester </el-divider>
-    <el-form-item label="tester address" required prop="tester.testerLogicalAddr">
-      <el-input v-model.number="data.tester.testerLogicalAddr" placeholder="0" />
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.ethAddr.sections.tester') }}
+    </el-divider>
+    <el-form-item
+      :label="i18next.t('uds.tester.ethAddr.labels.testerAddress')"
+      required
+      prop="tester.testerLogicalAddr"
+    >
+      <el-input
+        v-model.number="data.tester.testerLogicalAddr"
+        :placeholder="i18next.t('uds.tester.ethAddr.placeholders.logicalAddress')"
+      />
     </el-form-item>
     <el-form-item label-width="0">
       <el-row>
         <el-col :span="12">
-          <el-form-item label="Connect delay" required prop="tester.createConnectDelay">
+          <el-form-item
+            :label="i18next.t('uds.tester.ethAddr.labels.connectDelay')"
+            required
+            prop="tester.createConnectDelay"
+          >
             <el-input v-model="data.tester.createConnectDelay" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="Active delay" required prop="tester.routeActiveTime">
+          <el-form-item
+            :label="i18next.t('uds.tester.ethAddr.labels.activeDelay')"
+            required
+            prop="tester.routeActiveTime"
+          >
             <el-input v-model="data.tester.routeActiveTime" />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form-item>
-    <el-divider content-position="left"> ECU </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.ethAddr.sections.ecu') }}
+    </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="ECU address" required prop="entity.logicalAddr">
-          <el-input v-model.number="data.entity.logicalAddr" placeholder="0" />
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.ecuAddress')"
+          required
+          prop="entity.logicalAddr"
+        >
+          <el-input
+            v-model.number="data.entity.logicalAddr"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.logicalAddress')"
+          />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="EID" required prop="entity.eid">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.eid')"
+          required
+          prop="entity.eid"
+        >
           <el-input v-model="data.entity.eid" />
         </el-form-item>
       </el-col>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Entity Type" required prop="entity.nodeType">
-          <el-select v-model.number="data.entity.nodeType" placeholder="Node">
-            <el-option value="node" label="Node"></el-option>
-            <el-option value="gateway" label="Gateway"></el-option>
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.entityType')"
+          required
+          prop="entity.nodeType"
+        >
+          <el-select
+            v-model.number="data.entity.nodeType"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.entityType')"
+          >
+            <el-option
+              value="node"
+              :label="i18next.t('uds.tester.ethAddr.options.entityType.node')"
+            ></el-option>
+            <el-option
+              value="gateway"
+              :label="i18next.t('uds.tester.ethAddr.options.entityType.gateway')"
+            ></el-option>
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item
-          label="node address"
+          :label="i18next.t('uds.tester.ethAddr.labels.nodeAddress')"
           :required="data.entity.nodeType == 'gateway'"
           prop="entity.nodeAddr"
         >
           <el-input
             v-model.number="data.entity.nodeAddr"
-            placeholder="0"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.logicalAddress')"
             :disabled="data.entity.nodeType == 'node'"
           />
         </el-form-item>
@@ -74,46 +127,93 @@
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="VIN" required prop="entity.vin">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.vin')"
+          required
+          prop="entity.vin"
+        >
           <el-input v-model="data.entity.vin" :max="17" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="GID" required prop="entity.gid">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.gid')"
+          required
+          prop="entity.gid"
+        >
           <el-input v-model="data.entity.gid" :max="17" />
         </el-form-item>
       </el-col>
     </el-form-item>
-    <el-divider content-position="left"> Vehicle Identify Request Behavior </el-divider>
-    <el-form-item label="VIN Request method" required prop="virReqType">
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.ethAddr.sections.vehicleIdentify') }}
+    </el-divider>
+    <el-form-item
+      :label="i18next.t('uds.tester.ethAddr.labels.vinRequestMethod')"
+      required
+      prop="virReqType"
+    >
       <el-select v-model="data.virReqType">
-        <el-option value="unicast" label="Unicast VIN Request"></el-option>
-        <el-option value="omit" label="Omit VIN, tcp connect directly"></el-option>
-        <el-option value="broadcast" label="Broadcast UDP4"></el-option>
-        <el-option value="multicast" label="Multicast UDP6" disabled></el-option>
+        <el-option
+          value="unicast"
+          :label="i18next.t('uds.tester.ethAddr.options.virReqType.unicast')"
+        ></el-option>
+        <el-option
+          value="omit"
+          :label="i18next.t('uds.tester.ethAddr.options.virReqType.omit')"
+        ></el-option>
+        <el-option
+          value="broadcast"
+          :label="i18next.t('uds.tester.ethAddr.options.virReqType.broadcast')"
+        ></el-option>
+        <el-option
+          value="multicast"
+          :label="i18next.t('uds.tester.ethAddr.options.virReqType.multicast')"
+          disabled
+        ></el-option>
       </el-select>
     </el-form-item>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="Request Address" prop="virReqAddr">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.requestAddress')"
+          prop="virReqAddr"
+        >
           <el-input v-model="data.virReqAddr" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="Entity Miss Behavior" prop="entityNotFoundBehavior">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.entityMissBehavior')"
+          prop="entityNotFoundBehavior"
+        >
           <el-select v-model="data.entityNotFoundBehavior">
             <!-- <el-option value="no" label="Report Error"></el-option> -->
-            <el-option value="normal" label="Send Normal Request"></el-option>
-            <el-option value="withVin" label="Send VIN Request"></el-option>
-            <el-option value="withEid" label="Send EID Request"></el-option>
+            <el-option
+              value="normal"
+              :label="i18next.t('uds.tester.ethAddr.options.entityNotFoundBehavior.normal')"
+            ></el-option>
+            <el-option
+              value="withVin"
+              :label="i18next.t('uds.tester.ethAddr.options.entityNotFoundBehavior.withVin')"
+            ></el-option>
+            <el-option
+              value="withEid"
+              :label="i18next.t('uds.tester.ethAddr.options.entityNotFoundBehavior.withEid')"
+            ></el-option>
           </el-select>
         </el-form-item>
       </el-col>
     </el-form-item>
-    <el-divider content-position="left">Tester Speical Control</el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.ethAddr.sections.testerSpecialControl') }}
+    </el-divider>
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="UDP Client Port" prop="udpClientPort">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.udpClientPort')"
+          prop="udpClientPort"
+        >
           <el-input-number
             v-model="data.udpClientPort"
             :min="0"
@@ -123,7 +223,10 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="TCP Client Port" prop="tcpClientPort">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.tcpClientPort')"
+          prop="tcpClientPort"
+        >
           <el-input-number
             v-model="data.tcpClientPort"
             :min="0"
@@ -134,13 +237,17 @@
       </el-col>
     </el-form-item>
     <template v-if="Number(props.version) == 3">
-      <el-divider content-position="left">TLS Settings - Tester (DoIP v3)</el-divider>
-      <el-form-item label="Enable TLS" prop="tls.enabled">
+      <el-divider content-position="left">
+        {{ i18next.t('uds.tester.ethAddr.sections.tlsSettingsTesterV3') }}
+      </el-divider>
+      <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.enableTls')" prop="tls.enabled">
         <el-switch v-model="tlsEnabled" @change="onTlsEnabledChange" />
-        <span class="tls-hint">Enable TLS for secure communication (port 3496)</span>
+        <span class="tls-hint">
+          {{ i18next.t('uds.tester.ethAddr.tooltips.enableTls') }}
+        </span>
       </el-form-item>
       <template v-if="tlsEnabled">
-        <el-form-item label="TLS Port" prop="tls.port">
+        <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.tlsPort')" prop="tls.port">
           <el-input-number
             v-model="data.tls!.port"
             :min="1"
@@ -149,40 +256,73 @@
             controls-position="right"
           />
         </el-form-item>
-        <el-form-item label="CA Certificate" prop="tls.ca">
-          <el-input v-model="data.tls!.ca" placeholder="Path to CA certificate file">
+        <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.caCert')" prop="tls.ca">
+          <el-input
+            v-model="data.tls!.ca"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.caCertPath')"
+          >
             <template #append>
-              <el-button @click="selectCertFile('ca')">Browse</el-button>
+              <el-button @click="selectCertFile('ca')">
+                {{ i18next.t('uds.tester.ethAddr.actions.browse') }}
+              </el-button>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="Client Certificate" prop="tls.cert">
-          <el-input v-model="data.tls!.cert" placeholder="Path to tester certificate file">
+        <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.clientCert')" prop="tls.cert">
+          <el-input
+            v-model="data.tls!.cert"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.clientCertPath')"
+          >
             <template #append>
-              <el-button @click="selectCertFile('cert')">Browse</el-button>
+              <el-button @click="selectCertFile('cert')">
+                {{ i18next.t('uds.tester.ethAddr.actions.browse') }}
+              </el-button>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="Private Key" prop="tls.key">
-          <el-input v-model="data.tls!.key" placeholder="Path to tester private key file">
+        <el-form-item :label="i18next.t('uds.tester.ethAddr.labels.privateKey')" prop="tls.key">
+          <el-input
+            v-model="data.tls!.key"
+            :placeholder="i18next.t('uds.tester.ethAddr.placeholders.privateKeyPath')"
+          >
             <template #append>
-              <el-button @click="selectCertFile('key')">Browse</el-button>
+              <el-button @click="selectCertFile('key')">
+                {{ i18next.t('uds.tester.ethAddr.actions.browse') }}
+              </el-button>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="Skip Verify" prop="tls.rejectUnauthorized">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.skipVerify')"
+          prop="tls.rejectUnauthorized"
+        >
           <el-switch v-model="skipVerify" />
-          <span class="tls-hint">Skip certificate verification (for testing only)</span>
+          <span class="tls-hint">
+            {{ i18next.t('uds.tester.ethAddr.tooltips.skipVerify') }}
+          </span>
         </el-form-item>
-        <el-form-item label="Enable Key Log" prop="tls.enableKeyLog">
+        <el-form-item
+          :label="i18next.t('uds.tester.ethAddr.labels.enableKeyLog')"
+          prop="tls.enableKeyLog"
+        >
           <el-switch v-model="enableKeyLog" />
-          <span class="tls-hint">Enable key log for TLS communication</span>
+          <span class="tls-hint">
+            {{ i18next.t('uds.tester.ethAddr.tooltips.enableKeyLog') }}
+          </span>
         </el-form-item>
         <template v-if="enableKeyLog">
-          <el-form-item label="Key Log Path" prop="tls.keyLogPath">
-            <el-input v-model="data.tls!.keyLogPath" placeholder="logs/tls-keylog.txt">
+          <el-form-item
+            :label="i18next.t('uds.tester.ethAddr.labels.keyLogPath')"
+            prop="tls.keyLogPath"
+          >
+            <el-input
+              v-model="data.tls!.keyLogPath"
+              :placeholder="i18next.t('uds.tester.ethAddr.placeholders.keyLogPath')"
+            >
               <template #append>
-                <el-button @click="selectKeyLogFile">Browse</el-button>
+                <el-button @click="selectKeyLogFile">
+                  {{ i18next.t('uds.tester.ethAddr.actions.browse') }}
+                </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -219,6 +359,7 @@ import { UdsAddress } from 'nodeCan/uds'
 import { EntityAddr, EthAddr, TlsConfig } from 'nodeCan/doip'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useProjectStore } from '@r/stores/project'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()
@@ -278,9 +419,9 @@ function onTlsEnabledChange(val: boolean) {
 
 async function selectCertFile(type: 'ca' | 'cert' | 'key') {
   const titles: Record<string, string> = {
-    ca: 'Select CA Certificate',
-    cert: 'Select Client Certificate',
-    key: 'Select Private Key'
+    ca: i18next.t('uds.tester.ethAddr.dialogs.selectCaCert'),
+    cert: i18next.t('uds.tester.ethAddr.dialogs.selectClientCert'),
+    key: i18next.t('uds.tester.ethAddr.dialogs.selectPrivateKey')
   }
   const extensions: Record<string, string[]> = {
     ca: ['pem', 'crt', 'cer'],
@@ -293,8 +434,11 @@ async function selectCertFile(type: 'ca' | 'cert' | 'key') {
     title: titles[type],
     properties: ['openFile'],
     filters: [
-      { name: 'Certificate Files', extensions: extensions[type] },
-      { name: 'All Files', extensions: ['*'] }
+      {
+        name: i18next.t('uds.tester.ethAddr.dialogs.certificateFiles'),
+        extensions: extensions[type]
+      },
+      { name: i18next.t('uds.tester.ethAddr.dialogs.allFiles'), extensions: ['*'] }
     ]
   })
   const file = r.filePaths[0]
@@ -310,11 +454,11 @@ async function selectCertFile(type: 'ca' | 'cert' | 'key') {
 async function selectKeyLogFile() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Select Key Log File',
+    title: i18next.t('uds.tester.ethAddr.dialogs.selectKeyLogFile'),
     properties: ['openFile', 'createDirectory'],
     filters: [
-      { name: 'Log/Text Files', extensions: ['log', 'txt'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: i18next.t('uds.tester.ethAddr.dialogs.logTextFiles'), extensions: ['log', 'txt'] },
+      { name: i18next.t('uds.tester.ethAddr.dialogs.allFiles'), extensions: ['*'] }
     ]
   })
   const file = r.filePaths?.[0]
@@ -339,12 +483,12 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (let i = 0; i < addrs.value.length; i++) {
       const hasName = addrs.value[i].ethAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.tester.ethAddr.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.tester.ethAddr.validation.inputNodeName')))
   }
 }
 
@@ -355,33 +499,33 @@ const addrCheck = (rule: any, value: any, callback: any) => {
         const hasName = `${addrs.value[i].ethAddr?.entity.logicalAddr}.${addrs.value[i].ethAddr?.entity.nodeAddr}`
         const selfValue = `${data.value.entity.logicalAddr}.${data.value.entity.nodeAddr}`
         if (hasName == selfValue && i != editIndex.value) {
-          callback(new Error('The address already exists'))
+          callback(new Error(i18next.t('uds.tester.ethAddr.validation.addressExists')))
         }
       } else {
         const hasName = addrs.value[i].ethAddr?.entity.logicalAddr
         if (hasName == value && i != editIndex.value) {
-          callback(new Error('The address already exists'))
+          callback(new Error(i18next.t('uds.tester.ethAddr.validation.addressExists')))
         }
       }
     }
     if (value < 0 || value > 0xffff) {
-      callback(new Error('0 ~ 0xFFFF'))
+      callback(new Error(i18next.t('uds.tester.ethAddr.validation.addressRange')))
     }
     if (value == data.value.tester.testerLogicalAddr) {
-      callback(new Error("Tester address can't be the same as Tester address"))
+      callback(new Error(i18next.t('uds.tester.ethAddr.validation.testerAddrSameAsTester')))
     }
     callback()
   } else {
-    callback(new Error('Logical address is required'))
+    callback(new Error(i18next.t('uds.tester.ethAddr.validation.logicalAddressRequired')))
   }
 }
 const taddrCheck = (rule: any, value: any, callback: any) => {
   if (value.toString().length > 0) {
     if (value < 0 || value > 0xffff) {
-      callback(new Error('0 ~ 0xFFFF'))
+      callback(new Error(i18next.t('uds.tester.ethAddr.validation.addressRange')))
     }
     if (value == data.value.entity.logicalAddr) {
-      callback(new Error("Tester address can't be the same as ECU address"))
+      callback(new Error(i18next.t('uds.tester.ethAddr.validation.testerAddrSameAsEcu')))
     }
     // Check that all tester logical addresses match
     for (let i = 0; i < addrs.value.length; i++) {
@@ -389,12 +533,12 @@ const taddrCheck = (rule: any, value: any, callback: any) => {
         i !== editIndex.value &&
         data.value.tester.testerLogicalAddr !== addrs.value[i].ethAddr?.tester.testerLogicalAddr
       ) {
-        callback(new Error('All tester logical addresses must be the same'))
+        callback(new Error(i18next.t('uds.tester.ethAddr.validation.testerAddrAllSame')))
       }
     }
     callback()
   } else {
-    callback(new Error('Logical address is required'))
+    callback(new Error(i18next.t('uds.tester.ethAddr.validation.logicalAddressRequired')))
   }
 }
 const vaddrCheck = (rule: any, value: any, callback: any) => {
@@ -403,11 +547,11 @@ const vaddrCheck = (rule: any, value: any, callback: any) => {
       //must be ip address
       const reg = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
       if (!reg.test(value)) {
-        callback(new Error('Invalid IP address'))
+        callback(new Error(i18next.t('uds.tester.ethAddr.validation.invalidIpAddress')))
       }
       callback()
     } else {
-      callback(new Error('Request address is required'))
+      callback(new Error(i18next.t('uds.tester.ethAddr.validation.requestAddressRequired')))
     }
   } else {
     callback()
@@ -418,7 +562,7 @@ const rules: FormRules<EthAddr> = {
   name: [
     {
       required: true,
-      message: 'Please input addr name',
+      message: i18next.t('uds.tester.ethAddr.validation.inputAddrName'),
       trigger: 'blur',
       validator: nameCheck
     }
@@ -445,7 +589,7 @@ const rules: FormRules<EthAddr> = {
     {
       required: true,
       trigger: 'change',
-      message: 'xx-xx-xx-xx-xx-xx',
+      message: i18next.t('uds.tester.ethAddr.validation.eidFormat'),
       pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/
     }
   ],
@@ -453,7 +597,7 @@ const rules: FormRules<EthAddr> = {
     {
       required: true,
       trigger: 'change',
-      message: 'xx-xx-xx-xx-xx-xx',
+      message: i18next.t('uds.tester.ethAddr.validation.gidFormat'),
       pattern: /^([0-9A-Fa-f]{2}-){5}[0-9A-Fa-f]{2}$/
     }
   ],
@@ -461,7 +605,7 @@ const rules: FormRules<EthAddr> = {
     {
       required: true,
       trigger: 'change',
-      message: '17 characters',
+      message: i18next.t('uds.tester.ethAddr.validation.vinLength'),
       min: 17,
       max: 17
     }

@@ -86,6 +86,7 @@ import { v4 } from 'uuid'
 import { HardwareType } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -121,13 +122,17 @@ function nodeClick(data: tree, node: any) {
   })
 }
 function removeDevice(id: string) {
-  ElMessageBox.confirm('Are you sure to delete this tester?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: `#win${winKey}`
-  })
+  ElMessageBox.confirm(
+    i18next.t('uds.tester.dialogs.deleteTesterMessage'),
+    i18next.t('uds.tester.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('uds.tester.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.tester.dialogs.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${winKey}`
+    }
+  )
     .then(() => {
       window.electron.ipcRenderer
         .invoke(
@@ -224,7 +229,7 @@ const globalStart = useGlobalStart()
 function buildTree() {
   const t: tree[] = []
   const can: tree = {
-    label: 'CAN Interface',
+    label: i18next.t('uds.tester.tree.canInterface'),
     type: 'can',
     append: true,
     id: 'CAN',
@@ -242,7 +247,7 @@ function buildTree() {
   }
   t.push(can)
   const lin: tree = {
-    label: 'LIN Interface',
+    label: i18next.t('uds.tester.tree.linInterface'),
     type: 'lin',
     append: true,
     id: 'LIN',
@@ -261,7 +266,7 @@ function buildTree() {
   }
   t.push(lin)
   const eth: tree = {
-    label: 'ETH Interface',
+    label: i18next.t('uds.tester.tree.ethInterface'),
     type: 'eth',
     append: true,
     id: 'ETH',

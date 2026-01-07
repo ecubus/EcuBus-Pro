@@ -477,6 +477,550 @@
             "allFiles": "All Files"
           }
         },
+        "tester": {
+          "tree": {
+            "canInterface": "CAN Interface",
+            "linInterface": "LIN Interface",
+            "ethInterface": "ETH Interface"
+          },
+          "dialogs": {
+            "deleteTesterMessage": "Are you sure to delete this tester?",
+            "warning": "Warning",
+            "ok": "OK",
+            "cancel": "Cancel"
+          },
+          "buildError": {
+            "table": {
+              "file": "File",
+              "line": "Line",
+              "message": "Error"
+            },
+            "dialog": {
+              "title": "Errors",
+              "header": "Build Errors ({{count}})"
+            }
+          },
+          "canAddr": {
+            "sections": {
+              "canBase": "CAN Base",
+              "tpBase": "TP Base"
+            },
+            "labels": {
+              "addressName": "Address name",
+              "addrFormat": "Addr Format",
+              "addrType": "Addr Type",
+              "canIdType": "CAN-ID Type",
+              "canFd": "CAN FD",
+              "brs": "BRS",
+              "remote": "Remote",
+              "nSa": "N_SA",
+              "nTa": "N_TA",
+              "nAe": "N_AE",
+              "canIdTx": "CAN_ID TX",
+              "canIdRx": "CAN_ID RX",
+              "canIdTxCalc": "CAN_ID TX (calc)",
+              "canIdRxCalc": "CAN_ID RX (calc)",
+              "dlc": "DLC",
+              "paddingEnable": "Padding Enable",
+              "paddingValue": "Padding Value",
+              "nAs": "nAs",
+              "nAr": "nAr",
+              "nCr": "nCr",
+              "nBs": "nBs",
+              "nBr": "nBr",
+              "nCs": "nCs",
+              "blockSize": "Block Size",
+              "stMin": "STmin",
+              "maxWtf": "MAX WTF"
+            },
+            "options": {
+              "addrFormat": {
+                "normal": "NORMAL",
+                "fixedNormal": "FIXED_NORMAL",
+                "extended": "EXTENDED",
+                "mixed": "MIXED",
+                "enhanced": "ENHANCED"
+              },
+              "addrType": {
+                "physical": "ADDR_PHYSICAL",
+                "functional": "ADDR_FUNCTIONAL"
+              },
+              "canIdType": {
+                "standard": "STANDARD_ID",
+                "extended": "EXTEND_ID"
+              }
+            },
+            "tooltips": {
+              "dlcCan": "CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8",
+              "dlcCanFd": "CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64",
+              "nAs": "Time for transmission of the CAN frame (any N-PDU) on the sender side (see ISO 15765-2)",
+              "nAr": "Time for transmission of the CAN frame (any N-PDU) on the receiver side (see ISO 15765-2)",
+              "nCr": "Time until reception of the next consecutive frame N-PDU (see ISO 15765-2)",
+              "nBs": "Time until reception of the next flow control N-PDU (see ISO 15765-2)",
+              "nBr": "Time until transmission of the next FlowControl N_PDU (see ISO 15765-2)",
+              "nCs": "Time until transmission of the next ConsecutiveFrame N_PDU (see ISO 15765-2)"
+            },
+            "validation": {
+              "idTypeMustBeExtendedForFixedNormal": "CAN-ID Type must be EXTENDED_ID when Addr Format is FIXED_NORMAL",
+              "canIdStandardRange": "CAN-ID must be 0~0x7FF",
+              "canIdExtendedRange": "CAN-ID must be 0~0x1FFFFFFF",
+              "hexShouldStartWith0x": "HEX should start with 0x",
+              "canIdTxNotEqualRx": "CAN-ID TX can't be equal to CAN-ID RX",
+              "canIdTxMustBeUnique": "CAN-ID TX must be unique",
+              "canIdRxNotEqualTx": "CAN-ID RX can't be equal to CAN-ID TX",
+              "canIdRxMustBeSame": "CAN-ID RX must be same",
+              "canIdRequired": "CAN-ID is required",
+              "valueRange": "Value must be 0~0xFF",
+              "valueRequired": "Value is required",
+              "saMustBeSame": "SA must be the same",
+              "taNotEqualSa": "TA can't be equal to SA",
+              "taMustBeUnique": "TA must be unique",
+              "nameExists": "The name already exists",
+              "inputNodeName": "Please input node name",
+              "inputAddrName": "Please input addr name",
+              "inputDlc": "Please input DLC from 0-15",
+              "inputPaddingValue": "Please input padding value from 0-255",
+              "inputNAs": "Please input nAs",
+              "inputNBs": "Please input nBs",
+              "inputNCr": "Please input nCr",
+              "inputStMin": "Please input stMin",
+              "inputBs": "Please input bs",
+              "inputMaxWtf": "Please input maxWTF"
+            },
+            "messages": {
+              "unsupported": "Unsupported"
+            }
+          },
+          "ethAddr": {
+            "sections": {
+              "tester": "Tester",
+              "ecu": "ECU",
+              "vehicleIdentify": "Vehicle Identify Request Behavior",
+              "testerSpecialControl": "Tester Special Control",
+              "tlsSettingsTesterV3": "TLS Settings - Tester (DoIP v3)"
+            },
+            "labels": {
+              "addressName": "Address name",
+              "addressType": "Address Type",
+              "testerAddress": "Tester address",
+              "connectDelay": "Connect delay",
+              "activeDelay": "Active delay",
+              "ecuAddress": "ECU address",
+              "eid": "EID",
+              "entityType": "Entity Type",
+              "nodeAddress": "Node address",
+              "vin": "VIN",
+              "gid": "GID",
+              "vinRequestMethod": "VIN Request method",
+              "requestAddress": "Request Address",
+              "entityMissBehavior": "Entity Miss Behavior",
+              "udpClientPort": "UDP Client Port",
+              "tcpClientPort": "TCP Client Port",
+              "enableTls": "Enable TLS",
+              "tlsPort": "TLS Port",
+              "caCert": "CA Certificate",
+              "clientCert": "Client Certificate",
+              "privateKey": "Private Key",
+              "skipVerify": "Skip Verify",
+              "enableKeyLog": "Enable Key Log",
+              "keyLogPath": "Key Log Path"
+            },
+            "placeholders": {
+              "logicalAddress": "0",
+              "entityType": "Node",
+              "caCertPath": "Path to CA certificate file",
+              "clientCertPath": "Path to tester certificate file",
+              "privateKeyPath": "Path to tester private key file",
+              "keyLogPath": "logs/tls-keylog.txt"
+            },
+            "options": {
+              "addressType": {
+                "physical": "Physical",
+                "functional": "Functional"
+              },
+              "entityType": {
+                "node": "Node",
+                "gateway": "Gateway"
+              },
+              "virReqType": {
+                "unicast": "Unicast VIN Request",
+                "omit": "Omit VIN, tcp connect directly",
+                "broadcast": "Broadcast UDP4",
+                "multicast": "Multicast UDP6"
+              },
+              "entityNotFoundBehavior": {
+                "normal": "Send Normal Request",
+                "withVin": "Send VIN Request",
+                "withEid": "Send EID Request"
+              }
+            },
+            "tooltips": {
+              "enableTls": "Enable TLS for secure communication (port 3496)",
+              "skipVerify": "Skip certificate verification (for testing only)",
+              "enableKeyLog": "Enable key log for TLS communication"
+            },
+            "dialogs": {
+              "selectCaCert": "Select CA Certificate",
+              "selectClientCert": "Select Client Certificate",
+              "selectPrivateKey": "Select Private Key",
+              "certificateFiles": "Certificate Files",
+              "allFiles": "All Files",
+              "selectKeyLogFile": "Select Key Log File",
+              "logTextFiles": "Log/Text Files"
+            },
+            "actions": {
+              "browse": "Browse"
+            },
+            "validation": {
+              "nameExists": "The name already exists",
+              "inputNodeName": "Please input node name",
+              "addressExists": "The address already exists",
+              "addressRange": "0 ~ 0xFFFF",
+              "testerAddrSameAsTester": "Tester address can't be the same as Tester address",
+              "logicalAddressRequired": "Logical address is required",
+              "testerAddrSameAsEcu": "Tester address can't be the same as ECU address",
+              "testerAddrAllSame": "All tester logical addresses must be the same",
+              "invalidIpAddress": "Invalid IP address",
+              "requestAddressRequired": "Request address is required",
+              "inputAddrName": "Please input addr name",
+              "eidFormat": "xx-xx-xx-xx-xx-xx",
+              "gidFormat": "xx-xx-xx-xx-xx-xx",
+              "vinLength": "17 characters"
+            }
+          },
+          "linAddr": {
+            "sections": {
+              "tpBase": "TP Base",
+              "schedulingSettings": "Scheduling Settings"
+            },
+            "labels": {
+              "addressName": "Address name",
+              "addressType": "Address Type",
+              "nCr": "nCr",
+              "nAs": "nAs",
+              "nad": "NAD",
+              "stMin": "STmin"
+            },
+            "options": {
+              "addressType": {
+                "physical": "Physical",
+                "functional": "Functional"
+              },
+              "schType": {
+                "diagOnly": "Diagnostic only",
+                "diagInterleaved": "Interleaved"
+              }
+            },
+            "validation": {
+              "nameExists": "The name already exists",
+              "inputNodeName": "Please input node name",
+              "nadRange": "NAD must be 0~255",
+              "nadUnique": "NAD must be unique",
+              "inputAddrName": "Please input addr name",
+              "inputNad": "Please input NAD"
+            }
+          },
+          "param": {
+            "table": {
+              "name": "Name",
+              "type": "Type",
+              "lengthBit": "Length (bit)",
+              "value": "Value",
+              "description": "Description",
+              "operations": "Operations"
+            },
+            "placeholders": {
+              "filePath": "File Path"
+            },
+            "actions": {
+              "add": "Add",
+              "edit": "Edit",
+              "delete": "Delete",
+              "save": "Save",
+              "discard": "Discard"
+            },
+            "types": {
+              "num": "NUMBER",
+              "ascii": "ASCII",
+              "array": "ARRAY",
+              "float": "FLOAT",
+              "double": "DOUBLE",
+              "unicode": "UNICODE",
+              "file": "FILE"
+            },
+            "messages": {
+              "copied": "Copied"
+            },
+            "dialogs": {
+              "scriptFile": "Script File",
+              "allFiles": "All Files"
+            },
+            "validation": {
+              "nameDuplicate": "Name duplicate",
+              "bitLenMultipleOf8": "bitLen must be multiple of 8",
+              "bitLenMax32": "bitLen must be <=32",
+              "bitLen32": "bitLen must be 32",
+              "bitLen64": "bitLen must be 64",
+              "unknownType": "Unknown type {{type}}",
+              "idExistsInService": "The id already exists in service {{name}}, please change it"
+            }
+          },
+          "sequence": {
+            "tooltips": {
+              "addSequence": "Add a new sequence",
+              "testerPresent": "Tester Present Control",
+              "runSequence": "Run chosen sequence",
+              "stopSequence": "Stop chosen sequence",
+              "cycleRun": "Cycle Run"
+            },
+            "placeholders": {
+              "device": "Device"
+            },
+            "empty": {
+              "addFirst": "Add Sequence First"
+            },
+            "dialogs": {
+              "deleteSequenceMessage": "Are you sure to delete {{name}}?",
+              "warning": "Warning",
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "messages": {
+              "onlyDuringMeasurement": "Sequence can only be start during a running measurement"
+            }
+          },
+          "service": {
+            "labels": {
+              "name": "Name",
+              "autoSyncFuncId": "AutoSync Func / ID",
+              "suppressResponse": "Suppress Response",
+              "txPdu": "TX PDU",
+              "rxPdu": "RX PDU",
+              "description": "Description"
+            },
+            "tabs": {
+              "request": "Request",
+              "response": "Response",
+              "codeGenerate": "CodeGenerate"
+            },
+            "alerts": {
+              "jobRequiresParams": "Job requires these request parameters to serve as the function's input arguments."
+            },
+            "dialogs": {
+              "deleteServiceMessage": "Are you sure to delete this {{name}}",
+              "serviceUsedInSequence": "This service is used in sequence {{name}}[{{index}}], please remove it first",
+              "warning": "Warning",
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "messages": {
+              "serviceOnlyOnce": "This service may only be created once.",
+              "valueOutOfRange": "The value is out of range",
+              "unsupported": "Unsupported"
+            },
+            "validation": {
+              "nameExists": "Name already exists",
+              "inputName": "Please input addr name",
+              "chooseService": "Please choose service"
+            },
+            "odx": {
+              "title": "ODX File Import",
+              "labels": {
+                "ecu": "Ecu",
+                "variant": "Variant"
+              },
+              "buttons": {
+                "cancel": "Cancel",
+                "import": "Import"
+              },
+              "messages": {
+                "importSuccess": "Import success",
+                "ecuOrVariantNotFound": "Ecu or variant not found"
+              }
+            }
+          },
+          "subsequence": {
+            "null": "NULL",
+            "toolbar": {
+              "name": "NAME:"
+            },
+            "tooltips": {
+              "addService": "Add a new service",
+              "removeService": "Remove"
+            },
+            "columns": {
+              "enable": "EN",
+              "service": "Service",
+              "address": "Address",
+              "delay": "Delay",
+              "checkResp": "Check Resp",
+              "retry": "Retry",
+              "failedAction": "Failed Action",
+              "description": "Description",
+              "executeStatus": "Execute Status"
+            },
+            "switch": {
+              "yes": "Y",
+              "no": "N"
+            },
+            "failBehavior": {
+              "stop": "Stop",
+              "continue": "Continue"
+            },
+            "status": {
+              "notStart": "Not Start",
+              "error": "Error",
+              "running": "Running",
+              "success": "Success"
+            }
+          },
+          "testercan": {
+            "labels": {
+              "testerName": "Tester Name",
+              "simulateBy": "Simulate By",
+              "testerScriptFile": "Tester Script File",
+              "enableCodeGenerate": "Enable Code Generate",
+              "templateList": "Template List",
+              "p2Timeout": "P2 timeout",
+              "p2Max": "P2 max (0x78)",
+              "s3Time": "S3 Time",
+              "testerPresentEnable": "Tester Present Enable",
+              "testerPresentAddress": "Tester Present Address",
+              "fromSpecialService": "From Special Service",
+              "doipVersion": "DOIP Version",
+              "enableServerTls": "Enable Server TLS",
+              "serverTlsPort": "Server TLS Port",
+              "serverCaCert": "CA Certificate",
+              "serverCert": "Server Certificate",
+              "serverPrivateKey": "Private Key",
+              "requireClientCert": "Require Client Cert"
+            },
+            "sections": {
+              "udsCodeGenerate": "UDS Code Generate",
+              "udsTiming": "UDS Timing",
+              "doipSettings": "DOIP Settings",
+              "serverTls": "Server TLS (Entity Simulation)"
+            },
+            "placeholders": {
+              "name": "Name",
+              "templateFilePath": "Template file path",
+              "generatedFilePath": "Generated file path",
+              "doipV2": "DOIP V2",
+              "serverCaCertPath": "Path to CA certificate file (to verify tester)",
+              "serverCertPath": "Path to server certificate file",
+              "serverPrivateKeyPath": "Path to server private key file"
+            },
+            "buttons": {
+              "chooseScript": "Choose",
+              "build": "Build",
+              "refreshEdit": "Refresh / Edit",
+              "addTemplate": "Add Template",
+              "generate": "Generate",
+              "preview": "Preview",
+              "browse": "Browse",
+              "addAddress": "Add",
+              "loadFromDatabase": "Load From Database"
+            },
+            "buildStatus": {
+              "buildFailed": "Build Failed",
+              "buildSuccess": "Build Success",
+              "needRebuild": "Need Rebuild",
+              "needBuild": "Need Build"
+            },
+            "options": {
+              "doipVersion": {
+                "v2": "DOIP V2",
+                "v3": "DOIP V3"
+              }
+            },
+            "tooltips": {
+              "enableServerTls": "Enable TLS for entity simulation server",
+              "requireClientCert": "Require tester to provide certificate (mutual TLS)"
+            },
+            "validation": {
+              "nameExists": "The tester name already exists",
+              "inputTesterName": "Please input tester name",
+              "selectTargetDevice": "Please select target device",
+              "inputUdsTimeout": "Please input UDS Timeout",
+              "inputS3Time": "Please input S3 Time",
+              "addressRequired": "Address is required"
+            },
+            "dialogs": {
+              "scriptFile": "Script File",
+              "typescript": "typescript",
+              "allFiles": "All Files",
+              "error": "Error",
+              "warning": "Warning",
+              "ok": "OK"
+            },
+            "messages": {
+              "saveProjectFirst": "Please save the project first",
+              "selectScriptFirst": "Please select the script file first"
+            },
+            "tlsDialogs": {
+              "selectServerCa": "Select CA Certificate",
+              "selectServerCert": "Select Server Certificate",
+              "selectServerKey": "Select Server Private Key",
+              "certificateFiles": "Certificate Files",
+              "allFiles": "All Files"
+            },
+            "codeGenDialogs": {
+              "selectTemplateFile": "Select Template File",
+              "templateFiles": "Template Files",
+              "allFiles": "All Files",
+              "selectOutputFile": "Select Output File",
+              "codeFiles": "Code Files"
+            },
+            "codeGenMessages": {
+              "noValidTemplates": "No valid template configurations found",
+              "success": "Successfully generated {{count}} file(s)",
+              "failedTitle": "Code Generation Failed"
+            },
+            "preview": {
+              "title": "Preview Generated Code By: {{template}}",
+              "copied": "Copied to clipboard!",
+              "copyFailed": "Failed to copy to clipboard"
+            }
+          },
+          "config": {
+            "table": {
+              "key": "Key",
+              "value": "Value",
+              "operations": "Operations"
+            },
+            "placeholders": {
+              "key": "Configuration key",
+              "value": "Configuration value"
+            },
+            "actions": {
+              "add": "Add Config",
+              "edit": "Edit",
+              "delete": "Delete",
+              "save": "Save",
+              "discard": "Discard"
+            },
+            "messages": {
+              "copied": "Copied"
+            },
+            "validation": {
+              "keyRequired": "Key cannot be empty",
+              "keyExists": "Key already exists"
+            }
+          },
+          "dbchoose": {
+            "labels": {
+              "database": "Database",
+              "node": "Node"
+            },
+            "placeholders": {
+              "database": "Please select database",
+              "node": "Please select node"
+            },
+            "actions": {
+              "load": "Load"
+            }
+          }
+        },
         "udsView": {
           "defaultDeviceName": "Device",
           "dialogs": {

@@ -1,13 +1,21 @@
 <template>
   <div>
     <div class="tools">
-      <el-tooltip effect="light" content="Add a new sequence" placement="bottom">
+      <el-tooltip
+        effect="light"
+        :content="i18next.t('uds.tester.sequence.tooltips.addSequence')"
+        placement="bottom"
+      >
         <el-button type="primary" size="small" link plain :disabled="start" @click="addNewSeq">
           <Icon :icon="addCircle" class="icon" />
         </el-button>
       </el-tooltip>
       <el-divider direction="vertical" />
-      <el-tooltip effect="light" content="Tester Present Control" placement="bottom">
+      <el-tooltip
+        effect="light"
+        :content="i18next.t('uds.tester.sequence.tooltips.testerPresent')"
+        placement="bottom"
+      >
         <el-button
           :disabled="!tester.udsTime.testerPresentEnable"
           type="warning"
@@ -22,7 +30,11 @@
       </el-tooltip>
       <el-divider direction="vertical" />
       <el-button-group>
-        <el-tooltip effect="light" content="Run chosen sequence" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('uds.tester.sequence.tooltips.runSequence')"
+          placement="bottom"
+        >
           <el-button
             :disabled="!activeTabName || start || !tester.targetDeviceId"
             type="success"
@@ -35,7 +47,11 @@
           </el-button>
         </el-tooltip>
         <!-- stop -->
-        <el-tooltip effect="light" content="Stop chosen sequence" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('uds.tester.sequence.tooltips.stopSequence')"
+          placement="bottom"
+        >
           <el-button
             :disabled="!activeTabName || !start"
             type="danger"
@@ -49,7 +65,12 @@
         </el-tooltip>
       </el-button-group>
       <el-divider direction="vertical" />
-      <el-tooltip effect="light" content="Cycle Run" placement="bottom" :show-after="500">
+      <el-tooltip
+        effect="light"
+        :content="i18next.t('uds.tester.sequence.tooltips.cycleRun')"
+        placement="bottom"
+        :show-after="500"
+      >
         <Icon :icon="cycleIcon" style="color: var(--el-color-info)" />
       </el-tooltip>
       <el-input-number
@@ -64,7 +85,7 @@
       <Icon :icon="deviceIcon" style="color: var(--el-color-info)" />
       <el-select
         v-model="tester.targetDeviceId"
-        placeholder="Device"
+        :placeholder="i18next.t('uds.tester.sequence.placeholders.device')"
         clearable
         style="width: 300px; margin-left: 10px"
         size="small"
@@ -116,7 +137,7 @@
     <div v-else>
       <el-empty class="seqTabs">
         <el-button type="primary" link icon="Plus" @click="addNewSeq">
-          Add Sequence First
+          {{ i18next.t('uds.tester.sequence.empty.addFirst') }}
         </el-button>
       </el-empty>
     </div>
@@ -143,6 +164,7 @@ import presentIcon from '@iconify/icons-mdi/presentation-play'
 import { TesterInfo } from 'nodeCan/tester'
 import { useGlobalStart } from '@r/stores/runtime'
 import { error } from 'electron-log'
+import { i18next } from '@r/i18n'
 
 const seqCycle = ref(1)
 const dataBase = useDataStore()
@@ -196,11 +218,13 @@ const start = ref(false)
 function removeTab(index: string) {
   const num = parseInt(index.replace('index', ''))
   ElMessageBox.confirm(
-    `Are you sure to delete ${tester.value.seqList[num].name || `Seq${num}`}?`,
-    'Warning',
+    i18next.t('uds.tester.sequence.dialogs.deleteSequenceMessage', {
+      name: tester.value.seqList[num].name || `Seq${num}`
+    }),
+    i18next.t('uds.tester.sequence.dialogs.warning'),
     {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: i18next.t('uds.tester.sequence.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.tester.sequence.dialogs.cancel'),
       type: 'warning',
       buttonSize: 'small',
       appendTo: `#win${props.editIndex}_sequence`
@@ -232,12 +256,16 @@ function startSeq() {
       v?.clear()
     }
     if (globalStart.value == false) {
-      ElMessageBox.alert('Sequence can only be start during a running measurement', 'Warning', {
-        confirmButtonText: 'OK',
-        type: 'warning',
-        buttonSize: 'small',
-        appendTo: `#win${props.editIndex}_sequence`
-      })
+      ElMessageBox.alert(
+        i18next.t('uds.tester.sequence.messages.onlyDuringMeasurement'),
+        i18next.t('uds.tester.sequence.dialogs.warning'),
+        {
+          confirmButtonText: i18next.t('uds.tester.sequence.dialogs.ok'),
+          type: 'warning',
+          buttonSize: 'small',
+          appendTo: `#win${props.editIndex}_sequence`
+        }
+      )
       return
     }
     start.value = true
@@ -289,12 +317,16 @@ function presentChange({ values }: { values: any[] }) {
 
 async function switchTesterPresent() {
   if (globalStart.value == false) {
-    ElMessageBox.alert('Sequence can only be start during a running measurement', 'Warning', {
-      confirmButtonText: 'OK',
-      type: 'warning',
-      buttonSize: 'small',
-      appendTo: `#win${props.editIndex}_sequence`
-    })
+    ElMessageBox.alert(
+      i18next.t('uds.tester.sequence.messages.onlyDuringMeasurement'),
+      i18next.t('uds.tester.sequence.dialogs.warning'),
+      {
+        confirmButtonText: i18next.t('uds.tester.sequence.dialogs.ok'),
+        type: 'warning',
+        buttonSize: 'small',
+        appendTo: `#win${props.editIndex}_sequence`
+      }
+    )
     return
   }
   await window.electron.ipcRenderer.invoke(

@@ -151,7 +151,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, defineExpose } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { type FormRules, type FormInstance } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import type { ServiceConfig } from 'nodeCan/someip'

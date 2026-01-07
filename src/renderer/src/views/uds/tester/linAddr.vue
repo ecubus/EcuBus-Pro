@@ -9,26 +9,38 @@
     class="hardware"
     hide-required-asterisk
   >
-    <el-form-item label="Address name" required prop="name">
+    <el-form-item :label="i18next.t('uds.tester.linAddr.labels.addressName')" required prop="name">
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item label="Address Type" required prop="addrType">
+    <el-form-item
+      :label="i18next.t('uds.tester.linAddr.labels.addressType')"
+      required
+      prop="addrType"
+    >
       <el-select v-model="data.addrType">
-        <el-option value="physical" label="Physical"></el-option>
-        <el-option value="functional" label="Functional"></el-option>
+        <el-option
+          value="physical"
+          :label="i18next.t('uds.tester.linAddr.options.addressType.physical')"
+        ></el-option>
+        <el-option
+          value="functional"
+          :label="i18next.t('uds.tester.linAddr.options.addressType.functional')"
+        ></el-option>
       </el-select>
     </el-form-item>
-    <el-divider content-position="left"> TP Base </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.linAddr.sections.tpBase') }}
+    </el-divider>
 
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="nCr" prop="nCr">
+        <el-form-item :label="i18next.t('uds.tester.linAddr.labels.nCr')" prop="nCr">
           <el-input v-model.number="data.nCr" />
         </el-form-item>
       </el-col>
 
       <el-col :span="12">
-        <el-form-item label="nAs" prop="nAs">
+        <el-form-item :label="i18next.t('uds.tester.linAddr.labels.nAs')" prop="nAs">
           <el-input v-model.number="data.nAs" />
         </el-form-item>
       </el-col>
@@ -36,20 +48,26 @@
 
     <el-form-item label-width="0">
       <el-col :span="12">
-        <el-form-item label="NAD" prop="nad">
+        <el-form-item :label="i18next.t('uds.tester.linAddr.labels.nad')" prop="nad">
           <el-input-number v-model.number="data.nad" controls-position="right" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="STmin" prop="stMin">
+        <el-form-item :label="i18next.t('uds.tester.linAddr.labels.stMin')" prop="stMin">
           <el-input v-model.number="data.stMin" />
         </el-form-item>
       </el-col>
     </el-form-item>
-    <el-divider content-position="left"> Scheduling Settings </el-divider>
+    <el-divider content-position="left">
+      {{ i18next.t('uds.tester.linAddr.sections.schedulingSettings') }}
+    </el-divider>
     <el-radio-group v-model="data.schType" style="margin-left: 30px">
-      <el-radio value="DIAG_ONLY" size="small" border>Diagnostic only</el-radio>
-      <el-radio value="DIAG_INTERLEAVED" size="small" border>Interleaved</el-radio>
+      <el-radio value="DIAG_ONLY" size="small" border>
+        {{ i18next.t('uds.tester.linAddr.options.schType.diagOnly') }}
+      </el-radio>
+      <el-radio value="DIAG_INTERLEAVED" size="small" border>
+        {{ i18next.t('uds.tester.linAddr.options.schType.diagInterleaved') }}
+      </el-radio>
     </el-radio-group>
   </el-form>
 </template>
@@ -80,6 +98,7 @@ import { assign, cloneDeep } from 'lodash'
 import { UdsAddress } from 'nodeCan/uds'
 import { LinAddr } from 'nodeCan/lin'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()
@@ -92,24 +111,24 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (let i = 0; i < addrs.value.length; i++) {
       const hasName = addrs.value[i].linAddr?.name
       if (hasName == value && i != editIndex.value) {
-        callback(new Error('The name already exists'))
+        callback(new Error(i18next.t('uds.tester.linAddr.validation.nameExists')))
       }
     }
     callback()
   } else {
-    callback(new Error('Please input node name'))
+    callback(new Error(i18next.t('uds.tester.linAddr.validation.inputNodeName')))
   }
 }
 const nadCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     if (value < 0 || value > 255) {
-      callback(new Error('NAD must be 0~255'))
+      callback(new Error(i18next.t('uds.tester.linAddr.validation.nadRange')))
     }
   }
   //validate nad must be unique
   for (let i = 0; i < addrs.value.length; i++) {
     if (Number(value) == Number(addrs.value[i].linAddr?.nad) && i != editIndex.value) {
-      callback(new Error('NAD must be unique'))
+      callback(new Error(i18next.t('uds.tester.linAddr.validation.nadUnique')))
     }
   }
   callback()
@@ -118,7 +137,7 @@ const rules: FormRules<LinAddr> = {
   name: [
     {
       required: true,
-      message: 'Please input addr name',
+      message: i18next.t('uds.tester.linAddr.validation.inputAddrName'),
       trigger: 'blur',
       validator: nameCheck
     }
@@ -126,7 +145,7 @@ const rules: FormRules<LinAddr> = {
   nad: [
     {
       required: true,
-      message: 'Please input NAD',
+      message: i18next.t('uds.tester.linAddr.validation.inputNad'),
       trigger: 'blur',
       type: 'number',
       validator: nadCheck,

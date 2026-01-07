@@ -67,18 +67,26 @@
         hide-required-asterisk
         @submit.prevent
       >
-        <el-form-item label="Name" prop="name" required>
+        <el-form-item :label="i18next.t('uds.tester.service.labels.name')" prop="name" required>
           <el-input v-model="model.name" style="width: 100%" @change="reqParamChange" />
         </el-form-item>
         <template v-if="checkServiceId(model.serviceId, ['uds'])">
           <el-form-item label-width="0">
             <el-col :span="12">
-              <el-form-item label="AutoSync Func / ID" prop="serviceId" required>
+              <el-form-item
+                :label="i18next.t('uds.tester.service.labels.autoSyncFuncId')"
+                prop="serviceId"
+                required
+              >
                 <el-checkbox v-model="model.autoSubfunc" @change="reqParamChange" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="Suppress Response" prop="serviceId" required>
+              <el-form-item
+                :label="i18next.t('uds.tester.service.labels.suppressResponse')"
+                prop="serviceId"
+                required
+              >
                 <el-checkbox
                   v-model="model.suppress"
                   :disabled="!serviceDetail[model.serviceId].hasSubFunction"
@@ -88,7 +96,7 @@
             </el-col>
           </el-form-item>
 
-          <el-form-item label="TX PDU">
+          <el-form-item :label="i18next.t('uds.tester.service.labels.txPdu')">
             <div style="white-space: nowrap; overflow-x: auto">
               <span
                 v-for="(item, index) in reqArrayStr"
@@ -105,7 +113,10 @@
               >
             </div>
           </el-form-item>
-          <el-form-item v-if="!model.suppress" label="RX PDU">
+          <el-form-item
+            v-if="!model.suppress"
+            :label="i18next.t('uds.tester.service.labels.rxPdu')"
+          >
             <div style="white-space: nowrap; overflow-x: auto">
               <span
                 v-for="(item, index) in respArrayStr"
@@ -124,7 +135,7 @@
           </el-form-item>
         </template>
         <template v-else>
-          <el-form-item label="Description">
+          <el-form-item :label="i18next.t('uds.tester.service.labels.description')">
             <el-input
               v-model="model.desc"
               style="width: 100%"
@@ -135,7 +146,7 @@
           </el-form-item>
 
           <el-alert
-            title="Job requires these request parameters to serve as the function's input arguments."
+            :title="i18next.t('uds.tester.service.alerts.jobRequiresParams')"
             style="margin-bottom: 5px"
             effect="light"
             type="info"
@@ -156,7 +167,7 @@
         <el-form-item label-width="0px" style="margin-bottom: 0px" prop="params">
           <div style="width: 100%">
             <el-tabs v-model="activeName" type="border-card">
-              <el-tab-pane label="Request" name="request">
+              <el-tab-pane :label="i18next.t('uds.tester.service.tabs.request')" name="request">
                 <paramVue
                   :id="'req'"
                   ref="repParamRef"
@@ -175,7 +186,7 @@
                   checkServiceId(model.serviceId, ['uds']) &&
                   !(serviceDetail[model.serviceId].hasSubFunction && model.suppress)
                 "
-                label="Response"
+                :label="i18next.t('uds.tester.service.tabs.response')"
                 name="response"
               >
                 <paramVue
@@ -193,7 +204,7 @@
               </el-tab-pane>
               <el-tab-pane
                 v-if="dataBase.tester[editIndex].enableCodeGen"
-                label="CodeGenerate"
+                :label="i18next.t('uds.tester.service.tabs.codeGenerate')"
                 name="CodeGenerate"
               >
                 <configVue
@@ -224,7 +235,7 @@
     <el-dialog
       v-if="dialogVisible"
       v-model="dialogVisible"
-      title="ODX File Import"
+      :title="i18next.t('uds.tester.service.odx.title')"
       width="80%"
       :append-to="`#win${editIndex}_services`"
       align-center
@@ -237,12 +248,20 @@
         size="small"
         style="margin: 10px"
       >
-        <el-form-item label="Ecu" prop="ecuName" required>
+        <el-form-item
+          :label="i18next.t('uds.tester.service.odx.labels.ecu')"
+          prop="ecuName"
+          required
+        >
           <el-select v-model="odxForm.ecuName">
             <el-option v-for="ecu in ecuList" :key="ecu" :label="ecu" :value="ecu" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Variant" prop="variant" required>
+        <el-form-item
+          :label="i18next.t('uds.tester.service.odx.labels.variant')"
+          prop="variant"
+          required
+        >
           <el-select v-model="odxForm.variant">
             <el-option v-for="v in variants[odxForm.ecuName]" :key="v" :label="v" :value="v" />
           </el-select>
@@ -250,8 +269,12 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" plain @click="cancelImportOdx">Cancel</el-button>
-          <el-button type="primary" size="small" plain @click="realImportOdx"> Import </el-button>
+          <el-button size="small" plain @click="cancelImportOdx">
+            {{ i18next.t('uds.tester.service.odx.buttons.cancel') }}
+          </el-button>
+          <el-button type="primary" size="small" plain @click="realImportOdx">
+            {{ i18next.t('uds.tester.service.odx.buttons.import') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -282,6 +305,7 @@ import loadIcon from '@iconify/icons-material-symbols/upload'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const serviceDetail = window.serviceDetail
 const dialogVisible = ref(false)
@@ -349,21 +373,28 @@ function removeService(serviceId: ServiceId, id: string) {
   const targetService = serviceList.value[serviceId]
   if (targetService) {
     const name = targetService.find((item) => item.id == id)?.name
-    ElMessageBox.confirm(`Are you sure to delete this ${name}`, 'Warning', {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-      buttonSize: 'small',
-      appendTo: `#win${editIndex.value}_services`
-    }).then(() => {
+    ElMessageBox.confirm(
+      i18next.t('uds.tester.service.dialogs.deleteServiceMessage', { name }),
+      i18next.t('uds.tester.service.dialogs.warning'),
+      {
+        confirmButtonText: i18next.t('uds.tester.service.dialogs.ok'),
+        cancelButtonText: i18next.t('uds.tester.service.dialogs.cancel'),
+        type: 'warning',
+        buttonSize: 'small',
+        appendTo: `#win${editIndex.value}_services`
+      }
+    ).then(() => {
       for (const seq of sequence.value) {
         for (const [index, s] of seq.services.entries()) {
           if (s.serviceId == id) {
             ElMessageBox.alert(
-              `This service is used in sequence ${seq.name}[${index}], please remove it first`,
-              'Warning',
+              i18next.t('uds.tester.service.dialogs.serviceUsedInSequence', {
+                name: seq.name,
+                index
+              }),
+              i18next.t('uds.tester.service.dialogs.warning'),
               {
-                confirmButtonText: 'OK',
+                confirmButtonText: i18next.t('uds.tester.service.dialogs.ok'),
                 type: 'warning',
                 buttonSize: 'small',
                 appendTo: `#win${editIndex.value}_services`
@@ -395,9 +426,9 @@ function addNewService(name: string, id: ServiceId) {
   })
   if (deletedCnt == 0 && serviceList.value[id]?.length && checkServiceId(id, ['uds'])) {
     ElMessageBox({
-      message: 'This service may only be created once.',
+      message: i18next.t('uds.tester.service.messages.serviceOnlyOnce'),
       type: 'warning',
-      title: 'Warning',
+      title: i18next.t('uds.tester.service.dialogs.warning'),
       buttonSize: 'small',
       appendTo: `#win${editIndex.value}_services`
     })
@@ -469,9 +500,9 @@ function addNewService(name: string, id: ServiceId) {
           if (p.value.length * 8 > p.bitLen) {
             activeService.value = ''
             ElMessageBox({
-              message: 'The value is out of range',
+              message: i18next.t('uds.tester.service.messages.valueOutOfRange'),
               type: 'warning',
-              title: 'Warning',
+              title: i18next.t('uds.tester.service.dialogs.warning'),
               buttonSize: 'small',
               appendTo: `#win${editIndex.value}_services`
             })
@@ -573,9 +604,9 @@ function realImportOdx() {
             }
           }
           dialogVisible.value = false
-          ElMessage.success('Import success')
+          ElMessage.success(i18next.t('uds.tester.service.odx.messages.importSuccess'))
         } else {
-          ElMessage.error('Ecu or variant not found')
+          ElMessage.error(i18next.t('uds.tester.service.odx.messages.ecuOrVariantNotFound'))
         }
       }
     })
@@ -583,7 +614,7 @@ function realImportOdx() {
   dialogVisible.value = false
 }
 function importOdx() {
-  ElMessage.warning('Unsupported')
+  ElMessage.warning(i18next.t('uds.tester.service.messages.unsupported'))
   return
   // window.electron.ipcRenderer.invoke('ipcShowOpenDialog', {
   //   title: 'Select ODX file',
@@ -784,17 +815,27 @@ const globalNameCheck = (rule: any, value: any, callback: any) => {
   }
   const index = names.findIndex((item) => item.name == value)
   if (index > -1 && names[index].id != model.value.id) {
-    callback(new Error('Name already exists'))
+    callback(new Error(i18next.t('uds.tester.service.validation.nameExists')))
   }
   callback()
 }
 const rules: FormRules = {
   name: [
-    { required: true, message: 'Please input addr name', trigger: 'blur' },
+    {
+      required: true,
+      message: i18next.t('uds.tester.service.validation.inputName'),
+      trigger: 'blur'
+    },
     { validator: globalNameCheck, trigger: 'blur' }
   ],
   params: [{ validator: paramCheck, trigger: 'blur' }],
-  serviceId: [{ required: true, message: 'Please choose service', trigger: 'change' }]
+  serviceId: [
+    {
+      required: true,
+      message: i18next.t('uds.tester.service.validation.chooseService'),
+      trigger: 'change'
+    }
+  ]
 }
 
 function onSubmit() {

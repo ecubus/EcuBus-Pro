@@ -11,24 +11,35 @@
           overflowY: 'auto'
         }"
       >
-        <el-table-column property="file" label="File" width="200" />
-        <el-table-column property="line" label="Line" width="100" />
-        <el-table-column property="message" label="Error" />
+        <el-table-column
+          property="file"
+          :label="i18next.t('uds.tester.buildError.table.file')"
+          width="200"
+        />
+        <el-table-column
+          property="line"
+          :label="i18next.t('uds.tester.buildError.table.line')"
+          width="100"
+        />
+        <el-table-column
+          property="message"
+          :label="i18next.t('uds.tester.buildError.table.message')"
+        />
       </el-table>
     </div>
     <el-dialog
       v-else
       v-model="dialogFormVisible"
-      title="Errors"
+      :title="i18next.t('uds.tester.buildError.dialog.title')"
       width="80%"
       align-center
       size="small"
       :append-to="props.body"
     >
       <template #header>
-        <span style="color: var(--el-color-danger); font-size: 20px"
-          >Build Errors ({{ errorData.length }})</span
-        >
+        <span style="color: var(--el-color-danger); font-size: 20px">{{
+          i18next.t('uds.tester.buildError.dialog.header', { count: errorData.length })
+        }}</span>
       </template>
       <el-table
         :data="errorData"
@@ -40,17 +51,28 @@
           overflowY: 'auto'
         }"
       >
-        <el-table-column property="file" label="File" width="200" />
-        <el-table-column property="line" label="Line" width="100" />
-        <el-table-column property="message" label="Error" />
+        <el-table-column
+          property="file"
+          :label="i18next.t('uds.tester.buildError.table.file')"
+          width="200"
+        />
+        <el-table-column
+          property="line"
+          :label="i18next.t('uds.tester.buildError.table.line')"
+          width="100"
+        />
+        <el-table-column
+          property="message"
+          :label="i18next.t('uds.tester.buildError.table.message')"
+        />
       </el-table>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { over } from 'lodash'
 import { computed, toRef } from 'vue'
+import { i18next } from '@r/i18n'
 
 const dialogFormVisible = defineModel()
 

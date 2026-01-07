@@ -7,13 +7,19 @@
     row-key="key"
     :row-class-name="tableRowClassName"
   >
-    <el-table-column prop="key" label="Key" width="200" align="center" show-overflow-tooltip>
+    <el-table-column
+      prop="key"
+      :label="i18next.t('uds.tester.config.table.key')"
+      width="200"
+      align="center"
+      show-overflow-tooltip
+    >
       <template #default="{ $index, row }">
         <div v-if="editIndex == $index" class="editParam">
           <el-input
             v-model="editValue.key"
             style="padding-left: 15px; padding-right: 15px"
-            placeholder="Configuration key"
+            :placeholder="i18next.t('uds.tester.config.placeholders.key')"
           />
           <el-tooltip
             v-if="configError['key']"
@@ -30,13 +36,18 @@
         <span v-else @click="copyText(row.key)">{{ row.key }}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="value" label="Value" min-width="300" align="center">
+    <el-table-column
+      prop="value"
+      :label="i18next.t('uds.tester.config.table.value')"
+      min-width="300"
+      align="center"
+    >
       <template #default="{ row, $index }">
         <div v-if="editIndex == $index" class="editParam">
           <el-input
             v-model="editValue.value"
             style="padding-left: 15px; padding-right: 15px"
-            placeholder="Configuration value"
+            :placeholder="i18next.t('uds.tester.config.placeholders.value')"
           />
           <el-tooltip
             v-if="configError['value']"
@@ -56,7 +67,12 @@
       </template>
     </el-table-column>
 
-    <el-table-column fixed="right" label="Operations" width="180" align="center">
+    <el-table-column
+      fixed="right"
+      :label="i18next.t('uds.tester.config.table.operations')"
+      width="180"
+      align="center"
+    >
       <template #header>
         <div>
           <el-button
@@ -67,14 +83,14 @@
             :disabled="props.disabled"
             @click="addConfig"
           >
-            Add Config
+            {{ i18next.t('uds.tester.config.actions.add') }}
           </el-button>
         </div>
       </template>
       <template #default="{ row, $index }">
         <div v-if="editIndex != $index">
           <el-button size="small" type="warning" text icon="Edit" @click="editConfig(row, $index)">
-            Edit
+            {{ i18next.t('uds.tester.config.actions.edit') }}
           </el-button>
           <el-button
             size="small"
@@ -83,7 +99,7 @@
             icon="DeleteFilled"
             @click="deleteConfig($index)"
           >
-            Delete
+            {{ i18next.t('uds.tester.config.actions.delete') }}
           </el-button>
         </div>
         <div v-else>
@@ -94,7 +110,7 @@
             icon="FolderChecked"
             @click="saveConfig($index, false)"
           >
-            Save
+            {{ i18next.t('uds.tester.config.actions.save') }}
           </el-button>
           <el-button
             size="small"
@@ -103,7 +119,7 @@
             icon="Close"
             @click="() => ((editIndex = -1), (configError = {}))"
           >
-            Discard
+            {{ i18next.t('uds.tester.config.actions.discard') }}
           </el-button>
         </div>
       </template>
@@ -117,6 +133,7 @@ import { cloneDeep } from 'lodash'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled } from '@element-plus/icons-vue'
+import { i18next } from '@r/i18n'
 
 interface ConfigItem {
   key: string
@@ -141,7 +158,7 @@ const emits = defineEmits(['change'])
 function copyText(text: string) {
   copy(text)
   ElMessage({
-    message: 'Copied',
+    message: i18next.t('uds.tester.config.messages.copied'),
     type: 'success',
     plain: true,
     offset: 30,
@@ -174,7 +191,7 @@ function saveConfig(index: number, justValid: boolean) {
 
   // 检查key是否为空
   if (!d.key.trim()) {
-    configError.value['key'] = 'Key cannot be empty'
+    configError.value['key'] = i18next.t('uds.tester.config.validation.keyRequired')
     error = true
   }
 
@@ -182,7 +199,7 @@ function saveConfig(index: number, justValid: boolean) {
   const key = d.key.trim()
   for (const [index, item] of data.value.entries()) {
     if (item.key === key && index !== editIndex.value) {
-      configError.value['key'] = 'Key already exists'
+      configError.value['key'] = i18next.t('uds.tester.config.validation.keyExists')
       error = true
       break
     }

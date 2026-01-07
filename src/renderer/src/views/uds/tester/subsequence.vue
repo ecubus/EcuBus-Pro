@@ -39,7 +39,9 @@
           </div>
         </template>
         <template #default_name="{ row }">
-          <span>{{ services[row.serviceId]?.name || 'NULL' }}</span>
+          <span>{{
+            services[row.serviceId]?.name || i18next.t('uds.tester.subsequence.null')
+          }}</span>
         </template>
         <template #edit_addr="{ row }">
           <div>
@@ -90,8 +92,8 @@
             v-model="row.checkResp"
             size="small"
             inline-prompt
-            active-text="Y"
-            inactive-text="N"
+            :active-text="i18next.t('uds.tester.subsequence.switch.yes')"
+            :inactive-text="i18next.t('uds.tester.subsequence.switch.no')"
             :disabled="props.disabled"
           />
         </template>
@@ -111,8 +113,14 @@
         </template>
         <template #edit_failBehavior="{ row }">
           <el-select v-model="row.failBehavior" size="small" :disabled="props.disabled">
-            <el-option value="stop" label="Stop" />
-            <el-option value="continue" label="Continue" />
+            <el-option
+              value="stop"
+              :label="i18next.t('uds.tester.subsequence.failBehavior.stop')"
+            />
+            <el-option
+              value="continue"
+              :label="i18next.t('uds.tester.subsequence.failBehavior.continue')"
+            />
           </el-select>
         </template>
         <template #default_status="{ rowIndex }">
@@ -139,12 +147,17 @@
               margin-right: 10px;
             "
           >
-            <span style="color: var(--el-color-info); font-weight: bold">NAME:</span>
-
+            <span style="color: var(--el-color-info); font-weight: bold">
+              {{ i18next.t('uds.tester.subsequence.toolbar.name') }}
+            </span>
             <el-input v-model="data.name" size="small" style="width: 100px; margin: 4px" />
             <el-divider direction="vertical" />
             <el-button-group>
-              <el-tooltip effect="light" content="Add a new service" placement="bottom">
+              <el-tooltip
+                effect="light"
+                :content="i18next.t('uds.tester.subsequence.tooltips.addService')"
+                placement="bottom"
+              >
                 <el-button
                   type="primary"
                   link
@@ -155,7 +168,11 @@
                   <Icon :icon="circlePlusFilled" class="icon" />
                 </el-button>
               </el-tooltip>
-              <el-tooltip effect="light" content="Remove" placement="bottom">
+              <el-tooltip
+                effect="light"
+                :content="i18next.t('uds.tester.subsequence.tooltips.removeService')"
+                placement="bottom"
+              >
                 <el-button
                   type="danger"
                   link
@@ -186,6 +203,7 @@ import { VxeGrid } from 'vxe-table'
 import circlePlusFilled from '@iconify/icons-material-symbols/add-circle-outline'
 import removeIcon from '@iconify/icons-material-symbols/remove-rounded'
 import { useDataStore } from '@r/stores/data'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   id: string
@@ -203,7 +221,7 @@ watch(
     if (val) {
       excuseResults.value.forEach((item) => {
         item.status = 'notStart'
-        item.msg = 'Not Start'
+        item.msg = i18next.t('uds.tester.subsequence.status.notStart')
       })
     }
   }
@@ -269,7 +287,7 @@ const gridOptions = computed(() => {
       },
       {
         field: 'enable',
-        title: 'EN',
+        title: i18next.t('uds.tester.subsequence.columns.enable'),
         width: 40,
         resizable: false,
         editRender: {},
@@ -277,22 +295,28 @@ const gridOptions = computed(() => {
       },
       {
         field: 'service',
-        title: 'Service',
+        title: i18next.t('uds.tester.subsequence.columns.service'),
         minWidth: 200,
         editRender: {},
         slots: { edit: 'edit_name', default: 'default_name' }
       },
       {
         field: 'addr',
-        title: 'Address',
+        title: i18next.t('uds.tester.subsequence.columns.address'),
         width: 200,
         editRender: {},
         slots: { edit: 'edit_addr', default: 'default_addr' }
       },
-      { field: 'delay', title: 'Delay', width: 200, editRender: {}, slots: { edit: 'edit_delay' } },
+      {
+        field: 'delay',
+        title: i18next.t('uds.tester.subsequence.columns.delay'),
+        width: 200,
+        editRender: {},
+        slots: { edit: 'edit_delay' }
+      },
       {
         field: 'checkResp',
-        title: 'Check Resp',
+        title: i18next.t('uds.tester.subsequence.columns.checkResp'),
         width: 100,
         resizable: false,
         editRender: {},
@@ -300,28 +324,28 @@ const gridOptions = computed(() => {
       },
       {
         field: 'retryNum',
-        title: 'Retry',
+        title: i18next.t('uds.tester.subsequence.columns.retry'),
         width: 200,
         editRender: {},
         slots: { edit: 'edit_retryNum' }
       },
       {
         field: 'failBehavior',
-        title: 'Failed Action',
+        title: i18next.t('uds.tester.subsequence.columns.failedAction'),
         width: 200,
         editRender: {},
         slots: { default: 'default_failBehavior', edit: 'edit_failBehavior' }
       },
       {
         field: 'desc',
-        title: 'Description',
+        title: i18next.t('uds.tester.subsequence.columns.description'),
         width: 100,
         editRender: {},
         slots: { edit: 'edit_desc' }
       },
       {
         field: 'status',
-        title: 'Execute Status',
+        title: i18next.t('uds.tester.subsequence.columns.executeStatus'),
         fixed: 'right',
         width: 160,
         resizable: false,
@@ -356,7 +380,7 @@ function addService() {
   actionRow.value = -1
   excuseResults.value.push({
     status: 'notStart',
-    msg: 'Not Start'
+    msg: i18next.t('uds.tester.subsequence.status.notStart')
   })
   xGrid.value?.clearCurrentRow()
 }
@@ -387,7 +411,7 @@ function error({ values }: { values: LogItem[] }) {
     for (let i = 0; i < excuseResults.value.length; i++) {
       if (excuseResults.value[i].status == 'progress' || excuseResults.value[i].status == 'start') {
         excuseResults.value[i].status = 'error'
-        excuseResults.value[i].msg = 'Error'
+        excuseResults.value[i].msg = i18next.t('uds.tester.subsequence.status.error')
         break
       }
     }
@@ -435,9 +459,13 @@ function logDisplay({ values }: { values: LogItem[] }) {
     if (excuseResults.value[val.message.data.index]) {
       excuseResults.value[val.message.data.index].status = val.message.data.action
       if (val.message.data.action == 'start') {
-        excuseResults.value[val.message.data.index].msg = 'Running'
+        excuseResults.value[val.message.data.index].msg = i18next.t(
+          'uds.tester.subsequence.status.running'
+        )
       } else if (val.message.data.action == 'finished') {
-        excuseResults.value[val.message.data.index].msg = 'Success'
+        excuseResults.value[val.message.data.index].msg = i18next.t(
+          'uds.tester.subsequence.status.success'
+        )
       }
       if (val.message.data.percent) {
         excuseResults.value[val.message.data.index].msg = val.message.data.percent.toFixed(2) + '%'
@@ -448,7 +476,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
 function clear() {
   for (let i = 0; i < excuseResults.value.length; i++) {
     excuseResults.value[i].status = 'notStart'
-    excuseResults.value[i].msg = 'Not Start'
+    excuseResults.value[i].msg = i18next.t('uds.tester.subsequence.status.notStart')
   }
 }
 
@@ -460,7 +488,7 @@ onMounted(() => {
   for (let i = 0; i < data.value.services.length; i++) {
     excuseResults.value.push({
       status: 'notStart',
-      msg: 'Not Start'
+      msg: i18next.t('uds.tester.subsequence.status.notStart')
     })
   }
   window.logBus.on('udsIndex', logDisplay)

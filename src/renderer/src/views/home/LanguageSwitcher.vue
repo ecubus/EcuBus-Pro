@@ -13,10 +13,10 @@
         :label="lang.nativeName"
         :value="lang.code"
       >
-        <span>{{ lang.nativeName }}</span>
+        <!-- <span>{{ lang.nativeName }}</span>
         <span style="color: var(--el-text-color-secondary); float: right">
           {{ lang.name }}
-        </span>
+        </span> -->
       </el-option>
     </el-select>
   </div>

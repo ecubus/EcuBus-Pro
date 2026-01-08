@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-tabs v-model="activeTab" class="variableTabs" type="card">
-      <el-tab-pane label="User Variables" name="user">
+      <el-tab-pane :label="i18next.t('uds.variable.tabs.userVariables')" name="user">
         <VxeGrid
           ref="userVariableGrid"
           v-bind="userGridOptions"
@@ -21,17 +21,29 @@
               "
             >
               <el-button-group>
-                <el-tooltip effect="light" content="Add Variable" placement="bottom">
+                <el-tooltip
+                  effect="light"
+                  :content="i18next.t('uds.variable.tooltips.addVariable')"
+                  placement="bottom"
+                >
                   <el-button link @click="openNewVariableDialog">
                     <Icon :icon="fileOpenOutline" style="font-size: 18px" />
                   </el-button>
                 </el-tooltip>
-                <el-tooltip effect="light" content="Edit Variable" placement="bottom">
+                <el-tooltip
+                  effect="light"
+                  :content="i18next.t('uds.variable.tooltips.editVariable')"
+                  placement="bottom"
+                >
                   <el-button link type="warning" :disabled="!popoverIndex" @click="editVariable">
                     <Icon :icon="editIcon" style="font-size: 18px" />
                   </el-button>
                 </el-tooltip>
-                <el-tooltip effect="light" content="Delete Variable" placement="bottom">
+                <el-tooltip
+                  effect="light"
+                  :content="i18next.t('uds.variable.tooltips.deleteVariable')"
+                  placement="bottom"
+                >
                   <el-button link type="danger" :disabled="!popoverIndex" @click="deleteVariable">
                     <Icon :icon="deleteIcon" style="font-size: 18px" />
                   </el-button>
@@ -43,7 +55,7 @@
             {{ row.name }}
           </template>
           <template #default_type="{ row }">
-            {{ row.value?.type.toUpperCase() || 'GROUP' }}
+            {{ row.value?.type.toUpperCase() || i18next.t('uds.variable.defaults.group') }}
           </template>
           <template #default_initValue="{ row }">
             {{ row.value?.initValue }}
@@ -60,7 +72,7 @@
           </template>
         </VxeGrid>
       </el-tab-pane>
-      <el-tab-pane label="System Variables" name="system">
+      <el-tab-pane :label="i18next.t('uds.variable.tabs.systemVariables')" name="system">
         <VxeGrid
           ref="systemVariableGrid"
           v-bind="userGridOptions"
@@ -72,7 +84,7 @@
             {{ row.name }}
           </template>
           <template #default_type="{ row }">
-            {{ row.value?.type.toUpperCase() || 'GROUP' }}
+            {{ row.value?.type.toUpperCase() || i18next.t('uds.variable.defaults.group') }}
           </template>
           <template #default_initValue="{ row }">
             {{ row.value?.initValue }}
@@ -89,7 +101,11 @@
     <el-dialog
       v-model="newVariableDialogVisible"
       :close-on-click-modal="false"
-      :title="isEditing ? 'Edit Variable' : 'New Variable'"
+      :title="
+        isEditing
+          ? i18next.t('uds.variable.dialogs.editVariable')
+          : i18next.t('uds.variable.dialogs.newVariable')
+      "
       width="80%"
       align-center
       :style="{ height: dialogHeight + 'px', overflowY: 'auto' }"
@@ -103,11 +119,15 @@
         size="small"
         :rules="formRules"
       >
-        <el-form-item v-if="newVariableForm.value" label="Namespace" prop="namespace">
+        <el-form-item
+          v-if="newVariableForm.value"
+          :label="i18next.t('uds.variable.labels.namespace')"
+          prop="namespace"
+        >
           <el-select
             v-model="newVariableForm.namespace"
             :data="namespaceTreeData"
-            placeholder="Select namespace"
+            :placeholder="i18next.t('uds.variable.placeholders.selectNamespace')"
             filterable
             allow-create
             clearable
@@ -120,32 +140,39 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Name" required prop="name">
+        <el-form-item :label="i18next.t('uds.variable.labels.name')" required prop="name">
           <el-input v-model="newVariableForm.name" />
         </el-form-item>
-        <el-form-item label="Description" prop="desc">
+        <el-form-item :label="i18next.t('uds.variable.labels.description')" prop="desc">
           <el-input v-model="newVariableForm.desc" type="textarea" />
         </el-form-item>
 
         <template v-if="newVariableForm.value">
-          <el-form-item label="Data Type" required prop="value.type">
+          <el-form-item
+            :label="i18next.t('uds.variable.labels.dataType')"
+            required
+            prop="value.type"
+          >
             <el-select v-model="newVariableForm.value.type">
-              <el-option label="Number" value="number" />
-              <el-option label="String" value="string" />
-              <el-option label="Array" value="array" />
+              <el-option :label="i18next.t('uds.variable.types.number')" value="number" />
+              <el-option :label="i18next.t('uds.variable.types.string')" value="string" />
+              <el-option :label="i18next.t('uds.variable.types.array')" value="array" />
             </el-select>
           </el-form-item>
-          <el-form-item label="Initial Value" prop="value.initValue">
+          <el-form-item
+            :label="i18next.t('uds.variable.labels.initialValue')"
+            prop="value.initValue"
+          >
             <el-input v-model="newVariableForm.value.initValue" />
           </el-form-item>
           <template v-if="newVariableForm.value.type === 'number'">
-            <el-form-item label="Minimum" prop="value.min">
+            <el-form-item :label="i18next.t('uds.variable.labels.minimum')" prop="value.min">
               <el-input-number v-model="newVariableForm.value.min" controls-position="right" />
             </el-form-item>
-            <el-form-item label="Maximum" prop="value.max">
+            <el-form-item :label="i18next.t('uds.variable.labels.maximum')" prop="value.max">
               <el-input-number v-model="newVariableForm.value.max" controls-position="right" />
             </el-form-item>
-            <el-form-item label="Unit" prop="value.unit">
+            <el-form-item :label="i18next.t('uds.variable.labels.unit')" prop="value.unit">
               <el-input v-model="newVariableForm.value.unit" controls-position="right" />
             </el-form-item>
           </template>
@@ -153,13 +180,19 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="newVariableDialogVisible = false">Cancel</el-button>
+          <el-button size="small" @click="newVariableDialogVisible = false">{{
+            i18next.t('uds.variable.buttons.cancel')
+          }}</el-button>
           <el-button
             :type="isEditing ? 'warning' : 'primary'"
             size="small"
             @click="createOrUpdateVariable"
           >
-            {{ isEditing ? 'Save' : 'Create' }}
+            {{
+              isEditing
+                ? i18next.t('uds.variable.buttons.save')
+                : i18next.t('uds.variable.buttons.create')
+            }}
           </el-button>
         </div>
       </template>
@@ -182,6 +215,7 @@ import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()
@@ -267,7 +301,7 @@ const userGridOptions = computed<VxeGridProps>(() => ({
 
     {
       field: 'name',
-      title: 'Variable',
+      title: i18next.t('uds.variable.columns.variable'),
       treeNode: true,
       minWidth: 150,
       editRender: {},
@@ -275,35 +309,35 @@ const userGridOptions = computed<VxeGridProps>(() => ({
     },
     {
       field: 'type',
-      title: 'Data Type',
+      title: i18next.t('uds.variable.columns.dataType'),
       width: 150,
       editRender: {},
       slots: { default: 'default_type' }
     },
     {
       field: 'initValue',
-      title: 'Init Value',
+      title: i18next.t('uds.variable.columns.initValue'),
       width: 150,
       editRender: {},
       slots: { default: 'default_initValue' }
     },
     {
       field: 'min',
-      title: 'Min',
+      title: i18next.t('uds.variable.columns.min'),
       width: 150,
       editRender: {},
       slots: { default: 'default_min' }
     },
     {
       field: 'max',
-      title: 'Max',
+      title: i18next.t('uds.variable.columns.max'),
       width: 150,
       editRender: {},
       slots: { default: 'default_max' }
     },
     {
       field: 'desc',
-      title: 'Description',
+      title: i18next.t('uds.variable.columns.description'),
       width: 200
     }
   ]
@@ -332,13 +366,17 @@ function deleteVariable() {
 
   if (variable) {
     if (variable.value) {
-      ElMessageBox.confirm('Are you sure to delete this variable?', 'Delete Variable', {
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-        type: 'warning',
-        appendTo: `#winvariable`,
-        buttonSize: 'small'
-      })
+      ElMessageBox.confirm(
+        i18next.t('uds.variable.dialogs.deleteConfirm'),
+        i18next.t('uds.variable.dialogs.deleteVariable'),
+        {
+          confirmButtonText: i18next.t('uds.variable.dialogs.yes'),
+          cancelButtonText: i18next.t('uds.variable.dialogs.no'),
+          type: 'warning',
+          appendTo: `#winvariable`,
+          buttonSize: 'small'
+        }
+      )
         .then(() => {
           delete dataStore.vars[popoverIndex.value]
           popoverIndex.value = ''
@@ -352,13 +390,17 @@ function deleteVariable() {
         (item) => item.parentId === popoverIndex.value
       )
       if (childVariables.length === 0) {
-        ElMessageBox.confirm('Are you sure to delete this variable?', 'Delete Variable', {
-          confirmButtonText: 'Yes',
-          cancelButtonText: 'No',
-          type: 'warning',
-          appendTo: `#winvariable`,
-          buttonSize: 'small'
-        })
+        ElMessageBox.confirm(
+          i18next.t('uds.variable.dialogs.deleteConfirm'),
+          i18next.t('uds.variable.dialogs.deleteVariable'),
+          {
+            confirmButtonText: i18next.t('uds.variable.dialogs.yes'),
+            cancelButtonText: i18next.t('uds.variable.dialogs.no'),
+            type: 'warning',
+            appendTo: `#winvariable`,
+            buttonSize: 'small'
+          }
+        )
           .then(() => {
             delete dataStore.vars[popoverIndex.value]
             popoverIndex.value = ''
@@ -367,13 +409,17 @@ function deleteVariable() {
             // Do nothing
           })
       } else {
-        ElMessageBox.confirm('Please delete all child variables first', 'Delete Variable', {
-          confirmButtonText: 'OK',
-          showCancelButton: false,
-          type: 'warning',
-          appendTo: `#winvariable`,
-          buttonSize: 'small'
-        })
+        ElMessageBox.confirm(
+          i18next.t('uds.variable.dialogs.deleteChildVariablesFirst'),
+          i18next.t('uds.variable.dialogs.deleteVariable'),
+          {
+            confirmButtonText: i18next.t('uds.variable.dialogs.ok'),
+            showCancelButton: false,
+            type: 'warning',
+            appendTo: `#winvariable`,
+            buttonSize: 'small'
+          }
+        )
       }
     }
   }
@@ -382,11 +428,11 @@ function deleteVariable() {
 // Form validation rules
 const formRules = {
   name: [
-    { required: true, message: 'Please input variable name', trigger: 'blur' },
+    { required: true, message: i18next.t('uds.variable.validation.inputName'), trigger: 'blur' },
     {
       validator: (rule: any, value: string, callback: any) => {
         if (value && !value.match(/^[a-zA-Z0-9_]+$/)) {
-          callback(new Error('Variable name only contain letters, numbers, and underscores'))
+          callback(new Error(i18next.t('uds.variable.validation.nameFormat')))
         } else {
           callback()
         }
@@ -408,7 +454,7 @@ const formRules = {
         })
 
         if (hasDuplicate) {
-          callback(new Error('Variable name already exists in this namespace'))
+          callback(new Error(i18next.t('uds.variable.validation.nameExists')))
         } else {
           callback()
         }
@@ -416,8 +462,20 @@ const formRules = {
       trigger: 'blur'
     }
   ],
-  'value.type': [{ required: true, message: 'Please select data type', trigger: 'change' }],
-  'value.initValue': [{ required: true, message: 'Please input initial value', trigger: 'blur' }],
+  'value.type': [
+    {
+      required: true,
+      message: i18next.t('uds.variable.validation.selectDataType'),
+      trigger: 'change'
+    }
+  ],
+  'value.initValue': [
+    {
+      required: true,
+      message: i18next.t('uds.variable.validation.inputInitialValue'),
+      trigger: 'blur'
+    }
+  ],
   'value.min': [
     {
       validator: (rule: any, value: number, callback: any) => {
@@ -426,7 +484,7 @@ const formRules = {
           newVariableForm.value?.value?.max !== undefined &&
           value >= newVariableForm.value.value.max
         ) {
-          callback(new Error('Minimum value must be less than maximum value'))
+          callback(new Error(i18next.t('uds.variable.validation.minLessThanMax')))
         } else {
           callback()
         }
@@ -442,7 +500,7 @@ const formRules = {
           newVariableForm.value?.value?.min !== undefined &&
           value <= newVariableForm.value.value.min
         ) {
-          callback(new Error('Maximum value must be greater than minimum value'))
+          callback(new Error(i18next.t('uds.variable.validation.maxGreaterThanMin')))
         } else {
           callback()
         }

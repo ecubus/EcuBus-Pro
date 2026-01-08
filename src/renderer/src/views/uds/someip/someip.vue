@@ -9,32 +9,57 @@
       hide-required-asterisk
       :disabled="globalStart"
     >
-      <el-form-item label="SomeIP Name" prop="name">
-        <el-input v-model="data.name" placeholder="SomeIP_0" />
+      <el-form-item :label="i18next.t('uds.someip.someip.labels.name')" prop="name">
+        <el-input
+          v-model="data.name"
+          :placeholder="i18next.t('uds.someip.someip.placeholders.name')"
+        />
       </el-form-item>
 
-      <el-form-item label="Device" prop="device">
-        <el-select v-model="data.device" clearable placeholder="Select Device">
+      <el-form-item :label="i18next.t('uds.someip.someip.labels.device')" prop="device">
+        <el-select
+          v-model="data.device"
+          clearable
+          :placeholder="i18next.t('uds.someip.someip.placeholders.selectDevice')"
+        >
           <el-option v-for="item in deviceList" :key="item.id" :label="item.name" :value="item.id">
           </el-option>
         </el-select>
       </el-form-item>
 
-      <el-divider content-position="left">Application Configuration</el-divider>
+      <el-divider content-position="left">{{
+        i18next.t('uds.someip.someip.sections.applicationConfig')
+      }}</el-divider>
 
-      <el-form-item label="Application ID" prop="application.id">
-        <el-input v-model="data.application.id" placeholder="0x6301" :max="6" />
+      <el-form-item
+        :label="i18next.t('uds.someip.someip.labels.applicationId')"
+        prop="application.id"
+      >
+        <el-input
+          v-model="data.application.id"
+          :placeholder="i18next.t('uds.someip.someip.placeholders.applicationId')"
+          :max="6"
+        />
       </el-form-item>
       <el-collapse>
-        <el-collapse-item title="Advanced Application Configuration" name="1">
+        <el-collapse-item
+          :title="i18next.t('uds.someip.someip.sections.advancedApplicationConfig')"
+          name="1"
+        >
           <el-form-item label-width="0">
             <el-col :span="12">
-              <el-form-item label="Max Dispatchers" prop="application.max_dispatchers">
+              <el-form-item
+                :label="i18next.t('uds.someip.someip.labels.maxDispatchers')"
+                prop="application.max_dispatchers"
+              >
                 <el-input v-model.number="data.application.max_dispatchers" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="Max Dispatch Time" prop="application.max_dispatch_time">
+              <el-form-item
+                :label="i18next.t('uds.someip.someip.labels.maxDispatchTime')"
+                prop="application.max_dispatch_time"
+              >
                 <el-input v-model.number="data.application.max_dispatch_time" />
               </el-form-item>
             </el-col>
@@ -42,33 +67,46 @@
 
           <el-form-item label-width="0">
             <el-col :span="12">
-              <el-form-item label="Threads" prop="application.threads">
+              <el-form-item
+                :label="i18next.t('uds.someip.someip.labels.threads')"
+                prop="application.threads"
+              >
                 <el-input v-model.number="data.application.threads" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="IO Thread Nice" prop="application.io_thread_nice">
+              <el-form-item
+                :label="i18next.t('uds.someip.someip.labels.ioThreadNice')"
+                prop="application.io_thread_nice"
+              >
                 <el-input v-model.number="data.application.io_thread_nice" />
               </el-form-item>
             </el-col>
           </el-form-item>
 
-          <el-form-item label="Session Handling" prop="application.has_session_handling">
+          <el-form-item
+            :label="i18next.t('uds.someip.someip.labels.sessionHandling')"
+            prop="application.has_session_handling"
+          >
             <el-checkbox v-model="data.application.has_session_handling" />
           </el-form-item>
         </el-collapse-item>
       </el-collapse>
 
-      <el-divider content-position="left">Service Discovery Configuration</el-divider>
+      <el-divider content-position="left">{{
+        i18next.t('uds.someip.someip.sections.serviceDiscoveryConfig')
+      }}</el-divider>
 
       <el-form-item prop="serviceDiscovery.enable">
         <template #label>
           <el-tooltip
-            content="Specifies whether the Service Discovery is enabled"
+            :content="i18next.t('uds.someip.someip.tooltips.enableServiceDiscovery')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Enable Service Discovery </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.someip.labels.enableServiceDiscovery') }}
+            </span>
           </el-tooltip>
         </template>
         <el-checkbox v-model="data.serviceDiscovery.enable" />
@@ -79,17 +117,31 @@
         <el-form-item prop="serviceDiscovery.initial_state">
           <template #label>
             <el-tooltip
-              content="Specifies the initial Service Discovery state after startup"
+              :content="i18next.t('uds.someip.someip.tooltips.initialState')"
               placement="top"
               :show-after="1000"
             >
-              <span class="label-with-tooltip">Initial State </span>
+              <span class="label-with-tooltip"
+                >{{ i18next.t('uds.someip.someip.labels.initialState') }}
+              </span>
             </el-tooltip>
           </template>
-          <el-select v-model="data.serviceDiscovery.initial_state" placeholder="unknown">
-            <el-option label="Unknown" value="unknown" />
-            <el-option label="Suspended" value="suspended" />
-            <el-option label="Resumed" value="resumed" />
+          <el-select
+            v-model="data.serviceDiscovery.initial_state"
+            :placeholder="i18next.t('uds.someip.someip.placeholders.initialState')"
+          >
+            <el-option
+              :label="i18next.t('uds.someip.someip.options.initialState.unknown')"
+              value="unknown"
+            />
+            <el-option
+              :label="i18next.t('uds.someip.someip.options.initialState.suspended')"
+              value="suspended"
+            />
+            <el-option
+              :label="i18next.t('uds.someip.someip.options.initialState.resumed')"
+              value="resumed"
+            />
           </el-select>
         </el-form-item>
 
@@ -98,28 +150,38 @@
             <el-form-item prop="serviceDiscovery.multicast">
               <template #label>
                 <el-tooltip
-                  content="The multicast address which the messages of the Service Discovery will be sent to (default: 224.224.224.0)"
+                  :content="i18next.t('uds.someip.someip.tooltips.multicastAddress')"
                   placement="top"
                   :show-after="1000"
                 >
-                  <span class="label-with-tooltip">Multicast Address </span>
+                  <span class="label-with-tooltip"
+                    >{{ i18next.t('uds.someip.someip.labels.multicastAddress') }}
+                  </span>
                 </el-tooltip>
               </template>
-              <el-input v-model="data.serviceDiscovery.multicast" placeholder="224.224.224.0" />
+              <el-input
+                v-model="data.serviceDiscovery.multicast"
+                :placeholder="i18next.t('uds.someip.someip.placeholders.multicastAddress')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item prop="serviceDiscovery.port">
               <template #label>
                 <el-tooltip
-                  content="The port of the Service Discovery (default: 30490)"
+                  :content="i18next.t('uds.someip.someip.tooltips.port')"
                   placement="top"
                   :show-after="1000"
                 >
-                  <span class="label-with-tooltip">Port </span>
+                  <span class="label-with-tooltip"
+                    >{{ i18next.t('uds.someip.someip.labels.port') }}
+                  </span>
                 </el-tooltip>
               </template>
-              <el-input v-model.number="data.serviceDiscovery.port" placeholder="30490" />
+              <el-input
+                v-model.number="data.serviceDiscovery.port"
+                :placeholder="i18next.t('uds.someip.someip.placeholders.port')"
+              />
             </el-form-item>
           </el-col>
         </el-form-item>
@@ -127,40 +189,52 @@
         <el-form-item prop="serviceDiscovery.protocol">
           <template #label>
             <el-tooltip
-              content="The protocol that is used for sending the Service Discovery messages"
+              :content="i18next.t('uds.someip.someip.tooltips.protocol')"
               placement="top"
               :show-after="1000"
             >
-              <span class="label-with-tooltip">Protocol </span>
+              <span class="label-with-tooltip"
+                >{{ i18next.t('uds.someip.someip.labels.protocol') }}
+              </span>
             </el-tooltip>
           </template>
-          <el-select v-model="data.serviceDiscovery.protocol" placeholder="udp">
-            <el-option label="UDP" value="udp" />
-            <el-option label="TCP" value="tcp" />
+          <el-select
+            v-model="data.serviceDiscovery.protocol"
+            :placeholder="i18next.t('uds.someip.someip.placeholders.protocol')"
+          >
+            <el-option :label="i18next.t('uds.someip.someip.options.protocol.udp')" value="udp" />
+            <el-option :label="i18next.t('uds.someip.someip.options.protocol.tcp')" value="tcp" />
           </el-select>
         </el-form-item>
 
         <!-- Advanced Service Discovery Configuration (Collapsible) -->
         <el-collapse>
-          <el-collapse-item title="Advanced Service Discovery Configuration" name="1">
+          <el-collapse-item
+            :title="i18next.t('uds.someip.someip.sections.advancedServiceDiscoveryConfig')"
+            name="1"
+          >
             <!-- Timing Configuration -->
-            <el-divider content-position="left">Timing Configuration</el-divider>
+            <el-divider content-position="left">{{
+              i18next.t('uds.someip.someip.sections.timingConfig')
+            }}</el-divider>
 
             <el-form-item label-width="0">
               <el-col :span="12">
                 <el-form-item prop="serviceDiscovery.initial_delay_min">
                   <template #label>
                     <el-tooltip
-                      content="Minimum delay before first offer message (default: 0)"
+                      :content="i18next.t('uds.someip.someip.tooltips.initialDelayMin')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Initial Delay Min (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.initialDelayMin') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.initial_delay_min"
-                    placeholder="0"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.initialDelayMin')"
                   />
                 </el-form-item>
               </el-col>
@@ -168,16 +242,18 @@
                 <el-form-item prop="serviceDiscovery.initial_delay_max">
                   <template #label>
                     <el-tooltip
-                      content="Maximum delay before first offer message (default: 3000)"
+                      :content="i18next.t('uds.someip.someip.tooltips.initialDelayMax')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Initial Delay Max (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.initialDelayMax') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.initial_delay_max"
-                    placeholder="3000"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.initialDelayMax')"
                   />
                 </el-form-item>
               </el-col>
@@ -188,16 +264,18 @@
                 <el-form-item prop="serviceDiscovery.repetitions_base_delay">
                   <template #label>
                     <el-tooltip
-                      content="Base delay sending offer messages within the repetition phase (default: 10)"
+                      :content="i18next.t('uds.someip.someip.tooltips.repetitionsBaseDelay')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Repetitions Base Delay (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.repetitionsBaseDelay') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.repetitions_base_delay"
-                    placeholder="10"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.repetitionsBaseDelay')"
                   />
                 </el-form-item>
               </el-col>
@@ -205,16 +283,18 @@
                 <el-form-item prop="serviceDiscovery.repetitions_max">
                   <template #label>
                     <el-tooltip
-                      content="Maximum number of repetitions for provided services within the repetition phase (default: 3)"
+                      :content="i18next.t('uds.someip.someip.tooltips.repetitionsMax')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Repetitions Max </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.repetitionsMax') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.repetitions_max"
-                    placeholder="3"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.repetitionsMax')"
                   />
                 </el-form-item>
               </el-col>
@@ -225,16 +305,18 @@
                 <el-form-item prop="serviceDiscovery.cyclic_offer_delay">
                   <template #label>
                     <el-tooltip
-                      content="Cycle of the OfferService messages in the main phase (default: 1000)"
+                      :content="i18next.t('uds.someip.someip.tooltips.cyclicOfferDelay')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Cyclic Offer Delay (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.cyclicOfferDelay') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.cyclic_offer_delay"
-                    placeholder="1000"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.cyclicOfferDelay')"
                   />
                 </el-form-item>
               </el-col>
@@ -242,39 +324,45 @@
                 <el-form-item prop="serviceDiscovery.request_response_delay">
                   <template #label>
                     <el-tooltip
-                      content="Minimum delay of a unicast message to a multicast message for provided services and eventgroups (default: 2000)"
+                      :content="i18next.t('uds.someip.someip.tooltips.requestResponseDelay')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Request Response Delay (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.requestResponseDelay') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.request_response_delay"
-                    placeholder="2000"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.requestResponseDelay')"
                   />
                 </el-form-item>
               </el-col>
             </el-form-item>
 
             <!-- Debounce Configuration -->
-            <el-divider content-position="left">Debounce Configuration</el-divider>
+            <el-divider content-position="left">{{
+              i18next.t('uds.someip.someip.sections.debounceConfig')
+            }}</el-divider>
 
             <el-form-item label-width="0">
               <el-col :span="12">
                 <el-form-item prop="serviceDiscovery.offer_debounce_time">
                   <template #label>
                     <el-tooltip
-                      content="Time which the stack collects new service offers before they enter the repetition phase (default: 500)"
+                      :content="i18next.t('uds.someip.someip.tooltips.offerDebounceTime')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Offer Debounce Time (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.offerDebounceTime') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.offer_debounce_time"
-                    placeholder="500"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.offerDebounceTime')"
                   />
                 </el-form-item>
               </el-col>
@@ -282,16 +370,18 @@
                 <el-form-item prop="serviceDiscovery.find_debounce_time">
                   <template #label>
                     <el-tooltip
-                      content="Time which the stack collects non local service requests before sending find messages (default: 500)"
+                      :content="i18next.t('uds.someip.someip.tooltips.findDebounceTime')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Find Debounce Time (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.findDebounceTime') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.find_debounce_time"
-                    placeholder="500"
+                    :placeholder="i18next.t('uds.someip.someip.placeholders.findDebounceTime')"
                   />
                 </el-form-item>
               </el-col>
@@ -302,16 +392,20 @@
                 <el-form-item prop="serviceDiscovery.find_initial_debounce_reps">
                   <template #label>
                     <el-tooltip
-                      content="Number of initial debounces using find_initial_debounce_time (default: 0, valid values: 0-255)"
+                      :content="i18next.t('uds.someip.someip.tooltips.findInitialDebounceReps')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Find Initial Debounce Reps </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.findInitialDebounceReps') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.find_initial_debounce_reps"
-                    placeholder="0"
+                    :placeholder="
+                      i18next.t('uds.someip.someip.placeholders.findInitialDebounceReps')
+                    "
                   />
                 </el-form-item>
               </el-col>
@@ -319,64 +413,81 @@
                 <el-form-item prop="serviceDiscovery.find_initial_debounce_time">
                   <template #label>
                     <el-tooltip
-                      content="Time which the stack collects new service requests before they enter the repetition phase during initial startup (default: 200)"
+                      :content="i18next.t('uds.someip.someip.tooltips.findInitialDebounceTime')"
                       placement="top"
                       :show-after="1000"
                     >
-                      <span class="label-with-tooltip">Find Initial Debounce Time (ms) </span>
+                      <span class="label-with-tooltip"
+                        >{{ i18next.t('uds.someip.someip.labels.findInitialDebounceTime') }}
+                      </span>
                     </el-tooltip>
                   </template>
                   <el-input
                     v-model.number="data.serviceDiscovery.find_initial_debounce_time"
-                    placeholder="200"
+                    :placeholder="
+                      i18next.t('uds.someip.someip.placeholders.findInitialDebounceTime')
+                    "
                   />
                 </el-form-item>
               </el-col>
             </el-form-item>
 
             <!-- TTL Configuration -->
-            <el-divider content-position="left">TTL Configuration</el-divider>
+            <el-divider content-position="left">{{
+              i18next.t('uds.someip.someip.sections.ttlConfig')
+            }}</el-divider>
 
             <el-form-item prop="serviceDiscovery.ttl">
               <template #label>
                 <el-tooltip
-                  content="Lifetime of entries for provided services as well as consumed services and eventgroups (default: 0xFFFFFF)"
+                  :content="i18next.t('uds.someip.someip.tooltips.ttl')"
                   placement="top"
                   :show-after="1000"
                 >
-                  <span class="label-with-tooltip">TTL </span>
+                  <span class="label-with-tooltip"
+                    >{{ i18next.t('uds.someip.someip.labels.ttl') }}
+                  </span>
                 </el-tooltip>
               </template>
-              <el-input v-model="data.serviceDiscovery.ttl" placeholder="0xFFFFFF" />
+              <el-input
+                v-model="data.serviceDiscovery.ttl"
+                :placeholder="i18next.t('uds.someip.someip.placeholders.ttl')"
+              />
             </el-form-item>
 
             <!-- Other Configuration -->
-            <el-divider content-position="left">Other Configuration</el-divider>
+            <el-divider content-position="left">{{
+              i18next.t('uds.someip.someip.sections.otherConfig')
+            }}</el-divider>
 
             <el-form-item prop="serviceDiscovery.max_remote_subscribers">
               <template #label>
                 <el-tooltip
-                  content="Maximum possible number of different remote subscribers. Additional remote subscribers will not be acknowledged (default: 3)"
+                  :content="i18next.t('uds.someip.someip.tooltips.maxRemoteSubscribers')"
                   placement="top"
                   :show-after="1000"
                 >
-                  <span class="label-with-tooltip">Max Remote Subscribers </span>
+                  <span class="label-with-tooltip"
+                    >{{ i18next.t('uds.someip.someip.labels.maxRemoteSubscribers') }}
+                  </span>
                 </el-tooltip>
               </template>
               <el-input
                 v-model.number="data.serviceDiscovery.max_remote_subscribers"
-                placeholder="3"
+                :placeholder="i18next.t('uds.someip.someip.placeholders.maxRemoteSubscribers')"
               />
             </el-form-item>
 
             <el-form-item prop="serviceDiscovery.wait_route_netlink_notification">
               <template #label>
                 <el-tooltip
-                  content="Enables the tracking of the route state on_net_interface_or_route_state_changed (default: true)"
+                  :content="i18next.t('uds.someip.someip.tooltips.waitRouteNetlinkNotification')"
                   placement="top"
                   :show-after="1000"
                 >
-                  <span class="label-with-tooltip">Wait Route Netlink Notification </span>
+                  <span class="label-with-tooltip"
+                    >{{ i18next.t('uds.someip.someip.labels.waitRouteNetlinkNotification') }}
+                  </span>
                 </el-tooltip>
               </template>
               <el-checkbox v-model="data.serviceDiscovery.wait_route_netlink_notification" />
@@ -386,7 +497,9 @@
       </div>
 
       <el-divider content-position="left">
-        <el-button icon="Plus" link type="primary" @click="addService"> Add Service </el-button>
+        <el-button icon="Plus" link type="primary" @click="addService">
+          {{ i18next.t('uds.someip.someip.buttons.addService') }}
+        </el-button>
       </el-divider>
 
       <div v-if="data.services && data.services.length > 0">
@@ -423,9 +536,11 @@
       <el-form-item label-width="0">
         <div style="text-align: left; width: 100%">
           <el-button v-if="editIndex == ''" type="primary" plain @click="onSubmit">
-            Add Device
+            {{ i18next.t('uds.someip.someip.buttons.addDevice') }}
           </el-button>
-          <el-button v-else type="warning" plain @click="onSubmit"> Save Device </el-button>
+          <el-button v-else type="warning" plain @click="onSubmit">
+            {{ i18next.t('uds.someip.someip.buttons.saveDevice') }}
+          </el-button>
         </div>
       </el-form-item>
     </el-form>
@@ -455,6 +570,7 @@ import type { SomeipInfo, ServiceConfig, ApplicationConfig } from 'nodeCan/somei
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 // Import service configuration component
 import serviceConfig from './serviceConfig.vue'
@@ -498,7 +614,10 @@ const data = ref<SomeipInfo>({
 })
 
 function getServiceName(item: ServiceConfig, index: number) {
-  return `${item.instance.replace('0x', '')}.${item.service.replace('0x', '')}` || `Service${index}`
+  return (
+    `${item.instance.replace('0x', '')}.${item.service.replace('0x', '')}` ||
+    i18next.t('uds.someip.someip.serviceName', { index })
+  )
 }
 
 const serviceRef = ref<Record<number, any>>({})
@@ -530,7 +649,9 @@ function checkServiceDuplicates() {
 
   // Set errors for duplicate services
   duplicateIndices.forEach((index) => {
-    errors.value[index] = new Error('Service ID and Instance ID combination already exists')
+    errors.value[index] = new Error(
+      i18next.t('uds.someip.someip.validation.serviceInstanceDuplicate')
+    )
   })
 }
 
@@ -539,13 +660,13 @@ const nameCheck = (rule: any, value: any, callback: any) => {
     for (const key of Object.keys(dataBase.devices || {})) {
       if (dataBase.devices[key].type == 'someip' && dataBase.devices[key].someipDevice) {
         if (dataBase.devices[key].someipDevice.name == value && key != editIndex.value) {
-          callback(new Error('The SomeIP name already exists'))
+          callback(new Error(i18next.t('uds.someip.someip.validation.nameExists')))
         }
       }
     }
     callback()
   } else {
-    callback(new Error('Please input SomeIP name'))
+    callback(new Error(i18next.t('uds.someip.someip.validation.inputName')))
   }
 }
 
@@ -561,7 +682,7 @@ const idCheck = (rule: any, value: any, callback: any) => {
   if (value) {
     //must be hex string, max ffff
     if (!/^0x[0-9a-fA-F]{1,4}$/.test(value)) {
-      callback(new Error('Please input valid application ID, must be hex string,ex:0x6301'))
+      callback(new Error(i18next.t('uds.someip.someip.validation.invalidApplicationId')))
     }
 
     // Check for duplicate application ID across different SOME/IP configurations
@@ -570,21 +691,21 @@ const idCheck = (rule: any, value: any, callback: any) => {
         const hasApplicationId = dataBase.devices[key].someipDevice.application.id
 
         if (hasApplicationId == value && key != editIndex.value) {
-          callback(new Error('The application ID already exists'))
+          callback(new Error(i18next.t('uds.someip.someip.validation.applicationIdExists')))
         }
       }
     }
 
     callback()
   } else {
-    callback(new Error('Please input application ID'))
+    callback(new Error(i18next.t('uds.someip.someip.validation.inputApplicationId')))
   }
 }
 
 const portCheck = (rule: any, value: any, callback: any) => {
   if (value !== undefined && value !== null && value !== '') {
     if (isNaN(value) || value < 0 || value > 65535) {
-      callback(new Error('Port must be 0 - 65535'))
+      callback(new Error(i18next.t('uds.someip.someip.validation.portRange')))
     } else {
       callback()
     }
@@ -597,12 +718,12 @@ const ipAddressCheck = (rule: any, value: any, callback: any) => {
   if (value && value.trim() !== '') {
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/
     if (!ipRegex.test(value)) {
-      callback(new Error('Please enter a valid IP address'))
+      callback(new Error(i18next.t('uds.someip.someip.validation.invalidIpAddress')))
     } else {
       const parts = value.split('.')
       for (const part of parts) {
         if (parseInt(part) > 255) {
-          callback(new Error('IP address parts must 0 - 255'))
+          callback(new Error(i18next.t('uds.someip.someip.validation.ipAddressRange')))
         }
       }
       callback()
@@ -630,7 +751,7 @@ const rules = computed<FormRules>(() => {
     'application.name': [
       {
         required: true,
-        message: 'Please input application name',
+        message: i18next.t('uds.someip.someip.validation.inputApplicationName'),
         trigger: 'blur'
       }
     ],
@@ -751,7 +872,7 @@ let watcher: any
 const editIndex = ref(props.index)
 function generateUniqueName(): string {
   let index = 0
-  let name = `SomeIP_${index}`
+  let name = i18next.t('uds.someip.someip.defaultName', { index })
 
   // 检查是否存在同名配置
   while (
@@ -761,7 +882,7 @@ function generateUniqueName(): string {
     )
   ) {
     index++
-    name = `SomeIP_${index}`
+    name = i18next.t('uds.someip.someip.defaultName', { index })
   }
 
   return name

@@ -10,13 +10,29 @@
       "
     >
       <el-button-group>
-        <el-tooltip effect="light" content="Clear Trace" placement="bottom">
-          <el-button type="danger" link @click="clearLog('Clear Trace')">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('uds.trace.tooltips.clearTrace')"
+          placement="bottom"
+        >
+          <el-button
+            type="danger"
+            link
+            @click="clearLog(i18next.t('uds.trace.tooltips.clearTrace'))"
+          >
             <Icon :icon="circlePlusFilled" />
           </el-button>
         </el-tooltip>
 
-        <el-tooltip effect="light" :content="isPaused ? 'Resume' : 'Pause'" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="
+            isPaused
+              ? i18next.t('uds.trace.tooltips.resume')
+              : i18next.t('uds.trace.tooltips.pause')
+          "
+          placement="bottom"
+        >
           <el-button
             :type="isPaused ? 'success' : 'warning'"
             link
@@ -26,7 +42,11 @@
             <Icon :icon="isPaused ? playIcon : pauseIcon" />
           </el-button>
         </el-tooltip>
-        <el-tooltip effect="light" content="Swtich Overwrite/Scroll" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('uds.trace.tooltips.switchOverwriteScroll')"
+          placement="bottom"
+        >
           <el-button
             :type="isOverwrite ? 'success' : 'primary'"
             link
@@ -67,7 +87,7 @@
         style="width: 200px; margin: 4px; margin-left: 6px"
         multiple
         collapse-tags
-        placeholder="Filter by device"
+        :placeholder="i18next.t('uds.trace.placeholders.filterByDevice')"
         clearable
       >
         <el-option v-for="item of allInstanceList" :key="item" :label="item" :value="item" />
@@ -79,7 +99,7 @@
         multiple
         collapse-tags
         collapse-tags-tooltip
-        placeholder="Filter by ID"
+        :placeholder="i18next.t('uds.trace.placeholders.filterById')"
         clearable
         allow-create
         filterable
@@ -94,8 +114,12 @@
 
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="excel">Save as Excel</el-dropdown-item>
-            <el-dropdown-item command="asc">Save as ASC</el-dropdown-item>
+            <el-dropdown-item command="excel">{{
+              i18next.t('uds.trace.menu.saveAsExcel')
+            }}</el-dropdown-item>
+            <el-dropdown-item command="asc">{{
+              i18next.t('uds.trace.menu.saveAsAsc')
+            }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -106,7 +130,9 @@
 
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="changeName">Change Name</el-dropdown-item>
+            <el-dropdown-item command="changeName">{{
+              i18next.t('uds.trace.menu.changeName')
+            }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -167,6 +193,7 @@ import {
 import { TraceItem } from 'src/preload/data'
 import { cloneDeep } from 'lodash'
 import { Layout } from './layout'
+import { i18next } from '@r/i18n'
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -204,21 +231,25 @@ const database = useDataStore()
 
 function othersFeature(command: string) {
   if (command == 'changeName') {
-    ElMessageBox.prompt('Please enter the new name', 'Change Name', {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
-      buttonSize: 'small',
-      appendTo: `#win${props.editIndex}`,
-      inputValue: trace.value.name,
+    ElMessageBox.prompt(
+      i18next.t('uds.trace.dialogs.enterNewName'),
+      i18next.t('uds.trace.dialogs.changeName'),
+      {
+        confirmButtonText: i18next.t('uds.trace.dialogs.ok'),
+        cancelButtonText: i18next.t('uds.trace.dialogs.cancel'),
+        buttonSize: 'small',
+        appendTo: `#win${props.editIndex}`,
+        inputValue: trace.value.name,
 
-      inputValidator: (val: string) => {
-        if (val) {
-          return true
-        } else {
-          return "Name can't be empty"
+        inputValidator: (val: string) => {
+          if (val) {
+            return true
+          } else {
+            return i18next.t('uds.trace.validation.nameNotEmpty')
+          }
         }
       }
-    })
+    )
       .then(({ value }) => {
         trace.value.name = value
         layout?.changeWinName(props.editIndex, trace.value.name)
@@ -344,13 +375,13 @@ interface LogItem {
 const globalStart = useGlobalStart()
 watch(globalStart, (val) => {
   if (val) {
-    clearLog('Start Trace')
+    clearLog(i18next.t('uds.trace.messages.startTrace'))
     isPaused.value = false
     logData = []
   }
 })
 
-function clearLog(msg = 'Clear Trace') {
+function clearLog(msg = i18next.t('uds.trace.tooltips.clearTrace')) {
   allLogData = []
   idList.value.clear()
 
@@ -583,7 +614,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: val.message.data.recvData ? val.message.data.recvData.length : 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'UDS Req' + (val.message.data.msg || ''),
+        msgType: i18next.t('uds.trace.messageTypes.udsReq') + (val.message.data.msg || ''),
         children: (val.message.data as any).children
       })
     } else if (val.message.method == 'udsRecv') {
@@ -593,11 +624,11 @@ function logDisplay({ values }: { values: LogItem[] }) {
       }
       const data = val.message.data.recvData ? val.message.data.recvData : new Uint8Array(0)
       let method: string = val.message.method
-      let msgType = 'UDS Resp' + (val.message.data.msg || '')
+      let msgType = i18next.t('uds.trace.messageTypes.udsResp') + (val.message.data.msg || '')
 
       if (data[0] == 0x7f) {
         method = 'udsNegRecv'
-        msgType = 'UDS Negative Resp' + (val.message.data.msg || '')
+        msgType = i18next.t('uds.trace.messageTypes.udsNegativeResp') + (val.message.data.msg || '')
       }
       insertData({
         method: method,
@@ -624,7 +655,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'CAN Error'
+        msgType: i18next.t('uds.trace.messageTypes.canError')
       })
     } else if (val.message.method == 'linError') {
       if (val.message.data.data) {
@@ -643,7 +674,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error'
+          msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       } else {
         insertData({
@@ -655,7 +686,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           len: 0,
           device: val.label,
           channel: val.instance,
-          msgType: 'LIN Error'
+          msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       }
     } else if (val.message.method == 'linEvent') {
@@ -668,7 +699,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'LIN Event'
+        msgType: i18next.t('uds.trace.messageTypes.linEvent')
       })
     } else if (val.message.method == 'udsScript') {
       insertData({
@@ -680,7 +711,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'Script Message'
+        msgType: i18next.t('uds.trace.messageTypes.scriptMessage')
       })
     } else if (val.message.method == 'udsSystem') {
       insertData({
@@ -692,28 +723,28 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'System Message'
+        msgType: i18next.t('uds.trace.messageTypes.systemMessage')
       })
     } else if (val.message.method == 'someipBase') {
       const childrenList: { name: string; data: string }[] = [
         {
-          name: 'Version',
-          data: `Protocol Version:${val.message.data.protocolVersion}, Interface Version:${val.message.data.interfaceVersion}`
+          name: i18next.t('uds.trace.messageTypes.version'),
+          data: `${i18next.t('uds.trace.messageTypes.protocolVersion')}:${val.message.data.protocolVersion}, ${i18next.t('uds.trace.messageTypes.interfaceVersion')}:${val.message.data.interfaceVersion}`
         },
         {
-          name: 'Return Code',
+          name: i18next.t('uds.trace.messageTypes.returnCode'),
           data: '0x' + val.message.data.returnCode.toString(16).padStart(2, '0')
         }
       ]
       if (val.message.data.ip) {
         childrenList.push({
-          name: 'Address',
+          name: i18next.t('uds.trace.messageTypes.address'),
           data: `${val.message.data.ip}:${val.message.data.port}`
         })
       }
       if (val.message.data.protocol) {
         childrenList.push({
-          name: 'Protocol',
+          name: i18next.t('uds.trace.messageTypes.protocol'),
           data: val.message.data.protocol
         })
       }
@@ -735,13 +766,13 @@ function logDisplay({ values }: { values: LogItem[] }) {
     } else if (val.message.method == 'someipServiceValid') {
       insertData({
         method: val.message.method,
-        data: `Service:0x${val.message.data.info.service.toString(16).padStart(4, '0')} Instance:0x${val.message.data.info.instance.toString(16).padStart(4, '0')} Available:${val.message.data.info.available}`,
+        data: `${i18next.t('uds.trace.messageTypes.service')}:0x${val.message.data.info.service.toString(16).padStart(4, '0')} ${i18next.t('uds.trace.messageTypes.instance')}:0x${val.message.data.info.instance.toString(16).padStart(4, '0')} ${i18next.t('uds.trace.messageTypes.available')}:${val.message.data.info.available}`,
         ts: val.message.data.ts!,
         id: '',
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'SomeIP Service Valid'
+        msgType: i18next.t('uds.trace.messageTypes.someipServiceValid')
       })
     } else if (val.message.method == 'osEvent') {
       insertData({
@@ -754,7 +785,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
-        msgType: 'OS Event'
+        msgType: i18next.t('uds.trace.messageTypes.osEvent')
       })
     } else if (val.message.method == 'osError') {
       if (typeof val.message.error == 'string') {
@@ -767,7 +798,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           len: 0,
           device: val.label,
           channel: val.instance,
-          msgType: 'OS Error'
+          msgType: i18next.t('uds.trace.messageTypes.osError')
         })
       } else {
         insertData({
@@ -779,7 +810,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           len: 0,
           device: val.label,
           channel: val.instance,
-          msgType: 'OS Error'
+          msgType: i18next.t('uds.trace.messageTypes.osError')
         })
       }
     }
@@ -851,16 +882,16 @@ function saveAll(command: string) {
 
     // Define columns
     worksheet.columns = [
-      { header: 'Time', key: 'ts', width: 15 },
-      { header: 'Name', key: 'name', width: 20 },
-      { header: 'Data', key: 'data', width: 40 },
-      { header: 'Dir', key: 'dir', width: 10 },
-      { header: 'ID', key: 'id', width: 15 },
-      { header: 'DLC', key: 'dlc', width: 10 },
-      { header: 'Len', key: 'len', width: 10 },
-      { header: 'Type', key: 'msgType', width: 15 },
-      { header: 'Channel', key: 'channel', width: 15 },
-      { header: 'Device', key: 'device', width: 20 }
+      { header: i18next.t('uds.trace.columns.time'), key: 'ts', width: 15 },
+      { header: i18next.t('uds.trace.columns.name'), key: 'name', width: 20 },
+      { header: i18next.t('uds.trace.columns.data'), key: 'data', width: 40 },
+      { header: i18next.t('uds.trace.columns.dir'), key: 'dir', width: 10 },
+      { header: i18next.t('uds.trace.columns.id'), key: 'id', width: 15 },
+      { header: i18next.t('uds.trace.columns.dlc'), key: 'dlc', width: 10 },
+      { header: i18next.t('uds.trace.columns.len'), key: 'len', width: 10 },
+      { header: i18next.t('uds.trace.columns.type'), key: 'msgType', width: 15 },
+      { header: i18next.t('uds.trace.columns.channel'), key: 'channel', width: 15 },
+      { header: i18next.t('uds.trace.columns.device'), key: 'device', width: 20 }
     ]
 
     // Add data
@@ -1032,32 +1063,32 @@ const LogFilter = ref<
   }[]
 >([
   {
-    label: 'CAN',
+    label: i18next.t('uds.trace.filters.can'),
     v: 'canBase',
     value: ['canBase', 'canError']
   },
   {
-    label: 'LIN',
+    label: i18next.t('uds.trace.filters.lin'),
     v: 'linBase',
     value: ['linBase', 'linError', 'linWarning', 'linEvent']
   },
   {
-    label: 'UDS',
+    label: i18next.t('uds.trace.filters.uds'),
     v: 'uds',
     value: ['udsSent', 'udsRecv']
   },
   {
-    label: 'ETH',
+    label: i18next.t('uds.trace.filters.eth'),
     v: 'ipBase',
     value: ['ipBase', 'ipError']
   },
   {
-    label: 'SomeIP',
+    label: i18next.t('uds.trace.filters.someip'),
     v: 'someipBase',
     value: ['someipBase', 'someipError', 'someipServiceValid']
   },
   {
-    label: 'OS Trace',
+    label: i18next.t('uds.trace.filters.osTrace'),
     v: 'osTrace',
     value: ['osEvent', 'osError']
   }
@@ -1069,7 +1100,7 @@ let scrollY: number = -1
 const columes: Ref<Column[]> = ref([
   {
     key: 'ts',
-    title: 'Time',
+    title: i18next.t('uds.trace.columns.time'),
     width: 200,
     formatter: (row) => {
       if (row.row.ts) {
@@ -1082,15 +1113,15 @@ const columes: Ref<Column[]> = ref([
       }
     }
   },
-  { key: 'name', title: 'Name', width: 200 },
-  { key: 'data', title: 'Data', width: 300 },
-  { key: 'dir', title: 'Dir', width: 50 },
-  { key: 'id', title: 'ID', width: 100 },
-  { key: 'dlc', title: 'DLC', width: 100 },
-  { key: 'len', title: 'Len', width: 100 },
-  { key: 'msgType', title: 'Type', width: 100 },
-  { key: 'channel', title: 'Channel', width: 100 },
-  { key: 'device', title: 'Device', width: 200 }
+  { key: 'name', title: i18next.t('uds.trace.columns.name'), width: 200 },
+  { key: 'data', title: i18next.t('uds.trace.columns.data'), width: 300 },
+  { key: 'dir', title: i18next.t('uds.trace.columns.dir'), width: 50 },
+  { key: 'id', title: i18next.t('uds.trace.columns.id'), width: 100 },
+  { key: 'dlc', title: i18next.t('uds.trace.columns.dlc'), width: 100 },
+  { key: 'len', title: i18next.t('uds.trace.columns.len'), width: 100 },
+  { key: 'msgType', title: i18next.t('uds.trace.columns.type'), width: 100 },
+  { key: 'channel', title: i18next.t('uds.trace.columns.channel'), width: 100 },
+  { key: 'device', title: i18next.t('uds.trace.columns.device'), width: 200 }
 ])
 watch(
   columes,
@@ -1121,7 +1152,7 @@ const trace = ref<TraceItem>(
   cloneDeep(
     database.traces[props.editIndex] || {
       id: props.editIndex,
-      name: `Trace`,
+      name: i18next.t('uds.trace.defaultName'),
       filter: props.defaultCheckList,
       filterDevice: [],
       filterId: []
@@ -1192,7 +1223,7 @@ onMounted(() => {
       ENABLE_PASTER: false,
       ENABLE_KEYBOARD: false,
       ENABLE_RESIZE_ROW: false,
-      EMPTY_TEXT: 'No data',
+      EMPTY_TEXT: i18next.t('uds.trace.emptyText'),
       BODY_CELL_STYLE_METHOD: ({ row }) => {
         const method = row.method
         let color = getComputedStyle(document.documentElement)

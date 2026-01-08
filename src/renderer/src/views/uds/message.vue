@@ -2,7 +2,11 @@
   <div ref="logContainer" class="log-container">
     <div class="toolbar">
       <el-button-group>
-        <el-tooltip effect="light" content="Clear Message" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('uds.message.tooltips.clearMessage')"
+          placement="bottom"
+        >
           <el-button type="danger" link @click="clearLog">
             <Icon :icon="circlePlusFilled" />
           </el-button>
@@ -17,7 +21,7 @@
 
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>Save Message</el-dropdown-item>
+            <el-dropdown-item>{{ i18next.t('uds.message.actions.saveMessage') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -43,6 +47,7 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 interface LogData {
   time: string
   label: string
@@ -265,7 +270,7 @@ function testLog({
         time,
         item.message.data.data.name,
         'primary',
-        `----- Test ${item.message.data.data.name} starting -----`
+        i18next.t('uds.message.testLog.testStarting', { name: item.message.data.data.name })
       )
     } else if (item.message.data.type == 'test:pass') {
       const key =
@@ -281,7 +286,10 @@ function testLog({
         time,
         item.message.data.data.name,
         'success',
-        `----- Test ${item.message.data.data.name} passed, ${item.message.data.data.details.duration_ms}ms -----`
+        i18next.t('uds.message.testLog.testPassed', {
+          name: item.message.data.data.name,
+          duration: item.message.data.data.details.duration_ms
+        })
       )
     } else if (item.message.data.type == 'test:fail') {
       const key =
@@ -298,10 +306,19 @@ function testLog({
         time,
         item.message.data.data.name,
         'error',
-        `----- Test ${item.message.data.data.name} failed, ${item.message.data.data.details.duration_ms}ms, details: ${errorMessage} -----`
+        i18next.t('uds.message.testLog.testFailed', {
+          name: item.message.data.data.name,
+          duration: item.message.data.data.details.duration_ms,
+          error: errorMessage
+        })
       )
     } else if (item.message.data.type == 'test:diagnostic') {
-      writeToTerminal(time, 'Test Diagnostic', 'info', item.message.data.data.message)
+      writeToTerminal(
+        time,
+        i18next.t('uds.message.testLog.testDiagnostic'),
+        'info',
+        item.message.data.data.message
+      )
     }
   }
 }

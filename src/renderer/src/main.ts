@@ -100,7 +100,7 @@ app.use(formCreate)
 app.use(fcDesigner)
 app.use(wujieVue)
 
-// 初始化 i18n（同步）
+// 初始化 i18n
 const savedLang = window.electron?.ipcRenderer.sendSync('electron-store-get', 'language') || 'en'
 initRendererI18n(savedLang)
 app.use(i18nPlugin)

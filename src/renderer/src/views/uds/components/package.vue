@@ -229,6 +229,13 @@ const writeToTerminal = (data: string, type: 'success' | 'error' | 'info' = 'inf
 
 // 初始化终端
 const initTerminal = () => {
+  // Skip if terminal is already initialized
+  if (terminal) return
+
+  const terminalElement = document.getElementById('terminalElement')
+  // Skip if terminal element doesn't exist in DOM
+  if (!terminalElement) return
+
   terminal = new Terminal({
     theme: {
       background: '#ffffff',
@@ -261,7 +268,7 @@ const initTerminal = () => {
 
   fitAddon = new FitAddon()
   terminal.loadAddon(fitAddon)
-  terminal.open(document.getElementById('terminalElement') as HTMLElement)
+  terminal.open(terminalElement)
   terminal.clear()
   fitAddon.fit()
 }
@@ -368,13 +375,9 @@ const loadPackageJson = async () => {
       initTerminal()
     })
   } catch (error: any) {
-    writeToTerminal(
-      i18next.t('uds.components.package.messages.failedToLoad', {
-        error: error?.message || i18next.t('uds.components.package.messages.unknownError')
-      }),
-      'error'
-    )
-    initTerminal()
+    // packageJson remains null, so hasPackageJson is false and terminal element won't exist
+    // Don't call initTerminal here since the DOM element doesn't exist
+    console.error('Failed to load package.json:', error?.message)
   }
 }
 

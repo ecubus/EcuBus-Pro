@@ -8,6 +8,7 @@ import {
   createToken
 } from 'chevrotain'
 import { Signal } from './dbcVisitor'
+import { i18next } from '@r/i18n'
 
 // 首先定义所有的tokens
 const WhiteSpace = createToken({
@@ -619,11 +620,17 @@ export const productions: Record<string, Rule> = parser.getGAstProductions()
 export function multiCalc(signal: Signal) {
   if (signal.multiplexerIndicator) {
     if (signal.multiplexerIndicator == 'M') {
-      return 'Multiplexor'
+      return i18next.t('database.dbc.parse.multiplexor')
     } else if (signal.multiplexerIndicator.endsWith('M')) {
-      return `${signal.multiplexerRange?.name} = 0x${parseInt(signal.multiplexerIndicator.slice(1, -1), 10).toString(16)} Multiplexor`
+      return i18next.t('database.dbc.parse.multiplexorWithValue', {
+        name: signal.multiplexerRange?.name,
+        value: parseInt(signal.multiplexerIndicator.slice(1, -1), 10).toString(16)
+      })
     } else {
-      return `${signal.multiplexerRange?.name} = 0x${parseInt(signal.multiplexerIndicator.slice(1), 10).toString(16)}`
+      return i18next.t('database.dbc.parse.multiplexedValue', {
+        name: signal.multiplexerRange?.name,
+        value: parseInt(signal.multiplexerIndicator.slice(1), 10).toString(16)
+      })
     }
   } else {
     return ''

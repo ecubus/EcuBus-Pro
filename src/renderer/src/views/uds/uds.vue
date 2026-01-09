@@ -52,7 +52,7 @@
                 <Icon v-else :icon="item.icon" :style="{ fontSize: '22px' }" />
                 <el-dropdown @command="item.onCommand">
                   <span class="lr">
-                    {{ item.label }}
+                    {{ item.labelKey ? $t(item.labelKey) : item.label }}
                     <el-icon class="el-icon--right">
                       <arrow-down />
                     </el-icon>
@@ -470,10 +470,7 @@ const TraceDropdown = {
             'div',
             { style: 'display: flex; align-items: center; justify-content: space-between' },
             [
-              h(
-                'span',
-                dataBase.traces['trace']?.name || i18next.t('uds.dropdowns.trace.defaultName')
-              ),
+              h('span', dataBase.traces['trace']?.name || i18next.t('uds.trace.defaultName')),
               h(ElDivider, { direction: 'vertical' }),
               h(ElButton, { link: true }, () =>
                 h(
@@ -653,13 +650,13 @@ const DatabaseDropdown = {
     return () =>
       h(ElDropdownMenu, { size: 'small' }, () => [
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () =>
-          i18next.t('uds.dropdowns.database.addLin')
+          i18next.t('database.addLin')
         ),
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addCan' }, () =>
-          i18next.t('uds.dropdowns.database.addCan')
+          i18next.t('database.addCan')
         ),
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addOrti' }, () =>
-          i18next.t('uds.dropdowns.database.addOrti')
+          i18next.t('database.addOrti')
         ),
         ...dataBaseList.value.map((item, index) =>
           h(

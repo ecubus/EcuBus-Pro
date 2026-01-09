@@ -1,0 +1,2832 @@
+{
+  "general": {
+    "language": "语言",
+    "uiZoom": "界面缩放",
+    "theme": "主题",
+    "uiZoomTooltip": "调整应用程序的整体界面缩放比例",
+    "themeTooltip": "选择浅色或深色主题"
+  },
+  "header": {
+    "rearrangeWindows": "重新排列窗口",
+    "untitled": "未命名"
+  },
+  "home": {
+    "return": "返回",
+    "close": "关闭",
+    "home": "主页",
+    "documents": "文档",
+    "userManual": "用户手册",
+    "systemInformation": "系统信息",
+    "module": "模块",
+    "version": "版本",
+    "advertisingPartnership": "广告合作",
+    "advertiseHere": "📢 在此投放广告",
+    "advertiseDescription": "向专业汽车工程师展示您的产品和服务",
+    "contactUs": "联系我们 →",
+    "recent": "最近",
+    "pinned": "已固定",
+    "new": "新建",
+    "open": "打开",
+    "plugin": "插件",
+    "setting": "设置",
+    "general": "通用",
+    "others": "其他",
+    "license": "许可证",
+    "update": "更新",
+    "user": "用户",
+    "lincableTitle": "EcuBus LinCable",
+    "lincableDescription": "USB转LIN适配器 | 一致性测试 | 故障注入 | ISO 17987-6",
+    "learnMore": "了解更多 →",
+    "dateFormat": {
+      "monthDay": "M月D日",
+      "yearMonthDay": "YYYY年M月D日"
+    }
+  },
+  "homeNew": {
+    "createEmptyProject": "创建空项目",
+    "createExample": "创建示例项目",
+    "createExampleError": "创建示例失败",
+    "loadTemplatesError": "加载模板失败"
+  },
+  "database": {
+    "addLin": "添加LIN (LDF)",
+    "addCan": "添加CAN (DBC)",
+    "addOrti": "添加OS (ORTI)",
+    "noDatabase": "无数据库",
+    "openDatabaseTitle": "打开数据库文件",
+    "fileFilterName": "数据库文件",
+    "dbcParse": {
+      "errors": {
+        "lexerError": "词法错误：第{{line}}行，第{{column}}列",
+        "parserError": "解析错误：第{{line}}行，第{{column}}列",
+        "context": "上下文",
+        "unexpectedCharacter": "意外字符：\"{{char}}\"",
+        "expectedOneOf": "期望以下之一：{{tokens}}",
+        "lexingErrors": "词法分析错误",
+        "parsingErrors": "语法分析错误",
+        "unexpectedError": "解析过程中发生意外错误"
+      }
+    },
+    "dbc": {
+      "attrTable": {
+        "placeholders": {
+          "searchByName": "按名称搜索..."
+        },
+        "columns": {
+          "typeOfObject": "对象类型",
+          "name": "名称",
+          "valueType": "值类型",
+          "min": "最小值",
+          "max": "最大值",
+          "default": "默认值"
+        },
+        "attrTypes": {
+          "network": "网络",
+          "node": "节点",
+          "message": "报文",
+          "signal": "信号",
+          "envVar": "环境变量"
+        },
+        "valueTypes": {
+          "integer": "整数",
+          "float": "浮点数",
+          "string": "字符串",
+          "enum": "枚举",
+          "hex": "十六进制"
+        }
+      },
+      "dbcVisitor": {
+        "errors": {
+          "invalidMultiplexerIndicator": "多路复用器指示符格式必须为：[M|m<M-ID>]",
+          "parserError": "解析错误：第{{line}}行，第{{column}}列：{{message}}"
+        }
+      },
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "删除数据库",
+          "saveDatabase": "保存数据库",
+          "fixErrorsToSave": "修复错误后才能保存数据库"
+        },
+        "tabs": {
+          "overview": "概览",
+          "valueTables": "值表",
+          "attributes": "属性"
+        },
+        "errorGrid": {
+          "columns": {
+            "tab": "选项卡",
+            "field": "字段",
+            "errorMessage": "错误信息"
+          }
+        },
+        "errors": {
+          "invalid": "无效",
+          "parseFailed": "解析失败",
+          "error": "错误",
+          "duplicateDatabaseName": "数据库名称\"{{name}}\"已存在"
+        },
+        "deleteConfirm": {
+          "message": "确定要删除此数据库吗？",
+          "title": "警告",
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "messages": {
+          "saveSuccess": "数据库已成功保存"
+        }
+      },
+      "overview": {
+        "labels": {
+          "dbName": "数据库名称"
+        },
+        "placeholders": {
+          "filterTreeNodes": "筛选树节点...",
+          "searchByName": "按名称搜索..."
+        },
+        "treeCategories": {
+          "node": "节点",
+          "message": "报文",
+          "signal": "信号"
+        },
+        "columns": {
+          "name": "名称",
+          "message": "报文",
+          "multiplexer": "多路复用器",
+          "startBit": "起始位",
+          "length": "长度",
+          "byteOrder": "字节序",
+          "type": "类型",
+          "factor": "系数",
+          "offset": "偏移",
+          "min": "最小值",
+          "max": "最大值",
+          "unit": "单位",
+          "valueTable": "值表",
+          "comment": "注释",
+          "id": "ID",
+          "sender": "发送者",
+          "receivers": "接收者",
+          "role": "角色",
+          "signals": "信号"
+        },
+        "values": {
+          "intel": "Intel",
+          "motorola": "Motorola",
+          "float": "浮点数",
+          "double": "双精度",
+          "signed": "有符号",
+          "unsigned": "无符号",
+          "sender": "发送者",
+          "receiver": "接收者"
+        }
+      },
+      "parse": {
+        "multiplexor": "多路复用器",
+        "multiplexorWithValue": "{{name}} = 0x{{value}} 多路复用器",
+        "multiplexedValue": "{{name}} = 0x{{value}}"
+      },
+      "valTable": {
+        "placeholders": {
+          "searchByName": "按名称搜索..."
+        },
+        "columns": {
+          "name": "名称",
+          "comment": "注释",
+          "usage": "用途"
+        }
+      }
+    },
+    "ldfParse": {
+      "errors": {
+        "configurableFramesMustBeContinuous": "{{nodeName}}的configurable_frames必须连续，且从0开始",
+        "diagReqLengthMustBe": "DiagReq长度必须为16",
+        "diagReqFrameLengthMustBe": "DiagReqFrame长度必须为2",
+        "subDiagReqLengthMustBe": "SubDiagReq长度必须为16",
+        "unknownCommand": "未知命令",
+        "lexerError": "词法错误：第{{line}}行，第{{column}}列",
+        "parserError": "解析错误：第{{line}}行，第{{column}}列",
+        "context": "上下文",
+        "unexpectedCharacter": "意外字符：\"{{char}}\"",
+        "expectedOneOf": "期望以下之一：{{tokens}}",
+        "lexingErrors": "词法分析错误",
+        "parsingErrors": "语法分析错误",
+        "unexpectedError": "解析过程中发生意外错误"
+      }
+    },
+    "ldf": {
+      "editEncode": {
+        "labels": {
+          "type": "类型",
+          "value": "值",
+          "description": "描述",
+          "min": "最小值",
+          "max": "最大值",
+          "scale": "比例",
+          "offset": "偏移"
+        },
+        "options": {
+          "logicalValue": "逻辑值",
+          "physicalValue": "物理值",
+          "bcdValue": "BCD值",
+          "asciiValue": "ASCII值"
+        },
+        "buttons": {
+          "addEncode": "添加编码",
+          "saveEncode": "保存编码"
+        },
+        "columns": {
+          "type": "类型",
+          "details": "详情"
+        },
+        "details": {
+          "value": "值：{{value}}",
+          "description": "，描述：{{description}}",
+          "range": "范围：{{min}} ~ {{max}}，比例：{{scale}}，偏移：{{offset}}"
+        },
+        "validation": {
+          "pleaseSelectType": "请选择类型",
+          "signalValueRange": "信号值必须在0到65535之间",
+          "minValueRange": "最小值必须在0到65535之间",
+          "maxValueRange": "最大值必须在0到65535之间",
+          "maxMustBeGreaterThanMin": "最大值必须大于或等于最小值"
+        },
+        "dialogs": {
+          "warning": "警告",
+          "confirmDelete": "确定要删除此编码类型吗？"
+        }
+      },
+      "editFrame": {
+        "tooltips": {
+          "addSignal": "添加信号",
+          "editSignal": "编辑信号",
+          "deleteSignal": "删除信号"
+        },
+        "labels": {
+          "frameId": "帧ID",
+          "frameSize": "帧大小",
+          "autoUpdateOffset": "自动更新偏移"
+        },
+        "placeholders": {
+          "hex": "十六进制"
+        },
+        "columns": {
+          "signal": "信号",
+          "offset": "偏移 [位]",
+          "length": "长度 [位]"
+        },
+        "buttons": {
+          "add": "添加",
+          "cancel": "取消",
+          "yes": "是",
+          "no": "否"
+        },
+        "dialogs": {
+          "availableSignals": "{{frameName}}的可用信号",
+          "confirmDelete": "确定要删除此信号吗？",
+          "deleteSignal": "删除信号"
+        }
+      },
+      "editNode": {
+        "labels": {
+          "linProtocol": "LIN协议",
+          "nad": "NAD",
+          "initNad": "初始NAD",
+          "supplierId": "供应商ID",
+          "functionId": "功能ID",
+          "variant": "变体",
+          "responseErrorSignal": "响应错误信号",
+          "faultStateSignals": "故障状态信号",
+          "p2Min": "P2最小值 [ms]",
+          "stMin": "ST最小值 [ms]",
+          "nAsTimeout": "N_As超时 [ms]",
+          "nCrTimeout": "N_Cr超时 [ms]",
+          "configFrames": "配置帧"
+        }
+      },
+      "editSchedule": {
+        "labels": {
+          "frameType": "帧类型",
+          "frame": "帧",
+          "name": "名称",
+          "frameId": "帧ID",
+          "frames": "帧列表",
+          "scheduleTable": "调度表",
+          "type": "类型",
+          "node": "节点",
+          "nad": "NAD",
+          "id": "ID",
+          "byte": "字节",
+          "mask": "掩码",
+          "inv": "反转",
+          "newNad": "新NAD",
+          "d1": "D1",
+          "d2": "D2",
+          "d3": "D3",
+          "d4": "D4",
+          "d5": "D5",
+          "frameIndex": "帧索引",
+          "framePIDs": "帧PID"
+        },
+        "options": {
+          "normalFrame": "普通帧",
+          "eventTriggered": "事件触发",
+          "sporadic": "偶发",
+          "diagnostic": "诊断",
+          "assignNAD": "分配NAD",
+          "assignFrameId": "分配帧ID",
+          "conditionalChangeNAD": "条件更改NAD",
+          "dataDump": "数据转储",
+          "saveConfiguration": "保存配置",
+          "assignFrameIdRange": "分配帧ID范围",
+          "masterReq": "主机请求",
+          "slaveResp": "从机响应"
+        },
+        "placeholders": {
+          "pid": "PID"
+        },
+        "columns": {
+          "frame": "帧",
+          "id": "ID",
+          "type": "类型",
+          "delay": "延迟 [ms]",
+          "minTime": "最小时间 [ms]",
+          "maxTime": "最大时间 [ms]"
+        },
+        "frameTypes": {
+          "unconditional": "无条件",
+          "eventTriggered": "事件触发",
+          "sporadic": "偶发"
+        },
+        "buttons": {
+          "addFrame": "添加帧",
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "tooltips": {
+          "deleteFrame": "删除帧"
+        },
+        "dialogs": {
+          "warning": "警告",
+          "confirmDelete": "确定要删除此帧吗？"
+        },
+        "validation": {
+          "pleaseSelectFrameType": "请选择帧类型",
+          "pleaseInputEventFrameName": "请输入事件帧名称",
+          "nameConflictsUnconditional": "名称与现有无条件帧冲突",
+          "nameConflictsSporadic": "名称与现有偶发帧冲突",
+          "nameConflictsEventTriggered": "名称与现有事件触发帧冲突",
+          "pleaseInputFrameId": "请输入帧ID",
+          "frameIdMustBeHexadecimal": "帧ID必须为十六进制",
+          "frameIdRange": "帧ID必须在0x00到0x3F之间",
+          "frameIdConflictsUnconditional": "帧ID与无条件帧{{frameName}}冲突",
+          "frameIdConflictsEventTriggered": "帧ID与事件触发帧{{name}}冲突",
+          "pleaseSelectDiagnosticType": "请选择诊断类型",
+          "pleaseSelectNode": "请选择节点",
+          "pleaseSelectAtLeastOneFrame": "请至少选择一个帧",
+          "eventTriggeredMustHaveAtLeast2Frames": "事件触发帧必须至少包含2个帧",
+          "sporadicFramesMustBePublishedByMaster": "偶发帧只能包含由主机发布的帧",
+          "pleaseSelectFrame": "请选择帧",
+          "pleaseSelectNodeFirst": "请先选择节点",
+          "frameMustBeConfigurable": "所选帧必须是该节点的可配置帧",
+          "pleaseInputNad": "请输入NAD",
+          "nadRange": "NAD必须在0到255之间",
+          "pleaseInputId": "请输入ID",
+          "idRange": "ID必须在0到65535之间",
+          "pleaseInputByte": "请输入字节",
+          "byteRange": "字节必须在0到255之间",
+          "pleaseInputMask": "请输入掩码",
+          "maskRange": "掩码必须在0到255之间",
+          "pleaseInputInv": "请输入反转值",
+          "invRange": "反转值必须在0到255之间",
+          "pleaseInputNewNad": "请输入新NAD",
+          "newNadRange": "新NAD必须在0到255之间",
+          "pleaseInputD1": "请输入D1值",
+          "d1Range": "D1必须在0到255之间",
+          "pleaseInputD2": "请输入D2值",
+          "d2Range": "D2必须在0到255之间",
+          "pleaseInputD3": "请输入D3值",
+          "d3Range": "D3必须在0到255之间",
+          "pleaseInputD4": "请输入D4值",
+          "d4Range": "D4必须在0到255之间",
+          "pleaseInputD5": "请输入D5值",
+          "d5Range": "D5必须在0到255之间",
+          "pleaseInputFrameIndex": "请输入帧索引",
+          "frameIndexRange": "帧索引必须在0到3之间",
+          "frameIndexExceedsAvailable": "帧索引超出可用的可配置帧数量（{{count}}）",
+          "mustProvide4Pids": "必须提供4个PID",
+          "eachPidRange": "每个PID必须在0到63之间",
+          "pidsMustBeUnique": "PID必须唯一（0除外）",
+          "pleaseSelectScheduleTable": "请选择用于冲突处理的调度表"
+        }
+      },
+      "editSignal": {
+        "labels": {
+          "signalSize": "信号大小 [位]",
+          "signalType": "信号类型",
+          "initValue": "初始值",
+          "encodeType": "编码类型",
+          "publisher": "发布者",
+          "subscribeNodes": "订阅节点"
+        },
+        "options": {
+          "scalar": "标量",
+          "bytearray": "字节数组"
+        },
+        "placeholders": {
+          "none": "无"
+        },
+        "sections": {
+          "publisherSubscriberChoose": "发布者/订阅者选择"
+        }
+      },
+      "encode": {
+        "tooltips": {
+          "addEncodingType": "添加编码类型",
+          "editEncodingType": "编辑编码类型",
+          "deleteEncodingType": "删除编码类型"
+        },
+        "columns": {
+          "encodingTypeName": "编码类型名称",
+          "encodingDetails": "编码详情"
+        },
+        "details": {
+          "logical": "逻辑值({{value}})",
+          "physical": "物理值({{min}}~{{max}})",
+          "bcd": "BCD",
+          "ascii": "ASCII",
+          "notSupported": "不支持"
+        },
+        "tabs": {
+          "signalEncoding": "信号编码"
+        },
+        "buttons": {
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "dialogs": {
+          "addEncodingType": "添加编码类型",
+          "editEncodingType": "编辑编码类型：{{name}}",
+          "pleaseInputEncodingTypeName": "请输入编码类型名称",
+          "confirmDelete": "确定要删除此编码类型吗？",
+          "warning": "警告"
+        },
+        "messages": {
+          "error": "错误",
+          "encodingTypeNameAlreadyExists": "编码类型名称已存在"
+        },
+        "validation": {
+          "nameRequired": "名称为必填项",
+          "nameMustBeUnique": "编码类型名称必须唯一",
+          "atLeastOneEncodingTypeRequired": "至少需要一个编码类型",
+          "invalidEncodingType": "无效的编码类型",
+          "invalidLogicalValue": "无效的逻辑值",
+          "invalidPhysicalValueRange": "无效的物理值范围"
+        }
+      },
+      "file": {
+        "messages": {
+          "copiedToClipboard": "已复制到剪贴板！",
+          "failedToCopy": "复制失败"
+        }
+      },
+      "frame": {
+        "tooltips": {
+          "addFrame": "添加帧",
+          "editFrame": "编辑帧",
+          "deleteFrame": "删除帧"
+        },
+        "labels": {
+          "frameName": "帧名称",
+          "publisher": "发布者"
+        },
+        "columns": {
+          "frameName": "帧名称",
+          "framePublisher": "帧发布者",
+          "frameId": "帧ID",
+          "frameSize": "帧大小",
+          "signalCount": "信号数量",
+          "maxFrameTime": "最大帧时间 [ms]",
+          "minFrameTime": "最小帧时间 [ms]"
+        },
+        "buttons": {
+          "yes": "是",
+          "no": "否"
+        },
+        "dialogs": {
+          "addNewFrame": "添加新帧",
+          "editFrame": "编辑帧：{{name}}",
+          "deleteFrame": "删除帧",
+          "confirmDelete": "确定要删除此帧吗？"
+        },
+        "messages": {
+          "error": "错误",
+          "frameNameAlreadyExistsOrEmpty": "帧名称已存在或为空",
+          "nameAndPublisherCannotBeEmpty": "名称和发布者不能为空，且创建后无法更改"
+        },
+        "validation": {
+          "signalsMustBeArray": "信号必须是数组",
+          "duplicateSignalsNotAllowed": "不允许重复的信号",
+          "signalNotFound": "在LDF中未找到信号{{signalName}}",
+          "signalOverlaps": "信号{{signalName}}与信号{{rangeName}}重叠",
+          "signalExceedsFrameSize": "信号{{signalName}}超出帧大小",
+          "frameIdMustBeNumber": "帧ID必须是数字",
+          "frameIdRange": "帧ID必须在0到0x3F之间",
+          "frameIdAlreadyUsed": "帧ID已被其他帧使用",
+          "frameSizeMustBeNumber": "帧大小必须是数字",
+          "frameSizeRange": "帧大小必须在1到8字节之间",
+          "frameSizeTooSmall": "帧大小太小，信号至少需要{{bytes}}字节"
+        },
+        "tabs": {
+          "frames": "帧"
+        }
+      },
+      "general": {
+        "labels": {
+          "databaseName": "数据库名称",
+          "masterNodeName": "主节点名称",
+          "linVersion": "LIN版本",
+          "linLangVersion": "LIN语言版本",
+          "linSpeed": "LIN速率(kbps)",
+          "timebase": "时基 (ms)",
+          "jitter": "抖动 (ms)"
+        },
+        "validation": {
+          "nameCannotContainDot": "名称不能包含'.'",
+          "databaseNameAlreadyExists": "数据库名称已存在",
+          "pleaseInputDatabaseName": "请输入数据库名称",
+          "masterNodeCannotBeSameAsSlaveNode": "主节点不能与从节点相同",
+          "pleaseInputMasterNodeName": "请输入主节点名称"
+        },
+        "tabs": {
+          "general": "通用"
+        }
+      },
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "删除数据库",
+          "saveDatabase": "保存数据库",
+          "fixErrorsToSave": "修复错误后才能保存数据库"
+        },
+        "tabs": {
+          "general": "通用",
+          "nodes": "节点",
+          "signals": "信号",
+          "frames": "帧",
+          "scheduleTables": "调度表",
+          "encodings": "编码",
+          "ldfFile": "LDF文件"
+        },
+        "columns": {
+          "tab": "选项卡",
+          "field": "字段",
+          "errorMessage": "错误信息"
+        },
+        "buttons": {
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "dialogs": {
+          "warning": "警告",
+          "confirmDelete": "确定要删除此数据库吗？"
+        },
+        "messages": {
+          "error": "错误",
+          "parseFailed": "解析失败",
+          "databaseSavedSuccessfully": "数据库已成功保存"
+        }
+      },
+      "node": {
+        "tooltips": {
+          "addNode": "添加节点",
+          "copyNode": "复制节点",
+          "editNode": "编辑节点",
+          "deleteNode": "删除节点"
+        },
+        "columns": {
+          "nodeName": "节点名称",
+          "initialNad": "初始NAD",
+          "configNad": "配置NAD",
+          "supplierId": "供应商ID",
+          "functionId": "功能ID",
+          "variant": "变体",
+          "protocol": "协议",
+          "configFrames": "配置帧"
+        },
+        "buttons": {
+          "add": "添加",
+          "copy": "复制",
+          "cancel": "取消",
+          "yes": "是",
+          "no": "否"
+        },
+        "dialogs": {
+          "addSlaveNode": "添加从节点",
+          "copySlaveNode": "复制从节点",
+          "deleteNode": "删除节点",
+          "pleaseEnterSlaveNodeName": "请输入从节点名称",
+          "confirmDelete": "确定要删除此节点吗？",
+          "nodeAttributes": "{{name}}属性"
+        },
+        "validation": {
+          "pleaseSelectLinProtocol": "请选择LIN协议",
+          "invalidLinProtocolVersion": "无效的LIN协议版本",
+          "pleaseEnterConfiguredNad": "请输入配置NAD",
+          "pleaseEnterInitialNad": "请输入初始NAD",
+          "nadRange": "NAD必须在0到255之间",
+          "pleaseEnterSupplierId": "请输入供应商ID",
+          "supplierIdRange": "供应商ID必须在0到65535之间",
+          "pleaseEnterFunctionId": "请输入功能ID",
+          "functionIdRange": "功能ID必须在0到65535之间",
+          "variantRange": "变体必须在0到255之间",
+          "pleaseSelectResponseErrorSignal": "请选择响应错误信号",
+          "invalidSignalSelection": "无效的信号选择",
+          "oneOrMoreSignalsInvalid": "一个或多个所选信号无效",
+          "p2MinRequired": "P2最小值为必填项",
+          "p2MinMustBeGreaterThan0": "P2最小值必须大于0",
+          "stMinRequired": "ST最小值为必填项",
+          "stMinMustBeGreaterThan0": "ST最小值必须大于0",
+          "nAsTimeoutRequired": "N_As超时为必填项",
+          "nAsTimeoutMustBeGreaterThan0": "N_As超时必须大于0",
+          "nCrTimeoutRequired": "N_Cr超时为必填项",
+          "nCrTimeoutMustBeGreaterThan0": "N_Cr超时必须大于0",
+          "pleaseSelectAtLeastOneConfigFrame": "请至少选择一个配置帧",
+          "invalidFrameSelection": "无效的帧选择",
+          "oneOrMoreFramesInvalid": "一个或多个所选帧无效",
+          "nodeNamePattern": "节点名称只能包含字母、数字和下划线，且必须以字母开头",
+          "nodeNameCannotBeEmpty": "节点名称不能为空",
+          "nodeNameAlreadyExists": "节点名称已存在",
+          "slaveNodeNameCannotEqualMaster": "从节点名称不能与主节点名称相同"
+        },
+        "tabs": {
+          "nodes": "节点"
+        }
+      },
+      "sch": {
+        "tooltips": {
+          "addScheduleTable": "添加调度表",
+          "editSchedule": "编辑调度",
+          "deleteSchedule": "删除调度"
+        },
+        "labels": {
+          "ms": "毫秒"
+        },
+        "columns": {
+          "scheduleTable": "调度表",
+          "frames": "帧",
+          "totalTime": "总时间"
+        },
+        "buttons": {
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "dialogs": {
+          "addScheduleTable": "添加调度表",
+          "editSchedule": "编辑调度：{{name}}",
+          "pleaseInputScheduleTableName": "请输入调度表名称",
+          "confirmDelete": "确定要删除此调度表吗？",
+          "warning": "警告"
+        },
+        "messages": {
+          "error": "错误",
+          "noFrames": "无帧",
+          "scheduleTableNameAlreadyExists": "调度表名称已存在",
+          "nameReserved": "名称{{name}}是保留名称"
+        },
+        "frameTypes": {
+          "unconditional": "{{count}}个无条件帧",
+          "event": "{{count}}个事件帧",
+          "sporadic": "{{count}}个偶发帧",
+          "diagnostic": "{{count}}个诊断帧",
+          "command": "{{count}}个命令帧"
+        },
+        "validation": {
+          "scheduleNameRequired": "调度名称为必填项",
+          "scheduleTableNameMustBeUnique": "调度表名称必须唯一",
+          "entriesMustBeArray": "条目必须是数组",
+          "invalidDelayTime": "条目{{entryName}}中的延迟时间无效",
+          "delayTimeMustBeGreaterThanMaxFrameTime": "{{entryName}}的延迟时间（{{delay}}ms）必须大于最大帧时间（{{maxFrameTime}}ms）",
+          "invalidCommandStructure": "条目{{entryName}}中的命令结构无效",
+          "invalidFrameReference": "无效的帧引用：{{entryName}}",
+          "nameRequired": "名称为必填项"
+        },
+        "tabs": {
+          "scheduleTables": "调度表"
+        }
+      },
+      "signal": {
+        "tooltips": {
+          "addSignal": "添加信号",
+          "copySignal": "复制信号",
+          "editSignal": "编辑信号",
+          "deleteSignal": "删除信号"
+        },
+        "columns": {
+          "signal": "信号",
+          "publisher": "发布者",
+          "subscribers": "订阅者",
+          "length": "长度 [位]",
+          "initValue": "初始值",
+          "unit": "单位",
+          "encoding": "编码",
+          "joinedFrame": "所属帧"
+        },
+        "buttons": {
+          "add": "添加",
+          "confirm": "确认",
+          "cancel": "取消",
+          "yes": "是",
+          "no": "否"
+        },
+        "dialogs": {
+          "addSignal": "添加信号",
+          "copySignal": "复制信号",
+          "deleteSignal": "删除信号",
+          "pleaseInputSignalName": "请输入信号名称",
+          "confirmDelete": "确定要删除此信号吗？",
+          "signal": "{{name}}信号"
+        },
+        "validation": {
+          "signalNamePattern": "信号名称只能包含字母、数字和下划线",
+          "signalNameAlreadyExists": "信号名称已存在",
+          "pleaseEnterSignalSize": "请输入信号大小",
+          "signalSizeMustBeNumber": "信号大小必须是数字",
+          "signalSizeMustBeGreaterThan0": "信号大小必须大于0",
+          "scalarSignalSizeCannotExceed64Bits": "标量信号大小不能超过64位",
+          "byteArraySignalSizeMustBeMultipleOf8": "字节数组信号大小必须是8的倍数",
+          "pleaseSelectSignalType": "请选择信号类型",
+          "initialValueMustBeNumber": "初始值必须是数字",
+          "valueRange": "值必须在0到{{maxValue}}之间",
+          "byteArrayInitialValueMustBeArray": "字节数组初始值必须是数组",
+          "byteArrayMustHaveElements": "字节数组必须有{{expectedLength}}个元素",
+          "elementRange": "元素{{index}}必须在0到255之间",
+          "pleaseSelectPublisher": "请选择发布者",
+          "invalidPublisherNode": "无效的发布者节点",
+          "pleaseSelectAtLeastOneSubscriber": "请至少选择一个订阅者",
+          "subscribersMustBeArray": "订阅者必须是数组",
+          "invalidSubscriberNode": "无效的订阅者节点：{{node}}",
+          "publisherCannotBeSubscriber": "发布者不能同时是订阅者"
+        },
+        "tabs": {
+          "signals": "信号"
+        }
+      }
+    },
+    "ortiParse": {
+      "errors": {
+        "lexicalAnalysis": "词法分析",
+        "syntaxAnalysis": "语法分析",
+        "unknownParsingError": "未知解析错误",
+        "parserException": "解析器异常"
+      }
+    },
+    "orti": {
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "删除数据库",
+          "saveDatabase": "保存数据库"
+        },
+        "tabs": {
+          "taskIsr": "任务/ISR",
+          "resource": "资源",
+          "service": "服务",
+          "hook": "钩子",
+          "connector": "连接器",
+          "recordFile": "记录文件"
+        },
+        "labels": {
+          "name": "名称",
+          "cpuFreq": "CPU频率(MHz)"
+        },
+        "placeholders": {
+          "enterName": "输入名称",
+          "enterCpuFrequency": "输入CPU频率"
+        },
+        "buttons": {
+          "addTaskIsr": "添加任务/ISR",
+          "addResource": "添加资源",
+          "addService": "添加服务",
+          "addHook": "添加钩子",
+          "refresh": "刷新"
+        },
+        "values": {
+          "task": "任务",
+          "isr": "ISR"
+        },
+        "columns": {
+          "name": "名称",
+          "id": "ID",
+          "coreId": "核心ID",
+          "type": "类型",
+          "activeInterval": "活动间隔(us)",
+          "color": "颜色"
+        },
+        "connector": {
+          "type": "类型",
+          "selectType": "选择连接器类型",
+          "types": {
+            "serialPort": "串口",
+            "binaryFile": "二进制文件",
+            "csvFile": "CSV文件",
+            "can": "CAN",
+            "eth": "ETH"
+          },
+          "device": "设备",
+          "selectDevice": "选择设备",
+          "baudRate": "波特率",
+          "selectBaudRate": "选择波特率",
+          "dataBits": "数据位",
+          "selectDataBits": "选择数据位",
+          "stopBits": "停止位",
+          "selectStopBits": "选择停止位",
+          "parity": "校验",
+          "selectParity": "选择校验",
+          "parityOptions": {
+            "none": "无",
+            "even": "偶校验",
+            "odd": "奇校验",
+            "mark": "标记",
+            "space": "空格"
+          },
+          "bitRate": "比特率",
+          "enterBitRate": "输入比特率（如500000）",
+          "ipAddress": "IP地址",
+          "enterIpAddress": "输入IP地址",
+          "port": "端口",
+          "enterPort": "输入端口号",
+          "file": "文件",
+          "enterFilePath": "输入文件路径"
+        },
+        "recordFile": {
+          "enableRecord": "启用记录",
+          "enableRecordDescription": "启用将跟踪数据记录到文件",
+          "fileName": "文件名",
+          "enterFileName": "输入文件名（如processed_log.csv）",
+          "alertMessage": "跟踪数据将以CSV格式记录到指定文件，包含原始数据列：<strong>timestamp, type, id, status</strong>（无表头）。时间戳（YYYYMMDDHHmmss）将自动添加到文件名中。"
+        },
+        "validation": {
+          "selectConnectorType": "请选择连接器类型",
+          "selectDevice": "请选择设备",
+          "selectBaudRate": "请选择波特率",
+          "selectFile": "请选择文件"
+        },
+        "errors": {
+          "databaseNameCannotBeEmpty": "数据库名称不能为空",
+          "cpuFrequencyCannotBeZero": "CPU频率不能为0",
+          "taskIdAlreadyExists": "任务ID \"{{id}}\"在核心{{coreId}}中已存在",
+          "isrIdAlreadyExists": "ISR ID \"{{id}}\"已存在",
+          "duplicateDatabaseName": "数据库名称\"{{name}}\"已存在",
+          "parseFailed": "解析失败",
+          "error": "错误"
+        },
+        "deleteConfirm": {
+          "message": "确定要删除此数据库吗？",
+          "title": "警告",
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "messages": {
+          "saveSuccess": "数据库已成功保存"
+        }
+      }
+    }
+  },
+  "uds": {
+    "tabs": {
+      "home": "主页",
+      "hardware": "硬件",
+      "diagnostics": "诊断",
+      "soa": "SOA",
+      "test": "测试",
+      "others": "其他"
+    },
+    "toolbar": {
+      "start": "启动",
+      "stop": "停止",
+      "trace": "跟踪",
+      "graph": "图表",
+      "panel": "面板",
+      "message": "消息",
+      "devices": "设备",
+      "network": "网络",
+      "interact": "交互",
+      "udsTester": "UDS测试器",
+      "services": "服务",
+      "sequence": "序列",
+      "soaConfig": "SOA配置",
+      "testSetup": "测试设置",
+      "database": "数据库",
+      "variables": "变量",
+      "osInfo": "OS信息",
+      "scriptApi": "脚本API",
+      "packages": "包管理"
+    },
+    "variable": {
+      "tabs": {
+        "userVariables": "用户变量",
+        "systemVariables": "系统变量"
+      },
+      "tooltips": {
+        "addVariable": "添加变量",
+        "editVariable": "编辑变量",
+        "deleteVariable": "删除变量"
+      },
+      "labels": {
+        "namespace": "命名空间",
+        "name": "名称",
+        "description": "描述",
+        "dataType": "数据类型",
+        "initialValue": "初始值",
+        "minimum": "最小值",
+        "maximum": "最大值",
+        "unit": "单位"
+      },
+      "placeholders": {
+        "selectNamespace": "选择命名空间"
+      },
+      "types": {
+        "number": "数值",
+        "string": "字符串",
+        "array": "数组"
+      },
+      "columns": {
+        "variable": "变量",
+        "dataType": "数据类型",
+        "initValue": "初始值",
+        "min": "最小值",
+        "max": "最大值",
+        "description": "描述"
+      },
+      "buttons": {
+        "cancel": "取消",
+        "save": "保存",
+        "create": "创建"
+      },
+      "dialogs": {
+        "newVariable": "新建变量",
+        "editVariable": "编辑变量",
+        "deleteVariable": "删除变量",
+        "deleteConfirm": "确定要删除此变量吗？",
+        "yes": "是",
+        "no": "否",
+        "ok": "确定",
+        "deleteChildVariablesFirst": "请先删除所有子变量"
+      },
+      "validation": {
+        "inputName": "请输入变量名称",
+        "nameFormat": "变量名称只能包含字母、数字和下划线",
+        "nameExists": "此命名空间中已存在该变量名称",
+        "selectDataType": "请选择数据类型",
+        "inputInitialValue": "请输入初始值",
+        "minLessThanMax": "最小值必须小于最大值",
+        "maxGreaterThanMin": "最大值必须大于最小值"
+      },
+      "defaults": {
+        "group": "分组"
+      }
+    },
+    "dropdowns": {
+      "graph": {
+        "line": "折线图",
+        "gauge": "仪表盘",
+        "datas": "数据"
+      },
+      "interact": {
+        "noInteraction": "无交互"
+      },
+      "service": {
+        "noTester": "无测试器"
+      },
+      "sequence": {
+        "noTester": "无测试器"
+      },
+     
+
+      "panel": {
+        "addPanel": "添加面板"
+      },
+   
+      "osTrace": {
+        "statistics": "{{name}}统计",
+        "timeline": "{{name}}时间线",
+        "noOrtiLine1": "无ORTI文件",
+        "noOrtiLine2": "请在数据库中添加"
+      }
+    },
+    "plugin": {
+      "errorTitle": "插件错误",
+      "noEntry": "此插件在扩展{{label}}中没有入口点",
+      "handlerNotImplemented": "插件处理系统尚未实现"
+    },
+    "windows": {
+      "variable": "变量",
+      "datas": "数据",
+      "panel": "面板",
+      "panelPreview": "面板预览",
+      "package": "包管理",
+      "test": "测试",
+      "graph": "折线图",
+      "gauge": "仪表盘",
+      "network": "网络",
+      "hardware": "设备",
+      "tester": "UDS测试器",
+      "message": "消息",
+      "testerService": "服务",
+      "testerSequence": "序列",
+      "trace": "跟踪",
+      "cani": "交互",
+      "pwmi": "交互",
+      "lini": "交互",
+      "linPanel": "面板",
+      "ldf": "LDF",
+      "dbc": "DBC",
+      "orti": "ORTI",
+      "soa": "SOA",
+      "someipi": "交互",
+      "osTrace": "OS统计",
+      "osTime": "OS时间线",
+      "plugin": "插件"
+    },
+    "windowCloseConfirm": {
+      "messageWithName": "您在{{name}}中的更改将不会保存，是否继续？",
+      "messageWithoutName": "您的更改将不会保存，是否继续？",
+      "title": "警告",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "hardware": {
+      "dialogs": {
+        "discardChangesMessage": "确定要放弃您的更改吗？",
+        "deleteDeviceMessage": "确定要删除此设备吗？",
+        "warning": "警告",
+        "discard": "放弃",
+        "cancel": "取消",
+        "ok": "确定"
+      },
+      "deviceTypes": {
+        "can": "CAN",
+        "ethernet": "以太网",
+        "lin": "LIN",
+        "pwm": "PWM"
+      },
+      "vendors": {
+        "ecubus": "ECUBUS",
+        "zlg": "ZLG",
+        "peak": "PEAK",
+        "kvaser": "KVASER",
+        "simulate": "仿真",
+        "toomoss": "TOOMOSS",
+        "vector": "VECTOR",
+        "slcan": "SLCAN",
+        "candle": "CANDLE"
+      },
+      "canNode": {
+        "sections": {
+          "device": "设备",
+          "canParameters": "CAN参数",
+          "database": "数据库"
+        },
+        "labels": {
+          "name": "名称",
+          "vendor": "厂商",
+          "device": "设备",
+          "refresh": "刷新",
+          "res120Enable": "120Ω电阻使能",
+          "silentMode": "静默模式",
+          "canFdEnable": "CAN FD使能",
+          "clockFreq": "时钟频率 (MHz)",
+          "database": "数据库"
+        },
+        "options": {
+          "enable": "启用",
+          "disable": "禁用",
+          "noDatabase": "无数据库"
+        },
+        "tooltips": {
+          "silentMode": "静默模式不发送任何消息，只接收消息",
+          "clockFreq": "如果找不到所需的频率，可以手动输入",
+          "bitTimingCalculator": "位时序计算器"
+        },
+        "buttons": {
+          "addDevice": "添加设备",
+          "saveDevice": "保存设备"
+        },
+        "table": {
+          "frequency": "频率 (Hz)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "sjw": "SJW",
+          "preScaler": "预分频",
+          "zlgSpec": "ZLG规格",
+          "baudrate": "波特率/采样点"
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "selectDevice": "请选择设备",
+          "clockMustBeNumber": "时钟必须是数字",
+          "selectClock": "请选择时钟",
+          "tseg1GreaterThanTseg2": "标准TSEG1必须大于TSEG2-1",
+          "sjwLessThanTseg2": "标准SJW必须小于TSEG2",
+          "prescaleBetween": "标准预分频必须在{{min}}-{{max}}之间",
+          "tseg1Between": "标准TSEG1必须在{{min}}-{{max}}之间",
+          "tseg2Between": "标准TSEG2必须在{{min}}-{{max}}之间",
+          "dataTseg1GreaterThanTseg2": "数据TSEG1必须大于TSEG2-1",
+          "dataSjwLessThanTseg2": "数据SJW必须小于TSEG2",
+          "dataPrescaleBetween": "数据预分频必须在{{min}}-{{max}}之间",
+          "dataTseg1Between": "数据TSEG1必须在{{min}}-{{max}}之间",
+          "dataTseg2Between": "数据TSEG2必须在{{min}}-{{max}}之间",
+          "inputCorrectFrequency": "请输入正确的频率，计算频率为{{freq}}Hz",
+          "inputCorrectDataFrequency": "请输入正确的数据频率，计算频率为{{freq}}Hz",
+          "inputFrequency": "请输入频率",
+          "inputDataFrequency": "请输入数据频率"
+        },
+        "messages": {
+          "dontCare": "（不关心）",
+          "zlgCheckCalculator": "ZLG（请查看ZLG波特率计算器）"
+        }
+      },
+      "bitTimingCalculator": {
+        "dialogs": {
+          "title": "位时序配置：{{bitRate}} kbit/s @ {{clockFreq}} MHz"
+        },
+        "table": {
+          "emptyText": "无结果，请尝试更改时钟频率",
+          "samplePoint": "采样点 (%)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "prescaler": "预分频"
+        },
+        "buttons": {
+          "ok": "确定",
+          "cancel": "取消"
+        }
+      },
+      "linNode": {
+        "sections": {
+          "device": "设备",
+          "linParameters": "LIN参数",
+          "database": "数据库"
+        },
+        "labels": {
+          "name": "名称",
+          "vendor": "厂商",
+          "device": "设备",
+          "refresh": "刷新",
+          "voltageControl": "电压控制",
+          "powerEnable": "电源使能",
+          "linMode": "LIN模式",
+          "baudRate": "波特率",
+          "majorPrescale": "主预分频",
+          "minorPrescale": "次预分频",
+          "baudRateDisplay": "波特率",
+          "database": "数据库"
+        },
+        "options": {
+          "input12v": "输入12V",
+          "output0v": "输出0V",
+          "output12v": "输出12V",
+          "output5v": "输出5V",
+          "master": "主机",
+          "slave": "从机",
+          "baudRate9600": "9600",
+          "baudRate19200": "19200",
+          "custom": "自定义",
+          "noDatabase": "无数据库"
+        },
+        "buttons": {
+          "addDevice": "添加设备",
+          "saveDevice": "保存设备"
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "selectDevice": "请选择设备",
+          "selectDatabase": "请选择数据库",
+          "selectNode": "请选择节点",
+          "baudRateTooHigh": "波特率必须小于等于50000"
+        },
+        "messages": {
+          "baudRateWarning": "警告：此LIN PHY可能不支持如此高的速率，使用此速率可能导致通信异常，请谨慎使用"
+        }
+      },
+      "pwmNode": {
+        "sections": {
+          "device": "设备",
+          "pwmParameters": "PWM参数"
+        },
+        "labels": {
+          "name": "名称",
+          "vendor": "厂商",
+          "device": "设备",
+          "refresh": "刷新",
+          "frequency": "频率 (Hz)",
+          "initialDuty": "初始占空比 (%)",
+          "polarity": "极性"
+        },
+        "options": {
+          "activeHigh": "高电平有效",
+          "activeLow": "低电平有效"
+        },
+        "buttons": {
+          "addDevice": "添加设备",
+          "saveDevice": "保存设备"
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "selectDevice": "请选择设备",
+          "inputFrequency": "请输入频率",
+          "inputInitialDutyCycle": "请输入初始占空比"
+        }
+      }
+
+    
+    },
+    "components": {
+      "addVar": {
+        "placeholders": {
+          "searchByName": "按名称搜索..."
+        },
+        "tooltips": {
+          "collapseAll": "全部折叠",
+          "expandAll": "全部展开",
+          "addVariable": "添加变量",
+          "removeAttachSignal": "移除附加信号"
+        },
+        "table": {
+          "name": "名称",
+          "type": "类型",
+          "initValue": "初始值",
+          "min": "最小值",
+          "max": "最大值",
+          "unit": "单位",
+          "description": "描述"
+        }
+      },
+      "editSignal": {
+        "collapse": {
+          "signalInformation": "信号信息",
+          "variableInformation": "变量信息"
+        },
+        "labels": {
+          "database": "数据库",
+          "signalName": "信号名称",
+          "frameId": "帧ID",
+          "startBit": "起始位",
+          "bitLength": "位长度",
+          "variableFullName": "变量全名",
+          "variableName": "变量名称",
+          "variableType": "变量类型",
+          "name": "名称",
+          "color": "颜色",
+          "yAxis": "Y轴",
+          "yAxisMin": "Y轴最小值",
+          "yAxisMax": "Y轴最大值",
+          "splitLine": "分割线",
+          "disableZoom": "禁用缩放",
+          "tooltip": "提示框",
+          "showTooltip": "显示提示框",
+          "xAxis": "X轴",
+          "showGrid": "显示网格",
+          "gridStyle": "网格样式",
+          "showValue": "显示数值",
+          "series": "系列",
+          "step": "阶梯",
+          "showPoints": "显示数据点",
+          "pointSize": "数据点大小",
+          "pointStyle": "数据点样式",
+          "min": "最小值",
+          "max": "最大值"
+        },
+        "options": {
+          "solid": "实线",
+          "dashed": "虚线",
+          "dotted": "点线",
+          "step": "阶梯",
+          "line": "折线",
+          "circle": "圆形",
+          "rectangle": "矩形",
+          "triangle": "三角形",
+          "diamond": "菱形"
+        },
+        "messages": {
+          "variableNotFound": "未找到变量 {{name}}",
+          "checkVariableWindow": "请在变量窗口中检查"
+        },
+        "buttons": {
+          "save": "保存",
+          "cancel": "取消"
+        }
+      },
+      "package": {
+        "title": "包管理器",
+        "empty": {
+          "noPackageJson": "未找到package.json",
+          "saveProjectFirst": "请先保存项目后再初始化package.json",
+          "initializeFirst": "请先初始化package.json以管理依赖",
+          "initializeButton": "初始化package.json"
+        },
+        "form": {
+          "enterPackageName": "输入包名称",
+          "installType": "安装类型",
+          "dependencies": "依赖",
+          "devDependencies": "开发依赖",
+          "install": "安装"
+        },
+        "terminal": {
+          "installationLog": "安装日志",
+          "clear": "清除"
+        },
+        "table": {
+          "installedPackages": "已安装的包",
+          "packageName": "包名称",
+          "version": "版本",
+          "actions": "操作",
+          "uninstall": "卸载"
+        },
+        "messages": {
+          "packageJsonInitialized": "✓ package.json初始化成功",
+          "failedToInitialize": "✗ 初始化package.json失败：{{error}}",
+          "enterPackageName": "✗ 请输入包名称",
+          "packageInstalled": "✓ 包{{name}}安装成功",
+          "failedToInstall": "✗ 安装包{{name}}失败：{{error}}",
+          "packageUninstalled": "✓ 包{{name}}卸载成功",
+          "failedToUninstall": "✗ 卸载包{{name}}失败：{{error}}",
+          "failedToLoad": "✗ 加载package.json失败：{{error}}",
+          "unknownError": "未知错误"
+        }
+      },
+      "signal": {
+        "placeholders": {
+          "searchByName": "按名称搜索..."
+        },
+        "tooltips": {
+          "collapseAll": "全部折叠",
+          "expandAll": "全部展开",
+          "addSignal": "添加信号",
+          "addFrame": "添加帧",
+          "removeAttachSignal": "移除附加信号"
+        },
+        "table": {
+          "name": "名称",
+          "txNode": "发送节点",
+          "startBit": "起始位",
+          "bitLength": "位长度"
+        }
+      }
+    },
+    "tester": {
+      "tree": {
+        "canInterface": "CAN接口",
+        "linInterface": "LIN接口",
+        "ethInterface": "ETH接口"
+      },
+      "dialogs": {
+        "deleteTesterMessage": "确定要删除此测试器吗？",
+        "warning": "警告",
+        "ok": "确定",
+        "cancel": "取消"
+      },
+      "buildError": {
+        "table": {
+          "file": "文件",
+          "line": "行号",
+          "message": "错误"
+        },
+        "dialog": {
+          "title": "错误",
+          "header": "构建错误 ({{count}})"
+        }
+      },
+      "canAddr": {
+        "sections": {
+          "canBase": "CAN基础",
+          "tpBase": "TP基础"
+        },
+        "labels": {
+          "addressName": "地址名称",
+          "addrFormat": "地址格式",
+          "addrType": "地址类型",
+          "canIdType": "CAN-ID类型",
+          "canFd": "CAN FD",
+          "brs": "BRS",
+          "remote": "远程帧",
+          "nSa": "N_SA",
+          "nTa": "N_TA",
+          "nAe": "N_AE",
+          "canIdTx": "CAN_ID TX",
+          "canIdRx": "CAN_ID RX",
+          "canIdTxCalc": "CAN_ID TX（计算）",
+          "canIdRxCalc": "CAN_ID RX（计算）",
+          "dlc": "DLC",
+          "paddingEnable": "填充使能",
+          "paddingValue": "填充值",
+          "nAs": "nAs",
+          "nAr": "nAr",
+          "nCr": "nCr",
+          "nBs": "nBs",
+          "nBr": "nBr",
+          "nCs": "nCs",
+          "blockSize": "块大小",
+          "stMin": "STmin",
+          "maxWtf": "MAX WTF"
+        },
+        "options": {
+          "addrFormat": {
+            "normal": "普通",
+            "fixedNormal": "固定普通",
+            "extended": "扩展",
+            "mixed": "混合",
+            "enhanced": "增强"
+          },
+          "addrType": {
+            "physical": "物理地址",
+            "functional": "功能地址"
+          },
+          "canIdType": {
+            "standard": "标准ID",
+            "extended": "扩展ID"
+          }
+        },
+        "tooltips": {
+          "dlcCan": "CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8",
+          "dlcCanFd": "CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64",
+          "nAs": "发送端CAN帧（任意N-PDU）的传输时间（参见ISO 15765-2）",
+          "nAr": "接收端CAN帧（任意N-PDU）的传输时间（参见ISO 15765-2）",
+          "nCr": "接收下一个连续帧N-PDU的等待时间（参见ISO 15765-2）",
+          "nBs": "接收下一个流控制N-PDU的等待时间（参见ISO 15765-2）",
+          "nBr": "发送下一个流控制N_PDU的等待时间（参见ISO 15765-2）",
+          "nCs": "发送下一个连续帧N_PDU的等待时间（参见ISO 15765-2）"
+        },
+        "validation": {
+          "idTypeMustBeExtendedForFixedNormal": "当地址格式为FIXED_NORMAL时，CAN-ID类型必须为扩展ID",
+          "canIdStandardRange": "CAN-ID必须在0~0x7FF之间",
+          "canIdExtendedRange": "CAN-ID必须在0~0x1FFFFFFF之间",
+          "hexShouldStartWith0x": "十六进制应以0x开头",
+          "canIdTxNotEqualRx": "CAN-ID TX不能等于CAN-ID RX",
+          "canIdTxMustBeUnique": "CAN-ID TX必须唯一",
+          "canIdRxNotEqualTx": "CAN-ID RX不能等于CAN-ID TX",
+          "canIdRxMustBeSame": "CAN-ID RX必须相同",
+          "canIdRequired": "CAN-ID为必填项",
+          "valueRange": "值必须在0~0xFF之间",
+          "valueRequired": "值为必填项",
+          "saMustBeSame": "SA必须相同",
+          "taNotEqualSa": "TA不能等于SA",
+          "taMustBeUnique": "TA必须唯一",
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "inputAddrName": "请输入地址名称",
+          "inputDlc": "请输入DLC（0-15）",
+          "inputPaddingValue": "请输入填充值（0-255）",
+          "inputNAs": "请输入nAs",
+          "inputNBs": "请输入nBs",
+          "inputNCr": "请输入nCr",
+          "inputStMin": "请输入stMin",
+          "inputBs": "请输入bs",
+          "inputMaxWtf": "请输入maxWTF"
+        },
+        "messages": {
+          "unsupported": "不支持"
+        }
+      },
+      "ethAddr": {
+        "sections": {
+          "tester": "测试器",
+          "ecu": "ECU",
+          "vehicleIdentify": "车辆识别请求行为",
+          "testerSpecialControl": "测试器特殊控制",
+          "tlsSettingsTesterV3": "TLS设置 - 测试器 (DoIP v3)"
+        },
+        "labels": {
+          "addressName": "地址名称",
+          "addressType": "地址类型",
+          "testerAddress": "测试器地址",
+          "connectDelay": "连接延迟",
+          "activeDelay": "激活延迟",
+          "ecuAddress": "ECU地址",
+          "eid": "EID",
+          "entityType": "实体类型",
+          "nodeAddress": "节点地址",
+          "vin": "VIN",
+          "gid": "GID",
+          "vinRequestMethod": "VIN请求方式",
+          "requestAddress": "请求地址",
+          "entityMissBehavior": "实体缺失行为",
+          "udpClientPort": "UDP客户端端口",
+          "tcpClientPort": "TCP客户端端口",
+          "enableTls": "启用TLS",
+          "tlsPort": "TLS端口",
+          "caCert": "CA证书",
+          "clientCert": "客户端证书",
+          "privateKey": "私钥",
+          "skipVerify": "跳过验证",
+          "enableKeyLog": "启用密钥日志",
+          "keyLogPath": "密钥日志路径"
+        },
+        "placeholders": {
+          "logicalAddress": "0",
+          "entityType": "节点",
+          "caCertPath": "CA证书文件路径",
+          "clientCertPath": "测试器证书文件路径",
+          "privateKeyPath": "测试器私钥文件路径",
+          "keyLogPath": "logs/tls-keylog.txt"
+        },
+        "options": {
+          "addressType": {
+            "physical": "物理地址",
+            "functional": "功能地址"
+          },
+          "entityType": {
+            "node": "节点",
+            "gateway": "网关"
+          },
+          "virReqType": {
+            "unicast": "单播VIN请求",
+            "omit": "省略VIN，直接TCP连接",
+            "broadcast": "广播UDP4",
+            "multicast": "组播UDP6"
+          },
+          "entityNotFoundBehavior": {
+            "normal": "发送普通请求",
+            "withVin": "发送VIN请求",
+            "withEid": "发送EID请求"
+          }
+        },
+        "tooltips": {
+          "enableTls": "启用TLS进行安全通信（端口3496）",
+          "skipVerify": "跳过证书验证（仅用于测试）",
+          "enableKeyLog": "启用TLS通信的密钥日志"
+        },
+        "dialogs": {
+          "selectCaCert": "选择CA证书",
+          "selectClientCert": "选择客户端证书",
+          "selectPrivateKey": "选择私钥",
+          "certificateFiles": "证书文件",
+          "allFiles": "所有文件",
+          "selectKeyLogFile": "选择密钥日志文件",
+          "logTextFiles": "日志/文本文件"
+        },
+        "actions": {
+          "browse": "浏览"
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "addressExists": "地址已存在",
+          "addressRange": "0 ~ 0xFFFF",
+          "testerAddrSameAsTester": "测试器地址不能与测试器地址相同",
+          "logicalAddressRequired": "逻辑地址为必填项",
+          "testerAddrSameAsEcu": "测试器地址不能与ECU地址相同",
+          "testerAddrAllSame": "所有测试器逻辑地址必须相同",
+          "invalidIpAddress": "无效的IP地址",
+          "requestAddressRequired": "请求地址为必填项",
+          "inputAddrName": "请输入地址名称",
+          "eidFormat": "xx-xx-xx-xx-xx-xx",
+          "gidFormat": "xx-xx-xx-xx-xx-xx",
+          "vinLength": "17个字符"
+        }
+      },
+      "linAddr": {
+        "sections": {
+          "tpBase": "TP基础",
+          "schedulingSettings": "调度设置"
+        },
+        "labels": {
+          "addressName": "地址名称",
+          "addressType": "地址类型",
+          "nCr": "nCr",
+          "nAs": "nAs",
+          "nad": "NAD",
+          "stMin": "STmin"
+        },
+        "options": {
+          "addressType": {
+            "physical": "物理地址",
+            "functional": "功能地址"
+          },
+          "schType": {
+            "diagOnly": "仅诊断",
+            "diagInterleaved": "交替"
+          }
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "nadRange": "NAD必须在0~255之间",
+          "nadUnique": "NAD必须唯一",
+          "inputAddrName": "请输入地址名称",
+          "inputNad": "请输入NAD"
+        }
+      },
+      "param": {
+        "table": {
+          "name": "名称",
+          "type": "类型",
+          "lengthBit": "长度（位）",
+          "value": "值",
+          "description": "描述",
+          "operations": "操作"
+        },
+        "placeholders": {
+          "filePath": "文件路径"
+        },
+        "actions": {
+          "add": "添加",
+          "edit": "编辑",
+          "delete": "删除",
+          "save": "保存",
+          "discard": "放弃"
+        },
+        "types": {
+          "num": "数值",
+          "ascii": "ASCII",
+          "array": "数组",
+          "float": "浮点数",
+          "double": "双精度",
+          "unicode": "UNICODE",
+          "file": "文件"
+        },
+        "messages": {
+          "copied": "已复制"
+        },
+        "dialogs": {
+          "scriptFile": "脚本文件",
+          "allFiles": "所有文件"
+        },
+        "validation": {
+          "nameDuplicate": "名称重复",
+          "bitLenMultipleOf8": "位长度必须是8的倍数",
+          "bitLenMax32": "位长度必须小于等于32",
+          "bitLen32": "位长度必须为32",
+          "bitLen64": "位长度必须为64",
+          "unknownType": "未知类型 {{type}}",
+          "idExistsInService": "该ID已存在于服务{{name}}中，请更改"
+        }
+      },
+      "sequence": {
+        "tooltips": {
+          "addSequence": "添加新序列",
+          "testerPresent": "测试器在线控制",
+          "runSequence": "运行所选序列",
+          "stopSequence": "停止所选序列",
+          "cycleRun": "循环运行"
+        },
+        "placeholders": {
+          "device": "设备"
+        },
+        "empty": {
+          "addFirst": "请先添加序列"
+        },
+        "dialogs": {
+          "deleteSequenceMessage": "确定要删除{{name}}吗？",
+          "warning": "警告",
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "messages": {
+          "onlyDuringMeasurement": "序列只能在测量运行期间启动"
+        }
+      },
+      "service": {
+        "labels": {
+          "name": "名称",
+          "autoSyncFuncId": "自动同步功能/ID",
+          "suppressResponse": "抑制响应",
+          "txPdu": "TX PDU",
+          "rxPdu": "RX PDU",
+          "description": "描述"
+        },
+        "tabs": {
+          "request": "请求",
+          "response": "响应",
+          "codeGenerate": "代码生成"
+        },
+        "alerts": {
+          "jobRequiresParams": "Job需要这些请求参数作为函数的输入参数。"
+        },
+        "dialogs": {
+          "deleteServiceMessage": "确定要删除此{{name}}吗",
+          "serviceUsedInSequence": "此服务正在序列{{name}}[{{index}}]中使用，请先移除",
+          "warning": "警告",
+          "ok": "确定",
+          "cancel": "取消"
+        },
+        "messages": {
+          "serviceOnlyOnce": "此服务只能创建一次。",
+          "valueOutOfRange": "值超出范围",
+          "unsupported": "不支持"
+        },
+        "validation": {
+          "nameExists": "名称已存在",
+          "inputName": "请输入地址名称",
+          "chooseService": "请选择服务"
+        },
+        "odx": {
+          "title": "ODX文件导入",
+          "labels": {
+            "ecu": "ECU",
+            "variant": "变体"
+          },
+          "buttons": {
+            "cancel": "取消",
+            "import": "导入"
+          },
+          "messages": {
+            "importSuccess": "导入成功",
+            "ecuOrVariantNotFound": "未找到ECU或变体"
+          }
+        }
+      },
+      "subsequence": {
+        "null": "空",
+        "toolbar": {
+          "name": "名称："
+        },
+        "tooltips": {
+          "addService": "添加新服务",
+          "removeService": "移除"
+        },
+        "columns": {
+          "enable": "启用",
+          "service": "服务",
+          "address": "地址",
+          "delay": "延迟",
+          "checkResp": "检查响应",
+          "retry": "重试",
+          "failedAction": "失败操作",
+          "description": "描述",
+          "executeStatus": "执行状态"
+        },
+        "switch": {
+          "yes": "是",
+          "no": "否"
+        },
+        "failBehavior": {
+          "stop": "停止",
+          "continue": "继续"
+        },
+        "status": {
+          "notStart": "未开始",
+          "error": "错误",
+          "running": "运行中",
+          "success": "成功"
+        }
+      },
+      "testercan": {
+        "labels": {
+          "testerName": "测试器名称",
+          "simulateBy": "仿真方式",
+          "testerScriptFile": "测试器脚本文件",
+          "enableCodeGenerate": "启用代码生成",
+          "templateList": "模板列表",
+          "p2Timeout": "P2超时",
+          "p2Max": "P2最大值 (0x78)",
+          "s3Time": "S3时间",
+          "testerPresentEnable": "启用测试器在线",
+          "testerPresentAddress": "测试器在线地址",
+          "fromSpecialService": "来自特殊服务",
+          "doipVersion": "DOIP版本",
+          "enableServerTls": "启用服务器TLS",
+          "serverTlsPort": "服务器TLS端口",
+          "serverCaCert": "CA证书",
+          "serverCert": "服务器证书",
+          "serverPrivateKey": "私钥",
+          "requireClientCert": "需要客户端证书"
+        },
+        "sections": {
+          "udsCodeGenerate": "UDS代码生成",
+          "udsTiming": "UDS时序",
+          "doipSettings": "DOIP设置",
+          "serverTls": "服务器TLS（实体仿真）"
+        },
+        "placeholders": {
+          "name": "名称",
+          "templateFilePath": "模板文件路径",
+          "generatedFilePath": "生成文件路径",
+          "doipV2": "DOIP V2",
+          "serverCaCertPath": "CA证书文件路径（用于验证测试器）",
+          "serverCertPath": "服务器证书文件路径",
+          "serverPrivateKeyPath": "服务器私钥文件路径"
+        },
+        "buttons": {
+          "chooseScript": "选择",
+          "build": "构建",
+          "refreshEdit": "刷新/编辑",
+          "addTemplate": "添加模板",
+          "generate": "生成",
+          "preview": "预览",
+          "browse": "浏览",
+          "addAddress": "添加",
+          "loadFromDatabase": "从数据库加载"
+        },
+        "buildStatus": {
+          "buildFailed": "构建失败",
+          "buildSuccess": "构建成功",
+          "needRebuild": "需要重新构建",
+          "needBuild": "需要构建"
+        },
+        "options": {
+          "doipVersion": {
+            "v2": "DOIP V2",
+            "v3": "DOIP V3"
+          }
+        },
+        "tooltips": {
+          "enableServerTls": "为实体仿真服务器启用TLS",
+          "requireClientCert": "要求测试器提供证书（双向TLS）"
+        },
+        "validation": {
+          "nameExists": "测试器名称已存在",
+          "inputTesterName": "请输入测试器名称",
+          "selectTargetDevice": "请选择目标设备",
+          "inputUdsTimeout": "请输入UDS超时",
+          "inputS3Time": "请输入S3时间",
+          "addressRequired": "地址为必填项"
+        },
+        "dialogs": {
+          "scriptFile": "脚本文件",
+          "typescript": "TypeScript",
+          "allFiles": "所有文件",
+          "error": "错误",
+          "warning": "警告",
+          "ok": "确定"
+        },
+        "messages": {
+          "saveProjectFirst": "请先保存项目",
+          "selectScriptFirst": "请先选择脚本文件"
+        },
+        "tlsDialogs": {
+          "selectServerCa": "选择CA证书",
+          "selectServerCert": "选择服务器证书",
+          "selectServerKey": "选择服务器私钥",
+          "certificateFiles": "证书文件",
+          "allFiles": "所有文件"
+        },
+        "codeGenDialogs": {
+          "selectTemplateFile": "选择模板文件",
+          "templateFiles": "模板文件",
+          "allFiles": "所有文件",
+          "selectOutputFile": "选择输出文件",
+          "codeFiles": "代码文件"
+        },
+        "codeGenMessages": {
+          "noValidTemplates": "未找到有效的模板配置",
+          "success": "成功生成{{count}}个文件",
+          "failedTitle": "代码生成失败"
+        },
+        "preview": {
+          "title": "预览生成的代码：{{template}}",
+          "copied": "已复制到剪贴板！",
+          "copyFailed": "复制到剪贴板失败"
+        }
+      },
+      "config": {
+        "table": {
+          "key": "键",
+          "value": "值",
+          "operations": "操作"
+        },
+        "placeholders": {
+          "key": "配置键",
+          "value": "配置值"
+        },
+        "actions": {
+          "add": "添加配置",
+          "edit": "编辑",
+          "delete": "删除",
+          "save": "保存",
+          "discard": "放弃"
+        },
+        "messages": {
+          "copied": "已复制"
+        },
+        "validation": {
+          "keyRequired": "键不能为空",
+          "keyExists": "键已存在"
+        }
+      },
+      "dbchoose": {
+        "labels": {
+          "database": "数据库",
+          "node": "节点"
+        },
+        "placeholders": {
+          "database": "请选择数据库",
+          "node": "请选择节点"
+        },
+        "actions": {
+          "load": "加载"
+        }
+      }
+    },
+    "someip": {
+      "serviceConfig": {
+        "sections": {
+          "communicationConfig": "通信配置"
+        },
+        "labels": {
+          "serviceId": "服务ID",
+          "instanceId": "实例ID",
+          "unicastAddress": "单播地址",
+          "reliableTcp": "可靠传输 (TCP)",
+          "enableTcpCommunication": "启用TCP通信",
+          "tcpPort": "TCP端口",
+          "enableMagicCookies": "启用Magic Cookies",
+          "unreliableUdp": "不可靠传输 (UDP)",
+          "enableUdpCommunication": "启用UDP通信",
+          "udpPort": "UDP端口"
+        },
+        "placeholders": {
+          "serviceId": "0x1234",
+          "instanceId": "0x5678",
+          "unicastAddress": "192.168.1.100"
+        },
+        "tooltips": {
+          "serviceId": "十六进制格式的服务唯一标识符（例如0x1234）。此ID在系统内必须唯一。",
+          "instanceId": "十六进制格式的服务实例标识符（例如0x5678）。同一服务可以存在具有不同实例ID的多个实例。",
+          "unicastAddress": "托管服务实例的单播IP地址。当服务发现禁用时，外部服务需要此地址。",
+          "reliableTcp": "为此服务启用可靠的TCP通信。TCP提供有保证的传递和错误检查。",
+          "tcpPort": "可靠通信的TCP端口号。必须在1到65535之间。",
+          "enableMagicCookies": "为TCP连接启用Magic Cookies。Magic Cookies有助于检测远程端点是否支持SOME/IP协议。",
+          "unreliableUdp": "为此服务启用不可靠的UDP通信。UDP提供更快的通信但没有传递保证。",
+          "udpPort": "不可靠通信的UDP端口号。必须在1到65535之间。"
+        },
+        "validation": {
+          "inputServiceId": "请输入服务ID",
+          "inputInstanceId": "请输入实例ID",
+          "invalidHexFormat": "请输入有效的十六进制格式（例如0x1234）",
+          "portRange": "端口必须在1到65535之间",
+          "atLeastOneProtocol": "必须至少启用一种通信协议"
+        }
+      },
+      "si": {
+        "tooltips": {
+          "editConnect": "编辑连接",
+          "addFrame": "添加帧",
+          "selectFrameFromDatabase": "从数据库选择帧",
+          "editFrame": "编辑帧",
+          "deleteFrame": "删除帧"
+        },
+        "labels": {
+          "name": "名称",
+          "serviceId": "服务ID",
+          "instanceId": "实例ID",
+          "methodId": "方法ID",
+          "messageType": "消息类型",
+          "protocolVersion": "协议版本",
+          "interfaceVersion": "接口版本",
+          "majorVersion": "主版本",
+          "minorVersion": "次版本",
+          "channel": "通道",
+          "reliable": "可靠",
+          "onKey": "按键:",
+          "period": "周期 (ms):"
+        },
+        "columns": {
+          "send": "发送",
+          "trigger": "触发",
+          "name": "名称",
+          "messageType": "消息类型",
+          "serviceId": "服务ID",
+          "instanceId": "实例ID",
+          "methodId": "方法ID",
+          "channel": "通道",
+          "params": "参数"
+        },
+        "options": {
+          "triggerType": {
+            "manual": "手动",
+            "periodic": "周期"
+          },
+          "messageType": {
+            "request": "请求",
+            "requestNoReturn": "无返回请求"
+          },
+          "boolean": {
+            "true": "真",
+            "false": "假"
+          }
+        },
+        "tabs": {
+          "signal": "信号",
+          "request": "请求",
+          "response": "响应"
+        },
+        "placeholders": {
+          "period": "10",
+          "protocolVersion": "1",
+          "interfaceVersion": "0",
+          "majorVersion": "0",
+          "minorVersion": "0",
+          "reliable": "假"
+        },
+        "dialogs": {
+          "deviceConnect": "IA设备连接",
+          "editFrame": "编辑帧 {{name}}",
+          "selectFrameFromDatabase": "从数据库选择帧"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        }
+      },
+      "soa": {
+        "tree": {
+          "someip": "SOME/IP",
+          "dds": "DDS"
+        },
+        "dialogs": {
+          "deleteConfirm": "确定要删除此SOA配置吗？",
+          "warning": "警告",
+          "ok": "确定",
+          "cancel": "取消"
+        }
+      },
+      "someip": {
+        "sections": {
+          "applicationConfig": "应用配置",
+          "advancedApplicationConfig": "高级应用配置",
+          "serviceDiscoveryConfig": "服务发现配置",
+          "advancedServiceDiscoveryConfig": "高级服务发现配置",
+          "timingConfig": "时序配置",
+          "debounceConfig": "去抖动配置",
+          "ttlConfig": "TTL配置",
+          "otherConfig": "其他配置"
+        },
+        "labels": {
+          "name": "SomeIP名称",
+          "device": "设备",
+          "applicationId": "应用ID",
+          "maxDispatchers": "最大调度器数",
+          "maxDispatchTime": "最大调度时间",
+          "threads": "线程数",
+          "ioThreadNice": "IO线程优先级",
+          "sessionHandling": "会话处理",
+          "enableServiceDiscovery": "启用服务发现",
+          "initialState": "初始状态",
+          "multicastAddress": "组播地址",
+          "port": "端口",
+          "protocol": "协议",
+          "initialDelayMin": "初始延迟最小值 (ms)",
+          "initialDelayMax": "初始延迟最大值 (ms)",
+          "repetitionsBaseDelay": "重复基础延迟 (ms)",
+          "repetitionsMax": "最大重复次数",
+          "cyclicOfferDelay": "循环提供延迟 (ms)",
+          "requestResponseDelay": "请求响应延迟 (ms)",
+          "offerDebounceTime": "提供去抖动时间 (ms)",
+          "findDebounceTime": "查找去抖动时间 (ms)",
+          "findInitialDebounceReps": "初始查找去抖动次数",
+          "findInitialDebounceTime": "初始查找去抖动时间 (ms)",
+          "ttl": "TTL",
+          "maxRemoteSubscribers": "最大远程订阅者数",
+          "waitRouteNetlinkNotification": "等待路由Netlink通知"
+        },
+        "placeholders": {
+          "name": "SomeIP_0",
+          "selectDevice": "选择设备",
+          "applicationId": "0x6301",
+          "initialState": "未知",
+          "multicastAddress": "224.224.224.0",
+          "port": "30490",
+          "protocol": "udp",
+          "initialDelayMin": "0",
+          "initialDelayMax": "3000",
+          "repetitionsBaseDelay": "10",
+          "repetitionsMax": "3",
+          "cyclicOfferDelay": "1000",
+          "requestResponseDelay": "2000",
+          "offerDebounceTime": "500",
+          "findDebounceTime": "500",
+          "findInitialDebounceReps": "0",
+          "findInitialDebounceTime": "200",
+          "ttl": "0xFFFFFF",
+          "maxRemoteSubscribers": "3"
+        },
+        "tooltips": {
+          "enableServiceDiscovery": "指定是否启用服务发现",
+          "initialState": "指定启动后服务发现的初始状态",
+          "multicastAddress": "服务发现消息发送的组播地址（默认：224.224.224.0）",
+          "port": "服务发现端口（默认：30490）",
+          "protocol": "用于发送服务发现消息的协议",
+          "initialDelayMin": "首次提供消息前的最小延迟（默认：0）",
+          "initialDelayMax": "首次提供消息前的最大延迟（默认：3000）",
+          "repetitionsBaseDelay": "重复阶段发送提供消息的基础延迟（默认：10）",
+          "repetitionsMax": "重复阶段提供服务的最大重复次数（默认：3）",
+          "cyclicOfferDelay": "主阶段OfferService消息的周期（默认：1000）",
+          "requestResponseDelay": "提供服务和事件组的单播消息到组播消息的最小延迟（默认：2000）",
+          "offerDebounceTime": "协议栈在新服务提供进入重复阶段前收集它们的时间（默认：500）",
+          "findDebounceTime": "协议栈在发送查找消息前收集非本地服务请求的时间（默认：500）",
+          "findInitialDebounceReps": "使用find_initial_debounce_time的初始去抖动次数（默认：0，有效值：0-255）",
+          "findInitialDebounceTime": "初始启动期间协议栈在新服务请求进入重复阶段前收集它们的时间（默认：200）",
+          "ttl": "提供的服务以及消费的服务和事件组条目的生存时间（默认：0xFFFFFF）",
+          "maxRemoteSubscribers": "不同远程订阅者的最大可能数量。额外的远程订阅者将不被确认（默认：3）",
+          "waitRouteNetlinkNotification": "启用on_net_interface_or_route_state_changed上的路由状态跟踪（默认：true）"
+        },
+        "options": {
+          "initialState": {
+            "unknown": "未知",
+            "suspended": "暂停",
+            "resumed": "恢复"
+          },
+          "protocol": {
+            "udp": "UDP",
+            "tcp": "TCP"
+          }
+        },
+        "buttons": {
+          "addService": "添加服务",
+          "addDevice": "添加设备",
+          "saveDevice": "保存设备"
+        },
+        "validation": {
+          "nameExists": "SomeIP名称已存在",
+          "inputName": "请输入SomeIP名称",
+          "invalidApplicationId": "请输入有效的应用ID，必须是十六进制字符串，例如：0x6301",
+          "applicationIdExists": "应用ID已存在",
+          "inputApplicationId": "请输入应用ID",
+          "inputApplicationName": "请输入应用名称",
+          "portRange": "端口必须在0-65535之间",
+          "invalidIpAddress": "请输入有效的IP地址",
+          "ipAddressRange": "IP地址各部分必须在0-255之间",
+          "serviceInstanceDuplicate": "服务ID和实例ID组合已存在"
+        },
+        "defaultName": "SomeIP_{{index}}",
+        "serviceName": "服务{{index}}"
+      }
+    },
+    "message": {
+        "tooltips": {
+          "clearMessage": "清除消息"
+        },
+        "actions": {
+          "saveMessage": "保存消息"
+        },
+        "testLog": {
+          "testStarting": "----- 测试 {{name}} 开始 -----",
+          "testPassed": "----- 测试 {{name}} 通过，耗时 {{duration}}ms -----",
+          "testFailed": "----- 测试 {{name}} 失败，耗时 {{duration}}ms，详情：{{error}} -----",
+          "testDiagnostic": "测试诊断"
+        }
+      },
+    "network": {
+      "tree": {
+        "devices": "设备",
+        "interactive": "交互",
+        "can": "CAN",
+        "lin": "LIN",
+        "ethernet": "以太网",
+        "node": "节点",
+        "pwm": "PWM",
+        "loggers": "记录器",
+        "someip": "SomeIP"
+      },
+      "dialogs": {
+        "deleteNodeMessage": "此操作将永久删除该节点。是否继续？",
+        "warning": "警告",
+        "ok": "确定",
+        "cancel": "取消"
+      },
+      "names": {
+        "nodeTemplate": "节点 {{count}}",
+        "loggerTemplate": "记录器 {{count}}",
+        "iaTemplate": "{{label}} 交互"
+      },
+      "logConfig": {
+        "tabs": {
+          "general": "通用",
+          "connected": "已连接"
+        },
+        "labels": {
+          "name": "名称",
+          "logEnable": "启用日志",
+          "transport": "传输方式",
+          "format": "格式",
+          "compression": "压缩",
+          "filePath": "文件路径",
+          "recordTypes": "记录类型"
+        },
+        "placeholders": {
+          "name": "名称",
+          "transport": "传输方式",
+          "format": "格式",
+          "compressionLevel": "压缩级别",
+          "logFilePath": "日志文件路径"
+        },
+        "options": {
+          "disabled": "禁用",
+          "enabled": "启用",
+          "file": "文件",
+          "socket": "Socket",
+          "ascFormat": "ASC格式",
+          "blfFormat": "Vector BLF格式",
+          "csvFormat": "CSV格式",
+          "defaultCompression": "默认 (-1)",
+          "noCompression": "无压缩 (0)",
+          "fastCompression": "快速 (1)",
+          "balancedCompression": "平衡 (6)",
+          "maxCompression": "最大 (9)"
+        },
+        "recordTypes": {
+          "can": "CAN",
+          "lin": "LIN",
+          "eth": "ETH",
+          "uds": "UDS"
+        },
+        "buttons": {
+          "browse": "浏览",
+          "cancel": "取消",
+          "ok": "确定"
+        },
+        "messages": {
+          "timestampAppended": "时间戳（YYYYMMDDHHmmss）将自动添加到文件名中。"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        },
+        "validation": {
+          "logNameExists": "日志名称已存在",
+          "inputNodeName": "请输入节点名称",
+          "inputLogFilePath": "请输入日志文件路径"
+        },
+        "dialog": {
+          "selectLogFile": "选择日志文件",
+          "allFiles": "所有文件",
+          "logFile": "日志文件"
+        }
+      },
+      "nodeConfig": {
+        "tabs": {
+          "general": "通用",
+          "connected": "已连接"
+        },
+        "labels": {
+          "nodeName": "节点名称",
+          "netNode": "网络节点",
+          "nodeScriptFile": "节点脚本文件",
+          "nodeActive": "节点激活",
+          "testNode": "测试节点"
+        },
+        "placeholders": {
+          "name": "名称",
+          "nodeName": "节点名称"
+        },
+        "options": {
+          "disabled": "禁用",
+          "enabled": "启用"
+        },
+        "buttons": {
+          "choose": "选择",
+          "build": "构建",
+          "refreshEdit": "刷新/编辑",
+          "cancel": "取消",
+          "ok": "确定"
+        },
+        "buildStatus": {
+          "buildFailed": "构建失败",
+          "buildSuccess": "构建成功",
+          "needRebuild": "需要重新构建",
+          "needBuild": "需要构建"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        },
+        "validation": {
+          "nodeNameExists": "节点名称已存在",
+          "inputNodeName": "请输入节点名称"
+        },
+        "dialogs": {
+          "error": "错误",
+          "warning": "警告",
+          "ok": "确定",
+          "saveProjectFirst": "请先保存项目",
+          "selectScriptFileFirst": "请先选择脚本文件",
+          "scriptFile": "脚本文件",
+          "typescript": "TypeScript",
+          "allFiles": "所有文件"
+        }
+      },
+
+      
+    
+      "udsView": {
+        "defaultDeviceName": "设备",
+        "dialogs": {
+          "editNode": "编辑节点 {{name}}",
+          "editLog": "编辑日志 {{name}}",
+          "selectWorkNode": "请选择工作节点"
+        }
+      },
+      "cani": {
+        "tooltips": {
+          "editConnect": "编辑连接",
+          "addFrame": "添加帧",
+          "selectFrameFromDatabase": "从数据库选择帧",
+          "editFrame": "编辑帧",
+          "deleteFrame": "删除帧"
+        },
+        "dialogs": {
+          "iaDeviceConnect": "IA设备连接",
+          "editFrame": "编辑帧 {{name}}",
+          "selectFrameFromDatabase": "从数据库选择帧"
+        },
+        "labels": {
+          "name": "名称",
+          "id": "ID",
+          "channel": "通道",
+          "type": "类型",
+          "remote": "远程帧",
+          "brs": "BRS",
+          "dlc": "DLC",
+          "onKey": "按键:",
+          "period": "周期 (ms):"
+        },
+        "tabs": {
+          "signal": "信号",
+          "rawData": "原始数据"
+        },
+        "placeholders": {
+          "hexByte": "00"
+        },
+        "table": {
+          "send": "发送",
+          "trigger": "触发",
+          "name": "名称",
+          "idHex": "ID (十六进制)",
+          "channel": "通道",
+          "type": "类型",
+          "dlc": "DLC"
+        },
+        "triggerTypes": {
+          "manual": "手动",
+          "periodic": "周期"
+        },
+        "frameTypes": {
+          "can": "CAN",
+          "canFd": "CAN FD",
+          "extendedCan": "扩展CAN",
+          "extendedCanFd": "扩展CAN FD"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        }
+      },
+      "canisignale": {
+        "dialogs": {
+          "editSignalGenerator": "编辑信号发生器"
+        },
+        "labels": {
+          "generatorType": "发生器类型"
+        },
+        "options": {
+          "none": "无",
+          "sine": "正弦波",
+          "counter": "计数器"
+        },
+        "table": {
+          "name": "名称",
+          "rawValue": "原始值",
+          "physValue": "物理值",
+          "unit": "单位",
+          "startBit": "起始位",
+          "length": "长度"
+        }
+      },
+      "lini": {
+        "buttons": {
+          "stopSch": "停止调度",
+          "startSch": "启动调度"
+        },
+        "tooltips": {
+          "editConnect": "编辑连接"
+        },
+        "labels": {
+          "database": "数据库"
+        },
+        "placeholders": {
+          "selectDatabaseInDevice": "在设备中选择数据库"
+        },
+        "dialogs": {
+          "iaDeviceConnect": "IA设备连接"
+        },
+        "table": {
+          "index": "索引",
+          "schControl": "调度控制",
+          "scheduleTable": "调度表",
+          "frameNumber": "帧数量",
+          "frame": "帧",
+          "frameId": "帧ID",
+          "active": "激活",
+          "delay": "延迟 (ms)",
+          "size": "大小 (字节)",
+          "type": "类型"
+        },
+        "frameTypes": {
+          "command": "命令",
+          "unconditional": "无条件",
+          "eventTriggered": "事件触发",
+          "sporadic": "偶发",
+          "notSupported": "不支持"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        }
+      },
+      "linPanel": {
+        "labels": {
+          "database": "数据库：",
+          "node": "节点：",
+          "none": "无"
+        },
+        "buttons": {
+          "resetAll": "全部重置"
+        },
+        "table": {
+          "frame": "帧",
+          "frameDataHex": "帧数据（十六进制）",
+          "signal": "信号",
+          "bits": "位",
+          "physicalLogicalValue": "物理值/逻辑值",
+          "rawValue": "原始值"
+        }
+      },
+      "pwmi": {
+        "tabs": {
+          "pwmControl": "PWM控制",
+          "control": "控制",
+          "deviceConnection": "设备连接",
+          "device": "设备"
+        },
+        "labels": {
+          "dutyCycleControl": "占空比控制",
+          "quickPresets": "快速预设"
+        },
+        "transfer": {
+          "valid": "可用",
+          "assigned": "已分配"
+        }
+      }
+    },
+    "test": {
+      "tooltips": {
+        "refreshTestConfig": "刷新测试配置",
+        "runTestConfig": "运行测试配置",
+        "stopTestConfig": "停止测试配置"
+      },
+      "menu": {
+        "edit": "编辑",
+        "exportReportHtml": "导出报告 (HTML)",
+        "exportReportPdf": "导出报告 (PDF)",
+        "delete": "删除"
+      },
+      "labels": {
+        "name": "名称",
+        "testScriptFile": "测试脚本文件",
+        "connectDevices": "连接设备",
+        "reportPath": "报告路径"
+      },
+      "sections": {
+        "report": "报告"
+      },
+      "buttons": {
+        "choose": "选择",
+        "build": "构建",
+        "refreshEdit": "刷新/编辑",
+        "cancel": "取消",
+        "save": "保存"
+      },
+      "placeholders": {
+        "select": "选择"
+      },
+      "dialogs": {
+        "editConfiguration": "编辑配置",
+        "error": "错误",
+        "warning": "警告",
+        "success": "成功",
+        "ok": "确定",
+        "cancel": "取消",
+        "deleteConfirm": "确定要删除此配置吗？",
+        "scriptFile": "脚本文件",
+        "reportPath": "报告路径",
+        "typescript": "TypeScript",
+        "allFiles": "所有文件"
+      },
+      "messages": {
+        "saveProjectFirst": "请先保存项目",
+        "selectScriptFirst": "请先选择脚本文件",
+        "exportSuccess": "测试报告导出成功，是否打开？",
+        "exportFailed": "导出测试报告失败：{{msg}}"
+      },
+      "buildStatus": {
+        "buildFailed": "构建失败",
+        "buildSuccess": "构建成功",
+        "needRebuild": "需要重新构建",
+        "needBuild": "需要构建"
+      },
+      "validation": {
+        "nameExists": "测试配置名称已存在",
+        "inputName": "请输入测试配置名称"
+      },
+      "tree": {
+        "testConfig": "测试配置"
+      },
+      "defaultName": "测试配置",
+      "tips": {
+        "emptyReportPath": "留空则使用项目根路径"
+      }
+    },
+    "graph": {
+      "data": {
+        "tooltips": {
+          "resume": "恢复",
+          "pause": "暂停",
+          "addVariables": "添加变量",
+          "addSignals": "添加信号",
+          "deleteSignal": "删除信号"
+        },
+        "labels": {
+          "time": "时间：{{time}}s"
+        },
+        "table": {
+          "name": "名称",
+          "fullName": "全名",
+          "value": "值",
+          "unit": "单位",
+          "rawValue": "原始值",
+          "lastUpdate": "最后更新"
+        },
+        "dialogs": {
+          "addSignal": "添加信号",
+          "addVariable": "添加变量",
+          "deleteSignal": "删除信号",
+          "deleteSignalConfirm": "确定要删除此信号吗？",
+          "deleteSignalsConfirm": "确定要删除{{count}}个信号吗？",
+          "confirm": "确认",
+          "cancel": "取消"
+        },
+        "messages": {
+          "signalAlreadyExists": "信号已存在",
+          "noData": "--"
+        }
+      },
+      "gauge": {
+        "tooltips": {
+          "resume": "恢复",
+          "pause": "暂停",
+          "addVariables": "添加变量",
+          "addSignals": "添加信号"
+        },
+        "labels": {
+          "time": "时间：{{time}}s"
+        },
+        "tree": {
+          "emptyText": "添加"
+        },
+        "menu": {
+          "edit": "编辑",
+          "delete": "删除"
+        },
+        "dialogs": {
+          "addSignal": "添加信号",
+          "addVariable": "添加变量",
+          "editSignal": "编辑信号"
+        },
+        "messages": {
+          "signalAlreadyExists": "信号已存在",
+          "na": "N/A"
+        }
+      },
+      "graph": {
+        "tooltips": {
+          "resume": "恢复",
+          "pause": "暂停",
+          "addVariables": "添加变量",
+          "addSignals": "添加信号"
+        },
+        "labels": {
+          "time": "时间：{{time}}s"
+        },
+        "tree": {
+          "emptyText": "添加"
+        },
+        "menu": {
+          "edit": "编辑",
+          "delete": "删除"
+        },
+        "dialogs": {
+          "addSignal": "添加信号",
+          "addVariable": "添加变量",
+          "editSignal": "编辑信号",
+          "editVariable": "编辑变量"
+        },
+        "messages": {
+          "signalAlreadyExists": "信号已存在"
+        },
+        "tooltip": {
+          "time": "时间：{{time}}ms",
+          "value": "值：{{value}}"
+        }
+      }
+    },
+    "trace": {
+      "defaultName": "跟踪",
+      "tooltips": {
+        "clearTrace": "清除跟踪",
+        "resume": "恢复",
+        "pause": "暂停",
+        "switchOverwriteScroll": "切换覆盖/滚动模式"
+      },
+      "placeholders": {
+        "filterByDevice": "按设备筛选",
+        "filterById": "按ID筛选"
+      },
+      "menu": {
+        "saveAsExcel": "保存为Excel",
+        "saveAsAsc": "保存为ASC",
+        "changeName": "更改名称"
+      },
+      "dialogs": {
+        "changeName": "更改名称",
+        "enterNewName": "请输入新名称",
+        "ok": "确定",
+        "cancel": "取消"
+      },
+      "validation": {
+        "nameNotEmpty": "名称不能为空"
+      },
+      "messages": {
+        "startTrace": "开始跟踪"
+      },
+      "filters": {
+        "can": "CAN",
+        "lin": "LIN",
+        "uds": "UDS",
+        "eth": "ETH",
+        "someip": "SomeIP",
+        "osTrace": "OS跟踪"
+      },
+      "columns": {
+        "time": "时间",
+        "name": "名称",
+        "data": "数据",
+        "dir": "方向",
+        "id": "ID",
+        "dlc": "DLC",
+        "len": "长度",
+        "type": "类型",
+        "channel": "通道",
+        "device": "设备"
+      },
+      "emptyText": "无数据",
+      "messageTypes": {
+        "udsReq": "UDS请求",
+        "udsResp": "UDS响应",
+        "udsNegativeResp": "UDS否定响应",
+        "canError": "CAN错误",
+        "linError": "LIN错误",
+        "linEvent": "LIN事件",
+        "scriptMessage": "脚本消息",
+        "systemMessage": "系统消息",
+        "someipServiceValid": "SomeIP服务有效",
+        "osEvent": "OS事件",
+        "osError": "OS错误",
+        "version": "版本",
+        "protocolVersion": "协议版本",
+        "interfaceVersion": "接口版本",
+        "returnCode": "返回码",
+        "address": "地址",
+        "protocol": "协议",
+        "service": "服务",
+        "instance": "实例",
+        "available": "可用"
+      }
+    }
+  },
+  "pluginSettings": {
+    "downloadPathLabel": "插件下载路径",
+    "tooltip": {
+      "line1": "插件将下载到的路径。",
+      "line2": "路径只能包含英文字母、数字、",
+      "line3": "下划线（_）和路径分隔符（/、\\、:）。",
+      "line4": "不允许空格或特殊字符。"
+    },
+    "buttons": {
+      "selectPath": "选择插件下载路径",
+      "openPath": "在文件管理器中打开插件下载路径"
+    },
+    "dialog": {
+      "selectDirectoryTitle": "选择插件下载目录"
+    },
+    "errors": {
+      "noSpaces": "路径不能包含空格",
+      "invalidFormat": "路径只能包含英文字母、数字、下划线和路径分隔符。不允许空格或特殊字符。",
+      "invalidSelectedPath": "所选路径包含无效字符。只允许英文字母、数字、下划线和路径分隔符。"
+    }
+  },
+  "pluginMarketplace": {
+    "loading": "正在加载插件...",
+    "retry": "重试",
+    "headerTitle": "插件市场",
+    "pluginCount": "{{count}}个可用插件",
+    "installFromZip": "从ZIP安装",
+    "loadFromPath": "从路径加载",
+    "devPlugin": "开发插件",
+    "noPlugins": "没有可用的插件",
+    "pluginIconAlt": "插件图标",
+    "temporaryBadgeTitle": "临时加载（重启后将被移除）",
+    "localOnlyBadgeTitle": "仅本地插件",
+    "noSelection": "选择一个插件查看详情",
+    "action": {
+      "enable": "启用",
+      "disable": "禁用",
+      "uninstall": "卸载"
+    },
+    "tooltips": {
+      "temporaryUninstallBlocked": "临时插件无法卸载（重启后将被移除）"
+    },
+    "upgradeLabel": "🔔 有新版本可用：",
+    "metadata": {
+      "version": "版本：",
+      "author": "作者：",
+      "published": "发布日期：",
+      "newTabs": "新选项卡：",
+      "extensions": "扩展："
+    },
+    "noReadme": "此插件没有可用的README。",
+    "button": {
+      "install": "安装",
+      "installed": "已安装",
+      "installing": "正在安装...",
+      "upgradeTo": "升级到 {{version}}",
+      "upgrading": "正在升级..."
+    },
+    "messages": {
+      "loadFailed": "从市场加载插件失败：{{error}}",
+      "installSuccess": "插件{{name}} v{{version}}安装成功！",
+      "upgradeSuccess": "插件{{name}}已成功升级到v{{version}}！",
+      "installError": "安装插件失败：{{error}}",
+      "zipUrlMissing": "插件包URL不可用。",
+      "disableSuccess": "插件已成功禁用",
+      "enableSuccess": "插件已成功启用",
+      "uninstallSuccess": "插件{{name}}卸载成功！",
+      "uninstallError": "卸载插件失败：{{error}}",
+      "installZipSuccess": "从ZIP文件安装插件成功！",
+      "installZipError": "安装插件失败：{{error}}",
+      "loadDirSuccess": "从路径加载插件成功！",
+      "loadDirError": "加载插件失败：{{error}}"
+    },
+    "dialog": {
+      "uninstallMessage": "确定要卸载\"{{name}}\"吗？此操作无法撤销。",
+      "uninstallTitle": "确认卸载",
+      "uninstallConfirm": "卸载",
+      "uninstallCancel": "取消",
+      "selectZipTitle": "选择插件包",
+      "zipFilterName": "ZIP压缩包",
+      "selectDirTitle": "选择插件目录"
+    },
+    "devDocsUrl": "https://app.whyengineer.com/docs/dev/plugin.html"
+  },
+  "homeUpdate": {
+    "check": "检查更新",
+    "start": "开始更新",
+    "cancel": "取消",
+    "install": "退出并安装",
+    "downloadOk": "更新包下载完成"
+  },
+  "user": {
+    "welcome": "欢迎使用EcuBus",
+    "signInPrompt": "请登录以访问您的账户和许可证。",
+    "whyRegister": "为什么要注册？",
+    "benefits": {
+      "prioritySupport": {
+        "title": "优先支持",
+        "description": "获得更快的技术支持和更高优先级的bug修复"
+      },
+      "pluginDevelopment": {
+        "title": "插件开发",
+        "description": "创建和发布您自己的插件以扩展功能"
+      },
+      "moreFeatures": {
+        "title": "更多功能",
+        "description": "访问专属功能和抢先更新"
+      }
+    },
+    "signIn": "登录",
+    "createAccount": "创建账户",
+    "signOut": "退出登录",
+    "userFallback": "用户",
+    "messages": {
+      "loginTimeout": "登录超时。请重试。",
+      "warning": "警告",
+      "ok": "确定",
+      "securityVerificationFailed": "安全验证失败（状态不匹配）。请重新登录。",
+      "loginFailed": "登录失败"
+    }
+  },
+  "common": {
+    "unknownError": "未知错误"
+  }
+}

@@ -2,18 +2,26 @@
   <div v-loading="loading">
     <el-tabs v-if="!loading" v-model="editableTabsValue" class="dbcTabs" type="card" addable>
       <template #add-icon>
-        <el-tooltip effect="light" content="Delete Database" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('database.orti.index.tooltips.deleteDatabase')"
+          placement="bottom"
+        >
           <el-button type="info" link @click="deleteDatabase">
             <Icon :icon="deleteIcon" />
           </el-button>
         </el-tooltip>
-        <el-tooltip effect="light" content="Save Database" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('database.orti.index.tooltips.saveDatabase')"
+          placement="bottom"
+        >
           <el-button type="success" link @click="saveDataBase">
             <Icon :icon="saveIcon" :disabled="globalStart" />
           </el-button>
         </el-tooltip>
       </template>
-      <el-tab-pane name="TASK/ISR" label="TASK/ISR">
+      <el-tab-pane name="TASK/ISR" :label="i18next.t('database.orti.index.tabs.taskIsr')">
         <div>
           <vxe-grid
             ref="coreConfigGridRef"
@@ -23,8 +31,8 @@
           >
             <template #edit_type="{ row }">
               <el-select v-model="row.type" size="small" style="width: 100%">
-                <el-option label="Task" :value="0" />
-                <el-option label="ISR" :value="1" />
+                <el-option :label="i18next.t('database.orti.index.values.task')" :value="0" />
+                <el-option :label="i18next.t('database.orti.index.values.isr')" :value="1" />
               </el-select>
             </template>
             <template #edit_color="{ row }">
@@ -58,19 +66,23 @@
                   height: 34px;
                 "
               >
-                <span style="padding-left: 5px; padding-right: 5px">Name:</span>
+                <span style="padding-left: 5px; padding-right: 5px"
+                  >{{ i18next.t('database.orti.index.labels.name') }}:</span
+                >
                 <el-input
                   v-model="dbcObj.name"
-                  placeholder="Enter name"
+                  :placeholder="i18next.t('database.orti.index.placeholders.enterName')"
                   style="width: 150px"
                   size="small"
                 />
                 <el-divider direction="vertical" />
                 <!-- cpuFreq -->
-                <span style="padding-left: 5px; padding-right: 5px">CPU Freq(MHz):</span>
+                <span style="padding-left: 5px; padding-right: 5px"
+                  >{{ i18next.t('database.orti.index.labels.cpuFreq') }}:</span
+                >
                 <el-input-number
                   v-model="dbcObj.cpuFreq"
-                  placeholder="Enter CPU Frequency"
+                  :placeholder="i18next.t('database.orti.index.placeholders.enterCpuFrequency')"
                   style="width: 100px"
                   size="small"
                   :step="1"
@@ -79,14 +91,16 @@
                 <el-divider direction="vertical" />
                 <!-- add row -->
                 <el-button type="primary" link @click="addRow">
-                  <Icon :icon="addIcon" /><span>Add Task/ISR</span>
+                  <Icon :icon="addIcon" /><span>{{
+                    i18next.t('database.orti.index.buttons.addTaskIsr')
+                  }}</span>
                 </el-button>
               </div>
             </template>
           </vxe-grid>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="Resource" label="Resource">
+      <el-tab-pane name="Resource" :label="i18next.t('database.orti.index.tabs.resource')">
         <div>
           <vxe-grid
             ref="resourceConfigGridRef"
@@ -110,14 +124,16 @@
                 "
               >
                 <el-button type="primary" link @click="addResourceRow">
-                  <Icon :icon="addIcon" /><span>Add Resource</span>
+                  <Icon :icon="addIcon" /><span>{{
+                    i18next.t('database.orti.index.buttons.addResource')
+                  }}</span>
                 </el-button>
               </div>
             </template>
           </vxe-grid>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="Service" label="Service">
+      <el-tab-pane name="Service" :label="i18next.t('database.orti.index.tabs.service')">
         <div>
           <vxe-grid
             ref="serviceConfigGridRef"
@@ -141,14 +157,16 @@
                 "
               >
                 <el-button type="primary" link @click="addServiceRow">
-                  <Icon :icon="addIcon" /><span>Add Service</span>
+                  <Icon :icon="addIcon" /><span>{{
+                    i18next.t('database.orti.index.buttons.addService')
+                  }}</span>
                 </el-button>
               </div>
             </template>
           </vxe-grid>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="Hook" label="Hook">
+      <el-tab-pane name="Hook" :label="i18next.t('database.orti.index.tabs.hook')">
         <div>
           <vxe-grid
             ref="hookConfigGridRef"
@@ -172,14 +190,16 @@
                 "
               >
                 <el-button type="primary" link @click="addHookRow">
-                  <Icon :icon="addIcon" /><span>Add Hook</span>
+                  <Icon :icon="addIcon" /><span>{{
+                    i18next.t('database.orti.index.buttons.addHook')
+                  }}</span>
                 </el-button>
               </div>
             </template>
           </vxe-grid>
         </div>
       </el-tab-pane>
-      <el-tab-pane name="Connector" label="Connector">
+      <el-tab-pane name="Connector" :label="i18next.t('database.orti.index.tabs.connector')">
         <el-form
           ref="connectorFormRef"
           :model="connectorForm"
@@ -189,27 +209,52 @@
           class="connector-form"
           style="margin: 20px"
         >
-          <el-form-item label="Type" prop="type" required>
+          <el-form-item
+            :label="i18next.t('database.orti.index.connector.type')"
+            prop="type"
+            required
+          >
             <el-select
               v-model="connectorForm.type"
-              placeholder="Select connector type"
+              :placeholder="i18next.t('database.orti.index.connector.selectType')"
               style="width: 200px"
               @change="onConnectorTypeChange"
             >
-              <el-option label="SerialPort" value="SerialPort" />
-              <el-option label="Binary File" value="BinaryFile" />
-              <el-option label="CSV File" value="CSVFile" />
-              <el-option label="CAN" value="CAN" disabled />
-              <el-option label="ETH" value="ETH" disabled />
+              <el-option
+                :label="i18next.t('database.orti.index.connector.types.serialPort')"
+                value="SerialPort"
+              />
+              <el-option
+                :label="i18next.t('database.orti.index.connector.types.binaryFile')"
+                value="BinaryFile"
+              />
+              <el-option
+                :label="i18next.t('database.orti.index.connector.types.csvFile')"
+                value="CSVFile"
+              />
+              <el-option
+                :label="i18next.t('database.orti.index.connector.types.can')"
+                value="CAN"
+                disabled
+              />
+              <el-option
+                :label="i18next.t('database.orti.index.connector.types.eth')"
+                value="ETH"
+                disabled
+              />
             </el-select>
           </el-form-item>
 
           <!-- SerialPort specific options -->
           <template v-if="connectorForm.type === 'SerialPort'">
-            <el-form-item v-if="connectorForm.type" label="Device" prop="device">
+            <el-form-item
+              v-if="connectorForm.type"
+              :label="i18next.t('database.orti.index.connector.device')"
+              prop="device"
+            >
               <el-select
                 v-model="connectorForm.device"
-                placeholder="Select device"
+                :placeholder="i18next.t('database.orti.index.connector.selectDevice')"
                 style="width: 300px"
                 filterable
               >
@@ -227,15 +272,18 @@
                     icon="RefreshRight"
                     @click="refreshDeviceList"
                   >
-                    Refresh
+                    {{ i18next.t('database.orti.index.buttons.refresh') }}
                   </el-button>
                 </template>
               </el-select>
             </el-form-item>
-            <el-form-item label="Baud Rate" prop="options.baudRate">
+            <el-form-item
+              :label="i18next.t('database.orti.index.connector.baudRate')"
+              prop="options.baudRate"
+            >
               <el-select
                 v-model="connectorForm.options.baudRate"
-                placeholder="Select baud rate"
+                :placeholder="i18next.t('database.orti.index.connector.selectBaudRate')"
                 filterable
                 allow-create
                 style="width: 150px"
@@ -253,10 +301,10 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="Data Bits">
+            <el-form-item :label="i18next.t('database.orti.index.connector.dataBits')">
               <el-select
                 v-model="connectorForm.options.dataBits"
-                placeholder="Select data bits"
+                :placeholder="i18next.t('database.orti.index.connector.selectDataBits')"
                 style="width: 150px"
               >
                 <el-option label="5" value="5" />
@@ -266,10 +314,10 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="Stop Bits">
+            <el-form-item :label="i18next.t('database.orti.index.connector.stopBits')">
               <el-select
                 v-model="connectorForm.options.stopBits"
-                placeholder="Select stop bits"
+                :placeholder="i18next.t('database.orti.index.connector.selectStopBits')"
                 style="width: 150px"
               >
                 <el-option label="1" value="1" />
@@ -278,26 +326,41 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="Parity">
+            <el-form-item :label="i18next.t('database.orti.index.connector.parity')">
               <el-select
                 v-model="connectorForm.options.parity"
-                placeholder="Select parity"
+                :placeholder="i18next.t('database.orti.index.connector.selectParity')"
                 style="width: 150px"
               >
-                <el-option label="None" value="none" />
-                <el-option label="Even" value="even" />
-                <el-option label="Odd" value="odd" />
-                <el-option label="Mark" value="mark" />
-                <el-option label="Space" value="space" />
+                <el-option
+                  :label="i18next.t('database.orti.index.connector.parityOptions.none')"
+                  value="none"
+                />
+                <el-option
+                  :label="i18next.t('database.orti.index.connector.parityOptions.even')"
+                  value="even"
+                />
+                <el-option
+                  :label="i18next.t('database.orti.index.connector.parityOptions.odd')"
+                  value="odd"
+                />
+                <el-option
+                  :label="i18next.t('database.orti.index.connector.parityOptions.mark')"
+                  value="mark"
+                />
+                <el-option
+                  :label="i18next.t('database.orti.index.connector.parityOptions.space')"
+                  value="space"
+                />
               </el-select>
             </el-form-item>
           </template>
 
           <template v-if="connectorForm.type === 'CAN'">
-            <el-form-item label="Bit Rate">
+            <el-form-item :label="i18next.t('database.orti.index.connector.bitRate')">
               <el-input
                 v-model="connectorForm.options.bitRate"
-                placeholder="Enter bit rate (e.g., 500000)"
+                :placeholder="i18next.t('database.orti.index.connector.enterBitRate')"
                 disabled
                 style="width: 200px"
               />
@@ -306,18 +369,18 @@
 
           <!-- ETH specific options (disabled for now) -->
           <template v-if="connectorForm.type === 'ETH'">
-            <el-form-item label="IP Address">
+            <el-form-item :label="i18next.t('database.orti.index.connector.ipAddress')">
               <el-input
                 v-model="connectorForm.options.ipAddress"
-                placeholder="Enter IP address"
+                :placeholder="i18next.t('database.orti.index.connector.enterIpAddress')"
                 disabled
                 style="width: 200px"
               />
             </el-form-item>
-            <el-form-item label="Port">
+            <el-form-item :label="i18next.t('database.orti.index.connector.port')">
               <el-input
                 v-model="connectorForm.options.port"
-                placeholder="Enter port number"
+                :placeholder="i18next.t('database.orti.index.connector.enterPort')"
                 disabled
                 style="width: 150px"
               />
@@ -325,10 +388,13 @@
           </template>
 
           <template v-if="connectorForm.type === 'BinaryFile' || connectorForm.type === 'CSVFile'">
-            <el-form-item label="File" prop="options.file">
+            <el-form-item
+              :label="i18next.t('database.orti.index.connector.file')"
+              prop="options.file"
+            >
               <el-input
                 v-model="connectorForm.options.file"
-                placeholder="Enter file path"
+                :placeholder="i18next.t('database.orti.index.connector.enterFilePath')"
                 style="width: 80%"
               >
                 <template #append>
@@ -341,7 +407,7 @@
           </template>
         </el-form>
       </el-tab-pane>
-      <el-tab-pane name="Record File" label="Record File">
+      <el-tab-pane name="Record File" :label="i18next.t('database.orti.index.tabs.recordFile')">
         <el-form
           ref="recordFileFormRef"
           :model="recordFileForm"
@@ -350,17 +416,17 @@
           class="connector-form"
           style="margin: 20px"
         >
-          <el-form-item label="Enable Record">
+          <el-form-item :label="i18next.t('database.orti.index.recordFile.enableRecord')">
             <el-switch v-model="recordFileForm.enable" />
             <span style="margin-left: 10px; color: var(--el-text-color-secondary); font-size: 12px">
-              Enable recording of trace data to file
+              {{ i18next.t('database.orti.index.recordFile.enableRecordDescription') }}
             </span>
           </el-form-item>
 
-          <el-form-item label="File Name" prop="name">
+          <el-form-item :label="i18next.t('database.orti.index.recordFile.fileName')" prop="name">
             <el-input
               v-model="recordFileForm.name"
-              placeholder="Enter file name (e.g., processed_log.csv)"
+              :placeholder="i18next.t('database.orti.index.recordFile.enterFileName')"
               style="width: 80%"
             >
               <template #append>
@@ -372,9 +438,7 @@
           </el-form-item>
           <el-alert type="info" :closable="false" show-icon style="margin-top: 20px">
             <template #title>
-              The trace data will be recorded to the specified file in CSV format with raw data
-              columns: <strong>timestamp, type, id, status</strong> (no header). A timestamp
-              (YYYYMMDDHHmmss) will be automatically appended to the filename.
+              <span v-html="i18next.t('database.orti.index.recordFile.alertMessage')"></span>
             </template>
           </el-alert>
         </el-form>
@@ -410,6 +474,7 @@ import { VxeGrid, VxeGridProps, VxeGridInstance } from 'vxe-table'
 import { ORTIFile, parseORTI } from '../ortiParse'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useProjectStore } from '@r/stores/project'
+import { i18next } from '@r/i18n'
 
 const layout = inject('layout') as Layout
 
@@ -484,17 +549,23 @@ const coreConfigGridOptions = ref<VxeGridProps>({
       type: 'seq',
       resizable: false
     },
-    { align: 'center', field: 'name', title: 'Name', width: 200, editRender: { name: 'input' } },
+    {
+      align: 'center',
+      field: 'name',
+      title: i18next.t('database.orti.index.columns.name'),
+      width: 200,
+      editRender: { name: 'input' }
+    },
     {
       field: 'id',
-      title: 'ID',
+      title: i18next.t('database.orti.index.columns.id'),
       align: 'center',
       minWidth: 60,
       editRender: { name: 'input', attrs: { type: 'number' } }
     },
     {
       field: 'coreId',
-      title: 'Core ID',
+      title: i18next.t('database.orti.index.columns.coreId'),
       width: 80,
       align: 'center',
       editRender: { name: 'input', attrs: { type: 'number' } }
@@ -502,19 +573,23 @@ const coreConfigGridOptions = ref<VxeGridProps>({
     {
       align: 'center',
       field: 'type',
-      title: 'Type',
+      title: i18next.t('database.orti.index.columns.type'),
       width: 100,
       editRender: {},
       slots: { edit: 'edit_type' },
       formatter: ({ cellValue }) => {
-        return cellValue === 0 ? 'Task' : cellValue === 1 ? 'ISR' : cellValue
+        return cellValue === 0
+          ? i18next.t('database.orti.index.values.task')
+          : cellValue === 1
+            ? i18next.t('database.orti.index.values.isr')
+            : cellValue
       }
     },
 
     {
       align: 'center',
       field: 'activeInterval',
-      title: 'Active Interval(us)',
+      title: i18next.t('database.orti.index.columns.activeInterval'),
       width: 150,
       editRender: {
         name: 'input',
@@ -530,7 +605,7 @@ const coreConfigGridOptions = ref<VxeGridProps>({
     {
       align: 'center',
       field: 'color',
-      title: 'Color',
+      title: i18next.t('database.orti.index.columns.color'),
       width: 120,
 
       editRender: {},
@@ -602,17 +677,22 @@ const resourceConfigGridOptions = ref<VxeGridProps>({
       type: 'seq',
       resizable: false
     },
-    { align: 'center', field: 'name', title: 'Name', editRender: { name: 'input' } },
+    {
+      align: 'center',
+      field: 'name',
+      title: i18next.t('database.orti.index.columns.name'),
+      editRender: { name: 'input' }
+    },
     {
       field: 'id',
-      title: 'ID',
+      title: i18next.t('database.orti.index.columns.id'),
       align: 'center',
       width: 100,
       editRender: { name: 'input', attrs: { type: 'number' } }
     },
     {
       field: 'coreId',
-      title: 'Core ID',
+      title: i18next.t('database.orti.index.columns.coreId'),
       width: 100,
       align: 'center',
       editRender: { name: 'input', attrs: { type: 'number' } }
@@ -681,10 +761,16 @@ const serviceConfigGridOptions = ref<VxeGridProps>({
       type: 'seq',
       resizable: false
     },
-    { align: 'center', field: 'name', title: 'Name', minWidth: 250, editRender: { name: 'input' } },
+    {
+      align: 'center',
+      field: 'name',
+      title: i18next.t('database.orti.index.columns.name'),
+      minWidth: 250,
+      editRender: { name: 'input' }
+    },
     {
       field: 'id',
-      title: 'ID',
+      title: i18next.t('database.orti.index.columns.id'),
       align: 'center',
       width: 100,
       editRender: { name: 'input', attrs: { type: 'number' } }
@@ -752,10 +838,16 @@ const hookConfigGridOptions = ref<VxeGridProps>({
       type: 'seq',
       resizable: false
     },
-    { align: 'center', field: 'name', title: 'Name', minWidth: 250, editRender: { name: 'input' } },
+    {
+      align: 'center',
+      field: 'name',
+      title: i18next.t('database.orti.index.columns.name'),
+      minWidth: 250,
+      editRender: { name: 'input' }
+    },
     {
       field: 'id',
-      title: 'ID',
+      title: i18next.t('database.orti.index.columns.id'),
       align: 'center',
       width: 100,
       editRender: { name: 'input', attrs: { type: 'number' } }
@@ -813,16 +905,38 @@ const recordFileForm = ref({
 // Connector form validation rules
 const connectorFormRules = computed(() => {
   const rules: any = {
-    type: [{ required: true, message: 'Please select connector type', trigger: 'change' }]
+    type: [
+      {
+        required: true,
+        message: i18next.t('database.orti.index.validation.selectConnectorType'),
+        trigger: 'change'
+      }
+    ]
   }
 
   if (connectorForm.value.type === 'SerialPort') {
-    rules.device = [{ required: true, message: 'Please select a device', trigger: 'change' }]
+    rules.device = [
+      {
+        required: true,
+        message: i18next.t('database.orti.index.validation.selectDevice'),
+        trigger: 'change'
+      }
+    ]
     rules['options.baudRate'] = [
-      { required: true, message: 'Please select a baud rate', trigger: 'change' }
+      {
+        required: true,
+        message: i18next.t('database.orti.index.validation.selectBaudRate'),
+        trigger: 'change'
+      }
     ]
   } else if (connectorForm.value.type === 'BinaryFile' || connectorForm.value.type === 'CSVFile') {
-    rules['options.file'] = [{ required: true, message: 'Please select a file', trigger: 'change' }]
+    rules['options.file'] = [
+      {
+        required: true,
+        message: i18next.t('database.orti.index.validation.selectFile'),
+        trigger: 'change'
+      }
+    ]
   }
 
   return rules
@@ -1080,13 +1194,17 @@ const existed = computed(() => {
 })
 
 function deleteDatabase() {
-  ElMessageBox.confirm('Are you sure you want to delete this database?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`,
-    type: 'warning'
-  })
+  ElMessageBox.confirm(
+    i18next.t('database.orti.index.deleteConfirm.message'),
+    i18next.t('database.orti.index.deleteConfirm.title'),
+    {
+      confirmButtonText: i18next.t('database.orti.index.deleteConfirm.ok'),
+      cancelButtonText: i18next.t('database.orti.index.deleteConfirm.cancel'),
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`,
+      type: 'warning'
+    }
+  )
     .then(() => {
       database.$patch(() => {
         delete database.database.orti[props.editIndex]
@@ -1103,7 +1221,7 @@ async function saveDataBase() {
     ElNotification({
       offset: 50,
       type: 'error',
-      message: 'Database name cannot be empty',
+      message: i18next.t('database.orti.index.errors.databaseNameCannotBeEmpty'),
       appendTo: `#win${props.editIndex}`
     })
     return
@@ -1113,7 +1231,7 @@ async function saveDataBase() {
     ElNotification({
       offset: 50,
       type: 'error',
-      message: 'CPU Frequency cannot be 0',
+      message: i18next.t('database.orti.index.errors.cpuFrequencyCannotBeZero'),
       appendTo: `#win${props.editIndex}`
     })
     return
@@ -1143,7 +1261,10 @@ async function saveDataBase() {
         ElNotification({
           offset: 50,
           type: 'error',
-          message: `Task ID "${task.id}" already exists in core ${task.coreId}`,
+          message: i18next.t('database.orti.index.errors.taskIdAlreadyExists', {
+            id: task.id,
+            coreId: task.coreId
+          }),
           appendTo: `#win${props.editIndex}`
         })
         return
@@ -1154,7 +1275,7 @@ async function saveDataBase() {
         ElNotification({
           offset: 50,
           type: 'error',
-          message: `ISR ID "${task.id}" already exists`,
+          message: i18next.t('database.orti.index.errors.isrIdAlreadyExists', { id: task.id }),
           appendTo: `#win${props.editIndex}`
         })
         return
@@ -1173,7 +1294,9 @@ async function saveDataBase() {
     ElNotification({
       offset: 50,
       type: 'error',
-      message: `Database name "${dbcObj.value.name}" already exists`,
+      message: i18next.t('database.orti.index.errors.duplicateDatabaseName', {
+        name: dbcObj.value.name
+      }),
       appendTo: `#win${props.editIndex}`
     })
     return
@@ -1204,7 +1327,7 @@ async function saveDataBase() {
   ElNotification({
     offset: 50,
     type: 'success',
-    message: 'The database has been saved successfully',
+    message: i18next.t('database.orti.index.messages.saveSuccess'),
     appendTo: `#win${props.editIndex}`
   })
 }
@@ -1231,30 +1354,38 @@ onMounted(() => {
           initializeConnectorForm()
           initializeRecordFileForm()
         } else {
-          ElMessageBox.alert('Parse failed', 'Error', {
-            confirmButtonText: 'OK',
-            type: 'error',
-            buttonSize: 'small',
-            appendTo: `#win${props.editIndex}`,
-            message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:16px">
+          ElMessageBox.alert(
+            i18next.t('database.orti.index.errors.parseFailed'),
+            i18next.t('database.orti.index.errors.error'),
+            {
+              confirmButtonText: i18next.t('database.orti.index.deleteConfirm.ok'),
+              type: 'error',
+              buttonSize: 'small',
+              appendTo: `#win${props.editIndex}`,
+              message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:16px">
 ${result.errors[0].line ?? ''}${result.errors[0].line ? ':' : ''}${result.errors[0].column ?? ''}${result.errors[0].column ? ':\\n' : ''}
 ${result.errors[0].message}
 </pre>`,
-            dangerouslyUseHTMLString: true
-          }).finally(() => {
+              dangerouslyUseHTMLString: true
+            }
+          ).finally(() => {
             layout.removeWin(props.editIndex, true)
           })
         }
         loading.value = false
       })
       .catch((err) => {
-        ElMessageBox.alert('Parse failed', 'Error', {
-          confirmButtonText: 'OK',
-          type: 'error',
-          buttonSize: 'small',
-          appendTo: `#win${props.editIndex}`,
-          message: err.message
-        })
+        ElMessageBox.alert(
+          i18next.t('database.orti.index.errors.parseFailed'),
+          i18next.t('database.orti.index.errors.error'),
+          {
+            confirmButtonText: i18next.t('database.orti.index.deleteConfirm.ok'),
+            type: 'error',
+            buttonSize: 'small',
+            appendTo: `#win${props.editIndex}`,
+            message: err.message
+          }
+        )
           .then(() => {
             layout.removeWin(props.editIndex, true)
           })

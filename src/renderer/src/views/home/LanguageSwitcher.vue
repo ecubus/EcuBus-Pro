@@ -23,9 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useTranslation } from 'i18next-vue'
-import { reloadRendererTranslations } from '../../i18n'
+import { reloadRendererTranslations, getSupportedLanguages } from '../../i18n'
 
 interface LanguageInfo {
   code: string
@@ -40,10 +40,10 @@ const model = defineModel<string>({ required: true })
 const supportedLanguages = ref<LanguageInfo[]>([])
 const loading = ref(false)
 
-// 加载支持的语言列表（同步）
-const loadSupportedLanguages = () => {
+// 加载支持的语言列表
+const loadSupportedLanguages = async () => {
   try {
-    const languages = window.electron.ipcRenderer.sendSync('get-supported-languages-sync')
+    const languages = await getSupportedLanguages()
     supportedLanguages.value = languages
   } catch (error) {
     console.error('Failed to load supported languages:', error)
@@ -52,13 +52,13 @@ const loadSupportedLanguages = () => {
   }
 }
 
-// 切换语言（同步）
-const handleLanguageChange = (lang: string) => {
+// 切换语言
+const handleLanguageChange = async (lang: string) => {
   try {
     loading.value = true
 
-    // 重新加载翻译（同步）
-    reloadRendererTranslations(lang)
+    // 重新加载翻译
+    await reloadRendererTranslations(lang)
   } catch (error) {
     console.error('Failed to change language:', error)
   } finally {

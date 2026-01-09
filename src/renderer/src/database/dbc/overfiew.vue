@@ -2,14 +2,16 @@
   <div class="main">
     <div class="left">
       <div class="header">
-        <span style="font-size: 12px; width: 100px; text-align: center">DB Name</span>
+        <span style="font-size: 12px; width: 100px; text-align: center">{{
+          i18next.t('database.dbc.overview.labels.dbName')
+        }}</span>
         <el-input v-model="dbcObj.name" size="small" style="width: 100%" />
       </div>
       <div class="search-box">
         <el-input
           v-model="treeQuery"
           size="small"
-          placeholder="Filter tree nodes..."
+          :placeholder="i18next.t('database.dbc.overview.placeholders.filterTreeNodes')"
           clearable
           @input="onTreeQueryChanged"
           @clear="onTreeQueryChanged"
@@ -56,7 +58,7 @@
           >
             <el-input
               v-model="searchText"
-              placeholder="Search by name..."
+              :placeholder="i18next.t('database.dbc.overview.placeholders.searchByName')"
               style="width: 200px"
               size="small"
               clearable
@@ -99,6 +101,7 @@ import nodeIcon from '@iconify/icons-material-symbols/point-scan'
 import { multiCalc } from './parse'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElTreeV2 } from 'element-plus'
+import { i18next } from '@r/i18n'
 // import { validateLDF } from './validator'
 
 const dbcObj = defineModel<DBC>({
@@ -139,7 +142,7 @@ const treeData = computed(() => {
 
   const t = [
     {
-      label: 'Node',
+      label: i18next.t('database.dbc.overview.treeCategories.node'),
       type: 'category',
       children: Object.entries(dbcObj.value.nodes).map(([name, node]) => ({
         label: name,
@@ -148,7 +151,7 @@ const treeData = computed(() => {
       }))
     },
     {
-      label: 'Message',
+      label: i18next.t('database.dbc.overview.treeCategories.message'),
       type: 'category',
       children: Object.entries(dbcObj.value.messages)
         .sort((a, b) => a[1].name.localeCompare(b[1].name))
@@ -168,7 +171,7 @@ const treeData = computed(() => {
         }))
     },
     {
-      label: 'Signal',
+      label: i18next.t('database.dbc.overview.treeCategories.signal'),
       type: 'category',
       children: allSignals
     }
@@ -194,40 +197,54 @@ const defaultProps = {
 
 // Table configurations
 const signalColumns: VxeGridProps['columns'] = [
-  { field: 'name', title: 'Name', minWidth: 120, fixed: 'left' },
-  { field: 'messageName', title: 'Message', minWidth: 120 },
+  {
+    field: 'name',
+    title: i18next.t('database.dbc.overview.columns.name'),
+    minWidth: 120,
+    fixed: 'left'
+  },
+  {
+    field: 'messageName',
+    title: i18next.t('database.dbc.overview.columns.message'),
+    minWidth: 120
+  },
   {
     field: 'multiplexerIndicator',
-    title: 'Multiplexer',
+    title: i18next.t('database.dbc.overview.columns.multiplexer'),
     width: 100,
     formatter: ({ row }) => multiCalc(row) || '-'
   },
-  { field: 'startBit', title: 'Start Bit', width: 100 },
-  { field: 'length', title: 'Length', width: 80 },
+  { field: 'startBit', title: i18next.t('database.dbc.overview.columns.startBit'), width: 100 },
+  { field: 'length', title: i18next.t('database.dbc.overview.columns.length'), width: 80 },
   {
     field: 'isLittleEndian',
-    title: 'Byte Order',
+    title: i18next.t('database.dbc.overview.columns.byteOrder'),
     width: 100,
-    formatter: ({ cellValue }) => (cellValue ? 'Intel' : 'Motorola')
+    formatter: ({ cellValue }) =>
+      cellValue
+        ? i18next.t('database.dbc.overview.values.intel')
+        : i18next.t('database.dbc.overview.values.motorola')
   },
   {
     field: 'isSigned',
-    title: 'Type',
+    title: i18next.t('database.dbc.overview.columns.type'),
     width: 80,
     formatter: ({ row }) => {
-      if (row.valueType === 1) return 'Float'
-      if (row.valueType === 2) return 'Double'
-      return row.isSigned ? 'Signed' : 'Unsigned'
+      if (row.valueType === 1) return i18next.t('database.dbc.overview.values.float')
+      if (row.valueType === 2) return i18next.t('database.dbc.overview.values.double')
+      return row.isSigned
+        ? i18next.t('database.dbc.overview.values.signed')
+        : i18next.t('database.dbc.overview.values.unsigned')
     }
   },
-  { field: 'factor', title: 'Factor', width: 80 },
-  { field: 'offset', title: 'Offset', width: 80 },
-  { field: 'minimum', title: 'Min', width: 80 },
-  { field: 'maximum', title: 'Max', width: 80 },
-  { field: 'unit', title: 'Unit', width: 80 },
+  { field: 'factor', title: i18next.t('database.dbc.overview.columns.factor'), width: 80 },
+  { field: 'offset', title: i18next.t('database.dbc.overview.columns.offset'), width: 80 },
+  { field: 'minimum', title: i18next.t('database.dbc.overview.columns.min'), width: 80 },
+  { field: 'maximum', title: i18next.t('database.dbc.overview.columns.max'), width: 80 },
+  { field: 'unit', title: i18next.t('database.dbc.overview.columns.unit'), width: 80 },
   {
     field: 'valueTable',
-    title: 'Value Table',
+    title: i18next.t('database.dbc.overview.columns.valueTable'),
     width: 120,
     formatter: ({ row }) => {
       if (row.values) {
@@ -236,23 +253,28 @@ const signalColumns: VxeGridProps['columns'] = [
       return row.valueTable || ''
     }
   },
-  { field: 'comment', title: 'Comment', width: 200 }
+  { field: 'comment', title: i18next.t('database.dbc.overview.columns.comment'), width: 200 }
 ]
 
 // Add message columns configuration
 const messageColumns: VxeGridProps['columns'] = [
-  { field: 'name', title: 'Name', minWidth: 150, fixed: 'left' },
+  {
+    field: 'name',
+    title: i18next.t('database.dbc.overview.columns.name'),
+    minWidth: 150,
+    fixed: 'left'
+  },
   {
     field: 'id',
-    title: 'ID',
+    title: i18next.t('database.dbc.overview.columns.id'),
     width: 100,
     formatter: ({ cellValue }) => `0x${Number(cellValue).toString(16).toUpperCase()}`
   },
-  { field: 'length', title: 'Length', width: 100 },
-  { field: 'sender', title: 'Sender', width: 120 },
+  { field: 'length', title: i18next.t('database.dbc.overview.columns.length'), width: 100 },
+  { field: 'sender', title: i18next.t('database.dbc.overview.columns.sender'), width: 120 },
   {
     field: 'receivers',
-    title: 'Receivers',
+    title: i18next.t('database.dbc.overview.columns.receivers'),
     width: 150,
     formatter: ({ row }) => {
       const receivers = row.signals
@@ -261,14 +283,14 @@ const messageColumns: VxeGridProps['columns'] = [
       return receivers.join(', ')
     }
   },
-  { field: 'role', title: 'Role', width: 100 },
+  { field: 'role', title: i18next.t('database.dbc.overview.columns.role'), width: 100 },
   {
     field: 'signalCount',
-    title: 'Signals',
+    title: i18next.t('database.dbc.overview.columns.signals'),
     width: 100,
     formatter: ({ row }) => Object.keys(row.signals || {}).length
   },
-  { field: 'comment', title: 'Comment', width: 200 }
+  { field: 'comment', title: i18next.t('database.dbc.overview.columns.comment'), width: 200 }
 ]
 
 const signalData = ref<Signal[]>([])
@@ -344,7 +366,10 @@ const handleNodeClick = (data: any) => {
       .map(([id, msg]) => ({
         ...msg,
         id: parseInt(id),
-        role: msg.sender === nodeName ? 'Sender' : 'Receiver'
+        role:
+          msg.sender === nodeName
+            ? i18next.t('database.dbc.overview.values.sender')
+            : i18next.t('database.dbc.overview.values.receiver')
       }))
       .sort((a, b) => a.id - b.id)
 
@@ -391,9 +416,9 @@ const getNodeIcon = (data: any) => {
   if (data.type === 'message') return messageIcon
   if (data.type === 'node') return nodeIcon
   if (data.type === 'category') {
-    if (data.label === 'Node') return nodeIcon
-    if (data.label === 'Message') return messageIcon
-    if (data.label === 'Signal') return waveIcon
+    if (data.label === i18next.t('database.dbc.overview.treeCategories.node')) return nodeIcon
+    if (data.label === i18next.t('database.dbc.overview.treeCategories.message')) return messageIcon
+    if (data.label === i18next.t('database.dbc.overview.treeCategories.signal')) return waveIcon
   }
   return ''
 }

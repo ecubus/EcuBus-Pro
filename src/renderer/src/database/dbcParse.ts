@@ -1,5 +1,6 @@
 import { JsonLexer, parser } from './dbc/parse'
 import { DBC, DBCVisitor, Message, Signal } from './dbc/dbcVisitor'
+import { i18next } from '@r/i18n'
 // 添加一个函数来创建行号映射
 function createLineMapping(originalText: string, processedText: string): number[] {
   const originalLines = originalText.split('\n')
@@ -55,10 +56,10 @@ function formatLexerError(
     })
     .join('\n')
 
-  const message = `Lexer error at line ${originalLineNumber + 1}, column ${error.column}:
-Context:
+  const message = `${i18next.t('database.dbcParse.errors.lexerError', { line: originalLineNumber + 1, column: error.column })}:
+${i18next.t('database.dbcParse.errors.context')}:
 ${context}
-Unexpected character: "${error.message.split("'")[1]}"`
+${i18next.t('database.dbcParse.errors.unexpectedCharacter', { char: error.message.split("'")[1] })}`
   return message
 }
 
@@ -97,11 +98,11 @@ function formatParserError(
     })
     .join('\n')
 
-  const message = `Parser error at line ${originalLineNumber + 1}, column ${error.token.startColumn || 0}:
-Context:
+  const message = `${i18next.t('database.dbcParse.errors.parserError', { line: originalLineNumber + 1, column: error.token.startColumn || 0 })}:
+${i18next.t('database.dbcParse.errors.context')}:
 ${context}
 ${error.message}
-Expected one of: ${(error.expectedTokens || []).join(', ')}`
+${i18next.t('database.dbcParse.errors.expectedOneOf', { tokens: (error.expectedTokens || []).join(', ') })}`
 
   return message
 }
@@ -143,7 +144,7 @@ export default function parse(text: string): DBC {
       originalText,
       lineMapping
     )
-    throw new Error(`Lexing errors:\n${formattedErrors}`)
+    throw new Error(`${i18next.t('database.dbcParse.errors.lexingErrors')}:\n${formattedErrors}`)
   }
 
   parser.input = lexingResult.tokens
@@ -160,7 +161,7 @@ export default function parse(text: string): DBC {
         originalText,
         lineMapping
       )
-      throw new Error(`Parsing errors:\n${formattedErrors}`)
+      throw new Error(`${i18next.t('database.dbcParse.errors.parsingErrors')}:\n${formattedErrors}`)
     }
     const visitor = new DBCVisitor()
     return visitor.visit(cst)
@@ -168,6 +169,6 @@ export default function parse(text: string): DBC {
     if (err instanceof Error) {
       throw err
     }
-    throw new Error(`Unexpected error during parsing: ${err}`)
+    throw new Error(`${i18next.t('database.dbcParse.errors.unexpectedError')}: ${err}`)
   }
 }

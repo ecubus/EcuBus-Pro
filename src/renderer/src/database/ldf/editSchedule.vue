@@ -12,28 +12,64 @@
               :inline="true"
               size="small"
             >
-              <el-form-item label="Frame Type" prop="type">
+              <el-form-item
+                :label="i18next.t('database.ldf.editSchedule.labels.frameType')"
+                prop="type"
+              >
                 <el-select
                   v-model="addFrameForm.type"
                   style="width: 160px"
                   @change="handleFrameTypeChange"
                 >
-                  <el-option label="Normal Frame" value="existing" />
-                  <el-option label="Event Triggered" value="EventTrigger" />
-                  <el-option label="Sporadic" value="Sporadic" />
-                  <el-option label="Diagnostic" value="Diagnostic" />
-                  <el-option label="AssignNAD" value="AssignNAD" />
-                  <el-option label="AssignFrameId" value="AssignFrameId" />
-                  <el-option label="ConditionalChangeNAD" value="ConditionalChangeNAD" />
-                  <el-option label="DataDump" value="DataDump" />
-                  <el-option label="SaveConfiguration" value="SaveConfiguration" />
-                  <el-option label="AssignFrameIdRange" value="AssignFrameIdRange" />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.normalFrame')"
+                    value="existing"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.eventTriggered')"
+                    value="EventTrigger"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.sporadic')"
+                    value="Sporadic"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.diagnostic')"
+                    value="Diagnostic"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.assignNAD')"
+                    value="AssignNAD"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.assignFrameId')"
+                    value="AssignFrameId"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.conditionalChangeNAD')"
+                    value="ConditionalChangeNAD"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.dataDump')"
+                    value="DataDump"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.saveConfiguration')"
+                    value="SaveConfiguration"
+                  />
+                  <el-option
+                    :label="i18next.t('database.ldf.editSchedule.options.assignFrameIdRange')"
+                    value="AssignFrameIdRange"
+                  />
                 </el-select>
               </el-form-item>
 
               <!-- Existing Frame Selection -->
               <template v-if="addFrameForm.type === 'existing'">
-                <el-form-item label="Frame" prop="frameName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frame')"
+                  prop="frameName"
+                >
                   <el-select v-model="addFrameForm.frameName" style="width: 200px">
                     <el-option
                       v-for="frame in availableFrames"
@@ -47,13 +83,22 @@
 
               <!-- Event Triggered Frame Form -->
               <template v-if="addFrameForm.type === 'EventTrigger'">
-                <el-form-item label="Name" prop="name">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.name')"
+                  prop="name"
+                >
                   <el-input v-model="addFrameForm.name" style="width: 150px" />
                 </el-form-item>
-                <el-form-item label="Frame ID" prop="frameId">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frameId')"
+                  prop="frameId"
+                >
                   <el-input v-model="addFrameForm.frameId" style="width: 100px" />
                 </el-form-item>
-                <el-form-item label="Frames" prop="frameNames">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frames')"
+                  prop="frameNames"
+                >
                   <el-select
                     v-model="addFrameForm.frameNames"
                     multiple
@@ -68,7 +113,10 @@
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="Schedule Table" prop="scheduleName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.scheduleTable')"
+                  prop="scheduleName"
+                >
                   <el-select v-model="addFrameForm.scheduleName" style="width: 200px">
                     <el-option
                       v-for="schName in props.schNames"
@@ -82,10 +130,16 @@
 
               <!-- 添加 Sporadic Frame Form -->
               <template v-if="addFrameForm.type === 'Sporadic'">
-                <el-form-item label="Name" prop="name">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.name')"
+                  prop="name"
+                >
                   <el-input v-model="addFrameForm.name" style="width: 150px" />
                 </el-form-item>
-                <el-form-item label="Frames" prop="frameNames">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frames')"
+                  prop="frameNames"
+                >
                   <el-select
                     v-model="addFrameForm.frameNames"
                     multiple
@@ -104,10 +158,19 @@
 
               <!-- Diagnostic Frame Form -->
               <template v-if="addFrameForm.type === 'Diagnostic'">
-                <el-form-item label="Type" prop="diagnosticType">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.type')"
+                  prop="diagnosticType"
+                >
                   <el-select v-model="addFrameForm.diagnosticType" style="width: 120px">
-                    <el-option label="MasterReq" value="MasterReq" />
-                    <el-option label="SlaveResp" value="SlaveResp" />
+                    <el-option
+                      :label="i18next.t('database.ldf.editSchedule.options.masterReq')"
+                      value="MasterReq"
+                    />
+                    <el-option
+                      :label="i18next.t('database.ldf.editSchedule.options.slaveResp')"
+                      value="SlaveResp"
+                    />
                   </el-select>
                 </el-form-item>
               </template>
@@ -118,7 +181,10 @@
                   ['AssignNAD', 'SaveConfiguration', 'AssignFrameId'].includes(addFrameForm.type)
                 "
               >
-                <el-form-item label="Node" prop="nodeName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.node')"
+                  prop="nodeName"
+                >
                   <el-select v-model="addFrameForm.nodeName" style="width: 150px">
                     <el-option
                       v-for="node in props.ldf.node.salveNode"
@@ -132,7 +198,10 @@
 
               <!-- 添加AssignFrameId的表单部分 -->
               <template v-if="addFrameForm.type === 'AssignFrameId'">
-                <el-form-item label="Frame" prop="frameName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frame')"
+                  prop="frameName"
+                >
                   <el-select v-model="addFrameForm.frameName" style="width: 200px">
                     <el-option
                       v-for="frame in availableConfigFrames"
@@ -146,7 +215,7 @@
 
               <!-- 添加ConditionalChangeNAD表单部分 -->
               <template v-if="addFrameForm.type === 'ConditionalChangeNAD'">
-                <el-form-item label="NAD" prop="nad">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.nad')" prop="nad">
                   <el-input-number
                     v-model="addFrameForm.nad"
                     :min="0"
@@ -155,7 +224,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="ID" prop="id">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.id')" prop="id">
                   <el-input-number
                     v-model="addFrameForm.id"
                     :min="0"
@@ -164,7 +233,10 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="Byte" prop="byte">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.byte')"
+                  prop="byte"
+                >
                   <el-input-number
                     v-model="addFrameForm.byte"
                     :min="0"
@@ -173,7 +245,10 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="Mask" prop="mask">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.mask')"
+                  prop="mask"
+                >
                   <el-input-number
                     v-model="addFrameForm.mask"
                     :min="0"
@@ -182,7 +257,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="Inv" prop="inv">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.inv')" prop="inv">
                   <el-input-number
                     v-model="addFrameForm.inv"
                     :min="0"
@@ -191,7 +266,10 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="New NAD" prop="newNad">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.newNad')"
+                  prop="newNad"
+                >
                   <el-input-number
                     v-model="addFrameForm.newNad"
                     :min="0"
@@ -204,7 +282,10 @@
 
               <!-- 添加DataDump表单部分 -->
               <template v-if="addFrameForm.type === 'DataDump'">
-                <el-form-item label="Node" prop="nodeName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.node')"
+                  prop="nodeName"
+                >
                   <el-select v-model="addFrameForm.nodeName" style="width: 150px">
                     <el-option
                       v-for="node in props.ldf.node.salveNode"
@@ -214,7 +295,7 @@
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="D1" prop="D1">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.d1')" prop="D1">
                   <el-input-number
                     v-model="addFrameForm.D1"
                     :min="0"
@@ -223,7 +304,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="D2" prop="D2">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.d2')" prop="D2">
                   <el-input-number
                     v-model="addFrameForm.D2"
                     :min="0"
@@ -232,7 +313,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="D3" prop="D3">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.d3')" prop="D3">
                   <el-input-number
                     v-model="addFrameForm.D3"
                     :min="0"
@@ -241,7 +322,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="D4" prop="D4">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.d4')" prop="D4">
                   <el-input-number
                     v-model="addFrameForm.D4"
                     :min="0"
@@ -250,7 +331,7 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="D5" prop="D5">
+                <el-form-item :label="i18next.t('database.ldf.editSchedule.labels.d5')" prop="D5">
                   <el-input-number
                     v-model="addFrameForm.D5"
                     :min="0"
@@ -263,7 +344,10 @@
 
               <!-- 添加AssignFrameIdRange表单部分 -->
               <template v-if="addFrameForm.type === 'AssignFrameIdRange'">
-                <el-form-item label="Node" prop="nodeName">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.node')"
+                  prop="nodeName"
+                >
                   <el-select v-model="addFrameForm.nodeName" style="width: 150px">
                     <el-option
                       v-for="node in props.ldf.node.salveNode"
@@ -273,7 +357,10 @@
                     />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="Frame Index" prop="frameIndex">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.frameIndex')"
+                  prop="frameIndex"
+                >
                   <el-input-number
                     v-model="addFrameForm.frameIndex"
                     :min="0"
@@ -282,7 +369,10 @@
                     controls-position="right"
                   />
                 </el-form-item>
-                <el-form-item label="Frame PIDs" prop="framePIDs">
+                <el-form-item
+                  :label="i18next.t('database.ldf.editSchedule.labels.framePIDs')"
+                  prop="framePIDs"
+                >
                   <div style="display: flex; gap: 8px">
                     <el-input-number
                       v-for="(_, index) in 4"
@@ -292,14 +382,16 @@
                       :max="63"
                       style="width: 80px"
                       controls-position="right"
-                      placeholder="PID"
+                      :placeholder="i18next.t('database.ldf.editSchedule.placeholders.pid')"
                     />
                   </div>
                 </el-form-item>
               </template>
 
               <el-form-item>
-                <el-button type="primary" plain @click="submitForm">Add Frame</el-button>
+                <el-button type="primary" plain @click="submitForm">{{
+                  i18next.t('database.ldf.editSchedule.buttons.addFrame')
+                }}</el-button>
                 <el-button type="danger" plain :disabled="selectedIndex < 0" @click="deleteFrame">
                   <Icon :icon="deleteIcon" />
                 </el-button>
@@ -312,7 +404,12 @@
       <!-- 新增操作列模板 -->
       <template #default_operate>
         <el-button-group>
-          <el-button link type="danger" title="Delete Frame" @click="deleteFrame">
+          <el-button
+            link
+            type="danger"
+            :title="i18next.t('database.ldf.editSchedule.tooltips.deleteFrame')"
+            @click="deleteFrame"
+          >
             <Icon :icon="deleteIcon" />
           </el-button>
         </el-button-group>
@@ -371,6 +468,7 @@ import Sortable from 'sortablejs'
 import { LDF, SchTable, getFrameSize } from '../ldfParse'
 import type { FormInstance, FormRules } from 'element-plus'
 import Schema from 'async-validator'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   editIndex: string
@@ -417,38 +515,38 @@ const gridOptions = computed<VxeGridProps<Entry>>(() => ({
 
     {
       field: 'name',
-      title: 'Frame',
+      title: i18next.t('database.ldf.editSchedule.columns.frame'),
       minWidth: 200,
       slots: { default: 'default_name' }
     },
     {
       field: 'id',
-      title: 'ID',
+      title: i18next.t('database.ldf.editSchedule.columns.id'),
       width: 80,
       slots: { default: 'default_id' }
     },
     {
       field: 'type',
-      title: 'Type',
+      title: i18next.t('database.ldf.editSchedule.columns.type'),
       width: 200,
       slots: { default: 'default_type' }
     },
     {
       field: 'delay',
-      title: 'Delay [ms]',
+      title: i18next.t('database.ldf.editSchedule.columns.delay'),
       width: 150,
       editRender: {},
       slots: { edit: 'edit_delay' }
     },
     {
       field: 'minTime',
-      title: 'Min Time [ms]',
+      title: i18next.t('database.ldf.editSchedule.columns.minTime'),
       width: 120,
       slots: { default: 'default_minTime' }
     },
     {
       field: 'maxTime',
-      title: 'Max Time [ms]',
+      title: i18next.t('database.ldf.editSchedule.columns.maxTime'),
       width: 120,
       slots: { default: 'default_maxTime' }
     }
@@ -505,13 +603,13 @@ function getFrameType(entry: Entry) {
   }
 
   if (entry.name in props.ldf.frames) {
-    return 'Unconditional'
+    return i18next.t('database.ldf.editSchedule.frameTypes.unconditional')
   }
   if (entry.name in props.ldf.eventTriggeredFrames) {
-    return 'Event Triggered'
+    return i18next.t('database.ldf.editSchedule.frameTypes.eventTriggered')
   }
   if (entry.name in props.ldf.sporadicFrames) {
-    return 'Sporadic'
+    return i18next.t('database.ldf.editSchedule.frameTypes.sporadic')
   }
   return ''
 }
@@ -564,12 +662,18 @@ const formRef = ref<FormInstance>()
 
 // 表单验证规则
 const formRules = computed<FormRules>(() => ({
-  type: [{ required: true, message: 'Please select frame type', trigger: 'change' }],
+  type: [
+    {
+      required: true,
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectFrameType'),
+      trigger: 'change'
+    }
+  ],
   name: [
     {
       required:
         addFrameForm.value.type === 'EventTrigger' || addFrameForm.value.type === 'Sporadic',
-      message: 'Please input event frame name',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputEventFrameName'),
       trigger: 'blur'
     },
     {
@@ -581,11 +685,15 @@ const formRules = computed<FormRules>(() => ({
 
         // 检查是否与其他帧名冲突
         if (value in props.ldf.frames) {
-          callback(new Error('Name conflicts with existing unconditional frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsUnconditional'))
+          )
           return
         }
         if (value in props.ldf.sporadicFrames) {
-          callback(new Error('Name conflicts with existing sporadic frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsSporadic'))
+          )
           return
         }
         // 检查是否与其他event triggered frames冲突(排除自己)
@@ -593,7 +701,9 @@ const formRules = computed<FormRules>(() => ({
           ([k, v]) => k === value && v.schTableName !== props.editIndex
         )
         if (conflictEvent) {
-          callback(new Error('Name conflicts with existing event triggered frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsEventTriggered'))
+          )
           return
         }
         callback()
@@ -608,16 +718,22 @@ const formRules = computed<FormRules>(() => ({
 
         // 检查是否与其他帧名冲突
         if (value in props.ldf.frames) {
-          callback(new Error('Name conflicts with existing unconditional frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsUnconditional'))
+          )
           return
         }
         if (value in props.ldf.eventTriggeredFrames) {
-          callback(new Error('Name conflicts with existing event triggered frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsEventTriggered'))
+          )
           return
         }
         // 检查是否与其他sporadic frames冲突
         if (value in props.ldf.sporadicFrames) {
-          callback(new Error('Name conflicts with existing sporadic frame'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.nameConflictsSporadic'))
+          )
           return
         }
         callback()
@@ -627,12 +743,12 @@ const formRules = computed<FormRules>(() => ({
   frameId: [
     {
       required: addFrameForm.value.type === 'EventTrigger',
-      message: 'Please input frame ID',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputFrameId'),
       trigger: 'blur'
     },
     {
       pattern: /^[0-9a-fA-F]+$/,
-      message: 'Frame ID must be hexadecimal',
+      message: i18next.t('database.ldf.editSchedule.validation.frameIdMustBeHexadecimal'),
       trigger: 'blur'
     },
     {
@@ -644,14 +760,20 @@ const formRules = computed<FormRules>(() => ({
 
         const id = parseInt(value, 16)
         if (isNaN(id) || id < 0 || id > 0x3f) {
-          callback(new Error('Frame ID must be between 0x00 and 0x3F'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.frameIdRange')))
           return
         }
 
         // 检查ID是否与其他帧冲突
         for (const frame of Object.values(props.ldf.frames)) {
           if (frame.id === id) {
-            callback(new Error(`Frame ID conflicts with unconditional frame ${frame.name}`))
+            callback(
+              new Error(
+                i18next.t('database.ldf.editSchedule.validation.frameIdConflictsUnconditional', {
+                  frameName: frame.name
+                })
+              )
+            )
             return
           }
         }
@@ -659,7 +781,13 @@ const formRules = computed<FormRules>(() => ({
         // 检查是否与其他event triggered frames冲突(排除自己)
         for (const [name, frame] of Object.entries(props.ldf.eventTriggeredFrames)) {
           if (frame.frameId === id && frame.schTableName !== props.editIndex) {
-            callback(new Error(`Frame ID conflicts with event triggered frame ${name}`))
+            callback(
+              new Error(
+                i18next.t('database.ldf.editSchedule.validation.frameIdConflictsEventTriggered', {
+                  name
+                })
+              )
+            )
             return
           }
         }
@@ -670,7 +798,7 @@ const formRules = computed<FormRules>(() => ({
   diagnosticType: [
     {
       required: addFrameForm.value.type === 'Diagnostic',
-      message: 'Please select diagnostic type',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectDiagnosticType'),
       trigger: 'change'
     }
   ],
@@ -683,7 +811,7 @@ const formRules = computed<FormRules>(() => ({
         'DataDump',
         'AssignFrameIdRange'
       ].includes(addFrameForm.value.type),
-      message: 'Please select a node',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectNode'),
       trigger: 'change'
     }
   ],
@@ -691,7 +819,7 @@ const formRules = computed<FormRules>(() => ({
     {
       type: 'array',
       required: addFrameForm.value.type === 'EventTrigger',
-      message: 'Please select at least one frame',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectAtLeastOneFrame'),
       trigger: 'change',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'EventTrigger') {
@@ -699,7 +827,11 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (!Array.isArray(value) || value.length < 2) {
-          callback(new Error('Event triggered frame must have at least 2 frames'))
+          callback(
+            new Error(
+              i18next.t('database.ldf.editSchedule.validation.eventTriggeredMustHaveAtLeast2Frames')
+            )
+          )
           return
         }
         callback()
@@ -709,7 +841,11 @@ const formRules = computed<FormRules>(() => ({
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type === 'Sporadic') {
           if (!Array.isArray(value) || value.length === 0) {
-            callback(new Error('Please select at least one frame'))
+            callback(
+              new Error(
+                i18next.t('database.ldf.editSchedule.validation.pleaseSelectAtLeastOneFrame')
+              )
+            )
             return
           }
 
@@ -717,7 +853,13 @@ const formRules = computed<FormRules>(() => ({
           for (const frameName of value) {
             const frame = props.ldf.frames[frameName]
             if (!frame || frame.publishedBy !== props.ldf.node.master.nodeName) {
-              callback(new Error('Sporadic frames must only include frames published by master'))
+              callback(
+                new Error(
+                  i18next.t(
+                    'database.ldf.editSchedule.validation.sporadicFramesMustBePublishedByMaster'
+                  )
+                )
+              )
               return
             }
           }
@@ -730,7 +872,7 @@ const formRules = computed<FormRules>(() => ({
     {
       required:
         addFrameForm.value.type === 'AssignFrameId' || addFrameForm.value.type === 'existing',
-      message: 'Please select a frame',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectFrame'),
       trigger: 'change',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'AssignFrameId') {
@@ -738,12 +880,16 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (!addFrameForm.value.nodeName) {
-          callback(new Error('Please select node first'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.pleaseSelectNodeFirst'))
+          )
           return
         }
         const configFrames = props.ldf.nodeAttrs[addFrameForm.value.nodeName]?.configFrames || []
         if (!configFrames.includes(value)) {
-          callback(new Error('Selected frame must be a configurable frame for this node'))
+          callback(
+            new Error(i18next.t('database.ldf.editSchedule.validation.frameMustBeConfigurable'))
+          )
           return
         }
         callback()
@@ -753,7 +899,7 @@ const formRules = computed<FormRules>(() => ({
   nad: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input NAD',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputNad'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -761,7 +907,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('NAD must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.nadRange')))
           return
         }
         callback()
@@ -771,7 +917,7 @@ const formRules = computed<FormRules>(() => ({
   id: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input ID',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputId'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -779,7 +925,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 65535) {
-          callback(new Error('ID must be between 0 and 65535'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.idRange')))
           return
         }
         callback()
@@ -789,7 +935,7 @@ const formRules = computed<FormRules>(() => ({
   byte: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input byte',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputByte'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -797,7 +943,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('Byte must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.byteRange')))
           return
         }
         callback()
@@ -807,7 +953,7 @@ const formRules = computed<FormRules>(() => ({
   mask: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input mask',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputMask'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -815,7 +961,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('Mask must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.maskRange')))
           return
         }
         callback()
@@ -825,7 +971,7 @@ const formRules = computed<FormRules>(() => ({
   inv: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input inv',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputInv'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -833,7 +979,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('Inv must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.invRange')))
           return
         }
         callback()
@@ -843,7 +989,7 @@ const formRules = computed<FormRules>(() => ({
   newNad: [
     {
       required: addFrameForm.value.type === 'ConditionalChangeNAD',
-      message: 'Please input new NAD',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputNewNad'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'ConditionalChangeNAD') {
@@ -851,7 +997,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('New NAD must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.newNadRange')))
           return
         }
         callback()
@@ -861,7 +1007,7 @@ const formRules = computed<FormRules>(() => ({
   D1: [
     {
       required: addFrameForm.value.type === 'DataDump',
-      message: 'Please input D1 value',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputD1'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'DataDump') {
@@ -869,7 +1015,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('D1 must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.d1Range')))
           return
         }
         callback()
@@ -879,7 +1025,7 @@ const formRules = computed<FormRules>(() => ({
   D2: [
     {
       required: addFrameForm.value.type === 'DataDump',
-      message: 'Please input D2 value',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputD2'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'DataDump') {
@@ -887,7 +1033,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('D2 must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.d2Range')))
           return
         }
         callback()
@@ -897,7 +1043,7 @@ const formRules = computed<FormRules>(() => ({
   D3: [
     {
       required: addFrameForm.value.type === 'DataDump',
-      message: 'Please input D3 value',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputD3'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'DataDump') {
@@ -905,7 +1051,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('D3 must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.d3Range')))
           return
         }
         callback()
@@ -915,7 +1061,7 @@ const formRules = computed<FormRules>(() => ({
   D4: [
     {
       required: addFrameForm.value.type === 'DataDump',
-      message: 'Please input D4 value',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputD4'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'DataDump') {
@@ -923,7 +1069,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('D4 must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.d4Range')))
           return
         }
         callback()
@@ -933,7 +1079,7 @@ const formRules = computed<FormRules>(() => ({
   D5: [
     {
       required: addFrameForm.value.type === 'DataDump',
-      message: 'Please input D5 value',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputD5'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'DataDump') {
@@ -941,7 +1087,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 255) {
-          callback(new Error('D5 must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.d5Range')))
           return
         }
         callback()
@@ -951,7 +1097,7 @@ const formRules = computed<FormRules>(() => ({
   frameIndex: [
     {
       required: addFrameForm.value.type === 'AssignFrameIdRange',
-      message: 'Please input frame index',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseInputFrameIndex'),
       trigger: 'blur',
       validator: (rule: any, value: any, callback: any) => {
         if (addFrameForm.value.type !== 'AssignFrameIdRange') {
@@ -959,7 +1105,7 @@ const formRules = computed<FormRules>(() => ({
           return
         }
         if (typeof value !== 'number' || value < 0 || value > 3) {
-          callback(new Error('Frame index must be between 0 and 3'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.frameIndexRange')))
           return
         }
 
@@ -969,7 +1115,9 @@ const formRules = computed<FormRules>(() => ({
           if (value >= configFrames.length) {
             callback(
               new Error(
-                `Frame index exceeds available configurable frames (${configFrames.length})`
+                i18next.t('database.ldf.editSchedule.validation.frameIndexExceedsAvailable', {
+                  count: configFrames.length
+                })
               )
             )
             return
@@ -990,14 +1138,14 @@ const formRules = computed<FormRules>(() => ({
         }
 
         if (!Array.isArray(value) || value.length !== 4) {
-          callback(new Error('Must provide 4 PIDs'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.mustProvide4Pids')))
           return
         }
 
         // 检查每个PID的值是否有效
         for (const pid of value) {
           if (typeof pid !== 'number' || pid < 0 || pid > 63) {
-            callback(new Error('Each PID must be between 0 and 63'))
+            callback(new Error(i18next.t('database.ldf.editSchedule.validation.eachPidRange')))
             return
           }
         }
@@ -1005,7 +1153,7 @@ const formRules = computed<FormRules>(() => ({
         // 检查PID是否重复
         const uniquePIDs = new Set(value.filter((pid) => pid !== 0))
         if (uniquePIDs.size !== value.filter((pid) => pid !== 0).length) {
-          callback(new Error('PIDs must be unique (except 0)'))
+          callback(new Error(i18next.t('database.ldf.editSchedule.validation.pidsMustBeUnique')))
           return
         }
 
@@ -1016,7 +1164,7 @@ const formRules = computed<FormRules>(() => ({
   scheduleName: [
     {
       required: addFrameForm.value.type === 'EventTrigger',
-      message: 'Please select schedule table for collision handling',
+      message: i18next.t('database.ldf.editSchedule.validation.pleaseSelectScheduleTable'),
       trigger: 'change'
     }
   ]
@@ -1232,13 +1380,17 @@ function updateDelay(row: any) {
 function deleteFrame() {
   if (selectedIndex.value < 0) return
 
-  ElMessageBox.confirm('Are you sure to delete this frame?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`
-  }).then(() => {
+  ElMessageBox.confirm(
+    i18next.t('database.ldf.editSchedule.dialogs.confirmDelete'),
+    i18next.t('database.ldf.editSchedule.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('database.ldf.editSchedule.buttons.ok'),
+      cancelButtonText: i18next.t('database.ldf.editSchedule.buttons.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`
+    }
+  ).then(() => {
     schedule.value.entries.splice(selectedIndex.value, 1)
     selectedIndex.value = -1
   })

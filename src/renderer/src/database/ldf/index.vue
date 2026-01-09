@@ -2,7 +2,11 @@
   <div>
     <el-tabs v-if="!loading" v-model="editableTabsValue" class="ldfTabs" type="card" addable>
       <template #add-icon>
-        <el-tooltip effect="light" content="Delete Database" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('database.ldf.index.tooltips.deleteDatabase')"
+          placement="bottom"
+        >
           <el-button type="info" link @click="deleteDatabase">
             <Icon :icon="deleteIcon" />
           </el-button>
@@ -10,7 +14,7 @@
         <el-tooltip
           v-if="errorList.length == 0"
           effect="light"
-          content="Save Database"
+          :content="i18next.t('database.ldf.index.tooltips.saveDatabase')"
           placement="bottom"
         >
           <el-button type="success" link @click="saveDataBase">
@@ -20,15 +24,23 @@
         <el-tooltip
           v-else
           effect="light"
-          content="Fix errors to save the database"
+          :content="i18next.t('database.ldf.index.tooltips.fixErrorsToSave')"
           placement="bottom"
         >
-          <el-button type="danger" link :disabled="globalStart" @click="handleTabSwitch('General')">
+          <el-button
+            type="danger"
+            link
+            :disabled="globalStart"
+            @click="handleTabSwitch(i18next.t('database.ldf.index.tabs.general'))"
+          >
             <Icon :icon="saveIcon" />
           </el-button>
         </el-tooltip>
       </template>
-      <el-tab-pane name="General" label="General">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.general')"
+        :label="i18next.t('database.ldf.index.tabs.general')"
+      >
         <General ref="generateRef" v-model="ldfObj" :edit-index="props.editIndex" />
 
         <!-- Add error section -->
@@ -49,22 +61,40 @@
           </div>
         </template>
       </el-tab-pane>
-      <el-tab-pane name="Nodes" label="Nodes">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.nodes')"
+        :label="i18next.t('database.ldf.index.tabs.nodes')"
+      >
         <Node ref="nodeRef" v-model="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
-      <el-tab-pane name="Signals" label="Signals">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.signals')"
+        :label="i18next.t('database.ldf.index.tabs.signals')"
+      >
         <Signal ref="SignalRef" v-model="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
-      <el-tab-pane name="Frames" label="Frames">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.frames')"
+        :label="i18next.t('database.ldf.index.tabs.frames')"
+      >
         <Frame ref="FrameRef" v-model="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
-      <el-tab-pane name="Schedule Tables" label="Schedule Tables">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.scheduleTables')"
+        :label="i18next.t('database.ldf.index.tabs.scheduleTables')"
+      >
         <Sch ref="SchRef" v-model="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
-      <el-tab-pane name="Encodings" label="Encodings">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.encodings')"
+        :label="i18next.t('database.ldf.index.tabs.encodings')"
+      >
         <Encode ref="EncodeRef" v-model="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
-      <el-tab-pane name="LDF File" label="LDF File">
+      <el-tab-pane
+        :name="i18next.t('database.ldf.index.tabs.ldfFile')"
+        :label="i18next.t('database.ldf.index.tabs.ldfFile')"
+      >
         <File :ldf-obj="ldfObj" :edit-index="props.editIndex" />
       </el-tab-pane>
     </el-tabs>
@@ -101,6 +131,7 @@ import Encode from './encode.vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import File from './file.vue'
 import { useGlobalStart } from '@r/stores/runtime'
+import { i18next } from '@r/i18n'
 
 const layout = inject('layout') as Layout
 
@@ -113,7 +144,7 @@ const props = defineProps<{
 const generateRef = ref()
 const nodeRef = ref()
 const h = toRef(props, 'height')
-const editableTabsValue = ref('General')
+const editableTabsValue = ref(i18next.t('database.ldf.index.tabs.general'))
 provide('height', h)
 const database = useDataStore()
 
@@ -156,18 +187,18 @@ const errorGridOptions = computed<VxeGridProps>(() => ({
   columns: [
     {
       field: 'tab',
-      title: 'Tab',
+      title: i18next.t('database.ldf.index.columns.tab'),
       width: 120,
       slots: { default: 'tab' }
     },
     {
       field: 'field',
-      title: 'Field',
+      title: i18next.t('database.ldf.index.columns.field'),
       minWidth: 200
     },
     {
       field: 'message',
-      title: 'Error Message',
+      title: i18next.t('database.ldf.index.columns.errorMessage'),
       slots: { default: 'message' },
       minWidth: 200
     }
@@ -215,13 +246,17 @@ async function valid() {
 }
 
 function deleteDatabase() {
-  ElMessageBox.confirm('Are you sure you want to delete this database?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`,
-    type: 'warning'
-  })
+  ElMessageBox.confirm(
+    i18next.t('database.ldf.index.dialogs.confirmDelete'),
+    i18next.t('database.ldf.index.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('database.ldf.index.buttons.ok'),
+      cancelButtonText: i18next.t('database.ldf.index.buttons.cancel'),
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`,
+      type: 'warning'
+    }
+  )
     .then(() => {
       database.$patch(() => {
         delete database.database.lin[props.editIndex]
@@ -244,7 +279,7 @@ function saveDataBase() {
       ElNotification({
         offset: 50,
         type: 'success',
-        message: 'The database has been saved successfully',
+        message: i18next.t('database.ldf.index.messages.databaseSavedSuccessfully'),
         appendTo: `#win${props.editIndex}`
       })
     })
@@ -280,26 +315,34 @@ onMounted(() => {
           ldfObj.value.name = window.path.parse(props.ldfFile!).name
           loading.value = false
         } catch (err: any) {
-          ElMessageBox.alert('Parse failed', 'Error', {
-            confirmButtonText: 'OK',
-            type: 'error',
-            buttonSize: 'small',
-            appendTo: `#win${props.editIndex}`,
-            message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
-            dangerouslyUseHTMLString: true
-          }).finally(() => {
+          ElMessageBox.alert(
+            i18next.t('database.ldf.index.messages.parseFailed'),
+            i18next.t('database.ldf.index.messages.error'),
+            {
+              confirmButtonText: i18next.t('database.ldf.index.buttons.ok'),
+              type: 'error',
+              buttonSize: 'small',
+              appendTo: `#win${props.editIndex}`,
+              message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
+              dangerouslyUseHTMLString: true
+            }
+          ).finally(() => {
             layout.removeWin(props.editIndex, true)
           })
         }
       })
       .catch((err) => {
-        ElMessageBox.alert('Parse failed', 'Error', {
-          confirmButtonText: 'OK',
-          type: 'error',
-          buttonSize: 'small',
-          appendTo: `#win${props.editIndex}`,
-          message: err.message
-        })
+        ElMessageBox.alert(
+          i18next.t('database.ldf.index.messages.parseFailed'),
+          i18next.t('database.ldf.index.messages.error'),
+          {
+            confirmButtonText: i18next.t('database.ldf.index.buttons.ok'),
+            type: 'error',
+            buttonSize: 'small',
+            appendTo: `#win${props.editIndex}`,
+            message: err.message
+          }
+        )
           .then(() => {
             layout.removeWin(props.editIndex, true)
           })

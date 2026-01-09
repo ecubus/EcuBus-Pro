@@ -13,17 +13,29 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Add Schedule Table" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.sch.tooltips.addScheduleTable')"
+              placement="bottom"
+            >
               <el-button link @click="addSch">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Schedule" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.sch.tooltips.editSchedule')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="selectedIndex < 0" @click="editSchedule">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Schedule" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.sch.tooltips.deleteSchedule')"
+              placement="bottom"
+            >
               <el-button link type="danger" :disabled="selectedIndex < 0" @click="deleteSch">
                 <Icon :icon="deleteIcon" style="font-size: 18px" />
               </el-button>
@@ -34,11 +46,14 @@
 
       <!-- 添加统计信息插槽 -->
       <template #default_frameCount="{ row }">
-        {{ calculateScheduleStats(row).frameDetails || 'No frames' }}
+        {{
+          calculateScheduleStats(row).frameDetails ||
+          i18next.t('database.ldf.sch.messages.noFrames')
+        }}
       </template>
 
       <template #default_totalTime="{ row }">
-        {{ calculateScheduleStats(row).totalTime }} ms
+        {{ calculateScheduleStats(row).totalTime }} {{ i18next.t('database.ldf.sch.labels.ms') }}
       </template>
     </VxeGrid>
 
@@ -46,7 +61,9 @@
       v-if="editDialogVisible"
       v-model="editDialogVisible"
       :close-on-click-modal="false"
-      :title="`Edit Schedule: ${editingSchedule?.name || ''}`"
+      :title="
+        i18next.t('database.ldf.sch.dialogs.editSchedule', { name: editingSchedule?.name || '' })
+      "
       width="70%"
       align-center
       :append-to="`#win${editIndex}`"
@@ -75,6 +92,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditSchedule from './editSchedule.vue'
 import Schema from 'async-validator'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   editIndex: string
@@ -99,13 +117,15 @@ const rules: FormRules<SchTable> = {
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!value) {
-          callback(new Error('Schedule name is required'))
+          callback(new Error(i18next.t('database.ldf.sch.validation.scheduleNameRequired')))
           return
         }
         // Check for duplicate names
         const count = ldfObj.value.schTables.filter((t) => t.name === value).length
         if (count > 1) {
-          callback(new Error('Schedule table name must be unique'))
+          callback(
+            new Error(i18next.t('database.ldf.sch.validation.scheduleTableNameMustBeUnique'))
+          )
           return
         }
         callback()
@@ -116,7 +136,7 @@ const rules: FormRules<SchTable> = {
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!Array.isArray(value)) {
-          callback(new Error('Entries must be an array'))
+          callback(new Error(i18next.t('database.ldf.sch.validation.entriesMustBeArray')))
           return
         }
 
@@ -137,14 +157,22 @@ const rules: FormRules<SchTable> = {
 
           // Validate delay time - 必须大于frame的最大传输时间
           if (typeof entry.delay !== 'number' || entry.delay <= 0) {
-            callback(new Error(`Invalid delay time in entry ${entry.name}`))
+            callback(
+              new Error(
+                i18next.t('database.ldf.sch.validation.invalidDelayTime', { entryName: entry.name })
+              )
+            )
             return
           }
 
           if (entry.delay < maxFrameTime) {
             callback(
               new Error(
-                `Delay time (${entry.delay}ms) for ${entry.name} must be greater than maximum frame time (${maxFrameTime.toFixed(2)}ms)`
+                i18next.t('database.ldf.sch.validation.delayTimeMustBeGreaterThanMaxFrameTime', {
+                  delay: entry.delay,
+                  entryName: entry.name,
+                  maxFrameTime: maxFrameTime.toFixed(2)
+                })
               )
             )
             return
@@ -153,13 +181,25 @@ const rules: FormRules<SchTable> = {
           if (entry.isCommand) {
             // Validate command structure
             if (!validateCommand(entry)) {
-              callback(new Error(`Invalid command structure in entry ${entry.name}`))
+              callback(
+                new Error(
+                  i18next.t('database.ldf.sch.validation.invalidCommandStructure', {
+                    entryName: entry.name
+                  })
+                )
+              )
               return
             }
           } else {
             // Validate frame reference
             if (!validateFrame(entry.name)) {
-              callback(new Error(`Invalid frame reference: ${entry.name}`))
+              callback(
+                new Error(
+                  i18next.t('database.ldf.sch.validation.invalidFrameReference', {
+                    entryName: entry.name
+                  })
+                )
+              )
               return
             }
           }
@@ -248,7 +288,7 @@ async function validate() {
   editRef.value?.validate()
   if (errors.length > 0) {
     throw {
-      tab: 'Schedule Tables',
+      tab: i18next.t('database.ldf.sch.tabs.scheduleTables'),
       error: errors
     }
   }
@@ -267,16 +307,16 @@ const gridOptions = computed<VxeGridProps<SchTable>>(() => ({
   },
   columns: [
     { type: 'seq', width: 50, title: '#', fixed: 'left', align: 'center' },
-    { field: 'name', title: 'Schedule Table', minWidth: 200 },
+    { field: 'name', title: i18next.t('database.ldf.sch.columns.scheduleTable'), minWidth: 200 },
     {
       field: 'frameCount',
-      title: 'Frames',
+      title: i18next.t('database.ldf.sch.columns.frames'),
       width: 250,
       slots: { default: 'default_frameCount' }
     },
     {
       field: 'totalTime',
-      title: 'Total Time',
+      title: i18next.t('database.ldf.sch.columns.totalTime'),
       width: 150,
       slots: { default: 'default_totalTime' }
     }
@@ -292,20 +332,24 @@ function cellClick({ rowIndex }) {
 }
 
 function addSch() {
-  ElMessageBox.prompt('Please input schedule table name', 'Add Schedule Table', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    inputPattern: /\S+/,
-    inputErrorMessage: 'Name is required'
-  }).then(({ value }) => {
+  ElMessageBox.prompt(
+    i18next.t('database.ldf.sch.dialogs.pleaseInputScheduleTableName'),
+    i18next.t('database.ldf.sch.dialogs.addScheduleTable'),
+    {
+      confirmButtonText: i18next.t('database.ldf.sch.buttons.ok'),
+      cancelButtonText: i18next.t('database.ldf.sch.buttons.cancel'),
+      inputPattern: /\S+/,
+      inputErrorMessage: i18next.t('database.ldf.sch.validation.nameRequired')
+    }
+  ).then(({ value }) => {
     if (!value) return
 
     if (ldfObj.value.schTables.some((t) => t.name === value)) {
       ElNotification({
         offset: 50,
         appendTo: `#win${props.editIndex}`,
-        title: 'Error',
-        message: 'Schedule table name already exists',
+        title: i18next.t('database.ldf.sch.messages.error'),
+        message: i18next.t('database.ldf.sch.messages.scheduleTableNameAlreadyExists'),
         type: 'error'
       })
       return
@@ -315,8 +359,8 @@ function addSch() {
       ElNotification({
         offset: 50,
         appendTo: `#win${props.editIndex}`,
-        title: 'Error',
-        message: `Name ${value} is reserved`,
+        title: i18next.t('database.ldf.sch.messages.error'),
+        message: i18next.t('database.ldf.sch.messages.nameReserved', { name: value }),
         type: 'error'
       })
       return
@@ -332,9 +376,13 @@ function addSch() {
 function deleteSch() {
   if (selectedIndex.value < 0) return
 
-  ElMessageBox.confirm('Are you sure to delete this schedule table?', 'Warning', {
-    type: 'warning'
-  }).then(() => {
+  ElMessageBox.confirm(
+    i18next.t('database.ldf.sch.dialogs.confirmDelete'),
+    i18next.t('database.ldf.sch.dialogs.warning'),
+    {
+      type: 'warning'
+    }
+  ).then(() => {
     ldfObj.value.schTables.splice(selectedIndex.value, 1)
     selectedIndex.value = -1
   })
@@ -379,11 +427,22 @@ function calculateScheduleStats(schedule: SchTable) {
   const totalFrames = Object.values(frameStats).reduce((sum, count) => sum + count, 0)
   const details: string[] = []
 
-  if (frameStats.unconditional > 0) details.push(`${frameStats.unconditional} unconditional`)
-  if (frameStats.eventTriggered > 0) details.push(`${frameStats.eventTriggered} event`)
-  if (frameStats.sporadic > 0) details.push(`${frameStats.sporadic} sporadic`)
-  if (frameStats.diagnostic > 0) details.push(`${frameStats.diagnostic} diagnostic`)
-  if (frameStats.command > 0) details.push(`${frameStats.command} command`)
+  if (frameStats.unconditional > 0)
+    details.push(
+      i18next.t('database.ldf.sch.frameTypes.unconditional', { count: frameStats.unconditional })
+    )
+  if (frameStats.eventTriggered > 0)
+    details.push(
+      i18next.t('database.ldf.sch.frameTypes.event', { count: frameStats.eventTriggered })
+    )
+  if (frameStats.sporadic > 0)
+    details.push(i18next.t('database.ldf.sch.frameTypes.sporadic', { count: frameStats.sporadic }))
+  if (frameStats.diagnostic > 0)
+    details.push(
+      i18next.t('database.ldf.sch.frameTypes.diagnostic', { count: frameStats.diagnostic })
+    )
+  if (frameStats.command > 0)
+    details.push(i18next.t('database.ldf.sch.frameTypes.command', { count: frameStats.command }))
 
   return {
     frameCount: totalFrames,

@@ -1,4 +1,5 @@
 import { CstChildrenDictionary, CstNode, CstParser, IToken, Lexer, createToken } from 'chevrotain'
+import { i18next } from '@r/i18n'
 
 export interface GlobalDef {
   LIN_protocol_version: string
@@ -1280,7 +1281,9 @@ class LdfVistor extends visitor {
         for (let i = 0; i < configFramesVal.length; i++) {
           if (configFramesVal[i] == undefined) {
             throw new Error(
-              `configurable_frames of ${t.image}  must be continuous, and start from 0`
+              i18next.t('database.ldfParse.errors.configurableFramesMustBeContinuous', {
+                nodeName: t.image
+              })
             )
           }
         }
@@ -1405,7 +1408,7 @@ class LdfVistor extends visitor {
 
   Diagnostic_signalsClause(ctx: CstChildrenDictionary) {
     if (ctx.DiagReq.length != 16) {
-      throw new Error('DiagReq length must be 16')
+      throw new Error(i18next.t('database.ldfParse.errors.diagReqLengthMustBe'))
     }
   }
 
@@ -1482,10 +1485,10 @@ class LdfVistor extends visitor {
 
   Diagnostic_framesClause(ctx: CstChildrenDictionary) {
     if (ctx.DiagReqFrame.length != 2) {
-      throw new Error('DiagReqFrame length must be 2')
+      throw new Error(i18next.t('database.ldfParse.errors.diagReqFrameLengthMustBe'))
     }
     if (ctx.SubDiagReq.length != 16) {
-      throw new Error('SubDiagReq length must be 16')
+      throw new Error(i18next.t('database.ldfParse.errors.subDiagReqLengthMustBe'))
     }
   }
 
@@ -1575,7 +1578,7 @@ class LdfVistor extends visitor {
                 name = 'DiagnosticSlaveResp'
               }
             } else {
-              throw new Error('unknown command')
+              throw new Error(i18next.t('database.ldfParse.errors.unknownCommand'))
             }
           } else {
             name = (command.Identifier[0] as IToken).image
@@ -1752,11 +1755,11 @@ function formatLexerError(
     .join('\n')
 
   const pointer = `     ${' '.repeat(error.column)}^`
-  const message = `Lexer error at line ${originalLineNumber + 1}, column ${error.column}:
-Context:
+  const message = `${i18next.t('database.ldfParse.errors.lexerError', { line: originalLineNumber + 1, column: error.column })}:
+${i18next.t('database.ldfParse.errors.context')}:
 ${context}
 ${pointer}
-Unexpected character: "${error.message.split("'")[1]}"
+${i18next.t('database.ldfParse.errors.unexpectedCharacter', { char: error.message.split("'")[1] })}
 `
   return message
 }
@@ -1792,12 +1795,12 @@ function formatParserError(
     .join('\n')
 
   const pointer = `     ${' '.repeat(error.token.startColumn || 0)}^`
-  const message = `Parser error at line ${originalLineNumber + 1}, column ${error.token.startColumn || 0}:
-Context:
+  const message = `${i18next.t('database.ldfParse.errors.parserError', { line: originalLineNumber + 1, column: error.token.startColumn || 0 })}:
+${i18next.t('database.ldfParse.errors.context')}:
 ${context}
 ${pointer}
 ${error.message}
-Expected one of: ${(error.expectedTokens || []).join(', ')}`
+${i18next.t('database.ldfParse.errors.expectedOneOf', { tokens: (error.expectedTokens || []).join(', ') })}`
 
   return message
 }
@@ -1812,7 +1815,9 @@ export default function parseInput(text: string) {
     const formattedErrors = lexingResult.errors.map((err) =>
       formatLexerError(err, text, originalText, lineMapping)
     )
-    throw new Error(`Lexing errors:\n${formattedErrors.join('\n\n')}`)
+    throw new Error(
+      `${i18next.t('database.ldfParse.errors.lexingErrors')}:\n${formattedErrors.join('\n\n')}`
+    )
   }
 
   parser.input = lexingResult.tokens
@@ -1824,7 +1829,9 @@ export default function parseInput(text: string) {
       const formattedErrors = parser.errors.map((err) =>
         formatParserError(err, text, originalText, lineMapping)
       )
-      throw new Error(`Parsing errors:\n${formattedErrors.join('\n\n')}`)
+      throw new Error(
+        `${i18next.t('database.ldfParse.errors.parsingErrors')}:\n${formattedErrors.join('\n\n')}`
+      )
     }
     vv.visit(cst)
     return vv.ldf
@@ -1833,6 +1840,6 @@ export default function parseInput(text: string) {
       throw err
     }
     // Handle unexpected errors
-    throw new Error(`Unexpected error during parsing: ${err}`)
+    throw new Error(`${i18next.t('database.ldfParse.errors.unexpectedError')}: ${err}`)
   }
 }

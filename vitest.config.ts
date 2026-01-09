@@ -1,5 +1,5 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
-import path from 'path'
+import path, { resolve } from 'path'
 import fs from 'fs/promises'
 import { normalizePath, Plugin } from 'vite'
 
@@ -48,6 +48,12 @@ export const nodejsPolarsDirnamePlugin = () => {
 
 //export default mergeConfig(config.main as any, defineConfig({
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@r': resolve('src/renderer/src'),
+      nodeCan: resolve(__dirname, 'src/main/share')
+    }
+  },
   test: {
     // 全局设置文件，在所有测试文件运行前执行
     setupFiles: ['./test/setup.ts']

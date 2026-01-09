@@ -13,22 +13,38 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Add Node" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.node.tooltips.addNode')"
+              placement="bottom"
+            >
               <el-button link @click="addNewSlaveNode">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Copy Node" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.node.tooltips.copyNode')"
+              placement="bottom"
+            >
               <el-button link type="info" :disabled="selectedIndex < 0" @click="copySlaveNode">
                 <Icon :icon="copyIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Node" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.node.tooltips.editNode')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="selectedIndex < 0" @click="editSlaveNode">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Node" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.node.tooltips.deleteNode')"
+              placement="bottom"
+            >
               <el-button link type="danger" :disabled="selectedIndex < 0" @click="removeSlaveNode">
                 <Icon :icon="deleteIcon" style="font-size: 18px" />
               </el-button>
@@ -67,7 +83,7 @@
     <el-dialog
       v-if="editAttr"
       v-model="editAttr"
-      :title="`${editNodeName} Attributes`"
+      :title="i18next.t('database.ldf.node.dialogs.nodeAttributes', { name: editNodeName })"
       width="70%"
       align-center
       :close-on-click-modal="false"
@@ -99,6 +115,7 @@ import EditNode from './editNode.vue'
 import { getConfigFrames, LDF, NodeAttrDef } from '../ldfParse'
 import { cloneDeep } from 'lodash'
 import Schema from 'async-validator'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   editIndex: string
@@ -111,11 +128,11 @@ const editRef = ref()
 
 const rules: FormRules<NodeAttrDef> = {
   LIN_protocol: [
-    { required: true, message: 'Please select LIN protocol' },
+    { required: true, message: i18next.t('database.ldf.node.validation.pleaseSelectLinProtocol') },
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!['2.1', '2.2'].includes(value)) {
-          callback(new Error('Invalid LIN protocol version'))
+          callback(new Error(i18next.t('database.ldf.node.validation.invalidLinProtocolVersion')))
         } else {
           callback()
         }
@@ -129,15 +146,15 @@ const rules: FormRules<NodeAttrDef> = {
       validator: (rule: any, value: number | undefined, callback: any) => {
         if (typeof value === 'string') {
           //报错
-          callback(new Error('Please enter configured NAD'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterConfiguredNad')))
           return
         }
         if (value === undefined) {
-          callback(new Error('Please enter configured NAD'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterConfiguredNad')))
           return
         }
         if (value < 0 || value > 255) {
-          callback(new Error('NAD must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.node.validation.nadRange')))
         } else {
           callback()
         }
@@ -151,15 +168,15 @@ const rules: FormRules<NodeAttrDef> = {
       validator: (rule: any, value: number | undefined, callback: any) => {
         if (typeof value === 'string') {
           //报错
-          callback(new Error('Please enter initial NAD'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterInitialNad')))
           return
         }
         if (value === undefined) {
-          callback(new Error('Please enter initial NAD'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterInitialNad')))
           return
         }
         if (value < 0 || value > 255) {
-          callback(new Error('NAD must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.node.validation.nadRange')))
         } else {
           callback()
         }
@@ -173,15 +190,15 @@ const rules: FormRules<NodeAttrDef> = {
       validator: (rule: any, value: number | undefined, callback: any) => {
         if (typeof value === 'string') {
           //报错
-          callback(new Error('Please enter supplier ID'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterSupplierId')))
           return
         }
         if (value === undefined) {
-          callback(new Error('Please enter supplier ID'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterSupplierId')))
           return
         }
         if (value < 0 || value > 65535) {
-          callback(new Error('Supplier ID must be between 0 and 65535'))
+          callback(new Error(i18next.t('database.ldf.node.validation.supplierIdRange')))
         } else {
           callback()
         }
@@ -195,15 +212,15 @@ const rules: FormRules<NodeAttrDef> = {
       validator: (rule: any, value: number | undefined, callback: any) => {
         if (typeof value === 'string') {
           //报错
-          callback(new Error('Please enter function ID'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterFunctionId')))
           return
         }
         if (value === undefined) {
-          callback(new Error('Please enter function ID'))
+          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterFunctionId')))
           return
         }
         if (value < 0 || value > 65535) {
-          callback(new Error('Function ID must be between 0 and 65535'))
+          callback(new Error(i18next.t('database.ldf.node.validation.functionIdRange')))
         } else {
           callback()
         }
@@ -220,7 +237,7 @@ const rules: FormRules<NodeAttrDef> = {
           return
         }
         if (value < 0 || value > 255) {
-          callback(new Error('Variant must be between 0 and 255'))
+          callback(new Error(i18next.t('database.ldf.node.validation.variantRange')))
         } else {
           callback()
         }
@@ -228,11 +245,14 @@ const rules: FormRules<NodeAttrDef> = {
     }
   ],
   response_error: [
-    { required: true, message: 'Please select response error signal' },
+    {
+      required: true,
+      message: i18next.t('database.ldf.node.validation.pleaseSelectResponseErrorSignal')
+    },
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!value || !Object.keys(ldfObj.value.signals).includes(value)) {
-          callback(new Error('Invalid signal selection'))
+          callback(new Error(i18next.t('database.ldf.node.validation.invalidSignalSelection')))
         } else {
           callback()
         }
@@ -244,12 +264,12 @@ const rules: FormRules<NodeAttrDef> = {
       type: 'array',
       validator: (rule: any, value: any, callback: any) => {
         if (!Array.isArray(value)) {
-          callback(new Error('Invalid signal selection'))
+          callback(new Error(i18next.t('database.ldf.node.validation.invalidSignalSelection')))
           return
         }
         const validSignals = Object.keys(ldfObj.value.signals)
         if (value.some((signal) => !validSignals.includes(signal))) {
-          callback(new Error('One or more selected signals are invalid'))
+          callback(new Error(i18next.t('database.ldf.node.validation.oneOrMoreSignalsInvalid')))
         } else {
           callback()
         }
@@ -257,32 +277,68 @@ const rules: FormRules<NodeAttrDef> = {
     }
   ],
   P2_min: [
-    { required: true, type: 'number', message: 'P2 min is required' },
-    { type: 'number', min: 0, message: 'P2 min must be greater than 0' }
+    {
+      required: true,
+      type: 'number',
+      message: i18next.t('database.ldf.node.validation.p2MinRequired')
+    },
+    {
+      type: 'number',
+      min: 0,
+      message: i18next.t('database.ldf.node.validation.p2MinMustBeGreaterThan0')
+    }
   ],
   ST_min: [
-    { required: true, type: 'number', message: 'ST min is required' },
-    { type: 'number', min: 0, message: 'ST min must be greater than 0' }
+    {
+      required: true,
+      type: 'number',
+      message: i18next.t('database.ldf.node.validation.stMinRequired')
+    },
+    {
+      type: 'number',
+      min: 0,
+      message: i18next.t('database.ldf.node.validation.stMinMustBeGreaterThan0')
+    }
   ],
   N_As_timeout: [
-    { required: true, type: 'number', message: 'N_As timeout is required' },
-    { type: 'number', min: 0, message: 'N_As timeout must be greater than 0' }
+    {
+      required: true,
+      type: 'number',
+      message: i18next.t('database.ldf.node.validation.nAsTimeoutRequired')
+    },
+    {
+      type: 'number',
+      min: 0,
+      message: i18next.t('database.ldf.node.validation.nAsTimeoutMustBeGreaterThan0')
+    }
   ],
   N_Cr_timeout: [
-    { required: true, type: 'number', message: 'N_Cr timeout is required' },
-    { type: 'number', min: 0, message: 'N_Cr timeout must be greater than 0' }
+    {
+      required: true,
+      type: 'number',
+      message: i18next.t('database.ldf.node.validation.nCrTimeoutRequired')
+    },
+    {
+      type: 'number',
+      min: 0,
+      message: i18next.t('database.ldf.node.validation.nCrTimeoutMustBeGreaterThan0')
+    }
   ],
   configFrames: [
-    { type: 'array', required: true, message: 'Please select at least one config frame' },
+    {
+      type: 'array',
+      required: true,
+      message: i18next.t('database.ldf.node.validation.pleaseSelectAtLeastOneConfigFrame')
+    },
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!Array.isArray(value)) {
-          callback(new Error('Invalid frame selection'))
+          callback(new Error(i18next.t('database.ldf.node.validation.invalidFrameSelection')))
           return
         }
         const validFrames = getConfigFrames(ldfObj.value, editNodeName1)
         if (value.some((frame) => !validFrames.includes(frame))) {
-          callback(new Error('One or more selected frames are invalid'))
+          callback(new Error(i18next.t('database.ldf.node.validation.oneOrMoreFramesInvalid')))
         } else {
           callback()
         }
@@ -321,55 +377,55 @@ const gridOptions = computed<VxeGridProps>(() => ({
     },
     {
       field: 'name',
-      title: 'Node Name',
+      title: i18next.t('database.ldf.node.columns.nodeName'),
       minWidth: 150,
       slots: { default: 'default_name' }
     },
     {
       field: 'initialNad',
-      title: 'Initial NAD',
+      title: i18next.t('database.ldf.node.columns.initialNad'),
       width: 150,
       align: 'center',
       slots: { default: 'default_initialNad' }
     },
     {
       field: 'configuredNad',
-      title: 'Config NAD',
+      title: i18next.t('database.ldf.node.columns.configNad'),
       width: 150,
       align: 'center',
       slots: { default: 'default_configuredNad' }
     },
     {
       field: 'supplierId',
-      title: 'Supplier ID',
+      title: i18next.t('database.ldf.node.columns.supplierId'),
       width: 150,
       align: 'center',
       slots: { default: 'default_supplierId' }
     },
     {
       field: 'functionId',
-      title: 'Function ID',
+      title: i18next.t('database.ldf.node.columns.functionId'),
       width: 150,
       align: 'center',
       slots: { default: 'default_functionId' }
     },
     {
       field: 'variant',
-      title: 'Variant',
+      title: i18next.t('database.ldf.node.columns.variant'),
       width: 150,
       align: 'center',
       slots: { default: 'default_variant' }
     },
     {
       field: 'protocol',
-      title: 'Protocol',
+      title: i18next.t('database.ldf.node.columns.protocol'),
       width: 150,
       align: 'center',
       slots: { default: 'default_protocol' }
     },
     {
       field: 'configCount',
-      title: 'Config Frames',
+      title: i18next.t('database.ldf.node.columns.configFrames'),
       width: 120,
       align: 'center',
       slots: { default: 'default_configCount' }
@@ -383,21 +439,25 @@ function cellClick({ rowIndex }) {
 }
 
 function addNewSlaveNode() {
-  ElMessageBox.prompt('Please enter the slave node name', 'Add Slave Node', {
-    confirmButtonText: 'Add',
-    cancelButtonText: 'Cancel',
-    inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
-    appendTo: `#win${props.editIndex}`,
-    inputErrorMessage:
-      'Node name can only contain letters, numbers, and underscores, and must start with a letter',
-    inputValidator: (value) => {
-      if (!value) return "Node name can't be empty"
-      if (ldfObj.value.node.salveNode.includes(value)) return 'Node name already exists'
-      if (value === ldfObj.value.node.master.nodeName)
-        return "Slave node name can't equal master node name"
-      return true
+  ElMessageBox.prompt(
+    i18next.t('database.ldf.node.dialogs.pleaseEnterSlaveNodeName'),
+    i18next.t('database.ldf.node.dialogs.addSlaveNode'),
+    {
+      confirmButtonText: i18next.t('database.ldf.node.buttons.add'),
+      cancelButtonText: i18next.t('database.ldf.node.buttons.cancel'),
+      inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
+      appendTo: `#win${props.editIndex}`,
+      inputErrorMessage: i18next.t('database.ldf.node.validation.nodeNamePattern'),
+      inputValidator: (value) => {
+        if (!value) return i18next.t('database.ldf.node.validation.nodeNameCannotBeEmpty')
+        if (ldfObj.value.node.salveNode.includes(value))
+          return i18next.t('database.ldf.node.validation.nodeNameAlreadyExists')
+        if (value === ldfObj.value.node.master.nodeName)
+          return i18next.t('database.ldf.node.validation.slaveNodeNameCannotEqualMaster')
+        return true
+      }
     }
-  })
+  )
     .then(({ value }) => {
       ldfObj.value.node.salveNode.push(value)
       ldfObj.value.nodeAttrs[value] = {
@@ -423,21 +483,25 @@ function copySlaveNode() {
   if (selectedIndex.value < 0) return
   const sourceNode = ldfObj.value.node.salveNode[selectedIndex.value]
 
-  ElMessageBox.prompt('Please enter the slave node name', 'Copy Slave Node', {
-    confirmButtonText: 'Copy',
-    cancelButtonText: 'Cancel',
-    inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
-    appendTo: `#win${props.editIndex}`,
-    inputErrorMessage:
-      'Node name can only contain letters, numbers, and underscores, and must start with a letter',
-    inputValidator: (value) => {
-      if (!value) return "Node name can't be empty"
-      if (ldfObj.value.node.salveNode.includes(value)) return 'Node name already exists'
-      if (value === ldfObj.value.node.master.nodeName)
-        return "Slave node name can't equal master node name"
-      return true
+  ElMessageBox.prompt(
+    i18next.t('database.ldf.node.dialogs.pleaseEnterSlaveNodeName'),
+    i18next.t('database.ldf.node.dialogs.copySlaveNode'),
+    {
+      confirmButtonText: i18next.t('database.ldf.node.buttons.copy'),
+      cancelButtonText: i18next.t('database.ldf.node.buttons.cancel'),
+      inputPattern: /^[a-zA-Z][a-zA-Z0-9_]+$/,
+      appendTo: `#win${props.editIndex}`,
+      inputErrorMessage: i18next.t('database.ldf.node.validation.nodeNamePattern'),
+      inputValidator: (value) => {
+        if (!value) return i18next.t('database.ldf.node.validation.nodeNameCannotBeEmpty')
+        if (ldfObj.value.node.salveNode.includes(value))
+          return i18next.t('database.ldf.node.validation.nodeNameAlreadyExists')
+        if (value === ldfObj.value.node.master.nodeName)
+          return i18next.t('database.ldf.node.validation.slaveNodeNameCannotEqualMaster')
+        return true
+      }
     }
-  })
+  )
     .then(({ value }) => {
       ldfObj.value.node.salveNode.push(value)
       ldfObj.value.nodeAttrs[value] = cloneDeep(ldfObj.value.nodeAttrs[sourceNode])
@@ -456,13 +520,17 @@ function removeSlaveNode() {
   if (selectedIndex.value < 0) return
 
   const nodeName = ldfObj.value.node.salveNode[selectedIndex.value]
-  ElMessageBox.confirm('Are you sure to delete this node?', 'Delete Node', {
-    type: 'warning',
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`
-  })
+  ElMessageBox.confirm(
+    i18next.t('database.ldf.node.dialogs.confirmDelete'),
+    i18next.t('database.ldf.node.dialogs.deleteNode'),
+    {
+      type: 'warning',
+      confirmButtonText: i18next.t('database.ldf.node.buttons.yes'),
+      cancelButtonText: i18next.t('database.ldf.node.buttons.no'),
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`
+    }
+  )
     .then(() => {
       delete ldfObj.value.nodeAttrs[nodeName]
       ldfObj.value.node.salveNode.splice(selectedIndex.value, 1)
@@ -539,7 +607,7 @@ async function validate() {
   editRef.value?.validate()
   if (errors.length > 0) {
     throw {
-      tab: 'Nodes',
+      tab: i18next.t('database.ldf.node.tabs.nodes'),
       error: errors
     }
   }

@@ -16,6 +16,7 @@ import { Icon } from '@iconify/vue'
 import copyIcon from '@iconify/icons-material-symbols/content-copy'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
+import { i18next } from '@r/i18n'
 
 const props = defineProps<{
   ldfObj: LDF
@@ -50,14 +51,14 @@ async function copyToClipboard() {
   try {
     copy()
     ElNotification({
-      message: 'Copied to clipboard!',
+      message: i18next.t('database.ldf.file.messages.copiedToClipboard'),
       type: 'success',
       appendTo: `#win${props.editIndex}`,
       offset: 50
     })
   } catch (err) {
     ElNotification({
-      message: 'Failed to copy',
+      message: i18next.t('database.ldf.file.messages.failedToCopy'),
       type: 'error',
       appendTo: `#win${props.editIndex}`,
       offset: 50

@@ -13,17 +13,29 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Add Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.frame.tooltips.addFrame')"
+              placement="bottom"
+            >
               <el-button link @click="addFrame">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.frame.tooltips.editFrame')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="popoverIndex < 0" @click="editFrame">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.frame.tooltips.deleteFrame')"
+              placement="bottom"
+            >
               <el-button link type="danger" :disabled="popoverIndex < 0" @click="removeFrame">
                 <Icon :icon="deleteIcon" style="font-size: 18px" />
               </el-button>
@@ -43,7 +55,7 @@
     <el-dialog
       v-if="editFrameV"
       v-model="editFrameV"
-      :title="`Edit Frame: ${editFrameName}`"
+      :title="i18next.t('database.ldf.frame.dialogs.editFrame', { name: editFrameName })"
       :close-on-click-modal="false"
       width="70%"
       align-center
@@ -74,6 +86,7 @@ import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditFrame from './editFrame.vue'
 import { FormRules } from 'element-plus'
 import Schema from 'async-validator'
+import { i18next } from '@r/i18n'
 
 interface frameTable {
   name: string
@@ -166,12 +179,16 @@ const popoverIndex = ref(-1)
 
 function removeFrame() {
   if (popoverIndex.value >= 0) {
-    ElMessageBox.confirm('Are you sure to delete this frame?', 'Delete frame', {
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-      type: 'warning',
-      buttonSize: 'small'
-    })
+    ElMessageBox.confirm(
+      i18next.t('database.ldf.frame.dialogs.confirmDelete'),
+      i18next.t('database.ldf.frame.dialogs.deleteFrame'),
+      {
+        confirmButtonText: i18next.t('database.ldf.frame.buttons.yes'),
+        cancelButtonText: i18next.t('database.ldf.frame.buttons.no'),
+        type: 'warning',
+        buttonSize: 'small'
+      }
+    )
       .then(() => {
         delete ldfObj.value.frames[frameTables.value[popoverIndex.value].name]
         popoverIndex.value = -1
@@ -188,12 +205,12 @@ function addFrame() {
   const nodeList = [ldfObj.value.node.master.nodeName, ...ldfObj.value.node.salveNode]
 
   ElMessageBox({
-    title: `Add New Frame`,
+    title: i18next.t('database.ldf.frame.dialogs.addNewFrame'),
     buttonSize: 'small',
     message: () =>
       h('div', [
         h('div', [
-          h('span', 'Frame Name: '),
+          h('span', i18next.t('database.ldf.frame.labels.frameName') + ': '),
           h(ElInput, {
             size: 'small',
             modelValue: name.value,
@@ -203,7 +220,7 @@ function addFrame() {
           })
         ]),
         h('div', [
-          h('span', 'Publisher: '),
+          h('span', i18next.t('database.ldf.frame.labels.publisher') + ': '),
           h(
             ElSelect,
             {
@@ -237,7 +254,7 @@ function addFrame() {
               fontSize: '12px'
             }
           },
-          "Name and Publisher cannot be empty and can't be changed again after creation"
+          i18next.t('database.ldf.frame.messages.nameAndPublisherCannotBeEmpty')
         )
       ])
   })
@@ -254,8 +271,8 @@ function addFrame() {
         ElNotification({
           offset: 50,
           appendTo: `#win${props.editIndex}`,
-          title: 'Error',
-          message: 'Frame name already exists or empty',
+          title: i18next.t('database.ldf.frame.messages.error'),
+          message: i18next.t('database.ldf.frame.messages.frameNameAlreadyExistsOrEmpty'),
           type: 'error'
         })
       }
@@ -301,30 +318,44 @@ const gridOptions = computed<VxeGridProps<frameTable>>(() => {
         fixed: 'left',
         resizable: false
       },
-      { field: 'name', title: 'Frame Name', width: 150, slots: { default: 'default_name' } },
+      {
+        field: 'name',
+        title: i18next.t('database.ldf.frame.columns.frameName'),
+        width: 150,
+        slots: { default: 'default_name' }
+      },
       {
         field: 'punishedBy',
-        title: 'Frame Publisher',
+        title: i18next.t('database.ldf.frame.columns.framePublisher'),
         width: 150,
         slots: { default: 'default_punishedBy' }
       },
-      { field: 'id', title: 'Frame ID', minWidth: 150, slots: { default: 'default_id' } },
+      {
+        field: 'id',
+        title: i18next.t('database.ldf.frame.columns.frameId'),
+        minWidth: 150,
+        slots: { default: 'default_id' }
+      },
       {
         field: 'frameSize',
-        title: 'Frame Size',
+        title: i18next.t('database.ldf.frame.columns.frameSize'),
         minWidth: 150,
         slots: { default: 'default_frameSize' }
       },
-      { field: 'signalCount', title: 'Signal Count', width: 120 }, // Add this line
+      {
+        field: 'signalCount',
+        title: i18next.t('database.ldf.frame.columns.signalCount'),
+        width: 120
+      }, // Add this line
       {
         field: 'maxTime',
-        title: 'Max.Frame Time [ms]',
+        title: i18next.t('database.ldf.frame.columns.maxFrameTime'),
         width: 150,
         slots: { default: 'default_maxTime' }
       },
       {
         field: 'minTime',
-        title: 'Min.Frame Time [ms]',
+        title: i18next.t('database.ldf.frame.columns.minFrameTime'),
         width: 150,
         slots: { default: 'default_minTime' }
       }
@@ -359,14 +390,14 @@ const rules: FormRules<Frame> = {
     {
       validator: (rule: any, value: any, callback: any) => {
         if (!Array.isArray(value)) {
-          callback(new Error('Signals must be an array'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.signalsMustBeArray')))
           return
         }
         // Check for duplicate signals
         const signalNames = value.map((s) => s.name)
         const hasDuplicates = signalNames.length !== new Set(signalNames).size
         if (hasDuplicates) {
-          callback(new Error('Duplicate signals are not allowed'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.duplicateSignalsNotAllowed')))
           return
         }
 
@@ -374,7 +405,13 @@ const rules: FormRules<Frame> = {
         const signalRanges: Array<{ start: number; end: number; name: string }> = []
         for (const signal of value) {
           if (!(signal.name in ldfObj.value.signals)) {
-            callback(new Error(`Signal ${signal.name} not found in LDF`))
+            callback(
+              new Error(
+                i18next.t('database.ldf.frame.validation.signalNotFound', {
+                  signalName: signal.name
+                })
+              )
+            )
             return
           }
           const signalSize = ldfObj.value.signals[signal.name].signalSizeBits
@@ -384,7 +421,14 @@ const rules: FormRules<Frame> = {
           // Check for overlaps with other signals
           for (const range of signalRanges) {
             if (!(end < range.start || start > range.end)) {
-              callback(new Error(`Signal ${signal.name} overlaps with signal ${range.name}`))
+              callback(
+                new Error(
+                  i18next.t('database.ldf.frame.validation.signalOverlaps', {
+                    signalName: signal.name,
+                    rangeName: range.name
+                  })
+                )
+              )
               return
             }
           }
@@ -393,7 +437,13 @@ const rules: FormRules<Frame> = {
           const frame = ldfObj.value.frames[editFrameName1]
           // Check if signal fits within frame size
           if (end >= frame.frameSize * 8) {
-            callback(new Error(`Signal ${signal.name} exceeds frame size`))
+            callback(
+              new Error(
+                i18next.t('database.ldf.frame.validation.signalExceedsFrameSize', {
+                  signalName: signal.name
+                })
+              )
+            )
             return
           }
         }
@@ -405,18 +455,18 @@ const rules: FormRules<Frame> = {
     {
       validator: (rule: any, value: any, callback: any) => {
         if (typeof value !== 'number') {
-          callback(new Error('Frame ID must be a number'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.frameIdMustBeNumber')))
           return
         }
         if (value < 0 || value > 0x3f) {
-          callback(new Error('Frame ID must be between 0 and 0x3F'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.frameIdRange')))
           return
         }
         const frame = ldfObj.value.frames[editFrameName1]
         // Check for duplicate frame IDs
         for (const otherFrame of Object.values(ldfObj.value.frames)) {
           if (otherFrame.name !== frame.name && otherFrame.id === value) {
-            callback(new Error('Frame ID is already used by another frame'))
+            callback(new Error(i18next.t('database.ldf.frame.validation.frameIdAlreadyUsed')))
             return
           }
         }
@@ -428,11 +478,11 @@ const rules: FormRules<Frame> = {
     {
       validator: (rule: any, value: any, callback: any) => {
         if (typeof value !== 'number') {
-          callback(new Error('Frame size must be a number'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.frameSizeMustBeNumber')))
           return
         }
         if (value <= 0 || value > 8) {
-          callback(new Error('Frame size must be between 1 and 8 bytes'))
+          callback(new Error(i18next.t('database.ldf.frame.validation.frameSizeRange')))
           return
         }
         // Check if size is sufficient for signals
@@ -447,7 +497,9 @@ const rules: FormRules<Frame> = {
         if (maxOffset > value * 8) {
           callback(
             new Error(
-              `Frame size too small for signals (needs at least ${Math.ceil(maxOffset / 8)} bytes)`
+              i18next.t('database.ldf.frame.validation.frameSizeTooSmall', {
+                bytes: Math.ceil(maxOffset / 8)
+              })
             )
           )
           return
@@ -489,7 +541,7 @@ async function validate() {
   editRef.value?.validate()
   if (errors.length > 0) {
     throw {
-      tab: 'Frames',
+      tab: i18next.t('database.ldf.frame.tabs.frames'),
       error: errors
     }
   }

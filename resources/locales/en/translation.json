@@ -236,7 +236,602 @@
         "addOrti": "Add OS (ORTI)",
         "noDatabase": "No Database",
         "openDatabaseTitle": "Open Database File",
-        "fileFilterName": "Database File"
+        "fileFilterName": "Database File",
+        "dbcParse": {
+          "errors": {
+            "lexerError": "Lexer error at line {{line}}, column {{column}}",
+            "parserError": "Parser error at line {{line}}, column {{column}}",
+            "context": "Context",
+            "unexpectedCharacter": "Unexpected character: \"{{char}}\"",
+            "expectedOneOf": "Expected one of: {{tokens}}",
+            "lexingErrors": "Lexing errors",
+            "parsingErrors": "Parsing errors",
+            "unexpectedError": "Unexpected error during parsing"
+          }
+        },
+        "ldfParse": {
+          "errors": {
+            "configurableFramesMustBeContinuous": "configurable_frames of {{nodeName}} must be continuous, and start from 0",
+            "diagReqLengthMustBe": "DiagReq length must be 16",
+            "diagReqFrameLengthMustBe": "DiagReqFrame length must be 2",
+            "subDiagReqLengthMustBe": "SubDiagReq length must be 16",
+            "unknownCommand": "unknown command",
+            "lexerError": "Lexer error at line {{line}}, column {{column}}",
+            "parserError": "Parser error at line {{line}}, column {{column}}",
+            "context": "Context",
+            "unexpectedCharacter": "Unexpected character: \"{{char}}\"",
+            "expectedOneOf": "Expected one of: {{tokens}}",
+            "lexingErrors": "Lexing errors",
+            "parsingErrors": "Parsing errors",
+            "unexpectedError": "Unexpected error during parsing"
+          }
+        },
+        "ldf": {
+          "editEncode": {
+            "labels": {
+              "type": "Type",
+              "value": "Value",
+              "description": "Description",
+              "min": "Min",
+              "max": "Max",
+              "scale": "Scale",
+              "offset": "Offset"
+            },
+            "options": {
+              "logicalValue": "Logical Value",
+              "physicalValue": "Physical Value",
+              "bcdValue": "BCD Value",
+              "asciiValue": "ASCII Value"
+            },
+            "buttons": {
+              "addEncode": "Add Encode",
+              "saveEncode": "Save Encode"
+            },
+            "columns": {
+              "type": "Type",
+              "details": "Details"
+            },
+            "details": {
+              "value": "Value: {{value}}",
+              "description": ", Description: {{description}}",
+              "range": "Range: {{min}} ~ {{max}}, Scale: {{scale}}, Offset: {{offset}}"
+            },
+            "validation": {
+              "pleaseSelectType": "Please select type",
+              "signalValueRange": "Signal value must be between 0 and 65535",
+              "minValueRange": "Min value must be between 0 and 65535",
+              "maxValueRange": "Max value must be between 0 and 65535",
+              "maxMustBeGreaterThanMin": "Max value must be greater than or equal to min value"
+            },
+            "dialogs": {
+              "warning": "Warning",
+              "confirmDelete": "Are you sure to delete this encoding type?"
+            }
+          },
+          "editFrame": {
+            "tooltips": {
+              "addSignal": "Add Signal",
+              "editSignal": "Edit Signal",
+              "deleteSignal": "Delete Signal"
+            },
+            "labels": {
+              "frameId": "Frame ID",
+              "frameSize": "Frame Size",
+              "autoUpdateOffset": "Auto Update Offset"
+            },
+            "placeholders": {
+              "hex": "Hex"
+            },
+            "columns": {
+              "signal": "Signal",
+              "offset": "Offset [Bit]",
+              "length": "Length [Bit]"
+            },
+            "buttons": {
+              "add": "Add",
+              "cancel": "Cancel",
+              "yes": "Yes",
+              "no": "No"
+            },
+            "dialogs": {
+              "availableSignals": "Available signals for {{frameName}}",
+              "confirmDelete": "Are you sure to delete this signal?",
+              "deleteSignal": "Delete Signal"
+            }
+          },
+          "editNode": {
+            "labels": {
+              "linProtocol": "LIN Protocol",
+              "nad": "NAD",
+              "initNad": "Init NAD",
+              "supplierId": "Supplier Id",
+              "functionId": "Function Id",
+              "variant": "Variant",
+              "responseErrorSignal": "Response Error Signal",
+              "faultStateSignals": "Fault State Signals",
+              "p2Min": "P2 Min [ms]",
+              "stMin": "ST Min [ms]",
+              "nAsTimeout": "N_As_timeout [ms]",
+              "nCrTimeout": "N_Cr_timeout [ms]",
+              "configFrames": "Config Frames"
+            }
+          },
+          "editSchedule": {
+            "labels": {
+              "frameType": "Frame Type",
+              "frame": "Frame",
+              "name": "Name",
+              "frameId": "Frame ID",
+              "frames": "Frames",
+              "scheduleTable": "Schedule Table",
+              "type": "Type",
+              "node": "Node",
+              "nad": "NAD",
+              "id": "ID",
+              "byte": "Byte",
+              "mask": "Mask",
+              "inv": "Inv",
+              "newNad": "New NAD",
+              "d1": "D1",
+              "d2": "D2",
+              "d3": "D3",
+              "d4": "D4",
+              "d5": "D5",
+              "frameIndex": "Frame Index",
+              "framePIDs": "Frame PIDs"
+            },
+            "options": {
+              "normalFrame": "Normal Frame",
+              "eventTriggered": "Event Triggered",
+              "sporadic": "Sporadic",
+              "diagnostic": "Diagnostic",
+              "assignNAD": "AssignNAD",
+              "assignFrameId": "AssignFrameId",
+              "conditionalChangeNAD": "ConditionalChangeNAD",
+              "dataDump": "DataDump",
+              "saveConfiguration": "SaveConfiguration",
+              "assignFrameIdRange": "AssignFrameIdRange",
+              "masterReq": "MasterReq",
+              "slaveResp": "SlaveResp"
+            },
+            "placeholders": {
+              "pid": "PID"
+            },
+            "columns": {
+              "frame": "Frame",
+              "id": "ID",
+              "type": "Type",
+              "delay": "Delay [ms]",
+              "minTime": "Min Time [ms]",
+              "maxTime": "Max Time [ms]"
+            },
+            "frameTypes": {
+              "unconditional": "Unconditional",
+              "eventTriggered": "Event Triggered",
+              "sporadic": "Sporadic"
+            },
+            "buttons": {
+              "addFrame": "Add Frame",
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "tooltips": {
+              "deleteFrame": "Delete Frame"
+            },
+            "dialogs": {
+              "warning": "Warning",
+              "confirmDelete": "Are you sure to delete this frame?"
+            },
+            "validation": {
+              "pleaseSelectFrameType": "Please select frame type",
+              "pleaseInputEventFrameName": "Please input event frame name",
+              "nameConflictsUnconditional": "Name conflicts with existing unconditional frame",
+              "nameConflictsSporadic": "Name conflicts with existing sporadic frame",
+              "nameConflictsEventTriggered": "Name conflicts with existing event triggered frame",
+              "pleaseInputFrameId": "Please input frame ID",
+              "frameIdMustBeHexadecimal": "Frame ID must be hexadecimal",
+              "frameIdRange": "Frame ID must be between 0x00 and 0x3F",
+              "frameIdConflictsUnconditional": "Frame ID conflicts with unconditional frame {{frameName}}",
+              "frameIdConflictsEventTriggered": "Frame ID conflicts with event triggered frame {{name}}",
+              "pleaseSelectDiagnosticType": "Please select diagnostic type",
+              "pleaseSelectNode": "Please select a node",
+              "pleaseSelectAtLeastOneFrame": "Please select at least one frame",
+              "eventTriggeredMustHaveAtLeast2Frames": "Event triggered frame must have at least 2 frames",
+              "sporadicFramesMustBePublishedByMaster": "Sporadic frames must only include frames published by master",
+              "pleaseSelectFrame": "Please select a frame",
+              "pleaseSelectNodeFirst": "Please select node first",
+              "frameMustBeConfigurable": "Selected frame must be a configurable frame for this node",
+              "pleaseInputNad": "Please input NAD",
+              "nadRange": "NAD must be between 0 and 255",
+              "pleaseInputId": "Please input ID",
+              "idRange": "ID must be between 0 and 65535",
+              "pleaseInputByte": "Please input byte",
+              "byteRange": "Byte must be between 0 and 255",
+              "pleaseInputMask": "Please input mask",
+              "maskRange": "Mask must be between 0 and 255",
+              "pleaseInputInv": "Please input inv",
+              "invRange": "Inv must be between 0 and 255",
+              "pleaseInputNewNad": "Please input new NAD",
+              "newNadRange": "New NAD must be between 0 and 255",
+              "pleaseInputD1": "Please input D1 value",
+              "d1Range": "D1 must be between 0 and 255",
+              "pleaseInputD2": "Please input D2 value",
+              "d2Range": "D2 must be between 0 and 255",
+              "pleaseInputD3": "Please input D3 value",
+              "d3Range": "D3 must be between 0 and 255",
+              "pleaseInputD4": "Please input D4 value",
+              "d4Range": "D4 must be between 0 and 255",
+              "pleaseInputD5": "Please input D5 value",
+              "d5Range": "D5 must be between 0 and 255",
+              "pleaseInputFrameIndex": "Please input frame index",
+              "frameIndexRange": "Frame index must be between 0 and 3",
+              "frameIndexExceedsAvailable": "Frame index exceeds available configurable frames ({{count}})",
+              "mustProvide4Pids": "Must provide 4 PIDs",
+              "eachPidRange": "Each PID must be between 0 and 63",
+              "pidsMustBeUnique": "PIDs must be unique (except 0)",
+              "pleaseSelectScheduleTable": "Please select schedule table for collision handling"
+            }
+          },
+          "editSignal": {
+            "labels": {
+              "signalSize": "Signal Size [bits]",
+              "signalType": "Signal Type",
+              "initValue": "Init Value",
+              "encodeType": "Encode Type",
+              "publisher": "Publisher",
+              "subscribeNodes": "Subscribe Node(s)"
+            },
+            "options": {
+              "scalar": "Scalar",
+              "bytearray": "ByteArray"
+            },
+            "placeholders": {
+              "none": "None"
+            },
+            "sections": {
+              "publisherSubscriberChoose": "Publisher/Subscriber Choose"
+            }
+          },
+          "encode": {
+            "tooltips": {
+              "addEncodingType": "Add Encoding Type",
+              "editEncodingType": "Edit Encoding Type",
+              "deleteEncodingType": "Delete Encoding Type"
+            },
+            "columns": {
+              "encodingTypeName": "Encoding Type Name",
+              "encodingDetails": "Encoding Details"
+            },
+            "details": {
+              "logical": "Logical({{value}})",
+              "physical": "Physical({{min}}~{{max}})",
+              "bcd": "BCD",
+              "ascii": "ASCII",
+              "notSupported": "Not supported"
+            },
+            "tabs": {
+              "signalEncoding": "Signal Encoding"
+            },
+            "buttons": {
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "dialogs": {
+              "addEncodingType": "Add Encoding Type",
+              "editEncodingType": "Edit Encoding Type: {{name}}",
+              "pleaseInputEncodingTypeName": "Please input encoding type name",
+              "confirmDelete": "Are you sure to delete this encoding type?",
+              "warning": "Warning"
+            },
+            "messages": {
+              "error": "Error",
+              "encodingTypeNameAlreadyExists": "Encoding type name already exists"
+            },
+            "validation": {
+              "nameRequired": "Name is required",
+              "nameMustBeUnique": "Encoding type name must be unique",
+              "atLeastOneEncodingTypeRequired": "At least one encoding type is required",
+              "invalidEncodingType": "Invalid encoding type",
+              "invalidLogicalValue": "Invalid logical value",
+              "invalidPhysicalValueRange": "Invalid physical value range"
+            }
+          },
+          "file": {
+            "messages": {
+              "copiedToClipboard": "Copied to clipboard!",
+              "failedToCopy": "Failed to copy"
+            }
+          },
+          "frame": {
+            "tooltips": {
+              "addFrame": "Add Frame",
+              "editFrame": "Edit Frame",
+              "deleteFrame": "Delete Frame"
+            },
+            "labels": {
+              "frameName": "Frame Name",
+              "publisher": "Publisher"
+            },
+            "columns": {
+              "frameName": "Frame Name",
+              "framePublisher": "Frame Publisher",
+              "frameId": "Frame ID",
+              "frameSize": "Frame Size",
+              "signalCount": "Signal Count",
+              "maxFrameTime": "Max.Frame Time [ms]",
+              "minFrameTime": "Min.Frame Time [ms]"
+            },
+            "buttons": {
+              "yes": "Yes",
+              "no": "No"
+            },
+            "dialogs": {
+              "addNewFrame": "Add New Frame",
+              "editFrame": "Edit Frame: {{name}}",
+              "deleteFrame": "Delete frame",
+              "confirmDelete": "Are you sure to delete this frame?"
+            },
+            "messages": {
+              "error": "Error",
+              "frameNameAlreadyExistsOrEmpty": "Frame name already exists or empty",
+              "nameAndPublisherCannotBeEmpty": "Name and Publisher cannot be empty and can't be changed again after creation"
+            },
+            "validation": {
+              "signalsMustBeArray": "Signals must be an array",
+              "duplicateSignalsNotAllowed": "Duplicate signals are not allowed",
+              "signalNotFound": "Signal {{signalName}} not found in LDF",
+              "signalOverlaps": "Signal {{signalName}} overlaps with signal {{rangeName}}",
+              "signalExceedsFrameSize": "Signal {{signalName}} exceeds frame size",
+              "frameIdMustBeNumber": "Frame ID must be a number",
+              "frameIdRange": "Frame ID must be between 0 and 0x3F",
+              "frameIdAlreadyUsed": "Frame ID is already used by another frame",
+              "frameSizeMustBeNumber": "Frame size must be a number",
+              "frameSizeRange": "Frame size must be between 1 and 8 bytes",
+              "frameSizeTooSmall": "Frame size too small for signals (needs at least {{bytes}} bytes)"
+            },
+            "tabs": {
+              "frames": "Frames"
+            }
+          },
+          "general": {
+            "labels": {
+              "databaseName": "Database Name",
+              "masterNodeName": "Master Node Name",
+              "linVersion": "LIN Version",
+              "linLangVersion": "LIN Lang Version",
+              "linSpeed": "LIN Speed(kbps)",
+              "timebase": "Timebase (ms)",
+              "jitter": "Jitter (ms)"
+            },
+            "validation": {
+              "nameCannotContainDot": "Name cannot contain '.'",
+              "databaseNameAlreadyExists": "The database name already exists",
+              "pleaseInputDatabaseName": "Please input the database name",
+              "masterNodeCannotBeSameAsSlaveNode": "Master node can't be the same as slave node",
+              "pleaseInputMasterNodeName": "Please input the master node name"
+            },
+            "tabs": {
+              "general": "General"
+            }
+          },
+          "index": {
+            "tooltips": {
+              "deleteDatabase": "Delete Database",
+              "saveDatabase": "Save Database",
+              "fixErrorsToSave": "Fix errors to save the database"
+            },
+            "tabs": {
+              "general": "General",
+              "nodes": "Nodes",
+              "signals": "Signals",
+              "frames": "Frames",
+              "scheduleTables": "Schedule Tables",
+              "encodings": "Encodings",
+              "ldfFile": "LDF File"
+            },
+            "columns": {
+              "tab": "Tab",
+              "field": "Field",
+              "errorMessage": "Error Message"
+            },
+            "buttons": {
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "dialogs": {
+              "warning": "Warning",
+              "confirmDelete": "Are you sure you want to delete this database?"
+            },
+            "messages": {
+              "error": "Error",
+              "parseFailed": "Parse failed",
+              "databaseSavedSuccessfully": "The database has been saved successfully"
+            }
+          },
+          "node": {
+            "tooltips": {
+              "addNode": "Add Node",
+              "copyNode": "Copy Node",
+              "editNode": "Edit Node",
+              "deleteNode": "Delete Node"
+            },
+            "columns": {
+              "nodeName": "Node Name",
+              "initialNad": "Initial NAD",
+              "configNad": "Config NAD",
+              "supplierId": "Supplier ID",
+              "functionId": "Function ID",
+              "variant": "Variant",
+              "protocol": "Protocol",
+              "configFrames": "Config Frames"
+            },
+            "buttons": {
+              "add": "Add",
+              "copy": "Copy",
+              "cancel": "Cancel",
+              "yes": "Yes",
+              "no": "No"
+            },
+            "dialogs": {
+              "addSlaveNode": "Add Slave Node",
+              "copySlaveNode": "Copy Slave Node",
+              "deleteNode": "Delete Node",
+              "pleaseEnterSlaveNodeName": "Please enter the slave node name",
+              "confirmDelete": "Are you sure to delete this node?",
+              "nodeAttributes": "{{name}} Attributes"
+            },
+            "validation": {
+              "pleaseSelectLinProtocol": "Please select LIN protocol",
+              "invalidLinProtocolVersion": "Invalid LIN protocol version",
+              "pleaseEnterConfiguredNad": "Please enter configured NAD",
+              "pleaseEnterInitialNad": "Please enter initial NAD",
+              "nadRange": "NAD must be between 0 and 255",
+              "pleaseEnterSupplierId": "Please enter supplier ID",
+              "supplierIdRange": "Supplier ID must be between 0 and 65535",
+              "pleaseEnterFunctionId": "Please enter function ID",
+              "functionIdRange": "Function ID must be between 0 and 65535",
+              "variantRange": "Variant must be between 0 and 255",
+              "pleaseSelectResponseErrorSignal": "Please select response error signal",
+              "invalidSignalSelection": "Invalid signal selection",
+              "oneOrMoreSignalsInvalid": "One or more selected signals are invalid",
+              "p2MinRequired": "P2 min is required",
+              "p2MinMustBeGreaterThan0": "P2 min must be greater than 0",
+              "stMinRequired": "ST min is required",
+              "stMinMustBeGreaterThan0": "ST min must be greater than 0",
+              "nAsTimeoutRequired": "N_As timeout is required",
+              "nAsTimeoutMustBeGreaterThan0": "N_As timeout must be greater than 0",
+              "nCrTimeoutRequired": "N_Cr timeout is required",
+              "nCrTimeoutMustBeGreaterThan0": "N_Cr timeout must be greater than 0",
+              "pleaseSelectAtLeastOneConfigFrame": "Please select at least one config frame",
+              "invalidFrameSelection": "Invalid frame selection",
+              "oneOrMoreFramesInvalid": "One or more selected frames are invalid",
+              "nodeNamePattern": "Node name can only contain letters, numbers, and underscores, and must start with a letter",
+              "nodeNameCannotBeEmpty": "Node name can't be empty",
+              "nodeNameAlreadyExists": "Node name already exists",
+              "slaveNodeNameCannotEqualMaster": "Slave node name can't equal master node name"
+            },
+            "tabs": {
+              "nodes": "Nodes"
+            }
+          },
+          "sch": {
+            "tooltips": {
+              "addScheduleTable": "Add Schedule Table",
+              "editSchedule": "Edit Schedule",
+              "deleteSchedule": "Delete Schedule"
+            },
+            "labels": {
+              "ms": "ms"
+            },
+            "columns": {
+              "scheduleTable": "Schedule Table",
+              "frames": "Frames",
+              "totalTime": "Total Time"
+            },
+            "buttons": {
+              "ok": "OK",
+              "cancel": "Cancel"
+            },
+            "dialogs": {
+              "addScheduleTable": "Add Schedule Table",
+              "editSchedule": "Edit Schedule: {{name}}",
+              "pleaseInputScheduleTableName": "Please input schedule table name",
+              "confirmDelete": "Are you sure to delete this schedule table?",
+              "warning": "Warning"
+            },
+            "messages": {
+              "error": "Error",
+              "noFrames": "No frames",
+              "scheduleTableNameAlreadyExists": "Schedule table name already exists",
+              "nameReserved": "Name {{name}} is reserved"
+            },
+            "frameTypes": {
+              "unconditional": "{{count}} unconditional",
+              "event": "{{count}} event",
+              "sporadic": "{{count}} sporadic",
+              "diagnostic": "{{count}} diagnostic",
+              "command": "{{count}} command"
+            },
+            "validation": {
+              "scheduleNameRequired": "Schedule name is required",
+              "scheduleTableNameMustBeUnique": "Schedule table name must be unique",
+              "entriesMustBeArray": "Entries must be an array",
+              "invalidDelayTime": "Invalid delay time in entry {{entryName}}",
+              "delayTimeMustBeGreaterThanMaxFrameTime": "Delay time ({{delay}}ms) for {{entryName}} must be greater than maximum frame time ({{maxFrameTime}}ms)",
+              "invalidCommandStructure": "Invalid command structure in entry {{entryName}}",
+              "invalidFrameReference": "Invalid frame reference: {{entryName}}",
+              "nameRequired": "Name is required"
+            },
+            "tabs": {
+              "scheduleTables": "Schedule Tables"
+            }
+          },
+          "signal": {
+            "tooltips": {
+              "addSignal": "Add Signal",
+              "copySignal": "Copy Signal",
+              "editSignal": "Edit Signal",
+              "deleteSignal": "Delete Signal"
+            },
+            "columns": {
+              "signal": "Signal",
+              "publisher": "Publisher",
+              "subscribers": "Subscribers",
+              "length": "Length [Bit]",
+              "initValue": "Init Value",
+              "unit": "Unit",
+              "encoding": "Encoding",
+              "joinedFrame": "Joined Frame"
+            },
+            "buttons": {
+              "add": "Add",
+              "confirm": "Confirm",
+              "cancel": "Cancel",
+              "yes": "Yes",
+              "no": "No"
+            },
+            "dialogs": {
+              "addSignal": "Add Signal",
+              "copySignal": "Copy Signal",
+              "deleteSignal": "Delete Signal",
+              "pleaseInputSignalName": "Please input signal name",
+              "confirmDelete": "Are you sure to delete this signal?",
+              "signal": "{{name}} Signal"
+            },
+            "validation": {
+              "signalNamePattern": "signal name must be alphanumeric, and underscore",
+              "signalNameAlreadyExists": "signal name already exist",
+              "pleaseEnterSignalSize": "Please enter signal size",
+              "signalSizeMustBeNumber": "Signal size must be a number",
+              "signalSizeMustBeGreaterThan0": "Signal size must be greater than 0",
+              "scalarSignalSizeCannotExceed64Bits": "Scalar signal size cannot exceed 64 bits",
+              "byteArraySignalSizeMustBeMultipleOf8": "ByteArray signal size must be multiple of 8",
+              "pleaseSelectSignalType": "Please select signal type",
+              "initialValueMustBeNumber": "Initial value must be a number",
+              "valueRange": "Value must be between 0 and {{maxValue}}",
+              "byteArrayInitialValueMustBeArray": "ByteArray initial value must be an array",
+              "byteArrayMustHaveElements": "ByteArray must have {{expectedLength}} elements",
+              "elementRange": "Element {{index}} must be between 0 and 255",
+              "pleaseSelectPublisher": "Please select publisher",
+              "invalidPublisherNode": "Invalid publisher node",
+              "pleaseSelectAtLeastOneSubscriber": "Please select at least one subscriber",
+              "subscribersMustBeArray": "Subscribers must be an array",
+              "invalidSubscriberNode": "Invalid subscriber node: {{node}}",
+              "publisherCannotBeSubscriber": "Publisher cannot be a subscriber"
+            },
+            "tabs": {
+              "signals": "Signals"
+            }
+          }
+        },
+        "ortiParse": {
+          "errors": {
+            "lexicalAnalysis": "Lexical Analysis",
+            "syntaxAnalysis": "Syntax Analysis",
+            "unknownParsingError": "Unknown parsing error",
+            "parserException": "Parser Exception"
+          }
+        }
       },
       "osTrace": {
         "statistics": "{{name}} Statistics",

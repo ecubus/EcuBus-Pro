@@ -1,4 +1,12 @@
 # EcuBus-Pro Release Notes
+## 0.8.60
+changes from v0.8.59 to v0.8.60:
+ 
+* [api]:add linBaudRateCtrl api, [detail](https://app.whyengineer.com/scriptApi/functions/linBaudRateCtrl.html)
+* [base]:fix plugin setting doesn't exist
+* [base]:add multi language support, and zh-CN language has published in [Plugin Marketplace](https://app.whyengineer.com/docs/plugin/)
+---
+
 
 
 ## 0.8.59

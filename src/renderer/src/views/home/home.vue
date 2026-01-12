@@ -18,7 +18,7 @@
                 d="M960 0Q827 0 705 34t-230 96t-194 150t-150 195t-97 229T0 960q0 133 34 255t96 230t150 194t195 150t229 97t256 34q133 0 255-34t230-96t194-150t150-195t97-229t34-256q0-133-34-255t-96-230t-150-194t-195-150t-229-97T960 0m0 1792q-115 0-221-30t-198-84t-169-130t-130-168t-84-199t-30-221q0-115 30-221t84-198t130-169t168-130t199-84t221-30q115 0 221 30t198 84t169 130t130 168t84 199t30 221q0 115-30 221t-84 198t-130 169t-168 130t-199 84t-221 30m233-896H512v128h681l-278 274l90 92l434-430l-434-430l-90 92z"
               />
             </svg>
-            <span>Return</span>
+            <span>{{ $t('home.return') }}</span>
           </div>
         </template>
       </el-tab-pane>
@@ -26,7 +26,7 @@
         <template #label>
           <div class="menu-item danger">
             <Icon :icon="close" />
-            <span>Close</span>
+            <span>{{ $t('home.close') }}</span>
           </div>
         </template>
       </el-tab-pane>
@@ -34,33 +34,37 @@
         <template #label>
           <div class="menu-item">
             <Icon :icon="homeIcon" />
-            <span>Home</span>
+            <span>{{ $t('home.home') }}</span>
           </div>
         </template>
         <div class="lr">
           <div class="examples">
             <img style="width: 180px; margin-top: 20px; margin-left: 0px" :src="logo" />
             <div>
-              <el-divider content-position="left"><strong>Documents</strong></el-divider>
+              <el-divider content-position="left"
+                ><strong>{{ $t('home.documents') }}</strong></el-divider
+              >
               <div style="text-align: center">
                 <div class="doc" @click="openUm">
-                  <span class="card-text">User Manual</span>
+                  <span class="card-text">{{ $t('home.userManual') }}</span>
                   <Icon :icon="externalIcon" style="font-size: 20px" />
                 </div>
               </div>
-              <el-divider content-position="left"><strong>System Information</strong></el-divider>
+              <el-divider content-position="left"
+                ><strong>{{ $t('home.systemInformation') }}</strong></el-divider
+              >
               <div class="info">
                 <el-scrollbar :height="infoHeight">
                   <el-table :data="versions" style="width: 100%">
-                    <el-table-column prop="name" label="Module" width="180" />
-                    <el-table-column prop="version" label="Version" />
+                    <el-table-column prop="name" :label="$t('home.module')" width="180" />
+                    <el-table-column prop="version" :label="$t('home.version')" />
                   </el-table>
                 </el-scrollbar>
               </div>
 
               <!-- Advertisement Carousel -->
               <el-divider content-position="left"
-                ><strong>Advertising Partnership</strong></el-divider
+                ><strong>{{ $t('home.advertisingPartnership') }}</strong></el-divider
               >
               <div class="ad-carousel-container">
                 <el-carousel
@@ -76,11 +80,11 @@
                         <img :src="lincableImg" alt="LinCable" />
                       </div>
                       <div class="ad-content">
-                        <div class="ad-title">EcuBus LinCable</div>
+                        <div class="ad-title">{{ $t('home.lincableTitle') }}</div>
                         <div class="ad-description">
-                          USB to LIN Adapter | Conformance Testing | Fault Injection | ISO 17987-6
+                          {{ $t('home.lincableDescription') }}
                         </div>
-                        <div class="ad-cta">Learn More →</div>
+                        <div class="ad-cta">{{ $t('home.learnMore') }}</div>
                       </div>
                     </div>
                   </el-carousel-item>
@@ -91,11 +95,11 @@
                         <Icon :icon="starIcon" />
                       </div>
                       <div class="ad-content">
-                        <div class="ad-title">📢 Advertise Here</div>
+                        <div class="ad-title">{{ $t('home.advertiseHere') }}</div>
                         <div class="ad-description">
-                          Showcase your products and services to professional automotive engineers
+                          {{ $t('home.advertiseDescription') }}
                         </div>
-                        <div class="ad-cta">Contact Us →</div>
+                        <div class="ad-cta">{{ $t('home.contactUs') }}</div>
                       </div>
                     </div>
                   </el-carousel-item>
@@ -130,7 +134,9 @@
             <el-tabs v-model="homeActiveMenu" class="homeMenu">
               <el-tab-pane name="recent">
                 <template #label>
-                  <div class="mx-1"><Icon :icon="recentIcon"></Icon> <span>Recent</span></div>
+                  <div class="mx-1">
+                    <Icon :icon="recentIcon"></Icon> <span>{{ $t('home.recent') }}</span>
+                  </div>
                 </template>
                 <div class="recent">
                   <el-scrollbar :height="recentHeight">
@@ -177,7 +183,9 @@
               </el-tab-pane>
               <el-tab-pane name="pin">
                 <template #label>
-                  <div class="mx-1"><Icon :icon="pinIcon"></Icon> <span>Pinned</span></div>
+                  <div class="mx-1">
+                    <Icon :icon="pinIcon"></Icon> <span>{{ $t('home.pinned') }}</span>
+                  </div>
                 </template>
                 <div class="recent">
                   <el-scrollbar :height="recentHeight">
@@ -248,7 +256,7 @@
         <template #label>
           <div class="menu-item">
             <Icon :icon="newIcon" />
-            <span>New</span>
+            <span>{{ $t('home.new') }}</span>
           </div>
         </template>
         <div class="newMenu">
@@ -259,7 +267,7 @@
         <template #label>
           <div class="menu-item">
             <Icon :icon="openIcon" />
-            <span>Open</span>
+            <span>{{ $t('home.open') }}</span>
           </div>
         </template>
       </el-tab-pane>
@@ -267,7 +275,7 @@
         <template #label>
           <div class="menu-item">
             <Icon :icon="pluginIcon" />
-            <span>Plugin</span>
+            <span>{{ $t('home.plugin') }}</span>
           </div>
         </template>
         <div class="marketplaceMenu">
@@ -286,7 +294,7 @@
               <Icon :icon="userIcon" />
             </el-avatar>
             <Icon v-else :icon="userIcon" />
-            <span>User</span>
+            <span>{{ $t('home.user') }}</span>
           </div>
         </template>
         <div class="userMenu">
@@ -300,15 +308,15 @@
               <Icon :icon="setting" />
             </el-badge>
 
-            <span>Setting</span>
+            <span>{{ $t('home.setting') }}</span>
           </div>
         </template>
         <el-tabs v-model="activeSet" class="settingMenu">
-          <el-tab-pane label="Setting" name="setting">
+          <el-tab-pane :label="$t('home.setting')" name="setting">
             <template #label>
               <span class="custom-tabs-label">
                 <Icon :icon="setting" />
-                <span>Setting</span>
+                <span>{{ $t('home.setting') }}</span>
               </span>
             </template>
             <el-tabs
@@ -317,11 +325,11 @@
                 height: height - 110 + 'px'
               }"
             >
-              <el-tab-pane label="general">
+              <el-tab-pane :label="$t('home.general')">
                 <template #label>
                   <span class="custom-tabs-label">
                     <Icon :icon="generalIcon" />
-                    <span>General</span>
+                    <span>{{ $t('home.general') }}</span>
                   </span>
                 </template>
                 <general
@@ -334,7 +342,7 @@
                 <template #label>
                   <span class="custom-tabs-label">
                     <Icon :icon="pluginIcon" />
-                    <span>Plugin</span>
+                    <span>{{ $t('home.plugin') }}</span>
                   </span>
                 </template>
                 <plugin
@@ -346,11 +354,11 @@
             </el-tabs>
           </el-tab-pane>
 
-          <el-tab-pane label="Others" name="others">
+          <el-tab-pane :label="$t('home.others')" name="others">
             <template #label>
               <span class="custom-tabs-label">
                 <Icon :icon="baseIcon" />
-                <span>Others</span>
+                <span>{{ $t('home.others') }}</span>
               </span>
             </template>
             <el-tabs
@@ -359,11 +367,11 @@
                 height: height - 110 + 'px'
               }"
             >
-              <el-tab-pane label="policy">
+              <el-tab-pane :label="$t('home.license')">
                 <template #label>
                   <span class="custom-tabs-label">
                     <Icon :icon="policyIcon" />
-                    <span>License</span>
+                    <span>{{ $t('home.license') }}</span>
                   </span>
                 </template>
                 <policy
@@ -374,12 +382,12 @@
               </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
-          <el-tab-pane label="Update" name="second">
+          <el-tab-pane :label="$t('home.update')" name="second">
             <template #label>
               <el-badge is-dot :hidden="!hasUpdate" type="primary">
                 <span class="custom-tabs-label">
                   <Icon :icon="updateIcon" />
-                  <span>Update</span>
+                  <span>{{ $t('home.update') }}</span>
                 </span>
               </el-badge>
             </template>
@@ -489,6 +497,7 @@ import usbIcon from '@iconify/icons-mdi/usb'
 import lincableImg from '@r/assets/lincable.png'
 import PluginMarketplace from './PluginMarketplace.vue'
 import { usePluginStore } from '@r/stores/plugin'
+import i18next from 'i18next'
 // dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter)
 const hasUpdate = ref(false)
@@ -532,10 +541,12 @@ function formatDate(timestamp: number) {
     return date.format('dddd HH:mm') // 返回周几 + 时间
   } else if (date.year() === now.year()) {
     // 如果是今年的日期
-    return date.format('M月D日')
+    const format = i18next.t('home.dateFormat.monthDay', { defaultValue: 'M/D' })
+    return date.format(format)
   } else {
     // 如果是往年的日期
-    return date.format('YYYY年M月D日')
+    const format = i18next.t('home.dateFormat.yearMonthDay', { defaultValue: 'YYYY/M/D' })
+    return date.format(format)
   }
 }
 function openProject(p: any) {

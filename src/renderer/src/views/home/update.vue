@@ -9,7 +9,7 @@
           style="width: 100%"
           @click="checkUpdate"
         >
-          Check for updates
+          {{ $t('homeUpdate.check') }}
         </el-button>
         <el-button
           v-if="hasUpdate == true && started == false"
@@ -18,7 +18,7 @@
           style="width: 100%"
           @click="startUpdate"
         >
-          Start to update
+          {{ $t('homeUpdate.start') }}
         </el-button>
         <el-button
           v-if="started == true && downloaded == false"
@@ -27,7 +27,7 @@
           style="width: 100%"
           @click="cancelUpdate"
         >
-          Cancel
+          {{ $t('homeUpdate.cancel') }}
         </el-button>
         <el-button
           v-if="hasUpdate == true && downloaded == true"
@@ -36,7 +36,7 @@
           style="width: 100%"
           @click="installUpdate"
         >
-          Exit&Install
+          {{ $t('homeUpdate.install') }}
         </el-button>
       </el-col>
       <el-col :span="16" :offset="2">
@@ -73,6 +73,7 @@ import { version } from '../../../../../package.json'
 import { ElMessage } from 'element-plus'
 import { marked, MarkedExtension } from 'marked'
 import './readme.css'
+import i18next from 'i18next'
 
 function addLocalBaseUrl() {
   // extension code here
@@ -164,7 +165,7 @@ onMounted(() => {
   })
   window.electron.ipcRenderer.on('ipc-update-downloaded', (event, err: UpdateDownloadedEvent) => {
     ElMessage({
-      message: `Update package download ok`,
+      message: i18next.t('homeUpdate.downloadOk'),
       type: 'success'
     })
     downloaded.value = true

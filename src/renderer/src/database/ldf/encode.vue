@@ -13,17 +13,29 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Add Encoding Type" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.encode.tooltips.addEncodingType')"
+              placement="bottom"
+            >
               <el-button link @click="addEncode">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Encoding Type" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.encode.tooltips.editEncodingType')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="selectedIndex < 0" @click="editEncode">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Encoding Type" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.encode.tooltips.deleteEncodingType')"
+              placement="bottom"
+            >
               <el-button link type="danger" :disabled="selectedIndex < 0" @click="deleteEncode">
                 <Icon :icon="deleteIcon" style="font-size: 18px" />
               </el-button>
@@ -41,7 +53,11 @@
       v-if="editDialogVisible"
       v-model="editDialogVisible"
       :close-on-click-modal="false"
-      :title="`Edit Encoding Type: ${editingEncode?.name || ''}`"
+      :title="
+        i18next.t('database.ldf.encode.dialogs.editEncodingType', {
+          name: editingEncode?.name || ''
+        })
+      "
       width="70%"
       align-center
       :append-to="`#win${editIndex}`"
@@ -67,6 +83,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditEncode from './editEncode.vue'
 import Schema from 'async-validator'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string
@@ -87,15 +104,20 @@ function getEncodingTypeDetails(encode: SignalEncodeType) {
   const details = encode.encodingTypes.map((type) => {
     switch (type.type) {
       case 'logicalValue':
-        return `Logical(${type.logicalValue?.signalValue})`
+        return i18next.t('database.ldf.encode.details.logical', {
+          value: type.logicalValue?.signalValue
+        })
       case 'physicalValue':
-        return `Physical(${type.physicalValue?.minValue}~${type.physicalValue?.maxValue})`
+        return i18next.t('database.ldf.encode.details.physical', {
+          min: type.physicalValue?.minValue,
+          max: type.physicalValue?.maxValue
+        })
       case 'bcdValue':
-        return 'BCD'
+        return i18next.t('database.ldf.encode.details.bcd')
       case 'asciiValue':
-        return 'ASCII'
+        return i18next.t('database.ldf.encode.details.ascii')
       default:
-        return 'Not supported'
+        return i18next.t('database.ldf.encode.details.notSupported')
     }
   })
   return details.join(', ')
@@ -106,17 +128,17 @@ const rules: FormRules<SignalEncodeType> = {
   name: [
     {
       required: true,
-      message: 'Name is required',
+      message: i18next.t('database.ldf.encode.validation.nameRequired'),
       validator: (rule: any, value: any, callback: any) => {
         if (!value) {
-          callback(new Error('Name is required'))
+          callback(new Error(i18next.t('database.ldf.encode.validation.nameRequired')))
           return
         }
         // 检查名称唯一性
         if (
           Object.keys(ldfObj.value.signalEncodeTypes).filter((name) => name === value).length > 1
         ) {
-          callback(new Error('Encoding type name must be unique'))
+          callback(new Error(i18next.t('database.ldf.encode.validation.nameMustBeUnique')))
           return
         }
         callback()
@@ -127,10 +149,12 @@ const rules: FormRules<SignalEncodeType> = {
     {
       type: 'array',
       required: true,
-      message: 'At least one encoding type is required',
+      message: i18next.t('database.ldf.encode.validation.atLeastOneEncodingTypeRequired'),
       validator: (rule: any, value: any, callback: any) => {
         if (!Array.isArray(value) || value.length === 0) {
-          callback(new Error('At least one encoding type is required'))
+          callback(
+            new Error(i18next.t('database.ldf.encode.validation.atLeastOneEncodingTypeRequired'))
+          )
           return
         }
 
@@ -139,14 +163,14 @@ const rules: FormRules<SignalEncodeType> = {
           if (
             !['logicalValue', 'physicalValue', 'bcdValue', 'asciiValue'].includes(encoding.type)
           ) {
-            callback(new Error('Invalid encoding type'))
+            callback(new Error(i18next.t('database.ldf.encode.validation.invalidEncodingType')))
             return
           }
 
           // 验证logical value
           if (encoding.type === 'logicalValue') {
             if (!encoding.logicalValue || typeof encoding.logicalValue.signalValue !== 'number') {
-              callback(new Error('Invalid logical value'))
+              callback(new Error(i18next.t('database.ldf.encode.validation.invalidLogicalValue')))
               return
             }
           }
@@ -161,7 +185,9 @@ const rules: FormRules<SignalEncodeType> = {
               typeof encoding.physicalValue.offset !== 'number' ||
               encoding.physicalValue.minValue > encoding.physicalValue.maxValue
             ) {
-              callback(new Error('Invalid physical value range'))
+              callback(
+                new Error(i18next.t('database.ldf.encode.validation.invalidPhysicalValueRange'))
+              )
               return
             }
           }
@@ -205,7 +231,7 @@ async function validate() {
 
   if (errors.length > 0) {
     throw {
-      tab: 'Signal Encoding',
+      tab: i18next.t('database.ldf.encode.tabs.signalEncoding'),
       error: errors
     }
   }
@@ -226,10 +252,14 @@ const gridOptions = computed<VxeGridProps<SignalEncodeType>>(() => ({
   },
   columns: [
     { type: 'seq', width: 50, title: '#', fixed: 'left', align: 'center' },
-    { field: 'name', title: 'Encoding Type Name', minWidth: 200 },
+    {
+      field: 'name',
+      title: i18next.t('database.ldf.encode.columns.encodingTypeName'),
+      minWidth: 200
+    },
     {
       field: 'encodingTypes',
-      title: 'Encoding Details',
+      title: i18next.t('database.ldf.encode.columns.encodingDetails'),
       minWidth: 300,
       slots: { default: 'default_encodingTypes' }
     }
@@ -242,22 +272,26 @@ function cellClick({ rowIndex }) {
 }
 
 function addEncode() {
-  ElMessageBox.prompt('Please input encoding type name', 'Add Encoding Type', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    inputPattern: /\S+/,
-    inputErrorMessage: 'Name is required',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`
-  }).then(({ value }) => {
+  ElMessageBox.prompt(
+    i18next.t('database.ldf.encode.dialogs.pleaseInputEncodingTypeName'),
+    i18next.t('database.ldf.encode.dialogs.addEncodingType'),
+    {
+      confirmButtonText: i18next.t('database.ldf.encode.buttons.ok'),
+      cancelButtonText: i18next.t('database.ldf.encode.buttons.cancel'),
+      inputPattern: /\S+/,
+      inputErrorMessage: i18next.t('database.ldf.encode.validation.nameRequired'),
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`
+    }
+  ).then(({ value }) => {
     if (!value) return
 
     if (value in ldfObj.value.signalEncodeTypes) {
       ElNotification({
         offset: 50,
         appendTo: `#win${props.editIndex}`,
-        title: 'Error',
-        message: 'Encoding type name already exists',
+        title: i18next.t('database.ldf.encode.messages.error'),
+        message: i18next.t('database.ldf.encode.messages.encodingTypeNameAlreadyExists'),
         type: 'error'
       })
       return
@@ -276,11 +310,15 @@ function deleteEncode() {
 
   const encodeName = Object.keys(ldfObj.value.signalEncodeTypes)[selectedIndex.value]
 
-  ElMessageBox.confirm('Are you sure to delete this encoding type?', 'Warning', {
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`
-  }).then(() => {
+  ElMessageBox.confirm(
+    i18next.t('database.ldf.encode.dialogs.confirmDelete'),
+    i18next.t('database.ldf.encode.dialogs.warning'),
+    {
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`
+    }
+  ).then(() => {
     delete ldfObj.value.signalEncodeTypes[encodeName]
     delete ldfObj.value.signalRep[encodeName]
     selectedIndex.value = -1

@@ -467,11 +467,10 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
       // if(signal.multiplexerIndicator){
       //     const reg=/(M$|m\d+$)/
       //     if(!reg.test(signal.multiplexerIndicator)){
-      //         // throw new Error('multiplexerIndicator must like this: [M|m<M-ID>]')
       //         const line=ctx.Identifier[1].startLine
       //         const column=ctx.Identifier[1].startColumn
-      //         const message=`multiplexerIndicator must like this: [M|m<M-ID>]`
-      //         throw new Error(`Parser error at line ${line}, column ${column}: ${message}`)
+      //         const message = i18next.t('database.dbc.dbcVisitor.errors.invalidMultiplexerIndicator')
+      //         throw new Error(i18next.t('database.dbc.dbcVisitor.errors.parserError', { line, column, message }))
       //     }
       // }
     }

@@ -4,6 +4,7 @@
 import { ORTILexer } from './orti/lexer'
 import { ortiParser } from './orti/parser'
 import { ortiVisitor } from './orti/visitor'
+import i18next from 'i18next'
 
 /**
  * 版本信息
@@ -323,7 +324,7 @@ export function parseORTI(input: string): ORTIParseResult {
           message: error.message,
           line: error.line,
           column: error.column,
-          context: 'Lexical Analysis'
+          context: i18next.t('database.ortiParse.errors.lexicalAnalysis')
         }))
       )
     }
@@ -340,7 +341,7 @@ export function parseORTI(input: string): ORTIParseResult {
           line: error.token?.startLine,
           column: error.token?.startColumn,
           token: error.token?.image,
-          context: 'Syntax Analysis'
+          context: i18next.t('database.ortiParse.errors.syntaxAnalysis')
         }))
       )
     }
@@ -1139,8 +1140,11 @@ export function parseORTI(input: string): ORTIParseResult {
     return result
   } catch (error) {
     result.errors.push({
-      message: error instanceof Error ? error.message : 'Unknown parsing error',
-      context: 'Parser Exception'
+      message:
+        error instanceof Error
+          ? error.message
+          : i18next.t('database.ortiParse.errors.unknownParsingError'),
+      context: i18next.t('database.ortiParse.errors.parserException')
     })
     return result
   }

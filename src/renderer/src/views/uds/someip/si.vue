@@ -110,27 +110,47 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Edit Connect" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.someip.si.tooltips.editConnect')"
+              placement="bottom"
+            >
               <el-button type="primary" link @click="editConnect">
                 <Icon :icon="linkIcon" style="rotate: -45deg; font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Add Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.someip.si.tooltips.addFrame')"
+              placement="bottom"
+            >
               <el-button link @click="addFrame">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Select Frame from Database" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.someip.si.tooltips.selectFrameFromDatabase')"
+              placement="bottom"
+            >
               <el-button link disabled @click="openFrameSelect">
                 <Icon :icon="databaseIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Edit Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.someip.si.tooltips.editFrame')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="popoverIndex < 0" @click="editFrame">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Frame" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('uds.someip.si.tooltips.deleteFrame')"
+              placement="bottom"
+            >
               <el-button
                 link
                 type="danger"
@@ -152,13 +172,17 @@
             v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.type"
             :disabled="periodTimer[popoverIndex]"
           >
-            <el-radio value="manual">Manual</el-radio>
-            <el-radio value="periodic">Periodic</el-radio>
+            <el-radio value="manual">{{
+              i18next.t('uds.someip.si.options.triggerType.manual')
+            }}</el-radio>
+            <el-radio value="periodic">{{
+              i18next.t('uds.someip.si.options.triggerType.periodic')
+            }}</el-radio>
           </el-radio-group>
         </el-col>
 
         <el-col :span="12">
-          <div>On Key:</div>
+          <div>{{ i18next.t('uds.someip.si.labels.onKey') }}</div>
           <div>
             <el-input
               v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.onKey"
@@ -169,7 +193,7 @@
           </div>
         </el-col>
         <el-col :span="12">
-          <div>Period (ms):</div>
+          <div>{{ i18next.t('uds.someip.si.labels.period') }}</div>
           <div>
             <el-input-number
               v-model="dataBase.ia[editIndex].action[popoverIndex].trigger.period"
@@ -181,7 +205,7 @@
                 dataBase.ia[editIndex].action[popoverIndex].trigger.type != 'periodic' ||
                 periodTimer[popoverIndex]
               "
-              placeholder="10"
+              :placeholder="i18next.t('uds.someip.si.placeholders.period')"
             ></el-input-number>
           </div>
         </el-col>
@@ -190,7 +214,7 @@
     <el-dialog
       v-if="connectV"
       v-model="connectV"
-      title="IA Device Connect"
+      :title="i18next.t('uds.someip.si.dialogs.deviceConnect')"
       width="590"
       align-center
       :append-to="`#win${editIndex}_ia`"
@@ -210,14 +234,21 @@
           class="canit"
           style="text-align: left; display: inline-block"
           :data="allDeviceLabel"
-          :titles="['Valid', 'Assigned ']"
+          :titles="[
+            i18next.t('uds.someip.si.transfer.valid'),
+            i18next.t('uds.someip.si.transfer.assigned')
+          ]"
         />
       </div>
     </el-dialog>
     <el-dialog
       v-if="editV && formData"
       v-model="editV"
-      :title="`Edit Frame ${dataBase.ia[editIndex].action[popoverIndex].name}`"
+      :title="
+        i18next.t('uds.someip.si.dialogs.editFrame', {
+          name: dataBase.ia[editIndex].action[popoverIndex].name
+        })
+      "
       width="90%"
       align-center
       :append-to="`#win${editIndex}_ia`"
@@ -236,65 +267,80 @@
           class="formH"
           :disabled="periodTimer[popoverIndex] == true"
         >
-          <el-form-item label="Name">
+          <el-form-item :label="i18next.t('uds.someip.si.labels.name')">
             <el-input v-model="formData.name" :disabled="formData.database != undefined" />
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item label="Service ID">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.serviceId')">
                 <el-input v-model="formData.serviceId" @input="idChange('serviceId', $event)" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Instance ID">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.instanceId')">
                 <el-input v-model="formData.instanceId" @input="idChange('instanceId', $event)" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Method ID">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.methodId')">
                 <el-input v-model="formData.methodId" @input="idChange('methodId', $event)" />
               </el-form-item>
             </el-col>
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item label="Message Type">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.messageType')">
                 <el-select v-model="formData.messageType">
-                  <el-option :value="SomeipMessageType.REQUEST" label="Request" />
+                  <el-option
+                    :value="SomeipMessageType.REQUEST"
+                    :label="i18next.t('uds.someip.si.options.messageType.request')"
+                  />
                   <el-option
                     :value="SomeipMessageType.REQUEST_NO_RETURN"
-                    label="Request No Return"
+                    :label="i18next.t('uds.someip.si.options.messageType.requestNoReturn')"
                   />
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Protocol Version">
-                <el-input v-model="formData.protocolVersion" placeholder="1" />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.protocolVersion')">
+                <el-input
+                  v-model="formData.protocolVersion"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.protocolVersion')"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Interface Version">
-                <el-input v-model="formData.interfaceVersion" placeholder="0" />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.interfaceVersion')">
+                <el-input
+                  v-model="formData.interfaceVersion"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.interfaceVersion')"
+                />
               </el-form-item>
             </el-col>
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item label="Major Version">
-                <el-input v-model="formData.major" placeholder="0" />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.majorVersion')">
+                <el-input
+                  v-model="formData.major"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.majorVersion')"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Minor Version">
-                <el-input v-model="formData.minor" placeholder="0" />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.minorVersion')">
+                <el-input
+                  v-model="formData.minor"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.minorVersion')"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="8"> </el-col>
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item label="Channel">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.channel')">
                 <el-select v-model="formData.channel" size="small" style="width: 100%" clearable>
                   <el-option
                     v-for="key in dataBase.ia[editIndex].devices"
@@ -306,10 +352,19 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Reliable">
-                <el-select v-model="formData.reliable" placeholder="False">
-                  <el-option :value="true" label="True" />
-                  <el-option :value="false" label="False" />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.reliable')">
+                <el-select
+                  v-model="formData.reliable"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.reliable')"
+                >
+                  <el-option
+                    :value="true"
+                    :label="i18next.t('uds.someip.si.options.boolean.true')"
+                  />
+                  <el-option
+                    :value="false"
+                    :label="i18next.t('uds.someip.si.options.boolean.false')"
+                  />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -317,14 +372,18 @@
           </el-form-item>
         </el-form>
         <el-tabs v-model="activeName">
-          <el-tab-pane v-if="formData.database" label="Signal" name="signal">
+          <el-tab-pane
+            v-if="formData.database"
+            :label="i18next.t('uds.someip.si.tabs.signal')"
+            name="signal"
+          >
             <!-- <CanISignal
                 :message-id="formData.id"
                 :database="formData.database"
                 @change="handleDataChange"
               /> -->
           </el-tab-pane>
-          <el-tab-pane label="Request" name="req">
+          <el-tab-pane :label="i18next.t('uds.someip.si.tabs.request')" name="req">
             <paramVue
               id="req"
               ref="repParamRef"
@@ -336,7 +395,7 @@
           </el-tab-pane>
           <el-tab-pane
             v-if="formData.messageType == SomeipMessageType.REQUEST"
-            label="Response"
+            :label="i18next.t('uds.someip.si.tabs.response')"
             name="resp"
           >
             <paramVue
@@ -359,7 +418,7 @@
     <el-dialog
       v-if="selectFrameVisible"
       v-model="selectFrameVisible"
-      title="Select Frame from Database"
+      :title="i18next.t('uds.someip.si.dialogs.selectFrameFromDatabase')"
       :append-to="`#win${editIndex}_ia`"
       width="600"
       align-center
@@ -407,6 +466,7 @@ import { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 import { ElMessage } from 'element-plus'
 import errorParse from '@r/util/ipcError'
 import { SomeipMessageTypeMap } from 'nodeCan/someip'
+import i18next from 'i18next'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])
@@ -510,50 +570,56 @@ const gridOptions = computed(() => {
       },
       {
         field: 'send',
-        title: 'Send',
+        title: i18next.t('uds.someip.si.columns.send'),
         width: 100,
         resizable: false,
         slots: { default: 'default_send' }
       },
       {
         field: 'trigger',
-        title: 'Trigger',
+        title: i18next.t('uds.someip.si.columns.trigger'),
         width: 200,
         resizable: false,
         slots: { default: 'default_trigger' }
       },
-      { field: 'name', title: 'Name', width: 100, editRender: {}, slots: { edit: 'default_name' } },
+      {
+        field: 'name',
+        title: i18next.t('uds.someip.si.columns.name'),
+        width: 100,
+        editRender: {},
+        slots: { edit: 'default_name' }
+      },
       {
         field: 'messageType',
-        title: 'Message Type',
+        title: i18next.t('uds.someip.si.columns.messageType'),
         width: 120,
         editRender: {},
         slots: { default: 'default_messageType' }
       },
       {
         field: 'serviceId',
-        title: 'Service ID',
+        title: i18next.t('uds.someip.si.columns.serviceId'),
         minWidth: 100,
         editRender: {},
         slots: { edit: 'default_serviceId' }
       },
       {
         field: 'instanceId',
-        title: 'Instance ID',
+        title: i18next.t('uds.someip.si.columns.instanceId'),
         minWidth: 100,
         editRender: {},
         slots: { edit: 'default_instanceId' }
       },
       {
         field: 'methodId',
-        title: 'Method ID',
+        title: i18next.t('uds.someip.si.columns.methodId'),
         minWidth: 100,
         editRender: {},
         slots: { edit: 'default_methodId' }
       },
       {
         field: 'channel',
-        title: 'Channel',
+        title: i18next.t('uds.someip.si.columns.channel'),
         minWidth: 100,
         editRender: {},
         slots: { default: 'default_channel', edit: 'edit_channel' }
@@ -561,7 +627,7 @@ const gridOptions = computed(() => {
 
       {
         field: 'params',
-        title: 'Params',
+        title: i18next.t('uds.someip.si.columns.params'),
         width: 100,
         editRender: {},
         slots: { default: 'default_params' }

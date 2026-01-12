@@ -3,14 +3,16 @@
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Loading plugins...</p>
+      <p>{{ $t('pluginMarketplace.loading') }}</p>
     </div>
 
     <!-- Error State -->
     <div v-else-if="error" class="error-state">
       <div class="error-icon">⚠️</div>
       <p class="error-message">{{ error }}</p>
-      <button class="retry-button" @click="fetchPlugins">Retry</button>
+      <button class="retry-button" @click="fetchPlugins">
+        {{ $t('pluginMarketplace.retry') }}
+      </button>
     </div>
 
     <!-- Main Layout -->
@@ -20,8 +22,8 @@
         <el-card class="plugin-list-panel">
           <div class="marketplace-header">
             <div class="marketplace-header-text">
-              <h3>Plugin Marketplace</h3>
-              <p>{{ validPlugins.length }} plugins available</p>
+              <h3>{{ $t('pluginMarketplace.headerTitle') }}</h3>
+              <p>{{ $t('pluginMarketplace.pluginCount', { count: validPlugins.length }) }}</p>
             </div>
             <el-dropdown trigger="click" @command="handleManualCommand">
               <el-button type="primary" size="small" plain>
@@ -31,15 +33,15 @@
                 <el-dropdown-menu>
                   <el-dropdown-item command="install">
                     <el-icon><Upload /></el-icon>
-                    Install from ZIP
+                    {{ $t('pluginMarketplace.installFromZip') }}
                   </el-dropdown-item>
                   <el-dropdown-item command="load-path">
                     <el-icon><FolderOpened /></el-icon>
-                    Load from Path
+                    {{ $t('pluginMarketplace.loadFromPath') }}
                   </el-dropdown-item>
                   <el-dropdown-item command="dev-plugin" divided>
                     <el-icon><DocumentAdd /></el-icon>
-                    Dev Plugin
+                    {{ $t('pluginMarketplace.devPlugin') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -50,7 +52,7 @@
           <el-scrollbar :height="props.height - 35 - 60 - 121 - 20">
             <div v-if="validPlugins.length === 0" class="empty-state">
               <div class="empty-icon">📦</div>
-              <p>No plugins available</p>
+              <p>{{ $t('pluginMarketplace.noPlugins') }}</p>
             </div>
 
             <div
@@ -63,7 +65,7 @@
               <div class="plugin-list-icon">
                 <el-image
                   :src="getIconUrl(plugin)"
-                  alt="Plugin Icon"
+                  :alt="$t('pluginMarketplace.pluginIconAlt')"
                   class="plugin-list-icon-img"
                   fit="scale-down"
                 />
@@ -74,14 +76,14 @@
                   <span
                     v-if="plugin.isTemporary"
                     class="temporary-badge"
-                    title="Temporarily loaded (will be removed on restart)"
+                    :title="$t('pluginMarketplace.temporaryBadgeTitle')"
                   >
                     ⏳
                   </span>
                   <span
                     v-else-if="plugin.isLocalOnly"
                     class="local-only-badge"
-                    title="Local plugin only"
+                    :title="$t('pluginMarketplace.localOnlyBadgeTitle')"
                   >
                     📁
                   </span>
@@ -127,7 +129,7 @@
               <div class="detail-icon">
                 <el-image
                   :src="getIconUrl(selectedPlugin)"
-                  alt="Plugin Icon"
+                  :alt="$t('pluginMarketplace.pluginIconAlt')"
                   class="detail-icon-img"
                   fit="scale-down"
                 />
@@ -166,7 +168,11 @@
                   :disabled="installingPlugins.has(selectedPlugin.id)"
                   @click="togglePluginStatus(selectedPlugin.id)"
                 >
-                  {{ pluginStore.pluginsDisabled[selectedPlugin.id] ? 'Enable' : 'Disable' }}
+                  {{
+                    pluginStore.pluginsDisabled[selectedPlugin.id]
+                      ? $t('pluginMarketplace.action.enable')
+                      : $t('pluginMarketplace.action.disable')
+                  }}
                 </el-button>
 
                 <el-button
@@ -175,12 +181,12 @@
                   :disabled="installingPlugins.has(selectedPlugin.id) || selectedPlugin.isTemporary"
                   :title="
                     selectedPlugin.isTemporary
-                      ? 'Temporary plugins cannot be uninstalled (will be removed on restart)'
+                      ? $t('pluginMarketplace.tooltips.temporaryUninstallBlocked')
                       : ''
                   "
                   @click="uninstallPlugin(selectedPlugin)"
                 >
-                  Uninstall
+                  {{ $t('pluginMarketplace.action.uninstall') }}
                 </el-button>
               </template>
             </div>
@@ -190,30 +196,32 @@
               v-if="getPluginStatus(selectedPlugin.id, selectedPlugin.version).canUpgrade"
               class="version-info"
             >
-              <span class="upgrade-label">🔔 New version available:</span>
+              <span class="upgrade-label">{{ $t('pluginMarketplace.upgradeLabel') }}</span>
               <span class="new-version"> v{{ selectedPlugin.version }} </span>
             </div>
 
             <!-- Plugin Metadata -->
             <div class="plugin-metadata">
               <div class="metadata-row">
-                <span class="metadata-label">Version:</span>
+                <span class="metadata-label">{{ $t('pluginMarketplace.metadata.version') }}</span>
                 <span class="metadata-value">{{ selectedPlugin.version }}</span>
               </div>
               <div v-if="selectedPlugin.author" class="metadata-row">
-                <span class="metadata-label">Author:</span>
+                <span class="metadata-label">{{ $t('pluginMarketplace.metadata.author') }}</span>
                 <span class="metadata-value">{{ selectedPlugin.author }}</span>
               </div>
               <div class="metadata-row">
-                <span class="metadata-label">Published:</span>
+                <span class="metadata-label">{{ $t('pluginMarketplace.metadata.published') }}</span>
                 <span class="metadata-value">{{ formatDate(selectedPlugin.createdTime) }}</span>
               </div>
               <div v-if="selectedPlugin.manifestContent?.tabs?.length" class="metadata-row">
-                <span class="metadata-label">New Tabs:</span>
+                <span class="metadata-label">{{ $t('pluginMarketplace.metadata.newTabs') }}</span>
                 <span class="metadata-value">{{ selectedPlugin.manifestContent.tabs.length }}</span>
               </div>
               <div v-if="selectedPlugin.manifestContent?.extensions?.length" class="metadata-row">
-                <span class="metadata-label">Extensions:</span>
+                <span class="metadata-label">{{
+                  $t('pluginMarketplace.metadata.extensions')
+                }}</span>
                 <span class="metadata-value">
                   {{ selectedPlugin.manifestContent.extensions.map((e) => e.targetTab).join(', ') }}
                 </span>
@@ -228,7 +236,7 @@
 
           <div v-else class="no-selection">
             <div class="no-selection-icon">🧩</div>
-            <p>Select a plugin to view details</p>
+            <p>{{ $t('pluginMarketplace.noSelection') }}</p>
           </div>
         </el-card>
       </el-col>
@@ -259,6 +267,7 @@ import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
 import type { PluginManifest, RemotePluginInfo } from 'src/preload/plugin'
 import { cloneDeep } from 'lodash'
+import i18next from 'i18next'
 interface PluginWithReadme extends RemotePluginInfo {
   readmeContent?: string
   manifestContent?: PluginManifest
@@ -428,18 +437,20 @@ function getButtonText(plugin: PluginWithReadme): string {
   const status = getPluginStatus(plugin.id, plugin.version)
 
   if (installingPlugins.value.has(plugin.id)) {
-    return status.canUpgrade ? 'Upgrading...' : 'Installing...'
+    return status.canUpgrade
+      ? i18next.t('pluginMarketplace.button.upgrading')
+      : i18next.t('pluginMarketplace.button.installing')
   }
 
   if (status.canUpgrade) {
-    return `Upgrade to ${plugin.version}`
+    return i18next.t('pluginMarketplace.button.upgradeTo', { version: plugin.version })
   }
 
   if (status.installed) {
-    return 'Installed'
+    return i18next.t('pluginMarketplace.button.installed')
   }
 
-  return 'Install'
+  return i18next.t('pluginMarketplace.button.install')
 }
 
 // Check if button should be disabled
@@ -461,7 +472,7 @@ const renderedReadme = computed(() => {
 
   const readme = selectedPlugin.value.readmeContent
   if (!readme) {
-    return '<p class="no-readme">No README available for this plugin.</p>'
+    return `<p class="no-readme">${i18next.t('pluginMarketplace.noReadme')}</p>`
   }
 
   return marked.parse(readme) as string
@@ -521,8 +532,12 @@ async function fetchPlugins() {
     plugins.value = remotePlugins
     // console.log(`Loaded ${plugins.value.length} plugins from marketplace`)
   } catch (e: any) {
+    const message = i18next.t('pluginMarketplace.messages.loadFailed', {
+      error: e?.message || i18next.t('common.unknownError')
+    })
+    error.value = message
     ElNotification.error({
-      message: `Failed to load plugins from marketplace: ${e.message || 'Unknown error'}`,
+      message,
       position: 'bottom-right'
     })
   } finally {
@@ -536,7 +551,7 @@ async function installPlugin(plugin: PluginWithReadme) {
 
   try {
     if (!plugin.zipUrl) {
-      throw new Error('Plugin zip URL not available')
+      throw new Error(i18next.t('pluginMarketplace.messages.zipUrlMissing'))
     }
 
     // If upgrading, disable the plugin first
@@ -572,15 +587,25 @@ async function installPlugin(plugin: PluginWithReadme) {
     // Update temporary plugins list (this is an installed plugin, not temporary)
     updateTemporaryPlugins()
 
+    const successMessage = status.canUpgrade
+      ? i18next.t('pluginMarketplace.messages.upgradeSuccess', {
+          name: plugin.name,
+          version: plugin.version
+        })
+      : i18next.t('pluginMarketplace.messages.installSuccess', {
+          name: plugin.name,
+          version: plugin.version
+        })
+
     ElNotification.success({
-      message: status.canUpgrade
-        ? `Plugin ${plugin.name} upgraded to v${plugin.version} successfully!`
-        : `Plugin ${plugin.name} v${plugin.version} installed successfully!`,
+      message: successMessage,
       position: 'bottom-right'
     })
   } catch (error: any) {
     ElNotification.error({
-      message: `Failed to install plugin: ${error.message || 'Unknown error'}`,
+      message: i18next.t('pluginMarketplace.messages.installError', {
+        error: error?.message || i18next.t('common.unknownError')
+      }),
       position: 'bottom-right'
     })
   } finally {
@@ -604,13 +629,13 @@ async function togglePluginStatus(pluginId: string) {
   if (isEnabled) {
     await pluginStore.disablePlugin(pluginId)
     ElNotification.success({
-      message: 'Plugin disabled successfully',
+      message: i18next.t('pluginMarketplace.messages.disableSuccess'),
       position: 'bottom-right'
     })
   } else {
     await pluginStore.enablePlugin(pluginId)
     ElNotification.success({
-      message: 'Plugin enabled successfully',
+      message: i18next.t('pluginMarketplace.messages.enableSuccess'),
       position: 'bottom-right'
     })
   }
@@ -620,11 +645,11 @@ async function togglePluginStatus(pluginId: string) {
 async function uninstallPlugin(plugin: PluginWithReadme) {
   try {
     await ElMessageBox.confirm(
-      `Are you sure you want to uninstall "${plugin.name}"? This action cannot be undone.`,
-      'Confirm Uninstall',
+      i18next.t('pluginMarketplace.dialog.uninstallMessage', { name: plugin.name }),
+      i18next.t('pluginMarketplace.dialog.uninstallTitle'),
       {
-        confirmButtonText: 'Uninstall',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: i18next.t('pluginMarketplace.dialog.uninstallConfirm'),
+        cancelButtonText: i18next.t('pluginMarketplace.dialog.uninstallCancel'),
         type: 'warning'
       }
     )
@@ -639,7 +664,7 @@ async function uninstallPlugin(plugin: PluginWithReadme) {
     await pluginStore.uninstallPlugin(plugin.id)
 
     ElNotification.success({
-      message: `Plugin ${plugin.name} uninstalled successfully!`,
+      message: i18next.t('pluginMarketplace.messages.uninstallSuccess', { name: plugin.name }),
       position: 'bottom-right'
     })
 
@@ -649,7 +674,9 @@ async function uninstallPlugin(plugin: PluginWithReadme) {
     }
   } catch (error: any) {
     ElNotification.error({
-      message: `Failed to uninstall plugin: ${error.message || 'Unknown error'}`,
+      message: i18next.t('pluginMarketplace.messages.uninstallError', {
+        error: error?.message || i18next.t('common.unknownError')
+      }),
       position: 'bottom-right'
     })
   } finally {
@@ -662,8 +689,13 @@ async function handleManualCommand(command: string) {
   if (command === 'install') {
     // Manual install from ZIP file
     const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: 'Select Plugin Package',
-      filters: [{ name: 'ZIP Package', extensions: ['zip'] }],
+      title: i18next.t('pluginMarketplace.dialog.selectZipTitle'),
+      filters: [
+        {
+          name: i18next.t('pluginMarketplace.dialog.zipFilterName'),
+          extensions: ['zip']
+        }
+      ],
       properties: ['openFile']
     })
 
@@ -695,7 +727,7 @@ async function handleManualCommand(command: string) {
       }
 
       ElNotification.success({
-        message: 'Plugin installed successfully from ZIP file!',
+        message: i18next.t('pluginMarketplace.messages.installZipSuccess'),
         position: 'bottom-right'
       })
 
@@ -703,7 +735,9 @@ async function handleManualCommand(command: string) {
       updateTemporaryPlugins()
     } catch (error: any) {
       ElNotification.error({
-        message: `Failed to install plugin: ${error.message || 'Unknown error'}`,
+        message: i18next.t('pluginMarketplace.messages.installZipError', {
+          error: error?.message || i18next.t('common.unknownError')
+        }),
         position: 'bottom-right'
       })
     } finally {
@@ -712,7 +746,7 @@ async function handleManualCommand(command: string) {
   } else if (command === 'load-path') {
     // Manual load from path
     const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: 'Select Plugin Directory',
+      title: i18next.t('pluginMarketplace.dialog.selectDirTitle'),
       properties: ['openDirectory']
     })
 
@@ -731,18 +765,20 @@ async function handleManualCommand(command: string) {
       updateTemporaryPlugins()
 
       ElNotification.success({
-        message: 'Plugin loaded successfully from path!',
+        message: i18next.t('pluginMarketplace.messages.loadDirSuccess'),
         position: 'bottom-right'
       })
     } catch (error: any) {
       ElNotification.error({
-        message: `Failed to load plugin: ${error.message || 'Unknown error'}`,
+        message: i18next.t('pluginMarketplace.messages.loadDirError', {
+          error: error?.message || i18next.t('common.unknownError')
+        }),
         position: 'bottom-right'
       })
     }
   } else if (command === 'dev-plugin') {
     // Open plugin development documentation URL
-    const devUrl = 'https://app.whyengineer.com/docs/dev/plugin.html'
+    const devUrl = i18next.t('pluginMarketplace.devDocsUrl')
     window.electron.ipcRenderer.send('ipc-open-link', devUrl)
   }
 }

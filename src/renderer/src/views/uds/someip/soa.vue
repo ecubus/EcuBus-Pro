@@ -87,6 +87,7 @@ import { HardwareType } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
 import someipVue from './someip.vue'
+import i18next from 'i18next'
 
 const loading = ref(false)
 const activeTree = ref<tree>()
@@ -123,13 +124,17 @@ function nodeClick(data: tree, node: any) {
   })
 }
 function removeDevice(data: tree) {
-  ElMessageBox.confirm('Are you sure to delete this SOA config?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: `#win${winKey}`
-  }).then(() => {
+  ElMessageBox.confirm(
+    i18next.t('uds.someip.soa.dialogs.deleteConfirm'),
+    i18next.t('uds.someip.soa.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('uds.someip.soa.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.someip.soa.dialogs.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: `#win${winKey}`
+    }
+  ).then(() => {
     delete globalData.devices[data.id]
     treeRef.value?.remove(data.id)
     activeTree.value = undefined
@@ -177,7 +182,7 @@ const globalStart = useGlobalStart()
 function buildTree() {
   const t: tree[] = []
   const can: tree = {
-    label: 'SOME/IP',
+    label: i18next.t('uds.someip.soa.tree.someip'),
     type: 'someip',
     append: true,
     id: 'CAN',
@@ -197,7 +202,7 @@ function buildTree() {
   t.push(can)
 
   const eth: tree = {
-    label: 'DDS',
+    label: i18next.t('uds.someip.soa.tree.dds'),
     type: 'dds',
     append: true,
     id: 'DDS',

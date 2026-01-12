@@ -4,12 +4,8 @@
       <el-form-item>
         <template #label>
           <div class="label-container">
-            <span>Theme</span>
-            <el-tooltip
-              content="Choose between light and dark theme"
-              placement="bottom"
-              effect="light"
-            >
+            <span>{{ $t('general.theme') }}</span>
+            <el-tooltip :content="$t('general.themeTooltip')" placement="bottom" effect="light">
               <el-icon class="question-icon"><QuestionFilled /></el-icon>
             </el-tooltip>
           </div>
@@ -25,12 +21,16 @@
       <el-form-item>
         <template #label>
           <div class="label-container">
-            <span>UI Zoom</span>
-            <el-tooltip
-              content="Adjust the overall UI scaling of the application"
-              placement="bottom"
-              effect="light"
-            >
+            <span>{{ $t('general.language') }}</span>
+          </div>
+        </template>
+        <LanguageSwitcher v-model="form.language" />
+      </el-form-item>
+      <el-form-item>
+        <template #label>
+          <div class="label-container">
+            <span>{{ $t('general.uiZoom') }}</span>
+            <el-tooltip :content="$t('general.uiZoomTooltip')" placement="bottom" effect="light">
               <el-icon class="question-icon"><QuestionFilled /></el-icon>
             </el-tooltip>
           </div>
@@ -52,16 +52,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { ElMessage } from 'element-plus'
 import { QuestionFilled, Moon, Sunny } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
 import { useDark } from '@vueuse/core'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 
 const isDark = useDark()
-const form = ref({
-  zoom: 100
-})
 const OldVal = window.store.get('general.settings') as any
+const form = ref({
+  zoom: OldVal?.zoom || 100,
+  language: OldVal?.language || 'en'
+})
 
 watch(
   form,

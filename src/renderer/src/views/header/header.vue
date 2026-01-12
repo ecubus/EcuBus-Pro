@@ -47,7 +47,11 @@
       </el-button-group>
       <template v-if="project.open && !isExternal">
         <el-divider direction="vertical" />
-        <el-tooltip content="Rearrange Windows" placement="bottom" effect="light">
+        <el-tooltip
+          :content="i18next.t('header.rearrangeWindows')"
+          placement="bottom"
+          effect="light"
+        >
           <el-button link @click="runtime.rearrangeWindows = !runtime.rearrangeWindows">
             <Icon :icon="addBox" />
           </el-button>
@@ -89,6 +93,7 @@ import { ref, onMounted, inject, Ref, watch, onBeforeUnmount, toRef, watchEffect
 import { useProjectStore, State as projectState } from '@r/stores/project'
 import { useRouter } from 'vue-router'
 import logo from '@r/assets/logo64.png'
+import i18next from 'i18next'
 import { Icon } from '@iconify/vue'
 import FullScreen from '@iconify/icons-ep/full-screen'
 import Min from '@iconify/icons-ep/minus'
@@ -153,7 +158,7 @@ watchEffect(() => {
   if (project.open && !isExternal.value) {
     title.value = ''
     if (project.projectInfo.name == '') {
-      title.value += 'Untitled'
+      title.value += i18next.t('header.untitled')
     } else {
       title.value += project.projectInfo.name
     }

@@ -3,9 +3,9 @@
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card class="template-list">
-          <el-button type="primary" plain icon="Fold" @click="project.createNewProject"
-            >Create Empty Project</el-button
-          >
+          <el-button type="primary" plain icon="Fold" @click="project.createNewProject">{{
+            $t('homeNew.createEmptyProject')
+          }}</el-button>
           <el-divider></el-divider>
           <!-- <h3 class="section-title">Available Templates</h3> -->
           <el-scrollbar :height="props.height - 35 - 40 - 121">
@@ -21,7 +21,9 @@
       <el-col :span="16">
         <el-card id="mainReadme" class="action-panel">
           <div v-if="selectedTemplate" class="button-container">
-            <el-button type="primary" @click="createTemplateProject">Create The Example</el-button>
+            <el-button type="primary" @click="createTemplateProject">
+              {{ $t('homeNew.createExample') }}
+            </el-button>
             <el-divider></el-divider>
             <div class="readme">
               <div id="readme" v-html="readme" />
@@ -45,6 +47,7 @@ import './readme.css'
 import { cloneDeep } from 'lodash'
 import log from 'electron-log'
 import mermaid from 'mermaid'
+import i18next from 'i18next'
 
 interface exampleL1 {
   level: 1
@@ -83,7 +86,7 @@ function createTemplateProject() {
       })
       .catch((err) => {
         log.error(err)
-        ElMessage.error('Failed to create example')
+        ElMessage.error(i18next.t('homeNew.createExampleError'))
       })
   }
 }
@@ -226,7 +229,7 @@ onMounted(() => {
       templates.value = data
     })
     .catch((err) => {
-      ElMessage.error('Failed to load templates')
+      ElMessage.error(i18next.t('homeNew.loadTemplatesError'))
     })
   marked = new Marked()
   marked.use({ extensions: [videoRenderer, mermaidRenderer] })

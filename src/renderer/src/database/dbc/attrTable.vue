@@ -14,7 +14,7 @@
         >
           <el-input
             v-model="searchText"
-            placeholder="Search by name..."
+            :placeholder="i18next.t('database.dbc.attrTable.placeholders.searchByName')"
             style="width: 200px"
             size="small"
             clearable
@@ -37,6 +37,7 @@ import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { DBC, Attribute } from './dbcVisitor'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string
@@ -55,40 +56,40 @@ const w = toRef(props, 'width')
 const columns: VxeGridProps['columns'] = [
   {
     field: 'attrType',
-    title: 'Type of Object',
+    title: i18next.t('database.dbc.attrTable.columns.typeOfObject'),
     width: 140,
     fixed: 'left',
     formatter: ({ cellValue }) => {
       const typeMap = {
-        network: 'Network',
-        node: 'Node',
-        message: 'Message',
-        signal: 'Signal',
-        envVar: 'EnvVar'
+        network: i18next.t('database.dbc.attrTable.attrTypes.network'),
+        node: i18next.t('database.dbc.attrTable.attrTypes.node'),
+        message: i18next.t('database.dbc.attrTable.attrTypes.message'),
+        signal: i18next.t('database.dbc.attrTable.attrTypes.signal'),
+        envVar: i18next.t('database.dbc.attrTable.attrTypes.envVar')
       }
       return typeMap[cellValue as keyof typeof typeMap] || cellValue
     }
   },
-  { field: 'name', title: 'Name', minWidth: 150 },
+  { field: 'name', title: i18next.t('database.dbc.attrTable.columns.name'), minWidth: 150 },
 
   {
     field: 'type',
-    title: 'Value Type',
+    title: i18next.t('database.dbc.attrTable.columns.valueType'),
     width: 120,
     formatter: ({ cellValue }) => {
       const typeMap = {
-        INT: 'Integer',
-        FLOAT: 'Float',
-        STRING: 'String',
-        ENUM: 'Enum',
-        HEX: 'Hex'
+        INT: i18next.t('database.dbc.attrTable.valueTypes.integer'),
+        FLOAT: i18next.t('database.dbc.attrTable.valueTypes.float'),
+        STRING: i18next.t('database.dbc.attrTable.valueTypes.string'),
+        ENUM: i18next.t('database.dbc.attrTable.valueTypes.enum'),
+        HEX: i18next.t('database.dbc.attrTable.valueTypes.hex')
       }
       return typeMap[cellValue as keyof typeof typeMap] || cellValue
     }
   },
   {
     field: 'min',
-    title: 'Min',
+    title: i18next.t('database.dbc.attrTable.columns.min'),
     width: 100,
     formatter: ({ row }) => {
       if (row.type === 'INT' || row.type === 'FLOAT' || row.type === 'HEX') {
@@ -99,7 +100,7 @@ const columns: VxeGridProps['columns'] = [
   },
   {
     field: 'max',
-    title: 'Max',
+    title: i18next.t('database.dbc.attrTable.columns.max'),
     width: 100,
     formatter: ({ row }) => {
       if (row.type === 'INT' || row.type === 'FLOAT' || row.type === 'HEX') {
@@ -111,7 +112,7 @@ const columns: VxeGridProps['columns'] = [
 
   {
     field: 'defaultValue',
-    title: 'Default',
+    title: i18next.t('database.dbc.attrTable.columns.default'),
     width: 120,
     formatter: ({ row }) => {
       if (row.defaultValue !== undefined) {

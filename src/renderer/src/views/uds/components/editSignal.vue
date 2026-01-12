@@ -3,45 +3,62 @@
     <el-scrollbar>
       <div class="edit-signal__content">
         <el-collapse v-if="props.node.type === 'signal'" v-model="activeCollapse">
-          <el-collapse-item title="Signal Information" name="signal">
+          <el-collapse-item
+            :title="i18next.t('uds.components.editSignal.collapse.signalInformation')"
+            name="signal"
+          >
             <el-descriptions :column="1" border size="small">
-              <el-descriptions-item label="Database">{{
-                props.node.bindValue.dbName
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Signal Name">{{
-                props.node.bindValue.signalName
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Frame ID"
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.database')"
+                >{{ props.node.bindValue.dbName }}</el-descriptions-item
+              >
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.signalName')"
+                >{{ props.node.bindValue.signalName }}</el-descriptions-item
+              >
+              <el-descriptions-item :label="i18next.t('uds.components.editSignal.labels.frameId')"
                 >0x{{ props.node.bindValue.frameId.toString(16) }}</el-descriptions-item
               >
-              <el-descriptions-item label="Start Bit">{{
-                props.node.bindValue.startBit
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Bit Length">{{
-                props.node.bindValue.bitLength
-              }}</el-descriptions-item>
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.startBit')"
+                >{{ props.node.bindValue.startBit }}</el-descriptions-item
+              >
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.bitLength')"
+                >{{ props.node.bindValue.bitLength }}</el-descriptions-item
+              >
             </el-descriptions>
           </el-collapse-item>
         </el-collapse>
         <el-collapse v-else-if="props.node.type === 'variable'" v-model="activeCollapse">
-          <el-collapse-item title="Variable Information" name="variable">
+          <el-collapse-item
+            :title="i18next.t('uds.components.editSignal.collapse.variableInformation')"
+            name="variable"
+          >
             <el-descriptions v-if="varInfo" :column="1" border size="small">
-              <el-descriptions-item label="Variable Full Name">{{
-                varInfo.fullName
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Variable Name">{{
-                varInfo.var?.name
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Variable Type">{{
-                varInfo.var?.type.toUpperCase()
-              }}</el-descriptions-item>
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.variableFullName')"
+                >{{ varInfo.fullName }}</el-descriptions-item
+              >
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.variableName')"
+                >{{ varInfo.var?.name }}</el-descriptions-item
+              >
+              <el-descriptions-item
+                :label="i18next.t('uds.components.editSignal.labels.variableType')"
+                >{{ varInfo.var?.type.toUpperCase() }}</el-descriptions-item
+              >
             </el-descriptions>
 
             <el-alert
               v-else
-              :title="`Variable ${(props.node.bindValue as any).variableName} Not Found`"
+              :title="
+                i18next.t('uds.components.editSignal.messages.variableNotFound', {
+                  name: (props.node.bindValue as any).variableName
+                })
+              "
               type="warning"
-              description="Please check in Variable Window"
+              :description="i18next.t('uds.components.editSignal.messages.checkVariableWindow')"
               show-icon
             />
           </el-collapse-item>
@@ -50,83 +67,128 @@
         <!-- 当type为variable时暂时不显示description -->
 
         <el-form :model="form" label-width="120px" size="small">
-          <el-form-item label="Name">
+          <el-form-item :label="i18next.t('uds.components.editSignal.labels.name')">
             <el-input v-model="form.name" />
           </el-form-item>
-          <el-form-item label="Color">
+          <el-form-item :label="i18next.t('uds.components.editSignal.labels.color')">
             <el-color-picker v-model="form.color" show-alpha />
           </el-form-item>
           <template v-if="props.stype == 'line'">
-            <el-divider content-position="left">Y Axis</el-divider>
-            <el-form-item label="Y Axis Min">
+            <el-divider content-position="left">{{
+              i18next.t('uds.components.editSignal.labels.yAxis')
+            }}</el-divider>
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.yAxisMin')">
               <el-input-number v-model="form.yAxis.min" :controls="false" />
             </el-form-item>
-            <el-form-item label="Y Axis Max">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.yAxisMax')">
               <el-input-number v-model="form.yAxis.max" :controls="false" />
             </el-form-item>
-            <el-form-item label="Split Line">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.splitLine')">
               <el-switch v-model="form.yAxis.splitLine.show" />
             </el-form-item>
-            <el-form-item label="Disable Zoom">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.disableZoom')">
               <el-switch v-model="form.disZoom" />
             </el-form-item>
-            <el-divider content-position="left">Tooltip</el-divider>
-            <el-form-item label="Show Tooltip">
+            <el-divider content-position="left">{{
+              i18next.t('uds.components.editSignal.labels.tooltip')
+            }}</el-divider>
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.showTooltip')">
               <el-switch v-model="form.tooltip.show" />
             </el-form-item>
 
-            <el-divider content-position="left">X Axis</el-divider>
-            <el-form-item label="Show Grid">
+            <el-divider content-position="left">{{
+              i18next.t('uds.components.editSignal.labels.xAxis')
+            }}</el-divider>
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.showGrid')">
               <el-switch v-model="form.xAxis.splitLine.show" />
             </el-form-item>
-            <el-form-item label="Grid Style">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.gridStyle')">
               <el-select
                 v-model="form.xAxis.splitLine.lineStyle.type"
                 :disabled="!form.xAxis.splitLine.show"
               >
-                <el-option label="Solid" value="solid" />
-                <el-option label="Dashed" value="dashed" />
-                <el-option label="Dotted" value="dotted" />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.solid')"
+                  value="solid"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.dashed')"
+                  value="dashed"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.dotted')"
+                  value="dotted"
+                />
               </el-select>
             </el-form-item>
-            <el-form-item label="Show Value">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.showValue')">
               <el-switch v-model="form.xAxis.axisPointer.show" />
             </el-form-item>
 
-            <el-divider content-position="left">Series</el-divider>
-            <el-form-item label="Step">
+            <el-divider content-position="left">{{
+              i18next.t('uds.components.editSignal.labels.series')
+            }}</el-divider>
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.step')">
               <el-select v-model="form.series.step">
-                <el-option label="Step" value="end" />
-                <el-option label="Line" :value="false" />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.step')"
+                  value="end"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.line')"
+                  :value="false"
+                />
               </el-select>
             </el-form-item>
-            <el-form-item label="Show Points">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.showPoints')">
               <el-switch v-model="form.series.showSymbol" />
             </el-form-item>
-            <el-form-item v-if="form.series.showSymbol" label="Point Size">
+            <el-form-item
+              v-if="form.series.showSymbol"
+              :label="i18next.t('uds.components.editSignal.labels.pointSize')"
+            >
               <el-input-number v-model="form.series.symbolSize" :min="2" :max="10" :step="1" />
             </el-form-item>
-            <el-form-item v-if="form.series.showSymbol" label="Point Style">
+            <el-form-item
+              v-if="form.series.showSymbol"
+              :label="i18next.t('uds.components.editSignal.labels.pointStyle')"
+            >
               <el-select v-model="form.series.symbol">
-                <el-option label="Circle" value="circle" />
-                <el-option label="Rectangle" value="rect" />
-                <el-option label="Triangle" value="triangle" />
-                <el-option label="Diamond" value="diamond" />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.circle')"
+                  value="circle"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.rectangle')"
+                  value="rect"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.triangle')"
+                  value="triangle"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.editSignal.options.diamond')"
+                  value="diamond"
+                />
               </el-select>
             </el-form-item>
           </template>
           <template v-if="props.stype == 'gauge'">
-            <el-form-item label="Min">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.min')">
               <el-input-number v-model="form.yAxis.min" :controls="false" />
             </el-form-item>
-            <el-form-item label="Max">
+            <el-form-item :label="i18next.t('uds.components.editSignal.labels.max')">
               <el-input-number v-model="form.yAxis.max" :controls="false" />
             </el-form-item>
           </template>
 
           <el-form-item>
-            <el-button type="primary" @click="handleSubmit">Save</el-button>
-            <el-button @click="handleCancel">Cancel</el-button>
+            <el-button type="primary" @click="handleSubmit">{{
+              i18next.t('uds.components.editSignal.buttons.save')
+            }}</el-button>
+            <el-button @click="handleCancel">{{
+              i18next.t('uds.components.editSignal.buttons.cancel')
+            }}</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -141,6 +203,7 @@ import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
 import { useDataStore } from '@r/stores/data'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { cloneDeep } from 'lodash'
+import i18next from 'i18next'
 const database = useDataStore()
 const props = defineProps<{
   stype: 'line' | 'gauge'

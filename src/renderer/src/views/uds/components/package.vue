@@ -1,14 +1,14 @@
 <template>
   <div class="package-manager" :style="{ width: `${w - 4}px`, height: `${h}px` }">
     <div class="header">
-      <h2>Package Manager</h2>
+      <h2>{{ i18next.t('uds.components.package.title') }}</h2>
     </div>
 
     <div v-if="!hasPackageJson" class="no-package-json">
       <el-empty :image-size="50">
         <template #description>
           <div class="init-description">
-            <p>No package.json found</p>
+            <p>{{ i18next.t('uds.components.package.empty.noPackageJson') }}</p>
             <p class="sub-text">{{ initDescription }}</p>
             <el-button
               type="primary"
@@ -16,7 +16,7 @@
               :disabled="!canInitPackageJson"
               @click="handleInitPackageJson"
             >
-              Initialize package.json
+              {{ i18next.t('uds.components.package.empty.initializeButton') }}
             </el-button>
           </div>
         </template>
@@ -30,43 +30,70 @@
             <el-form-item>
               <el-input
                 v-model="packageName"
-                placeholder="Enter package name"
+                :placeholder="i18next.t('uds.components.package.form.enterPackageName')"
                 clearable
                 style="width: 200px"
               />
             </el-form-item>
             <el-form-item>
-              <el-select v-model="installType" placeholder="Install type" style="width: 200px">
-                <el-option label="Dependencies" value="dependencies" />
-                <el-option label="Dev Dependencies" value="devDependencies" />
+              <el-select
+                v-model="installType"
+                :placeholder="i18next.t('uds.components.package.form.installType')"
+                style="width: 200px"
+              >
+                <el-option
+                  :label="i18next.t('uds.components.package.form.dependencies')"
+                  value="dependencies"
+                />
+                <el-option
+                  :label="i18next.t('uds.components.package.form.devDependencies')"
+                  value="devDependencies"
+                />
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" :loading="isInstalling" plain @click="installPackage"
-                >Install</el-button
-              >
+              <el-button type="primary" :loading="isInstalling" plain @click="installPackage">{{
+                i18next.t('uds.components.package.form.install')
+              }}</el-button>
             </el-form-item>
           </el-form>
         </div>
 
         <div class="terminal-container">
           <div class="terminal-header">
-            <span>Installation Log</span>
-            <el-button link @click="clearTerminal">Clear</el-button>
+            <span>{{ i18next.t('uds.components.package.terminal.installationLog') }}</span>
+            <el-button link @click="clearTerminal">{{
+              i18next.t('uds.components.package.terminal.clear')
+            }}</el-button>
           </div>
           <div id="terminalElement" class="terminal"></div>
         </div>
 
         <div>
-          <h3>Installed Packages</h3>
+          <h3>{{ i18next.t('uds.components.package.table.installedPackages') }}</h3>
 
           <el-tabs v-model="activeTab">
-            <el-tab-pane label="Dependencies" name="dependencies">
+            <el-tab-pane
+              :label="i18next.t('uds.components.package.form.dependencies')"
+              name="dependencies"
+            >
               <div class="table-container">
                 <el-table :data="dependenciesList" style="width: 100%; min-height: 200px">
-                  <el-table-column prop="name" label="Package Name" min-width="180" />
-                  <el-table-column prop="version" label="Version" width="180" />
-                  <el-table-column label="Actions" width="120" fixed="right">
+                  <el-table-column
+                    prop="name"
+                    :label="i18next.t('uds.components.package.table.packageName')"
+                    min-width="180"
+                  />
+                  <el-table-column
+                    prop="version"
+                    :label="i18next.t('uds.components.package.table.version')"
+                    width="180"
+                  />
+                  <el-table-column
+                    :label="i18next.t('uds.components.package.table.actions')"
+                    width="120"
+                    fixed="right"
+                  >
                     <template #default="scope">
                       <el-button
                         type="danger"
@@ -74,7 +101,7 @@
                         plain
                         @click="uninstallPackage(scope.row.name)"
                       >
-                        Uninstall
+                        {{ i18next.t('uds.components.package.table.uninstall') }}
                       </el-button>
                     </template>
                   </el-table-column>
@@ -82,12 +109,27 @@
               </div>
             </el-tab-pane>
 
-            <el-tab-pane label="Dev Dependencies" name="devDependencies">
+            <el-tab-pane
+              :label="i18next.t('uds.components.package.form.devDependencies')"
+              name="devDependencies"
+            >
               <div class="table-container">
                 <el-table :data="devDependenciesList" style="width: 100%; min-height: 200px">
-                  <el-table-column prop="name" label="Package Name" min-width="180" />
-                  <el-table-column prop="version" label="Version" width="180" />
-                  <el-table-column label="Actions" width="120" fixed="right">
+                  <el-table-column
+                    prop="name"
+                    :label="i18next.t('uds.components.package.table.packageName')"
+                    min-width="180"
+                  />
+                  <el-table-column
+                    prop="version"
+                    :label="i18next.t('uds.components.package.table.version')"
+                    width="180"
+                  />
+                  <el-table-column
+                    :label="i18next.t('uds.components.package.table.actions')"
+                    width="120"
+                    fixed="right"
+                  >
                     <template #default="scope">
                       <el-button
                         type="danger"
@@ -95,7 +137,7 @@
                         plain
                         @click="uninstallPackage(scope.row.name, true)"
                       >
-                        Uninstall
+                        {{ i18next.t('uds.components.package.table.uninstall') }}
                       </el-button>
                     </template>
                   </el-table-column>
@@ -116,6 +158,7 @@ import { useProjectStore } from '@r/stores/project'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import 'xterm/css/xterm.css'
+import i18next from 'i18next'
 
 const project = useProjectStore()
 const packageName = ref('')
@@ -138,9 +181,9 @@ const hasPackageJson = computed(() => packageJson.value !== null)
 const canInitPackageJson = computed(() => !!project.projectInfo.path)
 const initDescription = computed(() => {
   if (!project.projectInfo.path) {
-    return 'Please save your project first before initializing package.json'
+    return i18next.t('uds.components.package.empty.saveProjectFirst')
   }
-  return 'Please initialize package.json first to manage dependencies'
+  return i18next.t('uds.components.package.empty.initializeFirst')
 })
 
 const dependenciesList = computed(() => {
@@ -186,6 +229,13 @@ const writeToTerminal = (data: string, type: 'success' | 'error' | 'info' = 'inf
 
 // 初始化终端
 const initTerminal = () => {
+  // Skip if terminal is already initialized
+  if (terminal) return
+
+  const terminalElement = document.getElementById('terminalElement')
+  // Skip if terminal element doesn't exist in DOM
+  if (!terminalElement) return
+
   terminal = new Terminal({
     theme: {
       background: '#ffffff',
@@ -218,7 +268,7 @@ const initTerminal = () => {
 
   fitAddon = new FitAddon()
   terminal.loadAddon(fitAddon)
-  terminal.open(document.getElementById('terminalElement') as HTMLElement)
+  terminal.open(terminalElement)
   terminal.clear()
   fitAddon.fit()
 }
@@ -242,11 +292,13 @@ const initPackageJson = async () => {
   try {
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke('ipc-pnpm-init', project.projectInfo.path)
-    writeToTerminal('✓ package.json initialized successfully', 'success')
+    writeToTerminal(i18next.t('uds.components.package.messages.packageJsonInitialized'), 'success')
     await loadPackageJson()
   } catch (error: any) {
     writeToTerminal(
-      `✗ Failed to initialize package.json: ${error?.message || 'Unknown error'}`,
+      i18next.t('uds.components.package.messages.failedToInitialize', {
+        error: error?.message || i18next.t('uds.components.package.messages.unknownError')
+      }),
       'error'
     )
   } finally {
@@ -257,7 +309,7 @@ const initPackageJson = async () => {
 // 安装包
 const installPackage = async () => {
   if (!packageName.value) {
-    writeToTerminal('✗ Please enter a package name', 'error')
+    writeToTerminal(i18next.t('uds.components.package.messages.enterPackageName'), 'error')
     return
   }
 
@@ -269,12 +321,18 @@ const installPackage = async () => {
       packageName.value,
       installType.value === 'devDependencies'
     )
-    writeToTerminal(`✓ Package ${packageName.value} installed successfully`, 'success')
+    writeToTerminal(
+      i18next.t('uds.components.package.messages.packageInstalled', { name: packageName.value }),
+      'success'
+    )
     packageName.value = ''
     await loadPackageJson()
   } catch (error: any) {
     writeToTerminal(
-      `✗ Failed to install package ${packageName.value}: ${error?.message || 'Unknown error'}`,
+      i18next.t('uds.components.package.messages.failedToInstall', {
+        name: packageName.value,
+        error: error?.message || i18next.t('uds.components.package.messages.unknownError')
+      }),
       'error'
     )
   } finally {
@@ -287,11 +345,17 @@ const uninstallPackage = async (name: string, isDev: boolean = false) => {
   try {
     isInstalling.value = true
     await window.electron.ipcRenderer.invoke('ipc-pnpm-uninstall', project.projectInfo.path, name)
-    writeToTerminal(`✓ Package ${name} uninstalled successfully`, 'success')
+    writeToTerminal(
+      i18next.t('uds.components.package.messages.packageUninstalled', { name }),
+      'success'
+    )
     await loadPackageJson()
   } catch (error: any) {
     writeToTerminal(
-      `✗ Failed to uninstall package ${name}: ${error?.message || 'Unknown error'}`,
+      i18next.t('uds.components.package.messages.failedToUninstall', {
+        name,
+        error: error?.message || i18next.t('uds.components.package.messages.unknownError')
+      }),
       'error'
     )
   } finally {
@@ -311,8 +375,9 @@ const loadPackageJson = async () => {
       initTerminal()
     })
   } catch (error: any) {
-    writeToTerminal(`✗ Failed to load package.json: ${error?.message || 'Unknown error'}`, 'error')
-    initTerminal()
+    // packageJson remains null, so hasPackageJson is false and terminal element won't exist
+    // Don't call initTerminal here since the DOM element doesn't exist
+    console.error('Failed to load package.json:', error?.message)
   }
 }
 

@@ -19,18 +19,30 @@
           "
         >
           <el-button-group>
-            <el-tooltip effect="light" content="Add Signal" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.editFrame.tooltips.addSignal')"
+              placement="bottom"
+            >
               <el-button link @click="addNewSignal">
                 <Icon :icon="fileOpenOutline" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
 
-            <el-tooltip effect="light" content="Edit Signal" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.editFrame.tooltips.editSignal')"
+              placement="bottom"
+            >
               <el-button link type="success" :disabled="popoverIndex < 0" @click="editSignal">
                 <Icon :icon="editIcon" style="font-size: 18px" />
               </el-button>
             </el-tooltip>
-            <el-tooltip effect="light" content="Delete Signal" placement="bottom">
+            <el-tooltip
+              effect="light"
+              :content="i18next.t('database.ldf.editFrame.tooltips.deleteSignal')"
+              placement="bottom"
+            >
               <el-button link type="danger" :disabled="popoverIndex < 0" @click="deleteSignal">
                 <Icon :icon="deleteIcon" style="font-size: 18px" />
               </el-button>
@@ -44,13 +56,13 @@
               :class="{
                 'ldf-danger-row': idHasError
               }"
-              >Frame ID:</span
+              >{{ i18next.t('database.ldf.editFrame.labels.frameId') }}:</span
             >
             <el-input
               v-model="frameId"
               style="width: 100px"
               size="small"
-              placeholder="Hex"
+              :placeholder="i18next.t('database.ldf.editFrame.placeholders.hex')"
               @input="updateFrameId"
             />
           </div>
@@ -62,7 +74,7 @@
               :class="{
                 'ldf-danger-row': frameSizeHasError
               }"
-              >Frame Size:</span
+              >{{ i18next.t('database.ldf.editFrame.labels.frameSize') }}:</span
             >
             <el-input-number
               v-model="frame.frameSize"
@@ -75,7 +87,11 @@
 
           <el-divider direction="vertical" />
 
-          <el-checkbox v-model="autoUpdateOffset" label="Auto Update Offset" size="small" />
+          <el-checkbox
+            v-model="autoUpdateOffset"
+            :label="i18next.t('database.ldf.editFrame.labels.autoUpdateOffset')"
+            size="small"
+          />
         </div>
       </template>
       <template #default_name="{ row }">
@@ -151,6 +167,7 @@ import EditSignal from './editSignal.vue'
 import { Grid } from '@element-plus/icons-vue'
 import Sortable from 'sortablejs'
 import Schema from 'async-validator'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string
@@ -222,7 +239,9 @@ const frameId = computed({
 function addNewSignal() {
   const index = ref()
   ElMessageBox({
-    title: `Available signals for ${frame.value.name}`,
+    title: i18next.t('database.ldf.editFrame.dialogs.availableSignals', {
+      frameName: frame.value.name
+    }),
     buttonSize: 'small',
     message: () =>
       h(
@@ -250,8 +269,8 @@ function addNewSignal() {
         }
       ),
     showCancelButton: true,
-    confirmButtonText: 'Add',
-    cancelButtonText: 'Cancel'
+    confirmButtonText: i18next.t('database.ldf.editFrame.buttons.add'),
+    cancelButtonText: i18next.t('database.ldf.editFrame.buttons.cancel')
   })
     .then(() => {
       if (index.value) {
@@ -315,13 +334,17 @@ function editSignal() {
 
 function deleteSignal() {
   if (popoverIndex.value >= 0) {
-    ElMessageBox.confirm('Are you sure to delete this signal?', 'Delete Signal', {
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-      type: 'warning',
-      buttonSize: 'small',
-      appendTo: `#win${props.editIndex}`
-    })
+    ElMessageBox.confirm(
+      i18next.t('database.ldf.editFrame.dialogs.confirmDelete'),
+      i18next.t('database.ldf.editFrame.dialogs.deleteSignal'),
+      {
+        confirmButtonText: i18next.t('database.ldf.editFrame.buttons.yes'),
+        cancelButtonText: i18next.t('database.ldf.editFrame.buttons.no'),
+        type: 'warning',
+        buttonSize: 'small',
+        appendTo: `#win${props.editIndex}`
+      }
+    )
       .then(() => {
         frame.value.signals.splice(popoverIndex.value, 1)
 
@@ -412,21 +435,21 @@ const gridOptions = computed<VxeGridProps<FrameSignalItem>>(() => {
       },
       {
         field: 'name',
-        title: 'Signal',
+        title: i18next.t('database.ldf.editFrame.columns.signal'),
         minWidth: 150,
         editRender: {},
         slots: { edit: 'edit_name' }
       },
       {
         field: 'offset',
-        title: 'Offset [Bit]',
+        title: i18next.t('database.ldf.editFrame.columns.offset'),
         minWidth: 150,
         editRender: {},
         slots: { edit: 'edit_offset' }
       },
       {
         field: 'length',
-        title: 'Length [Bit]',
+        title: i18next.t('database.ldf.editFrame.columns.length'),
         width: 150,
         slots: { default: 'default_length' }
       }

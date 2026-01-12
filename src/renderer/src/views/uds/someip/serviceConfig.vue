@@ -12,27 +12,37 @@
       <el-form-item prop="service" required>
         <template #label>
           <el-tooltip
-            content="The unique identifier of the service in hexadecimal format (e.g., 0x1234). This ID must be unique within the system."
+            :content="i18next.t('uds.someip.serviceConfig.tooltips.serviceId')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Service ID </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.serviceConfig.labels.serviceId') }}
+            </span>
           </el-tooltip>
         </template>
-        <el-input v-model="modelValue.service" placeholder="0x1234" />
+        <el-input
+          v-model="modelValue.service"
+          :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.serviceId')"
+        />
       </el-form-item>
 
       <el-form-item prop="instance" required>
         <template #label>
           <el-tooltip
-            content="The instance identifier of the service in hexadecimal format (e.g., 0x5678). Multiple instances of the same service can exist with different instance IDs."
+            :content="i18next.t('uds.someip.serviceConfig.tooltips.instanceId')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Instance ID </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.serviceConfig.labels.instanceId') }}
+            </span>
           </el-tooltip>
         </template>
-        <el-input v-model="modelValue.instance" placeholder="0x5678" />
+        <el-input
+          v-model="modelValue.instance"
+          :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.instanceId')"
+        />
       </el-form-item>
 
       <!-- <el-form-item prop="protocol">
@@ -51,30 +61,39 @@
       <el-form-item v-if="!sdEnable" prop="unicast" required>
         <template #label>
           <el-tooltip
-            content="The unicast IP address that hosts the service instance. Required for external services when service discovery is disabled."
+            :content="i18next.t('uds.someip.serviceConfig.tooltips.unicastAddress')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Unicast Address </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.serviceConfig.labels.unicastAddress') }}
+            </span>
           </el-tooltip>
         </template>
-        <el-input v-model="modelValue.unicast" placeholder="192.168.1.100" />
+        <el-input
+          v-model="modelValue.unicast"
+          :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.unicastAddress')"
+        />
       </el-form-item>
 
-      <el-divider content-position="left">Communication Configuration</el-divider>
+      <el-divider content-position="left">{{
+        i18next.t('uds.someip.serviceConfig.sections.communicationConfig')
+      }}</el-divider>
 
       <el-form-item prop="tcpValidation">
         <template #label>
           <el-tooltip
-            content="Enable reliable TCP communication for this service. TCP provides guaranteed delivery and error checking."
+            :content="i18next.t('uds.someip.serviceConfig.tooltips.reliableTcp')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Reliable (TCP) </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.serviceConfig.labels.reliableTcp') }}
+            </span>
           </el-tooltip>
         </template>
         <el-checkbox v-model="useReliable" @change="onReliableChange">
-          Enable TCP Communication
+          {{ i18next.t('uds.someip.serviceConfig.labels.enableTcpCommunication') }}
         </el-checkbox>
         <el-input v-model="tcpValidation" style="display: none" />
       </el-form-item>
@@ -83,11 +102,13 @@
         <el-form-item prop="reliable.port">
           <template #label>
             <el-tooltip
-              content="The TCP port number for reliable communication. Must be between 1 and 65535."
+              :content="i18next.t('uds.someip.serviceConfig.tooltips.tcpPort')"
               placement="top"
               :show-after="1000"
             >
-              <span class="label-with-tooltip">TCP Port </span>
+              <span class="label-with-tooltip"
+                >{{ i18next.t('uds.someip.serviceConfig.labels.tcpPort') }}
+              </span>
             </el-tooltip>
           </template>
           <el-input-number
@@ -100,11 +121,13 @@
         <el-form-item>
           <template #label>
             <el-tooltip
-              content="Enable magic cookies for TCP connections. Magic cookies help detect if the remote endpoint supports SOME/IP protocol."
+              :content="i18next.t('uds.someip.serviceConfig.tooltips.enableMagicCookies')"
               placement="top"
               :show-after="1000"
             >
-              <span class="label-with-tooltip">Enable Magic Cookies </span>
+              <span class="label-with-tooltip"
+                >{{ i18next.t('uds.someip.serviceConfig.labels.enableMagicCookies') }}
+              </span>
             </el-tooltip>
           </template>
           <el-checkbox v-model="modelValue.reliable!['enable-magic-cookies']" />
@@ -114,15 +137,17 @@
       <el-form-item prop="udpValidation">
         <template #label>
           <el-tooltip
-            content="Enable unreliable UDP communication for this service. UDP provides faster communication but without delivery guarantees."
+            :content="i18next.t('uds.someip.serviceConfig.tooltips.unreliableUdp')"
             placement="top"
             :show-after="1000"
           >
-            <span class="label-with-tooltip">Unreliable (UDP) </span>
+            <span class="label-with-tooltip"
+              >{{ i18next.t('uds.someip.serviceConfig.labels.unreliableUdp') }}
+            </span>
           </el-tooltip>
         </template>
         <el-checkbox v-model="useUnreliable" @change="onUnreliableChange">
-          Enable UDP Communication
+          {{ i18next.t('uds.someip.serviceConfig.labels.enableUdpCommunication') }}
         </el-checkbox>
         <el-input v-model="udpValidation" style="display: none" />
       </el-form-item>
@@ -131,11 +156,13 @@
         <el-form-item>
           <template #label>
             <el-tooltip
-              content="The UDP port number for unreliable communication. Must be between 1 and 65535."
+              :content="i18next.t('uds.someip.serviceConfig.tooltips.udpPort')"
               placement="top"
               :show-after="1000"
             >
-              <span class="label-with-tooltip">UDP Port </span>
+              <span class="label-with-tooltip"
+                >{{ i18next.t('uds.someip.serviceConfig.labels.udpPort') }}
+              </span>
             </el-tooltip>
           </template>
           <el-input-number
@@ -151,11 +178,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, defineExpose } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { type FormRules, type FormInstance } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import type { ServiceConfig } from 'nodeCan/someip'
 import { useGlobalStart } from '@r/stores/runtime'
+import i18next from 'i18next'
 
 const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()
@@ -182,7 +210,7 @@ const sdEnable = computed(() => {
 // Hex validation helper
 const hexValidator = (rule: any, value: any, callback: any) => {
   if (value && !/^0x[0-9a-fA-F]+$/.test(value)) {
-    callback(new Error('Please input valid hex format (e.g., 0x1234)'))
+    callback(new Error(i18next.t('uds.someip.serviceConfig.validation.invalidHexFormat')))
   } else {
     callback()
   }
@@ -191,7 +219,7 @@ const hexValidator = (rule: any, value: any, callback: any) => {
 // Port validation helper
 const portValidator = (rule: any, value: any, callback: any) => {
   if (value && (value < 1 || value > 65535)) {
-    callback(new Error('Port must be between 1 and 65535'))
+    callback(new Error(i18next.t('uds.someip.serviceConfig.validation.portRange')))
   } else {
     callback()
   }
@@ -203,7 +231,7 @@ const tcpProtocolValidator = (rule: any, value: any, callback: any) => {
   const hasUnreliable = modelValue.value.unreliable !== undefined
 
   if (!hasReliable && !hasUnreliable) {
-    callback(new Error('At least one communication protocol must be enabled'))
+    callback(new Error(i18next.t('uds.someip.serviceConfig.validation.atLeastOneProtocol')))
   } else {
     callback()
   }
@@ -215,7 +243,7 @@ const udpProtocolValidator = (rule: any, value: any, callback: any) => {
   const hasUnreliable = modelValue.value.unreliable !== undefined
 
   if (!hasReliable && !hasUnreliable) {
-    callback(new Error('At least one communication protocol must be enabled'))
+    callback(new Error(i18next.t('uds.someip.serviceConfig.validation.atLeastOneProtocol')))
   } else {
     callback()
   }
@@ -224,11 +252,19 @@ const udpProtocolValidator = (rule: any, value: any, callback: any) => {
 const rules = computed<FormRules>(() => {
   return {
     service: [
-      { required: true, message: 'Please input service ID', trigger: 'blur' },
+      {
+        required: true,
+        message: i18next.t('uds.someip.serviceConfig.validation.inputServiceId'),
+        trigger: 'blur'
+      },
       { validator: hexValidator, trigger: 'blur' }
     ],
     instance: [
-      { required: true, message: 'Please input instance ID', trigger: 'blur' },
+      {
+        required: true,
+        message: i18next.t('uds.someip.serviceConfig.validation.inputInstanceId'),
+        trigger: 'blur'
+      },
       { validator: hexValidator, trigger: 'blur' }
     ],
     'reliable.port': [{ validator: portValidator, trigger: 'blur' }],

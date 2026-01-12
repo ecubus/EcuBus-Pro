@@ -24,7 +24,7 @@ import mitt from 'mitt'
 import '@vxe-ui/plugin-render-element/dist/style.css'
 import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
-import fcDesigner from './views/uds/panel-designer/index.js'
+import fcDesigner from './views/uds/panel/panel-designer/index.js'
 import log from 'electron-log'
 import { useDataStore } from './stores/data'
 
@@ -33,6 +33,7 @@ import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
 import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
+import { initRendererI18n, i18nPlugin } from './i18n'
 
 const logChannel = new BroadcastChannel('ipc-log')
 const formatReason = (reason: unknown) => {
@@ -62,7 +63,6 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   log.error('[UnhandledRejection]', formatReason(event.reason))
 })
-
 
 const dataChannel = new BroadcastChannel('ipc-data')
 const projectChannel = new BroadcastChannel('ipc-project')
@@ -99,6 +99,11 @@ app.use(VxeLoading)
 app.use(formCreate)
 app.use(fcDesigner)
 app.use(wujieVue)
+
+// 初始化 i18n
+const savedLang = window.electron?.ipcRenderer.sendSync('electron-store-get', 'language') || 'en'
+initRendererI18n(savedLang)
+app.use(i18nPlugin)
 
 const dataStore = useDataStore()
 const projectStore = useProjectStore()

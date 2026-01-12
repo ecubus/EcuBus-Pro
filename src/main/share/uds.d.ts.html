@@ -1,4 +1,3 @@
-import Emittery from 'emittery';
 import { dot } from 'node:test/reporters';
 export { default as assert } from 'node:assert';
 
@@ -146,26 +145,6 @@ interface CanAddr extends CanMsgType {
 }
 
 /**
- * TLS configuration for DoIP v3
- * @category DOIP
- */
-interface TlsConfig {
-    /** Enable TLS for TCP connection (DoIP v3) */
-    enabled: boolean;
-    /** Path to CA certificate file for verifying peer */
-    ca?: string;
-    /** Path to client/server certificate file */
-    cert?: string;
-    /** Path to private key file */
-    key?: string;
-    /** Skip certificate verification (for testing only) */
-    rejectUnauthorized?: boolean;
-    /** TLS port, default is 3496 for DoIP v3 */
-    port?: number;
-    enableKeyLog?: boolean;
-    keyLogPath?: string;
-}
-/**
  * @category DOIP
  */
 interface EthAddr {
@@ -178,8 +157,6 @@ interface EthAddr {
     taType: 'physical' | 'functional';
     udpClientPort?: number;
     tcpClientPort?: number;
-    /** TLS configuration for DoIP v3 */
-    tls?: TlsConfig;
 }
 interface TesterAddr {
     routeActiveTime: number;
@@ -475,8 +452,6 @@ interface TesterInfo {
     simulateBy?: string;
     allServiceList: Partial<Record<ServiceId, ServiceItem[]>>;
     doipVersion?: number;
-    /** TLS configuration for DoIP v3 server (entity simulation) */
-    serverTls?: TlsConfig;
     enableCodeGen?: boolean;
     generateConfigs?: {
         tempaltePath: string;
@@ -550,10 +525,6 @@ declare class SomeipMessageResponse extends SomeipMessageBase {
      */
     static fromSomeipRequest(request: SomeipMessageRequest, payload?: Buffer): SomeipMessageResponse;
 }
-
-/**
- * @module Util
- */
 
 declare function registerWorker(methods: Record<string, Function>): void;
 declare function workerEmit(payload: any): void;
@@ -1796,12 +1767,6 @@ declare class UtilClass {
     private varUpdate;
     private evnetDone;
     constructor();
-    /** @internal */
-    private handleSerialPortData;
-    /** @internal */
-    private handleSerialPortError;
-    /** @internal */
-    private handleSerialPortClose;
     /**
      * Register a function, this function will be invoked when UDSClass is initialized.
      * @param fc Non-async or async function
@@ -2040,24 +2005,6 @@ declare function getSignal(signal: SignalName): {
  */
 declare function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]): void;
 /**
- * Set multiple variable values at once
- *
- * @category Variable
- * @param {Partial<VariableMap>} vars - An object where keys are variable names and values are the values to set
- * @returns {void} - Returns nothing
- *
- * @example
- * ```ts
- * // Set multiple variables at once
- * setVars({
- *   'var1': 123,
- *   'var2': 'hello',
- *   'namespace.var3': [1, 2, 3, 4]
- * });
- * ```
- */
-declare function setVars(vars: Partial<VariableMap>): void;
-/**
  * Get a variable value
  *
  * @category Variable
@@ -2185,35 +2132,6 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linPowerCtrl(power: boolean, device?: string): Promise<void>;
 /**
- * Control the baud rate of a LIN device
- *
- * This function calculates the optimal prescale and bitMap combination to achieve
- * the closest possible baud rate to the target value. The calculation uses the formula:
- * `baudRate = 5_500_000 / (2^(prescale + 1) * bitMap)`
- *
- * @category LIN
- * @param {number} baudRate - The target baud rate (e.g., 19200, 9600)
- * @param {string} [device] - The optional device name when multiple devices are connected
- * @returns {Promise<number>} - Returns a promise that resolves with the actual baud rate achieved
- *
- * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
- * @note The function automatically calculates the best combination of:
- *       - lincableCustomBaudRatePrescale (range: 0-7, corresponding to /2, /4, /8, /16, /32, /64, /128, /256)
- *       - lincableCustomBaudRateBitMap (range: 1-32)
- *       to minimize the difference between target and actual baud rate.
- *
- * @example
- * ```ts
- * // Set baud rate to 19200
- * const actualBaudRate = await linBaudRateCtrl(19200);
- * console.log(`Actual baud rate: ${actualBaudRate}`);
- *
- * // Set baud rate on specific device
- * const actualBaudRate = await linBaudRateCtrl(9600, 'Device1');
- * ```
- */
-declare function linBaudRateCtrl(baudRate: number, device?: string): Promise<number>;
-/**
  * Stop a LIN scheduler
  *
  * @category LIN
@@ -2253,286 +2171,6 @@ declare function setPwmDuty(value: {
     device?: string;
 }): Promise<void>;
 /**
- * Serial port configuration options
- *
- * @category SerialPort
- */
-interface SerialPortOptions {
-    /** Serial port path (e.g., 'COM3' on Windows, '/dev/ttyUSB0' on Linux) */
-    path: string;
-    /** Baud rate (e.g., 9600, 115200) */
-    baudRate: number;
-    /** Data bits: 5, 6, 7, or 8 (default: 8) */
-    dataBits?: 5 | 6 | 7 | 8;
-    /** Stop bits: 1, 1.5, or 2 (default: 1) */
-    stopBits?: 1 | 1.5 | 2;
-    /** Parity: 'none', 'even', 'odd', 'mark', or 'space' (default: 'none') */
-    parity?: 'none' | 'even' | 'odd' | 'mark' | 'space';
-    /** Enable RTS/CTS hardware flow control (default: false) */
-    rtscts?: boolean;
-    /** Enable XON software flow control (default: false) */
-    xon?: boolean;
-    /** Enable XOFF software flow control (default: false) */
-    xoff?: boolean;
-}
-/**
- * Serial port information returned by list()
- *
- * @category SerialPort
- */
-interface SerialPortInfo {
-    /** Port path (e.g., 'COM3', '/dev/ttyUSB0') */
-    path: string;
-    /** Manufacturer name */
-    manufacturer?: string;
-    /** Serial number */
-    serialNumber?: string;
-    /** PNP ID (Windows) */
-    pnpId?: string;
-    /** Location ID */
-    locationId?: string;
-    /** Friendly name */
-    friendlyName?: string;
-    /** Vendor ID */
-    vendorId?: string;
-    /** Product ID */
-    productId?: string;
-}
-/**
- * Serial port control signals for setting
- *
- * @category SerialPort
- */
-interface SerialPortSetSignals {
-    /** Break signal */
-    brk?: boolean;
-    /** Data Terminal Ready signal */
-    dtr?: boolean;
-    /** Request To Send signal */
-    rts?: boolean;
-}
-/**
- * Serial port control signals status
- *
- * @category SerialPort
- */
-interface SerialPortSignals {
-    /** Clear To Send signal */
-    cts: boolean;
-    /** Data Set Ready signal */
-    dsr: boolean;
-    /** Data Carrier Detect signal */
-    dcd: boolean;
-}
-/**
- * Serial port data event payload
- *
- * @category SerialPort
- */
-interface SerialPortDataEvent {
-    /** Serial port ID */
-    id: string;
-    /** Received data as number array */
-    data: number[];
-}
-/**
- * Serial port error event payload
- *
- * @category SerialPort
- */
-interface SerialPortErrorEvent {
-    /** Serial port ID */
-    id: string;
-    /** Error message */
-    error: string;
-}
-/**
- * Serial port close event payload
- *
- * @category SerialPort
- */
-interface SerialPortCloseEvent {
-    /** Serial port ID */
-    id: string;
-}
-/**
- * SerialPort client class for serial communication in worker scripts.
- * Provides methods to open, close, read, and write serial ports.
- * Supports multiple simultaneous serial port connections.
- * The port ID is automatically set to the path.
- * Extends Emittery for event-based data handling.
- *
- * @category SerialPort
- *
- * @example
- * ```ts
- * import { SerialPortClient } from 'ECB';
- *
- * // Create a serial port instance with configuration
- * const port = new SerialPortClient({
- *   path: 'COM3',
- *   baudRate: 115200
- * });
- *
- * // Open the port
- * await port.open();
- *
- * console.log(port.id); // 'COM3'
- *
- * // Handle incoming data using on('data')
- * port.on('data', (data) => {
- *   console.log('Received:', data.toString('hex'));
- * });
- *
- * // Handle errors
- * port.on('error', (err) => {
- *   console.error('Error:', err.message);
- * });
- *
- * // Handle close event
- * port.on('close', () => {
- *   console.log('Port closed');
- * });
- *
- * // Write data
- * await port.write(Buffer.from([0x01, 0x02, 0x03]));
- *
- * // Close when done
- * await port.close();
- * ```
- */
-declare class SerialPortClient extends Emittery<{
-    data: Buffer;
-    error: Error;
-    close: undefined;
-}> {
-    private _id;
-    private _options;
-    private _isOpen;
-    /**
-     * Creates a new SerialPortClient instance
-     *
-     * @param options - Serial port configuration options
-     *
-     * @example
-     * ```ts
-     * const port = new SerialPortClient({
-     *   path: 'COM3',
-     *   baudRate: 115200
-     * });
-     * ```
-     */
-    constructor(options: SerialPortOptions);
-    /**
-     * Get the unique identifier of this serial port instance (equals to path)
-     *
-     * @returns The serial port ID (path)
-     *
-     * @example
-     * ```ts
-     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
-     * console.log(port.id); // 'COM3'
-     * ```
-     */
-    get id(): string;
-    /**
-     * Check if the serial port is currently open
-     *
-     * @returns True if the port is open, false otherwise
-     *
-     * @example
-     * ```ts
-     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
-     * console.log(port.isOpen); // false
-     * await port.open();
-     * console.log(port.isOpen); // true
-     * ```
-     */
-    get isOpen(): boolean;
-    /**
-     * Open the serial port
-     *
-     * @returns Promise that resolves when the port is opened
-     * @throws Error if the port is already open or if opening fails
-     *
-     * @example
-     * ```ts
-     * // Basic usage
-     * const port = new SerialPortClient({
-     *   path: 'COM3',
-     *   baudRate: 115200
-     * });
-     * await port.open();
-     *
-     * // Full configuration
-     * const port2 = new SerialPortClient({
-     *   path: '/dev/ttyUSB0',
-     *   baudRate: 9600,
-     *   dataBits: 8,
-     *   stopBits: 1,
-     *   parity: 'none',
-     *   rtscts: false,
-     *   xon: false,
-     *   xoff: false
-     * });
-     * await port2.open();
-     * ```
-     */
-    open(): Promise<void>;
-    /**
-     * Close the serial port
-     *
-     * @returns Promise that resolves when the port is closed
-     * @throws Error if the port is not open
-     *
-     * @example
-     * ```ts
-     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
-     * await port.open();
-     * // ... do some work ...
-     * await port.close();
-     * ```
-     */
-    close(): Promise<void>;
-    /**
-     * Write data to the serial port
-     *
-     * @param data - Data to write (Buffer or array of bytes)
-     * @returns Promise that resolves when data is written and drained
-     * @throws Error if the port is not open
-     *
-     * @example
-     * ```ts
-     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
-     * await port.open();
-     *
-     * // Write using Buffer
-     * await port.write(Buffer.from('Hello'));
-     *
-     * // Write using byte array
-     * await port.write([0x01, 0x02, 0x03, 0x04]);
-     *
-     * // Write hex string as buffer
-     * await port.write(Buffer.from('48454C4C4F', 'hex'));
-     * ```
-     */
-    write(data: Buffer | number[]): Promise<void>;
-    /**
-     * List all available serial ports on the system
-     *
-     * @returns Promise that resolves with array of port information
-     *
-     * @example
-     * ```ts
-     * const ports = await SerialPortClient.list();
-     * for (const port of ports) {
-     *   console.log(`${port.path} - ${port.friendlyName || 'Unknown'}`);
-     * }
-     * ```
-     */
-    static list(): Promise<SerialPortInfo[]>;
-}
-/**
  * Get a frame from database by name
  *
  * @category LIN
@@ -2565,14 +2203,6 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  * ```
  */
 declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage;
-interface AuthenticationSessionAccountInformation {
-    id: string;
-    label: string;
-}
-interface AuthenticationSession {
-    accessToken: string;
-    accountInformation: AuthenticationSessionAccountInformation;
-}
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SerialPortClient, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linBaudRateCtrl, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, setVars, stopUdsSeq, test, workerEmit };
-export type { AuthenticationSession, AuthenticationSessionAccountInformation, CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, SerialPortCloseEvent, SerialPortDataEvent, SerialPortErrorEvent, SerialPortInfo, SerialPortOptions, SerialPortSetSignals, SerialPortSignals, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, stopUdsSeq, test, workerEmit };
+export type { CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };

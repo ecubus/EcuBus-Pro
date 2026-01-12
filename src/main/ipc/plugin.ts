@@ -119,7 +119,7 @@ export function stopPlugins() {
 }
 
 // 辅助函数：获取插件目录
-function getPluginsDirectory(): string {
+export function getPluginsDirectory(): string {
   const userDataPath = app.getPath('userData')
   let pluginsDir = path.join(userDataPath, 'plugins')
   const pluginSettings = store.get('plugin.settings') as any

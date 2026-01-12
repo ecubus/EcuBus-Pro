@@ -2,7 +2,11 @@
   <div v-loading="loading">
     <el-tabs v-if="!loading" v-model="editableTabsValue" class="dbcTabs" type="card" addable>
       <template #add-icon>
-        <el-tooltip effect="light" content="Delete Database" placement="bottom">
+        <el-tooltip
+          effect="light"
+          :content="i18next.t('database.dbc.index.tooltips.deleteDatabase')"
+          placement="bottom"
+        >
           <el-button type="info" link @click="deleteDatabase">
             <Icon :icon="deleteIcon" />
           </el-button>
@@ -10,7 +14,7 @@
         <el-tooltip
           v-if="errorList.length == 0"
           effect="light"
-          content="Save Database"
+          :content="i18next.t('database.dbc.index.tooltips.saveDatabase')"
           placement="bottom"
         >
           <el-button type="success" link @click="saveDataBase">
@@ -20,7 +24,7 @@
         <el-tooltip
           v-else
           effect="light"
-          content="Fix errors to save the database"
+          :content="i18next.t('database.dbc.index.tooltips.fixErrorsToSave')"
           placement="bottom"
         >
           <el-button
@@ -33,7 +37,7 @@
           </el-button>
         </el-tooltip>
       </template>
-      <el-tab-pane name="Overview" label="Overview">
+      <el-tab-pane name="Overview" :label="i18next.t('database.dbc.index.tabs.overview')">
         <Overview
           ref="overfiewRef"
           v-model="dbcObj"
@@ -60,7 +64,7 @@
           </div>
         </template>
       </el-tab-pane>
-      <el-tab-pane name="Value Tables" label="Value Tables">
+      <el-tab-pane name="Value Tables" :label="i18next.t('database.dbc.index.tabs.valueTables')">
         <ValTable
           ref="valueTableRef"
           v-model="dbcObj"
@@ -69,7 +73,7 @@
           :width="w"
         />
       </el-tab-pane>
-      <el-tab-pane name="Attributes" label="Attributes">
+      <el-tab-pane name="Attributes" :label="i18next.t('database.dbc.index.tabs.attributes')">
         <AttrTable
           ref="attrTableRef"
           v-model="dbcObj"
@@ -109,6 +113,7 @@ import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { DBC } from './dbcVisitor'
 import { useGlobalStart } from '@r/stores/runtime'
+import i18next from 'i18next'
 
 const layout = inject('layout') as Layout
 
@@ -166,18 +171,18 @@ const errorGridOptions = computed<VxeGridProps>(() => ({
   columns: [
     {
       field: 'tab',
-      title: 'Tab',
+      title: i18next.t('database.dbc.index.errorGrid.columns.tab'),
       width: 120,
       slots: { default: 'tab' }
     },
     {
       field: 'field',
-      title: 'Field',
+      title: i18next.t('database.dbc.index.errorGrid.columns.field'),
       minWidth: 200
     },
     {
       field: 'message',
-      title: 'Error Message',
+      title: i18next.t('database.dbc.index.errorGrid.columns.errorMessage'),
       slots: { default: 'message' },
       minWidth: 200
     }
@@ -212,18 +217,22 @@ async function valid() {
     }
   }
   if (errorList.value.length > 0) {
-    throw new Error('Invalid')
+    throw new Error(i18next.t('database.dbc.index.errors.invalid'))
   }
 }
 
 function deleteDatabase() {
-  ElMessageBox.confirm('Are you sure you want to delete this database?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    buttonSize: 'small',
-    appendTo: `#win${props.editIndex}`,
-    type: 'warning'
-  })
+  ElMessageBox.confirm(
+    i18next.t('database.dbc.index.deleteConfirm.message'),
+    i18next.t('database.dbc.index.deleteConfirm.title'),
+    {
+      confirmButtonText: i18next.t('database.dbc.index.deleteConfirm.ok'),
+      cancelButtonText: i18next.t('database.dbc.index.deleteConfirm.cancel'),
+      buttonSize: 'small',
+      appendTo: `#win${props.editIndex}`,
+      type: 'warning'
+    }
+  )
     .then(() => {
       database.$patch(() => {
         delete database.database.can[props.editIndex]
@@ -244,7 +253,9 @@ function saveDataBase() {
     ElNotification({
       offset: 50,
       type: 'error',
-      message: `Database name "${dbcObj.value.name}" already exists`,
+      message: i18next.t('database.dbc.index.errors.duplicateDatabaseName', {
+        name: dbcObj.value.name
+      }),
       appendTo: `#win${props.editIndex}`
     })
     return
@@ -263,7 +274,7 @@ function saveDataBase() {
       ElNotification({
         offset: 50,
         type: 'success',
-        message: 'The database has been saved successfully',
+        message: i18next.t('database.dbc.index.messages.saveSuccess'),
         appendTo: `#win${props.editIndex}`
       })
     })
@@ -301,26 +312,34 @@ onMounted(() => {
           dbcObj.value.name = window.path.parse(props.dbcFile!).name
           loading.value = false
         } catch (err: any) {
-          ElMessageBox.alert('Parse failed', 'Error', {
-            confirmButtonText: 'OK',
-            type: 'error',
-            buttonSize: 'small',
-            appendTo: `#win${props.editIndex}`,
-            message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
-            dangerouslyUseHTMLString: true
-          }).finally(() => {
+          ElMessageBox.alert(
+            i18next.t('database.dbc.index.errors.parseFailed'),
+            i18next.t('database.dbc.index.errors.error'),
+            {
+              confirmButtonText: i18next.t('database.dbc.index.deleteConfirm.ok'),
+              type: 'error',
+              buttonSize: 'small',
+              appendTo: `#win${props.editIndex}`,
+              message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
+              dangerouslyUseHTMLString: true
+            }
+          ).finally(() => {
             layout.removeWin(props.editIndex, true)
           })
         }
       })
       .catch((err) => {
-        ElMessageBox.alert('Parse failed', 'Error', {
-          confirmButtonText: 'OK',
-          type: 'error',
-          buttonSize: 'small',
-          appendTo: `#win${props.editIndex}`,
-          message: err.message
-        })
+        ElMessageBox.alert(
+          i18next.t('database.dbc.index.errors.parseFailed'),
+          i18next.t('database.dbc.index.errors.error'),
+          {
+            confirmButtonText: i18next.t('database.dbc.index.deleteConfirm.ok'),
+            type: 'error',
+            buttonSize: 'small',
+            appendTo: `#win${props.editIndex}`,
+            message: err.message
+          }
+        )
           .then(() => {
             layout.removeWin(props.editIndex, true)
           })

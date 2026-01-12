@@ -18,7 +18,7 @@
         >
           <el-input
             v-model="searchText"
-            placeholder="Search by name..."
+            :placeholder="i18next.t('uds.components.addVar.placeholders.searchByName')"
             style="width: 200px"
             size="small"
             clearable
@@ -32,7 +32,11 @@
           <el-divider direction="vertical" />
           <el-tooltip
             effect="light"
-            :content="!isExpanded ? 'Collapse All' : 'Expand All'"
+            :content="
+              !isExpanded
+                ? i18next.t('uds.components.addVar.tooltips.collapseAll')
+                : i18next.t('uds.components.addVar.tooltips.expandAll')
+            "
             placement="bottom"
           >
             <el-button link @click="toggleExpand">
@@ -43,7 +47,11 @@
             </el-button>
           </el-tooltip>
           <el-divider direction="vertical" />
-          <el-tooltip effect="light" content="Add Variable" placement="bottom">
+          <el-tooltip
+            effect="light"
+            :content="i18next.t('uds.components.addVar.tooltips.addVariable')"
+            placement="bottom"
+          >
             <el-button type="primary" link :disabled="!highlightedRows.length" @click="addVariable">
               <Icon :icon="variableIcon" style="font-size: 14px" />
               <span v-if="highlightedRows.length" style="margin-left: 4px; font-size: 12px">
@@ -54,7 +62,7 @@
           <el-tooltip
             v-if="props.highlightId"
             effect="light"
-            content="Remove Attach Signal"
+            :content="i18next.t('uds.components.addVar.tooltips.removeAttachSignal')"
             placement="bottom"
           >
             <el-button type="warning" link @click="removeSignal">
@@ -86,6 +94,7 @@ import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
+import i18next from 'i18next'
 
 interface TreeItem {
   id: string
@@ -199,13 +208,22 @@ const gridOptions = computed<any>(() => ({
       resizable: false
     },
 
-    { field: 'name', title: 'Name', minWidth: 200, treeNode: true },
-    { field: 'value.type', title: 'Type', width: 100 },
-    { field: 'value.initValue', title: 'Init Value', width: 100 },
-    { field: 'value.min', title: 'Min', width: 100 },
-    { field: 'value.max', title: 'Max', width: 100 },
-    { field: 'value.unit', title: 'Unit', width: 100 },
-    { field: 'desc', title: 'Description', width: 200 }
+    {
+      field: 'name',
+      title: i18next.t('uds.components.addVar.table.name'),
+      minWidth: 200,
+      treeNode: true
+    },
+    { field: 'value.type', title: i18next.t('uds.components.addVar.table.type'), width: 100 },
+    {
+      field: 'value.initValue',
+      title: i18next.t('uds.components.addVar.table.initValue'),
+      width: 100
+    },
+    { field: 'value.min', title: i18next.t('uds.components.addVar.table.min'), width: 100 },
+    { field: 'value.max', title: i18next.t('uds.components.addVar.table.max'), width: 100 },
+    { field: 'value.unit', title: i18next.t('uds.components.addVar.table.unit'), width: 100 },
+    { field: 'desc', title: i18next.t('uds.components.addVar.table.description'), width: 200 }
   ],
   data: allVariables.value
 }))

@@ -33,7 +33,7 @@
                     <el-button-group class="node-actions" style="margin-top: 5px">
                       <el-tooltip
                         effect="light"
-                        content="Refresh Test Config"
+                        :content="i18next.t('uds.test.tooltips.refreshTestConfig')"
                         placement="bottom"
                         :show-after="1000"
                       >
@@ -51,7 +51,7 @@
                       <el-tooltip
                         v-if="!isRunning[data.id]"
                         effect="light"
-                        content="Run Test Config"
+                        :content="i18next.t('uds.test.tooltips.runTestConfig')"
                         placement="bottom"
                         :show-after="1000"
                       >
@@ -67,7 +67,7 @@
                       <el-tooltip
                         v-else
                         effect="light"
-                        content="Stop Test Config"
+                        :content="i18next.t('uds.test.tooltips.stopTestConfig')"
                         placement="bottom"
                         :show-after="1000"
                       >
@@ -93,7 +93,7 @@
                       @click="handleEdit(data)"
                     >
                       <Icon :icon="editIcon" style="margin-right: 5px" />
-                      <span>Edit</span>
+                      <span>{{ i18next.t('uds.test.menu.edit') }}</span>
                     </el-button>
                   </div>
                   <div>
@@ -109,7 +109,7 @@
                       @click="handleExport(data)"
                     >
                       <Icon :icon="exportIcon" style="margin-right: 5px" />
-                      <span>Export Report (HTML)</span>
+                      <span>{{ i18next.t('uds.test.menu.exportReportHtml') }}</span>
                     </el-button>
                   </div>
                   <div>
@@ -126,7 +126,7 @@
                       @click="handleExport(data, 'pdf')"
                     >
                       <Icon :icon="exportIcon" style="margin-right: 5px" />
-                      <span>Export Report (PDF)</span>
+                      <span>{{ i18next.t('uds.test.menu.exportReportPdf') }}</span>
                     </el-button>
                   </div>
                   <div>
@@ -138,7 +138,7 @@
                       @click="handleDelete(data)"
                     >
                       <Icon :icon="deleteIcon" style="margin-right: 5px" />
-                      <span>Delete</span>
+                      <span>{{ i18next.t('uds.test.menu.delete') }}</span>
                     </el-button>
                   </div>
                 </div>
@@ -222,7 +222,7 @@
     <el-dialog
       v-if="editDialogVisible && activeConfig"
       v-model="editDialogVisible"
-      title="Edit Configuration"
+      :title="i18next.t('uds.test.dialogs.editConfiguration')"
       width="500px"
       align-center
       :append-to="`#wintest`"
@@ -236,21 +236,24 @@
           :rules="rules"
           hide-required-asterisk
         >
-          <el-form-item label="Name" prop="name" required>
+          <el-form-item :label="i18next.t('uds.test.labels.name')" prop="name" required>
             <el-input v-model="model.name" @change="onConfigChange" />
           </el-form-item>
-          <el-form-item label="Test Script File" prop="script">
+          <el-form-item :label="i18next.t('uds.test.labels.testScriptFile')" prop="script">
             <el-input v-model="model.script" clearable />
             <div class="lr">
               <el-button-group v-loading="buildLoading">
                 <el-button size="small" plain @click="editScript('open')">
-                  <Icon :icon="newIcon" class="icon" style="margin-right: 5px" /> Choose
+                  <Icon :icon="newIcon" class="icon" style="margin-right: 5px" />
+                  {{ i18next.t('uds.test.buttons.choose') }}
                 </el-button>
                 <el-button size="small" plain @click="editScript('build')">
-                  <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" /> Build
+                  <Icon :icon="buildIcon" class="icon" style="margin-right: 5px" />
+                  {{ i18next.t('uds.test.buttons.build') }}
                 </el-button>
                 <el-button size="small" plain @click="editScript('edit')">
-                  <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" /> Refresh / Edit
+                  <Icon :icon="refreshIcon" class="icon" style="margin-right: 5px" />
+                  {{ i18next.t('uds.test.buttons.refreshEdit') }}
                 </el-button>
               </el-button-group>
               <div v-if="buildStatus" class="build-status-container">
@@ -260,8 +263,13 @@
               </div>
             </div>
           </el-form-item>
-          <el-form-item label="Connect Devices" prop="devices">
-            <el-select v-model="model.channel" multiple placeholder="Select" style="width: 100%">
+          <el-form-item :label="i18next.t('uds.test.labels.connectDevices')" prop="devices">
+            <el-select
+              v-model="model.channel"
+              multiple
+              :placeholder="i18next.t('uds.test.placeholders.select')"
+              style="width: 100%"
+            >
               <el-option
                 v-for="item in devices"
                 :key="item.value"
@@ -271,8 +279,10 @@
             </el-select>
           </el-form-item>
 
-          <el-divider content-position="left"> Report </el-divider>
-          <el-form-item label="Report Path" prop="reportPath">
+          <el-divider content-position="left">
+            {{ i18next.t('uds.test.sections.report') }}
+          </el-divider>
+          <el-form-item :label="i18next.t('uds.test.labels.reportPath')" prop="reportPath">
             <el-input v-model="model.reportPath" clearable>
               <template #append>
                 <el-button @click="chooseReportPath">
@@ -280,14 +290,18 @@
                 </el-button>
               </template>
             </el-input>
-            <div class="form-tip">Leave empty to use project root path</div>
+            <div class="form-tip">{{ i18next.t('uds.test.tips.emptyReportPath') }}</div>
           </el-form-item>
         </el-form>
       </el-scrollbar>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="handleEditCancel">Cancel</el-button>
-          <el-button type="primary" size="small" @click="handleEditSave">Save</el-button>
+          <el-button size="small" @click="handleEditCancel">{{
+            i18next.t('uds.test.buttons.cancel')
+          }}</el-button>
+          <el-button type="primary" size="small" @click="handleEditSave">{{
+            i18next.t('uds.test.buttons.save')
+          }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -337,7 +351,8 @@ import runningIcon from '@iconify/icons-material-symbols/pending-outline'
 import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 import errorParse from '@r/util/ipcError'
-import TraceComponent from './log.vue'
+import TraceComponent from './message.vue'
+import i18next from 'i18next'
 
 const loading = ref(false)
 const traceRef = ref()
@@ -391,7 +406,7 @@ function nodeClick(data: TestTree) {
 
 const model = ref<NodeItem>({
   id: v4(),
-  name: 'Test Config',
+  name: '',
   script: '',
   reportPath: '',
   channel: []
@@ -463,8 +478,8 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
             EnableObj
           )
           .catch((e: any) => {
-            ElMessageBox.alert(e.message, 'Error', {
-              confirmButtonText: 'OK',
+            ElMessageBox.alert(e.message, i18next.t('uds.test.dialogs.error'), {
+              confirmButtonText: i18next.t('uds.test.dialogs.ok'),
               type: 'error',
               buttonSize: 'small',
               appendTo: '#wintest'
@@ -477,8 +492,8 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
       })
     })
     .catch((e: any) => {
-      ElMessageBox.alert(e.message, 'Error', {
-        confirmButtonText: 'OK',
+      ElMessageBox.alert(e.message, i18next.t('uds.test.dialogs.error'), {
+        confirmButtonText: i18next.t('uds.test.dialogs.ok'),
         type: 'error',
         buttonSize: 'small',
         appendTo: '#wintest'
@@ -508,7 +523,7 @@ function buildTree() {
   }
 
   const t: TestTree = {
-    label: 'Test Config',
+    label: i18next.t('uds.test.tree.testConfig'),
     canAdd: true,
     id: 'root',
     type: 'root',
@@ -569,7 +584,7 @@ function generateUniqueName(baseName: string): string {
 }
 
 function addNewConfig() {
-  const defaultName = generateUniqueName('Test Config')
+  const defaultName = generateUniqueName(i18next.t('uds.test.defaultName'))
   const id = v4()
   const newConfig: NodeItem = {
     id,
@@ -596,13 +611,17 @@ function addNewConfig() {
 }
 
 function removeConfig(id: string) {
-  ElMessageBox.confirm('Are you sure to delete this config?', 'Warning', {
-    confirmButtonText: 'OK',
-    cancelButtonText: 'Cancel',
-    type: 'warning',
-    buttonSize: 'small',
-    appendTo: '#wintest'
-  }).then(() => {
+  ElMessageBox.confirm(
+    i18next.t('uds.test.dialogs.deleteConfirm'),
+    i18next.t('uds.test.dialogs.warning'),
+    {
+      confirmButtonText: i18next.t('uds.test.dialogs.ok'),
+      cancelButtonText: i18next.t('uds.test.dialogs.cancel'),
+      type: 'warning',
+      buttonSize: 'small',
+      appendTo: '#wintest'
+    }
+  ).then(() => {
     delete dataBase.nodes[id]
     const index = tData.value[0].children?.findIndex((item) => item.id === id)
     if (index !== undefined && index > -1) {
@@ -620,13 +639,13 @@ const nameCheck = (rule: any, value: any, callback: any) => {
         nextTick(() => {
           model.value.name = dataBase.nodes[activeConfig.value].name
         })
-        callback(new Error('The test config name already exists'))
+        callback(new Error(i18next.t('uds.test.validation.nameExists')))
         return
       }
     }
     callback()
   } else {
-    callback(new Error('Please input test config name'))
+    callback(new Error(i18next.t('uds.test.validation.inputName')))
   }
 }
 
@@ -700,8 +719,8 @@ function editScript(action: 'open' | 'edit' | 'build') {
               cloneDeep(dataBase.getData())
             )
             .catch((e: any) => {
-              ElMessageBox.alert(e.message, 'Error', {
-                confirmButtonText: 'OK',
+              ElMessageBox.alert(e.message, i18next.t('uds.test.dialogs.error'), {
+                confirmButtonText: i18next.t('uds.test.dialogs.ok'),
                 type: 'error',
                 buttonSize: 'small',
                 appendTo: '#wintest'
@@ -727,8 +746,8 @@ function editScript(action: 'open' | 'edit' | 'build') {
               }
             })
             .catch((e: any) => {
-              ElMessageBox.alert(e.message, 'Error', {
-                confirmButtonText: 'OK',
+              ElMessageBox.alert(e.message, i18next.t('uds.test.dialogs.error'), {
+                confirmButtonText: i18next.t('uds.test.dialogs.ok'),
                 type: 'error',
                 buttonSize: 'small',
                 appendTo: '#wintest'
@@ -739,20 +758,28 @@ function editScript(action: 'open' | 'edit' | 'build') {
             })
         }
       } else {
-        ElMessageBox.alert('Please save the project first', 'Warning', {
-          confirmButtonText: 'OK',
+        ElMessageBox.alert(
+          i18next.t('uds.test.messages.saveProjectFirst'),
+          i18next.t('uds.test.dialogs.warning'),
+          {
+            confirmButtonText: i18next.t('uds.test.dialogs.ok'),
+            type: 'warning',
+            buttonSize: 'small',
+            appendTo: '#wintest'
+          }
+        )
+      }
+    } else {
+      ElMessageBox.alert(
+        i18next.t('uds.test.messages.selectScriptFirst'),
+        i18next.t('uds.test.dialogs.warning'),
+        {
+          confirmButtonText: i18next.t('uds.test.dialogs.ok'),
           type: 'warning',
           buttonSize: 'small',
           appendTo: '#wintest'
-        })
-      }
-    } else {
-      ElMessageBox.alert('Please select the script file first', 'Warning', {
-        confirmButtonText: 'OK',
-        type: 'warning',
-        buttonSize: 'small',
-        appendTo: '#wintest'
-      })
+        }
+      )
     }
   } else {
     openTs().then((file) => {
@@ -766,11 +793,11 @@ function editScript(action: 'open' | 'edit' | 'build') {
 async function openTs() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Script File',
+    title: i18next.t('uds.test.dialogs.scriptFile'),
     properties: ['openFile'],
     filters: [
-      { name: 'typescript', extensions: ['ts'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: i18next.t('uds.test.dialogs.typescript'), extensions: ['ts'] },
+      { name: i18next.t('uds.test.dialogs.allFiles'), extensions: ['*'] }
     ]
   })
   const file = r.filePaths[0]
@@ -955,10 +982,10 @@ function getBuildStatusIcon() {
 
 function getBuildStatusText() {
   const statusTexts = {
-    danger: 'Build Failed',
-    success: 'Build Success',
-    warning: 'Need Rebuild',
-    info: 'Need Build'
+    danger: i18next.t('uds.test.buildStatus.buildFailed'),
+    success: i18next.t('uds.test.buildStatus.buildSuccess'),
+    warning: i18next.t('uds.test.buildStatus.needRebuild'),
+    info: i18next.t('uds.test.buildStatus.needBuild')
   }
   return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
@@ -1089,12 +1116,16 @@ async function handleRefresh(data: TestTree) {
         cnt = root2tree(cnt, target, root)
       }
     } else {
-      ElMessageBox.alert('Please select the script file first', 'Warning', {
-        confirmButtonText: 'OK',
-        type: 'warning',
-        buttonSize: 'small',
-        appendTo: '#wintest'
-      })
+      ElMessageBox.alert(
+        i18next.t('uds.test.messages.selectScriptFirst'),
+        i18next.t('uds.test.dialogs.warning'),
+        {
+          confirmButtonText: i18next.t('uds.test.dialogs.ok'),
+          type: 'warning',
+          buttonSize: 'small',
+          appendTo: '#wintest'
+        }
+      )
     }
     refreshLoading.value[data.id] = false
   } catch (error) {
@@ -1114,12 +1145,16 @@ async function handleExport(data: TestTree, type: 'html' | 'pdf' = 'html') {
         dataBase.nodes[data.id].reportPath
       )
       if (p) {
-        ElMessageBox.confirm('Test report exported successfully, open it?', 'Success', {
-          confirmButtonText: 'OK',
-          type: 'success',
-          buttonSize: 'small',
-          appendTo: '#wintest'
-        })
+        ElMessageBox.confirm(
+          i18next.t('uds.test.messages.exportSuccess'),
+          i18next.t('uds.test.dialogs.success'),
+          {
+            confirmButtonText: i18next.t('uds.test.dialogs.ok'),
+            type: 'success',
+            buttonSize: 'small',
+            appendTo: '#wintest'
+          }
+        )
           .then(() => {
             window.electron.ipcRenderer.send('ipc-open-link', p)
           })
@@ -1129,12 +1164,16 @@ async function handleExport(data: TestTree, type: 'html' | 'pdf' = 'html') {
       }
     } catch (error: any) {
       const msg = errorParse(error)
-      ElMessageBox.alert(`Failed to export test report: ${msg}`, 'Error', {
-        confirmButtonText: 'OK',
-        type: 'error',
-        buttonSize: 'small',
-        appendTo: '#wintest'
-      })
+      ElMessageBox.alert(
+        i18next.t('uds.test.messages.exportFailed', { msg }),
+        i18next.t('uds.test.dialogs.error'),
+        {
+          confirmButtonText: i18next.t('uds.test.dialogs.ok'),
+          type: 'error',
+          buttonSize: 'small',
+          appendTo: '#wintest'
+        }
+      )
     }
   }
 }
@@ -1142,7 +1181,7 @@ async function handleExport(data: TestTree, type: 'html' | 'pdf' = 'html') {
 async function chooseReportPath() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
     defaultPath: project.projectInfo.path,
-    title: 'Report Path',
+    title: i18next.t('uds.test.dialogs.reportPath'),
     properties: ['openDirectory']
   })
 

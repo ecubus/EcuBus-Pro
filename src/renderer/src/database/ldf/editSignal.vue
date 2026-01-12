@@ -12,17 +12,25 @@
             </el-form-item> -->
       <el-form-item label-width="0px">
         <el-col :span="12">
-          <el-form-item label="Signal Size [bits]" prop="signalSizeBits" required>
+          <el-form-item
+            :label="i18next.t('database.ldf.editSignal.labels.signalSize')"
+            prop="signalSizeBits"
+            required
+          >
             <el-input-number v-model="signal.signalSizeBits" :min="1" @change="signalBitChange" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="Signal Type" prop="singleType" required>
+          <el-form-item
+            :label="i18next.t('database.ldf.editSignal.labels.signalType')"
+            prop="singleType"
+            required
+          >
             <el-select v-model="signal.singleType" style="width: 100%" @change="signalTypeChange">
               <el-option
                 v-for="item in ['Scalar', 'ByteArray']"
                 :key="item"
-                :label="item"
+                :label="i18next.t(`database.ldf.editSignal.options.${item.toLowerCase()}`)"
                 :value="item"
               />
             </el-select>
@@ -32,14 +40,17 @@
 
       <el-form-item
         v-if="signal.singleType == 'Scalar'"
-        label="Init Value"
+        :label="i18next.t('database.ldf.editSignal.labels.initValue')"
         prop="initValue"
         required
       >
         <el-input v-model.number="signal.initValue" style="width: 100px" />
       </el-form-item>
       <div v-else>
-        <el-form-item label="Init Value" prop="initValue">
+        <el-form-item
+          :label="i18next.t('database.ldf.editSignal.labels.initValue')"
+          prop="initValue"
+        >
           <el-form-item
             v-for="i in Math.ceil(signal.signalSizeBits / 8)"
             :key="i"
@@ -49,24 +60,38 @@
           </el-form-item>
         </el-form-item>
       </div>
-      <el-form-item v-if="signal.singleType == 'Scalar'" label="Encode Type" prop="encode">
+      <el-form-item
+        v-if="signal.singleType == 'Scalar'"
+        :label="i18next.t('database.ldf.editSignal.labels.encodeType')"
+        prop="encode"
+      >
         <el-select
           v-model="encode"
           style="width: 100%"
           clearable
-          placeholder="None"
+          :placeholder="i18next.t('database.ldf.editSignal.placeholders.none')"
           @change="encodeChange"
         >
           <el-option v-for="item in singleEncodeTypes" :key="item" :label="item" :value="item" />
         </el-select>
       </el-form-item>
-      <el-divider content-position="left"> Publisher/Subscriber Choose </el-divider>
-      <el-form-item label="Publisher" prop="punishedBy" required>
+      <el-divider content-position="left">{{
+        i18next.t('database.ldf.editSignal.sections.publisherSubscriberChoose')
+      }}</el-divider>
+      <el-form-item
+        :label="i18next.t('database.ldf.editSignal.labels.publisher')"
+        prop="punishedBy"
+        required
+      >
         <el-select v-model="signal.punishedBy" style="width: 100%">
           <el-option v-for="item in nodeList" :key="item" :label="item" :value="item" />
         </el-select>
       </el-form-item>
-      <el-form-item label="Subscribe Node(s)" prop="subscribedBy" required>
+      <el-form-item
+        :label="i18next.t('database.ldf.editSignal.labels.subscribeNodes')"
+        prop="subscribedBy"
+        required
+      >
         <el-select
           v-model.number="signal.subscribedBy"
           multiple
@@ -85,6 +110,7 @@
 import { toRef, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject, Ref } from 'vue'
 import { LDF, SignalDef } from '../ldfParse'
 import { ElMessageBox, ElNotification, ElOption, ElSelect, FormRules } from 'element-plus'
+import i18next from 'i18next'
 
 const h = inject('height') as Ref<number>
 const fh = computed(() => Math.ceil((h.value * 2) / 3) + 'px')

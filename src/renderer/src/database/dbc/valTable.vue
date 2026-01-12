@@ -14,7 +14,7 @@
         >
           <el-input
             v-model="searchText"
-            placeholder="Search by name..."
+            :placeholder="i18next.t('database.dbc.valTable.placeholders.searchByName')"
             style="width: 200px"
             size="small"
             clearable
@@ -37,6 +37,7 @@ import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { DBC, Message, Signal } from './dbcVisitor'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string
@@ -52,11 +53,16 @@ const h = toRef(props, 'height')
 const w = toRef(props, 'width')
 // 表格列定义
 const columns: VxeGridProps['columns'] = [
-  { field: 'name', title: 'Name', minWidth: 120, fixed: 'left' },
-  { field: 'comment', title: 'Comment', minWidth: 120 },
+  {
+    field: 'name',
+    title: i18next.t('database.dbc.valTable.columns.name'),
+    minWidth: 120,
+    fixed: 'left'
+  },
+  { field: 'comment', title: i18next.t('database.dbc.valTable.columns.comment'), minWidth: 120 },
   {
     field: 'usage',
-    title: 'Usage',
+    title: i18next.t('database.dbc.valTable.columns.usage'),
     minWidth: 200,
     showOverflow: true
   }

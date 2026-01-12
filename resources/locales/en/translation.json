@@ -1,0 +1,2832 @@
+{
+  "general": {
+    "language": "Language",
+    "uiZoom": "UI Zoom",
+    "theme": "Theme",
+    "uiZoomTooltip": "Adjust the overall UI scaling of the application",
+    "themeTooltip": "Choose between light and dark theme"
+  },
+  "header": {
+    "rearrangeWindows": "Rearrange Windows",
+    "untitled": "Untitled"
+  },
+  "home": {
+    "return": "Return",
+    "close": "Close",
+    "home": "Home",
+    "documents": "Documents",
+    "userManual": "User Manual",
+    "systemInformation": "System Information",
+    "module": "Module",
+    "version": "Version",
+    "advertisingPartnership": "Advertising Partnership",
+    "advertiseHere": "📢 Advertise Here",
+    "advertiseDescription": "Showcase your products and services to professional automotive engineers",
+    "contactUs": "Contact Us →",
+    "recent": "Recent",
+    "pinned": "Pinned",
+    "new": "New",
+    "open": "Open",
+    "plugin": "Plugin",
+    "setting": "Setting",
+    "general": "General",
+    "others": "Others",
+    "license": "License",
+    "update": "Update",
+    "user": "User",
+    "lincableTitle": "EcuBus LinCable",
+    "lincableDescription": "USB to LIN Adapter | Conformance Testing | Fault Injection | ISO 17987-6",
+    "learnMore": "Learn More →",
+    "dateFormat": {
+      "monthDay": "M/D",
+      "yearMonthDay": "YYYY/M/D"
+    }
+  },
+  "homeNew": {
+    "createEmptyProject": "Create Empty Project",
+    "createExample": "Create The Example",
+    "createExampleError": "Failed to create example",
+    "loadTemplatesError": "Failed to load templates"
+  },
+  "database": {
+    "addLin": "Add LIN (LDF)",
+    "addCan": "Add CAN (DBC)",
+    "addOrti": "Add OS (ORTI)",
+    "noDatabase": "No Database",
+    "openDatabaseTitle": "Open Database File",
+    "fileFilterName": "Database File",
+    "dbcParse": {
+      "errors": {
+        "lexerError": "Lexer error at line {{line}}, column {{column}}",
+        "parserError": "Parser error at line {{line}}, column {{column}}",
+        "context": "Context",
+        "unexpectedCharacter": "Unexpected character: \"{{char}}\"",
+        "expectedOneOf": "Expected one of: {{tokens}}",
+        "lexingErrors": "Lexing errors",
+        "parsingErrors": "Parsing errors",
+        "unexpectedError": "Unexpected error during parsing"
+      }
+    },
+    "dbc": {
+      "attrTable": {
+        "placeholders": {
+          "searchByName": "Search by name..."
+        },
+        "columns": {
+          "typeOfObject": "Type of Object",
+          "name": "Name",
+          "valueType": "Value Type",
+          "min": "Min",
+          "max": "Max",
+          "default": "Default"
+        },
+        "attrTypes": {
+          "network": "Network",
+          "node": "Node",
+          "message": "Message",
+          "signal": "Signal",
+          "envVar": "EnvVar"
+        },
+        "valueTypes": {
+          "integer": "Integer",
+          "float": "Float",
+          "string": "String",
+          "enum": "Enum",
+          "hex": "Hex"
+        }
+      },
+      "dbcVisitor": {
+        "errors": {
+          "invalidMultiplexerIndicator": "multiplexerIndicator must like this: [M|m<M-ID>]",
+          "parserError": "Parser error at line {{line}}, column {{column}}: {{message}}"
+        }
+      },
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "Delete Database",
+          "saveDatabase": "Save Database",
+          "fixErrorsToSave": "Fix errors to save the database"
+        },
+        "tabs": {
+          "overview": "Overview",
+          "valueTables": "Value Tables",
+          "attributes": "Attributes"
+        },
+        "errorGrid": {
+          "columns": {
+            "tab": "Tab",
+            "field": "Field",
+            "errorMessage": "Error Message"
+          }
+        },
+        "errors": {
+          "invalid": "Invalid",
+          "parseFailed": "Parse failed",
+          "error": "Error",
+          "duplicateDatabaseName": "Database name \"{{name}}\" already exists"
+        },
+        "deleteConfirm": {
+          "message": "Are you sure you want to delete this database?",
+          "title": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "messages": {
+          "saveSuccess": "The database has been saved successfully"
+        }
+      },
+      "overview": {
+        "labels": {
+          "dbName": "DB Name"
+        },
+        "placeholders": {
+          "filterTreeNodes": "Filter tree nodes...",
+          "searchByName": "Search by name..."
+        },
+        "treeCategories": {
+          "node": "Node",
+          "message": "Message",
+          "signal": "Signal"
+        },
+        "columns": {
+          "name": "Name",
+          "message": "Message",
+          "multiplexer": "Multiplexer",
+          "startBit": "Start Bit",
+          "length": "Length",
+          "byteOrder": "Byte Order",
+          "type": "Type",
+          "factor": "Factor",
+          "offset": "Offset",
+          "min": "Min",
+          "max": "Max",
+          "unit": "Unit",
+          "valueTable": "Value Table",
+          "comment": "Comment",
+          "id": "ID",
+          "sender": "Sender",
+          "receivers": "Receivers",
+          "role": "Role",
+          "signals": "Signals"
+        },
+        "values": {
+          "intel": "Intel",
+          "motorola": "Motorola",
+          "float": "Float",
+          "double": "Double",
+          "signed": "Signed",
+          "unsigned": "Unsigned",
+          "sender": "Sender",
+          "receiver": "Receiver"
+        }
+      },
+      "parse": {
+        "multiplexor": "Multiplexor",
+        "multiplexorWithValue": "{{name}} = 0x{{value}} Multiplexor",
+        "multiplexedValue": "{{name}} = 0x{{value}}"
+      },
+      "valTable": {
+        "placeholders": {
+          "searchByName": "Search by name..."
+        },
+        "columns": {
+          "name": "Name",
+          "comment": "Comment",
+          "usage": "Usage"
+        }
+      }
+    },
+    "ldfParse": {
+      "errors": {
+        "configurableFramesMustBeContinuous": "configurable_frames of {{nodeName}} must be continuous, and start from 0",
+        "diagReqLengthMustBe": "DiagReq length must be 16",
+        "diagReqFrameLengthMustBe": "DiagReqFrame length must be 2",
+        "subDiagReqLengthMustBe": "SubDiagReq length must be 16",
+        "unknownCommand": "unknown command",
+        "lexerError": "Lexer error at line {{line}}, column {{column}}",
+        "parserError": "Parser error at line {{line}}, column {{column}}",
+        "context": "Context",
+        "unexpectedCharacter": "Unexpected character: \"{{char}}\"",
+        "expectedOneOf": "Expected one of: {{tokens}}",
+        "lexingErrors": "Lexing errors",
+        "parsingErrors": "Parsing errors",
+        "unexpectedError": "Unexpected error during parsing"
+      }
+    },
+    "ldf": {
+      "editEncode": {
+        "labels": {
+          "type": "Type",
+          "value": "Value",
+          "description": "Description",
+          "min": "Min",
+          "max": "Max",
+          "scale": "Scale",
+          "offset": "Offset"
+        },
+        "options": {
+          "logicalValue": "Logical Value",
+          "physicalValue": "Physical Value",
+          "bcdValue": "BCD Value",
+          "asciiValue": "ASCII Value"
+        },
+        "buttons": {
+          "addEncode": "Add Encode",
+          "saveEncode": "Save Encode"
+        },
+        "columns": {
+          "type": "Type",
+          "details": "Details"
+        },
+        "details": {
+          "value": "Value: {{value}}",
+          "description": ", Description: {{description}}",
+          "range": "Range: {{min}} ~ {{max}}, Scale: {{scale}}, Offset: {{offset}}"
+        },
+        "validation": {
+          "pleaseSelectType": "Please select type",
+          "signalValueRange": "Signal value must be between 0 and 65535",
+          "minValueRange": "Min value must be between 0 and 65535",
+          "maxValueRange": "Max value must be between 0 and 65535",
+          "maxMustBeGreaterThanMin": "Max value must be greater than or equal to min value"
+        },
+        "dialogs": {
+          "warning": "Warning",
+          "confirmDelete": "Are you sure to delete this encoding type?"
+        }
+      },
+      "editFrame": {
+        "tooltips": {
+          "addSignal": "Add Signal",
+          "editSignal": "Edit Signal",
+          "deleteSignal": "Delete Signal"
+        },
+        "labels": {
+          "frameId": "Frame ID",
+          "frameSize": "Frame Size",
+          "autoUpdateOffset": "Auto Update Offset"
+        },
+        "placeholders": {
+          "hex": "Hex"
+        },
+        "columns": {
+          "signal": "Signal",
+          "offset": "Offset [Bit]",
+          "length": "Length [Bit]"
+        },
+        "buttons": {
+          "add": "Add",
+          "cancel": "Cancel",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "dialogs": {
+          "availableSignals": "Available signals for {{frameName}}",
+          "confirmDelete": "Are you sure to delete this signal?",
+          "deleteSignal": "Delete Signal"
+        }
+      },
+      "editNode": {
+        "labels": {
+          "linProtocol": "LIN Protocol",
+          "nad": "NAD",
+          "initNad": "Init NAD",
+          "supplierId": "Supplier Id",
+          "functionId": "Function Id",
+          "variant": "Variant",
+          "responseErrorSignal": "Response Error Signal",
+          "faultStateSignals": "Fault State Signals",
+          "p2Min": "P2 Min [ms]",
+          "stMin": "ST Min [ms]",
+          "nAsTimeout": "N_As_timeout [ms]",
+          "nCrTimeout": "N_Cr_timeout [ms]",
+          "configFrames": "Config Frames"
+        }
+      },
+      "editSchedule": {
+        "labels": {
+          "frameType": "Frame Type",
+          "frame": "Frame",
+          "name": "Name",
+          "frameId": "Frame ID",
+          "frames": "Frames",
+          "scheduleTable": "Schedule Table",
+          "type": "Type",
+          "node": "Node",
+          "nad": "NAD",
+          "id": "ID",
+          "byte": "Byte",
+          "mask": "Mask",
+          "inv": "Inv",
+          "newNad": "New NAD",
+          "d1": "D1",
+          "d2": "D2",
+          "d3": "D3",
+          "d4": "D4",
+          "d5": "D5",
+          "frameIndex": "Frame Index",
+          "framePIDs": "Frame PIDs"
+        },
+        "options": {
+          "normalFrame": "Normal Frame",
+          "eventTriggered": "Event Triggered",
+          "sporadic": "Sporadic",
+          "diagnostic": "Diagnostic",
+          "assignNAD": "AssignNAD",
+          "assignFrameId": "AssignFrameId",
+          "conditionalChangeNAD": "ConditionalChangeNAD",
+          "dataDump": "DataDump",
+          "saveConfiguration": "SaveConfiguration",
+          "assignFrameIdRange": "AssignFrameIdRange",
+          "masterReq": "MasterReq",
+          "slaveResp": "SlaveResp"
+        },
+        "placeholders": {
+          "pid": "PID"
+        },
+        "columns": {
+          "frame": "Frame",
+          "id": "ID",
+          "type": "Type",
+          "delay": "Delay [ms]",
+          "minTime": "Min Time [ms]",
+          "maxTime": "Max Time [ms]"
+        },
+        "frameTypes": {
+          "unconditional": "Unconditional",
+          "eventTriggered": "Event Triggered",
+          "sporadic": "Sporadic"
+        },
+        "buttons": {
+          "addFrame": "Add Frame",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "tooltips": {
+          "deleteFrame": "Delete Frame"
+        },
+        "dialogs": {
+          "warning": "Warning",
+          "confirmDelete": "Are you sure to delete this frame?"
+        },
+        "validation": {
+          "pleaseSelectFrameType": "Please select frame type",
+          "pleaseInputEventFrameName": "Please input event frame name",
+          "nameConflictsUnconditional": "Name conflicts with existing unconditional frame",
+          "nameConflictsSporadic": "Name conflicts with existing sporadic frame",
+          "nameConflictsEventTriggered": "Name conflicts with existing event triggered frame",
+          "pleaseInputFrameId": "Please input frame ID",
+          "frameIdMustBeHexadecimal": "Frame ID must be hexadecimal",
+          "frameIdRange": "Frame ID must be between 0x00 and 0x3F",
+          "frameIdConflictsUnconditional": "Frame ID conflicts with unconditional frame {{frameName}}",
+          "frameIdConflictsEventTriggered": "Frame ID conflicts with event triggered frame {{name}}",
+          "pleaseSelectDiagnosticType": "Please select diagnostic type",
+          "pleaseSelectNode": "Please select a node",
+          "pleaseSelectAtLeastOneFrame": "Please select at least one frame",
+          "eventTriggeredMustHaveAtLeast2Frames": "Event triggered frame must have at least 2 frames",
+          "sporadicFramesMustBePublishedByMaster": "Sporadic frames must only include frames published by master",
+          "pleaseSelectFrame": "Please select a frame",
+          "pleaseSelectNodeFirst": "Please select node first",
+          "frameMustBeConfigurable": "Selected frame must be a configurable frame for this node",
+          "pleaseInputNad": "Please input NAD",
+          "nadRange": "NAD must be between 0 and 255",
+          "pleaseInputId": "Please input ID",
+          "idRange": "ID must be between 0 and 65535",
+          "pleaseInputByte": "Please input byte",
+          "byteRange": "Byte must be between 0 and 255",
+          "pleaseInputMask": "Please input mask",
+          "maskRange": "Mask must be between 0 and 255",
+          "pleaseInputInv": "Please input inv",
+          "invRange": "Inv must be between 0 and 255",
+          "pleaseInputNewNad": "Please input new NAD",
+          "newNadRange": "New NAD must be between 0 and 255",
+          "pleaseInputD1": "Please input D1 value",
+          "d1Range": "D1 must be between 0 and 255",
+          "pleaseInputD2": "Please input D2 value",
+          "d2Range": "D2 must be between 0 and 255",
+          "pleaseInputD3": "Please input D3 value",
+          "d3Range": "D3 must be between 0 and 255",
+          "pleaseInputD4": "Please input D4 value",
+          "d4Range": "D4 must be between 0 and 255",
+          "pleaseInputD5": "Please input D5 value",
+          "d5Range": "D5 must be between 0 and 255",
+          "pleaseInputFrameIndex": "Please input frame index",
+          "frameIndexRange": "Frame index must be between 0 and 3",
+          "frameIndexExceedsAvailable": "Frame index exceeds available configurable frames ({{count}})",
+          "mustProvide4Pids": "Must provide 4 PIDs",
+          "eachPidRange": "Each PID must be between 0 and 63",
+          "pidsMustBeUnique": "PIDs must be unique (except 0)",
+          "pleaseSelectScheduleTable": "Please select schedule table for collision handling"
+        }
+      },
+      "editSignal": {
+        "labels": {
+          "signalSize": "Signal Size [bits]",
+          "signalType": "Signal Type",
+          "initValue": "Init Value",
+          "encodeType": "Encode Type",
+          "publisher": "Publisher",
+          "subscribeNodes": "Subscribe Node(s)"
+        },
+        "options": {
+          "scalar": "Scalar",
+          "bytearray": "ByteArray"
+        },
+        "placeholders": {
+          "none": "None"
+        },
+        "sections": {
+          "publisherSubscriberChoose": "Publisher/Subscriber Choose"
+        }
+      },
+      "encode": {
+        "tooltips": {
+          "addEncodingType": "Add Encoding Type",
+          "editEncodingType": "Edit Encoding Type",
+          "deleteEncodingType": "Delete Encoding Type"
+        },
+        "columns": {
+          "encodingTypeName": "Encoding Type Name",
+          "encodingDetails": "Encoding Details"
+        },
+        "details": {
+          "logical": "Logical({{value}})",
+          "physical": "Physical({{min}}~{{max}})",
+          "bcd": "BCD",
+          "ascii": "ASCII",
+          "notSupported": "Not supported"
+        },
+        "tabs": {
+          "signalEncoding": "Signal Encoding"
+        },
+        "buttons": {
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "dialogs": {
+          "addEncodingType": "Add Encoding Type",
+          "editEncodingType": "Edit Encoding Type: {{name}}",
+          "pleaseInputEncodingTypeName": "Please input encoding type name",
+          "confirmDelete": "Are you sure to delete this encoding type?",
+          "warning": "Warning"
+        },
+        "messages": {
+          "error": "Error",
+          "encodingTypeNameAlreadyExists": "Encoding type name already exists"
+        },
+        "validation": {
+          "nameRequired": "Name is required",
+          "nameMustBeUnique": "Encoding type name must be unique",
+          "atLeastOneEncodingTypeRequired": "At least one encoding type is required",
+          "invalidEncodingType": "Invalid encoding type",
+          "invalidLogicalValue": "Invalid logical value",
+          "invalidPhysicalValueRange": "Invalid physical value range"
+        }
+      },
+      "file": {
+        "messages": {
+          "copiedToClipboard": "Copied to clipboard!",
+          "failedToCopy": "Failed to copy"
+        }
+      },
+      "frame": {
+        "tooltips": {
+          "addFrame": "Add Frame",
+          "editFrame": "Edit Frame",
+          "deleteFrame": "Delete Frame"
+        },
+        "labels": {
+          "frameName": "Frame Name",
+          "publisher": "Publisher"
+        },
+        "columns": {
+          "frameName": "Frame Name",
+          "framePublisher": "Frame Publisher",
+          "frameId": "Frame ID",
+          "frameSize": "Frame Size",
+          "signalCount": "Signal Count",
+          "maxFrameTime": "Max.Frame Time [ms]",
+          "minFrameTime": "Min.Frame Time [ms]"
+        },
+        "buttons": {
+          "yes": "Yes",
+          "no": "No"
+        },
+        "dialogs": {
+          "addNewFrame": "Add New Frame",
+          "editFrame": "Edit Frame: {{name}}",
+          "deleteFrame": "Delete frame",
+          "confirmDelete": "Are you sure to delete this frame?"
+        },
+        "messages": {
+          "error": "Error",
+          "frameNameAlreadyExistsOrEmpty": "Frame name already exists or empty",
+          "nameAndPublisherCannotBeEmpty": "Name and Publisher cannot be empty and can't be changed again after creation"
+        },
+        "validation": {
+          "signalsMustBeArray": "Signals must be an array",
+          "duplicateSignalsNotAllowed": "Duplicate signals are not allowed",
+          "signalNotFound": "Signal {{signalName}} not found in LDF",
+          "signalOverlaps": "Signal {{signalName}} overlaps with signal {{rangeName}}",
+          "signalExceedsFrameSize": "Signal {{signalName}} exceeds frame size",
+          "frameIdMustBeNumber": "Frame ID must be a number",
+          "frameIdRange": "Frame ID must be between 0 and 0x3F",
+          "frameIdAlreadyUsed": "Frame ID is already used by another frame",
+          "frameSizeMustBeNumber": "Frame size must be a number",
+          "frameSizeRange": "Frame size must be between 1 and 8 bytes",
+          "frameSizeTooSmall": "Frame size too small for signals (needs at least {{bytes}} bytes)"
+        },
+        "tabs": {
+          "frames": "Frames"
+        }
+      },
+      "general": {
+        "labels": {
+          "databaseName": "Database Name",
+          "masterNodeName": "Master Node Name",
+          "linVersion": "LIN Version",
+          "linLangVersion": "LIN Lang Version",
+          "linSpeed": "LIN Speed(kbps)",
+          "timebase": "Timebase (ms)",
+          "jitter": "Jitter (ms)"
+        },
+        "validation": {
+          "nameCannotContainDot": "Name cannot contain '.'",
+          "databaseNameAlreadyExists": "The database name already exists",
+          "pleaseInputDatabaseName": "Please input the database name",
+          "masterNodeCannotBeSameAsSlaveNode": "Master node can't be the same as slave node",
+          "pleaseInputMasterNodeName": "Please input the master node name"
+        },
+        "tabs": {
+          "general": "General"
+        }
+      },
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "Delete Database",
+          "saveDatabase": "Save Database",
+          "fixErrorsToSave": "Fix errors to save the database"
+        },
+        "tabs": {
+          "general": "General",
+          "nodes": "Nodes",
+          "signals": "Signals",
+          "frames": "Frames",
+          "scheduleTables": "Schedule Tables",
+          "encodings": "Encodings",
+          "ldfFile": "LDF File"
+        },
+        "columns": {
+          "tab": "Tab",
+          "field": "Field",
+          "errorMessage": "Error Message"
+        },
+        "buttons": {
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "dialogs": {
+          "warning": "Warning",
+          "confirmDelete": "Are you sure you want to delete this database?"
+        },
+        "messages": {
+          "error": "Error",
+          "parseFailed": "Parse failed",
+          "databaseSavedSuccessfully": "The database has been saved successfully"
+        }
+      },
+      "node": {
+        "tooltips": {
+          "addNode": "Add Node",
+          "copyNode": "Copy Node",
+          "editNode": "Edit Node",
+          "deleteNode": "Delete Node"
+        },
+        "columns": {
+          "nodeName": "Node Name",
+          "initialNad": "Initial NAD",
+          "configNad": "Config NAD",
+          "supplierId": "Supplier ID",
+          "functionId": "Function ID",
+          "variant": "Variant",
+          "protocol": "Protocol",
+          "configFrames": "Config Frames"
+        },
+        "buttons": {
+          "add": "Add",
+          "copy": "Copy",
+          "cancel": "Cancel",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "dialogs": {
+          "addSlaveNode": "Add Slave Node",
+          "copySlaveNode": "Copy Slave Node",
+          "deleteNode": "Delete Node",
+          "pleaseEnterSlaveNodeName": "Please enter the slave node name",
+          "confirmDelete": "Are you sure to delete this node?",
+          "nodeAttributes": "{{name}} Attributes"
+        },
+        "validation": {
+          "pleaseSelectLinProtocol": "Please select LIN protocol",
+          "invalidLinProtocolVersion": "Invalid LIN protocol version",
+          "pleaseEnterConfiguredNad": "Please enter configured NAD",
+          "pleaseEnterInitialNad": "Please enter initial NAD",
+          "nadRange": "NAD must be between 0 and 255",
+          "pleaseEnterSupplierId": "Please enter supplier ID",
+          "supplierIdRange": "Supplier ID must be between 0 and 65535",
+          "pleaseEnterFunctionId": "Please enter function ID",
+          "functionIdRange": "Function ID must be between 0 and 65535",
+          "variantRange": "Variant must be between 0 and 255",
+          "pleaseSelectResponseErrorSignal": "Please select response error signal",
+          "invalidSignalSelection": "Invalid signal selection",
+          "oneOrMoreSignalsInvalid": "One or more selected signals are invalid",
+          "p2MinRequired": "P2 min is required",
+          "p2MinMustBeGreaterThan0": "P2 min must be greater than 0",
+          "stMinRequired": "ST min is required",
+          "stMinMustBeGreaterThan0": "ST min must be greater than 0",
+          "nAsTimeoutRequired": "N_As timeout is required",
+          "nAsTimeoutMustBeGreaterThan0": "N_As timeout must be greater than 0",
+          "nCrTimeoutRequired": "N_Cr timeout is required",
+          "nCrTimeoutMustBeGreaterThan0": "N_Cr timeout must be greater than 0",
+          "pleaseSelectAtLeastOneConfigFrame": "Please select at least one config frame",
+          "invalidFrameSelection": "Invalid frame selection",
+          "oneOrMoreFramesInvalid": "One or more selected frames are invalid",
+          "nodeNamePattern": "Node name can only contain letters, numbers, and underscores, and must start with a letter",
+          "nodeNameCannotBeEmpty": "Node name can't be empty",
+          "nodeNameAlreadyExists": "Node name already exists",
+          "slaveNodeNameCannotEqualMaster": "Slave node name can't equal master node name"
+        },
+        "tabs": {
+          "nodes": "Nodes"
+        }
+      },
+      "sch": {
+        "tooltips": {
+          "addScheduleTable": "Add Schedule Table",
+          "editSchedule": "Edit Schedule",
+          "deleteSchedule": "Delete Schedule"
+        },
+        "labels": {
+          "ms": "ms"
+        },
+        "columns": {
+          "scheduleTable": "Schedule Table",
+          "frames": "Frames",
+          "totalTime": "Total Time"
+        },
+        "buttons": {
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "dialogs": {
+          "addScheduleTable": "Add Schedule Table",
+          "editSchedule": "Edit Schedule: {{name}}",
+          "pleaseInputScheduleTableName": "Please input schedule table name",
+          "confirmDelete": "Are you sure to delete this schedule table?",
+          "warning": "Warning"
+        },
+        "messages": {
+          "error": "Error",
+          "noFrames": "No frames",
+          "scheduleTableNameAlreadyExists": "Schedule table name already exists",
+          "nameReserved": "Name {{name}} is reserved"
+        },
+        "frameTypes": {
+          "unconditional": "{{count}} unconditional",
+          "event": "{{count}} event",
+          "sporadic": "{{count}} sporadic",
+          "diagnostic": "{{count}} diagnostic",
+          "command": "{{count}} command"
+        },
+        "validation": {
+          "scheduleNameRequired": "Schedule name is required",
+          "scheduleTableNameMustBeUnique": "Schedule table name must be unique",
+          "entriesMustBeArray": "Entries must be an array",
+          "invalidDelayTime": "Invalid delay time in entry {{entryName}}",
+          "delayTimeMustBeGreaterThanMaxFrameTime": "Delay time ({{delay}}ms) for {{entryName}} must be greater than maximum frame time ({{maxFrameTime}}ms)",
+          "invalidCommandStructure": "Invalid command structure in entry {{entryName}}",
+          "invalidFrameReference": "Invalid frame reference: {{entryName}}",
+          "nameRequired": "Name is required"
+        },
+        "tabs": {
+          "scheduleTables": "Schedule Tables"
+        }
+      },
+      "signal": {
+        "tooltips": {
+          "addSignal": "Add Signal",
+          "copySignal": "Copy Signal",
+          "editSignal": "Edit Signal",
+          "deleteSignal": "Delete Signal"
+        },
+        "columns": {
+          "signal": "Signal",
+          "publisher": "Publisher",
+          "subscribers": "Subscribers",
+          "length": "Length [Bit]",
+          "initValue": "Init Value",
+          "unit": "Unit",
+          "encoding": "Encoding",
+          "joinedFrame": "Joined Frame"
+        },
+        "buttons": {
+          "add": "Add",
+          "confirm": "Confirm",
+          "cancel": "Cancel",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "dialogs": {
+          "addSignal": "Add Signal",
+          "copySignal": "Copy Signal",
+          "deleteSignal": "Delete Signal",
+          "pleaseInputSignalName": "Please input signal name",
+          "confirmDelete": "Are you sure to delete this signal?",
+          "signal": "{{name}} Signal"
+        },
+        "validation": {
+          "signalNamePattern": "signal name must be alphanumeric, and underscore",
+          "signalNameAlreadyExists": "signal name already exist",
+          "pleaseEnterSignalSize": "Please enter signal size",
+          "signalSizeMustBeNumber": "Signal size must be a number",
+          "signalSizeMustBeGreaterThan0": "Signal size must be greater than 0",
+          "scalarSignalSizeCannotExceed64Bits": "Scalar signal size cannot exceed 64 bits",
+          "byteArraySignalSizeMustBeMultipleOf8": "ByteArray signal size must be multiple of 8",
+          "pleaseSelectSignalType": "Please select signal type",
+          "initialValueMustBeNumber": "Initial value must be a number",
+          "valueRange": "Value must be between 0 and {{maxValue}}",
+          "byteArrayInitialValueMustBeArray": "ByteArray initial value must be an array",
+          "byteArrayMustHaveElements": "ByteArray must have {{expectedLength}} elements",
+          "elementRange": "Element {{index}} must be between 0 and 255",
+          "pleaseSelectPublisher": "Please select publisher",
+          "invalidPublisherNode": "Invalid publisher node",
+          "pleaseSelectAtLeastOneSubscriber": "Please select at least one subscriber",
+          "subscribersMustBeArray": "Subscribers must be an array",
+          "invalidSubscriberNode": "Invalid subscriber node: {{node}}",
+          "publisherCannotBeSubscriber": "Publisher cannot be a subscriber"
+        },
+        "tabs": {
+          "signals": "Signals"
+        }
+      }
+    },
+    "ortiParse": {
+      "errors": {
+        "lexicalAnalysis": "Lexical Analysis",
+        "syntaxAnalysis": "Syntax Analysis",
+        "unknownParsingError": "Unknown parsing error",
+        "parserException": "Parser Exception"
+      }
+    },
+    "orti": {
+      "index": {
+        "tooltips": {
+          "deleteDatabase": "Delete Database",
+          "saveDatabase": "Save Database"
+        },
+        "tabs": {
+          "taskIsr": "TASK/ISR",
+          "resource": "Resource",
+          "service": "Service",
+          "hook": "Hook",
+          "connector": "Connector",
+          "recordFile": "Record File"
+        },
+        "labels": {
+          "name": "Name",
+          "cpuFreq": "CPU Freq(MHz)"
+        },
+        "placeholders": {
+          "enterName": "Enter name",
+          "enterCpuFrequency": "Enter CPU Frequency"
+        },
+        "buttons": {
+          "addTaskIsr": "Add Task/ISR",
+          "addResource": "Add Resource",
+          "addService": "Add Service",
+          "addHook": "Add Hook",
+          "refresh": "Refresh"
+        },
+        "values": {
+          "task": "Task",
+          "isr": "ISR"
+        },
+        "columns": {
+          "name": "Name",
+          "id": "ID",
+          "coreId": "Core ID",
+          "type": "Type",
+          "activeInterval": "Active Interval(us)",
+          "color": "Color"
+        },
+        "connector": {
+          "type": "Type",
+          "selectType": "Select connector type",
+          "types": {
+            "serialPort": "SerialPort",
+            "binaryFile": "Binary File",
+            "csvFile": "CSV File",
+            "can": "CAN",
+            "eth": "ETH"
+          },
+          "device": "Device",
+          "selectDevice": "Select device",
+          "baudRate": "Baud Rate",
+          "selectBaudRate": "Select baud rate",
+          "dataBits": "Data Bits",
+          "selectDataBits": "Select data bits",
+          "stopBits": "Stop Bits",
+          "selectStopBits": "Select stop bits",
+          "parity": "Parity",
+          "selectParity": "Select parity",
+          "parityOptions": {
+            "none": "None",
+            "even": "Even",
+            "odd": "Odd",
+            "mark": "Mark",
+            "space": "Space"
+          },
+          "bitRate": "Bit Rate",
+          "enterBitRate": "Enter bit rate (e.g., 500000)",
+          "ipAddress": "IP Address",
+          "enterIpAddress": "Enter IP address",
+          "port": "Port",
+          "enterPort": "Enter port number",
+          "file": "File",
+          "enterFilePath": "Enter file path"
+        },
+        "recordFile": {
+          "enableRecord": "Enable Record",
+          "enableRecordDescription": "Enable recording of trace data to file",
+          "fileName": "File Name",
+          "enterFileName": "Enter file name (e.g., processed_log.csv)",
+          "alertMessage": "The trace data will be recorded to the specified file in CSV format with raw data columns: <strong>timestamp, type, id, status</strong> (no header). A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename."
+        },
+        "validation": {
+          "selectConnectorType": "Please select connector type",
+          "selectDevice": "Please select a device",
+          "selectBaudRate": "Please select a baud rate",
+          "selectFile": "Please select a file"
+        },
+        "errors": {
+          "databaseNameCannotBeEmpty": "Database name cannot be empty",
+          "cpuFrequencyCannotBeZero": "CPU Frequency cannot be 0",
+          "taskIdAlreadyExists": "Task ID \"{{id}}\" already exists in core {{coreId}}",
+          "isrIdAlreadyExists": "ISR ID \"{{id}}\" already exists",
+          "duplicateDatabaseName": "Database name \"{{name}}\" already exists",
+          "parseFailed": "Parse failed",
+          "error": "Error"
+        },
+        "deleteConfirm": {
+          "message": "Are you sure you want to delete this database?",
+          "title": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "messages": {
+          "saveSuccess": "The database has been saved successfully"
+        }
+      }
+    }
+  },
+  "uds": {
+    "tabs": {
+      "home": "Home",
+      "hardware": "Hardware",
+      "diagnostics": "Diagnostics",
+      "soa": "SOA",
+      "test": "Test",
+      "others": "Others"
+    },
+    "toolbar": {
+      "start": "Start",
+      "stop": "Stop",
+      "trace": "Trace",
+      "graph": "Graph",
+      "panel": "Panel",
+      "message": "Message",
+      "devices": "Devices",
+      "network": "Network",
+      "interact": "Interact",
+      "udsTester": "UDS Tester",
+      "services": "Services",
+      "sequence": "Sequence",
+      "soaConfig": "SOA Config",
+      "testSetup": "Test Setup",
+      "database": "Database",
+      "variables": "Variables",
+      "osInfo": "OS Info",
+      "scriptApi": "Script API",
+      "packages": "Packages"
+    },
+    "variable": {
+      "tabs": {
+        "userVariables": "User Variables",
+        "systemVariables": "System Variables"
+      },
+      "tooltips": {
+        "addVariable": "Add Variable",
+        "editVariable": "Edit Variable",
+        "deleteVariable": "Delete Variable"
+      },
+      "labels": {
+        "namespace": "Namespace",
+        "name": "Name",
+        "description": "Description",
+        "dataType": "Data Type",
+        "initialValue": "Initial Value",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "unit": "Unit"
+      },
+      "placeholders": {
+        "selectNamespace": "Select namespace"
+      },
+      "types": {
+        "number": "Number",
+        "string": "String",
+        "array": "Array"
+      },
+      "columns": {
+        "variable": "Variable",
+        "dataType": "Data Type",
+        "initValue": "Init Value",
+        "min": "Min",
+        "max": "Max",
+        "description": "Description"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "create": "Create"
+      },
+      "dialogs": {
+        "newVariable": "New Variable",
+        "editVariable": "Edit Variable",
+        "deleteVariable": "Delete Variable",
+        "deleteConfirm": "Are you sure to delete this variable?",
+        "yes": "Yes",
+        "no": "No",
+        "ok": "OK",
+        "deleteChildVariablesFirst": "Please delete all child variables first"
+      },
+      "validation": {
+        "inputName": "Please input variable name",
+        "nameFormat": "Variable name only contain letters, numbers, and underscores",
+        "nameExists": "Variable name already exists in this namespace",
+        "selectDataType": "Please select data type",
+        "inputInitialValue": "Please input initial value",
+        "minLessThanMax": "Minimum value must be less than maximum value",
+        "maxGreaterThanMin": "Maximum value must be greater than minimum value"
+      },
+      "defaults": {
+        "group": "GROUP"
+      }
+    },
+    "dropdowns": {
+      "graph": {
+        "line": "Line",
+        "gauge": "Gauge",
+        "datas": "Datas"
+      },
+      "interact": {
+        "noInteraction": "No Interaction"
+      },
+      "service": {
+        "noTester": "No Tester"
+      },
+      "sequence": {
+        "noTester": "No Tester"
+      },
+     
+
+      "panel": {
+        "addPanel": "Add Panel"
+      },
+     
+      "osTrace": {
+        "statistics": "{{name}} Statistics",
+        "timeline": "{{name}} Timeline",
+        "noOrtiLine1": "No ORTI File",
+        "noOrtiLine2": "Add In Database"
+      }
+    },
+    "plugin": {
+      "errorTitle": "Plugin Error",
+      "noEntry": "This plugin does not have an entry point in the extension {{label}}",
+      "handlerNotImplemented": "Plugin handler system not yet implemented"
+    },
+    "windows": {
+      "variable": "Variable",
+      "datas": "Datas",
+      "panel": "Panel",
+      "panelPreview": "Panel Preview",
+      "package": "Package",
+      "test": "Test",
+      "graph": "Line",
+      "gauge": "Gauge",
+      "network": "Network",
+      "hardware": "Devices",
+      "tester": "UDS Tester",
+      "message": "Message",
+      "testerService": "Service",
+      "testerSequence": "Sequence",
+      "trace": "Trace",
+      "cani": "IA",
+      "pwmi": "IA",
+      "lini": "IA",
+      "linPanel": "Panel",
+      "ldf": "LDF",
+      "dbc": "DBC",
+      "orti": "ORTI",
+      "soa": "SOA",
+      "someipi": "IA",
+      "osTrace": "OS Statistics",
+      "osTime": "OS Timeline",
+      "plugin": "Plugin"
+    },
+    "windowCloseConfirm": {
+      "messageWithName": "Your changes will not be saved in {{name}}, continue?",
+      "messageWithoutName": "Your changes will not be saved, continue?",
+      "title": "Warning",
+      "ok": "OK",
+      "cancel": "Cancel"
+    },
+    "hardware": {
+      "dialogs": {
+        "discardChangesMessage": "Are you sure you want to discard your changes?",
+        "deleteDeviceMessage": "Are you sure to delete this device?",
+        "warning": "Warning",
+        "discard": "Discard",
+        "cancel": "Cancel",
+        "ok": "OK"
+      },
+      "deviceTypes": {
+        "can": "CAN",
+        "ethernet": "Ethernet",
+        "lin": "LIN",
+        "pwm": "PWM"
+      },
+      "vendors": {
+        "ecubus": "ECUBUS",
+        "zlg": "ZLG",
+        "peak": "PEAK",
+        "kvaser": "KVASER",
+        "simulate": "Simulate",
+        "toomoss": "TOOMOSS",
+        "vector": "VECTOR",
+        "slcan": "SLCAN",
+        "candle": "CANDLE"
+      },
+      "canNode": {
+        "sections": {
+          "device": "Device",
+          "canParameters": "Can Parameters",
+          "database": "Database"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "res120Enable": "120R Res Enable",
+          "silentMode": "Silent Mode",
+          "canFdEnable": "CAN FD Enable",
+          "clockFreq": "Clock Freq (MHz)",
+          "database": "Database"
+        },
+        "options": {
+          "enable": "Enable",
+          "disable": "Disable",
+          "noDatabase": "No Database"
+        },
+        "tooltips": {
+          "silentMode": "Silent mode will not send any message, only receive message",
+          "clockFreq": "If you can't find the frequency you need, you can input it manually",
+          "bitTimingCalculator": "Bit Timing Calculator"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "table": {
+          "frequency": "Frequency (Hz)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "sjw": "SJW",
+          "preScaler": "Pre Scaler",
+          "zlgSpec": "ZLG Spec",
+          "baudrate": "Baudrate/Sample Point"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "clockMustBeNumber": "Clock must be a number",
+          "selectClock": "Please select clock",
+          "tseg1GreaterThanTseg2": "normal tseg1 must be greater than tseg2-1",
+          "sjwLessThanTseg2": "normal sjw must be less than tseg2",
+          "prescaleBetween": "normal prescale must be between {{min}}-{{max}}",
+          "tseg1Between": "normal tseg1 must be between {{min}}-{{max}}",
+          "tseg2Between": "normal tseg2 must be between {{min}}-{{max}}",
+          "dataTseg1GreaterThanTseg2": "data tseg1 must be greater than tseg2-1",
+          "dataSjwLessThanTseg2": "data sjw must be less than tseg2",
+          "dataPrescaleBetween": "data prescale must be between {{min}}-{{max}}",
+          "dataTseg1Between": "data tseg1 must be between {{min}}-{{max}}",
+          "dataTseg2Between": "data tseg2 must be between {{min}}-{{max}}",
+          "inputCorrectFrequency": "Please input correct frequency, calculated frequency is {{freq}}Hz",
+          "inputCorrectDataFrequency": "Please input correct data frequency, calculated frequency is {{freq}}Hz",
+          "inputFrequency": "Please input frequency",
+          "inputDataFrequency": "Please input data frequency"
+        },
+        "messages": {
+          "dontCare": "(Don't care)",
+          "zlgCheckCalculator": "ZLG (check the ZLG Baud Calculator)"
+        }
+      },
+      "bitTimingCalculator": {
+        "dialogs": {
+          "title": "Bit Timing Configuration: {{bitRate}} kbit/s @ {{clockFreq}} MHz"
+        },
+        "table": {
+          "emptyText": "No results, try change the clock frequency",
+          "samplePoint": "Sample Point (%)",
+          "tseg1": "TSEG1",
+          "tseg2": "TSEG2",
+          "prescaler": "Prescaler"
+        },
+        "buttons": {
+          "ok": "OK",
+          "cancel": "Cancel"
+        }
+      },
+      "linNode": {
+        "sections": {
+          "device": "Device",
+          "linParameters": "Lin Parameters",
+          "database": "Database"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "voltageControl": "Volatge Control",
+          "powerEnable": "Power Enable",
+          "linMode": "Lin Mode",
+          "baudRate": "Baud Rate",
+          "majorPrescale": "MajorPrescale",
+          "minorPrescale": "MinorPrescale",
+          "baudRateDisplay": "BaudRate",
+          "database": "Database"
+        },
+        "options": {
+          "input12v": "Input 12V",
+          "output0v": "Onput 0V",
+          "output12v": "Output 12V",
+          "output5v": "Output 5V",
+          "master": "Master",
+          "slave": "Slave",
+          "baudRate9600": "9600",
+          "baudRate19200": "19200",
+          "custom": "Custom",
+          "noDatabase": "No Database"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "selectDatabase": "Please select database",
+          "selectNode": "Please select node",
+          "baudRateTooHigh": "baud rate must be <= 50000"
+        },
+        "messages": {
+          "baudRateWarning": "WARNING: This LIN PHY may not support such high speed, using this speed may cause communication abnormalities, please use with caution"
+        }
+      },
+      "pwmNode": {
+        "sections": {
+          "device": "Device",
+          "pwmParameters": "PWM Parameters"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "device": "Device",
+          "refresh": "Refresh",
+          "frequency": "Frequency (Hz)",
+          "initialDuty": "Initial Duty (%)",
+          "polarity": "Polarity"
+        },
+        "options": {
+          "activeHigh": "Active High",
+          "activeLow": "Active Low"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectDevice": "Please select device",
+          "inputFrequency": "Please input frequency",
+          "inputInitialDutyCycle": "Please input initial duty cycle"
+        }
+      }
+
+      
+    },
+    "components": {
+        "addVar": {
+          "placeholders": {
+            "searchByName": "Search by name..."
+          },
+          "tooltips": {
+            "collapseAll": "Collapse All",
+            "expandAll": "Expand All",
+            "addVariable": "Add Variable",
+            "removeAttachSignal": "Remove Attach Signal"
+          },
+          "table": {
+            "name": "Name",
+            "type": "Type",
+            "initValue": "Init Value",
+            "min": "Min",
+            "max": "Max",
+            "unit": "Unit",
+            "description": "Description"
+          }
+        },
+        "editSignal": {
+          "collapse": {
+            "signalInformation": "Signal Information",
+            "variableInformation": "Variable Information"
+          },
+          "labels": {
+            "database": "Database",
+            "signalName": "Signal Name",
+            "frameId": "Frame ID",
+            "startBit": "Start Bit",
+            "bitLength": "Bit Length",
+            "variableFullName": "Variable Full Name",
+            "variableName": "Variable Name",
+            "variableType": "Variable Type",
+            "name": "Name",
+            "color": "Color",
+            "yAxis": "Y Axis",
+            "yAxisMin": "Y Axis Min",
+            "yAxisMax": "Y Axis Max",
+            "splitLine": "Split Line",
+            "disableZoom": "Disable Zoom",
+            "tooltip": "Tooltip",
+            "showTooltip": "Show Tooltip",
+            "xAxis": "X Axis",
+            "showGrid": "Show Grid",
+            "gridStyle": "Grid Style",
+            "showValue": "Show Value",
+            "series": "Series",
+            "step": "Step",
+            "showPoints": "Show Points",
+            "pointSize": "Point Size",
+            "pointStyle": "Point Style",
+            "min": "Min",
+            "max": "Max"
+          },
+          "options": {
+            "solid": "Solid",
+            "dashed": "Dashed",
+            "dotted": "Dotted",
+            "step": "Step",
+            "line": "Line",
+            "circle": "Circle",
+            "rectangle": "Rectangle",
+            "triangle": "Triangle",
+            "diamond": "Diamond"
+          },
+          "messages": {
+            "variableNotFound": "Variable {{name}} Not Found",
+            "checkVariableWindow": "Please check in Variable Window"
+          },
+          "buttons": {
+            "save": "Save",
+            "cancel": "Cancel"
+          }
+        },
+        "package": {
+          "title": "Package Manager",
+          "empty": {
+            "noPackageJson": "No package.json found",
+            "saveProjectFirst": "Please save your project first before initializing package.json",
+            "initializeFirst": "Please initialize package.json first to manage dependencies",
+            "initializeButton": "Initialize package.json"
+          },
+          "form": {
+            "enterPackageName": "Enter package name",
+            "installType": "Install type",
+            "dependencies": "Dependencies",
+            "devDependencies": "Dev Dependencies",
+            "install": "Install"
+          },
+          "terminal": {
+            "installationLog": "Installation Log",
+            "clear": "Clear"
+          },
+          "table": {
+            "installedPackages": "Installed Packages",
+            "packageName": "Package Name",
+            "version": "Version",
+            "actions": "Actions",
+            "uninstall": "Uninstall"
+          },
+          "messages": {
+            "packageJsonInitialized": "✓ package.json initialized successfully",
+            "failedToInitialize": "✗ Failed to initialize package.json: {{error}}",
+            "enterPackageName": "✗ Please enter a package name",
+            "packageInstalled": "✓ Package {{name}} installed successfully",
+            "failedToInstall": "✗ Failed to install package {{name}}: {{error}}",
+            "packageUninstalled": "✓ Package {{name}} uninstalled successfully",
+            "failedToUninstall": "✗ Failed to uninstall package {{name}}: {{error}}",
+            "failedToLoad": "✗ Failed to load package.json: {{error}}",
+            "unknownError": "Unknown error"
+          }
+        },
+        "signal": {
+          "placeholders": {
+            "searchByName": "Search by name..."
+          },
+          "tooltips": {
+            "collapseAll": "Collapse All",
+            "expandAll": "Expand All",
+            "addSignal": "Add Signal",
+            "addFrame": "Add Frame",
+            "removeAttachSignal": "Remove Attach Signal"
+          },
+          "table": {
+            "name": "Name",
+            "txNode": "Tx Node",
+            "startBit": "Start Bit",
+            "bitLength": "Bit Length"
+          }
+        }
+      },
+    "graph": {
+      "data": {
+        "tooltips": {
+          "resume": "Resume",
+          "pause": "Pause",
+          "addVariables": "Add Variables",
+          "addSignals": "Add Signals",
+          "deleteSignal": "Delete Signal"
+        },
+        "labels": {
+          "time": "Time: {{time}}s"
+        },
+        "table": {
+          "name": "Name",
+          "fullName": "Full Name",
+          "value": "Value",
+          "unit": "Unit",
+          "rawValue": "Raw Value",
+          "lastUpdate": "Last Update"
+        },
+        "dialogs": {
+          "addSignal": "Add Signal",
+          "addVariable": "Add Variable",
+          "deleteSignal": "Delete Signal",
+          "deleteSignalConfirm": "Are you sure you want to delete this signal?",
+          "deleteSignalsConfirm": "Are you sure you want to delete {{count}} signals?",
+          "confirm": "Confirm",
+          "cancel": "Cancel"
+        },
+        "messages": {
+          "signalAlreadyExists": "Signal already exists",
+          "noData": "--"
+        }
+      },
+      "gauge": {
+        "tooltips": {
+          "resume": "Resume",
+          "pause": "Pause",
+          "addVariables": "Add Variables",
+          "addSignals": "Add Signals"
+        },
+        "labels": {
+          "time": "Time: {{time}}s"
+        },
+        "tree": {
+          "emptyText": "Add"
+        },
+        "menu": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "dialogs": {
+          "addSignal": "Add Signal",
+          "addVariable": "Add Variable",
+          "editSignal": "Edit Signal"
+        },
+        "messages": {
+          "signalAlreadyExists": "Signal already exists",
+          "na": "N/A"
+        }
+      },
+      "graph": {
+        "tooltips": {
+          "resume": "Resume",
+          "pause": "Pause",
+          "addVariables": "Add Variables",
+          "addSignals": "Add Signals"
+        },
+        "labels": {
+          "time": "Time: {{time}}s"
+        },
+        "tree": {
+          "emptyText": "Add"
+        },
+        "menu": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "dialogs": {
+          "addSignal": "Add Signal",
+          "addVariable": "Add Variable",
+          "editSignal": "Edit Signal",
+          "editVariable": "Edit Variable"
+        },
+        "messages": {
+          "signalAlreadyExists": "Signal already exists"
+        },
+        "tooltip": {
+          "time": "Time: {{time}}ms",
+          "value": "Value: {{value}}"
+        }
+      }
+    },
+    "tester": {
+      "tree": {
+        "canInterface": "CAN Interface",
+        "linInterface": "LIN Interface",
+        "ethInterface": "ETH Interface"
+      },
+      "dialogs": {
+        "deleteTesterMessage": "Are you sure to delete this tester?",
+        "warning": "Warning",
+        "ok": "OK",
+        "cancel": "Cancel"
+      },
+      "buildError": {
+        "table": {
+          "file": "File",
+          "line": "Line",
+          "message": "Error"
+        },
+        "dialog": {
+          "title": "Errors",
+          "header": "Build Errors ({{count}})"
+        }
+      },
+      "canAddr": {
+        "sections": {
+          "canBase": "CAN Base",
+          "tpBase": "TP Base"
+        },
+        "labels": {
+          "addressName": "Address name",
+          "addrFormat": "Addr Format",
+          "addrType": "Addr Type",
+          "canIdType": "CAN-ID Type",
+          "canFd": "CAN FD",
+          "brs": "BRS",
+          "remote": "Remote",
+          "nSa": "N_SA",
+          "nTa": "N_TA",
+          "nAe": "N_AE",
+          "canIdTx": "CAN_ID TX",
+          "canIdRx": "CAN_ID RX",
+          "canIdTxCalc": "CAN_ID TX (calc)",
+          "canIdRxCalc": "CAN_ID RX (calc)",
+          "dlc": "DLC",
+          "paddingEnable": "Padding Enable",
+          "paddingValue": "Padding Value",
+          "nAs": "nAs",
+          "nAr": "nAr",
+          "nCr": "nCr",
+          "nBs": "nBs",
+          "nBr": "nBr",
+          "nCs": "nCs",
+          "blockSize": "Block Size",
+          "stMin": "STmin",
+          "maxWtf": "MAX WTF"
+        },
+        "options": {
+          "addrFormat": {
+            "normal": "NORMAL",
+            "fixedNormal": "FIXED_NORMAL",
+            "extended": "EXTENDED",
+            "mixed": "MIXED",
+            "enhanced": "ENHANCED"
+          },
+          "addrType": {
+            "physical": "ADDR_PHYSICAL",
+            "functional": "ADDR_FUNCTIONAL"
+          },
+          "canIdType": {
+            "standard": "STANDARD_ID",
+            "extended": "EXTEND_ID"
+          }
+        },
+        "tooltips": {
+          "dlcCan": "CAN:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9-15:8",
+          "dlcCanFd": "CAN-FD:0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:12,10:16,11:20,12:24,13:32,14:48,15:64",
+          "nAs": "Time for transmission of the CAN frame (any N-PDU) on the sender side (see ISO 15765-2)",
+          "nAr": "Time for transmission of the CAN frame (any N-PDU) on the receiver side (see ISO 15765-2)",
+          "nCr": "Time until reception of the next consecutive frame N-PDU (see ISO 15765-2)",
+          "nBs": "Time until reception of the next flow control N-PDU (see ISO 15765-2)",
+          "nBr": "Time until transmission of the next FlowControl N_PDU (see ISO 15765-2)",
+          "nCs": "Time until transmission of the next ConsecutiveFrame N_PDU (see ISO 15765-2)"
+        },
+        "validation": {
+          "idTypeMustBeExtendedForFixedNormal": "CAN-ID Type must be EXTENDED_ID when Addr Format is FIXED_NORMAL",
+          "canIdStandardRange": "CAN-ID must be 0~0x7FF",
+          "canIdExtendedRange": "CAN-ID must be 0~0x1FFFFFFF",
+          "hexShouldStartWith0x": "HEX should start with 0x",
+          "canIdTxNotEqualRx": "CAN-ID TX can't be equal to CAN-ID RX",
+          "canIdTxMustBeUnique": "CAN-ID TX must be unique",
+          "canIdRxNotEqualTx": "CAN-ID RX can't be equal to CAN-ID TX",
+          "canIdRxMustBeSame": "CAN-ID RX must be same",
+          "canIdRequired": "CAN-ID is required",
+          "valueRange": "Value must be 0~0xFF",
+          "valueRequired": "Value is required",
+          "saMustBeSame": "SA must be the same",
+          "taNotEqualSa": "TA can't be equal to SA",
+          "taMustBeUnique": "TA must be unique",
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "inputAddrName": "Please input addr name",
+          "inputDlc": "Please input DLC from 0-15",
+          "inputPaddingValue": "Please input padding value from 0-255",
+          "inputNAs": "Please input nAs",
+          "inputNBs": "Please input nBs",
+          "inputNCr": "Please input nCr",
+          "inputStMin": "Please input stMin",
+          "inputBs": "Please input bs",
+          "inputMaxWtf": "Please input maxWTF"
+        },
+        "messages": {
+          "unsupported": "Unsupported"
+        }
+      },
+      "ethAddr": {
+        "sections": {
+          "tester": "Tester",
+          "ecu": "ECU",
+          "vehicleIdentify": "Vehicle Identify Request Behavior",
+          "testerSpecialControl": "Tester Special Control",
+          "tlsSettingsTesterV3": "TLS Settings - Tester (DoIP v3)"
+        },
+        "labels": {
+          "addressName": "Address name",
+          "addressType": "Address Type",
+          "testerAddress": "Tester address",
+          "connectDelay": "Connect delay",
+          "activeDelay": "Active delay",
+          "ecuAddress": "ECU address",
+          "eid": "EID",
+          "entityType": "Entity Type",
+          "nodeAddress": "Node address",
+          "vin": "VIN",
+          "gid": "GID",
+          "vinRequestMethod": "VIN Request method",
+          "requestAddress": "Request Address",
+          "entityMissBehavior": "Entity Miss Behavior",
+          "udpClientPort": "UDP Client Port",
+          "tcpClientPort": "TCP Client Port",
+          "enableTls": "Enable TLS",
+          "tlsPort": "TLS Port",
+          "caCert": "CA Certificate",
+          "clientCert": "Client Certificate",
+          "privateKey": "Private Key",
+          "skipVerify": "Skip Verify",
+          "enableKeyLog": "Enable Key Log",
+          "keyLogPath": "Key Log Path"
+        },
+        "placeholders": {
+          "logicalAddress": "0",
+          "entityType": "Node",
+          "caCertPath": "Path to CA certificate file",
+          "clientCertPath": "Path to tester certificate file",
+          "privateKeyPath": "Path to tester private key file",
+          "keyLogPath": "logs/tls-keylog.txt"
+        },
+        "options": {
+          "addressType": {
+            "physical": "Physical",
+            "functional": "Functional"
+          },
+          "entityType": {
+            "node": "Node",
+            "gateway": "Gateway"
+          },
+          "virReqType": {
+            "unicast": "Unicast VIN Request",
+            "omit": "Omit VIN, tcp connect directly",
+            "broadcast": "Broadcast UDP4",
+            "multicast": "Multicast UDP6"
+          },
+          "entityNotFoundBehavior": {
+            "normal": "Send Normal Request",
+            "withVin": "Send VIN Request",
+            "withEid": "Send EID Request"
+          }
+        },
+        "tooltips": {
+          "enableTls": "Enable TLS for secure communication (port 3496)",
+          "skipVerify": "Skip certificate verification (for testing only)",
+          "enableKeyLog": "Enable key log for TLS communication"
+        },
+        "dialogs": {
+          "selectCaCert": "Select CA Certificate",
+          "selectClientCert": "Select Client Certificate",
+          "selectPrivateKey": "Select Private Key",
+          "certificateFiles": "Certificate Files",
+          "allFiles": "All Files",
+          "selectKeyLogFile": "Select Key Log File",
+          "logTextFiles": "Log/Text Files"
+        },
+        "actions": {
+          "browse": "Browse"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "addressExists": "The address already exists",
+          "addressRange": "0 ~ 0xFFFF",
+          "testerAddrSameAsTester": "Tester address can't be the same as Tester address",
+          "logicalAddressRequired": "Logical address is required",
+          "testerAddrSameAsEcu": "Tester address can't be the same as ECU address",
+          "testerAddrAllSame": "All tester logical addresses must be the same",
+          "invalidIpAddress": "Invalid IP address",
+          "requestAddressRequired": "Request address is required",
+          "inputAddrName": "Please input addr name",
+          "eidFormat": "xx-xx-xx-xx-xx-xx",
+          "gidFormat": "xx-xx-xx-xx-xx-xx",
+          "vinLength": "17 characters"
+        }
+      },
+      "linAddr": {
+        "sections": {
+          "tpBase": "TP Base",
+          "schedulingSettings": "Scheduling Settings"
+        },
+        "labels": {
+          "addressName": "Address name",
+          "addressType": "Address Type",
+          "nCr": "nCr",
+          "nAs": "nAs",
+          "nad": "NAD",
+          "stMin": "STmin"
+        },
+        "options": {
+          "addressType": {
+            "physical": "Physical",
+            "functional": "Functional"
+          },
+          "schType": {
+            "diagOnly": "Diagnostic only",
+            "diagInterleaved": "Interleaved"
+          }
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "nadRange": "NAD must be 0~255",
+          "nadUnique": "NAD must be unique",
+          "inputAddrName": "Please input addr name",
+          "inputNad": "Please input NAD"
+        }
+      },
+      "param": {
+        "table": {
+          "name": "Name",
+          "type": "Type",
+          "lengthBit": "Length (bit)",
+          "value": "Value",
+          "description": "Description",
+          "operations": "Operations"
+        },
+        "placeholders": {
+          "filePath": "File Path"
+        },
+        "actions": {
+          "add": "Add",
+          "edit": "Edit",
+          "delete": "Delete",
+          "save": "Save",
+          "discard": "Discard"
+        },
+        "types": {
+          "num": "NUMBER",
+          "ascii": "ASCII",
+          "array": "ARRAY",
+          "float": "FLOAT",
+          "double": "DOUBLE",
+          "unicode": "UNICODE",
+          "file": "FILE"
+        },
+        "messages": {
+          "copied": "Copied"
+        },
+        "dialogs": {
+          "scriptFile": "Script File",
+          "allFiles": "All Files"
+        },
+        "validation": {
+          "nameDuplicate": "Name duplicate",
+          "bitLenMultipleOf8": "bitLen must be multiple of 8",
+          "bitLenMax32": "bitLen must be <=32",
+          "bitLen32": "bitLen must be 32",
+          "bitLen64": "bitLen must be 64",
+          "unknownType": "Unknown type {{type}}",
+          "idExistsInService": "The id already exists in service {{name}}, please change it"
+        }
+      },
+      "sequence": {
+        "tooltips": {
+          "addSequence": "Add a new sequence",
+          "testerPresent": "Tester Present Control",
+          "runSequence": "Run chosen sequence",
+          "stopSequence": "Stop chosen sequence",
+          "cycleRun": "Cycle Run"
+        },
+        "placeholders": {
+          "device": "Device"
+        },
+        "empty": {
+          "addFirst": "Add Sequence First"
+        },
+        "dialogs": {
+          "deleteSequenceMessage": "Are you sure to delete {{name}}?",
+          "warning": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "messages": {
+          "onlyDuringMeasurement": "Sequence can only be start during a running measurement"
+        }
+      },
+      "service": {
+        "labels": {
+          "name": "Name",
+          "autoSyncFuncId": "AutoSync Func / ID",
+          "suppressResponse": "Suppress Response",
+          "txPdu": "TX PDU",
+          "rxPdu": "RX PDU",
+          "description": "Description"
+        },
+        "tabs": {
+          "request": "Request",
+          "response": "Response",
+          "codeGenerate": "CodeGenerate"
+        },
+        "alerts": {
+          "jobRequiresParams": "Job requires these request parameters to serve as the function's input arguments."
+        },
+        "dialogs": {
+          "deleteServiceMessage": "Are you sure to delete this {{name}}",
+          "serviceUsedInSequence": "This service is used in sequence {{name}}[{{index}}], please remove it first",
+          "warning": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        },
+        "messages": {
+          "serviceOnlyOnce": "This service may only be created once.",
+          "valueOutOfRange": "The value is out of range",
+          "unsupported": "Unsupported"
+        },
+        "validation": {
+          "nameExists": "Name already exists",
+          "inputName": "Please input addr name",
+          "chooseService": "Please choose service"
+        },
+        "odx": {
+          "title": "ODX File Import",
+          "labels": {
+            "ecu": "Ecu",
+            "variant": "Variant"
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "import": "Import"
+          },
+          "messages": {
+            "importSuccess": "Import success",
+            "ecuOrVariantNotFound": "Ecu or variant not found"
+          }
+        }
+      },
+      "subsequence": {
+        "null": "NULL",
+        "toolbar": {
+          "name": "NAME:"
+        },
+        "tooltips": {
+          "addService": "Add a new service",
+          "removeService": "Remove"
+        },
+        "columns": {
+          "enable": "EN",
+          "service": "Service",
+          "address": "Address",
+          "delay": "Delay",
+          "checkResp": "Check Resp",
+          "retry": "Retry",
+          "failedAction": "Failed Action",
+          "description": "Description",
+          "executeStatus": "Execute Status"
+        },
+        "switch": {
+          "yes": "Y",
+          "no": "N"
+        },
+        "failBehavior": {
+          "stop": "Stop",
+          "continue": "Continue"
+        },
+        "status": {
+          "notStart": "Not Start",
+          "error": "Error",
+          "running": "Running",
+          "success": "Success"
+        }
+      },
+      "testercan": {
+        "labels": {
+          "testerName": "Tester Name",
+          "simulateBy": "Simulate By",
+          "testerScriptFile": "Tester Script File",
+          "enableCodeGenerate": "Enable Code Generate",
+          "templateList": "Template List",
+          "p2Timeout": "P2 timeout",
+          "p2Max": "P2 max (0x78)",
+          "s3Time": "S3 Time",
+          "testerPresentEnable": "Tester Present Enable",
+          "testerPresentAddress": "Tester Present Address",
+          "fromSpecialService": "From Special Service",
+          "doipVersion": "DOIP Version",
+          "enableServerTls": "Enable Server TLS",
+          "serverTlsPort": "Server TLS Port",
+          "serverCaCert": "CA Certificate",
+          "serverCert": "Server Certificate",
+          "serverPrivateKey": "Private Key",
+          "requireClientCert": "Require Client Cert"
+        },
+        "sections": {
+          "udsCodeGenerate": "UDS Code Generate",
+          "udsTiming": "UDS Timing",
+          "doipSettings": "DOIP Settings",
+          "serverTls": "Server TLS (Entity Simulation)"
+        },
+        "placeholders": {
+          "name": "Name",
+          "templateFilePath": "Template file path",
+          "generatedFilePath": "Generated file path",
+          "doipV2": "DOIP V2",
+          "serverCaCertPath": "Path to CA certificate file (to verify tester)",
+          "serverCertPath": "Path to server certificate file",
+          "serverPrivateKeyPath": "Path to server private key file"
+        },
+        "buttons": {
+          "chooseScript": "Choose",
+          "build": "Build",
+          "refreshEdit": "Refresh / Edit",
+          "addTemplate": "Add Template",
+          "generate": "Generate",
+          "preview": "Preview",
+          "browse": "Browse",
+          "addAddress": "Add",
+          "loadFromDatabase": "Load From Database"
+        },
+        "buildStatus": {
+          "buildFailed": "Build Failed",
+          "buildSuccess": "Build Success",
+          "needRebuild": "Need Rebuild",
+          "needBuild": "Need Build"
+        },
+        "options": {
+          "doipVersion": {
+            "v2": "DOIP V2",
+            "v3": "DOIP V3"
+          }
+        },
+        "tooltips": {
+          "enableServerTls": "Enable TLS for entity simulation server",
+          "requireClientCert": "Require tester to provide certificate (mutual TLS)"
+        },
+        "validation": {
+          "nameExists": "The tester name already exists",
+          "inputTesterName": "Please input tester name",
+          "selectTargetDevice": "Please select target device",
+          "inputUdsTimeout": "Please input UDS Timeout",
+          "inputS3Time": "Please input S3 Time",
+          "addressRequired": "Address is required"
+        },
+        "dialogs": {
+          "scriptFile": "Script File",
+          "typescript": "typescript",
+          "allFiles": "All Files",
+          "error": "Error",
+          "warning": "Warning",
+          "ok": "OK"
+        },
+        "messages": {
+          "saveProjectFirst": "Please save the project first",
+          "selectScriptFirst": "Please select the script file first"
+        },
+        "tlsDialogs": {
+          "selectServerCa": "Select CA Certificate",
+          "selectServerCert": "Select Server Certificate",
+          "selectServerKey": "Select Server Private Key",
+          "certificateFiles": "Certificate Files",
+          "allFiles": "All Files"
+        },
+        "codeGenDialogs": {
+          "selectTemplateFile": "Select Template File",
+          "templateFiles": "Template Files",
+          "allFiles": "All Files",
+          "selectOutputFile": "Select Output File",
+          "codeFiles": "Code Files"
+        },
+        "codeGenMessages": {
+          "noValidTemplates": "No valid template configurations found",
+          "success": "Successfully generated {{count}} file(s)",
+          "failedTitle": "Code Generation Failed"
+        },
+        "preview": {
+          "title": "Preview Generated Code By: {{template}}",
+          "copied": "Copied to clipboard!",
+          "copyFailed": "Failed to copy to clipboard"
+        }
+      },
+      "config": {
+        "table": {
+          "key": "Key",
+          "value": "Value",
+          "operations": "Operations"
+        },
+        "placeholders": {
+          "key": "Configuration key",
+          "value": "Configuration value"
+        },
+        "actions": {
+          "add": "Add Config",
+          "edit": "Edit",
+          "delete": "Delete",
+          "save": "Save",
+          "discard": "Discard"
+        },
+        "messages": {
+          "copied": "Copied"
+        },
+        "validation": {
+          "keyRequired": "Key cannot be empty",
+          "keyExists": "Key already exists"
+        }
+      },
+      "dbchoose": {
+        "labels": {
+          "database": "Database",
+          "node": "Node"
+        },
+        "placeholders": {
+          "database": "Please select database",
+          "node": "Please select node"
+        },
+        "actions": {
+          "load": "Load"
+        }
+      }
+    },
+    "trace": {
+      "defaultName": "Trace",
+      "tooltips": {
+        "clearTrace": "Clear Trace",
+        "resume": "Resume",
+        "pause": "Pause",
+        "switchOverwriteScroll": "Switch Overwrite/Scroll"
+      },
+      "placeholders": {
+        "filterByDevice": "Filter by device",
+        "filterById": "Filter by ID"
+      },
+      "menu": {
+        "saveAsExcel": "Save as Excel",
+        "saveAsAsc": "Save as ASC",
+        "changeName": "Change Name"
+      },
+      "dialogs": {
+        "changeName": "Change Name",
+        "enterNewName": "Please enter the new name",
+        "ok": "OK",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "nameNotEmpty": "Name can't be empty"
+      },
+      "messages": {
+        "startTrace": "Start Trace"
+      },
+      "filters": {
+        "can": "CAN",
+        "lin": "LIN",
+        "uds": "UDS",
+        "eth": "ETH",
+        "someip": "SomeIP",
+        "osTrace": "OS Trace"
+      },
+      "columns": {
+        "time": "Time",
+        "name": "Name",
+        "data": "Data",
+        "dir": "Dir",
+        "id": "ID",
+        "dlc": "DLC",
+        "len": "Len",
+        "type": "Type",
+        "channel": "Channel",
+        "device": "Device"
+      },
+      "emptyText": "No data",
+      "messageTypes": {
+        "udsReq": "UDS Req",
+        "udsResp": "UDS Resp",
+        "udsNegativeResp": "UDS Negative Resp",
+        "canError": "CAN Error",
+        "linError": "LIN Error",
+        "linEvent": "LIN Event",
+        "scriptMessage": "Script Message",
+        "systemMessage": "System Message",
+        "someipServiceValid": "SomeIP Service Valid",
+        "osEvent": "OS Event",
+        "osError": "OS Error",
+        "version": "Version",
+        "protocolVersion": "Protocol Version",
+        "interfaceVersion": "Interface Version",
+        "returnCode": "Return Code",
+        "address": "Address",
+        "protocol": "Protocol",
+        "service": "Service",
+        "instance": "Instance",
+        "available": "Available"
+      }
+    },
+    "test": {
+        "tooltips": {
+          "refreshTestConfig": "Refresh Test Config",
+          "runTestConfig": "Run Test Config",
+          "stopTestConfig": "Stop Test Config"
+        },
+        "menu": {
+          "edit": "Edit",
+          "exportReportHtml": "Export Report (HTML)",
+          "exportReportPdf": "Export Report (PDF)",
+          "delete": "Delete"
+        },
+        "labels": {
+          "name": "Name",
+          "testScriptFile": "Test Script File",
+          "connectDevices": "Connect Devices",
+          "reportPath": "Report Path"
+        },
+        "sections": {
+          "report": "Report"
+        },
+        "buttons": {
+          "choose": "Choose",
+          "build": "Build",
+          "refreshEdit": "Refresh / Edit",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "placeholders": {
+          "select": "Select"
+        },
+        "dialogs": {
+          "editConfiguration": "Edit Configuration",
+          "error": "Error",
+          "warning": "Warning",
+          "success": "Success",
+          "ok": "OK",
+          "cancel": "Cancel",
+          "deleteConfirm": "Are you sure to delete this config?",
+          "scriptFile": "Script File",
+          "reportPath": "Report Path",
+          "typescript": "typescript",
+          "allFiles": "All Files"
+        },
+        "messages": {
+          "saveProjectFirst": "Please save the project first",
+          "selectScriptFirst": "Please select the script file first",
+          "exportSuccess": "Test report exported successfully, open it?",
+          "exportFailed": "Failed to export test report: {{msg}}"
+        },
+        "buildStatus": {
+          "buildFailed": "Build Failed",
+          "buildSuccess": "Build Success",
+          "needRebuild": "Need Rebuild",
+          "needBuild": "Need Build"
+        },
+        "validation": {
+          "nameExists": "The test config name already exists",
+          "inputName": "Please input test config name"
+        },
+        "tree": {
+          "testConfig": "Test Config"
+        },
+        "defaultName": "Test Config",
+        "tips": {
+          "emptyReportPath": "Leave empty to use project root path"
+        }
+      },
+    "network": {
+      "tree": {
+        "devices": "Devices",
+        "interactive": "Interactive",
+        "can": "Can",
+        "lin": "Lin",
+        "ethernet": "Ethernet",
+        "node": "Node",
+        "pwm": "PWM",
+        "loggers": "Loggers",
+        "someip": "SomeIP"
+      },
+      "dialogs": {
+        "deleteNodeMessage": "This will permanently delete the node. Continue?",
+        "warning": "Warning",
+        "ok": "OK",
+        "cancel": "Cancel"
+      },
+      "names": {
+        "nodeTemplate": "Node {{count}}",
+        "loggerTemplate": "Logger {{count}}",
+        "iaTemplate": "{{label}} IA"
+      },
+      "logConfig": {
+        "tabs": {
+          "general": "General",
+          "connected": "Connected"
+        },
+        "labels": {
+          "name": "Name",
+          "logEnable": "Log Enable",
+          "transport": "Transport",
+          "format": "Format",
+          "compression": "Compression",
+          "filePath": "File Path",
+          "recordTypes": "Record Types"
+        },
+        "placeholders": {
+          "name": "Name",
+          "transport": "Transport",
+          "format": "Format",
+          "compressionLevel": "Compression level",
+          "logFilePath": "Log file Path"
+        },
+        "options": {
+          "disabled": "Disabled",
+          "enabled": "Enabled",
+          "file": "File",
+          "socket": "Socket",
+          "ascFormat": "ASC Format",
+          "blfFormat": "Vector BLF Format",
+          "csvFormat": "CSV Format",
+          "defaultCompression": "Default (-1)",
+          "noCompression": "No compression (0)",
+          "fastCompression": "Fast (1)",
+          "balancedCompression": "Balanced (6)",
+          "maxCompression": "Max (9)"
+        },
+        "recordTypes": {
+          "can": "CAN",
+          "lin": "LIN",
+          "eth": "ETH",
+          "uds": "UDS"
+        },
+        "buttons": {
+          "browse": "Browse",
+          "cancel": "Cancel",
+          "ok": "OK"
+        },
+        "messages": {
+          "timestampAppended": "A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename."
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        },
+        "validation": {
+          "logNameExists": "The log name already exists",
+          "inputNodeName": "Please input node name",
+          "inputLogFilePath": "Please input log file path"
+        },
+        "dialog": {
+          "selectLogFile": "Select Log File",
+          "allFiles": "All Files",
+          "logFile": "Log File"
+        }
+      },
+      "nodeConfig": {
+        "tabs": {
+          "general": "General",
+          "connected": "Connected"
+        },
+        "labels": {
+          "nodeName": "Node Name",
+          "netNode": "Net Node",
+          "nodeScriptFile": "Node Script File",
+          "nodeActive": "Node Active",
+          "testNode": "Test Node"
+        },
+        "placeholders": {
+          "name": "Name",
+          "nodeName": "Node Name"
+        },
+        "options": {
+          "disabled": "Disabled",
+          "enabled": "Enabled"
+        },
+        "buttons": {
+          "choose": "Choose",
+          "build": "Build",
+          "refreshEdit": "Refresh / Edit",
+          "cancel": "Cancel",
+          "ok": "OK"
+        },
+        "buildStatus": {
+          "buildFailed": "Build Failed",
+          "buildSuccess": "Build Success",
+          "needRebuild": "Need Rebuild",
+          "needBuild": "Need Build"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        },
+        "validation": {
+          "nodeNameExists": "The node name already exists",
+          "inputNodeName": "Please input node name"
+        },
+        "dialogs": {
+          "error": "Error",
+          "warning": "Warning",
+          "ok": "OK",
+          "saveProjectFirst": "Please save the project first",
+          "selectScriptFileFirst": "Please select the script file first",
+          "scriptFile": "Script File",
+          "typescript": "typescript",
+          "allFiles": "All Files"
+        }
+      },
+
+     
+      
+      "udsView": {
+        "defaultDeviceName": "Device",
+        "dialogs": {
+          "editNode": "Edit Node {{name}}",
+          "editLog": "Edit Log {{name}}",
+          "selectWorkNode": "Please select a work node"
+        }
+      },
+      "cani": {
+        "tooltips": {
+          "editConnect": "Edit Connect",
+          "addFrame": "Add Frame",
+          "selectFrameFromDatabase": "Select Frame from Database",
+          "editFrame": "Edit Frame",
+          "deleteFrame": "Delete Frame"
+        },
+        "dialogs": {
+          "iaDeviceConnect": "IA Device Connect",
+          "editFrame": "Edit Frame {{name}}",
+          "selectFrameFromDatabase": "Select Frame from Database"
+        },
+        "labels": {
+          "name": "Name",
+          "id": "ID",
+          "channel": "Channel",
+          "type": "Type",
+          "remote": "Remote",
+          "brs": "BRS",
+          "dlc": "DLC",
+          "onKey": "On Key:",
+          "period": "Period (ms):"
+        },
+        "tabs": {
+          "signal": "Signal",
+          "rawData": "Raw Data"
+        },
+        "placeholders": {
+          "hexByte": "00"
+        },
+        "table": {
+          "send": "Send",
+          "trigger": "Trigger",
+          "name": "Name",
+          "idHex": "ID (HEX)",
+          "channel": "Channel",
+          "type": "Type",
+          "dlc": "DLC"
+        },
+        "triggerTypes": {
+          "manual": "Manual",
+          "periodic": "Periodic"
+        },
+        "frameTypes": {
+          "can": "CAN",
+          "canFd": "CAN FD",
+          "extendedCan": "Extended CAN",
+          "extendedCanFd": "Extended CAN FD"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        }
+      },
+      "canisignale": {
+        "dialogs": {
+          "editSignalGenerator": "Edit Signal Generator"
+        },
+        "labels": {
+          "generatorType": "Generator Type"
+        },
+        "options": {
+          "none": "None",
+          "sine": "Sine",
+          "counter": "Counter"
+        },
+        "table": {
+          "name": "Name",
+          "rawValue": "Raw Value",
+          "physValue": "Phys Value",
+          "unit": "Unit",
+          "startBit": "Start Bit",
+          "length": "Length"
+        }
+      },
+      "lini": {
+        "buttons": {
+          "stopSch": "Stop SCH",
+          "startSch": "Start SCH"
+        },
+        "tooltips": {
+          "editConnect": "Edit Connect"
+        },
+        "labels": {
+          "database": "Database"
+        },
+        "placeholders": {
+          "selectDatabaseInDevice": "Select Database In Device"
+        },
+        "dialogs": {
+          "iaDeviceConnect": "IA Device Connect"
+        },
+        "table": {
+          "index": "Index",
+          "schControl": "SCH Control",
+          "scheduleTable": "Schedule Table",
+          "frameNumber": "Frame Number",
+          "frame": "Frame",
+          "frameId": "Frame ID",
+          "active": "Active",
+          "delay": "Delay (ms)",
+          "size": "Size (bytes)",
+          "type": "Type"
+        },
+        "frameTypes": {
+          "command": "Command",
+          "unconditional": "Unconditional",
+          "eventTriggered": "Event Triggered",
+          "sporadic": "Sporadic",
+          "notSupported": "Not supported"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        }
+      },
+      "linPanel": {
+        "labels": {
+          "database": "Database:",
+          "node": "Node:",
+          "none": "None"
+        },
+        "buttons": {
+          "resetAll": "Reset All"
+        },
+        "table": {
+          "frame": "Frame",
+          "frameDataHex": "Frame Data (Hex)",
+          "signal": "Signal",
+          "bits": "Bits",
+          "physicalLogicalValue": "Physical/Logical Value",
+          "rawValue": "Raw Value"
+        }
+      },
+      "pwmi": {
+        "tabs": {
+          "pwmControl": "PWM Control",
+          "control": "Control",
+          "deviceConnection": "Device Connection",
+          "device": "Device"
+        },
+        "labels": {
+          "dutyCycleControl": "Duty Cycle Control",
+          "quickPresets": "Quick Presets"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        }
+      }
+    },
+    "message": {
+      "tooltips": {
+        "clearMessage": "Clear Message"
+      },
+      "actions": {
+        "saveMessage": "Save Message"
+      },
+      "testLog": {
+        "testStarting": "----- Test {{name}} starting -----",
+        "testPassed": "----- Test {{name}} passed, {{duration}}ms -----",
+        "testFailed": "----- Test {{name}} failed, {{duration}}ms, details: {{error}} -----",
+        "testDiagnostic": "Test Diagnostic"
+      }
+    },
+    "someip": {
+      "serviceConfig": {
+        "sections": {
+          "communicationConfig": "Communication Configuration"
+        },
+        "labels": {
+          "serviceId": "Service ID",
+          "instanceId": "Instance ID",
+          "unicastAddress": "Unicast Address",
+          "reliableTcp": "Reliable (TCP)",
+          "enableTcpCommunication": "Enable TCP Communication",
+          "tcpPort": "TCP Port",
+          "enableMagicCookies": "Enable Magic Cookies",
+          "unreliableUdp": "Unreliable (UDP)",
+          "enableUdpCommunication": "Enable UDP Communication",
+          "udpPort": "UDP Port"
+        },
+        "placeholders": {
+          "serviceId": "0x1234",
+          "instanceId": "0x5678",
+          "unicastAddress": "192.168.1.100"
+        },
+        "tooltips": {
+          "serviceId": "The unique identifier of the service in hexadecimal format (e.g., 0x1234). This ID must be unique within the system.",
+          "instanceId": "The instance identifier of the service in hexadecimal format (e.g., 0x5678). Multiple instances of the same service can exist with different instance IDs.",
+          "unicastAddress": "The unicast IP address that hosts the service instance. Required for external services when service discovery is disabled.",
+          "reliableTcp": "Enable reliable TCP communication for this service. TCP provides guaranteed delivery and error checking.",
+          "tcpPort": "The TCP port number for reliable communication. Must be between 1 and 65535.",
+          "enableMagicCookies": "Enable magic cookies for TCP connections. Magic cookies help detect if the remote endpoint supports SOME/IP protocol.",
+          "unreliableUdp": "Enable unreliable UDP communication for this service. UDP provides faster communication but without delivery guarantees.",
+          "udpPort": "The UDP port number for unreliable communication. Must be between 1 and 65535."
+        },
+        "validation": {
+          "inputServiceId": "Please input service ID",
+          "inputInstanceId": "Please input instance ID",
+          "invalidHexFormat": "Please input valid hex format (e.g., 0x1234)",
+          "portRange": "Port must be between 1 and 65535",
+          "atLeastOneProtocol": "At least one communication protocol must be enabled"
+        }
+      },
+      "si": {
+        "tooltips": {
+          "editConnect": "Edit Connect",
+          "addFrame": "Add Frame",
+          "selectFrameFromDatabase": "Select Frame from Database",
+          "editFrame": "Edit Frame",
+          "deleteFrame": "Delete Frame"
+        },
+        "labels": {
+          "name": "Name",
+          "serviceId": "Service ID",
+          "instanceId": "Instance ID",
+          "methodId": "Method ID",
+          "messageType": "Message Type",
+          "protocolVersion": "Protocol Version",
+          "interfaceVersion": "Interface Version",
+          "majorVersion": "Major Version",
+          "minorVersion": "Minor Version",
+          "channel": "Channel",
+          "reliable": "Reliable",
+          "onKey": "On Key:",
+          "period": "Period (ms):"
+        },
+        "columns": {
+          "send": "Send",
+          "trigger": "Trigger",
+          "name": "Name",
+          "messageType": "Message Type",
+          "serviceId": "Service ID",
+          "instanceId": "Instance ID",
+          "methodId": "Method ID",
+          "channel": "Channel",
+          "params": "Params"
+        },
+        "options": {
+          "triggerType": {
+            "manual": "Manual",
+            "periodic": "Periodic"
+          },
+          "messageType": {
+            "request": "Request",
+            "requestNoReturn": "Request No Return"
+          },
+          "boolean": {
+            "true": "True",
+            "false": "False"
+          }
+        },
+        "tabs": {
+          "signal": "Signal",
+          "request": "Request",
+          "response": "Response"
+        },
+        "placeholders": {
+          "period": "10",
+          "protocolVersion": "1",
+          "interfaceVersion": "0",
+          "majorVersion": "0",
+          "minorVersion": "0",
+          "reliable": "False"
+        },
+        "dialogs": {
+          "deviceConnect": "IA Device Connect",
+          "editFrame": "Edit Frame {{name}}",
+          "selectFrameFromDatabase": "Select Frame from Database"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned "
+        }
+      },
+      "soa": {
+        "tree": {
+          "someip": "SOME/IP",
+          "dds": "DDS"
+        },
+        "dialogs": {
+          "deleteConfirm": "Are you sure to delete this SOA config?",
+          "warning": "Warning",
+          "ok": "OK",
+          "cancel": "Cancel"
+        }
+      },
+      "someip": {
+        "sections": {
+          "applicationConfig": "Application Configuration",
+          "advancedApplicationConfig": "Advanced Application Configuration",
+          "serviceDiscoveryConfig": "Service Discovery Configuration",
+          "advancedServiceDiscoveryConfig": "Advanced Service Discovery Configuration",
+          "timingConfig": "Timing Configuration",
+          "debounceConfig": "Debounce Configuration",
+          "ttlConfig": "TTL Configuration",
+          "otherConfig": "Other Configuration"
+        },
+        "labels": {
+          "name": "SomeIP Name",
+          "device": "Device",
+          "applicationId": "Application ID",
+          "maxDispatchers": "Max Dispatchers",
+          "maxDispatchTime": "Max Dispatch Time",
+          "threads": "Threads",
+          "ioThreadNice": "IO Thread Nice",
+          "sessionHandling": "Session Handling",
+          "enableServiceDiscovery": "Enable Service Discovery",
+          "initialState": "Initial State",
+          "multicastAddress": "Multicast Address",
+          "port": "Port",
+          "protocol": "Protocol",
+          "initialDelayMin": "Initial Delay Min (ms)",
+          "initialDelayMax": "Initial Delay Max (ms)",
+          "repetitionsBaseDelay": "Repetitions Base Delay (ms)",
+          "repetitionsMax": "Repetitions Max",
+          "cyclicOfferDelay": "Cyclic Offer Delay (ms)",
+          "requestResponseDelay": "Request Response Delay (ms)",
+          "offerDebounceTime": "Offer Debounce Time (ms)",
+          "findDebounceTime": "Find Debounce Time (ms)",
+          "findInitialDebounceReps": "Find Initial Debounce Reps",
+          "findInitialDebounceTime": "Find Initial Debounce Time (ms)",
+          "ttl": "TTL",
+          "maxRemoteSubscribers": "Max Remote Subscribers",
+          "waitRouteNetlinkNotification": "Wait Route Netlink Notification"
+        },
+        "placeholders": {
+          "name": "SomeIP_0",
+          "selectDevice": "Select Device",
+          "applicationId": "0x6301",
+          "initialState": "unknown",
+          "multicastAddress": "224.224.224.0",
+          "port": "30490",
+          "protocol": "udp",
+          "initialDelayMin": "0",
+          "initialDelayMax": "3000",
+          "repetitionsBaseDelay": "10",
+          "repetitionsMax": "3",
+          "cyclicOfferDelay": "1000",
+          "requestResponseDelay": "2000",
+          "offerDebounceTime": "500",
+          "findDebounceTime": "500",
+          "findInitialDebounceReps": "0",
+          "findInitialDebounceTime": "200",
+          "ttl": "0xFFFFFF",
+          "maxRemoteSubscribers": "3"
+        },
+        "tooltips": {
+          "enableServiceDiscovery": "Specifies whether the Service Discovery is enabled",
+          "initialState": "Specifies the initial Service Discovery state after startup",
+          "multicastAddress": "The multicast address which the messages of the Service Discovery will be sent to (default: 224.224.224.0)",
+          "port": "The port of the Service Discovery (default: 30490)",
+          "protocol": "The protocol that is used for sending the Service Discovery messages",
+          "initialDelayMin": "Minimum delay before first offer message (default: 0)",
+          "initialDelayMax": "Maximum delay before first offer message (default: 3000)",
+          "repetitionsBaseDelay": "Base delay sending offer messages within the repetition phase (default: 10)",
+          "repetitionsMax": "Maximum number of repetitions for provided services within the repetition phase (default: 3)",
+          "cyclicOfferDelay": "Cycle of the OfferService messages in the main phase (default: 1000)",
+          "requestResponseDelay": "Minimum delay of a unicast message to a multicast message for provided services and eventgroups (default: 2000)",
+          "offerDebounceTime": "Time which the stack collects new service offers before they enter the repetition phase (default: 500)",
+          "findDebounceTime": "Time which the stack collects non local service requests before sending find messages (default: 500)",
+          "findInitialDebounceReps": "Number of initial debounces using find_initial_debounce_time (default: 0, valid values: 0-255)",
+          "findInitialDebounceTime": "Time which the stack collects new service requests before they enter the repetition phase during initial startup (default: 200)",
+          "ttl": "Lifetime of entries for provided services as well as consumed services and eventgroups (default: 0xFFFFFF)",
+          "maxRemoteSubscribers": "Maximum possible number of different remote subscribers. Additional remote subscribers will not be acknowledged (default: 3)",
+          "waitRouteNetlinkNotification": "Enables the tracking of the route state on_net_interface_or_route_state_changed (default: true)"
+        },
+        "options": {
+          "initialState": {
+            "unknown": "Unknown",
+            "suspended": "Suspended",
+            "resumed": "Resumed"
+          },
+          "protocol": {
+            "udp": "UDP",
+            "tcp": "TCP"
+          }
+        },
+        "buttons": {
+          "addService": "Add Service",
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The SomeIP name already exists",
+          "inputName": "Please input SomeIP name",
+          "invalidApplicationId": "Please input valid application ID, must be hex string,ex:0x6301",
+          "applicationIdExists": "The application ID already exists",
+          "inputApplicationId": "Please input application ID",
+          "inputApplicationName": "Please input application name",
+          "portRange": "Port must be 0 - 65535",
+          "invalidIpAddress": "Please enter a valid IP address",
+          "ipAddressRange": "IP address parts must 0 - 255",
+          "serviceInstanceDuplicate": "Service ID and Instance ID combination already exists"
+        },
+        "defaultName": "SomeIP_{{index}}",
+        "serviceName": "Service{{index}}"
+      }
+    }
+  },
+  "pluginSettings": {
+    "downloadPathLabel": "Plugin Download Path",
+    "tooltip": {
+      "line1": "The path where plugins will be downloaded.",
+      "line2": "Path must contain only English letters, numbers,",
+      "line3": "underscores (_), and path separators (/, \\, :).",
+      "line4": "No spaces or special characters allowed."
+    },
+    "buttons": {
+      "selectPath": "Select Plugin Download Path",
+      "openPath": "Open Plugin Download Path in File Manager"
+    },
+    "dialog": {
+      "selectDirectoryTitle": "Select Plugin Download Directory"
+    },
+    "errors": {
+      "noSpaces": "Path cannot contain spaces",
+      "invalidFormat": "Path must contain only English letters, numbers, underscores, and path separators. No spaces or special characters allowed.",
+      "invalidSelectedPath": "Selected path contains invalid characters. Only English letters, numbers, underscores, and path separators are allowed."
+    }
+  },
+  "pluginMarketplace": {
+    "loading": "Loading plugins...",
+    "retry": "Retry",
+    "headerTitle": "Plugin Marketplace",
+    "pluginCount": "{{count}} plugins available",
+    "installFromZip": "Install from ZIP",
+    "loadFromPath": "Load from Path",
+    "devPlugin": "Dev Plugin",
+    "noPlugins": "No plugins available",
+    "pluginIconAlt": "Plugin Icon",
+    "temporaryBadgeTitle": "Temporarily loaded (will be removed on restart)",
+    "localOnlyBadgeTitle": "Local plugin only",
+    "noSelection": "Select a plugin to view details",
+    "action": {
+      "enable": "Enable",
+      "disable": "Disable",
+      "uninstall": "Uninstall"
+    },
+    "tooltips": {
+      "temporaryUninstallBlocked": "Temporary plugins cannot be uninstalled (will be removed on restart)"
+    },
+    "upgradeLabel": "🔔 New version available:",
+    "metadata": {
+      "version": "Version:",
+      "author": "Author:",
+      "published": "Published:",
+      "newTabs": "New Tabs:",
+      "extensions": "Extensions:"
+    },
+    "noReadme": "No README available for this plugin.",
+    "button": {
+      "install": "Install",
+      "installed": "Installed",
+      "installing": "Installing...",
+      "upgradeTo": "Upgrade to {{version}}",
+      "upgrading": "Upgrading..."
+    },
+    "messages": {
+      "loadFailed": "Failed to load plugins from marketplace: {{error}}",
+      "installSuccess": "Plugin {{name}} v{{version}} installed successfully!",
+      "upgradeSuccess": "Plugin {{name}} upgraded to v{{version}} successfully!",
+      "installError": "Failed to install plugin: {{error}}",
+      "zipUrlMissing": "Plugin package URL is unavailable.",
+      "disableSuccess": "Plugin disabled successfully",
+      "enableSuccess": "Plugin enabled successfully",
+      "uninstallSuccess": "Plugin {{name}} uninstalled successfully!",
+      "uninstallError": "Failed to uninstall plugin: {{error}}",
+      "installZipSuccess": "Plugin installed successfully from ZIP file!",
+      "installZipError": "Failed to install plugin: {{error}}",
+      "loadDirSuccess": "Plugin loaded successfully from path!",
+      "loadDirError": "Failed to load plugin: {{error}}"
+    },
+    "dialog": {
+      "uninstallMessage": "Are you sure you want to uninstall \"{{name}}\"? This action cannot be undone.",
+      "uninstallTitle": "Confirm Uninstall",
+      "uninstallConfirm": "Uninstall",
+      "uninstallCancel": "Cancel",
+      "selectZipTitle": "Select Plugin Package",
+      "zipFilterName": "ZIP Package",
+      "selectDirTitle": "Select Plugin Directory"
+    },
+    "devDocsUrl": "https://app.whyengineer.com/docs/dev/plugin.html"
+  },
+  "homeUpdate": {
+    "check": "Check for updates",
+    "start": "Start to update",
+    "cancel": "Cancel",
+    "install": "Exit & Install",
+    "downloadOk": "Update package download ok"
+  },
+  "user": {
+    "welcome": "Welcome to Ecubus",
+    "signInPrompt": "Please sign in to access your account and licenses.",
+    "whyRegister": "Why Register?",
+    "benefits": {
+      "prioritySupport": {
+        "title": "Priority Support",
+        "description": "Get faster technical support and bug fixes with higher priority"
+      },
+      "pluginDevelopment": {
+        "title": "Plugin Development",
+        "description": "Create and publish your own plugins to extend functionality"
+      },
+      "moreFeatures": {
+        "title": "More Features",
+        "description": "Access exclusive features and early updates"
+      }
+    },
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "signOut": "Sign Out",
+    "userFallback": "User",
+    "messages": {
+      "loginTimeout": "Login timed out. Please try again.",
+      "warning": "Warning",
+      "ok": "OK",
+      "securityVerificationFailed": "Security verification failed (State mismatch). Please try logging in again.",
+      "loginFailed": "Login failed"
+    }
+  },
+  "common": {
+    "unknownError": "Unknown error"
+  }
+}

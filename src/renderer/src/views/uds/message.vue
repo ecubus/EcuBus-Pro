@@ -72,6 +72,7 @@ function clearLog() {
 const props = withDefaults(
   defineProps<{
     height: number
+    width: number
     prefix?: string
     captureTest?: boolean
     captureSystem?: boolean
@@ -104,6 +105,7 @@ watch(globalStart, (val) => {
   }
 })
 const tableHeight = toRef(props, 'height')
+const tableWidth = toRef(props, 'width')
 const project = useProjectStore()
 
 // Terminal theme based on dark mode

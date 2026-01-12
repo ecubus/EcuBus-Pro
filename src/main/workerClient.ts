@@ -33,7 +33,9 @@ type HandlerMap = {
   ) => void
   runUdsSeq: (data: { name: string; device?: string }) => void
   stopUdsSeq: (data: { name: string; device?: string }) => void
-  linApi: (data: linApiStartSch | linApiStopSch) => void
+  linApi: (
+    data: linApiStartSch | linApiStopSch | linApiPowerCtrl | linApiBaudRateCtrl
+  ) => void | Promise<number> | Promise<void>
   pwmApi: (data: pwmApiSetDuty) => void
   canApi: (data: any) => void
   pluginEvent: (data: { name: string; data: any }) => void
@@ -60,6 +62,12 @@ export type linApiPowerCtrl = {
 export type linApiStopSch = {
   method: 'stopSch'
   device?: string
+}
+export type linApiBaudRateCtrl = {
+  method: 'baudRateCtrl'
+  device?: string
+  lincableCustomBaudRatePrescale: number
+  lincableCustomBaudRateBitMap: number
 }
 
 // SerialPort API types

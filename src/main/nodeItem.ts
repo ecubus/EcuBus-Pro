@@ -3,6 +3,7 @@ import fs from 'fs'
 import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester, {
+  linApiBaudRateCtrl,
   linApiPowerCtrl,
   linApiStartSch,
   linApiStopSch,
@@ -865,7 +866,9 @@ export class NodeClass {
     return this.serialPortManager.handleApi(data)
   }
 
-  async linApi(data: linApiStartSch | linApiStopSch | linApiPowerCtrl) {
+  async linApi(
+    data: linApiStartSch | linApiStopSch | linApiPowerCtrl | linApiBaudRateCtrl
+  ): Promise<any> {
     const findLinBase = (name?: string) => {
       let ret: LinBase | undefined
       if (name != undefined) {
@@ -921,8 +924,16 @@ export class NodeClass {
         await device.powerCtrl(data.power)
         break
       }
+
+      case 'baudRateCtrl': {
+        const device = findLinBase(data.device)
+        const actualBaudRate = await device.baudRateCtrl(
+          data.lincableCustomBaudRatePrescale,
+          data.lincableCustomBaudRateBitMap
+        )
+        return actualBaudRate
+      }
     }
-    return
   }
   async canApi(data: any) {}
   async sendFrame(frame: CanMessage | LinMsg | SomeipMessage): Promise<number> {

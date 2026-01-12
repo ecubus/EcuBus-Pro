@@ -2812,7 +2812,79 @@ export async function linPowerCtrl(power: boolean, device?: string) {
   })
   return await p
 }
+/**
+ * Control the baud rate of a LIN device
+ *
+ * This function calculates the optimal prescale and bitMap combination to achieve
+ * the closest possible baud rate to the target value. The calculation uses the formula:
+ * `baudRate = 5_500_000 / (2^(prescale + 1) * bitMap)`
+ *
+ * @category LIN
+ * @param {number} baudRate - The target baud rate (e.g., 19200, 9600)
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<number>} - Returns a promise that resolves with the actual baud rate achieved
+ *
+ * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
+ * @note The function automatically calculates the best combination of:
+ *       - lincableCustomBaudRatePrescale (range: 0-7, corresponding to /2, /4, /8, /16, /32, /64, /128, /256)
+ *       - lincableCustomBaudRateBitMap (range: 1-32)
+ *       to minimize the difference between target and actual baud rate.
+ *
+ * @example
+ * ```ts
+ * // Set baud rate to 19200
+ * const actualBaudRate = await linBaudRateCtrl(19200);
+ * console.log(`Actual baud rate: ${actualBaudRate}`);
+ *
+ * // Set baud rate on specific device
+ * const actualBaudRate = await linBaudRateCtrl(9600, 'Device1');
+ * ```
+ */
+export async function linBaudRateCtrl(baudRate: number, device?: string) {
+  // Calculate the best prescale and bitMap combination to get closest to target baud rate
+  // Formula: baudRate = 5_500_000 / (2^(prescale + 1) * bitMap)
+  // prescale range: 0-7 (major prescale: 2^(prescale + 1))
+  // bitMap range: 1-32 (minor prescale)
 
+  const BASE_FREQUENCY = 5_500_000
+  let bestPrescale = 0
+  let bestBitMap = 1
+  let bestActualBaudRate = BASE_FREQUENCY / (Math.pow(2, 1) * 1)
+  let minError = Math.abs(baudRate - bestActualBaudRate)
+
+  // Try all combinations of prescale (0-7) and bitMap (1-32)
+  for (let prescale = 0; prescale <= 7; prescale++) {
+    for (let bitMap = 1; bitMap <= 32; bitMap++) {
+      const majorPrescale = Math.pow(2, prescale + 1)
+      const minorPrescale = bitMap
+      const actualBaudRate = BASE_FREQUENCY / (majorPrescale * minorPrescale)
+      const error = Math.abs(baudRate - actualBaudRate)
+
+      if (error < minError) {
+        minError = error
+        bestPrescale = prescale
+        bestBitMap = bitMap
+        bestActualBaudRate = actualBaudRate
+      }
+    }
+  }
+
+  const p: Promise<number> = new Promise((resolve, reject) => {
+    workerEmit({
+      id: global.cmdId,
+      event: 'linApi',
+      data: {
+        method: 'baudRateCtrl',
+        device,
+        lincableCustomBaudRatePrescale: bestPrescale,
+        lincableCustomBaudRateBitMap: bestBitMap
+      }
+    })
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
+  })
+  return await p
+}
 /**
  * Stop a LIN scheduler
  *

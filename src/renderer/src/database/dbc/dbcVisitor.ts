@@ -52,7 +52,6 @@ import {
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
 import { v4 } from 'uuid'
-import { i18next } from '@r/i18n'
 
 export interface NodeItem {
   name: string

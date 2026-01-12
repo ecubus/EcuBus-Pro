@@ -217,6 +217,7 @@ module.exports = {
                     loader: 'ts-loader',
                     options: {
                         configFile: "tsconfig.worker.json",
+                        transpileOnly: true,
                         compilerOptions: {
                             sourceMap: true
                         }

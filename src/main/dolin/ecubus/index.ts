@@ -119,7 +119,7 @@ export class LinCable extends LinBase {
       buf[1] = this.info.device.lincableCustomBaudRatePrescale || 0
       let line = buf.toString('hex').padStart(4, '0')
       line = `B${line}\r`
-      console.log('xx', line)
+
       this.serialPort.write(line)
     }
     this.serialPort.write(str)
@@ -708,6 +708,66 @@ export class LinCable extends LinBase {
           )
         }
         resolve()
+      })
+    })
+  }
+
+  override async baudRateCtrl(prescale: number, bitMap: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      // Validate parameters
+      if (prescale < 0 || prescale > 7) {
+        reject(
+          new LinError(
+            LIN_ERROR_ID.LIN_PARAM_ERROR,
+            undefined,
+            `prescale must be between 0 and 7, got ${prescale}`
+          )
+        )
+        return
+      }
+      if (bitMap < 1 || bitMap > 32) {
+        reject(
+          new LinError(
+            LIN_ERROR_ID.LIN_PARAM_ERROR,
+            undefined,
+            `bitMap must be between 1 and 32, got ${bitMap}`
+          )
+        )
+        return
+      }
+
+      // Update device info
+      this.info.device.lincableCustomBaudRatePrescale = prescale
+      this.info.device.lincableCustomBaudRateBitMap = bitMap
+
+      // Send baud rate command: B{hex}\r
+      // hex format: first 2 digits = bitMap, last 2 digits = prescale
+      const buf = Buffer.alloc(2)
+      buf[0] = bitMap
+      buf[1] = prescale
+      const hex = buf.toString('hex').padStart(4, '0')
+      const command = `B${hex}\r`
+
+      this.serialPort.write(command)
+      this.serialPort.drain((err) => {
+        if (err) {
+          reject(
+            new LinError(
+              LIN_ERROR_ID.LIN_BUS_ERROR,
+              undefined,
+              'baudRateCtrl error, ' + err.message
+            )
+          )
+          return
+        }
+
+        // Calculate actual baud rate
+        const BASE_FREQUENCY = 5_500_000
+        const majorPrescale = Math.pow(2, prescale + 1)
+        const minorPrescale = bitMap
+        const actualBaudRate = BASE_FREQUENCY / (majorPrescale * minorPrescale)
+
+        resolve(actualBaudRate)
       })
     })
   }

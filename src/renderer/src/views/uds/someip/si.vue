@@ -437,7 +437,7 @@
 <script lang="ts" setup>
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ref, onMounted, onUnmounted, computed, toRef, nextTick, watch } from 'vue'
-import paramVue from '../components/config/tester/param.vue'
+import paramVue from '../tester/param.vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'

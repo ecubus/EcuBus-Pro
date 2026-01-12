@@ -279,7 +279,7 @@
           </div>
         </template>
         <div class="marketplaceMenu">
-          <PluginMarketplace :height="height" />
+          <PluginMarketplace :height="height" @login-required="handlePluginLoginRequired" />
         </div>
       </el-tab-pane>
       <el-tab-pane name="user">
@@ -610,6 +610,12 @@ function mainTabChange(tab: string) {
     lastActiveMenu = tab
   }
   // lastActiveMenu=tab
+}
+
+// Handle login required event from PluginMarketplace - navigate to User tab
+function handlePluginLoginRequired() {
+  activeMenu.value = 'user'
+  lastActiveMenu = 'user'
 }
 
 // 监听用户头像变化，重置头像错误状态

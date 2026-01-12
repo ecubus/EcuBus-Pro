@@ -72,6 +72,7 @@ export interface PluginManifest {
   files?: string[]
   tabs?: PluginTabConfig[]
   extensions?: PluginTabExtension[]
+  login?: boolean // 是否需要登录才能下载
 }
 
 // 完整的插件定义
@@ -94,4 +95,5 @@ export interface RemotePluginInfo {
   manifestUrl?: string // manifest.json URL
   createdTime: string // 创建时间
   user: string // 上传用户
+  login?: boolean // 是否需要登录才能下载
 }

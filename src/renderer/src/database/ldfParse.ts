@@ -1,5 +1,5 @@
 import { CstChildrenDictionary, CstNode, CstParser, IToken, Lexer, createToken } from 'chevrotain'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 export interface GlobalDef {
   LIN_protocol_version: string

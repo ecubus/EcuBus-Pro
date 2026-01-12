@@ -96,7 +96,7 @@ import { DBC, Signal as DbcSignal } from '@r/database/dbc/dbcVisitor'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { nextTick } from 'process'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 // 在 interface TreeItem 之前添加类型定义
 type ProtocolFilter = 'all' | 'can' | 'lin'

@@ -86,7 +86,7 @@ import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditFrame from './editFrame.vue'
 import { FormRules } from 'element-plus'
 import Schema from 'async-validator'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface frameTable {
   name: string

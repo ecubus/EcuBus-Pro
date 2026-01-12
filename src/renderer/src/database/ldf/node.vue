@@ -115,7 +115,7 @@ import EditNode from './editNode.vue'
 import { getConfigFrames, LDF, NodeAttrDef } from '../ldfParse'
 import { cloneDeep } from 'lodash'
 import Schema from 'async-validator'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string

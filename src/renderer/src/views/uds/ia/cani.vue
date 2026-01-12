@@ -388,7 +388,7 @@ import { Message } from '@r/database/dbc/dbcVisitor'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { v4 } from 'uuid'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])

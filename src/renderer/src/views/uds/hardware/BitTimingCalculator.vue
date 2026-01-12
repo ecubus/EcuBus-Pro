@@ -74,7 +74,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { CanVendor } from 'nodeCan/can'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface CalculatorResult {
   t1: number

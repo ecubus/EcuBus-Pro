@@ -81,7 +81,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { EthDevice, EthBaseInfo } from 'nodeCan/doip'
 import { CanVendor } from 'nodeCan/can'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()

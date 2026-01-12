@@ -201,7 +201,7 @@ import editSignal from '../components/editSignal.vue'
 import { GaugeSeriesOption } from 'echarts'
 import addVar from '../components/addVar.vue'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 use([
   LineChart,

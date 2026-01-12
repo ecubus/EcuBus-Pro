@@ -122,7 +122,7 @@ import { ecubusPro } from '../../../../../../package.json'
 import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
 import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
 import PwmNodeVue from './pwmNode.vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const loading = ref(false)
 const activeTree = ref<tree>()

@@ -18,6 +18,12 @@ async function loadLanguage(lang: string): Promise<Record<string, any>> {
 
 // 初始化 i18next - 只加载当前语言
 export const initRendererI18n = async (lng: string = 'en') => {
+  // check lng exists in supported languages
+  const supportedLanguages = await getSupportedLanguages()
+  if (!supportedLanguages.some((l) => l.code === lng)) {
+    lng = 'en'
+  }
+
   // 只加载当前语言的翻译
   const translations = await loadLanguage(lng)
 
@@ -77,5 +83,3 @@ export const i18nPlugin = {
     app.use(I18NextVue, { i18next })
   }
 }
-
-export { i18next }

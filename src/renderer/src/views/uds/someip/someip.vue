@@ -570,7 +570,7 @@ import type { SomeipInfo, ServiceConfig, ApplicationConfig } from 'nodeCan/somei
 import { useProjectStore } from '@r/stores/project'
 import { Icon } from '@iconify/vue'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 // Import service configuration component
 import serviceConfig from './serviceConfig.vue'

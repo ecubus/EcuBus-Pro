@@ -154,7 +154,7 @@ import { LinBaseInfo, LinMode } from 'nodeCan/lin'
 import { getFrameSize, LDF, SchTable } from '@r/database/ldfParse'
 import { TransferKey } from 'element-plus'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])

@@ -6,9 +6,9 @@
     "src/cli/**/*.ts",
     "src/preload/**/*",
     "test/**/*.ts",
-    // "src/renderer/src/database/**/*.ts",
-    // "src/renderer/src/worker/**/*.ts",
-    // "src/renderer/src/views/ostrace/**/*.ts"
+    "src/renderer/src/database/**/*.ts",
+    "src/renderer/src/worker/**/*.ts",
+    "src/renderer/src/views/ostrace/**/*.ts"
  ],
   "compilerOptions": {
     "composite": true,
@@ -26,7 +26,7 @@
     "paths": {
       "nodeCan/*": [
         "src/main/share/*"
-      ]
+      ],
     },
     "baseUrl": ".",
   },

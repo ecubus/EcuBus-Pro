@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const dialogFormVisible = defineModel()
 

@@ -359,7 +359,7 @@ import { UdsAddress } from 'nodeCan/uds'
 import { EntityAddr, EthAddr, TlsConfig } from 'nodeCan/doip'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useProjectStore } from '@r/stores/project'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()

@@ -327,7 +327,7 @@ import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { UdsAddress } from 'nodeCan/uds'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const ruleFormRef = ref<FormInstance>()
 const globalStart = useGlobalStart()

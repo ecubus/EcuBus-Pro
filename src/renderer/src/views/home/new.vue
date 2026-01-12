@@ -47,7 +47,7 @@ import './readme.css'
 import { cloneDeep } from 'lodash'
 import log from 'electron-log'
 import mermaid from 'mermaid'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface exampleL1 {
   level: 1

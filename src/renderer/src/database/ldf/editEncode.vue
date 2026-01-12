@@ -196,7 +196,7 @@ import { Icon } from '@iconify/vue'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import { ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import clearIcon from '@iconify/icons-material-symbols/close'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 const props = defineProps<{
   editIndex: string
   ldf: LDF

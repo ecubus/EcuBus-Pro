@@ -97,7 +97,7 @@ import moreIcon from '@iconify/icons-material-symbols/stars-outline'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const userStore = useUserStore()
 const loading = ref(false)

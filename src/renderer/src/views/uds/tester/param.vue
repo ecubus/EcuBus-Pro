@@ -272,7 +272,7 @@ import { ElMessage } from 'element-plus'
 import { Folder } from '@element-plus/icons-vue'
 import { useProjectStore } from '@r/stores/project'
 import { error } from 'winston'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const serviceDetail = window.serviceDetail
 const paramError = ref<Record<string, string>>({})

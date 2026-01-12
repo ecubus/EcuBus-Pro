@@ -131,7 +131,7 @@ import Encode from './encode.vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import File from './file.vue'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const layout = inject('layout') as Layout
 

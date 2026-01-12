@@ -164,7 +164,7 @@ import presentIcon from '@iconify/icons-mdi/presentation-play'
 import { TesterInfo } from 'nodeCan/tester'
 import { useGlobalStart } from '@r/stores/runtime'
 import { error } from 'electron-log'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const seqCycle = ref(1)
 const dataBase = useDataStore()

@@ -204,5 +204,3 @@ export async function getAllSupportedLanguages(): Promise<string[]> {
 
   return languages
 }
-
-export { i18next }

@@ -133,7 +133,7 @@ import { cloneDeep } from 'lodash'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled } from '@element-plus/icons-vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface ConfigItem {
   key: string

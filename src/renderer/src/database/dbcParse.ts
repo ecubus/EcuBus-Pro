@@ -1,6 +1,6 @@
 import { JsonLexer, parser } from './dbc/parse'
 import { DBC, DBCVisitor, Message, Signal } from './dbc/dbcVisitor'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 // 添加一个函数来创建行号映射
 function createLineMapping(originalText: string, processedText: string): number[] {
   const originalLines = originalText.split('\n')

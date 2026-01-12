@@ -203,7 +203,7 @@ import { VxeGrid } from 'vxe-table'
 import circlePlusFilled from '@iconify/icons-material-symbols/add-circle-outline'
 import removeIcon from '@iconify/icons-material-symbols/remove-rounded'
 import { useDataStore } from '@r/stores/data'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   id: string

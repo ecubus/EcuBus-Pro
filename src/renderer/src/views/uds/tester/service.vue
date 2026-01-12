@@ -305,7 +305,7 @@ import loadIcon from '@iconify/icons-material-symbols/upload'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const serviceDetail = window.serviceDetail
 const dialogVisible = ref(false)

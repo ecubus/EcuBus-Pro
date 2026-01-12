@@ -44,7 +44,7 @@ import { ref, onMounted, watch } from 'vue'
 import { ElNotification, FormInstance, FormRules } from 'element-plus'
 import { QuestionFilled, Folder, FolderOpened } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const formRef = ref<FormInstance>()
 const form = ref({

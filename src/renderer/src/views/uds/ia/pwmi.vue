@@ -100,7 +100,7 @@ import playIcon from '@iconify/icons-material-symbols/play-arrow'
 import stopIcon from '@iconify/icons-material-symbols/stop'
 import { useGlobalStart } from '@r/stores/runtime'
 import { cloneDeep } from 'lodash'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface PwmDevice {
   id: string

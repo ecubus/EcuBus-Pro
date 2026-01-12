@@ -212,7 +212,7 @@ import editSignal from '../components/editSignal.vue'
 import { LineSeriesOption } from 'echarts'
 import { useGlobalStart } from '@r/stores/runtime'
 import { Layout } from '../layout'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
 

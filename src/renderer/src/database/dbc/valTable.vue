@@ -37,7 +37,7 @@ import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { DBC, Message, Signal } from './dbcVisitor'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string

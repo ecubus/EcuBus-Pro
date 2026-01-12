@@ -47,7 +47,7 @@ import saveIcon from '@iconify/icons-material-symbols/save'
 import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 interface LogData {
   time: string
   label: string

@@ -93,7 +93,7 @@ import { ref, onMounted, inject, Ref, watch, onBeforeUnmount, toRef, watchEffect
 import { useProjectStore, State as projectState } from '@r/stores/project'
 import { useRouter } from 'vue-router'
 import logo from '@r/assets/logo64.png'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 import { Icon } from '@iconify/vue'
 import FullScreen from '@iconify/icons-ep/full-screen'
 import Min from '@iconify/icons-ep/minus'

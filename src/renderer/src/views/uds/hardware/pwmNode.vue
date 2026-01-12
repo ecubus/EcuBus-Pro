@@ -161,7 +161,7 @@ import { VxeGridProps, VxeGrid } from 'vxe-table'
 import { CanVendor } from 'nodeCan/can'
 import type { PwmBaseInfo, PwmDevice } from 'src/main/share/uds'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const ruleFormRef = ref<FormInstance>()
 const devices = useDataStore()

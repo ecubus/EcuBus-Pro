@@ -113,7 +113,7 @@ import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { DBC } from './dbcVisitor'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const layout = inject('layout') as Layout
 

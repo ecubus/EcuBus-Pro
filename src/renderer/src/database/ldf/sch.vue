@@ -92,7 +92,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import EditSchedule from './editSchedule.vue'
 import Schema from 'async-validator'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string

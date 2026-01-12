@@ -413,7 +413,7 @@ import { usePluginStore } from '@r/stores/plugin'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import { CirclePlusFilled, Delete, Edit, ArrowDown } from '@element-plus/icons-vue'
 import type { EcuBusPlugin, PluginItemConfig, PluginTabConfig } from '../../../../preload/plugin'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 // TypeScript 接口定义
 interface TabItem {

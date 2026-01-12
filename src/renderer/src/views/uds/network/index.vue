@@ -92,7 +92,7 @@ import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
 import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface Tree {
   id: string

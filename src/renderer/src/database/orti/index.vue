@@ -474,7 +474,7 @@ import { VxeGrid, VxeGridProps, VxeGridInstance } from 'vxe-table'
 import { ORTIFile, parseORTI } from '../ortiParse'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useProjectStore } from '@r/stores/project'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const layout = inject('layout') as Layout
 

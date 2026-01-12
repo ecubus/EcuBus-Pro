@@ -16,7 +16,7 @@ import { Icon } from '@iconify/vue'
 import copyIcon from '@iconify/icons-material-symbols/content-copy'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   ldfObj: LDF

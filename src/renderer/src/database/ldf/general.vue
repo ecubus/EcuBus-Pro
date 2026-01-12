@@ -102,7 +102,7 @@ import { LDF } from '../ldfParse'
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 // import { validateLDF } from './validator'
 

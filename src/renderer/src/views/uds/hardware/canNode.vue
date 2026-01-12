@@ -301,7 +301,7 @@ import { Icon } from '@iconify/vue'
 import tableIcon from '@iconify/icons-mdi/table'
 import BitTimingCalculator from './BitTimingCalculator.vue'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   index: string

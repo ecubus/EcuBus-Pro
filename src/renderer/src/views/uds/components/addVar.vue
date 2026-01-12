@@ -94,7 +94,7 @@ import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface TreeItem {
   id: string

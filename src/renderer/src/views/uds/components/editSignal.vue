@@ -203,7 +203,7 @@ import { LineSeriesOption, GaugeSeriesOption } from 'echarts'
 import { useDataStore } from '@r/stores/data'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { cloneDeep } from 'lodash'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 const database = useDataStore()
 const props = defineProps<{
   stype: 'line' | 'gauge'

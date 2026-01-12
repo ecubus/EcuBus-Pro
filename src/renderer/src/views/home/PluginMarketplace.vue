@@ -267,7 +267,7 @@ import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
 import type { PluginManifest, RemotePluginInfo } from 'src/preload/plugin'
 import { cloneDeep } from 'lodash'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 interface PluginWithReadme extends RemotePluginInfo {
   readmeContent?: string
   manifestContent?: PluginManifest

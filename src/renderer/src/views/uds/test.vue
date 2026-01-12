@@ -352,7 +352,7 @@ import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 import errorParse from '@r/util/ipcError'
 import TraceComponent from './message.vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const loading = ref(false)
 const traceRef = ref()

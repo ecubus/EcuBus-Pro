@@ -153,7 +153,7 @@ import signal from '../components/signal.vue'
 import addVar from '../components/addVar.vue'
 import { VxeGrid, VxeGridProps, VxeTableEvents } from 'vxe-table'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const isPaused = ref(false)
 

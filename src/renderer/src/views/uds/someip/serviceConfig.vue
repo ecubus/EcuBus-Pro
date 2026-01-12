@@ -183,7 +183,7 @@ import { type FormRules, type FormInstance } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import type { ServiceConfig } from 'nodeCan/someip'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()

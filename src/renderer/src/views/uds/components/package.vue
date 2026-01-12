@@ -158,7 +158,7 @@ import { useProjectStore } from '@r/stores/project'
 import { Terminal } from 'xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import 'xterm/css/xterm.css'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const project = useProjectStore()
 const packageName = ref('')

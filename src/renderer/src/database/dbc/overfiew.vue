@@ -101,7 +101,7 @@ import nodeIcon from '@iconify/icons-material-symbols/point-scan'
 import { multiCalc } from './parse'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElTreeV2 } from 'element-plus'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 // import { validateLDF } from './validator'
 
 const dbcObj = defineModel<DBC>({

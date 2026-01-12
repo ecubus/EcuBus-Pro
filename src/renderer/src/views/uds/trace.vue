@@ -193,7 +193,7 @@ import {
 import { TraceItem } from 'src/preload/data'
 import { cloneDeep } from 'lodash'
 import { Layout } from './layout'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 let allLogData: LogData[] = []
 
 interface LogData {

@@ -8,7 +8,7 @@ import {
   createToken
 } from 'chevrotain'
 import { Signal } from './dbcVisitor'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 // 首先定义所有的tokens
 const WhiteSpace = createToken({

@@ -17,7 +17,7 @@ import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import { useDark } from '@vueuse/core'
 import logConfig from './logConfig.vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 export interface udsBase {
   name: string

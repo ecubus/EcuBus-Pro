@@ -468,7 +468,7 @@ import Sortable from 'sortablejs'
 import { LDF, SchTable, getFrameSize } from '../ldfParse'
 import type { FormInstance, FormRules } from 'element-plus'
 import Schema from 'async-validator'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string

@@ -91,7 +91,7 @@ import { getFrameData } from 'nodeCan/lin'
 import { isEqual } from 'lodash'
 import { getPhysicalValue, getRawValue } from '@r/database/ldf/calc'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 interface SignalRow {
   name: string

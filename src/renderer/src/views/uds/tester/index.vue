@@ -86,7 +86,7 @@ import { v4 } from 'uuid'
 import { HardwareType } from 'nodeCan/uds'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const loading = ref(false)
 const activeTree = ref<tree>()

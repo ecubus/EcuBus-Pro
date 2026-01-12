@@ -4,7 +4,7 @@
 import { ORTILexer } from './orti/lexer'
 import { ortiParser } from './orti/parser'
 import { ortiVisitor } from './orti/visitor'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 /**
  * 版本信息

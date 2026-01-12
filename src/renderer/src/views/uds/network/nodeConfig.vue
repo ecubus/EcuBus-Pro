@@ -201,7 +201,7 @@ import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
 import { udsCeil } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const activeName = ref('general')
 const props = defineProps<{

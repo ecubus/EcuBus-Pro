@@ -32,7 +32,7 @@ import { ElMessageBox } from 'element-plus'
 import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from 'nodeCan/lin'
 import { HardwareType, UdsAddress } from 'nodeCan/uds'
 import { computed, ref } from 'vue'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   type: HardwareType

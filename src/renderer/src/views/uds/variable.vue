@@ -215,7 +215,7 @@ import { v4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useGlobalStart } from '@r/stores/runtime'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()

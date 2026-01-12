@@ -73,7 +73,7 @@ import { version } from '../../../../../package.json'
 import { ElMessage } from 'element-plus'
 import { marked, MarkedExtension } from 'marked'
 import './readme.css'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 function addLocalBaseUrl() {
   // extension code here

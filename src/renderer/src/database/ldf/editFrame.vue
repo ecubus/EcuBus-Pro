@@ -167,7 +167,7 @@ import EditSignal from './editSignal.vue'
 import { Grid } from '@element-plus/icons-vue'
 import Sortable from 'sortablejs'
 import Schema from 'async-validator'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const props = defineProps<{
   editIndex: string

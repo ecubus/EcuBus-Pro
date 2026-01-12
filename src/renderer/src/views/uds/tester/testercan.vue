@@ -601,7 +601,7 @@ import { LIN_ADDR_TYPE, LIN_SCH_TYPE } from 'nodeCan/lin'
 import dbchoose from './dbchoose.vue'
 import { useGlobalStart } from '@r/stores/runtime'
 import { useClipboard } from '@vueuse/core'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const globalStart = useGlobalStart()
 const ruleFormRef = ref<FormInstance>()

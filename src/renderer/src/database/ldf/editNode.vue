@@ -146,7 +146,7 @@
 import { toRef, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, inject, Ref } from 'vue'
 import { getConfigFrames, LDF, NodeAttrDef } from '../ldfParse'
 import { ElMessageBox, ElNotification, ElOption, ElSelect, FormRules } from 'element-plus'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const h = inject('height') as Ref<number>
 const fh = computed(() => Math.ceil((h.value * 2) / 3) + 'px')

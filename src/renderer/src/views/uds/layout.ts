@@ -29,7 +29,7 @@ import soaIcon from '@iconify/icons-material-symbols/linked-services'
 import osTraceIcon from '@iconify/icons-ph/crosshair-fill'
 import pluginIcon from '@iconify/icons-mdi/puzzle'
 import { usePluginStore } from '@r/stores/plugin'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 type WinsType = ProjectState['project']['wins']
 type WinValueType = WinsType[keyof WinsType]

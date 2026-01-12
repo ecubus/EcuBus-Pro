@@ -466,7 +466,7 @@ import { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 import { ElMessage } from 'element-plus'
 import errorParse from '@r/util/ipcError'
 import { SomeipMessageTypeMap } from 'nodeCan/someip'
-import { i18next } from '@r/i18n'
+import i18next from 'i18next'
 
 const xGrid = ref()
 // const logData = ref<LogData[]>([])

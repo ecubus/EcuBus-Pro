@@ -99,6 +99,13 @@
                   >
                     ✓
                   </span>
+                  <span
+                    v-if="isLoginRequired(plugin) && !userStore.isLoggedIn"
+                    class="login-required-badge"
+                    :title="$t('pluginMarketplace.loginRequiredBadgeTitle')"
+                  >
+                    🔒
+                  </span>
                 </div>
                 <div v-if="plugin.description" class="plugin-list-brief">
                   {{ plugin.description }}
@@ -150,9 +157,22 @@
 
             <!-- Action Buttons Row -->
             <div class="action-buttons-row">
-              <!-- Only show Install button for remote plugins -->
+              <!-- Login Required button - navigates to User tab -->
               <el-button
-                v-if="!selectedPlugin.isLocalOnly"
+                v-if="
+                  !selectedPlugin.isLocalOnly &&
+                  isLoginRequired(selectedPlugin) &&
+                  !userStore.isLoggedIn
+                "
+                type="warning"
+                plain
+                @click="handleLoginRequired"
+              >
+                🔒 {{ $t('pluginMarketplace.button.loginRequired') }}
+              </el-button>
+              <!-- Normal Install button for remote plugins -->
+              <el-button
+                v-else-if="!selectedPlugin.isLocalOnly"
                 type="primary"
                 plain
                 :disabled="isButtonDisabled(selectedPlugin)"
@@ -189,6 +209,17 @@
                   {{ $t('pluginMarketplace.action.uninstall') }}
                 </el-button>
               </template>
+            </div>
+
+            <!-- Login Required Notice -->
+            <div
+              v-if="isLoginRequired(selectedPlugin) && !userStore.isLoggedIn"
+              class="login-required-info"
+            >
+              <span class="login-required-icon">🔒</span>
+              <span class="login-required-text">{{
+                $t('pluginMarketplace.loginRequiredNotice')
+              }}</span>
             </div>
 
             <!-- Upgrade Info for Installed Plugins -->
@@ -265,6 +296,7 @@ import { More, Upload, FolderOpened, DocumentAdd } from '@element-plus/icons-vue
 import { Marked, MarkedExtension, Token, Tokens } from 'marked'
 import '../home/readme.css'
 import { usePluginStore } from '@r/stores/plugin'
+import { useUserStore } from '@r/stores/user'
 import type { PluginManifest, RemotePluginInfo } from 'src/preload/plugin'
 import { cloneDeep } from 'lodash'
 import i18next from 'i18next'
@@ -277,6 +309,10 @@ interface PluginWithReadme extends RemotePluginInfo {
 
 const props = defineProps<{
   height: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'login-required'): void
 }>()
 
 interface PluginStatus {
@@ -292,6 +328,7 @@ const installingPlugins = ref<Set<string>>(new Set())
 const selectedPlugin = ref<PluginWithReadme | null>(null)
 const readmeHeight = computed(() => props.height - 35 - 40 - 121 - 200)
 const pluginStore = usePluginStore()
+const userStore = useUserStore()
 const temporaryPlugins = ref<Set<string>>(new Set()) // Store IDs of temporary plugins
 let marked: Marked
 let pluginsDir = '' // Cache the plugins directory
@@ -451,6 +488,12 @@ function getButtonText(plugin: PluginWithReadme): string {
   }
 
   return i18next.t('pluginMarketplace.button.install')
+}
+
+// Check if plugin requires login
+function isLoginRequired(plugin: PluginWithReadme): boolean {
+  // Check both top-level and manifestContent for login requirement
+  return !!(plugin as any).login || !!plugin.manifestContent?.login
 }
 
 // Check if button should be disabled
@@ -792,6 +835,11 @@ function handleReadmeClick(e: MouseEvent) {
   }
 }
 
+// Handle login required button click - emit event to navigate to User tab
+function handleLoginRequired() {
+  emit('login-required')
+}
+
 // Rewrite relative links/images in README to local-resource URLs based on the selected plugin path
 function addLocalBaseUrl() {
   const reIsAbsolute = /[\w+\-+]+:\/\//
@@ -1031,6 +1079,13 @@ onMounted(async () => {
   color: var(--el-color-warning);
 }
 
+.login-required-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 .plugin-list-icon-img {
   width: 64px;
   height: 64px;
@@ -1198,6 +1253,29 @@ onMounted(async () => {
   gap: 12px;
   margin-bottom: 20px;
   justify-content: flex-start;
+}
+
+/* Login Required Info */
+.login-required-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--el-color-info-light-9);
+  border: 1px solid var(--el-color-info-light-7);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  justify-content: center;
+}
+
+.login-required-icon {
+  font-size: 18px;
+}
+
+.login-required-text {
+  color: var(--el-color-info-dark-2);
+  font-weight: 500;
 }
 
 /* Version Info */

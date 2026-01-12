@@ -2738,6 +2738,8 @@
     "pluginIconAlt": "Plugin Icon",
     "temporaryBadgeTitle": "Temporarily loaded (will be removed on restart)",
     "localOnlyBadgeTitle": "Local plugin only",
+    "loginRequiredBadgeTitle": "Login required to install this plugin",
+    "loginRequiredNotice": "This plugin requires login to install. Please sign in to continue.",
     "noSelection": "Select a plugin to view details",
     "action": {
       "enable": "Enable",
@@ -2761,7 +2763,8 @@
       "installed": "Installed",
       "installing": "Installing...",
       "upgradeTo": "Upgrade to {{version}}",
-      "upgrading": "Upgrading..."
+      "upgrading": "Upgrading...",
+      "loginRequired": "Login Required"
     },
     "messages": {
       "loadFailed": "Failed to load plugins from marketplace: {{error}}",

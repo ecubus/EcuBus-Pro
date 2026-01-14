@@ -78,7 +78,7 @@ export class LinCable extends LinBase {
       }
     })
 
-    this.log = new LinLOG('EcuBus', info.name, this.info.device.id, this.event)
+    this.log = new LinLOG('EcuBus', info.name, this.info.id, this.event)
     this.startTs = getTsUs()
 
     if (info.database) {

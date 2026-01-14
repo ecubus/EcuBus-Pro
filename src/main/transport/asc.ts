@@ -1,8 +1,9 @@
-import { CanMessage } from 'nodeCan/can'
+import { CanMessage } from '../share/can'
 import winston, { format } from 'winston'
 import Transport from 'winston-transport'
 import dayjs from 'dayjs'
 import path from 'path'
+import { getCheckSum, LinChecksumType, LinDirection, LinError, LinMsg } from '../share/lin'
 
 // LogData interface matching the one from trace.vue
 
@@ -67,12 +68,27 @@ function ascFormat(method: string[], channel: string[], initTs: number): winston
     }
 
     let messageLine = ''
+
     switch (method) {
       case 'canBase': {
         const logData = info.message.data
         const msg = logData as CanMessage
         const relativeTime = logData.ts / 1000_000 // Convert to seconds
         messageLine = formatCanMessage(msg, channel, relativeTime)
+        break
+      }
+      case 'linBase': {
+        const logData = info.message.data
+        const msg = logData as LinMsg
+        const relativeTime = logData.ts / 1000_000 // Convert to seconds
+        messageLine = formatLinMessage(msg, channel, relativeTime)
+        break
+      }
+      case 'linError': {
+        const logData = info.message.data.msg as string
+
+        const relativeTime = info.message.data.ts / 1000_000 // Convert to seconds
+        messageLine = formatLinError(logData, info.message.data.data, channel, relativeTime)
         break
       }
       case 'canError': {
@@ -90,6 +106,71 @@ function ascFormat(method: string[], channel: string[], initTs: number): winston
     method: method,
     channel: channel
   })
+}
+
+function formatLinError(
+  errorStr: string,
+  msg: LinMsg | undefined,
+  channel: number,
+  timestamp: number
+): string {
+  const channelStr = channel === 1 ? 'Li' : `L${channel}`
+  const id = (msg?.frameId ?? 0).toString(16).toLowerCase()
+  const dir = msg?.direction === LinDirection.SEND ? 'Tx' : 'Rx'
+  const dlc = msg?.data?.length || 0
+  const tsStr = timestamp.toFixed(6)
+
+  // 1. 校验和错误 (CSErr)
+  if (errorStr.toLowerCase().includes('checksum error')) {
+    const dataHex = Array.from(msg?.data || [])
+      .map((b: any) => b.toString(16).padStart(2, '0'))
+      .join(' ')
+    // 格式: <Time> <Channel> <ID> CSErr <Dir> <DLC> <D0>...<D7> checksum = <checksum>
+    return `${tsStr} ${channelStr} ${id} CSErr ${dir} ${dlc} ${dataHex} checksum = ${(msg?.checksum ?? 0).toString(16)}`
+  }
+
+  // 2. 传输错误/无响应 (TransmErr)
+  if (errorStr.toLowerCase().includes('no response')) {
+    // 格式: <Time> <Channel> <ID> TransmErr
+    return `${tsStr} ${channelStr} ${id} TransmErr`
+  }
+
+  // 3. 同步错误 (SyncError)
+  if (
+    errorStr.toLowerCase().includes('sync val') ||
+    errorStr.toLowerCase().includes('sync error')
+  ) {
+    // 格式: <Time> <Channel> SyncError <Intervals...>
+    return `${tsStr} ${channelStr} SyncError 0 0 0 0`
+  }
+
+  // 4. 其他接收错误 (RcvError)
+  // 格式: <Time> <Channel> (<ID> <DLC>) RcvError: <description>
+  let description = 'unidentified error'
+  if (errorStr.includes('parity')) description = 'parity error in identifier'
+  else if (errorStr.includes('format')) description = 'framing error'
+  else description = errorStr
+
+  return `${tsStr} ${channelStr} (${id} ${dlc}) RcvError: ${description}`
+}
+function formatLinMessage(msg: LinMsg, channel: number, timestamp: number): string {
+  const channelStr = channel === 1 ? 'Li' : `L${channel}`
+  const dir = msg.direction === LinDirection.SEND ? 'Tx' : 'Rx'
+  const idHex = msg.frameId.toString(16).toLowerCase()
+  const dlc = msg.data.length
+
+  const dataHex = Array.from(msg.data)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join(' ')
+
+  const csm = msg.checksumType === LinChecksumType.ENHANCED ? 'enhanced' : 'standard'
+  const checksum = getCheckSum(msg.data, msg.checksumType, msg.frameId)
+    .toString(16)
+    .padStart(2, '0')
+  // 简化版 v7.2 格式：主要包含必需的物理层数据
+  // 格式: <Time> <Channel> <ID> <Dir> <DLC> <D0>...<D7> checksum = <checksum> ... CSM = <model>
+  // 注意：根据规范，Li 和 ID 之间通常有空格
+  return `${timestamp.toFixed(6)} ${channelStr} ${idHex.padStart(2)} ${dir} ${dlc} ${dataHex.padEnd(24)} checksum = ${checksum} CSM = ${csm}`
 }
 
 function formatCanMessage(msg: CanMessage, channel: number, timestamp: number): string {

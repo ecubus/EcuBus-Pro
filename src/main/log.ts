@@ -441,11 +441,11 @@ export class LinLOG {
         ...externalFormat
       )
     })
+
     //check device id
     const combinedLogs = this.log.transports.filter((transport) => {
       return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
     })
-
     for (const log of combinedLogs) {
       this.log.remove(log)
     }

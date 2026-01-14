@@ -400,11 +400,9 @@ async function buildTree() {
     await window.electron.ipcRenderer.invoke('ipc-get-vendor', ecubusPro)
   ).map((v: any) => v.name)
 
-  console.log('vendors', vendors)
-
   // 按照devices.devices的顺序创建索引映射
   const deviceIndexMap = new Map<string, number>()
-  let index = 0
+  let index = 1
   for (const key of Object.keys(devices.devices)) {
     deviceIndexMap.set(key, index++)
   }

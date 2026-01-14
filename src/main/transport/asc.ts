@@ -59,13 +59,8 @@ function ascFormat(method: string[], channel: string[], initTs: number): winston
     if (opts.method.indexOf(method) == -1) {
       return false
     }
-    let channel = 1
-    if (info.message.deviceId) {
-      const index = opts.channel.indexOf(info.message.deviceId)
-      if (index != -1) {
-        channel = index + 1
-      }
-    }
+
+    const channel = global.deviceIndexMap.get(info.message.deviceId) ?? 1
 
     let messageLine = ''
 

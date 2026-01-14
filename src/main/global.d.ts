@@ -26,6 +26,7 @@ declare global {
   var dataSet: DataSet
   var startTs: number
   var vars: Record<string, VarItem>
+  var deviceIndexMap: Map<string, number>
   var mainWindow: BrowserWindow
   var toomossDeviceHandles:
     | Map<

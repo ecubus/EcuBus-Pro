@@ -17,7 +17,7 @@ import type { OsEvent } from './share/osEvent'
 import path from 'path'
 import dayjs from 'dayjs'
 
-const isDev = process.env.NODE_ENV !== 'production'
+global.deviceIndexMap = new Map<string, number>()
 
 type LogFunc = (...args: any[]) => Transport
 

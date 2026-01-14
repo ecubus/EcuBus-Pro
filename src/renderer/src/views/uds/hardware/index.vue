@@ -32,6 +32,15 @@
                 </span>
 
                 <span v-else>{{ node.label }}</span>
+                <el-tag
+                  v-if="node.level == 3 && data.index !== undefined"
+                  effect="light"
+                  round
+                  size="small"
+                  style="margin-left: 10px"
+                >
+                  {{ data.index }}
+                </el-tag>
               </span>
               <el-button
                 v-if="data.append"
@@ -244,13 +253,22 @@ function nodeChange(id: string, name: string) {
   if (node) {
     node.data.label = name
   } else {
+    // 按照devices.devices的顺序计算索引（新设备已经在devices.devices中）
+    const deviceIndexMap = new Map<string, number>()
+    let index = 0
+    for (const key of Object.keys(devices.devices)) {
+      deviceIndexMap.set(key, index++)
+    }
+    const newIndex = deviceIndexMap.get(id) ?? Object.keys(devices.devices).length - 1
+
     treeRef.value?.append(
       {
         label: name,
         append: false,
         id: id,
         vendor: activeTree.value?.vendor,
-        type: activeTree.value?.type
+        type: activeTree.value?.type,
+        index: newIndex
       },
       activeTree.value?.id
     )
@@ -265,10 +283,11 @@ interface tree {
   append: boolean
   id: string
   children?: tree[]
+  index?: number
 }
 const tData = ref<tree[]>([])
 
-function addSubTree(vendor: CanVendor, node: tree) {
+function addSubTree(vendor: CanVendor, node: tree, deviceIndexMap: Map<string, number>) {
   const canTree: tree = {
     label: i18next.t('uds.hardware.deviceTypes.can'),
     append: true,
@@ -287,7 +306,8 @@ function addSubTree(vendor: CanVendor, node: tree) {
         append: false,
         vendor: vendor,
         id: key,
-        type: 'can'
+        type: 'can',
+        index: deviceIndexMap.get(key)
       })
     }
   }
@@ -308,7 +328,8 @@ function addSubTree(vendor: CanVendor, node: tree) {
           append: false,
           vendor: vendor,
           id: key,
-          type: 'eth'
+          type: 'eth',
+          index: deviceIndexMap.get(key)
         })
       }
     }
@@ -337,7 +358,8 @@ function addSubTree(vendor: CanVendor, node: tree) {
         append: false,
         vendor: vendor,
         id: key,
-        type: 'lin'
+        type: 'lin',
+        index: deviceIndexMap.get(key)
       })
     }
   }
@@ -359,7 +381,8 @@ function addSubTree(vendor: CanVendor, node: tree) {
         append: false,
         vendor: vendor,
         id: key,
-        type: 'pwm'
+        type: 'pwm',
+        index: deviceIndexMap.get(key)
       })
     }
   }
@@ -379,6 +402,13 @@ async function buildTree() {
 
   console.log('vendors', vendors)
 
+  // 按照devices.devices的顺序创建索引映射
+  const deviceIndexMap = new Map<string, number>()
+  let index = 0
+  for (const key of Object.keys(devices.devices)) {
+    deviceIndexMap.set(key, index++)
+  }
+
   if (vendors.includes('ecubus')) {
     const ecubus: tree = {
       label: i18next.t('uds.hardware.vendors.ecubus'),
@@ -388,7 +418,7 @@ async function buildTree() {
       children: []
     }
     t.push(ecubus)
-    addSubTree('ecubus', ecubus)
+    addSubTree('ecubus', ecubus, deviceIndexMap)
   }
 
   if (vendors.includes('zlg')) {
@@ -400,7 +430,7 @@ async function buildTree() {
       children: []
     }
     t.push(zlg)
-    addSubTree('zlg', zlg)
+    addSubTree('zlg', zlg, deviceIndexMap)
   }
   if (vendors.includes('peak')) {
     const peak: tree = {
@@ -411,7 +441,7 @@ async function buildTree() {
       children: []
     }
     t.push(peak)
-    addSubTree('peak', peak)
+    addSubTree('peak', peak, deviceIndexMap)
   }
   if (vendors.includes('kvaser')) {
     const kvaser: tree = {
@@ -423,7 +453,7 @@ async function buildTree() {
       children: []
     }
     t.push(kvaser)
-    addSubTree('kvaser', kvaser)
+    addSubTree('kvaser', kvaser, deviceIndexMap)
   }
   if (vendors.includes('simulate')) {
     const simulate: tree = {
@@ -435,7 +465,7 @@ async function buildTree() {
       children: []
     }
     t.push(simulate)
-    addSubTree('simulate', simulate)
+    addSubTree('simulate', simulate, deviceIndexMap)
   }
   if (vendors.includes('toomoss')) {
     const toomoss: tree = {
@@ -446,7 +476,7 @@ async function buildTree() {
       children: []
     }
     t.push(toomoss)
-    addSubTree('toomoss', toomoss)
+    addSubTree('toomoss', toomoss, deviceIndexMap)
   }
   if (vendors.includes('vector')) {
     const vector: tree = {
@@ -457,7 +487,7 @@ async function buildTree() {
       children: []
     }
     t.push(vector)
-    addSubTree('vector', vector)
+    addSubTree('vector', vector, deviceIndexMap)
   }
 
   if (vendors.includes('slcan')) {
@@ -469,7 +499,7 @@ async function buildTree() {
       children: []
     }
     t.push(slcan)
-    addSubTree('slcan', slcan)
+    addSubTree('slcan', slcan, deviceIndexMap)
   }
   if (vendors.includes('candle')) {
     const candle: tree = {
@@ -480,7 +510,7 @@ async function buildTree() {
       children: []
     }
     t.push(candle)
-    addSubTree('candle', candle)
+    addSubTree('candle', candle, deviceIndexMap)
   }
 
   tData.value = t

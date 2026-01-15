@@ -500,8 +500,8 @@ export class LinCable extends LinBase {
       this.pendingPromise = undefined
     }
 
-    this.serialPort.write('C\r')
     this.powerCtrl(false).finally(() => {
+      this.serialPort.write('C\r')
       this.serialPort.close()
       this.event.emit('close')
     })

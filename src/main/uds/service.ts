@@ -1132,9 +1132,9 @@ export const serviceDetail: ServiceDetial = {
           bitLen: 16,
           deletable: false,
           editable: true,
-          type: 'ARRAY',
+          type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
-          phyValue: '00 00'
+          phyValue: '00'
         }
       },
       {
@@ -1158,9 +1158,9 @@ export const serviceDetail: ServiceDetial = {
           bitLen: 16,
           deletable: false,
           editable: true,
-          type: 'ARRAY',
+          type: 'NUM',
           value: Buffer.from([0x0, 0x0]),
-          phyValue: '00 00'
+          phyValue: '00'
         }
       }
     ]

@@ -270,22 +270,58 @@ export function paramSetVal(param: Param, str: string | number) {
   switch (param.type) {
     case 'NUM':
       {
+        if (param.bitLen > 32) {
+          throw new Error('NUM bit size should be <= 32 bits')
+        }
+        const byte = Math.floor(param.bitLen / 8)
+
+        if (typeof str === 'string') {
+          const s = str.trim()
+          if (s.includes(' ')) {
+            // space split
+            const parts = s.split(/\s+/).filter(Boolean)
+            const values = parts.map((p) => {
+              const v = Number(p)
+              if (!Number.isFinite(v) || v < 0 || !Number.isInteger(v)) {
+                throw new Error('value should be non-negative integers split by space')
+              }
+              return v
+            })
+            //  calculate the minimum number of bytes required for each segment
+            const maxVal = values.reduce((m, v) => (v > m ? v : m), 0)
+            let bytesPerToken = 1
+            while (maxVal >= Math.pow(2, bytesPerToken * 8)) bytesPerToken++
+            const totalBytes = bytesPerToken * values.length
+            if (totalBytes > byte) {
+              throw new Error(
+                `value length ${values.length}*${bytesPerToken} should less than ${byte}`
+              )
+            }
+            const buf = Buffer.alloc(byte).fill(0)
+            let offset = byte - totalBytes
+            for (const val of values) {
+              for (let b = bytesPerToken - 1; b >= 0; b--) {
+                buf.writeUInt8((val >> (8 * b)) & 0xff, offset++)
+              }
+            }
+            param.phyValue = values.join(' ')
+            param.value = buf
+            break
+          }
+        }
+
         const v = Number(str)
         if (Number.isNaN(v)) {
           throw new Error('value should be a number')
         }
-        const byte = Math.floor(param.bitLen / 8)
         const pow = Math.pow(2, byte * 8)
-        if (v >= 0 && v < pow) {
-          param.phyValue = v
-          //v to hex string, 空格隔开
-          param.value = Buffer.alloc(byte)
-          //bit-endian
-          for (let i = 0; i < byte; i++) {
-            param.value.writeUInt8((v >> (8 * i)) & 0xff, byte - i - 1)
-          }
-        } else {
+        if (v < 0 || v >= pow) {
           throw new Error(`value should be in [0,${pow - 1}]`)
+        }
+        param.phyValue = v
+        param.value = Buffer.alloc(byte)
+        for (let i = 0; i < byte; i++) {
+          param.value.writeUInt8((v >> (8 * i)) & 0xff, byte - i - 1)
         }
       }
       break

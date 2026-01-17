@@ -1,5 +1,15 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.60
+
+从 v0.8.59 到 v0.8.60 的变更：
+
+- [api]：新增 linBaudRateCtrl API，[详情](https://app.whyengineer.com/scriptApi/functions/linBaudRateCtrl.html)
+- [base]：修复插件设置不存在的问题
+- [base]：新增多语言支持，zh-CN 语言已在 [插件市场](https://app.whyengineer.com/docs/plugin/) 发布
+
+---
+
 ## 0.8.59
 
 从 v0.8.58 到 v0.8.59 的更改：

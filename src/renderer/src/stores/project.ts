@@ -5,6 +5,7 @@ import { useDataStore } from './data'
 import { sortBy, toPairs, fromPairs, cloneDeep, assign, merge } from 'lodash'
 import { error, info } from 'electron-log'
 import { useRuntimeStore } from './runtime'
+import i18next from 'i18next'
 
 export interface ProjectInfo {
   name: string
@@ -136,14 +137,14 @@ export const useProjectStore = defineStore('project', {
           await this.saveProject()
           this.router.push('/uds')
         } catch (e) {
-          ElMessage.error(`${example} is not a valid project file`)
+          ElMessage.error(i18next.t('project.messages.invalidProjectFile', { file: example }))
         }
       }
     },
     async openProject() {
       {
         const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-          title: 'Open Project',
+          title: i18next.t('project.dialog.openTitle'),
           properties: ['openFile'],
           filters: [{ name: 'EcuBus-Pro', extensions: ['ecb'] }]
         })
@@ -201,12 +202,12 @@ export const useProjectStore = defineStore('project', {
               //add to history
               this.addToHistory(file)
             } catch (e) {
-              ElMessage.error(`${file} is not a valid project file`)
+              ElMessage.error(i18next.t('project.messages.invalidProjectFile', { file: file }))
             }
           })
           .catch((e) => {
             error(e)
-            ElMessage.error(`Failed to open project ${file}`)
+            ElMessage.error(i18next.t('project.messages.openProjectFailed', { file: file }))
           })
       }
     },
@@ -239,7 +240,7 @@ export const useProjectStore = defineStore('project', {
       if (this.open) {
         if (this.projectInfo.path == '') {
           const res = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
-            title: 'Save Project',
+            title: i18next.t('project.dialog.saveTitle'),
             defaultPath: 'Config.ecb',
             filters: [{ name: 'EcuBus-Pro', extensions: ['ecb'] }]
           })
@@ -273,7 +274,7 @@ export const useProjectStore = defineStore('project', {
         } catch (e: any) {
           error(e)
           ElMessageBox({
-            title: 'Save Project',
+            title: i18next.t('project.dialog.saveTitle'),
             message: `${e.toString()}`,
             type: 'error',
             buttonSize: 'small'
@@ -299,11 +300,11 @@ export const useProjectStore = defineStore('project', {
           }
           //工程没有保存，关闭会丢失数据
           ElMessageBox.confirm(
-            'You have unsaved changes in the current project, do you want to save them?',
-            'Warning',
+            i18next.t('project.dialog.unsavedChanges'),
+            i18next.t('project.dialog.warningTitle'),
             {
-              confirmButtonText: 'Save',
-              cancelButtonText: "Don't Save",
+              confirmButtonText: i18next.t('project.dialog.saveButton'),
+              cancelButtonText: i18next.t('project.dialog.dontSaveButton'),
               type: 'warning',
               buttonSize: 'small',
               distinguishCancelAndClose: true
@@ -321,7 +322,7 @@ export const useProjectStore = defineStore('project', {
                 })
                 .catch((e) => {
                   error('Save project failed', e)
-                  ElMessage.error('Save project failed')
+                  ElMessage.error(i18next.t('project.messages.saveProjectFailed'))
                   resolve(false)
                 })
             })

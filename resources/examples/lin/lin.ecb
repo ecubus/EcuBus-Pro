@@ -695,8 +695,25 @@
     "vars": {},
     "datas": {},
     "panels": {},
-    "logs": {},
-    "traces": {}
+    "logs": {
+      "8de19b3e-8ed3-45f8-b5cf-46a651bc2bf4": {
+        "name": "记录器 1",
+        "id": "8de19b3e-8ed3-45f8-b5cf-46a651bc2bf4",
+        "type": "file",
+        "format": "asc",
+        "path": "log.txt",
+        "channel": [
+          "3e8f62b0-63bf-4a3a-9bce-078faf1aced8"
+        ],
+        "method": [
+          "linBase",
+          "linError",
+          "linEvent"
+        ]
+      }
+    },
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {

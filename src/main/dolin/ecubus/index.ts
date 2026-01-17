@@ -78,7 +78,7 @@ export class LinCable extends LinBase {
       }
     })
 
-    this.log = new LinLOG('EcuBus', info.name, this.info.device.id, this.event)
+    this.log = new LinLOG('EcuBus', info.name, this.info.id, this.event)
     this.startTs = getTsUs()
 
     if (info.database) {
@@ -500,8 +500,8 @@ export class LinCable extends LinBase {
       this.pendingPromise = undefined
     }
 
-    this.serialPort.write('C\r')
     this.powerCtrl(false).finally(() => {
+      this.serialPort.write('C\r')
       this.serialPort.close()
       this.event.emit('close')
     })

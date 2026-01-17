@@ -17,7 +17,7 @@ import type { OsEvent } from './share/osEvent'
 import path from 'path'
 import dayjs from 'dayjs'
 
-const isDev = process.env.NODE_ENV !== 'production'
+global.deviceIndexMap = new Map<string, number>()
 
 type LogFunc = (...args: any[]) => Transport
 
@@ -441,11 +441,11 @@ export class LinLOG {
         ...externalFormat
       )
     })
+
     //check device id
     const combinedLogs = this.log.transports.filter((transport) => {
       return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
     })
-
     for (const log of combinedLogs) {
       this.log.remove(log)
     }

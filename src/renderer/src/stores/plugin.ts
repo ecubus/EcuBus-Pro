@@ -7,6 +7,7 @@ import type {
   PluginTabExtension
 } from '../../../preload/plugin'
 import { cloneDeep } from 'lodash'
+import i18next from 'i18next'
 
 export type PluginState = {
   plugins: Map<string, EcuBusPlugin>
@@ -227,7 +228,7 @@ export const usePluginStore = defineStore('usePluginStore', {
     async uninstallPlugin(pluginId: string): Promise<boolean> {
       const plugin = this.plugins.get(pluginId)
       if (!plugin) {
-        throw new Error(`Plugin ${pluginId} not found`)
+        throw new Error(i18next.t('pluginStore.messages.pluginNotFound', { pluginId: pluginId }))
       }
 
       await window.electron.ipcRenderer.invoke('ipc-plugin-close', pluginId)
@@ -235,7 +236,7 @@ export const usePluginStore = defineStore('usePluginStore', {
       // 获取插件目录
       const pluginsDir = await window.electron.ipcRenderer.invoke('ipc-get-plugins-dir')
       if (!pluginsDir) {
-        throw new Error('Failed to get plugins directory')
+        throw new Error(i18next.t('pluginStore.messages.failedToGetPluginsDirectory'))
       }
 
       const pluginDir = `${pluginsDir}/${pluginId}`
@@ -261,7 +262,7 @@ export const usePluginStore = defineStore('usePluginStore', {
       try {
         // 打开文件夹选择对话框
         const selectedPath = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-          title: 'Select Plugin Folder',
+          title: i18next.t('pluginStore.dialog.selectPluginFolder'),
           properties: ['openDirectory']
         })
 

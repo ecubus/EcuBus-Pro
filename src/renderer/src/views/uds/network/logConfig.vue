@@ -248,7 +248,7 @@ const methods = [
     label: i18next.t('uds.network.logConfig.recordTypes.lin'),
     value: 'LIN',
     methods: ['linBase', 'linError', 'linEvent'],
-    disabled: true
+    disabled: false
   },
   {
     label: i18next.t('uds.network.logConfig.recordTypes.eth'),

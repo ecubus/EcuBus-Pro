@@ -304,8 +304,10 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
   const channleList: string[] = []
   let rounterInit = false
   try {
+    let cntIndex = 1
     for (const key in data.devices) {
       const device = data.devices[key]
+      global.deviceIndexMap.set(key, cntIndex++)
       if (device.type == 'can' && device.canDevice) {
         channleList.push(device.canDevice.id)
         const canDevice = device.canDevice

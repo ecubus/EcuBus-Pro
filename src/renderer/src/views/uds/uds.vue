@@ -126,9 +126,12 @@
           style="margin-right: 5px; font-size: 14px"
         />
         <el-text style="width: 60px" truncated>
-          {{ firstByteUpper(item.title)
+          {{
+            layoutMaster.validLayout[item.title]?.labelKey
+              ? $t(layoutMaster.validLayout[item.title].labelKey!)
+              : firstByteUpper(item.title)
           }}<span v-if="item.options.name != undefined"
-            >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
+            >-{{ `${item.options.name ? item.options.name : $t('header.untitled')}` }}</span
           >
         </el-text>
 
@@ -204,7 +207,7 @@
                       ? $t(layoutMaster.validLayout[item.title].labelKey!)
                       : item.label
                   }}<span v-if="item.options.name != undefined"
-                    >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
+                    >-{{ `${item.options.name ? item.options.name : $t('header.untitled')}` }}</span
                   >
                   <span v-if="modify[item.id]" style="margin-left: 2px; font-weight: bolder"
                     >*</span
@@ -297,7 +300,7 @@
                       ? $t(layoutMaster.validLayout[item.title].labelKey!)
                       : firstByteUpper(item.title)
                   }}<span v-if="item.options.name != undefined"
-                    >-{{ `${item.options.name ? item.options.name : 'Untitled'}` }}</span
+                    >-{{ `${item.options.name ? item.options.name : $t('header.untitled')}` }}</span
                   >
                   <span v-if="modify[item.id]" style="margin-left: 2px; font-weight: bolder"
                     >*</span

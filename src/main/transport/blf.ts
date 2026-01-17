@@ -446,14 +446,6 @@ class BlfTransport extends Transport {
     this.channelOrder = channelOrder
   }
 
-  private resolveChannel(deviceId?: string): number {
-    if (!deviceId) {
-      return 1
-    }
-    const index = this.channelOrder.indexOf(deviceId)
-    return index === -1 ? 1 : index + 1
-  }
-
   log(info: any, callback: () => void) {
     if (this.closed) {
       callback()
@@ -472,7 +464,7 @@ class BlfTransport extends Transport {
       return
     }
 
-    const channel = this.resolveChannel(deviceId)
+    const channel = global.deviceIndexMap.get(deviceId) ?? 1
     try {
       if (method === 'canBase') {
         this.writer.writeCanMessage(data as CanMessage, channel, (data as any)?.ts)

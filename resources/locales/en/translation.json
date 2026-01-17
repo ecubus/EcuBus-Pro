@@ -2829,6 +2829,39 @@
       "loginFailed": "Login failed"
     }
   },
+  "project": {
+    "dialog": {
+      "openTitle": "Open Project",
+      "saveTitle": "Save Project",
+      "warningTitle": "Warning",
+      "unsavedChanges": "You have unsaved changes in the current project, do you want to save them?",
+      "saveButton": "Save",
+      "dontSaveButton": "Don't Save"
+    },
+    "messages": {
+      "invalidProjectFile": "{{file}} is not a valid project file",
+      "openProjectFailed": "Failed to open project {{file}}",
+      "saveProjectFailed": "Save project failed"
+    }
+  },
+  "runtime": {
+    "dialog": {
+      "buildingScripts": "Building Scripts"
+    },
+    "messages": {
+      "buildScriptsFailed": "Some scripts failed to build",
+      "loading": "Loading..."
+    }
+  },
+  "pluginStore": {
+    "dialog": {
+      "selectPluginFolder": "Select Plugin Folder"
+    },
+    "messages": {
+      "pluginNotFound": "Plugin {{pluginId}} not found",
+      "failedToGetPluginsDirectory": "Failed to get plugins directory"
+    }
+  },
   "common": {
     "unknownError": "Unknown error"
   }

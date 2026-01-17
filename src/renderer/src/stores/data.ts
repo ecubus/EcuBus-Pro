@@ -6,6 +6,7 @@ import { useProjectStore } from './project'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { useGlobalStart } from './runtime'
 import { nextTick, h, ref } from 'vue'
+import i18next from 'i18next'
 
 export type { DataSet }
 
@@ -84,7 +85,7 @@ export const useDataStore = defineStore('useDataStore', {
               }
 
               ElMessageBox({
-                title: 'Building Scripts',
+                title: i18next.t('runtime.dialog.buildingScripts'),
                 message: h(ProgressComponent),
                 buttonSize: 'small',
                 showCancelButton: false,
@@ -118,7 +119,7 @@ export const useDataStore = defineStore('useDataStore', {
               ElMessageBox.close()
 
               if (hasError) {
-                throw new Error('Some scripts failed to build')
+                throw new Error(i18next.t('runtime.messages.buildScriptsFailed'))
               }
             }
           }
@@ -127,7 +128,7 @@ export const useDataStore = defineStore('useDataStore', {
             .then(() => {
               const loading = ElLoading.service({
                 lock: true,
-                text: 'Loading...',
+                text: i18next.t('runtime.messages.loading'),
                 background: 'rgba(0, 0, 0, 0.7)'
               })
               window.electron.ipcRenderer

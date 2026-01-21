@@ -16,7 +16,7 @@ import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } from './share/uds'
 import { findService, UDSTesterMain } from './docan/uds'
 import { cloneDeep } from 'lodash'
-import type { Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+
 import { NodeItem } from 'src/preload/data'
 import LinBase from './dolin/base'
 import { EthAddr, EthBaseInfo, VinInfo, TlsConfig } from './share/doip'

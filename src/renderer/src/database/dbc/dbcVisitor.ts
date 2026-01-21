@@ -52,11 +52,12 @@ import {
 import { cloneDeep } from 'lodash'
 import { isCanFd } from '../dbcParse'
 import { v4 } from 'uuid'
-
+import { CanAttribute, CanSignal } from 'nodeCan/can'
+export type { CanAttribute as Attribute, CanSignal as Signal }
 export interface NodeItem {
   name: string
   comment?: string
-  attributes: Record<string, Attribute>
+  attributes: Record<string, CanAttribute>
 }
 
 export interface DBC {
@@ -67,43 +68,13 @@ export interface DBC {
   nodes: Record<string, NodeItem>
   messages: Record<number, Message>
   valueTables: Record<string, ValueTable>
-  attributes: Record<string, Attribute>
+  attributes: Record<string, CanAttribute>
   environmentVariables: Record<string, EnvironmentVariable>
   comments: string[] // global comment
 }
 
 export interface BusConfig {
   speed: number // in kBit/s
-}
-
-export interface Signal {
-  name: string
-  messageName: string
-  startBit: number
-  length: number
-  isLittleEndian: boolean // 1 = little-endian (Intel), 0 = big-endian (Motorola)
-  isSigned: boolean // true = signed, false = unsigned
-  factor: number
-  offset: number
-  minimum?: number
-  maximum?: number
-  unit?: string
-  receivers: string[]
-  comment?: string
-  valueTable?: string
-  values?: { label: string; value: number }[]
-  attributes: Record<string, Attribute>
-  multiplexerIndicator?: string // M for multiplexer, m<value> for multiplexed
-  multiplexerRange?: {
-    name: string
-    range: number[]
-  }
-  initValue?: number
-  value?: number
-  physValue?: number | string
-  physValueEnum?: string
-  generatorType?: string
-  valueType?: number // 0=signed, 1=float, 2=float
 }
 
 export interface Message {
@@ -113,9 +84,9 @@ export interface Message {
   sender: string
   canfd: boolean
   extId: boolean
-  signals: Record<string, Signal>
+  signals: Record<string, CanSignal>
   comment?: string
-  attributes: Record<string, Attribute>
+  attributes: Record<string, CanAttribute>
   transmitters?: string[]
   receivers?: string[]
 }
@@ -124,17 +95,6 @@ export interface ValueTable {
   name: string
   comment?: string
   values: { label: string; value: number }[]
-}
-
-export interface Attribute {
-  name: string
-  attrType: 'network' | 'node' | 'message' | 'signal' | 'envVar'
-  type: 'INT' | 'FLOAT' | 'STRING' | 'ENUM' | 'HEX'
-  min?: number
-  max?: number
-  enumList?: string[]
-  defaultValue?: number | string
-  currentValue?: number | string
 }
 
 export interface EnvironmentVariable {
@@ -148,7 +108,7 @@ export interface EnvironmentVariable {
   accessNode: 'unrestricted' | 'Read' | 'Write' | 'Read/Write'
   nodes: string[]
   comment?: string
-  attributes: Record<string, Attribute>
+  attributes: Record<string, CanAttribute>
 }
 
 export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
@@ -431,8 +391,8 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     return message
   }
 
-  signalClause(ctx: SignalClauseCstChildren): Signal {
-    const signal: Signal = {
+  signalClause(ctx: SignalClauseCstChildren): CanSignal {
+    const signal: CanSignal = {
       messageName: '',
       name: ctx.Identifier[0].image,
       startBit: parseInt(ctx.Number[0].image, 10),
@@ -506,8 +466,8 @@ export class DBCVisitor extends parser.getBaseCstVisitorConstructor() {
     return valueTable
   }
 
-  attributeClause(ctx: AttributeClauseCstChildren): Attribute {
-    const attrs: Attribute = {
+  attributeClause(ctx: AttributeClauseCstChildren): CanAttribute {
+    const attrs: CanAttribute = {
       name: ctx.StringLiteral[0].image.replace(/"/g, ''),
       attrType: 'network',
       type: 'INT'

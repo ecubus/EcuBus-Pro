@@ -25,6 +25,7 @@ import {
   CAN_ID_TYPE,
   CanInterAction,
   CanMessage,
+  CanSignal,
   formatError,
   getTsUs,
   swapAddr
@@ -58,7 +59,7 @@ import {
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
-import type { DBC, Message, Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import type { DBC, Message } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
@@ -1100,7 +1101,7 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
   const dbName = arg[0] as string
   const id = arg[1] as number
   const signalName = arg[2] as string
-  const signal = arg[3] as Signal
+  const signal = arg[3] as CanSignal
 
   const db = global.dataSet.database.can[dbName]
   if (db) {

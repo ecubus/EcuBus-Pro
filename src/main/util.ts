@@ -1,8 +1,9 @@
 import path from 'path'
-import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+// import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import { isEqual } from 'lodash'
+import { CanSignal } from 'nodeCan/can'
 
 export function updateLinSignalVal(db: LDF, signalName: string, value: number | number[] | string) {
   const signal = db.signals[signalName]
@@ -34,7 +35,7 @@ export function setSignal(data: { signal: string; value: number | number[] | str
   const db = Object.values(global.dataSet.database.can).find((db) => db.name == s[0])
   if (db) {
     const signalName = s[1]
-    let ss: Signal | undefined
+    let ss: CanSignal | undefined
     for (const msg of Object.values(db.messages)) {
       for (const signal of Object.values(msg.signals)) {
         if (signal.name == signalName) {
@@ -50,6 +51,7 @@ export function setSignal(data: { signal: string; value: number | number[] | str
       throw new Error(`Signal ${signalName} not found`)
     }
     if (typeof data.value === 'string') {
+      ss.physValue = data.value
       updateSignalPhys(ss, db)
     } else {
       if (Array.isArray(data.value)) {

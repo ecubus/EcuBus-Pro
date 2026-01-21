@@ -1,5 +1,6 @@
 import { CstChildrenDictionary, CstNode, CstParser, IToken, Lexer, createToken } from 'chevrotain'
 import i18next from 'i18next'
+import { LinSignal } from 'nodeCan/lin'
 
 export interface GlobalDef {
   LIN_protocol_version: string
@@ -77,19 +78,6 @@ export interface CompositeNode {
 export interface NodeDef {
   master: MasterNode
   salveNode: string[]
-}
-
-export interface SignalDef {
-  signalName: string
-  signalSizeBits: number
-  initValue: number | number[]
-  value?: number | number[]
-  physValue?: number | string
-  physValueEnum?: string
-  update?: boolean
-  punishedBy: string
-  subscribedBy: string[]
-  singleType: 'ByteArray' | 'Scalar'
 }
 
 export interface SignalGroupDef {
@@ -203,7 +191,7 @@ export interface LDF {
   node: NodeDef
   nodeAttrs: Record<string, NodeAttrDef>
   composite?: Record<string, CompositeNode[]>
-  signals: Record<string, SignalDef>
+  signals: Record<string, LinSignal>
   signalGroups: SignalGroupSDef[]
   frames: Record<string, Frame>
   sporadicFrames: Record<string, SporadicFrames>
@@ -212,7 +200,7 @@ export interface LDF {
   signalEncodeTypes: Record<string, SignalEncodeType>
   signalRep: Record<string, string[]>
 }
-
+export type { LinSignal as SignalDef }
 const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /\s+/,

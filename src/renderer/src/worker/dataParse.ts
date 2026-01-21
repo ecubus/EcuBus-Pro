@@ -94,7 +94,7 @@ function parseCanData(raw: any) {
       const frame = db.messages[msg.id]
       if (frame) {
         msg.name = frame.name
-        msg.children = []
+        msg.signals = {}
         writeMessageData(frame, msg.data, db)
         for (const signal of Object.values(frame.signals)) {
           const signalKey = `can.${db.name}.signals.${signal.name}`
@@ -110,12 +110,7 @@ function parseCanData(raw: any) {
               rawValue: signal.value
             }
           ])
-          msg.children.push({
-            name: signal.name,
-            data: `${signal.physValueEnum ? signal.physValueEnum : signal.physValue}  ${
-              signal.value
-            }`
-          })
+          msg.signals[signal.name] = signal
         }
       }
     }

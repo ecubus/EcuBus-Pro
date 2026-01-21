@@ -183,16 +183,28 @@ export function updateUdsDts(data: DataSet) {
   }
   //const Signals
   const signals: string[] = []
+  const frames: { name: string; type: 'lin' | 'can'; signals: { name: string }[] }[] = []
   for (const ldf of Object.values(data.database.lin)) {
+    Object.values(ldf.frames).forEach((frame) => {
+      const sigList: { name: string }[] = []
+      frame.signals.forEach((sig) => {
+        sigList.push({ name: sig.name })
+      })
+      frames.push({ name: frame.name, type: 'lin', signals: sigList })
+    })
+
     for (const sig of Object.values(ldf.signals)) {
       signals.push(`${ldf.name}.${sig.signalName}`)
     }
   }
   for (const dbc of Object.values(data.database.can)) {
     for (const msg of Object.values(dbc.messages)) {
+      const sigList: { name: string }[] = []
       for (const sig of Object.values(msg.signals)) {
         signals.push(`${dbc.name}.${sig.name}`)
+        sigList.push({ name: sig.name })
       }
+      frames.push({ name: msg.name, type: 'can', signals: sigList })
     }
   }
   //const variables
@@ -239,7 +251,8 @@ export function updateUdsDts(data: DataSet) {
     jobs: jobs,
     signals: signals,
     variables: variables,
-    udsSeqName: udsSeqName
+    udsSeqName: udsSeqName,
+    frames: frames
   })
   return libResult
 }
@@ -1474,7 +1487,7 @@ async function compileTscEntry(
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
 
-  const relativeLibPath = path.relative(projectPath, libPath)
+  const relativeLibPath = path.relative(projectPath, libPath).replace(/\\/g, '/')
 
   const cmaArray = [
     entry,

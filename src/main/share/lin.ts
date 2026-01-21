@@ -161,6 +161,59 @@ export interface LinMsg {
   lincable?: LinCableErrorInject
 }
 
+/**
+ * Represents a LIN (Local Interconnect Network) signal that defines data within a LIN frame.
+ *
+ * @category LIN
+ */
+export interface LinSignal {
+  /**
+   * The name of the LIN signal.
+   */
+  signalName: string
+  /**
+   * The size of the signal in bits.
+   */
+  signalSizeBits: number
+  /**
+   * The initial/default value of the signal.
+   * For scalar signals: a single number.
+   * For byte array signals: an array of numbers.
+   */
+  initValue: number | number[]
+  /**
+   * The current raw value of the signal.
+   * For scalar signals: a single number.
+   * For byte array signals: an array of numbers.
+   */
+  value?: number | number[]
+  /**
+   * The current physical value of the signal (if applicable).
+   */
+  physValue?: number | string
+  /**
+   * The current physical value represented as an enumeration label (if applicable).
+   */
+  physValueEnum?: string
+  /**
+   * Indicates whether the signal value has been updated.
+   */
+  update?: boolean
+  /**
+   * The name of the node that publishes this signal.
+   */
+  punishedBy: string
+  /**
+   * List of node names that subscribe to this signal.
+   */
+  subscribedBy: string[]
+  /**
+   * The type of signal representation.
+   * 'ByteArray' for multi-byte array signals, 'Scalar' for single value signals.
+   */
+  singleType: 'ByteArray' | 'Scalar'
+}
+
 export class LinError extends Error {
   errorId: LIN_ERROR_ID
   msgType?: LinMsg

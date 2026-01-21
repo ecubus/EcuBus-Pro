@@ -7,8 +7,8 @@ const dts = require('rollup-plugin-dts').default;
 // const {generateDtsBundle}=require('dts-bundle-generator');
 
 async function bundleDts(
-    input,
-    output
+  input,
+  output
   ) {
     try {
       // 创建 bundle
@@ -131,7 +131,16 @@ class MyCustomPlugin {
     {{#each this.udsSeqName}}
         "{{this}}",
     {{/each}}
-];`)
+];
+
+{{#each this.frames}}
+export interface {{this.name}} {
+    {{#each this.signals}}
+        {{this.name}}:{{#if (eq ../type 'can')}}CanSignal{{else}}LinSignaal{{/if}},
+    {{/each}}
+}
+{{/each}}
+`)
 
         //write 
         fs.writeFileSync(path.resolve(__dirname,'src','main','share','uds.d.ts.html'),content)
@@ -231,6 +240,7 @@ module.exports = {
         extensions: ['.js', '.ts'],
         alias: {
             'src': path.resolve(__dirname, 'src'),
+            'nodeCan': path.resolve(__dirname, 'src/main/share')
         },
     },
     devtool: 'source-map'

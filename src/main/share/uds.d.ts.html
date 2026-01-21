@@ -1,12 +1,174 @@
+import Emittery from 'emittery';
 import { dot } from 'node:test/reporters';
 export { default as assert } from 'node:assert';
 
 /**
- * Represents a CAN (Controller Area Network) message.
+ * Represents a CAN (Controller Area Network) attribute that can be associated with network, node, message, signal, or environment variable entities.
  *
  * @category CAN
  */
-interface CanMessage {
+interface CanAttribute {
+    /**
+     * The name of the attribute.
+     */
+    name: string;
+    /**
+     * The type of entity this attribute is associated with.
+     */
+    attrType: 'network' | 'node' | 'message' | 'signal' | 'envVar';
+    /**
+     * The data type of the attribute value.
+     */
+    type: 'INT' | 'FLOAT' | 'STRING' | 'ENUM' | 'HEX';
+    /**
+     * The minimum allowed value (for numeric types).
+     */
+    min?: number;
+    /**
+     * The maximum allowed value (for numeric types).
+     */
+    max?: number;
+    /**
+     * List of enumeration values (for ENUM type).
+     */
+    enumList?: string[];
+    /**
+     * The default value of the attribute.
+     */
+    defaultValue?: number | string;
+    /**
+     * The current value of the attribute.
+     */
+    currentValue?: number | string;
+}
+/**
+ * Represents a CAN (Controller Area Network) signal that defines the structure and properties of data within a CAN message.
+ *
+ * @category CAN
+ */
+interface CanSignal {
+    /**
+     * The name of the signal.
+     */
+    name: string;
+    /**
+     * The name of the CAN message this signal belongs to.
+     */
+    messageName: string;
+    /**
+     * The starting bit position of the signal within the message.
+     */
+    startBit: number;
+    /**
+     * The length of the signal in bits.
+     */
+    length: number;
+    /**
+     * Indicates the byte order (endianness) of the signal.
+     * true = little-endian (Intel format), false = big-endian (Motorola format).
+     */
+    isLittleEndian: boolean;
+    /**
+     * Indicates whether the signal represents a signed value.
+     * true = signed, false = unsigned.
+     */
+    isSigned: boolean;
+    /**
+     * Scaling factor for converting between physical and raw values.
+     * Physical value = (Raw value * factor) + offset
+     */
+    factor: number;
+    /**
+     * Offset for converting between physical and raw values.
+     * Physical value = (Raw value * factor) + offset
+     */
+    offset: number;
+    /**
+     * The minimum physical value allowed for this signal.
+     */
+    minimum?: number;
+    /**
+     * The maximum physical value allowed for this signal.
+     */
+    maximum?: number;
+    /**
+     * The unit of measurement for the physical value (e.g., "V", "A", "m/s").
+     */
+    unit?: string;
+    /**
+     * List of receiver node names that consume this signal.
+     */
+    receivers: string[];
+    /**
+     * Optional comment or description for the signal.
+     */
+    comment?: string;
+    /**
+     * Reference to a value table for signal interpretation.
+     */
+    valueTable?: string;
+    /**
+     * Array of labeled values for the signal (discrete value mappings).
+     */
+    values?: {
+        label: string;
+        value: number;
+    }[];
+    /**
+     * Collection of custom attributes associated with this signal.
+     */
+    attributes: Record<string, CanAttribute>;
+    /**
+     * Multiplexer indicator string.
+     * "M" indicates this is a multiplexer signal, "m<value>" indicates a multiplexed signal.
+     */
+    multiplexerIndicator?: string;
+    /**
+     * Defines the multiplexer range for this signal.
+     */
+    multiplexerRange?: {
+        /**
+         * Name of the multiplexer signal.
+         */
+        name: string;
+        /**
+         * Array of multiplexer switch values that apply to this signal.
+         */
+        range: number[];
+    };
+    /**
+     * The initial/default value of the signal.
+     */
+    initValue?: number;
+    /**
+     * The current raw value of the signal.
+     */
+    value?: number;
+    /**
+     * The current physical value of the signal (converted using factor and offset).
+     */
+    physValue?: number | string;
+    /**
+     * The current physical value represented as an enumeration label (if applicable).
+     */
+    physValueEnum?: string;
+    /**
+     * The type of signal generator used for simulation.
+     */
+    generatorType?: string;
+    /**
+     * The value type encoding.
+     * 0 = signed integer, 1 = unsigned integer, 2 = float.
+     */
+    valueType?: number;
+}
+/**
+ * Represents a CAN (Controller Area Network) message.
+ *
+ * @category CAN
+ * @template T - The type of the signal data.
+ */
+type CanMessage<T = any> = {
     /**
      * The name of the CAN message.
      */
@@ -41,18 +203,15 @@ interface CanMessage {
      */
     isSimulate?: boolean;
     /**
-     * The database name of the CAN message.
+     * The database id of the CAN message.
      */
     database?: string;
     /**
      * The children signals of the CAN message.
      * internal use
      */
-    children?: {
-        name: string;
-        data: string;
-    }[];
-}
+    signals?: T;
+};
 /**
  * Enumeration representing different CAN (Controller Area Network) ID types.
  *
@@ -145,6 +304,26 @@ interface CanAddr extends CanMsgType {
 }
 
 /**
+ * TLS configuration for DoIP v3
+ * @category DOIP
+ */
+interface TlsConfig {
+    /** Enable TLS for TCP connection (DoIP v3) */
+    enabled: boolean;
+    /** Path to CA certificate file for verifying peer */
+    ca?: string;
+    /** Path to client/server certificate file */
+    cert?: string;
+    /** Path to private key file */
+    key?: string;
+    /** Skip certificate verification (for testing only) */
+    rejectUnauthorized?: boolean;
+    /** TLS port, default is 3496 for DoIP v3 */
+    port?: number;
+    enableKeyLog?: boolean;
+    keyLogPath?: string;
+}
+/**
  * @category DOIP
  */
 interface EthAddr {
@@ -157,6 +336,8 @@ interface EthAddr {
     taType: 'physical' | 'functional';
     udpClientPort?: number;
     tcpClientPort?: number;
+    /** TLS configuration for DoIP v3 */
+    tls?: TlsConfig;
 }
 interface TesterAddr {
     routeActiveTime: number;
@@ -292,6 +473,58 @@ interface LinMsg {
         data: string;
     }[];
     lincable?: LinCableErrorInject;
+}
+/**
+ * Represents a LIN (Local Interconnect Network) signal that defines data within a LIN frame.
+ *
+ * @category LIN
+ */
+interface LinSignal {
+    /**
+     * The name of the LIN signal.
+     */
+    signalName: string;
+    /**
+     * The size of the signal in bits.
+     */
+    signalSizeBits: number;
+    /**
+     * The initial/default value of the signal.
+     * For scalar signals: a single number.
+     * For byte array signals: an array of numbers.
+     */
+    initValue: number | number[];
+    /**
+     * The current raw value of the signal.
+     * For scalar signals: a single number.
+     * For byte array signals: an array of numbers.
+     */
+    value?: number | number[];
+    /**
+     * The current physical value of the signal (if applicable).
+     */
+    physValue?: number | string;
+    /**
+     * The current physical value represented as an enumeration label (if applicable).
+     */
+    physValueEnum?: string;
+    /**
+     * Indicates whether the signal value has been updated.
+     */
+    update?: boolean;
+    /**
+     * The name of the node that publishes this signal.
+     */
+    punishedBy: string;
+    /**
+     * List of node names that subscribe to this signal.
+     */
+    subscribedBy: string[];
+    /**
+     * The type of signal representation.
+     * 'ByteArray' for multi-byte array signals, 'Scalar' for single value signals.
+     */
+    singleType: 'ByteArray' | 'Scalar';
 }
 declare enum LIN_ADDR_TYPE {
     PHYSICAL = "PHYSICAL",
@@ -452,6 +685,8 @@ interface TesterInfo {
     simulateBy?: string;
     allServiceList: Partial<Record<ServiceId, ServiceItem[]>>;
     doipVersion?: number;
+    /** TLS configuration for DoIP v3 server (entity simulation) */
+    serverTls?: TlsConfig;
     enableCodeGen?: boolean;
     generateConfigs?: {
         tempaltePath: string;
@@ -525,6 +760,10 @@ declare class SomeipMessageResponse extends SomeipMessageBase {
      */
     static fromSomeipRequest(request: SomeipMessageRequest, payload?: Buffer): SomeipMessageResponse;
 }
+
+/**
+ * @module Util
+ */
 
 declare function registerWorker(methods: Record<string, Function>): void;
 declare function workerEmit(payload: any): void;
@@ -785,6 +1024,15 @@ declare const allUdsSeq: readonly [
         "{{this}}",
     {{/each}}
 ];
+
+{{#each this.frames}}
+export interface {{this.name}} {
+    {{#each this.signals}}
+        {{this.name}}:{{#if (eq ../type 'can')}}CanSignal{{else}}LinSignaal{{/if}},
+    {{/each}}
+}
+{{/each}}
+
 interface Jobs {
 {{#each this.jobs}}
     "{{this.name}}": ({{#each this.param}}{{this}},{{/each}}) => DiagRequest[]|Promise<DiagRequest[]>;
@@ -1415,67 +1663,57 @@ declare class UtilClass {
     OnCan(id: number | string | true, fc: (msg: CanMessage) => void | Promise<void>): void;
     /**
      * Registers an event listener for signal updates from CAN/LIN databases.
-     * The signal will be emitted whenever the specified signal value changes.
+     * The callback is invoked whenever the specified signal value changes.
      *
      * @param signal - The signal name to listen for (format: "database.signalName")
      * @param fc - The callback function invoked when the signal is updated
-     * @param fc.rawValue - The raw signal value (number or Buffer)
-     * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
      *
      * @example
      * ```typescript
      * // Listen for engine RPM signal updates
-     * OnSignal("Engine.EngineRPM", ({ rawValue, physValue }) => {
-     *   console.log(`Engine RPM: ${physValue} (raw: ${rawValue})`)
+     * OnSignal("Engine.EngineRPM", (signal) => {
+     *   console.log(`Engine RPM: ${signal.physValue} (raw: ${signal.value})`)
      * })
      *
      * // Listen for gear position signal with enum values
-     * OnSignal("Transmission.GearPosition", ({ rawValue, physValue }) => {
-     *   console.log(`Gear: ${physValue}`) // Could be "Park", "Drive", "Reverse", etc.
+     * OnSignal("Transmission.GearPosition", (signal) => {
+     *   console.log(`Gear: ${signal.physValueEnum || signal.physValue}`) // "Park", "Drive", "Reverse", etc.
      * })
      *
      * // Async callback example
-     * OnSignal("Battery.Voltage", async ({ rawValue, physValue }) => {
-     *   if (physValue < 12.0) {
+     * OnSignal("Battery.Voltage", async (signal) => {
+     *   if ((signal.physValue as number) < 12.0) {
      *     await sendWarning("Low battery voltage detected!")
      *   }
      * })
      * ```
      */
-    OnSignal(signal: SignalName, fc: ({ rawValue, physValue }: {
-        rawValue: number | Buffer;
-        physValue: any;
-    }) => void | Promise<void>): void;
+    OnSignal(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>): void;
     /**
      * Registers a one-time event listener for signal updates from CAN/LIN databases.
-     * The listener will be automatically removed after the first signal update.
+     * The listener is automatically removed after the first signal update.
      *
      * @param signal - The signal name to listen for (format: "database.signalName")
      * @param fc - The callback function invoked when the signal is updated (only once)
-     * @param fc.rawValue - The raw signal value (number or Buffer)
-     * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
      *
      * @example
      * ```typescript
      * // Wait for the first engine start signal
-     * OnSignalOnce("Engine.EngineStatus", ({ rawValue, physValue }) => {
-     *   if (physValue === "Running") {
+     * OnSignalOnce("Engine.EngineStatus", (signal) => {
+     *   if (signal.physValue === "Running") {
      *     console.log("Engine started successfully!")
      *   }
      * })
      *
      * // Wait for initialization complete signal
-     * OnSignalOnce("System.InitStatus", async ({ rawValue, physValue }) => {
-     *   if (physValue === "Complete") {
+     * OnSignalOnce("System.InitStatus", async (signal) => {
+     *   if (signal.physValue === "Complete") {
      *     await startDiagnosticSequence()
      *   }
      * })
      * ```
      */
-    OnSignalOnce(signal: SignalName, fc: ({ rawValue, physValue }: {
-        rawValue: number | Buffer;
-        physValue: any;
-    }) => void | Promise<void>): void;
+    OnSignalOnce(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>): void;
     /**
      * Removes an event listener for signal updates from CAN/LIN databases.
      * The specified callback function will no longer be invoked for signal updates.
@@ -1486,8 +1724,8 @@ declare class UtilClass {
      * @example
      * ```typescript
      * // Define a callback function
-     * const rpmCallback = ({ rawValue, physValue }) => {
-     *   console.log(`RPM: ${physValue}`)
+     * const rpmCallback = (signal) => {
+     *   console.log(`RPM: ${signal.physValue}`)
      * }
      *
      * // Register the listener
@@ -1498,18 +1736,15 @@ declare class UtilClass {
      *
      * // Anonymous functions cannot be removed easily, so use named functions:
      * // ❌ This won't work for removal:
-     * // OnSignal("Engine.RPM", ({ physValue }) => console.log(physValue))
+     * // OnSignal("Engine.RPM", (signal) => console.log(signal.physValue))
      *
      * // ✅ This will work for removal:
-     * const callback = ({ physValue }) => console.log(physValue)
+     * const callback = (signal) => console.log(signal.physValue)
      * OnSignal("Engine.RPM", callback)
      * OffSignal("Engine.RPM", callback)
      * ```
      */
-    OffSignal(signal: SignalName, fc: ({ rawValue, physValue }: {
-        rawValue: number | Buffer;
-        physValue: any;
-    }) => void | Promise<void>): void;
+    OffSignal(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>): void;
     /**
      * Get the tester name, valid in Tester script
      * @returns {string}
@@ -1767,6 +2002,12 @@ declare class UtilClass {
     private varUpdate;
     private evnetDone;
     constructor();
+    /** @internal */
+    private handleSerialPortData;
+    /** @internal */
+    private handleSerialPortError;
+    /** @internal */
+    private handleSerialPortClose;
     /**
      * Register a function, this function will be invoked when UDSClass is initialized.
      * @param fc Non-async or async function
@@ -1960,32 +2201,37 @@ declare function output(msg: SomeipMessageBase): Promise<number>;
  */
 declare function setSignal(signal: SignalName, value: number | number[] | string): Promise<void>;
 /**
- * Get a signal's raw value and physical value
+ * Get a signal definition object from the database
  *
  * @category LIN
  * @category CAN
  * @param {SignalName} signal - The signal name in format 'dbName.signalName'
- * @returns {Object} Object containing raw value and physical value
- * @returns {number|number[]|undefined} rawValue - The raw value of the signal
- * @returns {any} physValue - The physical value or enum value of the signal
+ * @returns {CanSignal|LinSignal} The signal definition object (CanSignal for CAN signals, LinSignal for LIN signals)
  *
  * @example
  * ```ts
- * // Get signal value for CAN signal
+ * // Get CAN signal definition
  * const canSignal = getSignal('can.engineSpeed');
- * console.log('Raw value:', canSignal.rawValue); // e.g. 1000
- * console.log('Physical value:', canSignal.physValue); // e.g. '1000 rpm'
+ * console.log('Signal name:', canSignal.name);
+ * console.log('Signal length:', canSignal.length);
  *
- * // Get signal value for LIN signal
+ * // Get CAN signal value
+ * const canSignalWithValue = getSignal('can.engineSpeed');
+ * console.log('Raw value:', canSignalWithValue.value); // Raw signal value (number)
+ * console.log('Physical value:', canSignalWithValue.physValue); // Physical/scaled value or enum string
+ *
+ * // Get LIN signal definition
  * const linSignal = getSignal('lin.temperature');
- * console.log('Raw value:', linSignal.rawValue); // e.g. 50
- * console.log('Physical value:', linSignal.physValue); // e.g. '25°C'
+ * console.log('Signal name:', linSignal.signalName);
+ * console.log('Signal size:', linSignal.signalSizeBits);
+ *
+ * // Get LIN signal value
+ * const linSignalWithValue = getSignal('lin.temperature');
+ * console.log('Raw value:', linSignalWithValue.value); // Raw signal value (number or number[])
+ * console.log('Physical value:', linSignalWithValue.physValueEnum || linSignalWithValue.physValue); // Physical value or enum string
  * ```
  */
-declare function getSignal(signal: SignalName): {
-    rawValue: number | number[] | undefined;
-    physValue: any;
-};
+declare function getSignal(signal: SignalName): CanSignal | LinSignal;
 /**
  * Set a variable value
  *
@@ -2004,6 +2250,24 @@ declare function getSignal(signal: SignalName): {
  * ```
  */
 declare function setVar<T extends keyof VariableMap>(name: T, value: VariableMap[T]): void;
+/**
+ * Set multiple variable values at once
+ *
+ * @category Variable
+ * @param {Partial<VariableMap>} vars - An object where keys are variable names and values are the values to set
+ * @returns {void} - Returns nothing
+ *
+ * @example
+ * ```ts
+ * // Set multiple variables at once
+ * setVars({
+ *   'var1': 123,
+ *   'var2': 'hello',
+ *   'namespace.var3': [1, 2, 3, 4]
+ * });
+ * ```
+ */
+declare function setVars(vars: Partial<VariableMap>): void;
 /**
  * Get a variable value
  *
@@ -2132,6 +2396,35 @@ declare function linStartScheduler(schName: string, slot: number, device: string
  */
 declare function linPowerCtrl(power: boolean, device?: string): Promise<void>;
 /**
+ * Control the baud rate of a LIN device
+ *
+ * This function calculates the optimal prescale and bitMap combination to achieve
+ * the closest possible baud rate to the target value. The calculation uses the formula:
+ * `baudRate = 5_500_000 / (2^(prescale + 1) * bitMap)`
+ *
+ * @category LIN
+ * @param {number} baudRate - The target baud rate (e.g., 19200, 9600)
+ * @param {string} [device] - The optional device name when multiple devices are connected
+ * @returns {Promise<number>} - Returns a promise that resolves with the actual baud rate achieved
+ *
+ * @note This function is only available on LinCable devices (https://app.whyengineer.com/docs/um/hardware/lincable.html)
+ * @note The function automatically calculates the best combination of:
+ *       - lincableCustomBaudRatePrescale (range: 0-7, corresponding to /2, /4, /8, /16, /32, /64, /128, /256)
+ *       - lincableCustomBaudRateBitMap (range: 1-32)
+ *       to minimize the difference between target and actual baud rate.
+ *
+ * @example
+ * ```ts
+ * // Set baud rate to 19200
+ * const actualBaudRate = await linBaudRateCtrl(19200);
+ * console.log(`Actual baud rate: ${actualBaudRate}`);
+ *
+ * // Set baud rate on specific device
+ * const actualBaudRate = await linBaudRateCtrl(9600, 'Device1');
+ * ```
+ */
+declare function linBaudRateCtrl(baudRate: number, device?: string): Promise<number>;
+/**
  * Stop a LIN scheduler
  *
  * @category LIN
@@ -2171,6 +2464,286 @@ declare function setPwmDuty(value: {
     device?: string;
 }): Promise<void>;
 /**
+ * Serial port configuration options
+ *
+ * @category SerialPort
+ */
+interface SerialPortOptions {
+    /** Serial port path (e.g., 'COM3' on Windows, '/dev/ttyUSB0' on Linux) */
+    path: string;
+    /** Baud rate (e.g., 9600, 115200) */
+    baudRate: number;
+    /** Data bits: 5, 6, 7, or 8 (default: 8) */
+    dataBits?: 5 | 6 | 7 | 8;
+    /** Stop bits: 1, 1.5, or 2 (default: 1) */
+    stopBits?: 1 | 1.5 | 2;
+    /** Parity: 'none', 'even', 'odd', 'mark', or 'space' (default: 'none') */
+    parity?: 'none' | 'even' | 'odd' | 'mark' | 'space';
+    /** Enable RTS/CTS hardware flow control (default: false) */
+    rtscts?: boolean;
+    /** Enable XON software flow control (default: false) */
+    xon?: boolean;
+    /** Enable XOFF software flow control (default: false) */
+    xoff?: boolean;
+}
+/**
+ * Serial port information returned by list()
+ *
+ * @category SerialPort
+ */
+interface SerialPortInfo {
+    /** Port path (e.g., 'COM3', '/dev/ttyUSB0') */
+    path: string;
+    /** Manufacturer name */
+    manufacturer?: string;
+    /** Serial number */
+    serialNumber?: string;
+    /** PNP ID (Windows) */
+    pnpId?: string;
+    /** Location ID */
+    locationId?: string;
+    /** Friendly name */
+    friendlyName?: string;
+    /** Vendor ID */
+    vendorId?: string;
+    /** Product ID */
+    productId?: string;
+}
+/**
+ * Serial port control signals for setting
+ *
+ * @category SerialPort
+ */
+interface SerialPortSetSignals {
+    /** Break signal */
+    brk?: boolean;
+    /** Data Terminal Ready signal */
+    dtr?: boolean;
+    /** Request To Send signal */
+    rts?: boolean;
+}
+/**
+ * Serial port control signals status
+ *
+ * @category SerialPort
+ */
+interface SerialPortSignals {
+    /** Clear To Send signal */
+    cts: boolean;
+    /** Data Set Ready signal */
+    dsr: boolean;
+    /** Data Carrier Detect signal */
+    dcd: boolean;
+}
+/**
+ * Serial port data event payload
+ *
+ * @category SerialPort
+ */
+interface SerialPortDataEvent {
+    /** Serial port ID */
+    id: string;
+    /** Received data as number array */
+    data: number[];
+}
+/**
+ * Serial port error event payload
+ *
+ * @category SerialPort
+ */
+interface SerialPortErrorEvent {
+    /** Serial port ID */
+    id: string;
+    /** Error message */
+    error: string;
+}
+/**
+ * Serial port close event payload
+ *
+ * @category SerialPort
+ */
+interface SerialPortCloseEvent {
+    /** Serial port ID */
+    id: string;
+}
+/**
+ * SerialPort client class for serial communication in worker scripts.
+ * Provides methods to open, close, read, and write serial ports.
+ * Supports multiple simultaneous serial port connections.
+ * The port ID is automatically set to the path.
+ * Extends Emittery for event-based data handling.
+ *
+ * @category SerialPort
+ *
+ * @example
+ * ```ts
+ * import { SerialPortClient } from 'ECB';
+ *
+ * // Create a serial port instance with configuration
+ * const port = new SerialPortClient({
+ *   path: 'COM3',
+ *   baudRate: 115200
+ * });
+ *
+ * // Open the port
+ * await port.open();
+ *
+ * console.log(port.id); // 'COM3'
+ *
+ * // Handle incoming data using on('data')
+ * port.on('data', (data) => {
+ *   console.log('Received:', data.toString('hex'));
+ * });
+ *
+ * // Handle errors
+ * port.on('error', (err) => {
+ *   console.error('Error:', err.message);
+ * });
+ *
+ * // Handle close event
+ * port.on('close', () => {
+ *   console.log('Port closed');
+ * });
+ *
+ * // Write data
+ * await port.write(Buffer.from([0x01, 0x02, 0x03]));
+ *
+ * // Close when done
+ * await port.close();
+ * ```
+ */
+declare class SerialPortClient extends Emittery<{
+    data: Buffer;
+    error: Error;
+    close: undefined;
+}> {
+    private _id;
+    private _options;
+    private _isOpen;
+    /**
+     * Creates a new SerialPortClient instance
+     *
+     * @param options - Serial port configuration options
+     *
+     * @example
+     * ```ts
+     * const port = new SerialPortClient({
+     *   path: 'COM3',
+     *   baudRate: 115200
+     * });
+     * ```
+     */
+    constructor(options: SerialPortOptions);
+    /**
+     * Get the unique identifier of this serial port instance (equals to path)
+     *
+     * @returns The serial port ID (path)
+     *
+     * @example
+     * ```ts
+     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+     * console.log(port.id); // 'COM3'
+     * ```
+     */
+    get id(): string;
+    /**
+     * Check if the serial port is currently open
+     *
+     * @returns True if the port is open, false otherwise
+     *
+     * @example
+     * ```ts
+     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+     * console.log(port.isOpen); // false
+     * await port.open();
+     * console.log(port.isOpen); // true
+     * ```
+     */
+    get isOpen(): boolean;
+    /**
+     * Open the serial port
+     *
+     * @returns Promise that resolves when the port is opened
+     * @throws Error if the port is already open or if opening fails
+     *
+     * @example
+     * ```ts
+     * // Basic usage
+     * const port = new SerialPortClient({
+     *   path: 'COM3',
+     *   baudRate: 115200
+     * });
+     * await port.open();
+     *
+     * // Full configuration
+     * const port2 = new SerialPortClient({
+     *   path: '/dev/ttyUSB0',
+     *   baudRate: 9600,
+     *   dataBits: 8,
+     *   stopBits: 1,
+     *   parity: 'none',
+     *   rtscts: false,
+     *   xon: false,
+     *   xoff: false
+     * });
+     * await port2.open();
+     * ```
+     */
+    open(): Promise<void>;
+    /**
+     * Close the serial port
+     *
+     * @returns Promise that resolves when the port is closed
+     * @throws Error if the port is not open
+     *
+     * @example
+     * ```ts
+     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+     * await port.open();
+     * // ... do some work ...
+     * await port.close();
+     * ```
+     */
+    close(): Promise<void>;
+    /**
+     * Write data to the serial port
+     *
+     * @param data - Data to write (Buffer or array of bytes)
+     * @returns Promise that resolves when data is written and drained
+     * @throws Error if the port is not open
+     *
+     * @example
+     * ```ts
+     * const port = new SerialPortClient({ path: 'COM3', baudRate: 115200 });
+     * await port.open();
+     *
+     * // Write using Buffer
+     * await port.write(Buffer.from('Hello'));
+     *
+     * // Write using byte array
+     * await port.write([0x01, 0x02, 0x03, 0x04]);
+     *
+     * // Write hex string as buffer
+     * await port.write(Buffer.from('48454C4C4F', 'hex'));
+     * ```
+     */
+    write(data: Buffer | number[]): Promise<void>;
+    /**
+     * List all available serial ports on the system
+     *
+     * @returns Promise that resolves with array of port information
+     *
+     * @example
+     * ```ts
+     * const ports = await SerialPortClient.list();
+     * for (const port of ports) {
+     *   console.log(`${port.path} - ${port.friendlyName || 'Unknown'}`);
+     * }
+     * ```
+     */
+    static list(): Promise<SerialPortInfo[]>;
+}
+/**
  * Get a frame from database by name
  *
  * @category LIN
@@ -2202,7 +2775,15 @@ declare function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string
  * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
  * ```
  */
-declare function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage;
+declare function getFrameFromDB<T>(dbType: 'can', dbName: string, frameName: string): CanMessage<T>;
+interface AuthenticationSessionAccountInformation {
+    id: string;
+    label: string;
+}
+interface AuthenticationSession {
+    accessToken: string;
+    accountInformation: AuthenticationSessionAccountInformation;
+}
 
-export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, stopUdsSeq, test, workerEmit };
-export type { CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };
+export { CAN_ADDR_FORMAT, CAN_ADDR_TYPE, CAN_ID_TYPE, DiagJob, DiagRequest, DiagResponse, LinChecksumType, LinDirection, LinMode, RegisterEthVirtualEntity, SerialPortClient, SomeipMessageRequest, SomeipMessageResponse, Util, UtilClass, after, afterEach, before, beforeEach, describe, getFrameFromDB, getCheckSum as getLinCheckSum, getSignal, getVar, linBaudRateCtrl, linPowerCtrl, linStartScheduler, linStopScheduler, output, registerWorker, reporter, runUdsSeq, setPwmDuty, setSignal, setTxPending, setVar, setVars, stopUdsSeq, test, workerEmit };
+export type { AuthenticationSession, AuthenticationSessionAccountInformation, CanAddr, CanMessage, CanMsgType, EntityAddr, EthAddr, JobName, LinAddr, LinCableErrorInject, LinMsg, LinSignal, SerialPortCloseEvent, SerialPortDataEvent, SerialPortErrorEvent, SerialPortInfo, SerialPortOptions, SerialPortSetSignals, SerialPortSignals, ServiceEvent, ServiceId, ServiceItem, ServiceName, ServiceNameRecv, ServiceNameSend, SignalName, TesterInfo, TesterName, UdsAddress, UdsSeqName, VariableMap };

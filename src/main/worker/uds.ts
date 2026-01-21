@@ -64,14 +64,15 @@ export function registerWorker(methods: Record<string, Function>) {
 
 export function workerEmit(payload: any) {
   if (!isMainThread && parentPort) {
-    parentPort.postMessage({ type: 'event', payload })
+    parentPort.postMessage({ type: 'event', payload: cloneDeep(payload) })
   }
 }
 
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
-import { CAN_ID_TYPE, CanMessage } from '../share/can'
+import { CAN_ID_TYPE, CanMessage, CanSignal } from '../share/can'
+
 // import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
 import {
@@ -79,9 +80,10 @@ import {
   LinCableErrorInject,
   LinDirection,
   LinChecksumType,
-  getFrameData
+  getFrameData,
+  LinSignal
 } from '../share/lin'
-export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
+export type { LinDirection, LinChecksumType, LinMode, LinSignal } from '../share/lin'
 // export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }
@@ -456,9 +458,15 @@ import { describe as nodeDescribe } from 'node:test'
 import { VarUpdateItem } from '../global'
 import { DataSet, VarItem } from 'src/preload/data'
 
-import { getMessageData, writeMessageData } from 'src/renderer/src/database/dbc/calc'
-import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
+import {
+  getMessageData,
+  updateSignalPhys,
+  updateSignalRaw,
+  writeMessageData
+} from 'src/renderer/src/database/dbc/calc'
+
 import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
+
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
 
@@ -537,6 +545,7 @@ const allUdsSeq = ['{{{udsSeqName}}}'] as const
 interface Jobs {
   string: (data: Buffer) => string
 }
+
 /**
  * All services name config in Diagnostic Service.
  * @category UDS
@@ -1306,7 +1315,45 @@ export class DiagRequest extends Service {
     }
   }
 }
+function createCanMessageWrapper(msg: CanMessage) {
+  // Cache database and message definition to avoid repeated lookups
+  const db = msg.database ? global.dataSet.database.can[msg.database] : undefined
+  const msgDef = cloneDeep(db?.messages[msg.id])
 
+  if (db && msgDef) {
+    writeMessageData(msgDef, msg.data, db)
+    msg.signals = {}
+    for (const signal of Object.values(msgDef.signals)) {
+      msg.signals[signal.name] = new Proxy(signal, {
+        set(target, prop: keyof CanSignal, value: any) {
+          const ret = Reflect.set(target, prop, value)
+          if (prop === 'value') {
+            updateSignalRaw(target)
+          }
+          if (prop === 'physValue') {
+            updateSignalPhys(target, db)
+          }
+          return ret
+        }
+      })
+    }
+  }
+
+  return new Proxy(msg, {
+    get(target, prop: keyof CanMessage) {
+      if (prop === 'data' && msgDef) {
+        return getMessageData(msgDef)
+      }
+      return Reflect.get(target, prop)
+    },
+    set(target, prop: keyof CanMessage, value: any) {
+      if (prop === 'data' && db && msgDef) {
+        writeMessageData(msgDef, value, db)
+      }
+      return Reflect.set(target, prop, value)
+    }
+  })
+}
 /**
  * @category Util
  */
@@ -1397,82 +1444,60 @@ export class UtilClass {
   }
   /**
    * Registers an event listener for signal updates from CAN/LIN databases.
-   * The signal will be emitted whenever the specified signal value changes.
+   * The callback is invoked whenever the specified signal value changes.
    *
    * @param signal - The signal name to listen for (format: "database.signalName")
    * @param fc - The callback function invoked when the signal is updated
-   * @param fc.rawValue - The raw signal value (number or Buffer)
-   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
    *
    * @example
    * ```typescript
    * // Listen for engine RPM signal updates
-   * OnSignal("Engine.EngineRPM", ({ rawValue, physValue }) => {
-   *   console.log(`Engine RPM: ${physValue} (raw: ${rawValue})`)
+   * OnSignal("Engine.EngineRPM", (signal) => {
+   *   console.log(`Engine RPM: ${signal.physValue} (raw: ${signal.value})`)
    * })
    *
    * // Listen for gear position signal with enum values
-   * OnSignal("Transmission.GearPosition", ({ rawValue, physValue }) => {
-   *   console.log(`Gear: ${physValue}`) // Could be "Park", "Drive", "Reverse", etc.
+   * OnSignal("Transmission.GearPosition", (signal) => {
+   *   console.log(`Gear: ${signal.physValueEnum || signal.physValue}`) // "Park", "Drive", "Reverse", etc.
    * })
    *
    * // Async callback example
-   * OnSignal("Battery.Voltage", async ({ rawValue, physValue }) => {
-   *   if (physValue < 12.0) {
+   * OnSignal("Battery.Voltage", async (signal) => {
+   *   if ((signal.physValue as number) < 12.0) {
    *     await sendWarning("Low battery voltage detected!")
    *   }
    * })
    * ```
    */
-  OnSignal(
-    signal: SignalName,
-    fc: ({
-      rawValue,
-      physValue
-    }: {
-      rawValue: number | Buffer
-      physValue: any
-    }) => void | Promise<void>
-  ) {
+  OnSignal(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>) {
     this.event.on(signal as any, fc)
   }
 
   /**
    * Registers a one-time event listener for signal updates from CAN/LIN databases.
-   * The listener will be automatically removed after the first signal update.
+   * The listener is automatically removed after the first signal update.
    *
    * @param signal - The signal name to listen for (format: "database.signalName")
    * @param fc - The callback function invoked when the signal is updated (only once)
-   * @param fc.rawValue - The raw signal value (number or Buffer)
-   * @param fc.physValue - The physical/scaled signal value (could be enum string or scaled number)
    *
    * @example
    * ```typescript
    * // Wait for the first engine start signal
-   * OnSignalOnce("Engine.EngineStatus", ({ rawValue, physValue }) => {
-   *   if (physValue === "Running") {
+   * OnSignalOnce("Engine.EngineStatus", (signal) => {
+   *   if (signal.physValue === "Running") {
    *     console.log("Engine started successfully!")
    *   }
    * })
    *
    * // Wait for initialization complete signal
-   * OnSignalOnce("System.InitStatus", async ({ rawValue, physValue }) => {
-   *   if (physValue === "Complete") {
+   * OnSignalOnce("System.InitStatus", async (signal) => {
+   *   if (signal.physValue === "Complete") {
    *     await startDiagnosticSequence()
    *   }
    * })
    * ```
    */
-  OnSignalOnce(
-    signal: SignalName,
-    fc: ({
-      rawValue,
-      physValue
-    }: {
-      rawValue: number | Buffer
-      physValue: any
-    }) => void | Promise<void>
-  ) {
+  OnSignalOnce(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>) {
     this.event.once(signal as any).then(fc)
   }
 
@@ -1486,8 +1511,8 @@ export class UtilClass {
    * @example
    * ```typescript
    * // Define a callback function
-   * const rpmCallback = ({ rawValue, physValue }) => {
-   *   console.log(`RPM: ${physValue}`)
+   * const rpmCallback = (signal) => {
+   *   console.log(`RPM: ${signal.physValue}`)
    * }
    *
    * // Register the listener
@@ -1498,24 +1523,15 @@ export class UtilClass {
    *
    * // Anonymous functions cannot be removed easily, so use named functions:
    * // ❌ This won't work for removal:
-   * // OnSignal("Engine.RPM", ({ physValue }) => console.log(physValue))
+   * // OnSignal("Engine.RPM", (signal) => console.log(signal.physValue))
    *
    * // ✅ This will work for removal:
-   * const callback = ({ physValue }) => console.log(physValue)
+   * const callback = (signal) => console.log(signal.physValue)
    * OnSignal("Engine.RPM", callback)
    * OffSignal("Engine.RPM", callback)
    * ```
    */
-  OffSignal(
-    signal: SignalName,
-    fc: ({
-      rawValue,
-      physValue
-    }: {
-      rawValue: number | Buffer
-      physValue: any
-    }) => void | Promise<void>
-  ) {
+  OffSignal(signal: SignalName, fc: (signal: CanSignal | LinSignal) => void | Promise<void>) {
     this.event.off(signal as any, fc)
   }
   /**
@@ -1972,34 +1988,16 @@ export class UtilClass {
     // Convert Buffer objects if needed
     msg.data = Buffer.from(msg.data)
     //signal emit
-    let dbName: string | undefined
-    if (msg.device) {
-      const device = Object.values(global.dataSet.devices).find(
-        (device) => device.canDevice && device.canDevice.name == msg.device
-      )
-      if (device && device.canDevice!.database) {
-        const db = global.dataSet.database.can[device.canDevice!.database]
-        if (db) {
-          dbName = db.name
-          const message = db.messages[msg.id]
-          if (message) {
-            //apply message to signal
-            writeMessageData(message, msg.data, db)
-            //emit signal
-            for (const signal of Object.values(message.signals)) {
-              await this.event.emit(`${db.name}.${signal.name}` as any, {
-                rawValue: signal.value,
-                physValue: signal.physValueEnum || signal.physValue
-              })
-            }
-          }
-        }
+    msg = createCanMessageWrapper(msg)
+    if (msg.signals) {
+      const dbName = global.dataSet.database.can[msg.database!].name
+      //emit signal
+      for (const signal of Object.values(msg.signals as Record<string, CanSignal>)) {
+        await this.event.emit(`${dbName}.${signal.name}` as any, signal)
       }
     }
+
     await this.event.emit(`can.${msg.id}` as any, msg)
-    if (dbName && msg.name) {
-      await this.event.emit(`can.${dbName}.${msg.name}` as any, msg)
-    }
     await this.event.emit('can' as any, msg)
   }
   private async linMsg(msg: LinMsg) {
@@ -2034,10 +2032,7 @@ export class UtilClass {
               for (const signal of Object.values(frame.signals)) {
                 const signalDef = db.signals[signal.name]
                 if (signalDef) {
-                  await this.event.emit(`${db.name}.${signal.name}` as any, {
-                    rawValue: signalDef.value,
-                    physValue: signalDef.physValueEnum || signalDef.physValue
-                  })
+                  await this.event.emit(`${db.name}.${signal.name}` as any, signalDef)
                 }
               }
             }
@@ -2320,10 +2315,9 @@ export function setTxPending(
 ) {
   registerWorker({
     __setTxPending: (msg: CanMessage) => {
-      return func({
-        ...msg,
-        data: Buffer.from(msg.data)
-      })
+      msg.data = Buffer.from(msg.data)
+      msg = createCanMessageWrapper(msg)
+      return func(msg)
     }
   })
 }
@@ -2428,38 +2422,43 @@ export async function setSignal(
 }
 
 /**
- * Get a signal's raw value and physical value
+ * Get a signal definition object from the database
  *
  * @category LIN
  * @category CAN
  * @param {SignalName} signal - The signal name in format 'dbName.signalName'
- * @returns {Object} Object containing raw value and physical value
- * @returns {number|number[]|undefined} rawValue - The raw value of the signal
- * @returns {any} physValue - The physical value or enum value of the signal
+ * @returns {CanSignal|LinSignal} The signal definition object (CanSignal for CAN signals, LinSignal for LIN signals)
  *
  * @example
  * ```ts
- * // Get signal value for CAN signal
+ * // Get CAN signal definition
  * const canSignal = getSignal('can.engineSpeed');
- * console.log('Raw value:', canSignal.rawValue); // e.g. 1000
- * console.log('Physical value:', canSignal.physValue); // e.g. '1000 rpm'
+ * console.log('Signal name:', canSignal.name);
+ * console.log('Signal length:', canSignal.length);
  *
- * // Get signal value for LIN signal
+ * // Get CAN signal value
+ * const canSignalWithValue = getSignal('can.engineSpeed');
+ * console.log('Raw value:', canSignalWithValue.value); // Raw signal value (number)
+ * console.log('Physical value:', canSignalWithValue.physValue); // Physical/scaled value or enum string
+ *
+ * // Get LIN signal definition
  * const linSignal = getSignal('lin.temperature');
- * console.log('Raw value:', linSignal.rawValue); // e.g. 50
- * console.log('Physical value:', linSignal.physValue); // e.g. '25°C'
+ * console.log('Signal name:', linSignal.signalName);
+ * console.log('Signal size:', linSignal.signalSizeBits);
+ *
+ * // Get LIN signal value
+ * const linSignalWithValue = getSignal('lin.temperature');
+ * console.log('Raw value:', linSignalWithValue.value); // Raw signal value (number or number[])
+ * console.log('Physical value:', linSignalWithValue.physValueEnum || linSignalWithValue.physValue); // Physical value or enum string
  * ```
  */
-export function getSignal(signal: SignalName): {
-  rawValue: number | number[] | undefined
-  physValue: any
-} {
+export function getSignal(signal: SignalName): CanSignal | LinSignal {
   const s = signal.split('.')
   // 验证数据库是否存在
   const db = Object.values(global.dataSet.database.can).find((db) => db.name == s[0])
   if (db) {
     const signalName = s[1]
-    let ss: Signal | undefined
+    let ss: CanSignal | undefined
     for (const msg of Object.values(db.messages)) {
       for (const signal of Object.values(msg.signals)) {
         if (signal.name == signalName) {
@@ -2474,10 +2473,7 @@ export function getSignal(signal: SignalName): {
     if (!ss) {
       throw new Error(`Signal ${signalName} not found`)
     }
-    return {
-      rawValue: ss.value || ss.initValue,
-      physValue: ss.physValueEnum || ss.physValue
-    }
+    return ss
   } else {
     const linDb = Object.values(global.dataSet.database.lin).find((db) => db.name == s[0])
     if (linDb) {
@@ -2487,10 +2483,7 @@ export function getSignal(signal: SignalName): {
       if (!signal) {
         throw new Error(`Signal ${signalName} not found`)
       }
-      return {
-        rawValue: signal.value || signal.initValue,
-        physValue: signal.physValueEnum || signal.physValue
-      }
+      return signal
     }
   }
 
@@ -3371,13 +3364,13 @@ export function getFrameFromDB(dbType: 'lin', dbName: string, frameName: string)
  * const canFrame = getFrameFromDB('can', 'myCanDb', 'Frame2');
  * ```
  */
-export function getFrameFromDB(dbType: 'can', dbName: string, frameName: string): CanMessage
+export function getFrameFromDB<T>(dbType: 'can', dbName: string, frameName: string): CanMessage<T>
 // Implementation
-export function getFrameFromDB(
+export function getFrameFromDB<T>(
   dbType: 'lin' | 'can',
   dbName: string,
   frameName: string
-): LinMsg | CanMessage {
+): LinMsg | CanMessage<T> {
   if (dbType == 'lin') {
     const db = Object.values(global.dataSet.database.lin).find((db) => db.name == dbName)
     if (db) {
@@ -3480,7 +3473,7 @@ export function getFrameFromDB(
 
       if (msg) {
         // 构造 CanMessage
-        return {
+        return createCanMessageWrapper({
           id: msg.id,
           name: msg.name,
           dir: 'OUT',
@@ -3492,7 +3485,7 @@ export function getFrameFromDB(
             remote: false
           },
           database: db.id
-        }
+        })
       } else {
         throw new Error(`CAN message ${frameName} not found`)
       }

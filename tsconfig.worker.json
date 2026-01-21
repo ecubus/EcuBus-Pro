@@ -16,7 +16,12 @@
     "declaration": true,
     "types": ["node"],
     "baseUrl": ".",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "paths": {
+      "nodeCan/*": [
+        "src/main/share/*"
+      ]
+    }
   },
   "ts-node": {
     "compilerOptions": {

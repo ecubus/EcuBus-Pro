@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import { cloneDeep } from 'lodash'
+
 // import type { CanLOG } from '../log'
 
 export interface CanBitrate {
@@ -39,11 +40,170 @@ export interface CanBaseInfo {
 }
 
 /**
- * Represents a CAN (Controller Area Network) message.
+ * Represents a CAN (Controller Area Network) attribute that can be associated with network, node, message, signal, or environment variable entities.
  *
  * @category CAN
  */
-export interface CanMessage {
+export interface CanAttribute {
+  /**
+   * The name of the attribute.
+   */
+  name: string
+  /**
+   * The type of entity this attribute is associated with.
+   */
+  attrType: 'network' | 'node' | 'message' | 'signal' | 'envVar'
+  /**
+   * The data type of the attribute value.
+   */
+  type: 'INT' | 'FLOAT' | 'STRING' | 'ENUM' | 'HEX'
+  /**
+   * The minimum allowed value (for numeric types).
+   */
+  min?: number
+  /**
+   * The maximum allowed value (for numeric types).
+   */
+  max?: number
+  /**
+   * List of enumeration values (for ENUM type).
+   */
+  enumList?: string[]
+  /**
+   * The default value of the attribute.
+   */
+  defaultValue?: number | string
+  /**
+   * The current value of the attribute.
+   */
+  currentValue?: number | string
+}
+
+/**
+ * Represents a CAN (Controller Area Network) signal that defines the structure and properties of data within a CAN message.
+ *
+ * @category CAN
+ */
+export interface CanSignal {
+  /**
+   * The name of the signal.
+   */
+  name: string
+  /**
+   * The name of the CAN message this signal belongs to.
+   */
+  messageName: string
+  /**
+   * The starting bit position of the signal within the message.
+   */
+  startBit: number
+  /**
+   * The length of the signal in bits.
+   */
+  length: number
+  /**
+   * Indicates the byte order (endianness) of the signal.
+   * true = little-endian (Intel format), false = big-endian (Motorola format).
+   */
+  isLittleEndian: boolean
+  /**
+   * Indicates whether the signal represents a signed value.
+   * true = signed, false = unsigned.
+   */
+  isSigned: boolean
+  /**
+   * Scaling factor for converting between physical and raw values.
+   * Physical value = (Raw value * factor) + offset
+   */
+  factor: number
+  /**
+   * Offset for converting between physical and raw values.
+   * Physical value = (Raw value * factor) + offset
+   */
+  offset: number
+  /**
+   * The minimum physical value allowed for this signal.
+   */
+  minimum?: number
+  /**
+   * The maximum physical value allowed for this signal.
+   */
+  maximum?: number
+  /**
+   * The unit of measurement for the physical value (e.g., "V", "A", "m/s").
+   */
+  unit?: string
+  /**
+   * List of receiver node names that consume this signal.
+   */
+  receivers: string[]
+  /**
+   * Optional comment or description for the signal.
+   */
+  comment?: string
+  /**
+   * Reference to a value table for signal interpretation.
+   */
+  valueTable?: string
+  /**
+   * Array of labeled values for the signal (discrete value mappings).
+   */
+  values?: { label: string; value: number }[]
+  /**
+   * Collection of custom attributes associated with this signal.
+   */
+  attributes: Record<string, CanAttribute>
+  /**
+   * Multiplexer indicator string.
+   * "M" indicates this is a multiplexer signal, "m<value>" indicates a multiplexed signal.
+   */
+  multiplexerIndicator?: string
+  /**
+   * Defines the multiplexer range for this signal.
+   */
+  multiplexerRange?: {
+    /**
+     * Name of the multiplexer signal.
+     */
+    name: string
+    /**
+     * Array of multiplexer switch values that apply to this signal.
+     */
+    range: number[]
+  }
+  /**
+   * The initial/default value of the signal.
+   */
+  initValue?: number
+  /**
+   * The current raw value of the signal.
+   */
+  value?: number
+  /**
+   * The current physical value of the signal (converted using factor and offset).
+   */
+  physValue?: number | string
+  /**
+   * The current physical value represented as an enumeration label (if applicable).
+   */
+  physValueEnum?: string
+  /**
+   * The type of signal generator used for simulation.
+   */
+  generatorType?: string
+  /**
+   * The value type encoding.
+   * 0 = signed integer, 1 = unsigned integer, 2 = float.
+   */
+  valueType?: number
+}
+/**
+ * Represents a CAN (Controller Area Network) message.
+ *
+ * @category CAN
+ * @template T - The type of the signal data.
+ */
+export type CanMessage<T = any> = {
   /**
    * The name of the CAN message.
    */
@@ -84,17 +244,15 @@ export interface CanMessage {
    */
   isSimulate?: boolean
   /**
-   * The database name of the CAN message.
+   * The database id of the CAN message.
    */
   database?: string
+
   /**
    * The children signals of the CAN message.
    * internal use
    */
-  children?: {
-    name: string
-    data: string
-  }[]
+  signals?: T
 }
 
 /**

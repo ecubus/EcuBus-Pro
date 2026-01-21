@@ -9,7 +9,7 @@
           "handle": 0,
           "vendor": "simulate",
           "canfd": false,
-          "database": "",
+          "database": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
           "bitrate": {
             "sjw": 1,
             "timeSeg1": 13,
@@ -68811,9 +68811,9 @@
       },
       "a6773bbd-db04-405f-9a23-af32b1c12e70_ia": {
         "pos": {
-          "x": 950,
-          "y": 0,
-          "w": 700,
+          "x": 982,
+          "y": 472,
+          "w": 1023,
           "h": 400
         },
         "title": "cani",

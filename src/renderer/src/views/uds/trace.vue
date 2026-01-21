@@ -157,7 +157,7 @@ import {
   inject
 } from 'vue'
 
-import { CAN_ID_TYPE, CanMessage, CanMsgType, getDlcByLen } from 'nodeCan/can'
+import { CAN_ID_TYPE, CanMessage, CanMsgType, CanSignal, getDlcByLen } from 'nodeCan/can'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -293,7 +293,7 @@ function addToIdList(id: string) {
 
 interface CanBaseLog {
   method: 'canBase'
-  data: CanMessage
+  data: CanMessage<Record<string, CanSignal>>
 }
 interface IpBaseLog {
   method: 'ipBase'
@@ -567,7 +567,12 @@ function logDisplay({ values }: { values: LogItem[] }) {
         channel: val.instance,
         msgType: CanMsgType2Str(val.message.data.msgType),
         name: val.message.data.name,
-        children: val.message.data.children
+        children: Object.entries(val.message.data.signals || {}).map(([name, signal]) => {
+          return {
+            name: name,
+            data: `PHY:${signal.physValue} RAW:${signal.value}`
+          }
+        })
       })
     } else if (val.message.method == 'ipBase') {
       insertData({

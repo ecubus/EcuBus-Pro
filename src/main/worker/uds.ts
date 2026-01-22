@@ -2042,47 +2042,18 @@ export class UtilClass {
   private async linMsg(msg: LinMsg) {
     // Convert Buffer objects if needed
     msg.data = Buffer.from(msg.data)
-    //signal emit
-    let dbName: string | undefined
-    if (msg.device) {
-      const device = Object.values(global.dataSet.devices).find(
-        (device) => device.linDevice && device.linDevice.name == msg.device
-      )
-      if (device && device.linDevice!.database) {
-        const db = global.dataSet.database.lin[device.linDevice!.database]
 
-        if (db) {
-          dbName = db.name
-          if (!msg.name) {
-            for (const frame of Object.values(db.frames)) {
-              if (frame.id === msg.frameId) {
-                msg.name = frame.name
-                break
-              }
-            }
-          }
-          if (msg.name) {
-            //find frame by frameId
-            const frame = db.frames[msg.name]
-            if (frame && frame.signals) {
-              //apply message to signal
-              writeLinMessageData(frame, msg.data, db)
-              //emit signal
-              for (const signal of Object.values(frame.signals)) {
-                const signalDef = db.signals[signal.name]
-                if (signalDef) {
-                  await this.event.emit(`${db.name}.${signal.name}` as any, signalDef)
-                }
-              }
-            }
-          }
-        }
+    msg = createLinMessageWrapper(msg)
+
+    if (msg.signals) {
+      const dbName = global.dataSet.database.lin[msg.database!].name
+      //emit signal
+      for (const signal of Object.values(msg.signals as Record<string, LinSignal>)) {
+        await this.event.emit(`${dbName}.${signal.signalName}` as any, signal)
       }
     }
+
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
-    if (dbName && msg.name) {
-      await this.event.emit(`lin.${dbName}.${msg.name}` as any, msg)
-    }
     await this.event.emit('lin' as any, msg)
   }
   private async someipMsg(data: SomeipMessage) {
@@ -3442,7 +3413,7 @@ export function getFrameFromDB<T>(
           const containsFrame = eventFrame.frameNames[0]
           const frame = db.frames[containsFrame]
           if (frame) {
-            const ret: LinMsg = {
+            const ret = createLinMessageWrapper({
               frameId: eventFrame.frameId,
               data: Buffer.alloc(frame.frameSize + 1),
               direction: LinDirection.RECV,
@@ -3450,54 +3421,10 @@ export function getFrameFromDB<T>(
               database: db.id,
               name: eventFrame.name,
               isEvent: true
-            }
+            })
             return ret
           }
         }
-
-        // const a = data.frameName.split('.')
-        // const slaveNodeName = a[0]
-        // const id = a[1]
-
-        // //find slave node
-        // const slaveNode = db.nodeAttrs[slaveNodeName]
-        // if (slaveNode) {
-        //   if (id === 'ReadByIdentifier') {
-        //     const data = Buffer.alloc(8)
-        //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-        //     data.writeUInt8(0x6, 1)
-        //     data.writeUInt8(0xb2, 2)
-        //     data.writeUInt16LE(slaveNode.supplier_id, 4)
-        //     data.writeUInt16LE(slaveNode.function_id, 6)
-        //     const ret: LinMsg = {
-        //       frameId: 0x3c,
-        //       data,
-        //       direction: LinDirection.SEND,
-        //       checksumType: LinChecksumType.CLASSIC,
-        //       database: db.id,
-        //       name: 'ReadByIdentifier',
-        //       isEvent: false
-        //     }
-        //     return ret
-        //   } else if (id === 'AssignNAD') {
-        //     const data = Buffer.alloc(8)
-        //     data.writeUInt8(slaveNode.initial_NAD || 0, 0)
-        //     data.writeUInt8(0x6, 1)
-        //     data.writeUInt8(0xb0, 2)
-        //     data.writeUInt16LE(slaveNode.supplier_id, 3)
-        //     data.writeUInt16LE(slaveNode.function_id, 5)
-        //     const ret: LinMsg = {
-        //       frameId: 0x3c,
-        //       data,
-        //       direction: LinDirection.SEND,
-        //       checksumType: LinChecksumType.CLASSIC,
-        //       database: db.id,
-        //       name: 'AssignNAD',
-        //       isEvent: false
-        //     }
-        //     return ret
-        //   }
-        // }
       }
       throw new Error(`frame ${frameName} not found`)
     } else {

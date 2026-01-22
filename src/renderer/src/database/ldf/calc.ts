@@ -64,7 +64,7 @@ export function getPhysicalValue(
 }
 
 export function getRawValue(
-  physValue: number | string,
+  physValue: string,
   encodingTypes: SignalEncodeType['encodingTypes'],
   db: LDF
 ): { value?: number; usedEncode?: SignalEncodeType['encodingTypes'][0] } {

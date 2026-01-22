@@ -38,7 +38,7 @@ function parseLinData(raw: any) {
         const frame = db.frames[msg.name]
         // Process signals if available
         if (frame && frame.signals) {
-          msg.children = []
+          msg.signals = {}
           writeLinMessageData(frame, msg.data, db)
           for (const signal of frame.signals) {
             // Find signal definition
@@ -63,12 +63,7 @@ function parseLinData(raw: any) {
                 rawValue: signalDef.value
               }
             ])
-            msg.children.push({
-              name: signalDef.signalName,
-              data: `${signalDef.physValueEnum ? signalDef.physValueEnum : signalDef.physValue}  ${
-                signalDef.value
-              }`
-            })
+            msg.signals[signal.name] = signalDef
           }
         }
       }

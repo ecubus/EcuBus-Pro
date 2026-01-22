@@ -391,7 +391,7 @@ const handlePhysicalValueChange = (value: string, frameName: string, signal: Sig
   if (!db.value) return
   if (!signal.encodingType) return
   const encodeInfo = db.value.signalEncodeTypes[signal.encodingType]
-  const val = getRawValue(Number(value), encodeInfo.encodingTypes, db.value)
+  const val = getRawValue(value, encodeInfo.encodingTypes, db.value)
   if (val.value === undefined) {
     updateSignalDisplayValues(frameName, signal, true)
     return

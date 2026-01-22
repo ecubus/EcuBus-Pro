@@ -136,7 +136,7 @@ export interface LinCableErrorInject {
 /**
  * @category LIN
  */
-export interface LinMsg {
+export interface LinMsg<T = any> {
   frameId: number
   data: Buffer
   direction: LinDirection
@@ -150,13 +150,10 @@ export interface LinMsg {
   uuid?: string
   ts?: number
   /**
-   * The children signals of the CAN message.
+   * The children signals of the LIN message.
    * internal use
    */
-  children?: {
-    name: string
-    data: string
-  }[]
+  signals?: T
   /* advanced for ecubus lincable */
   lincable?: LinCableErrorInject
 }

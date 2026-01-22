@@ -451,7 +451,7 @@ interface LinCableErrorInject {
 /**
  * @category LIN
  */
-interface LinMsg {
+interface LinMsg<T = any> {
     frameId: number;
     data: Buffer;
     direction: LinDirection;
@@ -465,13 +465,10 @@ interface LinMsg {
     uuid?: string;
     ts?: number;
     /**
-     * The children signals of the CAN message.
-     * internal use
-     */
-    children?: {
-        name: string;
-        data: string;
-    }[];
+      * The children signals of the LIN message.
+      * internal use
+      */
+    signals?: T;
     lincable?: LinCableErrorInject;
 }
 /**

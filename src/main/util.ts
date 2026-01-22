@@ -4,6 +4,7 @@ import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import { isEqual } from 'lodash'
 import { CanSignal } from 'nodeCan/can'
+import { getPhysicalValue, getRawValue } from 'src/renderer/src/database/ldf/calc'
 
 export function updateLinSignalVal(db: LDF, signalName: string, value: number | number[] | string) {
   const signal = db.signals[signalName]
@@ -13,11 +14,26 @@ export function updateLinSignalVal(db: LDF, signalName: string, value: number | 
     if (!isEqual(lastValue, value)) {
       signal.update = true
     }
+    const encodingType = Object.entries(db.signalRep).find(([_, signals]) =>
+      signals.includes(signalName)
+    )?.[0]
     if (typeof value === 'string') {
       //find in encode
-      //TODO:
+
+      if (!encodingType) {
+        throw new Error(`Signal ${signalName} does not have encoding type`)
+      }
+      signal.physValue = value
+      const encodeInfo = db.signalEncodeTypes[encodingType]
+      const val = getRawValue(value, encodeInfo.encodingTypes, db)
+      signal.value = val.value
     } else {
       signal.value = value
+      if (encodingType && typeof value === 'number') {
+        const encodeInfo = db.signalEncodeTypes[encodingType]
+        const val = getPhysicalValue(value, encodeInfo.encodingTypes, db)
+        signal.physValue = val.numVal?.toString()
+      }
     }
   }
 }

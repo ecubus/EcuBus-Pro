@@ -180,7 +180,7 @@ import ExcelJS from 'exceljs'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
-import { LinDirection, LinMsg } from 'nodeCan/lin'
+import { LinDirection, LinMsg, LinSignal } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading, ElMessageBox } from 'element-plus'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
@@ -323,7 +323,7 @@ interface SomeipServiceValidLog {
 
 interface LinBaseLog {
   method: 'linBase'
-  data: LinMsg
+  data: LinMsg<Record<string, LinSignal>>
 }
 
 interface UdsLog {
@@ -570,7 +570,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         children: Object.entries(val.message.data.signals || {}).map(([name, signal]) => {
           return {
             name: name,
-            data: `PHY:${signal.physValue} RAW:${signal.value}`
+            data: `PHY:${signal.physValueEnum ? signal.physValueEnum : signal.physValue} RAW:${signal.value}`
           }
         })
       })
@@ -601,7 +601,14 @@ function logDisplay({ values }: { values: LogItem[] }) {
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
         name: val.message.data.name,
-        children: val.message.data.children
+        children: Object.entries(val.message.data.signals || {}).map(
+          ([name, signal]: [string, LinSignal]) => {
+            return {
+              name: name,
+              data: `PHY:${signal.physValueEnum ? signal.physValueEnum : signal.physValue} RAW:${signal.value}`
+            }
+          }
+        )
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name

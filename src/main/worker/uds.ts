@@ -96,7 +96,7 @@ export type { UdsAddress }
 import { dot } from 'node:test/reporters'
 import assert, { AssertionError } from 'node:assert'
 import { writeMessageData as writeLinMessageData } from 'src/renderer/src/database/ldf/calc'
-import { setSignal as setSignalNode } from '../util'
+import { setSignal as setSignalNode, updateLinSignalVal } from '../util'
 
 import { setVar as setVarMain, getVar as getVarMain } from '../var'
 /**
@@ -1349,6 +1349,45 @@ function createCanMessageWrapper(msg: CanMessage) {
     set(target, prop: keyof CanMessage, value: any) {
       if (prop === 'data' && db && msgDef) {
         writeMessageData(msgDef, value, db)
+      }
+      return Reflect.set(target, prop, value)
+    }
+  })
+}
+function createLinMessageWrapper(msg: LinMsg) {
+  // Cache database and message definition to avoid repeated lookups
+  const db = msg.database ? global.dataSet.database.lin[msg.database] : undefined
+  const msgDef = msg.name ? db?.frames[msg.name] : undefined
+
+  if (db && msgDef) {
+    writeLinMessageData(msgDef, msg.data, db)
+    msg.signals = {}
+    for (const signal of Object.values(msgDef.signals)) {
+      msg.signals[signal.name] = new Proxy(signal, {
+        set(target, prop: keyof CanSignal, value: any) {
+          const ret = Reflect.set(target, prop, value)
+          if (prop === 'value') {
+            updateLinSignalVal(db, signal.name, value)
+          }
+          if (prop === 'physValue') {
+            updateLinSignalVal(db, signal.name, String(value))
+          }
+          return ret
+        }
+      })
+    }
+  }
+
+  return new Proxy(msg, {
+    get(target, prop: keyof CanMessage) {
+      if (prop === 'data' && msgDef && db) {
+        return getFrameData(db, msgDef)
+      }
+      return Reflect.get(target, prop)
+    },
+    set(target, prop: keyof CanMessage, value: any) {
+      if (prop === 'data' && db && msgDef) {
+        writeLinMessageData(msgDef, value, db)
       }
       return Reflect.set(target, prop, value)
     }
@@ -3370,7 +3409,7 @@ export function getFrameFromDB<T>(
   dbType: 'lin' | 'can',
   dbName: string,
   frameName: string
-): LinMsg | CanMessage<T> {
+): LinMsg<T> | CanMessage<T> {
   if (dbType == 'lin') {
     const db = Object.values(global.dataSet.database.lin).find((db) => db.name == dbName)
     if (db) {

@@ -38,7 +38,7 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts,.vue --fix",
-    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:node": "tsgo --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "worker": "cd src/main/worker/secureAccess && npx node-gyp rebuild &&  cd ../../../.. && npx webpack --config webpack.config.js --mode production",
@@ -153,6 +153,7 @@
     "@types/node": "^22.9.1",
     "@types/path-browserify": "^1.0.3",
     "@types/uuid": "^10.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260124.1",
     "@vitejs/plugin-vue": "^5.0.3",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",

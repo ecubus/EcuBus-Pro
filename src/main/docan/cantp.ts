@@ -15,7 +15,7 @@ import {
 import { queue, QueueObject } from 'async'
 import { CAN_SOCKET, CanBase } from './base'
 import { v4 } from 'uuid'
-import { i } from 'vite/dist/node/types.d-aGj9QkWt'
+
 export interface CanTp {
   close: () => void
   writeTp(addr: CanAddr, data: Buffer): Promise<number>

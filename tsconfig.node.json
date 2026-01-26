@@ -24,11 +24,11 @@
       "electron-vite/node"
     ],
     "paths": {
+      "*": ["./*"],
       "nodeCan/*": [
-        "src/main/share/*"
-      ],
-    },
-    "baseUrl": ".",
+        "./src/main/share/*"
+      ]
+    }
   },
 
 }

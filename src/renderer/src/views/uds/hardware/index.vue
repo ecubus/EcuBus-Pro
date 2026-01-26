@@ -253,13 +253,13 @@ function nodeChange(id: string, name: string) {
   if (node) {
     node.data.label = name
   } else {
-    // 按照devices.devices的顺序计算索引（新设备已经在devices.devices中）
+    // 按照devices.devices的顺序计算索引（新设备已经在devices.devices中），与 buildTree 一致从 1 开始
     const deviceIndexMap = new Map<string, number>()
-    let index = 0
+    let index = 1
     for (const key of Object.keys(devices.devices)) {
       deviceIndexMap.set(key, index++)
     }
-    const newIndex = deviceIndexMap.get(id) ?? Object.keys(devices.devices).length - 1
+    const newIndex = deviceIndexMap.get(id) ?? Object.keys(devices.devices).length + 1
 
     treeRef.value?.append(
       {

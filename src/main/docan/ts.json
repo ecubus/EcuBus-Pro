@@ -9,8 +9,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": ".ScriptBuild",
-    "resolveJsonModule": true,
-    "baseUrl": "."
+    "resolveJsonModule": true
   }
 }
 

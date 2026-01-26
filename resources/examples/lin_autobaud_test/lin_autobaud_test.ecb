@@ -1,0 +1,93 @@
+{
+  "data": {
+    "devices": {
+      "98ba0bef-84fd-4152-b6f8-677d14fa10e8": {
+        "type": "lin",
+        "linDevice": {
+          "device": {
+            "label": "",
+            "handle": "COM8",
+            "id": ""
+          },
+          "name": "ECUBUS_0",
+          "id": "98ba0bef-84fd-4152-b6f8-677d14fa10e8",
+          "vendor": "ecubus",
+          "baudRate": 19200,
+          "mode": "MASTER"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "40255500-e0ac-4c8e-b3d5-0150cb9b94ba": {
+        "id": "40255500-e0ac-4c8e-b3d5-0150cb9b94ba",
+        "name": "测试配置 0",
+        "script": "test.ts",
+        "reportPath": "",
+        "channel": [],
+        "isTest": true
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 403,
+          "y": 239,
+          "w": 1099,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "test": {
+        "pos": {
+          "x": 1466,
+          "y": 234,
+          "w": 600,
+          "h": 400
+        },
+        "title": "test",
+        "label": "Test",
+        "id": "test",
+        "options": {}
+      }
+    },
+     "example": {
+      "catalog": "LIN"
+    }
+  }
+}

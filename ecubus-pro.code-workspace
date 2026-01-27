@@ -8,6 +8,7 @@
     }
   ],
   "settings": {
-    "typescript.tsserver.log": "off"
+    "typescript.tsserver.log": "off",
+    "typescript.experimental.useTsgo": false
   }
 }

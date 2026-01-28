@@ -1,4 +1,4 @@
-﻿# EcuBus-Pro CLI
+# EcuBus-Pro CLI
 
 EcuBus-Pro provides a command line interface (CLI) that allows you run your
 code without the GUI. It's useful for automation, testing, and debugging. The
@@ -35,6 +35,14 @@ ecb_cli seq xx.ecb Tester_1 --log-level=debug
 ```
 
 ![seq](./../../../media/um/seq.png)
+
+### Build command
+
+Compile TypeScript script files into JavaScript. See [Build command](./build.md) for syntax, options (e.g. minify/obfuscate, custom output dir), and examples.
+
+```bash
+ecb_cli build -h
+```
 
 ### PNPM command
 

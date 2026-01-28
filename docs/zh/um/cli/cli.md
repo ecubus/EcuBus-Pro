@@ -30,6 +30,14 @@ ecb_cli seq xx.ecb Tester_1 --log-level=debug
 
 ![seq](./../../../media/um/seq.png)
 
+### 构建命令
+
+将 TypeScript 脚本文件编译为 JavaScript。 有关语法、选项（例如压缩/混淆、自定义输出目录）和示例，请参阅[构建命令](./build.md)。
+
+```bash
+ecb_cli build -h
+```
+
 ### PNPM 命令
 
 `pnpm` 是一个 JavaScript 包管理器，速度快、磁盘空间效率高，并针对 monorepo 进行了优化。 更多详情请参阅 [pnpm 文档](https://pnpm.io/)。 我们将 `pnpm` 集成到 EcuBus-Pro CLI 中，因此您可以使用 `pnpm` 命令安装项目的依赖项。

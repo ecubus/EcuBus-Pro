@@ -18,9 +18,9 @@ ecb_cli build <project> <file> [options]
 
 - **-m, --minify**: 压缩并混淆输出代码。 这会使代码更难以阅读和逆向工程。 混淆包括控制流扁平化、字符串编码、死代码注入和标识符混淆。 混淆后会移除源映射，因此不支持调试混淆后的输出。
 
-- **-o, --output <dir>**：编译后 JavaScript 文件的输出目录。 默认为项目根目录下的 `.ScriptBuild`。 给定路径相对于项目目录。
+- **-o, --output &lt;dir&gt;**：编译后 JavaScript 文件的输出目录。 默认为项目根目录下的 `.ScriptBuild`。 给定路径相对于项目目录。
 
-- **-l, --log-level <level>**：设置日志级别（`error`、`warn`、`info`、`debug`）。 默认为 `info`。
+- **-l, --log-level &lt;level&gt;**：设置日志级别（`error`、`warn`、`info`、`debug`）。 默认为 `info`。
 
 - **-h, --help**：显示 build 命令的帮助信息。
 

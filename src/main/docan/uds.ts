@@ -1144,14 +1144,20 @@ const preDefineTypes: Record<string, string> = {
 // }
 
 export async function getBuildStatus(projectPath: string, projectName: string, script: string) {
+  //only check ts file
+  if (!script.endsWith('.ts')) {
+    return 'success'
+  }
   if (path.isAbsolute(script) === false) {
     script = path.join(projectPath, script)
   }
   const outFile = getJsPath(script, projectPath)
+
   if (fs.existsSync(outFile) === false) {
     //never build
     return 'info'
   }
+
   const scriptStat = await fsP.stat(script)
   const outStat = await fsP.stat(outFile)
   if (scriptStat.mtime.toString() != outStat.mtime.toString()) {
@@ -1297,7 +1303,7 @@ export * from './utli'
   if (!fs.existsSync(tsconfigFile)) {
     ;(tsconfig as any).files = []
     for (const tester of Object.values(data.tester)) {
-      if (tester.script) {
+      if (tester.script && tester.script.endsWith('.ts')) {
         if (path.isAbsolute(tester.script) === false) {
           ;((tsconfig as any).files as string[]).push(tester.script)
         } else {
@@ -1307,7 +1313,7 @@ export * from './utli'
       }
     }
     for (const node of Object.values(data.nodes)) {
-      if (node.script) {
+      if (node.script && node.script.endsWith('.ts')) {
         if (path.isAbsolute(node.script) === false) {
           ;((tsconfig as any).files as string[]).push(node.script)
         } else {
@@ -1323,7 +1329,7 @@ export * from './utli'
     const tsconfig = JSON.parse(contnet)
     tsconfig.files = tsconfig.files || []
     for (const tester of Object.values(data.tester)) {
-      if (tester.script) {
+      if (tester.script && tester.script.endsWith('.ts')) {
         if (path.isAbsolute(tester.script) === false) {
           if ((tsconfig.files as string[]).indexOf(tester.script) == -1) {
             ;(tsconfig.files as string[]).push(tester.script)
@@ -1337,7 +1343,7 @@ export * from './utli'
       }
     }
     for (const node of Object.values(data.nodes)) {
-      if (node.script) {
+      if (node.script && node.script.endsWith('.ts')) {
         if (path.isAbsolute(node.script) === false) {
           if ((tsconfig.files as string[]).indexOf(node.script) == -1) {
             ;(tsconfig.files as string[]).push(node.script)

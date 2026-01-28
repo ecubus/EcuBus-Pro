@@ -123,6 +123,8 @@ export class NodeClass {
       if (info.ext == '.ts') {
         const outDir = path.join(this.projectPath, '.ScriptBuild')
         jsPath = path.join(outDir, info.name + '.js')
+      } else {
+        jsPath = path.join(this.projectPath, jsPath)
       }
 
       this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)

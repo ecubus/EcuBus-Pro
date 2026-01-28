@@ -25,6 +25,7 @@ import { build as buildFunc } from './build'
 import { getAllSysVar } from '../main/share/sysVar'
 import { cloneDeep } from 'lodash'
 import { pluginMain } from './plugin'
+import 'src/renderer/src/helper'
 
 // import async_hooks from 'async_hooks';
 
@@ -328,22 +329,38 @@ test.action(async (project, name, options) => {
   //打印还有哪些pending的promise
 })
 
-const build = program.command('build').description('buils script file')
+const build = program.command('build').description('build script file')
 build.argument('<project>', 'EcuBus-Pro project path')
 build.argument('<file>', 'scriptfile')
+build.option('-m, --minify', 'minify and obfuscate the output code')
+build.option('-o, --output <dir>', 'output directory (default: .ScriptBuild)')
 
 addLoggingOption(build)
 build.action(async (project, file, options) => {
   createLog(options.logLevel, options.logFile)
   try {
     const { data, projectPath, projectName } = await parseProject(project)
+    // Resolve file path: if not absolute, try relative to project path first, then cwd
     if (!path.isAbsolute(file)) {
-      file = path.join(process.cwd(), file)
+      const projectRelativePath = path.join(projectPath, file)
+      const cwdRelativePath = path.join(process.cwd(), file)
+      if (fs.existsSync(projectRelativePath)) {
+        file = projectRelativePath
+      } else if (fs.existsSync(cwdRelativePath)) {
+        file = cwdRelativePath
+      } else {
+        // Default to project relative path for error message
+        file = projectRelativePath
+      }
     }
 
-    await buildFunc(projectPath, projectName, data, file, options.test)
+    await buildFunc(projectPath, projectName, data, file, {
+      isTest: options.test,
+      obfuscate: options.minify,
+      outputDir: options.output
+    })
   } catch (e: any) {
-    sysLog.error(e.message || 'failed to run test config')
+    sysLog.error(e.message || 'failed to build script')
     exit(1)
   }
 })

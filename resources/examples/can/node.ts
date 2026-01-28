@@ -17,6 +17,7 @@ Util.OnCan(0x142, async (data) => {
 
 let canMsg: CanMessage<ID111RCM_inertial2>
 Util.Init(() => {
+  console.log('Init Can Demo')
   canMsg = getFrameFromDB<ID111RCM_inertial2>('can', 'Model3CAN', 'ID111RCM_inertial2')
   console.log(`init value ${canMsg.signals.RCM_inertial2Checksum.value}`)
   canMsg.data = Buffer.from([0, 0, 0, 0, 0, 0, 0, 5])

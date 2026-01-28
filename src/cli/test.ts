@@ -38,7 +38,7 @@ export default async function main(
   }
 
   if (forceBuild) {
-    await build(projectPath, projectName, data, testItem.script, true)
+    await build(projectPath, projectName, data, testItem.script, { isTest: true })
   }
   const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap } = await deviceMain(
     projectPath,

@@ -1,6 +1,10 @@
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import esbuild from '../../resources/bin/esbuild.exe?asset&asarUnpack'
 
+// Disable javascript-obfuscator banner/advertisement messages
+process.env.BUILDKITE = '1'
+import JavaScriptObfuscator from 'javascript-obfuscator'
+
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
@@ -11,13 +15,9 @@ if (process.platform === 'darwin') {
 import path from 'path'
 import fs from 'fs'
 import fsP from 'fs/promises'
-import util from 'util'
-import { exec as execCb } from 'child_process'
 import { DataSet } from 'src/preload/data'
 import { compileTsc, getBuildStatus } from 'src/main/docan/uds'
 import { exit } from 'process'
-
-const exec = util.promisify(execCb)
 
 const libPath = path.dirname(dllLib)
 
@@ -28,35 +28,44 @@ export interface BuildOptions {
 }
 
 /**
- * Obfuscate JavaScript code using esbuild minification
+ * Obfuscate JavaScript code using javascript-obfuscator
  */
-async function obfuscateCode(
-  jsFilePath: string,
-  esbuildPath: string,
-  projectPath: string
-): Promise<void> {
-  const outputPath = jsFilePath.replace(/\.js$/, '.min.js')
+async function obfuscateCode(jsFilePath: string): Promise<void> {
+  const code = await fsP.readFile(jsFilePath, 'utf-8')
 
-  const args = [
-    `"${jsFilePath}"`,
-    '--minify',
-    '--keep-names=false',
-    '--target=node18',
-    `--outfile="${outputPath}"`,
-    '--platform=node',
-    '--format=cjs'
-  ].join(' ')
+  const obfuscatedCode = JavaScriptObfuscator.obfuscate(code, {
+    compact: true,
+    controlFlowFlattening: true,
+    controlFlowFlatteningThreshold: 0.75,
+    deadCodeInjection: true,
+    deadCodeInjectionThreshold: 0.4,
+    debugProtection: false,
+    disableConsoleOutput: false,
+    identifierNamesGenerator: 'hexadecimal',
+    log: false,
+    numbersToExpressions: true,
+    renameGlobals: false,
+    selfDefending: false,
+    simplify: true,
+    splitStrings: true,
+    splitStringsChunkLength: 10,
+    stringArray: true,
+    stringArrayCallsTransform: true,
+    stringArrayCallsTransformThreshold: 0.75,
+    stringArrayEncoding: ['base64'],
+    stringArrayIndexShift: true,
+    stringArrayRotate: true,
+    stringArrayShuffle: true,
+    stringArrayWrappersCount: 2,
+    stringArrayWrappersChainedCalls: true,
+    stringArrayWrappersParametersMaxCount: 4,
+    stringArrayWrappersType: 'function',
+    stringArrayThreshold: 0.75,
+    transformObjectKeys: true,
+    unicodeEscapeSequence: false
+  }).getObfuscatedCode()
 
-  const cmd = `"${path.resolve(esbuildPath)}" ${args}`
-
-  const { stderr } = await exec(cmd, { cwd: projectPath })
-
-  if (stderr && !stderr.includes('Done')) {
-    throw new Error(`Obfuscation failed: ${stderr}`)
-  }
-
-  // Replace original file with minified version
-  await fsP.rename(outputPath, jsFilePath)
+  await fsP.writeFile(jsFilePath, obfuscatedCode)
 }
 
 export async function build(
@@ -109,9 +118,9 @@ export async function build(
 
   // Apply obfuscation if requested
   if (obfuscate) {
-    sysLog.info('Obfuscating code with esbuild minification...')
+    sysLog.info('Obfuscating code with javascript-obfuscator...')
     try {
-      await obfuscateCode(jsFilePath, esbuild_executable, projectPath)
+      await obfuscateCode(jsFilePath)
       // Remove sourcemap since it won't be valid after obfuscation
       const mapFile = jsFilePath + '.map'
       if (fs.existsSync(mapFile)) {

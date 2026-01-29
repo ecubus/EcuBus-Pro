@@ -270,6 +270,14 @@ export function paramSetVal(param: Param, str: string | number) {
   switch (param.type) {
     case 'NUM':
       {
+        if (str.toString().includes(' ')) {
+          //remove all space and as hex
+          str = str.toString().replace(/ /g, '').toUpperCase()
+          if (!/^[0-9a-fA-F]+$/.test(str)) {
+            throw new Error('value should be a hex string')
+          }
+          str = '0x' + str
+        }
         const v = Number(str)
         if (Number.isNaN(v)) {
           throw new Error('value should be a number')

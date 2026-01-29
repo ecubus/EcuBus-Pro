@@ -175,6 +175,47 @@ export type TraceItem = {
   filterId?: string[]
 }
 
+/**
+ * Supported replay file formats
+ */
+export type ReplayFileFormat = 'blf' | 'asc' | 'csv' | 'trc' | 'log' | 'mf4'
+
+/**
+ * Replay mode - online with hardware or offline simulation
+ */
+export type ReplayMode = 'online' | 'offline'
+
+/**
+ * Replay item configuration for replaying BLF, ASC, and other log files
+ */
+export type ReplayItem = {
+  id: string
+  name: string
+  disabled?: boolean
+  /** File path to the replay file */
+  filePath: string
+  /** File format (auto-detected if not specified) */
+  format?: ReplayFileFormat
+  /** Target channels to replay to */
+  channel: string[]
+  /**
+   * Replay mode
+   * - 'online': Replay to actual hardware devices (real-time transmission)
+   * - 'offline': Simulation mode for analysis without hardware
+   */
+  mode: ReplayMode
+  /**
+   * Speed factor for replay
+   * 1.0 = original speed, 2.0 = 2x speed, 0.5 = half speed, 0 = as fast as possible
+   */
+  speedFactor?: number
+  /**
+   * Number of times to repeat the replay
+   * undefined/1 = play once, 0 = infinite loop
+   */
+  repeatCount?: number
+}
+
 export interface DataSet {
   devices: Record<string, UdsDevice>
   tester: Record<string, TesterInfo>
@@ -196,5 +237,6 @@ export interface DataSet {
   panels: Record<string, PanelItem>
   logs: Record<string, LogItem>
   traces: Record<string, TraceItem>
+  replays: Record<string, ReplayItem>
   pluginData: Record<string, any>
 }

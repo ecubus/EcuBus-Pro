@@ -12,12 +12,26 @@ import nodeConfig from './nodeConfig.vue'
 import { h } from 'vue'
 import { useProjectStore } from '@r/stores/project'
 import { cloneDeep, get } from 'lodash'
-import { Inter, LogItem, NodeItem } from 'src/preload/data'
+import { Inter, LogItem, NodeItem, ReplayItem } from 'src/preload/data'
 import { nextTick } from 'vue'
 import testConfig from '@iconify/icons-grommet-icons/test'
 import { useDark } from '@vueuse/core'
 import logConfig from './logConfig.vue'
+import replayConfig from './replayConfig.vue'
 import i18next from 'i18next'
+
+// Global map to store all ceil instances for cross-component access
+export const ceilInstanceMap = new Map<string, udsCeil>()
+
+// Get ceil instance by ID
+export function getCeilInstance(id: string): udsCeil | undefined {
+  return ceilInstanceMap.get(id)
+}
+
+// Get ceil instance by ID with type casting
+export function getCeilInstanceAs<T extends udsCeil>(id: string): T | undefined {
+  return ceilInstanceMap.get(id) as T | undefined
+}
 
 export interface udsBase {
   name: string
@@ -162,6 +176,10 @@ export const colorMap: Record<string, { fill: string; color: string }> = {
   log: {
     fill: 'rgb(202, 176, 9)',
     color: '#FFFFFF'
+  },
+  replay: {
+    fill: 'rgb(76, 175, 80)',
+    color: '#FFFFFF'
   }
 }
 
@@ -236,7 +254,11 @@ export class udsCeil {
           y: this.y
         })
 
-        nodeXOffset = newPos.x - 200
+        if (this.data.type === 'replay') {
+          replayXOffset = newPos.x - 200
+        } else {
+          nodeXOffset = newPos.x - 200
+        }
       } else if (button.lockX && !button.lockY) {
         this.y = newPos.y
         cell.set('position', {
@@ -381,6 +403,9 @@ export class udsCeil {
       view.addTools(toolsView)
       view.hideTools()
     }
+
+    // Register this instance in the global map
+    ceilInstanceMap.set(e.id, this)
   }
 
   addDocumentIcon() {
@@ -397,7 +422,7 @@ export class udsCeil {
   getId() {
     return this.data.id
   }
-  on(event: 'edit' | 'add' | 'remove' | 'panel', cb: (ceil: udsCeil) => void) {
+  on(event: 'edit' | 'add' | 'remove' | 'panel' | 'play', cb: (ceil: udsCeil) => void) {
     this.events.on(event, cb)
   }
   changeName(name: string) {
@@ -416,6 +441,8 @@ export class udsCeil {
     }
   }
   destroy() {
+    // Remove from global map
+    ceilInstanceMap.delete(this.data.id)
     this.rect.remove()
     this.events.removeAllListeners()
   }
@@ -528,6 +555,103 @@ export class Log extends udsCeil {
   }
 }
 
+export class Replay extends udsCeil {
+  private isPlaying = false
+  private paper: joint.dia.Paper
+
+  constructor(
+    paper: joint.dia.Paper,
+    graph: joint.dia.Graph,
+    id: string,
+    data: ReplayItem,
+    x: number,
+    y: number
+  ) {
+    super(
+      paper,
+      graph,
+      {
+        name: data.name,
+        type: 'replay',
+        id: id
+      },
+      x,
+      y,
+      {
+        panel: false,
+        edit: true,
+        remove: true,
+        lockX: false,
+        lockY: true
+      }
+    )
+    this.paper = paper
+    this.addReplayIcon()
+    this.addPlayButton()
+  }
+
+  addReplayIcon() {
+    // Add replay SVG icon to the bottom-right corner
+    this.rect.attr('documentIcon', {
+      d: 'M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z',
+      fill: 'currentColor',
+      transform: 'translate(132, 82) scale(0.5)',
+      'pointer-events': 'none',
+      opacity: 0.7
+    })
+  }
+
+  addPlayButton() {
+    // Add play button circle in top-left corner (always visible)
+    this.rect.attr('cornerCircle', {
+      r: 10,
+      cx: 12,
+      cy: 28,
+      fill: '#4CAF50',
+      stroke: '#FFFFFF',
+      'stroke-width': 2,
+      cursor: 'pointer',
+      event: 'element:playButton:pointerdown'
+    })
+
+    // Add play icon (triangle) - positioned inside the circle
+    this.rect.attr('testIcon', {
+      d: 'M8 5v14l11-7z',
+      fill: '#FFFFFF',
+      transform: 'translate(4, 20) scale(0.65)',
+      'pointer-events': 'none'
+    })
+
+    // Add click handler via paper events
+    this.paper.on('element:playButton:pointerdown', (elementView: joint.dia.ElementView) => {
+      if (elementView.model.id === this.rect.id) {
+        this.events.emit('play', this)
+      }
+    })
+  }
+
+  setPlaying(playing: boolean) {
+    this.isPlaying = playing
+    if (playing) {
+      this.rect.attr('body/stroke', '#00C853')
+      this.rect.attr('body/strokeWidth', 3)
+      // Update to stop icon (square) and red color
+      this.rect.attr('cornerCircle/fill', '#F44336')
+      this.rect.attr('testIcon/d', 'M6 6h12v12H6z')
+    } else {
+      this.rect.attr('body/stroke', '#000000')
+      this.rect.attr('body/strokeWidth', 2)
+      // Update to play icon (triangle) and green color
+      this.rect.attr('cornerCircle/fill', '#4CAF50')
+      this.rect.attr('testIcon/d', 'M8 5v14l11-7z')
+    }
+  }
+
+  getIsPlaying() {
+    return this.isPlaying
+  }
+}
+
 export class Node extends udsCeil {
   vendor = ''
   constructor(
@@ -607,6 +731,7 @@ export interface udsLoger {
 }
 let deviceYOffset = 0
 let nodeXOffset = -200
+let replayXOffset = -200
 export class UDSView {
   graph: joint.dia.Graph
   paper?: joint.dia.Paper
@@ -626,6 +751,7 @@ export class UDSView {
   clear() {
     deviceYOffset = 0
     nodeXOffset = -200
+    replayXOffset = -200
     this.graph.clear()
     this.ceilMap.clear()
   }
@@ -771,8 +897,7 @@ export class UDSView {
         },
         message: () =>
           h(nodeConfig, {
-            editIndex: id,
-            ceil: ceil
+            editIndex: id
           })
       }).catch(null)
     })
@@ -837,10 +962,64 @@ export class UDSView {
           },
           message: () =>
             h(logConfig, {
-              editIndex: id,
-              ceil: ceil
+              editIndex: id
             })
         }).catch(null)
+      })
+      return element
+    } else {
+      return e
+    }
+  }
+  addReplay(id: string, data: ReplayItem) {
+    const e = this.ceilMap.get(id)
+    if (!e) {
+      const element = new Replay(this.paper!, this.graph, id, data, replayXOffset, -200)
+      replayXOffset -= 250
+
+      this.ceilMap.set(id, element)
+      element.on('remove', (ceil) => {
+        const dataBase = useDataStore()
+        const replayElement = ceil as Replay
+        delete dataBase.replays[ceil.getId()]
+        replayElement.destroy()
+        this.graph.removeCells([ceil.rect])
+        this.layout.removeWin(ceil.getId())
+      })
+      element.on('edit', (ceil) => {
+        const dataBase = useDataStore()
+        const id = ceil.getId()
+        const item = dataBase.replays[id]
+        ElMessageBox({
+          buttonSize: 'small',
+          showConfirmButton: false,
+          title: i18next.t('uds.network.udsView.dialogs.editReplay', { name: item.name }),
+          showClose: false,
+          customStyle: {
+            width: '600px',
+            maxWidth: 'none'
+          },
+          message: () =>
+            h(replayConfig, {
+              editIndex: id
+            })
+        }).catch(null)
+      })
+      element.on('play', (ceil) => {
+        const dataBase = useDataStore()
+        const replayElement = ceil as Replay
+        const id = ceil.getId()
+        const item = dataBase.replays[id]
+
+        if (replayElement.getIsPlaying()) {
+          // Stop replay
+          window.electron.ipcRenderer.invoke('ipc-replay-stop', id)
+          replayElement.setPlaying(false)
+        } else {
+          // Start replay
+          window.electron.ipcRenderer.invoke('ipc-replay-start', id, item)
+          replayElement.setPlaying(true)
+        }
       })
       return element
     } else {

@@ -5,7 +5,7 @@ const sp = new SerialPortClient({
   baudRate: 115200
 })
 
-sp.on('data', (data: Buffer) => {
+sp.on('data', (data) => {
   console.log('data received:', data)
 })
 Util.Init(async () => {

@@ -68,7 +68,7 @@ import {
   onUnmounted,
   watchEffect
 } from 'vue'
-import { UDSView, udsCeil, udsHardware, Node as UdsNode } from './udsView'
+import { UDSView, udsCeil, udsHardware, Node as UdsNode, Replay as UdsReplay } from './udsView'
 import fullscreenIcon from '@iconify/icons-material-symbols/fullscreen'
 import zoomInRounded from '@iconify/icons-material-symbols/zoom-in-rounded'
 import zoomOutRounded from '@iconify/icons-material-symbols/zoom-out-rounded'
@@ -92,6 +92,7 @@ import networkNode from '@iconify/icons-material-symbols/network-node'
 import nodeIcon from '@iconify/icons-material-symbols/variables-outline-rounded'
 import { useProjectStore } from '@r/stores/project'
 import soaIcon from '@iconify/icons-material-symbols/linked-services-outline'
+import replayIcon from '@iconify/icons-material-symbols/replay'
 import i18next from 'i18next'
 
 interface Tree {
@@ -326,6 +327,14 @@ const tData = computed(() => {
     children: [],
     id: 'log'
   }
+  const replay: Tree = {
+    type: 'replay',
+    label: i18next.t('uds.network.tree.replays'),
+    canAdd: true,
+    icon: replayIcon,
+    children: [],
+    id: 'replay'
+  }
   for (const key of Object.keys(dataBase.nodes)) {
     const item = dataBase.nodes[key]
 
@@ -352,6 +361,18 @@ const tData = computed(() => {
     }
     log.children.push(cc)
   }
+  for (const key of Object.keys(dataBase.replays)) {
+    const item = dataBase.replays[key]
+    const cc: Tree = {
+      type: 'replay',
+      label: item.name,
+      canAdd: false,
+      children: [],
+      icon: replayIcon,
+      id: key
+    }
+    replay.children.push(cc)
+  }
   const someip: Tree = {
     type: 'someip',
     label: i18next.t('uds.network.tree.someip'),
@@ -368,7 +389,7 @@ const tData = computed(() => {
   addChild(someip)
 
   // addChild(node)
-  return [can, lin, eth, someip, pwm, node, log]
+  return [can, lin, eth, someip, pwm, node, log, replay]
 })
 
 const defaultProps = {
@@ -622,6 +643,34 @@ watchEffect(() => {
         }
       }
     }
+    //check replay - remove deleted replays
+    for (const el of udsView.ceilMap.values()) {
+      if (el instanceof UdsReplay) {
+        if (dataBase.replays[el.getId()] == undefined) {
+          udsView.removeElement(el.getId())
+        }
+      }
+    }
+    //add new replays
+    for (const key of Object.keys(dataBase.replays)) {
+      udsView.addReplay(key, dataBase.replays[key])
+    }
+    //check replay links
+    for (const from of Object.keys(dataBase.replays)) {
+      for (const to of Object.keys(dataBase.devices)) {
+        if (dataBase.replays[from].channel.indexOf(to) == -1) {
+          udsView.removeLink(from, to)
+        }
+      }
+    }
+    //add new replay links
+    for (const key of Object.keys(dataBase.replays)) {
+      for (const to of dataBase.replays[key].channel) {
+        if (dataBase.devices[to]) {
+          udsView.addLink(key, to)
+        }
+      }
+    }
   }
 })
 
@@ -670,6 +719,20 @@ function buildView() {
     }
     for (const to of dataBase.logs[key].channel) {
       udsView.addLink(to, key)
+    }
+  }
+  //add replay
+  for (const key of Object.keys(dataBase.replays)) {
+    udsView.addReplay(key, dataBase.replays[key])
+    //check devices if device is not in the list remove it
+    const ff = dataBase.replays[key].channel.filter((v) => {
+      return dataBase.devices[v] != undefined
+    })
+    if (ff.length != dataBase.replays[key].channel.length) {
+      dataBase.replays[key].channel = ff
+    }
+    for (const to of dataBase.replays[key].channel) {
+      udsView.addLink(key, to)
     }
   }
   fitPater()
@@ -842,6 +905,27 @@ function addNode(type: string, parent?: Tree) {
     // add link
     for (const key of devices) {
       udsView.addLink(id, key)
+    }
+  } else if (type == 'replay') {
+    const id = v4()
+    const devices: string[] = []
+    dataBase.replays[id] = {
+      name: i18next.t('uds.network.names.replayTemplate', {
+        count: Object.keys(dataBase.replays).length + 1
+      }),
+      id: id,
+      filePath: '',
+      format: 'asc',
+      channel: [],
+      channelMap: [],
+      mode: 'online',
+      speedFactor: 1,
+      repeatCount: 1
+    }
+    udsView.addReplay(id, dataBase.replays[id])
+    // add link
+    for (const key of devices) {
+      udsView.addLink(key, id)
     }
   }
   //fit

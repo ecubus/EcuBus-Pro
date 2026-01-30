@@ -369,6 +369,7 @@ import diagServiceIcon from '@iconify/icons-material-symbols/home-repair-service
 import stepIcon from '@iconify/icons-material-symbols/step-rounded'
 import deviceIcon from '@iconify/icons-material-symbols/important-devices-outline'
 import logIcon from '@iconify/icons-material-symbols/text-ad-outline-rounded'
+import replayIcon from '@iconify/icons-material-symbols/replay'
 import msgIcon from '@iconify/icons-material-symbols/terminal'
 import toolIcon from '@iconify/icons-material-symbols/service-toolbox-outline-rounded'
 import userIcon from '@iconify/icons-material-symbols/person-outline'
@@ -388,6 +389,7 @@ import { cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import * as joint from '@joint/core'
 import { UDSView } from './network/udsView'
+import replayConfig from './network/replayConfig.vue'
 import {
   ElMessage,
   ElMessageBox,
@@ -605,6 +607,24 @@ const InteractDropdown = {
           ? [
               h(ElDropdownItem, { disabled: true }, () =>
                 i18next.t('uds.dropdowns.interact.noInteraction')
+              )
+            ]
+          : [])
+      ])
+  }
+}
+
+const ReplayDropdown = {
+  setup() {
+    return () =>
+      h(ElDropdownMenu, { size: 'small' }, () => [
+        ...Object.entries(dataBase.replays).map(([key, item]) =>
+          h(ElDropdownItem, { key, command: key }, () => (item as any).name)
+        ),
+        ...(Object.keys(dataBase.replays).length === 0
+          ? [
+              h(ElDropdownItem, { disabled: true }, () =>
+                i18next.t('uds.dropdowns.replay.noReplay')
               )
             ]
           : [])
@@ -999,6 +1019,14 @@ const baseTabsConfig = computed<TabConfig[]>(() => [
         icon: interIcon,
         onCommand: openIA,
         dropdownContent: InteractDropdown
+      },
+      {
+        type: 'dropdown',
+        label: 'Replay',
+        labelKey: 'uds.toolbar.replay',
+        icon: replayIcon,
+        onCommand: openReplay,
+        dropdownContent: ReplayDropdown
       }
     ]
   },
@@ -1228,6 +1256,26 @@ function openIA(testerIndex: string) {
       }
     })
   }
+}
+
+function openReplay(replayId: string) {
+  const item = dataBase.replays[replayId]
+  if (!item) return
+
+  ElMessageBox({
+    buttonSize: 'small',
+    showConfirmButton: false,
+    title: i18next.t('uds.network.udsView.dialogs.editReplay', { name: item.name }),
+    showClose: false,
+    customStyle: {
+      width: '600px',
+      maxWidth: 'none'
+    },
+    message: () =>
+      h(replayConfig, {
+        editIndex: replayId
+      })
+  }).catch(null)
 }
 function openSequence(testerIndex: string) {
   layoutMaster.addWin('testerSequence', `${testerIndex}_sequence`, {

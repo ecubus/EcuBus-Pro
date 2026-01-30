@@ -199,14 +199,13 @@ import { useProjectStore } from '@r/stores/project'
 import { ElMessageBox, FormInstance, FormRules, TransferKey } from 'element-plus'
 import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
-import { udsCeil } from './udsView'
+import { getCeilInstance } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
 
 const activeName = ref('general')
 const props = defineProps<{
   editIndex: string
-  ceil: udsCeil
 }>()
 const globalStart = useGlobalStart()
 const editIndex = toRef(props, 'editIndex')
@@ -497,9 +496,11 @@ const handleConfirm = async () => {
       // 验证通过，更新数据
       dataBase.nodes[editIndex.value] = cloneDeep(formData.value)
 
-      props.ceil.changeName(dataBase.nodes[editIndex.value].name)
-      // const t=props.ceil.getNodeBottomName()
-      props.ceil.changeNameBottom(dataBase.nodes[editIndex.value].workNode || '')
+      const ceil = getCeilInstance(editIndex.value)
+      if (ceil) {
+        ceil.changeName(dataBase.nodes[editIndex.value].name)
+        ceil.changeNameBottom(dataBase.nodes[editIndex.value].workNode || '')
+      }
 
       ElMessageBox.close()
     }

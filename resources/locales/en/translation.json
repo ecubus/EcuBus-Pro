@@ -909,6 +909,7 @@
       "devices": "Devices",
       "network": "Network",
       "interact": "Interact",
+      "replay": "Replay",
       "udsTester": "UDS Tester",
       "services": "Services",
       "sequence": "Sequence",
@@ -992,6 +993,9 @@
       },
       "interact": {
         "noInteraction": "No Interaction"
+      },
+      "replay": {
+        "noReplay": "No Replay"
       },
       "service": {
         "noTester": "No Tester"
@@ -2163,6 +2167,7 @@
         "node": "Node",
         "pwm": "PWM",
         "loggers": "Loggers",
+        "replays": "Replays",
         "someip": "SomeIP"
       },
       "dialogs": {
@@ -2174,6 +2179,7 @@
       "names": {
         "nodeTemplate": "Node {{count}}",
         "loggerTemplate": "Logger {{count}}",
+        "replayTemplate": "Replay {{count}}",
         "iaTemplate": "{{label}} IA"
       },
       "logConfig": {
@@ -2240,6 +2246,74 @@
           "logFile": "Log File"
         }
       },
+      "replayConfig": {
+        "tabs": {
+          "general": "General",
+          "connected": "Connected",
+          "channelMap": "Channel Map"
+        },
+        "labels": {
+          "name": "Name",
+          "replayEnable": "Replay Enable",
+          "filePath": "File Path",
+          "format": "Format",
+          "mode": "Mode",
+          "speedFactor": "Speed Factor",
+          "repeatCount": "Repeat Count"
+        },
+        "placeholders": {
+          "name": "Name",
+          "replayFilePath": "Replay file path",
+          "format": "Format",
+          "mode": "Mode"
+        },
+        "options": {
+          "disabled": "Disabled",
+          "enabled": "Enabled",
+          "ascFormat": "ASC Format",
+          "blfFormat": "Vector BLF Format",
+          "trcFormat": "PEAK TRC Format",
+          "mf4Format": "MDF4 Format",
+          "onlineMode": "Online (Hardware)",
+          "offlineMode": "Offline (Simulation)"
+        },
+        "hints": {
+          "speedFactor": "1.0 = original, 0 = as fast as possible",
+          "repeatCount": "0 = infinite loop"
+        },
+        "buttons": {
+          "browse": "Browse",
+          "cancel": "Cancel",
+          "ok": "OK",
+          "play": "Play",
+          "stop": "Stop"
+        },
+        "transfer": {
+          "valid": "Valid",
+          "assigned": "Assigned"
+        },
+        "channelMap": {
+          "hint": "Map log file channels to connected devices. One channel can send to multiple devices.",
+          "logChannel": "Log Channel",
+          "channel": "Channel",
+          "arrow": "",
+          "targetDevice": "Target Device",
+          "targetDevices": "Target Devices",
+          "selectDevice": "Select device",
+          "selectDevices": "Select devices"
+        },
+        "validation": {
+          "replayNameExists": "The replay name already exists",
+          "inputReplayName": "Please input replay name",
+          "inputReplayFilePath": "Please input replay file path"
+        },
+        "dialog": {
+          "selectReplayFile": "Select Replay File",
+          "allFiles": "All Files",
+          "allLogFiles": "All Log Files",
+          "replayFile": "Replay File"
+        }
+      },
       "nodeConfig": {
         "tabs": {
           "general": "General",
@@ -2300,6 +2374,7 @@
         "dialogs": {
           "editNode": "Edit Node {{name}}",
           "editLog": "Edit Log {{name}}",
+          "editReplay": "Edit Replay {{name}}",
           "selectWorkNode": "Please select a work node"
         }
       },

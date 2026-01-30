@@ -188,6 +188,16 @@ export type ReplayMode = 'online' | 'offline'
 /**
  * Replay item configuration for replaying BLF, ASC, and other log files
  */
+/**
+ * Channel mapping from log file channel to device channels
+ */
+export type ReplayChannelMap = {
+  /** Channel number/index in the log file */
+  logChannel: number
+  /** Device IDs to replay to (supports multiple targets) */
+  deviceIds: string[]
+}
+
 export type ReplayItem = {
   id: string
   name: string
@@ -198,6 +208,11 @@ export type ReplayItem = {
   format?: ReplayFileFormat
   /** Target channels to replay to */
   channel: string[]
+  /**
+   * Channel mapping from log file to connected devices
+   * Maps log file channel numbers to device IDs
+   */
+  channelMap?: ReplayChannelMap[]
   /**
    * Replay mode
    * - 'online': Replay to actual hardware devices (real-time transmission)

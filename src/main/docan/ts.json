@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2022",
     "skipLibCheck": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "sourceMap": true,
     "outDir": ".ScriptBuild",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": [
+        "node",
+        "ECB"
+    ]
   }
 }
 

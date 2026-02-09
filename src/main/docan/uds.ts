@@ -1493,7 +1493,7 @@ async function compileTscEntry(
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
 
-  const relativeLibPath = path.relative(projectPath, libPath).replace(/\\/g, '/')
+  const relativeLibPath = './'+path.relative(projectPath, libPath).replace(/\\/g, '/')
 
   const cmaArray = [
     entry,

@@ -2247,6 +2247,9 @@
         }
       },
       "replayConfig": {
+        "messages": {
+          "startFailed": "Failed to start replay: {{msg}}"
+        },
         "tabs": {
           "general": "General",
           "connected": "Connected",

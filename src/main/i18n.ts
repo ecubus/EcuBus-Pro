@@ -119,7 +119,10 @@ export const initMainI18n = async (lng: string = 'en') => {
     resources,
     ns: ['translation'],
     defaultNS: 'translation',
-    debug: false
+    debug: false,
+    interpolation: {
+      escapeValue: false
+    }
   })
 
   return i18next

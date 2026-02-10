@@ -66,14 +66,6 @@
                 <el-option
                   :label="i18next.t('uds.network.replayConfig.options.blfFormat')"
                   value="blf"
-                />
-                <el-option
-                  :label="i18next.t('uds.network.replayConfig.options.trcFormat')"
-                  value="trc"
-                />
-                <el-option
-                  :label="i18next.t('uds.network.replayConfig.options.mf4Format')"
-                  value="mf4"
                   disabled
                 />
               </el-select>
@@ -85,12 +77,12 @@
                 :placeholder="i18next.t('uds.network.replayConfig.placeholders.mode')"
               >
                 <el-option
-                  :label="i18next.t('uds.network.replayConfig.options.onlineMode')"
-                  value="online"
-                />
-                <el-option
                   :label="i18next.t('uds.network.replayConfig.options.offlineMode')"
                   value="offline"
+                />
+                <el-option
+                  :label="i18next.t('uds.network.replayConfig.options.onlineMode')"
+                  value="online"
                   disabled
                 />
               </el-select>
@@ -161,13 +153,18 @@
             <el-table-column
               prop="logChannel"
               :label="i18next.t('uds.network.replayConfig.channelMap.logChannel')"
-              width="120"
+              width="140"
             >
-              <template #default="{ row }">
-                <span
-                  >{{ i18next.t('uds.network.replayConfig.channelMap.channel') }}
-                  {{ row.logChannel }}</span
-                >
+              <template #default="{ row, $index }">
+                <el-input-number
+                  v-model="row.logChannel"
+                  :min="1"
+                  :controls="true"
+                  :disabled="globalStart"
+                  size="small"
+                  style="width: 100%"
+                  @change="onLogChannelChange($index, row)"
+                />
               </template>
             </el-table-column>
             <el-table-column
@@ -189,6 +186,7 @@
                   :placeholder="i18next.t('uds.network.replayConfig.channelMap.selectDevices')"
                   size="small"
                   multiple
+                  :disabled="globalStart"
                   collapse-tags
                   collapse-tags-tooltip
                   @change="updateChannelMap($index, row.logChannel, $event)"
@@ -221,14 +219,6 @@
 
     <!-- Bottom buttons -->
     <div class="bottom-buttons">
-      <el-button size="small" :type="isPlaying ? 'danger' : 'success'" @click="handlePlayStop">
-        <Icon :icon="isPlaying ? stopIcon : playIcon" style="margin-right: 4px" />
-        {{
-          isPlaying
-            ? i18next.t('uds.network.replayConfig.buttons.stop')
-            : i18next.t('uds.network.replayConfig.buttons.play')
-        }}
-      </el-button>
       <div style="flex: 1"></div>
       <el-button size="small" @click="handleCancel">{{
         i18next.t('uds.network.replayConfig.buttons.cancel')
@@ -273,7 +263,7 @@ if (formData.value.repeatCount === undefined) {
   formData.value.repeatCount = 1
 }
 if (formData.value.mode === undefined) {
-  formData.value.mode = 'online'
+  formData.value.mode = 'offline'
 }
 
 const nameCheck = (rule: any, value: any, callback: any) => {
@@ -417,15 +407,14 @@ const channelMapData = ref<ReplayChannelMap[]>([])
 if (formData.value.channelMap && formData.value.channelMap.length > 0) {
   channelMapData.value = cloneDeep(formData.value.channelMap)
 } else {
-  // Default: add channel 0 mapping
-  channelMapData.value = [{ logChannel: 0, deviceIds: [] }]
+  // Default: add channel 1 mapping (logChannel must start from 1)
+  channelMapData.value = [{ logChannel: 1, deviceIds: [] }]
 }
 
-// Add a new channel mapping row
+// Add a new channel mapping row (logChannel starts from 1)
 const addChannelMapping = () => {
-  // Find the next available log channel number
   const existingChannels = channelMapData.value.map((m) => m.logChannel)
-  let nextChannel = 0
+  let nextChannel = 1
   while (existingChannels.includes(nextChannel)) {
     nextChannel++
   }
@@ -442,8 +431,12 @@ const updateChannelMap = (index: number, logChannel: number, deviceIds: string[]
   channelMapData.value[index] = { logChannel, deviceIds }
 }
 
+const onLogChannelChange = (index: number, row: ReplayChannelMap) => {
+  updateChannelMap(index, row.logChannel, row.deviceIds)
+}
+
 const ruleFormRef = ref<FormInstance>()
-const isPlaying = ref(false)
+// const isPlaying = ref(false)
 
 // Get replay instance from global map
 const getReplayCeil = (): Replay | undefined => {
@@ -451,31 +444,6 @@ const getReplayCeil = (): Replay | undefined => {
 }
 
 // Initialize playing state from replay instance
-const replayCeil = getReplayCeil()
-if (replayCeil) {
-  isPlaying.value = replayCeil.getIsPlaying()
-}
-
-const handlePlayStop = () => {
-  const item = dataBase.replays[editIndex.value]
-  const ceil = getReplayCeil()
-
-  if (isPlaying.value) {
-    // Stop replay
-    window.electron.ipcRenderer.invoke('ipc-replay-stop', editIndex.value)
-    isPlaying.value = false
-    if (ceil) {
-      ceil.setPlaying(false)
-    }
-  } else {
-    // Start replay
-    window.electron.ipcRenderer.invoke('ipc-replay-start', editIndex.value, item)
-    isPlaying.value = true
-    if (ceil) {
-      ceil.setPlaying(true)
-    }
-  }
-}
 
 const handleCancel = () => {
   ElMessageBox.close()

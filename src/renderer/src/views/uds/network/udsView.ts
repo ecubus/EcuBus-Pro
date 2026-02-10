@@ -19,6 +19,7 @@ import { useDark } from '@vueuse/core'
 import logConfig from './logConfig.vue'
 import replayConfig from './replayConfig.vue'
 import i18next from 'i18next'
+import { useGlobalStart } from '@r/stores/runtime'
 
 // Global map to store all ceil instances for cross-component access
 export const ceilInstanceMap = new Map<string, udsCeil>()
@@ -51,6 +52,28 @@ class Region extends joint.dia.Element {
             strokeWidth: 2,
             stroke: '#000000',
             fill: '#FFFFFF'
+          },
+          progressBackground: {
+            x: 10,
+            y: 'calc(h - 18)',
+            width: 'calc(w - 20)',
+            height: 8,
+            fill: '#E0E0E0',
+            stroke: '#BDBDBD',
+            strokeWidth: 1,
+            rx: 4,
+            ry: 4,
+            opacity: 0
+          },
+          progressBar: {
+            x: 10,
+            y: 'calc(h - 18)',
+            width: 0,
+            height: 8,
+            fill: '#FF9800',
+            rx: 4,
+            ry: 4,
+            opacity: 0
           },
           labelTop: {
             x: 'calc(1*w)',
@@ -112,6 +135,14 @@ class Region extends joint.dia.Element {
     {
       tagName: 'rect',
       selector: 'body'
+    },
+    {
+      tagName: 'rect',
+      selector: 'progressBackground'
+    },
+    {
+      tagName: 'rect',
+      selector: 'progressBar'
     },
     {
       tagName: 'text',
@@ -558,6 +589,7 @@ export class Log extends udsCeil {
 export class Replay extends udsCeil {
   private isPlaying = false
   private paper: joint.dia.Paper
+  private progressPercent = 0
 
   constructor(
     paper: joint.dia.Paper,
@@ -586,19 +618,12 @@ export class Replay extends udsCeil {
       }
     )
     this.paper = paper
-    this.addReplayIcon()
+    // Enable progress bar only for replay
+    this.rect.attr('progressBackground/opacity', 1)
+    this.rect.attr('progressBar/opacity', 1)
     this.addPlayButton()
-  }
-
-  addReplayIcon() {
-    // Add replay SVG icon to the bottom-right corner
-    this.rect.attr('documentIcon', {
-      d: 'M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z',
-      fill: 'currentColor',
-      transform: 'translate(132, 82) scale(0.5)',
-      'pointer-events': 'none',
-      opacity: 0.7
-    })
+    // Initialize progress bar to 0
+    this.setProgress(0)
   }
 
   addPlayButton() {
@@ -649,6 +674,19 @@ export class Replay extends udsCeil {
 
   getIsPlaying() {
     return this.isPlaying
+  }
+
+  setProgress(percent: number) {
+    // Clamp percent between 0 and 100
+    const clamped = Math.max(0, Math.min(100, percent))
+    this.progressPercent = clamped
+
+    // Calculate the actual width of the progress bar based on the rect size
+    const size = this.rect.get('size') as { width: number; height: number }
+    const totalWidth = size.width - 20 // match x:10 and width: w-20
+    const barWidth = (totalWidth * clamped) / 100
+
+    this.rect.attr('progressBar/width', barWidth)
   }
 }
 
@@ -1007,6 +1045,7 @@ export class UDSView {
       })
       element.on('play', (ceil) => {
         const dataBase = useDataStore()
+        const globalStart = useGlobalStart()
         const replayElement = ceil as Replay
         const id = ceil.getId()
         const item = dataBase.replays[id]
@@ -1017,8 +1056,11 @@ export class UDSView {
           replayElement.setPlaying(false)
         } else {
           // Start replay
-          window.electron.ipcRenderer.invoke('ipc-replay-start', id, item)
-          replayElement.setPlaying(true)
+          if (globalStart.value) {
+            window.electron.ipcRenderer.invoke('ipc-replay-start', id).then(() => {
+              replayElement.setPlaying(true)
+            })
+          }
         }
       })
       return element

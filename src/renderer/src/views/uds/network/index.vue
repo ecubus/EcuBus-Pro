@@ -68,7 +68,15 @@ import {
   onUnmounted,
   watchEffect
 } from 'vue'
-import { UDSView, udsCeil, udsHardware, Node as UdsNode, Replay as UdsReplay } from './udsView'
+import {
+  UDSView,
+  udsCeil,
+  udsHardware,
+  Node as UdsNode,
+  Replay as UdsReplay,
+  getCeilInstanceAs
+} from './udsView'
+import { useGlobalStart } from '@r/stores/runtime'
 import fullscreenIcon from '@iconify/icons-material-symbols/fullscreen'
 import zoomInRounded from '@iconify/icons-material-symbols/zoom-in-rounded'
 import zoomOutRounded from '@iconify/icons-material-symbols/zoom-out-rounded'
@@ -106,8 +114,21 @@ interface Tree {
 }
 
 const dataBase = useDataStore()
+const globalStart = useGlobalStart()
 const leftWidth = ref(200)
 const initDone = ref(false)
+
+// When globalStart stops, stop all playing replays and restore to play (idle) state
+watch(globalStart, (val) => {
+  if (val) return
+  for (const id of Object.keys(dataBase.replays)) {
+    const replay = getCeilInstanceAs<UdsReplay>(id)
+    if (replay?.getIsPlaying()) {
+      replay.setPlaying(false)
+      replay.setProgress(0)
+    }
+  }
+})
 
 function addChild(parent: Tree) {
   const c: Tree = {
@@ -416,8 +437,48 @@ watch([w, h, leftWidth], () => {
 })
 
 const loading = ref(true)
+
+interface RelayStop {
+  key: 'replayStop'
+  values: {
+    message: {
+      replayId: string
+      data: {
+        reason?: string
+      }
+    }
+  }[]
+}
+interface RelayProgress {
+  key: 'replayProgress'
+  values: {
+    message: {
+      replayId: string
+      data: {
+        percent: number
+      }
+    }
+  }[]
+}
+function replayCallback(val: RelayStop | RelayProgress) {
+  if (val.key === 'replayStop') {
+    const replay = getCeilInstanceAs<UdsReplay>(val.values[0].message.replayId)
+
+    if (replay) {
+      replay.setPlaying(false)
+    }
+  } else if (val.key === 'replayProgress') {
+    const last = val.values[val.values.length - 1]
+    const replay = getCeilInstanceAs<UdsReplay>(last.message.replayId)
+    if (replay) {
+      replay.setProgress(last.message.data.percent)
+    }
+  }
+}
 onMounted(() => {
   loading.value = true
+  window.logBus.on('replayStop', replayCallback)
+  window.logBus.on('replayProgress', replayCallback)
   window.jQuery('#networkShift').resizable({
     handles: 'e',
     containment: '#networkMain',
@@ -734,6 +795,16 @@ function buildView() {
     for (const to of dataBase.replays[key].channel) {
       udsView.addLink(key, to)
     }
+    window.electron.ipcRenderer.invoke('ipc-replay-get-state', key).then((val: any) => {
+      const replay = getCeilInstanceAs<UdsReplay>(key)
+      if (replay) {
+        if (val === 'running') {
+          replay.setPlaying(true)
+        } else {
+          replay.setPlaying(false)
+        }
+      }
+    })
   }
   fitPater()
 
@@ -976,6 +1047,8 @@ onUnmounted(() => {
   udsView.clear()
   layout.off(`max:network`, fitPater)
   paper.remove()
+  window.logBus.off('replayStop', replayCallback)
+  window.logBus.off('replayProgress', replayCallback)
 })
 </script>
 <style>

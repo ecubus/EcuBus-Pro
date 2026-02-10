@@ -1,0 +1,128 @@
+{
+  "data": {
+    "devices": {
+      "ca7b83a4-d20f-4ba3-8cfb-e2df2f6f904d": {
+        "type": "can",
+        "canDevice": {
+          "id": "ca7b83a4-d20f-4ba3-8cfb-e2df2f6f904d",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_6"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {},
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {},
+    "replays": {
+      "c18f88f0-2f51-4a11-909f-1f0078b0419c": {
+        "name": "Replay 1",
+        "id": "c18f88f0-2f51-4a11-909f-1f0078b0419c",
+        "filePath": "test.asc",
+        "format": "asc",
+        "channel": [
+          "ca7b83a4-d20f-4ba3-8cfb-e2df2f6f904d"
+        ],
+        "channelMap": [
+          {
+            "logChannel": 2,
+            "deviceIds": [
+              "ca7b83a4-d20f-4ba3-8cfb-e2df2f6f904d"
+            ]
+          }
+        ],
+        "mode": "offline",
+        "speedFactor": 1,
+        "repeatCount": 2
+      }
+    }
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 403,
+          "y": 239,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 733,
+          "y": 101,
+          "w": 874,
+          "h": 526
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 374,
+          "y": 536,
+          "w": 1488,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      }
+    },
+    "example": {
+      "catalog": "CAN"
+    }
+  }
+}

@@ -205,7 +205,7 @@ export type ReplayItem = {
   /** File path to the replay file */
   filePath: string
   /** File format (auto-detected if not specified) */
-  format?: ReplayFileFormat
+  format: ReplayFileFormat
   /** Target channels to replay to */
   channel: string[]
   /**

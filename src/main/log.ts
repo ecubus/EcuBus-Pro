@@ -818,3 +818,81 @@ export class PluginLOG {
     this.log.close()
   }
 }
+
+export class ReplayLOG {
+  log: Logger
+  closeFlag = false
+  replayId: string
+
+  constructor(replayId: string, instance?: string) {
+    this.replayId = replayId
+    const et1 = externalTransport.map((t) => t.t())
+    const formatList = [format.json(), format.label({ label: 'Replay' })]
+    if (instance) {
+      formatList.push(instanceFormat({ instance: instance }))
+    }
+    this.log = createLogger({
+      transports: [new Base(), ...et1],
+      format: format.combine(...formatList, ...externalFormat)
+    })
+  }
+
+  close() {
+    this.closeFlag = true
+    this.log.close()
+  }
+
+  start(filePath: string, fileFormat: string) {
+    if (this.closeFlag) return
+    this.log.info({
+      method: 'replayStart',
+      replayId: this.replayId,
+      data: { filePath, format: fileFormat }
+    })
+  }
+
+  stop(reason?: string) {
+    if (this.closeFlag) return
+    this.log.info({
+      method: 'replayStop',
+      replayId: this.replayId,
+      data: { reason }
+    })
+  }
+
+  pause() {
+    if (this.closeFlag) return
+    this.log.info({
+      method: 'replayPause',
+      replayId: this.replayId,
+      data: {}
+    })
+  }
+
+  resume() {
+    if (this.closeFlag) return
+    this.log.info({
+      method: 'replayResume',
+      replayId: this.replayId,
+      data: {}
+    })
+  }
+
+  progress(current: number, total: number, percent: number, repeat: number) {
+    if (this.closeFlag) return
+    this.log.info({
+      method: 'replayProgress',
+      replayId: this.replayId,
+      data: { current, total, percent, repeat }
+    })
+  }
+
+  error(msg: string) {
+    if (this.closeFlag) return
+    this.log.error({
+      method: 'replayError',
+      replayId: this.replayId,
+      data: { msg }
+    })
+  }
+}

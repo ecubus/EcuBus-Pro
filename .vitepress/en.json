@@ -50,6 +50,10 @@
       ]
     },
     {
+      "text": "Replay",
+      "link": "replay/replay.md"
+    },
+    {
       "text": "CLI",
       "link": "cli/cli.md"
     },

@@ -80,6 +80,7 @@ import {
 
 import TraceItem from '../ostrace/item'
 import { startPlugins, stopPlugins } from './plugin'
+import Replay from '../replay'
 
 const libPath = path.dirname(dllLib)
 
@@ -289,6 +290,7 @@ const someipMap = new Map<string, VSomeIP_Client>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
 const ortiMap = new Map<string, TraceItem>()
+const replayMap = new Map<string, Replay>()
 let cantps: {
   close: () => void
 }[] = []
@@ -524,6 +526,25 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       }
     }
   }
+  //
+  //replays
+  for (const key in data.replays) {
+    const replay = data.replays[key]
+    const replayItem = new Replay(
+      replay,
+      {
+        path: projectInfo.path,
+        name: projectInfo.name
+      },
+      canBaseMap,
+      linBaseMap,
+      doips,
+      ethBaseMap,
+      pwmBaseMap,
+      someipMap
+    )
+    replayMap.set(key, replayItem)
+  }
 
   //nodes
   for (const key in data.nodes) {
@@ -729,6 +750,41 @@ ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
   }
 })
 
+//replay
+ipcMain.handle('ipc-replay-start', async (event, ...arg) => {
+  const replay = replayMap.get(arg[0] as string)
+  if (replay) {
+    replay.start()
+  }
+})
+
+ipcMain.handle('ipc-replay-stop', async (event, ...arg) => {
+  const replay = replayMap.get(arg[0] as string)
+  if (replay) {
+    replay.stop()
+  }
+})
+ipcMain.handle('ipc-replay-pause', async (event, ...arg) => {
+  const replay = replayMap.get(arg[0] as string)
+  if (replay) {
+    replay.pause()
+  }
+})
+ipcMain.handle('ipc-replay-resume', async (event, ...arg) => {
+  const replay = replayMap.get(arg[0] as string)
+  if (replay) {
+    replay.resume()
+  }
+})
+
+ipcMain.handle('ipc-replay-get-state', async (event, ...arg) => {
+  const replay = replayMap.get(arg[0] as string)
+  if (replay) {
+    return replay.getState()
+  }
+  return 'idle'
+})
+
 interface timerType {
   socket: CAN_SOCKET
   period: number
@@ -741,8 +797,12 @@ const timerMap = new Map<string, timerType>()
 
 export function globalStop(emit = false) {
   stopPlugins()
+  //clear all replay
+  replayMap.forEach((value) => {
+    value.stop()
+  })
+  replayMap.clear()
   //clear all timer
-
   clearTimeout(timer)
   udsTesterMap.forEach((value) => {
     value.close()

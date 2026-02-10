@@ -50,6 +50,10 @@
       ]
     },
     {
+      "text": "回放",
+      "link": "replay/replay.md"
+    },
+    {
       "text": "CLI",
       "link": "cli/cli.md"
     },
@@ -61,7 +65,7 @@
           "link": "doip/doip.md",
           "items": [
             {
-              "text": "VIN 请求行为",
+              "text": "VIN请求行为",
               "link": "doip/vin.md"
             },
             {
@@ -81,7 +85,7 @@
       "link": "someip/index.md"
     },
     {
-      "text": "OSEK OS 追踪",
+      "text": "OSEK OS追踪",
       "link": "osTrace/index.md"
     },
     {
@@ -96,11 +100,11 @@
           "link": "uds/testerPresent/testerPresent.md"
         },
         {
-          "text": "UDS -> C 代码",
+          "text": "UDS -> C代码",
           "link": "uds/udscode/udscode.md"
         },
         {
-          "text": "UDS Bootloader 实现指南",
+          "text": "UDS Bootloader实施指南",
           "link": "uds/example/example.md"
         }
       ]

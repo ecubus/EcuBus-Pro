@@ -50,18 +50,22 @@
       ]
     },
     {
+      "text": "Replay",
+      "link": "replay/replay.md"
+    },
+    {
       "text": "CLI",
       "link": "cli/cli.md"
     },
     {
-      "text": "以太网",
+      "text": "Ethernet",
       "items": [
         {
           "text": "DoIP",
           "link": "doip/doip.md",
           "items": [
             {
-              "text": "VIN 请求行为",
+              "text": "VIN Request Behavior",
               "link": "doip/vin.md"
             },
             {
@@ -81,14 +85,14 @@
       "link": "someip/index.md"
     },
     {
-      "text": "OSEK OS 追踪",
+      "text": "OSEK OS Tracking",
       "link": "osTrace/index.md"
     },
     {
-      "text": "诊断",
+      "text": "Diagnostic",
       "items": [
         {
-          "text": "内置脚本",
+          "text": "Build In Script",
           "link": "uds/buildInScript/buildInScript.md"
         },
         {
@@ -96,33 +100,33 @@
           "link": "uds/testerPresent/testerPresent.md"
         },
         {
-          "text": "UDS -> C 代码",
+          "text": "UDS -> C Code",
           "link": "uds/udscode/udscode.md"
         },
         {
-          "text": "UDS Bootloader 实现指南",
+          "text": "UDS Bootloader Implementation Guide",
           "link": "uds/example/example.md"
         }
       ]
     },
     {
-      "text": "追踪",
+      "text": "Trace",
       "link": "trace/trace.md"
     },
     {
-      "text": "图表",
+      "text": "Graph",
       "link": "graph/graph.md"
     },
     {
-      "text": "变量",
+      "text": "Variable",
       "link": "var/var.md"
     },
     {
-      "text": "脚本",
+      "text": "Script",
       "link": "script/script.md",
       "items": [
         {
-          "text": "使用外部包",
+          "text": "Use External Package",
           "link": "script/SerialPort/scriptSerialPort.md"
         },
         {
@@ -132,11 +136,11 @@
       ]
     },
     {
-      "text": "测试",
+      "text": "Test",
       "link": "test/test.md"
     },
     {
-      "text": "数据库",
+      "text": "Database",
       "link": "database/database.md",
       "items": [
         {
@@ -150,18 +154,18 @@
       ]
     },
     {
-      "text": "面板",
+      "text": "Panel",
       "link": "panel/index.md"
     },
     {
-      "text": "插件",
+      "text": "Plugin",
       "link": "plugin/plugin.md"
     },
     {
-      "text": "设置",
+      "text": "Setting",
       "items": [
         {
-          "text": "通用",
+          "text": "General",
           "link": "setting/general.md"
         }
       ]

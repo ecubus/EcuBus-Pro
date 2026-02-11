@@ -132,6 +132,10 @@
         {
           "text": "CAPL->TS",
           "link": "script/capl2ts/capl2ts.md"
+        },
+        {
+          "text": "AI助手",
+          "link": "script/ai.md"
         }
       ]
     },

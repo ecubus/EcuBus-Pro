@@ -1,6 +1,6 @@
 <template>
   <div class="plugin-settings">
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="180px" @submit.prevent>
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="auto" @submit.prevent>
       <el-form-item :label="$t('pluginSettings.downloadPathLabel')" prop="downloadPath">
         <template #label>
           <div class="label-container">

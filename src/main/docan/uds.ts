@@ -19,6 +19,8 @@ import path from 'path'
 import Handlebars from 'handlebars'
 import fsP from 'fs/promises'
 import fs from 'fs'
+import Store from 'electron-store'
+import skillsDirRef from '../../../resources/skills/.gitkeep?asset&asarUnpack'
 import udsHeaderStr from '../share/uds.d.ts.html?raw'
 import crcStr from '../share/crc.d.ts.html?raw'
 import secureAccessStr from '../share/secureAccess.d.ts.html?raw'
@@ -1404,6 +1406,25 @@ export async function refreshProject(
     await fsP.mkdir(vendorPath)
   }
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
+
+  // copy skills from resources/skills to .claude/skills when enabled
+  const store = new Store()
+  const aiSettings = store.get('ai.settings') as { generateSkillDoc?: boolean } | undefined
+  if (aiSettings?.generateSkillDoc !== false) {
+    const resourcesSkillsDir = path.dirname(skillsDirRef)
+    const claudeSkillsDir = path.join(projectPath, '.claude', 'skills')
+    if (fs.existsSync(resourcesSkillsDir)) {
+      await fsP.mkdir(claudeSkillsDir, { recursive: true })
+      const entries = await fsP.readdir(resourcesSkillsDir, { withFileTypes: true })
+      for (const ent of entries) {
+        if (ent.isDirectory()) {
+          const src = path.join(resourcesSkillsDir, ent.name)
+          const dest = path.join(claudeSkillsDir, ent.name)
+          await fsP.cp(src, dest, { recursive: true, force: true })
+        }
+      }
+    }
+  }
 }
 
 export async function compileTsc(
@@ -1493,7 +1514,10 @@ async function compileTscEntry(
   const latBuildFile = path.join(outputDir, path.basename(entry).replace('.ts', '.js'))
   await fsP.rm(latBuildFile, { force: true, recursive: true })
 
-  const relativeLibPath = './'+path.relative(projectPath, libPath).replace(/\\/g, '/')
+  const _relativeLibPath = path.relative(projectPath, libPath).replace(/\\/g, '/')
+  const relativeLibPath = path.isAbsolute(_relativeLibPath)
+    ? _relativeLibPath
+    : './' + _relativeLibPath
 
   const cmaArray = [
     entry,

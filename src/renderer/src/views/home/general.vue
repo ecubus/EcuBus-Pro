@@ -1,6 +1,6 @@
 <template>
   <div class="general-settings">
-    <el-form :model="form" label-width="120px">
+    <el-form :model="form" label-width="auto">
       <el-form-item>
         <template #label>
           <div class="label-container">

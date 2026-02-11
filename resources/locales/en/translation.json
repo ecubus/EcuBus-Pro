@@ -6,6 +6,10 @@
     "uiZoomTooltip": "Adjust the overall UI scaling of the application",
     "themeTooltip": "Choose between light and dark theme"
   },
+  "ai": {
+    "generateSkillDoc": "Generate skill document",
+    "generateSkillDocTooltip": "Whether to generate skill documentation for the project"
+  },
   "header": {
     "rearrangeWindows": "Rearrange Windows",
     "untitled": "Untitled"
@@ -28,6 +32,7 @@
     "new": "New",
     "open": "Open",
     "plugin": "Plugin",
+    "ai": "AI",
     "setting": "Setting",
     "general": "General",
     "others": "Others",

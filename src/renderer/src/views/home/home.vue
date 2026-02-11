@@ -351,6 +351,19 @@
                   }"
                 />
               </el-tab-pane>
+              <el-tab-pane :label="$t('home.ai')">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="aiIcon" />
+                    <span>{{ $t('home.ai') }}</span>
+                  </span>
+                </template>
+                <ai
+                  :style="{
+                    height: height - 170 + 'px'
+                  }"
+                />
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
 
@@ -486,7 +499,9 @@ import update from './update.vue'
 import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
+import aiIcon from '@iconify/icons-material-symbols/psychology'
 import general from './general.vue'
+import ai from './ai.vue'
 import plugin from './plugin.vue'
 import user from './user.vue'
 import externalIcon from '@iconify/icons-mdi/external-link'

@@ -83,7 +83,7 @@
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "adm-zip": "^0.5.16",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "animate.css": "^4.1.1",
     "async": "^3.2.6",
     "async-validator": "^4.2.5",

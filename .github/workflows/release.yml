@@ -18,38 +18,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Not needed if lastUpdated is not enabled
+          fetch-depth: 0
       - name: Set Version
         id: version
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v',''
           echo "VERSION=$version" >> $env:GITHUB_ENV
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Embedding Python
+        uses: ./.github/actions/setup-python-build
+      - name: Build App
+        uses: ./.github/actions/build-app
         with:
-          node-version: 22
-          cache: npm # or pnpm / yarn
-      - name: Install dependencies
-        run: npm install
-      - name: Build with VitePress
-        run: npm run docs:build
-      - name: Build native
-        run: npm run native
-      - name: Build worker
-        run: npm run worker
-      - name: Build api
-        run: npm run api
-      - name: Build cli
-        run: npm run cli:build:win
-      - name: Build sdk
-        run: npm run build:sdk
-      - name: Build APP
-        run: npm run build:win
+          platform: win
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{secrets.CLIENT_SECRET }}
+          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -114,31 +99,16 @@ jobs:
         run: |
           version=${GITHUB_REF_NAME#v}
           echo "VERSION=$version" >> $GITHUB_ENV
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Embedding Python
+        uses: ./.github/actions/setup-python-build
+      - name: Build App
+        uses: ./.github/actions/build-app
         with:
-          node-version: 22
-          cache: npm
-      - name: Install dependencies
-        run: npm install
-      - name: Build with VitePress
-        run: npm run docs:build
-      - name: Build native
-        run: npm run native
-      - name: Build worker
-        run: npm run worker
-      - name: Build api
-        run: npm run api
-      - name: Build cli
-        run: npm run cli:build:linux
-      - name: Build sdk
-        run: npm run build:sdk
-      - name: Build APP
+          platform: linux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{secrets.CLIENT_SECRET }}
-        run: npm run build:linux
+          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       - name: Upload CLI
         uses: actions/upload-release-asset@v1
         env:

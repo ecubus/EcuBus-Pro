@@ -1,10 +1,107 @@
 import path from 'path'
+import { spawn } from 'child_process'
 // import type { Signal } from 'src/renderer/src/database/dbc/dbcVisitor'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import { isEqual } from 'lodash'
 import { CanSignal } from 'nodeCan/can'
 import { getPhysicalValue, getRawValue } from 'src/renderer/src/database/ldf/calc'
+import pythonRequirements from '../../../resources/requirements.txt?asset&asarUnpack'
+
+export function getPythonPath(): string {
+  const baseDir = path.dirname(pythonRequirements)
+  const pythonDir = path.join(baseDir, 'python')
+  if (process.platform === 'win32') {
+    return path.join(pythonDir, 'python.exe')
+  }
+  // darwin (macOS) and linux: python-build-standalone uses bin/python3
+  return path.join(pythonDir, 'bin', 'python3')
+}
+
+export interface ExecResult {
+  success: boolean
+  stdout: string
+  stderr: string
+}
+
+/**
+ * Async execution of an external binary.
+ * @param command - Path to the executable
+ * @param args - Command line arguments
+ * @param options - Optional cwd, env, timeout (ms)
+ * @returns success, all stdout, stderr (or error message)
+ */
+export async function execBinary(
+  command: string,
+  args: string[] = [],
+  options?: { cwd?: string; env?: NodeJS.ProcessEnv; timeout?: number }
+): Promise<ExecResult> {
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = []
+    const errChunks: Buffer[] = []
+
+    const proc = spawn(command, args, {
+      cwd: options?.cwd,
+      env: { ...process.env, ...options?.env }
+    })
+
+    proc.stdout?.on('data', (data: Buffer) => chunks.push(data))
+    proc.stderr?.on('data', (data: Buffer) => errChunks.push(data))
+
+    let timedOut = false
+    const timeoutId = options?.timeout
+      ? setTimeout(() => {
+          timedOut = true
+          proc.kill('SIGTERM')
+        }, options.timeout)
+      : null
+
+    proc.on('close', (code, signal) => {
+      if (timeoutId) clearTimeout(timeoutId)
+
+      const stdout = Buffer.concat(chunks).toString('utf8')
+      let stderr = Buffer.concat(errChunks).toString('utf8')
+
+      if (timedOut) {
+        stderr = (stderr ? stderr + '\n' : '') + `Process timed out after ${options!.timeout}ms`
+      } else if (signal) {
+        stderr = (stderr ? stderr + '\n' : '') + `Process killed with signal: ${signal}`
+      } else if (code !== 0 && !stderr) {
+        stderr = `Process exited with code ${code}`
+      }
+
+      resolve({
+        success: !timedOut && code === 0 && !signal,
+        stdout,
+        stderr
+      })
+    })
+
+    proc.on('error', (err) => {
+      if (timeoutId) clearTimeout(timeoutId)
+      resolve({
+        success: false,
+        stdout: Buffer.concat(chunks).toString('utf8'),
+        stderr: err.message
+      })
+    })
+  })
+}
+
+/**
+ * Returns the path to a pip-installed script/executable.
+ * - Windows: python/Scripts/<scriptName>.exe
+ * - macOS/Linux: python/bin/<scriptName>
+ */
+export function getPythonScriptPath(scriptName: string): string {
+  const baseDir = path.dirname(pythonRequirements)
+  const pythonDir = path.join(baseDir, 'python')
+  if (process.platform === 'win32') {
+    const name = scriptName.endsWith('.exe') ? scriptName : `${scriptName}.exe`
+    return path.join(pythonDir, 'Scripts', name)
+  }
+  return path.join(pythonDir, 'bin', scriptName)
+}
 
 export function updateLinSignalVal(db: LDF, signalName: string, value: number | number[] | string) {
   const signal = db.signals[signalName]

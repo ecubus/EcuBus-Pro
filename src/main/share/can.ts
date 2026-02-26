@@ -39,6 +39,109 @@ export interface CanBaseInfo {
   slcanDelay?: number
 }
 
+export interface SignalDefine {
+  default: string
+  define: string
+  name: string
+  type: string
+}
+
+export interface ValueTables {
+  string: Record<number, string>
+}
+export interface CanDB {
+  attributes: Record<string, any>
+  baudrate: number
+  ecu_defines: EcuDefine[]
+  ecus: Record<string, any>
+  enumerations: Enumerations
+  env_defines: EnvDefine[]
+  env_vars: EnvVars
+  fd_baudrate: number
+  frame_defines: FrameDefine[]
+  global_defines: GlobalDefine[]
+  messages: Message[]
+  signal_defines: SignalDefine[]
+  value_tables: ValueTables
+}
+
+export interface EcuDefine {
+  default: string
+  define: string
+  name: string
+  type: string
+}
+
+export interface Enumerations {
+  string: Record<number, string>
+}
+
+export interface EnvDefine {
+  default: any
+  define: string
+  name: string
+  type: string
+}
+
+export interface EnvVars {
+  [key: string]: { [key: string]: any }
+}
+
+export interface FrameDefine {
+  default: string
+  define: string
+  name: string
+  type: string
+}
+
+export interface GlobalDefine {
+  default: string
+  define: string
+  name: string
+  type: string
+}
+
+export interface Message {
+  attributes: Record<string, any>
+  comment: string
+  cycle_time: number
+  header_id: any
+  id: number
+  is_complex_multiplexed: boolean
+  is_extended_frame: boolean
+  is_fd: boolean
+  is_j1939: boolean
+  length: number
+  mux_names: Record<number, string>
+  name: string
+  pdu_name: string
+  signals: Signal[]
+  transmitters: string[]
+}
+
+export interface Signal {
+  attributes: Record<string, any>
+  bit_length: number
+  comment?: string
+  comments: Record<number, string>
+  factor: string
+  initial_value: string
+  is_big_endian: boolean
+  is_float: boolean
+  is_multiplexer: boolean
+  is_signed: boolean
+  max: string
+  min: string
+  mux_value?: number
+  name: string
+  offset: string
+  receivers: string[]
+  start_bit: number
+  values: Record<number, string>
+  unit?: string
+  multiplex: any
+  muxer_for_signal?: string
+}
 /**
  * Represents a CAN (Controller Area Network) attribute that can be associated with network, node, message, signal, or environment variable entities.
  *

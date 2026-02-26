@@ -1,0 +1,48 @@
+name: Setup Embedding Python
+description: Download embedding Python, modify _pth (Windows only), install pip and requirements
+runs:
+  using: composite
+  steps:
+    - name: Setup Embedding Python (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.13.12/python-3.13.12-embed-amd64.zip" -OutFile "python-embed.zip" -UseBasicParsing
+        Expand-Archive -Path "python-embed.zip" -DestinationPath "resources/python"
+    - name: Modify python313._pth (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $pthPath = "resources/python/python313._pth"
+        $content = Get-Content $pthPath -Raw
+        $content = $content -replace '#import site', 'import site'
+        if ($content -notmatch 'site-packages') {
+          $content = $content.TrimEnd() + "`n./Lib/site-packages`n"
+        }
+        Set-Content -Path $pthPath -Value $content
+    - name: Setup Embedding Python (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        curl -sL -o python-embed.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20260211/cpython-3.13.12+20260211-aarch64-apple-darwin-install_only.tar.gz"
+        mkdir -p resources
+        tar -xzf python-embed.tar.gz -C resources
+    - name: Setup Embedding Python (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        curl -sL -o python-embed.tar.gz "https://github.com/astral-sh/python-build-standalone/releases/download/20260211/cpython-3.13.12+20260211-x86_64-unknown-linux-gnu-install_only.tar.gz"
+        mkdir -p resources
+        tar -xzf python-embed.tar.gz -C resources
+    - name: Install pip (Windows only, macOS/Linux have pip pre-installed)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -OutFile "get-pip.py" -UseBasicParsing
+        resources/python/python.exe get-pip.py
+    - name: Install Python dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: resources/python/python.exe -m pip install -r resources/requirements.txt
+    - name: Install Python dependencies (macOS/Linux)
+      if: runner.os != 'Windows'
+      run: resources/python/bin/python3 -m pip install -r resources/requirements.txt

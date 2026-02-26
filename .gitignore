@@ -29,3 +29,9 @@ tools/a.csv
 
 .env.development
 doip-certs
+
+
+# python
+
+resources/python
+resources/get-pip.py

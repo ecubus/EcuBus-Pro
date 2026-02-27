@@ -42,7 +42,9 @@ runs:
         resources/python/python.exe get-pip.py
     - name: Install Python dependencies (Windows)
       if: runner.os == 'Windows'
+      shell: pwsh
       run: resources/python/python.exe -m pip install -r resources/requirements.txt
     - name: Install Python dependencies (macOS/Linux)
       if: runner.os != 'Windows'
+      shell: bash
       run: resources/python/bin/python3 -m pip install -r resources/requirements.txt

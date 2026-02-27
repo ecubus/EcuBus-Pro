@@ -21,22 +21,30 @@ runs:
         node-version: 22
         cache: npm
     - name: Install dependencies
+      shell: bash
       run: npm install
     - name: Build with VitePress
       if: inputs.run-docs-build == 'true'
+      shell: bash
       run: npm run docs:build
     - name: Build native
+      shell: bash
       run: npm run native
     - name: Build worker
+      shell: bash
       run: npm run worker
     - name: Build api
+      shell: bash
       run: npm run api
     - name: Build cli
+      shell: bash
       run: npm run cli:build:${{ inputs.platform }}
     - name: Build sdk
       if: inputs.run-sdk-build == 'true'
+      shell: bash
       run: npm run build:sdk
     - name: Build APP
+      shell: bash
       run: npm run build:${{ inputs.platform }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

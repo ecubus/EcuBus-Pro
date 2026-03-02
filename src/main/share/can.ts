@@ -46,10 +46,21 @@ export interface SignalDefine {
   type: string
 }
 
+/**
+ * Value tables mapping string keys to string values for CAN signal enumerations.
+ * @category CAN
+ */
 export interface ValueTables {
-  string: Record<number, string>
+  string: Record<string, string>
 }
+
+/**
+ * CAN database containing messages, signals, ECUs, and related definitions.
+ * @category CAN
+ */
 export interface CanDB {
+  id: string
+  name: string
   attributes: Record<string, any>
   baudrate: number
   ecu_defines: EcuDefine[]
@@ -65,6 +76,10 @@ export interface CanDB {
   value_tables: ValueTables
 }
 
+/**
+ * ECU (Electronic Control Unit) definition for CAN database.
+ * @category CAN
+ */
 export interface EcuDefine {
   default: string
   define: string
@@ -72,10 +87,18 @@ export interface EcuDefine {
   type: string
 }
 
+/**
+ * Enumerations mapping numeric values to string labels for CAN signals.
+ * @category CAN
+ */
 export interface Enumerations {
   string: Record<number, string>
 }
 
+/**
+ * Environment variable definition for CAN database.
+ * @category CAN
+ */
 export interface EnvDefine {
   default: any
   define: string
@@ -83,10 +106,23 @@ export interface EnvDefine {
   type: string
 }
 
+/**
+ * Environment variables in CAN database, keyed by variable name.
+ * @category CAN
+ */
 export interface EnvVars {
-  [key: string]: { [key: string]: any }
+  [key: string]: {
+    initialValue: string
+    values: Record<string, string>
+    unit?: string
+    varType: string
+  }
 }
 
+/**
+ * Frame (message) attribute definition for CAN database.
+ * @category CAN
+ */
 export interface FrameDefine {
   default: string
   define: string
@@ -94,6 +130,10 @@ export interface FrameDefine {
   type: string
 }
 
+/**
+ * Global attribute definition for CAN database.
+ * @category CAN
+ */
 export interface GlobalDefine {
   default: string
   define: string
@@ -101,6 +141,10 @@ export interface GlobalDefine {
   type: string
 }
 
+/**
+ * CAN message (frame) definition containing signals and metadata.
+ * @category CAN
+ */
 export interface Message {
   attributes: Record<string, any>
   comment: string
@@ -112,194 +156,44 @@ export interface Message {
   is_fd: boolean
   is_j1939: boolean
   length: number
-  mux_names: Record<number, string>
+  mux_names: Record<string, string>
   name: string
   pdu_name: string
   signals: Signal[]
   transmitters: string[]
 }
 
+/**
+ * CAN signal definition with bit layout, scaling, and value mapping.
+ * @category CAN
+ */
 export interface Signal {
   attributes: Record<string, any>
   bit_length: number
   comment?: string
-  comments: Record<number, string>
+  comments: Record<string, string>
   factor: string
   initial_value: string
+  value?: string
+  physValue?: string
   is_big_endian: boolean
   is_float: boolean
   is_multiplexer: boolean
   is_signed: boolean
   max: string
   min: string
+  mux_val_grp?: number[][]
   mux_value?: number
   name: string
   offset: string
   receivers: string[]
   start_bit: number
-  values: Record<number, string>
+  values: Record<string, string>
   unit?: string
   multiplex: any
   muxer_for_signal?: string
 }
-/**
- * Represents a CAN (Controller Area Network) attribute that can be associated with network, node, message, signal, or environment variable entities.
- *
- * @category CAN
- */
-export interface CanAttribute {
-  /**
-   * The name of the attribute.
-   */
-  name: string
-  /**
-   * The type of entity this attribute is associated with.
-   */
-  attrType: 'network' | 'node' | 'message' | 'signal' | 'envVar'
-  /**
-   * The data type of the attribute value.
-   */
-  type: 'INT' | 'FLOAT' | 'STRING' | 'ENUM' | 'HEX'
-  /**
-   * The minimum allowed value (for numeric types).
-   */
-  min?: number
-  /**
-   * The maximum allowed value (for numeric types).
-   */
-  max?: number
-  /**
-   * List of enumeration values (for ENUM type).
-   */
-  enumList?: string[]
-  /**
-   * The default value of the attribute.
-   */
-  defaultValue?: number | string
-  /**
-   * The current value of the attribute.
-   */
-  currentValue?: number | string
-}
 
-/**
- * Represents a CAN (Controller Area Network) signal that defines the structure and properties of data within a CAN message.
- *
- * @category CAN
- */
-export interface CanSignal {
-  /**
-   * The name of the signal.
-   */
-  name: string
-  /**
-   * The name of the CAN message this signal belongs to.
-   */
-  messageName: string
-  /**
-   * The starting bit position of the signal within the message.
-   */
-  startBit: number
-  /**
-   * The length of the signal in bits.
-   */
-  length: number
-  /**
-   * Indicates the byte order (endianness) of the signal.
-   * true = little-endian (Intel format), false = big-endian (Motorola format).
-   */
-  isLittleEndian: boolean
-  /**
-   * Indicates whether the signal represents a signed value.
-   * true = signed, false = unsigned.
-   */
-  isSigned: boolean
-  /**
-   * Scaling factor for converting between physical and raw values.
-   * Physical value = (Raw value * factor) + offset
-   */
-  factor: number
-  /**
-   * Offset for converting between physical and raw values.
-   * Physical value = (Raw value * factor) + offset
-   */
-  offset: number
-  /**
-   * The minimum physical value allowed for this signal.
-   */
-  minimum?: number
-  /**
-   * The maximum physical value allowed for this signal.
-   */
-  maximum?: number
-  /**
-   * The unit of measurement for the physical value (e.g., "V", "A", "m/s").
-   */
-  unit?: string
-  /**
-   * List of receiver node names that consume this signal.
-   */
-  receivers: string[]
-  /**
-   * Optional comment or description for the signal.
-   */
-  comment?: string
-  /**
-   * Reference to a value table for signal interpretation.
-   */
-  valueTable?: string
-  /**
-   * Array of labeled values for the signal (discrete value mappings).
-   */
-  values?: { label: string; value: number }[]
-  /**
-   * Collection of custom attributes associated with this signal.
-   */
-  attributes: Record<string, CanAttribute>
-  /**
-   * Multiplexer indicator string.
-   * "M" indicates this is a multiplexer signal, "m<value>" indicates a multiplexed signal.
-   */
-  multiplexerIndicator?: string
-  /**
-   * Defines the multiplexer range for this signal.
-   */
-  multiplexerRange?: {
-    /**
-     * Name of the multiplexer signal.
-     */
-    name: string
-    /**
-     * Array of multiplexer switch values that apply to this signal.
-     */
-    range: number[]
-  }
-  /**
-   * The initial/default value of the signal.
-   */
-  initValue?: number
-  /**
-   * The current raw value of the signal.
-   */
-  value?: number
-  /**
-   * The current physical value of the signal (converted using factor and offset).
-   */
-  physValue?: number | string
-  /**
-   * The current physical value represented as an enumeration label (if applicable).
-   */
-  physValueEnum?: string
-  /**
-   * The type of signal generator used for simulation.
-   */
-  generatorType?: string
-  /**
-   * The value type encoding.
-   * 0 = signed integer, 1 = unsigned integer, 2 = float.
-   */
-  valueType?: number
-}
 /**
  * Represents a CAN (Controller Area Network) message.
  *

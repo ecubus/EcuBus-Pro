@@ -71,7 +71,7 @@ export function workerEmit(payload: any) {
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
-import { CAN_ID_TYPE, CanMessage, CanSignal } from '../share/can'
+import { CAN_ID_TYPE, CanMessage, Signal as CanSignal } from '../share/can'
 
 // import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
@@ -3445,9 +3445,9 @@ export function getFrameFromDB<T>(
           dir: 'OUT',
           data: getMessageData(msg),
           msgType: {
-            idType: msg.extId ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+            idType: msg.is_extended_frame ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
             brs: false,
-            canfd: msg.canfd || false,
+            canfd: msg.is_fd || false,
             remote: false
           },
           database: db.id

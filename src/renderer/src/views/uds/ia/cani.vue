@@ -384,7 +384,7 @@ import { onKeyStroke, onKeyUp } from '@vueuse/core'
 import Signal from '../components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
-import { Message } from '@r/database/dbc/dbcVisitor'
+import { Message } from 'nodeCan/can'
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { v4 } from 'uuid'
@@ -804,18 +804,19 @@ onMounted(async () => {
 })
 
 function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
+  console.log(frame)
   if (frame.bindValue.frameInfo) {
     const channel = Object.keys(devices.value)[0] || ''
     const frameInfo = frame.bindValue.frameInfo as Message
     let type: 'can' | 'canfd' | 'ecan' | 'ecanfd' = 'can'
-    if (frameInfo.canfd) {
-      if (frameInfo.extId) {
+    if (frameInfo.is_fd) {
+      if (frameInfo.is_extended_frame) {
         type = 'ecanfd'
       } else {
         type = 'canfd'
       }
     } else {
-      if (frameInfo.extId) {
+      if (frameInfo.is_extended_frame) {
         type = 'ecan'
       }
     }
@@ -830,7 +831,7 @@ function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
       id: frameInfo.id.toString(16), // 转换为16进制字符串
       channel: channel,
       type: type,
-      dlc: getDlcByLen(frameInfo.length, frameInfo.canfd),
+      dlc: getDlcByLen(frameInfo.length, frameInfo.is_fd),
       data: new Array(frameInfo.length).fill('00') // 初始化数据为全0
     })
   }

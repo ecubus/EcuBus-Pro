@@ -14,20 +14,17 @@
             </template> -->
       <template #default_raw_control="{ row }">
         <div class="value-control">
-          <el-input-number
+          <el-input
             v-model="row.value"
             size="small"
             :min="0"
-            :max="getMaxRawValue(row.length)"
-            :step="1"
-            step-strictly
-            controls-position="right"
+            :max="getMaxRawValue(row.bit_length)"
             @change="handleRawValueChange(row)"
           />
         </div>
       </template>
       <template #default_phys_value="{ row }">
-        <template v-if="row.values">
+        <template v-if="getSignalValues(row).length">
           <el-select
             v-model="row.physValue"
             size="small"
@@ -35,33 +32,19 @@
             @change="handlePhysValueChange(row, dataStore.database.can[props.database])"
           >
             <el-option
-              v-for="item in row.values"
-              :key="item.value"
+              v-for="(item, idx) in getSignalValues(row)"
+              :key="idx"
               :label="item.label"
               :value="item.value"
             />
           </el-select>
         </template>
-        <template v-else-if="row.valueTable">
-          <el-select
-            v-model="row.physValue"
-            size="small"
-            style="width: 100%"
-            @change="handlePhysValueChange(row, dataStore.database.can[props.database])"
-          >
-            <el-option
-              v-for="item in getValues(row.valueTable)"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </template>
+
         <template v-else>
-          <el-input-number
+          <el-input
             v-model="row.physValue"
-            :min="row.minimum != row.maximum ? row.minimum : undefined"
-            :max="row.maximum != row.minimum ? row.maximum : undefined"
+            :min="row.min !== row.max ? Number(row.min) : undefined"
+            :max="row.max !== row.min ? Number(row.max) : undefined"
             style="width: 100%"
             size="small"
             controls-position="right"
@@ -85,7 +68,7 @@
       </template>
     </VxeGrid>
 
-    <el-dialog
+    <!-- <el-dialog
       v-model="editDialogVisible"
       :title="i18next.t('uds.network.canisignale.dialogs.editSignalGenerator')"
       width="400px"
@@ -102,7 +85,7 @@
           </el-select>
         </el-form-item>
       </el-form>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -111,11 +94,12 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
-import { DBC, Message, Signal } from '@r/database/dbc/dbcVisitor'
+import { CanDB, Message, Signal } from 'nodeCan/can'
 import { useDataStore } from '@r/stores/data'
 import {
   getMessageData,
   getMaxRawValue,
+  getActiveSignals,
   rawToPhys,
   updateSignalPhys,
   updateSignalRaw
@@ -136,65 +120,21 @@ const currentSignal = ref<Signal | null>(null)
 const message = computed<Message | undefined>(() => {
   const db = dataStore.database.can[props.database]
   if (db) {
-    const msg = db.messages[parseInt(props.messageId, 16)]
-    return msg
+    const msgId = parseInt(props.messageId, 16)
+    return db.messages?.find((m) => m.id === msgId)
   }
   return undefined
 })
 // Get signals data from store
 const signals = computed(() => {
-  const data: Signal[] = []
-  let multiplexer: Signal | undefined
-  if (message.value) {
-    Object.values(message.value.signals).forEach((signal) => {
-      if (signal.multiplexerIndicator) {
-        if (signal.multiplexerIndicator == 'M') {
-          data.push(signal)
-          multiplexer = signal
-        }
-      } else {
-        data.push(signal)
-      }
-    })
-    if (multiplexer) {
-      Object.values(message.value.signals).forEach((signal) => {
-        if (signal.multiplexerIndicator) {
-          if (signal.multiplexerIndicator == 'M') {
-            //skip
-          } else if (signal.multiplexerRange) {
-            const target = message.value!.signals[signal.multiplexerRange.name]
-            for (let i = 0; i <= signal.multiplexerRange.range.length; i++) {
-              if (target.value == signal.multiplexerRange.range[i]) {
-                data.push(signal)
-                break
-              }
-            }
-          } else {
-            const val = Number(signal.multiplexerIndicator.slice(1))
-            if (val == multiplexer!.value) {
-              data.push(signal)
-            }
-          }
-        }
-      })
-    }
-  }
-
-  return data
+  return message.value ? getActiveSignals(message.value) : []
 })
 
-function getValues(valueTable: string) {
-  const t: { label: string; value: number }[] = []
-  const db = dataStore.database.can[props.database]
-  if (db) {
-    const vt = Object.values(db.valueTables).find((vt) => vt.name === valueTable)
-    if (vt) {
-      vt.values.forEach((value) => {
-        t.push({ label: value.label, value: value.value })
-      })
-    }
-  }
-  return t
+// Signal.values is Record<string, string> (raw->label); convert for el-select. physValue uses label.
+function getSignalValues(signal: Signal): { label: string; value: string }[] {
+  const v = signal.values
+  if (!v || typeof v !== 'object') return []
+  return Object.entries(v).map(([k, val]) => ({ label: val, value: val }))
 }
 
 const gridOptions = computed<VxeGridProps<Signal>>(() => {
@@ -256,14 +196,14 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
         align: 'center'
       },
       {
-        field: 'startBit',
+        field: 'start_bit',
         title: i18next.t('uds.network.canisignale.table.startBit'),
         width: 120,
         align: 'center',
         sortable: true
       },
       {
-        field: 'length',
+        field: 'bit_length',
         title: i18next.t('uds.network.canisignale.table.length'),
         width: 100,
         align: 'center',
@@ -273,14 +213,6 @@ const gridOptions = computed<VxeGridProps<Signal>>(() => {
     data: signals.value
   }
 })
-
-function toggleGenerator(row: Signal) {
-  if (row.generatorType) {
-    row.generatorType = undefined
-  } else {
-    row.generatorType = 'sine' // Default to sine
-  }
-}
 
 function editGenerator(row: Signal) {
   currentSignal.value = row
@@ -307,7 +239,7 @@ function handleRawValueChange(row: Signal) {
 }
 
 // Physical value change handler
-function handlePhysValueChange(row: Signal, db: DBC) {
+function handlePhysValueChange(row: Signal, db: CanDB) {
   updateSignalPhys(row, db)
   if (message.value) {
     if (globalStart.value) {
@@ -330,29 +262,15 @@ const emits = defineEmits<{
 // Initialize signal values
 function initializeSignal(signal: Signal) {
   if (signal.value === undefined) {
-    signal.value = 0
-
-    if (signal.values || signal.valueTable) {
-      // For enum values
-      signal.physValue = 0
-    } else {
-      // For numeric values, calculate initial phys value
-      signal.physValue = rawToPhys(0, signal)
-    }
-  } else if (signal.physValue === undefined) {
-    // If raw value exists but phys value doesn't, calculate it
-    if (signal.values || signal.valueTable) {
-      signal.physValue = signal.value
-    } else {
-      signal.physValue = rawToPhys(signal.value, signal)
-    }
+    signal.value = signal.initial_value
   }
+  updateSignalRaw(signal)
 }
 
 onMounted(() => {
-  // Initialize all signals
+  // Initialize all signals (signals is array)
   if (message.value) {
-    Object.values(message.value.signals).forEach((signal) => {
+    ;(message.value.signals || []).forEach((signal) => {
       initializeSignal(signal)
     })
     emits('change', getMessageData(message.value))

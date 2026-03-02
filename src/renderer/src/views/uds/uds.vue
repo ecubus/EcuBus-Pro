@@ -1302,7 +1302,7 @@ const dataBaseList = computed(() => {
   }
   if (list.length == 0) {
     list.push({
-      url: i18next.t('uds.dropdowns.database.noDatabase'),
+      url: i18next.t('database.noDatabase'),
       disabled: true
     })
   }
@@ -1323,11 +1323,11 @@ async function openDatabase(testerIndex: string) {
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: i18next.t('uds.dropdowns.database.openDatabaseTitle'),
+      title: i18next.t('database.openDatabaseTitle'),
       properties: ['openFile'],
       filters: [
         {
-          name: i18next.t('uds.dropdowns.database.fileFilterName'),
+          name: i18next.t('database.fileFilterName'),
           extensions: [fileExtMap[type]]
         }
       ]

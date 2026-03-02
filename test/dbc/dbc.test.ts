@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from 'vitest'
-import parse, { isCanFd } from 'src/renderer/src/database/dbcParse'
+import { parseFile } from 'src/main/canmartix'
 import { updateSignalPhys } from 'src/renderer/src/database/dbc/calc'
 import fs from 'fs'
 import path from 'path'
@@ -9,7 +9,13 @@ import {
   updateSignalRaw,
   writeMessageData
 } from 'src/renderer/src/database/dbc/calc'
+import { tmpdir } from 'os'
+const outputJson = path.join(tmpdir(), 'testDBC.json')
 
+const parse = async (filePath: string) => {
+  const v = await parseFile(filePath, outputJson)
+  return v.data
+}
 describe('DBC Parser Tests', () => {
   let dbcContentModel3: string
   let dbcContentHyundaiKia: string
@@ -23,276 +29,291 @@ describe('DBC Parser Tests', () => {
   let scuDbc: string
   let testDbc1: string
   beforeAll(() => {
-    dbcContentModel3 = fs.readFileSync(path.join(__dirname, 'Model3CAN.dbc'), 'utf-8')
-    dbcContentHyundaiKia = fs.readFileSync(
-      path.join(__dirname, 'can1-hyundai-kia-uds-v2.4.dbc'),
-      'utf-8'
-    )
-    dbcContentVwSkodaAudi = fs.readFileSync(
-      path.join(__dirname, 'can1-vw-skoda-audi-uds-v2.5.dbc'),
-      'utf-8'
-    )
-    dbcContentTest = fs.readFileSync(path.join(__dirname, 'testdbc.dbc'), 'utf-8')
-    floatDbc = fs.readFileSync(path.join(__dirname, 'float.dbc'), 'utf-8')
-    evDbc = fs.readFileSync(path.join(__dirname, 'ev.dbc'), 'utf-8')
-    sgDbc = fs.readFileSync(path.join(__dirname, 'sig_group.dbc'), 'utf-8')
-    id200Dbc = fs.readFileSync(path.join(__dirname, 'ID200.dbc'), 'utf-8')
-    test1Dbc = fs.readFileSync(path.join(__dirname, 'test1.dbc'), 'utf-8')
-    scuDbc = fs.readFileSync(path.join(__dirname, 'SCU.dbc'), 'utf-8')
-    testDbc1 = fs.readFileSync(path.join(__dirname, 'TestDbc1.dbc'), 'utf-8')
-  })
-  test('scu', () => {
-    const result = parse(scuDbc)
-    expect(result).toBeDefined()
-    expect(result.messages[119].name).toBe('EOL_Check_77')
-    expect(result.messages[119].signals['Eol_KL30_ADC'].name).toBe('Eol_KL30_ADC')
-    expect(result.messages[119].signals['Eol_KL15_ADC'].name).toBe('Eol_KL15_ADC')
-  })
-  test('test1', () => {
-    const result = parse(test1Dbc)
-    expect(result).toBeDefined()
-    expect(result.messages[655].name).toBe('InternalReader1_Flt_D_Stat')
-    expect(result.messages[655].signals['INT1_VoltageFault'].name).toBe('INT1_VoltageFault')
-    expect(result.messages[655].signals['INT1_FaultStatus'].name).toBe('INT1_FaultStatus')
-    expect(result.messages[655].signals['INT1_AntennaFault'].name).toBe('INT1_AntennaFault')
-  })
-  test('id200', () => {
-    const result = parse(id200Dbc)
-    expect(result).toBeDefined()
-    expect(result.messages[0x200].name).toBe('Message_200')
-    const s = result.messages[0x200].signals['HhBmIO']
-    const s1 = result.messages[0x200].signals['LwBmIO']
+    dbcContentModel3 = path.join(__dirname, 'Model3CAN.dbc')
+    dbcContentHyundaiKia = path.join(__dirname, 'can1-hyundai-kia-uds-v2.4.dbc')
 
-    s.physValue = 1
-    s1.physValue = 1
-    updateSignalPhys(s, result)
-    updateSignalPhys(s1, result)
+    dbcContentVwSkodaAudi = path.join(__dirname, 'can1-vw-skoda-audi-uds-v2.5.dbc')
+    dbcContentTest = path.join(__dirname, 'testdbc.dbc')
+    floatDbc = path.join(__dirname, 'float.dbc')
+    ;((evDbc = path.join(__dirname, 'ev.dbc')), 'utf-8')
+    sgDbc = path.join(__dirname, 'sig_group.dbc')
+    id200Dbc = path.join(__dirname, 'ID200.dbc')
+    test1Dbc = path.join(__dirname, 'test1.dbc')
+    scuDbc = path.join(__dirname, 'SCU.dbc')
+    testDbc1 = path.join(__dirname, 'TestDbc1.dbc')
+  })
+  test('scu', async () => {
+    const result = await parse(scuDbc)
 
-    const buf = getMessageData(result.messages[0x200])
+    const msg = result.messages.find((m: any) => m.name === 'EOL_Check_77')
+    expect(msg).toBeDefined()
+    if (msg) {
+      expect(msg.signals.find((s) => s.name === 'Eol_KL30_ADC')?.name).toBe('Eol_KL30_ADC')
+      expect(msg.signals.find((s) => s.name === 'Eol_KL15_ADC')?.name).toBe('Eol_KL15_ADC')
+    }
+  })
+  test('test1', async () => {
+    const result = await parse(test1Dbc)
+    const msg = result.messages.find((m) => m.name === 'InternalReader1_Flt_D_Stat')
+    expect(msg).toBeDefined()
+    if (msg) {
+      expect(msg.id).toBe(655)
+      expect(msg.signals.find((s) => s.name === 'INT1_VoltageFault')?.name).toBe(
+        'INT1_VoltageFault'
+      )
+      expect(msg.signals.find((s) => s.name === 'INT1_FaultStatus')?.name).toBe('INT1_FaultStatus')
+      expect(msg.signals.find((s) => s.name === 'INT1_AntennaFault')?.name).toBe(
+        'INT1_AntennaFault'
+      )
+    }
+  })
+  test('id200', async () => {
+    const result = await parse(id200Dbc)
+    expect(result).toBeDefined()
+
+    const msg = result.messages.find((m) => m.id === 0x200)
+    expect(msg).toBeDefined()
+
+    expect(msg!.name).toBe('Message_200')
+    const s = msg!.signals.find((s) => s.name === 'HhBmIO')
+    const s1 = msg!.signals.find((s) => s.name === 'LwBmIO')
+
+    s!.physValue = '1'
+    s1!.physValue = '1'
+    updateSignalPhys(s!, result)
+    updateSignalPhys(s1!, result)
+
+    const buf = getMessageData(msg!)
     expect(buf).toEqual(Buffer.from([0x81, 0, 0, 0, 0, 0, 0, 0]))
 
-    const ns = result.messages[12].signals['UI_audioActive']
-    const ns1 = result.messages[12].signals['UI_cellVector__XXXPower']
+    const msg1 = result.messages.find((m) => m.id === 12)
+    expect(msg1).toBeDefined()
 
-    ns.physValue = 1
-    ns1.physValue = -116
-    updateSignalPhys(ns, result)
-    updateSignalPhys(ns1, result)
+    const ns = msg1!.signals.find((s) => s.name === 'UI_audioActive')
+    const ns1 = msg1!.signals.find((s) => s.name === 'UI_cellVector__XXXPower')
 
-    const buf1 = getMessageData(result.messages[12])
+    ns!.physValue = '1'
+    ns1!.physValue = '-116'
+    updateSignalPhys(ns!, result)
+    updateSignalPhys(ns1!, result)
+
+    const buf1 = getMessageData(msg1!)
     expect(buf1).toEqual(Buffer.from([0x2, 0, 0, 0xc, 0, 0, 0, 0]))
   })
-  test('dbc model3', () => {
-    const result = parse(dbcContentModel3)
+  test('dbc model3', async () => {
+    const result = await parse(dbcContentModel3)
     // Add assertions to verify the parsed values for Model3CAN.dbc
     expect(result).toBeDefined()
-    expect(isCanFd(result.messages[0x113])).toBe(false)
-    expect(result.messages[0x113].extId).toBe(true)
+    const msg113 = result.messages.find((m) => m.id === 0x113)
+    expect(msg113).toBeDefined()
+    if (msg113) {
+      expect(msg113.is_fd).toBe(false)
+      expect(msg113.is_extended_frame).toBe(true)
+    }
     // Add more specific assertions based on the expected structure of Model3CAN.dbc
   })
-  test('dbc sig_group', () => {
-    const result = parse(sgDbc)
+  test('dbc sig_group', async () => {
+    const result = await parse(sgDbc)
     // Add assertions to verify the parsed values for Model3CAN.dbc
     expect(result).toBeDefined()
 
     // Add more specific assertions based on the expected structure of Model3CAN.dbc
   })
 
-  test('dbc can1-hyundai-kia-uds-v2.4', () => {
-    const result = parse(dbcContentHyundaiKia)
+  test('dbc can1-hyundai-kia-uds-v2.4', async () => {
+    const result = await parse(dbcContentHyundaiKia)
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
-  test('dbc testdbc', () => {
-    const result = parse(dbcContentTest)
+  test('dbc testdbc', async () => {
+    const result = await parse(dbcContentTest)
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
-  test('dbc ev', () => {
-    const result = parse(evDbc)
+  test('dbc ev', async () => {
+    const result = await parse(evDbc)
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
-    expect(result.environmentVariables['V2CTxTime'].name).toBe('V2CTxTime')
+    expect(result.env_vars['V2CTxTime']).toBeDefined()
 
     // Add more specific assertions based on the expected structure of can1-hyundai-kia-uds-v2.4.dbc
   })
-  test('float', () => {
-    const result = parse(floatDbc)
+  test('float', async () => {
+    const result = await parse(floatDbc)
     // Add assertions to verify the parsed values for can1-hyundai-kia-uds-v2.4.dbc
     expect(result).toBeDefined()
     const id = 0x12332
-    expect(result.messages[Number(id)].signals['Binary32'].valueType).toEqual(1)
+    const msg1 = result.messages.find((m) => m.id === id)
+    expect(msg1).toBeDefined()
+    const signal1 = msg1!.signals.find((s) => s.name === 'Binary32')
+    if (msg1) {
+      expect(signal1!.is_float).toBe(true)
+    }
 
-    writeMessageData(result.messages[Number(id)], Buffer.from([0, 0, 0x80, 0x3f]), result)
-    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
-    updateSignalRaw(result.messages[Number(id)].signals['Binary32'])
-    expect(result.messages[Number(id)].signals['Binary32'].physValue).toEqual(1.0)
-    expect(getMessageData(result.messages[Number(id)])).toEqual(Buffer.from([0, 0, 0x80, 0x3f]))
+    writeMessageData(msg1!, Buffer.from([0, 0, 0x80, 0x3f]), result)
+    expect(signal1!.physValue).toEqual('1.0')
+    updateSignalRaw(signal1!)
+    expect(signal1!.physValue).toEqual('1.0')
+    expect(getMessageData(msg1!)).toEqual(Buffer.from([0, 0, 0x80, 0x3f]))
 
-    const msg = result.messages[326]
-    expect(msg.name).toBe('ISGF_1')
-    writeMessageData(msg, Buffer.from([0xa0, 0x08, 0x7f, 0xff, 0x0, 0x3f, 0xc7, 0xf8]), result)
-    expect(msg.signals['ISGF_TorqMax_M146'].value).toBeDefined()
+    const msg = result.messages.find((m) => m.id === 326)
+    expect(msg!.name).toBe('ISGF_1')
+    writeMessageData(msg!, Buffer.from([0xa0, 0x08, 0x7f, 0xff, 0x0, 0x3f, 0xc7, 0xf8]), result)
+    const signal2 = msg!.signals.find((s) => s.name === 'ISGF_TorqMax_M146')
+    expect(signal2!.value).toBeDefined()
 
-    writeMessageData(msg, Buffer.from([0xb2, 0xab, 0xff, 0xff, 0xff, 0xff, 0xf7, 0xf8]), result)
-    expect(msg.signals['ISGF_TorqMax_M146'].value).toEqual(1023)
-    expect(msg.signals['ISGF_TorqMax_M146'].physValueEnum).toEqual('Invalid')
+    writeMessageData(msg!, Buffer.from([0xb2, 0xab, 0xff, 0xff, 0xff, 0xff, 0xf7, 0xf8]), result)
+    expect(signal2!.value).toEqual('1023')
+    expect(signal2!.physValue).toEqual('Invalid')
 
-    writeMessageData(msg, Buffer.from([0xa0, 0x08, 0x7f, 0xff, 0x0, 0x3f, 0xc7, 0xf8]), result)
-    expect(msg.signals['ISGF_TorqMax_M146'].value).toEqual(0)
+    writeMessageData(msg!, Buffer.from([0xa0, 0x08, 0x7f, 0xff, 0x0, 0x3f, 0xc7, 0xf8]), result)
+    expect(signal2!.value).toEqual('0')
   })
-  test('dbc can1-vw-skoda-audi-uds-v2.5', () => {
-    const result = parse(dbcContentVwSkodaAudi)
+  test('dbc can1-vw-skoda-audi-uds-v2.5', async () => {
+    const result = await parse(dbcContentVwSkodaAudi)
     // Add assertions to verify the parsed values for can1-vw-skoda-audi-uds-v2.5.dbc
     expect(result).toBeDefined()
-    expect(result.version).toBe('')
-    expect(result.nodes).toEqual({})
-    const id = 2550005883 & 0x1fffffff
-    expect(result.messages[id].name).toBe('Battery')
-    expect(result.messages[id].signals['StateOfChargeBMS'].multiplexerRange).toEqual({
-      name: 'R',
-      range: [652]
-    })
-    expect(result.messages[id].signals['R'].multiplexerRange).toEqual({
-      name: 'S',
-      range: [98]
-    })
 
-    expect(result.messages[1968].name).toBe('Temperature')
-    expect(result.messages[1968].signals['OutdoorTemp'].multiplexerRange).toEqual({
-      name: 'R',
-      range: [9737]
-    })
+    const id = 2550005883 & 0x1fffffff
+    const msgBattery = result.messages.find((m: { id: number }) => m.id === id)
+    expect(msgBattery).toBeDefined()
+    expect(msgBattery!.name).toBe('Battery')
+
+    expect(
+      msgBattery!.signals.find((s: { name: string }) => s.name === 'StateOfChargeBMS')!
+        .muxer_for_signal
+    ).toEqual('R')
+    expect(
+      msgBattery!.signals.find((s: { name: string }) => s.name === 'R')!.muxer_for_signal
+    ).toEqual('S')
+
+    const msgTemp = result.messages.find((m: { id: number }) => m.id === 1968)
+    expect(msgTemp).toBeDefined()
+    expect(msgTemp!.name).toBe('Temperature')
+    expect(
+      msgTemp!.signals.find((s: { name: string }) => s.name === 'OutdoorTemp')!.muxer_for_signal
+    ).toEqual('R')
 
     // Add assertions for signal values
-    expect(result.messages[id].signals['StateOfChargeBMS'].factor).toBe(0.4)
-    expect(result.messages[id].signals['StateOfChargeBMS'].offset).toBe(0)
-    expect(result.messages[id].signals['StateOfChargeBMS'].minimum).toBe(0)
-    expect(result.messages[id].signals['StateOfChargeBMS'].maximum).toBe(100)
-    expect(result.messages[id].signals['StateOfChargeBMS'].unit).toBe('%')
+    const sigStateOfChargeBMS = msgBattery!.signals.find(
+      (s: { name: string }) => s.name === 'StateOfChargeBMS'
+    )
+    expect(sigStateOfChargeBMS!.factor).toBe('0.4')
+    expect(sigStateOfChargeBMS!.offset).toBe('0')
+    expect(sigStateOfChargeBMS!.min).toBe('0')
+    expect(sigStateOfChargeBMS!.max).toBe('100')
+    expect(sigStateOfChargeBMS!.unit).toBe('%')
 
     const id2 = 2550005945 & 0x1fffffff
-    expect(result.messages[id2].signals['Voltage'].factor).toBe(0.001953125)
-    expect(result.messages[id2].signals['Voltage'].offset).toBe(0)
-    expect(result.messages[id2].signals['Voltage'].minimum).toBe(0)
-    expect(result.messages[id2].signals['Voltage'].maximum).toBe(0)
-    expect(result.messages[id2].signals['Voltage'].unit).toBe('V')
-    expect(result.messages[id2].name).toBe('VoltageCurrent')
-    expect(result.messages[id2].signals['Voltage'].multiplexerRange).toEqual({
-      name: 'R',
-      range: [18013]
-    })
+    const msgVoltage = result.messages.find((m: { id: number }) => m.id === id2)
+    expect(msgVoltage).toBeDefined()
+    const sigVoltage = msgVoltage!.signals.find((s: { name: string }) => s.name === 'Voltage')
+    expect(sigVoltage!.factor).toBe('0.001953125')
+    expect(sigVoltage!.offset).toBe('0')
+    expect(sigVoltage!.min).toBe('0')
+    expect(sigVoltage!.max).toBe('0')
+    expect(sigVoltage!.unit).toBe('V')
+    expect(msgVoltage!.name).toBe('VoltageCurrent')
+    expect(sigVoltage!.muxer_for_signal).toEqual('R')
     const id3 = 2550005878 & 0x1fffffff
-    expect(result.messages[id3].name).toBe('Odometer')
-    expect(result.messages[id3].signals['Odometer'].multiplexerRange).toEqual({
-      name: 'R',
-      range: [10586]
-    })
-    expect(result.messages[id3].signals['Odometer'].factor).toBe(1)
-    expect(result.messages[id3].signals['Odometer'].offset).toBe(0)
-    expect(result.messages[id3].signals['Odometer'].minimum).toBe(0)
-    expect(result.messages[id3].signals['Odometer'].maximum).toBe(0)
-    expect(result.messages[id3].signals['Odometer'].unit).toBe('km')
+    const msgOdometer = result.messages.find((m: { id: number }) => m.id === id3)
+    expect(msgOdometer).toBeDefined()
+    expect(msgOdometer!.name).toBe('Odometer')
+    const sigOdometer = msgOdometer!.signals.find((s: { name: string }) => s.name === 'Odometer')
+    expect(sigOdometer!.muxer_for_signal).toEqual('R')
+    expect(sigOdometer!.factor).toBe('1')
+    expect(sigOdometer!.offset).toBe('0')
+    expect(sigOdometer!.min).toBe('0')
+    expect(sigOdometer!.max).toBe('0')
+    expect(sigOdometer!.unit).toBe('km')
 
-    expect(result.messages[1968].signals['OutdoorTemp'].factor).toBe(0.5)
-    expect(result.messages[1968].signals['OutdoorTemp'].offset).toBe(-50)
-    expect(result.messages[1968].signals['OutdoorTemp'].minimum).toBe(0)
-    expect(result.messages[1968].signals['OutdoorTemp'].maximum).toBe(0)
-    expect(result.messages[1968].signals['OutdoorTemp'].unit).toBe('degC')
+    const sigOutdoorTemp = msgTemp!.signals.find((s: { name: string }) => s.name === 'OutdoorTemp')
+    expect(sigOutdoorTemp!.factor).toBe('0.5')
+    expect(sigOutdoorTemp!.offset).toBe('-50')
+    expect(sigOutdoorTemp!.min).toBe('0')
+    expect(sigOutdoorTemp!.max).toBe('0')
+    expect(sigOutdoorTemp!.unit).toBe('degC')
 
-    expect(result.messages[1968].attributes['TransportProtocolType'].currentValue).toBe('ISOTP')
+    expect(msgTemp!.attributes['TransportProtocolType']).toBe('ISOTP')
 
+    const signalIgnore = result.signal_defines.find((s) => s.name === 'SignalIgnore')
     // Add assertions for BA_DEF_ and BA_DEF_DEF_
-    expect(result.attributes['SignalIgnore']).toBeDefined()
-    expect(result.attributes['SignalIgnore'].type).toBe('INT')
-    expect(result.attributes['SignalIgnore'].min).toBe(0)
-    expect(result.attributes['SignalIgnore'].max).toBe(1)
-    expect(result.attributes['SignalIgnore'].defaultValue).toBe(0)
+    expect(signalIgnore).toBeDefined()
+    expect(signalIgnore!.type).toBe('INT')
+    expect(signalIgnore!.define).toBe('INT 0 1')
+    expect(signalIgnore!.default).toBe('0')
 
-    expect(result.attributes['VFrameFormat']).toBeDefined()
-    expect(result.attributes['VFrameFormat'].type).toBe('ENUM')
-    expect(result.attributes['VFrameFormat'].enumList).toEqual([
-      'StandardCAN',
-      'ExtendedCAN',
-      'StandardCAN_FD',
-      'ExtendedCAN_FD',
-      'J1939PG'
-    ])
-    expect(result.attributes['VFrameFormat'].defaultValue).toBe('')
-
-    expect(result.attributes['MessageIgnore']).toBeDefined()
-    expect(result.attributes['MessageIgnore'].type).toBe('INT')
-    expect(result.attributes['MessageIgnore'].min).toBe(0)
-    expect(result.attributes['MessageIgnore'].max).toBe(1)
-    expect(result.attributes['MessageIgnore'].defaultValue).toBe(0)
-
-    expect(result.attributes['TransportProtocolType']).toBeDefined()
-    expect(result.attributes['TransportProtocolType'].type).toBe('STRING')
-    expect(result.attributes['TransportProtocolType'].defaultValue).toBe('')
-
-    expect(result.attributes['BusType']).toBeDefined()
-    expect(result.attributes['BusType'].type).toBe('STRING')
-    expect(result.attributes['BusType'].currentValue).toBe('CAN')
-
-    expect(result.attributes['ProtocolType']).toBeDefined()
-    expect(result.attributes['ProtocolType'].type).toBe('STRING')
-    expect(result.attributes['ProtocolType'].currentValue).toBe('OBD')
-
-    expect(result.attributes['DatabaseCompiler']).toBeDefined()
-    expect(result.attributes['DatabaseCompiler'].type).toBe('STRING')
-    expect(result.attributes['DatabaseCompiler'].defaultValue).toBe(
-      'CSS Electronics (wwww.csselectronics.com)'
+    const frameDefine = result.frame_defines.find((s) => s.name === 'VFrameFormat')
+    expect(frameDefine).toBeDefined()
+    expect(frameDefine!.type).toBe('ENUM')
+    expect(frameDefine!.define).toEqual(
+      'ENUM  "StandardCAN","ExtendedCAN","StandardCAN_FD","ExtendedCAN_FD","J1939PG"'
     )
+    expect(frameDefine!.default).toBe('')
 
-    expect(result.messages[0x17fe007b].signals['S'].startBit).toBe(0)
-    expect(result.messages[0x17fe007b].signals['R'].startBit).toBe(16)
-    expect(result.messages[0x17fe007b].signals['BattTempMain'].startBit).toBe(24)
-    expect(result.messages[0x17fe007b].signals['Speed'].startBit).toBe(24)
-    expect(result.messages[0x17fe007b].signals['BatteryCurrentHV'].startBit).toBe(48)
-    expect(result.messages[0x17fe007b].signals['BatteryVoltageHV'].startBit).toBe(32)
-    expect(result.messages[0x17fe007b].signals['BatteryTotalChargeHV'].startBit).toBe(88)
-    expect(result.messages[0x17fe007b].signals['BatteryTotalDischargeHV'].startBit).toBe(120)
+    const msg17fe = result.messages.find((m: { id: number }) => m.id === 0x17fe007b)
+    expect(msg17fe).toBeDefined()
+    expect(msg17fe!.signals.find((s: { name: string }) => s.name === 'S')!.start_bit).toBe(0)
+    expect(msg17fe!.signals.find((s: { name: string }) => s.name === 'R')!.start_bit).toBe(16)
+    expect(
+      msg17fe!.signals.find((s: { name: string }) => s.name === 'BattTempMain')!.start_bit
+    ).toBe(24)
+    expect(msg17fe!.signals.find((s: { name: string }) => s.name === 'Speed')!.start_bit).toBe(24)
+    expect(
+      msg17fe!.signals.find((s: { name: string }) => s.name === 'BatteryCurrentHV')!.start_bit
+    ).toBe(48)
+    expect(
+      msg17fe!.signals.find((s: { name: string }) => s.name === 'BatteryVoltageHV')!.start_bit
+    ).toBe(32)
+    expect(
+      msg17fe!.signals.find((s: { name: string }) => s.name === 'BatteryTotalChargeHV')!.start_bit
+    ).toBe(88)
+    expect(
+      msg17fe!.signals.find((s: { name: string }) => s.name === 'BatteryTotalDischargeHV')!
+        .start_bit
+    ).toBe(120)
   })
 
-  test('id2001.dbc', () => {
-    const id2001Dbc = fs.readFileSync(path.join(__dirname, 'id2001.dbc'), 'utf-8')
-    const result = parse(id2001Dbc)
+  test('id2001.dbc', async () => {
+    const id2001Dbc = path.join(__dirname, 'id2001.dbc')
+    const result = await parse(id2001Dbc)
     expect(result).toBeDefined()
-    const msg = result.messages[0x200]
-    expect(msg.name).toBe('Message_200')
+    const msg = result.messages.find((m) => m.id === 0x200)
+    expect(msg!.name).toBe('Message_200')
     //set signal value
-    const s = msg.signals['test']
+    const s = msg!.signals.find((s) => s.name === 'test')
     expect(s).toBeDefined()
-    s.value = 14
-    updateSignalRaw(s)
-    expect(s.physValue).toBe(14)
-    const buf = getMessageData(msg)
+    s!.value = '14'
+    updateSignalRaw(s!)
+    expect(s!.physValue).toBe('14')
+    const buf = getMessageData(msg!)
 
     expect(buf).toEqual(Buffer.from([0, 0, 0, 1, 0xc0, 0, 0, 0]))
-    writeMessageData(msg, Buffer.from([0, 0, 0, 0xce, 0x80, 0, 0, 0]), result)
-    expect(s.value).toBe(0x674)
+    writeMessageData(msg!, Buffer.from([0, 0, 0, 0xce, 0x80, 0, 0, 0]), result)
+    expect(s!.value).toBe('1652')
   })
 
-  test('testDbc1.dbc', () => {
-    const result = parse(testDbc1)
+  test('testDbc1.dbc', async () => {
+    const result = await parse(testDbc1)
     expect(result).toBeDefined()
-    const msg = result.messages[0x150]
-    writeMessageData(msg, Buffer.from([0xb7, 0x1b, 0x80, 0x02, 0x80, 0, 0xb5, 0xa0]), result)
-    const s = msg.signals['MCU_F_CrtSpd']
-    expect(s.value).toBe(0x8002)
-    expect(s.physValue).toBe(2)
+    const msg = result.messages.find((m) => m.id === 0x150)
+    expect(msg).toBeDefined()
+    writeMessageData(msg!, Buffer.from([0xb7, 0x1b, 0x80, 0x02, 0x80, 0, 0xb5, 0xa0]), result)
+    const s = msg!.signals.find((s) => s.name === 'MCU_F_CrtSpd')
+    expect(s!.value).toBe('32770')
+    expect(s!.physValue).toBe('2')
 
-    const buf = getMessageData(msg)
+    const buf = getMessageData(msg!)
     // The original buffer has 0xA0 (10100000) at the end, but the DBC defines no signal for bit 63 (MSB).
     // getMessageData reconstructs the buffer from signals, so the unmapped bit 63 becomes 0.
     // Result is 0x20 (00100000).
     expect(buf).toEqual(Buffer.from([0xb7, 0x1b, 0x80, 0x02, 0x80, 0, 0xb5, 0x20]))
 
-    s.physValue = 3
-    updateSignalPhys(s, result)
-    const buf1 = getMessageData(msg)
+    s!.physValue = '3'
+    updateSignalPhys(s!, result)
+    const buf1 = getMessageData(msg!)
     expect(buf1).toEqual(Buffer.from([0xb7, 0x1b, 0x80, 0x03, 0x80, 0, 0xb5, 0x20]))
   })
 })

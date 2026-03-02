@@ -92,19 +92,19 @@ import {
 import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
-import { DBC, Signal } from './dbcVisitor'
+import type { CanDB, Message, Signal } from 'nodeCan/can'
 import { Icon } from '@iconify/vue'
 import removeIcon from '@iconify/icons-ep/remove'
 import waveIcon from '@iconify/icons-material-symbols/airwave-rounded'
 import messageIcon from '@iconify/icons-material-symbols/business-messages-outline'
 import nodeIcon from '@iconify/icons-material-symbols/point-scan'
-import { multiCalc } from './parse'
+// import { multiCalc } from './parse'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElTreeV2 } from 'element-plus'
 import i18next from 'i18next'
 // import { validateLDF } from './validator'
 
-const dbcObj = defineModel<DBC>({
+const dbcObj = defineModel<CanDB>({
   required: true
 })
 
@@ -123,15 +123,15 @@ const database = useDataStore()
 // Tree data structure
 const treeData = computed(() => {
   // Get all signals from all messages and sort them
-  const allSignals = Object.entries(dbcObj.value.messages)
-    .reduce((acc, [msgId, msg]) => {
-      Object.entries(msg.signals).forEach(([name, signal]) => {
+  const allSignals = dbcObj.value.messages
+    .reduce((acc, msg) => {
+      msg.signals.forEach((signal) => {
         acc.push({
-          label: name,
+          label: signal.name,
           type: 'signal',
           data: {
             ...signal,
-            messageId: msgId,
+            messageId: msg.id,
             messageName: msg.name
           }
         })
@@ -144,7 +144,7 @@ const treeData = computed(() => {
     {
       label: i18next.t('database.dbc.overview.treeCategories.node'),
       type: 'category',
-      children: Object.entries(dbcObj.value.nodes).map(([name, node]) => ({
+      children: Object.entries(dbcObj.value.ecus).map(([name, node]) => ({
         label: name,
         type: 'node',
         data: node
@@ -153,18 +153,18 @@ const treeData = computed(() => {
     {
       label: i18next.t('database.dbc.overview.treeCategories.message'),
       type: 'category',
-      children: Object.entries(dbcObj.value.messages)
-        .sort((a, b) => a[1].name.localeCompare(b[1].name))
-        .map(([id, msg]) => ({
-          label: `${msg.name} (0x${Number(id).toString(16)})`,
+      children: [...dbcObj.value.messages]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((msg) => ({
+          label: `${msg.name} (0x${Number(msg.id).toString(16)})`,
           type: 'message',
           data: msg,
-          children: Object.entries(msg.signals).map(([name, signal]) => ({
-            label: name,
+          children: msg.signals.map((signal) => ({
+            label: signal.name,
             type: 'signal',
             data: {
               ...signal,
-              messageId: id,
+              messageId: msg.id,
               messageName: msg.name
             }
           }))
@@ -194,7 +194,47 @@ const defaultProps = {
   label: 'label',
   children: 'children'
 }
+function formatMuxValue(signal: Signal): string {
+  if (signal.mux_val_grp && signal.mux_val_grp.length > 0) {
+    return signal.mux_val_grp
+      .map(([min, max]) =>
+        min === max ? min.toString(16) : `${min.toString(16)}-${max.toString(16)}`
+      )
+      .join(', ')
+  }
+  if (signal.mux_value !== undefined && signal.mux_value !== null) {
+    return signal.mux_value.toString(16)
+  }
+  return ''
+}
 
+function multiCalc(signal: Signal) {
+  if (signal.is_multiplexer) {
+    if (!signal.muxer_for_signal) {
+      return i18next.t('database.dbc.parse.multiplexor')
+    }
+    const value = formatMuxValue(signal)
+    return value
+      ? i18next.t('database.dbc.parse.multiplexorWithValue', {
+          name: signal.muxer_for_signal,
+          value
+        })
+      : i18next.t('database.dbc.parse.multiplexorWithValue', {
+          name: signal.muxer_for_signal,
+          value: '0'
+        })
+  }
+  if (signal.muxer_for_signal) {
+    const value = formatMuxValue(signal)
+    return value
+      ? i18next.t('database.dbc.parse.multiplexedValue', {
+          name: signal.muxer_for_signal,
+          value
+        })
+      : ''
+  }
+  return ''
+}
 // Table configurations
 const signalColumns: VxeGridProps['columns'] = [
   {
@@ -209,48 +249,52 @@ const signalColumns: VxeGridProps['columns'] = [
     minWidth: 120
   },
   {
-    field: 'multiplexerIndicator',
+    field: 'mux_value',
     title: i18next.t('database.dbc.overview.columns.multiplexer'),
     width: 100,
     formatter: ({ row }) => multiCalc(row) || '-'
   },
-  { field: 'startBit', title: i18next.t('database.dbc.overview.columns.startBit'), width: 100 },
-  { field: 'length', title: i18next.t('database.dbc.overview.columns.length'), width: 80 },
+  { field: 'start_bit', title: i18next.t('database.dbc.overview.columns.startBit'), width: 100 },
+  { field: 'bit_length', title: i18next.t('database.dbc.overview.columns.length'), width: 80 },
   {
-    field: 'isLittleEndian',
+    field: 'is_big_endian',
     title: i18next.t('database.dbc.overview.columns.byteOrder'),
     width: 100,
     formatter: ({ cellValue }) =>
       cellValue
-        ? i18next.t('database.dbc.overview.values.intel')
-        : i18next.t('database.dbc.overview.values.motorola')
+        ? i18next.t('database.dbc.overview.values.motorola')
+        : i18next.t('database.dbc.overview.values.intel')
   },
   {
-    field: 'isSigned',
+    field: 'is_signed',
     title: i18next.t('database.dbc.overview.columns.type'),
     width: 80,
     formatter: ({ row }) => {
-      if (row.valueType === 1) return i18next.t('database.dbc.overview.values.float')
-      if (row.valueType === 2) return i18next.t('database.dbc.overview.values.double')
-      return row.isSigned
+      if (row.is_float && row.bit_length === 64)
+        return i18next.t('database.dbc.overview.values.double')
+      if (row.is_float) return i18next.t('database.dbc.overview.values.float')
+      return row.is_signed
         ? i18next.t('database.dbc.overview.values.signed')
         : i18next.t('database.dbc.overview.values.unsigned')
     }
   },
   { field: 'factor', title: i18next.t('database.dbc.overview.columns.factor'), width: 80 },
   { field: 'offset', title: i18next.t('database.dbc.overview.columns.offset'), width: 80 },
-  { field: 'minimum', title: i18next.t('database.dbc.overview.columns.min'), width: 80 },
-  { field: 'maximum', title: i18next.t('database.dbc.overview.columns.max'), width: 80 },
+  { field: 'min', title: i18next.t('database.dbc.overview.columns.min'), width: 80 },
+  { field: 'max', title: i18next.t('database.dbc.overview.columns.max'), width: 80 },
   { field: 'unit', title: i18next.t('database.dbc.overview.columns.unit'), width: 80 },
   {
-    field: 'valueTable',
+    field: 'values',
     title: i18next.t('database.dbc.overview.columns.valueTable'),
     width: 120,
     formatter: ({ row }) => {
-      if (row.values) {
-        return row.values.map((v) => `${v.value}:${v.label}`).join(', ')
+      const values = row.values
+      if (values && typeof values === 'object') {
+        return Object.entries(values)
+          .map(([k, v]) => `${k}:${v}`)
+          .join(', ')
       }
-      return row.valueTable || ''
+      return ''
     }
   },
   { field: 'comment', title: i18next.t('database.dbc.overview.columns.comment'), width: 200 }
@@ -271,24 +315,28 @@ const messageColumns: VxeGridProps['columns'] = [
     formatter: ({ cellValue }) => `0x${Number(cellValue).toString(16).toUpperCase()}`
   },
   { field: 'length', title: i18next.t('database.dbc.overview.columns.length'), width: 100 },
-  { field: 'sender', title: i18next.t('database.dbc.overview.columns.sender'), width: 120 },
+  {
+    field: 'transmitters',
+    title: i18next.t('database.dbc.overview.columns.sender'),
+    width: 120,
+    formatter: ({ row }) => (row.transmitters || []).join(', ')
+  },
   {
     field: 'receivers',
     title: i18next.t('database.dbc.overview.columns.receivers'),
     width: 150,
     formatter: ({ row }) => {
-      const receivers = row.signals
-        ? [...new Set(Object.values<Signal>(row.signals).flatMap((signal) => signal.receivers))]
-        : []
+      const signals = row.signals || []
+      const receivers = [...new Set(signals.flatMap((signal: Signal) => signal.receivers || []))]
       return receivers.join(', ')
     }
   },
   { field: 'role', title: i18next.t('database.dbc.overview.columns.role'), width: 100 },
   {
-    field: 'signalCount',
+    field: 'signals',
     title: i18next.t('database.dbc.overview.columns.signals'),
     width: 100,
-    formatter: ({ row }) => Object.keys(row.signals || {}).length
+    formatter: ({ row }) => (row.signals || []).length
   },
   { field: 'comment', title: i18next.t('database.dbc.overview.columns.comment'), width: 200 }
 ]
@@ -348,7 +396,10 @@ const handleNodeClick = (data: any) => {
   searchText.value = '' // Clear search text when switching nodes
   if (data.type === 'message' && data.data.signals) {
     currentView.value = 'signals'
-    const signals = Object.values<Signal>(data.data.signals).sort((a, b) => a.startBit - b.startBit)
+    const msg = data.data as Message
+    const signals = [...msg.signals]
+      .sort((a, b) => a.start_bit - b.start_bit)
+      .map((s) => ({ ...s, messageId: msg.id, messageName: msg.name }))
     xGrid.value?.remove()
     insertData(signals)
   } else if (data.type === 'signal') {
@@ -358,18 +409,17 @@ const handleNodeClick = (data: any) => {
   } else if (data.type === 'node') {
     currentView.value = 'messages'
     const nodeName = data.label
-    const nodeMessages = Object.entries(dbcObj.value.messages)
-      .filter(([_, msg]) => {
-        if (msg.sender === nodeName) return true
-        return Object.values(msg.signals).some((signal) => signal.receivers.includes(nodeName))
+    const nodeMessages = dbcObj.value.messages
+      .filter((msg) => {
+        if (msg.transmitters.includes(nodeName)) return true
+        return msg.signals.some((signal) => signal.receivers.includes(nodeName))
       })
-      .map(([id, msg]) => ({
+      .map((msg) => ({
         ...msg,
-        id: parseInt(id),
-        role:
-          msg.sender === nodeName
-            ? i18next.t('database.dbc.overview.values.sender')
-            : i18next.t('database.dbc.overview.values.receiver')
+        id: msg.id,
+        role: msg.transmitters.includes(nodeName)
+          ? i18next.t('database.dbc.overview.values.sender')
+          : i18next.t('database.dbc.overview.values.receiver')
       }))
       .sort((a, b) => a.id - b.id)
 

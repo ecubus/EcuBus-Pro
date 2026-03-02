@@ -46,7 +46,7 @@ function parseLinData(raw: any) {
             if (!signalDef) continue
 
             // Create signal key
-            const signalKey = `lin.${db.name}.signals.${signal.name}`
+            const signalKey = `lin.${db.name}.${frame.name}.signals.${signal.name}`
 
             // Initialize array if needed
             if (!result[signalKey]) {
@@ -92,7 +92,7 @@ function parseCanData(raw: any) {
         msg.signals = {}
         writeMessageData(frame, msg.data, db)
         for (const signal of Object.values(frame.signals)) {
-          const signalKey = `can.${db.name}.signals.${signal.name}`
+          const signalKey = `can.${db.name}.${frame.name}.signals.${signal.name}`
           if (!result[signalKey]) {
             result[signalKey] = []
           }

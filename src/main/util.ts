@@ -4,9 +4,9 @@ import { spawn } from 'child_process'
 import { updateSignalPhys, updateSignalRaw } from 'src/renderer/src/database/dbc/calc'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
 import { isEqual } from 'lodash'
-import { CanSignal } from 'nodeCan/can'
+import { Signal as CanSignal } from 'nodeCan/can'
 import { getPhysicalValue, getRawValue } from 'src/renderer/src/database/ldf/calc'
-import pythonRequirements from '../../../resources/requirements.txt?asset&asarUnpack'
+import pythonRequirements from '../../resources/requirements.txt?asset&asarUnpack'
 
 export function getPythonPath(): string {
   const baseDir = path.dirname(pythonRequirements)
@@ -93,9 +93,11 @@ export async function execBinary(
  * - Windows: python/Scripts/<scriptName>.exe
  * - macOS/Linux: python/bin/<scriptName>
  */
-export function getPythonScriptPath(scriptName: string): string {
-  const baseDir = path.dirname(pythonRequirements)
-  const pythonDir = path.join(baseDir, 'python')
+export function getPythonScriptPath(scriptName: string, pythonDir?: string): string {
+  if (!pythonDir) {
+    const baseDir = path.dirname(pythonRequirements)
+    pythonDir = path.join(baseDir, 'python')
+  }
   if (process.platform === 'win32') {
     const name = scriptName.endsWith('.exe') ? scriptName : `${scriptName}.exe`
     return path.join(pythonDir, 'Scripts', name)
@@ -170,7 +172,7 @@ export function setSignal(data: { signal: string; value: number | number[] | str
       if (Array.isArray(data.value)) {
         throw new Error('Can not set array value')
       }
-      ss.value = data.value
+      ss.value = data.value.toString()
       updateSignalRaw(ss)
     }
   } else {

@@ -36,7 +36,7 @@ import { computed, ref, toRef } from 'vue'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import { Icon } from '@iconify/vue'
 import searchIcon from '@iconify/icons-material-symbols/search'
-import { DBC, Message, Signal } from './dbcVisitor'
+import type { CanDB } from 'nodeCan/can'
 import i18next from 'i18next'
 
 const props = defineProps<{
@@ -45,7 +45,7 @@ const props = defineProps<{
   height: number
 }>()
 
-const dbcObj = defineModel<DBC>({
+const dbcObj = defineModel<CanDB>({
   required: true
 })
 
@@ -72,35 +72,26 @@ const columns: VxeGridProps['columns'] = [
 const tableData = computed(() => {
   const data: any[] = []
 
-  // 添加ValueTables数据
-  Object.entries(dbcObj.value.valueTables).forEach(([name, table]) => {
-    //遍历所有信号，看看哪些信号使用了这个valueTable
-    const usage: string[] = []
-    for (const message of Object.values<Message>(dbcObj.value.messages)) {
-      for (const signal of Object.values<Signal>(message.signals)) {
-        if (signal.valueTable === name) {
-          usage.push(`${message.name}:${signal.name}`)
-        }
-      }
-    }
-
+  // 添加ValueTables数据 (value_tables: Record<name, Record<value, label>>)
+  Object.entries(dbcObj.value.value_tables || {}).forEach(([name, table]) => {
+    const tbl = table as Record<string, unknown>
     data.push({
       name,
-      comment: table.comment || '',
-      usage: usage.join(', '),
-      values: table.values,
+      comment: (tbl?.comment as string) || '',
+      usage: '',
+      values: (tbl?.values as Record<string, string>) ?? (table as Record<string, string>) ?? {},
       type: 'valueTable'
     })
   })
 
   // 添加Message中Signal的values数据
-  Object.entries(dbcObj.value.messages).forEach(([_, message]) => {
-    Object.entries(message.signals).forEach(([signalName, signal]) => {
-      if (signal.values && signal.values.length > 0) {
+  dbcObj.value.messages.forEach((message) => {
+    message.signals.forEach((signal) => {
+      if (Object.keys(signal.values || {}).length > 0) {
         data.push({
-          name: `VtSig_${signalName}`,
-          comment: '',
-          usage: `${message.name}:${signalName}`,
+          name: `VtSig_${signal.name}`,
+          comment: signal.comment || '',
+          usage: `${message.name}:${signal.name}`,
           values: signal.values,
           type: 'signal'
         })

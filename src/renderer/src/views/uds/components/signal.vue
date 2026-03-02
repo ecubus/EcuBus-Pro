@@ -92,7 +92,6 @@ import tableCollapseIcon from '@iconify/icons-material-symbols/collapse-all'
 import { GraphBindFrameValue, GraphBindSignalValue, GraphNode } from 'src/preload/data'
 import deleteIcon from '@iconify/icons-material-symbols/leak-remove'
 import { v4 } from 'uuid'
-import { DBC, Signal as DbcSignal } from '@r/database/dbc/dbcVisitor'
 import searchIcon from '@iconify/icons-material-symbols/search'
 import { ElMessage } from 'element-plus'
 import { nextTick } from 'process'
@@ -274,7 +273,7 @@ function getLinSignals() {
           }
         }
         const signalItem: TreeItem = {
-          id: `lin.${ldf.name}.signals.${signalId.name}`,
+          id: `lin.${ldf.name}.${frame.name}.signals.${signalId.name}`,
           name: signalId.name,
           children: [],
           type: 'signal',
@@ -312,10 +311,10 @@ function getCanSignals() {
     }
     signals.push(db)
 
-    // add messages
-    for (const [messageId, message] of Object.entries(dbc.messages)) {
+    // add messages (messages is array)
+    for (const message of dbc.messages || []) {
       const messageItem: TreeItem = {
-        id: `${key}.messages.${messageId}`,
+        id: `${key}.messages.${message.id}`,
         name: message.name,
         children: [],
         type: 'frame',
@@ -327,31 +326,23 @@ function getCanSignals() {
       }
       db.children.push(messageItem)
 
-      // add signals in the message
-      for (const [signalName, signal] of Object.entries(message.signals)) {
+      // add signals in the message (signals is array)
+      for (const signal of message.signals || []) {
         let enums: { label: string; value: number }[] | undefined = undefined
         if (signal.values) {
-          enums = signal.values.map((value) => ({
-            label: value.label,
-            value: value.value
+          enums = Object.entries(signal.values).map(([k, v]) => ({
+            label: v,
+            value: parseInt(k, 10)
           }))
-        } else if (signal.valueTable) {
-          const tt = dbc.valueTables[signal.valueTable]
-          if (tt) {
-            enums = tt.values.map((value) => ({
-              label: value.label,
-              value: value.value
-            }))
-          }
         }
         const signalItem: TreeItem = {
-          id: `can.${dbc.name}.signals.${signalName}`,
-          name: signalName,
+          id: `can.${dbc.name}.${message.name}.signals.${signal.name}`,
+          name: signal.name,
           children: [],
           type: 'signal',
           frameId: message.id,
-          startBit: signal.startBit,
-          bitLen: signal.length,
+          startBit: signal.start_bit,
+          bitLen: signal.bit_length,
           txNode: signal.receivers?.join(','),
           enums: enums,
           dbInfo: {
@@ -411,8 +402,9 @@ function addSignal() {
     let frameInfo
     if (highlightedRow.value.dbInfo?.key) {
       if (props.protocolFilter == 'can' || props.protocolFilter == 'all') {
-        frameInfo =
-          database.can[highlightedRow.value.dbInfo?.key].messages[highlightedRow.value.frameId!]
+        frameInfo = database.can[highlightedRow.value.dbInfo?.key].messages?.find(
+          (m) => m.id === highlightedRow.value!.frameId
+        )
       } else if (props.protocolFilter == 'lin' || props.protocolFilter == 'all') {
         frameInfo = database.lin[highlightedRow.value.dbInfo?.key].frames[highlightedRow.value.name]
       }

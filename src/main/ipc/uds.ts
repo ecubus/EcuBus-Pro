@@ -1166,7 +1166,7 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
 
   const db = global.dataSet.database.can[dbName]
   if (db) {
-    const message = db.messages[id]
+    const message = db.messages.find((msg) => msg.id === id)
     if (message) {
       const rawsignal = message.signals.find((sig) => sig.name == signalName)
       if (rawsignal) {

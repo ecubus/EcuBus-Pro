@@ -48,3 +48,11 @@ runs:
       if: runner.os != 'Windows'
       shell: bash
       run: resources/python/bin/python3 -m pip install -r resources/requirements.txt
+    - name: Clean Python artifacts (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: resources/python/python.exe resources/clean.py resources/python
+    - name: Clean Python artifacts (macOS/Linux)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: resources/python/bin/python3 resources/clean.py resources/python

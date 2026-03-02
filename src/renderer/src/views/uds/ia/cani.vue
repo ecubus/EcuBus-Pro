@@ -804,7 +804,6 @@ onMounted(async () => {
 })
 
 function handleFrameSelect(frame: GraphNode<GraphBindFrameValue>) {
-  console.log(frame)
   if (frame.bindValue.frameInfo) {
     const channel = Object.keys(devices.value)[0] || ''
     const frameInfo = frame.bindValue.frameInfo as Message

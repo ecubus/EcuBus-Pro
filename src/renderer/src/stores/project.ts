@@ -6,6 +6,7 @@ import { sortBy, toPairs, fromPairs, cloneDeep, assign, merge } from 'lodash'
 import { error, info } from 'electron-log'
 import { useRuntimeStore } from './runtime'
 import i18next from 'i18next'
+import { markRaw } from 'vue'
 
 export interface ProjectInfo {
   name: string
@@ -126,6 +127,11 @@ export const useProjectStore = defineStore('project', {
           const rdata = JSON.parse(r)
           const data = useDataStore()
           data.$patch((ss) => {
+            if (rdata.data.database?.can) {
+              for (const key in rdata.data.database.can) {
+                markRaw(rdata.data.database.can[key])
+              }
+            }
             assign(ss, rdata.data)
           })
           this.project = rdata.project
@@ -175,14 +181,23 @@ export const useProjectStore = defineStore('project', {
               const data = useDataStore()
 
               data.$patch((ss) => {
+                const canData = rdata.data.database?.can
+                if (canData) {
+                  delete rdata.data.database.can
+                }
+
                 merge(ss, rdata.data)
+
+                if (canData) {
+                  for (const key in canData) {
+                    canData[key].id = key
+                    ss.database.can[key] = markRaw(canData[key])
+                  }
+                }
 
                 //TODO: remove id in 0.9 version
                 for (const key in ss.database.lin) {
                   ss.database.lin[key].id = key
-                }
-                for (const key in ss.database.can) {
-                  ss.database.can[key].id = key
                 }
 
                 //TODO: remove convert freq to number in 0.9 version

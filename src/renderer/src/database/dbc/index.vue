@@ -93,11 +93,14 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  shallowRef,
+  triggerRef,
   watch,
   toRef,
   inject,
   provide,
-  Ref
+  markRaw,
+  ShallowRef
 } from 'vue'
 import Overview from './overfiew.vue'
 import ValTable from './valTable.vue'
@@ -133,7 +136,12 @@ const editableTabsValue = ref('Overview')
 provide('height', h)
 const database = useDataStore()
 
-const dbcObj = ref<CanDB>() as Ref<CanDB>
+const dbcObj = shallowRef<CanDB>() as ShallowRef<CanDB>
+
+function notifyDbcChange() {
+  triggerRef(dbcObj)
+}
+provide('notifyDbcChange', notifyDbcChange)
 
 const globalStart = useGlobalStart()
 
@@ -265,7 +273,7 @@ function saveDataBase() {
   valid()
     .then(() => {
       database.$patch(() => {
-        const db = cloneDeep(dbcObj.value)
+        const db = markRaw(cloneDeep(dbcObj.value))
         db.id = props.editIndex
         database.database.can[props.editIndex] = db
       })
@@ -286,17 +294,13 @@ function handleTabSwitch(tabName: string) {
 }
 
 let timeout
-watch(
-  dbcObj,
-  (val) => {
-    layout.setWinModified(props.editIndex, true)
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      valid().catch(null)
-    }, 500)
-  },
-  { deep: true }
-)
+watch(dbcObj, (val) => {
+  layout.setWinModified(props.editIndex, true)
+  clearTimeout(timeout)
+  timeout = setTimeout(() => {
+    valid().catch(null)
+  }, 500)
+})
 
 const loading = ref(true)
 
@@ -307,12 +311,12 @@ onMounted(() => {
     window.electron.ipcRenderer
       .invoke('ipc-canmartix-parse', props.dbcFile)
       .then((result) => {
-        log(result.msg)
         dbcObj.value = result.data
         dbcObj.value.name = window.path.parse(props.dbcFile!).name
         loading.value = false
       })
       .catch((err) => {
+        log(err)
         ElMessageBox.alert(
           i18next.t('database.dbc.index.errors.parseFailed'),
           i18next.t('database.dbc.index.errors.error'),

@@ -5,7 +5,7 @@
         <span style="font-size: 12px; width: 100px; text-align: center">{{
           i18next.t('database.dbc.overview.labels.dbName')
         }}</span>
-        <el-input v-model="dbcObj.name" size="small" style="width: 100%" />
+        <el-input v-model="dbName" size="small" style="width: 100%" />
       </div>
       <div class="search-box">
         <el-input
@@ -106,6 +106,14 @@ import i18next from 'i18next'
 
 const dbcObj = defineModel<CanDB>({
   required: true
+})
+
+const notifyDbcChange = inject<() => void>('notifyDbcChange')!
+
+const dbName = ref(dbcObj.value?.name ?? '')
+watch(dbName, (val) => {
+  dbcObj.value.name = val
+  notifyDbcChange()
 })
 
 const props = defineProps<{

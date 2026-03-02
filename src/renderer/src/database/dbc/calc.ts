@@ -108,6 +108,7 @@ export function updateSignalRaw(signal: Signal) {
   }
 }
 export function updateSignalPhys(row: Signal, db: CanDB) {
+  const t1 = Date.now()
   if (row.physValue === undefined) return
   for (const [key, value] of Object.entries(row.values)) {
     if (value === row.physValue) {
@@ -146,6 +147,8 @@ export function updateSignalPhys(row: Signal, db: CanDB) {
     // Calculate and set raw value
     row.value = physToRaw(Number(clampedPhysValue), row).toString()
   }
+  const t2 = Date.now()
+  console.log('updateSignalPhys', t2 - t1)
 }
 
 /**

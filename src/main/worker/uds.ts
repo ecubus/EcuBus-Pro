@@ -1318,7 +1318,7 @@ export class DiagRequest extends Service {
 function createCanMessageWrapper(msg: CanMessage) {
   // Cache database and message definition to avoid repeated lookups
   const db = msg.database ? global.dataSet.database.can[msg.database] : undefined
-  const msgDef = cloneDeep(db?.messages[msg.id])
+  const msgDef = cloneDeep(db?.messages.find((m) => m.id === msg.id))
 
   if (db && msgDef) {
     writeMessageData(msgDef, msg.data, db)

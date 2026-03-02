@@ -46,6 +46,14 @@ def clean(root: Path) -> None:
                 shutil.rmtree(item)
                 removed_size += size
 
+    # pip-generated launcher executables have hardcoded Python paths that
+    # break after relocation; we invoke modules via `python -m` instead.
+    scripts_dir = root / "Scripts"
+    if scripts_dir.is_dir():
+        size = sum(f.stat().st_size for f in scripts_dir.rglob("*") if f.is_file())
+        shutil.rmtree(scripts_dir)
+        removed_size += size
+
     print(f"Cleaned {removed_size / 1024 / 1024:.2f} MB from {root}")
 
 

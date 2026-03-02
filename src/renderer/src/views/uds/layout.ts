@@ -561,7 +561,7 @@ export class Layout {
     const data = this.data.project.wins[id]
     const drag = document.querySelector(dragSelect) as HTMLElement
     if (target && this.parentElement && data) {
-      let v = 'e, s'
+      let v = 'e, s, se'
 
       if (layoutType == 'bottom') {
         v = 'n'

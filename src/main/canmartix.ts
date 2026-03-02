@@ -1,5 +1,6 @@
 import { CanDB } from './share/can'
-import { execBinary, getPythonPath, getPythonScriptPath } from './util'
+import { execBinary } from './util'
+import { getPythonScriptPath } from './python'
 import fsP from 'fs/promises'
 
 export async function parseFile(

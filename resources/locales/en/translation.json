@@ -2955,7 +2955,8 @@
     "messages": {
       "invalidProjectFile": "{{file}} is not a valid project file",
       "openProjectFailed": "Failed to open project {{file}}",
-      "saveProjectFailed": "Save project failed"
+      "saveProjectFailed": "Save project failed",
+      "canDbVersionMismatch": "Some CAN databases have an incompatible version and will be removed. Please re-import the CAN database via DBC import."
     }
   },
   "runtime": {

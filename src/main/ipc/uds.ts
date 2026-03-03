@@ -1133,6 +1133,7 @@ function send(id: string, send: boolean): Buffer | null {
       message = db.messages.find((msg) => msg.id == parseInt(item.ia.id, 16))
     }
   }
+
   if (message) {
     const data = getMessageData(message)
     if (send) {

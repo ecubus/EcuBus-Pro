@@ -124,13 +124,14 @@ export function setSignal(data: { signal: string; value: number | number[] | str
   if (db) {
     const signalName = s[1]
     let ss: CanSignal | undefined
-    for (const msg of Object.values(db.messages)) {
-      for (const signal of Object.values(msg.signals)) {
+    for (const msg of db.messages) {
+      for (const signal of msg.signals) {
         if (signal.name == signalName) {
           ss = signal
           break
         }
       }
+
       if (ss) {
         break
       }

@@ -74,6 +74,7 @@ export interface CanDB {
   messages: Message[]
   signal_defines: SignalDefine[]
   value_tables: ValueTables
+  version?: string
 }
 
 /**

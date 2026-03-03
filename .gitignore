@@ -21,6 +21,7 @@ resources/examples/**/**/*.csv
 resources/examples/**/**/*.blf
 resources/examples/**/**/*.txt
 resources/examples/**/**/*.bin
+resources/examples/**/**/.claude
 *.bak
 log.txt
 tools/a.bin

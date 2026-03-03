@@ -315,6 +315,7 @@ onMounted(() => {
     window.electron.ipcRenderer
       .invoke('ipc-canmartix-parse', props.dbcFile)
       .then((result) => {
+        result.data.version = 'canmartix'
         dbcObj.value = result.data
         dbcObj.value.name = window.path.parse(props.dbcFile!).name
         loading.value = false
@@ -332,10 +333,12 @@ onMounted(() => {
             message: err.message
           }
         )
-          .then(() => {
+
+          .catch(null)
+          .finally(() => {
+            loading.value = false
             layout.removeWin(props.editIndex, true)
           })
-          .catch(null)
       })
   } else {
     dbcObj.value = cloneDeep(database.database.can[props.editIndex])

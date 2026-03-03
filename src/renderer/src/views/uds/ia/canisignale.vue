@@ -125,8 +125,11 @@ const message = computed<Message | undefined>(() => {
   }
   return undefined
 })
+
+const signalVersion = ref(0)
 // Get signals data from store
 const signals = computed(() => {
+  signalVersion.value // reactive dependency to allow forced re-evaluation
   return message.value ? getActiveSignals(message.value) : []
 })
 
@@ -223,6 +226,7 @@ const globalStart = useGlobalStart()
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
   updateSignalRaw(row)
+  signalVersion.value++
   if (message.value) {
     if (globalStart.value) {
       window.electron.ipcRenderer.send(
@@ -241,6 +245,7 @@ function handleRawValueChange(row: Signal) {
 // Physical value change handler
 function handlePhysValueChange(row: Signal, db: CanDB) {
   updateSignalPhys(row, db)
+  signalVersion.value++
   if (message.value) {
     if (globalStart.value) {
       window.electron.ipcRenderer.send(
@@ -273,6 +278,7 @@ onMounted(() => {
     ;(message.value.signals || []).forEach((signal) => {
       initializeSignal(signal)
     })
+    signalVersion.value++
     emits('change', getMessageData(message.value))
   }
 })

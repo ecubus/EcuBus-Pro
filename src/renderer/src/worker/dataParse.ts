@@ -86,7 +86,7 @@ function parseCanData(raw: any) {
     const msg: CanMessage = sraw.message.data
     const db = findDb(msg.database)
     if (db) {
-      const frame = db.messages[msg.id]
+      const frame = Object.values(db.messages).find((item) => item.id === msg.id)
       if (frame) {
         msg.name = frame.name
         msg.signals = {}

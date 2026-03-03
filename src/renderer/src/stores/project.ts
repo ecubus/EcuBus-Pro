@@ -78,6 +78,22 @@ export const useProjectList = defineStore('projectList', {
   }
 })
 
+const CANDB_VERSION_CANMARTIX = 'canmartix'
+
+function filterValidCanDBs(canData: Record<string, any>): Record<string, any> {
+  const valid: Record<string, any> = {}
+  for (const key in canData) {
+    if (canData[key]?.version === CANDB_VERSION_CANMARTIX) {
+      valid[key] = canData[key]
+    }
+  }
+  return valid
+}
+
+function getInvalidCanDBKeys(canData: Record<string, any>): string[] {
+  return Object.keys(canData).filter((key) => canData[key]?.version !== CANDB_VERSION_CANMARTIX)
+}
+
 function printNestedKeys(obj: any, prefix = '') {
   for (const key in obj) {
     // 构建当前key的完整路径
@@ -125,6 +141,22 @@ export const useProjectStore = defineStore('project', {
         const r = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', example, 'utf-8')
         try {
           const rdata = JSON.parse(r)
+          const canData = rdata.data.database?.can
+          if (canData) {
+            const invalidKeys = getInvalidCanDBKeys(canData)
+            if (invalidKeys.length > 0) {
+              await ElMessageBox.alert(
+                i18next.t('project.messages.canDbVersionMismatch'),
+                i18next.t('project.dialog.warningTitle'),
+                {
+                  confirmButtonText: 'OK',
+                  type: 'warning',
+                  buttonSize: 'small'
+                }
+              )
+              rdata.data.database.can = filterValidCanDBs(canData)
+            }
+          }
           const data = useDataStore()
           data.$patch((ss) => {
             if (rdata.data.database?.can) {
@@ -171,7 +203,7 @@ export const useProjectStore = defineStore('project', {
       if (skipClose) {
         window.electron.ipcRenderer
           .invoke('ipc-fs-readFile', file, 'utf-8')
-          .then((r) => {
+          .then(async (r) => {
             try {
               const rdata = JSON.parse(r)
               const parse = window.path.parse(file)
@@ -180,8 +212,23 @@ export const useProjectStore = defineStore('project', {
               this.projectInfo.path = parse.dir
               const data = useDataStore()
 
+              const canData = rdata.data.database?.can
+              if (canData) {
+                const invalidKeys = getInvalidCanDBKeys(canData)
+                if (invalidKeys.length > 0) {
+                  await ElMessageBox.alert(
+                    i18next.t('project.messages.canDbVersionMismatch'),
+                    i18next.t('project.dialog.warningTitle'),
+                    {
+                      confirmButtonText: 'OK',
+                      type: 'warning',
+                      buttonSize: 'small'
+                    }
+                  )
+                }
+              }
+
               data.$patch((ss) => {
-                const canData = rdata.data.database?.can
                 if (canData) {
                   delete rdata.data.database.can
                 }
@@ -189,9 +236,10 @@ export const useProjectStore = defineStore('project', {
                 merge(ss, rdata.data)
 
                 if (canData) {
-                  for (const key in canData) {
-                    canData[key].id = key
-                    ss.database.can[key] = markRaw(canData[key])
+                  const validCanData = filterValidCanDBs(canData)
+                  for (const key in validCanData) {
+                    validCanData[key].id = key
+                    ss.database.can[key] = markRaw(validCanData[key])
                   }
                 }
 

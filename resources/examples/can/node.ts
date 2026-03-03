@@ -32,5 +32,5 @@ setInterval(() => {
 }, 1000)
 
 Util.OnSignal('Model3CAN.VCLEFT_liftgateLatchRequest', (v) => {
-  console.log(`Raw Value: ${v.value}, Physical Value: ${v.physValueEnum ?? v.physValue}`)
+  console.log(`Raw Value: ${v.value}, Physical Value: ${v.physValue}`)
 })

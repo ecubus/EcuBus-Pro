@@ -184,7 +184,8 @@ export function getActiveSignals(message: Message): Signal[] {
     .sort((a, b) => getMuxerDepth(a) - getMuxerDepth(b))
     .forEach((signal) => {
       const parentMux = signal.muxer_for_signal
-      const rawVal = Number(signal.value)
+      const rawVal =
+        signal.value !== undefined ? Number(signal.value) : Number(signal.initial_value)
       if (!parentMux) {
         if (!Number.isNaN(rawVal)) muxValues[signal.name] = rawVal
       } else {

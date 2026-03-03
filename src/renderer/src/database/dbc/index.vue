@@ -82,6 +82,9 @@
           :width="w"
         />
       </el-tab-pane>
+      <el-tab-pane name="Export" :label="i18next.t('database.dbc.index.tabs.export')">
+        <Export v-model="dbcObj" :edit-index="props.editIndex" :height="h" :width="w" />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -105,6 +108,7 @@ import {
 import Overview from './overfiew.vue'
 import ValTable from './valTable.vue'
 import AttrTable from './attrTable.vue'
+import Export from './export.vue'
 
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'

@@ -31,7 +31,8 @@ export async function execBinary(
 
     const proc = spawn(command, args, {
       cwd: options?.cwd,
-      env: { ...process.env, ...options?.env }
+      env: { ...process.env, PYTHONUNBUFFERED: '1', ...options?.env },
+      stdio: ['pipe', 'pipe', 'pipe']
     })
 
     proc.stdout?.on('data', (data: Buffer) => chunks.push(data))

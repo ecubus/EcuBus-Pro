@@ -11,6 +11,7 @@ REMOVE_PATTERNS = [
     "*.pdb",
     "*.lib",
     "*.a",
+    "*.dist-info",
 ]
 
 REMOVE_DIRS = [

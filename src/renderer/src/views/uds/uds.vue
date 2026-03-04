@@ -667,19 +667,29 @@ const SequenceDropdown = {
       ])
   }
 }
-
+const fileExtMap = {
+  lin: ['ldf'],
+  can: ['dbc', 'arxml'],
+  orti: ['orti']
+}
 const DatabaseDropdown = {
   setup() {
     return () =>
       h(ElDropdownMenu, { size: 'small' }, () => [
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () =>
-          i18next.t('database.addLin')
+          i18next.t('database.addLin', {
+            extensions: fileExtMap.lin.map((ext) => ext.toUpperCase()).join(', ')
+          })
         ),
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addCan' }, () =>
-          i18next.t('database.addCan')
+          i18next.t('database.addCan', {
+            extensions: fileExtMap.can.map((ext) => ext.toUpperCase()).join(', ')
+          })
         ),
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addOrti' }, () =>
-          i18next.t('database.addOrti')
+          i18next.t('database.addOrti', {
+            extensions: fileExtMap.orti.map((ext) => ext.toUpperCase()).join(', ')
+          })
         ),
         ...dataBaseList.value.map((item, index) =>
           h(
@@ -1302,7 +1312,7 @@ const dataBaseList = computed(() => {
   }
   if (list.length == 0) {
     list.push({
-      url: i18next.t('uds.dropdowns.database.noDatabase'),
+      url: i18next.t('database.noDatabase'),
       disabled: true
     })
   }
@@ -1315,20 +1325,16 @@ async function openDatabase(testerIndex: string) {
   //     'edit-index': testerIndex,
   //   }
   // })
-  const fileExtMap = {
-    lin: 'ldf',
-    can: 'dbc',
-    orti: 'orti'
-  }
+
   if (testerIndex.startsWith('add')) {
     const type = testerIndex.split('add')[1].toLocaleLowerCase()
     const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-      title: i18next.t('uds.dropdowns.database.openDatabaseTitle'),
+      title: i18next.t('database.openDatabaseTitle'),
       properties: ['openFile'],
       filters: [
         {
-          name: i18next.t('uds.dropdowns.database.fileFilterName'),
-          extensions: [fileExtMap[type]]
+          name: i18next.t('database.fileFilterName'),
+          extensions: fileExtMap[type]
         }
       ]
     })
@@ -1546,6 +1552,10 @@ watch([contentH, contentW], (val) => {
 </script>
 
 <style lang="scss">
+.ui-resizable-se {
+  width: 12px !important;
+  height: 12px !important;
+}
 .vue-grid-item.vue-grid-placeholder {
   background: none !important;
 }

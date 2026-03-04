@@ -459,7 +459,7 @@ import { onKeyStroke, onKeyUp } from '@vueuse/core'
 // import Signal from './components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import type { GraphBindFrameValue, GraphNode, SomeipAction } from 'src/preload/data'
-import { Message } from '@r/database/dbc/dbcVisitor'
+
 import { writeMessageData } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'

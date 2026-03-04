@@ -21,6 +21,7 @@ resources/examples/**/**/*.csv
 resources/examples/**/**/*.blf
 resources/examples/**/**/*.txt
 resources/examples/**/**/*.bin
+resources/examples/**/**/.claude
 *.bak
 log.txt
 tools/a.bin
@@ -29,3 +30,9 @@ tools/a.csv
 
 .env.development
 doip-certs
+
+
+# python
+
+resources/python
+resources/get-pip.py

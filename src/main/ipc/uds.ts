@@ -23,12 +23,14 @@ import {
 } from '../docan/uds'
 import {
   CAN_ID_TYPE,
+  CanDB,
   CanInterAction,
-  CanMessage,
-  CanSignal,
+  Message as CanDbMessage,
+  Signal as CanSignal,
   formatError,
   getTsUs,
-  swapAddr
+  swapAddr,
+  CanMessage
 } from '../share/can'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
@@ -59,7 +61,7 @@ import {
 import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
-import type { DBC, Message } from 'src/renderer/src/database/dbc/dbcVisitor'
+
 import { getMessageData } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
@@ -661,9 +663,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
         }
         return ret
       }
-      Object.entries(msg.signals).forEach(([key, signal]) => {
-        signal
-        msg.signals[key] = new Proxy(signal, {
+      msg.signals.forEach((signal, index) => {
+        msg.signals[index] = new Proxy(signal, {
           set: x
         })
       })
@@ -1086,12 +1087,12 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
       }
     )
     let b: Buffer = Buffer.alloc(len)
-    let db: DBC | undefined
-    let message: Message | undefined
+    let db: CanDB | undefined
+    let message: CanDbMessage | undefined
     if (ia.database) {
       db = global.dataSet.database.can[ia.database]
       if (db) {
-        message = db.messages[parseInt(ia.id, 16)]
+        message = db.messages.find((msg) => msg.id == parseInt(ia.id, 16))
         if (message) {
           b = getMessageData(message)
         }
@@ -1124,14 +1125,15 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 function send(id: string, send: boolean): Buffer | null {
   const item = timerMap.get(id)
   if (!item) return null
-  let db: DBC | undefined
-  let message: Message | undefined
+  let db: CanDB | undefined
+  let message: CanDbMessage | undefined
   if (item.ia.database) {
     db = global.dataSet.database.can[item.ia.database]
     if (db) {
-      message = db.messages[parseInt(item.ia.id, 16)]
+      message = db.messages.find((msg) => msg.id == parseInt(item.ia.id, 16))
     }
   }
+
   if (message) {
     const data = getMessageData(message)
     if (send) {
@@ -1165,9 +1167,9 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
 
   const db = global.dataSet.database.can[dbName]
   if (db) {
-    const message = db.messages[id]
+    const message = db.messages.find((msg) => msg.id === id)
     if (message) {
-      const rawsignal = message.signals[signalName]
+      const rawsignal = message.signals.find((sig) => sig.name == signalName)
       if (rawsignal) {
         Object.assign(rawsignal, signal)
         for (const [index, d] of timerMap.entries()) {

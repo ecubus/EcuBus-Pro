@@ -82,6 +82,9 @@
           :width="w"
         />
       </el-tab-pane>
+      <el-tab-pane name="Export" :label="i18next.t('database.dbc.index.tabs.export')">
+        <Export v-model="dbcObj" :edit-index="props.editIndex" :height="h" :width="w" />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -93,16 +96,20 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  shallowRef,
+  triggerRef,
   watch,
   toRef,
   inject,
   provide,
-  Ref
+  markRaw,
+  ShallowRef
 } from 'vue'
 import Overview from './overfiew.vue'
 import ValTable from './valTable.vue'
 import AttrTable from './attrTable.vue'
-import dbcParse from '../dbcParse'
+import Export from './export.vue'
+
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
 import { Icon } from '@iconify/vue'
@@ -111,9 +118,10 @@ import { useDataStore } from '@r/stores/data'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
-import { DBC } from './dbcVisitor'
+import { CanDB } from 'nodeCan/can'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
+import { log } from 'electron-log'
 
 const layout = inject('layout') as Layout
 
@@ -132,7 +140,12 @@ const editableTabsValue = ref('Overview')
 provide('height', h)
 const database = useDataStore()
 
-const dbcObj = ref<DBC>() as Ref<DBC>
+const dbcObj = shallowRef<CanDB>() as ShallowRef<CanDB>
+
+function notifyDbcChange() {
+  triggerRef(dbcObj)
+}
+provide('notifyDbcChange', notifyDbcChange)
 
 const globalStart = useGlobalStart()
 
@@ -264,7 +277,7 @@ function saveDataBase() {
   valid()
     .then(() => {
       database.$patch(() => {
-        const db = cloneDeep(dbcObj.value)
+        const db = markRaw(cloneDeep(dbcObj.value))
         db.id = props.editIndex
         database.database.can[props.editIndex] = db
       })
@@ -285,17 +298,13 @@ function handleTabSwitch(tabName: string) {
 }
 
 let timeout
-watch(
-  dbcObj,
-  (val) => {
-    layout.setWinModified(props.editIndex, true)
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      valid().catch(null)
-    }, 500)
-  },
-  { deep: true }
-)
+watch(dbcObj, (val) => {
+  layout.setWinModified(props.editIndex, true)
+  clearTimeout(timeout)
+  timeout = setTimeout(() => {
+    valid().catch(null)
+  }, 500)
+})
 
 const loading = ref(true)
 
@@ -304,31 +313,15 @@ onMounted(() => {
   if (!existed.value && props.dbcFile) {
     loading.value = true
     window.electron.ipcRenderer
-      .invoke('ipc-fs-readFile', props.dbcFile)
-      .then((content: string) => {
-        try {
-          const result = dbcParse(content)
-          dbcObj.value = result
-          dbcObj.value.name = window.path.parse(props.dbcFile!).name
-          loading.value = false
-        } catch (err: any) {
-          ElMessageBox.alert(
-            i18next.t('database.dbc.index.errors.parseFailed'),
-            i18next.t('database.dbc.index.errors.error'),
-            {
-              confirmButtonText: i18next.t('database.dbc.index.deleteConfirm.ok'),
-              type: 'error',
-              buttonSize: 'small',
-              appendTo: `#win${props.editIndex}`,
-              message: `<pre style="max-height:200px;overflow:auto;width:380px;font-size:12px;line-height:12px">${err.message}</pre>`,
-              dangerouslyUseHTMLString: true
-            }
-          ).finally(() => {
-            layout.removeWin(props.editIndex, true)
-          })
-        }
+      .invoke('ipc-canmartix-parse', props.dbcFile)
+      .then((result) => {
+        result.data.version = 'canmartix'
+        dbcObj.value = result.data
+        dbcObj.value.name = window.path.parse(props.dbcFile!).name
+        loading.value = false
       })
       .catch((err) => {
+        log(err)
         ElMessageBox.alert(
           i18next.t('database.dbc.index.errors.parseFailed'),
           i18next.t('database.dbc.index.errors.error'),
@@ -340,10 +333,12 @@ onMounted(() => {
             message: err.message
           }
         )
-          .then(() => {
+
+          .catch(null)
+          .finally(() => {
+            loading.value = false
             layout.removeWin(props.editIndex, true)
           })
-          .catch(null)
       })
   } else {
     dbcObj.value = cloneDeep(database.database.can[props.editIndex])

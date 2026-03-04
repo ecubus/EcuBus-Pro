@@ -1,8 +1,8 @@
-import type { CanInterAction } from 'src/main/share/can'
+import type { CanInterAction, CanDB } from 'src/main/share/can'
 import type { Param, UdsDevice } from 'src/main/share/uds'
 import type { TesterInfo } from 'src/main/share/tester'
 import type { LDF } from 'src/renderer/src/database/ldfParse'
-import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
+// import type { DBC } from 'src/renderer/src/database/dbc/dbcVisitor'
 import type { SomeipInfo, SomeipMessageType } from 'nodeCan/someip'
 import type { ORTIFile } from 'src/renderer/src/database/ortiParse'
 
@@ -239,7 +239,7 @@ export interface DataSet {
   ia: Record<string, Inter>
   database: {
     lin: Record<string, LDF>
-    can: Record<string, DBC>
+    can: Record<string, CanDB>
     orti: Record<string, ORTIFile>
   }
   graphs: Record<string, GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>>

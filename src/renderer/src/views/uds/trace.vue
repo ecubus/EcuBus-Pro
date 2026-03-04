@@ -157,7 +157,7 @@ import {
   inject
 } from 'vue'
 
-import { CAN_ID_TYPE, CanMessage, CanMsgType, CanSignal, getDlcByLen } from 'nodeCan/can'
+import { CAN_ID_TYPE, CanMessage, CanMsgType, Signal as CanSignal, getDlcByLen } from 'nodeCan/can'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -570,7 +570,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         children: Object.entries(val.message.data.signals || {}).map(([name, signal]) => {
           return {
             name: name,
-            data: `PHY:${signal.physValueEnum ? signal.physValueEnum : signal.physValue} RAW:${signal.value}`
+            data: `PHY:${signal.physValue} RAW:${signal.value}`
           }
         })
       })

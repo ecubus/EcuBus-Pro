@@ -16,29 +16,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Embedding Python
+        uses: ./.github/actions/setup-python-build
+      - name: Build App
+        uses: ./.github/actions/build-app
         with:
-          node-version: 22
-          cache: npm
-      - name: Install dependencies
-        run: npm install
-      - name: Build with VitePress
-        run: npm run docs:build
-      - name: Build native
-        run: npm run native
-      - name: Build worker
-        run: npm run worker
-      - name: Build api
-        run: npm run api
-      - name: Build cli
-        run: npm run cli:build:mac
-      - name: Build APP
+          platform: mac
+          run-sdk-build: 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{secrets.CLIENT_SECRET }}
-        run: npm run build:mac
+          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       - uses: actions/upload-artifact@v4
         with:
           name: artifact

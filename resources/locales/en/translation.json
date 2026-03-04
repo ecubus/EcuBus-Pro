@@ -54,9 +54,9 @@
     "loadTemplatesError": "Failed to load templates"
   },
   "database": {
-    "addLin": "Add LIN (LDF)",
-    "addCan": "Add CAN (DBC)",
-    "addOrti": "Add OS (ORTI)",
+    "addLin": "Add LIN ({{extensions}})",
+    "addCan": "Add CAN ({{extensions}})",
+    "addOrti": "Add OS ({{extensions}})",
     "noDatabase": "No Database",
     "openDatabaseTitle": "Open Database File",
     "fileFilterName": "Database File",
@@ -115,7 +115,8 @@
         "tabs": {
           "overview": "Overview",
           "valueTables": "Value Tables",
-          "attributes": "Attributes"
+          "attributes": "Attributes",
+          "export": "Export"
         },
         "errorGrid": {
           "columns": {
@@ -198,6 +199,36 @@
           "name": "Name",
           "comment": "Comment",
           "usage": "Usage"
+        }
+      },
+      "export": {
+        "section": {
+          "format": "Export Format",
+          "description": "Format Description"
+        },
+        "actions": {
+          "export": "Export Database"
+        },
+        "formats": {
+          "dbc": "Vector DBC format - Industry standard for CAN database definitions",
+          "xlsx": "Excel spreadsheet - Human-readable format for viewing and editing",
+          "arxml": "AUTOSAR ARXML - Used in automotive ECU development (basic implementation)",
+          "json": "JSON - Machine-readable format for tool integration",
+          "yaml": "YAML - Human-readable configuration format",
+          "kcd": "Kayak KCD - Open source CAN description format",
+          "dbf": "Busmaster DBF - Format used by Busmaster tool",
+          "sym": "PEAK PCAN SYM - Format for PEAK System tools"
+        },
+        "dialogs": {
+          "saveTitle": "Export Database",
+          "allFiles": "All Files"
+        },
+        "messages": {
+          "success": "Database exported successfully to {{path}}"
+        },
+        "errors": {
+          "noData": "No database data to export",
+          "exportFailed": "Export failed"
         }
       }
     },
@@ -2924,7 +2955,8 @@
     "messages": {
       "invalidProjectFile": "{{file}} is not a valid project file",
       "openProjectFailed": "Failed to open project {{file}}",
-      "saveProjectFailed": "Save project failed"
+      "saveProjectFailed": "Save project failed",
+      "canDbVersionMismatch": "Some CAN databases have an incompatible version and will be removed. Please re-import the CAN database via DBC import."
     }
   },
   "runtime": {

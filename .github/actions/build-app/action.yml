@@ -1,0 +1,52 @@
+name: Build App
+description: Build native, worker, api, cli, sdk and app
+inputs:
+  platform:
+    description: 'Platform: win, mac, or linux'
+    required: true
+  run-docs-build:
+    description: 'Run VitePress docs build'
+    required: false
+    default: 'true'
+  run-sdk-build:
+    description: 'Run SDK build'
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+    - name: Install dependencies
+      shell: bash
+      run: npm install
+    - name: Build with VitePress
+      if: inputs.run-docs-build == 'true'
+      shell: bash
+      run: npm run docs:build
+    - name: Build native
+      shell: bash
+      run: npm run native
+    - name: Build worker
+      shell: bash
+      run: npm run worker
+    - name: Build api
+      shell: bash
+      run: npm run api
+    - name: Build cli
+      shell: bash
+      run: npm run cli:build:${{ inputs.platform }}
+    - name: Build sdk
+      if: inputs.run-sdk-build == 'true'
+      shell: bash
+      run: npm run build:sdk
+    - name: Build APP
+      shell: bash
+      run: npm run build:${{ inputs.platform }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}

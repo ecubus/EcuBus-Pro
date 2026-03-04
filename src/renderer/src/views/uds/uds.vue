@@ -1552,6 +1552,10 @@ watch([contentH, contentW], (val) => {
 </script>
 
 <style lang="scss">
+.ui-resizable-se {
+  width: 12px !important;
+  height: 12px !important;
+}
 .vue-grid-item.vue-grid-placeholder {
   background: none !important;
 }

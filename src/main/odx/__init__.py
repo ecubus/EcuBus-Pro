@@ -1,2 +1,0 @@
-
-from .odxparse import OdxParse

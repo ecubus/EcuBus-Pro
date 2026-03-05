@@ -1,7 +1,27 @@
 <template>
   <div v-loading="loading" class="main">
     <div class="left">
-      <el-scrollbar :height="h + 'px'">
+      <div class="left-toolbar">
+        <el-dropdown :disabled="globalStart" @command="handleImport">
+          <el-button size="small" link :disabled="globalStart">
+            <Icon :icon="uploadIcon" style="margin-right: 2px" />
+            Import
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="ecb">
+                <Icon :icon="documentIcon" style="margin-right: 4px" />
+                ECB File
+              </el-dropdown-item>
+              <el-dropdown-item command="odx">
+                <Icon :icon="folderOpenedIcon" style="margin-right: 4px" />
+                ODX / PDX File
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+      <el-scrollbar :height="h - 28 + 'px'">
         <el-tree
           ref="treeRef"
           node-key="id"
@@ -58,6 +78,50 @@
         </testerCanVue>
       </div>
     </div>
+
+    <el-dialog
+      v-if="importDialogVisible"
+      v-model="importDialogVisible"
+      :title="importDialogTitle"
+      width="480"
+      :append-to="`#win${winKey}`"
+      align-center
+      destroy-on-close
+    >
+      <div v-if="importItems.length > 0">
+        <el-checkbox
+          v-model="importSelectAll"
+          :indeterminate="importIndeterminate"
+          style="margin-bottom: 8px"
+          @change="handleSelectAllChange"
+        >
+          Select All
+        </el-checkbox>
+        <el-divider style="margin: 4px 0 8px 0" />
+        <el-scrollbar max-height="300px">
+          <el-checkbox-group v-model="importSelected">
+            <div v-for="item in importItems" :key="item.id" class="import-item">
+              <el-checkbox :value="item.id">
+                <span>{{ item.label }}</span>
+                <el-tag size="small" type="info" style="margin-left: 8px">{{ item.type }}</el-tag>
+              </el-checkbox>
+            </div>
+          </el-checkbox-group>
+        </el-scrollbar>
+      </div>
+      <el-empty v-else description="No testers found in this file" :image-size="80" />
+      <template #footer>
+        <el-button size="small" @click="importDialogVisible = false">Cancel</el-button>
+        <el-button
+          size="small"
+          type="primary"
+          :disabled="importSelected.length === 0"
+          @click="confirmImport"
+        >
+          Import ({{ importSelected.length }})
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -78,12 +142,16 @@ import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
+import uploadIcon from '@iconify/icons-ep/upload'
+import documentIcon from '@iconify/icons-ep/document'
+import folderOpenedIcon from '@iconify/icons-ep/folder-opened'
 import { useDataStore } from '@r/stores/data'
 import testerCanVue from './testercan.vue'
 import { Layout } from '../layout'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { HardwareType } from 'nodeCan/uds'
+import type { TesterInfo } from 'nodeCan/tester'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
@@ -288,6 +356,201 @@ function buildTree() {
   tData.value = t
 }
 
+interface ImportItem {
+  id: string
+  label: string
+  type: HardwareType
+  tester: TesterInfo
+}
+
+const importDialogVisible = ref(false)
+const importDialogTitle = ref('Import Tester')
+const importItems = ref<ImportItem[]>([])
+const importSelected = ref<string[]>([])
+const importSelectAll = ref(false)
+const importIndeterminate = computed(
+  () => importSelected.value.length > 0 && importSelected.value.length < importItems.value.length
+)
+
+watch(importSelected, (val) => {
+  importSelectAll.value = val.length === importItems.value.length && val.length > 0
+})
+
+function handleSelectAllChange(val: boolean) {
+  importSelected.value = val ? importItems.value.map((i) => i.id) : []
+}
+
+async function handleImport(command: string) {
+  if (command === 'ecb') {
+    await importFromEcb()
+  } else if (command === 'odx') {
+    await importFromOdx()
+  }
+}
+
+async function importFromEcb() {
+  const res = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Import Tester from ECB',
+    properties: ['openFile'],
+    filters: [
+      { name: 'EcuBus-Pro', extensions: ['ecb'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  if (res.canceled || !res.filePaths?.length) return
+
+  loading.value = true
+  try {
+    const content = await window.electron.ipcRenderer.invoke('ipc-fs-readFile', res.filePaths[0])
+    const parsed = JSON.parse(content)
+    const testers: Record<string, TesterInfo> = parsed?.data?.tester || parsed?.tester || {}
+
+    const items: ImportItem[] = []
+    for (const [, tester] of Object.entries(testers)) {
+      items.push({
+        id: v4(),
+        label: tester.name,
+        type: tester.type,
+        tester: tester
+      })
+    }
+
+    if (items.length === 0) {
+      ElMessage({
+        message: 'No testers found in the ECB file',
+        type: 'warning',
+        appendTo: `#win${winKey}`
+      })
+      return
+    }
+
+    importDialogTitle.value = 'Import from ECB'
+    importItems.value = items
+    importSelected.value = items.map((i) => i.id)
+    importSelectAll.value = true
+    importDialogVisible.value = true
+  } catch (e: any) {
+    ElMessage({
+      message: 'Failed to read ECB file: ' + (e.message || e),
+      type: 'error',
+      appendTo: `#win${winKey}`
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+async function importFromOdx() {
+  const res = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Import Tester from ODX/PDX',
+    properties: ['openFile'],
+    filters: [
+      { name: 'ODX/PDX Files', extensions: ['odx', 'pdx'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  if (res.canceled || !res.filePaths?.length) return
+
+  loading.value = true
+  try {
+    const result = await window.electron.ipcRenderer.invoke(
+      'ipcOdxParseTesterInfo',
+      '',
+      res.filePaths[0],
+      true
+    )
+
+    if (result.error !== 0) {
+      ElMessage({
+        message: 'ODX parse error: ' + (result.message || 'Unknown error'),
+        type: 'error',
+        appendTo: `#win${winKey}`
+      })
+      return
+    }
+
+    const items: ImportItem[] = []
+    for (const [containerName, layers] of Object.entries(result.data as Record<string, any>)) {
+      for (const [layerName, tester] of Object.entries(layers as Record<string, any>)) {
+        items.push({
+          id: v4(),
+          label: containerName !== layerName ? `${containerName} / ${layerName}` : layerName,
+          type: (tester as TesterInfo).type,
+          tester: tester as TesterInfo
+        })
+      }
+    }
+
+    if (items.length === 0) {
+      ElMessage({
+        message: 'No tester configurations found in the ODX/PDX file',
+        type: 'warning',
+        appendTo: `#win${winKey}`
+      })
+      return
+    }
+
+    importDialogTitle.value = 'Import from ODX/PDX'
+    importItems.value = items
+    importSelected.value = items.map((i) => i.id)
+    importSelectAll.value = true
+    importDialogVisible.value = true
+  } catch (e: any) {
+    ElMessage({
+      message: 'Failed to parse ODX/PDX file: ' + (e.message || e),
+      type: 'error',
+      appendTo: `#win${winKey}`
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+function confirmImport() {
+  const selected = importItems.value.filter((i) => importSelected.value.includes(i.id))
+  let count = 0
+
+  for (const item of selected) {
+    const newId = v4()
+    const tester = cloneDeep(item.tester)
+    tester.id = newId
+    tester.name = generateUniqueImportName(tester.name, tester.type)
+
+    globalData.tester[newId] = tester
+
+    const parentId = tester.type === 'can' ? 'CAN' : tester.type === 'lin' ? 'LIN' : 'ETH'
+    treeRef.value?.append(
+      {
+        label: tester.name,
+        append: false,
+        id: newId,
+        type: tester.type
+      },
+      parentId
+    )
+    count++
+  }
+
+  importDialogVisible.value = false
+  ElMessage({
+    message: `Imported ${count} tester(s)`,
+    type: 'success',
+    appendTo: `#win${winKey}`
+  })
+}
+
+function generateUniqueImportName(baseName: string, type: HardwareType): string {
+  let name = baseName
+  let suffix = 1
+  while (Object.values(globalData.tester).some((t) => t.name === name)) {
+    name = `${baseName}_${suffix}`
+    suffix++
+  }
+  return name
+}
+
 const layout = inject('layout') as Layout
 onMounted(() => {
   window.jQuery(`#${winKey}Shift`).resizable({
@@ -331,6 +594,18 @@ onMounted(() => {
 .button:hover {
   cursor: pointer;
   border: 2px dashed var(--el-color-primary-dark-2);
+}
+
+.left-toolbar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--el-border-color);
+}
+
+.import-item {
+  padding: 2px 0;
 }
 
 .isTop {

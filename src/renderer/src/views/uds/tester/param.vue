@@ -109,18 +109,13 @@
           </template>
           <template v-else>
             <el-select
-              v-if="infoParam && infoParam.enum"
+              v-if="infoParam"
               v-model="editValue.editValue"
               filterable
               allow-create
               style="padding-left: 15px; padding-right: 15px"
             >
-              <el-option
-                v-for="e in infoParam.enum"
-                :key="e.value"
-                :label="e.name"
-                :value="e.value"
-              >
+              <el-option v-for="e in infoParam" :key="e.value" :label="e.name" :value="e.value">
                 <span style="float: left">{{ e.name }}</span>
                 <span style="float: right; color: var(--el-text-color-secondary); font-size: 13px">
                   {{ e.value }}
@@ -336,9 +331,17 @@ interface EditParam extends Param {
 const infoParam = computed(() => {
   if (editIndex.value >= 0) {
     if (props.id == 'req') {
-      return serviceDetail[props.serviceId].defaultParams[editIndex.value]
+      return serviceDetail[props.serviceId].defaultParams[editIndex.value].enum?.map((item) => ({
+        name: item.name,
+        value: Number(item.value).toString()
+      }))
     } else {
-      return serviceDetail[props.serviceId].defaultRespParams[editIndex.value]
+      return serviceDetail[props.serviceId].defaultRespParams[editIndex.value].enum?.map(
+        (item) => ({
+          name: item.name,
+          value: Number(item.value).toString()
+        })
+      )
     }
   }
   return undefined

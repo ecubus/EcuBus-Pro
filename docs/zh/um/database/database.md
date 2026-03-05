@@ -7,4 +7,4 @@
 ## 支持的数据库
 
 - [LIN LDF](./ldf/ldf)
-- [CAN DBC](./dbc/dbc)
+- [CAN DBC,ARXML](./dbc/dbc)

@@ -1,19 +1,19 @@
-# CAN DBC
+# CAN DBC 与 ARXML
 
-EcuBus-Pro 支持解析大多数 CAN DBC 文件。 如果您遇到任何无法正确解析的 DBC 文件，请在 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面报告问题。
+EcuBus-Pro 使用 [python-canmatrix](https://github.com/canmatrix/canmatrix) 来解析和转换 CAN 数据库文件。 如果您遇到任何导入或解析问题，请在我们的 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面上报告，或者如果问题似乎出在解析器本身，请直接在 [canmatrix Issues](https://github.com/canmatrix/canmatrix/issues) 上报告。
+
+**导入：** 支持 DBC 和 ARXML 格式。  
+**导出：** 数据库可以导出为 DBC、ARXML、Excel、JSON、YAML、KCD、DBF 和 SYM 格式。
 
 该应用程序为报文和信号提供了高效的搜索界面。
 
-> [!NOTE]
-> 目前，EcuBus-Pro 仅支持查看 DBC 文件，不支持编辑。 请确保您的 DBC 文件在使用前格式正确。
-
-## 选择 DBC 文件
+## 导入数据库文件
 
 ![alt text](../../../../media/um/database/dbc/image-18.png)
 
 ## 概述
 
-DBC 查看器提供以下方面的全面信息：
+数据库查看器提供以下方面的全面信息：
 
 - 网络节点
 - 报文
@@ -29,6 +29,12 @@ DBC 查看器提供以下方面的全面信息：
 
 ## 属性
 
-查看和检查所有 DBC 属性。
+查看和检查所有数据库属性。
 
 ![alt text](../../../../media/um/database/dbc/image-21.png)
+
+## 导出
+
+将加载的数据库导出为其他格式：DBC、ARXML、Excel (XLSX)、JSON、YAML、KCD、DBF 或 SYM。 选择所需的格式并保存文件。
+
+![export](../../../../media/um/database/dbc/export.png)

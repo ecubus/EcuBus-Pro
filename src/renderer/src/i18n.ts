@@ -59,7 +59,7 @@ export const reloadRendererTranslations = async (lng: string) => {
   // 切换到新语言
   await i18next.changeLanguage(lng)
 
-  // 保存语言偏好到 electron-store
+  // 保存语言偏好到 store (conf)
   try {
     await window.electron.ipcRenderer.invoke('set-language', lng)
   } catch (error) {

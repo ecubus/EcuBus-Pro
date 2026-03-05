@@ -16,9 +16,7 @@ import { EthBaseInfo } from 'nodeCan/doip'
 import PwmBase from '../pwm/base'
 import { VSomeIP_Client } from '../vsomeip'
 import { TesterInfo } from 'nodeCan/tester'
-import Store from 'electron-store'
-
-const store = new Store()
+import { store } from '../store'
 const libPath = path.dirname(runtimeDom)
 
 ipcMain.on('ipc-plugin-lib-path', async (event, ...arg) => {

@@ -11,6 +11,7 @@
     "src/renderer/src/views/ostrace/**/*.ts"
  ],
   "compilerOptions": {
+    "moduleResolution": "bundler",
     "composite": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,

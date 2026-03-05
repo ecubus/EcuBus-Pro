@@ -5,6 +5,9 @@
     },
     {
       "path": "../ecubus-plugin-template"
+    },
+    {
+      "path": "../ecubus-lang-zh"
     }
   ],
   "settings": {

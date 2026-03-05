@@ -1,10 +1,9 @@
 import { ipcMain, app, safeStorage } from 'electron'
 import axios from 'axios'
-import Store from 'electron-store'
+import { store } from '../store'
 import log from 'electron-log/main'
 import url from 'url'
 
-const store = new Store()
 const protocol = 'ecubuspro'
 const ProtocolRegExp = new RegExp(`^${protocol}://`)
 

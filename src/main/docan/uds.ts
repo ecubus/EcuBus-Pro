@@ -19,7 +19,7 @@ import path from 'path'
 import Handlebars from 'handlebars'
 import fsP from 'fs/promises'
 import fs from 'fs'
-import Store from 'electron-store'
+import { store } from '../store'
 import skillsDirRef from '../../../resources/skills/.gitkeep?asset&asarUnpack'
 import udsHeaderStr from '../share/uds.d.ts.html?raw'
 import crcStr from '../share/crc.d.ts.html?raw'
@@ -1408,7 +1408,6 @@ export async function refreshProject(
   await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
 
   // copy skills from resources/skills to .claude/skills when enabled
-  const store = new Store()
   const aiSettings = store.get('ai.settings') as { generateSkillDoc?: boolean } | undefined
   if (aiSettings?.generateSkillDoc !== false) {
     const resourcesSkillsDir = path.dirname(skillsDirRef)

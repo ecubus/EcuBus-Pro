@@ -1,9 +1,7 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log'
-import Store from 'electron-store'
+import { store } from '../store'
 import { getAllSupportedLanguages, getAllTranslations, reloadTranslations } from '../i18n'
-
-const store = new Store()
 
 // 语言信息接口
 export interface LanguageInfo {
@@ -50,7 +48,7 @@ ipcMain.handle('get-supported-languages', async () => {
 // 设置语言
 ipcMain.handle('set-language', async (_event, lang: string) => {
   try {
-    // 保存到 electron-store
+    // 保存到 store (conf)
     store.set('language', lang)
 
     // 重新加载主进程翻译

@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog, protocol as eProtocol, net 
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import Store from 'electron-store'
+import { store } from './store'
 import './ipc'
 import log from 'electron-log/main'
 import { createLogs } from './log'
@@ -63,8 +63,6 @@ function registerLocalResourceProtocol() {
 
 // process.env.PYTHON_PATH=pythonPath
 const isDev = process.env.NODE_ENV === 'development'
-
-const store = new Store()
 
 ipcMain.on('electron-store-get', async (event, val) => {
   event.returnValue = store.get(val)

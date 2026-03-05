@@ -1,19 +1,19 @@
-﻿# CAN DBC
+# CAN DBC & ARXML
 
-EcuBus-Pro supports parsing most CAN DBC files. If you encounter any DBC files that cannot be parsed correctly, please report the issue on our [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) page.
+EcuBus-Pro uses [python-canmatrix](https://github.com/canmatrix/canmatrix) to parse and convert CAN database files. If you encounter any import or parsing issues, please report them on our [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) page, or directly on [canmatrix Issues](https://github.com/canmatrix/canmatrix/issues) if the problem appears to be with the parser itself.
+
+**Import:** DBC and ARXML formats are supported.  
+**Export:** Databases can be exported to DBC, ARXML, Excel, JSON, YAML, KCD, DBF, and SYM formats.
 
 The application provides an efficient search interface for messages and signals.
 
-> [!NOTE]
-> Currently, EcuBus-Pro only supports viewing DBC files and does not support editing. Please ensure your DBC file is correctly formatted before use.
-
-## Select a DBC File
+## Import a Database File
 
 ![alt text](../../../../media/um/database/dbc/image-18.png)
 
 ## Overview
 
-The DBC viewer provides comprehensive information about:
+The database viewer provides comprehensive information about:
 
 - Network Nodes
 - Messages
@@ -29,6 +29,12 @@ Value tables define the mapping between raw values and their corresponding meani
 
 ## Attributes
 
-View and inspect all DBC attributes.
+View and inspect all database attributes.
 
 ![alt text](../../../../media/um/database/dbc/image-21.png)
+
+## Export
+
+Export the loaded database to other formats: DBC, ARXML, Excel (XLSX), JSON, YAML, KCD, DBF, or SYM. Select the desired format and save the file.
+
+![export](../../../../media/um/database/dbc/export.png)

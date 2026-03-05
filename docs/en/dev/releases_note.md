@@ -1,4 +1,19 @@
 # EcuBus-Pro Release Notes
+
+
+## 0.8.61
+Changes since v0.8.60:
+* [base]:integrated python
+* [base]:optimized with python-canmatrix as a replacement for the original dbc parser; all CAN databases need to be reimported
+* [base]:add agent skills generate 
+* [base]:add can replay feature(offline mode), only asc format log file support 
+* [cli]:add build code with minify ability 
+* [api]:add can message proxy with signals 
+* [base]:add lin asc format logger 
+* [ui]:add channel number display in hardware setup page 
+* [logger]:add lin asc logger
+---
+
 ## 0.8.60
 changes from v0.8.59 to v0.8.60:
  

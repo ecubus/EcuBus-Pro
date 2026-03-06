@@ -40,27 +40,11 @@ runs:
       run: |
         Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -OutFile "get-pip.py" -UseBasicParsing
         resources/python/python.exe get-pip.py
-    - name: Install setuptools (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: resources/python/python.exe -m pip install setuptools
     - name: Install Python dependencies (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
       run: resources/python/python.exe -m pip install -r resources/requirements.txt
-    - name: Install setuptools (macOS/Linux)
-      if: runner.os != 'Windows'
-      shell: bash
-      run: resources/python/bin/python3 -m pip install setuptools
     - name: Install Python dependencies (macOS/Linux)
       if: runner.os != 'Windows'
       shell: bash
       run: resources/python/bin/python3 -m pip install -r resources/requirements.txt
-    - name: Clean Python artifacts (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: resources/python/python.exe resources/clean.py resources/python
-    - name: Clean Python artifacts (macOS/Linux)
-      if: runner.os != 'Windows'
-      shell: bash
-      run: resources/python/bin/python3 resources/clean.py resources/python

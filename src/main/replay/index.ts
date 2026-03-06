@@ -101,6 +101,8 @@ export class Replay {
   private lastProgressPercent: number | null = null
   private channelIdMap: Map<number, ReplayChannelMap> = new Map()
   private tsOffset: number = 0
+  /** Cache: `${databaseId}|${frameId}|${idType}` -> { database, name } or null (not found) */
+  private frameDbInfoCache: Map<string, { database: string; name: string } | null> = new Map()
   constructor(
     config: ReplayItem,
     private projectInfo: { path: string; name: string },
@@ -137,6 +139,31 @@ export class Replay {
       this.channelIdMap.set(logChannel, channelMap)
     }
     return channelMap
+  }
+
+  /**
+   * Get database info for a frame by CAN id. Uses cache to avoid repeated lookups.
+   * Returns undefined if base has no database or frame id not found in database.
+   */
+  private getFrameDbInfo(
+    databaseId: string,
+    frame: ReplayCanFrame
+  ): { database: string; name: string } | undefined {
+    const cacheKey = `${databaseId}|${frame.id}|${frame.msgType.idType}`
+    const cached = this.frameDbInfoCache.get(cacheKey)
+    if (cached !== undefined) {
+      return cached ?? undefined
+    }
+    const db = global.dataSet?.database?.can?.[databaseId]
+    if (!db) {
+      this.frameDbInfoCache.set(cacheKey, null)
+      return undefined
+    }
+    const isExtended = frame.msgType.idType === CAN_ID_TYPE.EXTENDED
+    const msg = db.messages.find((m) => m.id === frame.id && m.is_extended_frame === isExtended)
+    const result = msg ? { database: databaseId, name: msg.name } : null
+    this.frameDbInfoCache.set(cacheKey, result)
+    return result ?? undefined
   }
 
   /**
@@ -206,6 +233,13 @@ export class Replay {
       for (const deviceId of channelMap.deviceIds) {
         const base = this.canBaseMap.get(deviceId)
         if (base) {
+          if (base.info.database) {
+            const dbInfo = this.getFrameDbInfo(base.info.database, frame)
+            if (dbInfo) {
+              frame.database = dbInfo.database
+              frame.name = dbInfo.name
+            }
+          }
           if (this.config.mode == 'offline') {
             frame.ts += this.tsOffset
             base.log.canBase(frame)

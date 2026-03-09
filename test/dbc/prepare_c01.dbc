@@ -1,0 +1,258 @@
+VERSION "DNPBNNNYNNNNNNNNNNNNNNNNNNYYYNYNNNNNNNNNNN/4/%%%/4/'%**4NNN///"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: CAB1000_Sensor BMS_Master
+VAL_TABLE_ IP_LOGIC -1 "Invalid" -2 "Init" ;
+VAL_TABLE_ ERROR_Def 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_TABLE_ Range_Def 3 "High2" 2 "High" 1 "Middle" 0 "Low" ;
+VAL_TABLE_ SystemMode_Def 9 "FLT_NO_RECOVERY" 8 "FLT_YES_FLUX_NO_DCDC" 7 "FLUX_CHECK" 6 "FLT_NO_FLUX_NO_DCDC" 5 "FLT_NO_COMM" 4 "FLT_NO_FLUX_YES_DCDC" 3 "CALIB" 2 "RUN" 1 "CHECK" 0 "INIT" ;
+VAL_TABLE_ TempSource_Def 1 "MCU" 0 "NTC" ;
+VAL_TABLE_ ClockSource_Def 1 "Internal" 0 "External" ;
+VAL_TABLE_ FunctionStatus_Def 1 "Active" 0 "Inactive" ;
+VAL_TABLE_ FaultStatus_Def 1 "Error" 0 "No Error" ;
+
+
+BO_ 964 IP_x04: 8 Vector__XXX
+ SG_ SW_REV_MAJ : 63|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_REV_MIN : 59|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_NAME : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INFORMATION : 39|7@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INDICATION : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IP_CURRENT : 7|32@0+ (1,-2147483648) [-1050000|1050000] "mA" Vector__XXX
+
+BO_ 963 IP_x03: 8 Vector__XXX
+ SG_ SW_REV_MAJ : 63|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_REV_MIN : 59|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_NAME : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INFORMATION : 39|7@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INDICATION : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IP_CURRENT : 7|32@0+ (1,-2147483648) [-1050000|1050000] "mA" Vector__XXX
+
+BO_ 962 IP_x02: 8 Vector__XXX
+ SG_ SW_REV_MAJ : 63|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_REV_MIN : 59|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_NAME : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INFORMATION : 39|7@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INDICATION : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IP_CURRENT : 7|32@0+ (1,-2147483648) [-1050000|1050000] "mA" Vector__XXX
+
+BO_ 961 IP_x01: 8 Vector__XXX
+ SG_ SW_REV_MAJ : 63|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_REV_MIN : 59|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_NAME : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INFORMATION : 39|7@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INDICATION : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IP_CURRENT : 7|32@0+ (1,-2147483648) [-1050000|1050000] "mA" Vector__XXX
+
+BO_ 960 IP_x00: 8 Vector__XXX
+ SG_ SW_REV_MAJ : 63|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_REV_MIN : 59|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_NAME : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INFORMATION : 39|7@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_INDICATION : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IP_CURRENT : 7|32@0+ (1,-2147483648) [-1050000|1050000] "mA" Vector__XXX
+
+BO_ 2026 LEM_ACurr_HrFlatCurr: 8 Vector__XXX
+ SG_ ACurr_HrOffFlatTail : 55|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_HrOffFlatHead : 39|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_HrOnFlatTail : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_HrOnFlatHead : 7|16@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2028 LEM_ACurr_MrFlatCurr: 8 Vector__XXX
+ SG_ ACurr_MrOffFlatTail : 55|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_MrOffFlatHead : 39|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_MrOnFlatTail : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_MrOnFlatHead : 7|16@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2030 LEM_ACurr_LrFlatCurr: 8 Vector__XXX
+ SG_ ACurr_LrOffFlatTail : 55|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_LrOffFlatHead : 39|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_LrOnFlatTail : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACurr_LrOnFlatHead : 7|16@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2024 LEM_System: 8 CAB1000_Sensor
+ SG_ Flt_AdcMux_Hw : 31|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Flt_CfgPara_CRC : 32|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Sys_ACurrRange : 62|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Sys_TempSrc : 60|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Sys_ClkSrc : 59|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Sys_Alias : 58|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Sys_FluxStat : 57|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Sys_Dcdc : 56|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Sys_Mode : 55|8@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Hbridge_OC1 : 24|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Hbridge_OC2 : 25|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_UV3 : 26|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_OV3 : 27|1@0+ (1,0) [0|1] ""  BMS_Master
+ SG_ Flt_Clk_Fail : 28|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Can_Busoff1 : 29|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Can_Busoff2 : 30|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_LrOffset : 16|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_HrOffset : 17|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_MrOffset : 18|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Freq_OF : 19|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Freq_UF : 20|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Hbridge_Stop : 21|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_Diff : 22|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Calib_Fail : 23|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_V5v_UV : 8|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_V5v_OV : 9|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Ntc_SC : 10|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Ntc_OL : 11|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Ntc_OT : 12|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_PosOCD : 13|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Curr_NegOCD : 14|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_OV2 : 7|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_OV1 : 6|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_UV2 : 5|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbridge_UV1 : 4|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbat_OV2 : 3|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbat_OV1 : 2|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbat_UV2 : 1|1@0+ (1,0) [0|0] ""  BMS_Master
+ SG_ Flt_Vbat_UV1 : 0|1@0+ (1,0) [0|0] ""  BMS_Master
+
+BO_ 2038 LEM_ACurr_HrCurr: 8 CAB1000_Sensor
+ SG_ ACurr_Hr2Current : 39|32@0- (1,0) [0|0] "mA" Vector__XXX
+ SG_ ACurr_HrCurrent : 7|32@0- (1,0) [0|0] "mA"  BMS_Master
+
+BO_ 2040 LEM_ACurr_LrMrCurr: 8 CAB1000_Sensor
+ SG_ ACurr_MrCurrent : 39|32@0- (1,0) [0|0] "mA"  BMS_Master
+ SG_ ACurr_LrCurrent : 7|32@0- (1,0) [0|0] "mA"  BMS_Master
+
+BO_ 2042 LEM_ACurr_Offset: 6 CAB1000_Sensor
+ SG_ ACurr_HrOffset : 39|16@0+ (1,0) [0|0] "mV"  BMS_Master
+ SG_ ACurr_MrOffset : 23|16@0+ (1,0) [0|0] "mV"  BMS_Master
+ SG_ ACurr_LrOffset : 7|16@0+ (1,0) [0|0] "mV"  BMS_Master
+
+BO_ 2032 LEM_Temperature: 6 CAB1000_Sensor
+ SG_ V_ProtBatt : 39|16@0+ (1,0) [0|0] "mV" Vector__XXX
+ SG_ T_Mcu : 23|16@0- (1,0) [0|0] "degC"  BMS_Master
+ SG_ T_Ntc : 7|16@0- (1,0) [0|0] "degC"  BMS_Master
+
+BO_ 2036 LEM_DCurr: 7 CAB1000_Sensor
+ SG_ DCurr_Freq : 39|16@0+ (1,0) [0|0] "Hz"  BMS_Master
+ SG_ DCurr_DutyCycle : 55|8@0+ (1,0) [0|0] "%"  BMS_Master
+ SG_ DCurr_FilterCurrent : 7|32@0- (1,0) [0|0] "mA"  BMS_Master
+
+BO_ 2034 LEM_Voltage: 8 CAB1000_Sensor
+ SG_ V_3v3 : 55|16@0+ (1,0) [0|0] "mV" Vector__XXX
+ SG_ V_5v : 39|16@0+ (1,0) [0|0] "mV"  BMS_Master
+ SG_ V_Batt : 7|16@0+ (1,0) [0|0] "mV"  BMS_Master
+ SG_ V_Bridge : 23|16@0+ (1,0) [0|0] "mV"  BMS_Master
+
+BO_ 1678 UDS_Server: 8 Vector__XXX
+ SG_ UDS_SERVER_7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_SERVER_0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1677 UDS_Client: 8 Vector__XXX
+ SG_ UDS_CLIENT_7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UDS_CLIENT_0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+
+
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BO_  "CycleTime" INT 5 1000;
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "Manufacturer" "Mitsubishi";
+BA_DEF_DEF_  "CycleTime" 100;
+BA_ "BusType" "CAN";
+VAL_ 964 ERROR_INFORMATION 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_ 964 ERROR_INDICATION 1 "Error" 0 "No Error" ;
+VAL_ 964 IP_CURRENT -1 "Invalid" -2 "Init" ;
+VAL_ 963 ERROR_INFORMATION 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_ 963 ERROR_INDICATION 1 "Error" 0 "No Error" ;
+VAL_ 963 IP_CURRENT -1 "Invalid" -2 "Init" ;
+VAL_ 962 ERROR_INFORMATION 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_ 962 ERROR_INDICATION 1 "Error" 0 "No Error" ;
+VAL_ 962 IP_CURRENT -1 "Invalid" -2 "Init" ;
+VAL_ 961 ERROR_INFORMATION 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_ 961 ERROR_INDICATION 1 "Error" 0 "No Error" ;
+VAL_ 961 IP_CURRENT -1 "Invalid" -2 "Init" ;
+VAL_ 960 ERROR_INFORMATION 97 "Bootloader Error" 96 "Internal Common Error" 85 "Supply Overvoltage Error" 84 "Supply Undervoltage Error" 68 "Overtemperature Error" 65 "Overcurrent Error" 64 "Memory Error" ;
+VAL_ 960 ERROR_INDICATION 1 "Error" 0 "No Error" ;
+VAL_ 960 IP_CURRENT -1 "Invalid" -2 "Init" ;
+VAL_ 2024 Flt_AdcMux_Hw 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_CfgPara_CRC 1 "Error" 0 "No Error" ;
+VAL_ 2024 Sys_ACurrRange 3 "High2" 2 "High" 1 "Middle" 0 "Low" ;
+VAL_ 2024 Sys_TempSrc 1 "MCU" 0 "NTC" ;
+VAL_ 2024 Sys_ClkSrc 1 "Internal" 0 "External" ;
+VAL_ 2024 Sys_Alias 1 "Active" 0 "Inactive" ;
+VAL_ 2024 Sys_FluxStat 1 "Active" 0 "Inactive" ;
+VAL_ 2024 Sys_Dcdc 1 "Active" 0 "Inactive" ;
+VAL_ 2024 Sys_Mode 9 "FLT_NO_RECOVERY" 8 "FLT_YES_FLUX_NO_DCDC" 7 "FLUX_CHECK" 6 "FLT_NO_FLUX_NO_DCDC" 5 "FLT_NO_COMM" 4 "FLT_NO_FLUX_YES_DCDC" 3 "CALIB" 2 "RUN" 1 "CHECK" 0 "INIT" ;
+VAL_ 2024 Flt_Hbridge_OC1 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Hbridge_OC2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_UV3 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_OV3 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Clk_Fail 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Can_Busoff1 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Can_Busoff2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_LrOffset 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_HrOffset 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_MrOffset 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Freq_OF 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Freq_UF 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Hbridge_Stop 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_Diff 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Calib_Fail 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_V5v_UV 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_V5v_OV 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Ntc_SC 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Ntc_OL 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Ntc_OT 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_PosOCD 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Curr_NegOCD 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_OV2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_OV1 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_UV2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbridge_UV1 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbat_OV2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbat_OV1 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbat_UV2 1 "Error" 0 "No Error" ;
+VAL_ 2024 Flt_Vbat_UV1 1 "Error" 0 "No Error" ;
+

@@ -307,6 +307,12 @@ function readSignalFromBuffer(signal: Signal, data: Buffer, db: CanDB) {
     }
   }
 
+  // For unsigned signals, JavaScript bitwise ops treat 32-bit values as signed.
+  // Convert to unsigned so values like 0x80000002 become 2147483650, not -2147483646.
+  if (!signal.is_float && !signal.is_signed) {
+    rawValue = rawValue >>> 0
+  }
+
   let physValue = rawValue
 
   // 检查原始值是否合法

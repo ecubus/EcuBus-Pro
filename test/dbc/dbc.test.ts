@@ -295,6 +295,22 @@ describe('DBC Parser Tests', () => {
     expect(s!.value).toBe('1652')
   })
 
+  test('IP_CURRENT unsigned 32-bit 0x80000002 (prepare_c01.dbc)', async () => {
+    // Use DBC with IP_CURRENT at start_bit 0 (same scale/offset as prepare_c01.dbc)
+    const dbcPath = path.join(__dirname, 'ip_current_start0.dbc')
+    const result = await parse(dbcPath)
+    expect(result).toBeDefined()
+    const msg = result.messages.find((m) => m.id === 962)
+    expect(msg).toBeDefined()
+    const ipCurrent = msg!.signals.find((s) => s.name === 'IP_CURRENT')
+    expect(ipCurrent).toBeDefined()
+    expect(ipCurrent!.is_signed).toBe(false)
+    // Buffer for 0x80000002: bytes 0-3 = 0x02,0x00,0x00,0x80 (little endian)
+    writeMessageData(msg!, Buffer.from([0x02, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00]), result)
+    expect(ipCurrent!.value).toBe('2147483650')
+    expect(ipCurrent!.physValue).toBe('2')
+  })
+
   test('testDbc1.dbc', async () => {
     const result = await parse(testDbc1)
     expect(result).toBeDefined()

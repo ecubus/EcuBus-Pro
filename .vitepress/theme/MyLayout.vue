@@ -5,8 +5,14 @@ import DefaultTheme from 'vitepress/theme'
 import { onMounted, computed } from 'vue'
 import { version } from '../../package.json'
 const { Layout } = DefaultTheme
+import { createMermaidRenderer } from 'vitepress-mermaid-renderer'
 const { lang } = useData() // 获取当前语言，比如 'en-US' 或 'zh-CN'
 const route = useRoute()
+const initMermaid = () => {
+  const mermaidRenderer = createMermaidRenderer({
+    theme: isDark.value ? 'dark' : 'forest'
+  })
+}
 
 function getVerion() {
   const actionElements = document.querySelectorAll('.action')
@@ -29,6 +35,7 @@ function getVerion() {
 
 onMounted(() => {
   getVerion()
+  initMermaid()
 })
 </script>
 

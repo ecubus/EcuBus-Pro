@@ -6,7 +6,6 @@
   "name": "EcuBus-Pro Script API Documentation",
   "readme": "docs/en/um/script/script.md",
   "skipErrorChecking": true,
-
   "navigationLinks": {
     "Home": "https://app.whyengineer.com",
     "GitHub": "https://github.com/ecubus/EcuBus-Pro"
@@ -14,5 +13,6 @@
   "favicon": "./resources/icon.png",
   "navigation": {
     "includeCategories": true
-  }
+  },
+  "hostedBaseUrl": "https://app.whyengineer.com/scriptApi"
 }

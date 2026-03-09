@@ -121,7 +121,19 @@ export const shared = defineConfig({
       options: {
         appId: 'KXFLA7UAD8',
         apiKey: '67edbcb2f3c63548c4bf738d61602a03',
-        indexName: 'app-whyengineer'
+        indexName: 'app-whyengineer',
+        askAi: {
+          assistantId: 'IB8KWek9OVOC',
+          sidePanel: {
+            panel: {
+              variant: 'floating', // or 'inline'
+              side: 'right',
+              width: '360px',
+              expandedWidth: '580px',
+              suggestedQuestions: true
+            }
+          }
+        }
       }
     },
     socialLinks: [{ icon: 'github', link: 'https://github.com/ecubus/EcuBus-Pro' }]

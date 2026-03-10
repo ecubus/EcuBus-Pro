@@ -150,7 +150,7 @@ export { assert }
 
 import { test as nodeTest, TestContext } from 'node:test'
 
-export { getCheckSum as getLinCheckSum } from '../share/lin'
+export { getCheckSum as getLinCheckSum, getPID } from '../share/lin'
 
 let init = process.env.ONLY == 'true' ? true : false
 let initPromiseResolve: () => void = () => {}

@@ -132,6 +132,19 @@ export interface LinCableErrorInject {
    * Override the checksum value
    */
   checkSum?: number
+
+  /**
+   * Custom pulses - LIN idle high, alternates high/low.
+   * Array length = pulse count (max 64). Each element = length in bit-time units (uint16).
+   * When set, sends only custom pulses (no LIN frame).
+   *
+   * @example
+   * ```ts
+   * // 2 segments: high 10 bit-times, low 5 bit-times
+   * frame.lincable = { customPulses: [10, 5] }
+   * ```
+   */
+  customPulses?: number[]
 }
 /**
  * @category LIN

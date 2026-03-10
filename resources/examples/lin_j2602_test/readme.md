@@ -18,3 +18,7 @@ You can modify the test script to implement your own additional test requirement
 ## Test Database
 
 The test database is in the [LINdb.ldf](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_j2602_test/J2602_VectorExample.ldf) file.
+
+## Custom Pulses Example
+
+The test includes a `Custom pulses (lincable.customPulses)` describe block demonstrating how to send arbitrary pulse sequences via `frame.lincable.customPulses` (array of lengths in bit-time units). When set, sends only custom pulses (no LIN frame). See [LinCable docs](https://app.whyengineer.com/docs/um/hardware/lincable.html) for details.

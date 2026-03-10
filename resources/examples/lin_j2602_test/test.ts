@@ -9,7 +9,8 @@ import {
   LinCableErrorInject,
   getFrameFromDB,
   getVar,
-  getLinCheckSum
+  getLinCheckSum,
+  getPID
 } from 'ECB'
 const headerBitLength = 13 + 1 + 10 + 10
 const FrameMap: Record<string, LinMsg> = {}
@@ -133,6 +134,61 @@ test('timeout', async () => {
   const result1 = await sendLinWithSend(ct, {})
   assert(result1)
 })
+
+/** Convert byte to pulse lengths for customPulses (MSB first, merge consecutive same-level bits) */
+function byteToPulseLengths(b: number): number[] {
+  const lengths: number[] = []
+  let prev = (b >> 7) & 1
+  let count = 1
+  for (let i = 6; i >= 0; i--) {
+    const bit = (b >> i) & 1
+    if (bit === prev) {
+      count++
+    } else {
+      lengths.push(count)
+      prev = bit
+      count = 1
+    }
+  }
+  lengths.push(count)
+  return lengths
+}
+
+describe('Custom pulses (lincable.customPulses)', () => {
+  test('send custom pulses', async () => {
+    const msg: LinMsg = {
+      frameId: 0,
+      data: Buffer.alloc(0),
+      direction: LinDirection.RECV,
+      checksumType: LinChecksumType.ENHANCED,
+      lincable: { customPulses: [10, 5] }
+    }
+    await output(msg)
+  })
+
+  test('9/10bit dominant + 30-120bit recessive + 3d header (break 13bit + sync + PID)', async () => {
+    // Build custom pulse sequence: 10bit dominant, 60bit recessive, 13bit break, 1bit delimiter, sync 0x55, PID(3d)
+    const sync = byteToPulseLengths(0x55)
+    const pid = byteToPulseLengths(getPID(0x3d))
+    const customPulses: number[] = [
+      10, // 9/10 bit dominant
+      60, // 30-120 bit recessive (use 60)
+      13, // break 13 bit
+      1, // delimiter 1 bit
+      ...sync, // sync 0x55
+      ...pid // PID for frame 0x3d
+    ]
+    const msg: LinMsg = {
+      frameId: 0,
+      data: Buffer.alloc(0),
+      direction: LinDirection.RECV,
+      checksumType: LinChecksumType.ENHANCED,
+      lincable: { customPulses }
+    }
+    await output(msg)
+  })
+})
+
 describe('4.2', () => {
   test('4.2.1 Wrong Synch Field = 0x80 (one falling edge)', async () => {
     const msg = FrameMap['Slave1_TxFrame1']

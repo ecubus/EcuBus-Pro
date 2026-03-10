@@ -311,14 +311,14 @@ static bool candle_dev_interal_open(candle_handle hdev)
         }
         dev->data_bt_const.feature = cap_externd.feature;
         dev->data_bt_const.fclk_can = cap_externd.fclk_can;
-        dev->data_bt_const.brp_inc = cap_externd.brp_inc;
-        dev->data_bt_const.brp_max = cap_externd.brp_max;
-        dev->data_bt_const.brp_min = cap_externd.brp_min;
-        dev->data_bt_const.sjw_max = cap_externd.sjw_max;
-        dev->data_bt_const.tseg1_max = cap_externd.tseg1_max;
-        dev->data_bt_const.tseg1_min = cap_externd.tseg1_min;
-        dev->data_bt_const.tseg2_max = cap_externd.tseg2_max;
-        dev->data_bt_const.tseg2_min = cap_externd.tseg2_min;
+        dev->data_bt_const.brp_inc = cap_externd.dtbrp_inc;
+        dev->data_bt_const.brp_max = cap_externd.dtbrp_max;
+        dev->data_bt_const.brp_min = cap_externd.dtbrp_min;
+        dev->data_bt_const.sjw_max = cap_externd.dtsjw_max;
+        dev->data_bt_const.tseg1_max = cap_externd.dttseg1_max;
+        dev->data_bt_const.tseg1_min = cap_externd.dttseg1_min;
+        dev->data_bt_const.tseg2_max = cap_externd.dttseg2_max;
+        dev->data_bt_const.tseg2_min = cap_externd.dttseg2_min;
     }
 
     dev->last_error = CANDLE_ERR_OK;

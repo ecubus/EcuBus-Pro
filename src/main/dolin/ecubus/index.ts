@@ -508,6 +508,14 @@ export class LinCable extends LinBase {
   }
 
   async _write(m: LinMsg): Promise<number> {
+    if (this.info.mode == LinMode.MASTER) {
+      const lengths = m.lincable?.customPulses
+      if (lengths && lengths.length > 0) {
+        await this.sendCustomPulsesInternal(lengths)
+        return 0
+      }
+    }
+
     return new Promise<number>((resolve, reject) => {
       if (this.info.mode == LinMode.MASTER) {
         let str = 'M'
@@ -771,6 +779,45 @@ export class LinCable extends LinBase {
       })
     })
   }
+
+  /**
+   * Send custom pulses on LIN bus (U command). LIN idle high, alternates high/low.
+   * @internal Used by _write when lincable.customPulses is set
+   */
+  private async sendCustomPulsesInternal(lengths: number[]): Promise<void> {
+    const count = lengths.length
+    if (count === 0 || count > 32) {
+      throw new LinError(
+        LIN_ERROR_ID.LIN_PARAM_ERROR,
+        undefined,
+        `Invalid custom pulses: lengths array must have 1-32 elements, got ${count}`
+      )
+    }
+    let str = 'U'
+    str += count.toString(16).padStart(2, '0')
+    for (let i = 0; i < count; i++) {
+      str += ((lengths[i] >>> 0) & 0xffffffff).toString(16).padStart(8, '0')
+    }
+    str += '\r'
+
+    return new Promise<void>((resolve, reject) => {
+      this.serialPort.write(str)
+      this.serialPort.drain((err) => {
+        if (err) {
+          reject(
+            new LinError(
+              LIN_ERROR_ID.LIN_BUS_ERROR,
+              undefined,
+              'sendCustomPulses error, ' + err.message
+            )
+          )
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
   read(frameId: number) {
     return this.lastFrame.get(frameId)
   }

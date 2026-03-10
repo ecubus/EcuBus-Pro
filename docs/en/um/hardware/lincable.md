@@ -144,6 +144,29 @@ and quality assurance.
 ### Checksum Override
 - **Checksum Override**: Override the checksum with a custom value
 
+### Custom Pulses
+- **Custom Pulse Sequences**: Send arbitrary high/low pulse sequences on the LIN bus (LIN idle high, alternates high/low)
+- **Bit-time Units**: Each element is length in bit-time units based on the current baud rate
+- **Array Length = Count**: Array length = pulse count (max 32)
+- **Pulses Only**: When set, sends only custom pulses (no LIN frame)
+- **Use Cases**: LIN wake-up patterns, break timing tests, custom signal injection
+
+Configure via `frame.lincable.customPulses` (array of lengths):
+
+```typescript
+import { output, LinDirection, LinChecksumType } from 'ECB'
+
+// Send custom pulses: high 10 bit-times, low 5 bit-times
+const wakeupFrame = {
+  frameId: 0,
+  data: Buffer.alloc(0),
+  direction: LinDirection.RECV,
+  checksumType: LinChecksumType.ENHANCED,
+  lincable: { customPulses: [10, 5] }
+}
+await output(wakeupFrame)
+```
+
 ---
 
 > See [Lin Conformance Test Example](https://app.whyengineer.com/examples/lin_conformance_test/readme.html) for more details.   

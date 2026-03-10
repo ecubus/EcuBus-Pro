@@ -147,7 +147,7 @@ and quality assurance.
 ### Custom Pulses
 - **Custom Pulse Sequences**: Send arbitrary high/low pulse sequences on the LIN bus (LIN idle high, alternates high/low)
 - **Bit-time Units**: Each element is length in bit-time units based on the current baud rate
-- **Array Length = Count**: Array length = pulse count (max 32)
+- **Array Length = Count**: Array length = pulse count (max 64)
 - **Pulses Only**: When set, sends only custom pulses (no LIN frame)
 - **Use Cases**: LIN wake-up patterns, break timing tests, custom signal injection
 

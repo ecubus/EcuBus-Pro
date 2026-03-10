@@ -786,17 +786,17 @@ export class LinCable extends LinBase {
    */
   private async sendCustomPulsesInternal(lengths: number[]): Promise<void> {
     const count = lengths.length
-    if (count === 0 || count > 32) {
+    if (count === 0 || count > 64) {
       throw new LinError(
         LIN_ERROR_ID.LIN_PARAM_ERROR,
         undefined,
-        `Invalid custom pulses: lengths array must have 1-32 elements, got ${count}`
+        `Invalid custom pulses: lengths array must have 1-64 elements, got ${count}`
       )
     }
     let str = 'U'
     str += count.toString(16).padStart(2, '0')
     for (let i = 0; i < count; i++) {
-      str += ((lengths[i] >>> 0) & 0xffffffff).toString(16).padStart(8, '0')
+      str += ((lengths[i] >>> 0) & 0xffff).toString(16).padStart(8, '0')
     }
     str += '\r'
 

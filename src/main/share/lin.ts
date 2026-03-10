@@ -135,7 +135,7 @@ export interface LinCableErrorInject {
 
   /**
    * Custom pulses - LIN idle high, alternates high/low.
-   * Array length = pulse count (max 32). Each element = length in bit-time units.
+   * Array length = pulse count (max 64). Each element = length in bit-time units (uint16).
    * When set, sends only custom pulses (no LIN frame).
    *
    * @example

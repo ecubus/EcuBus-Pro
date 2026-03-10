@@ -5,7 +5,7 @@ export const shared = defineConfig({
   description: 'A powerful automotive ECU development tool',
   ignoreDeadLinks: true,
   lastUpdated: true,
-  srcExclude: ['out', 'resources/docs'],
+  srcExclude: ['out', 'resources/docs', 'src'],
   rewrites: {
     'docs/en/:rest*': 'docs/:rest*',
     'docs/zh/:rest*': 'zh/docs/:rest*',

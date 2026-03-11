@@ -18,3 +18,7 @@ LIN SAE J2602 测试示例提供了一个完整的测试框架，用于根据汽
 ## 测试数据库
 
 测试数据库位于 [LINdb.ldf](https://github.com/ecubus-pro/ecubus-pro/blob/main/resources/examples/lin_j2602_test/J2602_VectorExample.ldf) 文件中。
+
+## 自定义脉冲示例
+
+该测试包含一个 `Custom pulses (lincable.customPulses)` 描述块，演示如何通过 `frame.lincable.customPulses`（以位时间单位为长度的数组）发送任意脉冲序列。 设置后，仅发送自定义脉冲（无 LIN 帧）。 详情请参阅 [LinCable 文档](https://app.whyengineer.com/docs/um/hardware/lincable.html)。

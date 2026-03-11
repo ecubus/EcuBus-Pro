@@ -8,6 +8,9 @@
     },
     {
       "path": "../ecubus-lang-zh"
+    },
+    {
+      "path": "../canopen"
     }
   ],
   "settings": {

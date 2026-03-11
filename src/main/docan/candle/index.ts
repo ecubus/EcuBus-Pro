@@ -357,6 +357,9 @@ export class Candle_CAN extends CanBase {
             this.pendingBaseCmds.delete(cmdId)
           }
 
+          // Log with firmware hardware timestamp.
+          // noCount=true: sentFrames was already counted in _writeBase at send time
+          // to avoid depending on TSFN callback reliability under high CPU load.
           const message: CanMessage = {
             device: this.info.name,
             dir: 'OUT',
@@ -365,7 +368,8 @@ export class Candle_CAN extends CanBase {
             ts: msg.TimeStamp,
             msgType: msgType,
             database: item.extra?.database,
-            name: item.extra?.name
+            name: item.extra?.name,
+            noCount: true
           }
           this.log.canBase(message)
           this.event.emit(cmdId, message)
@@ -677,6 +681,12 @@ export class Candle_CAN extends CanBase {
         frame.flags = falg
 
         Candle.SendCANMsg(this.id, this.channel, frame)
+        // Increment sentFrames immediately after USB write succeeds.
+        // Do NOT rely on echo callback — TSFN can drop/delay frames under
+        // high CPU load, causing SentCnt to under-count.
+        // The echo callback still calls log.canBase (with noCount:true)
+        // to write trace with firmware hardware timestamp.
+        this.busLoadingStats.sentFrames++
       } catch (err: any) {
         const items = this.pendingBaseCmds.get(cmdId)
         if (items && items.length > 0) {

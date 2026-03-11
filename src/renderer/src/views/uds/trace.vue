@@ -213,6 +213,7 @@ interface LogData {
   children?: LogData[] | { name: string; data: string }[]
   deltaTime?: string
   previousTs?: number
+  count?: number
 }
 const isOverwrite = ref(false)
 function toggleOverwrite() {
@@ -487,15 +488,18 @@ function insertData2(data: LogData[]) {
           const previousTime = existingLog.ts
           const deltaMs = (currentTime - previousTime) / 1000 // Convert to milliseconds
 
-          // Store previous timestamp and delta time
+          // Store previous timestamp, delta time and increment count
           item.previousTs = existingLog.ts
           item.deltaTime = deltaMs >= 0 ? `(Δ${deltaMs.toFixed(3)}ms)` : ''
+          item.count = (existingLog.count || 1) + 1
 
           allLogData[idx] = item
         } else {
+          item.count = 1
           allLogData.push(item)
         }
       } else {
+        item.count = 1
         allLogData.push(item)
       }
     }
@@ -1116,8 +1120,11 @@ const columes: Ref<Column[]> = ref([
     width: 200,
     formatter: (row) => {
       if (row.row.ts) {
-        if (isOverwrite.value && row.row.deltaTime) {
-          return `${(row.row.ts / 1000000).toFixed(6)} ${row.row.deltaTime}`
+        if (isOverwrite.value) {
+          const parts = [(row.row.ts / 1000000).toFixed(6)]
+          if (row.row.deltaTime) parts.push(row.row.deltaTime)
+          if (row.row.count != null && row.row.count > 0) parts.push(`#${row.row.count}`)
+          return parts.join(' ')
         }
         return (row.row.ts / 1000000).toFixed(6)
       } else {

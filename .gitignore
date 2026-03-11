@@ -32,6 +32,19 @@ tools/a.csv
 doip-certs
 
 
+# generated lib js and d.ts docs
+resources/lib/js/cryptoExt.js
+resources/lib/js/cryptoExt.js.map
+resources/lib/js/plugin.js
+resources/lib/js/plugin.js.map
+resources/lib/js/secureAccess.js
+resources/lib/js/uds.js
+resources/lib/js/uds.js.map
+src/main/share/crc.d.ts.html
+src/main/share/cryptoExt.d.ts.html
+src/main/share/uds.d.ts.html
+src/main/share/utli.d.ts.html
+
 # python
 
 resources/python

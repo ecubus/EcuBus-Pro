@@ -1872,3 +1872,5 @@ export class S19MemoryMap {
     return true
   }
 }
+
+export * from './fuzz'

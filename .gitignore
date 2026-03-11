@@ -40,6 +40,8 @@ resources/lib/js/plugin.js.map
 resources/lib/js/secureAccess.js
 resources/lib/js/uds.js
 resources/lib/js/uds.js.map
+resources/lib/js/utli.js
+resources/lib/js/utli.js.map
 src/main/share/crc.d.ts.html
 src/main/share/cryptoExt.d.ts.html
 src/main/share/uds.d.ts.html

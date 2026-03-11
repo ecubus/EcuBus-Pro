@@ -93,7 +93,7 @@ export interface EcuDefine {
  * @category CAN
  */
 export interface Enumerations {
-  string: Record<number, string>
+  [key: string]: Record<number, string>
 }
 
 /**

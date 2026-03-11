@@ -28,6 +28,7 @@ describe('DBC Parser Tests', () => {
   let test1Dbc: string
   let scuDbc: string
   let testDbc1: string
+  let gbkDbc: string
   beforeAll(() => {
     dbcContentModel3 = path.join(__dirname, 'Model3CAN.dbc')
     dbcContentHyundaiKia = path.join(__dirname, 'can1-hyundai-kia-uds-v2.4.dbc')
@@ -41,6 +42,7 @@ describe('DBC Parser Tests', () => {
     test1Dbc = path.join(__dirname, 'test1.dbc')
     scuDbc = path.join(__dirname, 'SCU.dbc')
     testDbc1 = path.join(__dirname, 'TestDbc1.dbc')
+    gbkDbc = path.join(__dirname, 'gbk.dbc')
   })
   test('scu', async () => {
     const result = await parse(scuDbc)
@@ -331,5 +333,56 @@ describe('DBC Parser Tests', () => {
     updateSignalPhys(s!, result)
     const buf1 = getMessageData(msg!)
     expect(buf1).toEqual(Buffer.from([0xb7, 0x1b, 0x80, 0x03, 0x80, 0, 0xb5, 0x20]))
+  })
+
+  test('gbk.dbc - GBK-encoded Chinese strings are correctly decoded', async () => {
+    const result = await parse(gbkDbc)
+    expect(result).toBeDefined()
+
+    // Enumerations: RelayStatus (VAL_TABLE) - 断开/闭合
+    const relayStatus = result.enumerations?.RelayStatus
+    expect(relayStatus).toBeDefined()
+    expect(relayStatus!['0']).toBe('断开')
+    expect(relayStatus!['1']).toBe('闭合')
+
+    // Enumerations: Communication_Status - 通讯正常 / 通讯指令超时或收到指令异常
+    const commStatus = result.enumerations?.Communication_Status
+    expect(commStatus).toBeDefined()
+    expect(commStatus!['0']).toBe('通讯正常')
+    expect(commStatus!['1']).toContain('通讯')
+
+    // Signal BMS_PowerOnReady values (VAL_ per message)
+    const msgBmsCts = result.messages.find(
+      (m: { name: string; id: number }) => m.name === 'BMS_CTS_1082F5F2' || m.id === 2424501746
+    )
+    expect(msgBmsCts).toBeDefined()
+    const powerOnReady = msgBmsCts!.signals.find(
+      (s: { name: string }) => s.name === 'BMS_PowerOnReady'
+    )
+    expect(powerOnReady).toBeDefined()
+    expect(powerOnReady!.values).toBeDefined()
+    expect(powerOnReady!.values!['0']).toBe('未准备')
+    expect(powerOnReady!.values!['1']).toBe('准备')
+    expect(powerOnReady!.values!['2']).toBe('错误')
+    expect(powerOnReady!.values!['3']).toBe('保留')
+
+    // Signal comment: BMS_NegativeInsulationResistance - 负绝缘电阻值
+    const negInsul = msgBmsCts!.signals.find(
+      (s: { name: string }) => s.name === 'BMS_NegativeInsulationResistance'
+    )
+    expect(negInsul).toBeDefined()
+    expect(negInsul!.comment).toBe('负极绝缘阻值')
+
+    // Signal unit: BMS_CellPoleTempT1 - 度 (from VECTOR__INDEPENDENT_SIG_MSG)
+    const vectorMsg = result.messages.find(
+      (m: { name: string; id: number }) =>
+        m.name === 'VECTOR__INDEPENDENT_SIG_MSG' || m.id === 3221225472
+    )
+    expect(vectorMsg).toBeDefined()
+    const cellPoleTemp = vectorMsg!.signals.find(
+      (s: { name: string }) => s.name === 'BMS_CellPoleTempT1'
+    )
+    expect(cellPoleTemp).toBeDefined()
+    expect(cellPoleTemp!.unit).toBe('℃')
   })
 })

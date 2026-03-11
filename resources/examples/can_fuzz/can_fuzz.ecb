@@ -1,0 +1,126 @@
+{
+  "data": {
+    "devices": {
+      "e54ae6ea-f3d1-4755-ad80-79ebfdf68f6a": {
+        "type": "can",
+        "canDevice": {
+          "id": "e54ae6ea-f3d1-4755-ad80-79ebfdf68f6a",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_6"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "d0428f8b-2b56-4f8a-84a6-7825acf764ae": {
+        "name": "Node 1",
+        "id": "d0428f8b-2b56-4f8a-84a6-7825acf764ae",
+        "channel": [
+          "e54ae6ea-f3d1-4755-ad80-79ebfdf68f6a"
+        ],
+        "workNode": "",
+        "script": "fuzz.ts"
+      },
+      "0e76c0d8-e97b-49fc-ad9d-bcca3c4a3ef4": {
+        "name": "Node 2",
+        "id": "0e76c0d8-e97b-49fc-ad9d-bcca3c4a3ef4",
+        "channel": [
+          "e54ae6ea-f3d1-4755-ad80-79ebfdf68f6a"
+        ],
+        "script": "ecu.ts",
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {},
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2562,
+          "h": 361
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 403,
+          "y": 239,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {}
+      },
+      "network": {
+        "pos": {
+          "x": 1275,
+          "y": 3,
+          "w": 708,
+          "h": 426
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 1233,
+          "y": 472,
+          "w": 1080,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      }
+    },
+    "example": {
+      "catalog": "CAN"
+    }
+  }
+}

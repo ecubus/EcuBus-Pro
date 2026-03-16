@@ -796,7 +796,7 @@ export class LinCable extends LinBase {
     let str = 'U'
     str += count.toString(16).padStart(2, '0')
     for (let i = 0; i < count; i++) {
-      str += ((lengths[i] >>> 0) & 0xffff).toString(16).padStart(8, '0')
+      str += ((lengths[i] >>> 0) & 0xffff).toString(16).padStart(4, '0')
     }
     str += '\r'
 

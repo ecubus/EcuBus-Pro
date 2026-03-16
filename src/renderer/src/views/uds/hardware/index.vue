@@ -510,6 +510,17 @@ async function buildTree() {
     t.push(candle)
     addSubTree('candle', candle, deviceIndexMap)
   }
+  if (vendors.includes('socketcan')) {
+    const socketcan: tree = {
+      label: i18next.t('uds.hardware.vendors.socketcan'),
+      vendor: 'socketcan',
+      append: false,
+      id: 'SOCKETCAN',
+      children: []
+    }
+    t.push(socketcan)
+    addSubTree('socketcan', socketcan, deviceIndexMap)
+  }
 
   tData.value = t
 }

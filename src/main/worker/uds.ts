@@ -83,7 +83,8 @@ import {
   getFrameData,
   LinSignal
 } from '../share/lin'
-export type { LinDirection, LinChecksumType, LinMode, LinSignal } from '../share/lin'
+export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
+export type { LinSignal } from '../share/lin'
 // export { SecureAccessDll }
 export type { CanMessage }
 export type { EntityAddr }

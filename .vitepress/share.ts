@@ -121,9 +121,6 @@ export const shared = defineConfig({
         appId: 'KXFLA7UAD8',
         apiKey: '67edbcb2f3c63548c4bf738d61602a03',
         indexName: 'app-whyengineer',
-        searchParameters: {
-          facetFilters: ['language:en', 'language:zh-CN', 'language:en-US']
-        },
         askAi: {
           assistantId: 'IB8KWek9OVOC',
           sidePanel: {

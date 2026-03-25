@@ -2,16 +2,16 @@
 
 ## 0.8.62
 
-Changes since v0.8.62:
+自 v0.8.62 以来的变更：
 
-- [bug]:fix ldf parse without nodeAttr
-- [example]:add can fuzz example
-- [feat]:add fuzz api ref form can-hax
-- [feat]:add count display in trace window
-- [bug]:fix dbc file others encode
-- [bug]:fix unsigned 32-bit value handling in signal reading.
-- [replay]:attach database info to replay frame
-- [uds]:add odx parse and import feature
+- [bug]:修复无 nodeAttr 时的 ldf 解析
+- [example]:添加 can fuzz 示例
+- [feat]:添加来自 can-hax 的 fuzz api 参考
+- [feat]: 在跟踪窗口中添加计数显示
+- [bug]:修复 dbc 文件其他编码
+- [bug]:修复信号读取中的无符号 32 位值处理。
+- [replay]: 将数据库信息附加到回放帧
+- [uds]:添加 odx 解析和导入功能
 
 ---
 

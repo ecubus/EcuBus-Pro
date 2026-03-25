@@ -1251,28 +1251,32 @@ class LdfVistor extends visitor {
   Node_attributesClause(ctx: CstChildrenDictionary) {
     for (const [index, i] of ctx.Identifier.entries()) {
       const t = i as IToken
-      // console.log(ctx.configurable_framesClause[index].children.frameDefinition)
-      const configFrames = (ctx.configurable_framesClause[index] as any)?.children?.frameDefinition
 
       const configFramesVal: string[] = []
-      if (configFrames) {
-        for (const f of configFrames) {
-          const name = f.children.Identifier[0].image
-          if (f.children.Interger) {
-            const number = Number(f.children.Interger[0].image)
-            configFramesVal[number] = name
-          } else {
-            configFramesVal.push(name)
+      if (ctx.configurable_framesClause) {
+        // console.log(ctx.configurable_framesClause[index].children.frameDefinition)
+        const configFrames = (ctx.configurable_framesClause[index] as any)?.children
+          ?.frameDefinition
+
+        if (configFrames) {
+          for (const f of configFrames) {
+            const name = f.children.Identifier[0].image
+            if (f.children.Interger) {
+              const number = Number(f.children.Interger[0].image)
+              configFramesVal[number] = name
+            } else {
+              configFramesVal.push(name)
+            }
           }
-        }
-        //check empty in configFramesVal
-        for (let i = 0; i < configFramesVal.length; i++) {
-          if (configFramesVal[i] == undefined) {
-            throw new Error(
-              i18next.t('database.ldfParse.errors.configurableFramesMustBeContinuous', {
-                nodeName: t.image
-              })
-            )
+          //check empty in configFramesVal
+          for (let i = 0; i < configFramesVal.length; i++) {
+            if (configFramesVal[i] == undefined) {
+              throw new Error(
+                i18next.t('database.ldfParse.errors.configurableFramesMustBeContinuous', {
+                  nodeName: t.image
+                })
+              )
+            }
           }
         }
       }
@@ -1824,6 +1828,7 @@ export default function parseInput(text: string) {
     vv.visit(cst)
     return vv.ldf
   } catch (err) {
+    console.error(err)
     if (err instanceof Error) {
       throw err
     }

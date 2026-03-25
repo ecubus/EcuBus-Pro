@@ -1,4 +1,17 @@
 # EcuBus-Pro Release Notes
+## 0.8.62
+Changes since v0.8.62:
+
+* [bug]:fix ldf parse without nodeAttr 
+* [example]:add can fuzz example 
+* [feat]:add fuzz api ref form can-hax 
+* [feat]:add count display in trace window 
+* [bug]:fix dbc file others encode 
+* [bug]:fix unsigned 32-bit value handling in signal reading. 
+* [replay]:attach database info to replay frame 
+* [uds]:add odx parse and import feature
+---
+
 
 
 ## 0.8.61

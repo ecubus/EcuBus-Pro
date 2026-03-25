@@ -86,7 +86,7 @@ import {
 export { LinDirection, LinChecksumType, LinMode } from '../share/lin'
 export type { LinSignal } from '../share/lin'
 // export { SecureAccessDll }
-export type { CanMessage }
+export type { CanMessage, CanSignal }
 export type { EntityAddr }
 export type { LinMsg, LinCableErrorInject }
 export type { CanAddr } from '../share/can'

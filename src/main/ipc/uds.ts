@@ -83,6 +83,7 @@ import {
 import TraceItem from '../ostrace/item'
 import { startPlugins, stopPlugins } from './plugin'
 import Replay from '../replay'
+import { trackEvent } from '../analytics'
 
 const libPath = path.dirname(dllLib)
 
@@ -298,7 +299,52 @@ let cantps: {
 }[] = []
 let doips: DOIP[] = []
 
+function getDeviceSymbol(data: UdsDevice) {
+  let vendor
+  switch (data.type) {
+    case 'can':
+      vendor = data.canDevice?.vendor
+      break
+    case 'eth':
+      vendor = data.ethDevice?.vendor
+      break
+    case 'lin':
+      vendor = data.linDevice?.vendor
+      break
+    case 'pwm':
+      vendor = data.pwmDevice?.vendor
+      break
+    case 'someip':
+      vendor = 'pc'
+      break
+    default:
+      break
+  }
+  return `${data.type}-${vendor || 'N/A'}`
+}
 async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
+  const deviceSymboCnt: Record<string, number> = {}
+  for (const key in data.devices) {
+    const device = data.devices[key]
+    const symbol = getDeviceSymbol(device)
+    deviceSymboCnt[symbol] = (deviceSymboCnt[symbol] || 0) + 1
+  }
+  trackEvent('app_start', {
+    ...deviceSymboCnt,
+    tester: Object.keys(data.tester).length,
+    replay: Object.keys(data.replays).length,
+    node: Object.keys(data.nodes).length,
+    dbc: Object.keys(data.database.can).length,
+    orti: Object.keys(data.database.orti).length,
+    ldf: Object.keys(data.database.lin).length,
+    vars: Object.keys(data.vars).length,
+    graph: Object.keys(data.graphs).length,
+    guage: Object.keys(data.guages).length,
+    data: Object.keys(data.datas).length,
+    panel: Object.keys(data.panels).length,
+    log: Object.keys(data.logs).length
+  })
+
   let activeKey = ''
   const varLog = new VarLOG()
   const periodTaskList: ((diffMs: number, currentTs: number) => void)[] = []
@@ -797,6 +843,7 @@ interface timerType {
 const timerMap = new Map<string, timerType>()
 
 export function globalStop(emit = false) {
+  trackEvent('app_stop')
   stopPlugins()
   //clear all replay
   replayMap.forEach((value) => {

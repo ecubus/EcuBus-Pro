@@ -5,6 +5,8 @@ import icon from '../../resources/icon.png?asset'
 import { store } from './store'
 import './ipc'
 import log from 'electron-log/main'
+import { initialize as initAnalytics, trackEvent } from './analytics'
+
 import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
@@ -14,8 +16,24 @@ import { setupCasdoor } from './ipc/casdoor'
 import 'src/renderer/src/helper'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
-
+initAnalytics('A-EU-6409047217')
 log.initialize()
+
+// Track app exit once (user closes window / app quits).
+let exitTracked = false
+app.once('before-quit', async () => {
+  if (exitTracked) return
+  exitTracked = true
+  try {
+    // Small timeout so we don't block quitting too long.
+    await Promise.race([
+      trackEvent('app_exit'),
+      new Promise<void>((resolve) => setTimeout(resolve, 1500))
+    ])
+  } catch {
+    // Ignore tracking errors on shutdown.
+  }
+})
 
 // Register custom protocol as privileged before app is ready
 eProtocol.registerSchemesAsPrivileged([
@@ -221,6 +239,8 @@ app.whenReady().then(async () => {
   }
 
   createWindow()
+
+  trackEvent('app_open')
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

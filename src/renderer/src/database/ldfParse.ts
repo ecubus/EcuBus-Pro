@@ -1202,7 +1202,8 @@ class LdfVistor extends visitor {
       eventTriggeredFrames: {},
       sporadicFrames: {},
       signalRep: {},
-      signalEncodeTypes: {}
+      signalEncodeTypes: {},
+      nodeAttrs: {}
     } as LDF
   }
   ldf!: LDF
@@ -1248,7 +1249,6 @@ class LdfVistor extends visitor {
   }
 
   Node_attributesClause(ctx: CstChildrenDictionary) {
-    this.ldf.nodeAttrs = {}
     for (const [index, i] of ctx.Identifier.entries()) {
       const t = i as IToken
       // console.log(ctx.configurable_framesClause[index].children.frameDefinition)

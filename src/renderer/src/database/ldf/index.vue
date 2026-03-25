@@ -177,7 +177,7 @@ const errorList = ref<ErrorItem[]>([])
 const errorGridOptions = computed<VxeGridProps>(() => ({
   border: true,
   size: 'mini',
-  height: h.value - 400,
+  height: Math.max(h.value - 400, 200),
   showOverflow: true,
   columnConfig: { resizable: true },
   rowConfig: {

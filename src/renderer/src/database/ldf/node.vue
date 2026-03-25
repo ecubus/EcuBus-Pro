@@ -513,6 +513,9 @@ function editSlaveNode() {
   if (selectedIndex.value < 0) return
   editNodeName.value = ldfObj.value.node.salveNode[selectedIndex.value]
   editNodeName1 = editNodeName.value
+  if (!ldfObj.value.nodeAttrs[editNodeName.value]) {
+    ldfObj.value.nodeAttrs[editNodeName.value] = {} as NodeAttrDef
+  }
   editAttr.value = true
 }
 
@@ -584,11 +587,12 @@ async function validate() {
     message: string
   }[] = []
   ErrorList.value = []
-  for (const key of Object.keys(ldfObj.value.nodeAttrs)) {
+  for (const Name of ldfObj.value.node.salveNode) {
+    const attr = ldfObj.value.nodeAttrs[Name] || {}
     const schema = new Schema(rules as any)
-    editNodeName1 = key
+    editNodeName1 = Name
     try {
-      await schema.validate(ldfObj.value.nodeAttrs[key])
+      await schema.validate(attr)
       ErrorList.value.push(false)
     } catch (e: any) {
       ErrorList.value.push(true)

@@ -104,7 +104,7 @@
     "events": "^3.3.0",
     "exceljs": "^4.4.0",
     "glob": "^11.1.0",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.9",
     "i18next": "^25.6.2",
     "i18next-vue": "^5.3.0",
     "iconv-lite": "^0.7.0",

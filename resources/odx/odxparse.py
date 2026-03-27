@@ -717,13 +717,6 @@ class OdxParse:
                     if len(params) > 0:
                         param = params[0]
                         if param['bytePos'] == 1 and param['bitLen'] == 8:
-                            param['deletable'] = False
-                            param['editable'] = True
-                            if parseResp and len(respParams) > 0:
-                                resp_param = respParams[0]
-                                if resp_param['bytePos'] == 1 and resp_param['bitLen'] == 8:
-                                    resp_param['deletable'] = False
-                                    resp_param['editable'] = True
                             reqItem['autoSubfunc'] = True
                             reqItem['suppress'] = False
                         else:

@@ -1,0 +1,1327 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ODX MODEL-VERSION="2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="odx.xsd">
+  <COMPARAM-SUBSET ID="ISO_14229_5_DIS_2015" CATEGORY="APP">
+    <SHORT-NAME>ISO_14229_5_DIS_2015</SHORT-NAME>
+    <LONG-NAME>ISO 14229-5 (DIS 2015)</LONG-NAME>
+    <DESC>
+      <p>Application Layer</p>
+      <p>Based on ISO 22900-2 DIS dated 2015-06-16</p>
+    </DESC>
+    <ADMIN-DATA>
+      <LANGUAGE>en-US</LANGUAGE>
+      <DOC-REVISIONS>
+        <DOC-REVISION>
+          <TEAM-MEMBER-REF ID-REF="Generator"/>
+          <REVISION-LABEL>1.0.0</REVISION-LABEL>
+          <STATE>release</STATE>
+          <DATE>2016-03-02T13:46:57+01:00</DATE>
+          <TOOL>MDF2ODX 1.0 2016-03-01</TOOL>
+          <MODIFICATIONS>
+            <MODIFICATION>
+              <CHANGE>Initial generation from MDF</CHANGE>
+            </MODIFICATION>
+          </MODIFICATIONS>
+        </DOC-REVISION>
+      </DOC-REVISIONS>
+    </ADMIN-DATA>
+    <COMPANY-DATAS>
+      <COMPANY-DATA ID="ISO_14229_5_DIS_2015_Company_Data">
+        <SHORT-NAME>Vector_Informatik</SHORT-NAME>
+        <LONG-NAME>Vector Informatik</LONG-NAME>
+        <TEAM-MEMBERS>
+          <TEAM-MEMBER ID="Generator">
+            <SHORT-NAME>Generator</SHORT-NAME>
+            <DEPARTMENT>PDG</DEPARTMENT>
+          </TEAM-MEMBER>
+        </TEAM-MEMBERS>
+      </COMPANY-DATA>
+    </COMPANY-DATAS>
+    <COMPARAMS>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_CyclicRespTimeout" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_CyclicRespTimeout</SHORT-NAME>
+        <LONG-NAME>CP_CyclicRespTimeout</LONG-NAME>
+        <DESC>
+          <p>This ComParam is used for ComPrimitives that have a NumRecvCycles set to IS-CYCLIC (-1, infinite). The timer is enabled after the first positive response is received from an ECU. If CP_CyclicRespTimeout = 0, there is no receive timing enabled for the infinite receive ComPrimitive.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_DoIPConnectionCloseDelay" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPConnectionCloseDelay</SHORT-NAME>
+        <LONG-NAME>CP_DoIPConnectionCloseDelay</LONG-NAME>
+        <DESC>
+          <p>Delay time before the Tester closes a TCP connection to a DoIP entity after the last logical link that uses this TCP connection has been disconnected via PDUDisconnect. Note: The Tester will close the TCP connection immediately, if PDUModuleDisconnect is called for a DoIP module using this TCP connection. </p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_EnablePerformanceTest" PARAM-CLASS="COM" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_EnablePerformanceTest</SHORT-NAME>
+        <LONG-NAME>CP_EnablePerformanceTest</LONG-NAME>
+        <DESC>
+          <p>This ComParam (when enabled) will place the tester into a performance measurement mode. Measurements will be collected during a normal ComPrimitive communications session. ComParams such as P1Min, P2Min, Br, Cs will be tested in this mode. Once the testing is disabled, results of the testing will be returned to the client application.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT32_Disabled_Enabled"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_Loopback" PARAM-CLASS="COM" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_Loopback</SHORT-NAME>
+        <LONG-NAME>CP_Loopback</LONG-NAME>
+        <DESC>
+          <p>Echo Transmitted messages in the receive queue, including periodic messages. Loopback messages shall only be sent after successful transmission of a message. Loopback frames are not subject to message filtering.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Off</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT32_Off_On"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_ModifyTiming" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_ModifyTiming</SHORT-NAME>
+        <LONG-NAME>CP_ModifyTiming</LONG-NAME>
+        <DESC>
+          <p>This parameter signals the D-PDU API to automatically modify timing parameters based on a response from the ECU. For ISO 14230-2 this would apply to service 0x83/0xC3 with TPI of 1, 2 or 3. For ISO 15765-3 this would apply to service 0x10/0x50.  For functional addressing mode, the worst case timing parameter returned by the responding ECUs shall be used. Based on the protocol, the following parameters are modified when a positive ECU response is received: 
+    - CP_P2Max
+    - CP_P2Min
+    - CP_P2Star
+    - CP_P3Min
+    - CP_P4Min
+    NOTE: The values returned by an ECU are in a different time resolution than the ComParams to be automatically modified. The values will be reinterpreted from the protocol specified time resolution to the 1us resolution specified in the D-PDU API.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT32_Disabled_Enabled"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_NetworkTransmissionTime" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_NetworkTransmissionTime</SHORT-NAME>
+        <LONG-NAME>CP_NetworkTransmissionTime</LONG-NAME>
+        <DESC>
+          <p>If the timeout values are used which have been received by the ECU via session control response (0x50), the Network transmission time has to be added to the timeout values. P6 = received P2 + NetworkTransmissionTime (contains delay for both transmission directions).                  Note: This ComParam is relevant for all protocols except those on CAN (especially Ethernet). For CAN protocols, the ComParam CP_CanTransmissionTime is relevant instead. </p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>100000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P2Max_Ecu" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="ECU-COMM">
+        <SHORT-NAME>CP_P2Max_Ecu</SHORT-NAME>
+        <LONG-NAME>CP_P2Max_Ecu</LONG-NAME>
+        <DESC>
+          <p>Performance requirement for the server to start with the response message after the reception of a request message (indicated via N_USData.ind). This is a performance requirement ComParam.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>50000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_100000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P2Min" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_P2Min</SHORT-NAME>
+        <LONG-NAME>CP_P2Min</LONG-NAME>
+        <DESC>
+          <p>This sets the minimum time between tester request and ECU responses, or two ECU responses. After the request, the interface shall be capable of handling an immediate response (P2_min=0). For subsequent responses, a byte received after P1_MAX shall be considered as the start of the subsequent response. This is a performance requirement ComParam.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_250000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P2Star_Ecu" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="ECU-COMM">
+        <SHORT-NAME>CP_P2Star_Ecu</SHORT-NAME>
+        <LONG-NAME>CP_P2Star_Ecu</LONG-NAME>
+        <DESC>
+          <p>Performance requirement for the server to start with the response message after the transmission of a negative response message (indicated via N_USData.con) with response code 0x78 (enhanced response timing). This is a performance requirement ComParam.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>5000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_655350000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P3Func" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_P3Func</SHORT-NAME>
+        <LONG-NAME>CP_P3Func</LONG-NAME>
+        <DESC>
+          <p>Minimum time for the client to wait, after the successful transmission of a functionally addressed request message (indicated via N_USData.con), before it can transmit the next functionally addressed request message, in case no response is required, or the requested data is only supported by a subset of the functionally addressed servers.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>50000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_125000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P3Phys" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_P3Phys</SHORT-NAME>
+        <LONG-NAME>CP_P3Phys</LONG-NAME>
+        <DESC>
+          <p>Minimum time for the client to wait after the successful transmission of a physically addressed request message (indicated via N_USData.con) with no response required before it can transmit the next physically-addressed request message.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>50000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_125000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P6Max" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_P6Max</SHORT-NAME>
+        <LONG-NAME>CP_P6Max</LONG-NAME>
+        <DESC>
+          <p>Timeout for the client to wait after the successful transmission of a request message (indicated via T_Data.con) for the complete reception of the corresponding response message (indicated via T_Data.ind). If the transport/network layer doesn't support the T_DataSOM.ind interface (e.g. ISO 13400 DoIP), this ComParam shall be used instead of CP_P2Max.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>1000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_125000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_P6Star" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_P6Star</SHORT-NAME>
+        <LONG-NAME>CP_P6Star</LONG-NAME>
+        <DESC>
+          <p>Enhanced timeout for the client to wait after the reception of a negative response message with negative response code 0x78 (indicated via T_Data.ind) for the complete reception of the corresponding response messages (indicated via T_Data.ind). If the transport/network layer doesn't support the T_DataSOM.ind interface (e.g. ISO 13400 DoIP), this ComParam shall be used instead of CP_P2Star.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>10000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_655350000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC21CompletionTimeout" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC21CompletionTimeout</SHORT-NAME>
+        <LONG-NAME>CP_RC21CompletionTimeout</LONG-NAME>
+        <DESC>
+          <p>Time period the tester accepts repeated negative responses with response code 0x21 and repeats the same request. Timer is started after reception of first negative response.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>1300000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_4294967295"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC21Handling" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC21Handling</SHORT-NAME>
+        <LONG-NAME>CP_RC21Handling</LONG-NAME>
+        <DESC>
+          <p>Repetition mode in case of response code 0x7F XX 0x21.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_RC21Handling"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC21RequestTime" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC21RequestTime</SHORT-NAME>
+        <LONG-NAME>CP_RC21RequestTime</LONG-NAME>
+        <DESC>
+          <p>Time between negative response with response code 0x21 and the retransmission of the same request. If CP_P3Min is greater than CP_RC21RequestTime, the time delay prior to the retransmission of the same request will be CP_P3Min.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>200000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_100000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC23CompletionTimeout" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC23CompletionTimeout</SHORT-NAME>
+        <LONG-NAME>CP_RC23CompletionTimeout</LONG-NAME>
+        <DESC>
+          <p>Time period the tester accepts repeated negative responses with response code 0x23 and repeats the same request.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_4294967295_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC23Handling" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC23Handling</SHORT-NAME>
+        <LONG-NAME>CP_RC23Handling</LONG-NAME>
+        <DESC>
+          <p>Repetition mode in case of response code 0x7F XX 0x23</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_RC23Handling"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC23RequestTime" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC23RequestTime</SHORT-NAME>
+        <LONG-NAME>CP_RC23RequestTime</LONG-NAME>
+        <DESC>
+          <p>Time between negative response with response code 0x23 and the retransmission of the same request.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>200000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_100000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC78CompletionTimeout" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC78CompletionTimeout</SHORT-NAME>
+        <LONG-NAME>CP_RC78CompletionTimeout</LONG-NAME>
+        <DESC>
+          <p>Time period the tester accepts repeated negative responses with response code 0x78 and waits for a positive response further on.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>25000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_4294967295_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RC78Handling" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RC78Handling</SHORT-NAME>
+        <LONG-NAME>CP_RC78Handling</LONG-NAME>
+        <DESC>
+          <p>Handling of 0x7F XX 0x78 ResponseTimeout and 0x78 Repetitions.  The receive timeout value will be CP_P2Star.  This timer will be reset on each consecutive reception of the 0x7F 0x78 response.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Continue unlimited</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_RC78Handling"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RCByteOffset" PARAM-CLASS="ERRHDL" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RCByteOffset</SHORT-NAME>
+        <LONG-NAME>CP_RCByteOffset</LONG-NAME>
+        <DESC>
+          <p>This parameter is used by the MVCI Protocol Handlers to offset into the received negative response message (0x7F) to retrieve the response code byte.  Most protocols as a default place the response code as the last byte of the message.  There are some protocols which place the response code after the Service Id (offset = 1).  A range is provided to allow for different negative response configurations.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Last byte</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_RCByteOffset"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_RepeatReqCountApp" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RepeatReqCountApp</SHORT-NAME>
+        <LONG-NAME>CP_RepeatReqCountApp</LONG-NAME>
+        <DESC>
+          <p>This ComParam contains a counter to enable a re-transmission of the last request when either a transmit, receive error, or timeout with no response is detected. This only applies to the application layer.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_127500"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SuspendQueueOnError" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_SuspendQueueOnError</SHORT-NAME>
+        <LONG-NAME>CP_SuspendQueueOnError</LONG-NAME>
+        <DESC>
+          <p>This ComParam is used as a temporary ComParam, for services that require a positive response before any further Com Primitives can be executed.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Do not suspend</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_SuspendQueueOnError"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentAddrMode" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentAddrMode</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentAddrMode</LONG-NAME>
+        <DESC>
+          <p>Addressing Mode to be used for periodic Tester Present messages. Uses the PhysReqxxx or FuncReqxxx ComParams. NOTE 1 If the CLL is in the PDU_CLLST_COMM_STARTED state and tester present handling is enabled (see CP_TesterPresentHandling) any changes to one of the tester present ComParms will cause the tester present message to be sent immediately, prior to the initial tester present cyclic time. NOTE 2 Protocol handler must always wait the proper P3Min time before allowing any transmit.  See CP_P3Min, CP_P3Func, CP_P3Phys.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Functional</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_TesterPresentAddrMode"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentExpPosResp" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentExpPosResp</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentExpPosResp</LONG-NAME>
+        <DESC>
+          <p>Define the expected ECU positive response to a Tester Present Message.</p>
+          <p>This is only applicable if CP_TesterPresentReqRsp is set to 1 (ECU responses are expected on a Tester Present Message).</p>
+          <p>No header bytes or checksum bytes are included. Only the ParamActLen bytes in the array will be compared to the received ECU data.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE></PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_BYTEFIELD_0_12_END_OF_PDU"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentExpNegResp" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentExpNegResp</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentExpNegResp</LONG-NAME>
+        <DESC>
+          <p>Define the expected ECU negative response to a Tester Present Message.</p>
+          <p>This is only applicable if CP_TesterPresentReqRsp is set to 1 (ECU responses are expected on a Tester Present Message).</p>
+          <p>No header bytes or checksum bytes are included.</p>
+          <p>When a negative response is received to a tester present message, which cannot be handled by the MVCI Protocol module (See RC 21, RC 23 and RC 78), the MVCI protocol module should report a Tester Present Error, but continue sending Tester Present Messages. (See PDU_ERR_EVT_TESTER_PRESENT_ERROR)</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE></PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_BYTEFIELD_0_12_END_OF_PDU"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentHandling" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentHandling</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentHandling</LONG-NAME>
+        <DESC>
+          <p>Define Tester Present message generation settings. The ComLogicaLink must be in the state PDU_CLLST_COMM_STARTED to enable tester present message handling.  (See PDU_COPT_STARTCOMM ComPrimitive). NOTE 1 If the CLL is in the PDU_CLLST_COMM_STARTED state and tester present handling is enabled any changes to one of the tester present ComParms will cause the tester present message to be sent immediately, prior to the initial tester present cyclic time. NOTE 2 Protocol handler must always wait the proper P3Min time before allowing any transmit.  See CP_P3Min, CP_P3Func, CP_P3Phys.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Enabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT32_Disabled_Enabled"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentMessage" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentMessage</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentMessage</LONG-NAME>
+        <DESC>
+          <p>Define the Tester Present Message</p>
+          <p>This message data does not include any header bytes or checksum information.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>3E80</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_BYTEFIELD_0_12_END_OF_PDU"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentReqRsp" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentReqRsp</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentReqRsp</LONG-NAME>
+        <DESC>
+          <p>Define settings for handling Tester Present ECU responses. NOTE 1 If the CLL is in the PDU_CLLST_COMM_STARTED state and tester present handling is enabled (see CP_TesterPresentHandling) any changes to one of the tester present ComParms will cause the tester present message to be sent immediately, prior to the initial tester present cyclic time. NOTE 2 Protocol handler must always wait the proper P3Min time before allowing any transmit.  See CP_P3Min, CP_P3Func, CP_P3Phys.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>No response</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_TesterPresentReqRsp"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentSendType" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentSendType</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentSendType</LONG-NAME>
+        <DESC>
+          <p>Define settings for the type of tester present transmits. NOTE 1 If the CLL is in the PDU_CLLST_COMM_STARTED state and tester present handling is enabled (see CP_TesterPresentHandling) any changes to one of the tester present ComParms will cause the tester present message to be sent immediately, prior to the initial tester present cyclic time. NOTE 2 Protocol handler must always wait the proper P3Min time before allowing any transmit.  See CP_P3Min, CP_P3Func, CP_P3Phys.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Periodic</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_TesterPresentSendType"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentTime" PARAM-CLASS="TESTER_PRESENT" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TesterPresentTime</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentTime</LONG-NAME>
+        <DESC>
+          <p>Time between Tester Present messages, or Time bus must be idle before transmitting a Tester Present Message.  NOTE 1 If the CLL is in the PDU_CLLST_COMM_STARTED state and tester present handling is enabled (see CP_TesterPresentHandling) any changes to one of the tester present ComParms will cause the tester present message to be sent immediately, prior to the initial tester present cyclic time. NOTE 2 Protocol handler must always wait the proper P3Min time before allowing any transmit.  See CP_P3Min, CP_P3Func, CP_P3Phys.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>2000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_30000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TesterPresentTime_Ecu" PARAM-CLASS="TESTER_PRESENT" CPTYPE="OPTIONAL" CPUSAGE="ECU-COMM">
+        <SHORT-NAME>CP_TesterPresentTime_Ecu</SHORT-NAME>
+        <LONG-NAME>CP_TesterPresentTime_Ecu</LONG-NAME>
+        <DESC>
+          <p>Time for the server to keep a diagnostic session (other than the default session) active while not receiving any diagnostic request message.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>5000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_30000000_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_14229_5_DIS_2015.CP_TransmitIndEnable" PARAM-CLASS="COM" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_TransmitIndEnable</SHORT-NAME>
+        <LONG-NAME>CP_TransmitIndEnable</LONG-NAME>
+        <DESC>
+          <p>Transmit Indication Enable. On completion of a transmit message by the protocol, an indication will be set in the RX_FLAG result item. No data bytes will accompany the result item.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT32_Disabled_Enabled"/>
+      </COMPARAM>
+    </COMPARAMS>
+    <COMPLEX-COMPARAMS>
+      <COMPLEX-COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu" PARAM-CLASS="TIMING" CPTYPE="STANDARD" CPUSAGE="ECU-COMM" ALLOW-MULTIPLE-VALUES="true">
+        <SHORT-NAME>CP_SessionTiming_Ecu</SHORT-NAME>
+        <LONG-NAME>CP_SessionTiming_Ecu</LONG-NAME>
+        <DESC>
+          <p>Description: Timing parameters to be used by different sessions for the ECU protocol application layer ISO15765_3 in response to a service 0x10 (Set Diagnostic Session). The ECU returns the session timing information on a positive response to the service. If CP_ModifyTiming is enabled, the MVCI protocol module will interpret the positive response from the ECU and set the appropriate timing ComParams. =&gt; Parameter muessen dem Gateway uebergeben werden.</p>
+        </DESC>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu_SessionNumber" PARAM-CLASS="TIMING" CPTYPE="STANDARD" DISPLAY-LEVEL="1" CPUSAGE="ECU-COMM">
+          <SHORT-NAME>CP_SessionTiming_Ecu_SessionNumber</SHORT-NAME>
+          <LONG-NAME>CP_SessionTiming_Ecu_SessionNumber</LONG-NAME>
+          <DESC>
+            <p>Session Number, for the diagnostic session of ISO 15765-3</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_UINT7_HEX"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu_P2Max_High" PARAM-CLASS="TIMING" CPTYPE="STANDARD" DISPLAY-LEVEL="1" CPUSAGE="ECU-COMM">
+          <SHORT-NAME>CP_SessionTiming_Ecu_P2Max_High</SHORT-NAME>
+          <LONG-NAME>CP_SessionTiming_Ecu_P2Max High</LONG-NAME>
+          <DESC>
+            <p>Default P2Can_Server_max timing supported by the server for the activated diagnostic session. Used for ComParam CP_P2Max.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_256000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu_P2Max_Low" PARAM-CLASS="TIMING" CPTYPE="STANDARD" DISPLAY-LEVEL="1" CPUSAGE="ECU-COMM">
+          <SHORT-NAME>CP_SessionTiming_Ecu_P2Max_Low</SHORT-NAME>
+          <LONG-NAME>CP_SessionTiming_Ecu_P2Max Low</LONG-NAME>
+          <DESC>
+            <p>Used for ComParam CP_P2Min.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_1000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu_P2Star_High" PARAM-CLASS="TIMING" CPTYPE="STANDARD" DISPLAY-LEVEL="1" CPUSAGE="ECU-COMM">
+          <SHORT-NAME>CP_SessionTiming_Ecu_P2Star_High</SHORT-NAME>
+          <LONG-NAME>CP_SessionTiming_Ecu_P2Star High</LONG-NAME>
+          <DESC>
+            <p>Enhanced (NRC 78 hex) P2Can_Server_max supported by the server for the activated diagnostic session. Used for ComParam CP_P2Star.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_2560000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTiming_Ecu_P2Star_Low" PARAM-CLASS="TIMING" CPTYPE="STANDARD" DISPLAY-LEVEL="1" CPUSAGE="ECU-COMM">
+          <SHORT-NAME>CP_SessionTiming_Ecu_P2Star_Low</SHORT-NAME>
+          <LONG-NAME>CP_SessionTiming_Ecu_P2Star Low</LONG-NAME>
+          <DESC>
+            <p>Used for internal ECU use only.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_10000x_MicroSecond"/>
+        </COMPARAM>
+      </COMPLEX-COMPARAM>
+      <COMPLEX-COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER" ALLOW-MULTIPLE-VALUES="true">
+        <SHORT-NAME>CP_SessionTimingOverride</SHORT-NAME>
+        <LONG-NAME>CP_SessionTimingOverride</LONG-NAME>
+        <DESC>
+          <p>This parameter signals the D-PDU API to override the response from any ECUs to a Session Timing request (See CP_SessionTiming_Ecu and CP_ModifyTiming).</p>
+          <p>The timing parameters are to be used for the ECU protocol application layer ISO15765_3 in response to a service 0x10 (Set Diagnostic Session).</p>
+          <p>The ECU returns the session timing information on a positive response to the service.</p>
+          <p>If CP_ModifyTiming is enabled and CP_SessionTimingOverride is not empty (ParamActEntries != 0), then the MVCI protocol module will use data in this ComParam instead of the data returned in a positive reponse from the ECUs.</p>
+        </DESC>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride_P2Max_High" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_SessionTimingOverride_P2Max_High</SHORT-NAME>
+          <LONG-NAME>CP_SessionTimingOverride_P2Max_High</LONG-NAME>
+          <DESC>
+            <p>1 ms resolution</p>
+            <p>High byte of the default P2Can_Server_max timing supported by the server for the activated diagnostic session</p>
+            <p>Used for ComParam CP_P2Max</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_256000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride_P2Max_Low" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_SessionTimingOverride_P2Max_Low</SHORT-NAME>
+          <LONG-NAME>CP_SessionTimingOverride_P2Max_Low</LONG-NAME>
+          <DESC>
+            <p>1 ms resolution</p>
+            <p>Low byte of the default P2Can_Server_max timing supported by the server for the activated diagnostic session</p>
+            <p>Used for ComParam CP_P2Max</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_1000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride_P2Star_High" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_SessionTimingOverride_P2Star_High</SHORT-NAME>
+          <LONG-NAME>CP_SessionTimingOverride_P2Star_High</LONG-NAME>
+          <DESC>
+            <p>10 ms resolution</p>
+            <p>High byte of the enhanced (NRC 78 hex) P2Can_Server_max supported by theserver for the activated diagnostic session</p>
+            <p>Used for ComParam CP_P2Star</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_2560000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride_P2Star_Low" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_SessionTimingOverride_P2Star_Low</SHORT-NAME>
+          <LONG-NAME>CP_SessionTimingOverride_P2Star_Low</LONG-NAME>
+          <DESC>
+            <p>10 ms resolution</p>
+            <p>Low byte of the enhanced (NRC 78 hex) P2Can_Server_max supported by theserver for the activated diagnostic session</p>
+            <p>Used for ComParam CP_P2Star</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="LINEAR_UINT8_UINT32_10000x_MicroSecond"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_14229_5_DIS_2015.CP_SessionTimingOverride_SessionNumber" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_SessionTimingOverride_SessionNumber</SHORT-NAME>
+          <LONG-NAME>CP_SessionTimingOverride_SessionNumber</LONG-NAME>
+          <DESC>
+            <p>Session Number, for the diagnostic session of ISO 15765-3</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_UINT7_HEX"/>
+        </COMPARAM>
+      </COMPLEX-COMPARAM>
+    </COMPLEX-COMPARAMS>
+    <DATA-OBJECT-PROPS>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0x00_0xFFFFFFFF_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0x00_0xFFFFFFFF_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0x00_0xFFFFFFFF_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_1">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_1</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_1</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>1</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UINT32_Off_On">
+        <SHORT-NAME>TEXTTABLE_UINT32_Off_On</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UINT32_Off/On</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Off</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>On</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UINT32_Disabled_Enabled">
+        <SHORT-NAME>TEXTTABLE_UINT32_Disabled_Enabled</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UINT32_Disabled/Enabled</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Disabled</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Enabled</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_100000000_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_100000000_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_100000000_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>100000000</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_250000_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_250000_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_250000_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>250000</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_655350000_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_655350000_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_655350000_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>655350000</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_125000000_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_125000000_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_125000000_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>125000000</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_4294967295">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_4294967295</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_4294967295</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_RC21Handling">
+        <SHORT-NAME>TEXTTABLE_UNIT32_RC21Handling</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_RC21Handling</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Disabled</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling negative responses until CP_RC21CompletionTimeout</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue until RC21 timeout</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling unlimited (until disabled)</p>
+                </DESC>
+                <LOWER-LIMIT>2</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>2</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue unlimited</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>3</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_4294967295_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_4294967295_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_4294967295_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_RC23Handling">
+        <SHORT-NAME>TEXTTABLE_UNIT32_RC23Handling</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_RC23Handling</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Disabled</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling negative responses until CP_RC23CompletionTimeout</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue until RC23 timeout</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling unlimited (until disabled)</p>
+                </DESC>
+                <LOWER-LIMIT>2</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>2</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue unlimited</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>3</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_RC78Handling">
+        <SHORT-NAME>TEXTTABLE_UNIT32_RC78Handling</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_RC78Handling</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Disabled</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling negative responses until CP_RC78CompletionTimeout</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue until RC78 timeout</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Continue handling unlimited (until disabled)</p>
+                </DESC>
+                <LOWER-LIMIT>2</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>2</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Continue unlimited</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>3</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_RCByteOffset">
+        <SHORT-NAME>TEXTTABLE_UNIT32_RCByteOffset</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_RCByteOffset</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>first byte after the Service Id byte (0x7F)</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>First byte</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>last byte in message (not including checksum bytes)</p>
+                </DESC>
+                <LOWER-LIMIT>4294967295</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>4294967295</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Last byte</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>invalid value</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967294</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_127500">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_127500</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_127500</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>127500</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_UINT7_HEX">
+        <SHORT-NAME>IDENTICAL_UINT7_HEX</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_UINT7_HEX</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>16</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32" DISPLAY-RADIX="HEX"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>127</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="LINEAR_UINT8_UINT32_256000x_MicroSecond">
+        <SHORT-NAME>LINEAR_UINT8_UINT32_256000x_MicroSecond</SHORT-NAME>
+        <LONG-NAME>LINEAR_UINT8_UINT32_256000x_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>LINEAR</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>256000</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>8</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="LINEAR_UINT8_UINT32_1000x_MicroSecond">
+        <SHORT-NAME>LINEAR_UINT8_UINT32_1000x_MicroSecond</SHORT-NAME>
+        <LONG-NAME>LINEAR_UINT8_UINT32_1000x_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>LINEAR</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>1000</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>8</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="LINEAR_UINT8_UINT32_2560000x_MicroSecond">
+        <SHORT-NAME>LINEAR_UINT8_UINT32_2560000x_MicroSecond</SHORT-NAME>
+        <LONG-NAME>LINEAR_UINT8_UINT32_2560000x_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>LINEAR</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>2560000</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>8</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="LINEAR_UINT8_UINT32_10000x_MicroSecond">
+        <SHORT-NAME>LINEAR_UINT8_UINT32_10000x_MicroSecond</SHORT-NAME>
+        <LONG-NAME>LINEAR_UINT8_UINT32_10000x_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>LINEAR</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>10000</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>8</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_SuspendQueueOnError">
+        <SHORT-NAME>TEXTTABLE_UNIT32_SuspendQueueOnError</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_SuspendQueueOnError</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Do not suspend ComPrimitive Transmit Queue</p>
+                </DESC>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Do not suspend</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Suspend ComPrimitive Transmit Queue on a Timeout Error or on a non-handled 0x7F error (not an enabled protocol ComParam)</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Suspend</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_TesterPresentAddrMode">
+        <SHORT-NAME>TEXTTABLE_UNIT32_TesterPresentAddrMode</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_TesterPresentAddrMode</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Use Physical Addressing for the Tester Present message</p>
+                </DESC>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Physical</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Use Functional Addressing for the Tester Present message</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Functional</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_BYTEFIELD_0_12_END_OF_PDU">
+        <SHORT-NAME>IDENTICAL_BYTEFIELD_0_12_END_OF_PDU</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_BYTEFIELD_0_12_END_OF_PDU</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_BYTEFIELD" TERMINATION="END-OF-PDU" xsi:type="MIN-MAX-LENGTH-TYPE">
+          <MAX-LENGTH>12</MAX-LENGTH>
+          <MIN-LENGTH>0</MIN-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_BYTEFIELD"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_TesterPresentReqRsp">
+        <SHORT-NAME>TEXTTABLE_UNIT32_TesterPresentReqRsp</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_TesterPresentReqRsp</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>No response returned by an ECU on a Tester Present message</p>
+                </DESC>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>No response</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>An ECU response is expected from a Tester Present message. The response message will be discarded by the MVCI Protocol Module.</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Response expected</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_TesterPresentSendType">
+        <SHORT-NAME>TEXTTABLE_UNIT32_TesterPresentSendType</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_TesterPresentSendType</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Send on periodic interval defined by CP_TesterPresentTime</p>
+                </DESC>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>0</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Periodic</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Send when bus has been idle for CP_TesterPresentTime</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>On idle</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>2</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_30000000_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_30000000_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_30000000_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>30000000</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+    </DATA-OBJECT-PROPS>
+    <UNIT-SPEC>
+      <UNITS>
+        <UNIT ID="MicroSecond">
+          <SHORT-NAME>MicroSecond</SHORT-NAME>
+          <LONG-NAME>Micro-Second</LONG-NAME>
+          <DISPLAY-NAME>µs</DISPLAY-NAME>
+        </UNIT>
+      </UNITS>
+      <PHYSICAL-DIMENSIONS>
+        <PHYSICAL-DIMENSION ID="Time">
+          <SHORT-NAME>Time</SHORT-NAME>
+          <LONG-NAME>Time</LONG-NAME>
+          <TIME-EXP>1</TIME-EXP>
+        </PHYSICAL-DIMENSION>
+      </PHYSICAL-DIMENSIONS>
+    </UNIT-SPEC>
+  </COMPARAM-SUBSET>
+</ODX>

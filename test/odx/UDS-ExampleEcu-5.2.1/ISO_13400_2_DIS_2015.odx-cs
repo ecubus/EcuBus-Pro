@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ODX MODEL-VERSION="2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="odx.xsd">
+  <COMPARAM-SUBSET ID="ISO_13400_2_DIS_2015" CATEGORY="TRANS">
+    <SHORT-NAME>ISO_13400_2_DIS_2015</SHORT-NAME>
+    <LONG-NAME>ISO 13400-2 (DIS 2015)</LONG-NAME>
+    <DESC>
+      <p>Transport Layer</p>
+      <p>Based on ISO 22900-2 DIS dated 2015-06-16</p>
+    </DESC>
+    <ADMIN-DATA>
+      <LANGUAGE>en-US</LANGUAGE>
+      <DOC-REVISIONS>
+        <DOC-REVISION>
+          <TEAM-MEMBER-REF ID-REF="Generator"/>
+          <REVISION-LABEL>1.0.0</REVISION-LABEL>
+          <STATE>release</STATE>
+          <DATE>2016-04-18T16:37:38+02:00</DATE>
+          <TOOL>MDF2ODX 1.0 2016-03-02</TOOL>
+          <MODIFICATIONS>
+            <MODIFICATION>
+              <CHANGE>Initial generation from MDF</CHANGE>
+            </MODIFICATION>
+          </MODIFICATIONS>
+        </DOC-REVISION>
+      </DOC-REVISIONS>
+    </ADMIN-DATA>
+    <COMPANY-DATAS>
+      <COMPANY-DATA ID="ISO_13400_2_DIS_2015_Company_Data">
+        <SHORT-NAME>Vector_Informatik</SHORT-NAME>
+        <LONG-NAME>Vector Informatik</LONG-NAME>
+        <TEAM-MEMBERS>
+          <TEAM-MEMBER ID="Generator">
+            <SHORT-NAME>Generator</SHORT-NAME>
+            <DEPARTMENT>PDG</DEPARTMENT>
+          </TEAM-MEMBER>
+        </TEAM-MEMBERS>
+      </COMPANY-DATA>
+    </COMPANY-DATAS>
+    <COMPARAMS>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPLogicalGatewayAddress" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPLogicalGatewayAddress</SHORT-NAME>
+        <LONG-NAME>CP_DoIPLogicalGatewayAddress</LONG-NAME>
+        <DESC>
+          <p>The logical address of the DoIP gateway or the DoIP node. For a DoIP gateway, this address has to be used to reach the target addressed in CP_DoIPLogicalEcuAddress or CP_DoIPLogicalFunctionalAddress. For a DoIP node, the values for CP_DoIPLogicalGatewayAddress and CP_DoIPLogicalEcuAddress are identical. Note: for a DoIP Node, CP_DoIPLogicalGatewayAddress and CP_DoIPLogicalEcuAddress shall be identical.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>1</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x0000_0xFFFF"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPLogicalTesterAddress" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPLogicalTesterAddress</SHORT-NAME>
+        <LONG-NAME>CP_DoIPLogicalTesterAddress</LONG-NAME>
+        <DESC>
+          <p>The logical source address of the Tester.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>3584</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x0000_0xFFFF"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPLogicalFunctionalAddress" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPLogicalFunctionalAddress</SHORT-NAME>
+        <LONG-NAME>CP_DoIPLogicalFunctionalAddress</LONG-NAME>
+        <DESC>
+          <p>The logical functional target address to address multiple ECUs behind a DoIP gateway. Note: Functional addressing is only possible on a single LogicalLink, which leads to the restriction, that functional addressing is not possible over multiple DoIP gateways or DoIP nodes.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>58368</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x0000_0xFFFF"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPNumberOfRetries" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPNumberOfRetries</SHORT-NAME>
+        <LONG-NAME>CP_DoIPNumberOfRetries</LONG-NAME>
+        <DESC>
+          <p>The number of retries to be performed when a certain NACK condition is encountered.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPDiagnosticAckTimeout" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPDiagnosticAckTimeout</SHORT-NAME>
+        <LONG-NAME>CP_DoIPDiagnosticAckTimeout</LONG-NAME>
+        <DESC>
+          <p>This timeout specifies the maximum time that the test equipment waits for a confirmation ACK or NACK from the DoIP entity after the last byte of a DoIP Diagnostic request message has been sent. After the timeout has elapsed the request must be considered lost and the request may be repeated (see CP_RepeatReqCountTrans). (Corresponds to A_DoIP_Diagnostic_Message).</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>2000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPRetryPeriod" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPRetryPeriod</SHORT-NAME>
+        <LONG-NAME>CP_DoIPRetryPeriod</LONG-NAME>
+        <DESC>
+          <p>The period between retries, performed when a certain NACK condition is encountered.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>1000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPRoutingActivationTimeout" PARAM-CLASS="TIMING" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPRoutingActivationTimeout</SHORT-NAME>
+        <LONG-NAME>CP_DoIPRoutingActivationTimeout</LONG-NAME>
+        <DESC>
+          <p>This ComParam is used to configure the timeout value for a DoIP Routing Activation request. NOTE: This timing parameter is based on the time it takes for a DoIP entity to perform an alive check on all its open DoIP sockets. It takes into account the Routing Activation timing, but not the MVCI TCP/IP stack related timings, which heavily depend on the underlying operating system and are out of control of the MVCI in regard of their timing behaviour (such as the Windows TCP/IP stack).</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>1000000</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPRoutingActivationType" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_DoIPRoutingActivationType</SHORT-NAME>
+        <LONG-NAME>CP_DoIPRoutingActivationType</LONG-NAME>
+        <DESC>
+          <p>Specifies the Activation Type sent in the DoIP Routing Activation request. Note: TCP connections shall be shared by multiple ComLogicalLinks that share the same value of CP_DoIPRoutingActivationType. For all ComLogicalLinks with differing values of CP_DoIPRoutingActivationType separate TCP connections (including separate Routing Activations) shall be used.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_RepeatReqCountTrans" PARAM-CLASS="ERRHDL" CPTYPE="OPTIONAL" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RepeatReqCountTrans</SHORT-NAME>
+        <LONG-NAME>CP_RepeatReqCountTrans</LONG-NAME>
+        <DESC>
+          <p>This ComParam contains a counter to enable a re-transmission of the last request when either a transmit, a receive error, or transport layer timeout is detected. This applies to the transport layer only.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0_255"/>
+      </COMPARAM>
+      <COMPARAM ID="ISO_13400_2_DIS_2015.CP_RequestAddrMode" PARAM-CLASS="COM" CPTYPE="STANDARD" CPUSAGE="TESTER">
+        <SHORT-NAME>CP_RequestAddrMode</SHORT-NAME>
+        <LONG-NAME>CP_RequestAddrMode</LONG-NAME>
+        <DESC>
+          <p>Addressing Mode, physical or functional, to be used for sending a ComPrimitive.</p>
+        </DESC>
+        <PHYSICAL-DEFAULT-VALUE>Physical</PHYSICAL-DEFAULT-VALUE>
+        <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UNIT32_RequestAddrMode"/>
+      </COMPARAM>
+    </COMPARAMS>
+    <COMPLEX-COMPARAMS>
+      <COMPLEX-COMPARAM ID="ISO_13400_2_DIS_2015.CP_UniqueRespIdTable" PARAM-CLASS="UNIQUE_ID" CPTYPE="STANDARD" CPUSAGE="ECU-COMM" ALLOW-MULTIPLE-VALUES="true">
+        <SHORT-NAME>CP_UniqueRespIdTable</SHORT-NAME>
+        <LONG-NAME>CP_UniqueRespIdTable</LONG-NAME>
+        <DESC>
+          <p>The purpose of this communication parameter is to provide a table that allows the D-server to map the ECU responses to functional requests to their physical source ECUs.</p>
+        </DESC>
+        <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPLogicalEcuAddress" PARAM-CLASS="UNIQUE_ID" CPTYPE="STANDARD" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_DoIPLogicalEcuAddress</SHORT-NAME>
+          <LONG-NAME>CP_DoIPLogicalEcuAddress</LONG-NAME>
+          <DESC>
+            <p>The logical target address of the ECU to communicate with.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>1</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x0000_0xFFFF"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_13400_2_DIS_2015.CP_DoIPSecondaryLogicalECUResponseAddress" PARAM-CLASS="UNIQUE_ID" CPTYPE="STANDARD" CPUSAGE="TESTER">
+          <SHORT-NAME>CP_DoIPSecondaryLogicalECUResponseAddress</SHORT-NAME>
+          <LONG-NAME>CP_DoIPSecondaryLogicalECUResponseAddress</LONG-NAME>
+          <DESC>
+            <p>Secondary logical ECU address delivered with ECU responses corresponding to CAN UUDT addressed responses. The special value of 0 is used to indicate that UUDT responses are not used.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>0</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_A_UINT32_0x0000_0xFFFF"/>
+        </COMPARAM>
+        <COMPARAM ID="ISO_13400_2_DIS_2015.CP_ECULayerShortName" PARAM-CLASS="UNIQUE_ID" CPTYPE="STANDARD" CPUSAGE="APPLICATION">
+          <SHORT-NAME>CP_ECULayerShortName</SHORT-NAME>
+          <LONG-NAME>CP_ECULayerShortName</LONG-NAME>
+          <DESC>
+            <p>This communication parameter is needed by the D-server to set up the correct Access Keys for every received response.</p>
+          </DESC>
+          <PHYSICAL-DEFAULT-VALUE>None</PHYSICAL-DEFAULT-VALUE>
+          <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_ASCII_1_128_END_OF_PDU"/>
+        </COMPARAM>
+      </COMPLEX-COMPARAM>
+    </COMPLEX-COMPARAMS>
+    <DATA-OBJECT-PROPS>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0x0000_0xFFFF">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0x0000_0xFFFF</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0x0000_0xFFFF</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>65535</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0x00000000_0xFFFFFFFF_MicroSecond</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+        <UNIT-REF ID-REF="MicroSecond"/>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_A_UINT32_0_255">
+        <SHORT-NAME>IDENTICAL_A_UINT32_0_255</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_A_UINT32_0_255</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+        <INTERNAL-CONSTR>
+          <LOWER-LIMIT>0</LOWER-LIMIT>
+          <UPPER-LIMIT>255</UPPER-LIMIT>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="TEXTTABLE_UNIT32_RequestAddrMode">
+        <SHORT-NAME>TEXTTABLE_UNIT32_RequestAddrMode</SHORT-NAME>
+        <LONG-NAME>TEXTTABLE_UNIT32_RequestAddrMode</LONG-NAME>
+        <DESC>
+          <p/>
+        </DESC>
+        <COMPU-METHOD>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Use Physical Addressing for the request</p>
+                </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>1</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Physical</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <DESC>
+                  <p>Use Functional Addressing for the request</p>
+                </DESC>
+                <LOWER-LIMIT>2</LOWER-LIMIT>
+                <COMPU-INVERSE-VALUE>
+                  <V>2</V>
+                </COMPU-INVERSE-VALUE>
+                <COMPU-CONST>
+                  <VT>Functional</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+          <BIT-LENGTH>32</BIT-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+        <INTERNAL-CONSTR>
+          <SCALE-CONSTRS>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>0</LOWER-LIMIT>
+              <UPPER-LIMIT>0</UPPER-LIMIT>
+            </SCALE-CONSTR>
+            <SCALE-CONSTR VALIDITY="NOT-DEFINED">
+              <LOWER-LIMIT>3</LOWER-LIMIT>
+              <UPPER-LIMIT>4294967295</UPPER-LIMIT>
+            </SCALE-CONSTR>
+          </SCALE-CONSTRS>
+        </INTERNAL-CONSTR>
+      </DATA-OBJECT-PROP>
+      <DATA-OBJECT-PROP ID="IDENTICAL_ASCII_1_128_END_OF_PDU">
+        <SHORT-NAME>IDENTICAL_ASCII_1_128_END_OF_PDU</SHORT-NAME>
+        <LONG-NAME>IDENTICAL_ASCII_1_128_END_OF_PDU</LONG-NAME>
+        <COMPU-METHOD>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <DIAG-CODED-TYPE BASE-DATA-TYPE="A_ASCIISTRING" TERMINATION="END-OF-PDU" xsi:type="MIN-MAX-LENGTH-TYPE">
+          <MAX-LENGTH>128</MAX-LENGTH>
+          <MIN-LENGTH>1</MIN-LENGTH>
+        </DIAG-CODED-TYPE>
+        <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+      </DATA-OBJECT-PROP>
+    </DATA-OBJECT-PROPS>
+    <UNIT-SPEC>
+      <UNITS>
+        <UNIT ID="MicroSecond">
+          <SHORT-NAME>MicroSecond</SHORT-NAME>
+          <LONG-NAME>Micro-Second</LONG-NAME>
+          <DISPLAY-NAME>µs</DISPLAY-NAME>
+        </UNIT>
+      </UNITS>
+      <PHYSICAL-DIMENSIONS>
+        <PHYSICAL-DIMENSION ID="Time">
+          <SHORT-NAME>Time</SHORT-NAME>
+          <LONG-NAME>Time</LONG-NAME>
+          <TIME-EXP>1</TIME-EXP>
+        </PHYSICAL-DIMENSION>
+      </PHYSICAL-DIMENSIONS>
+    </UNIT-SPEC>
+  </COMPARAM-SUBSET>
+</ODX>

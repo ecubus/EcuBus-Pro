@@ -150,7 +150,7 @@ import testerCanVue from './testercan.vue'
 import { Layout } from '../layout'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
-import { HardwareType } from 'nodeCan/uds'
+import { applyOdxImportedSubfuncParamFlags, HardwareType } from 'nodeCan/uds'
 import type { TesterInfo } from 'nodeCan/tester'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -364,6 +364,7 @@ interface ImportItem {
 }
 
 const importDialogVisible = ref(false)
+const importKind = ref<'ecb' | 'odx' | null>(null)
 const importDialogTitle = ref('Import Tester')
 const importItems = ref<ImportItem[]>([])
 const importSelected = ref<string[]>([])
@@ -426,6 +427,7 @@ async function importFromEcb() {
     }
 
     importDialogTitle.value = 'Import from ECB'
+    importKind.value = 'ecb'
     importItems.value = items
     importSelected.value = items.map((i) => i.id)
     importSelectAll.value = true
@@ -493,6 +495,7 @@ async function importFromOdx() {
     }
 
     importDialogTitle.value = 'Import from ODX/PDX'
+    importKind.value = 'odx'
     importItems.value = items
     importSelected.value = items.map((i) => i.id)
     importSelectAll.value = true
@@ -517,6 +520,9 @@ function confirmImport() {
     const tester = cloneDeep(item.tester)
     tester.id = newId
     tester.name = generateUniqueImportName(tester.name, tester.type)
+    if (importKind.value === 'odx') {
+      applyOdxImportedSubfuncParamFlags(tester, window.serviceDetail)
+    }
 
     globalData.tester[newId] = tester
 
@@ -534,6 +540,7 @@ function confirmImport() {
   }
 
   importDialogVisible.value = false
+  importKind.value = null
   ElMessage({
     message: `Imported ${count} tester(s)`,
     type: 'success',

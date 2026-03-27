@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ODX MODEL-VERSION="2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="odx.xsd">
+  <COMPARAM-SUBSET ID="IEEE_802_3_DIS_2015" CATEGORY="PHYS">
+    <SHORT-NAME>IEEE_802_3_DIS_2015</SHORT-NAME>
+    <LONG-NAME>IEEE 802.3 (DIS 2015)</LONG-NAME>
+    <DESC>
+      <p>Physical Layer</p>
+      <p>Based on ISO 22900-2 DIS dated 2015-06-16</p>
+    </DESC>
+    <ADMIN-DATA>
+      <LANGUAGE>en-US</LANGUAGE>
+      <DOC-REVISIONS>
+        <DOC-REVISION>
+          <TEAM-MEMBER-REF ID-REF="Generator"/>
+          <REVISION-LABEL>1.0.0</REVISION-LABEL>
+          <STATE>release</STATE>
+          <DATE>2016-04-19T09:43:10+02:00</DATE>
+          <TOOL>MDF2ODX 1.0 2016-03-02</TOOL>
+          <MODIFICATIONS>
+            <MODIFICATION>
+              <CHANGE>Initial generation from MDF</CHANGE>
+            </MODIFICATION>
+          </MODIFICATIONS>
+        </DOC-REVISION>
+      </DOC-REVISIONS>
+    </ADMIN-DATA>
+    <COMPANY-DATAS>
+      <COMPANY-DATA ID="IEEE_802_3_DIS_2015_Company_Data">
+        <SHORT-NAME>Vector_Informatik</SHORT-NAME>
+        <LONG-NAME>Vector Informatik</LONG-NAME>
+        <TEAM-MEMBERS>
+          <TEAM-MEMBER ID="Generator">
+            <SHORT-NAME>Generator</SHORT-NAME>
+            <DEPARTMENT>PDG</DEPARTMENT>
+          </TEAM-MEMBER>
+        </TEAM-MEMBERS>
+      </COMPANY-DATA>
+    </COMPANY-DATAS>
+  </COMPARAM-SUBSET>
+</ODX>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ODX MODEL-VERSION="2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="odx.xsd">
+  <COMPARAM-SPEC ID="ISO_14229_5_on_ISO_13400_2">
+    <SHORT-NAME>ISO_14229_5_on_ISO_13400_2</SHORT-NAME>
+    <LONG-NAME>ISO 14229-5 on ISO 13400-2 (DIS 2015)</LONG-NAME>
+    <DESC>
+      <p>Based on ISO 22900-2 DIS dated 2015-06-16</p>
+    </DESC>
+    <ADMIN-DATA>
+      <LANGUAGE>en-US</LANGUAGE>
+      <DOC-REVISIONS>
+        <DOC-REVISION>
+          <TEAM-MEMBER-REF ID-REF="Generator"/>
+          <REVISION-LABEL>1.0.0</REVISION-LABEL>
+          <STATE>release</STATE>
+          <DATE>2016-04-19T09:43:10+02:00</DATE>
+          <TOOL>MDF2ODX 1.0 2016-03-02</TOOL>
+          <MODIFICATIONS>
+            <MODIFICATION>
+              <CHANGE>Initial generation from MDF</CHANGE>
+            </MODIFICATION>
+          </MODIFICATIONS>
+        </DOC-REVISION>
+      </DOC-REVISIONS>
+    </ADMIN-DATA>
+    <COMPANY-DATAS>
+      <COMPANY-DATA ID="ISO_14229_5_on_ISO_13400_2_Company_Data">
+        <SHORT-NAME>Vector_Informatik</SHORT-NAME>
+        <LONG-NAME>Vector Informatik</LONG-NAME>
+        <TEAM-MEMBERS>
+          <TEAM-MEMBER ID="Generator">
+            <SHORT-NAME>Generator</SHORT-NAME>
+            <DEPARTMENT>PDG</DEPARTMENT>
+          </TEAM-MEMBER>
+        </TEAM-MEMBERS>
+      </COMPANY-DATA>
+    </COMPANY-DATAS>
+    <PROT-STACKS>
+      <PROT-STACK ID="ISO_14229_5_on_ISO_13400_2_DIS_2015_PROT_STACK">
+        <SHORT-NAME>ISO_14229_5_on_ISO_13400_2_DIS_2015_PROT_STACK</SHORT-NAME>
+        <LONG-NAME>ISO 14229-5 on ISO 13400-2 DIS 2015 PROT STACK</LONG-NAME>
+        <DESC>
+          <p>ISO UDS on IP (DoIP) protocol</p>
+        </DESC>
+        <PDU-PROTOCOL-TYPE>ISO_14229_5_on_ISO_13400_2</PDU-PROTOCOL-TYPE>
+        <PHYSICAL-LINK-TYPE>IEEE_802_3</PHYSICAL-LINK-TYPE>
+        <COMPARAM-SUBSET-REFS>
+          <COMPARAM-SUBSET-REF ID-REF="ISO_14229_5_DIS_2015" DOCREF="ISO_14229_5_DIS_2015" DOCTYPE="COMPARAM-SUBSET"/>
+          <COMPARAM-SUBSET-REF ID-REF="ISO_13400_2_DIS_2015" DOCREF="ISO_13400_2_DIS_2015" DOCTYPE="COMPARAM-SUBSET"/>
+          <COMPARAM-SUBSET-REF ID-REF="IEEE_802_3_DIS_2015" DOCREF="IEEE_802_3_DIS_2015" DOCTYPE="COMPARAM-SUBSET"/>
+        </COMPARAM-SUBSET-REFS>
+      </PROT-STACK>
+    </PROT-STACKS>
+  </COMPARAM-SPEC>
+</ODX>

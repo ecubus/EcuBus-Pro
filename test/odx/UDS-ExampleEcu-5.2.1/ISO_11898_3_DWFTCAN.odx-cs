@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ODX MODEL-VERSION="2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="odx.xsd">
+ <COMPARAM-SUBSET ID="ISO_11898_3_DWFTCAN" CATEGORY="PHYS">
+  <SHORT-NAME>ISO_11898_3_DWFTCAN</SHORT-NAME>
+  <LONG-NAME>ISO 11898-3 DWFTCAN</LONG-NAME>
+  <ADMIN-DATA>
+   <LANGUAGE>en-UK</LANGUAGE>
+   <DOC-REVISIONS>
+    <DOC-REVISION>
+     <TEAM-MEMBER-REF ID-REF="ISO_11898_3_DWFTCAN.ISO.Joint_COMPARAM_Group"/>
+     <REVISION-LABEL>1.0.0</REVISION-LABEL>
+     <STATE>Release</STATE>
+     <DATE>2009-04-17T00:00:00</DATE>
+     <MODIFICATIONS>
+      <MODIFICATION>
+       <CHANGE>No changes</CHANGE>
+       <REASON>Official version</REASON>
+      </MODIFICATION>
+     </MODIFICATIONS>
+    </DOC-REVISION>
+   </DOC-REVISIONS>
+  </ADMIN-DATA>
+  <COMPANY-DATAS>
+   <COMPANY-DATA ID="ISO_11898_3_DWFTCAN.ISO">
+    <SHORT-NAME>ISO</SHORT-NAME>
+    <LONG-NAME>International Organization for Standardization (ISO)</LONG-NAME>
+    <TEAM-MEMBERS>
+     <TEAM-MEMBER ID="ISO_11898_3_DWFTCAN.ISO.Joint_COMPARAM_Group">
+      <SHORT-NAME>Joint_COMPARAM_Group</SHORT-NAME>
+      <LONG-NAME>Joint COMPARAM-Group</LONG-NAME>
+      <ADDRESS>Arnikastrasse 2</ADDRESS>
+      <ZIP>85635</ZIP>
+      <CITY>Hoehenkirchen</CITY>
+      <PHONE>+49 8102 895317</PHONE>
+      <FAX>+49 8102 895310</FAX>
+      <EMAIL>info@asam.net</EMAIL>
+     </TEAM-MEMBER>
+    </TEAM-MEMBERS>
+    <COMPANY-SPECIFIC-INFO>
+     <RELATED-DOCS>
+      <RELATED-DOC>
+       <XDOC>
+        <SHORT-NAME>ISO_22900_2</SHORT-NAME>
+        <LONG-NAME>ISO 22900-2</LONG-NAME>
+        <NUMBER>2.2.0</NUMBER>
+        <STATE>Release</STATE>
+        <DATE>2009-01-27T00:00:00</DATE>
+        <PUBLISHER>ISO</PUBLISHER>
+       </XDOC>
+      </RELATED-DOC>
+      <RELATED-DOC>
+       <XDOC>
+        <SHORT-NAME>ISO_22901_1</SHORT-NAME>
+        <LONG-NAME>ISO 22901-1</LONG-NAME>
+        <NUMBER>2.2.0</NUMBER>
+        <STATE>Release</STATE>
+        <DATE>2008-11-06T00:00:00</DATE>
+        <PUBLISHER>ISO</PUBLISHER>
+       </XDOC>
+      </RELATED-DOC>
+     </RELATED-DOCS>
+    </COMPANY-SPECIFIC-INFO>
+   </COMPANY-DATA>
+  </COMPANY-DATAS>
+  <COMPARAMS>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_Baudrate" CPTYPE="STANDARD" CPUSAGE="ECU-COMM" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_Baudrate</SHORT-NAME>
+    <LONG-NAME>CP_Baudrate</LONG-NAME>
+    <DESC>
+     <p>Represents the desired baud rate.</p>
+     <p>If the desired baud rate cannot be achieved within the tolerance of the protocol, the interface will remain at the previous baud rate.</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>125000</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_UINT32_Baud"/>
+   </COMPARAM>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_BitSamplePoint" CPTYPE="STANDARD" CPUSAGE="TESTER" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_BitSamplePoint</SHORT-NAME>
+    <LONG-NAME>CP_BitSamplePoint</LONG-NAME>
+    <DESC>
+     <p>This sets the desired bit sample point as a percentage of the bit time.</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>80</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_UINT7_0_100_PerCent"/>
+   </COMPARAM>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_ListenOnly" CPTYPE="OPTIONAL" CPUSAGE="ECU-COMM" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_ListenOnly</SHORT-NAME>
+    <LONG-NAME>CP_ListenOnly</LONG-NAME>
+    <DESC>
+     <p>Enable a Listen Only mode on the Com Logical Link</p>
+     <p>This will cause the link to no longer acknowledge received frames on the CAN Network.</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>Disabled</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT1_Disabled_Enabled"/>
+   </COMPARAM>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_SamplesPerBit" CPTYPE="STANDARD" CPUSAGE="TESTER" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_SamplesPerBit</SHORT-NAME>
+    <LONG-NAME>CP_SamplesPerBit</LONG-NAME>
+    <DESC>
+     <p>Number of samples per bit</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>1-Sample</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT1_SamplesPerBit"/>
+   </COMPARAM>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_SyncJumpWidth" CPTYPE="STANDARD" CPUSAGE="TESTER" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_SyncJumpWidth</SHORT-NAME>
+    <LONG-NAME>CP_SyncJumpWidth</LONG-NAME>
+    <DESC>
+     <p>This sets the desired synchronization jump width as a percentage of the bit time.</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>15</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="IDENTICAL_UINT7_0_100_PerCent"/>
+   </COMPARAM>
+   <COMPARAM ID="ISO_11898_3_DWFTCAN.CP_TerminationType" CPTYPE="OPTIONAL" CPUSAGE="TESTER" PARAM-CLASS="BUSTYPE">
+    <SHORT-NAME>CP_TerminationType</SHORT-NAME>
+    <LONG-NAME>CP_TerminationType</LONG-NAME>
+    <DESC>
+     <p>CAN termination settings</p>
+     <p>This ComParam can be used to manually change the termination being used on the vehicle bus line.</p>
+    </DESC>
+    <PHYSICAL-DEFAULT-VALUE>No termination</PHYSICAL-DEFAULT-VALUE>
+    <DATA-OBJECT-PROP-REF ID-REF="TEXTTABLE_UINT3_0_4_TerminationType"/>
+   </COMPARAM>
+  </COMPARAMS>
+  <DATA-OBJECT-PROPS>
+   <DATA-OBJECT-PROP ID="IDENTICAL_UINT32_Baud">
+    <SHORT-NAME>IDENTICAL_UINT32_Baud</SHORT-NAME>
+    <LONG-NAME>IDENTICAL_UINT32_Baud</LONG-NAME>
+    <COMPU-METHOD>
+     <CATEGORY>IDENTICAL</CATEGORY>
+    </COMPU-METHOD>
+    <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+     <BIT-LENGTH>32</BIT-LENGTH>
+    </DIAG-CODED-TYPE>
+    <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+    <UNIT-REF ID-REF="Baud"/>
+   </DATA-OBJECT-PROP>
+   <DATA-OBJECT-PROP ID="IDENTICAL_UINT7_0_100_PerCent">
+    <SHORT-NAME>IDENTICAL_UINT7_0_100_PerCent</SHORT-NAME>
+    <LONG-NAME>IDENTICAL_UINT7_0_100_PerCent</LONG-NAME>
+    <COMPU-METHOD>
+     <CATEGORY>IDENTICAL</CATEGORY>
+    </COMPU-METHOD>
+    <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+     <BIT-LENGTH>32</BIT-LENGTH>
+    </DIAG-CODED-TYPE>
+    <PHYSICAL-TYPE BASE-DATA-TYPE="A_UINT32"/>
+    <INTERNAL-CONSTR>
+     <LOWER-LIMIT>0</LOWER-LIMIT>
+     <UPPER-LIMIT>100</UPPER-LIMIT>
+    </INTERNAL-CONSTR>
+    <UNIT-REF ID-REF="PerCent"/>
+   </DATA-OBJECT-PROP>
+   <DATA-OBJECT-PROP ID="TEXTTABLE_UINT1_Disabled_Enabled">
+    <SHORT-NAME>TEXTTABLE_UINT1_Disabled_Enabled</SHORT-NAME>
+    <LONG-NAME>TEXTTABLE_UINT1_Disabled_Enabled</LONG-NAME>
+    <COMPU-METHOD>
+     <CATEGORY>TEXTTABLE</CATEGORY>
+     <COMPU-INTERNAL-TO-PHYS>
+      <COMPU-SCALES>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>0</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>Disabled</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>1</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>Enabled</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+      </COMPU-SCALES>
+     </COMPU-INTERNAL-TO-PHYS>
+    </COMPU-METHOD>
+    <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+     <BIT-LENGTH>32</BIT-LENGTH>
+    </DIAG-CODED-TYPE>
+    <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+    <INTERNAL-CONSTR>
+     <LOWER-LIMIT>0</LOWER-LIMIT>
+     <UPPER-LIMIT>1</UPPER-LIMIT>
+    </INTERNAL-CONSTR>
+   </DATA-OBJECT-PROP>
+   <DATA-OBJECT-PROP ID="TEXTTABLE_UINT1_SamplesPerBit">
+    <SHORT-NAME>TEXTTABLE_UINT1_SamplesPerBit</SHORT-NAME>
+    <LONG-NAME>TEXTTABLE_UINT1_SamplesPerBit</LONG-NAME>
+    <COMPU-METHOD>
+     <CATEGORY>TEXTTABLE</CATEGORY>
+     <COMPU-INTERNAL-TO-PHYS>
+      <COMPU-SCALES>
+       <COMPU-SCALE>
+        <DESC>
+         <p>1 sample per bit</p>
+        </DESC>
+        <LOWER-LIMIT>0</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>1-Sample</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <DESC>
+         <p>3 samples per bit</p>
+        </DESC>
+        <LOWER-LIMIT>1</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>3-Sample</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+      </COMPU-SCALES>
+     </COMPU-INTERNAL-TO-PHYS>
+    </COMPU-METHOD>
+    <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+     <BIT-LENGTH>32</BIT-LENGTH>
+    </DIAG-CODED-TYPE>
+    <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+    <INTERNAL-CONSTR>
+     <LOWER-LIMIT>0</LOWER-LIMIT>
+     <UPPER-LIMIT>1</UPPER-LIMIT>
+    </INTERNAL-CONSTR>
+   </DATA-OBJECT-PROP>
+   <DATA-OBJECT-PROP ID="TEXTTABLE_UINT3_0_4_TerminationType">
+    <SHORT-NAME>TEXTTABLE_UINT3_0_4_TerminationType</SHORT-NAME>
+    <LONG-NAME>TEXTTABLE_UINT3_0_4_TerminationType</LONG-NAME>
+    <COMPU-METHOD>
+     <CATEGORY>TEXTTABLE</CATEGORY>
+     <COMPU-INTERNAL-TO-PHYS>
+      <COMPU-SCALES>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>0</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>No termination</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>1</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>AC termination</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>2</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>60 Ohm termination</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>3</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>120 Ohm termination</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+       <COMPU-SCALE>
+        <LOWER-LIMIT>4</LOWER-LIMIT>
+        <COMPU-CONST>
+         <VT>SWCAN termination</VT>
+        </COMPU-CONST>
+       </COMPU-SCALE>
+      </COMPU-SCALES>
+     </COMPU-INTERNAL-TO-PHYS>
+    </COMPU-METHOD>
+    <DIAG-CODED-TYPE BASE-DATA-TYPE="A_UINT32" xsi:type="STANDARD-LENGTH-TYPE">
+     <BIT-LENGTH>32</BIT-LENGTH>
+    </DIAG-CODED-TYPE>
+    <PHYSICAL-TYPE BASE-DATA-TYPE="A_UNICODE2STRING"/>
+    <INTERNAL-CONSTR>
+     <LOWER-LIMIT>0</LOWER-LIMIT>
+     <UPPER-LIMIT>4</UPPER-LIMIT>
+    </INTERNAL-CONSTR>
+   </DATA-OBJECT-PROP>
+  </DATA-OBJECT-PROPS>
+  <UNIT-SPEC>
+   <UNITS>
+    <UNIT ID="Baud">
+     <SHORT-NAME>Baud</SHORT-NAME>
+     <LONG-NAME>Baud</LONG-NAME>
+     <DISPLAY-NAME>Bd</DISPLAY-NAME>
+    </UNIT>
+    <UNIT ID="PerCent">
+     <SHORT-NAME>PerCent</SHORT-NAME>
+     <LONG-NAME>Per Cent</LONG-NAME>
+     <DISPLAY-NAME>%</DISPLAY-NAME>
+    </UNIT>
+   </UNITS>
+  </UNIT-SPEC>
+ </COMPARAM-SUBSET>
+</ODX>

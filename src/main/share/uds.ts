@@ -539,3 +539,36 @@ export interface UdsDevice {
   pwmDevice?: PwmBaseInfo
   someipDevice?: SomeipInfo
 }
+
+/**
+ * ODX import: set subfunction row deletable/editable from built-in UDS defaults (see `uds/service.ts`).
+ * Call when applying an ODX-parsed tester so flags match manually created services.
+ */
+export function applyOdxImportedSubfuncParamFlags(
+  tester: { allServiceList?: Partial<Record<ServiceId, ServiceItem[]>> },
+  detailMap: ServiceDetial
+): void {
+  const all = tester.allServiceList
+  if (!all) return
+  for (const sid of Object.keys(all) as ServiceId[]) {
+    const items = all[sid]
+    if (!items?.length) continue
+    const detail = detailMap[sid]
+    if (!detail?.hasSubFunction) continue
+    const subReq = detail.defaultParams[0]?.param
+    const subResp = detail.defaultRespParams[0]?.param
+    for (const item of items) {
+      if (!item.autoSubfunc) continue
+      const p0 = item.params[0] as Param & { bytePos?: number }
+      if (p0 && p0.bytePos === 1 && p0.bitLen === 8) {
+        p0.deletable = subReq?.deletable ?? false
+        p0.editable = subReq?.editable ?? true
+      }
+      const r0 = item.respParams[0] as Param & { bytePos?: number }
+      if (r0 && r0.bytePos === 1 && r0.bitLen === 8) {
+        r0.deletable = subResp?.deletable ?? false
+        r0.editable = subResp?.editable ?? true
+      }
+    }
+  }
+}

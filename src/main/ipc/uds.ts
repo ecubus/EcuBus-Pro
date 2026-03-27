@@ -680,7 +680,12 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
 }
 
 const exTransportList: string[] = []
+let isGlobalStarting = false
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
+  if (isGlobalStarting) {
+    return
+  }
+  isGlobalStarting = true
   const projectInfo = arg[0] as {
     path: string
     name: string
@@ -688,6 +693,10 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   const data = arg[1] as DataSet
 
   global.dataSet = data
+  for (const t of exTransportList) {
+    removeTransport(t)
+  }
+  exTransportList.splice(0, exTransportList.length)
 
   //can signal as proxy
   Object.values(global.dataSet.database.can).forEach((db) => {
@@ -724,6 +733,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   const vars: Record<string, VarItem> = cloneDeep(data.vars)
   const logs = data.logs
+
   for (const log of Object.values(logs)) {
     if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
       if (!path.isAbsolute(log.path)) {
@@ -774,6 +784,8 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   } catch (err: any) {
     globalStop(true)
     throw err
+  } finally {
+    isGlobalStarting = false
   }
 })
 

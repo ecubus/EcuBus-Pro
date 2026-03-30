@@ -4,6 +4,15 @@ inputs:
   platform:
     description: 'Platform: win, mac, or linux'
     required: true
+  github_token:
+    description: 'Token used by the build (e.g. for publishing or authenticated downloads)'
+    required: true
+  main_vite_client_id:
+    description: 'MAIN_VITE_CLIENT_ID used by app build'
+    required: true
+  main_vite_client_secret:
+    description: 'MAIN_VITE_CLIENT_SECRET used by app build'
+    required: true
   run-docs-build:
     description: 'Run VitePress docs build'
     required: false
@@ -18,7 +27,7 @@ runs:
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: 24
         cache: npm
     - name: Install dependencies
       shell: bash
@@ -47,6 +56,6 @@ runs:
       shell: bash
       run: npm run build:${{ inputs.platform }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-        MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        MAIN_VITE_CLIENT_ID: ${{ inputs.main_vite_client_id }}
+        MAIN_VITE_CLIENT_SECRET: ${{ inputs.main_vite_client_secret }}

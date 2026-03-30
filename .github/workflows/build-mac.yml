@@ -23,10 +23,9 @@ jobs:
         with:
           platform: mac
           run-sdk-build: 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          main_vite_client_id: ${{ secrets.CLIENT_ID }}
+          main_vite_client_secret: ${{ secrets.CLIENT_SECRET }}
       - uses: actions/upload-artifact@v4
         with:
           name: artifact

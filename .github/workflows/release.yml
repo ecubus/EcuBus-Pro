@@ -31,10 +31,9 @@ jobs:
         uses: ./.github/actions/build-app
         with:
           platform: win
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          main_vite_client_id: ${{ secrets.CLIENT_ID }}
+          main_vite_client_secret: ${{ secrets.CLIENT_SECRET }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -105,10 +104,9 @@ jobs:
         uses: ./.github/actions/build-app
         with:
           platform: linux
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          MAIN_VITE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          main_vite_client_id: ${{ secrets.CLIENT_ID }}
+          main_vite_client_secret: ${{ secrets.CLIENT_SECRET }}
       - name: Upload CLI
         uses: actions/upload-release-asset@v1
         env:

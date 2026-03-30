@@ -38,7 +38,7 @@ import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
 import { TesterInfo } from '../share/tester'
 import log from 'electron-log'
 import Transport from 'winston-transport'
-import { addTransport, removeTransport, UdsLOG, VarLOG } from '../log'
+import { addDeviceTransport, removeDeviceTransport, UdsLOG, VarLOG } from '../log'
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
@@ -694,7 +694,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
   global.dataSet = data
   for (const t of exTransportList) {
-    removeTransport(t)
+    removeDeviceTransport(t)
   }
   exTransportList.splice(0, exTransportList.length)
 
@@ -742,8 +742,10 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
 
       const id =
         log.format === 'blf'
-          ? addTransport(() => blfTransport(log.path, log.channel, log.method, log.compression))
-          : addTransport(() => ascTransport(log.path, log.channel, log.method))
+          ? addDeviceTransport(() =>
+              blfTransport(log.path, log.channel, log.method, log.compression)
+            )
+          : addDeviceTransport(() => ascTransport(log.path, log.channel, log.method))
 
       exTransportList.push(id)
     }
@@ -929,7 +931,7 @@ export function globalStop(emit = false) {
   ortiMap.clear()
 
   for (const t of exTransportList) {
-    removeTransport(t)
+    removeDeviceTransport(t)
   }
   exTransportList.splice(0, exTransportList.length)
 

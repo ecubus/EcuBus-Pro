@@ -62,6 +62,39 @@ const instanceFormat = format((info, opts: any) => {
   info.instance = opts.instance
   return info
 })
+const externalTransport: { id: string; t: () => Transport }[] = []
+const deviceTransport: { id: string; t: () => Transport }[] = []
+export function addTransport(t: () => Transport): string {
+  const id = v4()
+  externalTransport.push({ id, t })
+  return id
+}
+export function addDeviceTransport(t: () => Transport): string {
+  const id = v4()
+  deviceTransport.push({ id, t })
+  return id
+}
+
+export function removeDeviceTransport(id: string) {
+  const index = deviceTransport.findIndex((t) => t.id == id)
+  if (index != -1) {
+    deviceTransport.splice(index, 1)
+  }
+}
+export function removeTransport(id: string) {
+  const index = externalTransport.findIndex((t) => t.id == id)
+  if (index != -1) {
+    externalTransport.splice(index, 1)
+  }
+}
+
+const externalFormat: Format[] = []
+export function addFormat(f: Format) {
+  externalFormat.push(f)
+}
+export function clearFormat() {
+  externalFormat.splice(0, externalFormat.length)
+}
 
 export class CanLOG {
   vendor: string
@@ -77,8 +110,9 @@ export class CanLOG {
     this.deviceId = deviceId
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t.t())
+    const dt1 = deviceTransport.map((t) => t.t())
     this.log = createLogger({
-      transports: [new Base(), ...et1],
+      transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
@@ -127,29 +161,6 @@ export class CanLOG {
       }
     })
   }
-}
-
-const externalTransport: { id: string; t: () => Transport }[] = []
-
-export function addTransport(t: () => Transport): string {
-  const id = v4()
-  externalTransport.push({ id, t })
-  return id
-}
-
-export function removeTransport(id: string) {
-  const index = externalTransport.findIndex((t) => t.id == id)
-  if (index != -1) {
-    externalTransport.splice(index, 1)
-  }
-}
-
-const externalFormat: Format[] = []
-export function addFormat(f: Format) {
-  externalFormat.push(f)
-}
-export function clearFormat() {
-  externalFormat.splice(0, externalFormat.length)
 }
 
 export class UdsLOG {
@@ -301,8 +312,9 @@ export class DoipLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
+    const dt1 = deviceTransport.map((t) => t.t())
     this.log = createLogger({
-      transports: [new Base(), ...et1],
+      transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
@@ -432,8 +444,9 @@ export class LinLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
+    const dt1 = deviceTransport.map((t) => t.t())
     this.log = createLogger({
-      transports: [new Base(), ...et1],
+      transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
@@ -497,14 +510,6 @@ export class VarLOG {
       transports: [new Base(), ...et1],
       format: format.combine(format.json(), ...externalFormat)
     })
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return Array.isArray((transport as any).devices)
-    })
-
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   setVarByKey(key: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarByKey(key, value)
@@ -595,8 +600,9 @@ export class SomeipLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
+    const dt1 = deviceTransport.map((t) => t.t())
     this.log = createLogger({
-      transports: [new Base(), ...et1],
+      transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),

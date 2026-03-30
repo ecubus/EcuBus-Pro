@@ -29,7 +29,7 @@ if (!isMainThread && parentPort) {
       try {
         const fn = exposedMethods[method]
         if (!fn) {
-          throw new Error(`Method ${method} not found`)
+          throw new Error(`Method ${method} not found, valid method:${Object.keys(exposedMethods)}`)
         }
         const result = fn(...params)
         // id === -1 means fire-and-forget, no response needed
@@ -1192,7 +1192,7 @@ export class DiagResponse extends Service {
   /**
    * @param {string} serviceName
    *
-   * > serviceName's type '{{{serviceName}}}' is the string configured by Service.
+   * > serviceName's type '{serviceName}' is the string configured by Service.
    *
    * @example
    *
@@ -1219,7 +1219,7 @@ export class DiagResponse extends Service {
    * @param {DiagRequest} req
    * @returns {DiagResponse}
    *
-   * > req's type '{{{DiagRequest}}}' is the DiagRequest object.
+   * > req's type '{DiagRequest}' is the DiagRequest object.
    *
    * @example
    *
@@ -1291,7 +1291,7 @@ export class DiagRequest extends Service {
   /**
    * @param {string} serviceName
    *
-   * > serviceName's type '{{{serviceName}}}' is the string configured by Service.
+   * > serviceName's type '{serviceName}' is the string configured by Service.
    *
    * @example
    *
@@ -1886,7 +1886,7 @@ export class UtilClass {
    *
    * @example
    *
-   * > The `UDS` is a UDSClass type and has already been created by Service.
+   * > The `Util` is a UtilClass type and has already been created by Service.
    *
    * 1. *send functions*
    *
@@ -2168,7 +2168,7 @@ export class UtilClass {
   }
 
   /**
-   * Register a function, this function will be invoked when UDSClass is initialized.
+   * Register a function, this function will be invoked when UtilClass is initialized.
    * @param fc Non-async or async function
    *
    * @example
@@ -2218,7 +2218,7 @@ export class UtilClass {
     }
   }
   /**
-   * Register a function, this function will be invoked when UDSClass is terminated.
+   * Register a function, this function will be invoked when UtilClass is terminated.
    * @param fc Non-async or async function
    *
    * @example
@@ -2232,7 +2232,7 @@ export class UtilClass {
 }
 
 /**
- * Global instance of UDSClass, providing access to UDS functionality throughout the application.
+ * Global instance of UtilClass, providing access to UDS functionality throughout the application.
  * Use this instance to interact with UDS features and services.
  *
  * @category Util

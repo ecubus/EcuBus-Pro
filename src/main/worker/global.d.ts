@@ -1,8 +1,8 @@
 /* eslint-disable no-var */
-import { UDSClass } from './uds'
+import { UtilClass } from './uds'
 
 declare global {
-  var Util: UDSClass
+  var Util: UtilClass
   var cmdId: number
 }
 

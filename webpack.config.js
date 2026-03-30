@@ -40,9 +40,14 @@ class MyCustomPlugin {
       // 当Webpack完成构建过程后执行
       compiler.hooks.done.tap('MyCustomPlugin',async  (stats) => {
        
-        const jsList=['uds.js','crc.js','cryptoExt.js','utli.js','plugin.js','uds.js.map','crc.js.map','cryptoExt.js.map','utli.js.map','plugin.js.map','secureAccess.js']
+        // Copy bundled artifacts (single worker bundle + plugin bundle)
+        const jsList=['index.js','index.js.map','plugin.js','plugin.js.map']
         for(const js of jsList){
-            fs.copyFileSync(path.resolve(__dirname,'dist',js),path.resolve(__dirname,'resources','lib','js',js))
+            const src = path.resolve(__dirname,'dist',js)
+            const dest = path.resolve(__dirname,'resources','lib','js',js)
+            if(fs.existsSync(src)){
+                fs.copyFileSync(src,dest)
+            }
         }
 
        
@@ -55,15 +60,29 @@ class MyCustomPlugin {
         // //copy precision_timer.node
         // fs.copyFileSync(path.resolve(__dirname,'dist','precision_timer.node'),path.resolve(__dirname,'resources','lib','js','precision_timer.node'))
 
-        //copy uds.d.ts
-        const udsDTs=path.resolve(__dirname,'dist','src/main/worker','uds.d.ts')
-        await bundleDts(udsDTs,udsDTs)
-        let content=fs.readFileSync(udsDTs,'utf-8')
+       
+
+        // merge worker typings into one worker.d.ts
+        const workerDtsEntry = path.resolve(__dirname,'dist','src/main/worker','index.d.ts')
+        const workerBundledDts = path.resolve(__dirname,'dist','src/main/worker','index.bundled.d.ts')
+        
+        await bundleDts(workerDtsEntry,workerBundledDts)
+        let content=fs.readFileSync(workerBundledDts,'utf-8')
+        const globalDtsPath = path.resolve(__dirname,'src','main','worker','global.d.ts')
+        if(fs.existsSync(globalDtsPath) && !content.includes('declare global {')){
+            let globalContent = fs.readFileSync(globalDtsPath,'utf-8')
+            globalContent = globalContent
+                .replace(/\/\* eslint-disable no-var \*\/\r?\n?/g,'')
+                .replace(/import\s+\{[^}]+\}\s+from\s+['"][^'"]+['"]\s*;?\r?\n?/g,'')
+                .replace(/export\s+\{\}\s*;?\r?\n?/g,'')
+                .trim()
+            content = `${globalContent}\n\n${content}`
+        }
         //reaplace
-        content=content.replace("import { ServiceItem } from '../share/uds';",'')
-        content=content.replace("service: ServiceItem;","")
-        content=content.replace('declare const selfDescribe: typeof describe.only;','declare const selfDescribe: typeof describe;')
-        content=content.replace("constructor(service: ServiceItem, isRequest: boolean, data?: Buffer);","")
+        // content=content.replace("import { ServiceItem } from '../share/uds';",'')
+        // content=content.replace("service: ServiceItem;","")
+        // content=content.replace('declare const selfDescribe: typeof describe.only;','declare const selfDescribe: typeof describe;')
+        // content=content.replace("constructor(service: ServiceItem, isRequest: boolean, data?: Buffer);","")
         content=content.replace('declare const serviceList: readonly ["{{{serviceName}}}"];',
 `declare const serviceList: readonly [
     {{#each this.services}}
@@ -72,12 +91,11 @@ class MyCustomPlugin {
 ];`
         )
         content=content.replace('declare const testerList: readonly ["{{{testerName}}}"];',
-            `declare const testerList: readonly [
-                {{#each this.testers}}
-                    "{{this}}",
-                {{/each}}
-            ];`
-                    )
+`declare const testerList: readonly [
+    {{#each this.testers}}
+        "{{this}}",
+    {{/each}}
+];`)
         content=content.replace('declare const allServicesSend: readonly ["{{{serviceName}}}.send"];',
 `declare const allServicesSend: readonly [
     {{#each this.services}}
@@ -141,30 +159,8 @@ export interface {{this.name}} {
 }
 {{/each}}
 `)
+        fs.writeFileSync(path.resolve(__dirname,'src','main','share','index.d.ts.html'),content)
 
-        //write 
-        fs.writeFileSync(path.resolve(__dirname,'src','main','share','uds.d.ts.html'),content)
-        //bundle cryptoExt.d.ts
-        const crcFile=path.resolve(__dirname,'dist','src/main/worker','crc.d.ts')
-        // const v=generateDtsBundle([{
-        //     filePath: cryptoFile,
-        // }],)
-        await bundleDts(crcFile,path.resolve(__dirname,'src','main','share','crc.d.ts.html'))
-        //bundle cryptoExt.d.ts
-        const cryptoFile=path.resolve(__dirname,'dist','src/main/worker','cryptoExt.d.ts')
-        // const v=generateDtsBundle([{
-        //     filePath: cryptoFile,
-        // }],)
-        await bundleDts(cryptoFile,path.resolve(__dirname,'src','main','share','cryptoExt.d.ts.html'))
-
-        //bundle secureAccess.d.ts
-        const secureAccessFile=path.resolve(__dirname,'dist','src/main/worker','secureAccess','index.d.ts')
-        await bundleDts(secureAccessFile,path.resolve(__dirname,'src','main','share','secureAccess.d.ts.html'))
-
-        //bundle utli.d.ts
-        const utliFile=path.resolve(__dirname,'dist','src/main/worker','utli.d.ts')
-        await bundleDts(utliFile,path.resolve(__dirname,'src','main','share','utli.d.ts.html'))
-        
         //bundle plugin.d.ts
         const pluginFile=path.resolve(__dirname,'dist','src/main/plugin-sdk','index.d.ts')
         await bundleDts(pluginFile,path.resolve(__dirname,'src','main','plugin-sdk','dist','index.d.ts'))
@@ -175,7 +171,7 @@ export interface {{this.name}} {
         // fs.writeFileSync(path.resolve(__dirname,'src','share','cryptoExt.d.ts.html'),v[0])
         console.log('构建过程完成！');
 
-      });
+      });   
     }
 }
 
@@ -183,12 +179,9 @@ export interface {{this.name}} {
 
 module.exports = {
     entry: {
-        uds:path.resolve(__dirname,'src/main/worker') + '/uds.ts',
-        crc:path.resolve(__dirname,'src/main/worker') + '/crc.ts',
-        cryptoExt:path.resolve(__dirname,'src/main/worker') + '/cryptoExt.ts',
-        secureAccess:path.resolve(__dirname,'src/main/worker') + '/secureAccess/index.ts',
-        utli:path.resolve(__dirname,'src/main/worker') + '/utli.ts',
+        index:path.resolve(__dirname,'src/main/worker') + '/index.ts',
         plugin:path.resolve(__dirname,'src/main/plugin-sdk') + '/index.ts',
+        
     },
     output: {
         path: path.resolve(__dirname,'dist'),

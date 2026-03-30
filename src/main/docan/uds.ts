@@ -21,11 +21,7 @@ import fsP from 'fs/promises'
 import fs from 'fs'
 import { store } from '../store'
 import skillsDirRef from '../../../resources/skills/.gitkeep?asset&asarUnpack'
-import udsHeaderStr from '../share/uds.d.ts.html?raw'
-import crcStr from '../share/crc.d.ts.html?raw'
-import secureAccessStr from '../share/secureAccess.d.ts.html?raw'
-import cryptoExtStr from '../share/cryptoExt.d.ts.html?raw'
-import utliStr from '../share/utli.d.ts.html?raw'
+import workerStr from '../share/index.d.ts.html?raw'
 import zlibStr from '../share/node/zlib.d.ts.html?raw'
 import assertStr from '../share/node/assert.d.ts.html?raw'
 import async_hooksStr from '../share/node/async_hooks.d.ts.html?raw'
@@ -246,7 +242,7 @@ export function updateUdsDts(data: DataSet) {
     }
   }
 
-  const libTmpl = Handlebars.compile(udsHeaderStr)
+  const libTmpl = Handlebars.compile(workerStr)
   const libResult = libTmpl({
     testers: Object.values(data.tester).map((item) => item.name),
     services: [...new Set(nameString)],
@@ -1123,28 +1119,6 @@ const preDefineTypes: Record<string, string> = {
   'node_modules/@types/node/timers/promises.d.ts': timerSubStr
 }
 
-// export function getAllTypes(tester: TesterInfo, vendor = 'YT') {
-//   const allTypes: Record<string, string> = {}
-//   for (const [p, c] of Object.entries(preDefineTypes)) {
-//     allTypes[p] = c
-//   }
-//   allTypes['node_modules/@types/' + vendor + '/index.d.ts'] = `
-//     export as namespace ${vendor};
-// import { UDSClass} from './uds'
-// declare global {
-//     var UDS: UDSClass
-// }
-// export * from './uds'
-// export * from './crc'
-// export * from './cryptoExt'
-//     `
-//   allTypes['node_modules/@types/' + vendor + '/uds.d.ts'] = updateUdsDts(tester)
-//   allTypes['node_modules/@types/' + vendor + '/crc.d.ts'] = crcStr
-//   allTypes['node_modules/@types/' + vendor + '/cryptoExt.d.ts'] = cryptoExtStr
-
-//   return allTypes
-// }
-
 export async function getBuildStatus(projectPath: string, projectName: string, script: string) {
   //only check ts file
   if (!script.endsWith('.ts')) {
@@ -1279,27 +1253,8 @@ export async function createProject(
   if (!fs.existsSync(vendorPath)) {
     await fsP.mkdir(vendorPath)
   }
-  // await fsP.mkdir(vendorPath)
-  await fsP.writeFile(
-    path.join(vendorPath, 'index.d.ts'),
-    `
-    export as namespace ${vendor};
-import { UtilClass} from './uds'
-declare global {
-    var Util: UtilClass
-}
-export * from './uds'
-export * from './crc'
-export * from './secureAccess'
-export * from './cryptoExt'
-export * from './utli'
-    `
-  )
-  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
-  await fsP.writeFile(path.join(vendorPath, 'crc.d.ts'), crcStr)
-  await fsP.writeFile(path.join(vendorPath, 'cryptoExt.d.ts'), cryptoExtStr)
-  await fsP.writeFile(path.join(vendorPath, 'utli.d.ts'), utliStr)
-  await fsP.writeFile(path.join(vendorPath, 'secureAccess.d.ts'), secureAccessStr)
+
+  await fsP.writeFile(path.join(vendorPath, 'index.d.ts'), updateUdsDts(data))
   //create tsconfig.json
   const tsconfigFile = path.join(projectPath, 'tsconfig.json')
   if (!fs.existsSync(tsconfigFile)) {
@@ -1405,7 +1360,7 @@ export async function refreshProject(
   if (!fs.existsSync(vendorPath)) {
     await fsP.mkdir(vendorPath)
   }
-  await fsP.writeFile(path.join(vendorPath, 'uds.d.ts'), updateUdsDts(data))
+  await fsP.writeFile(path.join(vendorPath, 'index.d.ts'), updateUdsDts(data))
 
   // copy skills from resources/skills to .claude/skills when enabled
   const aiSettings = store.get('ai.settings') as { generateSkillDoc?: boolean } | undefined
@@ -1526,7 +1481,7 @@ async function compileTscEntry(
     '--format=cjs',
     `--alias:ECB=${relativeLibPath}`,
     `--outdir=${outputDir}`,
-    `--inject:${path.join(relativeLibPath, 'uds.js')}`,
+    `--inject:${path.join(relativeLibPath, 'init.js')}`,
     `--define:process.platform="${process.platform}"`,
     `--external:*.node`
   ]

@@ -42,11 +42,13 @@ resources/lib/js/uds.js
 resources/lib/js/uds.js.map
 resources/lib/js/utli.js
 resources/lib/js/utli.js.map
+resources/lib/js/index.js
+resources/lib/js/index.js.map
 src/main/share/crc.d.ts.html
 src/main/share/cryptoExt.d.ts.html
 src/main/share/uds.d.ts.html
 src/main/share/utli.d.ts.html
-
+src/main/share/index.d.ts.html
 # python
 
 resources/python

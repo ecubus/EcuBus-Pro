@@ -5,10 +5,7 @@ import { DataSet } from 'src/preload/data'
 import { registerWorker, workerEmit } from '../worker/uds'
 
 // Re-export all worker capabilities
-export * from '../worker/uds'
-export * from '../worker/crc'
-export * from '../worker/cryptoExt'
-export * from '../worker/utli'
+export * from '../worker'
 
 type ServiceMap = {
   [key: string]: any

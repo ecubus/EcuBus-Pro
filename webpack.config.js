@@ -62,6 +62,14 @@ class MyCustomPlugin {
 
        
 
+        // Copy canopen .d.ts files to dist so rollup can resolve them
+        const canopenSrcDir = path.resolve(__dirname,'src/main/worker/canopen')
+        const canopenDistDir = path.resolve(__dirname,'dist/src/main/worker/canopen')
+        fs.cpSync(canopenSrcDir, canopenDistDir, {
+          recursive: true,
+          filter: (src) => fs.statSync(src).isDirectory() || src.endsWith('.d.ts')
+        })
+
         // merge worker typings into one worker.d.ts
         const workerDtsEntry = path.resolve(__dirname,'dist','src/main/worker','index.d.ts')
         const workerBundledDts = path.resolve(__dirname,'dist','src/main/worker','index.bundled.d.ts')

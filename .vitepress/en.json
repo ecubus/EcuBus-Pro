@@ -304,6 +304,16 @@
         }
       ],
       "collapsed": true
+    },
+    {
+      "text": "CANOpen",
+      "items": [
+        {
+          "text": "CANOpen PDO",
+          "link": "canopen_pdo/readme.md"
+        }
+      ],
+      "collapsed": true
     }
   ],
   "developerManual": [

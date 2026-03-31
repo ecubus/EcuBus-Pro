@@ -1,0 +1,385 @@
+{
+  "data": {
+    "devices": {
+      "e4af1795-9155-46f9-b29b-f622e34982d9": {
+        "type": "can",
+        "canDevice": {
+          "id": "e4af1795-9155-46f9-b29b-f622e34982d9",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_6"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "d20bd5d7-e104-42d0-8839-7b2579872fc8": {
+        "name": "pdo_consumer",
+        "id": "d20bd5d7-e104-42d0-8839-7b2579872fc8",
+        "channel": [
+          "e4af1795-9155-46f9-b29b-f622e34982d9"
+        ],
+        "script": "pdo_consumer.ts",
+        "workNode": ""
+      },
+      "5ed587b2-e702-4d5e-a70f-521d38422b9c": {
+        "name": "pdo_producer",
+        "id": "5ed587b2-e702-4d5e-a70f-521d38422b9c",
+        "channel": [
+          "e4af1795-9155-46f9-b29b-f622e34982d9"
+        ],
+        "script": "pdo_producer.ts",
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {
+      "b29cadb8-7f8a-48b1-8a15-95c959384181": {
+        "name": "MotorSpeedPlus",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181"
+      },
+      "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd": {
+        "name": "MotorSpeedMinus",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd"
+      },
+      "60a2d996-ca92-4276-bb35-92574e959209": {
+        "name": "MotorSpeed",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "60a2d996-ca92-4276-bb35-92574e959209"
+      }
+    },
+    "datas": {},
+    "panels": {
+      "237463d4-1c35-4300-a316-0c6029db353c": {
+        "name": "Demo",
+        "id": "237463d4-1c35-4300-a316-0c6029db353c",
+        "rule": [
+          {
+            "type": "grid",
+            "props": {
+              "rule": {
+                "layout": [
+                  {
+                    "i": "F0wzmnebckbfamc",
+                    "x": 0,
+                    "y": 0,
+                    "w": 8,
+                    "h": 2
+                  },
+                  {
+                    "i": "Fxxhmnebckbfaoc",
+                    "x": 8,
+                    "y": 0,
+                    "w": 6,
+                    "h": 2
+                  },
+                  {
+                    "i": "Fnw2mnebckbfarc",
+                    "x": 14,
+                    "y": 0,
+                    "w": 6,
+                    "h": 2
+                  }
+                ],
+                "row": 24,
+                "rowHeight": 80,
+                "margin": 10,
+                "style": {},
+                "class": {},
+                "col": 1
+              }
+            },
+            "children": [
+              {
+                "type": "xProgress",
+                "field": "Fx0xmnebcvykayc",
+                "style": {
+                  "width": "100%"
+                },
+                "props": {
+                  "strokeWidth": 20,
+                  "textInside": true,
+                  "showText": true,
+                  "color": "#409EFF",
+                  "type": "circle",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "60a2d996-ca92-4276-bb35-92574e959209",
+                    "name": "MotorSpeed",
+                    "color": "#6aa3ca",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100
+                    },
+                    "bindValue": {
+                      "variableId": "60a2d996-ca92-4276-bb35-92574e959209",
+                      "variableType": "user",
+                      "variableName": "MotorSpeed",
+                      "variableFullName": "MotorSpeed",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "_fc_id": "id_Fu0omnebcvykazc",
+                "name": "ref_Ftrpmnebcvykb0c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "xProgress",
+                "slot": "F0wzmnebckbfamc"
+              },
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "type": "primary",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+                    "name": "MotorSpeedPlus",
+                    "color": "#54941c",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "variableId": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+                      "variableType": "user",
+                      "variableName": "MotorSpeedPlus",
+                      "variableFullName": "MotorSpeedPlus",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "children": [
+                  "Speed+"
+                ],
+                "_fc_id": "id_F84nmnebdg7xb4c",
+                "name": "ref_Fa7kmnebdg7xb5c",
+                "field": "F3k8mnebdg7xb6c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "title": "",
+                "info": "",
+                "slot": "Fxxhmnebckbfaoc"
+              },
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "type": "warning",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+                    "name": "MotorSpeedMinus",
+                    "color": "#d7f5cb",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "variableId": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+                      "variableType": "user",
+                      "variableName": "MotorSpeedMinus",
+                      "variableFullName": "MotorSpeedMinus",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "children": [
+                  "Speed-"
+                ],
+                "_fc_id": "id_Fy5kmnebebiwb7c",
+                "name": "ref_F461mnebebiwb8c",
+                "field": "F64kmnebebiwb9c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "slot": "Fnw2mnebckbfarc"
+              }
+            ],
+            "_fc_id": "id_Fkx7mnebckbcakc",
+            "name": "ref_Fd81mnebckbcalc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "grid"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "Demo"
+        }
+      }
+    },
+    "logs": {},
+    "traces": {},
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 2562,
+          "h": 456
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom",
+        "hide": true
+      },
+      "hardware": {
+        "pos": {
+          "x": 403,
+          "y": 239,
+          "w": 600,
+          "h": 400
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {},
+        "hide": true
+      },
+      "network": {
+        "pos": {
+          "x": 423,
+          "y": 260,
+          "w": 707,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {},
+        "hide": false,
+        "backupPos": {
+          "x": 423,
+          "y": 259,
+          "w": 600,
+          "h": 400
+        },
+        "isMax": false
+      },
+      "trace": {
+        "pos": {
+          "x": 1630,
+          "y": 330,
+          "w": 700,
+          "h": 400
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        },
+        "hide": true
+      },
+      "variable": {
+        "pos": {
+          "x": 981,
+          "y": 242,
+          "w": 1323,
+          "h": 391
+        },
+        "title": "variable",
+        "label": "Variable",
+        "id": "variable",
+        "options": {},
+        "hide": true
+      },
+      "p237463d4-1c35-4300-a316-0c6029db353c": {
+        "pos": {
+          "x": 1373,
+          "y": 51.5,
+          "w": 800,
+          "h": 550
+        },
+        "title": "panelPreview",
+        "label": "PanelPreview",
+        "id": "p237463d4-1c35-4300-a316-0c6029db353c",
+        "options": {
+          "params": {
+            "edit-index": "p237463d4-1c35-4300-a316-0c6029db353c"
+          },
+          "name": "Demo"
+        },
+        "hide": false
+      }
+    },
+    "example": {
+      "catalog": "CANOpen"
+    }
+  }
+}

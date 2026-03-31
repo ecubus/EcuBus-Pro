@@ -11,3 +11,4 @@ resources/docs/scriptApi
 resources/buildInScript
 src/renderer/src/views/uds/panel/panel-designer
 src/renderer/src/views/ostrace/timeline
+src/main/worker/canopen/source

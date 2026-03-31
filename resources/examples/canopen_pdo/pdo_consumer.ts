@@ -51,7 +51,7 @@ Util.Init(() => {
     for (const obj of dataObjects) {
       console.log(`Set ${obj} to ${obj.value}`)
       if (obj.index === 0x2001) {
-        setVar('MotorSpeed', obj.value)
+        setVar('MotorSpeed', Number(obj.value))
       }
     }
   })

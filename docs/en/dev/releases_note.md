@@ -1,6 +1,17 @@
 # EcuBus-Pro Release Notes
-## 0.8.62
+
+## 0.8.63
 Changes since v0.8.62:
+
+ 
+* [feat]:add canopen api 
+* [bug]:fix logger empty log file 
+* [opt]:opt script api import
+* [bug]:fix uds job not found issue
+---
+
+## 0.8.62
+Changes since v0.8.61:
 
 * [bug]:fix ldf parse without nodeAttr 
 * [example]:add can fuzz example 

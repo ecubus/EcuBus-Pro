@@ -15,4 +15,8 @@ export * from './secureAccess'
 export * from './crc'
 export * from './cryptoExt'
 export * from './utli'
+/**
+ * CANopen API.
+ * @category canopen
+ */
 export * as canopen from './canopen'

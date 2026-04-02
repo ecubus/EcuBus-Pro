@@ -124,7 +124,9 @@ export class NodeClass {
         const outDir = path.join(this.projectPath, '.ScriptBuild')
         jsPath = path.join(outDir, info.name + '.js')
       } else {
-        jsPath = path.join(this.projectPath, jsPath)
+        if (!path.isAbsolute(jsPath)) {
+          jsPath = path.join(this.projectPath, jsPath)
+        }
       }
 
       this.log = new UdsLOG(`${nodeItem.name} ${path.basename(nodeItem.script)}`)

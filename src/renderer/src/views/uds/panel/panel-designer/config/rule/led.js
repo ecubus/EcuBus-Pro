@@ -19,7 +19,8 @@ export default {
             props: {
                 size: 50,
                 onColor: '#00ff00',
-                offColor: '#666666'
+                offColor: '#666666',
+                customSvg: ''
             }
         };
     },
@@ -45,6 +46,16 @@ export default {
                 field: 'offColor',
                 title: 'Off Color',
                 value: '#666666'
+            },
+            {
+                type: 'input',
+                field: 'customSvg',
+                title: 'Custom SVG',
+                props: {
+                    type: 'textarea',
+                    rows: 8,
+                    placeholder: 'Paste <svg>...</svg> source (empty = default icon)'
+                }
             }
         ]);
     }

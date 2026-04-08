@@ -55,15 +55,24 @@ const loadLocalImage = (src) => {
     return
   }
 
+  if (src.startsWith('local-resource:///')) {
+    localSrc.value = src
+    return
+  }
+
   // 处理本地资源，使用相对路径
   if (project.projectInfo?.path) {
     const isAbsolutePath = src.match(/^[A-Za-z]:\\/) || src.startsWith('/')
     // 如果是绝对路径，直接使用
     if (isAbsolutePath) {
-      localSrc.value = 'local-resource://' + src
+      const normalized = src.replace(/\\/g, '/')
+      localSrc.value = 'local-resource:///' + normalized
     } else {
       // 相对路径，需要附加项目路径
-      localSrc.value = 'local-resource://' + project.projectInfo.path + '\\' + src
+      const cleanSrc = src.replace(/^\.\//, '')
+      const fullPath = `${project.projectInfo.path}\\${cleanSrc}`
+      const normalized = fullPath.replace(/\\/g, '/')
+      localSrc.value = 'local-resource:///' + normalized
     }
   } else {
     localSrc.value = src

@@ -126,7 +126,8 @@
     "panels": {},
     "logs": {},
     "traces": {},
-    "pluginData": {}
+    "pluginData": {},
+    "replays": {}
   },
   "project": {
     "wins": {
@@ -177,8 +178,8 @@
       },
       "trace": {
         "pos": {
-          "x": 72.5,
-          "y": 117,
+          "x": 54.5,
+          "y": 186,
           "w": 1562,
           "h": 400
         },

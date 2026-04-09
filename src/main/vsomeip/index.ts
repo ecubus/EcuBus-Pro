@@ -42,7 +42,6 @@ export function startRouterCounter(configFilePath: string, quiet: boolean = true
 
     // Handle process events
     routingManagerProcess.on('message', (msg: any) => {
-      console.log('routingManagerProcess message:', msg)
       if (msg.id === 0 && msg.data === 'initRouter') {
         resolved = true
         resolvePromise()
@@ -222,7 +221,13 @@ export class VSomeIP_Client {
     public info: SomeipInfo
   ) {
     this.worker = fork(resolve(__dirname, 'vsomeip.js'))
-    this.log = new SomeipLOG('Vsomeip', name, this.info.id, this.event)
+    this.log = new SomeipLOG(
+      'Vsomeip',
+      name,
+      this.info.id,
+      this.event,
+      Number(this.info.application.id)
+    )
     this.worker.on('message', (message: any) => {
       const id = message.id
       if (id !== undefined) {

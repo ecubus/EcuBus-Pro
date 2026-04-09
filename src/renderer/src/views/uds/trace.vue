@@ -210,7 +210,7 @@ interface LogData {
   method: string
   name?: string
   seqIndex?: number
-  children?: LogData[] | { name: string; data: string }[]
+  children?: LogData[] | { key?: string; name: string; data: string; children?: any[] }[]
   deltaTime?: string
   previousTs?: number
   count?: number
@@ -529,6 +529,22 @@ function insertData2(data: LogData[]) {
 
 let logData: LogData[] = []
 let timer: any = null
+
+function withUniqueChildKeys(
+  children: { key?: string; name: string; data: string; children?: any[] }[] | undefined,
+  seed: string
+) {
+  if (!Array.isArray(children) || children.length === 0) return undefined
+  return children.map((child, idx) => {
+    const childKey = `${seed}/c${idx}-${child.name}`
+    return {
+      ...child,
+      key: childKey,
+      children: withUniqueChildKeys(child.children as any, childKey)
+    }
+  })
+}
+
 function logDisplay({ values }: { values: LogItem[] }) {
   const vals = values
   // Don't process logs when paused
@@ -545,6 +561,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
 
     if (isOverwrite.value) {
       data.key = `${data.channel}-${data.device}-${data.id}`
+      data.children = withUniqueChildKeys(data.children as any, String(data.key)) as any
     } else {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.ts.toFixed(0)}`
     }
@@ -742,42 +759,37 @@ function logDisplay({ values }: { values: LogItem[] }) {
         msgType: i18next.t('uds.trace.messageTypes.systemMessage')
       })
     } else if (val.message.method == 'someipBase') {
-      const childrenList: { name: string; data: string }[] = [
-        {
-          name: i18next.t('uds.trace.messageTypes.version'),
-          data: `${i18next.t('uds.trace.messageTypes.protocolVersion')}:${val.message.data.protocolVersion}, ${i18next.t('uds.trace.messageTypes.interfaceVersion')}:${val.message.data.interfaceVersion}`
-        },
-        {
-          name: i18next.t('uds.trace.messageTypes.returnCode'),
-          data: '0x' + val.message.data.returnCode.toString(16).padStart(2, '0')
-        }
-      ]
-      if (val.message.data.ip) {
-        childrenList.push({
-          name: i18next.t('uds.trace.messageTypes.address'),
-          data: `${val.message.data.ip}:${val.message.data.port}`
-        })
+      const someipData = val.message.data as SomeipMessage & {
+        children?: { name: string; data: string; children?: any[] }[]
+        summary?: string
+        sd?: boolean
+        header?: Uint8Array
+        data?: Uint8Array
       }
-      if (val.message.data.protocol) {
-        childrenList.push({
-          name: i18next.t('uds.trace.messageTypes.protocol'),
-          data: val.message.data.protocol
-        })
-      }
-
+      const n16 = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
+      const rawPayload =
+        someipData.payload && someipData.payload instanceof Uint8Array
+          ? someipData.payload
+          : someipData.data && someipData.data instanceof Uint8Array
+            ? someipData.data
+            : new Uint8Array()
       insertData({
         method: val.message.method,
-        name: `Client:0x${val.message.data.client.toString(16).padStart(4, '0')} Session:0x${val.message.data.session.toString(16).padStart(4, '0')}`,
-        data: data2str(val.message.data.payload),
-        ts: val.message.data.ts!,
-        id: `SID:0x${val.message.data.service.toString(16).padStart(4, '0')} IID:0x${val.message.data.instance.toString(16).padStart(4, '0')} MID:0x${val.message.data.method.toString(16).padStart(4, '0')}`,
-        len: val.message.data.payload.length,
-        dlc: val.message.data.payload.length,
-        dir: val.message.data.sending ? 'Tx' : 'Rx',
+        name:
+          someipData.summary ||
+          `Client:0x${n16(someipData.client).toString(16).padStart(4, '0')} Session:0x${n16(someipData.session).toString(16).padStart(4, '0')}`,
+        data: data2str(rawPayload),
+        ts: someipData.ts!,
+        id: `SID:0x${n16(someipData.service).toString(16).padStart(4, '0')} IID:0x${n16(someipData.instance).toString(16).padStart(4, '0')} MID:0x${n16(someipData.method).toString(16).padStart(4, '0')}`,
+        len: rawPayload.length,
+        dlc: rawPayload.length,
+        dir: someipData.sending ? 'Tx' : 'Rx',
         device: val.label,
         channel: val.instance,
-        msgType: SomeipMessageTypeMap[val.message.data.messageType],
-        children: childrenList
+        msgType: someipData.sd
+          ? `${SomeipMessageTypeMap[someipData.messageType] || 'Unknown'} (SD)`
+          : SomeipMessageTypeMap[someipData.messageType] || 'Unknown',
+        children: someipData.children || []
       })
     } else if (val.message.method == 'someipServiceValid') {
       insertData({
@@ -1150,15 +1162,9 @@ watch(
   { deep: true }
 )
 watch([isPaused, isOverwrite], (v) => {
-  if (v[1]) {
-    columes.value[0].type = 'tree'
-  } else {
-    if (v[0]) {
-      columes.value[0].type = 'tree'
-    } else {
-      columes.value[0].type = undefined
-      scrollY = -1
-    }
+  columes.value[0].type = 'tree'
+  if (!v[0] && !v[1]) {
+    scrollY = -1
   }
   if (v[0]) {
     //load data

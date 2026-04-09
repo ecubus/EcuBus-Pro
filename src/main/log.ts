@@ -11,7 +11,6 @@ import type { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
 import { v4 } from 'uuid'
-import { SomeipMessageType } from './share/someip/index'
 import type { SomeipMessage, VsomeipAvailabilityInfo } from './share/someip'
 import type { OsEvent } from './share/osEvent'
 import path from 'path'
@@ -595,7 +594,8 @@ export class SomeipLOG {
     vendor: string,
     instance: string,
     deviceId: string,
-    private event: EventEmitter
+    private event: EventEmitter,
+    private applicationId?: number
   ) {
     this.vendor = vendor
     this.deviceId = deviceId
@@ -623,50 +623,18 @@ export class SomeipLOG {
 
     this.event.removeAllListeners()
   }
+
   someipBase(header: Buffer, data: Buffer, ts: number) {
     try {
-      const dataInfo: SomeipMessage = {
-        sending: false,
-        service: 0,
-        instance: 0,
-        method: 0,
-        client: 0,
-        session: 0,
-        protocolVersion: 0,
-        interfaceVersion: 0,
-        messageType: SomeipMessageType.UNKNOWN,
-        returnCode: 0,
-        payload: Buffer.from([]),
-        ts: ts
-      }
-      dataInfo.service = data.readUint16BE(0)
-      dataInfo.method = data.readUint16BE(2)
-      dataInfo.client = data.readUint16BE(8)
-      dataInfo.session = data.readUint16BE(10)
-      dataInfo.protocolVersion = data.readUint8(12)
-      dataInfo.interfaceVersion = data.readUint8(13)
-      dataInfo.messageType = data.readUint8(14)
-      dataInfo.returnCode = data.readUint8(15)
-      dataInfo.payload = data.subarray(16)
-
-      const protocolMap: Record<number, string> = {
-        0: 'local',
-        1: 'udp',
-        2: 'tcp',
-        3: 'unknown'
-      }
-      dataInfo.ip = header.readUint32BE(0).toString(16)
-      dataInfo.port = header.readUint16BE(4)
-      dataInfo.protocol = protocolMap[header.readUint8(6)] || 'unknown'
-      dataInfo.sending = header.readUint8(7) == 1
-      dataInfo.instance = header.readUint16BE(8)
-
       this.log.info({
         method: 'someipBase',
         deviceId: this.deviceId,
-        data: dataInfo
+        data: {
+          header,
+          data,
+          ts
+        }
       })
-      this.event.emit('someip-frame', dataInfo)
     } catch (e: any) {
       this.log.error({
         method: 'someipError',

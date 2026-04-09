@@ -1,17 +1,16 @@
-// Copyright (C) 2020-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_LOGGER_HPP_
-#define VSOMEIP_V3_LOGGER_HPP_
+#pragma once
 
 #include <chrono>
 #include <cstdint>
-#include <mutex>
 #include <ostream>
-#include <sstream>
 #include <streambuf>
+#include <string_view>
+#include <vector>
 
 #include <vsomeip/export.hpp>
 
@@ -28,26 +27,38 @@ enum class VSOMEIP_IMPORT_EXPORT level_e : std::uint8_t {
     LL_VERBOSE = 6
 };
 
-class message
-    : public std::ostream {
-
+class message : public std::ostream {
 public:
-    VSOMEIP_IMPORT_EXPORT message(level_e _level);
-    VSOMEIP_IMPORT_EXPORT ~message();
+    VSOMEIP_IMPORT_EXPORT explicit message(level_e _level);
+    VSOMEIP_IMPORT_EXPORT ~message() override;
 
 private:
-    class buffer : public std::streambuf {
-    public:
-        int_type overflow(int_type);
-        std::streamsize xsputn(const char *, std::streamsize);
+    std::string_view timestamp() const;
+    std::string_view app_name() const;
+    std::string_view level_as_view() const;
+    std::string_view buffer_as_view() const;
 
-        std::stringstream data_;
+    struct buffer : public std::streambuf {
+        void activate();
+        bool is_active() const;
+
+        std::streambuf::int_type overflow(std::streambuf::int_type c) override;
+        std::streamsize xsputn(const char* s, std::streamsize n) override;
+
+        // The internal storage for the streambuffer. We use this for being able to access data
+        // directly as a string_view. This saving having to allocate a new std::string. The
+        // main use-case is being able to pass data to DLT without unnecessary copying.
+        std::vector<char> data_;
+        bool active_{false};
     };
 
-    std::chrono::system_clock::time_point when_;
     buffer buffer_;
-    level_e level_;
-    static std::mutex mutex__;
+    const level_e level_;
+    bool console_enabled_{false};
+    bool dlt_enabled_{false};
+    bool file_enabled_{false};
+    std::chrono::system_clock::time_point when_;
+    mutable std::string timestamp_;
 };
 
 } // namespace logger
@@ -62,5 +73,3 @@ private:
 
 #define VSOMEIP_LOG_DEFAULT_APPLICATION_ID      "VSIP"
 #define VSOMEIP_LOG_DEFAULT_APPLICATION_NAME    "vSomeIP application|SysInfra|IPC"
-
-#endif // VSOMEIP_V3_LOGGER_HPP_

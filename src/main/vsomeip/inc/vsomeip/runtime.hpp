@@ -1,10 +1,9 @@
-// Copyright (C) 2014-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_RUNTIME_HPP
-#define VSOMEIP_V3_RUNTIME_HPP
+#pragma once
 
 #include <memory>
 #include <string>
@@ -50,14 +49,12 @@ class payload;
  */
 class VSOMEIP_IMPORT_EXPORT runtime {
 public:
-
-    static std::string get_property(const std::string &_name);
-    static void set_property(const std::string &_name, const std::string &_value);
+    static std::string get_property(const std::string& _name);
+    static void set_property(const std::string& _name, const std::string& _value);
 
     static std::shared_ptr<runtime> get();
 
-    virtual ~runtime() {
-    }
+    virtual ~runtime() { }
 
     /**
      *
@@ -75,8 +72,7 @@ public:
      * \param _name Name of the application on the system.
      *
      */
-    virtual std::shared_ptr<application> create_application(
-            const std::string &_name = "") = 0;
+    virtual std::shared_ptr<application> create_application(const std::string& _name = "") = 0;
 
     /**
      *
@@ -91,8 +87,7 @@ public:
      * over a reliable connection (TCP) or not (UDP).
      *
      */
-    virtual std::shared_ptr<message> create_message(
-            bool _reliable = false) const = 0;
+    virtual std::shared_ptr<message> create_message(bool _reliable = false) const = 0;
     /**
      *
      * \brief Constructs an empty request message.
@@ -109,8 +104,7 @@ public:
      * over a reliable connection (TCP) or not (UDP).
      *
      */
-    virtual std::shared_ptr<message> create_request(
-            bool _reliable = false) const = 0;
+    virtual std::shared_ptr<message> create_request(bool _reliable = false) const = 0;
 
     /*
      * \brief Constructs an empty response message from a given request
@@ -128,8 +122,7 @@ public:
      * the response message.
      *
      */
-    virtual std::shared_ptr<message> create_response(
-            const std::shared_ptr<message> &_request) const = 0;
+    virtual std::shared_ptr<message> create_response(const std::shared_ptr<message>& _request) const = 0;
 
     /**
      *
@@ -152,8 +145,7 @@ public:
      * @ref application::notify / @ref application::notify_one methods.
      *
      */
-    virtual std::shared_ptr<message> create_notification(
-            bool _reliable = false) const = 0;
+    virtual std::shared_ptr<message> create_notification(bool _reliable = false) const = 0;
 
     /**
      *
@@ -170,8 +162,7 @@ public:
      * \param _size Number of bytes to be copied into the payload object.
      *
      */
-    virtual std::shared_ptr<payload> create_payload(
-            const byte_t *_data, uint32_t _size) const = 0;
+    virtual std::shared_ptr<payload> create_payload(const byte_t* _data, uint32_t _size) const = 0;
 
     /**
      *
@@ -180,8 +171,7 @@ public:
      * \param _data Bytes to be copied into the payload object.
      *
      */
-    virtual std::shared_ptr<payload> create_payload(
-            const std::vector<byte_t> &_data) const = 0;
+    virtual std::shared_ptr<payload> create_payload(const std::vector<byte_t>& _data) const = 0;
 
     /**
      *
@@ -194,8 +184,7 @@ public:
      * \param _name Name of the application to be found.
      *
      */
-    virtual std::shared_ptr<application> get_application(
-            const std::string &_name) const = 0;
+    virtual std::shared_ptr<application> get_application(const std::string& _name) const = 0;
 
     /**
      * \brief Registers a handler for tracing vsomeip messages.
@@ -230,7 +219,7 @@ public:
      * \param _name Name of the application to be removed.
      *
      */
-    virtual void remove_application( const std::string &_name) = 0;
+    virtual void remove_application(const std::string& _name) = 0;
 
     /**
      *
@@ -249,12 +238,9 @@ public:
      * \param _path Path to the configuration file or folder.
      *
      */
-    virtual std::shared_ptr<application> create_application(
-            const std::string &_name, const std::string &_path) = 0;
+    virtual std::shared_ptr<application> create_application(const std::string& _name, const std::string& _path) = 0;
 };
 
 /** @} */
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_RUNTIME_HPP_

@@ -1,10 +1,9 @@
-// Copyright (C) 2016-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_PRE_CONFIGURATION_PLUGIN_HPP_
-#define VSOMEIP_V3_PRE_CONFIGURATION_PLUGIN_HPP_
+#pragma once
 
 #include <vsomeip/export.hpp>
 
@@ -18,7 +17,7 @@ namespace vsomeip_v3 {
  */
 class pre_configuration_plugin {
 public:
-    virtual ~pre_configuration_plugin() {}
+    virtual ~pre_configuration_plugin() { }
 
     // Plug-In should return a valid path to a vSomeIP configuration.
     // vSomeIP will use this path for config loading if such a plug-in is availablel.
@@ -26,5 +25,3 @@ public:
 };
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_PRE_CONFIGURATION_PLUGIN_HPP_

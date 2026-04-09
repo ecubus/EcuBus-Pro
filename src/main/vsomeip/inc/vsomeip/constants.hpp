@@ -1,10 +1,9 @@
-// Copyright (C) 2014-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_CONSTANTS_HPP_
-#define VSOMEIP_V3_CONSTANTS_HPP_
+#pragma once
 
 #include <string>
 
@@ -43,17 +42,13 @@ inline constexpr request_t MAGIC_COOKIE_REQUEST = 0xDEADBEEF;
 inline constexpr client_t MAGIC_COOKIE_CLIENT = 0xDEAD;
 inline constexpr protocol_version_t MAGIC_COOKIE_PROTOCOL_VERSION = 0x01;
 inline constexpr interface_version_t MAGIC_COOKIE_INTERFACE_VERSION = 0x01;
-inline constexpr message_type_e MAGIC_COOKIE_CLIENT_MESSAGE_TYPE =
-        message_type_e::MT_REQUEST_NO_RETURN;
-inline constexpr message_type_e MAGIC_COOKIE_SERVICE_MESSAGE_TYPE =
-        message_type_e::MT_NOTIFICATION;
+inline constexpr message_type_e MAGIC_COOKIE_CLIENT_MESSAGE_TYPE = message_type_e::MT_REQUEST_NO_RETURN;
+inline constexpr message_type_e MAGIC_COOKIE_SERVICE_MESSAGE_TYPE = message_type_e::MT_NOTIFICATION;
 inline constexpr return_code_e MAGIC_COOKIE_RETURN_CODE = return_code_e::E_OK;
 
-inline constexpr byte_t CLIENT_COOKIE[] = { 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08,
-        0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x01, 0x01, 0x00 };
+inline constexpr byte_t CLIENT_COOKIE[] = {0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x01, 0x01, 0x00};
 
-inline constexpr byte_t SERVICE_COOKIE[] = { 0xFF, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00,
-        0x08, 0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x01, 0x02, 0x00 };
+inline constexpr byte_t SERVICE_COOKIE[] = {0xFF, 0xFF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x01, 0x02, 0x00};
 
 inline constexpr event_t ANY_EVENT = 0xFFFF;
 inline constexpr client_t ANY_CLIENT = 0xFFFF;
@@ -63,5 +58,3 @@ inline constexpr int VSOMEIP_ALL = -1;
 inline constexpr pending_security_update_id_t DEFAULT_SECURITY_UPDATE_ID = 0x0;
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_CONSTANTS_HPP_

@@ -1,16 +1,15 @@
-// Copyright (C) 2014-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_PRIMITIVE_TYPES_HPP_
-#define VSOMEIP_V3_PRIMITIVE_TYPES_HPP_
+#pragma once
 
 #include <array>
 #include <cstdint>
 #include <string>
 
-#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
+#if defined(__linux__) || defined(__QNX__)
 #include <sys/types.h>
 #endif
 
@@ -55,13 +54,11 @@ typedef std::uint32_t pending_remote_offer_id_t;
 typedef std::uint32_t pending_security_update_id_t;
 
 #if defined(_WIN32)
-    typedef std::uint32_t uid_t;
-    typedef std::uint32_t gid_t;
+typedef std::uint32_t uid_t;
+typedef std::uint32_t gid_t;
 #else
-    typedef ::uid_t uid_t;
-    typedef ::uid_t gid_t;
+typedef ::uid_t uid_t;
+typedef ::uid_t gid_t;
 #endif
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_PRIMITIVE_TYPES_HPP

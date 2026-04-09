@@ -1410,6 +1410,14 @@ Napi::Value exports_handler_registration_type_e_HRT_UNKNOWN_get(const Napi::Call
 Napi::Value exports_endianess_e_be_get(const Napi::CallbackInfo &info);
 // js_global_declaration
 Napi::Value exports_endianess_e_le_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_request_e_CCR_ACCEPT_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_response_e_CCR_OK_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get(const Napi::CallbackInfo &info);
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
 class _exports_message_base_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
@@ -1826,6 +1834,8 @@ Napi::Value _wrap_application_register_message_handler_ext(const Napi::CallbackI
 Napi::Value _wrap_application_get_configuration(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_application_get_policy_manager(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_application_change_connection_control(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -14658,6 +14668,81 @@ fail:
 }
 
 
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_change_connection_control(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  vsomeip_v3::application *arg1 = (vsomeip_v3::application *) 0 ;
+  vsomeip_v3::connection_control_request_e arg2 ;
+  std::string *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  vsomeip_v3::connection_control_response_e result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_application_change_connection_control.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_vsomeip_v3__application, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "application_change_connection_control" "', argument " "1"" of type '" "vsomeip_v3::application *""'"); 
+    }
+    arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "application_change_connection_control" "', argument " "2"" of type '" "vsomeip_v3::connection_control_request_e""'");
+    } 
+    arg2 = static_cast< vsomeip_v3::connection_control_request_e >(val2);{
+      {
+        std::string *ptr = (std::string *)0;
+        res3 = SWIG_AsPtr_std_string(info[1], &ptr);
+        if (!SWIG_IsOK(res3)) {
+          SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "application_change_connection_control" "', argument " "3"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "application_change_connection_control" "', argument " "3"" of type '" "std::string const &""'"); 
+        }
+        arg3 = ptr;
+      }
+    }
+    
+    
+    
+    
+    
+    result = (vsomeip_v3::connection_control_response_e)(arg1)->change_connection_control(arg2,(std::string const &)*arg3);
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+    
+    if (SWIG_IsNewObj(res3)) delete arg3;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res3)) delete arg3;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  
+#endif
+  return Napi::Value();
+}
+
+
 // js_veto_ctor
 template <typename SWIG_OBJ_WRAP>
 _exports_application_templ<SWIG_OBJ_WRAP>::_exports_application_templ(const Napi::CallbackInfo &info)
@@ -21583,6 +21668,122 @@ fail:
 }
 
 
+// js_global_getter
+Napi::Value exports_connection_control_request_e_CCR_ACCEPT_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_request_e::CCR_ACCEPT));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_request_e::CCR_RESET_AND_BLOCK));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_response_e_CCR_OK_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_response_e::CCR_OK));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_response_e::CCR_ERROR_INVALID_PARAMETER));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
 SWIGINTERN
 int SWIG_AsVal_unsigned_SS_int (Napi::Value valRef, unsigned int* val)
 {
@@ -25010,6 +25211,14 @@ void _exports_application_inst::GetMembers(
         &_exports_application_templ::_wrap_application_get_policy_manager,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
+  // jsnapi_register_member_function
+  members.erase("change_connection_control");
+  members.insert({
+    "change_connection_control",
+      _exports_application_templ::InstanceMethod("change_connection_control",
+        &_exports_application_templ::_wrap_application_change_connection_control,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
   
   /* add static class functions and variables */
   
@@ -26493,6 +26702,42 @@ do {
   Napi::Value value;
   NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("endianess_e_le", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_request_e_CCR_ACCEPT_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_request_e_CCR_ACCEPT", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_request_e_CCR_RESET_AND_BLOCK", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_response_e_CCR_OK_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_response_e_CCR_OK", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_response_e_CCR_ERROR_INVALID_PARAMETER", value,
     static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
   NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
 } while (0);

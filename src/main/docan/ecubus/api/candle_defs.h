@@ -72,6 +72,7 @@ typedef struct {
 typedef struct {
     wchar_t path[256];
     char friendly_name[256];  // Add friendly name field as char array
+    char serialNumber[256];   // Add serial number field
     candle_devstate_t state;
     candle_err_t last_error;
     DWORD error;

@@ -65,6 +65,9 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
         return false;
     }
 
+    /* Initialize serial number with empty string */
+    strcpy_s(dev->serialNumber, sizeof(dev->serialNumber), "");
+
     /* Get friendly name */
     // Initialize friendly name with default value
     strcpy_s(dev->friendly_name, sizeof(dev->friendly_name), "CandleLight Device");
@@ -94,6 +97,43 @@ static bool candle_read_di(HDEVINFO hdi, SP_DEVICE_INTERFACE_DATA interfaceData,
     /* try to open to read device infos and see if it is avail */
     if (candle_dev_interal_open(dev)) {
         dev->state = CANDLE_DEVSTATE_AVAIL;
+        
+        /* Read serial number from USB device using WinUSB API */
+        // First, get device descriptor to find serial number string index
+        USB_DEVICE_DESCRIPTOR deviceDescriptor;
+        ULONG lengthReceived = 0;
+        if (WinUsb_GetDescriptor(dev->winUSBHandle, USB_DEVICE_DESCRIPTOR_TYPE, 0, 0, 
+                                 (PUCHAR)&deviceDescriptor, sizeof(deviceDescriptor), &lengthReceived)) {
+            // Check if device has serial number string (iSerialNumber != 0)
+            if (deviceDescriptor.iSerialNumber != 0) {
+                UCHAR stringDescriptor[256];
+                ULONG bytesReceived = 0;
+                // Get string descriptor using serial number index and English language ID (0x0409)
+                if (WinUsb_GetDescriptor(dev->winUSBHandle, USB_STRING_DESCRIPTOR_TYPE, 
+                                         deviceDescriptor.iSerialNumber, 0x0409, 
+                                         stringDescriptor, sizeof(stringDescriptor), &bytesReceived)) {
+                    if (bytesReceived >= 2 && stringDescriptor[0] >= 2) {
+                        // USB string descriptors are UTF-16LE, starting at offset 2
+                        // stringDescriptor[0] is the length of the descriptor in bytes
+                        // stringDescriptor[1] is the descriptor type (USB_STRING_DESCRIPTOR_TYPE)
+                        // Actual string data starts at offset 2
+                        int stringLen = (stringDescriptor[0] - 2) / 2; // Length in UTF-16 characters
+                        if (stringLen > 0 && stringLen < 128) {
+                            wchar_t* wideStr = (wchar_t*)(stringDescriptor + 2);
+                            // Convert UTF-16LE to UTF-8 using WideCharToMultiByte
+                            int convertedLen = WideCharToMultiByte(CP_UTF8, 0, wideStr, stringLen, 
+                                                                  dev->serialNumber, sizeof(dev->serialNumber) - 1, NULL, NULL);
+                            if (convertedLen > 0) {
+                                dev->serialNumber[convertedLen] = '\0';
+                            } else {
+                                dev->serialNumber[0] = '\0';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         candle_dev_close(dev);
     } else {
         dev->state = CANDLE_DEVSTATE_INUSE;
@@ -220,6 +260,16 @@ char* __stdcall DLL candle_dev_get_friendly_name(candle_handle hdev)
     } else {
         candle_device_t *dev = (candle_device_t*)hdev;
         return dev->friendly_name;
+    }
+}
+
+char* __stdcall DLL candle_dev_get_serial_number(candle_handle hdev)
+{
+    if (hdev==NULL) {
+        return NULL;
+    } else {
+        candle_device_t *dev = (candle_device_t*)hdev;
+        return dev->serialNumber;
     }
 }
 
@@ -706,9 +756,4 @@ bool __stdcall DLL candle_channel_set_can_resister_enable_state(candle_handle hd
     return candle_ctrl_set_can_resister_enable_state(dev, ch, enable);
 }
 
-bool __stdcall DLL candle_channel_set_interfacenumber_endpoints(candle_handle hdev, uint8_t ch)
-{
-    candle_device_t *dev = (candle_device_t*)hdev;
-    return candle_ctrl_set_can_interfacenumber_endpoint(dev, ch);
-}
 

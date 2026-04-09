@@ -14,7 +14,7 @@ import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { CanLOG } from '../../log'
-import Candle from './../build/Release/candle.node'
+import Candle from './../build/Release/ecubus.node'
 import { platform } from 'os'
 import { CanBase } from '../base'
 
@@ -25,7 +25,7 @@ interface CANFrame {
   ts: number
 }
 
-export class Candle_CAN extends CanBase {
+export class EcuBusCan extends CanBase {
   event: EventEmitter
   info: CanBaseInfo
   target: any
@@ -39,7 +39,7 @@ export class Candle_CAN extends CanBase {
   canfdConfig: any
   startTime = getTsUs()
   tsOffset: number | undefined
-  static candleOpened = false
+
   private readAbort = new AbortController()
 
   rejectBaseMap = new Map<
@@ -120,16 +120,7 @@ export class Candle_CAN extends CanBase {
 
     // Check baud rate parameters against device capabilities
     const cap = this.target.bt_const
-    if (Candle_CAN.candleOpened == false) {
-      const candleInfo = {
-        channel_count: this.target.dconf.icount,
-        HW_version: `${(this.target.dconf.hw_version >> 24) & 0xff}.${(this.target.dconf.hw_version >> 16) & 0xff}.${(this.target.dconf.hw_version >> 8) & 0xff}`,
-        SW_version: `${(this.target.dconf.sw_version >> 16) & 0xff}.${(this.target.dconf.sw_version >> 8) & 0xff}.${(this.target.dconf.sw_version >> 0) & 0xff}`
-      }
 
-      sysLog.info(`candle info: ${JSON.stringify(candleInfo)}`)
-      Candle_CAN.candleOpened = true
-    }
     if (CLOCK != cap.fclk_can) {
       throw new Error(`Clock frequency mismatch: expected ${CLOCK}, got ${cap.fclk_can}`)
     }
@@ -204,6 +195,7 @@ export class Candle_CAN extends CanBase {
       }
     }
 
+    // let flag =( 1 << 3 )
     let flag = 0
     //canfd config
     if (info.canfd && info.bitratefd) {
@@ -252,18 +244,14 @@ export class Candle_CAN extends CanBase {
 
     // flag |= (1 << 12)
 
-    const ts = new Candle.TS()
+    // const ts = new Candle.TS()
 
-    if (!Candle.candle_dev_get_timestamp_us(this.target, ts.cast())) {
-      // throw new Error('Get timestamp failed')
-    }
-
-    if (!Candle.candle_channel_set_interfacenumber_endpoints(this.target, this.channel)) {
-      // throw new Error('Set interface number endpoints failed')
-    }
+    // if (!Candle.candle_dev_get_timestamp_us(this.target, ts.cast())) {
+    //   // throw new Error('Get timestamp failed')
+    // }
 
     if (!Candle.candle_channel_start(this.target, this.channel, flag)) {
-      // throw new Error('Start channel failed')
+      throw new Error('Start channel failed')
     }
 
     Candle.CreateTSFN(
@@ -404,6 +392,7 @@ export class Candle_CAN extends CanBase {
             msgType: msgType,
             database: this.info.database
           }
+          console.log('receive message: ', message)
           this.log.canBase(message) //打印接收帧
           this.event.emit(cmdId, message) //EventEmitter触发事件，接收帧触发
         }
@@ -475,11 +464,11 @@ export class Candle_CAN extends CanBase {
         // pathStr = pathStr.replace(/\{.*\}/g, '')
         // pathStr = pathStr.replace(/\{.*/g, '')
         // 直接使用设备对象获取友好名称
-        const pathStr = Candle.GetDevicePath(device)
+        const pathStr = Buffer.from(Candle.GetDeviceSerialNumber(device), 'hex').toString('base64')
         const friendlyNameStr = Candle.GetDeviceFriendlyName(device)
         devices.push({
           label: friendlyNameStr,
-          id: `Candle_${device.interfaceNumber}`,
+          id: `EcuBus_${pathStr}`,
           handle: device.interfaceNumber,
           serialNumber: pathStr
           // serialNumber: pathStr
@@ -491,13 +480,11 @@ export class Candle_CAN extends CanBase {
 
   static override getLibVersion(): string {
     if (process.platform == 'win32') {
-      const v = Candle_CAN.getRawDeviceList()[0]
+      const v = EcuBusCan.getRawDeviceList()[0]
       if (v) {
-        return `SW:${(v.dconf.sw_version >> 16) & 0xff}.${(v.dconf.sw_version >> 8) & 0xff}.${(v.dconf.sw_version >> 0) & 0xff}
-                HW:${(v.dconf.hw_version >> 24) & 0xff}.${(v.dconf.hw_version >> 16) & 0xff}.${(v.dconf.hw_version >> 8) & 0xff}
-                channel:${v.dconf.icount}`
+        return `SW:v${v.dconf.sw_version} HW:v${v.dconf.hw_version}`
       }
-      return '1.0.0'
+      return 'Please connect the device'
     } else {
       return 'only support windows'
     }
@@ -530,7 +517,7 @@ export class Candle_CAN extends CanBase {
       Candle.candle_channel_stop(this.target, this.channel)
       Candle.candle_dev_close(this.target)
     }
-    Candle_CAN.candleOpened = false
+
     this._close()
   }
   writeBase(

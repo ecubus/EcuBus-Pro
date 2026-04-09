@@ -1372,6 +1372,7 @@ extern bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hde
 extern bool __stdcall DLL SendCANMsg(std::string name,uint8_t ch,candle_frame_t *frame);
 extern std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev);
 extern std::string __stdcall DLL GetDevicePath(candle_device_t* hdev);
+extern std::string __stdcall DLL GetDeviceSerialNumber(candle_device_t* hdev);
 
 
 #include <stdint.h>		// Use the C99 official header
@@ -1820,6 +1821,15 @@ Napi::Value SWIG_From_unsigned_SS_long(Napi::Env env, unsigned long val)
 {
   return Napi::Number::New(env, val);
 }
+
+
+#ifdef SWIG_LONG_LONG_AVAILABLE
+SWIGINTERN
+Napi::Value SWIG_From_unsigned_SS_long_SS_long(Napi::Env env, unsigned long long val)
+{
+  return Napi::Number::New(env, val);
+}
+#endif
 
 
 SWIGINTERN
@@ -2838,6 +2848,10 @@ Napi::Value _wrap_candle_device_t_friendly_name_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
 void _wrap_candle_device_t_friendly_name_set(const Napi::CallbackInfo &, const Napi::Value &);
 // jsnapi_class_method_declaration
+Napi::Value _wrap_candle_device_t_serialNumber_get(const Napi::CallbackInfo &);
+// jsnapi_class_setter_declaration
+void _wrap_candle_device_t_serialNumber_set(const Napi::CallbackInfo &, const Napi::Value &);
+// jsnapi_class_method_declaration
 Napi::Value _wrap_candle_device_t_state_get(const Napi::CallbackInfo &);
 // jsnapi_class_setter_declaration
 void _wrap_candle_device_t_state_set(const Napi::CallbackInfo &, const Napi::Value &);
@@ -2962,6 +2976,15 @@ void _exports_candle_device_t_inst::GetMembers(
       _exports_candle_device_t_templ::InstanceAccessor("friendly_name",
         &_exports_candle_device_t_templ::_wrap_candle_device_t_friendly_name_get,
         &_exports_candle_device_t_templ::_wrap_candle_device_t_friendly_name_set,
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
+    });
+  // jsnapi_register_member_variable
+  members.erase("serialNumber");
+  members.insert({
+    "serialNumber",
+      _exports_candle_device_t_templ::InstanceAccessor("serialNumber",
+        &_exports_candle_device_t_templ::_wrap_candle_device_t_serialNumber_get,
+        &_exports_candle_device_t_templ::_wrap_candle_device_t_serialNumber_set,
         static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable))
     });
   // jsnapi_register_member_variable
@@ -6310,6 +6333,71 @@ fail:
 
 // js_setter
 template <typename SWIG_OBJ_WRAP>
+void _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_serialNumber_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char temp2[256] ;
+  int res2 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_serialNumber_set" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);res2 = SWIG_AsCharArray(value, temp2, 256);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "candle_device_t_serialNumber_set" "', argument " "2"" of type '" "char [256]""'");
+  }
+  arg2 = reinterpret_cast< char * >(temp2);if (arg2) memcpy(arg1->serialNumber,arg2,256*sizeof(char));
+  else memset(arg1->serialNumber,0,256*sizeof(char));
+  
+  
+  
+  return;
+  
+  goto fail;
+fail:
+  return;
+}
+
+
+// js_getter
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_serialNumber_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char *result = 0 ;
+  
+  res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_device_t_serialNumber_get" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = (char *)(char *) ((arg1)->serialNumber);
+  {
+    size_t size = SWIG_strnlen(result, 256);
+    
+    
+    
+    jsresult = SWIG_FromCharPtrAndSize(result, size);
+  }
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_setter
+template <typename SWIG_OBJ_WRAP>
 void _exports_candle_device_t_templ<SWIG_OBJ_WRAP>::_wrap_candle_device_t_state_set(const Napi::CallbackInfo &info, const Napi::Value &value) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
@@ -8259,21 +8347,21 @@ void _exports_classic_can_t_templ<SWIG_OBJ_WRAP>::_wrap_classic_can_t_timestamp_
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   classic_can *arg1 = (classic_can *) 0 ;
-  uint32_t arg2 ;
+  uint64_t arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned int val2 ;
+  unsigned long long val2 ;
   int ecode2 = 0 ;
   
   res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_classic_can, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "classic_can_t_timestamp_us_set" "', argument " "1"" of type '" "classic_can *""'"); 
   }
-  arg1 = reinterpret_cast< classic_can * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_int(value, &val2);
+  arg1 = reinterpret_cast< classic_can * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long(value, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "classic_can_t_timestamp_us_set" "', argument " "2"" of type '" "uint32_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "classic_can_t_timestamp_us_set" "', argument " "2"" of type '" "uint64_t""'");
   } 
-  arg2 = static_cast< uint32_t >(val2);if (arg1) (arg1)->timestamp_us = arg2;
+  arg2 = static_cast< uint64_t >(val2);if (arg1) (arg1)->timestamp_us = arg2;
   
   
   
@@ -8293,14 +8381,14 @@ Napi::Value _exports_classic_can_t_templ<SWIG_OBJ_WRAP>::_wrap_classic_can_t_tim
   classic_can *arg1 = (classic_can *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  uint32_t result;
+  uint64_t result;
   
   res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_classic_can, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "classic_can_t_timestamp_us_get" "', argument " "1"" of type '" "classic_can *""'"); 
   }
-  arg1 = reinterpret_cast< classic_can * >(argp1);result = (uint32_t) ((arg1)->timestamp_us);
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(result));
+  arg1 = reinterpret_cast< classic_can * >(argp1);result = (uint64_t) ((arg1)->timestamp_us);
+  jsresult = SWIG_From_unsigned_SS_long_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long long >(result));
   
   
   return jsresult;
@@ -8497,21 +8585,21 @@ void _exports_canfd_t_templ<SWIG_OBJ_WRAP>::_wrap_canfd_t_timestamp_us_set(const
   Napi::Env env = info.Env();
   Napi::Value jsresult;
   canfd *arg1 = (canfd *) 0 ;
-  uint32_t arg2 ;
+  uint64_t arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned int val2 ;
+  unsigned long long val2 ;
   int ecode2 = 0 ;
   
   res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_canfd, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "canfd_t_timestamp_us_set" "', argument " "1"" of type '" "canfd *""'"); 
   }
-  arg1 = reinterpret_cast< canfd * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_int(value, &val2);
+  arg1 = reinterpret_cast< canfd * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_long_SS_long(value, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "canfd_t_timestamp_us_set" "', argument " "2"" of type '" "uint32_t""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "canfd_t_timestamp_us_set" "', argument " "2"" of type '" "uint64_t""'");
   } 
-  arg2 = static_cast< uint32_t >(val2);if (arg1) (arg1)->timestamp_us = arg2;
+  arg2 = static_cast< uint64_t >(val2);if (arg1) (arg1)->timestamp_us = arg2;
   
   
   
@@ -8531,14 +8619,14 @@ Napi::Value _exports_canfd_t_templ<SWIG_OBJ_WRAP>::_wrap_canfd_t_timestamp_us_ge
   canfd *arg1 = (canfd *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  uint32_t result;
+  uint64_t result;
   
   res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_canfd, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "canfd_t_timestamp_us_get" "', argument " "1"" of type '" "canfd *""'"); 
   }
-  arg1 = reinterpret_cast< canfd * >(argp1);result = (uint32_t) ((arg1)->timestamp_us);
-  jsresult = SWIG_From_unsigned_SS_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned int >(result));
+  arg1 = reinterpret_cast< canfd * >(argp1);result = (uint64_t) ((arg1)->timestamp_us);
+  jsresult = SWIG_From_unsigned_SS_long_SS_long  SWIG_NAPI_FROM_CALL_ARGS(static_cast< unsigned long long >(result));
   
   
   return jsresult;
@@ -11478,6 +11566,33 @@ fail:
 
 
 // js_global_function
+Napi::Value _wrap_candle_dev_get_serial_number(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_handle arg1 = (candle_handle) 0 ;
+  int res1 ;
+  char *result = 0 ;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_candle_dev_get_serial_number.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0],SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_dev_get_serial_number" "', argument " "1"" of type '" "candle_handle""'"); 
+  }result = (char *)candle_dev_get_serial_number(arg1);
+  jsresult = SWIG_FromCharPtr((const char *)result);
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
 Napi::Value _wrap_candle_dev_open(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
@@ -12324,41 +12439,6 @@ fail:
 
 
 // js_global_function
-Napi::Value _wrap_candle_channel_set_interfacenumber_endpoints(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-  Napi::Value jsresult;
-  candle_handle arg1 = (candle_handle) 0 ;
-  uint8_t arg2 ;
-  int res1 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
-  bool result;
-  
-  if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
-    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_candle_channel_set_interfacenumber_endpoints.");
-  }
-  
-  res1 = SWIG_ConvertPtr(info[0],SWIG_as_voidptrptr(&arg1), 0, 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "candle_channel_set_interfacenumber_endpoints" "', argument " "1"" of type '" "candle_handle""'"); 
-  }ecode2 = SWIG_AsVal_unsigned_SS_char(info[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "candle_channel_set_interfacenumber_endpoints" "', argument " "2"" of type '" "uint8_t""'");
-  } 
-  arg2 = static_cast< uint8_t >(val2);result = (bool)candle_channel_set_interfacenumber_endpoints(arg1,arg2);
-  jsresult = SWIG_From_bool  SWIG_NAPI_FROM_CALL_ARGS(static_cast< bool >(result));
-  
-  
-  
-  return jsresult;
-  
-  goto fail;
-fail:
-  return Napi::Value();
-}
-
-
-// js_global_function
 Napi::Value _wrap_SetContextDevice(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Value jsresult;
@@ -12497,6 +12577,35 @@ Napi::Value _wrap_GetDevicePath(const Napi::CallbackInfo &info) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetDevicePath" "', argument " "1"" of type '" "candle_device_t *""'"); 
   }
   arg1 = reinterpret_cast< candle_device_t * >(argp1);result = GetDevicePath(arg1);
+  jsresult = SWIG_From_std_string  SWIG_NAPI_FROM_CALL_ARGS(static_cast< std::string >(result));
+  
+  
+  return jsresult;
+  
+  goto fail;
+fail:
+  return Napi::Value();
+}
+
+
+// js_global_function
+Napi::Value _wrap_GetDeviceSerialNumber(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  candle_device_t *arg1 = (candle_device_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::string result;
+  
+  if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+    SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_GetDeviceSerialNumber.");
+  }
+  
+  res1 = SWIG_ConvertPtr(info[0], &argp1,SWIGTYPE_p_candle_device_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetDeviceSerialNumber" "', argument " "1"" of type '" "candle_device_t *""'"); 
+  }
+  arg1 = reinterpret_cast< candle_device_t * >(argp1);result = GetDeviceSerialNumber(arg1);
   jsresult = SWIG_From_std_string  SWIG_NAPI_FROM_CALL_ARGS(static_cast< std::string >(result));
   
   
@@ -13927,6 +14036,13 @@ do {
 } while (0);
 // jsnapi_register_global_function
 do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_dev_get_serial_number", _wrap_candle_dev_get_serial_number);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
+// jsnapi_register_global_function
+do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_dev_open", _wrap_candle_dev_open);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
@@ -14095,13 +14211,6 @@ do {
 } while (0);
 // jsnapi_register_global_function
 do {
-  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("candle_channel_set_interfacenumber_endpoints", _wrap_candle_channel_set_interfacenumber_endpoints);
-  NAPI_CHECK_MAYBE(exports.DefineProperties({
-    pd
-  }));
-} while (0);
-// jsnapi_register_global_function
-do {
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("SetContextDevice", _wrap_SetContextDevice);
   NAPI_CHECK_MAYBE(exports.DefineProperties({
     pd
@@ -14128,6 +14237,13 @@ do {
     pd
   }));
 } while (0);
+// jsnapi_register_global_function
+do {
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Function("GetDeviceSerialNumber", _wrap_GetDeviceSerialNumber);
+  NAPI_CHECK_MAYBE(exports.DefineProperties({
+    pd
+  }));
+} while (0);
 
 
   return exports;
@@ -14137,4 +14253,3 @@ fail:
 }
 
 NODE_API_MODULE(xmlpp, Init)
-

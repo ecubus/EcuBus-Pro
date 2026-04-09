@@ -206,6 +206,13 @@ std::string __stdcall DLL GetDeviceFriendlyName(candle_device_t* hdev) {
 }
 
 
+std::string __stdcall DLL GetDeviceSerialNumber(candle_device_t* hdev) {
+    if (!hdev) {
+        return "";
+    }
+    return std::string(hdev->serialNumber);
+}
+
 
 bool __stdcall DLL SetContextDevice(std::string name,candle_device_t* hdev){
     std::lock_guard<std::mutex> lock(contextMapMutex);

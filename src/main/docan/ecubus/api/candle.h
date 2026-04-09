@@ -198,6 +198,7 @@ bool __stdcall DLL candle_dev_get(candle_list_handle list, uint8_t dev_num, cand
 bool __stdcall DLL candle_dev_get_state(candle_handle hdev, candle_devstate_t *state);
 wchar_t* __stdcall DLL candle_dev_get_path(candle_handle hdev);
 char* __stdcall DLL candle_dev_get_friendly_name(candle_handle hdev);
+char* __stdcall DLL candle_dev_get_serial_number(candle_handle hdev);
 bool __stdcall DLL candle_dev_open(candle_handle hdev);
 bool __stdcall DLL candle_dev_get_timestamp_us(candle_handle hdev, uint32_t *timestamp_us);
 bool __stdcall DLL candle_dev_close(candle_handle hdev);
@@ -227,7 +228,7 @@ candle_err_t __stdcall DLL candle_dev_last_error(candle_handle hdev);
 
 bool __stdcall DLL candle_channel_get_can_resister_enable_state(candle_handle hdev, uint8_t ch, uint8_t *enable);
 bool __stdcall DLL candle_channel_set_can_resister_enable_state(candle_handle hdev, uint8_t ch, uint8_t *enable);
-bool __stdcall DLL candle_channel_set_interfacenumber_endpoints(candle_handle hdev, uint8_t ch);
+
 
 #ifdef __cplusplus
 }

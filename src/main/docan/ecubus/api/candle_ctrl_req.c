@@ -184,7 +184,7 @@ bool candle_ctrl_get_can_resister_enable_state(candle_device_t *dev, uint8_t cha
         channel,
         dev->interfaceNumber,
         enable,
-        1
+        4
     );
 
     dev->last_error = rc ? CANDLE_ERR_OK : CANDLE_ERR_GET_TIMESTAMP;
@@ -200,7 +200,7 @@ bool candle_ctrl_set_can_resister_enable_state(candle_device_t *dev, uint8_t cha
         channel,
         dev->interfaceNumber,
         enable,
-        1
+        4
     );
 
     dev->last_error = rc ? CANDLE_ERR_OK : CANDLE_ERR_SET_BITTIMING;

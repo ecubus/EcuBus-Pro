@@ -6,7 +6,7 @@
         "linDevice": {
           "device": {
             "label": "",
-            "handle": "COM8",
+            "handle": "COM43",
             "id": ""
           },
           "name": "ECUBUS_1",
@@ -32,16 +32,6 @@
     "tester": {},
     "subFunction": {},
     "nodes": {
-      "69c0b8cc-f674-4142-99fc-9eed944cacf9": {
-        "name": "Node 2",
-        "type": "lin",
-        "id": "69c0b8cc-f674-4142-99fc-9eed944cacf9",
-        "channel": [
-          "3e8f62b0-63bf-4a3a-9bce-078faf1aced8"
-        ],
-        "workNode": "2_2:Motor1",
-        "script": "node.ts"
-      },
       "db6f596a-77a9-422f-bca2-931d129a7cd9": {
         "name": "Node 1",
         "id": "db6f596a-77a9-422f-bca2-931d129a7cd9",
@@ -696,7 +686,8 @@
     "datas": {},
     "panels": {},
     "logs": {},
-    "traces": {}
+    "traces": {},
+    "pluginData": {}
   },
   "project": {
     "wins": {
@@ -757,7 +748,7 @@
       "trace": {
         "pos": {
           "x": 0,
-          "y": 337.6666666666667,
+          "y": 337.656,
           "w": 1280,
           "h": 337.6666666666667
         },
@@ -778,29 +769,12 @@
         "label": "Devices",
         "id": "hardware",
         "options": {},
-        "hide": true
-      },
-      "69c0b8cc-f674-4142-99fc-9eed944cacf9": {
-        "pos": {
-          "x": 1280,
-          "y": 337.6666666666667,
-          "w": 1280,
-          "h": 337.6666666666667
-        },
-        "title": "linPanel",
-        "label": "Panel",
-        "id": "69c0b8cc-f674-4142-99fc-9eed944cacf9",
-        "options": {
-          "params": {
-            "editIndex": "69c0b8cc-f674-4142-99fc-9eed944cacf9"
-          },
-          "name": "Node 2"
-        }
+        "hide": false
       },
       "db6f596a-77a9-422f-bca2-931d129a7cd9": {
         "pos": {
           "x": 0,
-          "y": 675.3333333333334,
+          "y": 590,
           "w": 1280,
           "h": 337.6666666666667
         },

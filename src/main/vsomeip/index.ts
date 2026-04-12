@@ -10,7 +10,51 @@ import type { VsomeipCallbackData } from './client'
 import { SomeipLOG } from '../log'
 import EventEmitter from 'events'
 import { getTsUs } from '../share/can'
-import { SomeipMessage, SomeipInfo, ServiceConfig } from '../share/someip'
+import {
+  SomeipMessage,
+  SomeipInfo,
+  ServiceConfig,
+  ServiceEvent,
+  ServiceEventgroup,
+  SomeipMessageType
+} from '../share/someip'
+
+function mapEventForVsomeipJson(e: ServiceEvent): Record<string, unknown> {
+  const isField = e.is_field === true || e.is_field === 'true'
+  const isReliable = !(e.is_reliable === false || e.is_reliable === 'false')
+  return {
+    event: e.event,
+    is_field: isField ? 'true' : 'false',
+    is_reliable: isReliable ? 'true' : 'false'
+  }
+}
+
+function mapEventgroupForVsomeipJson(g: ServiceEventgroup): Record<string, unknown> {
+  const row: Record<string, unknown> = {
+    eventgroup: g.eventgroup,
+    events: g.events ?? []
+  }
+  if (g.multicast) row.multicast = g.multicast
+  if (g.threshold !== undefined) row.threshold = g.threshold
+  return row
+}
+
+/** Shape service entry for vSomeIP JSON (string booleans on events). */
+function mapServiceForVsomeipJson(s: ServiceConfig): Record<string, unknown> {
+  const o: Record<string, unknown> = {
+    service: s.service,
+    instance: s.instance
+  }
+  if (s.protocol) o.protocol = s.protocol
+  if (s.unicast) o.unicast = s.unicast
+  if (s.reliable) o.reliable = { ...s.reliable }
+  if (s.unreliable !== undefined) o.unreliable = s.unreliable
+  if (s.events?.length) o.events = s.events.map(mapEventForVsomeipJson)
+  if (s.eventgroups?.length) o.eventgroups = s.eventgroups.map(mapEventgroupForVsomeipJson)
+  if (s['debounce-times']) o['debounce-times'] = s['debounce-times']
+  if (s['someip-tp']) o['someip-tp'] = s['someip-tp']
+  return o
+}
 
 // Global routing manager process reference
 let routingManagerProcess: ChildProcess | null = null
@@ -170,7 +214,7 @@ export async function generateConfigFile(
     }
   ]
 
-  vsomeipConfig.services = config.services
+  vsomeipConfig.services = (config.services || []).map(mapServiceForVsomeipJson)
 
   // Add routing
   vsomeipConfig.routing = 'routingmanagerd'
@@ -321,6 +365,71 @@ export class VSomeIP_Client {
 
     return ts
   }
+  async sendRequestAndWaitResponse(msg: SomeipMessage, timeout: number) {
+    return new Promise<SomeipMessage>((resolve, reject) => {
+      const waitTimeout = Number(timeout)
+      let expectClient: number | null = null
+      let expectSession: number | null = null
+      const responseTypes = [
+        SomeipMessageType.RESPONSE,
+        SomeipMessageType.ERROR,
+        SomeipMessageType.RESPONSE_ACK,
+        SomeipMessageType.ERROR_ACK
+      ]
+      const timer = setTimeout(() => {
+        this.event.off('someip-frame', onSomeipFrame)
+        reject(new Error('SomeIP request response timeout'))
+      }, waitTimeout)
+      const onSomeipFrame = (incoming: SomeipMessage) => {
+        const raw = incoming as any
+        const incomingService = Number(raw.service)
+        const incomingInstance = Number(raw.instance)
+        const incomingMethod = Number(raw.method)
+        const incomingType = Number(raw.messageType)
+        const incomingClient = Number(raw.client)
+        const incomingSession = Number(raw.session)
+        const sending = raw.sending === true
+
+        const tripletMatch =
+          incomingService === Number(msg.service) &&
+          incomingInstance === Number(msg.instance) &&
+          incomingMethod === Number(msg.method)
+
+        // Capture Client ID + Session ID from our outbound REQUEST (stack-assigned)
+        if (
+          expectClient === null &&
+          sending &&
+          tripletMatch &&
+          incomingType === SomeipMessageType.REQUEST
+        ) {
+          expectClient = incomingClient
+          expectSession = incomingSession
+          return
+        }
+
+        if (!sending && tripletMatch && responseTypes.includes(incomingType)) {
+          if (expectClient !== null && expectSession !== null) {
+            if (incomingClient === expectClient && incomingSession === expectSession) {
+              clearTimeout(timer)
+              this.event.off('someip-frame', onSomeipFrame)
+              resolve(incoming)
+            }
+            return
+          }
+          // Fallback: no captured REQUEST seen (some stacks may not echo); match triplet only
+          clearTimeout(timer)
+          this.event.off('someip-frame', onSomeipFrame)
+          resolve(incoming)
+        }
+      }
+      this.event.on('someip-frame', onSomeipFrame)
+      this.sendRequest(msg).catch((err) => {
+        clearTimeout(timer)
+        this.event.off('someip-frame', onSomeipFrame)
+        reject(err)
+      })
+    })
+  }
   private getKey16(service: number, instance: number) {
     return instance.toString(16).padStart(4, '0') + '.' + service.toString(16).padStart(4, '0')
   }
@@ -374,5 +483,50 @@ export class VSomeIP_Client {
   }
   releaseService(services: ServiceConfig[]) {
     return this.send('releaseServices', { services })
+  }
+  /**
+   * Subscribe to an event (client): request_service → request_event (single group) → subscribe.
+   * @param eventType vSomeIP event_type_e (default 2 = ET_FIELD, matches BMW sample)
+   */
+  async subscribeToEvent(
+    service: number,
+    instance: number,
+    eventgroup: number,
+    event: number,
+    major: number = 0,
+    timeout: number = 1000,
+    eventType: number = 2
+  ) {
+    await this.requestService(service, instance, major, 0, timeout)
+    await this.send('requestEvent', {
+      service,
+      instance,
+      event,
+      eventgroup,
+      eventType
+    })
+    return this.send('subscribe', { service, instance, eventgroup, major, event })
+  }
+  /**
+   * Unsubscribe from an event or event group, then release_event when event id is known.
+   */
+  async unsubscribeFromEvent(
+    service: number,
+    instance: number,
+    eventgroup: number,
+    event?: number,
+    major: number = 0,
+    timeout: number = 1000
+  ) {
+    await this.requestService(service, instance, major, 0, timeout)
+    await this.send('unsubscribe', {
+      service,
+      instance,
+      eventgroup,
+      event: event !== undefined ? event : undefined
+    })
+    if (event !== undefined && Number.isFinite(event)) {
+      await this.send('releaseEvent', { service, instance, event })
+    }
   }
 }

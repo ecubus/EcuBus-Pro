@@ -82,6 +82,45 @@ process.on('message', (message: any) => {
       }
       break
     }
+    case 'requestEvent': {
+      instance?.sendc.requestEventOneGroup(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.event),
+        Number(data.eventgroup),
+        Number(data.eventType ?? 2)
+      )
+      break
+    }
+    case 'releaseEvent': {
+      instance?.sendc.releaseEventSimple(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.event)
+      )
+      break
+    }
+    case 'subscribe': {
+      instance?.app.subscribe(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.eventgroup),
+        Number(data.major ?? 0),
+        Number(data.event)
+      )
+      break
+    }
+    case 'unsubscribe': {
+      const s = Number(data.service)
+      const i = Number(data.instance)
+      const eg = Number(data.eventgroup)
+      if (data.event !== undefined && data.event !== null && data.event !== '') {
+        instance?.app.unsubscribe(s, i, eg, Number(data.event))
+      } else {
+        instance?.app.unsubscribe(s, i, eg)
+      }
+      break
+    }
   }
 
   process.send!(response)

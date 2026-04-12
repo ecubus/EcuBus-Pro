@@ -379,6 +379,8 @@ watch(globalStart, (val) => {
     clearLog(i18next.t('uds.trace.messages.startTrace'))
     isPaused.value = false
     logData = []
+  } else {
+    isPaused.value = true
   }
 })
 
@@ -560,7 +562,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
     }
 
     if (isOverwrite.value) {
-      data.key = `${data.channel}-${data.device}-${data.id}`
+      data.key = `${data.channel}-${data.device}-${data.id}-${data.dir || ''}`
       data.children = withUniqueChildKeys(data.children as any, String(data.key)) as any
     } else {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.ts.toFixed(0)}`

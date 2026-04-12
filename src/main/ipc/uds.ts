@@ -442,6 +442,27 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
         const client = new VSomeIP_Client(val.name, file, val)
         client.init()
 
+        client.attachSomeipMessage((msg) => {
+          if (
+            msg.sending === false &&
+            (msg.messageType === SomeipMessageType.NOTIFICATION ||
+              msg.messageType === SomeipMessageType.NOTIFICATION_ACK)
+          ) {
+            const payload = Buffer.isBuffer(msg.payload) ? [...msg.payload] : []
+            BrowserWindow.getAllWindows().forEach((win) => {
+              win.webContents.send('someip-incoming-notification', {
+                deviceKey: key,
+                service: msg.service,
+                instance: msg.instance,
+                method: msg.method,
+                messageType: msg.messageType,
+                returnCode: msg.returnCode,
+                payload
+              })
+            })
+          }
+        })
+
         someipMap.set(key, client)
       }
     }
@@ -1371,6 +1392,41 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
 
   const base = someipMap.get(ia.channel) as VSomeIP_Client
   if (base) {
+    const op = ia.someipOp ?? 'send'
+    if (op === 'subscribe') {
+      const eg = ia.eventGroupId != null && ia.eventGroupId !== '' ? Number(ia.eventGroupId) : NaN
+      if (!Number.isFinite(eg)) {
+        throw new Error('Subscribe requires a valid eventGroupId')
+      }
+      await base.subscribeToEvent(
+        Number(ia.serviceId),
+        Number(ia.instanceId),
+        eg,
+        Number(ia.methodId),
+        Number(ia.major || 0),
+        Number(ia.responseTimeout || 1000),
+        ia.someipEventType != null && Number.isFinite(Number(ia.someipEventType))
+          ? Number(ia.someipEventType)
+          : 2
+      )
+      return { ok: true }
+    }
+    if (op === 'unsubscribe') {
+      const eg = ia.eventGroupId != null && ia.eventGroupId !== '' ? Number(ia.eventGroupId) : NaN
+      if (!Number.isFinite(eg)) {
+        throw new Error('Unsubscribe requires a valid eventGroupId')
+      }
+      await base.unsubscribeFromEvent(
+        Number(ia.serviceId),
+        Number(ia.instanceId),
+        eg,
+        Number(ia.methodId),
+        Number(ia.major || 0),
+        Number(ia.responseTimeout || 1000)
+      )
+      return { ok: true }
+    }
+
     const msg: SomeipMessage = {
       service: Number(ia.serviceId),
       instance: Number(ia.instanceId),
@@ -1386,15 +1442,27 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
       reliable: ia.reliable,
       sending: true
     }
-    await base.requestService(
-      Number(ia.serviceId),
-      Number(ia.instanceId),
-      Number(ia.major || 0),
-      Number(ia.minor || 0),
-      1000
-    )
-    await base.sendRequest(msg)
+    const skipRequest =
+      ia.messageType === SomeipMessageType.NOTIFICATION ||
+      ia.messageType === SomeipMessageType.NOTIFICATION_ACK
+    if (!skipRequest) {
+      await base.requestService(
+        Number(ia.serviceId),
+        Number(ia.instanceId),
+        Number(ia.major || 0),
+        Number(ia.minor || 0),
+        1000
+      )
+    }
+    if (ia.messageType === SomeipMessageType.REQUEST) {
+      return await base.sendRequestAndWaitResponse(msg, Number(ia.responseTimeout || 1000))
+    } else {
+      await base.sendRequest(msg)
+      return null
+    }
   } else {
-    sysLog.error(`someip device not found`)
+    const errMsg = `someip device not found: ${ia.channel || 'unknown channel'}`
+    sysLog.error(errMsg)
+    throw new Error(errMsg)
   }
 })

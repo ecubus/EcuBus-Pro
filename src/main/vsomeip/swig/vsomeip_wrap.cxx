@@ -2168,6 +2168,10 @@ Napi::Value _wrap_new_Send__SWIG_2(const Napi::CallbackInfo &);
 virtual ~_exports_Send_templ();
 // jsnapi_class_method_declaration
 Napi::Value _wrap_Send_sendMessage(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_request_event_one_group(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_release_event_simple(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -19174,6 +19178,158 @@ fail:
 }
 
 
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_request_event_one_group(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  std::uint16_t arg5 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  unsigned short val5 ;
+  int ecode5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 5 || static_cast<int>(info.Length()) > 5) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_request_event_one_group.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_request_event_one_group" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_request_event_one_group" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_request_event_one_group" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_request_event_one_group" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);ecode5 = SWIG_AsVal_unsigned_SS_short(info[3], &val5);
+    if (!SWIG_IsOK(ecode5)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Send_request_event_one_group" "', argument " "5"" of type '" "std::uint16_t""'");
+    } 
+    arg5 = static_cast< std::uint16_t >(val5);ecode6 = SWIG_AsVal_int(info[4], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_request_event_one_group" "', argument " "6"" of type '" "int""'");
+    } 
+    arg6 = static_cast< int >(val6);
+    
+    
+    
+    
+    (arg1)->request_event_one_group(arg2,arg3,arg4,arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_release_event_simple(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_release_event_simple.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_release_event_simple" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_release_event_simple" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_release_event_simple" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_release_event_simple" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);
+    
+    
+    
+    
+    (arg1)->release_event_simple(arg2,arg3,arg4);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
 /* -----------------------------------------------------------------------------
  * swigrun_body.swg
  *
@@ -22275,6 +22431,22 @@ void _exports_Send_inst::GetMembers(
     "sendMessage",
       _exports_Send_templ::InstanceMethod("sendMessage",
         &_exports_Send_templ::_wrap_Send_sendMessage,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("request_event_one_group");
+  members.insert({
+    "request_event_one_group",
+      _exports_Send_templ::InstanceMethod("request_event_one_group",
+        &_exports_Send_templ::_wrap_Send_request_event_one_group,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("release_event_simple");
+  members.insert({
+    "release_event_simple",
+      _exports_Send_templ::InstanceMethod("release_event_simple",
+        &_exports_Send_templ::_wrap_Send_release_event_simple,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   

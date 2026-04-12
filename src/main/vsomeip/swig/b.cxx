@@ -206,6 +206,29 @@ Send::Send(std::shared_ptr<vsomeip_v3::runtime> rtm,std::shared_ptr<vsomeip_v3::
 
 
 
+void Send::request_event_one_group(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    std::uint16_t eventgroup,
+    int event_type) {
+    std::set<vsomeip_v3::eventgroup_t> groups;
+    groups.insert(static_cast<vsomeip_v3::eventgroup_t>(eventgroup));
+    app_->request_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        groups,
+        static_cast<vsomeip_v3::event_type_e>(event_type));
+}
+
+void Send::release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event) {
+    app_->release_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event));
+}
+
 void Send::sendMessage(struct SomeipMessage* message,char* data,uint32_t length){
     // Create a new request
     std::shared_ptr<vsomeip::message> rq = rtm_->create_message(message->reliable);

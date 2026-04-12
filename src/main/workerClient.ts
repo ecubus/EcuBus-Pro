@@ -40,6 +40,7 @@ type HandlerMap = {
   canApi: (data: any) => void
   pluginEvent: (data: { name: string; data: any }) => void
   serialPortApi: (data: SerialPortApi) => Promise<any>
+  someipApi: (data: SomeipApiCall) => Promise<any>
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'
@@ -124,6 +125,51 @@ export type SerialPortApi =
   | SerialPortApiList
   | SerialPortApiSetSignals
   | SerialPortApiGetSignals
+
+/** Payload from worker SOME/IP script helpers to {@link NodeClass.someipApi}. */
+export type SomeipApiCall =
+  | {
+      op: 'request'
+      channel?: string
+      msg: SomeipMessage
+      major?: number
+      minor?: number
+      timeout: number
+    }
+  | {
+      op: 'requestNoReturn'
+      channel?: string
+      msg: SomeipMessage
+      major?: number
+      minor?: number
+    }
+  | {
+      op: 'notify'
+      channel?: string
+      msg: SomeipMessage
+    }
+  | {
+      op: 'subscribe'
+      channel?: string
+      service: number
+      instance: number
+      eventgroup: number
+      event: number
+      major?: number
+      timeout: number
+      eventType: number
+    }
+  | {
+      op: 'unsubscribe'
+      channel?: string
+      service: number
+      instance: number
+      eventgroup: number
+      event?: number
+      major?: number
+      timeout: number
+    }
+
 type EventHandlerMap = {
   [K in keyof HandlerMap]: HandlerMap[K]
 }

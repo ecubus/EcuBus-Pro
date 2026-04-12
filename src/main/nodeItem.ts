@@ -9,7 +9,8 @@ import UdsTester, {
   linApiStopSch,
   pwmApiSetDuty,
   SerialPortManager,
-  SerialPortApi
+  SerialPortApi,
+  SomeipApiCall
 } from './workerClient'
 import { CAN_TP, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
@@ -32,7 +33,7 @@ import type { TestEvent } from 'node:test/reporters'
 import { PwmBase } from './pwm'
 import { setSignal } from './util'
 import { VSomeIP_Client } from './vsomeip'
-import { SomeipMessage } from './share/someip'
+import { SomeipMessage, SomeipMessageType } from './share/someip'
 type TestTree = {
   label: string
   type: 'test' | 'config' | 'log'
@@ -232,6 +233,7 @@ export class NodeClass {
       // SerialPort API
       this.serialPortManager = new SerialPortManager(this.pool)
       this.pool.registerHandler('serialPortApi', this.serialPortApi.bind(this))
+      this.pool.registerHandler('someipApi', this.someipApi.bind(this))
 
       //cantp
       for (const tester of Object.values(this.testers)) {
@@ -940,6 +942,94 @@ export class NodeClass {
     }
   }
   async canApi(data: any) {}
+
+  private resolveSomeipClient(channel?: string): VSomeIP_Client {
+    if (channel) {
+      const c = this.someipMap.get(channel)
+      if (c) return c
+      throw new Error(`someip device not found: ${channel}`)
+    }
+    if (this.someipBaseId.length === 1) {
+      const c = this.someipMap.get(this.someipBaseId[0])
+      if (c) return c
+    }
+    throw new Error(
+      'SOME/IP device key is required (channel) when zero or multiple SOME/IP devices are attached to this node'
+    )
+  }
+
+  /**
+   * Worker RPC: SOME/IP request / notify / subscribe / unsubscribe via vSomeIP client.
+   */
+  async someipApi(data: SomeipApiCall) {
+    const base = this.resolveSomeipClient(data.channel)
+    const toBuf = (p: SomeipMessage['payload']) =>
+      Buffer.isBuffer(p) ? p : Buffer.from((p as any)?.data ?? p ?? [])
+
+    if (data.op === 'subscribe') {
+      await base.subscribeToEvent(
+        data.service,
+        data.instance,
+        data.eventgroup,
+        data.event,
+        data.major ?? 0,
+        data.timeout,
+        data.eventType
+      )
+      return { ok: true }
+    }
+    if (data.op === 'unsubscribe') {
+      await base.unsubscribeFromEvent(
+        data.service,
+        data.instance,
+        data.eventgroup,
+        data.event,
+        data.major ?? 0,
+        data.timeout
+      )
+      return { ok: true }
+    }
+
+    const msg = { ...data.msg, payload: toBuf(data.msg.payload), sending: true as const }
+
+    if (data.op === 'notify') {
+      await base.sendRequest(msg)
+      return null
+    }
+
+    if (data.op === 'requestNoReturn') {
+      await base.requestService(
+        Number(msg.service),
+        Number(msg.instance),
+        data.major ?? 0,
+        data.minor ?? 0,
+        1000
+      )
+      await base.sendRequest(msg)
+      return null
+    }
+
+    if (data.op === 'request') {
+      await base.requestService(
+        Number(msg.service),
+        Number(msg.instance),
+        data.major ?? 0,
+        data.minor ?? 0,
+        1000
+      )
+      if (msg.messageType !== SomeipMessageType.REQUEST) {
+        msg.messageType = SomeipMessageType.REQUEST
+      }
+      const resp = await base.sendRequestAndWaitResponse(msg, data.timeout)
+      return {
+        ...resp,
+        payload: Buffer.isBuffer(resp.payload) ? resp.payload : Buffer.from(resp.payload as any)
+      }
+    }
+
+    throw new Error(`unsupported someipApi op: ${(data as any).op}`)
+  }
+
   async sendFrame(frame: CanMessage | LinMsg | SomeipMessage): Promise<number> {
     if ('msgType' in frame) {
       frame.msgType.uuid = this.nodeItem.id

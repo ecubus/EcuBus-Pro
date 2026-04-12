@@ -18,6 +18,8 @@
 #include <chrono>
 #include <thread>
 #include <map>
+#include <set>
+#include <cstdint>
 
 namespace vsomeip_v3 {
     class application;
@@ -68,8 +70,16 @@ public:
     ~Send();
 
     void sendMessage(struct SomeipMessage* message,char* data,uint32_t length);
-    
-   
+
+    /** request_event(service, instance, event, {eventgroup}, type) — single event group */
+    void request_event_one_group(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        std::uint16_t eventgroup,
+        int event_type);
+
+    void release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event);
 };
 
 

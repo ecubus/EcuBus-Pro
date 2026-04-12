@@ -19,7 +19,13 @@ import type { SecurityConfig } from './security-config'
 
 import type { ServiceDiscoveryConfig, TracingConfig } from './service-discovery-config'
 
-import type { ServiceConfig, InternalServiceConfig, ClientConfig } from './service-config'
+import type {
+  ServiceConfig,
+  ServiceEvent,
+  ServiceEventgroup,
+  InternalServiceConfig,
+  ClientConfig
+} from './service-config'
 
 import type {
   WatchdogConfig,
@@ -690,6 +696,14 @@ export const SomeipMessageTypeMap: Record<SomeipMessageType, string> = {
   [SomeipMessageType.UNKNOWN]: 'Unknown'
 }
 
+/** vSomeIP event_type_e (application::request_event) — matches vsomeip enumeration_types.hpp */
+export const VsomeipEventType = {
+  ET_EVENT: 0,
+  ET_SELECTIVE_EVENT: 1,
+  ET_FIELD: 2,
+  ET_UNKNOWN: 255
+} as const
+
 // Re-export imported sub-interfaces for convenience
 export type {
   GlobalPayloadConfig,
@@ -700,6 +714,8 @@ export type {
   ServiceDiscoveryConfig,
   TracingConfig,
   ServiceConfig,
+  ServiceEvent,
+  ServiceEventgroup,
   InternalServiceConfig,
   ClientConfig,
   WatchdogConfig,

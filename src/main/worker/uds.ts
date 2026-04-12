@@ -1,5 +1,23 @@
 /**
+ * **UDS / diagnostics worker runtime** — largest module in the worker bundle.
+ *
+ * @remarks
+ * ### Responsibilities
+ * - Registers the worker RPC surface (`registerWorker`, `__on`, `__start`, …) so the parent `Worker` can call script code.
+ * - Exposes {@link UtilClass} as the global {@link Util} singleton for hooks, timers, CAN/LIN/SOME/IP **listeners**, and variables.
+ * - Provides `output` / `setSignal` / `setVar` helpers that marshal requests to the main process via {@link workerEmit}
+ *   and correlate replies through an internal `emitMap` keyed by {@link global.cmdId | global.cmdId}.
+ *
+ * ### Threading
+ * This file is executed inside a **worker thread**. APIs that touch hardware or native modules must go through
+ * `workerEmit` / {@link emitWorkerEventWithReply}; never assume Node native addons are loadable here unless documented.
+ *
+ * ### See also
+ * - Node.js `worker_threads` documentation: `https://nodejs.org/api/worker_threads.html`
+ * - `src/main/workerClient.ts` — parent-side counterpart.
+ *
  * @module Util
+ * @category Util
  */
 import Emittery from 'emittery'
 import {
@@ -58,10 +76,34 @@ if (!isMainThread && parentPort) {
   exposedMethods['methods'] = () => Object.keys(exposedMethods)
 }
 
+/**
+ * Register additional RPC callables on the worker `parentPort` message bus.
+ *
+ * @param methods - Map of method name → function. Names must be unique; later registrations overwrite earlier ones
+ *   for the same key (same behavior as `Object.assign` on the internal `exposedMethods` table).
+ *
+ * @remarks
+ * Built-ins such as `methods`, `__on`, `__start`, and `__eventDone` are registered by {@link UtilClass} construction.
+ * Third-party extensions (e.g. `setTxPending`) should use descriptive `__`-prefixed names to avoid collisions.
+ *
+ * @category Worker infrastructure
+ */
 export function registerWorker(methods: Record<string, Function>) {
   Object.assign(exposedMethods, methods)
 }
 
+/**
+ * Emit an **event** (not an RPC return) to the parent thread.
+ *
+ * @param payload - Arbitrary JSON-cloneable data; shallow-cloned with `lodash/cloneDeep` before `postMessage`.
+ *   Common shape: `{ id, event, data }` where `event` selects a handler on `UdsTester.eventHandlerMap`.
+ *
+ * @remarks
+ * No promise is returned — the parent must acknowledge async work through a follow-up RPC such as `__eventDone`
+ * when the payload includes a correlation `id` managed by `emitMap`.
+ *
+ * @category Worker infrastructure
+ */
 export function workerEmit(payload: any) {
   if (!isMainThread && parentPort) {
     parentPort.postMessage({ type: 'event', payload: cloneDeep(payload) })
@@ -610,6 +652,33 @@ const emitMap = new Map<number, { resolve: any; reject: any }>()
 const serviceMap = new Map<string, ServiceItem>()
 
 global.cmdId = 0
+
+/**
+ * Emit a worker **event** that expects a single correlated completion from the main process.
+ *
+ * @param event - Handler key on the parent `UdsTester` (e.g. `'someipApi'`, `'serialPortApi'`, `'output'`).
+ * @param data - Inner payload forwarded to that handler (the worker automatically assigns `payload.id` from
+ *   `global.cmdId` before incrementing it).
+ *
+ * @returns Promise settled when the parent calls `__eventDone` with the same `id`, or rejected if the parent reports `err`.
+ *
+ * @remarks
+ * Typical pattern:
+ * ```ts
+ * emitWorkerEventWithReply('someipApi', { op: 'request', msg: { ... } })
+ * ```
+ * Submodule `someip.ts` uses a **lazy** `require('./uds')` + this helper to avoid circular static imports while still
+ * participating in the same `emitMap` lifecycle as {@link output}.
+ *
+ * @category Worker infrastructure
+ */
+export function emitWorkerEventWithReply(event: string, data: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    workerEmit({ id: global.cmdId, event, data })
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
+  })
+}
 
 /**
  * @category UDS
@@ -1673,7 +1742,9 @@ export class UtilClass {
    */
   OnSomeipMessage(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.on('someip' as any, fc)
@@ -1701,7 +1772,9 @@ export class UtilClass {
    */
   OffSomeipMessage(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.off('someip' as any, fc)
@@ -1732,7 +1805,9 @@ export class UtilClass {
    */
   OnSomeipMessageOnce(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.once('someip' as any).then(fc)
@@ -2059,12 +2134,15 @@ export class UtilClass {
   }
   private async someipMsg(data: SomeipMessage) {
     let someipMsg: SomeipMessageBase
-    if (data.messageType == SomeipMessageType.REQUEST) {
+    if (
+      data.messageType == SomeipMessageType.REQUEST ||
+      data.messageType == SomeipMessageType.REQUEST_NO_RETURN
+    ) {
       someipMsg = new SomeipMessageRequest(data)
     } else if (data.messageType == SomeipMessageType.RESPONSE) {
       someipMsg = new SomeipMessageResponse(data)
     } else {
-      throw new Error(`someip message type not supported: ${data.messageType}`)
+      someipMsg = new SomeipMessageBase(data)
     }
 
     const msg = someipMsg.msg
@@ -2385,8 +2463,6 @@ export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Prom
   })
   return await p
 }
-
-export { SomeipMessageRequest, SomeipMessageResponse }
 
 /**
  * Set a signal value

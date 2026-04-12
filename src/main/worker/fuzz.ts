@@ -1,6 +1,14 @@
 /**
- * CAN Fuzzing API - Fingerprint and fuzz Controller Area Network traffic.
- * Based on can-hax. Template: 0=not observed, H=hex, N=decimal.
+ * **CAN fuzzing** utilities — build compact **fingerprints** of observed traffic and replay **mutated** frames.
+ *
+ * @remarks
+ * - **Fingerprint format** follows the can-hax convention: template characters describe each nibble (`H`=hex wild,
+ *   `N`=decimal digit, `0`=never seen) so you can diff ECU families quickly.
+ * - **Fuzzing** reuses the worker `output()` bridge so frames go through the same scheduling / logging path as normal scripts.
+ * - This module is intentionally self-contained (no native deps) so it is safe to import from sandboxed snippets.
+ *
+ * CLI-oriented tools such as can-hax use similar flags (`--fuzz`, `--canid`, …); this module mirrors those concepts
+ * for in-app scripting.
  *
  * @category CAN
  * @module fuzz

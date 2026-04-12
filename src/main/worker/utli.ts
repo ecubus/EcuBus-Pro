@@ -1,5 +1,18 @@
 /**
- * Parser/writer for the "Intel hex" format.
+ * **Intel HEX** (.hex) memory image parser and helper utilities for flashing / calibration scripts.
+ *
+ * @remarks
+ * ### Scope
+ * - Parses industry-standard `:llaaaatt[dd...]cc` records into contiguous {@link HexMemoryMap} blocks.
+ * - Supports merging, slicing, padding, and exporting back to `.hex` text for toolchain interoperability.
+ *
+ * ### Typical workflow
+ * 1. Load firmware with {@link HexMemoryMap.fromHex} or construct {@link HexMemoryMap} from explicit blocks.
+ * 2. Patch individual bytes or merge segments (bootloader + application + calibration).
+ * 3. Serialize back to Intel HEX text using the `HexMemoryMap` instance methods before UDS **TransferData** or flashing.
+ *
+ * @module utli
+ * @category Util
  */
 
 /*

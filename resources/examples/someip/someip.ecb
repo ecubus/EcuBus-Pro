@@ -72,8 +72,21 @@
               "reliable": {
                 "port": 30510
               },
-              "events": [],
-              "eventgroups": []
+              "events": [
+                {
+                  "event": "0x8777",
+                  "is_field": false,
+                  "is_reliable": true
+                }
+              ],
+              "eventgroups": [
+                {
+                  "eventgroup": "0x2345",
+                  "events": [
+                    "0x8777"
+                  ]
+                }
+              ]
             }
           ],
           "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
@@ -90,7 +103,7 @@
             "enable": true,
             "initial_state": "unknown",
             "multicast": "224.244.224.245",
-            "port": 0,
+            "port": 30490,
             "protocol": "udp",
             "initial_delay_min": 0,
             "initial_delay_max": 3000,
@@ -181,6 +194,24 @@
             ],
             "_X_ROW_KEY": "row_204",
             "messageType": 0
+          },
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "someipOp": "subscribe",
+            "eventGroupId": "0x2345",
+            "someipEventType": 2,
+            "messageType": 0,
+            "serviceId": "0x1000",
+            "instanceId": "0x1001",
+            "methodId": "0x1002",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [],
+            "respParams": [],
+            "responseTimeout": 1000,
+            "_X_ROW_KEY": "row_18"
           }
         ]
       }
@@ -210,7 +241,8 @@
     "panels": {},
     "logs": {},
     "traces": {},
-    "pluginData": {}
+    "pluginData": {},
+    "replays": {}
   },
   "project": {
     "wins": {
@@ -243,8 +275,8 @@
       },
       "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
         "pos": {
-          "x": 473.5,
-          "y": 0,
+          "x": 735.5,
+          "y": 7,
           "w": 992,
           "h": 399
         },
@@ -260,10 +292,10 @@
       },
       "soa": {
         "pos": {
-          "x": 496,
-          "y": 200.328125,
+          "x": 611.5,
+          "y": 28.3125,
           "w": 933,
-          "h": 400
+          "h": 606
         },
         "title": "soa",
         "label": "SOA",
@@ -276,26 +308,14 @@
       },
       "trace": {
         "pos": {
-          "x": 49.5,
-          "y": 283.0000305175781,
+          "x": 246.5,
+          "y": 218,
           "w": 1038,
           "h": 351.34400000000005
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {}
-      },
-      "hardware": {
-        "pos": {
-          "x": 553.5,
-          "y": 117.17200000000003,
-          "w": 600,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
         "options": {}
       }
     },

@@ -647,15 +647,28 @@ export class SomeipLOG {
     }
   }
   someipMessage(message: SomeipMessage, sending: boolean, ts: number) {
+    const resolvedSending =
+      typeof (message as any).sending === 'boolean' ? (message as any).sending : sending === true
+    // if (
+    //   this.applicationId !== undefined &&
+    //   Number.isFinite(this.applicationId) &&
+    //   !resolvedSending &&
+    //   (message.client & 0xffff) === (this.applicationId & 0xffff)
+    // ) {
+    //   return
+    // }
     message.ts = ts
-    message.sending = sending
+    message.sending = resolvedSending
     message.payload = Buffer.from(message.payload)
-    this.log.info({
-      method: 'someipBase',
-      deviceId: this.deviceId,
-      data: message
-    })
+
     this.event.emit('someip-frame', message)
+    setTimeout(() => {
+      this.log.info({
+        method: 'someipBase',
+        deviceId: this.deviceId,
+        data: message
+      })
+    }, 0)
   }
   someipServiceValid(info: VsomeipAvailabilityInfo, ts: number) {
     this.log.info({

@@ -1,6 +1,6 @@
 
 const {
   reporter
-} = require('./uds');
+} = require('./index');
 
 module.exports = reporter

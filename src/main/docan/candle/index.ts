@@ -84,9 +84,6 @@ export class Candle_CAN extends CanBase {
     this.target = targetDevice
     this.channel = targetDevice.interfaceNumber
 
-    console.log(`device id ${this.id}: ${this.target.interfaceNumber}`)
-    console.log('info: ', this.info)
-
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
     }

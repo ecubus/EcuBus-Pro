@@ -29,7 +29,6 @@ type EnvironmentInfo = {
 }
 
 const _sessionId = newSessionId()
-console.log('sessionId', _sessionId)
 let _appKey = ''
 let _apiUrl = ''
 let _env: EnvironmentInfo | undefined

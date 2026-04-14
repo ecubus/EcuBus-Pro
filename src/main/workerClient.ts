@@ -532,6 +532,7 @@ export default class UdsTester {
     }
   }
   async triggerSomeipFrame(msg: SomeipMessage) {
+    console.trace(msg)
     try {
       const r = await this.workerEmit('__someipMsg', msg)
       return r

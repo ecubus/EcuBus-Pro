@@ -4,7 +4,7 @@
  * @remarks
  * This module has two layers:
  *
- * 1. **Message wrappers** ({@link SomeipMessageBase}, {@link SomeipMessageRequest}, {@link SomeipMessageResponse})
+ * 1. **Message wrappers** ({@link SomeipMessageBase}, {@link SomeipMessageRequest}, {@link SomeipMessageResponse}, {@link SomeipMessageEvent})
  *    — lightweight types used when frames are delivered into the worker (see {@link UtilClass.OnSomeipMessage}).
  *
  * 2. **Script RPC helpers** (`someipRequest`, `someipNotify`, `someipSubscribe`, …) — these do **not** talk to
@@ -121,7 +121,32 @@ class SomeipMessageResponse extends SomeipMessageBase {
   }
 }
 
-export { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse }
+/**
+ * Wrapper for SOME/IP event notifications.
+ *
+ * @throws {Error} If `msg.messageType` is not
+ * {@link SomeipMessageType.NOTIFICATION} or {@link SomeipMessageType.NOTIFICATION_ACK}.
+ *
+ * @category SOME/IP
+ */
+class SomeipMessageEvent extends SomeipMessageBase {
+  /**
+   * @param msg - SOME/IP message; must be notification/event type.
+   */
+  constructor(public msg: SomeipMessage) {
+    if (
+      msg.messageType != SomeipMessageType.NOTIFICATION &&
+      msg.messageType != SomeipMessageType.NOTIFICATION_ACK
+    ) {
+      throw new Error(
+        'SomeipMessageEvent must be SomeipMessageType.NOTIFICATION or SomeipMessageType.NOTIFICATION_ACK'
+      )
+    }
+    super(msg)
+  }
+}
+
+export { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse, SomeipMessageEvent }
 
 // ---------------------------------------------------------------------------
 // Script API — main process performs vSomeIP I/O

@@ -97,6 +97,27 @@ public:
         bool force = false);
 
     void release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event);
+
+    /**
+     * Native periodic SOME/IP send based on CyclicSendTask (no JS timer).
+     * task_id is supplied by upper layer (e.g. `${editIndex}-${rowIndex}`).
+     */
+    void start_periodic_message(
+        const std::string& task_id,
+        struct SomeipMessage* message,
+        char* data,
+        uint32_t length,
+        uint32_t period_ms,
+        bool as_notify = false,
+        bool force = false);
+    void stop_periodic_message(const std::string& task_id);
+    void update_periodic_message(
+        const std::string& task_id,
+        struct SomeipMessage* message,
+        char* data,
+        uint32_t length,
+        bool as_notify = false,
+        bool force = false);
 };
 
 

@@ -77,6 +77,35 @@ process.on('message', (message: any) => {
       )
       break
     }
+    case 'startPeriodicMessage': {
+      const pl = data.payload
+      const buf = Buffer.isBuffer(pl) ? pl : Buffer.from((pl as any)?.data ?? pl ?? [])
+      instance?.startPeriodicMessage(
+        String(data.taskId),
+        data.msg,
+        buf,
+        Number(data.periodMs),
+        Boolean(data.asNotify),
+        Boolean(data.force)
+      )
+      break
+    }
+    case 'updatePeriodicMessage': {
+      const pl = data.payload
+      const buf = Buffer.isBuffer(pl) ? pl : Buffer.from((pl as any)?.data ?? pl ?? [])
+      instance?.updatePeriodicMessage(
+        String(data.taskId),
+        data.msg,
+        buf,
+        Boolean(data.asNotify),
+        Boolean(data.force)
+      )
+      break
+    }
+    case 'stopPeriodicMessage': {
+      instance?.sendc.stop_periodic_message(String(data.taskId))
+      break
+    }
     case 'offerServices': {
       for (const e of data.services) {
         instance?.app.offer_service(Number(e.service), Number(e.instance))

@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { CanAddr, CanMessage, getTsUs, swapAddr } from './share/can'
+import { CanAddr, CanMessage, formatError, getTsUs, swapAddr } from './share/can'
 import { TesterInfo } from './share/tester'
 import UdsTester, {
   linApiBaudRateCtrl,
@@ -1496,17 +1496,18 @@ export class NodeClass {
     return res ? Buffer.from(res) : undefined
   }
   cb(frame: CanMessage | LinMsg | SomeipMessage) {
+    const reportAsyncError = (e: any) => {
+      this.log?.scriptMsg(e.toString(), getTsUs(), 'error')
+    }
     if ('msgType' in frame) {
       if (frame.msgType.uuid != this.nodeItem.id) {
-        this.pool?.triggerCanFrame(frame)
+        void this.pool?.triggerCanFrame(frame).catch(reportAsyncError)
       }
     } else if ('instance' in frame) {
-      if (frame.uuid != this.nodeItem.id) {
-        this.pool?.triggerSomeipFrame(frame)
-      }
+      void this.pool?.triggerSomeipFrame(frame).catch(reportAsyncError)
     } else {
       if (frame.uuid != this.nodeItem.id || frame.direction == LinDirection.RECV) {
-        this.pool?.triggerLinFrame(frame)
+        void this.pool?.triggerLinFrame(frame).catch(reportAsyncError)
       }
     }
   }

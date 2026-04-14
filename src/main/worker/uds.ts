@@ -67,7 +67,25 @@ if (!isMainThread && parentPort) {
       } catch (e: any) {
         // id === -1 means fire-and-forget, no error response needed
         if (id !== -1) {
-          parentPort?.postMessage({ type: 'rpc_response', id, error: e })
+          const normalizedError =
+            e instanceof Error
+              ? { message: e.message || 'Unknown error', stack: e.stack || '' }
+              : {
+                  message:
+                    typeof e === 'string'
+                      ? e
+                      : e == null
+                        ? 'Unknown error'
+                        : (() => {
+                            try {
+                              return JSON.stringify(e)
+                            } catch {
+                              return String(e)
+                            }
+                          })(),
+                  stack: ''
+                }
+          parentPort?.postMessage({ type: 'rpc_response', id, error: normalizedError })
         }
       }
     }
@@ -508,7 +526,12 @@ import {
   writeMessageData
 } from 'src/renderer/src/database/dbc/calc'
 
-import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
+import {
+  SomeipMessageBase,
+  SomeipMessageEvent,
+  SomeipMessageRequest,
+  SomeipMessageResponse
+} from './someip'
 
 import { SomeipMessage, SomeipMessageType } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
@@ -1743,7 +1766,7 @@ export class UtilClass {
   OnSomeipMessage(
     id: string | true,
     fc: (
-      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
     ) => void | Promise<void>
   ) {
     if (id === true) {
@@ -1773,7 +1796,7 @@ export class UtilClass {
   OffSomeipMessage(
     id: string | true,
     fc: (
-      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
     ) => void | Promise<void>
   ) {
     if (id === true) {
@@ -1806,7 +1829,7 @@ export class UtilClass {
   OnSomeipMessageOnce(
     id: string | true,
     fc: (
-      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageBase
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
     ) => void | Promise<void>
   ) {
     if (id === true) {
@@ -2141,25 +2164,31 @@ export class UtilClass {
       someipMsg = new SomeipMessageRequest(data)
     } else if (data.messageType == SomeipMessageType.RESPONSE) {
       someipMsg = new SomeipMessageResponse(data)
+    } else if (
+      data.messageType == SomeipMessageType.NOTIFICATION ||
+      data.messageType == SomeipMessageType.NOTIFICATION_ACK
+    ) {
+      someipMsg = new SomeipMessageEvent(data)
     } else {
       someipMsg = new SomeipMessageBase(data)
     }
 
     const msg = someipMsg.msg
     msg.payload = Buffer.from(msg.payload)
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.*.*` as any,
-      someipMsg
-    )
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.*` as any,
-      someipMsg
-    )
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.${msg.method.toString(16).padStart(4, '0')}` as any,
-      someipMsg
-    )
-    await this.event.emit('someip' as any, someipMsg)
+    const events = [
+      `someip.${msg.service.toString(16).padStart(4, '0')}.*.*`,
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.*`,
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.${msg.method.toString(16).padStart(4, '0')}`,
+      'someip'
+    ]
+    for (const eventName of events) {
+      try {
+        await this.event.emit(eventName as any, someipMsg)
+      } catch (e: any) {
+        // Plugin/user listener errors should not crash the worker loop.
+        console.error(`someip listener error on ${eventName}: ${e?.message || e}`)
+      }
+    }
   }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)

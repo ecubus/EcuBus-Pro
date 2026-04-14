@@ -876,6 +876,7 @@ interface timerType {
   data: Buffer | null
 }
 const timerMap = new Map<string, timerType>()
+const someipPeriodMap = new Map<string, { clientKey: string }>()
 
 export function globalStop(emit = false) {
   trackEvent('app_stop')
@@ -902,6 +903,13 @@ export function globalStop(emit = false) {
     value.socket.close()
   })
   timerMap.clear()
+  someipPeriodMap.forEach((value, key) => {
+    const client = someipMap.get(value.clientKey)
+    if (client) {
+      void client.stopPeriodicMessage(key)
+    }
+  })
+  someipPeriodMap.clear()
 
   //testMap
   testMap.forEach((value) => {
@@ -1464,5 +1472,105 @@ ipcMain.handle('ipc-send-someip', async (event, ...arg) => {
     const errMsg = `someip device not found: ${ia.channel || 'unknown channel'}`
     sysLog.error(errMsg)
     throw new Error(errMsg)
+  }
+})
+
+ipcMain.on('ipc-send-someip-period', async (event, ...arg) => {
+  const id = arg[0] as string
+  const ia = arg[1] as SomeipAction
+  const base = someipMap.get(ia.channel) as VSomeIP_Client
+  if (!base) {
+    sysLog.error(`someip device not found: ${ia.channel || 'unknown channel'}`)
+    return
+  }
+  const op = ia.someipOp ?? 'send'
+  if (op !== 'send') {
+    return
+  }
+
+  const msg: SomeipMessage = {
+    service: Number(ia.serviceId),
+    instance: Number(ia.instanceId),
+    method: Number(ia.methodId),
+    payload: getParamBuffer(ia.params),
+    messageType: ia.messageType,
+    client: 0,
+    session: 0,
+    returnCode: 0,
+    protocolVersion: ia.protocolVersion != undefined ? Number(ia.protocolVersion) : 1,
+    interfaceVersion: ia.interfaceVersion != undefined ? Number(ia.interfaceVersion) : 0,
+    ts: 0,
+    reliable: ia.reliable,
+    sending: true
+  }
+
+  const asNotify =
+    ia.messageType === SomeipMessageType.NOTIFICATION ||
+    ia.messageType === SomeipMessageType.NOTIFICATION_ACK
+
+  try {
+    if (!asNotify) {
+      await base.requestService(
+        Number(ia.serviceId),
+        Number(ia.instanceId),
+        Number(ia.major || 0),
+        Number(ia.minor || 0),
+        1000
+      )
+    }
+    await base.startPeriodicMessage(id, msg, Number(ia.trigger.period || 10), asNotify, false)
+    someipPeriodMap.set(id, { clientKey: ia.channel })
+  } catch (e: any) {
+    sysLog.error(`start someip periodic failed (${id}): ${e?.message || e}`)
+  }
+})
+
+ipcMain.on('ipc-update-someip-period', async (event, ...arg) => {
+  const id = arg[0] as string
+  const ia = arg[1] as SomeipAction
+  const rec = someipPeriodMap.get(id)
+  const key = ia.channel || rec?.clientKey
+  const base = key ? (someipMap.get(key) as VSomeIP_Client) : undefined
+  if (!base) return
+  const op = ia.someipOp ?? 'send'
+  if (op !== 'send') return
+
+  const msg: SomeipMessage = {
+    service: Number(ia.serviceId),
+    instance: Number(ia.instanceId),
+    method: Number(ia.methodId),
+    payload: getParamBuffer(ia.params),
+    messageType: ia.messageType,
+    client: 0,
+    session: 0,
+    returnCode: 0,
+    protocolVersion: ia.protocolVersion != undefined ? Number(ia.protocolVersion) : 1,
+    interfaceVersion: ia.interfaceVersion != undefined ? Number(ia.interfaceVersion) : 0,
+    ts: 0,
+    reliable: ia.reliable,
+    sending: true
+  }
+
+  const asNotify =
+    ia.messageType === SomeipMessageType.NOTIFICATION ||
+    ia.messageType === SomeipMessageType.NOTIFICATION_ACK
+  try {
+    await base.updatePeriodicMessage(id, msg, asNotify, false)
+  } catch {
+    // ignore update failures when periodic task has already been stopped
+  }
+})
+
+ipcMain.on('ipc-stop-someip-period', async (event, ...arg) => {
+  const id = arg[0] as string
+  const rec = someipPeriodMap.get(id)
+  if (!rec) return
+  const base = someipMap.get(rec.clientKey) as VSomeIP_Client
+  try {
+    if (base) {
+      await base.stopPeriodicMessage(id)
+    }
+  } finally {
+    someipPeriodMap.delete(id)
   }
 })

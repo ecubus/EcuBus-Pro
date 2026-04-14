@@ -385,6 +385,41 @@ export class VSomeIP_Client {
       force
     })
   }
+  startPeriodicMessage(
+    taskId: string,
+    msg: SomeipMessage,
+    periodMs: number,
+    asNotify: boolean = false,
+    force: boolean = false
+  ) {
+    const payload = Buffer.isBuffer(msg.payload) ? msg.payload : Buffer.from(msg.payload as any)
+    return this.send('startPeriodicMessage', {
+      taskId,
+      msg: { ...msg, payload: payload },
+      payload,
+      periodMs: Number(periodMs),
+      asNotify,
+      force
+    })
+  }
+  updatePeriodicMessage(
+    taskId: string,
+    msg: SomeipMessage,
+    asNotify: boolean = false,
+    force: boolean = false
+  ) {
+    const payload = Buffer.isBuffer(msg.payload) ? msg.payload : Buffer.from(msg.payload as any)
+    return this.send('updatePeriodicMessage', {
+      taskId,
+      msg: { ...msg, payload: payload },
+      payload,
+      asNotify,
+      force
+    })
+  }
+  stopPeriodicMessage(taskId: string) {
+    return this.send('stopPeriodicMessage', { taskId })
+  }
   async sendRequestAndWaitResponse(msg: SomeipMessage, timeout: number) {
     return new Promise<SomeipMessage>((resolve, reject) => {
       const waitTimeout = Number(timeout)

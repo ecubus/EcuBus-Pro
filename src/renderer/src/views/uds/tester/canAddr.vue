@@ -89,12 +89,12 @@
     <el-form-item label-width="0">
       <el-col :span="8">
         <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nSa')" prop="SA" required>
-          <el-input v-model="data.SA" />
+          <el-input v-model="data.SA" :disabled="!networkAddressNeed" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
         <el-form-item :label="i18next.t('uds.tester.canAddr.labels.nTa')" prop="TA" required>
-          <el-input v-model="data.TA" />
+          <el-input v-model="data.TA" :disabled="!networkAddressNeed" />
         </el-form-item>
       </el-col>
       <el-col :span="8">
@@ -346,6 +346,10 @@ const canidNeed = computed(() => {
   return true
 })
 
+const networkAddressNeed = computed(() => {
+  return data.value.addrFormat != CAN_ADDR_FORMAT.NORMAL
+})
+
 const idTypeCheck = (rule: any, value: any, callback: any) => {
   if (data.value.addrFormat == CAN_ADDR_FORMAT.FIXED_NORMAL) {
     if (data.value.idType == CAN_ID_TYPE.STANDARD) {
@@ -406,34 +410,55 @@ const idCheck = (rule: any, value: any, callback: any) => {
 }
 const addrCheck = (rule: any, value: any, callback: any) => {
   if (value) {
-    if (Number(value) < 0 || Number(value) > 0xff) {
-      callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRange')))
+    if (Number.isNaN(Number(value))) {
+      callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
+      return
+    }
+    if (networkAddressNeed.value) {
+      if (Number(value) < 0 || Number(value) > 0xff) {
+        callback(new Error(i18next.t('uds.tester.canAddr.validation.valueRange')))
+        return
+      }
+    } else {
+      if (data.value.idType == CAN_ID_TYPE.STANDARD) {
+        if (Number(value) < 0 || Number(value) > 0x7ff) {
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdStandardRange')))
+          return
+        }
+      } else {
+        if (Number(value) < 0 || Number(value) > 0x1fffffff) {
+          callback(new Error(i18next.t('uds.tester.canAddr.validation.canIdExtendedRange')))
+          return
+        }
+      }
     }
     if (rule.field == 'SA') {
-      if (Number.isNaN(Number(value))) {
-        callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
-      }
-      if (Number(value) == Number(data.value.TA)) {
+      if (networkAddressNeed.value && Number(value) == Number(data.value.TA)) {
         callback(new Error("SA can't be equal to TA"))
+        return
       }
-      //all sa must equal addrs[0].canAddr.SA, 排除自己
-      for (let i = 0; i < addrs.value.length; i++) {
-        if (Number(value) != Number(addrs.value[i].canAddr?.SA) && i != editIndex.value) {
-          callback(new Error(i18next.t('uds.tester.canAddr.validation.saMustBeSame')))
+      if (networkAddressNeed.value) {
+        //all sa must equal addrs[0].canAddr.SA, 排除自己
+        for (let i = 0; i < addrs.value.length; i++) {
+          if (Number(value) != Number(addrs.value[i].canAddr?.SA) && i != editIndex.value) {
+            callback(new Error(i18next.t('uds.tester.canAddr.validation.saMustBeSame')))
+            return
+          }
         }
       }
     }
     if (rule.field == 'TA') {
-      if (Number.isNaN(Number(value))) {
-        callback(new Error(i18next.t('uds.tester.canAddr.validation.hexShouldStartWith0x')))
-      }
-      if (Number(value) == Number(data.value.SA)) {
+      if (networkAddressNeed.value && Number(value) == Number(data.value.SA)) {
         callback(new Error(i18next.t('uds.tester.canAddr.validation.taNotEqualSa')))
+        return
       }
-      //all TA must be unique, 排除自己
-      for (let i = 0; i < addrs.value.length; i++) {
-        if (Number(value) == Number(addrs.value[i].canAddr?.TA) && i != editIndex.value) {
-          callback(new Error(i18next.t('uds.tester.canAddr.validation.taMustBeUnique')))
+      if (networkAddressNeed.value) {
+        //all TA must be unique, 排除自己
+        for (let i = 0; i < addrs.value.length; i++) {
+          if (Number(value) == Number(addrs.value[i].canAddr?.TA) && i != editIndex.value) {
+            callback(new Error(i18next.t('uds.tester.canAddr.validation.taMustBeUnique')))
+            return
+          }
         }
       }
     }
@@ -553,6 +578,17 @@ const rules: FormRules<CanAddr> = {
     }
   ]
 }
+
+watch(
+  () => [data.value.addrFormat, data.value.canIdTx, data.value.canIdRx],
+  ([addrFormat, canIdTx, canIdRx]) => {
+    if (addrFormat == CAN_ADDR_FORMAT.NORMAL) {
+      data.value.SA = canIdTx
+      data.value.TA = canIdRx
+    }
+  },
+  { immediate: true }
+)
 
 const canidCalcTx = computed(() => {
   if (canidNeed.value) {

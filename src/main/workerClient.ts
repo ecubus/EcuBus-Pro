@@ -11,6 +11,7 @@ import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
+import { VsomeipAvailabilityInfo } from './share/someip'
 import { error } from 'electron-log'
 import fs from 'fs'
 import { SerialPort, SerialPortOpenOptions } from 'serialport'
@@ -532,9 +533,16 @@ export default class UdsTester {
     }
   }
   async triggerSomeipFrame(msg: SomeipMessage) {
-    console.trace(msg)
     try {
       const r = await this.workerEmit('__someipMsg', msg)
+      return r
+    } catch (e: any) {
+      throw formatError(e)
+    }
+  }
+  async triggerSomeipServiceValid(info: VsomeipAvailabilityInfo) {
+    try {
+      const r = await this.workerEmit('__someipServiceValid', info)
       return r
     } catch (e: any) {
       throw formatError(e)

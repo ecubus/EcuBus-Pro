@@ -533,7 +533,7 @@ import {
   SomeipMessageResponse
 } from './someip'
 
-import { SomeipMessage, SomeipMessageType } from '../share/someip'
+import { SomeipMessage, SomeipMessageType, VsomeipAvailabilityInfo } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
 
 const selfDescribe = process.env.ONLY == 'true' ? nodeDescribe.only : nodeDescribe
@@ -1777,6 +1777,55 @@ export class UtilClass {
   }
 
   /**
+   * Registers an event listener for SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns:
+   * - `"service.*"`: all instances under one service
+   * - `"*.*"`: all services and instances
+   * If `true`, listens for all availability changes.
+   * @param fc - The callback function invoked when SOME/IP service availability changes.
+   *
+   * @example
+   * ```ts
+   * // 1) Listen all changes
+   * Util.OnSomeipServiceValid(true, (info) => {
+   *   console.log(
+   *     `[ALL] ${info.service.toString(16)}.${info.instance.toString(16)} => ${info.available}`
+   *   )
+   * })
+   *
+   * // 2) Listen one service, any instance
+   * Util.OnSomeipServiceValid('1234.*', (info) => {
+   *   console.log(`[SVC 1234] instance=${info.instance.toString(16)} available=${info.available}`)
+   * })
+   *
+   * // 3) Listen exact service+instance
+   * Util.OnSomeipServiceValid('1234.0001', (info) => {
+   *   if (info.available) {
+   *     console.log('target service is online')
+   *   } else {
+   *     console.log('target service is offline')
+   *   }
+   * })
+   *
+   * // 4) Same as true, wildcard style
+   * Util.OnSomeipServiceValid('*.*', (info) => {
+   *   console.log('wildcard', info)
+   * })
+   * ```
+   */
+  OnSomeipServiceValid(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.on('someipServiceValid' as any, fc)
+    } else {
+      this.event.on(`someipServiceValid.${id}` as any, fc)
+    }
+  }
+
+  /**
    * Unsubscribes from SOMEIP messages.
    *
    * @param id - The SOMEIP message identifier to unsubscribe from. If `true`, unsubscribes from all SOMEIP messages.
@@ -1836,6 +1885,40 @@ export class UtilClass {
       this.event.once('someip' as any).then(fc)
     } else {
       this.event.once(`someip.${id}` as any).then(fc)
+    }
+  }
+  /**
+   * Registers a one-time event listener for SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns (`"service.*"`, `"*.*"`).
+   * If `true`, listens for all availability changes.
+   * @param fc - The callback function to be invoked once when availability changes.
+   */
+  OnSomeipServiceValidOnce(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.once('someipServiceValid' as any).then(fc)
+    } else {
+      this.event.once(`someipServiceValid.${id}` as any).then(fc)
+    }
+  }
+  /**
+   * Unsubscribes from SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns (`"service.*"`, `"*.*"`).
+   * If `true`, unsubscribes from all availability changes.
+   * @param fc - The callback function to remove from listeners.
+   */
+  OffSomeipServiceValid(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.off('someipServiceValid' as any, fc)
+    } else {
+      this.event.off(`someipServiceValid.${id}` as any, fc)
     }
   }
   /**
@@ -2190,6 +2273,23 @@ export class UtilClass {
       }
     }
   }
+  private async someipServiceValid(info: VsomeipAvailabilityInfo) {
+    const serviceHex = info.service.toString(16).padStart(4, '0')
+    const instanceHex = info.instance.toString(16).padStart(4, '0')
+    const events = [
+      `someipServiceValid.${serviceHex}.${instanceHex}`,
+      `someipServiceValid.${serviceHex}.*`,
+      'someipServiceValid.*.*',
+      'someipServiceValid'
+    ]
+    for (const eventName of events) {
+      try {
+        await this.event.emit(eventName as any, info)
+      } catch (e: any) {
+        console.error(`someip service valid listener error on ${eventName}: ${e?.message || e}`)
+      }
+    }
+  }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
     await this.event.emit(`keyDown*` as any, key)
@@ -2240,6 +2340,7 @@ export class UtilClass {
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
       this.event.on('__linMsg' as any, this.linMsg.bind(this))
       this.event.on('__someipMsg' as any, this.someipMsg.bind(this))
+      this.event.on('__someipServiceValid' as any, this.someipServiceValid.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
       this.event.on('__varUpdate' as any, this.varUpdate.bind(this))
       // SerialPort event handlers

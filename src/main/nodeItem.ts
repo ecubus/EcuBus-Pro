@@ -33,7 +33,7 @@ import type { TestEvent } from 'node:test/reporters'
 import { PwmBase } from './pwm'
 import { setSignal } from './util'
 import { VSomeIP_Client } from './vsomeip'
-import { SomeipMessage, SomeipMessageType } from './share/someip'
+import { SomeipMessage, SomeipMessageType, VsomeipAvailabilityInfo } from './share/someip'
 type TestTree = {
   label: string
   type: 'test' | 'config' | 'log'
@@ -87,6 +87,7 @@ export class NodeClass {
   private someipBaseId: string[] = []
   private startTs = 0
   private boundCb: (frame: CanMessage | LinMsg | SomeipMessage) => void
+  private boundSomeipServiceValidCb: (info: VsomeipAvailabilityInfo) => void
   private udsTesterMap = new Map<string, UDSTesterMain>()
   private canBaseMap: Map<string, CanBase> = new Map()
   private linBaseMap: Map<string, LinBase> = new Map()
@@ -117,6 +118,7 @@ export class NodeClass {
   ) {
     this.varLog = new VarLOG(nodeItem.id)
     this.boundCb = this.cb.bind(this)
+    this.boundSomeipServiceValidCb = this.someipServiceValidCb.bind(this)
     this.startTs = getTsUs()
     if (nodeItem.script) {
       let jsPath = nodeItem.script
@@ -218,6 +220,7 @@ export class NodeClass {
       if (someipBaseItem) {
         this.someipBaseId.push(c)
         someipBaseItem.attachSomeipMessage(this.boundCb)
+        someipBaseItem.attachSomeipServiceValid(this.boundSomeipServiceValidCb)
       }
     }
     if (this.pool) {
@@ -1431,6 +1434,11 @@ export class NodeClass {
       if (linBaseItem) {
         linBaseItem.detachLinMessage(this.boundCb)
       }
+      const someipBaseItem = this.someipMap.get(c)
+      if (someipBaseItem) {
+        someipBaseItem.detachSomeipMessage(this.boundCb)
+        someipBaseItem.detachSomeipServiceValid(this.boundSomeipServiceValidCb)
+      }
     }
     for (const e of this.freeEvent) {
       e.doip.event.removeListener(e.id, e.cb)
@@ -1510,5 +1518,11 @@ export class NodeClass {
         void this.pool?.triggerLinFrame(frame).catch(reportAsyncError)
       }
     }
+  }
+  private someipServiceValidCb(info: VsomeipAvailabilityInfo) {
+    const reportAsyncError = (e: any) => {
+      this.log?.scriptMsg(e.toString(), getTsUs(), 'error')
+    }
+    void this.pool?.triggerSomeipServiceValid(info).catch(reportAsyncError)
   }
 }

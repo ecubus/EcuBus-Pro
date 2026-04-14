@@ -16,7 +16,8 @@ import {
   ServiceConfig,
   ServiceEvent,
   ServiceEventgroup,
-  SomeipMessageType
+  SomeipMessageType,
+  VsomeipAvailabilityInfo
 } from '../share/someip'
 
 function mapEventForVsomeipJson(e: ServiceEvent): Record<string, unknown> {
@@ -290,6 +291,15 @@ export class VSomeIP_Client {
   attachSomeipMessage(cb: (msg: SomeipMessage) => void) {
     this.event.on('someip-frame', cb)
   }
+  detachSomeipMessage(cb: (msg: SomeipMessage) => void) {
+    this.event.off('someip-frame', cb)
+  }
+  attachSomeipServiceValid(cb: (info: VsomeipAvailabilityInfo) => void) {
+    this.event.on('someip-service-valid', cb)
+  }
+  detachSomeipServiceValid(cb: (info: VsomeipAvailabilityInfo) => void) {
+    this.event.off('someip-service-valid', cb)
+  }
   init() {
     return this.send('init', {
       name: this.name,
@@ -319,6 +329,7 @@ export class VSomeIP_Client {
         if (callbackData.data.instance != 0xffff && callbackData.data.service != 0xffff) {
           // 这里 callbackData.data 自动是 VsomeipAvailabilityInfo
           this.log.someipServiceValid(callbackData.data, ts)
+          this.event.emit('someip-service-valid', callbackData.data)
           const key = this.getKey16(callbackData.data.service, callbackData.data.instance)
           const pending = this.requestServiceMap.get(key)
           if (pending) {

@@ -170,6 +170,20 @@ export interface SomeipScriptSendBase {
 }
 
 /**
+ * Options for {@link someipNotify}.
+ *
+ * @remarks
+ * SOME/IP notification carries event id in the header "Method ID" field.
+ * Use `eventId` for clarity; `method` is kept as a backward-compatible alias.
+ *
+ * @category SOME/IP
+ */
+export interface SomeipNotifyOpts extends Omit<SomeipScriptSendBase, 'method'> {
+  /** Event id to publish (mapped to SOME/IP Method ID field). */
+  eventId: number
+}
+
+/**
  * Forward a structured SOME/IP RPC to the main thread (`someipApi` handler).
  *
  * @param data - Discriminated payload consumed by {@link NodeClass.someipApi}.
@@ -297,21 +311,31 @@ export async function someipRequestNoReturn(opts: SomeipScriptSendBase): Promise
 }
 
 /**
- * Send a **NOTIFICATION** (event) frame without calling `request_service` first — same semantics as notification send in the UI.
+ * Publish an offered event/field using vSomeIP `application::notify` (not a raw SOME/IP `send`).
+ * Requires {@link someipOfferService} / configured services and {@link someipOfferEvent} for that event first.
  *
- * @param opts - Target service / instance / method (event id) and optional payload.
+ * @param opts - Target service / instance and event id (`eventId` preferred), plus optional payload.
  *
  * @remarks
- * Use this when your application acts as a **publisher** or when the stack does not require an explicit service request
- * for this notification path.
+ * This is the **service provider** path: subscribers receive the update through the normal vSomeIP event pipeline.
  *
  * @category SOME/IP
  */
-export async function someipNotify(opts: SomeipScriptSendBase): Promise<void> {
+export async function someipNotify(opts: SomeipNotifyOpts): Promise<void> {
+  if (opts.eventId === undefined || opts.eventId === null || Number.isNaN(Number(opts.eventId))) {
+    throw new Error('someipNotify requires eventId')
+  }
   await emitMain({
     op: 'notify',
     channel: opts.channel,
-    msg: baseMessage(opts, SomeipMessageType.NOTIFICATION, true)
+    msg: baseMessage(
+      {
+        ...opts,
+        method: Number(opts.eventId)
+      },
+      SomeipMessageType.NOTIFICATION,
+      true
+    )
   })
 }
 

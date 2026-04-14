@@ -26,7 +26,7 @@
         </template>
         <template #default_send="{ row, rowIndex }">
           <el-button
-            v-if="row.trigger.type == 'manual'"
+            v-if="row.trigger.type == 'manual' || (row.someipOp ?? 'send') !== 'send'"
             type="primary"
             size="small"
             plain
@@ -88,6 +88,7 @@
             v-model="row.methodId"
             size="small"
             style="width: 100%"
+            :placeholder="methodIdCellPlaceholder(row)"
             @input="idChange('methodId', $event)"
           />
         </template>
@@ -105,12 +106,14 @@
         <template #default_someipOp="{ row }">
           {{ someipOpLabel(row.someipOp) }}
         </template>
-        <template #edit_someipOp="{ row }">
+        <template #edit_someipOp="{ row, rowIndex }">
           <el-select
             :model-value="row.someipOp ?? 'send'"
             size="small"
             style="width: 100%"
-            @update:model-value="(v) => (row.someipOp = v as SomeipAction['someipOp'])"
+            @update:model-value="
+              onInlineSomeipOpChange(row, rowIndex, $event as SomeipAction['someipOp'])
+            "
           >
             <el-option value="send" label="Send" />
             <el-option value="subscribe" label="Subscribe" />
@@ -157,6 +160,19 @@
               >
                 <el-button link @click="addFrame">
                   <Icon :icon="fileOpenOutline" style="font-size: 18px" />
+                </el-button>
+              </el-tooltip>
+              <el-tooltip
+                effect="light"
+                :content="i18next.t('uds.someip.si.tooltips.copyFrame')"
+                placement="bottom"
+              >
+                <el-button
+                  link
+                  :disabled="popoverIndex < 0 || periodTimer[popoverIndex] == true"
+                  @click="copyFrame"
+                >
+                  <Icon :icon="copyIcon" style="font-size: 18px" />
                 </el-button>
               </el-tooltip>
               <el-tooltip
@@ -215,9 +231,13 @@
             <el-radio value="manual">{{
               i18next.t('uds.someip.si.options.triggerType.manual')
             }}</el-radio>
-            <el-radio value="periodic">{{
-              i18next.t('uds.someip.si.options.triggerType.periodic')
-            }}</el-radio>
+            <el-radio
+              value="periodic"
+              :disabled="
+                (dataBase.ia[editIndex]?.action[popoverIndex]?.someipOp ?? 'send') !== 'send'
+              "
+              >{{ i18next.t('uds.someip.si.options.triggerType.periodic') }}</el-radio
+            >
           </el-radio-group>
         </el-col>
 
@@ -312,28 +332,20 @@
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item :label="i18next.t('uds.someip.si.labels.serviceId')">
-                <el-input v-model="formData.serviceId" @input="idChange('serviceId', $event)" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item :label="i18next.t('uds.someip.si.labels.instanceId')">
-                <el-input v-model="formData.instanceId" @input="idChange('instanceId', $event)" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item :label="i18next.t('uds.someip.si.labels.methodId')">
-                <el-input v-model="formData.methodId" @input="idChange('methodId', $event)" />
-              </el-form-item>
-            </el-col>
-          </el-form-item>
-          <el-form-item label-width="0">
-            <el-col :span="8">
-              <el-form-item label="Operation">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.someipOperation')">
                 <el-select v-model="formData.someipOp" @change="onSomeipOpFormChange">
-                  <el-option value="send" label="Send message" />
-                  <el-option value="subscribe" label="Subscribe (receive events)" />
-                  <el-option value="unsubscribe" label="Unsubscribe" />
+                  <el-option
+                    value="send"
+                    :label="i18next.t('uds.someip.si.options.someipOperation.send')"
+                  />
+                  <el-option
+                    value="subscribe"
+                    :label="i18next.t('uds.someip.si.options.someipOperation.subscribe')"
+                  />
+                  <el-option
+                    value="unsubscribe"
+                    :label="i18next.t('uds.someip.si.options.someipOperation.unsubscribe')"
+                  />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -366,15 +378,24 @@
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
-              <el-form-item :label="i18next.t('uds.someip.si.labels.interfaceVersion')">
-                <el-input
-                  v-model="formData.interfaceVersion"
-                  :placeholder="i18next.t('uds.someip.si.placeholders.interfaceVersion')"
-                />
+              <el-form-item :label="i18next.t('uds.someip.si.labels.serviceId')">
+                <el-input v-model="formData.serviceId" @input="idChange('serviceId', $event)" />
               </el-form-item>
             </el-col>
-            <el-col v-if="formData.someipOp !== 'send'" :span="8">
-              <el-form-item label="Event group ID">
+            <el-col :span="8">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.instanceId')">
+                <el-input v-model="formData.instanceId" @input="idChange('instanceId', $event)" />
+              </el-form-item>
+            </el-col>
+            <el-col v-if="formData.someipOp === 'send'" :span="8">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.methodId')">
+                <el-input v-model="formData.methodId" @input="idChange('methodId', $event)" />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item v-if="formData.someipOp !== 'send'" label-width="0">
+            <el-col :span="8">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.eventGroupId')">
                 <el-input
                   v-model="formData.eventGroupId"
                   @input="idChange('eventGroupId', $event)"
@@ -382,7 +403,7 @@
               </el-form-item>
             </el-col>
             <el-col v-if="formData.someipOp === 'subscribe'" :span="8">
-              <el-form-item label="Event type (request_event)">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.eventRequestType')">
                 <el-select v-model.number="formData.someipEventType" style="width: 100%">
                   <el-option :value="VsomeipEventType.ET_EVENT" label="ET_EVENT" />
                   <el-option
@@ -394,6 +415,24 @@
                 </el-select>
               </el-form-item>
             </el-col>
+            <el-col :span="formData.someipOp === 'subscribe' ? 8 : 16">
+              <el-form-item :label="i18next.t('uds.someip.si.labels.eventId')">
+                <el-input
+                  v-model="formData.methodId"
+                  :placeholder="i18next.t('uds.someip.si.placeholders.eventIdHex')"
+                  @input="idChange('methodId', $event)"
+                />
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item
+            :label="i18next.t('uds.someip.si.labels.interfaceVersion')"
+            label-width="120"
+          >
+            <el-input
+              v-model="formData.interfaceVersion"
+              :placeholder="i18next.t('uds.someip.si.placeholders.interfaceVersion')"
+            />
           </el-form-item>
           <el-form-item label-width="0">
             <el-col :span="8">
@@ -421,7 +460,9 @@
                   formData.someipOp === 'unsubscribe'
                 "
                 :label="
-                  formData.someipOp !== 'send' ? 'Subscribe timeout (ms)' : 'Response Timeout(ms)'
+                  formData.someipOp !== 'send'
+                    ? i18next.t('uds.someip.si.labels.subscribeTimeout')
+                    : i18next.t('uds.someip.si.labels.responseTimeout')
                 "
               >
                 <el-input
@@ -546,6 +587,7 @@ import errorIcon from '@iconify/icons-material-symbols/chat-error-outline-sharp'
 import warnIcon from '@iconify/icons-material-symbols/warning-outline-rounded'
 import saveIcon from '@iconify/icons-material-symbols/save'
 import fileOpenOutline from '@iconify/icons-material-symbols/file-open-outline'
+import copyIcon from '@iconify/icons-material-symbols/content-copy'
 import linkIcon from '@iconify/icons-material-symbols/add-link'
 import sendIcon from '@iconify/icons-material-symbols/send'
 import stopIcon from '@iconify/icons-material-symbols/stop'
@@ -706,14 +748,14 @@ const gridOptions = computed(() => {
       },
       {
         field: 'someipOp',
-        title: 'Op',
+        title: i18next.t('uds.someip.si.columns.someipOp'),
         width: 110,
         editRender: {},
         slots: { default: 'default_someipOp', edit: 'edit_someipOp' }
       },
       {
         field: 'eventGroupId',
-        title: 'Evt grp',
+        title: i18next.t('uds.someip.si.columns.eventGroupId'),
         minWidth: 90,
         editRender: {},
         slots: { default: 'default_eventGroupId', edit: 'edit_eventGroupId' }
@@ -734,8 +776,8 @@ const gridOptions = computed(() => {
       },
       {
         field: 'methodId',
-        title: i18next.t('uds.someip.si.columns.methodId'),
-        minWidth: 100,
+        title: i18next.t('uds.someip.si.columns.methodOrEventId'),
+        minWidth: 110,
         editRender: {},
         slots: { edit: 'default_methodId' }
       },
@@ -762,6 +804,16 @@ const gridOptions = computed(() => {
   }
   return v
 })
+/** vxe-table attaches `_X_*` metadata on row refs; cloneDeep would duplicate it and break row identity. */
+function stripVxeRowInternalKeys<T extends object>(row: T): T {
+  for (const key of Object.getOwnPropertyNames(row)) {
+    if (key.includes('_X_ROW_KEY')) {
+      Reflect.deleteProperty(row, key)
+    }
+  }
+  return row
+}
+
 function addFrame() {
   const channel = Object.keys(devices.value)[0] || ''
   if (dataBase.ia[editIndex.value]?.type == 'someip') {
@@ -783,6 +835,27 @@ function addFrame() {
       responseTimeout: 1000
     })
   }
+}
+
+function copyFrame() {
+  const idx = popoverIndex.value
+  if (idx < 0 || dataBase.ia[editIndex.value]?.type !== 'someip') return
+  const actions = dataBase.ia[editIndex.value].action
+  const src = actions[idx]
+  if (!src) return
+  const dup = stripVxeRowInternalKeys(cloneDeep(src) as SomeipAction)
+  if ((dup.someipOp ?? 'send') !== 'send' && dup.trigger?.type === 'periodic') {
+    dup.trigger.type = 'manual'
+  }
+  if (dup.name && String(dup.name).trim() !== '') {
+    dup.name = `${dup.name} (copy)`
+  }
+  const insertAt = idx + 1
+  actions.splice(insertAt, 0, dup)
+  void nextTick(() => {
+    popoverIndex.value = insertAt
+    xGrid.value?.setCurrentRow?.(actions[insertAt])
+  })
 }
 watch(globalStart, (v) => {
   if (v == false) {
@@ -809,6 +882,13 @@ function idChange(type: 'serviceId' | 'instanceId' | 'methodId' | 'eventGroupId'
   }
 }
 
+function methodIdCellPlaceholder(row: SomeipAction) {
+  if (row.someipOp === 'subscribe' || row.someipOp === 'unsubscribe') {
+    return i18next.t('uds.someip.si.placeholders.eventIdHex')
+  }
+  return ''
+}
+
 function someipOpLabel(op: SomeipAction['someipOp']) {
   if (op === 'subscribe') return 'Subscribe'
   if (op === 'unsubscribe') return 'Unsub'
@@ -818,6 +898,9 @@ function someipOpLabel(op: SomeipAction['someipOp']) {
 function onSomeipOpFormChange() {
   const fd = formData.value
   if (!fd) return
+  if (fd.someipOp !== 'send' && fd.trigger?.type === 'periodic') {
+    fd.trigger.type = 'manual'
+  }
   if (fd.someipOp !== 'send' && (fd.eventGroupId == null || fd.eventGroupId === '')) {
     fd.eventGroupId = '0x0001'
   }
@@ -826,6 +909,22 @@ function onSomeipOpFormChange() {
     (fd.someipEventType == null || fd.someipEventType === undefined)
   ) {
     fd.someipEventType = VsomeipEventType.ET_FIELD
+  }
+}
+
+function onInlineSomeipOpChange(row: SomeipAction, rowIndex: number, v: SomeipAction['someipOp']) {
+  const prevOp = row.someipOp ?? 'send'
+  const wasPeriodicSend = prevOp === 'send' && row.trigger?.type === 'periodic'
+  row.someipOp = v
+  if (v !== 'send' && row.trigger?.type === 'periodic') {
+    row.trigger.type = 'manual'
+  }
+  if (wasPeriodicSend && v !== 'send') {
+    const key = `${editIndex.value}-${rowIndex}`
+    if (runtime.someipPeriods[key]) {
+      runtime.removeSomeipPeriod(key)
+      window.electron.ipcRenderer.send('ipc-stop-someip-period', key)
+    }
   }
 }
 
@@ -866,7 +965,7 @@ async function sendFrame(index: number) {
     const op = frame.someipOp ?? 'send'
     if (op !== 'send' && frame.trigger.type === 'periodic') {
       ElNotification.warning({
-        message: 'Subscribe / Unsubscribe only supports manual trigger.'
+        message: i18next.t('uds.someip.si.notifications.subscribeManualOnly')
       })
       return
     }

@@ -18,10 +18,17 @@ This example shows a basic SOME/IP setup with:
 
 ## Script Behavior
 
-The TypeScript script (`someip.ts`) implements a simple echo server:
+The TypeScript script (`someip.ts`) runs on **Node 1**, which is attached only to **SomeIP_1** (the server, app `0x6302`). It implements:
 
-- Receives any SOME/IP request message for service 0x1234
-- Automatically generates and sends a response back to the requester
+- An echo server: receives SOME/IP **requests** for service `0x1234` and sends a response.
+- A periodic **`someipNotify`** for event `0x8777` on the **same** SomeIP_1 stack (publisher path: `offer_event` was done at startup for that service).
+
+**SomeIP_0** (`0x6301`) is the **client**. It does **not** run this script. To **receive** that event on SomeIP_0 you must:
+
+1. Run the IA manual action **subscribe** on device SomeIP_0 (it calls `subscribeToEvent` on the client).
+2. Use the **event id** `0x8777` (not the RPC method `0x1002`) and an `event_type` consistent with the server (`0` = ET_EVENT for this demo’s `is_field: false`).
+
+Without a successful subscription, vSomeIP will not deliver the notification to SomeIP_0.
 
 ## Network Setup
 

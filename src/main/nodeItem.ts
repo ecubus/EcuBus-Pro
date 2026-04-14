@@ -993,7 +993,13 @@ export class NodeClass {
     const msg = { ...data.msg, payload: toBuf(data.msg.payload), sending: true as const }
 
     if (data.op === 'notify') {
-      await base.sendRequest(msg)
+      await base.notifyEvent(
+        Number(msg.service),
+        Number(msg.instance),
+        Number(msg.method),
+        toBuf(data.msg.payload),
+        false
+      )
       return null
     }
 

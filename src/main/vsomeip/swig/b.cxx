@@ -7,6 +7,9 @@
 #include <string>
 #include <functional>
 #include <iostream>
+#include <cctype>
+#include <cstdlib>
+#include <stdexcept>
 
 using namespace vsomeip_v3;
 
@@ -222,11 +225,76 @@ void Send::request_event_one_group(
         static_cast<vsomeip_v3::event_type_e>(event_type));
 }
 
+static void trim_in_place(std::string& s) {
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front()))) {
+        s.erase(0, 1);
+    }
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) {
+        s.pop_back();
+    }
+}
+
+void Send::offer_event_with_groups(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    const std::string& eventgroups_csv,
+    int event_type) {
+    std::set<vsomeip_v3::eventgroup_t> groups;
+    size_t start = 0;
+    while (start < eventgroups_csv.size()) {
+        size_t comma = eventgroups_csv.find(',', start);
+        std::string token =
+            comma == std::string::npos ? eventgroups_csv.substr(start) : eventgroups_csv.substr(start, comma - start);
+        trim_in_place(token);
+        if (!token.empty()) {
+            char* endp = nullptr;
+            unsigned long v = std::strtoul(token.c_str(), &endp, 0);
+            if (endp != token.c_str() && *endp == '\0' && v <= 0xFFFFUL) {
+                groups.insert(static_cast<vsomeip_v3::eventgroup_t>(v));
+            }
+        }
+        if (comma == std::string::npos) {
+            break;
+        }
+        start = comma + 1;
+    }
+    if (groups.empty()) {
+        throw std::invalid_argument("offer_event_with_groups: no valid event groups");
+    }
+    app_->offer_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        groups,
+        static_cast<vsomeip_v3::event_type_e>(event_type));
+}
+
 void Send::release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event) {
     app_->release_event(
         static_cast<vsomeip_v3::service_t>(service),
         static_cast<vsomeip_v3::instance_t>(instance),
         static_cast<vsomeip_v3::event_t>(event));
+}
+
+void Send::notify_event(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    char* data,
+    uint32_t length,
+    bool force) {
+    std::shared_ptr<vsomeip::payload> pl = rtm_->create_payload();
+    if (length > 0 && data != nullptr) {
+        std::vector<vsomeip::byte_t> pl_data(data, data + length);
+        pl->set_data(pl_data);
+    }
+    app_->notify(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        pl,
+        force);
 }
 
 void Send::sendMessage(struct SomeipMessage* message,char* data,uint32_t length){

@@ -64,6 +64,19 @@ process.on('message', (message: any) => {
       instance?.sendMessage(data.msg)
       break
     }
+    case 'notifyEvent': {
+      const pl = data.payload
+      const buf = Buffer.isBuffer(pl) ? pl : Buffer.from((pl as any)?.data ?? pl ?? [])
+      // SWIG: 4 args (…, buf) or 5 args (…, buf, force); char*+length come from one Buffer via vsomeip.i typemap
+      instance?.sendc.notify_event(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.event),
+        buf,
+        Boolean(data.force)
+      )
+      break
+    }
     case 'offerServices': {
       for (const e of data.services) {
         instance?.app.offer_service(Number(e.service), Number(e.instance))
@@ -83,7 +96,8 @@ process.on('message', (message: any) => {
       break
     }
     case 'requestEvent': {
-      instance?.sendc.requestEventOneGroup(
+      // SWIG N-API exposes C++ method names (snake_case), not camelCase
+      instance?.sendc.request_event_one_group(
         Number(data.service),
         Number(data.instance),
         Number(data.event),
@@ -93,7 +107,34 @@ process.on('message', (message: any) => {
       break
     }
     case 'releaseEvent': {
-      instance?.sendc.releaseEventSimple(
+      instance?.sendc.release_event_simple(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.event)
+      )
+      break
+    }
+    case 'offerEvent': {
+      const eventgroups = Array.isArray(data.eventgroups)
+        ? data.eventgroups.map((v: unknown) => Number(v))
+        : data.eventgroup !== undefined && data.eventgroup !== null
+          ? [Number(data.eventgroup)]
+          : []
+      if (eventgroups.length === 0) {
+        throw new Error('offerEvent requires eventgroup or eventgroups')
+      }
+      // SWIG expects std::set<eventgroup_t>*; use Send helper (same pattern as request_event_one_group)
+      instance?.sendc.offer_event_with_groups(
+        Number(data.service),
+        Number(data.instance),
+        Number(data.event),
+        eventgroups.join(','),
+        Number(data.eventType ?? 0)
+      )
+      break
+    }
+    case 'stopOfferEvent': {
+      instance?.app.stop_offer_event(
         Number(data.service),
         Number(data.instance),
         Number(data.event)

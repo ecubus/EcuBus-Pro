@@ -39,7 +39,7 @@
             "has_session_handling": true
           },
           "serviceDiscovery": {
-            "enable": false,
+            "enable": true,
             "initial_state": "unknown",
             "multicast": "224.244.224.245",
             "port": 30490,
@@ -202,16 +202,34 @@
             "name": "",
             "someipOp": "subscribe",
             "eventGroupId": "0x2345",
-            "someipEventType": 2,
+            "someipEventType": 0,
             "messageType": 0,
-            "serviceId": "0x1000",
-            "instanceId": "0x1001",
-            "methodId": "0x1002",
+            "serviceId": "0x1234",
+            "instanceId": "0x1111",
+            "methodId": "0x8777",
             "channel": "a3228634-b533-4933-baff-807d6e453db9",
             "params": [],
             "respParams": [],
             "responseTimeout": 1000,
             "_X_ROW_KEY": "row_18"
+          },
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "someipOp": "unsubscribe",
+            "eventGroupId": "0x2345",
+            "someipEventType": 0,
+            "messageType": 0,
+            "serviceId": "0x1234",
+            "instanceId": "0x1111",
+            "methodId": "0x8777",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [],
+            "respParams": [],
+            "responseTimeout": 1000,
+            "_X_ROW_KEY": "row_53"
           }
         ]
       }
@@ -275,10 +293,10 @@
       },
       "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
         "pos": {
-          "x": 735.5,
-          "y": 7,
+          "x": 1107.5,
+          "y": 8,
           "w": 992,
-          "h": 399
+          "h": 423
         },
         "title": "someipi",
         "label": "IA",
@@ -292,8 +310,8 @@
       },
       "soa": {
         "pos": {
-          "x": 611.5,
-          "y": 28.3125,
+          "x": 349.5,
+          "y": 56,
           "w": 933,
           "h": 606
         },
@@ -308,8 +326,8 @@
       },
       "trace": {
         "pos": {
-          "x": 246.5,
-          "y": 218,
+          "x": 1096.5,
+          "y": 662,
           "w": 1038,
           "h": 351.34400000000005
         },

@@ -79,6 +79,23 @@ public:
         std::uint16_t eventgroup,
         int event_type);
 
+    /** Comma-separated event group ids (e.g. "1" or "1,2") for application::offer_event */
+    void offer_event_with_groups(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        const std::string& eventgroups_csv,
+        int event_type);
+
+    /** application::notify — publisher path after offer_event (Buffer maps via vsomeip.i typemap like sendMessage) */
+    void notify_event(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        char* data,
+        uint32_t length,
+        bool force = false);
+
     void release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event);
 };
 

@@ -2644,6 +2644,7 @@
         "tooltips": {
           "editConnect": "Edit Connect",
           "addFrame": "Add Frame",
+          "copyFrame": "Duplicate selected row",
           "selectFrameFromDatabase": "Select Frame from Database",
           "editFrame": "Edit Frame",
           "deleteFrame": "Delete Frame"
@@ -2653,6 +2654,10 @@
           "serviceId": "Service ID",
           "instanceId": "Instance ID",
           "methodId": "Method ID",
+          "eventId": "Event ID",
+          "eventGroupId": "Event group ID",
+          "eventRequestType": "Event type (request_event)",
+          "someipOperation": "Operation",
           "messageType": "Message Type",
           "protocolVersion": "Protocol Version",
           "interfaceVersion": "Interface Version",
@@ -2661,16 +2666,21 @@
           "channel": "Channel",
           "reliable": "Reliable",
           "onKey": "On Key:",
-          "period": "Period (ms):"
+          "period": "Period (ms):",
+          "subscribeTimeout": "Subscribe timeout (ms)",
+          "responseTimeout": "Response timeout (ms)"
         },
         "columns": {
           "send": "Send",
           "trigger": "Trigger",
           "name": "Name",
           "messageType": "Message Type",
+          "someipOp": "Operation",
+          "eventGroupId": "Event group",
           "serviceId": "Service ID",
           "instanceId": "Instance ID",
           "methodId": "Method ID",
+          "methodOrEventId": "Method / Event ID",
           "channel": "Channel",
           "params": "Params"
         },
@@ -2678,6 +2688,11 @@
           "triggerType": {
             "manual": "Manual",
             "periodic": "Periodic"
+          },
+          "someipOperation": {
+            "send": "Send message",
+            "subscribe": "Subscribe (receive events)",
+            "unsubscribe": "Unsubscribe"
           },
           "messageType": {
             "request": "Request",
@@ -2699,12 +2714,16 @@
           "interfaceVersion": "0",
           "majorVersion": "0",
           "minorVersion": "0",
-          "reliable": "False"
+          "reliable": "False",
+          "eventIdHex": "e.g. 0x8001"
         },
         "dialogs": {
           "deviceConnect": "IA Device Connect",
           "editFrame": "Edit Frame {{name}}",
           "selectFrameFromDatabase": "Select Frame from Database"
+        },
+        "notifications": {
+          "subscribeManualOnly": "Subscribe and unsubscribe can only use a manual trigger, not periodic."
         },
         "transfer": {
           "valid": "Valid",

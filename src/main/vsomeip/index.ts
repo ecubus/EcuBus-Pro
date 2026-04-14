@@ -307,6 +307,7 @@ export class VSomeIP_Client {
           sysLog.log(stateStr.level, `${this.name} - ${stateStr.msg}`)
           if (callbackData.data == 0) {
             this.offerService(this.info.services)
+            void this.offerConfiguredEvents()
           }
         }
         break
@@ -335,7 +336,6 @@ export class VSomeIP_Client {
       }
       case 'subscription':
         // 这里 callbackData.data 自动是 VsomeipSubscriptionInfo
-        console.log('Subscription changed:', callbackData.data)
         this.event.emit('subscription', callbackData.data)
         break
       case 'subscription_status':
@@ -364,6 +364,26 @@ export class VSomeIP_Client {
     const ts = getTsUs() - global.startTs
 
     return ts
+  }
+
+  /**
+   * Fire an offered event/field via vSomeIP `application::notify` (not raw NOTIFICATION send).
+   */
+  notifyEvent(
+    service: number,
+    instance: number,
+    event: number,
+    payload: Buffer | Uint8Array,
+    force: boolean = false
+  ) {
+    const buf = Buffer.isBuffer(payload) ? payload : Buffer.from(payload)
+    return this.send('notifyEvent', {
+      service,
+      instance,
+      event,
+      payload: buf,
+      force
+    })
   }
   async sendRequestAndWaitResponse(msg: SomeipMessage, timeout: number) {
     return new Promise<SomeipMessage>((resolve, reject) => {
@@ -480,6 +500,57 @@ export class VSomeIP_Client {
   }
   offerService(services: ServiceConfig[]) {
     return this.send('offerServices', { services })
+  }
+  private async offerConfiguredEvents() {
+    for (const serviceCfg of this.info.services || []) {
+      const events = serviceCfg.events || []
+      const eventgroups = serviceCfg.eventgroups || []
+      if (events.length === 0 || eventgroups.length === 0) {
+        continue
+      }
+      const service = Number(serviceCfg.service)
+      const instance = Number(serviceCfg.instance)
+      for (const eventCfg of events) {
+        const event = Number(eventCfg.event)
+        const matchedGroups = eventgroups
+          .filter((g) => (g.events || []).some((e) => Number(e) === event))
+          .map((g) => Number(g.eventgroup))
+        if (matchedGroups.length === 0) {
+          continue
+        }
+        const isField = eventCfg.is_field === true || eventCfg.is_field === 'true'
+        const eventType = isField ? 2 : 0 // vsomeip event_type_e: ET_FIELD=2, ET_EVENT=0
+        try {
+          await this.offerEvent(service, instance, event, matchedGroups, eventType)
+        } catch (e) {
+          sysLog.error(
+            `offerEvent failed for ${serviceCfg.service}.${serviceCfg.instance}.${eventCfg.event}: ${e}`
+          )
+        }
+      }
+    }
+  }
+  offerEvent(
+    service: number,
+    instance: number,
+    event: number,
+    eventgroup: number | number[],
+    eventType: number = 0
+  ) {
+    const eventgroups = Array.isArray(eventgroup) ? eventgroup : [eventgroup]
+    if (eventgroups.length === 0) {
+      throw new Error('offerEvent requires at least one eventgroup')
+    }
+    return this.send('offerEvent', {
+      service,
+      instance,
+      event,
+      eventgroups,
+      eventType
+    })
+  }
+  stopOfferEvent(service: number, instance: number, event: number) {
+    return this.send('stopOfferEvent', { service, instance, event })
   }
   releaseService(services: ServiceConfig[]) {
     return this.send('releaseServices', { services })

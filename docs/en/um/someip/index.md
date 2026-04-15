@@ -8,39 +8,52 @@ EcuBus-Pro supports the SOME/IP protocol and can be used for developing and test
 
 ### Add SOME/IP Configuration
 
-Add SOME/IP configuration by clicking SOA->SOA Config->Add SOME/IP Configuration.
+Add a SOME/IP configuration by clicking `SOA -> SOA Config -> Add SOME/IP Configuration`.
 
 ![Add SOME/IP Configuration](../../../media/um/someip/add.png)
 
 ### Configure SOME/IP
 
-Click on the SOME/IP configuration to configure it.
+Click a SOME/IP configuration item to open its settings.
 
 ![SOME/IP Configuration](../../../media/um/someip/config.png)
 
 #### Device Configuration
 
-Each SOME/IP configuration must include an Ethernet device.
+Each SOME/IP configuration must bind to one Ethernet device.
+
+- Select the NIC used for SOME/IP communication.
+- Verify local IP and subnet are reachable from the target ECU/service.
+- In multi-NIC environments, explicitly bind to the NIC used for test traffic.
+
+
 
 #### Application Configuration
 
-Each SOME/IP configuration corresponds to an application and requires an Application ID. The Application ID is the unique identifier for the application and ranges from 1-65535.
+Each SOME/IP configuration corresponds to one application and requires an Application ID.
+
+- Application ID range: `1` to `65535`
+- The value must be unique in the same runtime context.
+- It should match your vSomeIP runtime expectation when integrating with external services.
+
+
 
 #### Service Discovery Configuration
 
-Controls whether service discovery is enabled. If service discovery is enabled, you need to configure the service discovery-related settings.
+This section controls whether SOME/IP Service Discovery (SD) is enabled.
+
+If SD is enabled, configure multicast and timing settings (for example multicast address, SD port, offer/request timing, and TTL).
 
 > [!TIP]
-> If service discovery is enabled, you may need to configure multicast-related settings on your computer.
+> If service discovery is enabled, you may need multicast routing/firewall configuration on your computer.
+
+
 
 #### Service Configuration
 
 ![SOME/IP Service Configuration](../../../media/um/someip/service.png)
 
-> [!WARNING]
-> Currently, only simple services are supported. Support for events and event groups will be added in the future.
-
-Each service needs to be configured with:
+For each service, configure:
 
 1. Service ID - The unique identifier for the service, ranging from 1-65535
 2. Service Instance ID - The unique identifier for the service instance, ranging from 1-65535
@@ -49,13 +62,13 @@ Each service needs to be configured with:
 
 ## SOME/IP Interactor
 
-Click on the SOME/IP Interactor to quickly initiate SOME/IP requests and view the responses to SOME/IP requests.
+Use SOME/IP Interactor to quickly send SOME/IP actions and inspect responses/messages.
 
 ![SOME/IP Interactor](../../../media/um/someip/ia.png)
 
 ### Interactor Configuration
 
-Hover over the interactor block and click the edit button to configure the interactor.
+Hover over the interactor block and click **Edit**.
 
 #### Connection Configuration
 
@@ -68,6 +81,31 @@ Hover over the interactor block and click the edit button to configure the inter
 > Selecting requests from the database is not currently supported.
 
 ![SOME/IP Interactor Request Configuration](../../../media/um/someip/frame.png)
+
+### Common Action Flow (Subscribe Before Notify)
+
+For event-based communication, use this sequence:
+
+1. Configure a `subscribe` action (`someipOp=subscribe`) for the target Service/Instance/Event Group.
+2. Execute the subscribe action first and confirm subscription succeeds.
+3. Trigger or wait for remote notify messages.
+4. Observe messages in Trace or in the Interactor response area.
+
+> [!IMPORTANT]
+> If you do not subscribe first, notify messages are typically not delivered to the client.
+
+
+![Subscribe Action Screenshot](../../../media/um/someip/sub.png)
+
+![Notify Reception Screenshot](../../../media/um/someip/notify.png)
+
+### Recommended Validation Checklist
+
+- Service/Instance/Method/Event Group IDs match on both sides.
+- Local NIC/IP binding is correct.
+- UDP/TCP ports are consistent with remote service.
+- Service Discovery multicast settings are reachable.
+- Firewall allows SOME/IP and SD traffic.
 
 ## SOME/IP Script
 

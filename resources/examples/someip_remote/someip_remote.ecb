@@ -236,6 +236,9 @@
           "name": "Trace"
         }
       }
+    },
+    "example": {
+      "catalog": "SOME/IP"
     }
   }
 }

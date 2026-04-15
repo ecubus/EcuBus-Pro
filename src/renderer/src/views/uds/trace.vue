@@ -1164,7 +1164,11 @@ watch(
   { deep: true }
 )
 watch([isPaused, isOverwrite], (v) => {
-  columes.value[0].type = 'tree'
+  if (v[1]) {
+    columes.value[0].type = 'tree'
+  } else {
+    columes.value[0].type = undefined
+  }
   if (!v[0] && !v[1]) {
     scrollY = -1
   }

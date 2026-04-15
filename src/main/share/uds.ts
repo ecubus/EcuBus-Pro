@@ -28,6 +28,14 @@ export interface ServiceItem {
 }
 // 使用泛型简化定义
 
+export interface DtcTableEntry {
+  identifier?: string
+  name: string
+  hexNumber: string
+  hexValue: number
+  codeText?: string | null
+}
+
 export interface Param {
   id: string
   name: string
@@ -41,6 +49,7 @@ export interface Param {
   meta?: {
     type: string
   }
+  DTC_Table?: DtcTableEntry[]
   deletable?: boolean
   editable?: boolean
 }
@@ -568,6 +577,34 @@ export function applyOdxImportedSubfuncParamFlags(
       if (r0 && r0.bytePos === 1 && r0.bitLen === 8) {
         r0.deletable = subResp?.deletable ?? false
         r0.editable = subResp?.editable ?? true
+      }
+    }
+  }
+}
+
+/**
+ * CDD import: normalize editable/deletable flags from parser metadata so
+ * business payload fields remain editable while protocol identity fields stay locked.
+ */
+export function applyImportedCddParamFlags(tester: {
+  allServiceList?: Partial<Record<ServiceId, ServiceItem[]>>
+}): void {
+  const all = tester.allServiceList
+  if (!all) return
+  for (const sid of Object.keys(all) as ServiceId[]) {
+    const items = all[sid]
+    if (!items?.length) continue
+    for (const item of items) {
+      for (const param of [...item.params, ...item.respParams]) {
+        const spec = (param as any)?.meta?.cddField?.spec
+        const isIdentityField = spec === 'id' || spec === 'sub' || spec === 'accm'
+        if (isIdentityField) {
+          param.deletable = false
+          param.editable = false
+        } else {
+          if (param.deletable === undefined) param.deletable = true
+          if (param.editable === undefined) param.editable = true
+        }
       }
     }
   }

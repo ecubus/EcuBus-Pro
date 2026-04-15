@@ -17,6 +17,10 @@
                 <Icon :icon="folderOpenedIcon" style="margin-right: 4px" />
                 ODX / PDX File
               </el-dropdown-item>
+              <el-dropdown-item command="cdd">
+                <Icon :icon="folderOpenedIcon" style="margin-right: 4px" />
+                CDD File
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -150,7 +154,11 @@ import testerCanVue from './testercan.vue'
 import { Layout } from '../layout'
 import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
-import { applyOdxImportedSubfuncParamFlags, HardwareType } from 'nodeCan/uds'
+import {
+  applyImportedCddParamFlags,
+  applyOdxImportedSubfuncParamFlags,
+  HardwareType
+} from 'nodeCan/uds'
 import type { TesterInfo } from 'nodeCan/tester'
 import { useProjectStore } from '@r/stores/project'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -364,7 +372,7 @@ interface ImportItem {
 }
 
 const importDialogVisible = ref(false)
-const importKind = ref<'ecb' | 'odx' | null>(null)
+const importKind = ref<'ecb' | 'odx' | 'cdd' | null>(null)
 const importDialogTitle = ref('Import Tester')
 const importItems = ref<ImportItem[]>([])
 const importSelected = ref<string[]>([])
@@ -386,6 +394,8 @@ async function handleImport(command: string) {
     await importFromEcb()
   } else if (command === 'odx') {
     await importFromOdx()
+  } else if (command === 'cdd') {
+    await importFromCdd()
   }
 }
 
@@ -511,6 +521,74 @@ async function importFromOdx() {
   }
 }
 
+async function importFromCdd() {
+  const res = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    defaultPath: project.projectInfo.path,
+    title: 'Import Tester from CDD',
+    properties: ['openFile'],
+    filters: [
+      { name: 'CDD Files', extensions: ['cdd'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+  if (res.canceled || !res.filePaths?.length) return
+
+  loading.value = true
+  try {
+    const result = await window.electron.ipcRenderer.invoke(
+      'ipcCddParseTesterInfo',
+      '',
+      res.filePaths[0],
+      true
+    )
+
+    if (result.error !== 0) {
+      ElMessage({
+        message: 'CDD parse error: ' + (result.message || 'Unknown error'),
+        type: 'error',
+        appendTo: `#win${winKey}`
+      })
+      return
+    }
+
+    const items: ImportItem[] = []
+    for (const [containerName, layers] of Object.entries(result.data as Record<string, any>)) {
+      for (const [layerName, tester] of Object.entries(layers as Record<string, any>)) {
+        items.push({
+          id: v4(),
+          label: containerName !== layerName ? `${containerName} / ${layerName}` : layerName,
+          type: (tester as TesterInfo).type,
+          tester: tester as TesterInfo
+        })
+      }
+    }
+
+    if (items.length === 0) {
+      ElMessage({
+        message: 'No tester configurations found in the CDD file',
+        type: 'warning',
+        appendTo: `#win${winKey}`
+      })
+      return
+    }
+
+    importDialogTitle.value = 'Import from CDD'
+    importKind.value = 'cdd'
+    importItems.value = items
+    importSelected.value = items.map((i) => i.id)
+    importSelectAll.value = true
+    importDialogVisible.value = true
+  } catch (e: any) {
+    ElMessage({
+      message: 'Failed to parse CDD file: ' + (e.message || e),
+      type: 'error',
+      appendTo: `#win${winKey}`
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
 function confirmImport() {
   const selected = importItems.value.filter((i) => importSelected.value.includes(i.id))
   let count = 0
@@ -520,7 +598,9 @@ function confirmImport() {
     const tester = cloneDeep(item.tester)
     tester.id = newId
     tester.name = generateUniqueImportName(tester.name, tester.type)
-    if (importKind.value === 'odx') {
+    if (importKind.value === 'cdd') {
+      applyImportedCddParamFlags(tester)
+    } else if (importKind.value === 'odx') {
       applyOdxImportedSubfuncParamFlags(tester, window.serviceDetail)
     }
 

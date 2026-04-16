@@ -1,4 +1,4 @@
-# SOME/IP Request/Response + Event Demo
+# SOME/IP 请求/响应 + 事件演示
 
 本演示展示了如何在 EcuBus-Pro 环境中使用 SOME/IP 协议。
 
@@ -9,43 +9,43 @@
 - 两个配置用于通信的 SOME/IP 设备（客户端和服务器）
   - **客户端应用 ID**：0x6301
   - **服务器应用 ID**：0x6302
-- A Server provider offering a service and event
+- 一个提供服务和事件的服务器提供者
   - **服务 ID**：0x1234
   - **实例 ID**：0x1111
-  - **Method ID**: 0x1002 (request/response)
-  - **Event ID**: 0x8777 (notification/event publish)
+  - **方法 ID**: 0x1002 (请求/响应)
+  - **事件 ID**: 0x8777 (通知/事件发布)
   - **端口**：30510（可靠的 TCP 连接）
 
 ## 脚本行为
 
-The TypeScript script (`someip.ts`) runs on **Node 1**, which is attached only to **SomeIP_1** (the server, app `0x6302`). It implements:
+TypeScript 脚本 (`someip.ts`) 运行在 **节点 1** 上，该节点仅连接到 **SomeIP_1**（服务器，应用 `0x6302`）。 它实现了：
 
-- An echo server: receives SOME/IP **requests** for service `0x1234` and sends a response.
-- A periodic **`someipNotify`** for event `0x8777` on the **same** SomeIP_1 stack (publisher path: `offer_event` was done at startup for that service).
+- 一个回显服务器：接收服务 `0x1234` 的 SOME/IP **请求** 并发送响应。
+- 一个针对 **同一** SomeIP_1 栈上事件 `0x8777` 的周期性 **`someipNotify`**（发布者路径：`offer_event` 在启动时已为该服务完成）。
 
-The subscriber example script (`sub.ts`) runs on the client side and listens with:
+订阅者示例脚本 (`sub.ts`) 在客户端运行并监听：
 
 - `Util.OnSomeipMessage('1234.*.*', ...)`
-- `msg instanceof SomeipMessageEvent` to handle incoming event/notification frames.
+- `msg instanceof SomeipMessageEvent` 以处理传入的事件/通知帧。
 
-**SomeIP_0** (`0x6301`) is the **client**. It does **not** run this script. To **receive** that event on SomeIP_0 you must:
+**SomeIP_0** (`0x6301`) 是 **客户端**。 它 **不** 运行此脚本。 要在 SomeIP_0 上 **接收** 该事件，您必须：
 
-1. Run the IA manual action **subscribe** on device SomeIP_0 (it calls `subscribeToEvent` on the client).
-2. Use the **event id** `0x8777` (not the RPC method `0x1002`) and an `event_type` consistent with the server (`0` = ET_EVENT for this demo’s `is_field: false`).
+1. 在设备 SomeIP_0 上运行 IA 手动操作 **订阅**（它在客户端调用 `subscribeToEvent`）。
+2. 使用 **事件 id** `0x8777`（而非 RPC 方法 `0x1002`）以及与服务器一致的 `event_type`（`0` = ET_EVENT，对应此演示的 `is_field: false`）。
 
-Without a successful subscription, vSomeIP will not deliver the notification to SomeIP_0.
+如果没有成功的订阅，vSomeIP 将不会将通知传递给 SomeIP_0。
 
-## Run Steps
+## 运行步骤
 
-1. Start project and ensure both SOME/IP devices are online.
-2. Run `someip.ts` on the provider node (SomeIP_1 / app `0x6302`).
-3. Run `sub.ts` on the consumer node (SomeIP_0 / app `0x6301`).
-4. Trigger IA manual **subscribe** action on SomeIP_0 for:
-   - service `0x1234`
-   - instance `0x1111`
-   - event group `0x0001`
-   - event `0x8777`
-5. Observe event logs on subscriber side.
+1. 启动项目并确保两个 SOME/IP 设备都在线。
+2. 在提供者节点（SomeIP_1 / 应用 `0x6302`）上运行 `someip.ts`。
+3. 在消费者节点（SomeIP_0 / 应用 `0x6301`）上运行 `sub.ts`。
+4. 在 SomeIP_0 上触发 IA 手动 **订阅** 操作，针对：
+   - 服务 `0x1234`
+   - 实例 `0x1111`
+   - 事件组 `0x0001`
+   - 事件 `0x8777`
+5. 观察订阅者端的事件日志。
 
 ## 网络设置
 

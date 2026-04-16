@@ -76,29 +76,29 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ![SOME/IP 交互器请求配置](../../../media/um/someip/frame.png)
 
-### Common Action Flow (Subscribe Before Notify)
+### 通用操作流程（先订阅后通知）
 
-For event-based communication, use this sequence:
+对于基于事件的通信，请使用以下序列：
 
-1. Configure a `subscribe` action (`someipOp=subscribe`) for the target Service/Instance/Event Group.
-2. Execute the subscribe action first and confirm subscription succeeds.
-3. Trigger or wait for remote notify messages.
-4. Observe messages in Trace or in the Interactor response area.
+1. 为目标服务/实例/事件组配置一个 `subscribe` 操作（`someipOp=subscribe`）。
+2. 首先执行订阅操作，并确认订阅成功。
+3. 触发或等待远程通知消息。
+4. 在 Trace 或 Interactor 响应区域中观察消息。
 
 > [!IMPORTANT]
-> If you do not subscribe first, notify messages are typically not delivered to the client.
+> 如果不先订阅，通知消息通常不会传递到客户端。
 
 ![Subscribe Action Screenshot](../../../media/um/someip/sub.png)
 
 ![Notify Reception Screenshot](../../../media/um/someip/notify.png)
 
-### Recommended Validation Checklist
+### 推荐的验证清单
 
-- Service/Instance/Method/Event Group IDs match on both sides.
-- Local NIC/IP binding is correct.
-- UDP/TCP ports are consistent with remote service.
-- Service Discovery multicast settings are reachable.
-- Firewall allows SOME/IP and SD traffic.
+- 服务/实例/方法/事件组 ID 在两端匹配。
+- 本地 NIC/IP 绑定正确。
+- UDP/TCP 端口与远程服务一致。
+- 服务发现多播设置可达。
+- 防火墙允许 SOME/IP 和 SD 流量。
 
 ## SOME/IP 脚本
 

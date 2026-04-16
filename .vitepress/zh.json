@@ -299,11 +299,11 @@
       "text": "SOME/IP",
       "items": [
         {
-          "text": "Local SOME/IP Demo",
+          "text": "本地 SOME/IP 演示",
           "link": "someip/readme.md"
         },
         {
-          "text": "Remote SOME/IP sDemo",
+          "text": "远程 SOME/IP 演示",
           "link": "someip_remote/readme.md"
         }
       ],

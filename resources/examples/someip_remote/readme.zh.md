@@ -1,75 +1,75 @@
-# SOME/IP Remote Example (vsomeip `notify-sample`)
+# SOME/IP 远程示例（vsomeip `notify-sample`）
 
-The `remote` side in this folder is based on the official `vsomeip` example app: `notify-sample`.
-You can treat it as the remote SOME/IP service, while `ecubus-pro` acts as the client that discovers the service and receives notifications.
+此文件夹中的 `remote` 端基于官方的 `vsomeip` 示例应用：`notify-sample`。
+您可以将其视为远程 SOME/IP 服务，而 `ecubus-pro` 则作为发现该服务并接收通知的客户端。
 
-## 1. Prerequisites
+## 1. 先决条件
 
-- `vsomeip` is installed and working (including sample binaries)
-- `notify-sample` can be executed on the remote host
-- Network connectivity is available between remote and local host
-- `someip_remote.json` in this folder is prepared (adjust path as needed)
+- `vsomeip` 已安装且正常工作（包括示例二进制文件）
+- `notify-sample` 可在远程主机上执行
+- 远程主机与本地主机之间具备网络连接
+- 此文件夹中的 `someip_remote.json` 已准备就绪（根据需要调整路径）
 
-## 2. Network Preparation (Linux)
+## 2. 网络准备（Linux）
 
-If multicast routing is not available by default in your environment, run:
+如果您的环境中默认未启用多播路由，请运行：
 
 ```bash
 sudo ip route add multicast 224.0.0.0/4 dev eth0
 ```
 
-Replace `eth0` with your actual network interface (for example `enp3s0`, `ens33`, etc.).
+将 `eth0` 替换为您实际的网络接口（例如 `enp3s0`、`ens33` 等）。
 
-## 3. Set vsomeip Environment Variables
+## 3. 设置 vsomeip 环境变量
 
-Set these variables in the same terminal where you will start `notify-sample`:
+在您将启动 `notify-sample` 的同一终端中设置这些变量：
 
 ```bash
 export VSOMEIP_CONFIGURATION=/path/to/someip_remote.json
 export VSOMEIP_APPLICATION_NAME=hello_world_service
 ```
 
-Notes:
+注意：
 
-- `VSOMEIP_CONFIGURATION`: path to the remote-side vsomeip config file
-- `VSOMEIP_APPLICATION_NAME`: must match the application name defined in the config
+- `VSOMEIP_CONFIGURATION`：远程端 vsomeip 配置文件的路径
+- `VSOMEIP_APPLICATION_NAME`：必须与配置文件中定义的应用程序名称匹配
 
-## 4. Start Remote (`notify-sample`)
+## 4. 启动远程端（`notify-sample`）
 
 ```bash
 notify-sample
 ```
 
-If startup succeeds, you should see logs related to service registration, service discovery, and event notifications.
+如果启动成功，您应该会看到与服务注册、服务发现和事件通知相关的日志。
 
-## 5. Use with EcuBus-Pro
+## 5. 与 EcuBus-Pro 配合使用
 
-1. Open the `someip_remote` example in EcuBus-Pro (or import equivalent configuration)
-2. Ensure local/remote IP, port, Service ID, Instance ID, and Event Group values match
-3. In `SomeIP IA`, run the `subscribe` action first (`someipOp=subscribe`, `methodId=0x8778`)
-4. After subscription succeeds, run or observe the notify flow (the second SOME/IP IA action) and verify notifications from `notify-sample`
+1. 在 EcuBus-Pro 中打开 `someip_remote` 示例（或导入等效配置）
+2. 确保本地/远程 IP、端口、服务 ID、实例 ID 和事件组值匹配
+3. 在 `SomeIP IA` 中，首先运行 `subscribe` 操作（`someipOp=subscribe`，`methodId=0x8778`）
+4. 订阅成功后，运行或观察通知流（第二个 SOME/IP IA 操作），并验证来自 `notify-sample` 的通知
 
-Important:
+重要提示：
 
-- This project contains **two** SOME/IP IA actions.
-- You must execute the **subscribe** action first; otherwise, notify messages will not be received.
+- 此项目包含 **两个** SOME/IP IA 操作。
+- 您必须首先执行 **subscribe** 操作；否则，将无法收到通知消息。
 
 ![demo_someip](someip.gif)
 
-## 6. Troubleshooting
+## 6. 故障排除
 
-- Service is not discovered:
-  - Verify network connectivity (`ping`)
-  - Check firewall rules for SOME/IP UDP multicast/unicast traffic
-  - Confirm `someip_remote.json` matches EcuBus-Pro settings
-- Service is discovered but no events:
-  - Verify the `subscribe` action was executed successfully before checking notifications
-  - Verify `notify-sample` is still running and publishing notifications
-- Multi-NIC environment issues:
-  - Bind the correct NIC/IP in configuration
-  - Temporarily keep only the target NIC enabled to remove route ambiguity
+- 服务未被发现：
+  - 验证网络连接（`ping`）
+  - 检查 SOME/IP UDP 多播/单播流量的防火墙规则
+  - 确认 `someip_remote.json` 与 EcuBus-Pro 设置匹配
+- 服务已发现但无事件：
+  - 在检查通知之前，验证 `subscribe` 操作是否已成功执行
+  - 验证 `notify-sample` 是否仍在运行并发布通知
+- 多网卡环境问题：
+  - 在配置中绑定正确的网卡/IP
+  - 临时仅启用目标网卡以消除路由歧义
 
-## 7. Minimal Startup Commands
+## 7. 最小启动命令
 
 ```bash
 sudo ip route add multicast 224.0.0.0/4 dev eth0

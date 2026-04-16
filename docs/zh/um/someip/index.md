@@ -8,39 +8,46 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ### 添加 SOME/IP 配置
 
-通过点击 SOA->SOA 配置->添加 SOME/IP 配置来添加 SOME/IP 配置。
+通过点击 `SOA -> SOA 配置 -> 添加 SOME/IP 配置` 来添加一个 SOME/IP 配置。
 
 ![添加 SOME/IP 配置](../../../media/um/someip/add.png)
 
 ### 配置 SOME/IP
 
-点击 SOME/IP 配置以进行配置。
+点击一个 SOME/IP 配置项以打开其设置。
 
 ![SOME/IP 配置](../../../media/um/someip/config.png)
 
 #### 设备配置
 
-每个 SOME/IP 配置必须包含一个以太网设备。
+每个 SOME/IP 配置必须绑定到一个以太网设备。
+
+- 选择用于 SOME/IP 通信的网卡。
+- 验证目标 ECU/服务可以访问本地 IP 和子网。
+- 在多网卡环境中，请明确绑定到用于测试流量的网卡。
 
 #### 应用程序配置
 
 每个 SOME/IP 配置对应一个应用程序，并需要一个应用程序 ID。 应用程序 ID 是应用程序的唯一标识符，范围为 1-65535。
 
+- 应用程序 ID 范围：`1` 到 `65535`
+- 该值在同一运行时上下文中必须是唯一的。
+- 在与外部服务集成时，它应匹配您的 vSomeIP 运行时预期。
+
 #### 服务发现配置
 
-控制是否启用服务发现。 如果启用了服务发现，您需要配置与服务发现相关的设置。
+此部分控制是否启用 SOME/IP 服务发现。
+
+如果启用了服务发现，请配置组播和定时设置（例如组播地址、服务发现端口、提供/请求定时和生存时间）。
 
 > [!TIP]
-> 如果启用了服务发现，您可能需要在计算机上配置多播相关设置。
+> 如果启用了服务发现，您可能需要在计算机上配置组播路由/防火墙。
 
 #### 服务配置
 
 ![SOME/IP 服务配置](../../../media/um/someip/service.png)
 
-> [!WARNING]
-> 目前仅支持简单服务。 对事件和事件组的支持将在未来添加。
-
-每个服务需要配置：
+对于每个服务，配置：
 
 1. 服务 ID - 服务的唯一标识符，范围为 1-65535
 2. 服务实例 ID - 服务实例的唯一标识符，范围为 1-65535
@@ -49,13 +56,13 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ## SOME/IP 交互器
 
-点击 SOME/IP 交互器以快速发起 SOME/IP 请求并查看 SOME/IP 请求的响应。
+使用 SOME/IP 交互器快速发送 SOME/IP 操作并检查响应/消息。
 
 ![SOME/IP 交互器](../../../media/um/someip/ia.png)
 
 ### 交互器配置
 
-悬停在交互器块上并点击编辑按钮以配置交互器。
+将鼠标悬停在交互器块上并点击 **编辑**。
 
 #### 连接配置
 
@@ -68,6 +75,30 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 > 目前不支持从数据库中选择请求。
 
 ![SOME/IP 交互器请求配置](../../../media/um/someip/frame.png)
+
+### Common Action Flow (Subscribe Before Notify)
+
+For event-based communication, use this sequence:
+
+1. Configure a `subscribe` action (`someipOp=subscribe`) for the target Service/Instance/Event Group.
+2. Execute the subscribe action first and confirm subscription succeeds.
+3. Trigger or wait for remote notify messages.
+4. Observe messages in Trace or in the Interactor response area.
+
+> [!IMPORTANT]
+> If you do not subscribe first, notify messages are typically not delivered to the client.
+
+![Subscribe Action Screenshot](../../../media/um/someip/sub.png)
+
+![Notify Reception Screenshot](../../../media/um/someip/notify.png)
+
+### Recommended Validation Checklist
+
+- Service/Instance/Method/Event Group IDs match on both sides.
+- Local NIC/IP binding is correct.
+- UDP/TCP ports are consistent with remote service.
+- Service Discovery multicast settings are reachable.
+- Firewall allows SOME/IP and SD traffic.
 
 ## SOME/IP 脚本
 

@@ -299,8 +299,12 @@
       "text": "SOME/IP",
       "items": [
         {
-          "text": "请求/响应",
+          "text": "Local SOME/IP Demo",
           "link": "someip/readme.md"
+        },
+        {
+          "text": "Remote SOME/IP sDemo",
+          "link": "someip_remote/readme.md"
         }
       ],
       "collapsed": true

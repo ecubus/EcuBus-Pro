@@ -77,9 +77,9 @@
             },
             "name": "",
             "messageType": 0,
-            "serviceId": "0x1111",
-            "instanceId": "0x2222",
-            "methodId": "0x3333",
+            "serviceId": "0x1234",
+            "instanceId": "0x5678",
+            "methodId": "0x0421",
             "channel": "721ea2b9-12cd-494a-b448-e3514fb0d96d",
             "params": [
               {
@@ -106,7 +106,50 @@
             "respParams": [],
             "_X_ROW_KEY": "row_26",
             "protocolVersion": "",
-            "interfaceVersion": ""
+            "interfaceVersion": "",
+            "someipOp": "send",
+            "eventGroupId": "0x0001",
+            "someipEventType": 2
+          },
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "messageType": 0,
+            "serviceId": "0x1234",
+            "instanceId": "0x5678",
+            "methodId": "0x8778",
+            "channel": "721ea2b9-12cd-494a-b448-e3514fb0d96d",
+            "params": [
+              {
+                "id": "959689b6-efcd-4f2c-9e1a-ed591a55d03a",
+                "name": "param1",
+                "desc": "",
+                "phyValue": "hello",
+                "value": {
+                  "type": "Buffer",
+                  "data": [
+                    104,
+                    101,
+                    108,
+                    108,
+                    111
+                  ]
+                },
+                "bitLen": 40,
+                "type": "ASCII",
+                "deletable": true,
+                "editable": true
+              }
+            ],
+            "respParams": [],
+            "protocolVersion": "",
+            "interfaceVersion": "",
+            "someipOp": "subscribe",
+            "eventGroupId": "0x4465",
+            "someipEventType": 0,
+            "_X_ROW_KEY": "row_18"
           }
         ]
       }
@@ -126,7 +169,8 @@
     "panels": {},
     "logs": {},
     "traces": {},
-    "pluginData": {}
+    "pluginData": {},
+    "replays": {}
   },
   "project": {
     "wins": {
@@ -160,9 +204,9 @@
       },
       "802c5740-920c-487f-9cab-6f85483e091e_ia": {
         "pos": {
-          "x": 576,
-          "y": 26,
-          "w": 1387,
+          "x": 494,
+          "y": 0,
+          "w": 1162,
           "h": 400
         },
         "title": "someipi",
@@ -177,8 +221,8 @@
       },
       "trace": {
         "pos": {
-          "x": 72.5,
-          "y": 117,
+          "x": 54.5,
+          "y": 186,
           "w": 1562,
           "h": 400
         },
@@ -192,6 +236,9 @@
           "name": "Trace"
         }
       }
+    },
+    "example": {
+      "catalog": "SOME/IP"
     }
   }
 }

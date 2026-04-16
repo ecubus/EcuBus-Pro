@@ -1,10 +1,9 @@
-// Copyright (C) 2014-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_HANDLER_HPP_
-#define VSOMEIP_V3_HANDLER_HPP_
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -18,28 +17,28 @@ namespace vsomeip_v3 {
 
 class message;
 
-typedef std::function< void (state_type_e) > state_handler_t;
-typedef std::function< void (const std::shared_ptr< message > &) > message_handler_t;
-typedef std::function< void (service_t, instance_t, bool) > availability_handler_t;
-typedef std::function< void (service_t, instance_t, availability_state_e) > availability_state_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< bool (client_t, uid_t, gid_t, bool) > subscription_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< bool (client_t, uid_t, gid_t, const std::string &, bool) > subscription_handler_ext_t;
-typedef std::function< void (const uint16_t) > error_handler_t;
-typedef std::function< void (const service_t, const instance_t, const eventgroup_t,
-                             const event_t, const uint16_t) > subscription_status_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< void (client_t, uid_t, gid_t, bool,
-            std::function< void (const bool) > )> async_subscription_handler_t;
-VSOMEIP_DEPRECATED_UID_GID typedef std::function< void (client_t, uid_t, gid_t, const std::string &, bool,
-            std::function< void (const bool) > )> async_subscription_handler_ext_t;
+typedef std::function<void(state_type_e)> state_handler_t;
+typedef std::function<void(const std::shared_ptr<message>&)> message_handler_t;
+typedef std::function<void(service_t, instance_t, bool)> availability_handler_t;
+typedef std::function<void(service_t, instance_t, availability_state_e)> availability_state_handler_t;
+VSOMEIP_DEPRECATED_UID_GID typedef std::function<bool(client_t, uid_t, gid_t, bool)> subscription_handler_t;
+VSOMEIP_DEPRECATED_UID_GID typedef std::function<bool(client_t, uid_t, gid_t, const std::string&, bool)> subscription_handler_ext_t;
+typedef std::function<void(const uint16_t)> error_handler_t;
+typedef std::function<void(const service_t, const instance_t, const eventgroup_t, const event_t, const uint16_t)>
+        subscription_status_handler_t;
+VSOMEIP_DEPRECATED_UID_GID typedef std::function<void(client_t, uid_t, gid_t, bool, std::function<void(const bool)>)>
+        async_subscription_handler_t;
+VSOMEIP_DEPRECATED_UID_GID typedef std::function<void(client_t, uid_t, gid_t, const std::string&, bool, std::function<void(const bool)>)>
+        async_subscription_handler_ext_t;
 
 typedef std::function< void (const std::vector<std::pair<service_t, instance_t>> &_services) > offered_services_handler_t;
 typedef std::function< void () > watchdog_handler_t;
-
 /*
  * vsomeip_sec_client_t-aware subscription handlers
  */
-using subscription_handler_sec_t       = std::function<bool(client_t, const vsomeip_sec_client_t*, const std::string&, bool)>;
-using async_subscription_handler_sec_t = std::function<void(client_t, const vsomeip_sec_client_t*, const std::string&, bool, std::function<void(bool)>)>;
+using subscription_handler_sec_t = std::function<bool(client_t, const vsomeip_sec_client_t*, const std::string&, bool)>;
+using async_subscription_handler_sec_t =
+        std::function<void(client_t, const vsomeip_sec_client_t*, const std::string&, bool, std::function<void(bool)>)>;
 
 struct ip_address_t {
     union {
@@ -70,10 +69,7 @@ struct ip_address_t {
         }
     }
 
-    bool operator!=(const ip_address_t& _other) const {
-        return !(*this == _other);
-    }
-
+    bool operator!=(const ip_address_t& _other) const { return !(*this == _other); }
 };
 
 struct remote_info_t {
@@ -84,9 +80,8 @@ struct remote_info_t {
     bool is_reliable_;
 
     bool operator<(const remote_info_t& _other) const {
-        return std::tie(ip_, first_, last_, is_range_, is_reliable_) <
-                std::tie(_other.ip_, _other.first_, _other.last_,
-                         _other.is_range_, _other.is_reliable_);
+        return std::tie(ip_, first_, last_, is_range_, is_reliable_)
+                < std::tie(_other.ip_, _other.first_, _other.last_, _other.is_range_, _other.is_reliable_);
     }
 };
 
@@ -106,5 +101,3 @@ typedef std::function<void(security_update_state_e)> security_update_handler_t;
 typedef std::function<bool(const message_acceptance_t&)> message_acceptance_handler_t;
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_HANDLER_HPP_

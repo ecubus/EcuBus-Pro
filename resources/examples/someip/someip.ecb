@@ -39,7 +39,7 @@
             "has_session_handling": true
           },
           "serviceDiscovery": {
-            "enable": false,
+            "enable": true,
             "initial_state": "unknown",
             "multicast": "224.244.224.245",
             "port": 30490,
@@ -72,8 +72,21 @@
               "reliable": {
                 "port": 30510
               },
-              "events": [],
-              "eventgroups": []
+              "events": [
+                {
+                  "event": "0x8777",
+                  "is_field": false,
+                  "is_reliable": true
+                }
+              ],
+              "eventgroups": [
+                {
+                  "eventgroup": "0x2345",
+                  "events": [
+                    "0x8777"
+                  ]
+                }
+              ]
             }
           ],
           "device": "67f2631c-0ddf-42cc-9615-f2fc9b377a65",
@@ -90,7 +103,7 @@
             "enable": true,
             "initial_state": "unknown",
             "multicast": "224.244.224.245",
-            "port": 0,
+            "port": 30490,
             "protocol": "udp",
             "initial_delay_min": 0,
             "initial_delay_max": 3000,
@@ -181,6 +194,42 @@
             ],
             "_X_ROW_KEY": "row_204",
             "messageType": 0
+          },
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "someipOp": "subscribe",
+            "eventGroupId": "0x2345",
+            "someipEventType": 0,
+            "messageType": 0,
+            "serviceId": "0x1234",
+            "instanceId": "0x1111",
+            "methodId": "0x8777",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [],
+            "respParams": [],
+            "responseTimeout": 1000,
+            "_X_ROW_KEY": "row_18"
+          },
+          {
+            "trigger": {
+              "type": "manual"
+            },
+            "name": "",
+            "someipOp": "unsubscribe",
+            "eventGroupId": "0x2345",
+            "someipEventType": 0,
+            "messageType": 0,
+            "serviceId": "0x1234",
+            "instanceId": "0x1111",
+            "methodId": "0x8777",
+            "channel": "a3228634-b533-4933-baff-807d6e453db9",
+            "params": [],
+            "respParams": [],
+            "responseTimeout": 1000,
+            "_X_ROW_KEY": "row_53"
           }
         ]
       }
@@ -196,6 +245,15 @@
         ],
         "workNode": "",
         "script": "someip.ts"
+      },
+      "63c8bdbe-b927-45b4-9749-e7492e639c17": {
+        "name": "Node 2",
+        "id": "63c8bdbe-b927-45b4-9749-e7492e639c17",
+        "channel": [
+          "a3228634-b533-4933-baff-807d6e453db9"
+        ],
+        "workNode": "",
+        "script": "sub.ts"
       }
     },
     "database": {
@@ -210,7 +268,8 @@
     "panels": {},
     "logs": {},
     "traces": {},
-    "pluginData": {}
+    "pluginData": {},
+    "replays": {}
   },
   "project": {
     "wins": {
@@ -218,8 +277,8 @@
         "pos": {
           "x": 383,
           "y": 195.33300000000003,
-          "w": 1677,
-          "h": 225.656
+          "w": 2562,
+          "h": 403.64099999999996
         },
         "options": {
           "params": {}
@@ -233,8 +292,8 @@
         "pos": {
           "x": 11.5,
           "y": 0,
-          "w": 600,
-          "h": 400
+          "w": 1082,
+          "h": 657
         },
         "title": "network",
         "label": "Network",
@@ -243,10 +302,10 @@
       },
       "f8ec96c4-c00f-45f9-84d9-446878e91dcd_ia": {
         "pos": {
-          "x": 473.5,
+          "x": 1510.5,
           "y": 0,
           "w": 992,
-          "h": 399
+          "h": 423
         },
         "title": "someipi",
         "label": "IA",
@@ -260,10 +319,10 @@
       },
       "soa": {
         "pos": {
-          "x": 496,
-          "y": 200.328125,
+          "x": 515.5,
+          "y": 45,
           "w": 933,
-          "h": 400
+          "h": 606
         },
         "title": "soa",
         "label": "SOA",
@@ -276,26 +335,14 @@
       },
       "trace": {
         "pos": {
-          "x": 49.5,
-          "y": 283.0000305175781,
+          "x": 1199.5,
+          "y": 412,
           "w": 1038,
           "h": 351.34400000000005
         },
         "title": "trace",
         "label": "Trace",
         "id": "trace",
-        "options": {}
-      },
-      "hardware": {
-        "pos": {
-          "x": 553.5,
-          "y": 117.17200000000003,
-          "w": 600,
-          "h": 400
-        },
-        "title": "hardware",
-        "label": "Devices",
-        "id": "hardware",
         "options": {}
       }
     },

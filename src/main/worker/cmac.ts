@@ -1,3 +1,14 @@
+/**
+ * **AES-CMAC** (Cipher-based Message Authentication Code) for 128-bit blocks.
+ *
+ * @remarks
+ * Implements the standard subkey derivation + CBC-MAC style construction used in many automotive ECU
+ * authentication schemes. Depends only on Node.js `crypto.createCipheriv` for the raw AES primitive.
+ *
+ * @module cmac
+ * @category Crypto
+ */
+
 import crypto from 'crypto'
 
 const const_Zero = Buffer.from('00000000000000000000000000000000', 'hex')

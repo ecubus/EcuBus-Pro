@@ -11,6 +11,7 @@ import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
 import { UdsAddress } from './share/uds'
 import { SomeipMessage } from 'nodeCan/someip'
+import { VsomeipAvailabilityInfo } from './share/someip'
 import { error } from 'electron-log'
 import fs from 'fs'
 import { SerialPort, SerialPortOpenOptions } from 'serialport'
@@ -40,6 +41,7 @@ type HandlerMap = {
   canApi: (data: any) => void
   pluginEvent: (data: { name: string; data: any }) => void
   serialPortApi: (data: SerialPortApi) => Promise<any>
+  someipApi: (data: SomeipApiCall) => Promise<any>
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'
@@ -124,6 +126,51 @@ export type SerialPortApi =
   | SerialPortApiList
   | SerialPortApiSetSignals
   | SerialPortApiGetSignals
+
+/** Payload from worker SOME/IP script helpers to {@link NodeClass.someipApi}. */
+export type SomeipApiCall =
+  | {
+      op: 'request'
+      channel?: string
+      msg: SomeipMessage
+      major?: number
+      minor?: number
+      timeout: number
+    }
+  | {
+      op: 'requestNoReturn'
+      channel?: string
+      msg: SomeipMessage
+      major?: number
+      minor?: number
+    }
+  | {
+      op: 'notify'
+      channel?: string
+      msg: SomeipMessage
+    }
+  | {
+      op: 'subscribe'
+      channel?: string
+      service: number
+      instance: number
+      eventgroup: number
+      event: number
+      major?: number
+      timeout: number
+      eventType: number
+    }
+  | {
+      op: 'unsubscribe'
+      channel?: string
+      service: number
+      instance: number
+      eventgroup: number
+      event?: number
+      major?: number
+      timeout: number
+    }
+
 type EventHandlerMap = {
   [K in keyof HandlerMap]: HandlerMap[K]
 }
@@ -488,6 +535,14 @@ export default class UdsTester {
   async triggerSomeipFrame(msg: SomeipMessage) {
     try {
       const r = await this.workerEmit('__someipMsg', msg)
+      return r
+    } catch (e: any) {
+      throw formatError(e)
+    }
+  }
+  async triggerSomeipServiceValid(info: VsomeipAvailabilityInfo) {
+    try {
+      const r = await this.workerEmit('__someipServiceValid', info)
       return r
     } catch (e: any) {
       throw formatError(e)

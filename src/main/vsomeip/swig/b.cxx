@@ -7,8 +7,121 @@
 #include <string>
 #include <functional>
 #include <iostream>
+#include <cctype>
+#include <cstdlib>
+#include <stdexcept>
+#include <atomic>
+#include <mutex>
+#include <sstream>
+#include "../../timer/timer.hpp"
 
 using namespace vsomeip_v3;
+
+namespace {
+constexpr size_t PERIODIC_META_LEN = 17; // header + mode flags before payload
+
+struct PeriodicTaskHolder {
+    CyclicSendTask* task = nullptr;
+    BusABC* bus = nullptr;
+};
+
+std::map<std::string, PeriodicTaskHolder> periodicTaskMap;
+std::mutex periodicTaskMutex;
+
+class SomeipPeriodicBus : public BusABC {
+public:
+    SomeipPeriodicBus(std::shared_ptr<vsomeip_v3::runtime> rtm, std::shared_ptr<vsomeip_v3::application> app)
+        : rtm_(std::move(rtm)), app_(std::move(app)) {}
+
+    void send(const CanMessage& msg) override {
+        if (msg.data.size() < PERIODIC_META_LEN) {
+            throw std::runtime_error("periodic someip message payload too short");
+        }
+
+        const auto rd16 = [&](size_t off) -> std::uint16_t {
+            return static_cast<std::uint16_t>((static_cast<std::uint16_t>(msg.data[off]) << 8) |
+                                              static_cast<std::uint16_t>(msg.data[off + 1]));
+        };
+
+        std::uint16_t service = rd16(0);
+        std::uint16_t instance = rd16(2);
+        std::uint16_t method = rd16(4);
+        std::uint16_t client = rd16(6);
+        std::uint16_t session = rd16(8);
+        bool reliable = msg.data[10] != 0;
+        std::uint8_t messageType = msg.data[11];
+        std::uint8_t returnCode = msg.data[12];
+        std::uint8_t protocolVersion = msg.data[13];
+        std::uint8_t interfaceVersion = msg.data[14];
+        bool asNotify = msg.data[15] != 0;
+        bool force = msg.data[16] != 0;
+
+        std::vector<vsomeip::byte_t> plData;
+        if (msg.data.size() > PERIODIC_META_LEN) {
+            plData.assign(msg.data.begin() + PERIODIC_META_LEN, msg.data.end());
+        }
+
+        std::shared_ptr<vsomeip::payload> pl = rtm_->create_payload();
+        if (!plData.empty()) {
+            pl->set_data(plData);
+        }
+
+        if (asNotify) {
+            app_->notify(
+                static_cast<vsomeip_v3::service_t>(service),
+                static_cast<vsomeip_v3::instance_t>(instance),
+                static_cast<vsomeip_v3::event_t>(method),
+                pl,
+                force);
+            return;
+        }
+
+        std::shared_ptr<vsomeip::message> rq = rtm_->create_message(reliable);
+        rq->set_service(service);
+        rq->set_instance(instance);
+        rq->set_method(method);
+        rq->set_client(client);
+        rq->set_session(session);
+        rq->set_message_type(static_cast<vsomeip_v3::message_type_e>(messageType));
+        rq->set_return_code(static_cast<vsomeip_v3::return_code_e>(returnCode));
+        rq->set_interface_version(interfaceVersion);
+        rq->set_payload(pl);
+        app_->send(rq);
+    }
+
+private:
+    std::shared_ptr<vsomeip_v3::runtime> rtm_;
+    std::shared_ptr<vsomeip_v3::application> app_;
+};
+
+CanMessage pack_periodic_message(const SomeipMessage* message, const char* data, uint32_t length, bool as_notify, bool force) {
+    if (message == nullptr) {
+        throw std::invalid_argument("periodic message requires non-null SomeipMessage");
+    }
+    CanMessage out;
+    out.data.reserve(PERIODIC_META_LEN + length);
+    auto wr16 = [&](std::uint16_t v) {
+        out.data.push_back(static_cast<std::uint8_t>((v >> 8) & 0xFF));
+        out.data.push_back(static_cast<std::uint8_t>(v & 0xFF));
+    };
+    wr16(message->service);
+    wr16(message->instance);
+    wr16(message->method);
+    wr16(message->client);
+    wr16(message->session);
+    out.data.push_back(message->reliable ? 1 : 0);
+    out.data.push_back(message->messageType);
+    out.data.push_back(message->returnCode);
+    out.data.push_back(message->protocolVersion);
+    out.data.push_back(message->interfaceVersion);
+    out.data.push_back(as_notify ? 1 : 0);
+    out.data.push_back(force ? 1 : 0);
+    if (length > 0 && data != nullptr) {
+        out.data.insert(out.data.end(), data, data + length);
+    }
+    return out;
+}
+}
 
 // Callback context structure to store JavaScript callbacks
 struct CallbackContext {
@@ -206,6 +319,94 @@ Send::Send(std::shared_ptr<vsomeip_v3::runtime> rtm,std::shared_ptr<vsomeip_v3::
 
 
 
+void Send::request_event_one_group(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    std::uint16_t eventgroup,
+    int event_type) {
+    std::set<vsomeip_v3::eventgroup_t> groups;
+    groups.insert(static_cast<vsomeip_v3::eventgroup_t>(eventgroup));
+    app_->request_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        groups,
+        static_cast<vsomeip_v3::event_type_e>(event_type));
+}
+
+static void trim_in_place(std::string& s) {
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front()))) {
+        s.erase(0, 1);
+    }
+    while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) {
+        s.pop_back();
+    }
+}
+
+void Send::offer_event_with_groups(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    const std::string& eventgroups_csv,
+    int event_type) {
+    std::set<vsomeip_v3::eventgroup_t> groups;
+    size_t start = 0;
+    while (start < eventgroups_csv.size()) {
+        size_t comma = eventgroups_csv.find(',', start);
+        std::string token =
+            comma == std::string::npos ? eventgroups_csv.substr(start) : eventgroups_csv.substr(start, comma - start);
+        trim_in_place(token);
+        if (!token.empty()) {
+            char* endp = nullptr;
+            unsigned long v = std::strtoul(token.c_str(), &endp, 0);
+            if (endp != token.c_str() && *endp == '\0' && v <= 0xFFFFUL) {
+                groups.insert(static_cast<vsomeip_v3::eventgroup_t>(v));
+            }
+        }
+        if (comma == std::string::npos) {
+            break;
+        }
+        start = comma + 1;
+    }
+    if (groups.empty()) {
+        throw std::invalid_argument("offer_event_with_groups: no valid event groups");
+    }
+    app_->offer_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        groups,
+        static_cast<vsomeip_v3::event_type_e>(event_type));
+}
+
+void Send::release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event) {
+    app_->release_event(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event));
+}
+
+void Send::notify_event(
+    std::uint16_t service,
+    std::uint16_t instance,
+    std::uint16_t event,
+    char* data,
+    uint32_t length,
+    bool force) {
+    std::shared_ptr<vsomeip::payload> pl = rtm_->create_payload();
+    if (length > 0 && data != nullptr) {
+        std::vector<vsomeip::byte_t> pl_data(data, data + length);
+        pl->set_data(pl_data);
+    }
+    app_->notify(
+        static_cast<vsomeip_v3::service_t>(service),
+        static_cast<vsomeip_v3::instance_t>(instance),
+        static_cast<vsomeip_v3::event_t>(event),
+        pl,
+        force);
+}
+
 void Send::sendMessage(struct SomeipMessage* message,char* data,uint32_t length){
     // Create a new request
     std::shared_ptr<vsomeip::message> rq = rtm_->create_message(message->reliable);
@@ -235,6 +436,101 @@ void Send::sendMessage(struct SomeipMessage* message,char* data,uint32_t length)
 }
 
 Send::~Send(){
+    std::lock_guard<std::mutex> lock(periodicTaskMutex);
+    std::vector<std::string> ownedKeys;
+    const std::string prefix = std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ":";
+    for (const auto& it : periodicTaskMap) {
+        if (it.first.rfind(prefix, 0) == 0) {
+            ownedKeys.push_back(it.first);
+        }
+    }
+    for (const auto& key : ownedKeys) {
+        auto it = periodicTaskMap.find(key);
+        if (it != periodicTaskMap.end()) {
+            if (it->second.task) {
+                it->second.task->stop();
+                delete it->second.task;
+            }
+            if (it->second.bus) {
+                delete it->second.bus;
+            }
+            periodicTaskMap.erase(it);
+        }
+    }
+}
+
+void Send::start_periodic_message(
+    const std::string& task_id,
+    struct SomeipMessage* message,
+    char* data,
+    uint32_t length,
+    uint32_t period_ms,
+    bool as_notify,
+    bool force) {
+    if (period_ms < 1) {
+        throw std::invalid_argument("period_ms must be >= 1");
+    }
+    const std::string key = std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ":" + task_id;
+    CanMessage packed = pack_periodic_message(message, data, length, as_notify, force);
+    std::lock_guard<std::mutex> lock(periodicTaskMutex);
+
+    auto old = periodicTaskMap.find(key);
+    if (old != periodicTaskMap.end()) {
+        if (old->second.task) {
+            old->second.task->stop();
+            delete old->second.task;
+        }
+        if (old->second.bus) {
+            delete old->second.bus;
+        }
+        periodicTaskMap.erase(old);
+    }
+
+    auto* bus = new SomeipPeriodicBus(rtm_, app_);
+    auto* task = new CyclicSendTask(
+        bus,
+        packed,
+        static_cast<double>(period_ms) / 1000.0,
+        nullptr,
+        true);
+    periodicTaskMap[key] = PeriodicTaskHolder{task, bus};
+}
+
+void Send::stop_periodic_message(const std::string& task_id) {
+    const std::string key = std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ":" + task_id;
+    std::lock_guard<std::mutex> lock(periodicTaskMutex);
+    auto it = periodicTaskMap.find(key);
+    if (it == periodicTaskMap.end()) {
+        return;
+    }
+    if (it->second.task) {
+        it->second.task->stop();
+        delete it->second.task;
+    }
+    if (it->second.bus) {
+        delete it->second.bus;
+    }
+    periodicTaskMap.erase(it);
+}
+
+void Send::update_periodic_message(
+    const std::string& task_id,
+    struct SomeipMessage* message,
+    char* data,
+    uint32_t length,
+    bool as_notify,
+    bool force) {
+    const std::string key = std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ":" + task_id;
+    CanMessage packed = pack_periodic_message(message, data, length, as_notify, force);
+    std::lock_guard<std::mutex> lock(periodicTaskMutex);
+    auto it = periodicTaskMap.find(key);
+    if (it == periodicTaskMap.end()) {
+        throw std::runtime_error("periodic task not found: " + task_id);
+    }
+    if (!it->second.task) {
+        throw std::runtime_error("periodic task is invalid: " + task_id);
+    }
+    it->second.task->modifyMessage(packed);
 }
 
 

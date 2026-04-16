@@ -1,3 +1,13 @@
+/**
+ * Internal **bit-reflection** and CRC utilities shared by {@link CRC} in `crc.ts`.
+ *
+ * @remarks
+ * Not intended for direct use from end-user scripts — prefer the high-level {@link CRC} class API.
+ *
+ * @module crcUtil
+ * @category Util
+ */
+
 /* eslint-disable no-var */
 class CrcUtil {
   public static Reflect8(val: number) {

@@ -1,10 +1,9 @@
-// Copyright (C) 2014-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_MESSAGE_BASE_HPP_
-#define VSOMEIP_V3_MESSAGE_BASE_HPP_
+#pragma once
 
 #include <vsomeip/export.hpp>
 #include <vsomeip/primitive_types.hpp>
@@ -31,11 +30,9 @@ namespace vsomeip_v3 {
  * the message classes within ::vsomeip and vsomeip::sd that add the
  * payload representations for regular and Service Discovery messages.
  */
-class message_base
-        : public serializable,
-          public deserializable {
+class message_base : public serializable, public deserializable {
 public:
-    VSOMEIP_EXPORT virtual ~message_base() {};
+    VSOMEIP_EXPORT virtual ~message_base(){};
 
     /**
      * \brief Returns the message identifier.
@@ -192,9 +189,6 @@ public:
      * \brief Set whether or not the message is an initial event.
      */
     VSOMEIP_EXPORT virtual void set_initial(bool _is_initial) = 0;
-
 };
 
 } // namespace vsomeip_v3
-
-#endif // VSOMEIP_V3_MESSAGE_BASE_HPP_

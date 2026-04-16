@@ -173,6 +173,140 @@
           />
         </el-form-item>
       </div>
+
+      <el-divider content-position="left">
+        <el-tooltip
+          :content="i18next.t('uds.someip.serviceConfig.tooltips.eventsSection')"
+          placement="top"
+          :show-after="800"
+        >
+          <span class="label-with-tooltip">{{
+            i18next.t('uds.someip.serviceConfig.sections.eventsAndGroups')
+          }}</span>
+        </el-tooltip>
+      </el-divider>
+
+      <div style="margin-bottom: 8px">
+        <el-button icon="Plus" type="primary" link @click="addEvent">
+          {{ i18next.t('uds.someip.serviceConfig.buttons.addEvent') }}
+        </el-button>
+      </div>
+      <el-table
+        :data="modelValue.events || []"
+        border
+        size="small"
+        style="width: 100%; margin-bottom: 20px"
+      >
+        <el-table-column
+          :label="i18next.t('uds.someip.serviceConfig.labels.eventId')"
+          min-width="120"
+        >
+          <template #default="{ row }">
+            <el-input
+              v-model="row.event"
+              :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.eventId')"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="i18next.t('uds.someip.serviceConfig.labels.isField')"
+          width="90"
+          align="center"
+        >
+          <template #default="{ row }">
+            <el-checkbox v-model="row.is_field" />
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="i18next.t('uds.someip.serviceConfig.labels.isReliableEvent')"
+          width="110"
+          align="center"
+        >
+          <template #default="{ row }">
+            <el-checkbox v-model="row.is_reliable" />
+          </template>
+        </el-table-column>
+        <el-table-column min-width="140">
+          <template #header>
+            <el-tooltip
+              :content="i18next.t('uds.someip.serviceConfig.tooltips.updateCycleMs')"
+              placement="top"
+              :show-after="800"
+            >
+              <span class="label-with-tooltip">{{
+                i18next.t('uds.someip.serviceConfig.labels.updateCycleMs')
+              }}</span>
+            </el-tooltip>
+          </template>
+          <template #default="{ row }">
+            <el-input-number
+              v-model="row.cycle"
+              :min="0"
+              :step="1"
+              controls-position="right"
+              style="width: 100%"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column width="88" align="center" fixed="right">
+          <template #default="{ $index }">
+            <el-button type="danger" link @click="removeEvent($index)">
+              {{ i18next.t('uds.someip.serviceConfig.buttons.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div style="margin-bottom: 8px">
+        <el-button icon="Plus" type="primary" link @click="addEventgroup">
+          {{ i18next.t('uds.someip.serviceConfig.buttons.addEventgroup') }}
+        </el-button>
+      </div>
+      <el-table :data="modelValue.eventgroups || []" border size="small" style="width: 100%">
+        <el-table-column
+          :label="i18next.t('uds.someip.serviceConfig.labels.eventgroupId')"
+          min-width="120"
+        >
+          <template #default="{ row }">
+            <el-input
+              v-model="row.eventgroup"
+              :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.eventgroupId')"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="i18next.t('uds.someip.serviceConfig.labels.eventsInGroup')"
+          min-width="220"
+        >
+          <template #default="{ row }">
+            <el-select
+              v-model="row.events"
+              multiple
+              filterable
+              allow-create
+              default-first-option
+              collapse-tags
+              collapse-tags-tooltip
+              style="width: 100%"
+              :placeholder="i18next.t('uds.someip.serviceConfig.placeholders.eventIds')"
+            >
+              <el-option
+                v-for="opt in eventIdOptions"
+                :key="opt.value"
+                :label="opt.label"
+                :value="opt.value"
+              />
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column width="88" align="center" fixed="right">
+          <template #default="{ $index }">
+            <el-button type="danger" link @click="removeEventgroup($index)">
+              {{ i18next.t('uds.someip.serviceConfig.buttons.remove') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-form>
   </div>
 </template>
@@ -180,8 +314,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import { type FormRules, type FormInstance } from 'element-plus'
-import { InfoFilled } from '@element-plus/icons-vue'
-import type { ServiceConfig } from 'nodeCan/someip'
+import type { ServiceConfig, ServiceEvent } from 'nodeCan/someip'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
 
@@ -195,6 +328,107 @@ const props = defineProps<{
 }>()
 
 const modelValue = defineModel<ServiceConfig>({ required: true })
+
+const eventIdOptions = computed(() => {
+  const events = modelValue.value.events || []
+  const ids = events.map((e) => e.event?.trim()).filter((id): id is string => !!id)
+  return [...new Set(ids)].map((id) => ({ label: id, value: id }))
+})
+
+function ensureEventsModel() {
+  const m = modelValue.value
+  if (!Array.isArray(m.events)) m.events = []
+  if (!Array.isArray(m.eventgroups)) m.eventgroups = []
+  for (const ev of m.events) {
+    const raw = ev as ServiceEvent & Record<string, unknown>
+    const legacyUc = raw['update-cycle']
+    if (legacyUc !== undefined && legacyUc !== '' && legacyUc !== null) {
+      if (ev.cycle === undefined) {
+        const n = Number(legacyUc)
+        if (!Number.isNaN(n)) ev.cycle = n
+      }
+      delete raw['update-cycle']
+    }
+    if (ev.cycle !== undefined && ev.cycle !== null) {
+      const n = Number(ev.cycle)
+      if (!Number.isNaN(n)) ev.cycle = n
+    }
+    if (typeof ev.is_field === 'string') ev.is_field = ev.is_field === 'true'
+    if (typeof ev.is_reliable === 'string') ev.is_reliable = ev.is_reliable !== 'false'
+    if (ev.is_field === undefined) ev.is_field = false
+    if (ev.is_reliable === undefined) ev.is_reliable = true
+  }
+  for (const g of m.eventgroups) {
+    if (!Array.isArray(g.events)) g.events = []
+  }
+}
+
+function addEvent() {
+  ensureEventsModel()
+  modelValue.value.events!.push({
+    event: '',
+    is_field: false,
+    is_reliable: true
+  })
+}
+
+function removeEvent(index: number) {
+  const list = modelValue.value.events
+  if (!list) return
+  const removed = list[index]?.event?.trim()
+  list.splice(index, 1)
+  if (removed) {
+    for (const g of modelValue.value.eventgroups || []) {
+      g.events = (g.events || []).filter((id) => id !== removed)
+    }
+  }
+}
+
+function addEventgroup() {
+  ensureEventsModel()
+  modelValue.value.eventgroups!.push({ eventgroup: '', events: [] })
+}
+
+function removeEventgroup(index: number) {
+  modelValue.value.eventgroups?.splice(index, 1)
+}
+
+function validateEventsAndGroups(): Promise<void> {
+  const m = modelValue.value
+  const hex = /^0x[0-9a-fA-F]+$/
+  for (const ev of m.events || []) {
+    if (!ev.event?.trim()) continue
+    if (!hex.test(ev.event)) {
+      return Promise.reject(
+        new Error(i18next.t('uds.someip.serviceConfig.validation.invalidHexFormat'))
+      )
+    }
+  }
+  for (const g of m.eventgroups || []) {
+    if (!g.eventgroup?.trim()) continue
+    if (!hex.test(g.eventgroup)) {
+      return Promise.reject(
+        new Error(i18next.t('uds.someip.serviceConfig.validation.invalidHexFormat'))
+      )
+    }
+    for (const id of g.events || []) {
+      if (id && !hex.test(id)) {
+        return Promise.reject(
+          new Error(i18next.t('uds.someip.serviceConfig.validation.invalidHexFormat'))
+        )
+      }
+    }
+  }
+  return Promise.resolve()
+}
+
+watch(
+  () => modelValue.value,
+  () => {
+    ensureEventsModel()
+  },
+  { deep: true, immediate: true }
+)
 
 // Reactive flags for optional configurations
 const useReliable = ref(!!modelValue.value.reliable)
@@ -312,6 +546,7 @@ const onUnreliableChange = (enabled: boolean) => {
 // Validation method for parent component
 async function dataValid() {
   await ruleFormRef.value?.validate()
+  await validateEventsAndGroups()
 }
 
 // Expose validation method to parent

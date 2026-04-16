@@ -1,19 +1,15 @@
-// Copyright (C) 2014-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef VSOMEIP_V3_ENUMERATION_TYPES_HPP_
-#define VSOMEIP_V3_ENUMERATION_TYPES_HPP_
+#pragma once
 
 #include <cstdint>
 
 namespace vsomeip_v3 {
 
-enum class state_type_e : uint8_t {
-    ST_REGISTERED = 0x0,
-    ST_DEREGISTERED = 0x1
-};
+enum class state_type_e : uint8_t { ST_REGISTERED = 0x0, ST_DEREGISTERED = 0x1 };
 
 // SIP_RPC_684
 enum class message_type_e : uint8_t {
@@ -62,18 +58,9 @@ enum class offer_type_e : uint8_t {
     OT_ALL = 0x02,
 };
 
-enum class event_type_e : uint8_t {
-    ET_EVENT = 0x00,
-    ET_SELECTIVE_EVENT = 0x01,
-    ET_FIELD = 0x02,
-    ET_UNKNOWN = 0xFF
-};
+enum class event_type_e : uint8_t { ET_EVENT = 0x00, ET_SELECTIVE_EVENT = 0x01, ET_FIELD = 0x02, ET_UNKNOWN = 0xFF };
 
-enum class security_mode_e : uint8_t {
-    SM_OFF = 0x00,
-    SM_ON = 0x01,
-    SM_AUDIT = 0x02
-};
+enum class security_mode_e : uint8_t { SM_OFF = 0x00, SM_ON = 0x01, SM_AUDIT = 0x02 };
 
 enum class security_update_state_e : uint8_t {
     SU_SUCCESS = 0x00,
@@ -91,23 +78,20 @@ enum class reliability_type_e : uint8_t {
 
 enum class availability_state_e : uint8_t {
     AS_UNAVAILABLE = 0x00, // unseen
-    AS_OFFERED = 0x01,     // seen, but not requested/not yet usable
-    AS_AVAILABLE = 0x02,   // seen and usable
+    AS_OFFERED = 0x01, // seen, but not requested/not yet usable
+    AS_AVAILABLE = 0x02, // seen and usable
     AS_UNKNOWN = 0xFF
 };
 
-enum class handler_registration_type_e : uint8_t {
-    HRT_REPLACE = 0x00,
-    HRT_PREPEND = 0x01,
-    HRT_APPEND = 0x02,
-    HRT_UNKNOWN = 0xFF
-};
+enum class handler_registration_type_e : uint8_t { HRT_REPLACE = 0x00, HRT_PREPEND = 0x01, HRT_APPEND = 0x02, HRT_UNKNOWN = 0xFF };
 
 enum class endianess_e {
-    be,     // big-endian
-    le      // little-endian
+    be, // big-endian
+    le // little-endian
 };
 
-} // namespace vsomeip_v3
+enum class connection_control_request_e : uint8_t { CCR_ACCEPT = 0, CCR_RESET_AND_BLOCK = 1 };
 
-#endif // VSOMEIP_V3_ENUMERATION_TYPES_HPP_
+enum class connection_control_response_e : uint8_t { CCR_OK = 0, CCR_ERROR_INVALID_PARAMETER = 255 };
+
+} // namespace vsomeip_v3

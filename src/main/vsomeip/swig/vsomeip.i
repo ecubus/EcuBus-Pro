@@ -169,6 +169,7 @@ class VsomeipCallbackWrapper;
 
 
 
+
 %include "vsomeip_callback_wrapper.hpp"
 %include "send.hpp"
 

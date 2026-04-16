@@ -73,6 +73,51 @@ export default class VSomeIP_Client {
     this.sendc.sendMessage(msg, Buffer.from(message.payload))
   }
 
+  startPeriodicMessage(
+    taskId: string,
+    message: SomeipMessage,
+    payload: Buffer,
+    periodMs: number,
+    asNotify: boolean,
+    force: boolean
+  ) {
+    const msg = new vsomeip.SomeipMessage()
+    msg.service = message.service
+    msg.instance = message.instance
+    msg.method = message.method
+    msg.client = message.client
+    msg.session = message.session
+    msg.payload = payload
+    msg.messageType = message.messageType
+    msg.returnCode = message.returnCode
+    msg.protocolVersion = message.protocolVersion
+    msg.interfaceVersion = message.interfaceVersion
+    msg.reliable = message.reliable || false
+    this.sendc.start_periodic_message(taskId, msg, payload, Number(periodMs), asNotify, force)
+  }
+
+  updatePeriodicMessage(
+    taskId: string,
+    message: SomeipMessage,
+    payload: Buffer,
+    asNotify: boolean,
+    force: boolean
+  ) {
+    const msg = new vsomeip.SomeipMessage()
+    msg.service = message.service
+    msg.instance = message.instance
+    msg.method = message.method
+    msg.client = message.client
+    msg.session = message.session
+    msg.payload = payload
+    msg.messageType = message.messageType
+    msg.returnCode = message.returnCode
+    msg.protocolVersion = message.protocolVersion
+    msg.interfaceVersion = message.interfaceVersion
+    msg.reliable = message.reliable || false
+    this.sendc.update_periodic_message(taskId, msg, payload, asNotify, force)
+  }
+
   init() {
     if (!VSomeIP_Client.traceRegister) {
       this.cb.registerTraceHandler(this.cbId)

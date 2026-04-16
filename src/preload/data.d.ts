@@ -75,12 +75,26 @@ export interface SomeipAction {
   serviceId: string
   instanceId: string
   methodId: string
+  /** Event group id (hex string) for subscribe / unsubscribe */
+  eventGroupId?: string
+  /**
+   * vSomeIP event_type_e for request_event: 0=ET_EVENT, 1=ET_SELECTIVE_EVENT, 2=ET_FIELD, 255=ET_UNKNOWN
+   * @default 2 (ET_FIELD)
+   */
+  someipEventType?: number
+  /**
+   * send: request / notification send path;
+   * subscribe: vSomeIP subscribe(service, instance, eventgroup, major, event);
+   * unsubscribe: vSomeIP unsubscribe
+   */
+  someipOp?: 'send' | 'subscribe' | 'unsubscribe'
   protocolVersion?: number
   interfaceVersion?: number
   channel: string
   messageType: SomeipMessageType
   params: Param[]
   respParams: Param[]
+  responseTimeout?: number
   major?: number
   minor?: number
 }

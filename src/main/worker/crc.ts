@@ -1,9 +1,20 @@
+/**
+ * **CRC catalogue** for diagnostic and bootloader scripts — wraps {@link CrcUtil} with named presets.
+ *
+ * @remarks
+ * Supports dozens of common polynomials (SAE J1850, MODBUS, CRC32 MPEG-2, …) plus fully custom width / poly /
+ * init / xor-out / reflect parameters. Typical usage is `CRC.default('CRC16_MODBUS')` then `compute(Buffer)`.
+ *
+ * @module crc
+ * @category Util
+ */
+
 /* eslint-disable prefer-const */
 /* eslint-disable no-var */
 import CrcUtil from './crcUtil'
 
 /**
- * Built-in CRC algorithm names
+ * Union of all built-in CRC algorithm names understood by {@link CRC.default}.
  */
 export type CRCName =
   | 'CRC8'

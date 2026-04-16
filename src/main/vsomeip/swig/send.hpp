@@ -18,6 +18,8 @@
 #include <chrono>
 #include <thread>
 #include <map>
+#include <set>
+#include <cstdint>
 
 namespace vsomeip_v3 {
     class application;
@@ -68,8 +70,54 @@ public:
     ~Send();
 
     void sendMessage(struct SomeipMessage* message,char* data,uint32_t length);
-    
-   
+
+    /** request_event(service, instance, event, {eventgroup}, type) — single event group */
+    void request_event_one_group(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        std::uint16_t eventgroup,
+        int event_type);
+
+    /** Comma-separated event group ids (e.g. "1" or "1,2") for application::offer_event */
+    void offer_event_with_groups(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        const std::string& eventgroups_csv,
+        int event_type);
+
+    /** application::notify — publisher path after offer_event (Buffer maps via vsomeip.i typemap like sendMessage) */
+    void notify_event(
+        std::uint16_t service,
+        std::uint16_t instance,
+        std::uint16_t event,
+        char* data,
+        uint32_t length,
+        bool force = false);
+
+    void release_event_simple(std::uint16_t service, std::uint16_t instance, std::uint16_t event);
+
+    /**
+     * Native periodic SOME/IP send based on CyclicSendTask (no JS timer).
+     * task_id is supplied by upper layer (e.g. `${editIndex}-${rowIndex}`).
+     */
+    void start_periodic_message(
+        const std::string& task_id,
+        struct SomeipMessage* message,
+        char* data,
+        uint32_t length,
+        uint32_t period_ms,
+        bool as_notify = false,
+        bool force = false);
+    void stop_periodic_message(const std::string& task_id);
+    void update_periodic_message(
+        const std::string& task_id,
+        struct SomeipMessage* message,
+        char* data,
+        uint32_t length,
+        bool as_notify = false,
+        bool force = false);
 };
 
 

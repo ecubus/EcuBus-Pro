@@ -1,5 +1,23 @@
 /**
+ * **UDS / diagnostics worker runtime** — largest module in the worker bundle.
+ *
+ * @remarks
+ * ### Responsibilities
+ * - Registers the worker RPC surface (`registerWorker`, `__on`, `__start`, …) so the parent `Worker` can call script code.
+ * - Exposes {@link UtilClass} as the global {@link Util} singleton for hooks, timers, CAN/LIN/SOME/IP **listeners**, and variables.
+ * - Provides `output` / `setSignal` / `setVar` helpers that marshal requests to the main process via {@link workerEmit}
+ *   and correlate replies through an internal `emitMap` keyed by {@link global.cmdId | global.cmdId}.
+ *
+ * ### Threading
+ * This file is executed inside a **worker thread**. APIs that touch hardware or native modules must go through
+ * `workerEmit` / {@link emitWorkerEventWithReply}; never assume Node native addons are loadable here unless documented.
+ *
+ * ### See also
+ * - Node.js `worker_threads` documentation: `https://nodejs.org/api/worker_threads.html`
+ * - `src/main/workerClient.ts` — parent-side counterpart.
+ *
  * @module Util
+ * @category Util
  */
 import Emittery from 'emittery'
 import {
@@ -49,7 +67,25 @@ if (!isMainThread && parentPort) {
       } catch (e: any) {
         // id === -1 means fire-and-forget, no error response needed
         if (id !== -1) {
-          parentPort?.postMessage({ type: 'rpc_response', id, error: e })
+          const normalizedError =
+            e instanceof Error
+              ? { message: e.message || 'Unknown error', stack: e.stack || '' }
+              : {
+                  message:
+                    typeof e === 'string'
+                      ? e
+                      : e == null
+                        ? 'Unknown error'
+                        : (() => {
+                            try {
+                              return JSON.stringify(e)
+                            } catch {
+                              return String(e)
+                            }
+                          })(),
+                  stack: ''
+                }
+          parentPort?.postMessage({ type: 'rpc_response', id, error: normalizedError })
         }
       }
     }
@@ -58,10 +94,34 @@ if (!isMainThread && parentPort) {
   exposedMethods['methods'] = () => Object.keys(exposedMethods)
 }
 
+/**
+ * Register additional RPC callables on the worker `parentPort` message bus.
+ *
+ * @param methods - Map of method name → function. Names must be unique; later registrations overwrite earlier ones
+ *   for the same key (same behavior as `Object.assign` on the internal `exposedMethods` table).
+ *
+ * @remarks
+ * Built-ins such as `methods`, `__on`, `__start`, and `__eventDone` are registered by {@link UtilClass} construction.
+ * Third-party extensions (e.g. `setTxPending`) should use descriptive `__`-prefixed names to avoid collisions.
+ *
+ * @category Worker infrastructure
+ */
 export function registerWorker(methods: Record<string, Function>) {
   Object.assign(exposedMethods, methods)
 }
 
+/**
+ * Emit an **event** (not an RPC return) to the parent thread.
+ *
+ * @param payload - Arbitrary JSON-cloneable data; shallow-cloned with `lodash/cloneDeep` before `postMessage`.
+ *   Common shape: `{ id, event, data }` where `event` selects a handler on `UdsTester.eventHandlerMap`.
+ *
+ * @remarks
+ * No promise is returned — the parent must acknowledge async work through a follow-up RPC such as `__eventDone`
+ * when the payload includes a correlation `id` managed by `emitMap`.
+ *
+ * @category Worker infrastructure
+ */
 export function workerEmit(payload: any) {
   if (!isMainThread && parentPort) {
     parentPort.postMessage({ type: 'event', payload: cloneDeep(payload) })
@@ -466,9 +526,14 @@ import {
   writeMessageData
 } from 'src/renderer/src/database/dbc/calc'
 
-import { SomeipMessageBase, SomeipMessageRequest, SomeipMessageResponse } from './someip'
+import {
+  SomeipMessageBase,
+  SomeipMessageEvent,
+  SomeipMessageRequest,
+  SomeipMessageResponse
+} from './someip'
 
-import { SomeipMessage, SomeipMessageType } from '../share/someip'
+import { SomeipMessage, SomeipMessageType, VsomeipAvailabilityInfo } from '../share/someip'
 import { getAllSysVar } from '../share/sysVar'
 
 const selfDescribe = process.env.ONLY == 'true' ? nodeDescribe.only : nodeDescribe
@@ -610,6 +675,33 @@ const emitMap = new Map<number, { resolve: any; reject: any }>()
 const serviceMap = new Map<string, ServiceItem>()
 
 global.cmdId = 0
+
+/**
+ * Emit a worker **event** that expects a single correlated completion from the main process.
+ *
+ * @param event - Handler key on the parent `UdsTester` (e.g. `'someipApi'`, `'serialPortApi'`, `'output'`).
+ * @param data - Inner payload forwarded to that handler (the worker automatically assigns `payload.id` from
+ *   `global.cmdId` before incrementing it).
+ *
+ * @returns Promise settled when the parent calls `__eventDone` with the same `id`, or rejected if the parent reports `err`.
+ *
+ * @remarks
+ * Typical pattern:
+ * ```ts
+ * emitWorkerEventWithReply('someipApi', { op: 'request', msg: { ... } })
+ * ```
+ * Submodule `someip.ts` uses a **lazy** `require('./uds')` + this helper to avoid circular static imports while still
+ * participating in the same `emitMap` lifecycle as {@link output}.
+ *
+ * @category Worker infrastructure
+ */
+export function emitWorkerEventWithReply(event: string, data: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    workerEmit({ id: global.cmdId, event, data })
+    emitMap.set(global.cmdId, { resolve, reject })
+    global.cmdId++
+  })
+}
 
 /**
  * @category UDS
@@ -1673,12 +1765,63 @@ export class UtilClass {
    */
   OnSomeipMessage(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.on('someip' as any, fc)
     } else {
       this.event.on(`someip.${id}` as any, fc)
+    }
+  }
+
+  /**
+   * Registers an event listener for SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns:
+   * - `"service.*"`: all instances under one service
+   * - `"*.*"`: all services and instances
+   * If `true`, listens for all availability changes.
+   * @param fc - The callback function invoked when SOME/IP service availability changes.
+   *
+   * @example
+   * ```ts
+   * // 1) Listen all changes
+   * Util.OnSomeipServiceValid(true, (info) => {
+   *   console.log(
+   *     `[ALL] ${info.service.toString(16)}.${info.instance.toString(16)} => ${info.available}`
+   *   )
+   * })
+   *
+   * // 2) Listen one service, any instance
+   * Util.OnSomeipServiceValid('1234.*', (info) => {
+   *   console.log(`[SVC 1234] instance=${info.instance.toString(16)} available=${info.available}`)
+   * })
+   *
+   * // 3) Listen exact service+instance
+   * Util.OnSomeipServiceValid('1234.0001', (info) => {
+   *   if (info.available) {
+   *     console.log('target service is online')
+   *   } else {
+   *     console.log('target service is offline')
+   *   }
+   * })
+   *
+   * // 4) Same as true, wildcard style
+   * Util.OnSomeipServiceValid('*.*', (info) => {
+   *   console.log('wildcard', info)
+   * })
+   * ```
+   */
+  OnSomeipServiceValid(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.on('someipServiceValid' as any, fc)
+    } else {
+      this.event.on(`someipServiceValid.${id}` as any, fc)
     }
   }
 
@@ -1701,7 +1844,9 @@ export class UtilClass {
    */
   OffSomeipMessage(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.off('someip' as any, fc)
@@ -1732,12 +1877,48 @@ export class UtilClass {
    */
   OnSomeipMessageOnce(
     id: string | true,
-    fc: (msg: SomeipMessageRequest | SomeipMessageResponse) => void | Promise<void>
+    fc: (
+      msg: SomeipMessageRequest | SomeipMessageResponse | SomeipMessageEvent | SomeipMessageBase
+    ) => void | Promise<void>
   ) {
     if (id === true) {
       this.event.once('someip' as any).then(fc)
     } else {
       this.event.once(`someip.${id}` as any).then(fc)
+    }
+  }
+  /**
+   * Registers a one-time event listener for SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns (`"service.*"`, `"*.*"`).
+   * If `true`, listens for all availability changes.
+   * @param fc - The callback function to be invoked once when availability changes.
+   */
+  OnSomeipServiceValidOnce(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.once('someipServiceValid' as any).then(fc)
+    } else {
+      this.event.once(`someipServiceValid.${id}` as any).then(fc)
+    }
+  }
+  /**
+   * Unsubscribes from SOME/IP service availability changes.
+   *
+   * @param id - The SOME/IP service identifier in format "service.instance", or wildcard patterns (`"service.*"`, `"*.*"`).
+   * If `true`, unsubscribes from all availability changes.
+   * @param fc - The callback function to remove from listeners.
+   */
+  OffSomeipServiceValid(
+    id: string | true,
+    fc: (info: VsomeipAvailabilityInfo) => void | Promise<void>
+  ) {
+    if (id === true) {
+      this.event.off('someipServiceValid' as any, fc)
+    } else {
+      this.event.off(`someipServiceValid.${id}` as any, fc)
     }
   }
   /**
@@ -2059,29 +2240,55 @@ export class UtilClass {
   }
   private async someipMsg(data: SomeipMessage) {
     let someipMsg: SomeipMessageBase
-    if (data.messageType == SomeipMessageType.REQUEST) {
+    if (
+      data.messageType == SomeipMessageType.REQUEST ||
+      data.messageType == SomeipMessageType.REQUEST_NO_RETURN
+    ) {
       someipMsg = new SomeipMessageRequest(data)
     } else if (data.messageType == SomeipMessageType.RESPONSE) {
       someipMsg = new SomeipMessageResponse(data)
+    } else if (
+      data.messageType == SomeipMessageType.NOTIFICATION ||
+      data.messageType == SomeipMessageType.NOTIFICATION_ACK
+    ) {
+      someipMsg = new SomeipMessageEvent(data)
     } else {
-      throw new Error(`someip message type not supported: ${data.messageType}`)
+      someipMsg = new SomeipMessageBase(data)
     }
 
     const msg = someipMsg.msg
     msg.payload = Buffer.from(msg.payload)
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.*.*` as any,
-      someipMsg
-    )
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.*` as any,
-      someipMsg
-    )
-    await this.event.emit(
-      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.${msg.method.toString(16).padStart(4, '0')}` as any,
-      someipMsg
-    )
-    await this.event.emit('someip' as any, someipMsg)
+    const events = [
+      `someip.${msg.service.toString(16).padStart(4, '0')}.*.*`,
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.*`,
+      `someip.${msg.service.toString(16).padStart(4, '0')}.${msg.instance.toString(16).padStart(4, '0')}.${msg.method.toString(16).padStart(4, '0')}`,
+      'someip'
+    ]
+    for (const eventName of events) {
+      try {
+        await this.event.emit(eventName as any, someipMsg)
+      } catch (e: any) {
+        // Plugin/user listener errors should not crash the worker loop.
+        console.error(`someip listener error on ${eventName}: ${e?.message || e}`)
+      }
+    }
+  }
+  private async someipServiceValid(info: VsomeipAvailabilityInfo) {
+    const serviceHex = info.service.toString(16).padStart(4, '0')
+    const instanceHex = info.instance.toString(16).padStart(4, '0')
+    const events = [
+      `someipServiceValid.${serviceHex}.${instanceHex}`,
+      `someipServiceValid.${serviceHex}.*`,
+      'someipServiceValid.*.*',
+      'someipServiceValid'
+    ]
+    for (const eventName of events) {
+      try {
+        await this.event.emit(eventName as any, info)
+      } catch (e: any) {
+        console.error(`someip service valid listener error on ${eventName}: ${e?.message || e}`)
+      }
+    }
   }
   private async keyDown(key: string) {
     await this.event.emit(`keyDown${key}` as any, key)
@@ -2133,6 +2340,7 @@ export class UtilClass {
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
       this.event.on('__linMsg' as any, this.linMsg.bind(this))
       this.event.on('__someipMsg' as any, this.someipMsg.bind(this))
+      this.event.on('__someipServiceValid' as any, this.someipServiceValid.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))
       this.event.on('__varUpdate' as any, this.varUpdate.bind(this))
       // SerialPort event handlers
@@ -2385,8 +2593,6 @@ export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Prom
   })
   return await p
 }
-
-export { SomeipMessageRequest, SomeipMessageResponse }
 
 /**
  * Set a signal value

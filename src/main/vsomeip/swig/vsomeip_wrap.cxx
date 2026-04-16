@@ -1410,6 +1410,14 @@ Napi::Value exports_handler_registration_type_e_HRT_UNKNOWN_get(const Napi::Call
 Napi::Value exports_endianess_e_be_get(const Napi::CallbackInfo &info);
 // js_global_declaration
 Napi::Value exports_endianess_e_le_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_request_e_CCR_ACCEPT_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_response_e_CCR_OK_get(const Napi::CallbackInfo &info);
+// js_global_declaration
+Napi::Value exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get(const Napi::CallbackInfo &info);
 // jsnapi_class_prologue_template
 template <typename SWIG_OBJ_WRAP>
 class _exports_message_base_templ : public SWIG_NAPI_ObjectWrap_templ<SWIG_OBJ_WRAP> {
@@ -1826,6 +1834,8 @@ Napi::Value _wrap_application_register_message_handler_ext(const Napi::CallbackI
 Napi::Value _wrap_application_get_configuration(const Napi::CallbackInfo &);
 // jsnapi_class_method_declaration
 Napi::Value _wrap_application_get_policy_manager(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_application_change_connection_control(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -2158,6 +2168,36 @@ Napi::Value _wrap_new_Send__SWIG_2(const Napi::CallbackInfo &);
 virtual ~_exports_Send_templ();
 // jsnapi_class_method_declaration
 Napi::Value _wrap_Send_sendMessage(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_request_event_one_group(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_offer_event_with_groups(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_notify_event__SWIG_0(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_notify_event__SWIG_1(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send__wrap_Send_notify_event(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_release_event_simple(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_start_periodic_message__SWIG_0(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_start_periodic_message__SWIG_1(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_start_periodic_message__SWIG_2(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send__wrap_Send_start_periodic_message(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_stop_periodic_message(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_update_periodic_message__SWIG_0(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_update_periodic_message__SWIG_1(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send_update_periodic_message__SWIG_2(const Napi::CallbackInfo &);
+// jsnapi_class_method_declaration
+Napi::Value _wrap_Send__wrap_Send_update_periodic_message(const Napi::CallbackInfo &);
 // jsnapi_class_epilogue_template
 };
 // jsnapi_class_instance
@@ -14658,6 +14698,81 @@ fail:
 }
 
 
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_application_templ<SWIG_OBJ_WRAP>::_wrap_application_change_connection_control(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  vsomeip_v3::application *arg1 = (vsomeip_v3::application *) 0 ;
+  vsomeip_v3::connection_control_request_e arg2 ;
+  std::string *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  vsomeip_v3::connection_control_response_e result;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 2 || static_cast<int>(info.Length()) > 2) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_application_change_connection_control.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_vsomeip_v3__application, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "application_change_connection_control" "', argument " "1"" of type '" "vsomeip_v3::application *""'"); 
+    }
+    arg1 = reinterpret_cast< vsomeip_v3::application * >(argp1);ecode2 = SWIG_AsVal_int(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "application_change_connection_control" "', argument " "2"" of type '" "vsomeip_v3::connection_control_request_e""'");
+    } 
+    arg2 = static_cast< vsomeip_v3::connection_control_request_e >(val2);{
+      {
+        std::string *ptr = (std::string *)0;
+        res3 = SWIG_AsPtr_std_string(info[1], &ptr);
+        if (!SWIG_IsOK(res3)) {
+          SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "application_change_connection_control" "', argument " "3"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "application_change_connection_control" "', argument " "3"" of type '" "std::string const &""'"); 
+        }
+        arg3 = ptr;
+      }
+    }
+    
+    
+    
+    
+    
+    result = (vsomeip_v3::connection_control_response_e)(arg1)->change_connection_control(arg2,(std::string const &)*arg3);
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(result));
+    
+    if (SWIG_IsNewObj(res3)) delete arg3;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res3)) delete arg3;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  
+#endif
+  return Napi::Value();
+}
+
+
 // js_veto_ctor
 template <typename SWIG_OBJ_WRAP>
 _exports_application_templ<SWIG_OBJ_WRAP>::_exports_application_templ(const Napi::CallbackInfo &info)
@@ -19089,6 +19204,1377 @@ fail:
 }
 
 
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_request_event_one_group(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  std::uint16_t arg5 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  unsigned short val5 ;
+  int ecode5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 5 || static_cast<int>(info.Length()) > 5) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_request_event_one_group.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_request_event_one_group" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_request_event_one_group" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_request_event_one_group" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_request_event_one_group" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);ecode5 = SWIG_AsVal_unsigned_SS_short(info[3], &val5);
+    if (!SWIG_IsOK(ecode5)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Send_request_event_one_group" "', argument " "5"" of type '" "std::uint16_t""'");
+    } 
+    arg5 = static_cast< std::uint16_t >(val5);ecode6 = SWIG_AsVal_int(info[4], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_request_event_one_group" "', argument " "6"" of type '" "int""'");
+    } 
+    arg6 = static_cast< int >(val6);
+    
+    
+    
+    
+    (arg1)->request_event_one_group(arg2,arg3,arg4,arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_offer_event_with_groups(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  std::string *arg5 = 0 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  int res5 = SWIG_OLDOBJ ;
+  int val6 ;
+  int ecode6 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 5 || static_cast<int>(info.Length()) > 5) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_offer_event_with_groups.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_offer_event_with_groups" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_offer_event_with_groups" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_offer_event_with_groups" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_offer_event_with_groups" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);{
+      {
+        std::string *ptr = (std::string *)0;
+        res5 = SWIG_AsPtr_std_string(info[3], &ptr);
+        if (!SWIG_IsOK(res5)) {
+          SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "Send_offer_event_with_groups" "', argument " "5"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_offer_event_with_groups" "', argument " "5"" of type '" "std::string const &""'"); 
+        }
+        arg5 = ptr;
+      }
+    }
+    ecode6 = SWIG_AsVal_int(info[4], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_offer_event_with_groups" "', argument " "6"" of type '" "int""'");
+    } 
+    arg6 = static_cast< int >(val6);
+    
+    
+    
+    
+    (arg1)->offer_event_with_groups(arg2,arg3,arg4,(std::string const &)*arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res5)) delete arg5;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res5)) delete arg5;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_notify_event__SWIG_0(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  char *arg5 = (char *) 0 ;
+  uint32_t arg6 ;
+  bool arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  bool val7 ;
+  int ecode7 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_notify_event" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_notify_event" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_notify_event" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_notify_event" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);{
+      {
+        if (info[3].IsBuffer()) {
+          Napi::Buffer<char> buf = info[3].As<Napi::Buffer<char>>();
+          arg5 = reinterpret_cast<char *>(buf.Data());
+          arg6 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_notify_event', argument is not a Buffer");
+        }
+      }
+    }
+    ecode7 = SWIG_AsVal_bool(info[4], &val7);
+    if (!SWIG_IsOK(ecode7)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Send_notify_event" "', argument " "7"" of type '" "bool""'");
+    } 
+    arg7 = static_cast< bool >(val7);
+    
+    
+    
+    
+    (arg1)->notify_event(arg2,arg3,arg4,arg5,arg6,arg7);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_notify_event__SWIG_1(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  char *arg5 = (char *) 0 ;
+  uint32_t arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_notify_event" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_notify_event" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_notify_event" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_notify_event" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);{
+      {
+        if (info[3].IsBuffer()) {
+          Napi::Buffer<char> buf = info[3].As<Napi::Buffer<char>>();
+          arg5 = reinterpret_cast<char *>(buf.Data());
+          arg6 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_notify_event', argument is not a Buffer");
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    (arg1)->notify_event(arg2,arg3,arg4,arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function_dispatcher
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send__wrap_Send_notify_event(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 5 && static_cast<int>(info.Length()) <= 5) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_notify_event__SWIG_0(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_notify_event__SWIG_0(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 4 && static_cast<int>(info.Length()) <= 4) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_notify_event__SWIG_1(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_notify_event__SWIG_1(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  SWIG_Error(SWIG_ERROR, "Illegal arguments for function notify_event.");
+#ifndef NAPI_CPP_EXCEPTIONS
+  goto fail;
+fail:
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_release_event_simple(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::uint16_t arg2 ;
+  std::uint16_t arg3 ;
+  std::uint16_t arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned short val2 ;
+  int ecode2 = 0 ;
+  unsigned short val3 ;
+  int ecode3 = 0 ;
+  unsigned short val4 ;
+  int ecode4 = 0 ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 3 || static_cast<int>(info.Length()) > 3) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_release_event_simple.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_release_event_simple" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);ecode2 = SWIG_AsVal_unsigned_SS_short(info[0], &val2);
+    if (!SWIG_IsOK(ecode2)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Send_release_event_simple" "', argument " "2"" of type '" "std::uint16_t""'");
+    } 
+    arg2 = static_cast< std::uint16_t >(val2);ecode3 = SWIG_AsVal_unsigned_SS_short(info[1], &val3);
+    if (!SWIG_IsOK(ecode3)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Send_release_event_simple" "', argument " "3"" of type '" "std::uint16_t""'");
+    } 
+    arg3 = static_cast< std::uint16_t >(val3);ecode4 = SWIG_AsVal_unsigned_SS_short(info[2], &val4);
+    if (!SWIG_IsOK(ecode4)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Send_release_event_simple" "', argument " "4"" of type '" "std::uint16_t""'");
+    } 
+    arg4 = static_cast< std::uint16_t >(val4);
+    
+    
+    
+    
+    (arg1)->release_event_simple(arg2,arg3,arg4);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_start_periodic_message__SWIG_0(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  uint32_t arg6 ;
+  bool arg7 ;
+  bool arg8 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  unsigned int val6 ;
+  int ecode6 = 0 ;
+  bool val7 ;
+  int ecode7 = 0 ;
+  bool val8 ;
+  int ecode8 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_start_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_start_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_start_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    ecode6 = SWIG_AsVal_unsigned_SS_int(info[3], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_start_periodic_message" "', argument " "6"" of type '" "uint32_t""'");
+    } 
+    arg6 = static_cast< uint32_t >(val6);ecode7 = SWIG_AsVal_bool(info[4], &val7);
+    if (!SWIG_IsOK(ecode7)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Send_start_periodic_message" "', argument " "7"" of type '" "bool""'");
+    } 
+    arg7 = static_cast< bool >(val7);ecode8 = SWIG_AsVal_bool(info[5], &val8);
+    if (!SWIG_IsOK(ecode8)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "Send_start_periodic_message" "', argument " "8"" of type '" "bool""'");
+    } 
+    arg8 = static_cast< bool >(val8);
+    
+    
+    
+    
+    (arg1)->start_periodic_message((std::string const &)*arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_start_periodic_message__SWIG_1(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  uint32_t arg6 ;
+  bool arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  unsigned int val6 ;
+  int ecode6 = 0 ;
+  bool val7 ;
+  int ecode7 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_start_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_start_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_start_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    ecode6 = SWIG_AsVal_unsigned_SS_int(info[3], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_start_periodic_message" "', argument " "6"" of type '" "uint32_t""'");
+    } 
+    arg6 = static_cast< uint32_t >(val6);ecode7 = SWIG_AsVal_bool(info[4], &val7);
+    if (!SWIG_IsOK(ecode7)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Send_start_periodic_message" "', argument " "7"" of type '" "bool""'");
+    } 
+    arg7 = static_cast< bool >(val7);
+    
+    
+    
+    
+    (arg1)->start_periodic_message((std::string const &)*arg2,arg3,arg4,arg5,arg6,arg7);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_start_periodic_message__SWIG_2(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  uint32_t arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  unsigned int val6 ;
+  int ecode6 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_start_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_start_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_start_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_start_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    ecode6 = SWIG_AsVal_unsigned_SS_int(info[3], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_start_periodic_message" "', argument " "6"" of type '" "uint32_t""'");
+    } 
+    arg6 = static_cast< uint32_t >(val6);
+    
+    
+    
+    
+    (arg1)->start_periodic_message((std::string const &)*arg2,arg3,arg4,arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function_dispatcher
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send__wrap_Send_start_periodic_message(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 6 && static_cast<int>(info.Length()) <= 6) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_start_periodic_message__SWIG_0(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_start_periodic_message__SWIG_0(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 5 && static_cast<int>(info.Length()) <= 5) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_start_periodic_message__SWIG_1(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_start_periodic_message__SWIG_1(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 4 && static_cast<int>(info.Length()) <= 4) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_start_periodic_message__SWIG_2(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_start_periodic_message__SWIG_2(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  SWIG_Error(SWIG_ERROR, "Illegal arguments for function start_periodic_message.");
+#ifndef NAPI_CPP_EXCEPTIONS
+  goto fail;
+fail:
+#endif
+  return Napi::Value();
+}
+
+
+// js_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_stop_periodic_message(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    if(static_cast<int>(info.Length()) < 1 || static_cast<int>(info.Length()) > 1) {
+      SWIG_Error(SWIG_ERROR, "Illegal number of arguments for _wrap_Send_stop_periodic_message.");
+    }
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_stop_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_stop_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_stop_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    
+    
+    
+    
+    
+    (arg1)->stop_periodic_message((std::string const &)*arg2);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_update_periodic_message__SWIG_0(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  bool arg6 ;
+  bool arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  bool val6 ;
+  int ecode6 = 0 ;
+  bool val7 ;
+  int ecode7 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_update_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_update_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_update_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    ecode6 = SWIG_AsVal_bool(info[3], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_update_periodic_message" "', argument " "6"" of type '" "bool""'");
+    } 
+    arg6 = static_cast< bool >(val6);ecode7 = SWIG_AsVal_bool(info[4], &val7);
+    if (!SWIG_IsOK(ecode7)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Send_update_periodic_message" "', argument " "7"" of type '" "bool""'");
+    } 
+    arg7 = static_cast< bool >(val7);
+    
+    
+    
+    
+    (arg1)->update_periodic_message((std::string const &)*arg2,arg3,arg4,arg5,arg6,arg7);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_update_periodic_message__SWIG_1(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  bool arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  bool val6 ;
+  int ecode6 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_update_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_update_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_update_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    ecode6 = SWIG_AsVal_bool(info[3], &val6);
+    if (!SWIG_IsOK(ecode6)) {
+      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Send_update_periodic_message" "', argument " "6"" of type '" "bool""'");
+    } 
+    arg6 = static_cast< bool >(val6);
+    
+    
+    
+    
+    (arg1)->update_periodic_message((std::string const &)*arg2,arg3,arg4,arg5,arg6);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_overloaded_function
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send_update_periodic_message__SWIG_2(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  Send *arg1 = (Send *) 0 ;
+  std::string *arg2 = 0 ;
+  SomeipMessage *arg3 = (SomeipMessage *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint32_t arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    res1 = SWIG_ConvertPtr(info.This(), &argp1,SWIGTYPE_p_Send, 0 |  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Send_update_periodic_message" "', argument " "1"" of type '" "Send *""'"); 
+    }
+    arg1 = reinterpret_cast< Send * >(argp1);{
+      {
+        std::string *ptr = (std::string *)0;
+        res2 = SWIG_AsPtr_std_string(info[0], &ptr);
+        if (!SWIG_IsOK(res2)) {
+          SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        if (!ptr) {
+          SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Send_update_periodic_message" "', argument " "2"" of type '" "std::string const &""'"); 
+        }
+        arg2 = ptr;
+      }
+    }
+    res3 = SWIG_ConvertPtr(info[1], &argp3,SWIGTYPE_p_SomeipMessage, 0 |  0 );
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Send_update_periodic_message" "', argument " "3"" of type '" "SomeipMessage *""'"); 
+    }
+    arg3 = reinterpret_cast< SomeipMessage * >(argp3);{
+      {
+        if (info[2].IsBuffer()) {
+          Napi::Buffer<char> buf = info[2].As<Napi::Buffer<char>>();
+          arg4 = reinterpret_cast<char *>(buf.Data());
+          arg5 = buf.ByteLength();
+          
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "in method 'Send_update_periodic_message', argument is not a Buffer");
+        }
+      }
+    }
+    
+    
+    
+    
+    
+    (arg1)->update_periodic_message((std::string const &)*arg2,arg3,arg4,arg5);
+    
+    
+    
+    jsresult = env.Undefined();
+    
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    if (SWIG_IsNewObj(res2)) delete arg2;
+    
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+#endif
+  return Napi::Value();
+}
+
+
+// js_function_dispatcher
+template <typename SWIG_OBJ_WRAP>
+Napi::Value _exports_Send_templ<SWIG_OBJ_WRAP>::_wrap_Send__wrap_Send_update_periodic_message(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 5 && static_cast<int>(info.Length()) <= 5) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_update_periodic_message__SWIG_0(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_update_periodic_message__SWIG_0(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 4 && static_cast<int>(info.Length()) <= 4) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_update_periodic_message__SWIG_1(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_update_periodic_message__SWIG_1(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  // js_function_dispatch_case
+  if(static_cast<int>(info.Length()) >= 3 && static_cast<int>(info.Length()) <= 3) {
+#ifdef NAPI_CPP_EXCEPTIONS
+    bool tryNext = false;
+    try {
+      jsresult = _wrap_Send_update_periodic_message__SWIG_2(info);
+    } catch (const Napi::TypeError &) {
+      tryNext = true;
+    } catch (const Napi::Error &e) {
+      throw e;
+    }
+    if (!tryNext)
+    return jsresult;
+#else
+    _wrap_Send_update_periodic_message__SWIG_2(info);
+    if (env.IsExceptionPending()) {
+      Napi::Error e = env.GetAndClearPendingException();
+      Napi::Value typeErrorValue;
+      bool isTypeError;
+      Napi::Function typeErrorCons;
+      // Yes, this is ugly
+      // TODO: Fix this in Node.js when the core team grows up
+      NAPI_CHECK_RESULT(env.Global().Get("TypeError"), typeErrorValue);
+      typeErrorCons = typeErrorValue.As<Napi::Function>();
+      NAPI_CHECK_RESULT(e.Value().InstanceOf(typeErrorCons), isTypeError);
+      if (!isTypeError) {
+        // This is not the error you are looking for
+        e.ThrowAsJavaScriptException();
+        SWIG_fail;
+      }
+    } else {
+      return jsresult;
+    }
+#endif
+  }
+  
+  SWIG_Error(SWIG_ERROR, "Illegal arguments for function update_periodic_message.");
+#ifndef NAPI_CPP_EXCEPTIONS
+  goto fail;
+fail:
+#endif
+  return Napi::Value();
+}
+
+
 /* -----------------------------------------------------------------------------
  * swigrun_body.swg
  *
@@ -21583,6 +23069,122 @@ fail:
 }
 
 
+// js_global_getter
+Napi::Value exports_connection_control_request_e_CCR_ACCEPT_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_request_e::CCR_ACCEPT));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_request_e::CCR_RESET_AND_BLOCK));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_response_e_CCR_OK_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_response_e::CCR_OK));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
+// js_global_getter
+Napi::Value exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+  Napi::Value jsresult;
+  
+#ifdef NAPI_CPP_EXCEPTIONS
+  try {
+#endif
+    
+    
+    
+    jsresult = SWIG_From_int  SWIG_NAPI_FROM_CALL_ARGS(static_cast< int >(vsomeip_v3::connection_control_response_e::CCR_ERROR_INVALID_PARAMETER));
+    
+    
+    
+    return jsresult;
+#ifdef NAPI_CPP_EXCEPTIONS
+  } catch (...) {
+    std::rethrow_exception(std::current_exception());
+  }
+#else
+  goto fail;
+fail:
+  
+  return Napi::Value();
+#endif
+}
+
+
 SWIGINTERN
 int SWIG_AsVal_unsigned_SS_int (Napi::Value valRef, unsigned int* val)
 {
@@ -22074,6 +23676,62 @@ void _exports_Send_inst::GetMembers(
     "sendMessage",
       _exports_Send_templ::InstanceMethod("sendMessage",
         &_exports_Send_templ::_wrap_Send_sendMessage,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("request_event_one_group");
+  members.insert({
+    "request_event_one_group",
+      _exports_Send_templ::InstanceMethod("request_event_one_group",
+        &_exports_Send_templ::_wrap_Send_request_event_one_group,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("offer_event_with_groups");
+  members.insert({
+    "offer_event_with_groups",
+      _exports_Send_templ::InstanceMethod("offer_event_with_groups",
+        &_exports_Send_templ::_wrap_Send_offer_event_with_groups,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("notify_event");
+  members.insert({
+    "notify_event",
+      _exports_Send_templ::InstanceMethod("notify_event",
+        &_exports_Send_templ::_wrap_Send__wrap_Send_notify_event,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("release_event_simple");
+  members.insert({
+    "release_event_simple",
+      _exports_Send_templ::InstanceMethod("release_event_simple",
+        &_exports_Send_templ::_wrap_Send_release_event_simple,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("start_periodic_message");
+  members.insert({
+    "start_periodic_message",
+      _exports_Send_templ::InstanceMethod("start_periodic_message",
+        &_exports_Send_templ::_wrap_Send__wrap_Send_start_periodic_message,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("stop_periodic_message");
+  members.insert({
+    "stop_periodic_message",
+      _exports_Send_templ::InstanceMethod("stop_periodic_message",
+        &_exports_Send_templ::_wrap_Send_stop_periodic_message,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
+  // jsnapi_register_member_function
+  members.erase("update_periodic_message");
+  members.insert({
+    "update_periodic_message",
+      _exports_Send_templ::InstanceMethod("update_periodic_message",
+        &_exports_Send_templ::_wrap_Send__wrap_Send_update_periodic_message,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
   
@@ -25010,6 +26668,14 @@ void _exports_application_inst::GetMembers(
         &_exports_application_templ::_wrap_application_get_policy_manager,
         static_cast<napi_property_attributes>(napi_writable | napi_configurable))
     });
+  // jsnapi_register_member_function
+  members.erase("change_connection_control");
+  members.insert({
+    "change_connection_control",
+      _exports_application_templ::InstanceMethod("change_connection_control",
+        &_exports_application_templ::_wrap_application_change_connection_control,
+        static_cast<napi_property_attributes>(napi_writable | napi_configurable))
+    });
   
   /* add static class functions and variables */
   
@@ -26493,6 +28159,42 @@ do {
   Napi::Value value;
   NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
   Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("endianess_e_le", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_request_e_CCR_ACCEPT_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_request_e_CCR_ACCEPT", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_request_e_CCR_RESET_AND_BLOCK_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_request_e_CCR_RESET_AND_BLOCK", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_response_e_CCR_OK_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_response_e_CCR_OK", value,
+    static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
+  NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
+} while (0);
+// jsnapi_register_global_constant
+do {
+  Napi::Function f = Napi::Function::New(env, exports_connection_control_response_e_CCR_ERROR_INVALID_PARAMETER_get);
+  Napi::Value value;
+  NAPI_CHECK_RESULT(f.Call(0, SWIG_NULLPTR), value);
+  Napi::PropertyDescriptor pd = Napi::PropertyDescriptor::Value("connection_control_response_e_CCR_ERROR_INVALID_PARAMETER", value,
     static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_configurable));
   NAPI_CHECK_MAYBE(exports.DefineProperty(pd));
 } while (0);

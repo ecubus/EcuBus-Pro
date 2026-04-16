@@ -368,11 +368,28 @@ export interface CanInterAction {
   remote?: boolean
   data: string[]
 }
-export function formatError(error: Error) {
-  const stack = error?.stack || ''
+export function formatError(error: unknown) {
+  const errObj =
+    error instanceof Error
+      ? error
+      : new Error(
+          typeof error === 'string'
+            ? error
+            : error == null
+              ? 'Unknown error'
+              : (() => {
+                  try {
+                    return JSON.stringify(error)
+                  } catch {
+                    return String(error)
+                  }
+                })()
+        )
+
+  const stack = errObj.stack || ''
 
   // Get first stack line (usually contains error location)
-  const locationLine = stack.split('\n')[1] || ''
+  const locationLine = stack.split('\n')[1]?.trim() || ''
 
   // Extract file location info
   const locationMatch = locationLine.match(/webpack:\\ecubuspro\\(.*):(\d+):(\d+)\)$/)
@@ -390,12 +407,12 @@ export function formatError(error: Error) {
       const [, file, line, column] = newMatch
       location = `file://${file}:${line}:${column}`
     } else {
-      location = locationLine
+      location = locationLine || 'unknown'
     }
   }
 
   // Return simplified error message
-  return `Error: ${error.message}, Pos: ${location}`
+  return `Error: ${errObj.message || 'Unknown error'}, Pos: ${location || 'unknown'}`
 }
 
 export class CanError extends Error {

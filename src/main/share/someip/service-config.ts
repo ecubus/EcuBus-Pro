@@ -17,16 +17,16 @@ export interface ServiceEvent {
    * a setter, or a notifier. The notifier sends an event message that transports
    * the current value of a field on change.
    */
-  is_field?: boolean
+  is_field?: boolean | string
 
   /**
    * Specifies whether the communication is reliable respectively whether the
    * event is sent with the TCP protocol. If the value is false the UDP protocol will be used.
    */
-  is_reliable?: boolean
+  is_reliable?: boolean | string
 
   /**
-   * Defines the period for events to be sent. (values are defined in ms)
+   * Period between periodic event sends (milliseconds).
    */
   cycle?: number
 
@@ -38,7 +38,7 @@ export interface ServiceEvent {
 
   /**
    * When the update_on_change is set to true, and this parameter is also true,
-   * the defined cycle will be reset when the event value changes.
+   * the defined cycle is reset when the event value changes.
    * @default false
    */
   change_resets_cycle?: boolean

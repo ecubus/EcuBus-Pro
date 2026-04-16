@@ -73,3 +73,13 @@ setInterval(() => {
 ```
 
 :::
+## Can I use a custom sub-function for preset `0x27 (SecurityAccess)` commands? (for example `0x35` / `0x36`)
+
+::: details Answer
+Yes. When configuring a preset `0x27` service, set the sub-function to custom and enter the target value, such as `0x35` (request seed) and `0x36` (send key).
+
+For security access, make sure the request-seed and send-key sub-functions are paired correctly (typically odd/even pairs) and match your ECU implementation.
+
+Reference: [Issue #335 comment](https://github.com/ecubus/EcuBus-Pro/issues/335#issuecomment-4258104744)
+::::
+

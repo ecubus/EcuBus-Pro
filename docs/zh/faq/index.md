@@ -73,12 +73,14 @@ setInterval(() => {
 ```
 
 :::
-## 预设指令里的 `0x27 (SecurityAccess)` 子功能可以自定义吗？（例如 `0x35` / `0x36`）
 
-:::details 答案
-可以。在预设指令中配置 `0x27` 服务时，将子功能设置为自定义并输入目标值即可，例如 `0x35`（请求种子）和 `0x36`（发送密钥）。
+## 我可以为预设的 `0x27 (SecurityAccess)` 命令使用自定义子功能吗？ （例如 `0x35` / `0x36`）
 
-对于安全访问场景，请确保请求种子和发送密钥的子功能配对正确（通常为奇偶配对），并与ECU实现保持一致。
-:::
+::: details 答案
+是的。 配置预设的 `0x27` 服务时，将子功能设置为自定义并输入目标值，例如 `0x35`（请求种子）和 `0x36`（发送密钥）。
 
-参考链接： [Issue #335 comment](https://github.com/ecubus/EcuBus-Pro/issues/335#issuecomment-4258104744)
+对于安全访问，请确保请求种子和发送密钥子功能正确配对（通常为奇数/偶数对）并与您的 ECU 实现匹配。
+
+Reference: [Issue #335 comment](https://github.com/ecubus/EcuBus-Pro/issues/335#issuecomment-4258104744)
+::::
+

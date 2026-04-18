@@ -1,5 +1,19 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.64
+Changes since v0.8.63:
+
+ 
+* [bug]:fix module imports in report.js 
+* [bug]:Implement variable setting in IPC handler with data update logic #327 
+* [bug]:fix panel image can't display local image 
+* [opt]:opt panel led, allow custom svg 
+* [bug]:fix plugin script path issue
+* [feat]:someip feature done, [Detail](https://app.whyengineer.com/docs/um/someip/)
+* [feat]:add cdd parse by @crazy0104 in #328
+---
+
+
 ## 0.8.63
 Changes since v0.8.62:
 

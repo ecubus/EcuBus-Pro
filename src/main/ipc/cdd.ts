@@ -21,7 +21,9 @@ async function runCddParse(
     args.push('--parseResp')
   }
 
-  const result = await execBinary(pythonPath, args)
+  const result = await execBinary(pythonPath, args, {
+    cwd: path.dirname(cddPyFile)
+  })
 
   try {
     if (result.success) {

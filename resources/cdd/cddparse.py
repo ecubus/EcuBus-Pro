@@ -1,10 +1,15 @@
 import json
 import sys
+from pathlib import Path
 
-try:
-    from .cdd_tester_parser import CddParse
-except ImportError:
-    from cdd_tester_parser import CddParse
+# When launched as `python cddparse.py`, this file is not part of a package, so
+# relative imports fail and sibling modules are not on sys.path. Ensure the
+# directory containing the CDD Python sources is importable.
+_cdd_dir = str(Path(__file__).resolve().parent)
+if _cdd_dir not in sys.path:
+    sys.path.insert(0, _cdd_dir)
+
+from cdd_tester_parser import CddParse
 
 
 def parseTesterInfo(file_path):

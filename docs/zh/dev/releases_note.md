@@ -1,5 +1,19 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.64
+
+自 v0.8.63 以来的变更：
+
+- [bug]：修复 report.js 中的模块导入
+- [bug]：在 IPC 处理程序中实现带有数据更新逻辑的变量设置 #327
+- [bug]：修复面板图像无法显示本地图像
+- [opt]：优化面板 LED，允许自定义 SVG
+- [bug]：修复插件脚本路径问题
+- [feat]：SOME/IP 功能已完成，[详情](https://app.whyengineer.com/docs/um/someip/)
+- [feat]：由 @crazy0104 在 #328 中添加 CDD 解析
+
+---
+
 ## 0.8.63
 
 自 v0.8.62 以来的变更：

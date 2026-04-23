@@ -123,7 +123,7 @@
     "serialport": "^13.0.0",
     "sortablejs": "^1.15.2",
     "ts-morph": "^26.0.0",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.0",
     "vite-plugin-string": "^1.2.3",
     "vite-raw-plugin": "^1.0.2",
     "vitepress-plugin-image-viewer": "^1.1.6",

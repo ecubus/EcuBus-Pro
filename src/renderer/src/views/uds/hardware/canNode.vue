@@ -382,6 +382,17 @@ const configInfo: Record<CanVendor, any> = {
     can: {},
     canFd: {}
   },
+  socketcan: {
+    clock: false,
+    timeSeg1: false,
+    timeSeg2: false,
+    sjw: false,
+    preScaler: false,
+    freq: true,
+    zlgSpec: false,
+    can: {},
+    canFd: {}
+  },
   peak: {
     clock: true,
     timeSeg1: true,

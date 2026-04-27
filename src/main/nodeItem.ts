@@ -253,7 +253,7 @@ export class NodeClass {
                       //TODO:
                     } else {
                       if (data.addr.uuid != this.nodeItem.id) {
-                        const item = findService(tester, data.data, true)
+                        const item = cloneDeep(findService(tester, data.data, true))
                         if (item) {
                           try {
                             applyBuffer(item, data.data, true)
@@ -277,7 +277,7 @@ export class NodeClass {
                         //TODO:
                       } else {
                         if (data.addr.uuid != this.nodeItem.id) {
-                          const item = findService(tester, data.data, false)
+                          const item = cloneDeep(findService(tester, data.data, false))
                           if (item) {
                             try {
                               applyBuffer(item, data.data, false)
@@ -307,7 +307,7 @@ export class NodeClass {
                       //TODO:
                     } else {
                       if (data.addr.uuid != this.nodeItem.id) {
-                        const item = findService(tester, data.data, true)
+                        const item = cloneDeep(findService(tester, data.data, true))
                         if (item) {
                           try {
                             applyBuffer(item, data.data, true)
@@ -327,7 +327,7 @@ export class NodeClass {
                       //TODO:
                     } else {
                       if (data.addr.uuid != this.nodeItem.id) {
-                        const item = findService(tester, data.data, false)
+                        const item = cloneDeep(findService(tester, data.data, false))
                         if (item) {
                           try {
                             applyBuffer(item, data.data, false)
@@ -362,7 +362,7 @@ export class NodeClass {
                       if (data instanceof DoipError) {
                         //TODO:
                       } else {
-                        const item = findService(tester, data.data, true)
+                        const item = cloneDeep(findService(tester, data.data, true))
                         if (item) {
                           try {
                             applyBuffer(item, data.data, true)
@@ -383,7 +383,7 @@ export class NodeClass {
                       if (data instanceof DoipError) {
                         //TODO:
                       } else {
-                        const item = findService(tester, data.data, false)
+                        const item = cloneDeep(findService(tester, data.data, false))
                         if (item) {
                           try {
                             applyBuffer(item, data.data, false)

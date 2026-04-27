@@ -18,6 +18,9 @@ Util.On('Tester_can_0.authenticationConfiguration.send', async (req) => {
 let memorySize: number
 Util.On('Tester_can_0.RequestDownload520.send', async (req) => {
   const resp = DiagResponse.fromDiagRequest(req)
+  // Reset transfer session state so this example can run repeatedly.
+  fwContent = Buffer.alloc(0)
+  encryptedContent = Buffer.alloc(0)
   memorySize = Number(req.diagGetParameter('memorySize'))
   console.log(`memorySize:${memorySize}`)
   resp.diagSetRaw(Buffer.from([0x74, 0x40, 0, 0, 0, 0x81]))
@@ -101,20 +104,15 @@ Util.On('Tester_can_0.proofOfOwnership.send', async (req) => {
   }
 })
 let fwContent: Buffer = Buffer.alloc(0)
-let decipher: crypto.DecipherGCM
+let encryptedContent: Buffer = Buffer.alloc(0)
 
 Util.On('Tester_can_0.TransferData540.send', async (req) => {
   const raw = req.diagGetRaw()
-  if (!decipher) {
-    decipher = crypto.createDecipheriv('aes-256-gcm', realKey, Buffer.alloc(12, 0))
-  }
   const transferRequestParameterRecord = raw.subarray(2)
-  const decrypted = decipher.update(transferRequestParameterRecord)
-  if (fwContent.length < memorySize) {
-    fwContent = Buffer.concat([fwContent, decrypted])
-    if (fwContent.length >= memorySize) {
-      console.log(`decrypted content :${fwContent.subarray(0, memorySize).toString('ascii')}`)
-    }
+  console.log(`TransferData payload length:${transferRequestParameterRecord.length}`)
+  if (encryptedContent.length < memorySize) {
+    encryptedContent = Buffer.concat([encryptedContent, transferRequestParameterRecord])
+    console.log(`encryptedContent length:${encryptedContent.length}/${memorySize}`)
   }
   const resp = DiagResponse.fromDiagRequest(req)
   resp.diagSetRaw(Buffer.from([0x76, Number(req.diagGetParameter('blockSequenceCounter'))]))
@@ -122,9 +120,37 @@ Util.On('Tester_can_0.TransferData540.send', async (req) => {
 })
 
 Util.On('Tester_can_0.RequestTransferExit550.send', async (req) => {
+  if (!realKey || encryptedContent.length === 0) {
+    throw new Error('transfer session not initialized')
+  }
   const raw = req.diagGetRaw()
-  decipher.setAuthTag(raw.subarray(2))
-  decipher.final()
+  let authTag = req.diagGetParameterRaw('auth')
+  console.log(`RequestTransferExit raw length:${raw.length}, auth length:${authTag.length}`)
+  console.log(
+    `RequestTransferExit encryptedContent length:${encryptedContent.length}/${memorySize}`
+  )
+  // Some service descriptions keep auth default at 4 bytes unless resized at runtime.
+  // AES-GCM tag is 16 bytes, so fall back to the last 16 bytes of raw payload.
+  if (authTag.length !== 16 && raw.length >= 17) {
+    authTag = raw.subarray(raw.length - 16)
+    console.log(`fallback auth length:${authTag.length}`)
+  }
+  if (authTag.length !== 16) {
+    throw new Error(`invalid auth tag length:${authTag.length}`)
+  }
+  // Some stacks may append extra bytes in TransferData payload. Keep only expected download size.
+  const encryptedPayload = encryptedContent.subarray(0, memorySize)
+  if (encryptedContent.length !== memorySize) {
+    console.log(
+      `trim encryptedContent from ${encryptedContent.length} to ${encryptedPayload.length}`
+    )
+  }
+  const decipher = crypto.createDecipheriv('aes-256-gcm', realKey, Buffer.alloc(12, 0))
+  decipher.setAuthTag(authTag)
+  const decrypted = Buffer.concat([decipher.update(encryptedPayload), decipher.final()])
+  fwContent = decrypted
+  console.log(`decrypted content :${fwContent.subarray(0, memorySize).toString('ascii')}`)
+  encryptedContent = Buffer.alloc(0)
   const resp = DiagResponse.fromDiagRequest(req)
   resp.diagSetRaw(Buffer.from([0x77]))
   await resp.outputDiag()

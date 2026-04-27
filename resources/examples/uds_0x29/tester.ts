@@ -120,7 +120,7 @@ Util.Register('Tester_can_0.SecureDownload', async () => {
       const blockSequenceCounter = Buffer.alloc(1)
       blockSequenceCounter.writeUInt8((i + 1) & 0xff) // 使用循环计数 1-255
       transferRequest.diagSetParameterRaw('blockSequenceCounter', blockSequenceCounter)
-
+      await transferRequest.changeService()
       list.push(transferRequest)
     }
     //set auth tag

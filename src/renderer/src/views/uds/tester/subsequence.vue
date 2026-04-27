@@ -7,16 +7,9 @@
         class="sequenceTable"
         :data="data.services"
         @cell-click="ceilClick"
+        @row-dragend="onRowDragEnd"
       >
-        <template #default_drag>
-          <el-icon
-            :id="'sequenceDragBtn' + props.id + props.index"
-            class="drag-btn"
-            @mouseenter="rowDrop"
-          >
-            <Grid />
-          </el-icon>
-        </template>
+        <template #default_drag> </template>
         <template #default_enable="{ row }">
           <el-checkbox v-model="row.enable" size="small" />
         </template>
@@ -194,10 +187,8 @@
 <script lang="tsx" setup>
 import { v4 } from 'uuid'
 import { Sequence, SequenceItem, ServiceItem, UdsAddress, getUdsAddrName } from 'nodeCan/uds'
-import { onMounted, ref, nextTick, computed, toRef, Ref, onUnmounted, watch } from 'vue'
-import Sortable from 'sortablejs'
+import { onMounted, ref, computed, onUnmounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
-import { cloneDeep } from 'lodash'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import circlePlusFilled from '@iconify/icons-material-symbols/add-circle-outline'
@@ -214,6 +205,12 @@ const props = defineProps<{
 const data = defineModel<Sequence>({
   required: true
 })
+//check uuid is valid
+for (const service of data.value.services) {
+  if (!service.uuid) {
+    service.uuid = v4()
+  }
+}
 const xGrid = ref()
 watch(
   () => props.disabled,
@@ -253,7 +250,8 @@ const gridOptions = computed(() => {
     showOverflow: false,
     rowConfig: {
       isCurrent: true,
-      keyField: 'uuid'
+      keyField: 'uuid',
+      drag: true
     },
     id: `sequenceTable${props.id}${props.index}`,
     editConfig: {
@@ -282,6 +280,7 @@ const gridOptions = computed(() => {
         title: '',
         width: 36,
         resizable: false,
+        dragSort: true,
         editRender: {},
         slots: { default: 'default_drag' }
       },
@@ -402,6 +401,20 @@ function ceilClick(val: any) {
   actionRow.value = val.rowIndex
 }
 
+function onRowDragEnd(params: any) {
+  const newIndex = params._index.newIndex
+  const oldIndex = params._index.oldIndex
+  if (newIndex == undefined || oldIndex == undefined || newIndex === oldIndex) {
+    return
+  }
+  const row = data.value.services.splice(oldIndex, 1)[0]
+  data.value.services.splice(newIndex, 0, row)
+  const result = excuseResults.value.splice(oldIndex, 1)[0]
+  excuseResults.value.splice(newIndex, 0, result)
+  actionRow.value = -1
+  xGrid.value?.clearCurrentRow()
+}
+
 function error({ values }: { values: LogItem[] }) {
   const vals = values
   for (const val of vals) {
@@ -416,26 +429,6 @@ function error({ values }: { values: LogItem[] }) {
       }
     }
   }
-}
-
-const rowDrop = (event: { preventDefault: () => void }) => {
-  event.preventDefault()
-  nextTick(() => {
-    const wrapper = document.querySelector(`#${tableId.value} tbody`) as HTMLElement
-    Sortable.create(wrapper, {
-      animation: 300,
-      handle: `#sequenceDragBtn${props.id}${props.index}`,
-      onEnd: ({ newIndex, oldIndex }) => {
-        if (newIndex === oldIndex) return
-        if (newIndex == undefined || oldIndex == undefined) return
-        const currentRow = data.value.services.splice(oldIndex, 1)[0]
-        data.value.services.splice(newIndex, 0, currentRow)
-        const currentResult = excuseResults.value.splice(oldIndex, 1)[0]
-        excuseResults.value.splice(newIndex, 0, currentResult)
-        // xGrid.value?.reloadData(data.value.services)
-      }
-    })
-  })
 }
 interface LogItem {
   level: string

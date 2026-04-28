@@ -5,6 +5,7 @@ import { CAN_ID_TYPE, CanMessage, getTsUs } from '../share/can'
 import { ReplayLOG } from '../log'
 import type { ReplayItem, ReplayFileFormat, ReplayChannelMap } from 'src/preload/data'
 import { AscReader } from './ascReader'
+import { BlfReader } from './blfReader'
 import { DOIP } from '../doip'
 import { CanBase } from '../docan/base'
 import LinBase from '../dolin/base'
@@ -125,6 +126,8 @@ export class Replay {
     switch (this.config.format) {
       case 'asc':
         return new AscReader(this.config.filePath, this.speedFactor)
+      case 'blf':
+        return new BlfReader(this.config.filePath, this.speedFactor)
       default:
         throw new Error(`Reader not implemented for format: ${this.config.format}`)
     }

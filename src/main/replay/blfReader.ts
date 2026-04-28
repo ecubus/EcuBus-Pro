@@ -17,6 +17,7 @@ const LOG_CONTAINER_HEADER_SIZE = 16
 const CAN_MESSAGE = 1
 const LOG_CONTAINER = 10
 const CAN_ERROR_EXT = 73
+const CAN_MESSAGE2 = 86
 const CAN_FD_MESSAGE = 100
 
 const ZLIB_DEFLATE = 2
@@ -395,6 +396,7 @@ export class BlfTransform extends Transform {
   private parseFrame(objType: number, payload: Buffer, timestampUs: number): ReplayCanFrame | null {
     switch (objType) {
       case CAN_MESSAGE:
+      case CAN_MESSAGE2:
         return parseCanMessage(payload, timestampUs)
       case CAN_FD_MESSAGE:
         return parseCanFdMessage(payload, timestampUs)

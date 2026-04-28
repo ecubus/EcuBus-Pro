@@ -19,6 +19,7 @@ const LOG_CONTAINER = 10
 const CAN_ERROR_EXT = 73
 const CAN_MESSAGE2 = 86
 const CAN_FD_MESSAGE = 100
+const CAN_FD_MESSAGE_64 = 101
 
 const ZLIB_DEFLATE = 2
 
@@ -27,7 +28,16 @@ const REMOTE_FLAG = 0x80
 const DIR_FLAG = 0x1
 const EDL_FLAG = 0x1
 const BRS_FLAG = 0x2
+const TIME_TEN_MICS = 0x00000001
 const TIME_ONE_NANS = 0x00000002
+
+// CAN_FD_MESSAGE_64 fd_flags bits (different from CAN_FD_MESSAGE)
+const FD64_REMOTE = 0x0010
+const FD64_FD = 0x1000
+const FD64_BRS = 0x2000
+
+// CAN_FD_MESSAGE_64 fixed header size (before data): <BBBBLLLLLLLHBBL> = 40 bytes
+const CAN_FD_MSG_64_HEADER_SIZE = 40
 
 const MAX_OBJECT_SIZE = 64 * 1024 * 1024
 const MAX_UNCOMPRESSED_SIZE = 64 * 1024 * 1024
@@ -129,6 +139,51 @@ function parseCanErrorExt(payload: Buffer, timestampUs: number): ReplayCanFrame 
 }
 
 /**
+ * Parse a CAN_FD_MESSAGE_64 (type 101) object payload into a ReplayCanFrame.
+ * Layout: channel(B) + dlc(B) + validBytes(B) + txCount(B) + arbId(L) +
+ *   frameLengthNs(L) + fdFlags(L) + btrCfgArb(L) + btrCfgData(L) +
+ *   timeOffsetBrsNs(L) + timeOffsetCrcDelNs(L) + bitCount(H) + direction(b) +
+ *   extDataOffset(b) + crc(l) = 40 bytes, then data[validBytes]
+ */
+function parseCanFdMessage64(payload: Buffer, timestampUs: number): ReplayCanFrame | null {
+  if (payload.length < CAN_FD_MSG_64_HEADER_SIZE) return null
+
+  const channel = payload.readUInt8(0)
+  const dlc = payload.readUInt8(1)
+  const validBytes = payload.readUInt8(2)
+  const arbId = payload.readUInt32LE(4)
+  const fdFlags = payload.readUInt32LE(12)
+  const direction = payload.readInt8(34)
+
+  const isExtended = (arbId & CAN_MSG_EXT) !== 0
+  const id = arbId & ~CAN_MSG_EXT
+  const isFd = (fdFlags & FD64_FD) !== 0
+  const isBrs = (fdFlags & FD64_BRS) !== 0
+  const isRemote = (fdFlags & FD64_REMOTE) !== 0
+  const dir = direction ? 'OUT' : 'IN'
+
+  const dataLen = Math.min(validBytes, 64, payload.length - CAN_FD_MSG_64_HEADER_SIZE)
+  const data =
+    dataLen > 0
+      ? payload.subarray(CAN_FD_MSG_64_HEADER_SIZE, CAN_FD_MSG_64_HEADER_SIZE + dataLen)
+      : Buffer.alloc(0)
+
+  return {
+    channel,
+    ts: timestampUs,
+    id,
+    dir: dir as 'IN' | 'OUT',
+    msgType: {
+      idType: isExtended ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+      brs: isBrs,
+      canfd: isFd,
+      remote: isRemote
+    },
+    data: Buffer.from(data)
+  }
+}
+
+/**
  * Extract inner LOBJ objects from (decompressed) container data.
  * Handles cross-container reassembly via the carryover buffer.
  */
@@ -145,10 +200,11 @@ function* extractInnerObjects(
     }
 
     const headerSize = data.readUInt16LE(offset + 4)
+    const headerVersion = data.readUInt16LE(offset + 6)
     const objSize = data.readUInt32LE(offset + 8)
     const objType = data.readUInt32LE(offset + 12)
 
-    if (objSize < headerSize || objSize > MAX_OBJECT_SIZE) {
+    if (objSize < OBJ_HEADER_BASE_SIZE || objSize > MAX_OBJECT_SIZE) {
       offset += 4
       continue
     }
@@ -157,20 +213,27 @@ function* extractInnerObjects(
       break
     }
 
+    // V1 header is always present when headerVersion >= 1,
+    // even if headerSize only reports the base size (16)
     let timestampUs = 0
-    if (headerSize >= OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE) {
+    let actualHeaderEnd = OBJ_HEADER_BASE_SIZE
+    if (
+      headerVersion >= 1 &&
+      offset + OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE <= offset + objSize
+    ) {
       const tsFlags = data.readUInt32LE(offset + OBJ_HEADER_BASE_SIZE)
       const tsRaw = data.readBigUInt64LE(offset + OBJ_HEADER_BASE_SIZE + 8)
       if (tsFlags === TIME_ONE_NANS) {
         timestampUs = Number(tsRaw / 1000n)
       } else {
-        // Default: assume 10μs units
+        // TIME_TEN_MICS or default: 10μs units
         timestampUs = Number(tsRaw) * 10
       }
+      actualHeaderEnd = OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE
     }
 
-    const payloadOffset = offset + headerSize
-    const payloadSize = objSize - headerSize
+    const payloadOffset = offset + actualHeaderEnd
+    const payloadSize = objSize - actualHeaderEnd
     const payload = data.subarray(payloadOffset, payloadOffset + payloadSize)
 
     yield { objType, timestampUs, payload }
@@ -332,19 +395,23 @@ export class BlfTransform extends Transform {
   }
 
   private async processTopLevelObject(objType: number, objData: Buffer): Promise<void> {
-    const headerSize = objData.readUInt16LE(4)
-    if (headerSize < OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE) return
+    const headerVersion = objData.readUInt16LE(6)
 
     let timestampUs = 0
-    const tsFlags = objData.readUInt32LE(OBJ_HEADER_BASE_SIZE)
-    const tsRaw = objData.readBigUInt64LE(OBJ_HEADER_BASE_SIZE + 8)
-    if (tsFlags === TIME_ONE_NANS) {
-      timestampUs = Number(tsRaw / 1000n)
-    } else {
-      timestampUs = Number(tsRaw) * 10
+    let payloadStart = OBJ_HEADER_BASE_SIZE
+
+    if (headerVersion >= 1 && objData.length >= OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE) {
+      const tsFlags = objData.readUInt32LE(OBJ_HEADER_BASE_SIZE)
+      const tsRaw = objData.readBigUInt64LE(OBJ_HEADER_BASE_SIZE + 8)
+      if (tsFlags === TIME_ONE_NANS) {
+        timestampUs = Number(tsRaw / 1000n)
+      } else {
+        timestampUs = Number(tsRaw) * 10
+      }
+      payloadStart = OBJ_HEADER_BASE_SIZE + OBJ_HEADER_V1_SIZE
     }
 
-    const payload = objData.subarray(headerSize)
+    const payload = objData.subarray(payloadStart)
     const frame = this.parseFrame(objType, payload, timestampUs)
     if (frame) {
       await this.pushFrame(frame)
@@ -400,6 +467,8 @@ export class BlfTransform extends Transform {
         return parseCanMessage(payload, timestampUs)
       case CAN_FD_MESSAGE:
         return parseCanFdMessage(payload, timestampUs)
+      case CAN_FD_MESSAGE_64:
+        return parseCanFdMessage64(payload, timestampUs)
       case CAN_ERROR_EXT:
         return parseCanErrorExt(payload, timestampUs)
       default:

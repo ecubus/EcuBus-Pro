@@ -44,7 +44,9 @@ mac:
   target:
     - target: dmg
   icon: ./build/icon.icns
+  entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
+  identity: null
   artifactName: EcuBus-Pro-${version}-${arch}.dmg
 linux:
   target:

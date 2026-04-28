@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { ReplayCanFrame } from '../../src/main/replay/index'
 import path from 'path'
 import { AscReader } from 'src/main/replay/ascReader'
+import { BlfReader } from 'src/main/replay/blfReader'
 
 describe('Replay', () => {
   const blfFilePath = path.resolve(__dirname, './Logging.blf')
@@ -159,6 +160,93 @@ describe('Replay', () => {
       console.log(`Total frames: ${frames.length}`)
       console.log(`ID 0x200 frames: ${id200Frames.length}, ID 0x400 frames: ${id400Frames.length}`)
       console.log(`TesterPresent frames: ${testerPresentFrames.length}`)
+
+      reader.close()
+    })
+  })
+
+  describe('BlfReader', () => {
+    it('should initialize and read total objects', async () => {
+      const reader = new BlfReader(blfFilePath, 0)
+      const result = reader.init()
+
+      expect(result.total).toBeGreaterThan(0)
+      console.log(`Total objects in BLF file: ${result.total}`)
+
+      reader.close()
+    })
+
+    it('should read CAN frames from BLF file', async () => {
+      const reader = new BlfReader(blfFilePath, 0)
+      reader.init()
+
+      const frames: ReplayCanFrame[] = []
+      let frame: ReplayCanFrame | null
+
+      while ((frame = await reader.readFrame()) !== null) {
+        frames.push(frame)
+      }
+
+      expect(frames.length).toBeGreaterThan(0)
+      console.log(`Read ${frames.length} CAN frames from BLF file`)
+
+      // Verify frame structure
+      const firstFrame = frames[0]
+      expect(firstFrame).toHaveProperty('channel')
+      expect(firstFrame).toHaveProperty('ts')
+      expect(firstFrame).toHaveProperty('id')
+      expect(firstFrame).toHaveProperty('dir')
+      expect(firstFrame).toHaveProperty('msgType')
+      expect(firstFrame).toHaveProperty('data')
+      expect(firstFrame.data).toBeInstanceOf(Buffer)
+
+      console.log('First frame:', {
+        channel: firstFrame.channel,
+        ts: firstFrame.ts,
+        id: `0x${firstFrame.id.toString(16)}`,
+        dir: firstFrame.dir,
+        msgType: firstFrame.msgType,
+        data: firstFrame.data.toString('hex')
+      })
+
+      reader.close()
+    })
+
+    it('should have increasing timestamps', async () => {
+      const reader = new BlfReader(blfFilePath, 0)
+      await reader.init()
+
+      let lastTs = -1
+      let frame: ReplayCanFrame | null
+      let count = 0
+
+      while ((frame = await reader.readFrame()) !== null) {
+        expect(frame.ts).toBeGreaterThanOrEqual(lastTs)
+        lastTs = frame.ts
+        count++
+      }
+
+      expect(count).toBeGreaterThan(0)
+      console.log(`Verified ${count} frames have increasing timestamps`)
+      reader.close()
+    })
+
+    it('should report progress correctly', async () => {
+      const reader = new BlfReader(blfFilePath, 0)
+      await reader.init()
+
+      let frame: ReplayCanFrame | null
+
+      while ((frame = await reader.readFrame()) !== null) {
+        const progress = reader.getProgress()
+        expect(progress.current).toBeLessThanOrEqual(progress.total)
+      }
+
+      const finalProgress = reader.getProgress()
+      expect(finalProgress.percent).toBeGreaterThan(90)
+      console.log(
+        `Final progress: ${finalProgress.current}/${finalProgress.total} (${finalProgress.percent.toFixed(2)}%)`
+      )
 
       reader.close()
     })

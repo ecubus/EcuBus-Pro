@@ -227,6 +227,12 @@ export type CanMessage<T = any> = {
   ts?: number
 
   /**
+   * If true, updateBusLoadingWithFrame will skip frame counting (sent/recv).
+   * Used to prevent double-counting when sentFrames is already counted at send time.
+   */
+  noCount?: boolean
+
+  /**
    * The identifier of the CAN message.
    */
   id: number

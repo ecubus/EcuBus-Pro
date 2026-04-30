@@ -298,6 +298,62 @@ let cantps: {
   close: () => void
 }[] = []
 let doips: DOIP[] = []
+const doipTesterPresentMap = new Map<
+  string,
+  {
+    enable: boolean
+    timer?: NodeJS.Timeout
+    action: () => Promise<void>
+    schedule: () => void
+  }
+>()
+
+function getDoipTesterPresentKey(testerId: string, deviceId: string, addrIndex: number) {
+  return `${testerId}:${deviceId}:${addrIndex}`
+}
+
+function setupDoipTesterPresent(
+  doip: DOIP,
+  tester: TesterInfo,
+  addrIndex: number,
+  addr: EthAddr,
+  data: Buffer
+) {
+  const key = getDoipTesterPresentKey(tester.id, doip.base.id, addrIndex)
+  const old = doipTesterPresentMap.get(key)
+  if (old?.timer) {
+    clearTimeout(old.timer)
+  }
+  const item = {
+    enable: true,
+    timer: undefined as NodeJS.Timeout | undefined,
+    action: async () => {
+      const client = await doip.createClient(addr)
+      await doip.writeTpReq(client, data, addr.entity.logicalAddr)
+    },
+    schedule: () => {
+      const current = doipTesterPresentMap.get(key)
+      if (!current || !current.enable) {
+        return
+      }
+      current.timer = setTimeout(() => {
+        const latest = doipTesterPresentMap.get(key)
+        if (!latest || !latest.enable) {
+          return
+        }
+        latest.action()
+          .catch((err: any) => {
+            sysLog.warn(`doip tester present failed: ${err?.message || err?.toString?.() || err}`)
+          })
+          .finally(() => {
+            latest.schedule()
+          })
+      }, tester.udsTime.s3Time)
+    }
+  }
+  doipTesterPresentMap.set(key, item)
+  item.schedule()
+}
 
 function getDeviceSymbol(data: UdsDevice) {
   let vendor
@@ -546,6 +602,22 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       for (const val of ethBaseMap.values()) {
         const doip = new DOIP(val, tester, projectInfo.path)
         doips.push(doip)
+        if (tester.udsTime.testerPresentEnable && tester.udsTime.testerPresentAddrIndex != undefined) {
+          const tpAddrIndex = tester.udsTime.testerPresentAddrIndex
+          const tpAddr = tester.address[tpAddrIndex]
+          if (tpAddr?.type == 'eth' && tpAddr.ethAddr) {
+            let tpData = Buffer.from([0x3e, 0x00])
+            if (tester.udsTime.testerPresentSpecialService) {
+              const service = tester.allServiceList['0x3E']?.find(
+                (e) => e.id == tester.udsTime.testerPresentSpecialService
+              )
+              if (service) {
+                tpData = getTxPdu(service)
+              }
+            }
+            setupDoipTesterPresent(doip, tester, tpAddrIndex, tpAddr.ethAddr, tpData)
+          }
+        }
 
         for (const addr of tester.address) {
           if (addr.type == 'eth' && addr.ethAddr) {
@@ -828,6 +900,35 @@ ipcMain.handle('ipc-switch-tester-present', async (event, ...arg) => {
           }
         }
       }
+    } else if (addr && addr.ethAddr) {
+      for (const doip of doips) {
+        if (doip.base.id == tester.targetDeviceId) {
+          const key = getDoipTesterPresentKey(
+            tester.id,
+            doip.base.id,
+            tester.udsTime.testerPresentAddrIndex
+          )
+          const item = doipTesterPresentMap.get(key)
+          if (item) {
+            item.enable = enable
+            if (item.timer) {
+              clearTimeout(item.timer)
+              item.timer = undefined
+            }
+            if (enable) {
+              item.action()
+                .catch((err: any) => {
+                  sysLog.warn(
+                    `doip tester present failed: ${err?.message || err?.toString?.() || err}`
+                  )
+                })
+                .finally(() => {
+                  item.schedule()
+                })
+            }
+          }
+        }
+      }
     }
   }
 })
@@ -947,6 +1048,12 @@ export function globalStop(emit = false) {
     value.close()
   })
   doips = []
+  doipTesterPresentMap.forEach((value) => {
+    if (value.timer) {
+      clearTimeout(value.timer)
+    }
+  })
+  doipTesterPresentMap.clear()
 
   someipMap.forEach((e) => {
     e.stop()

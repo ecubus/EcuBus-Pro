@@ -453,7 +453,10 @@ export class udsCeil {
   getId() {
     return this.data.id
   }
-  on(event: 'edit' | 'add' | 'remove' | 'panel' | 'play', cb: (ceil: udsCeil) => void) {
+  on(
+    event: 'edit' | 'add' | 'remove' | 'panel' | 'play' | 'dblclick' | 'contextmenu',
+    cb: (ceil: udsCeil) => void
+  ) {
     this.events.on(event, cb)
   }
   changeName(name: string) {
@@ -774,6 +777,7 @@ export class UDSView {
   graph: joint.dia.Graph
   paper?: joint.dia.Paper
   ceilMap: Map<string, udsCeil> = new Map()
+  selectedElement?: string // Currently selected element for copy/paste
   private isDark = useDark()
 
   constructor(

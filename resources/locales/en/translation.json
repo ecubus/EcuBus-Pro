@@ -2212,6 +2212,11 @@
         "ok": "OK",
         "cancel": "Cancel"
       },
+      "contextMenu": {
+        "edit": "Edit",
+        "copy": "Copy",
+        "delete": "Delete"
+      },
       "names": {
         "nodeTemplate": "Node {{count}}",
         "loggerTemplate": "Logger {{count}}",

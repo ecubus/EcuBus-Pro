@@ -15,5 +15,18 @@
   "cursorpyright.analysis.extraPaths": [
     "./resources/python/Lib/site-packages",
     "./src/main"
-  ]
+  ],
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#521A20",
+    "titleBar.activeBackground": "#73252C",
+    "titleBar.activeForeground": "#FEFBFB",
+    "titleBar.inactiveBackground": "#521A20",
+    "titleBar.inactiveForeground": "#FEFBFB",
+    "statusBar.background": "#521A20",
+    "statusBar.foreground": "#FEFBFB",
+    "statusBar.debuggingBackground": "#521A20",
+    "statusBar.debuggingForeground": "#FEFBFB",
+    "statusBar.noFolderBackground": "#521A20",
+    "statusBar.noFolderForeground": "#FEFBFB"
+  }
 }

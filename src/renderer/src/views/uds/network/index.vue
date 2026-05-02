@@ -632,22 +632,27 @@ function pasteNode() {
     const existingNames = Object.values(dataBase.devices).map((d) => getDeviceName(d))
     const originalName = getDeviceName(newDevice)
     const newName = generateUniqueName(originalName, existingNames)
-    // Update name for the copied device
+    // Update name and clear handle for the copied device
     if (newDevice.canDevice) {
       newDevice.canDevice.name = newName
       newDevice.canDevice.id = id
+      newDevice.canDevice.handle = '' // Clear device handle, user needs to reselect
     } else if (newDevice.ethDevice) {
       newDevice.ethDevice.name = newName
       newDevice.ethDevice.id = id
+      newDevice.ethDevice.handle = '' // Clear device handle
     } else if (newDevice.linDevice) {
       newDevice.linDevice.name = newName
       newDevice.linDevice.id = id
+      newDevice.linDevice.handle = '' // Clear device handle
     } else if (newDevice.pwmDevice) {
       newDevice.pwmDevice.name = newName
       newDevice.pwmDevice.id = id
+      newDevice.pwmDevice.handle = '' // Clear device handle
     } else if (newDevice.someipDevice) {
       newDevice.someipDevice.name = newName
       newDevice.someipDevice.id = id
+      // someip uses different connection fields
     }
     dataBase.devices[id] = newDevice
     udsView.addDevice(id, dataBase.devices[id])

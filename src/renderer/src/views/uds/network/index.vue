@@ -640,15 +640,15 @@ function pasteNode() {
     } else if (newDevice.ethDevice) {
       newDevice.ethDevice.name = newName
       newDevice.ethDevice.id = id
-      newDevice.ethDevice.handle = '' // Clear device handle
+      newDevice.ethDevice.device.handle = '' // Clear device handle
     } else if (newDevice.linDevice) {
       newDevice.linDevice.name = newName
       newDevice.linDevice.id = id
-      newDevice.linDevice.handle = '' // Clear device handle
+      newDevice.linDevice.device.handle = '' // Clear device handle
     } else if (newDevice.pwmDevice) {
       newDevice.pwmDevice.name = newName
       newDevice.pwmDevice.id = id
-      newDevice.pwmDevice.handle = '' // Clear device handle
+      newDevice.pwmDevice.device.handle = '' // Clear device handle
     } else if (newDevice.someipDevice) {
       newDevice.someipDevice.name = newName
       newDevice.someipDevice.id = id

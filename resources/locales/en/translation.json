@@ -1095,9 +1095,11 @@
     },
     "hardware": {
       "dialogs": {
+        "unsavedChangesMessage": "You have unsaved changes. Do you want to save them?",
         "discardChangesMessage": "Are you sure you want to discard your changes?",
         "deleteDeviceMessage": "Are you sure to delete this device?",
         "warning": "Warning",
+        "save": "Save",
         "discard": "Discard",
         "cancel": "Cancel",
         "ok": "OK"

@@ -1243,6 +1243,35 @@ const handleCalculatorResult = (result: any) => {
     })
   }
 }
+
+// Expose save method for parent component to call
+function save() {
+  return new Promise<boolean>((resolve) => {
+    ruleFormRef.value?.validate((valid) => {
+      if (valid) {
+        data.value.vendor = props.vendor
+        if (editIndex.value == '') {
+          const id = v4()
+          data.value.id = id
+          devices.devices[id] = {
+            type: 'can',
+            canDevice: cloneDeep(data.value)
+          }
+          emits('change', id, data.value.name)
+        } else {
+          data.value.id = editIndex.value
+          devices.devices[editIndex.value].canDevice = cloneDeep(data.value)
+          emits('change', editIndex.value, data.value.name)
+        }
+        dataModify.value = false
+        resolve(true)
+      } else {
+        resolve(false)
+      }
+    })
+  })
+}
+defineExpose({ save })
 </script>
 <style scoped>
 .hardware {

@@ -66,7 +66,6 @@
                 <el-option
                   :label="i18next.t('uds.network.replayConfig.options.blfFormat')"
                   value="blf"
-                  disabled
                 />
               </el-select>
             </el-form-item>

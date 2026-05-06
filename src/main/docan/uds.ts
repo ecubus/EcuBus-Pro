@@ -1515,7 +1515,7 @@ async function compileTscEntry(
     }
   }
 
-  const nodeFilesInProject = await glob(['**/*.node', '**/*.dll'], {
+  const nodeFilesInProject = await glob(['**/*.node', '**/*.dll', '**/*.so', '**/*.dylib'], {
     cwd: path.join(projectPath, 'node_modules'),
     dot: true, // 包含以点开头的文件/文件夹
     follow: false, // 关键：跟随软链接

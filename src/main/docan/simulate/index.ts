@@ -15,7 +15,7 @@ import { addrToId, CanError } from '../../share/can'
 import { TpError, CanTp } from '../cantp'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
-const vBusCount = 8
+const vBusCount = 64
 
 const vBusCountEvent: Record<number, EventEmitter> = {}
 for (let i = 0; i < vBusCount; i++) {

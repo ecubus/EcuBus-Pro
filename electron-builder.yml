@@ -40,6 +40,14 @@ nsis:
   artifactName: EcuBus-Pro ${version}.exe
   guid: 98123fde-012f-5ff3-8b50-881449dac91a
   include: build/installer.nsh
+mac:
+  target:
+    - target: dmg
+  icon: ./build/icon.icns
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  identity: null
+  artifactName: EcuBus-Pro-${version}-${arch}.dmg
 linux:
   target:
     - target: deb

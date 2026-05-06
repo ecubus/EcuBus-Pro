@@ -267,6 +267,35 @@ const onSubmit = () => {
     }
   })
 }
+
+// Expose save method for parent component to call
+function save() {
+  return new Promise<boolean>((resolve) => {
+    ruleFormRef.value?.validate((valid) => {
+      if (valid) {
+        data.value.vendor = props.vendor
+        if (editIndex.value == '') {
+          const id = v4()
+          data.value.id = id
+          devices.devices[id] = {
+            type: 'pwm',
+            pwmDevice: cloneDeep(data.value)
+          }
+          emits('change', id, data.value.name)
+        } else {
+          data.value.id = editIndex.value
+          assign(devices.devices[editIndex.value].pwmDevice, data.value)
+          emits('change', editIndex.value, data.value.name)
+        }
+        dataModify.value = false
+        resolve(true)
+      } else {
+        resolve(false)
+      }
+    })
+  })
+}
+defineExpose({ save })
 const dataModify = defineModel({
   default: false
 })

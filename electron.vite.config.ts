@@ -28,6 +28,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
+        src: resolve(__dirname, 'src'),
         '@r': resolve('src/renderer/src'),
         nodeCan: resolve(__dirname, 'src/main/share')
       }

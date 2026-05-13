@@ -15,6 +15,33 @@ Use below button to switch between overwrite mode and scroll mode.
 In overwrite mode, the Trace window will overwrite the oldest data when the maximum storage capacity is exceeded.
 ![ow](../../../media/um/trace/ow.gif)
 
+## Drag & Drop BLF/ASC Files
+
+You can directly drag and drop BLF or ASC trace files into the Trace window for offline analysis. The file will be parsed and displayed with pagination support.
+
+![drag-drop](../../../media/um/trace/drag-drop.png)
+
+### Channel Mapping
+
+When a file is first loaded, a channel mapping dialog will appear. This allows you to map the log file's channel numbers to your project's configured CAN devices. If a device has a DBC database attached, message names and signals will be automatically decoded.
+
+![channel-map](../../../media/um/trace/channel-map.png)
+
+### Pagination
+
+Large trace files are displayed with pagination. You can configure the page size (10K ~ 1M frames per page) and navigate between pages using the toolbar controls.
+
+### Frame Detail Panel
+
+Click any row to expand a detail panel at the bottom of the Trace window (Wireshark-style):
+
+- **Left side**: Frame field information (ID, direction, type, timestamps, hex dump)
+- **Right side**: Signal table with decoded values (signal name, physical value, raw value, bit position, enum labels)
+
+The divider between left and right panels can be dragged to resize.
+
+![detail-panel](../../../media/um/trace/detail-panel.png)
+
 ## Filter
 
 ### Filter By Device
@@ -42,18 +69,25 @@ The Trace window supports filtering by device, signal name, and signal value.
 
 ## Column Information
 
-The Trace window typically includes the following columns:
+The Trace window includes the following columns (configurable via the column settings panel):
 
-* **Timestamp**: Displays the precise time when the event occurred
-* **Name**: Represents the frame signal name that triggered the event
-* **Signal Value**: Shows the current value of the signal
-* **DIR (Direction)**: Indicates the signal direction (Tx for transmit, Rx for receive)
-* **ID**: Represents the signal identifier
-* **DLC (Data Length Code)**: Shows the data length code
-* **LEN (Length)**: Displays the actual data length
-* **Type**: Indicates the signal type (e.g., boolean, integer, float)
-* **Channel**: Shows the communication channel number
-* **Device**: Displays the device name
+* **#**: Sequential index number
+* **Time**: Elapsed time in seconds since the start of recording/replay
+* **Δt(s)**: Delta time between consecutive frames in seconds
+* **UTC Time**: Absolute UTC timestamp of the frame
+* **Name**: The message name (decoded from DBC if available)
+* **Data**: Raw data bytes in hex format
+* **DIR (Direction)**: Indicates the direction (Tx for transmit, Rx for receive)
+* **ID**: The message identifier
+* **DLC (Data Length Code)**: The data length code
+* **LEN (Length)**: The actual data length in bytes
+* **Type**: The message type (e.g., CAN, CAN-FD, Extended)
+* **Channel**: The communication channel
+* **Device**: The device name
+
+Column visibility, order, and width can be customized through the column configuration panel and will be persisted across sessions.
+
+![column-config](../../../media/um/trace/column-config.png)
 
 When the corresponding hardware channel is bound to a [database](../database.md), these column information helps users quickly understand and analyze the system's operating state.
 

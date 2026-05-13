@@ -52,4 +52,4 @@ src/main/share/index.d.ts.html
 # python
 
 resources/python
-resources/get-pip.py
+resources/get-pip.py*.tsbuildinfo

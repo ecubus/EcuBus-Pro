@@ -82,7 +82,9 @@ import {
 
 import TraceItem from '../ostrace/item'
 import { startPlugins, stopPlugins } from './plugin'
-import Replay from '../replay'
+import Replay, { ReplayReader } from '../replay'
+import { BlfReader } from '../replay/blfReader'
+import { AscReader } from '../replay/ascReader'
 import { trackEvent } from '../analytics'
 
 const libPath = path.dirname(dllLib)
@@ -1573,4 +1575,103 @@ ipcMain.on('ipc-stop-someip-period', async (event, ...arg) => {
   } finally {
     someipPeriodMap.delete(id)
   }
+})
+
+// Parse BLF/ASC trace file for drag-and-drop viewing (paginated API)
+type TraceFileFrame = {
+  channel: number
+  ts: number
+  id: number
+  dir: string
+  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean }
+  data: number[]
+  isError?: boolean
+}
+
+const traceFileSessions = new Map<
+  string,
+  { frames: TraceFileFrame[]; channels: number[]; measurementStartTimeMs: number }
+>()
+let traceSessionCounter = 0
+
+ipcMain.handle(
+  'ipc-trace-file-open',
+  async (
+    _event,
+    filePath: string
+  ): Promise<{
+    sessionId: string
+    totalFrames: number
+    channels: number[]
+    measurementStartTimeMs: number
+  }> => {
+    const ext = path.extname(filePath).toLowerCase()
+    let reader: ReplayReader
+    if (ext === '.blf') {
+      reader = new BlfReader(filePath, 0)
+    } else if (ext === '.asc') {
+      reader = new AscReader(filePath, 0)
+    } else {
+      throw new Error(`Unsupported file format: ${ext}`)
+    }
+
+    reader.init()
+    const frames: TraceFileFrame[] = []
+    const channelSet = new Set<number>()
+
+    let frame = await reader.readFrame()
+    while (frame) {
+      channelSet.add(frame.channel)
+      frames.push({
+        channel: frame.channel,
+        ts: frame.ts,
+        id: frame.id,
+        dir: frame.dir,
+        msgType: {
+          idType: frame.msgType.idType,
+          brs: frame.msgType.brs,
+          canfd: frame.msgType.canfd,
+          remote: frame.msgType.remote
+        },
+        data: Array.from(frame.data),
+        isError: frame.isError
+      })
+      frame = await reader.readFrame()
+    }
+
+    const measurementStartTimeMs = reader.measurementStartTimeMs ?? 0
+    reader.close()
+
+    const sessionId = `trace-${++traceSessionCounter}`
+    const channels = Array.from(channelSet).sort((a, b) => a - b)
+    traceFileSessions.set(sessionId, { frames, channels, measurementStartTimeMs })
+
+    return { sessionId, totalFrames: frames.length, channels, measurementStartTimeMs }
+  }
+)
+
+ipcMain.handle(
+  'ipc-trace-file-page',
+  async (
+    _event,
+    sessionId: string,
+    page: number,
+    pageSize: number
+  ): Promise<{ frames: TraceFileFrame[]; totalFrames: number; prevLastTs: number }> => {
+    const session = traceFileSessions.get(sessionId)
+    if (!session) throw new Error('Session not found')
+
+    const start = page * pageSize
+    const end = Math.min(start + pageSize, session.frames.length)
+    const prevLastTs = start > 0 ? session.frames[start - 1].ts : -1
+    return {
+      frames: session.frames.slice(start, end),
+      totalFrames: session.frames.length,
+      prevLastTs
+    }
+  }
+)
+
+ipcMain.handle('ipc-trace-file-close', async (_event, sessionId: string) => {
+  traceFileSessions.delete(sessionId)
 })

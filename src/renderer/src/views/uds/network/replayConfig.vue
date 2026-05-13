@@ -112,6 +112,16 @@
                 {{ i18next.t('uds.network.replayConfig.hints.repeatCount') }}
               </span>
             </el-form-item>
+
+            <el-form-item
+              :label="i18next.t('uds.network.replayConfig.labels.useOriginalTime')"
+              prop="useOriginalTime"
+            >
+              <el-switch v-model="formData.useOriginalTime" />
+              <span style="margin-left: 10px; color: #909399; font-size: 12px">
+                {{ i18next.t('uds.network.replayConfig.hints.useOriginalTime') }}
+              </span>
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -263,6 +273,9 @@ if (formData.value.repeatCount === undefined) {
 }
 if (formData.value.mode === undefined) {
   formData.value.mode = 'offline'
+}
+if (formData.value.useOriginalTime === undefined) {
+  formData.value.useOriginalTime = true
 }
 
 const nameCheck = (rule: any, value: any, callback: any) => {

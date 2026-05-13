@@ -316,6 +316,7 @@ onMounted(() => {
       .invoke('ipc-canmartix-parse', props.dbcFile)
       .then((result) => {
         result.data.version = 'canmartix'
+        result.data.filePath = props.dbcFile
         dbcObj.value = result.data
         dbcObj.value.name = window.path.parse(props.dbcFile!).name
         loading.value = false

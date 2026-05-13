@@ -250,6 +250,15 @@
           :label="`CAN.${item.label}`"
           :value="item.value"
         >
+          <div>
+            <span>CAN.{{ item.label }}</span>
+            <div
+              v-if="item.filePath"
+              style="font-size: 11px; color: var(--el-text-color-secondary); line-height: 1.2"
+            >
+              {{ item.filePath }}
+            </div>
+          </div>
         </el-option>
       </el-select>
     </el-form-item>
@@ -833,11 +842,12 @@ const gridOptions = computed(() => {
 })
 
 const dbList = computed(() => {
-  const list: { label: string; value: string }[] = []
+  const list: { label: string; value: string; filePath?: string }[] = []
   for (const key of Object.keys(devices.database.can)) {
     list.push({
       label: devices.database.can[key].name,
-      value: key
+      value: key,
+      filePath: devices.database.can[key].filePath
     })
   }
   return list
@@ -1199,17 +1209,22 @@ onBeforeMount(() => {
       editIndex.value = ''
     }
   }
-
-  watcher = watch(
-    data,
-    () => {
-      dataModify.value = true
-    },
-    { deep: true }
-  )
+})
+onMounted(() => {
+  // Defer watcher to next tick so VXE-Table's _X_ROW_KEY injection
+  // on bitrate rows doesn't trigger false dirty detection
+  nextTick(() => {
+    watcher = watch(
+      data,
+      () => {
+        dataModify.value = true
+      },
+      { deep: true }
+    )
+  })
 })
 onUnmounted(() => {
-  watcher()
+  watcher?.()
 })
 
 const showCalculator = (row: CanBitrate) => {

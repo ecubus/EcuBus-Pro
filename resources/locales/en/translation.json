@@ -2056,6 +2056,7 @@
     },
     "trace": {
       "defaultName": "Trace",
+      "resetColumns": "Reset Columns",
       "tooltips": {
         "clearTrace": "Clear Trace",
         "resume": "Resume",
@@ -2081,7 +2082,13 @@
         "nameNotEmpty": "Name can't be empty"
       },
       "messages": {
-        "startTrace": "Start Trace"
+        "startTrace": "Start Trace",
+        "parsingFile": "Parsing file...",
+        "parseComplete": "Parsed {{count}} frames from {{channels}} channels",
+        "parseError": "Failed to parse file: {{msg}}",
+        "unsupportedFormat": "Unsupported file format. Please drop a .blf or .asc file.",
+        "dropFileHint": "Drop BLF/ASC file here",
+        "loadMore": "Load More"
       },
       "filters": {
         "can": "CAN",
@@ -2305,7 +2312,8 @@
           "format": "Format",
           "mode": "Mode",
           "speedFactor": "Speed Factor",
-          "repeatCount": "Repeat Count"
+          "repeatCount": "Repeat Count",
+          "useOriginalTime": "Original Time"
         },
         "placeholders": {
           "name": "Name",
@@ -2325,7 +2333,8 @@
         },
         "hints": {
           "speedFactor": "1.0 = original, 0 = as fast as possible",
-          "repeatCount": "0 = infinite loop"
+          "repeatCount": "0 = infinite loop",
+          "useOriginalTime": "Use recording time from log file for UTC Time"
         },
         "buttons": {
           "browse": "Browse",

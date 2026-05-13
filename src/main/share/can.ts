@@ -75,6 +75,8 @@ export interface CanDB {
   signal_defines: SignalDefine[]
   value_tables: ValueTables
   version?: string
+  /** Original DBC file path (set during import) */
+  filePath?: string
 }
 
 /**
@@ -245,6 +247,18 @@ export type CanMessage<T = any> = {
    * The database id of the CAN message.
    */
   database?: string
+
+  /**
+   * Absolute UTC time string for display (e.g. "2024-01-15 08:30:12.345").
+   * Set by replay module when using original recording time.
+   */
+  absTimeStr?: string
+
+  /**
+   * Original timestamp in microseconds from log file (before tsOffset).
+   * Set by replay module when using original recording time.
+   */
+  originalTs?: number
 
   /**
    * The children signals of the CAN message.

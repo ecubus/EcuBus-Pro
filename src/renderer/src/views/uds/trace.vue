@@ -1,5 +1,32 @@
 <template>
-  <div>
+  <div
+    style="position: relative"
+    @dragover.prevent="onDragOver"
+    @dragleave.prevent="onDragLeave"
+    @drop.prevent="onDrop"
+  >
+    <div
+      v-if="isDragOver"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(64, 158, 255, 0.15);
+        border: 2px dashed var(--el-color-primary);
+        border-radius: 4px;
+        pointer-events: none;
+      "
+    >
+      <span style="font-size: 16px; color: var(--el-color-primary); font-weight: bold">
+        {{ i18next.t('uds.trace.messages.dropFileHint') }}
+      </span>
+    </div>
     <div
       style="
         justify-content: flex-start;
@@ -136,8 +163,243 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <el-popover trigger="click" :width="320" placement="bottom-start" :teleported="false">
+        <template #reference>
+          <el-button type="info" link style="margin-left: 4px" title="Column Configuration">
+            <Icon :icon="columnIcon" />
+          </el-button>
+        </template>
+        <div style="max-height: 300px; overflow-y: auto">
+          <div
+            v-for="(col, idx) in columnConfig"
+            :key="col.key"
+            :draggable="true"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              padding: 4px 6px;
+              cursor: grab;
+              border-radius: 4px;
+            "
+            :style="{
+              background: colDragOverIdx === idx ? 'var(--el-color-primary-light-8)' : 'transparent'
+            }"
+            @dragstart="onColDragStart(idx)"
+            @dragover.prevent="onColDragOver(idx)"
+            @dragleave="colDragOverIdx = -1"
+            @drop.prevent="onColDrop(idx)"
+            @dragend="colDragOverIdx = -1"
+          >
+            <el-checkbox
+              v-model="col.visible"
+              :disabled="col.key === 'seqIndex'"
+              size="small"
+              @change="applyColumnConfig"
+            />
+            <span style="font-size: 12px; flex: 1; user-select: none">{{ col.title }}</span>
+            <el-input-number
+              v-model="col.width"
+              :min="40"
+              :max="600"
+              :step="10"
+              size="small"
+              style="width: 80px"
+              controls-position="right"
+              @change="applyColumnConfig"
+            />
+            <span style="color: var(--el-text-color-placeholder); font-size: 10px">⠿</span>
+          </div>
+        </div>
+        <el-button size="small" style="margin-top: 8px; width: 100%" @click="resetColumnConfig">
+          {{ i18next.t('uds.trace.resetColumns') }}
+        </el-button>
+      </el-popover>
+      <template v-if="traceFileActive">
+        <el-divider direction="vertical" />
+        <span style="font-size: 12px; color: var(--el-text-color-secondary); white-space: nowrap">
+          {{ traceFileTotalFrames }} frames
+        </span>
+        <el-select
+          v-model="traceFilePageSize"
+          size="small"
+          style="width: 100px"
+          @change="onPageSizeChange"
+        >
+          <el-option :value="10000" label="10000/page" />
+          <el-option :value="20000" label="20000/page" />
+          <el-option :value="50000" label="50000/page" />
+          <el-option :value="100000" label="100000/page" />
+          <el-option :value="200000" label="200000/page" />
+          <el-option :value="500000" label="500000/page" />
+          <el-option :value="1000000" label="1000000/page" />
+        </el-select>
+        <el-tooltip effect="light" content="First Page" placement="bottom">
+          <el-button
+            size="small"
+            :icon="DArrowLeft"
+            link
+            :disabled="traceFileCurrentPage <= 0 || traceFileLoading"
+            @click="traceFileGoFirst"
+          />
+        </el-tooltip>
+        <el-tooltip effect="light" content="Previous Page" placement="bottom">
+          <el-button
+            size="small"
+            :icon="ArrowLeft"
+            link
+            :disabled="traceFileCurrentPage <= 0 || traceFileLoading"
+            @click="traceFileGoPrev"
+          />
+        </el-tooltip>
+        <span style="font-size: 12px; color: var(--el-text-color-regular); white-space: nowrap">
+          {{ traceFileCurrentPage + 1 }} / {{ traceFileTotalPages }}
+        </span>
+        <el-tooltip effect="light" content="Next Page" placement="bottom">
+          <el-button
+            size="small"
+            :icon="ArrowRight"
+            link
+            :disabled="traceFileCurrentPage >= traceFileTotalPages - 1 || traceFileLoading"
+            @click="traceFileGoNext"
+          />
+        </el-tooltip>
+        <el-tooltip effect="light" content="Last Page" placement="bottom">
+          <el-button
+            size="small"
+            :icon="DArrowRight"
+            link
+            :disabled="traceFileCurrentPage >= traceFileTotalPages - 1 || traceFileLoading"
+            @click="traceFileGoLast"
+          />
+        </el-tooltip>
+        <el-input-number
+          v-model="traceFileJumpPage"
+          size="small"
+          :min="1"
+          :max="traceFileTotalPages"
+          controls-position="right"
+          style="width: 80px"
+          @keyup.enter="traceFileGoJump"
+        />
+        <el-tooltip effect="light" content="Jump to Page" placement="bottom">
+          <el-button
+            size="small"
+            :icon="ArrowRight"
+            :loading="traceFileLoading"
+            :type="traceFileLoading ? 'primary' : ''"
+            @click="traceFileGoJump"
+          />
+        </el-tooltip>
+      </template>
     </div>
     <div :id="`traceTable-${props.editIndex}`" class="realLog"></div>
+    <!-- Detail panel (Wireshark-style) -->
+    <div
+      v-if="detailPanelHeight > 0"
+      class="detail-resize-handle"
+      @mousedown="onDetailResizeStart"
+    ></div>
+    <div
+      v-if="detailPanelHeight > 0 && detailInfo"
+      class="detail-panel"
+      :style="{ height: detailPanelHeight + 'px' }"
+    >
+      <div class="detail-panel-header">
+        <span style="font-weight: bold; font-size: 12px">
+          {{ detailInfo.msgName || detailInfo.frameFields.find((f) => f.label === 'ID')?.value }}
+        </span>
+        <el-button link size="small" style="margin-left: auto" @click="closeDetailPanel">
+          ✕
+        </el-button>
+      </div>
+      <div class="detail-panel-body">
+        <div class="detail-hex" :style="{ width: detailHexWidth + 'px' }">
+          <details open class="detail-collapsible">
+            <summary class="detail-hex-title">Frame</summary>
+            <div class="detail-fields">
+              <div v-for="f in detailInfo.frameFields" :key="f.label" class="detail-field-row">
+                <span class="detail-label">{{ f.label }}:</span>
+                <span class="detail-value">{{ f.value }}</span>
+              </div>
+            </div>
+          </details>
+          <details open class="detail-collapsible">
+            <summary class="detail-hex-title" style="margin-top: 6px">Data</summary>
+            <pre class="hex-dump">{{ formatHexDump(detailInfo.dataBytes) }}</pre>
+          </details>
+        </div>
+        <div class="detail-col-resize" @mousedown="onColResizeStart"></div>
+        <div class="detail-tree">
+          <template v-if="detailInfo.msgName && detailInfo.signals.length > 0">
+            <table class="detail-signal-table">
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Physical</th>
+                  <th>Raw</th>
+                  <th>Bit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="sig in detailInfo.signals" :key="sig.name" :title="sig.comment">
+                  <td class="detail-sig-name">{{ sig.name }}</td>
+                  <td class="detail-sig-phys">
+                    {{ sig.enumLabel || sig.physValue }}
+                    <span v-if="sig.unit" class="detail-sig-unit">{{ sig.unit }}</span>
+                  </td>
+                  <td class="detail-sig-raw">{{ sig.rawHex }}</td>
+                  <td class="detail-sig-bits">{{ sig.bitPos }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+          <div v-else class="detail-no-signals">
+            {{ detailInfo.msgName ? 'No signals' : 'No DBC mapping for this channel' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <el-dialog
+      v-model="channelMapDialogVisible"
+      title="Channel → Device Mapping"
+      width="480"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      append-to-body
+    >
+      <el-table :data="channelMapTemp" size="small" style="width: 100%">
+        <el-table-column label="Log Channel" width="120" align="center">
+          <template #default="{ row }"> CH{{ row.logChannel }} </template>
+        </el-table-column>
+        <el-table-column label="→" width="50" align="center">
+          <template #default>→</template>
+        </el-table-column>
+        <el-table-column label="Project Device">
+          <template #default="{ row }">
+            <el-select
+              v-model="row.deviceId"
+              placeholder="Not mapped"
+              size="small"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dev in canDeviceOptions"
+                :key="dev.key"
+                :label="dev.label"
+                :value="dev.key"
+              />
+            </el-select>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="cancelChannelMap">Cancel</el-button>
+        <el-button type="primary" @click="confirmChannelMap">OK</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <script lang="ts" setup>
@@ -157,7 +419,15 @@ import {
   inject
 } from 'vue'
 
-import { CAN_ID_TYPE, CanMessage, CanMsgType, Signal as CanSignal, getDlcByLen } from 'nodeCan/can'
+import {
+  CAN_ID_TYPE,
+  CanMessage,
+  CanMsgType,
+  Signal as CanSignal,
+  Message as CanDbMessage,
+  getDlcByLen
+} from 'nodeCan/can'
+import { writeMessageData } from '@r/database/dbc/calc'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -176,13 +446,15 @@ import switchIcon from '@iconify/icons-material-symbols/cameraswitch-outline-rou
 import scrollIcon1 from '@iconify/icons-material-symbols/autoplay'
 import scrollIcon2 from '@iconify/icons-material-symbols/autopause'
 import othersIcon from '@iconify/icons-material-symbols/more-horiz'
+import columnIcon from '@iconify/icons-material-symbols/view-column-outline'
 import ExcelJS from 'exceljs'
 
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg, LinSignal } from 'nodeCan/lin'
 import EVirtTable, { Column } from 'e-virt-table'
-import { ElLoading, ElMessageBox } from 'element-plus'
+import { ElLoading, ElMessageBox, ElMessage } from 'element-plus'
+import { ArrowLeft, ArrowRight, DArrowLeft, DArrowRight } from '@element-plus/icons-vue'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import {
   SomeipMessageType,
@@ -190,10 +462,11 @@ import {
   VsomeipAvailabilityInfo,
   SomeipMessage
 } from 'nodeCan/someip'
-import { TraceItem } from 'src/preload/data'
+import { TraceItem, TraceColumnConfig, TraceChannelMap } from 'src/preload/data'
 import { cloneDeep } from 'lodash'
 import { Layout } from './layout'
 import i18next from 'i18next'
+
 let allLogData: LogData[] = []
 
 interface LogData {
@@ -210,6 +483,8 @@ interface LogData {
   method: string
   name?: string
   seqIndex?: number
+  deltaTs?: number
+  absTimeStr?: string
   children?: LogData[] | { key?: string; name: string; data: string; children?: any[] }[]
   deltaTime?: string
   previousTs?: number
@@ -379,6 +654,7 @@ watch(globalStart, (val) => {
     clearLog(i18next.t('uds.trace.messages.startTrace'))
     isPaused.value = false
     logData = []
+    liveStartMs = Date.now()
   } else {
     isPaused.value = true
   }
@@ -387,6 +663,8 @@ watch(globalStart, (val) => {
 function clearLog(msg = i18next.t('uds.trace.tooltips.clearTrace')) {
   allLogData = []
   idList.value.clear()
+  liveSeqCounter = 0
+  liveStartMs = 0
 
   scrollY = -1
 
@@ -492,6 +770,7 @@ function insertData2(data: LogData[]) {
 
           // Store previous timestamp, delta time and increment count
           item.previousTs = existingLog.ts
+          item.deltaTs = currentTime - previousTime
           item.deltaTime = deltaMs >= 0 ? `(Δ${deltaMs.toFixed(3)}ms)` : ''
           item.count = (existingLog.count || 1) + 1
 
@@ -506,7 +785,14 @@ function insertData2(data: LogData[]) {
       }
     }
   } else {
-    allLogData.push(...data)
+    // Non-overwrite: compute deltaTs from previous item
+    for (const item of data) {
+      if (allLogData.length > 0) {
+        const prevItem = allLogData[allLogData.length - 1]
+        item.deltaTs = item.ts - prevItem.ts
+      }
+      allLogData.push(item)
+    }
   }
 
   if (globalStart.value) {
@@ -531,6 +817,8 @@ function insertData2(data: LogData[]) {
 
 let logData: LogData[] = []
 let timer: any = null
+let liveSeqCounter = 0
+let liveStartMs = 0
 
 function withUniqueChildKeys(
   children: { key?: string; name: string; data: string; children?: any[] }[] | undefined,
@@ -561,6 +849,21 @@ function logDisplay({ values }: { values: LogItem[] }) {
       return
     }
 
+    liveSeqCounter++
+    data.seqIndex = liveSeqCounter
+    // UTC time: use pre-computed absTimeStr (from replay original time) or compute from start wall clock
+    if (!data.absTimeStr && liveStartMs > 0) {
+      const d = new Date(liveStartMs + data.ts / 1000)
+      const y = d.getUTCFullYear()
+      const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(d.getUTCDate()).padStart(2, '0')
+      const h = String(d.getUTCHours()).padStart(2, '0')
+      const mi = String(d.getUTCMinutes()).padStart(2, '0')
+      const s = String(d.getUTCSeconds()).padStart(2, '0')
+      const ms = String(d.getUTCMilliseconds()).padStart(3, '0')
+      data.absTimeStr = `${y}-${mo}-${day} ${h}:${mi}:${s}.${ms}`
+    }
+
     if (isOverwrite.value) {
       data.key = `${data.channel}-${data.device}-${data.id}-${data.dir || ''}`
       data.children = withUniqueChildKeys(data.children as any, String(data.key)) as any
@@ -578,19 +881,21 @@ function logDisplay({ values }: { values: LogItem[] }) {
     )
       continue
     if (val.message.method == 'canBase') {
+      const canData = val.message.data
       insertData({
         method: val.message.method,
-        dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
-        data: data2str(val.message.data.data),
-        ts: val.message.data.ts!,
-        id: '0x' + val.message.data.id.toString(16),
-        dlc: getDlcByLen(val.message.data.data.length, val.message.data.msgType.canfd),
-        len: val.message.data.data.length,
+        dir: canData.dir == 'OUT' ? 'Tx' : 'Rx',
+        data: data2str(canData.data),
+        ts: canData.originalTs ?? canData.ts!,
+        id: '0x' + canData.id.toString(16),
+        dlc: getDlcByLen(canData.data.length, canData.msgType.canfd),
+        len: canData.data.length,
         device: val.label,
         channel: val.instance,
-        msgType: CanMsgType2Str(val.message.data.msgType),
-        name: val.message.data.name,
-        children: Object.entries(val.message.data.signals || {}).map(([name, signal]) => {
+        msgType: CanMsgType2Str(canData.msgType),
+        name: canData.name,
+        absTimeStr: canData.absTimeStr,
+        children: Object.entries(canData.signals || {}).map(([name, signal]) => {
           return {
             name: name,
             data: `PHY:${signal.physValue} RAW:${signal.value}`
@@ -885,12 +1190,209 @@ function filterChange(
   }
 }
 
+const detailPanelHeight = ref(0)
+const detailHexWidth = ref(320)
+const detailPanelMinHeight = 120
+const detailPanelDefaultHeight = 200
+
 const tableHeight = computed(() => {
-  return props.height - 30
+  return props.height - 30 - detailPanelHeight.value - (detailPanelHeight.value > 0 ? 4 : 0)
 })
 const tableWidth = computed(() => {
   return props.width
 })
+
+// Detail panel: selected row and decoded signals
+const selectedRowData = ref<LogData | null>(null)
+
+interface DecodedSignal {
+  name: string
+  value: string
+  physValue: string
+  unit: string
+  rawHex: string
+  bitPos: string
+  comment: string
+  enumLabel: string
+}
+interface DetailInfo {
+  frameFields: { label: string; value: string }[]
+  msgName: string
+  msgComment: string
+  signals: DecodedSignal[]
+  dataBytes: number[]
+}
+const detailInfo = ref<DetailInfo | null>(null)
+
+function str2data(hex: string): number[] {
+  return hex
+    .trim()
+    .split(/\s+/)
+    .map((b) => parseInt(b, 16))
+}
+
+function decodeSelectedRow(row: LogData) {
+  selectedRowData.value = row
+  const dataBytes = str2data(row.data)
+  const fields: { label: string; value: string }[] = [
+    { label: '#', value: String(row.seqIndex ?? '') },
+    { label: 'Time(s)', value: (row.ts / 1000000).toFixed(6) },
+    { label: 'Direction', value: row.dir ?? '--' },
+    { label: 'Channel', value: row.channel },
+    { label: 'Device', value: row.device },
+    { label: 'ID', value: row.id },
+    { label: 'DLC', value: String(row.dlc ?? '') },
+    { label: 'Length', value: String(row.len ?? dataBytes.length) },
+    { label: 'Type', value: row.msgType }
+  ]
+  if (row.absTimeStr) {
+    fields.push({ label: 'UTC Time', value: row.absTimeStr })
+  }
+  if (row.deltaTs !== undefined) {
+    fields.push({ label: 'Δt(s)', value: (row.deltaTs / 1000000).toFixed(6) })
+  } else if (row.previousTs !== undefined) {
+    const delta = (row.ts - row.previousTs) / 1000000
+    fields.push({ label: 'Δt(s)', value: delta.toFixed(6) })
+  }
+
+  let msgName = row.name || ''
+  let msgComment = ''
+  const signals: DecodedSignal[] = []
+
+  // Try DBC decoding if channel map available
+  if (row.method === 'canBase' && channelDbcMapCache) {
+    const chNum = parseInt(row.channel.replace('CH', ''), 10)
+    const chDbc = channelDbcMapCache.get(chNum)
+    if (chDbc && chDbc.db) {
+      const frameId = parseInt(row.id, 16)
+      const isExtended = row.msgType?.includes('X') ?? false
+      const dbMsg = chDbc.db.messages.find(
+        (m: CanDbMessage) => m.id === frameId && m.is_extended_frame === isExtended
+      )
+      if (dbMsg) {
+        msgName = dbMsg.name
+        msgComment = dbMsg.comment || ''
+        const msgClone = cloneDeep(dbMsg) as CanDbMessage
+        const buf = Buffer.from(dataBytes)
+        writeMessageData(msgClone, buf, chDbc.db)
+        for (const sig of msgClone.signals) {
+          const enumLabel =
+            sig.values && sig.value !== undefined ? sig.values[String(sig.value)] || '' : ''
+          signals.push({
+            name: sig.name,
+            value: sig.value ?? '',
+            physValue: sig.physValue ?? '',
+            unit: sig.unit || '',
+            rawHex:
+              sig.value !== undefined ? '0x' + Number(sig.value).toString(16).toUpperCase() : '',
+            bitPos: `[${sig.start_bit}|${sig.bit_length}] ${sig.is_big_endian ? 'BE' : 'LE'}`,
+            comment: sig.comment || '',
+            enumLabel
+          })
+        }
+      }
+    }
+  }
+
+  // Fallback: use live signal data from children if DBC decoding didn't produce signals
+  if (signals.length === 0 && row.children && row.children.length > 0) {
+    for (const child of row.children) {
+      const match = child.data?.match(/PHY:(.*?)\s+RAW:(.*)/)
+      const rawVal = match ? match[2].trim() : ''
+      signals.push({
+        name: child.name || '',
+        value: rawVal,
+        physValue: match ? match[1] : child.data || '',
+        unit: '',
+        rawHex: rawVal,
+        bitPos: '',
+        comment: '',
+        enumLabel: ''
+      })
+    }
+    if (!msgName) msgName = row.name || ''
+  }
+
+  detailInfo.value = {
+    frameFields: fields,
+    msgName,
+    msgComment,
+    signals,
+    dataBytes
+  }
+}
+
+function closeDetailPanel() {
+  detailPanelHeight.value = 0
+  selectedRowData.value = null
+  detailInfo.value = null
+}
+
+// Drag resize for detail panel
+let isResizingDetail = false
+let resizeStartY = 0
+let resizeStartHeight = 0
+
+function onDetailResizeStart(e: MouseEvent) {
+  isResizingDetail = true
+  resizeStartY = e.clientY
+  resizeStartHeight = detailPanelHeight.value
+  document.addEventListener('mousemove', onDetailResizeMove)
+  document.addEventListener('mouseup', onDetailResizeEnd)
+  e.preventDefault()
+}
+
+function onDetailResizeMove(e: MouseEvent) {
+  if (!isResizingDetail) return
+  const delta = resizeStartY - e.clientY
+  const newHeight = Math.max(detailPanelMinHeight, resizeStartHeight + delta)
+  const maxHeight = props.height - 100
+  detailPanelHeight.value = Math.min(newHeight, maxHeight)
+}
+
+function onDetailResizeEnd() {
+  isResizingDetail = false
+  document.removeEventListener('mousemove', onDetailResizeMove)
+  document.removeEventListener('mouseup', onDetailResizeEnd)
+}
+
+// Drag resize for detail column split
+let isResizingCol = false
+let colResizeStartX = 0
+let colResizeStartWidth = 0
+
+function onColResizeStart(e: MouseEvent) {
+  isResizingCol = true
+  colResizeStartX = e.clientX
+  colResizeStartWidth = detailHexWidth.value
+  document.addEventListener('mousemove', onColResizeMove)
+  document.addEventListener('mouseup', onColResizeEnd)
+  e.preventDefault()
+}
+
+function onColResizeMove(e: MouseEvent) {
+  if (!isResizingCol) return
+  const delta = e.clientX - colResizeStartX
+  detailHexWidth.value = Math.max(150, Math.min(colResizeStartWidth + delta, 800))
+}
+
+function onColResizeEnd() {
+  isResizingCol = false
+  document.removeEventListener('mousemove', onColResizeMove)
+  document.removeEventListener('mouseup', onColResizeEnd)
+}
+
+function formatHexDump(bytes: number[]): string {
+  const lines: string[] = []
+  for (let offset = 0; offset < bytes.length; offset += 16) {
+    const chunk = bytes.slice(offset, offset + 16)
+    const hex = chunk.map((b) => b.toString(16).padStart(2, '0')).join(' ')
+    const ascii = chunk.map((b) => (b >= 0x20 && b <= 0x7e ? String.fromCharCode(b) : '.')).join('')
+    const addr = offset.toString(16).padStart(4, '0')
+    lines.push(`${addr}  ${hex.padEnd(47)}  ${ascii}`)
+  }
+  return lines.join('\n')
+}
 // DLC 计算辅助函数
 function len2dlc(len: number) {
   if (len <= 8) return len
@@ -1075,6 +1577,378 @@ function getData() {
   return allLogData
 }
 
+// ---- Drag-and-drop BLF/ASC file support with pagination ----
+const isDragOver = ref(false)
+const traceFileSessionId = ref<string | null>(null)
+const traceFileTotalFrames = ref(0)
+const traceFilePageSize = ref(100000)
+const traceFileCurrentPage = ref(0)
+const traceFileLoading = ref(false)
+const traceFileChannelCount = ref(0)
+const traceFileMeasurementStartMs = ref(0)
+let dragLeaveTimer: any = null
+
+const traceFileTotalPages = computed(() =>
+  traceFileTotalFrames.value > 0
+    ? Math.ceil(traceFileTotalFrames.value / traceFilePageSize.value)
+    : 0
+)
+const traceFileActive = computed(() => traceFileSessionId.value !== null)
+
+// Channel map dialog
+const channelMapDialogVisible = ref(false)
+const channelMapTemp = ref<TraceChannelMap[]>([])
+let channelMapResolve: (() => void) | null = null
+
+const canDeviceOptions = computed(() => {
+  const opts: { key: string; label: string }[] = []
+  for (const [id, dev] of Object.entries(database.devices)) {
+    if (dev.type === 'can' && dev.canDevice) {
+      opts.push({ key: id, label: dev.canDevice.name })
+    }
+  }
+  return opts
+})
+
+function showChannelMapDialog(channels: number[]): Promise<void> {
+  const saved = trace.value.channelMap || []
+  channelMapTemp.value = channels.map((ch) => {
+    const existing = saved.find((m) => m.logChannel === ch)
+    if (existing) return { ...existing }
+    // Auto-match: channel N → Nth CAN device (by order)
+    const canDevKeys = Object.entries(database.devices)
+      .filter(([, d]) => d.type === 'can' && d.canDevice)
+      .map(([id]) => id)
+    const autoDeviceId = canDevKeys[ch - 1] || ''
+    return { logChannel: ch, deviceId: autoDeviceId }
+  })
+  channelMapDialogVisible.value = true
+  return new Promise((resolve) => {
+    channelMapResolve = resolve
+  })
+}
+
+function confirmChannelMap() {
+  trace.value.channelMap = channelMapTemp.value.filter((m) => m.deviceId)
+  channelMapDialogVisible.value = false
+  channelDbcMapCache = null
+  channelMsgNameCache = null
+  channelMapResolve?.()
+  channelMapResolve = null
+}
+
+function cancelChannelMap() {
+  channelMapDialogVisible.value = false
+  channelMapResolve?.()
+  channelMapResolve = null
+}
+
+function onDragOver(e: DragEvent) {
+  if (e.dataTransfer?.types.includes('Files')) {
+    isDragOver.value = true
+    clearTimeout(dragLeaveTimer)
+  }
+}
+
+function onDragLeave() {
+  dragLeaveTimer = setTimeout(() => {
+    isDragOver.value = false
+  }, 100)
+}
+
+function buildChannelDbcMap(): Map<number, { dbKey: string; db: any; deviceName: string }> {
+  const map = new Map<number, { dbKey: string; db: any; deviceName: string }>()
+  const chMap = trace.value.channelMap
+  if (chMap && chMap.length > 0) {
+    for (const entry of chMap) {
+      const dev = database.devices[entry.deviceId]
+      if (dev && dev.type === 'can' && dev.canDevice) {
+        const canDev = dev.canDevice
+        if (canDev.database && database.database.can[canDev.database]) {
+          map.set(entry.logChannel, {
+            dbKey: canDev.database,
+            db: database.database.can[canDev.database],
+            deviceName: canDev.name || `CH${entry.logChannel}`
+          })
+        } else {
+          map.set(entry.logChannel, {
+            dbKey: '',
+            db: null,
+            deviceName: canDev.name || `CH${entry.logChannel}`
+          })
+        }
+      }
+    }
+  }
+  return map
+}
+
+type ParsedFrame = {
+  channel: number
+  ts: number
+  id: number
+  dir: string
+  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean }
+  data: number[]
+  isError?: boolean
+}
+
+let channelDbcMapCache: Map<number, { dbKey: string; db: any; deviceName: string }> | null = null
+// Pre-built message name lookup: channel -> (msgKey -> messageName)
+let channelMsgNameCache: Map<number, Map<string, string>> | null = null
+
+function buildMsgNameCache(
+  chDbcMap: Map<number, { dbKey: string; db: any; deviceName: string }>
+): Map<number, Map<string, string>> {
+  const cache = new Map<number, Map<string, string>>()
+  for (const [ch, entry] of chDbcMap) {
+    if (!entry.db || !entry.db.messages) continue
+    const lookup = new Map<string, string>()
+    for (const m of entry.db.messages) {
+      const key = `${m.id}-${!!m.is_extended_frame}`
+      lookup.set(key, m.name)
+    }
+    cache.set(ch, lookup)
+  }
+  return cache
+}
+
+function formatAbsTime(tsUs: number): string {
+  const startMs = traceFileMeasurementStartMs.value
+  if (startMs > 0) {
+    const d = new Date(startMs + tsUs / 1000)
+    const y = d.getUTCFullYear()
+    const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(d.getUTCDate()).padStart(2, '0')
+    const h = String(d.getUTCHours()).padStart(2, '0')
+    const mi = String(d.getUTCMinutes()).padStart(2, '0')
+    const s = String(d.getUTCSeconds()).padStart(2, '0')
+    const ms = String(d.getUTCMilliseconds()).padStart(3, '0')
+    return `${y}-${mo}-${day} ${h}:${mi}:${s}.${ms}`
+  }
+  // Fallback: elapsed time
+  const totalSeconds = tsUs / 1000000
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${seconds.toFixed(3).padStart(6, '0')}`
+}
+
+function framesToLogData(
+  frames: ParsedFrame[],
+  indexOffset: number,
+  prevLastTs: number
+): LogData[] {
+  if (!channelDbcMapCache) {
+    channelDbcMapCache = buildChannelDbcMap()
+    channelMsgNameCache = buildMsgNameCache(channelDbcMapCache)
+  }
+  const result: LogData[] = []
+
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i]
+    if (frame.isError) continue
+
+    const msgType: CanMsgType = {
+      idType: frame.msgType.idType as CAN_ID_TYPE,
+      brs: frame.msgType.brs,
+      canfd: frame.msgType.canfd,
+      remote: frame.msgType.remote
+    }
+    const dataArr = new Uint8Array(frame.data)
+    let name: string | undefined
+
+    const chDbc = channelDbcMapCache.get(frame.channel)
+    const msgLookup = channelMsgNameCache?.get(frame.channel)
+    if (msgLookup) {
+      const isExtended = msgType.idType === CAN_ID_TYPE.EXTENDED
+      name = msgLookup.get(`${frame.id}-${isExtended}`)
+    }
+
+    const deviceName = chDbc?.deviceName || `CH${frame.channel}`
+
+    const idStr = '0x' + frame.id.toString(16)
+    const globalIndex = indexOffset + i + 1
+    const deltaTs = prevLastTs >= 0 ? frame.ts - prevLastTs : undefined
+    prevLastTs = frame.ts
+    result.push({
+      method: 'canBase',
+      dir: frame.dir === 'OUT' ? 'Tx' : 'Rx',
+      data: data2str(dataArr),
+      ts: frame.ts,
+      id: idStr,
+      dlc: getDlcByLen(dataArr.length, msgType.canfd),
+      len: dataArr.length,
+      device: deviceName,
+      channel: `CH${frame.channel}`,
+      msgType: CanMsgType2Str(msgType),
+      name,
+      seqIndex: globalIndex,
+      deltaTs,
+      absTimeStr: formatAbsTime(frame.ts),
+      key: `${globalIndex}-CH${frame.channel}-${idStr}`
+    })
+    addToIdList(idStr)
+  }
+  return result
+}
+
+async function closeTraceFileSession() {
+  if (traceFileSessionId.value) {
+    await window.electron.ipcRenderer.invoke('ipc-trace-file-close', traceFileSessionId.value)
+    traceFileSessionId.value = null
+  }
+  traceFileTotalFrames.value = 0
+  traceFileCurrentPage.value = 0
+  traceFileChannelCount.value = 0
+  traceFileMeasurementStartMs.value = 0
+  channelDbcMapCache = null
+  channelMsgNameCache = null
+}
+
+async function loadTraceFilePage(page: number) {
+  if (!traceFileSessionId.value || traceFileLoading.value) return
+  if (page < 0 || page >= traceFileTotalPages.value) return
+
+  traceFileLoading.value = true
+  try {
+    const result = await window.electron.ipcRenderer.invoke(
+      'ipc-trace-file-page',
+      traceFileSessionId.value,
+      page,
+      traceFilePageSize.value
+    )
+    const { frames, prevLastTs } = result as {
+      frames: ParsedFrame[]
+      totalFrames: number
+      prevLastTs: number
+    }
+
+    const indexOffset = page * traceFilePageSize.value
+    const parsedData = framesToLogData(frames, indexOffset, prevLastTs)
+    allLogData = parsedData
+    grid.loadData(allLogData)
+    grid.scrollYTo(0)
+    traceFileCurrentPage.value = page
+  } catch (err: any) {
+    ElMessage.error(i18next.t('uds.trace.messages.parseError', { msg: err.message || err }))
+  } finally {
+    traceFileLoading.value = false
+  }
+}
+
+function traceFileGoFirst() {
+  loadTraceFilePage(0)
+}
+function traceFileGoPrev() {
+  loadTraceFilePage(traceFileCurrentPage.value - 1)
+}
+function traceFileGoNext() {
+  loadTraceFilePage(traceFileCurrentPage.value + 1)
+}
+function traceFileGoLast() {
+  loadTraceFilePage(traceFileTotalPages.value - 1)
+}
+const traceFileJumpPage = ref(1)
+function traceFileGoJump() {
+  const target = traceFileJumpPage.value - 1
+  loadTraceFilePage(target)
+}
+function onPageSizeChange() {
+  if (traceFileSessionId.value) {
+    loadTraceFilePage(0)
+  }
+}
+
+async function onDrop(e: DragEvent) {
+  isDragOver.value = false
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
+
+  const file = files[0]
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (ext !== 'blf' && ext !== 'asc') {
+    ElMessage.warning(i18next.t('uds.trace.messages.unsupportedFormat'))
+    return
+  }
+
+  const filePath = window.electron.webUtils.getPathForFile(file)
+  if (!filePath) return
+
+  await closeTraceFileSession()
+  clearLog(i18next.t('uds.trace.messages.dropFileHint'))
+  isPaused.value = true
+  channelDbcMapCache = null
+  channelMsgNameCache = null
+
+  const loadingInstance = ElLoading.service({
+    text: i18next.t('uds.trace.messages.parsingFile')
+  })
+
+  try {
+    const openResult = await window.electron.ipcRenderer.invoke('ipc-trace-file-open', filePath)
+    const { sessionId, totalFrames, channels, measurementStartTimeMs } = openResult as {
+      sessionId: string
+      totalFrames: number
+      channels: number[]
+      measurementStartTimeMs: number
+    }
+
+    traceFileSessionId.value = sessionId
+    traceFileTotalFrames.value = totalFrames
+    traceFileChannelCount.value = channels.length
+    traceFileMeasurementStartMs.value = measurementStartTimeMs
+    traceFileCurrentPage.value = 0
+    traceFileJumpPage.value = 1
+
+    // Show channel map dialog if there are CAN devices configured
+    if (canDeviceOptions.value.length > 0 && channels.length > 0) {
+      loadingInstance.close()
+      await showChannelMapDialog(channels)
+    }
+
+    channelDbcMapCache = null
+    channelMsgNameCache = null
+    const loadingInstance2 = ElLoading.service({
+      text: i18next.t('uds.trace.messages.parsingFile')
+    })
+
+    try {
+      // Load first page
+      const pageResult = await window.electron.ipcRenderer.invoke(
+        'ipc-trace-file-page',
+        sessionId,
+        0,
+        traceFilePageSize.value
+      )
+      const { frames: firstFrames, prevLastTs: firstPrevLastTs } = pageResult as {
+        frames: ParsedFrame[]
+        totalFrames: number
+        prevLastTs: number
+      }
+
+      const parsedData = framesToLogData(firstFrames, 0, firstPrevLastTs)
+      allLogData = parsedData
+      grid.loadData(allLogData)
+      grid.scrollYTo(0)
+
+      ElMessage.success(
+        i18next.t('uds.trace.messages.parseComplete', {
+          count: totalFrames,
+          channels: channels.length
+        })
+      )
+    } finally {
+      loadingInstance2.close()
+    }
+  } catch (err: any) {
+    ElMessage.error(i18next.t('uds.trace.messages.parseError', { msg: err.message || err }))
+    await closeTraceFileSession()
+  } finally {
+    loadingInstance.close()
+  }
+}
+
 defineExpose({
   clearLog,
   getData
@@ -1127,16 +2001,22 @@ const LogFilter = ref<
 let grid: EVirtTable
 let scrollY: number = -1
 
-const columes: Ref<Column[]> = ref([
+// All available column definitions (index column always first and visible)
+const allColumnDefs: { key: string; title: string; width: number; formatter?: any }[] = [
+  {
+    key: 'seqIndex',
+    title: '#',
+    width: 80,
+    formatter: (row: any) => (row.row.seqIndex != null ? String(row.row.seqIndex) : '')
+  },
   {
     key: 'ts',
     title: i18next.t('uds.trace.columns.time'),
     width: 200,
-    formatter: (row) => {
+    formatter: (row: any) => {
       if (row.row.ts) {
         if (isOverwrite.value) {
           const parts = [(row.row.ts / 1000000).toFixed(6)]
-          if (row.row.deltaTime) parts.push(row.row.deltaTime)
           if (row.row.count != null && row.row.count > 0) parts.push(`#${row.row.count}`)
           return parts.join(' ')
         }
@@ -1145,6 +2025,18 @@ const columes: Ref<Column[]> = ref([
         return ''
       }
     }
+  },
+  {
+    key: 'deltaTs',
+    title: 'Δt(s)',
+    width: 120,
+    formatter: (row: any) => (row.row.deltaTs != null ? (row.row.deltaTs / 1000000).toFixed(6) : '')
+  },
+  {
+    key: 'absTimeStr',
+    title: 'UTC Time',
+    width: 200,
+    formatter: (row: any) => row.row.absTimeStr || ''
   },
   { key: 'name', title: i18next.t('uds.trace.columns.name'), width: 200 },
   { key: 'data', title: i18next.t('uds.trace.columns.data'), width: 300 },
@@ -1155,29 +2047,7 @@ const columes: Ref<Column[]> = ref([
   { key: 'msgType', title: i18next.t('uds.trace.columns.type'), width: 100 },
   { key: 'channel', title: i18next.t('uds.trace.columns.channel'), width: 100 },
   { key: 'device', title: i18next.t('uds.trace.columns.device'), width: 200 }
-])
-watch(
-  columes,
-  () => {
-    grid.loadColumns(columes.value)
-  },
-  { deep: true }
-)
-watch([isPaused, isOverwrite], (v) => {
-  if (v[1]) {
-    columes.value[0].type = 'tree'
-  } else {
-    columes.value[0].type = undefined
-  }
-  if (!v[0] && !v[1]) {
-    scrollY = -1
-  }
-  if (v[0]) {
-    //load data
-    grid.loadData(allLogData)
-    grid.scrollYTo(99999999999)
-  }
-})
+]
 
 const trace = ref<TraceItem>(
   cloneDeep(
@@ -1190,6 +2060,117 @@ const trace = ref<TraceItem>(
     }
   )
 )
+
+// Column config: controls visibility, order and width (index column always first)
+function buildColumnConfig(): { key: string; title: string; visible: boolean; width: number }[] {
+  const saved = trace.value.columnConfig
+  if (saved && saved.length > 0) {
+    // Rebuild from saved config, merging with allColumnDefs for title/formatter
+    const result: { key: string; title: string; visible: boolean; width: number }[] = []
+    for (const sc of saved) {
+      const def = allColumnDefs.find((d) => d.key === sc.key)
+      if (def) {
+        result.push({ key: sc.key, title: def.title, visible: sc.visible, width: sc.width })
+      }
+    }
+    // Add any new columns not in saved config
+    for (const def of allColumnDefs) {
+      if (!result.find((r) => r.key === def.key)) {
+        result.push({ key: def.key, title: def.title, visible: true, width: def.width })
+      }
+    }
+    return result
+  }
+  return allColumnDefs.map((c) => ({ key: c.key, title: c.title, visible: true, width: c.width }))
+}
+
+const columnConfig = ref(buildColumnConfig())
+
+const colDragOverIdx = ref(-1)
+let colDragStartIdx = -1
+
+function onColDragStart(idx: number) {
+  if (columnConfig.value[idx].key === 'seqIndex') return
+  colDragStartIdx = idx
+}
+function onColDragOver(idx: number) {
+  if (idx === 0) return // can't drop onto index column
+  colDragOverIdx.value = idx
+}
+function onColDrop(idx: number) {
+  colDragOverIdx.value = -1
+  if (colDragStartIdx < 0 || colDragStartIdx === idx || idx === 0) return
+  if (columnConfig.value[colDragStartIdx].key === 'seqIndex') return
+  const item = columnConfig.value.splice(colDragStartIdx, 1)[0]
+  columnConfig.value.splice(idx, 0, item)
+  applyColumnConfig()
+}
+
+function applyColumnConfig() {
+  const visible = columnConfig.value.filter((c) => c.visible)
+  const newCols: Column[] = visible.map((c) => {
+    const def = allColumnDefs.find((d) => d.key === c.key)!
+    const col: Column = { key: def.key, title: def.title, width: c.width }
+    if (def.formatter) col.formatter = def.formatter
+    return col
+  })
+  // Apply tree type to seqIndex column if in overwrite mode
+  if (isOverwrite.value) {
+    const seqCol = newCols.find((c) => c.key === 'seqIndex')
+    if (seqCol) seqCol.type = 'tree'
+  }
+  columes.value = newCols
+  // Persist to project
+  saveColumnConfig()
+}
+
+function saveColumnConfig() {
+  trace.value.columnConfig = columnConfig.value.map((c) => ({
+    key: c.key,
+    visible: c.visible,
+    width: c.width
+  }))
+}
+
+function resetColumnConfig() {
+  columnConfig.value = allColumnDefs.map((c) => ({
+    key: c.key,
+    title: c.title,
+    visible: true,
+    width: c.width
+  }))
+  applyColumnConfig()
+}
+
+const columes: Ref<Column[]> = ref(
+  (() => {
+    const visible = columnConfig.value.filter((c) => c.visible)
+    return visible.map((c) => {
+      const def = allColumnDefs.find((d) => d.key === c.key)!
+      const col: Column = { key: def.key, title: def.title, width: c.width }
+      if (def.formatter) col.formatter = def.formatter
+      return col
+    })
+  })()
+)
+watch(
+  columes,
+  () => {
+    grid.loadColumns(columes.value)
+  },
+  { deep: true }
+)
+watch([isPaused, isOverwrite], (v) => {
+  applyColumnConfig()
+  if (!v[0] && !v[1]) {
+    scrollY = -1
+  }
+  if (v[0]) {
+    //load data
+    grid.loadData(allLogData)
+    grid.scrollYTo(99999999999)
+  }
+})
 
 const layout = inject('layout') as Layout | undefined
 
@@ -1254,6 +2235,7 @@ onMounted(() => {
       ENABLE_PASTER: false,
       ENABLE_KEYBOARD: false,
       ENABLE_RESIZE_ROW: false,
+      ENABLE_RESIZE_COLUMN: true,
       EMPTY_TEXT: i18next.t('uds.trace.emptyText'),
       BODY_CELL_STYLE_METHOD: ({ row }) => {
         const method = row.method
@@ -1337,6 +2319,23 @@ onMounted(() => {
     } else {
       runtimeStore.setTraceLinkIdBack(row?.rowKey || '')
     }
+    // Open detail panel for clicked row
+    if (row) {
+      const logRow = allLogData.find((d) => d.key === row.rowKey)
+      if (logRow) {
+        if (detailPanelHeight.value === 0) {
+          detailPanelHeight.value = detailPanelDefaultHeight
+        }
+        decodeSelectedRow(logRow)
+      }
+    }
+  })
+  grid.on('resizeColumnChange', (info: { key: string; width: number }) => {
+    const cfg = columnConfig.value.find((c) => c.key === info.key)
+    if (cfg) {
+      cfg.width = Math.round(info.width)
+      saveColumnConfig()
+    }
   })
 })
 watch([tableWidth, tableHeight], () => {
@@ -1352,8 +2351,7 @@ onUnmounted(() => {
       window.logBus.off(val, logDisplay)
     }
   })
-  // cTable.close()
-  // stage.destroy()
+  closeTraceFileSession()
   grid.destroy()
   clearInterval(timer)
 })
@@ -1420,5 +2418,182 @@ onUnmounted(() => {
   box-shadow: inset 0 0 4px var(--el-color-info-light-5);
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Detail panel styles */
+.detail-resize-handle {
+  height: 4px;
+  cursor: ns-resize;
+  background: var(--el-border-color-lighter);
+  border-top: 1px solid var(--el-border-color);
+  border-bottom: 1px solid var(--el-border-color);
+}
+.detail-resize-handle:hover {
+  background: var(--el-color-primary-light-7);
+}
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--el-border-color);
+  overflow: hidden;
+  font-size: 12px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.detail-panel-header {
+  display: flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: var(--el-fill-color-light);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  min-height: 24px;
+}
+
+.detail-panel-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.detail-tree {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 8px;
+  min-width: 0;
+}
+
+.detail-hex {
+  min-width: 150px;
+  overflow: auto;
+  padding: 4px 8px;
+  border-right: 1px solid var(--el-border-color-lighter);
+  background: var(--el-fill-color-blank);
+}
+
+.detail-col-resize {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.detail-col-resize:hover {
+  background: var(--el-color-primary-light-7);
+}
+
+.detail-hex-title {
+  font-weight: bold;
+  font-size: 12px;
+  color: var(--el-text-color-primary);
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.detail-collapsible {
+  margin: 0;
+}
+
+.hex-dump {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre;
+  color: var(--el-text-color-regular);
+}
+
+details > summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+.detail-section {
+  font-weight: bold;
+  color: var(--el-text-color-primary);
+  padding: 2px 0;
+  font-size: 12px;
+}
+
+.detail-comment {
+  font-weight: normal;
+  color: var(--el-text-color-secondary);
+  font-style: italic;
+}
+
+.detail-fields {
+  padding-left: 4px;
+}
+
+.detail-field-row {
+  padding: 1px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.detail-label {
+  color: var(--el-text-color-secondary);
+  min-width: 80px;
+}
+
+.detail-value {
+  color: var(--el-text-color-primary);
+}
+
+.detail-signal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.detail-signal-table th {
+  text-align: left;
+  padding: 2px 8px;
+  color: var(--el-text-color-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--el-bg-color);
+}
+
+.detail-signal-table td {
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.detail-signal-table tbody tr:hover {
+  background: var(--el-fill-color-light);
+}
+
+.detail-no-signals {
+  color: var(--el-text-color-placeholder);
+  padding: 8px;
+  font-style: italic;
+}
+
+.detail-sig-name {
+  color: var(--el-color-primary);
+  font-weight: 500;
+}
+
+.detail-sig-phys {
+  color: var(--el-text-color-primary);
+}
+
+.detail-sig-unit {
+  color: var(--el-text-color-secondary);
+  font-size: 11px;
+}
+
+.detail-sig-raw {
+  color: var(--el-text-color-secondary);
+  font-size: 11px;
+}
+
+.detail-sig-bits {
+  color: var(--el-text-color-placeholder);
+  font-size: 11px;
 }
 </style>

@@ -20,6 +20,8 @@ export class AscTransform extends Transform {
   private firstFrameTs = -1
   /** Bytes of input consumed (for progress) */
   bytesRead = 0
+  /** Measurement start time from file header (ms since epoch, UTC) */
+  measurementStartTimeMs = 0
 
   constructor(speedFactor: number = 1.0) {
     super({
@@ -109,7 +111,16 @@ export class AscTransform extends Transform {
 
   private parseLine(line: string): ReplayCanFrame | null {
     const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('date') || trimmed.startsWith('base')) {
+    if (!trimmed || trimmed.startsWith('base')) {
+      return null
+    }
+    if (trimmed.startsWith('date')) {
+      // Parse: "date Mon Jan 01 12:00:00.000 2024" or similar
+      const dateStr = trimmed.substring(5).trim()
+      const d = new Date(dateStr)
+      if (!isNaN(d.getTime())) {
+        this.measurementStartTimeMs = d.getTime()
+      }
       return null
     }
     if (
@@ -242,6 +253,10 @@ export class AscReader implements ReplayReader {
   constructor(filePath: string, speedFactor: number = 1.0) {
     this.filePath = filePath
     this.initStream(speedFactor)
+  }
+
+  get measurementStartTimeMs(): number {
+    return this.transform?.measurementStartTimeMs ?? 0
   }
 
   private initStream(speedFactor: number): void {

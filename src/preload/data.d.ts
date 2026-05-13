@@ -181,12 +181,25 @@ export type LogItem = {
   compression?: number
 }
 
+export type TraceColumnConfig = {
+  key: string
+  visible: boolean
+  width: number
+}
+
+export type TraceChannelMap = {
+  logChannel: number
+  deviceId: string
+}
+
 export type TraceItem = {
   id: string
   name: string
   filter?: string[]
   filterDevice?: string[]
   filterId?: string[]
+  columnConfig?: TraceColumnConfig[]
+  channelMap?: TraceChannelMap[]
 }
 
 /**
@@ -243,6 +256,12 @@ export type ReplayItem = {
    * undefined/1 = play once, 0 = infinite loop
    */
   repeatCount?: number
+  /**
+   * Use original recording time from log file for UTC Time display
+   * When true, UTC Time shows the original measurement time from the log file
+   * When false, UTC Time shows wall clock time relative to Start
+   */
+  useOriginalTime?: boolean
 }
 
 export interface DataSet {

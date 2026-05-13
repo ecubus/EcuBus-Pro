@@ -256,6 +256,8 @@ export class BlfTransform extends Transform {
   /** File-level bytes consumed (for progress tracking) */
   bytesRead = 0
   private headerParsed = false
+  /** Measurement start time from file header (ms since epoch, UTC) */
+  measurementStartTimeMs = 0
 
   constructor(speedFactor: number = 1.0) {
     super({
@@ -323,6 +325,17 @@ export class BlfTransform extends Transform {
       const sig = this.buffer.toString('ascii', 0, 4)
       if (sig !== 'LOGG') {
         throw new Error('Not a valid BLF file: missing LOGG signature')
+      }
+      // Parse measurementStartTime SYSTEMTIME at offset 0x28
+      if (this.buffer.length >= 0x38) {
+        const year = this.buffer.readUInt16LE(0x28)
+        const month = this.buffer.readUInt16LE(0x2a)
+        const day = this.buffer.readUInt16LE(0x2e)
+        const hour = this.buffer.readUInt16LE(0x30)
+        const minute = this.buffer.readUInt16LE(0x32)
+        const second = this.buffer.readUInt16LE(0x34)
+        const ms = this.buffer.readUInt16LE(0x36)
+        this.measurementStartTimeMs = Date.UTC(year, month - 1, day, hour, minute, second, ms)
       }
       this.buffer = this.buffer.subarray(FILE_HEADER_SIZE)
       this.bytesRead = FILE_HEADER_SIZE
@@ -493,6 +506,10 @@ export class BlfReader implements ReplayReader {
   constructor(filePath: string, speedFactor: number = 1.0) {
     this.filePath = filePath
     this.transform = new BlfTransform(speedFactor)
+  }
+
+  get measurementStartTimeMs(): number {
+    return this.transform?.measurementStartTimeMs ?? 0
   }
 
   init(): { total: number } {

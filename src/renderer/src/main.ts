@@ -52,6 +52,7 @@ const formatReason = (reason: unknown) => {
 
 // Global exception monitoring
 window.addEventListener('error', (event) => {
+  if (event.message?.includes('ResizeObserver loop')) return
   log.error('[GlobalError]', event.message, {
     source: event.filename,
     line: event.lineno,

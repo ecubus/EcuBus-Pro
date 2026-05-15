@@ -1,6 +1,6 @@
 <template>
   <div
-    style="position: relative"
+    style="position: relative; overflow: hidden; height: 100%"
     @dragover.prevent="onDragOver"
     @dragleave.prevent="onDragLeave"
     @drop.prevent="onDrop"

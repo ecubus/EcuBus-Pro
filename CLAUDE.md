@@ -109,6 +109,10 @@ Tests live under `test/` and run with Vitest.
 
 i18next-based. App translations in `resources/locales/<lang>/translation.json`. Plugin translations loaded from `locales/<lang>/translation.json` and merged via IPC.
 
+## Git Commit Rules
+
+- Do NOT add `Co-authored-by` trailers to commit messages.
+
 ## MCP Servers
 
 Workspace MCP config in `.vscode/mcp.json`. The `playwright` server (`npx -y @playwright/mcp@latest`) is useful for browser-based UI exploration when dev server is running.

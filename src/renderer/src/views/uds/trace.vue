@@ -1196,7 +1196,7 @@ const detailPanelMinHeight = 120
 const detailPanelDefaultHeight = 200
 
 const tableHeight = computed(() => {
-  return props.height - 30 - detailPanelHeight.value - (detailPanelHeight.value > 0 ? 4 : 0)
+  return props.height - 30 - detailPanelHeight.value - (detailPanelHeight.value > 0 ? 8 : 0)
 })
 const tableWidth = computed(() => {
   return props.width

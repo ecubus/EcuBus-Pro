@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { ReplayCanFrame, ReplayFrame } from '../../src/main/replay/index'
+import { ReplayCanFrame, ReplayFrame, ReplayLinFrame } from '../../src/main/replay/index'
 import path from 'path'
 import { AscReader } from 'src/main/replay/ascReader'
 import { BlfReader } from 'src/main/replay/blfReader'
@@ -16,6 +16,20 @@ async function readAllCanFrames(reader: {
     }
   }
   return frames
+}
+
+/** Helper: read all frames separated by type */
+async function readAllFrames(reader: {
+  readFrame(): Promise<ReplayFrame | null>
+}): Promise<{ can: ReplayCanFrame[]; lin: ReplayLinFrame[] }> {
+  const can: ReplayCanFrame[] = []
+  const lin: ReplayLinFrame[] = []
+  let result: ReplayFrame | null
+  while ((result = await reader.readFrame()) !== null) {
+    if (result.type === 'can') can.push(result.frame)
+    else if (result.type === 'lin') lin.push(result.frame)
+  }
+  return { can, lin }
 }
 
 describe('Replay', () => {
@@ -247,6 +261,96 @@ describe('Replay', () => {
         `Final progress: ${finalProgress.current}/${finalProgress.total} (${finalProgress.percent.toFixed(2)}%)`
       )
 
+      reader.close()
+    })
+  })
+
+  describe('BlfReader - LIN frames', () => {
+    const linBlfPath = path.resolve(__dirname, './LINSystem_1.blf')
+
+    it('should read LIN frames from BLF file', async () => {
+      const reader = new BlfReader(linBlfPath, 0)
+      reader.init()
+
+      const { can, lin } = await readAllFrames(reader)
+
+      expect(lin.length).toBeGreaterThan(0)
+      console.log(`Read ${lin.length} LIN frames, ${can.length} CAN frames from LIN BLF file`)
+
+      reader.close()
+    })
+
+    it('should parse LIN frame structure correctly', async () => {
+      const reader = new BlfReader(linBlfPath, 0)
+      reader.init()
+
+      const { lin } = await readAllFrames(reader)
+      expect(lin.length).toBeGreaterThan(0)
+
+      const firstFrame = lin[0]
+      expect(firstFrame).toHaveProperty('channel')
+      expect(firstFrame).toHaveProperty('ts')
+      expect(firstFrame).toHaveProperty('frameId')
+      expect(firstFrame).toHaveProperty('dir')
+      expect(firstFrame).toHaveProperty('data')
+      expect(firstFrame).toHaveProperty('dlc')
+      expect(firstFrame).toHaveProperty('checksumType')
+      expect(firstFrame.data).toBeInstanceOf(Buffer)
+
+      // LIN Frame ID should be 0-63
+      expect(firstFrame.frameId).toBeGreaterThanOrEqual(0)
+      expect(firstFrame.frameId).toBeLessThanOrEqual(63)
+
+      // LIN channels use offset 100+
+      expect(firstFrame.channel).toBeGreaterThanOrEqual(101)
+
+      // Direction should be Tx or Rx
+      expect(['Tx', 'Rx']).toContain(firstFrame.dir)
+
+      console.log('First LIN frame:', {
+        channel: firstFrame.channel,
+        ts: firstFrame.ts,
+        frameId: `0x${firstFrame.frameId.toString(16)}`,
+        dir: firstFrame.dir,
+        dlc: firstFrame.dlc,
+        data: firstFrame.data.toString('hex'),
+        checksumType: firstFrame.checksumType
+      })
+
+      reader.close()
+    })
+
+    it('should have increasing timestamps for LIN frames', async () => {
+      const reader = new BlfReader(linBlfPath, 0)
+      reader.init()
+
+      const { lin } = await readAllFrames(reader)
+
+      let lastTs = -1
+      for (const frame of lin) {
+        expect(frame.ts).toBeGreaterThanOrEqual(lastTs)
+        lastTs = frame.ts
+      }
+
+      console.log(`Verified ${lin.length} LIN frames have increasing timestamps`)
+      reader.close()
+    })
+
+    it('should parse all LIN frame IDs within valid range', async () => {
+      const reader = new BlfReader(linBlfPath, 0)
+      reader.init()
+
+      const { lin } = await readAllFrames(reader)
+
+      const idSet = new Set(lin.map((f) => f.frameId))
+      for (const id of idSet) {
+        expect(id).toBeGreaterThanOrEqual(0)
+        expect(id).toBeLessThanOrEqual(63)
+      }
+
+      console.log(
+        `Unique LIN Frame IDs: ${[...idSet].map((id) => `0x${id.toString(16)}`).join(', ')}`
+      )
       reader.close()
     })
   })

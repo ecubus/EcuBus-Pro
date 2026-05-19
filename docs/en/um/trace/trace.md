@@ -23,7 +23,7 @@ You can directly drag and drop BLF or ASC trace files into the Trace window for 
 
 ### Channel Mapping
 
-When a file is first loaded, a channel mapping dialog will appear. This allows you to map the log file's channel numbers to your project's configured CAN devices. If a device has a DBC database attached, message names and signals will be automatically decoded.
+When a file is first loaded, a channel mapping dialog will appear. This allows you to map the log file's channel numbers to your project's configured CAN/LIN devices. If a device has a DBC/LDF database attached, message names and signals will be automatically decoded.
 
 ![channel-map](../../../media/um/trace/channel-map.png)
 
@@ -81,9 +81,10 @@ The Trace window includes the following columns (configurable via the column set
 * **ID**: The message identifier
 * **DLC (Data Length Code)**: The data length code
 * **LEN (Length)**: The actual data length in bytes
-* **Type**: The message type (e.g., CAN, CAN-FD, Extended)
-* **Channel**: The communication channel
-* **Device**: The device name
+* **Type**: The message type (e.g., CAN, CAN-FD, LIN, Extended)
+* **Bus**: The bus identifier (e.g., CAN 1, Lin 7)
+* **Channel**: The device name associated with the channel
+* **Device**: The hardware device name
 
 Column visibility, order, and width can be customized through the column configuration panel and will be persisted across sessions.
 

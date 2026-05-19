@@ -2352,7 +2352,8 @@
         },
         "channelMap": {
           "hint": "Map log file channels to connected devices. One channel can send to multiple devices.",
-          "logChannel": "Log Channel",
+          "busType": "Bus",
+          "logChannel": "Channel",
           "channel": "Channel",
           "arrow": "",
           "targetDevice": "Target Device",

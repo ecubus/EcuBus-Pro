@@ -160,25 +160,42 @@
 
           <el-table :data="channelMapData" size="small" style="width: 100%">
             <el-table-column
+              prop="busType"
+              :label="i18next.t('uds.network.replayConfig.channelMap.busType')"
+              width="90"
+            >
+              <template #default="{ row, $index }">
+                <el-select
+                  v-model="row.busType"
+                  size="small"
+                  :disabled="globalStart"
+                  @change="onBusTypeChange($index, row)"
+                >
+                  <el-option label="CAN" value="can" />
+                  <el-option label="LIN" value="lin" />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column
               prop="logChannel"
               :label="i18next.t('uds.network.replayConfig.channelMap.logChannel')"
-              width="140"
+              width="120"
             >
               <template #default="{ row, $index }">
                 <el-input-number
-                  v-model="row.logChannel"
+                  v-model="row.displayChannel"
                   :min="1"
                   :controls="true"
                   :disabled="globalStart"
                   size="small"
                   style="width: 100%"
-                  @change="onLogChannelChange($index, row)"
+                  @change="onDisplayChannelChange($index, row)"
                 />
               </template>
             </el-table-column>
             <el-table-column
               :label="i18next.t('uds.network.replayConfig.channelMap.arrow')"
-              width="60"
+              width="50"
               align="center"
             >
               <template #default>
@@ -198,10 +215,10 @@
                   :disabled="globalStart"
                   collapse-tags
                   collapse-tags-tooltip
-                  @change="updateChannelMap($index, row.logChannel, $event)"
+                  @change="updateChannelMap($index, row)"
                 >
                   <el-option
-                    v-for="device in assignedDevices"
+                    v-for="device in getDevicesForBusType(row.busType)"
                     :key="device.key"
                     :label="device.label"
                     :value="device.key"
@@ -397,7 +414,25 @@ const allDevices = computed(() => {
   return dd
 })
 
-// Channel mapping - only show assigned devices
+// Channel mapping - show devices filtered by bus type
+const getDevicesForBusType = (busType: 'can' | 'lin') => {
+  const dd: Option[] = []
+  for (const deviceId of formData.value.channel) {
+    if (allDevices.value[deviceId]) {
+      const deviceType = dataBase.devices[deviceId]?.type
+      if (deviceType === busType) {
+        dd.push({
+          key: deviceId,
+          label: allDevices.value[deviceId].name,
+          disabled: false
+        })
+      }
+    }
+  }
+  return dd
+}
+
+// Also keep assignedDevices for backward compatibility
 const assignedDevices = computed(() => {
   const dd: Option[] = []
   for (const deviceId of formData.value.channel) {
@@ -412,25 +447,50 @@ const assignedDevices = computed(() => {
   return dd
 })
 
+// Internal channel map row with display-friendly fields
+type ChannelMapRow = ReplayChannelMap & {
+  displayChannel: number
+}
+
 // Channel map data for the table
-const channelMapData = ref<ReplayChannelMap[]>([])
+const channelMapData = ref<ChannelMapRow[]>([])
+
+// Convert logChannel to display: LIN channels subtract 100
+function toDisplayChannel(logChannel: number, busType?: 'can' | 'lin'): number {
+  if (busType === 'lin') return logChannel - 100
+  if (!busType && logChannel >= 100) return logChannel - 100
+  return logChannel
+}
+
+// Convert display channel back to logChannel
+function toLogChannel(displayChannel: number, busType: 'can' | 'lin'): number {
+  return busType === 'lin' ? displayChannel + 100 : displayChannel
+}
 
 // Initialize channel map from formData
 if (formData.value.channelMap && formData.value.channelMap.length > 0) {
-  channelMapData.value = cloneDeep(formData.value.channelMap)
+  channelMapData.value = formData.value.channelMap.map((m) => ({
+    ...cloneDeep(m),
+    busType: m.busType || (m.logChannel >= 100 ? 'lin' : 'can'),
+    displayChannel: toDisplayChannel(m.logChannel, m.busType)
+  }))
 } else {
-  // Default: add channel 1 mapping (logChannel must start from 1)
-  channelMapData.value = [{ logChannel: 1, deviceIds: [] }]
+  channelMapData.value = [{ logChannel: 1, deviceIds: [], busType: 'can', displayChannel: 1 }]
 }
 
-// Add a new channel mapping row (logChannel starts from 1)
+// Add a new channel mapping row
 const addChannelMapping = () => {
   const existingChannels = channelMapData.value.map((m) => m.logChannel)
   let nextChannel = 1
   while (existingChannels.includes(nextChannel)) {
     nextChannel++
   }
-  channelMapData.value.push({ logChannel: nextChannel, deviceIds: [] })
+  channelMapData.value.push({
+    logChannel: nextChannel,
+    deviceIds: [],
+    busType: 'can',
+    displayChannel: nextChannel
+  })
 }
 
 // Remove a channel mapping row
@@ -438,13 +498,24 @@ const removeChannelMapping = (index: number) => {
   channelMapData.value.splice(index, 1)
 }
 
-// Update channel mapping
-const updateChannelMap = (index: number, logChannel: number, deviceIds: string[]) => {
-  channelMapData.value[index] = { logChannel, deviceIds }
+// When bus type changes, recalculate logChannel and clear incompatible devices
+const onBusTypeChange = (index: number, row: ChannelMapRow) => {
+  row.logChannel = toLogChannel(row.displayChannel, row.busType as 'can' | 'lin')
+  // Clear devices that don't match the new bus type
+  row.deviceIds = row.deviceIds.filter((id) => {
+    const deviceType = dataBase.devices[id]?.type
+    return deviceType === row.busType
+  })
 }
 
-const onLogChannelChange = (index: number, row: ReplayChannelMap) => {
-  updateChannelMap(index, row.logChannel, row.deviceIds)
+// When display channel changes
+const onDisplayChannelChange = (index: number, row: ChannelMapRow) => {
+  row.logChannel = toLogChannel(row.displayChannel, (row.busType || 'can') as 'can' | 'lin')
+}
+
+// Update channel mapping
+const updateChannelMap = (index: number, row: ChannelMapRow) => {
+  row.logChannel = toLogChannel(row.displayChannel, (row.busType || 'can') as 'can' | 'lin')
 }
 
 const ruleFormRef = ref<FormInstance>()
@@ -466,8 +537,10 @@ const handleConfirm = async () => {
 
   await ruleFormRef.value.validate((valid, fields) => {
     if (valid) {
-      // Save channel map (filter out empty device mappings)
-      formData.value.channelMap = channelMapData.value.filter((m) => m.deviceIds.length > 0)
+      // Save channel map (filter out empty device mappings, strip displayChannel)
+      formData.value.channelMap = channelMapData.value
+        .filter((m) => m.deviceIds.length > 0)
+        .map(({ displayChannel, ...rest }) => ({ ...rest }))
 
       dataBase.replays[editIndex.value] = cloneDeep(formData.value)
       const ceil = getReplayCeil()

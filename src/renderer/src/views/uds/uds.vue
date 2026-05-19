@@ -675,7 +675,7 @@ const fileExtMap = {
 const DatabaseDropdown = {
   setup() {
     return () =>
-      h(ElDropdownMenu, { size: 'small' }, () => [
+      h(ElDropdownMenu, { size: 'small', style: 'max-height: 60vh; overflow-y: auto' }, () => [
         h(ElDropdownItem, { icon: CirclePlusFilled, command: 'addLin' }, () =>
           i18next.t('database.addLin', {
             extensions: fileExtMap.lin.map((ext) => ext.toUpperCase()).join(', ')

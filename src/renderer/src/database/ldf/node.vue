@@ -163,15 +163,14 @@ const rules: FormRules<NodeAttrDef> = {
   ],
   initial_NAD: [
     {
-      required: true,
+      required: false,
       type: 'number',
       validator: (rule: any, value: number | undefined, callback: any) => {
-        if (typeof value === 'string') {
-          //报错
-          callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterInitialNad')))
+        if (value === undefined) {
+          callback()
           return
         }
-        if (value === undefined) {
+        if (typeof value === 'string') {
           callback(new Error(i18next.t('database.ldf.node.validation.pleaseEnterInitialNad')))
           return
         }

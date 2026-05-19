@@ -277,7 +277,7 @@
           v-model="traceFileJumpPage"
           size="small"
           :min="1"
-          :max="traceFileTotalPages"
+          :max="Math.max(1, traceFileTotalPages)"
           controls-position="right"
           style="width: 80px"
           @keyup.enter="traceFileGoJump"
@@ -371,7 +371,9 @@
     >
       <el-table :data="channelMapTemp" size="small" style="width: 100%">
         <el-table-column label="Log Channel" width="120" align="center">
-          <template #default="{ row }"> CH{{ row.logChannel }} </template>
+          <template #default="{ row }">
+            {{ row.logChannel >= 100 ? `Lin ${row.logChannel - 100}` : `CH${row.logChannel}` }}
+          </template>
         </el-table-column>
         <el-table-column label="→" width="50" align="center">
           <template #default>→</template>
@@ -386,7 +388,7 @@
               style="width: 100%"
             >
               <el-option
-                v-for="dev in canDeviceOptions"
+                v-for="dev in getDeviceOptionsForChannel(row.logChannel)"
                 :key="dev.key"
                 :label="dev.label"
                 :value="dev.key"
@@ -428,6 +430,7 @@ import {
   getDlcByLen
 } from 'nodeCan/can'
 import { writeMessageData } from '@r/database/dbc/calc'
+import type { LDF, Frame } from '@r/database/ldfParse'
 import { Icon } from '@iconify/vue'
 import circlePlusFilled from '@iconify/icons-material-symbols/scan-delete-outline'
 import email from '@iconify/icons-material-symbols/mark-email-unread-outline-rounded'
@@ -479,6 +482,7 @@ interface LogData {
   len?: number
   device: string
   channel: string
+  bus?: string
   msgType: string
   method: string
   name?: string
@@ -687,6 +691,9 @@ function data2str(data: Uint8Array) {
 }
 function CanMsgType2Str(msgType: CanMsgType) {
   let str = ''
+  if ((msgType.idType as string) === 'LIN') {
+    return 'LIN'
+  }
   if (msgType.canfd) {
     str += 'CANFD '
   }
@@ -882,6 +889,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
       continue
     if (val.message.method == 'canBase') {
       const canData = val.message.data
+      const canBusStr = devNameToBusStr.value.get(val.instance) || val.instance
       insertData({
         method: val.message.method,
         dir: canData.dir == 'OUT' ? 'Tx' : 'Rx',
@@ -892,6 +900,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: canData.data.length,
         device: val.label,
         channel: val.instance,
+        bus: canBusStr,
         msgType: CanMsgType2Str(canData.msgType),
         name: canData.name,
         absTimeStr: canData.absTimeStr,
@@ -917,6 +926,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         name: val.message.data.name
       })
     } else if (val.message.method == 'linBase') {
+      const linBusStr = devNameToBusStr.value.get(val.instance) || val.instance
       insertData({
         method: val.message.method,
         dir: val.message.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
@@ -926,6 +936,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: val.message.data.data.length,
         device: val.label,
         channel: val.instance,
+        bus: linBusStr,
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
         name: val.message.data.name,
@@ -998,6 +1009,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         msgType: i18next.t('uds.trace.messageTypes.canError')
       })
     } else if (val.message.method == 'linError') {
+      const linBusStr = devNameToBusStr.value.get(val.instance) || val.instance
       if (val.message.data.data) {
         let method = 'linError'
         if (val.message.data.data?.isEvent || val.message.data.data?.frameId == 0x3d) {
@@ -1014,6 +1026,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
           device: val.label,
           channel: val.instance,
+          bus: linBusStr,
           msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       } else {
@@ -1026,10 +1039,12 @@ function logDisplay({ values }: { values: LogItem[] }) {
           len: 0,
           device: val.label,
           channel: val.instance,
+          bus: linBusStr,
           msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       }
     } else if (val.message.method == 'linEvent') {
+      const linBusStr = devNameToBusStr.value.get(val.instance) || val.instance
       insertData({
         method: val.message.method,
         name: '',
@@ -1039,6 +1054,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
+        bus: linBusStr,
         msgType: i18next.t('uds.trace.messageTypes.linEvent')
       })
     } else if (val.message.method == 'udsScript') {
@@ -1238,6 +1254,7 @@ function decodeSelectedRow(row: LogData) {
     { label: '#', value: String(row.seqIndex ?? '') },
     { label: 'Time(s)', value: (row.ts / 1000000).toFixed(6) },
     { label: 'Direction', value: row.dir ?? '--' },
+    { label: 'Bus', value: row.bus || '' },
     { label: 'Channel', value: row.channel },
     { label: 'Device', value: row.device },
     { label: 'ID', value: row.id },
@@ -1294,7 +1311,88 @@ function decodeSelectedRow(row: LogData) {
     }
   }
 
-  // Fallback: use live signal data from children if DBC decoding didn't produce signals
+  // Try LDF decoding for LIN frames
+  if (row.method === 'linBase' && channelDbcMapCache) {
+    const chNum = row.channel.startsWith('Lin ')
+      ? parseInt(row.channel.replace('Lin ', ''), 10) + 100
+      : parseInt(row.channel.replace('CH', ''), 10)
+    const chDbc = channelDbcMapCache.get(chNum)
+    if (chDbc && chDbc.db && chDbc.db.frames) {
+      const frameId = parseInt(row.id, 16)
+      const ldfDb = chDbc.db as LDF
+      const ldfFrame = Object.values(ldfDb.frames).find((f) => (f as Frame).id === frameId) as
+        | Frame
+        | undefined
+      if (ldfFrame) {
+        msgName = ldfFrame.name
+        // Build reverse map: signalName → encodingTypeName
+        const sigToEncoding: Record<string, string> = {}
+        if (ldfDb.signalRep) {
+          for (const [encName, sigNames] of Object.entries(ldfDb.signalRep)) {
+            for (const sn of sigNames) {
+              sigToEncoding[sn] = encName
+            }
+          }
+        }
+        for (const sigRef of ldfFrame.signals) {
+          const sigDef = ldfDb.signals[sigRef.name]
+          if (!sigDef) continue
+          const bitOffset = sigRef.offset
+          const bitLength = sigDef.signalSizeBits
+          // Read raw value (LIN is always little-endian)
+          let rawValue = 0
+          let startByte = Math.floor(bitOffset / 8)
+          let startBitInByte = bitOffset % 8
+          let remaining = bitLength
+          let valueIndex = 0
+          while (remaining > 0 && startByte < dataBytes.length) {
+            const bits = Math.min(8 - startBitInByte, remaining)
+            const mask = (1 << bits) - 1
+            const v = (dataBytes[startByte] >> startBitInByte) & mask
+            rawValue |= v << valueIndex
+            remaining -= bits
+            valueIndex += bits
+            startByte++
+            startBitInByte = 0
+          }
+          // Apply encoding type for physical value
+          let physValue: string | number = rawValue
+          let unit = ''
+          let enumLabel = ''
+          const encName = sigToEncoding[sigRef.name]
+          if (encName && ldfDb.signalEncodeTypes[encName]) {
+            const enc = ldfDb.signalEncodeTypes[encName]
+            for (const et of enc.encodingTypes) {
+              if (et.type === 'physicalValue' && et.physicalValue) {
+                const pv = et.physicalValue
+                if (rawValue >= pv.minValue && rawValue <= pv.maxValue) {
+                  physValue = rawValue * pv.scale + pv.offset
+                  unit = pv.textInfo || ''
+                  break
+                }
+              } else if (et.type === 'logicalValue' && et.logicalValue) {
+                if (rawValue === et.logicalValue.signalValue) {
+                  enumLabel = et.logicalValue.textInfo || ''
+                  physValue = enumLabel || rawValue
+                  break
+                }
+              }
+            }
+          }
+          signals.push({
+            name: sigRef.name,
+            value: rawValue,
+            physValue,
+            unit,
+            rawHex: '0x' + rawValue.toString(16).toUpperCase(),
+            bitPos: `[${bitOffset}|${bitLength}] LE`,
+            comment: '',
+            enumLabel
+          })
+        }
+      }
+    }
+  }
   if (signals.length === 0 && row.children && row.children.length > 0) {
     for (const child of row.children) {
       const match = child.data?.match(/PHY:(.*?)\s+RAW:(.*)/)
@@ -1610,16 +1708,77 @@ const canDeviceOptions = computed(() => {
   return opts
 })
 
+const linDeviceOptions = computed(() => {
+  const opts: { key: string; label: string }[] = []
+  for (const [id, dev] of Object.entries(database.devices)) {
+    if (dev.type === 'lin' && dev.linDevice) {
+      opts.push({ key: id, label: dev.linDevice.name })
+    }
+  }
+  return opts
+})
+
+const allDeviceOptions = computed(() => [...canDeviceOptions.value, ...linDeviceOptions.value])
+
+// Reverse lookup: device name → "Bus N" channel string (from replay config)
+const devNameToBusStr = computed(() => {
+  const map = new Map<string, string>()
+  for (const replay of Object.values(database.replays)) {
+    if (!replay.channelMap) continue
+    for (const cm of replay.channelMap) {
+      if (cm.deviceIds?.length > 0) {
+        for (const did of cm.deviceIds) {
+          const dev = database.devices[did]
+          if (dev?.type === 'lin' && dev.linDevice) {
+            map.set(
+              dev.linDevice.name,
+              `Lin ${cm.logChannel >= 100 ? cm.logChannel - 100 : cm.logChannel}`
+            )
+          } else if (dev?.type === 'can' && dev.canDevice) {
+            map.set(dev.canDevice.name, `CAN ${cm.logChannel}`)
+          }
+        }
+      }
+    }
+  }
+  return map
+})
+
+function getDeviceOptionsForChannel(logChannel: number) {
+  return logChannel >= 100 ? linDeviceOptions.value : canDeviceOptions.value
+}
+
 function showChannelMapDialog(channels: number[]): Promise<void> {
   const saved = trace.value.channelMap || []
+  // Build lookup from replay config channel maps for auto-matching
+  const replayLookup = new Map<number, string>()
+  for (const replay of Object.values(database.replays)) {
+    if (replay.channelMap) {
+      for (const cm of replay.channelMap) {
+        if (cm.deviceIds?.length > 0 && !replayLookup.has(cm.logChannel)) {
+          replayLookup.set(cm.logChannel, cm.deviceIds[0])
+        }
+      }
+    }
+  }
   channelMapTemp.value = channels.map((ch) => {
     const existing = saved.find((m) => m.logChannel === ch)
     if (existing) return { ...existing }
-    // Auto-match: channel N → Nth CAN device (by order)
-    const canDevKeys = Object.entries(database.devices)
-      .filter(([, d]) => d.type === 'can' && d.canDevice)
-      .map(([id]) => id)
-    const autoDeviceId = canDevKeys[ch - 1] || ''
+    // Auto-match from replay config first, then fall back to index-based
+    let autoDeviceId = replayLookup.get(ch) || ''
+    if (!autoDeviceId) {
+      if (ch >= 100) {
+        const linDevKeys = Object.entries(database.devices)
+          .filter(([, d]) => d.type === 'lin' && d.linDevice)
+          .map(([id]) => id)
+        autoDeviceId = linDevKeys[ch - 101] || ''
+      } else {
+        const canDevKeys = Object.entries(database.devices)
+          .filter(([, d]) => d.type === 'can' && d.canDevice)
+          .map(([id]) => id)
+        autoDeviceId = canDevKeys[ch - 1] || ''
+      }
+    }
     return { logChannel: ch, deviceId: autoDeviceId }
   })
   channelMapDialogVisible.value = true
@@ -1677,6 +1836,22 @@ function buildChannelDbcMap(): Map<number, { dbKey: string; db: any; deviceName:
             deviceName: canDev.name || `CH${entry.logChannel}`
           })
         }
+      } else if (dev && dev.type === 'lin' && dev.linDevice) {
+        const linDev = dev.linDevice
+        const linCh = entry.logChannel >= 100 ? entry.logChannel - 100 : entry.logChannel
+        if (linDev.database && database.database.lin[linDev.database]) {
+          map.set(entry.logChannel, {
+            dbKey: linDev.database,
+            db: database.database.lin[linDev.database],
+            deviceName: linDev.name || `Lin ${linCh}`
+          })
+        } else {
+          map.set(entry.logChannel, {
+            dbKey: '',
+            db: null,
+            deviceName: linDev.name || `Lin ${linCh}`
+          })
+        }
       }
     }
   }
@@ -1702,11 +1877,19 @@ function buildMsgNameCache(
 ): Map<number, Map<string, string>> {
   const cache = new Map<number, Map<string, string>>()
   for (const [ch, entry] of chDbcMap) {
-    if (!entry.db || !entry.db.messages) continue
+    if (!entry.db) continue
     const lookup = new Map<string, string>()
-    for (const m of entry.db.messages) {
-      const key = `${m.id}-${!!m.is_extended_frame}`
-      lookup.set(key, m.name)
+    if (entry.db.messages) {
+      // CAN DBC: messages is an array with id + is_extended_frame
+      for (const m of entry.db.messages) {
+        const key = `${m.id}-${!!m.is_extended_frame}`
+        lookup.set(key, m.name)
+      }
+    } else if (entry.db.frames) {
+      // LIN LDF: frames is Record<string, Frame> with id
+      for (const frame of Object.values(entry.db.frames) as { id: number; name: string }[]) {
+        lookup.set(`${frame.id}-false`, frame.name)
+      }
     }
     cache.set(ch, lookup)
   }
@@ -1765,22 +1948,26 @@ function framesToLogData(
       name = msgLookup.get(`${frame.id}-${isExtended}`)
     }
 
-    const deviceName = chDbc?.deviceName || `CH${frame.channel}`
+    const isLin = (msgType.idType as string) === 'LIN'
+    const deviceName =
+      chDbc?.deviceName || (isLin ? `Lin ${frame.channel - 100}` : `CH${frame.channel}`)
 
     const idStr = '0x' + frame.id.toString(16)
     const globalIndex = indexOffset + i + 1
     const deltaTs = prevLastTs >= 0 ? frame.ts - prevLastTs : undefined
     prevLastTs = frame.ts
+    const busStr = isLin ? `Lin ${frame.channel - 100}` : `CAN ${frame.channel}`
     result.push({
-      method: 'canBase',
+      method: isLin ? 'linBase' : 'canBase',
       dir: frame.dir === 'OUT' ? 'Tx' : 'Rx',
       data: data2str(dataArr),
       ts: frame.ts,
       id: idStr,
       dlc: getDlcByLen(dataArr.length, msgType.canfd),
       len: dataArr.length,
-      device: deviceName,
-      channel: `CH${frame.channel}`,
+      device: '',
+      channel: deviceName,
+      bus: busStr,
       msgType: CanMsgType2Str(msgType),
       name,
       seqIndex: globalIndex,
@@ -1902,7 +2089,7 @@ async function onDrop(e: DragEvent) {
     traceFileJumpPage.value = 1
 
     // Show channel map dialog if there are CAN devices configured
-    if (canDeviceOptions.value.length > 0 && channels.length > 0) {
+    if (allDeviceOptions.value.length > 0 && channels.length > 0) {
       loadingInstance.close()
       await showChannelMapDialog(channels)
     }
@@ -2045,6 +2232,7 @@ const allColumnDefs: { key: string; title: string; width: number; formatter?: an
   { key: 'dlc', title: i18next.t('uds.trace.columns.dlc'), width: 100 },
   { key: 'len', title: i18next.t('uds.trace.columns.len'), width: 100 },
   { key: 'msgType', title: i18next.t('uds.trace.columns.type'), width: 100 },
+  { key: 'bus', title: 'Bus', width: 100 },
   { key: 'channel', title: i18next.t('uds.trace.columns.channel'), width: 100 },
   { key: 'device', title: i18next.t('uds.trace.columns.device'), width: 200 }
 ]

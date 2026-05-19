@@ -1619,27 +1619,44 @@ ipcMain.handle(
     const frames: TraceFileFrame[] = []
     const channelSet = new Set<number>()
 
-    let replayFrame = await reader.readFrame()
-    while (replayFrame) {
-      if (replayFrame.type === 'can') {
-        const f = replayFrame.frame
-        channelSet.add(f.channel)
+    let result = await reader.readFrame()
+    while (result) {
+      if (result.type === 'can') {
+        const frame = result.frame
+        channelSet.add(frame.channel)
         frames.push({
-          channel: f.channel,
-          ts: f.ts,
-          id: f.id,
-          dir: f.dir,
+          channel: frame.channel,
+          ts: frame.ts,
+          id: frame.id,
+          dir: frame.dir,
           msgType: {
-            idType: f.msgType.idType,
-            brs: f.msgType.brs,
-            canfd: f.msgType.canfd,
-            remote: f.msgType.remote
+            idType: frame.msgType.idType,
+            brs: frame.msgType.brs,
+            canfd: frame.msgType.canfd,
+            remote: frame.msgType.remote
           },
-          data: Array.from(f.data),
-          isError: f.isError
+          data: Array.from(frame.data),
+          isError: frame.isError
+        })
+      } else if (result.type === 'lin') {
+        const frame = result.frame
+        channelSet.add(frame.channel)
+        frames.push({
+          channel: frame.channel,
+          ts: frame.ts,
+          id: frame.frameId,
+          dir: frame.dir === 'Tx' ? 'OUT' : 'IN',
+          msgType: {
+            idType: 'LIN',
+            brs: false,
+            canfd: false,
+            remote: false
+          },
+          data: Array.from(frame.data),
+          isError: frame.isError
         })
       }
-      replayFrame = await reader.readFrame()
+      result = await reader.readFrame()
     }
 
     const measurementStartTimeMs = reader.measurementStartTimeMs ?? 0

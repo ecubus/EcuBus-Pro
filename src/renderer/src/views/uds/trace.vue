@@ -1381,8 +1381,8 @@ function decodeSelectedRow(row: LogData) {
           }
           signals.push({
             name: sigRef.name,
-            value: rawValue,
-            physValue,
+            value: String(rawValue),
+            physValue: String(physValue),
             unit,
             rawHex: '0x' + rawValue.toString(16).toUpperCase(),
             bitPos: `[${bitOffset}|${bitLength}] LE`,

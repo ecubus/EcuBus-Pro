@@ -368,7 +368,8 @@ function addSubTree(vendor: CanVendor, node: tree, deviceIndexMap: Map<string, n
     vendor == 'toomoss' ||
     vendor == 'kvaser' ||
     vendor == 'vector' ||
-    vendor == 'ecubus'
+    vendor == 'ecubus' ||
+    vendor == 'simulate'
   ) {
     node.children?.push(linTree)
   }

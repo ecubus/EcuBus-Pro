@@ -28,6 +28,7 @@ import { ToomossLin } from './toomoss'
 import { KvaserLin } from './kvaser'
 import { VectorLin } from './vector'
 import { LinCable } from './ecubus'
+import { SIMULATE_LIN } from './simulate'
 
 const libPath = path.dirname(dllLib)
 PeakLin.loadDllPath(libPath)
@@ -45,6 +46,8 @@ export function openLinDevice(device: LinBaseInfo) {
     linBase = new VectorLin(device)
   } else if (device.vendor == 'ecubus') {
     linBase = new LinCable(device)
+  } else if (device.vendor == 'simulate') {
+    linBase = new SIMULATE_LIN(device)
   }
 
   return linBase
@@ -62,6 +65,8 @@ export function getLinVersion(vendor: string) {
     return VectorLin.getLibVersion()
   } else if (vendor === 'ECUBUS') {
     return LinCable.getLibVersion()
+  } else if (vendor === 'SIMULATE') {
+    return SIMULATE_LIN.getLibVersion()
   } else {
     return 'Not supported'
   }
@@ -79,6 +84,8 @@ export function getLinDevices(vendor: string) {
     return VectorLin.getValidDevices()
   } else if (vendor === 'ECUBUS') {
     return LinCable.getValidDevices()
+  } else if (vendor === 'SIMULATE') {
+    return SIMULATE_LIN.getValidDevices()
   } else {
     return []
   }

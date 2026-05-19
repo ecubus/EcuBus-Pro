@@ -1619,24 +1619,44 @@ ipcMain.handle(
     const frames: TraceFileFrame[] = []
     const channelSet = new Set<number>()
 
-    let frame = await reader.readFrame()
-    while (frame) {
-      channelSet.add(frame.channel)
-      frames.push({
-        channel: frame.channel,
-        ts: frame.ts,
-        id: frame.id,
-        dir: frame.dir,
-        msgType: {
-          idType: frame.msgType.idType,
-          brs: frame.msgType.brs,
-          canfd: frame.msgType.canfd,
-          remote: frame.msgType.remote
-        },
-        data: Array.from(frame.data),
-        isError: frame.isError
-      })
-      frame = await reader.readFrame()
+    let result = await reader.readFrame()
+    while (result) {
+      if (result.type === 'can') {
+        const frame = result.frame
+        channelSet.add(frame.channel)
+        frames.push({
+          channel: frame.channel,
+          ts: frame.ts,
+          id: frame.id,
+          dir: frame.dir,
+          msgType: {
+            idType: frame.msgType.idType,
+            brs: frame.msgType.brs,
+            canfd: frame.msgType.canfd,
+            remote: frame.msgType.remote
+          },
+          data: Array.from(frame.data),
+          isError: frame.isError
+        })
+      } else if (result.type === 'lin') {
+        const frame = result.frame
+        channelSet.add(frame.channel)
+        frames.push({
+          channel: frame.channel,
+          ts: frame.ts,
+          id: frame.frameId,
+          dir: frame.dir === 'Tx' ? 'OUT' : 'IN',
+          msgType: {
+            idType: 'LIN',
+            brs: false,
+            canfd: false,
+            remote: false
+          },
+          data: Array.from(frame.data),
+          isError: frame.isError
+        })
+      }
+      result = await reader.readFrame()
     }
 
     const measurementStartTimeMs = reader.measurementStartTimeMs ?? 0

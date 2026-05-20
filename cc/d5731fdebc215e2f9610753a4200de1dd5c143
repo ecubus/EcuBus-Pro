@@ -1,0 +1,21 @@
+src/renderer/src/views/uds/trace.vue
+  s_5aea40c565db9d::t_cd63cef6cde3d9 1281-1282,1286
+  s_5aea40c565db9d::t_36bcaf7ba9973d 1321,1324,1327-1328,1330
+  s_5aea40c565db9d::t_1950dfdc405a7f 1283-1285,1325-1326,1329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "ccd5731fdebc215e2f9610753a4200de1dd5c143",
+  "prompts": {},
+  "sessions": {
+    "s_5aea40c565db9d": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "d8276460-11a4-42e2-8bde-8176ad8846b4",
+        "model": "claude-opus-4.6"
+      },
+      "human_author": "Luke Li <898185718@qq.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+test/replay/replay.spec.ts
+  s_5aea40c565db9d::t_2d4978868e5d23 2,7-15
+  s_5aea40c565db9d::t_e8431d955c6c62 83,86
+  s_5aea40c565db9d::t_6438934658f18d 37
+  s_5aea40c565db9d::t_b9a7d88e8a5d33 68,70,75
+  s_5aea40c565db9d::t_4f3ff236356b63 107
+  s_5aea40c565db9d::t_fed331227599c6 178
+  s_5aea40c565db9d::t_09b7ab184f496a 209,211,216-217,225,227
+src/main/ipc/uds.ts
+  s_5aea40c565db9d::t_a4cbca590d16c1 1622-1642
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "a314a5e5ea84e6f380ead198d842b3eebd51e38f",
+  "prompts": {},
+  "sessions": {
+    "s_5aea40c565db9d": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "d8276460-11a4-42e2-8bde-8176ad8846b4",
+        "model": "claude-opus-4.6"
+      },
+      "human_author": "Luke Li <898185718@qq.com>"
+    }
+  }
+}

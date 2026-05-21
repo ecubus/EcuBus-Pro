@@ -1278,7 +1278,12 @@ function decodeSelectedRow(row: LogData) {
 
   // Try DBC decoding if channel map available
   if (row.method === 'canBase' && channelDbcMapCache) {
-    const chNum = parseInt(row.channel.replace('CH', ''), 10)
+    let chNum = parseInt(row.channel.replace('CH', ''), 10)
+    // For BLF/ASC loaded data, channel is device name; parse from bus field instead
+    if ((isNaN(chNum) || !channelDbcMapCache.has(chNum)) && row.bus) {
+      const busNum = parseInt(row.bus.replace('CAN ', ''), 10)
+      if (!isNaN(busNum)) chNum = busNum
+    }
     const chDbc = channelDbcMapCache.get(chNum)
     if (chDbc && chDbc.db) {
       const frameId = parseInt(row.id, 16)
@@ -1313,9 +1318,16 @@ function decodeSelectedRow(row: LogData) {
 
   // Try LDF decoding for LIN frames
   if (row.method === 'linBase' && channelDbcMapCache) {
-    const chNum = row.channel.startsWith('Lin ')
+    let chNum = row.channel.startsWith('Lin ')
       ? parseInt(row.channel.replace('Lin ', ''), 10) + 100
       : parseInt(row.channel.replace('CH', ''), 10)
+    // For BLF/ASC loaded data, channel is device name; parse from bus field instead
+    if ((isNaN(chNum) || !channelDbcMapCache.has(chNum)) && row.bus) {
+      const busNum = row.bus.startsWith('Lin ')
+        ? parseInt(row.bus.replace('Lin ', ''), 10) + 100
+        : parseInt(row.bus.replace('CAN ', ''), 10)
+      if (!isNaN(busNum)) chNum = busNum
+    }
     const chDbc = channelDbcMapCache.get(chNum)
     if (chDbc && chDbc.db && chDbc.db.frames) {
       const frameId = parseInt(row.id, 16)

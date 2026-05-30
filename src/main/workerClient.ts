@@ -38,7 +38,7 @@ type HandlerMap = {
     data: linApiStartSch | linApiStopSch | linApiPowerCtrl | linApiBaudRateCtrl
   ) => void | Promise<number> | Promise<void>
   pwmApi: (data: pwmApiSetDuty) => void
-  canApi: (data: any) => void
+  canApi: (data: any) => Promise<any>
   pluginEvent: (data: { name: string; data: any }) => void
   serialPortApi: (data: SerialPortApi) => Promise<any>
   someipApi: (data: SomeipApiCall) => Promise<any>

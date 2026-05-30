@@ -12,7 +12,7 @@ import UdsTester, {
   SerialPortApi,
   SomeipApiCall
 } from './workerClient'
-import { CAN_TP, TpError as CanTpError } from './docan/cantp'
+import { CAN_TP, CAN_TP_SOCKET, TpError as CanTpError } from './docan/cantp'
 import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } from './share/uds'
 import { findService, UDSTesterMain } from './docan/uds'
@@ -80,6 +80,7 @@ export class NodeClass {
   pool?: UdsTester
   private cantp: CAN_TP[] = []
   private lintp: LIN_TP[] = []
+  private cantpSocketMap: Map<string, { tp: CAN_TP; socket: CAN_TP_SOCKET }> = new Map()
   private linBaseId: string[] = []
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
@@ -944,7 +945,58 @@ export class NodeClass {
       }
     }
   }
-  async canApi(data: any) {}
+  async canApi(data: any): Promise<any> {
+    const { op } = data
+
+    const findCanBase = (device?: string) => {
+      if (device != undefined) {
+        for (const channelId of this.canBaseId) {
+          const item = this.canBaseMap.get(channelId)
+          if (item && item.info.name == device) return item
+        }
+        throw new Error(`CAN device '${device}' not found`)
+      }
+      if (this.canBaseId.length > 0) {
+        const item = this.canBaseMap.get(this.canBaseId[0])
+        if (item) return item
+      }
+      throw new Error('no CAN device attached to this node')
+    }
+
+    if (op === 'createConnection') {
+      const base = findCanBase(data.device)
+      const tp = new CAN_TP(base)
+      const socket = new CAN_TP_SOCKET(tp, data.addr)
+      const handle = `cantp-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      this.cantpSocketMap.set(handle, { tp, socket })
+      return handle
+    }
+
+    if (op === 'closeConnection') {
+      const entry = this.cantpSocketMap.get(data.handle)
+      if (!entry) throw new Error(`CAN-TP handle '${data.handle}' not found`)
+      entry.socket.close()
+      entry.tp.close(false)
+      this.cantpSocketMap.delete(data.handle)
+      return
+    }
+
+    if (op === 'sendData') {
+      const entry = this.cantpSocketMap.get(data.handle)
+      if (!entry) throw new Error(`CAN-TP handle '${data.handle}' not found`)
+      const ts = await entry.socket.write(Buffer.from(data.data))
+      return ts
+    }
+
+    if (op === 'recvData') {
+      const entry = this.cantpSocketMap.get(data.handle)
+      if (!entry) throw new Error(`CAN-TP handle '${data.handle}' not found`)
+      const result = await entry.socket.read(data.timeout ?? 5000)
+      return { data: Array.from(result.data), ts: result.ts }
+    }
+
+    throw new Error(`unknown canApi op: ${op}`)
+  }
 
   private resolveSomeipClient(channel?: string): VSomeIP_Client {
     if (channel) {
@@ -1447,6 +1499,11 @@ export class NodeClass {
     this.cantp.forEach((tp) => {
       tp.close(false)
     })
+    for (const { socket, tp } of this.cantpSocketMap.values()) {
+      socket.close()
+      tp.close(false)
+    }
+    this.cantpSocketMap.clear()
     this.lintp.forEach((tp) => {
       tp.close(false)
     })

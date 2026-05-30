@@ -1,0 +1,198 @@
+{
+  "data": {
+    "devices": {
+      "c07c3701-6a7a-4a23-9848-dd86bbc38061": {
+        "type": "can",
+        "canDevice": {
+          "id": "c07c3701-6a7a-4a23-9848-dd86bbc38061",
+          "name": "SIMULATE_0",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80",
+            "_X_ROW_KEY": "row_80"
+          }
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "f67340dd-e027-454b-aaba-d0521350993c": {
+        "name": "Client",
+        "id": "f67340dd-e027-454b-aaba-d0521350993c",
+        "channel": [
+          "c07c3701-6a7a-4a23-9848-dd86bbc38061"
+        ],
+        "workNode": "",
+        "script": "tester.ts"
+      },
+      "99806fc5-64a9-4c84-9f83-710c938b28a9": {
+        "name": "Server",
+        "id": "99806fc5-64a9-4c84-9f83-710c938b28a9",
+        "channel": [
+          "c07c3701-6a7a-4a23-9848-dd86bbc38061"
+        ],
+        "script": "ecu.ts",
+        "workNode": ""
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [
+          "SIMULATE_0"
+        ],
+        "filterId": [],
+        "columnConfig": [
+          {
+            "key": "seqIndex",
+            "visible": true,
+            "width": 80
+          },
+          {
+            "key": "ts",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "deltaTs",
+            "visible": true,
+            "width": 120
+          },
+          {
+            "key": "absTimeStr",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "name",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "data",
+            "visible": true,
+            "width": 300
+          },
+          {
+            "key": "dir",
+            "visible": true,
+            "width": 50
+          },
+          {
+            "key": "id",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "dlc",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "len",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "msgType",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "channel",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "device",
+            "visible": true,
+            "width": 200
+          }
+        ]
+      }
+    },
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "network": {
+        "pos": {
+          "x": 1141,
+          "y": 0,
+          "w": 845,
+          "h": 559
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 8,
+          "y": 0,
+          "w": 1111,
+          "h": 952
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      }
+    },
+    "example": {
+      "catalog": "CAN"
+    }
+  }
+}

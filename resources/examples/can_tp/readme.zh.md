@@ -1,37 +1,37 @@
 # CAN-TP 示例
 
-演示 ISO 15765-2（CAN 传输层协议）的 Worker API：`CanTpCreateConnection` / `CanTpSendData` / `CanTpRecvData`。无需真实硬件——两个节点运行在同一个虚拟 CAN 总线上即可。
+演示了用于 ISO 15765-2（CAN 传输层协议）通信的 `CanTpCreateConnection` / `CanTpSendData` / `CanTpRecvData` 工作器 API。 无需硬件——两个节点均运行在单个虚拟 CAN 总线上。
 
 ## 概述
 
-- **节点 1 (tester.ts)**：使用 `CanTp*` API 发送请求、接收响应。启动时自动执行四个测试，覆盖单帧和多帧场景，最大 500 字节。
-- **节点 2 (ecu.ts)**：用 `Util.OnCan` + `output()` 实现的模拟 ECU，手动处理 ISO 15765-2 的 SF / FF / CF / FC 帧，返回正响应（`service_id + 0x40`，其余字节原样）。
-- **设备**：SIMULATE_0（虚拟 CAN 总线，无需硬件）
+- **节点 1 (tester.ts)**：使用 `CanTp*` API 发送请求并接收响应。 启动时运行四个测试，涵盖单帧和多帧场景，最多 500 字节。
+- **节点 2 (ecu.ts)**：使用 `Util.OnCan` + `output()` 实现的模拟 ECU。 手动处理 ISO 15765-2 SF / FF / CF / FC 帧，并回显肯定响应（`service_id + 0x40`）。
+- **设备**：SIMULATE_0（虚拟 CAN 总线——无需硬件）
 
-## 地址配置
+## 寻址
 
-| 参数 | Tester | ECU |
-|------|--------|-----|
+| 参数    | 测试端     | ECU     |
+| ----- | ------- | ------- |
 | TX ID | `0x7E0` | `0x7E8` |
 | RX ID | `0x7E8` | `0x7E0` |
-| 寻址模式 | Normal | Normal |
+| 寻址    | 正常      | 正常      |
 
-## 测试项
+## 测试
 
-| # | 数据长度 | 帧类型 | 通过条件 |
-|---|---------|--------|---------|
-| 1 | 2 B | SF TX → SF RX | `resp[0] == 0x50`，`resp.length == 2` |
-| 2 | 8 B | MF TX → MF RX | `resp[0] == 0x62`，`resp.length == 8` |
-| 3 | 20 B | MF TX → MF RX | `resp[0] == 0x76`，`resp.length == 20` |
-| 4 | 500 B | MF TX → MF RX | `resp[0] == 0x76`，`resp.length == 500` |
+| # | 负载    | 帧类型           | 通过条件                                    |
+| - | ----- | ------------- | --------------------------------------- |
+| 1 | 2 B   | SF TX → SF RX | `resp[0] == 0x50`, `resp.length == 2`   |
+| 2 | 8 B   | MF TX → MF RX | `resp[0] == 0x62`, `resp.length == 8`   |
+| 3 | 20 B  | MF TX → MF RX | `resp[0] == 0x76`, `resp.length == 20`  |
+| 4 | 500 B | MF TX → MF RX | `resp[0] == 0x76`, `resp.length == 500` |
 
 ## 如何运行
 
 1. 在 EcuBus-Pro 中打开 `can_tp.ecb`
-2. 启动工程，两个节点自动运行
-3. 查看 Tester 节点日志
+2. 启动项目 — 两个节点自动启动
+3. 检查 Tester 日志以获取通过/失败结果
 
-预期 Tester 输出：
+预期的测试输出：
 
 ```
 [Tester] Connection ready
@@ -59,9 +59,9 @@
 [Tester] Done  4/4 passed
 ```
 
-## 代码要点
+## 代码亮点
 
-### Tester — 创建连接并收发数据
+### Tester — 创建连接并发送/接收
 
 ```typescript
 import { CanTpCreateConnection, CanTpSendData, CanTpRecvData, CanTpCloseConnection } from 'ECB'
@@ -83,22 +83,22 @@ const { data } = await CanTpRecvData(handle, 2000)
 await CanTpCloseConnection(handle)
 ```
 
-### ECU — 用 Util.OnCan 处理原始帧
+### ECU — 使用 Util.OnCan 的原始帧处理程序
 
 ```typescript
 Util.OnCan(0x7E0, (msg) => {
   const d = Array.from(msg.data)
   const frameType = (d[0] >> 4) & 0x0f
 
-  if (frameType === 0) {           // SF — 直接回复
+  if (frameType === 0) {           // SF — 立即响应
     respond(d.slice(1, 1 + (d[0] & 0x0f)))
-  } else if (frameType === 1) {    // FF — 发 FC
+  } else if (frameType === 1) {    // FF — 发送 FC
     rxState = { totalLen: ((d[0] & 0xf) << 8) | d[1], buf: [...d.slice(2)], expectedSN: 1 }
     sendRaw([0x30, 0x00, 0x00])
-  } else if (frameType === 2) {    // CF — 累积，完整后回复
+  } else if (frameType === 2) {    // CF — 累积，完成后响应
     rxState!.buf.push(...d.slice(1))
     if (rxState!.buf.length >= rxState!.totalLen) respond(rxState!.buf)
-  } else if (frameType === 3) {    // FC — 发送剩余 CF
+  } else if (frameType === 3) {    // FC — 发送剩余的 CF
     while (txState!.offset < txState!.data.length) { ... }
   }
 })
@@ -108,13 +108,13 @@ Util.OnCan(0x7E0, (msg) => {
 
 ```
 can_tp/
-├── can_tp.ecb    # 工程配置（SIMULATE_0，两个节点）
+├── can_tp.ecb    # 项目配置（SIMULATE_0，两个节点）
 ├── tester.ts     # 节点 1 — CanTp* API 演示
-├── ecu.ts        # 节点 2 — Util.OnCan + output() 模拟 ECU
+├── ecu.ts        # 节点 2 — Util.OnCan + output() ECU 模拟器
 ├── readme.md
 └── readme.zh.md
 ```
 
 ## 真实硬件
 
-将 SIMULATE_0 替换为真实 CAN 设备。双节点在同一物理总线上通信时，两个通道必须能互相 ACK（背靠背连接的两个通道，或总线上接有真实 ECU）。详见 [EcuBus-Pro 文档](https://ecubus.org)。
+将 `SIMULATE_0` 替换为真实的 CAN 设备。 对于在同一物理总线上设置两个节点的情况，两个通道必须能够相互确认（背对背连接的独立通道，或总线上的真实 ECU）。 有关硬件配置，请参阅 [EcuBus-Pro 文档](https://ecubus.org)。

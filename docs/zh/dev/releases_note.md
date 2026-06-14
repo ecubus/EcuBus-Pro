@@ -1,14 +1,35 @@
 # EcuBus-Pro 发布说明
 
-## 0.8.64
+## 0.8.65
 
-自 v0.8.63 以来的变更：
+自v0.8.64以来的变更：
 
+- [bug]: 修复脚本LIN信号触发
+- [opt]:添加UDS序列和服务重复 #350
+- [fix]: 为渲染器导入添加缺失的'src'路径别名 "#352"
+- [feat]: macOS支持、BLF回放读取器和网络拓扑增强 "#347"
+- [bug]: 修复日志变更UDS服务
+- [bug]:修复序列排序 #346
 - [bug]：修复 report.js 中的模块导入
 - [bug]：在 IPC 处理程序中实现带有数据更新逻辑的变量设置 #327
 - [bug]：修复面板图像无法显示本地图像
 - [opt]：优化面板 LED，允许自定义 SVG
 - [bug]：修复插件脚本路径问题
+- [feat]:由@lixiaoxie在 https://github.com/ecubus/EcuBus-Pro/pull/354 实现的带详情面板的拖放BLF/ASC解析
+- [feat]:由@crazy0104在 https://github.com/ecubus/EcuBus-Pro/pull/376 添加的CAN-TP工作者API和can_tp示例
+- [opt]:\* 由@zhangjiance在 https://github.com/ecubus/EcuBus-Pro/pull/379 重构Candle功能并增强时序特性
+
+---
+
+## 0.8.64
+
+自 v0.8.63 以来的变更：
+
+- [bug]: 修复report.js中的模块导入
+- [bug]:在IPC处理器中实现带有数据更新逻辑的变量设置 #327
+- [bug]: 修复面板图像无法显示本地图像
+- [opt]: 优化面板LED，允许自定义SVG
+- [bug]: 修复插件脚本路径问题
 - [feat]：SOME/IP 功能已完成，[详情](https://app.whyengineer.com/docs/um/someip/)
 - [feat]：由 @crazy0104 在 #328 中添加 CDD 解析
 

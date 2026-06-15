@@ -2489,6 +2489,14 @@
         "transfer": {
           "valid": "Valid",
           "assigned": "Assigned"
+        },
+        "contextMenu": {
+          "addFrame": "Add Frame",
+          "deleteFrame": "Delete Frame",
+          "deleteAllFrames": "Delete All Frames",
+          "selectFrameFromDatabase": "Select Frame from Database",
+          "copy": "Copy",
+          "paste": "Paste"
         }
       },
       "canisignale": {

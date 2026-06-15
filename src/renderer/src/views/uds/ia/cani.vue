@@ -1,5 +1,5 @@
 <template>
-  <div style="display: relative">
+  <div style="display: relative" @click="hideContextMenu" @contextmenu.prevent="onContextMenu">
     <VxeGrid
       ref="xGrid"
       v-bind="gridOptions"
@@ -159,6 +159,61 @@
         </div>
       </template>
     </VxeGrid>
+
+    <!-- Right-Click Context Menu (teleported to body to avoid parent CSS interference) -->
+    <Teleport to="body">
+      <div
+        v-show="contextMenuVisible"
+        :style="{
+          position: 'fixed',
+          left: contextMenuX + 'px',
+          top: contextMenuY + 'px',
+          zIndex: 9999
+        }"
+        class="context-menu"
+        @click.stop
+      >
+        <div class="context-menu-item" @click="(addFrame(), hideContextMenu())">
+          {{ i18next.t('uds.network.cani.contextMenu.addFrame') }}
+        </div>
+        <div
+          class="context-menu-item"
+          :class="{ disabled: popoverIndex < 0 || periodTimer[popoverIndex] == true }"
+          @click="(editFrame(), hideContextMenu())"
+        >
+          {{ i18next.t('uds.network.cani.tooltips.editFrame') }}
+        </div>
+        <div class="context-menu-item" @click="(openFrameSelect(), hideContextMenu())">
+          {{ i18next.t('uds.network.cani.contextMenu.selectFrameFromDatabase') }}
+        </div>
+        <div class="context-menu-separator"></div>
+        <div
+          class="context-menu-item"
+          :class="{ disabled: popoverIndex < 0 }"
+          @click="(copyFrame(), hideContextMenu())"
+        >
+          {{ i18next.t('uds.network.cani.contextMenu.copy') }}
+        </div>
+        <div
+          class="context-menu-item"
+          :class="{ disabled: !copiedFrame }"
+          @click="(pasteFrame(), hideContextMenu())"
+        >
+          {{ i18next.t('uds.network.cani.contextMenu.paste') }}
+        </div>
+        <div class="context-menu-separator"></div>
+        <div
+          class="context-menu-item"
+          :class="{ disabled: popoverIndex < 0 || periodTimer[popoverIndex] == true }"
+          @click="(deleteFrame(), hideContextMenu())"
+        >
+          {{ i18next.t('uds.network.cani.contextMenu.deleteFrame') }}
+        </div>
+        <div class="context-menu-item" @click="(deleteAllFrames(), hideContextMenu())">
+          {{ i18next.t('uds.network.cani.contextMenu.deleteAllFrames') }}
+        </div>
+      </div>
+    </Teleport>
 
     <el-tooltip
       effect="light"
@@ -571,6 +626,10 @@ const periodTimer = computed({
   }
 })
 const selectFrameVisible = ref(false)
+const contextMenuVisible = ref(false)
+const contextMenuX = ref(0)
+const contextMenuY = ref(0)
+const copiedFrame = ref<CanInterAction | null>(null)
 const speicalDb = computed(() => {
   //connected device db
   const list: string[] = []
@@ -820,6 +879,7 @@ function dataChangeDone() {
 }
 const byteInputRefs = ref<any[]>([])
 function onByteFocus(event: FocusEvent) {
+  // Auto-select existing content so user can type over it immediately
   const target = event.target as HTMLElement
   const input =
     target.tagName === 'INPUT' ? (target as HTMLInputElement) : target.querySelector('input')
@@ -831,6 +891,7 @@ function dataChange(index: number, v: string) {
       formData.value.data[index] = v.slice(0, -1)
     }
   }
+  // Auto-focus next byte input when current is fully filled (2 hex chars)
   if (v.length >= 2) {
     nextTick(() => {
       const nextRef = byteInputRefs.value[index + 1]
@@ -857,11 +918,82 @@ function handleDataChange(data: Buffer) {
 
 function deleteFrame() {
   if (popoverIndex.value >= 0) {
-    dataBase.ia[editIndex.value].action.splice(popoverIndex.value, 1)
+    const deletedIndex = popoverIndex.value
+    dataBase.ia[editIndex.value].action.splice(deletedIndex, 1)
+    const actions = dataBase.ia[editIndex.value].action
+    if (actions.length > 0) {
+      // Select the previous record, or the first if the deleted one was at index 0
+      popoverIndex.value = Math.max(0, deletedIndex - 1)
+      xGrid.value?.setCurrentRow(actions[popoverIndex.value])
+    } else {
+      popoverIndex.value = -1
+      xGrid.value?.clearCurrentRow()
+    }
+  }
+}
+
+function deleteAllFrames() {
+  const actions = dataBase.ia[editIndex.value].action
+  if (actions.length > 0) {
+    // Clear all periodic sends first
+    for (let i = 0; i < actions.length; i++) {
+      const key = `${editIndex.value}-${i}`
+      if (runtime.canPeriods[key]) {
+        runtime.removeCanPeriod(key)
+        window.electron.ipcRenderer.send('ipc-stop-can-period', key)
+      }
+    }
+    actions.length = 0
     popoverIndex.value = -1
     xGrid.value?.clearCurrentRow()
   }
 }
+
+function copyFrame() {
+  if (popoverIndex.value >= 0) {
+    const frame = dataBase.ia[editIndex.value].action[popoverIndex.value]
+    if (frame) {
+      copiedFrame.value = cloneDeep(frame)
+    }
+  }
+}
+
+function pasteFrame() {
+  if (copiedFrame.value) {
+    const channel = Object.keys(devices.value)[0] || ''
+    const frame = cloneDeep(copiedFrame.value)
+    frame.uuid = v4()
+    if (!Object.keys(devices.value).includes(frame.channel)) {
+      frame.channel = channel
+    }
+    dataBase.ia[editIndex.value].action.push(frame)
+  }
+}
+
+function onContextMenu(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  // Locate row by VxeGrid CSS class instead of relying on data-row-index attribute
+  const row = target.closest('.vxe-body--row') as HTMLElement | null
+  if (row?.parentElement) {
+    const allRows = Array.from(row.parentElement.querySelectorAll('.vxe-body--row'))
+    const rowIndex = allRows.indexOf(row)
+    if (rowIndex >= 0) {
+      popoverIndex.value = rowIndex
+      xGrid.value?.setCurrentRow(dataBase.ia[editIndex.value].action[rowIndex])
+    }
+  }
+  contextMenuVisible.value = true
+  // Keep menu within viewport bounds
+  const menuWidth = 220
+  const menuHeight = 220
+  contextMenuX.value = Math.min(event.clientX, window.innerWidth - menuWidth)
+  contextMenuY.value = Math.min(event.clientY, window.innerHeight - menuHeight)
+}
+
+function hideContextMenu() {
+  contextMenuVisible.value = false
+}
+
 const pressedKey = ref('')
 const animate = ref(false)
 onKeyStroke(true, (e) => {
@@ -886,6 +1018,53 @@ onKeyUp(true, () => {
     animate.value = false
   }, 200)
 })
+
+// Ctrl+C / Ctrl+V keyboard shortcuts for copy/paste frame
+onKeyStroke(['c', 'C'], (e) => {
+  if ((e.ctrlKey || e.metaKey) && !editV.value && !connectV.value && !selectFrameVisible.value) {
+    e.preventDefault()
+    copyFrame()
+  }
+})
+onKeyStroke(['v', 'V'], (e) => {
+  if ((e.ctrlKey || e.metaKey) && !editV.value && !connectV.value && !selectFrameVisible.value) {
+    e.preventDefault()
+    pasteFrame()
+  }
+})
+
+// Arrow Up/Down: navigate between frame rows
+onKeyStroke('ArrowUp', (e) => {
+  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+    const actions = dataBase.ia[editIndex.value].action
+    if (actions.length > 0 && popoverIndex.value > 0) {
+      e.preventDefault()
+      popoverIndex.value--
+      xGrid.value?.setCurrentRow(actions[popoverIndex.value])
+    }
+  }
+})
+onKeyStroke('ArrowDown', (e) => {
+  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+    const actions = dataBase.ia[editIndex.value].action
+    if (actions.length > 0 && popoverIndex.value < actions.length - 1) {
+      e.preventDefault()
+      popoverIndex.value++
+      xGrid.value?.setCurrentRow(actions[popoverIndex.value])
+    }
+  }
+})
+
+// Delete key: delete selected frame
+onKeyStroke('Delete', (e) => {
+  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+    if (popoverIndex.value >= 0 && !periodTimer.value[popoverIndex.value]) {
+      e.preventDefault()
+      deleteFrame()
+    }
+  }
+})
+
 function sendFrame(index: number) {
   const frame = dataBase.ia[editIndex.value]?.action[index]
   if (frame) {
@@ -1036,6 +1215,41 @@ function openFrameSelect() {
   }
 }
 
+/* Context Menu (global — Teleport renders it outside component tree) */
+.context-menu {
+  background: var(--el-bg-color-overlay);
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  min-width: 220px;
+  font-size: 13px;
+}
+
+.context-menu-item {
+  padding: 6px 16px;
+  cursor: pointer;
+  color: var(--el-text-color-primary);
+  transition: background-color 0.15s;
+}
+
+.context-menu-item:hover {
+  background-color: var(--el-color-primary-light-9);
+}
+
+.context-menu-item.disabled {
+  color: var(--el-text-color-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.context-menu-separator {
+  height: 1px;
+  margin: 4px 0;
+  background-color: var(--el-border-color-light);
+}
+
+/* Frame data tooltip */
 .frame-data-tooltip {
   max-width: 480px !important;
   padding: 6px 8px !important;
@@ -1104,14 +1318,14 @@ function openFrameSelect() {
   color: #1f2937;
 }
 
+.hint-text {
+  color: #6b7280;
+}
+
 .name-cell {
   cursor: default;
   display: inline-block;
   width: 100%;
-}
-
-.hint-text {
-  color: #6b7280;
 }
 
 /* 动画效果 */

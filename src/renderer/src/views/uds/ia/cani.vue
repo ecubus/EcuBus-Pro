@@ -1,6 +1,13 @@
 <template>
   <div style="display: relative">
-    <VxeGrid ref="xGrid" v-bind="gridOptions" class="sequenceTable" @cell-click="ceilClick">
+    <VxeGrid
+      ref="xGrid"
+      v-bind="gridOptions"
+      class="sequenceTable"
+      @cell-click="ceilClick"
+      @cell-mouseenter="onCellMouseEnter"
+      @cell-mouseleave="onCellMouseLeave"
+    >
       <template #default_trigger="{ row, rowIndex }">
         <span class="lr">
           <span
@@ -82,6 +89,9 @@
         <el-input v-model="row.id" size="small" style="width: 100%" @input="idChange" />
       </template>
       <template #default_name="{ row }">
+        <span class="name-cell">{{ row.name || '--' }}</span>
+      </template>
+      <template #edit_name="{ row }">
         <el-input v-model="row.name" size="small" style="width: 100%" />
       </template>
       <template #toolbar>
@@ -149,6 +159,70 @@
         </div>
       </template>
     </VxeGrid>
+
+    <el-tooltip
+      effect="light"
+      placement="top"
+      :show-after="200"
+      popper-class="frame-data-tooltip"
+      :virtual-ref="tooltipTarget"
+      virtual-triggering
+      :disabled="!tooltipInfo"
+    >
+      <template #content>
+        <div class="tooltip-content">
+          <table class="tp-table">
+            <tbody>
+              <tr v-if="tooltipInfo?.name">
+                <td class="tp-label">Name</td>
+                <td class="tp-value">{{ tooltipInfo.name }}</td>
+              </tr>
+              <tr v-if="tooltipInfo?.database">
+                <td class="tp-label">DB</td>
+                <td class="tp-value">{{ tooltipInfo.database }}</td>
+              </tr>
+              <tr>
+                <td class="tp-label">ID</td>
+                <td class="tp-value">0x{{ tooltipInfo?.idHex }}</td>
+              </tr>
+              <tr>
+                <td class="tp-label">Type</td>
+                <td class="tp-value">
+                  {{ tooltipInfo?.typeName }}<span v-if="tooltipInfo?.remote">, Remote</span
+                  ><span v-if="tooltipInfo?.brs">, BRS</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="tp-label">DLC</td>
+                <td class="tp-value">{{ tooltipInfo?.dlc }}</td>
+              </tr>
+              <tr>
+                <td class="tp-label">Channel</td>
+                <td class="tp-value">{{ tooltipInfo?.channelName }}</td>
+              </tr>
+              <tr>
+                <td class="tp-label">Trigger</td>
+                <td class="tp-value">
+                  {{ tooltipInfo?.triggerType
+                  }}<span v-if="tooltipInfo?.triggerDetail">
+                    ({{ tooltipInfo.triggerDetail }})</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tp-data">
+            <template v-if="tooltipInfo?.dataChunks.length">
+              <template v-for="(chunk, ci) in tooltipInfo.dataChunks" :key="ci">
+                <span v-if="ci > 0"><br /></span>
+                <span>{{ chunk }}</span>
+              </template>
+            </template>
+            <span v-else>--</span>
+          </div>
+        </div>
+      </template>
+    </el-tooltip>
 
     <el-popover width="250" :virtual-ref="ppRef" trigger="click" virtual-triggering>
       <el-row v-if="dataBase.ia[editIndex]?.action[popoverIndex]" style="padding: 10px">
@@ -397,6 +471,60 @@ import { v4 } from 'uuid'
 import i18next from 'i18next'
 
 const xGrid = ref()
+const tooltipRowIndex = ref(-1)
+const tooltipTarget = ref<HTMLElement | null>(null)
+let tooltipTimer: ReturnType<typeof setTimeout> | null = null
+
+const tooltipInfo = computed(() => {
+  const idx = tooltipRowIndex.value
+  if (idx < 0) return null
+  const row = dataBase.ia[editIndex.value]?.action[idx]
+  if (!row) return null
+
+  // Explicitly read all row properties so Vue tracks every reactive dependency
+  const name = row.name
+  const database = row.database
+  const rawId = row.id
+  const rowType = row.type
+  const remote = row.remote
+  const brs = row.brs
+  const dlc = row.dlc
+  const channel = row.channel
+  const trigger = row.trigger
+  const data = row.data
+
+  return {
+    name,
+    database,
+    idHex: rawId
+      ? parseInt(rawId, 16)
+          .toString(16)
+          .toUpperCase()
+          .padStart(rowType.includes('ecan') ? 8 : 4, '0')
+      : '--',
+    typeName: typeMap[rowType || ''] || rowType,
+    remote,
+    brs,
+    dlc,
+    channelName: devices.value[channel]?.name || channel || '--',
+    triggerType: trigger.type.toUpperCase(),
+    triggerDetail:
+      trigger.type === 'manual' && trigger.onKey
+        ? `Key: ${trigger.onKey}`
+        : trigger.type === 'periodic'
+          ? `${trigger.period || 10}ms`
+          : '',
+    dataChunks: (() => {
+      if (!data || data.length === 0) return []
+      const formatted = data.map((b: string) => (b || '00').padStart(2, '0').toUpperCase())
+      const chunks: string[] = []
+      for (let i = 0; i < formatted.length; i += 16) {
+        chunks.push(formatted.slice(i, i + 16).join(' '))
+      }
+      return chunks
+    })()
+  }
+})
 // const logData = ref<LogData[]>([])
 const typeMap = {
   can: i18next.t('uds.network.cani.frameTypes.can'),
@@ -502,7 +630,7 @@ const gridOptions = computed(() => {
     columns: [
       {
         type: 'seq',
-        width: 50,
+        width: 40,
         title: '#',
         align: 'center',
         fixed: 'left',
@@ -511,28 +639,28 @@ const gridOptions = computed(() => {
       {
         field: 'send',
         title: i18next.t('uds.network.cani.table.send'),
-        width: 100,
+        minWidth: 80,
         resizable: false,
         slots: { default: 'default_send' }
       },
       {
         field: 'trigger',
         title: i18next.t('uds.network.cani.table.trigger'),
-        width: 200,
+        minWidth: 140,
         resizable: false,
         slots: { default: 'default_trigger' }
       },
       {
         field: 'name',
         title: i18next.t('uds.network.cani.table.name'),
-        width: 100,
+        minWidth: 80,
         editRender: {},
-        slots: { edit: 'default_name' }
+        slots: { default: 'default_name', edit: 'edit_name' }
       },
       {
         field: 'id',
         title: i18next.t('uds.network.cani.table.idHex'),
-        minWidth: 100,
+        minWidth: 80,
         editRender: {},
         slots: { edit: 'default_id' }
       },
@@ -546,14 +674,14 @@ const gridOptions = computed(() => {
       {
         field: 'type',
         title: i18next.t('uds.network.cani.table.type'),
-        width: 100,
+        minWidth: 90,
         editRender: {},
         slots: { default: 'default_type1', edit: 'default_type' }
       },
       {
         field: 'dlc',
         title: i18next.t('uds.network.cani.table.dlc'),
-        width: 100,
+        minWidth: 70,
         editRender: {},
         slots: { edit: 'default_dlc' }
       }
@@ -641,6 +769,34 @@ const dlcToLen = computed(() => {
 })
 function ceilClick(val: any) {
   popoverIndex.value = val.rowIndex
+}
+function onCellMouseEnter({ rowIndex, $event }: any) {
+  if (tooltipTimer) {
+    clearTimeout(tooltipTimer)
+    tooltipTimer = null
+  }
+  const tr = $event.currentTarget.parentElement as HTMLElement
+  // Same row: tr unchanged. Only update target and fire synthetic event on row change
+  if (tooltipRowIndex.value !== rowIndex || tooltipTarget.value !== tr) {
+    tooltipRowIndex.value = rowIndex
+    tooltipTarget.value = tr
+    nextTick(() => {
+      // Dispatch synthetic mouseenter so el-tooltip detects hover on the row
+      tr.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }))
+    })
+  }
+}
+function onCellMouseLeave() {
+  // el-tooltip auto-hides via its own mouseleave listener on the tr.
+  // Delay clearing rowIndex to allow moving between rows without flicker
+  if (tooltipTimer) {
+    clearTimeout(tooltipTimer)
+    tooltipTimer = null
+  }
+  tooltipTimer = setTimeout(() => {
+    tooltipRowIndex.value = -1
+    tooltipTarget.value = null
+  }, 200)
 }
 function idChange(v: string) {
   //if last char is not hex, remove it
@@ -879,6 +1035,52 @@ function openFrameSelect() {
     padding: 0 5px !important;
   }
 }
+
+.frame-data-tooltip {
+  max-width: 480px !important;
+  padding: 6px 8px !important;
+}
+
+.tooltip-content {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tp-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tp-table tr {
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.tp-label {
+  color: var(--el-text-color-secondary);
+  padding: 2px 8px 2px 0;
+  white-space: nowrap;
+  vertical-align: top;
+  text-align: right;
+  width: 50px;
+}
+
+.tp-value {
+  color: var(--el-text-color-primary);
+  padding: 2px 0;
+  word-break: break-all;
+}
+
+.tp-data {
+  margin-top: 6px;
+  padding: 4px 6px;
+  background: var(--el-fill-color-light);
+  border-radius: 3px;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  word-break: break-all;
+  color: var(--el-text-color-primary);
+}
 </style>
 <style scoped>
 .key-box {
@@ -900,6 +1102,12 @@ function openFrameSelect() {
   font-size: 2.25rem;
   font-weight: bold;
   color: #1f2937;
+}
+
+.name-cell {
+  cursor: default;
+  display: inline-block;
+  width: 100%;
 }
 
 .hint-text {

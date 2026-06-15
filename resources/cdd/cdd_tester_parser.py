@@ -105,6 +105,48 @@ class CddParse(CddParserBase):
         except ValueError:
             return None
 
+    def _first_text_by_paths(self, element, paths):
+        for path in paths:
+            text = self._text_by_path(element, path)
+            if text is not None:
+                return text
+        for child in element.iter("TUV"):
+            if child is element or child.text is None:
+                continue
+            value = child.text.strip()
+            if value:
+                return value
+        return None
+
+    def _load_enum_value_texts(self, enum_def):
+        choices = {}
+        for choice in enum_def.iter():
+            if choice.tag not in ("ETAG", "TEXTMAP"):
+                continue
+
+            raw_value = choice.attrib.get("v") or choice.attrib.get("s")
+            value = self._parse_optional_number(
+                (raw_value or "").replace("(", "").replace(")", "")
+            )
+            if value is None:
+                continue
+
+            raw_end = choice.attrib.get("e")
+            end_value = self._parse_optional_number(
+                (raw_end or "").replace("(", "").replace(")", "")
+            )
+            if end_value is not None and end_value != value:
+                continue
+
+            text = self._first_text_by_paths(
+                choice,
+                ("TUV", "TEXT/TUV", "NAME/TUV", "QUAL"),
+            )
+            if text is not None:
+                choices[value] = text
+
+        return choices
+
     def _cdd_offset_to_start_bit(self, offset, bit_length, byte_order):
         if byte_order == "big_endian":
             return (8 * (offset // 8)) + min(7, (offset % 8) + bit_length - 1)
@@ -295,7 +337,11 @@ class CddParse(CddParserBase):
                 definitions[attr_id] = {
                     "qual": qual,
                     "default": default_value,
+                    "choices": self._load_enum_value_texts(child) if child.tag == "ENUMDEF" else {},
                 }
+        self.system_defs_by_qual = {
+            item["qual"]: item for item in definitions.values() if item.get("qual")
+        }
         return definitions
 
     def _load_system_defaults(self, system_defs):
@@ -321,6 +367,111 @@ class CddParse(CddParserBase):
                 values[qual] = value
         return values
 
+    def _split_system_qualifier(self, qual):
+        if not qual or "." not in qual:
+            return None, qual
+        prefix, suffix = qual.split(".", 1)
+        return prefix, suffix
+
+    def _enum_choice_text(self, qual, value):
+        choices = (getattr(self, "system_defs_by_qual", {}).get(qual) or {}).get("choices") or {}
+        return choices.get(value)
+
+    def _detect_interface_bus_kind(self, interface_name, bus_type_text=None, bus_type_value=None):
+        normalized_text = _normalize_text(bus_type_text)
+        normalized_name = _normalize_text(interface_name)
+
+        if "doip" in normalized_text or normalized_text in ("eth", "ethernet"):
+            return "eth"
+        if "can" in normalized_text:
+            return "can"
+
+        if normalized_name == "doip" or normalized_name.startswith("doip"):
+            return "eth"
+        if normalized_name == "can" or normalized_name.startswith("can"):
+            return "can"
+
+        if bus_type_value == 1 and normalized_name == "doip":
+            return "eth"
+        return None
+
+    def _is_interface_supported(self, system_values, interface_name):
+        value = system_values.get(interface_name)
+        if value is None:
+            return True
+
+        choice_text = _normalize_text(self._enum_choice_text(interface_name, value))
+        if choice_text in ("notsupported", "unsupported", "disabled", "disable", "false", "no", "off"):
+            return False
+        if choice_text in ("supported", "enabled", "enable", "true", "yes", "on"):
+            return True
+        return value != 0
+
+    def _canonical_interface_values(self, system_values, interface_name, bus_kind):
+        family = "DoIP" if bus_kind == "eth" else "CAN"
+        canonical = {}
+
+        for key, value in system_values.items():
+            if "." not in key:
+                canonical[key] = value
+                continue
+
+            prefix, suffix = self._split_system_qualifier(key)
+            if prefix == interface_name:
+                canonical[f"{family}.{suffix}"] = value
+            elif prefix == family:
+                canonical[key] = value
+
+        canonical[family] = 1
+        return canonical
+
+    def _load_interface_system_values(self, system_values, explicit_system_values=None):
+        interfaces = []
+        seen = set()
+        candidate_values = explicit_system_values or {}
+        if not any(
+            (self._split_system_qualifier(qual)[1] or "").lower() == "bustype"
+            for qual in candidate_values
+        ):
+            candidate_values = system_values
+
+        for qual, value in candidate_values.items():
+            interface_name, suffix = self._split_system_qualifier(qual)
+            if interface_name is None or (suffix or "").lower() != "bustype" or interface_name in seen:
+                continue
+            if not self._is_interface_supported(system_values, interface_name):
+                continue
+
+            bus_kind = self._detect_interface_bus_kind(
+                interface_name,
+                self._enum_choice_text(qual, value),
+                value,
+            )
+            if bus_kind is None:
+                continue
+
+            seen.add(interface_name)
+            interfaces.append(
+                {
+                    "name": interface_name,
+                    "type": bus_kind,
+                    "values": self._canonical_interface_values(system_values, interface_name, bus_kind),
+                }
+            )
+
+        if interfaces:
+            return interfaces
+
+        legacy_kind = self._detect_bus_kind(system_values)
+        legacy_name = "DoIP" if legacy_kind == "eth" else "CAN"
+        return [
+            {
+                "name": legacy_name,
+                "type": legacy_kind,
+                "values": system_values,
+            }
+        ]
+
     def _detect_bus_kind(self, system_values):
         if system_values.get("CAN") == 1 or any(key.startswith("CAN.") for key in system_values):
             return "can"
@@ -328,34 +479,81 @@ class CddParse(CddParserBase):
             return "eth"
         return "can"
 
-    def _build_uds_time(self, system_values):
+    def _tester_present_addr_index(self, addresses, system_values=None):
+        system_values = system_values or {}
+        preferred_addr_type = None
+
+        if system_values.get("CAN.TesterPresentPhys") is not None:
+            preferred_addr_type = "PHYSICAL"
+        elif system_values.get("CAN.TesterPresentFunc") is not None:
+            preferred_addr_type = "FUNCTIONAL"
+
+        if preferred_addr_type is not None:
+            for index, address in enumerate(addresses):
+                can_addr = address.get("canAddr")
+                if can_addr and can_addr.get("addrType") == preferred_addr_type:
+                    return index
+
+        for index, address in enumerate(addresses):
+            can_addr = address.get("canAddr")
+            if can_addr and can_addr.get("addrType") == "PHYSICAL":
+                return index
+
+        for index, address in enumerate(addresses):
+            if address.get("canAddr"):
+                return index
+
+        return None
+
+    def _build_uds_time(self, system_values, addresses=None, bus_kind=None):
+        addresses = addresses or []
+        tester_present_addr_index = self._tester_present_addr_index(addresses, system_values)
+
+        def with_tester_present_address(uds_time):
+            if bus_kind != "can" or tester_present_addr_index is None:
+                uds_time["testerPresentEnable"] = False
+                return uds_time
+
+            if uds_time.get("testerPresentEnable"):
+                uds_time["testerPresentAddrIndex"] = tester_present_addr_index
+            return uds_time
+
         if system_values.get("CAN") == 1 or any(key.startswith("CAN.") for key in system_values):
             s3_time = system_values.get("CAN.S3Client", 5000)
-            return {
+            return with_tester_present_address({
                 "pTime": system_values.get("CAN.P2Client", 2000),
                 "pExtTime": system_values.get("CAN.P2ExClient", 5000),
                 "s3Time": s3_time,
                 "testerPresentEnable": s3_time > 0,
-            }
+            })
 
         if system_values.get("DoIP") == 1 or any(key.startswith("DoIP.") for key in system_values):
             s3_time = system_values.get(
                 "DoIP.CP_TesterPresentTime",
                 system_values.get("DoIP.CP_TesterPresentTime_Ecu", 5000),
             )
-            return {
+            return with_tester_present_address({
                 "pTime": system_values.get("DoIP.CP_P2Max_Ecu", 2000),
                 "pExtTime": system_values.get("DoIP.CP_P2Star_Ecu", 5000),
                 "s3Time": s3_time,
                 "testerPresentEnable": s3_time > 0,
-            }
+            })
 
-        return {
+        return with_tester_present_address({
             "pTime": 2000,
             "pExtTime": 5000,
             "s3Time": 5000,
             "testerPresentEnable": False,
-        }
+        })
+
+    def _tester_present_service_id(self, service_map):
+        tester_present_services = service_map.get("0x3E") or []
+        for service in tester_present_services:
+            if service.get("subfunc") == "0x00":
+                return service.get("id")
+        if tester_present_services:
+            return tester_present_services[0].get("id")
+        return None
 
     def _build_can_address_defaults(self, system_values):
         defaults = {}
@@ -366,22 +564,95 @@ class CddParse(CddParserBase):
         )
         defaults["paddingValue"] = hex(system_values.get("CAN.CANFrameFillerByte", 0x00))
         defaults["padding"] = system_values.get("CAN.FillerByteHandling", 1) != 0
-        defaults["dlc"] = 8
-        defaults["brs"] = False
-        defaults["canfd"] = False
+        canfd = self._system_flag_enabled(system_values, "CAN.CanFdHandling")
+        defaults["dlc"] = self._can_dlc_to_length(system_values.get("CAN.CanFdMaxDlc")) if canfd else 8
+        defaults["brs"] = self._system_flag_enabled(system_values, "CAN.CanFdBrsHandling")
+        defaults["canfd"] = canfd
         defaults["remote"] = False
         defaults["AE"] = "0"
         return defaults
 
-    def _build_can_address_entry(self, name, addr_type, tx_id, rx_id, id_type, defaults):
+    def _system_flag_enabled(self, system_values, key):
+        value = system_values.get(key)
+        if value is None:
+            return False
+
+        choice_text = _normalize_text(self._enum_choice_text(key, value))
+        if choice_text in ("enabled", "enable", "true", "yes", "on"):
+            return True
+        if choice_text in ("disabled", "disable", "false", "no", "off"):
+            return False
+        return value != 0
+
+    def _can_dlc_to_length(self, dlc):
+        if dlc is None:
+            return 8
+        return {
+            9: 12,
+            10: 16,
+            11: 20,
+            12: 24,
+            13: 32,
+            14: 48,
+            15: 64,
+        }.get(dlc, dlc)
+
+    def _can_addr_format(self, system_values, source_key):
+        value = system_values.get(source_key)
+        choice_text = _normalize_text(self._enum_choice_text(source_key, value))
+
+        if "fixednormal" in choice_text or "normalfixed" in choice_text:
+            return "NORMAL_FIXED"
+        if "extended" in choice_text:
+            return "EXTENDED"
+        if "mixed" in choice_text:
+            return "MIXED"
+        if "enhanced" in choice_text:
+            return "ENHANCED"
+        if "normal" in choice_text:
+            return "NORMAL"
+
+        return {
+            0: "NORMAL",
+            1: "EXTENDED",
+            2: "MIXED",
+            3: "NORMAL_FIXED",
+            4: "ENHANCED",
+        }.get(value, "NORMAL")
+
+    def _network_address_pair(self, system_values, addr_format, default_sa, default_ta, functional=False):
+        if addr_format == "NORMAL":
+            return default_sa, default_ta
+
+        tester_address = system_values.get("CAN.TesterAddress")
+        ecu_address = system_values.get("CAN.BroadcastAddress" if functional else "CAN.EcuAddress")
+        if ecu_address is None and functional:
+            ecu_address = system_values.get("CAN.EcuAddress")
+
+        sa = hex(tester_address) if tester_address is not None else default_sa
+        ta = hex(ecu_address) if ecu_address is not None else default_ta
+        return sa, ta
+
+    def _build_can_address_entry(
+        self,
+        name,
+        addr_type,
+        tx_id,
+        rx_id,
+        id_type,
+        defaults,
+        addr_format="NORMAL",
+        sa=None,
+        ta=None,
+    ):
         return {
             "type": "can",
             "canAddr": {
                 "name": name,
-                "addrFormat": "NORMAL",
+                "addrFormat": addr_format,
                 "addrType": addr_type,
-                "SA": tx_id,
-                "TA": rx_id,
+                "SA": sa or tx_id,
+                "TA": ta or rx_id,
                 "canIdTx": tx_id,
                 "canIdRx": rx_id,
                 "idType": id_type,
@@ -389,7 +660,75 @@ class CddParse(CddParserBase):
             },
         }
 
+    def _build_eth_address_entry(
+        self,
+        name,
+        ta_type,
+        target_logical_addr,
+        tester_logical_addr,
+        gateway_logical_addr=None,
+    ):
+        is_gateway = gateway_logical_addr is not None
+        entity = {
+            "vin": "00000000000000000",
+            "eid": "00-00-00-00-00-00",
+            "gid": "00-00-00-00-00-00",
+            "nodeType": "gateway" if is_gateway else "node",
+            "logicalAddr": gateway_logical_addr if is_gateway else target_logical_addr,
+        }
+        if is_gateway:
+            entity["nodeAddr"] = target_logical_addr
+
+        return {
+            "type": "eth",
+            "ethAddr": {
+                "name": name,
+                "taType": ta_type,
+                "virReqType": "broadcast",
+                "virReqAddr": "",
+                "entityNotFoundBehavior": "normal",
+                "entity": entity,
+                "tester": {
+                    "testerLogicalAddr": tester_logical_addr,
+                    "routeActiveTime": 0,
+                    "createConnectDelay": 1000,
+                },
+            },
+        }
+
+    def _build_eth_addresses(self, system_values):
+        tester_logical_addr = system_values.get("DoIP.CP_DoIPLogicalTesterAddress", 0x0E00)
+        gateway_logical_addr = system_values.get("DoIP.CP_DoIPLogicalGatewayAddress")
+        ecu_logical_addr = system_values.get("DoIP.CP_DoIPLogicalEcuAddress")
+        functional_logical_addr = system_values.get("DoIP.CP_DoIPLogicalFunctionalAddress")
+
+        addresses = []
+        if ecu_logical_addr is not None:
+            addresses.append(
+                self._build_eth_address_entry(
+                    "Physical",
+                    "physical",
+                    ecu_logical_addr,
+                    tester_logical_addr,
+                    gateway_logical_addr,
+                )
+            )
+        if functional_logical_addr is not None:
+            addresses.append(
+                self._build_eth_address_entry(
+                    "Functional",
+                    "functional",
+                    functional_logical_addr,
+                    tester_logical_addr,
+                    gateway_logical_addr,
+                )
+            )
+        return addresses
+
     def _build_addresses(self, system_values):
+        if system_values.get("DoIP") == 1 or any(key.startswith("DoIP.") for key in system_values):
+            return self._build_eth_addresses(system_values)
+
         if not (
             system_values.get("CAN") == 1
             or any(key.startswith("CAN.") for key in system_values)
@@ -407,20 +746,49 @@ class CddParse(CddParserBase):
         )
         defaults = self._build_can_address_defaults(system_values)
         standard_id_type = "EXTENDED" if is_extended else "STANDARD"
+        physical_addr_format = self._can_addr_format(system_values, "CAN.AddrScheme")
+        physical_sa, physical_ta = self._network_address_pair(
+            system_values,
+            physical_addr_format,
+            tx_id,
+            rx_id,
+        )
 
         addresses = [
-            self._build_can_address_entry("Physical", "PHYSICAL", tx_id, rx_id, standard_id_type, defaults)
+            self._build_can_address_entry(
+                "Physical",
+                "PHYSICAL",
+                tx_id,
+                rx_id,
+                standard_id_type,
+                defaults,
+                physical_addr_format,
+                physical_sa,
+                physical_ta,
+            )
         ]
 
         if can_func_req is not None:
+            functional_addr_format = self._can_addr_format(system_values, "CAN.AddrSchemeFunc")
+            functional_tx_id = hex(can_func_req)
+            functional_sa, functional_ta = self._network_address_pair(
+                system_values,
+                functional_addr_format,
+                functional_tx_id,
+                rx_id,
+                functional=True,
+            )
             addresses.append(
                 self._build_can_address_entry(
                     "Functional",
                     "FUNCTIONAL",
-                    hex(can_func_req),
+                    functional_tx_id,
                     rx_id,
                     "EXTENDED" if can_func_req > 0x7FF else "STANDARD",
                     defaults,
+                    functional_addr_format,
+                    functional_sa,
+                    functional_ta,
                 )
             )
 
@@ -1556,15 +1924,34 @@ class CddParse(CddParserBase):
                 sid = built["serviceId"]
                 service_map.setdefault(sid, []).append(built)
 
+        bus_kind = self._detect_bus_kind(system_values)
+        addresses = self._build_addresses(system_values)
+        uds_time = self._build_uds_time(system_values, addresses, bus_kind)
+        if uds_time.get("testerPresentEnable"):
+            tester_present_service_id = self._tester_present_service_id(service_map)
+            if tester_present_service_id is not None:
+                uds_time["testerPresentSpecialService"] = tester_present_service_id
+
         return {
             "id": str(uuid.uuid4()),
             "name": name,
-            "type": self._detect_bus_kind(system_values),
-            "udsTime": self._build_uds_time(system_values),
+            "type": bus_kind,
+            "udsTime": uds_time,
             "seqList": [],
-            "address": self._build_addresses(system_values),
+            "address": addresses,
             "allServiceList": service_map,
         }
+
+    def _element_display_name(self, element, fallback):
+        return self._text_by_path(element, "QUAL") or self._text_by_path(element, "NAME/TUV") or fallback
+
+    def _unique_result_key(self, testers, base_name):
+        if base_name not in testers:
+            return base_name
+        index = 2
+        while f"{base_name}_{index}" in testers:
+            index += 1
+        return f"{base_name}_{index}"
 
     def parse_tester_info(self, file_path):
         try:
@@ -1592,16 +1979,20 @@ class CddParse(CddParserBase):
             ecu_name = self._text_by_path(ecu, "QUAL") or self._text_by_path(ecu, "NAME/TUV") or "CDD"
             result = {ecu_name: {}}
             ecu_system_values = dict(system_defaults)
-            ecu_system_values.update(self._load_system_values(ecu, system_defs))
+            ecu_explicit_values = self._load_system_values(ecu, system_defs)
+            ecu_system_values.update(ecu_explicit_values)
 
             variants = self._direct_children(ecu, "VAR")
             if not variants:
                 variants = [ecu]
 
             for index, var in enumerate(variants):
-                var_name = ecu_name
+                var_name = self._element_display_name(var, ecu_name if var is ecu else f"{ecu_name}_{index + 1}")
                 system_values = dict(ecu_system_values)
-                system_values.update(self._load_system_values(var, system_defs))
+                explicit_values = dict(ecu_explicit_values)
+                var_explicit_values = self._load_system_values(var, system_defs)
+                explicit_values.update(var_explicit_values)
+                system_values.update(var_explicit_values)
                 diagnostics = []
                 for diag_class in self._direct_children(var, "DIAGCLASS"):
                     class_name = self._text_by_path(diag_class, "QUAL") or self._text_by_path(diag_class, "NAME/TUV") or ""
@@ -1615,7 +2006,19 @@ class CddParse(CddParserBase):
                         or ""
                     )
                     diagnostics.append(self._load_diag_instance(diag_inst, class_name))
-                result[ecu_name][var_name] = self._build_tester(var_name, diagnostics, system_values)
+                interfaces = self._load_interface_system_values(system_values, explicit_values)
+                for interface in interfaces:
+                    tester_name = var_name if len(interfaces) == 1 else interface["name"]
+                    result_key = tester_name
+                    if len(variants) > 1 and len(interfaces) > 1:
+                        result_key = f"{var_name}.{interface['name']}"
+                        tester_name = result_key
+                    result_key = self._unique_result_key(result[ecu_name], result_key)
+                    result[ecu_name][result_key] = self._build_tester(
+                        tester_name,
+                        diagnostics,
+                        interface["values"],
+                    )
 
             return {"error": 0, "data": result}
         except Exception as exc:

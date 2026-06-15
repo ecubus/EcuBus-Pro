@@ -313,11 +313,17 @@
               <el-input
                 v-for="index in dlcToLen"
                 :key="index"
+                :ref="
+                  (el: any) => {
+                    if (el) byteInputRefs[index - 1] = el
+                  }
+                "
                 v-model="formData.data[index - 1]"
                 class="dataI"
                 :maxlength="2"
                 :placeholder="i18next.t('uds.network.cani.placeholders.hexByte')"
                 style="width: 65px; margin-right: 5px; margin-bottom: 5px"
+                @focus="onByteFocus"
                 @input="dataChange(index - 1, $event)"
                 @change="dataChangeDone"
                 ><template #prepend>{{ index - 1 }}</template></el-input
@@ -656,11 +662,33 @@ function dataChangeDone() {
     }
   }
 }
+const byteInputRefs = ref<any[]>([])
+function onByteFocus(event: FocusEvent) {
+  const target = event.target as HTMLElement
+  const input =
+    target.tagName === 'INPUT' ? (target as HTMLInputElement) : target.querySelector('input')
+  input?.select()
+}
 function dataChange(index: number, v: string) {
   if (v.length > 0 && formData.value) {
     if (v[v.length - 1].match(/[0-9a-fA-F]/) == null) {
       formData.value.data[index] = v.slice(0, -1)
     }
+  }
+  if (v.length >= 2) {
+    nextTick(() => {
+      const nextRef = byteInputRefs.value[index + 1]
+      if (nextRef) {
+        if (typeof nextRef.focus === 'function') {
+          nextRef.focus()
+          nextRef.select?.()
+        } else if (nextRef.$el) {
+          const input = nextRef.$el.querySelector('input')
+          input?.focus()
+          input?.select()
+        }
+      }
+    })
   }
 }
 function handleDataChange(data: Buffer) {

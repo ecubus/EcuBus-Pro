@@ -413,6 +413,8 @@ class CddParse(CddParserBase):
 
         for key, value in system_values.items():
             if "." not in key:
+                if f"{key}.BusType" in system_values and key not in (interface_name, family):
+                    continue
                 canonical[key] = value
                 continue
 

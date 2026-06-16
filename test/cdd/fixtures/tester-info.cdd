@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CANDELA>
+  <ECUDOC>
+    <ENUMDEF id="iface_can_fd" v="1">
+      <QUAL>CAN_FD</QUAL>
+      <ETAG v="0"><TUV>not supported</TUV></ETAG>
+      <ETAG v="1"><TUV>supported</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="iface_doip_iso13400" v="1">
+      <QUAL>DoIP_ISO13400</QUAL>
+      <ETAG v="0"><TUV>not supported</TUV></ETAG>
+      <ETAG v="1"><TUV>supported</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="iface_private_can" v="0">
+      <QUAL>PrivateCAN</QUAL>
+      <ETAG v="0"><TUV>not supported</TUV></ETAG>
+      <ETAG v="1"><TUV>supported</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="bus_can_fd" v="0">
+      <QUAL>CAN_FD.BusType</QUAL>
+      <ETAG v="0"><TUV>CAN</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="bus_doip_iso13400" v="0">
+      <QUAL>DoIP_ISO13400.BusType</QUAL>
+      <ETAG v="0"><TUV>Ethernet</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="bus_private_can" v="0">
+      <QUAL>PrivateCAN.BusType</QUAL>
+      <ETAG v="0"><TUV>CAN</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="can_fd_handling" v="1">
+      <QUAL>CAN_FD.CanFdHandling</QUAL>
+      <ETAG v="0"><TUV>disabled</TUV></ETAG>
+      <ETAG v="1"><TUV>enabled</TUV></ETAG>
+    </ENUMDEF>
+    <ENUMDEF id="can_fd_brs_handling" v="1">
+      <QUAL>CAN_FD.CanFdBrsHandling</QUAL>
+      <ETAG v="0"><TUV>disabled</TUV></ETAG>
+      <ETAG v="1"><TUV>enabled</TUV></ETAG>
+    </ENUMDEF>
+    <UNSDEF id="can_fd_dlc" v="15"><QUAL>CAN_FD.CanFdMaxDlc</QUAL></UNSDEF>
+    <UNSDEF id="can_req" v="1792"><QUAL>CAN_FD.ReqCanId</QUAL></UNSDEF>
+    <UNSDEF id="can_res" v="1800"><QUAL>CAN_FD.ResCanId</QUAL></UNSDEF>
+    <UNSDEF id="can_func" v="2015"><QUAL>CAN_FD.ReqCanIdFunc</QUAL></UNSDEF>
+    <UNSDEF id="can_p2" v="50"><QUAL>CAN_FD.P2Client</QUAL></UNSDEF>
+    <UNSDEF id="can_p2ex" v="500"><QUAL>CAN_FD.P2ExClient</QUAL></UNSDEF>
+    <UNSDEF id="can_s3" v="5000"><QUAL>CAN_FD.S3Client</QUAL></UNSDEF>
+    <UNSDEF id="can_tester_present_phys" v="1"><QUAL>CAN_FD.TesterPresentPhys</QUAL></UNSDEF>
+    <UNSDEF id="doip_tester" v="3584"><QUAL>DoIP_ISO13400.CP_DoIPLogicalTesterAddress</QUAL></UNSDEF>
+    <UNSDEF id="doip_gateway" v="4096"><QUAL>DoIP_ISO13400.CP_DoIPLogicalGatewayAddress</QUAL></UNSDEF>
+    <UNSDEF id="doip_ecu" v="4097"><QUAL>DoIP_ISO13400.CP_DoIPLogicalEcuAddress</QUAL></UNSDEF>
+    <UNSDEF id="doip_func" v="4098"><QUAL>DoIP_ISO13400.CP_DoIPLogicalFunctionalAddress</QUAL></UNSDEF>
+    <UNSDEF id="doip_p2" v="50"><QUAL>DoIP_ISO13400.CP_P2Max_Ecu</QUAL></UNSDEF>
+    <UNSDEF id="doip_p2ex" v="500"><QUAL>DoIP_ISO13400.CP_P2Star_Ecu</QUAL></UNSDEF>
+    <UNSDEF id="doip_s3" v="5000"><QUAL>DoIP_ISO13400.CP_TesterPresentTime</QUAL></UNSDEF>
+    <UNSDEF id="disabled_req" v="1792"><QUAL>PrivateCAN.ReqCanId</QUAL></UNSDEF>
+    <ECU>
+      <QUAL>SyntheticEcu</QUAL>
+      <VAR>
+        <QUAL>BaseVariant</QUAL>
+      </VAR>
+    </ECU>
+  </ECUDOC>
+</CANDELA>

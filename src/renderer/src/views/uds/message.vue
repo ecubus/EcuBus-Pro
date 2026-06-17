@@ -284,15 +284,27 @@ function testLog({
       if (testId.value != undefined && !testId.value.includes(key)) {
         continue
       }
-      writeToTerminal(
-        time,
-        item.message.data.data.name,
-        'success',
-        i18next.t('uds.message.testLog.testPassed', {
-          name: item.message.data.data.name,
-          duration: item.message.data.data.details.duration_ms
-        })
-      )
+      if (item.message.data.data.skip) {
+        writeToTerminal(
+          time,
+          item.message.data.data.name,
+          'warning',
+          i18next.t('uds.message.testLog.testSkipped', {
+            name: item.message.data.data.name,
+            duration: item.message.data.data.details.duration_ms
+          })
+        )
+      } else {
+        writeToTerminal(
+          time,
+          item.message.data.data.name,
+          'success',
+          i18next.t('uds.message.testLog.testPassed', {
+            name: item.message.data.data.name,
+            duration: item.message.data.data.details.duration_ms
+          })
+        )
+      }
     } else if (item.message.data.type == 'test:fail') {
       const key =
         item.message.data.data.name +

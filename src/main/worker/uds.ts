@@ -300,19 +300,30 @@ export function test(name: string, fn: () => void | Promise<void>) {
       init = true
     }
 
-    t.before(async () => {
-      if (testEnableControl[testCnt] != true) {
-        t.skip()
-        return
+    const currentTestCnt = testCnt
+    const enabled = testEnableControl[currentTestCnt] == true
+    let advanced = false
+    const advanceTestCnt = () => {
+      if (!advanced) {
+        testCnt = Math.max(testCnt, currentTestCnt + 1)
+        advanced = true
       }
-      console.log(`<<< TEST START ${name}>>>`)
+    }
+
+    t.before(async () => {
+      if (enabled) {
+        console.log(`<<< TEST START ${name}>>>`)
+      }
     })
     t.after(() => {
-      console.log(`<<< TEST END ${name}>>>`)
-      testCnt++
+      if (enabled) {
+        console.log(`<<< TEST END ${name}>>>`)
+      }
+      advanceTestCnt()
     })
 
-    if (testEnableControl[testCnt] != true) {
+    if (!enabled) {
+      advanceTestCnt()
       t.skip()
     } else {
       return preserveErrorStack(fn)
@@ -322,13 +333,23 @@ export function test(name: string, fn: () => void | Promise<void>) {
 
 test.skip = function (name: string, fn: () => void | Promise<void>) {
   selfTest(name, (t) => {
+    const currentTestCnt = testCnt
+    let advanced = false
+    const advanceTestCnt = () => {
+      if (!advanced) {
+        testCnt = Math.max(testCnt, currentTestCnt + 1)
+        advanced = true
+      }
+    }
+
     t.before(() => {
       console.log(`<<< TEST START ${name}>>>`)
     })
     t.after(() => {
       console.log(`<<< TEST END ${name}>>>`)
-      testCnt++
+      advanceTestCnt()
     })
+    advanceTestCnt()
     t.skip()
   })
 }
@@ -593,10 +614,6 @@ const selfTest = process.env.ONLY == 'true' ? nodeTest.only : nodeTest
  */
 export function describe(name: string, fn: () => void | Promise<void>) {
   selfDescribe(name, async (t) => {
-    before(() => {
-      testCnt++
-    })
-
     return preserveErrorStack(fn)
   })
 }

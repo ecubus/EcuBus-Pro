@@ -416,17 +416,29 @@ const isSingleRun = ref<string[] | undefined>(undefined)
 function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) {
   handleRefresh(data)
     .then(() => {
-      runtime.testStates.isRunning[data.id] = true
-      runtime.testStates.activeTest = data
-      const id = singleId || data.id
+      const configId = data.id
+      const id = singleId || configId
+      const configNode = tData.value[0].children?.find((item) => item.id === configId)
+      const runNode = singleId ? treeRef.value.getNode(singleId)?.data : configNode
+      if (!configNode || !runNode) {
+        throw new Error('Test tree changed, please refresh and run again')
+      }
+
+      runtime.testStates.isRunning[configId] = true
+      runtime.testStates.activeTest = runNode
       if (clearLog) {
         traceRef.value.clearLog()
       }
       const cnt: number[] = []
+      const pushCnt = (testCnt?: number) => {
+        if (testCnt != undefined && !cnt.includes(testCnt)) {
+          cnt.push(testCnt)
+        }
+      }
       const getChildren = (val: TestTree, ids?: string[]) => {
         for (const item of val.children) {
           if (item.testCnt != undefined) {
-            cnt.push(item.testCnt)
+            pushCnt(item.testCnt)
             if (ids) {
               ids.push(item.id)
             }
@@ -436,24 +448,22 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
           }
         }
       }
-      if (data.type == 'config') {
+      if (runNode.type == 'config') {
         isSingleRun.value = undefined
         //get node from the tree
 
-        getChildren(data)
+        getChildren(runNode)
       } else {
         isSingleRun.value = [id]
 
         const node = treeRef.value.getNode(id)
-        if (data.testCnt != undefined) {
-          cnt.push(data.testCnt)
-        }
-        getChildren(data, isSingleRun.value)
+        pushCnt(runNode.testCnt)
+        getChildren(runNode, isSingleRun.value)
         if (node) {
           const getParent = (val: any) => {
             if (val.parent && val.parent.data && val.parent.data.type == 'test') {
               if (val.parent.data.testCnt != undefined) {
-                cnt.push(val.parent.data.testCnt)
+                pushCnt(val.parent.data.testCnt)
               }
               getParent(val.parent)
             }
@@ -473,7 +483,7 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
             'ipc-run-test',
             project.projectInfo.path,
             project.projectInfo.name,
-            cloneDeep(dataBase.nodes[data.id]),
+            cloneDeep(dataBase.nodes[configId]),
             cloneDeep(dataBase.tester),
             EnableObj
           )
@@ -486,7 +496,7 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
             })
           })
           .finally(() => {
-            runtime.testStates.isRunning[data.id] = false
+            runtime.testStates.isRunning[configId] = false
             runtime.testStates.activeTest = undefined
           })
       })
@@ -1051,20 +1061,21 @@ function buildSubTree(infos: TestEvent[]) {
 
 const root2tree = (cnt: number, parent: TestTree, root: TestTree) => {
   const newNode: TestTree = {
-    testCnt: cnt,
     id: root.id,
     type: 'test',
     canAdd: false,
     label: root.label,
     children: []
   }
-  cnt++
   parent.children.push(newNode)
 
   if (root.children && root.children.length > 0) {
     for (const child of root.children) {
       cnt = root2tree(cnt, newNode, child)
     }
+  } else {
+    newNode.testCnt = cnt
+    cnt++
   }
   return cnt
 }

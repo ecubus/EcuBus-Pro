@@ -2606,6 +2606,7 @@
       "testLog": {
         "testStarting": "----- Test {{name}} starting -----",
         "testPassed": "----- Test {{name}} passed, {{duration}}ms -----",
+        "testSkipped": "----- Test {{name}} skipped, {{duration}}ms -----",
         "testFailed": "----- Test {{name}} failed, {{duration}}ms, details: {{error}} -----",
         "testDiagnostic": "Test Diagnostic"
       }

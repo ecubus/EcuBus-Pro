@@ -102,6 +102,13 @@
           :vendor="activeTree.vendor"
           @change="nodeChange"
         />
+        <SerialNodeVue
+          v-else-if="activeTree.type == 'serial'"
+          ref="serialNodeRef"
+          v-model="dataModify"
+          :index="activeTree.id"
+          @change="nodeChange"
+        />
       </div>
     </div>
   </div>
@@ -135,6 +142,7 @@ import { ecubusPro } from '../../../../../../package.json'
 import questionIcon from '@iconify/icons-mdi/question-mark-circle-outline'
 import questionIcon1 from '@iconify/icons-mdi/question-mark-circle'
 import PwmNodeVue from './pwmNode.vue'
+import SerialNodeVue from './serialNode.vue'
 import i18next from 'i18next'
 
 const loading = ref(false)
@@ -159,6 +167,7 @@ const canNodeRef = ref()
 const ethNodeRef = ref()
 const linNodeRef = ref()
 const pwmNodeRef = ref()
+const serialNodeRef = ref()
 
 function openEcuBusHardware() {
   window.electron.ipcRenderer.send('ipc-open-link', 'https://app.whyengineer.com/docs/um/hardware/')
@@ -191,6 +200,8 @@ async function showSaveDialog(done: () => void): Promise<void> {
       saved = await linNodeRef.value.save?.()
     } else if (activeTree.value?.type == 'pwm' && pwmNodeRef.value) {
       saved = await pwmNodeRef.value.save?.()
+    } else if (activeTree.value?.type == 'serial' && serialNodeRef.value) {
+      saved = await serialNodeRef.value.save?.()
     }
 
     if (saved) {
@@ -300,7 +311,7 @@ function nodeChange(id: string, name: string) {
 interface tree {
   label: string
   vendor: CanVendor
-  type?: 'can' | 'lin' | 'eth' | 'pwm'
+  type?: 'can' | 'lin' | 'eth' | 'pwm' | 'serial'
   append: boolean
   id: string
   children?: tree[]
@@ -531,6 +542,29 @@ async function buildTree() {
     t.push(candle)
     addSubTree('candle', candle, deviceIndexMap)
   }
+
+  // Serial port devices (not vendor-specific)
+  const serialTree: tree = {
+    label: 'Serial Port (USART)',
+    vendor: 'simulate' as CanVendor,
+    append: true,
+    id: 'SERIAL',
+    type: 'serial',
+    children: []
+  }
+  for (const [key, value] of Object.entries(devices.devices)) {
+    if (value.type == 'serial' && value.serialDevice) {
+      serialTree.children?.push({
+        label: value.serialDevice.name,
+        append: false,
+        vendor: 'simulate' as CanVendor,
+        id: key,
+        type: 'serial',
+        index: deviceIndexMap.get(key)
+      })
+    }
+  }
+  t.push(serialTree)
 
   tData.value = t
 }

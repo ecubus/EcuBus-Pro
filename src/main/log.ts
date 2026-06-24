@@ -7,6 +7,7 @@ import EventEmitter from 'events'
 import type { Sequence, ServiceItem } from './share/uds'
 import { PayloadType } from './doip'
 import type { LinMsg } from './share/lin'
+import type { SerialMessage } from './share/serial'
 import type { TestEvent } from 'node:test/reporters'
 import { setVar as setVarMain, setVarByKey, getVar as getVarMain } from './var'
 import { VarItem } from 'src/preload/data'
@@ -492,6 +493,64 @@ export class LinLOG {
         ts,
         msg,
         data
+      },
+      deviceId: this.deviceId
+    })
+  }
+}
+
+export class SerialLOG {
+  vendor: string
+  log: Logger
+  deviceId: string
+
+  constructor(
+    vendor: string,
+    instance: string,
+    deviceId: string,
+    private event: EventEmitter
+  ) {
+    this.vendor = vendor
+    this.deviceId = deviceId
+    const et1 = externalTransport.map((t) => t.t())
+    const dt1 = deviceTransport.map((t) => t.t())
+    this.log = createLogger({
+      transports: [new Base(), ...et1, ...dt1],
+      format: format.combine(
+        format.json(),
+        instanceFormat({ instance: instance }),
+        format.label({ label: `Serial-${vendor}` }),
+        ...externalFormat
+      )
+    })
+
+    //check device id
+    const combinedLogs = this.log.transports.filter((transport) => {
+      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
+    })
+    for (const log of combinedLogs) {
+      this.log.remove(log)
+    }
+  }
+  close() {
+    this.log.close()
+
+    this.event.removeAllListeners()
+  }
+  serialBase(data: SerialMessage) {
+    this.log.debug({
+      method: 'serialBase',
+      data,
+      deviceId: this.deviceId
+    })
+    this.event.emit('serial-frame', data)
+  }
+  error(ts: number, msg?: string) {
+    this.log.error({
+      method: 'serialError',
+      data: {
+        ts,
+        msg
       },
       deviceId: this.deviceId
     })

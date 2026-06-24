@@ -4,9 +4,10 @@ import { CAN_ADDR_FORMAT, CAN_ID_TYPE, CanAddr, CanBaseInfo, CanVendor } from '.
 import { EthBaseInfo, EthAddr, EntityAddr } from './doip'
 import { LinAddr, LinBaseInfo } from './lin'
 import { SomeipInfo } from './someip'
+import { SerialBaseInfo } from './serial'
 
 export type DataType = 'NUM' | 'ARRAY' | 'ASCII' | 'UNICODE' | 'FLOAT' | 'DOUBLE' | 'FILE'
-export type HardwareType = 'can' | 'lin' | 'eth' | 'pwm' | 'someip'
+export type HardwareType = 'can' | 'lin' | 'eth' | 'pwm' | 'someip' | 'serial'
 //serviceDetail所有的key作为serviceId
 
 /**
@@ -547,6 +548,7 @@ export interface UdsDevice {
   linDevice?: LinBaseInfo
   pwmDevice?: PwmBaseInfo
   someipDevice?: SomeipInfo
+  serialDevice?: SerialBaseInfo
 }
 
 /**

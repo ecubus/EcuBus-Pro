@@ -42,6 +42,7 @@ import { addDeviceTransport, removeDeviceTransport, UdsLOG, VarLOG } from '../lo
 import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
+import { SerialBase } from '../serial'
 
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
@@ -202,7 +203,17 @@ ipcMain.handle('ipc-run-test', async (event, ...arg) => {
       testOnly: false
     }
   )
-  node.init(test, canBaseMap, linBaseMap, doips, ethBaseMap, pwmBaseMap, someipMap, testers)
+  node.init(
+    test,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    pwmBaseMap,
+    someipMap,
+    serialBaseMap,
+    testers
+  )
   await node.start(testControl)
   testMap.set(test.id, node)
   try {
@@ -291,6 +302,7 @@ const canBaseMap = new Map<string, CanBase>()
 const ethBaseMap = new Map<string, EthBaseInfo>()
 const linBaseMap = new Map<string, LinBase>()
 const pwmBaseMap = new Map<string, PwmBase>()
+const serialBaseMap = new Map<string, SerialBase>()
 const someipMap = new Map<string, VSomeIP_Client>()
 const udsTesterMap = new Map<string, UDSTesterMain>()
 const nodeMap = new Map<string, NodeItemA>()
@@ -318,6 +330,9 @@ function getDeviceSymbol(data: UdsDevice) {
       break
     case 'someip':
       vendor = 'pc'
+      break
+    case 'serial':
+      vendor = data.serialDevice?.vendor
       break
     default:
       break
@@ -433,6 +448,23 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
           })
           pwmBaseMap.set(key, pwmBase)
         }
+      } else if (device.type == 'serial' && device.serialDevice) {
+        channleList.push(device.serialDevice.id)
+        const serialDevice = device.serialDevice
+        activeKey = serialDevice.name
+        const serialBase = new SerialBase(serialDevice)
+        await serialBase.open()
+        sysLog.info(
+          `start serial device ${serialDevice.vendor}-${serialDevice.device.handle} success`
+        )
+        serialBase.event.on('error', (e: Error) => {
+          sysLog.error(`${serialDevice.vendor}-${serialDevice.device.handle} error: ${e.message}`)
+        })
+        serialBase.event.on('close', () => {
+          sysLog.error(`${serialDevice.vendor}-${serialDevice.device.handle} closed`)
+          globalStop(true)
+        })
+        serialBaseMap.set(key, serialBase)
       } else if (device.type == 'someip' && device.someipDevice) {
         channleList.push(device.someipDevice.id)
         const val = device.someipDevice
@@ -632,6 +664,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       ethBaseMap,
       pwmBaseMap,
       someipMap,
+      serialBaseMap,
       data.tester
     )
     try {
@@ -659,6 +692,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     ethBaseMap,
     pwmBaseMap,
     someipMap,
+    serialBaseMap,
     data.tester
   )
   canBaseMap.forEach((base) => {
@@ -935,6 +969,11 @@ export function globalStop(emit = false) {
     value.close()
   })
   pwmBaseMap.clear()
+  serialBaseMap.forEach((value) => {
+    value.close()
+    sysLog.info(`stop serial device ${value.info.vendor}-${value.info.device.handle}`)
+  })
+  serialBaseMap.clear()
 
   nodeMap.forEach((value) => {
     value.close()

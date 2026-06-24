@@ -6,6 +6,7 @@ import { openCanDevice } from 'src/main/docan/can'
 import { openLinDevice } from 'src/main/dolin'
 import LinBase from 'src/main/dolin/base'
 import { createPwmDevice, PwmBase } from 'src/main/pwm'
+import { SerialBase } from 'src/main/serial'
 import { generateConfigFile, VSomeIP_Client } from 'src/main/vsomeip'
 
 export default async function main(
@@ -17,6 +18,7 @@ export default async function main(
   const ethBaseMap = new Map<string, EthBaseInfo>()
   const linBaseMap = new Map<string, LinBase>()
   const pwmBaseMap = new Map<string, PwmBase>()
+  const serialBaseMap = new Map<string, SerialBase>()
   const someipMap = new Map<string, VSomeIP_Client>()
   for (const key in devices) {
     const device = devices[key]
@@ -66,6 +68,18 @@ export default async function main(
         })
         pwmBaseMap.set(key, pwmBase)
       }
+    } else if (device.type == 'serial' && device.serialDevice) {
+      const serialDevice = device.serialDevice
+      const serialBase = new SerialBase(serialDevice)
+      await serialBase.open()
+      sysLog.info(
+        `start serial device ${serialDevice.vendor}-${serialDevice.device.handle} success`
+      )
+      serialBase.event.on('close', () => {
+        sysLog.error(`${serialDevice.vendor}-${serialDevice.device.handle} closed`)
+        exit(-1)
+      })
+      serialBaseMap.set(key, serialBase)
     } else if (device.type == 'someip' && device.someipDevice) {
       const val = device.someipDevice
       const file = await generateConfigFile(val, projectPath, devices)
@@ -74,7 +88,7 @@ export default async function main(
       someipMap.set(key, client)
     }
   }
-  return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap }
+  return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap }
 }
 
 export async function closeDevice(
@@ -82,6 +96,7 @@ export async function closeDevice(
   linBaseMap: Map<string, LinBase>,
   ethBaseMap: Map<string, EthBaseInfo>,
   pwmBaseMap: Map<string, PwmBase>,
+  serialBaseMap: Map<string, SerialBase>,
   someipMap: Map<string, VSomeIP_Client>
 ) {
   for (const canBase of canBaseMap.values()) {
@@ -93,6 +108,9 @@ export async function closeDevice(
 
   for (const pwmBase of pwmBaseMap.values()) {
     await pwmBase.close()
+  }
+  for (const serialBase of serialBaseMap.values()) {
+    await serialBase.close()
   }
   for (const someipBase of someipMap.values()) {
     await someipBase.stop()

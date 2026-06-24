@@ -14,6 +14,7 @@ import LinBase from '../dolin/base'
 import { DOIP } from '../doip'
 import { EthBaseInfo } from 'nodeCan/doip'
 import PwmBase from '../pwm/base'
+import { SerialBase } from '../serial'
 import { VSomeIP_Client } from '../vsomeip'
 import { TesterInfo } from 'nodeCan/tester'
 import { store } from '../store'
@@ -86,6 +87,7 @@ export async function startPlugins(
   ethBaseMap: Map<string, EthBaseInfo>,
   pwmBaseMap: Map<string, PwmBase>,
   someipMap: Map<string, VSomeIP_Client>,
+  serialBaseMap: Map<string, SerialBase>,
   testers: Record<string, TesterInfo>
 ) {
   for (const entry of Object.values(plugins)) {
@@ -100,6 +102,7 @@ export async function startPlugins(
       ethBaseMap,
       pwmBaseMap,
       someipMap,
+      serialBaseMap,
       testers
     )
     try {

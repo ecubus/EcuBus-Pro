@@ -6,6 +6,7 @@ import { TesterInfo } from './share/tester'
 import { CanMessage, formatError } from './share/can'
 import { VinInfo } from './share/doip'
 import { LinMsg } from './share/lin'
+import { SerialMessage } from './share/serial'
 import reportPath from '../../resources/lib/js/report.js?asset&asarUnpack'
 import { pathToFileURL } from 'node:url'
 import { TestEvent } from 'node:test/reporters'
@@ -41,7 +42,16 @@ type HandlerMap = {
   canApi: (data: any) => Promise<any>
   pluginEvent: (data: { name: string; data: any }) => void
   serialPortApi: (data: SerialPortApi) => Promise<any>
+  serialApi: (data: SerialApi) => Promise<number>
   someipApi: (data: SomeipApiCall) => Promise<any>
+}
+
+/** Device-bound serial write request from a script node to {@link NodeClass.serialApi}. */
+export type SerialApi = {
+  method: 'write'
+  /** Device name to write to; defaults to the node's first serial channel */
+  device?: string
+  data: number[]
 }
 export type pwmApiSetDuty = {
   method: 'setDuty'
@@ -551,6 +561,14 @@ export default class UdsTester {
   async triggerLinFrame(msg: LinMsg) {
     try {
       const r = await this.workerEmit('__linMsg', msg)
+      return r
+    } catch (e: any) {
+      throw formatError(e)
+    }
+  }
+  async triggerSerialFrame(msg: SerialMessage) {
+    try {
+      const r = await this.workerEmit('__serialMsg', msg)
       return r
     } catch (e: any) {
       throw formatError(e)

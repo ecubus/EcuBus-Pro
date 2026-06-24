@@ -1,0 +1,214 @@
+{
+  "data": {
+    "devices": {
+      "49cb0022-e769-458b-8025-d63160d6a3dd": {
+        "type": "serial",
+        "serialDevice": {
+          "device": {
+            "label": "USB-SERIAL CH340 (COM7)",
+            "id": "COM7",
+            "handle": "COM7",
+            "serialNumber": "5&CC96C2&0&10"
+          },
+          "name": "ECUBUS_Serial_0",
+          "id": "49cb0022-e769-458b-8025-d63160d6a3dd",
+          "vendor": "ecubus",
+          "baudRate": 500000,
+          "dataBits": 8,
+          "stopBits": 1,
+          "parity": "none"
+        }
+      }
+    },
+    "ia": {},
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "5c4c1f77-ff90-4f31-bb02-f9bb4230f10e": {
+        "name": "Node 1",
+        "id": "5c4c1f77-ff90-4f31-bb02-f9bb4230f10e",
+        "channel": [
+          "49cb0022-e769-458b-8025-d63160d6a3dd"
+        ],
+        "workNode": "",
+        "script": "serial_send.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {},
+    "datas": {},
+    "panels": {},
+    "logs": {},
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "uds",
+          "someipBase",
+          "osTrace",
+          "serialBase"
+        ],
+        "filterDevice": [],
+        "filterId": [],
+        "columnConfig": [
+          {
+            "key": "seqIndex",
+            "visible": true,
+            "width": 80
+          },
+          {
+            "key": "ts",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "deltaTs",
+            "visible": true,
+            "width": 120
+          },
+          {
+            "key": "absTimeStr",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "name",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "data",
+            "visible": true,
+            "width": 300
+          },
+          {
+            "key": "dir",
+            "visible": true,
+            "width": 50
+          },
+          {
+            "key": "id",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "dlc",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "len",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "msgType",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "channel",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "device",
+            "visible": true,
+            "width": 200
+          }
+        ]
+      }
+    },
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "wins": {
+      "message": {
+        "pos": {
+          "x": 383,
+          "y": 219,
+          "w": 1280,
+          "h": 200
+        },
+        "options": {
+          "params": {}
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "layoutType": "bottom"
+      },
+      "hardware": {
+        "pos": {
+          "x": 1269.5,
+          "y": 40.5,
+          "w": 735.5,
+          "h": 631
+        },
+        "title": "hardware",
+        "label": "Devices",
+        "id": "hardware",
+        "options": {
+          "params": {
+            "deviceId": "49cb0022-e769-458b-8025-d63160d6a3dd"
+          }
+        }
+      },
+      "network": {
+        "pos": {
+          "x": 44.5,
+          "y": 13.5,
+          "w": 925,
+          "h": 665
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "tester": {
+        "pos": {
+          "x": 990.5,
+          "y": 149.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "tester",
+        "label": "UDS Tester",
+        "id": "tester",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 447.5,
+          "y": 353.5,
+          "w": 1557.5,
+          "h": 629
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      }
+    },
+    "example": {
+      "catalog": "Serial"
+    }
+  }
+}

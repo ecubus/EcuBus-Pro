@@ -40,11 +40,8 @@ export default async function main(
   if (forceBuild) {
     await build(projectPath, projectName, data, testItem.script, { isTest: true })
   }
-  const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap } = await deviceMain(
-    projectPath,
-    projectName,
-    data.devices
-  )
+  const { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap } =
+    await deviceMain(projectPath, projectName, data.devices)
 
   const doips: DOIP[] = []
   for (const tester of Object.values(data.tester)) {
@@ -67,7 +64,17 @@ export default async function main(
       id: testItem.id
     }
   )
-  node.init(testItem, canBaseMap, linBaseMap, doips, ethBaseMap, pwmBaseMap, someipMap, data.tester)
+  node.init(
+    testItem,
+    canBaseMap,
+    linBaseMap,
+    doips,
+    ethBaseMap,
+    pwmBaseMap,
+    someipMap,
+    serialBaseMap,
+    data.tester
+  )
   //surpress log this stage
   node.log!.log.silent = true
 
@@ -86,7 +93,7 @@ export default async function main(
   if (justShowTree) {
     printTestTree(testInfo)
     node.close()
-    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap)
+    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
     return
   }
   node.close()
@@ -102,6 +109,7 @@ export default async function main(
     ethBaseMap,
     pwmBaseMap,
     someipMap,
+    serialBaseMap,
     data.tester
   )
   // Generate EnableObj and isSingleRun based on pattern (matching test.vue logic)
@@ -327,7 +335,7 @@ export default async function main(
   }
   node1.close()
 
-  await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, someipMap)
+  await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
 
   if (testSummary.failed > 0) {
     exit(-1)

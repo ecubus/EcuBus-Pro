@@ -1108,7 +1108,8 @@
         "can": "CAN",
         "ethernet": "Ethernet",
         "lin": "LIN",
-        "pwm": "PWM"
+        "pwm": "PWM",
+        "serial": "Serial"
       },
       "vendors": {
         "ecubus": "ECUBUS",
@@ -1280,9 +1281,35 @@
           "inputFrequency": "Please input frequency",
           "inputInitialDutyCycle": "Please input initial duty cycle"
         }
+      },
+      "serialNode": {
+        "sections": {
+          "device": "Device",
+          "serialParameters": "Serial Parameters"
+        },
+        "labels": {
+          "name": "Name",
+          "vendor": "Vendor",
+          "port": "Port",
+          "refresh": "Refresh",
+          "baudRate": "Baud Rate",
+          "dataBits": "Data Bits",
+          "stopBits": "Stop Bits",
+          "parity": "Parity"
+        },
+        "buttons": {
+          "addDevice": "Add Device",
+          "saveDevice": "Save Device"
+        },
+        "validation": {
+          "nameExists": "The name already exists",
+          "inputNodeName": "Please input node name",
+          "selectPort": "Please select serial port",
+          "inputBaudRate": "Please input baud rate"
+        }
       }
 
-      
+
     },
     "components": {
         "addVar": {
@@ -2096,6 +2123,7 @@
       "filters": {
         "can": "CAN",
         "lin": "LIN",
+        "serial": "Serial",
         "uds": "UDS",
         "eth": "ETH",
         "someip": "SomeIP",

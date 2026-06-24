@@ -132,6 +132,8 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
 import { CAN_ID_TYPE, CanMessage, Signal as CanSignal } from '../share/can'
+import { SerialMessage } from '../share/serial'
+export type { SerialMessage } from '../share/serial'
 
 // import SecureAccessDll from './secureAccess'
 import { EntityAddr, VinInfo } from '../share/doip'
@@ -1593,6 +1595,70 @@ export class UtilClass {
     }
   }
   /**
+   * Registers a listener for raw data received/sent on a serial (UART) hardware device.
+   *
+   * The configured serial device opens automatically when the project starts.
+   * The callback fires for both received (`dir: 'IN'`) and sent (`dir: 'OUT'`)
+   * frames; filter on `msg.dir` if you only want one direction.
+   *
+   * @category Serial
+   * @param device - The serial device name to listen on, or `true` for all serial devices
+   * @param fc - Callback invoked with each {@link SerialMessage}
+   *
+   * @example
+   * ```ts
+   * // Listen to all serial devices
+   * Util.OnSerial(true, (msg) => {
+   *   if (msg.dir === 'IN') console.log('rx:', msg.data.toString('hex'))
+   * })
+   *
+   * // Listen to a specific device by name
+   * Util.OnSerial('Serial_1', (msg) => {
+   *   console.log(msg.dir, msg.data)
+   * })
+   * ```
+   */
+  OnSerial(device: string | true, fc: (msg: SerialMessage) => void | Promise<void>) {
+    if (device === true) {
+      this.event.on('serial' as any, fc)
+    } else {
+      this.event.on(`serial.${device}` as any, fc)
+    }
+  }
+  /**
+   * Writes raw bytes to a serial (UART) hardware device.
+   *
+   * The device must be configured in the project and bound to this node's
+   * channel. The written bytes are shown in the trace window.
+   *
+   * @category Serial
+   * @param device - The serial device name, or `undefined` to use the node's first serial channel
+   * @param data - Bytes to write
+   * @returns Promise resolving to the sent timestamp (microseconds)
+   *
+   * @example
+   * ```ts
+   * await Util.writeSerial('Serial_1', Buffer.from([0x01, 0x02, 0x03]))
+   * await Util.writeSerial(undefined, [0x55, 0xaa])
+   * ```
+   */
+  async writeSerial(device: string | undefined, data: Buffer | number[]): Promise<number> {
+    const p: Promise<number> = new Promise((resolve, reject) => {
+      workerEmit({
+        id: global.cmdId,
+        event: 'serialApi',
+        data: {
+          method: 'write',
+          device,
+          data: Buffer.isBuffer(data) ? Array.from(data) : data
+        }
+      })
+      emitMap.set(global.cmdId, { resolve, reject })
+      global.cmdId++
+    })
+    return await p
+  }
+  /**
    * Registers an event listener for signal updates from CAN/LIN databases.
    * The callback is invoked whenever the specified signal value changes.
    *
@@ -2259,6 +2325,11 @@ export class UtilClass {
     await this.event.emit(`lin.${msg.frameId}` as any, msg)
     await this.event.emit('lin' as any, msg)
   }
+  private async serialMsg(msg: SerialMessage) {
+    msg.data = Buffer.from(msg.data)
+    await this.event.emit(`serial.${msg.name}` as any, msg)
+    await this.event.emit('serial' as any, msg)
+  }
   private async someipMsg(data: SomeipMessage) {
     let someipMsg: SomeipMessageBase
     if (
@@ -2360,6 +2431,7 @@ export class UtilClass {
       })
       this.event.on('__canMsg' as any, this.canMsg.bind(this))
       this.event.on('__linMsg' as any, this.linMsg.bind(this))
+      this.event.on('__serialMsg' as any, this.serialMsg.bind(this))
       this.event.on('__someipMsg' as any, this.someipMsg.bind(this))
       this.event.on('__someipServiceValid' as any, this.someipServiceValid.bind(this))
       this.event.on('__keyDown' as any, this.keyDown.bind(this))

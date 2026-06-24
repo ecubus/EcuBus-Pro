@@ -452,6 +452,7 @@ import ExcelJS from 'exceljs'
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg, LinSignal } from 'nodeCan/lin'
+import { SerialMessage } from 'nodeCan/serial'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading, ElMessageBox, ElMessage } from 'element-plus'
 import { ArrowLeft, ArrowRight, DArrowLeft, DArrowRight } from '@element-plus/icons-vue'
@@ -602,6 +603,11 @@ interface LinBaseLog {
   data: LinMsg<Record<string, LinSignal>>
 }
 
+interface SerialBaseLog {
+  method: 'serialBase'
+  data: SerialMessage
+}
+
 interface UdsLog {
   method: 'udsSent' | 'udsRecv' | 'udsNegRecv'
   id?: string
@@ -640,6 +646,7 @@ interface LogItem {
     | IpBaseLog
     | LinBaseLog
     | LinErrorLog
+    | SerialBaseLog
     | SomeipBaseLog
     | SomeipServiceValidLog
     | OsEventLog
@@ -664,7 +671,9 @@ function clearLog(msg = i18next.t('uds.trace.tooltips.clearTrace')) {
   allLogData = []
   idList.value.clear()
   liveSeqCounter = 0
-  liveStartMs = 0
+  if (!globalStart.value) {
+    liveStartMs = 0
+  }
 
   scrollY = -1
 
@@ -938,6 +947,20 @@ function logDisplay({ values }: { values: LogItem[] }) {
           }
         )
       })
+    } else if (val.message.method == 'serialBase') {
+      insertData({
+        method: val.message.method,
+        dir: val.message.data.dir == 'OUT' ? 'Tx' : 'Rx',
+        data: data2str(val.message.data.data),
+        ts: val.message.data.ts!,
+        id: val.message.data.name,
+        len: val.message.data.data.length,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'Serial',
+        dlc: val.message.data.data.length,
+        name: val.message.data.name
+      })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name
       if (val.message.id) {
@@ -1171,12 +1194,12 @@ const props = defineProps({
   },
   defaultCheckList: {
     type: Array as PropType<string[]>,
-    default: () => ['canBase', 'ipBase', 'linBase', 'uds', 'someipBase', 'osTrace']
+    default: () => ['canBase', 'ipBase', 'linBase', 'serialBase', 'uds', 'someipBase', 'osTrace']
   }
 })
 
 function filterChange(
-  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase' | 'osTrace',
+  method: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'serialBase' | 'someipBase' | 'osTrace',
   val: boolean
 ) {
   const i = LogFilter.value.find((v) => v.v == method)
@@ -1962,7 +1985,7 @@ function togglePause() {
 const LogFilter = ref<
   {
     label: string
-    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'someipBase' | 'osTrace'
+    v: 'uds' | 'canBase' | 'ipBase' | 'linBase' | 'serialBase' | 'someipBase' | 'osTrace'
     value: string[]
   }[]
 >([
@@ -1975,6 +1998,11 @@ const LogFilter = ref<
     label: i18next.t('uds.trace.filters.lin'),
     v: 'linBase',
     value: ['linBase', 'linError', 'linWarning', 'linEvent']
+  },
+  {
+    label: i18next.t('uds.trace.filters.serial'),
+    v: 'serialBase',
+    value: ['serialBase', 'serialError']
   },
   {
     label: i18next.t('uds.trace.filters.uds'),
@@ -2245,6 +2273,7 @@ onMounted(() => {
         switch (method) {
           case 'canBase':
           case 'linBase':
+          case 'serialBase':
             color = getComputedStyle(document.documentElement)
               .getPropertyValue('--el-color-primary')
               .trim()

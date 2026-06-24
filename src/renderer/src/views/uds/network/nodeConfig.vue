@@ -458,6 +458,8 @@ const allDevices = computed(() => {
       dd[d] = dataBase.devices[d].pwmDevice
     } else if (dataBase.devices[d].type == 'someip' && dataBase.devices[d].someipDevice) {
       dd[d] = dataBase.devices[d].someipDevice
+    } else if (dataBase.devices[d].type == 'serial' && dataBase.devices[d].serialDevice) {
+      dd[d] = dataBase.devices[d].serialDevice
     }
   }
   return dd

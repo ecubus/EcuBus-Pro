@@ -8,8 +8,6 @@ import UdsTester, {
   linApiStartSch,
   linApiStopSch,
   pwmApiSetDuty,
-  SerialPortManager,
-  SerialPortApi,
   SerialApi,
   SomeipApiCall
 } from './workerClient'
@@ -102,7 +100,6 @@ export class NodeClass {
   private serialBaseMap: Map<string, SerialBase> = new Map()
   private someipMap: Map<string, VSomeIP_Client> = new Map()
   private testers: Record<string, TesterInfo> = {}
-  private serialPortManager?: SerialPortManager
   freeEvent: {
     doip: DOIP
     id: string
@@ -247,9 +244,6 @@ export class NodeClass {
       this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
       this.pool.registerHandler('pwmApi', this.pwmApi.bind(this))
       this.pool.registerHandler('serialApi', this.serialApi.bind(this))
-      // SerialPort API
-      this.serialPortManager = new SerialPortManager(this.pool)
-      this.pool.registerHandler('serialPortApi', this.serialPortApi.bind(this))
       this.pool.registerHandler('someipApi', this.someipApi.bind(this))
 
       //cantp
@@ -880,13 +874,6 @@ export class NodeClass {
     if (data.method == 'setDuty') {
       pwmBase.setDutyCycle(data.duty)
     }
-  }
-
-  async serialPortApi(data: SerialPortApi): Promise<any> {
-    if (!this.serialPortManager) {
-      throw new Error('SerialPortManager not initialized')
-    }
-    return this.serialPortManager.handleApi(data)
   }
 
   async serialApi(data: SerialApi): Promise<number> {
@@ -1551,14 +1538,6 @@ export class NodeClass {
       tp.close(false)
     })
     this.lintp.length = 0 // 清空数组
-
-    // 清理 SerialPort
-    if (this.serialPortManager) {
-      this.serialPortManager.closeAll().catch(() => {
-        // ignore errors during cleanup
-      })
-      this.serialPortManager = undefined
-    }
 
     // 清理 UdsTester 事件处理器
     if (this.pool) {

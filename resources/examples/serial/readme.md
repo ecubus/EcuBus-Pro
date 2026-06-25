@@ -6,8 +6,8 @@ This example shows how to use a **Serial port** as a first-class **hardware
 device** in EcuBus-Pro — configured in the Devices panel, driven from a script
 node, and observed in the Trace window.
 
-Unlike the `script_serial_port` example (which opens a port by path inside the
-script via `SerialPortClient`), here the serial port is a configured device:
+Here the serial port is a configured device (rather than an ad-hoc port opened
+by path inside the script):
 
 - It is opened automatically when the project **Starts** (like CAN / LIN / PWM).
 - A script node bound to the device sends and receives raw UART bytes through
@@ -61,6 +61,6 @@ script via `SerialPortClient`), here the serial port is a configured device:
 
 - If the port fails to open, make sure no other program holds the same COM port
   and that the driver is installed.
-- This device-bound flow is the recommended way to integrate serial hardware;
-  use the standalone `SerialPortClient` (`script_serial_port` example) only for
-  ad-hoc, path-based access that does not need device config or trace.
+- This device-bound flow is the recommended way to integrate serial hardware.
+  For ad-hoc, path-based access that does not need device config or trace, you
+  can also use the `serialport` npm package directly in a script.

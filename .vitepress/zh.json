@@ -41,6 +41,10 @@
       "link": "pwm/pwm.md"
     },
     {
+      "text": "Serial",
+      "link": "serial/serial.md"
+    },
+    {
       "text": "网络",
       "items": [
         {

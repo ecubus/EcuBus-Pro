@@ -58,6 +58,8 @@ export class VectorLin extends LinBase {
   private channelMask = 0
   private PermissionMask = new VECTOR.XLACCESS()
   private PortHandle = new VECTOR.XLPORTHANDLE()
+  private portOpened = false
+  private tsfnCreated = false
   constructor(public info: LinBaseInfo) {
     super(info)
 
@@ -87,69 +89,99 @@ export class VectorLin extends LinBase {
     )
 
     // 总线类型处理
-    if (this.channelConfig.busParams.busType === 2) {
-      this.PermissionMask.assign(this.channelMask)
-      xlStatus = VECTOR.xlOpenPort(
-        this.PortHandle.cast(),
-        'EcuBus-Pro',
+    try {
+      if (this.channelConfig.busParams.busType === 2) {
+        this.PermissionMask.assign(this.channelMask)
+        xlStatus = VECTOR.xlOpenPort(
+          this.PortHandle.cast(),
+          'EcuBus-Pro',
+          this.channelMask,
+          this.PermissionMask.cast(),
+          256,
+          3,
+          2
+        )
+        if (xlStatus !== 0) {
+          VECTOR.xlClosePort(this.PortHandle.value())
+          throw new Error(this.getError(xlStatus))
+        }
+        this.portOpened = true
+        if (this.PermissionMask.value() == 0) {
+          throw new Error('PermissionMask failed')
+        }
+
+        const baudRate = Number(info.baudRate)
+        if (!Number.isFinite(baudRate) || baudRate <= 0) {
+          throw new Error(`Invalid LIN baud rate: ${info.baudRate}`)
+        }
+
+        const LinStatPar = new VECTOR.XLlinStatPar()
+        LinStatPar.LINMode = info.mode == LinMode.MASTER ? 1 : 2
+        LinStatPar.baudrate = baudRate
+        LinStatPar.LINVersion = 3
+        xlStatus = VECTOR.xlLinSetChannelParams(
+          this.PortHandle.value(),
+          this.channelMask,
+          LinStatPar
+        )
+        if (xlStatus !== 0) {
+          throw new Error(this.getError(xlStatus))
+        }
+
+        const LinDLC = new VECTOR.UINT8ARRAY(64)
+        for (let j = 0; j < 64; j++) {
+          LinDLC.setitem(j, 8)
+        }
+        xlStatus = VECTOR.xlLinSetDLC(this.PortHandle.value(), this.channelMask, LinDLC.cast())
+        if (xlStatus !== 0) {
+          throw new Error(this.getError(xlStatus))
+        }
+
+        xlStatus = VECTOR.xlActivateChannel(this.PortHandle.value(), this.channelMask, 2, 8)
+        if (xlStatus !== 0) {
+          throw new Error(this.getError(xlStatus))
+        }
+
+        xlStatus = VECTOR.xlFlushReceiveQueue(this.PortHandle.value())
+        if (xlStatus !== 0) {
+          throw new Error(this.getError(xlStatus))
+        }
+      }
+
+      VECTOR.CreateTSFN(
+        this.PortHandle.value(),
+        this.info.id,
+        this.callback.bind(this),
         this.channelMask,
-        this.PermissionMask.cast(),
-        256,
-        3,
-        2
+        false
       )
-      if (xlStatus !== 0) {
+      this.tsfnCreated = true
+
+      this.log = new LinLOG('VECTOR', info.name, this.info.device.id, this.event)
+      this.startTs = getTsUs()
+
+      if (info.database) {
+        this.db = global.dataSet.database.lin[info.database]
+      }
+
+      for (let i = 0; i <= 0x3f; i++) {
+        const checksum = i == 0x3c || i == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+        this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0)
+      }
+      // this.getEntrys()
+      // this.wakeup()
+    } catch (error) {
+      if (this.tsfnCreated) {
+        VECTOR.FreeTSFN(this.info.id)
+        this.tsfnCreated = false
+      }
+      if (this.portOpened) {
+        VECTOR.xlDeactivateChannel(this.PortHandle.value(), this.channelMask)
         VECTOR.xlClosePort(this.PortHandle.value())
-        throw new Error(this.getError(xlStatus))
+        this.portOpened = false
       }
-      if (this.PermissionMask.value() == 0) {
-        throw new Error('PermissionMask failed')
-      }
-
-      const LinStatPar = new VECTOR.XLlinStatPar()
-      LinStatPar.LINMode = info.mode == LinMode.MASTER ? 1 : 2
-      LinStatPar.baudrate = info.baudRate
-      LinStatPar.LINVersion = 3
-      xlStatus = VECTOR.xlLinSetChannelParams(this.PortHandle.value(), this.channelMask, LinStatPar)
-      if (xlStatus !== 0) {
-        throw new Error(this.getError(xlStatus))
-      }
-
-      const LinDLC = new VECTOR.UINT8ARRAY(64)
-      for (let j = 0; j < 64; j++) {
-        LinDLC.setitem(j, 8)
-      }
-      xlStatus = VECTOR.xlLinSetDLC(this.PortHandle.value(), this.channelMask, LinDLC)
-      if (xlStatus !== 0) {
-        throw new Error(this.getError(xlStatus))
-      }
-
-      xlStatus = VECTOR.xlActivateChannel(this.PortHandle.value(), this.channelMask, 2, 8)
-      if (xlStatus !== 0) {
-        throw new Error(this.getError(xlStatus))
-      }
-
-      xlStatus = VECTOR.xlFlushReceiveQueue(this.PortHandle.value())
-      if (xlStatus !== 0) {
-        throw new Error(this.getError(xlStatus))
-      }
+      throw error
     }
-
-    VECTOR.CreateTSFN(this.PortHandle.value(), this.info.id, this.callback.bind(this))
-
-    this.log = new LinLOG('VECTOR', info.name, this.info.device.id, this.event)
-    this.startTs = getTsUs()
-
-    if (info.database) {
-      this.db = global.dataSet.database.lin[info.database]
-    }
-
-    for (let i = 0; i <= 0x3f; i++) {
-      const checksum = i == 0x3c || i == 0x3d ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
-      this.setEntry(i, 8, LinDirection.RECV_AUTO_LEN, checksum, Buffer.alloc(8), 0)
-    }
-    // this.getEntrys()
-    // this.wakeup()
   }
 
   setEntry(

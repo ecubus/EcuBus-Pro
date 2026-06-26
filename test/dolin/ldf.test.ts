@@ -14,6 +14,25 @@ test('ldf parse 2.1', () => {
   const r = parse(ldf)
 })
 
+test('ldf parse optional channel name before sections', () => {
+  const ldf = `
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+Channel_name = "LIN1";
+
+Nodes {
+  Master: MasterNode, 5 ms, 0.1 ms ;
+  Slaves: SlaveNode ;
+}
+`
+  const r = parse(ldf)
+  expect(r.global.Channel_name).toEqual('LIN1')
+  expect(r.node.master.nodeName).toEqual('MasterNode')
+  expect(r.node.salveNode).toEqual(['SlaveNode'])
+})
+
 test('ldf file1', () => {
   const ldf = fs.readFileSync(path.join(__dirname, 'file1.ldf'), 'utf-8')
   const r = parse(ldf)

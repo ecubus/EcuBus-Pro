@@ -1167,7 +1167,9 @@ class LdfParser extends CstParser {
     this.SUBRULE(this.version)
     this.SUBRULE(this.llversion)
     this.SUBRULE(this.speed)
-    this.OPTION(this.channel)
+    this.OPTION(() => {
+      this.SUBRULE(this.channel)
+    })
     this.MANY({
       DEF: () => {
         this.OR([

@@ -231,6 +231,22 @@ function addChild(parent: Tree) {
         c.children.push(cc)
       }
     }
+  } else if (parent.type == 'serial') {
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'serial' && item.serialDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.serialDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+    }
   } else if (parent.type == 'someip') {
     for (const key of Object.keys(dataBase.devices)) {
       const item = dataBase.devices[key]
@@ -323,7 +339,7 @@ function addChild(parent: Tree) {
       }
     }
   }
-  if (parent.type != 'eth') {
+  if (parent.type != 'eth' && parent.type != 'serial') {
     parent.children.push(i)
   }
 }
@@ -367,6 +383,14 @@ const tData = computed(() => {
     icon: networkNode,
     children: [],
     id: 'pwm'
+  }
+  const serial: Tree = {
+    type: 'serial',
+    label: i18next.t('uds.network.tree.serial'),
+    canAdd: false,
+    icon: networkNode,
+    children: [],
+    id: 'serial'
   }
   const log: Tree = {
     type: 'log',
@@ -435,10 +459,11 @@ const tData = computed(() => {
   addChild(lin)
   addChild(eth)
   addChild(pwm)
+  addChild(serial)
   addChild(someip)
 
   // addChild(node)
-  return [can, lin, eth, someip, pwm, node, log, replay]
+  return [can, lin, eth, someip, pwm, serial, node, log, replay]
 })
 
 const defaultProps = {
@@ -534,6 +559,7 @@ function getDeviceName(device: UdsDevice): string {
   if (device.ethDevice) return device.ethDevice.name
   if (device.linDevice) return device.linDevice.name
   if (device.pwmDevice) return device.pwmDevice.name
+  if (device.serialDevice) return device.serialDevice.name
   if (device.someipDevice) return device.someipDevice.name
   return 'Device'
 }
@@ -649,6 +675,10 @@ function pasteNode() {
       newDevice.pwmDevice.name = newName
       newDevice.pwmDevice.id = id
       newDevice.pwmDevice.device.handle = '' // Clear device handle
+    } else if (newDevice.serialDevice) {
+      newDevice.serialDevice.name = newName
+      newDevice.serialDevice.id = id
+      newDevice.serialDevice.device.handle = '' // Clear device handle
     } else if (newDevice.someipDevice) {
       newDevice.someipDevice.name = newName
       newDevice.someipDevice.id = id
@@ -1019,6 +1049,8 @@ watchEffect(() => {
         udsView.changeName(key, dataBase.devices[key].someipDevice.name)
       } else if (dataBase.devices[key].type == 'pwm' && dataBase.devices[key].pwmDevice) {
         udsView.changeName(key, dataBase.devices[key].pwmDevice.name)
+      } else if (dataBase.devices[key].type == 'serial' && dataBase.devices[key].serialDevice) {
+        udsView.changeName(key, dataBase.devices[key].serialDevice.name)
       }
     }
     // test nodes

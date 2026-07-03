@@ -2242,6 +2242,7 @@
         "ethernet": "Ethernet",
         "node": "Node",
         "pwm": "PWM",
+        "serial": "Serial Port",
         "loggers": "Loggers",
         "replays": "Replays",
         "someip": "SomeIP"

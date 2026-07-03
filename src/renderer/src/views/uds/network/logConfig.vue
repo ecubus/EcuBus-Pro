@@ -411,6 +411,8 @@ const allDevices = computed(() => {
       dd[d] = dataBase.devices[d].linDevice
     } else if (dataBase.devices[d].type == 'pwm' && dataBase.devices[d].pwmDevice) {
       dd[d] = dataBase.devices[d].pwmDevice
+    } else if (dataBase.devices[d].type == 'serial' && dataBase.devices[d].serialDevice) {
+      dd[d] = dataBase.devices[d].serialDevice
     }
   }
   return dd

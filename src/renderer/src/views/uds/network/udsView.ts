@@ -505,6 +505,8 @@ export class udsHardware extends udsCeil {
       type = 'soa'
     } else if (device.type == 'pwm' && device.pwmDevice) {
       name = device.pwmDevice.name
+    } else if (device.type == 'serial' && device.serialDevice) {
+      name = device.serialDevice.name
     }
 
     super(

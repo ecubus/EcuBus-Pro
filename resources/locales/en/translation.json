@@ -109,6 +109,7 @@
       "index": {
         "tooltips": {
           "deleteDatabase": "Delete Database",
+          "updateDatabase": "Reload database from source file",
           "saveDatabase": "Save Database",
           "fixErrorsToSave": "Fix errors to save the database"
         },
@@ -138,7 +139,13 @@
           "cancel": "Cancel"
         },
         "messages": {
-          "saveSuccess": "The database has been saved successfully"
+          "saveSuccess": "The database has been saved successfully",
+          "updateSuccess": "Database updated successfully. Existing IA messages and panel bindings are preserved.",
+          "updateSuccessSaveRequired": "Database updated. Save the database to apply changes to the project.",
+          "fileNotFound": "Source file not found: {{path}}. Please select a new file."
+        },
+        "updateConfirm": {
+          "title": "Select Database File"
         }
       },
       "overview": {

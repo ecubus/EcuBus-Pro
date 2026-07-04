@@ -12,6 +12,15 @@
           </el-button>
         </el-tooltip>
         <el-tooltip
+          effect="light"
+          :content="i18next.t('database.dbc.index.tooltips.updateDatabase')"
+          placement="bottom"
+        >
+          <el-button type="primary" link :disabled="globalStart" @click="updateDatabaseFromFile">
+            <Icon :icon="refreshIcon" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip
           v-if="errorList.length == 0"
           effect="light"
           :content="i18next.t('database.dbc.index.tooltips.saveDatabase')"
@@ -112,9 +121,11 @@ import Export from './export.vue'
 
 import saveIcon from '@iconify/icons-material-symbols/save'
 import deleteIcon from '@iconify/icons-material-symbols/delete'
+import refreshIcon from '@iconify/icons-material-symbols/refresh'
 import { Icon } from '@iconify/vue'
 import { Layout } from '@r/views/uds/layout'
 import { useDataStore } from '@r/stores/data'
+import { useProjectStore } from '@r/stores/project'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { assign, cloneDeep } from 'lodash'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
@@ -139,6 +150,7 @@ const w = toRef(props, 'width')
 const editableTabsValue = ref('Overview')
 provide('height', h)
 const database = useDataStore()
+const project = useProjectStore()
 
 const dbcObj = shallowRef<CanDB>() as ShallowRef<CanDB>
 
@@ -234,6 +246,131 @@ async function valid() {
   }
 }
 
+function storeDbcFilePath(absoluteFile: string): string {
+  if (project.projectInfo.path) {
+    return window.path.relative(project.projectInfo.path, absoluteFile)
+  }
+  return absoluteFile
+}
+
+function resolveDbcFilePath(filePath?: string): string | undefined {
+  if (!filePath) return undefined
+  if (project.projectInfo.path && !window.path.isAbsolute(filePath)) {
+    return window.path.join(project.projectInfo.path, filePath)
+  }
+  return filePath
+}
+
+let skipDbcWatch = false
+
+async function applyParsedDatabase(file: string) {
+  const result = await window.electron.ipcRenderer.invoke('ipc-canmartix-parse', file)
+  result.data.version = 'canmartix'
+  result.data.filePath = storeDbcFilePath(file)
+  result.data.id = props.editIndex
+  result.data.name = dbcObj.value?.name || window.path.parse(file).name
+
+  skipDbcWatch = true
+  dbcObj.value = result.data
+  notifyDbcChange()
+  await valid()
+
+  if (existed.value) {
+    database.$patch(() => {
+      const db = markRaw(cloneDeep(dbcObj.value))
+      db.id = props.editIndex
+      database.database.can[props.editIndex] = db
+    })
+    layout.setWinModified(props.editIndex, false)
+    ElNotification({
+      offset: 50,
+      type: 'success',
+      message: i18next.t('database.dbc.index.messages.updateSuccess'),
+      appendTo: `#win${props.editIndex}`
+    })
+  } else {
+    layout.setWinModified(props.editIndex, true)
+    ElNotification({
+      offset: 50,
+      type: 'success',
+      message: i18next.t('database.dbc.index.messages.updateSuccessSaveRequired'),
+      appendTo: `#win${props.editIndex}`
+    })
+  }
+  skipDbcWatch = false
+}
+
+async function updateDatabaseFromFile() {
+  if (globalStart.value) return
+
+  const storedPath = dbcObj.value?.filePath
+  if (storedPath) {
+    const absolutePath = resolveDbcFilePath(storedPath)
+    if (absolutePath) {
+      const exists = await window.electron.ipcRenderer.invoke('ipc-fs-exist', absolutePath)
+      if (globalStart.value) return
+      if (exists) {
+        loading.value = true
+        try {
+          await applyParsedDatabase(absolutePath)
+        } catch (err: any) {
+          skipDbcWatch = false
+          log(err)
+          ElNotification({
+            offset: 50,
+            type: 'error',
+            title: i18next.t('database.dbc.index.errors.parseFailed'),
+            message: err?.message || String(err),
+            appendTo: `#win${props.editIndex}`
+          })
+        } finally {
+          loading.value = false
+        }
+        return
+      }
+      ElNotification({
+        offset: 50,
+        type: 'warning',
+        message: i18next.t('database.dbc.index.messages.fileNotFound', { path: absolutePath }),
+        appendTo: `#win${props.editIndex}`
+      })
+    }
+  }
+
+  if (globalStart.value) return
+
+  const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    title: i18next.t('database.dbc.index.updateConfirm.title'),
+    defaultPath: resolveDbcFilePath(storedPath),
+    properties: ['openFile'],
+    filters: [
+      {
+        name: i18next.t('database.fileFilterName'),
+        extensions: ['dbc', 'arxml']
+      }
+    ]
+  })
+  const file = r.filePaths[0]
+  if (!file || globalStart.value) return
+
+  loading.value = true
+  try {
+    await applyParsedDatabase(file)
+  } catch (err: any) {
+    skipDbcWatch = false
+    log(err)
+    ElNotification({
+      offset: 50,
+      type: 'error',
+      title: i18next.t('database.dbc.index.errors.parseFailed'),
+      message: err?.message || String(err),
+      appendTo: `#win${props.editIndex}`
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
 function deleteDatabase() {
   ElMessageBox.confirm(
     i18next.t('database.dbc.index.deleteConfirm.message'),
@@ -279,6 +416,12 @@ function saveDataBase() {
       database.$patch(() => {
         const db = markRaw(cloneDeep(dbcObj.value))
         db.id = props.editIndex
+        if (db.filePath) {
+          const resolved = resolveDbcFilePath(db.filePath)
+          if (resolved) {
+            db.filePath = storeDbcFilePath(resolved)
+          }
+        }
         database.database.can[props.editIndex] = db
       })
       layout.changeWinName(props.editIndex, dbcObj.value.name)
@@ -298,7 +441,8 @@ function handleTabSwitch(tabName: string) {
 }
 
 let timeout
-watch(dbcObj, (val) => {
+watch(dbcObj, () => {
+  if (skipDbcWatch) return
   layout.setWinModified(props.editIndex, true)
   clearTimeout(timeout)
   timeout = setTimeout(() => {
@@ -316,7 +460,8 @@ onMounted(() => {
       .invoke('ipc-canmartix-parse', props.dbcFile)
       .then((result) => {
         result.data.version = 'canmartix'
-        result.data.filePath = props.dbcFile
+        result.data.filePath = storeDbcFilePath(props.dbcFile!)
+        result.data.id = props.editIndex
         dbcObj.value = result.data
         dbcObj.value.name = window.path.parse(props.dbcFile!).name
         loading.value = false
@@ -359,7 +504,7 @@ onMounted(() => {
     margin-bottom: 0px !important;
   }
   .el-tabs__new-tab {
-    width: 60px !important;
+    width: 90px !important;
     cursor: default !important;
   }
 }

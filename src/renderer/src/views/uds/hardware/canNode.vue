@@ -369,6 +369,27 @@ const configInfo: Record<CanVendor, any> = {
     can: {},
     canFd: {}
   },
+  uartcan: {
+    clock: false,
+    time: false,
+    timeSeg1: false,
+    timeSeg2: false,
+    sjw: false,
+    preScaler: false,
+    freq: true,
+    zlgSpec: false,
+    can: {
+      bitrate: {
+        sjw: 1,
+        timeSeg1: 13,
+        timeSeg2: 2,
+        preScaler: 10,
+        freq: 115200,
+        clock: '80'
+      }
+    },
+    canFd: {}
+  },
   peak: {
     clock: true,
     timeSeg1: true,
@@ -779,6 +800,7 @@ const showCandleTimingTable = computed(() => {
 })
 
 const showCanFdCheckbox = computed(() => {
+  if (props.vendor === 'uartcan') return false
   if (props.vendor !== 'candle') return true
   const dev = getSelectedCandleDevice()
   return !!dev?.extra?.candle?.fdSupported
@@ -973,6 +995,8 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     return `${(baudrate / 1000).toFixed(0)}K / ${(sample_point * 100).toFixed(2)}%`
   } else if (props.vendor == 'simulate') {
     return `${speed.freq / 1000}K/ ${i18next.t('uds.hardware.canNode.messages.dontCare')}`
+  } else if (props.vendor == 'uartcan') {
+    return `${speed.freq} bps (UART)`
   } else if (props.vendor == 'zlg') {
     if (data.value.bitrate.zlgSpec) {
       return i18next.t('uds.hardware.canNode.messages.zlgCheckCalculator')

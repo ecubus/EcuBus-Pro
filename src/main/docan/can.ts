@@ -11,6 +11,7 @@ import { CanBaseInfo } from '../share/can'
 import { CanBase } from './base'
 import { SLCAN_CAN } from './slcan'
 import { Candle_CAN } from './candle'
+import { UARTCAN_CAN } from './uartcan'
 
 const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)
@@ -38,6 +39,8 @@ export function openCanDevice(canDevice: CanBaseInfo) {
     canBase = new SLCAN_CAN(canDevice)
   } else if (canDevice.vendor == 'candle') {
     canBase = new Candle_CAN(canDevice)
+  } else if (canDevice.vendor == 'uartcan') {
+    canBase = new UARTCAN_CAN(canDevice)
   }
 
   return canBase
@@ -61,6 +64,8 @@ export function getCanVersion(vendor: string) {
     return SLCAN_CAN.getLibVersion()
   } else if (vendor === 'CANDLE') {
     return Candle_CAN.getLibVersion()
+  } else if (vendor === 'UARTCAN') {
+    return UARTCAN_CAN.getLibVersion()
   } else {
     return 'Not supported'
   }
@@ -84,6 +89,8 @@ export function getCanDevices(vendor: string) {
     return SLCAN_CAN.getValidDevices()
   } else if (vendor === 'CANDLE') {
     return Candle_CAN.getValidDevices()
+  } else if (vendor === 'UARTCAN') {
+    return UARTCAN_CAN.getValidDevices()
   } else {
     return []
   }

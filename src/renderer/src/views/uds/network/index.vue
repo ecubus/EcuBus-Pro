@@ -170,7 +170,8 @@ function addChild(parent: Tree) {
   if (parent.type == 'can') {
     for (const key of Object.keys(dataBase.devices)) {
       const item = dataBase.devices[key]
-      if (item.type == 'can' && item.canDevice) {
+      // uartcan devices are grouped under the Serial branch
+      if (item.type == 'can' && item.canDevice && item.canDevice.vendor != 'uartcan') {
         const cc: Tree = {
           type: 'device',
           label: item.canDevice.name,
@@ -231,6 +232,22 @@ function addChild(parent: Tree) {
         c.children.push(cc)
       }
     }
+  } else if (parent.type == 'someip') {
+    for (const key of Object.keys(dataBase.devices)) {
+      const item = dataBase.devices[key]
+      if (item.type == 'someip' && item.someipDevice) {
+        const cc: Tree = {
+          type: 'device',
+          label: item.someipDevice.name,
+          canAdd: false,
+          children: [],
+          icon: deviceIcon,
+          contextMenu: true,
+          id: key
+        }
+        c.children.push(cc)
+      }
+    }
   } else if (parent.type == 'serial') {
     for (const key of Object.keys(dataBase.devices)) {
       const item = dataBase.devices[key]
@@ -245,15 +262,11 @@ function addChild(parent: Tree) {
           id: key
         }
         c.children.push(cc)
-      }
-    }
-  } else if (parent.type == 'someip') {
-    for (const key of Object.keys(dataBase.devices)) {
-      const item = dataBase.devices[key]
-      if (item.type == 'someip' && item.someipDevice) {
+      } else if (item.type == 'can' && item.canDevice && item.canDevice.vendor == 'uartcan') {
+        // UDS over UART devices live here, matching the hardware page grouping
         const cc: Tree = {
           type: 'device',
-          label: item.someipDevice.name,
+          label: item.canDevice.name,
           canAdd: false,
           children: [],
           icon: deviceIcon,
@@ -338,8 +351,24 @@ function addChild(parent: Tree) {
         i.children.push(cc)
       }
     }
+  } else if (parent.type == 'serial') {
+    for (const key of Object.keys(dataBase.ia)) {
+      const item = dataBase.ia[key]
+      if (item.type == 'serial') {
+        const cc: Tree = {
+          type: 'interactive',
+          label: item.name,
+          canAdd: false,
+          children: [],
+          icon: interIcon,
+          contextMenu: true,
+          id: key
+        }
+        i.children.push(cc)
+      }
+    }
   }
-  if (parent.type != 'eth' && parent.type != 'serial') {
+  if (parent.type != 'eth') {
     parent.children.push(i)
   }
 }
@@ -383,14 +412,6 @@ const tData = computed(() => {
     icon: networkNode,
     children: [],
     id: 'pwm'
-  }
-  const serial: Tree = {
-    type: 'serial',
-    label: i18next.t('uds.network.tree.serial'),
-    canAdd: false,
-    icon: networkNode,
-    children: [],
-    id: 'serial'
   }
   const log: Tree = {
     type: 'log',
@@ -454,13 +475,21 @@ const tData = computed(() => {
     children: [],
     id: 'someip'
   }
+  const serial: Tree = {
+    type: 'serial',
+    label: i18next.t('uds.network.tree.serial'),
+    canAdd: false,
+    icon: networkNode,
+    children: [],
+    id: 'serial'
+  }
 
   addChild(can)
   addChild(lin)
   addChild(eth)
   addChild(pwm)
-  addChild(serial)
   addChild(someip)
+  addChild(serial)
 
   // addChild(node)
   return [can, lin, eth, someip, pwm, serial, node, log, replay]
@@ -678,7 +707,10 @@ function pasteNode() {
     } else if (newDevice.serialDevice) {
       newDevice.serialDevice.name = newName
       newDevice.serialDevice.id = id
-      newDevice.serialDevice.device.handle = '' // Clear device handle
+      newDevice.serialDevice.device.handle = ''
+      newDevice.serialDevice.device.id = ''
+      newDevice.serialDevice.device.label = ''
+      newDevice.serialDevice.device.serialNumber = undefined
     } else if (newDevice.someipDevice) {
       newDevice.someipDevice.name = newName
       newDevice.someipDevice.id = id
@@ -1334,6 +1366,19 @@ function addNode(type: string, parent?: Tree) {
       }
       udsView.addIg(id, dataBase.ia[id])
       // add link
+      for (const key of devices) {
+        udsView.addLink(id, key)
+      }
+    } else if (parent?.type == 'serial') {
+      const devices: string[] = []
+      dataBase.ia[id] = {
+        name: parent?.label || i18next.t('uds.network.tree.serial'),
+        type: 'serial',
+        id: id,
+        devices: devices,
+        action: []
+      }
+      udsView.addIg(id, dataBase.ia[id])
       for (const key of devices) {
         udsView.addLink(id, key)
       }

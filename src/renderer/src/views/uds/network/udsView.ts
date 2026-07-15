@@ -28,7 +28,6 @@ export const ceilInstanceMap = new Map<string, udsCeil>()
 export function getCeilInstance(id: string): udsCeil | undefined {
   return ceilInstanceMap.get(id)
 }
-
 // Get ceil instance by ID with type casting
 export function getCeilInstanceAs<T extends udsCeil>(id: string): T | undefined {
   return ceilInstanceMap.get(id) as T | undefined
@@ -892,6 +891,13 @@ export class UDSView {
         })
       } else if (item.type == 'someip') {
         this.layout.addWin('someipi', `${id}_ia`, {
+          name: item.name,
+          params: {
+            'edit-index': id
+          }
+        })
+      } else if (item.type == 'serial') {
+        this.layout.addWin('seriali', `${id}_ia`, {
           name: item.name,
           params: {
             'edit-index': id

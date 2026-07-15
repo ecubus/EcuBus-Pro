@@ -14,17 +14,21 @@ EcuBus-Pro 支持把串口（UART）作为一等硬件设备，与 CAN / LIN / P
 
 > 如果你只需要不依赖设备配置的、按路径直连的临时访问，也可以在脚本里直接使用 `serialport` npm 包——见 [使用外部包](../script/SerialPort/scriptSerialPort.md)。
 
+> 如需**通过串口跑 UDS 诊断**（ISO 15765-2 隧道到 UART），请使用 Serial 分组下的 **UDS** 设备——见 [UDS on Serial](./uds.md)。
+
 ## 添加串口设备
 
-1. 打开 **设备（Devices）** 窗口。
-2. 在 **ECUBUS** 厂商下选择 **Serial**，点击 **+** 按钮。
+1. 打开 **设备（Devices）** 窗口（Hardware → Devices）。
+2. 在 **Serial** 分组下选择 **Serial**，点击 **+** 按钮。
 3. 配置设备：
    - **端口（Port）** —— 操作系统串口（如 `COM7`、`/dev/ttyUSB0`）。点 **Refresh** 重新枚举端口。
    - **波特率（Baud Rate）** —— 预设包含 `115200`、`500000`、`1000000`；也可手动输入任意值。
    - **数据位（Data Bits）** —— `8` / `7` / `6` / `5`
    - **停止位（Stop Bits）** —— `1` / `1.5` / `2`
    - **校验（Parity）** —— `none` / `even` / `odd` / `mark` / `space`
-4. 给设备起个**名字**（如 `ECUBUS_Serial_0`）并保存。
+4. 给设备起个**名字**（如 `Serial_0`），点击 **Add Device**。
+
+![serial-device](../../../media/um/serial/serial-device.png)
 
 ## 绑定脚本节点
 
@@ -54,6 +58,22 @@ Util.Init(async () => {
 |------|------|
 | `Util.OnSerial(device \| true, cb)` | 注册串口帧监听。`cb` 收到一个 `SerialMessage`，包含 `dir`、`data`、`ts`。 |
 | `Util.writeSerial(device, data)` | 写入原始字节（`Buffer` 或 `number[]`），返回发送时间戳。`device` 传 `undefined` 时使用该节点的第一个串口通道。 |
+
+## 交互发送（IA）
+
+除了脚本，也可以在**交互面板（IA）**里手动发送原始字节：
+
+1. 打开 **Network** 窗口（Hardware → Network）。
+2. 展开 **Serial** 分支，点击 **Interactive** 上的 **+** 创建串口 IA。
+3. 双击图中的 IA 节点打开面板，点击连接图标为它分配设备。
+
+![serial-network](../../../media/um/serial/serial-network.png)
+
+4. 用添加图标新建一帧，选择**通道（Channel）**，然后点击 **Data** 单元格直接输入 HEX 字节（支持 `0x` 前缀、空格、逗号等分隔）。**触发（Trigger）**支持**手动**（可绑定键盘按键）和**周期**（周期可配）。
+
+![serial-ia](../../../media/um/serial/serial-ia.png)
+
+IA 会**原样发送**你输入的字节，不附加任何帧头。通道既可以选普通串口设备，也可以选 [UDS on Serial](./uds.md) 设备。
 
 ## 在 Trace 中查看
 

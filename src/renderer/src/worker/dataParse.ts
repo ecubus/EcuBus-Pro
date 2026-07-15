@@ -75,6 +75,21 @@ function parseLinData(raw: any) {
   return result
 }
 
+function parseSerialData(raw: any) {
+  const list = raw.map((item: any) => {
+    const bytes = item.message?.data?.data
+    if (bytes?.type === 'Buffer' && Array.isArray(bytes.data)) {
+      item.message.data.data = new Uint8Array(bytes.data)
+    } else if (Array.isArray(bytes)) {
+      item.message.data.data = new Uint8Array(bytes)
+    }
+    return item
+  })
+  return {
+    serialBase: list
+  }
+}
+
 function parseCanData(raw: any) {
   const result: Record<string, any> = {}
   const findDb = (db?: string) => {
@@ -731,6 +746,13 @@ function dataHandle(method: string, data: any) {
     }
     case 'linBase': {
       const result = parseLinData(data)
+      if (result) {
+        self.postMessage(result)
+      }
+      break
+    }
+    case 'serialBase': {
+      const result = parseSerialData(data)
       if (result) {
         self.postMessage(result)
       }

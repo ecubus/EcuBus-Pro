@@ -15,11 +15,6 @@
     <el-form-item :label="i18next.t('uds.hardware.serialNode.labels.name')" prop="name" required>
       <el-input v-model="data.name" />
     </el-form-item>
-    <el-form-item :label="i18next.t('uds.hardware.serialNode.labels.vendor')">
-      <el-tag>
-        {{ props.vendor.toLocaleUpperCase() }}
-      </el-tag>
-    </el-form-item>
     <el-form-item
       :label="i18next.t('uds.hardware.serialNode.labels.port')"
       prop="device.handle"
@@ -292,7 +287,7 @@ onBeforeMount(() => {
     if (editData && editData.type == 'serial' && editData.serialDevice) {
       data.value = cloneDeep(editData.serialDevice)
     } else {
-      data.value.name = `${props.vendor.toLocaleUpperCase()}_Serial_${Object.keys(devices.devices).length}`
+      data.value.name = `Serial_${Object.keys(devices.devices).length}`
       editIndex.value = ''
     }
   }

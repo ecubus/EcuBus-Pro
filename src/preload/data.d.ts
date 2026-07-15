@@ -107,7 +107,27 @@ export interface SomeipInter {
   action: SomeipAction[]
 }
 
-export type Inter = CanInter | LinInter | PwmInter | SomeipInter
+export interface SerialAction {
+  uuid: string
+  trigger: {
+    type: 'manual' | 'periodic'
+    period?: number
+    onKey?: string
+  }
+  name: string
+  channel: string
+  data: string[]
+}
+
+export interface SerialInter {
+  id: string
+  name: string
+  devices: string[]
+  type: 'serial'
+  action: SerialAction[]
+}
+
+export type Inter = CanInter | LinInter | PwmInter | SomeipInter | SerialInter
 export interface NodeItem {
   disabled?: boolean
   id: string

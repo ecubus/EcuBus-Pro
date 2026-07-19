@@ -4,8 +4,16 @@ import { workerData, isMainThread } from 'worker_threads'
 import { DataSet } from 'src/preload/data'
 import { registerWorker, workerEmit } from '../worker/uds'
 
-// Re-export all worker capabilities
-export * from '../worker'
+// Re-export worker APIs that are safe for the published plugin SDK.
+// Do NOT export secureAccess: it loads native sa.node at import time, and that
+// binary is not shipped in the npm package (crashes require on Windows).
+export * from '../worker/uds'
+export * from '../worker/someip'
+export * from '../worker/cantp'
+export * from '../worker/crc'
+export * from '../worker/cryptoExt'
+export * from '../worker/utli'
+export * as canopen from '../worker/canopen'
 
 type ServiceMap = {
   [key: string]: any

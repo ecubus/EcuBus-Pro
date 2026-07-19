@@ -1,11 +1,9 @@
-// 条件导入sa.node，只在Windows平台导入
+// Lazy-load sa.node so importing this module does not crash when the native
+// binary is absent (e.g. published main-plugin-sdk has no sa.node).
 let saNode: any
-if (process.platform == 'win32') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  saNode = require('./build/Release/sa.node')
-} else {
-  // 非Windows平台提供空实现
-  saNode = {
+
+function getStubSaNode() {
+  return {
     SeedKey: class {
       constructor() {}
       IsLoaded() {
@@ -48,13 +46,27 @@ if (process.platform == 'win32') {
   }
 }
 
+function getSaNode() {
+  if (saNode) {
+    return saNode
+  }
+  if (process.platform == 'win32') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    saNode = require('./build/Release/sa.node')
+  } else {
+    saNode = getStubSaNode()
+  }
+  return saNode
+}
+
 /**
  * @category UDS
  */
 export class SecureAccessDll {
   _ref: any
   constructor(dllPath: string) {
-    this._ref = new saNode.SeedKey()
+    const native = getSaNode()
+    this._ref = new native.SeedKey()
     // console.log(dllPath)
     this.loadDll(dllPath)
     if (!this._ref.IsLoaded()) {
@@ -90,23 +102,24 @@ export class SecureAccessDll {
     ipOptions: Buffer,
     key: Buffer
   ): Buffer {
-    const seedArray = new saNode.UINT8_ARRAY(ipSeedArray.length)
+    const native = getSaNode()
+    const seedArray = new native.UINT8_ARRAY(ipSeedArray.length)
     for (let i = 0; i < ipSeedArray.length; i++) {
       seedArray.setitem(i, ipSeedArray.readUInt8(i))
     }
-    const variant = new saNode.INT8_ARRAY(ipVariant.length)
+    const variant = new native.INT8_ARRAY(ipVariant.length)
     for (let i = 0; i < ipVariant.length; i++) {
       variant.setitem(i, ipVariant.readInt8(i))
     }
-    const options = new saNode.INT8_ARRAY(ipOptions.length)
+    const options = new native.INT8_ARRAY(ipOptions.length)
     for (let i = 0; i < ipOptions.length; i++) {
       options.setitem(i, ipOptions.readInt8(i))
     }
-    const KeyArray = new saNode.UINT8_ARRAY(key.length)
+    const KeyArray = new native.UINT8_ARRAY(key.length)
     for (let i = 0; i < key.length; i++) {
       KeyArray.setitem(i, key.readUInt8(i))
     }
-    const KeySize = new saNode.UINT32_PTR()
+    const KeySize = new native.UINT32_PTR()
     KeySize.assign(key.length)
     const ret = this._ref.GenerateKeyExOpt(
       seedArray.cast(),
@@ -154,20 +167,21 @@ export class SecureAccessDll {
     ipVariant: Buffer,
     key: Buffer
   ): Buffer {
-    const seedArray = new saNode.UINT8_ARRAY(ipSeedArray.length)
+    const native = getSaNode()
+    const seedArray = new native.UINT8_ARRAY(ipSeedArray.length)
     for (let i = 0; i < ipSeedArray.length; i++) {
       seedArray.setitem(i, ipSeedArray.readUInt8(i))
     }
-    const variant = new saNode.INT8_ARRAY(ipVariant.length)
+    const variant = new native.INT8_ARRAY(ipVariant.length)
     for (let i = 0; i < ipVariant.length; i++) {
       variant.setitem(i, ipVariant.readInt8(i))
     }
 
-    const KeyArray = new saNode.UINT8_ARRAY(key.length)
+    const KeyArray = new native.UINT8_ARRAY(key.length)
     for (let i = 0; i < key.length; i++) {
       KeyArray.setitem(i, key.readUInt8(i))
     }
-    const KeySize = new saNode.UINT32_PTR()
+    const KeySize = new native.UINT32_PTR()
     KeySize.assign(key.length)
     const ret = this._ref.GenerateKeyEx(
       seedArray.cast(),

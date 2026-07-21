@@ -1,5 +1,21 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.66
+Changes since v0.8.65:
+
+ 
+* [opt]:opt serial port in network
+* Fix device handling and CANLE frame definition consistency by @zhangjiance in https://github.com/ecubus/EcuBus-Pro/pull/383
+* Enhance raw data editor with auto-focus, tooltips, and context menu by @zhangjiance in https://github.com/ecubus/EcuBus-Pro/pull/386
+* fix(cdd): improve tester interface import by @EclipsedWing in https://github.com/ecubus/EcuBus-Pro/pull/387
+* Fix running selected test cases in test config by @EclipsedWing in https://github.com/ecubus/EcuBus-Pro/pull/391
+* feat(serial): add serial (UART) hardware device with script & trace integration. by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/399
+* Fix Vector LIN initialization failure by @EclipsedWing in https://github.com/ecubus/EcuBus-Pro/pull/401
+* Fix LDF parser optional channel name handling by @EclipsedWing in https://github.com/ecubus/EcuBus-Pro/pull/402
+* Fix Vector CAN/LIN channel filtering by bus type by @EclipsedWing in https://github.com/ecubus/EcuBus-Pro/pull/404
+---
+
+
 
 ## 0.8.65
 Changes since v0.8.64:

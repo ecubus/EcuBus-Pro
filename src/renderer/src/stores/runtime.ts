@@ -26,6 +26,7 @@ export type RunTimeStatus = {
   globalStart: boolean
   canPeriods: Record<string, boolean>
   someipPeriods: Record<string, boolean>
+  serialPeriods: Record<string, boolean>
   rearrangeWindows: boolean
   traceLinkId: string
   traceLinkIdBack: string
@@ -39,6 +40,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     canPeriods: {},
     someipPeriods: {},
+    serialPeriods: {},
     globalStart: false,
     rearrangeWindows: false,
     traceLinkId: '',
@@ -57,6 +59,12 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     removeSomeipPeriod(key: string) {
       delete this.someipPeriods[key]
+    },
+    setSerialPeriod(key: string, value: boolean) {
+      this.serialPeriods[key] = value
+    },
+    removeSerialPeriod(key: string) {
+      delete this.serialPeriods[key]
     },
     setTraceLinkId(id: string) {
       this.traceLinkId = id

@@ -17,10 +17,14 @@ Supported Hardware:
 > can also use the `serialport` npm package directly in a script — see
 > [Use External Packages](../script/SerialPort/scriptSerialPort.md).
 
+> To run **UDS diagnostics over a serial port** (ISO 15765-2 tunneled through
+> UART), use the **UDS** entry under the same Serial group — see
+> [UDS on Serial](./uds.md).
+
 ## Add a Serial Device
 
-1. Open the **Devices** window.
-2. Under the **ECUBUS** vendor, select **Serial** and click the **+** button.
+1. Open the **Devices** window (Hardware → Devices).
+2. Under the **Serial** group, select **Serial** and click the **+** button.
 3. Configure the device:
    - **Port** — the OS serial port (e.g. `COM7`, `/dev/ttyUSB0`). Use **Refresh**
      to re-enumerate ports.
@@ -29,7 +33,9 @@ Supported Hardware:
    - **Data Bits** — `8` / `7` / `6` / `5`
    - **Stop Bits** — `1` / `1.5` / `2`
    - **Parity** — `none` / `even` / `odd` / `mark` / `space`
-4. Give the device a **Name** (e.g. `ECUBUS_Serial_0`) and save.
+4. Give the device a **Name** (e.g. `Serial_0`) and click **Add Device**.
+
+![serial-device](../../../media/um/serial/serial-device.png)
 
 ## Bind a Script Node
 
@@ -61,6 +67,30 @@ Util.Init(async () => {
 |--------|-------------|
 | `Util.OnSerial(device \| true, cb)` | Register a listener for serial frames. `cb` receives a `SerialMessage` with `dir`, `data`, `ts`. |
 | `Util.writeSerial(device, data)` | Write raw bytes (`Buffer` or `number[]`). Returns the sent timestamp. Pass `undefined` as `device` to use the node's first serial channel. |
+
+## Interactive Send (IA)
+
+Besides scripting, raw bytes can also be sent manually from an **Interactive
+(IA)** panel:
+
+1. Open the **Network** window (Hardware → Network).
+2. Expand the **Serial** branch and click **+** on **Interactive** to create a
+   serial IA.
+3. Double-click the IA cell in the graph and click the link icon to assign
+   devices to it.
+
+![serial-network](../../../media/um/serial/serial-network.png)
+
+4. Add a frame with the add icon, pick a **Channel**, then click the **Data**
+   cell and type HEX bytes directly (`0x` prefixes, spaces and commas are all
+   accepted). The **Trigger** supports **Manual** (optionally bound to a
+   keyboard key) and **Periodic** with a configurable period.
+
+![serial-ia](../../../media/um/serial/serial-ia.png)
+
+The IA sends the bytes exactly as entered — no header or framing is added.
+Both plain serial devices and [UDS on Serial](./uds.md) devices can be
+selected as the channel.
 
 ## View in Trace
 

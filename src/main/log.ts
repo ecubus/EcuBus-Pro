@@ -519,7 +519,7 @@ export class SerialLOG {
       format: format.combine(
         format.json(),
         instanceFormat({ instance: instance }),
-        format.label({ label: `Serial-${vendor}` }),
+        format.label({ label: 'Serial' }),
         ...externalFormat
       )
     })

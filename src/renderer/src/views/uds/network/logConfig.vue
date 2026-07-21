@@ -250,6 +250,12 @@ const methods = [
     disabled: false
   },
   {
+    label: i18next.t('uds.network.logConfig.recordTypes.serial'),
+    value: 'SERIAL',
+    methods: ['serialBase', 'serialError'],
+    disabled: false
+  },
+  {
     label: i18next.t('uds.network.logConfig.recordTypes.eth'),
     value: 'ETH',
     methods: ['ipBase', 'ipError'],
@@ -409,10 +415,10 @@ const allDevices = computed(() => {
       dd[d] = dataBase.devices[d].ethDevice
     } else if (dataBase.devices[d].type == 'lin' && dataBase.devices[d].linDevice) {
       dd[d] = dataBase.devices[d].linDevice
-    } else if (dataBase.devices[d].type == 'pwm' && dataBase.devices[d].pwmDevice) {
-      dd[d] = dataBase.devices[d].pwmDevice
     } else if (dataBase.devices[d].type == 'serial' && dataBase.devices[d].serialDevice) {
       dd[d] = dataBase.devices[d].serialDevice
+    } else if (dataBase.devices[d].type == 'pwm' && dataBase.devices[d].pwmDevice) {
+      dd[d] = dataBase.devices[d].pwmDevice
     }
   }
   return dd

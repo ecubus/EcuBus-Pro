@@ -614,7 +614,7 @@ interface UdsLog {
   data: { service: ServiceItem; ts: number; recvData?: Uint8Array; msg?: string }
 }
 interface UdsErrorLog {
-  method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError' | 'linEvent'
+  method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError' | 'linEvent' | 'serialError'
   data: { msg: string; ts: number }
 }
 interface LinErrorLog {
@@ -960,6 +960,18 @@ function logDisplay({ values }: { values: LogItem[] }) {
         msgType: 'Serial',
         dlc: val.message.data.data.length,
         name: val.message.data.name
+      })
+    } else if (val.message.method == 'serialError') {
+      insertData({
+        method: val.message.method,
+        name: '',
+        data: val.message.data.msg,
+        ts: val.message.data.ts!,
+        id: 'serialError',
+        len: 0,
+        device: val.label,
+        channel: val.instance,
+        msgType: 'Serial Error'
       })
     } else if (val.message.method == 'udsSent') {
       let testerName = val.message.data.service.name

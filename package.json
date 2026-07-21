@@ -17,15 +17,18 @@
         "vector",
         "slcan",
         "ecubus",
-        "candle"
+        "candle",
+        "uartcan"
       ],
       "linux": [
         "simulate",
-        "slcan"
+        "slcan",
+        "uartcan"
       ],
       "darwin": [
         "simulate",
-        "slcan"
+        "slcan",
+        "uartcan"
       ]
     }
   },

@@ -43,6 +43,7 @@ import { clientTcp, DOIP, getEthDevices } from './../doip'
 import { EthAddr, EthBaseInfo } from '../share/doip'
 import { createPwmDevice, getValidPwmDevices, PwmBase } from '../pwm'
 import { SerialBase } from '../serial'
+import { UARTCAN_CAN } from '../docan/uartcan'
 
 import { getCanDevices, openCanDevice } from '../docan/can'
 import dllLib from '../../../resources/lib/zlgcan.dll?asset&asarUnpack'
@@ -56,6 +57,7 @@ import {
   LogItem,
   NodeItem,
   PwmInter,
+  SerialAction,
   SomeipAction,
   VarItem
 } from 'src/preload/data'
@@ -913,6 +915,7 @@ interface timerType {
 }
 const timerMap = new Map<string, timerType>()
 const someipPeriodMap = new Map<string, { clientKey: string }>()
+const serialPeriodMap = new Map<string, { timer: NodeJS.Timeout; ia: SerialAction }>()
 
 export function globalStop(emit = false) {
   trackEvent('app_stop')
@@ -974,6 +977,10 @@ export function globalStop(emit = false) {
     sysLog.info(`stop serial device ${value.info.vendor}-${value.info.device.handle}`)
   })
   serialBaseMap.clear()
+  serialPeriodMap.forEach((value) => {
+    clearInterval(value.timer)
+  })
+  serialPeriodMap.clear()
 
   nodeMap.forEach((value) => {
     value.close()
@@ -1424,6 +1431,90 @@ ipcMain.on('ipc-stop-can-period', (event, ...arg) => {
     timer.socket.close()
     timerMap.delete(id)
   }
+})
+
+function getSerialData(ia: SerialAction): Buffer {
+  return Buffer.from(
+    ia.data
+      .map((d) => Number.parseInt(d, 16))
+      .filter((d) => Number.isFinite(d))
+      .map((d) => d & 0xff)
+  )
+}
+
+async function sendSerialAction(ia: SerialAction): Promise<void> {
+  const serialBase = serialBaseMap.get(ia.channel)
+  if (serialBase) {
+    await serialBase.write(getSerialData(ia))
+    return
+  }
+  // UDS over UART devices live in canBaseMap but accept raw bytes too
+  const canBase = canBaseMap.get(ia.channel)
+  if (canBase instanceof UARTCAN_CAN) {
+    await canBase.writeRaw(getSerialData(ia))
+    return
+  }
+  throw new Error(
+    `serial device not opened: ${ia.channel || 'unknown channel'}, start the project first`
+  )
+}
+
+ipcMain.handle('ipc-send-serial', async (event, ...arg) => {
+  const ia = arg[0] as SerialAction
+  await sendSerialAction(ia)
+})
+
+ipcMain.handle('ipc-send-serial-period', async (event, ...arg) => {
+  const id = arg[0] as string
+  const ia = arg[1] as SerialAction
+  const old = serialPeriodMap.get(id)
+  if (old) {
+    clearInterval(old.timer)
+  }
+
+  // Validate the first send before starting the timer so failures reach the UI
+  await sendSerialAction(ia)
+
+  const period = Math.max(1, Number(ia.trigger.period || 500))
+  const timer = setInterval(() => {
+    const latest = serialPeriodMap.get(id)?.ia || ia
+    sendSerialAction(latest).catch((e: any) => {
+      sysLog.error(`serial send failed: ${e?.message || e}`)
+    })
+  }, period)
+
+  serialPeriodMap.set(id, { timer, ia })
+})
+
+ipcMain.on('ipc-update-serial-period', (event, ...arg) => {
+  const id = arg[0] as string
+  const ia = arg[1] as SerialAction
+  const old = serialPeriodMap.get(id)
+  if (!old) return
+
+  const oldPeriod = Math.max(1, Number(old.ia.trigger.period || 500))
+  const newPeriod = Math.max(1, Number(ia.trigger.period || 500))
+  if (oldPeriod === newPeriod) {
+    old.ia = ia
+    return
+  }
+
+  clearInterval(old.timer)
+  const timer = setInterval(() => {
+    const latest = serialPeriodMap.get(id)?.ia || ia
+    sendSerialAction(latest).catch((e: any) => {
+      sysLog.error(`serial send failed: ${e?.message || e}`)
+    })
+  }, newPeriod)
+  serialPeriodMap.set(id, { timer, ia })
+})
+
+ipcMain.on('ipc-stop-serial-period', (event, ...arg) => {
+  const id = arg[0] as string
+  const old = serialPeriodMap.get(id)
+  if (!old) return
+  clearInterval(old.timer)
+  serialPeriodMap.delete(id)
 })
 
 ipcMain.on('ipc-update-lin-signals', (event, ...arg) => {

@@ -288,6 +288,18 @@ export const layoutMap: Record<string, LayoutItem> = {
     component: defineAsyncComponent(() => import('./ia/lini.vue')),
     icon: interIcon
   },
+  seriali: {
+    i: 'IA',
+    x: 0,
+    y: 0,
+    w: 700,
+    h: 400,
+    label: 'IA',
+    labelKey: 'uds.windows.seriali',
+    key: 'IA',
+    component: defineAsyncComponent(() => import('./ia/seriali.vue')),
+    icon: interIcon
+  },
   linPanel: {
     i: 'Panel',
     x: 0,

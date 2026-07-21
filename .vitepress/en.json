@@ -42,7 +42,16 @@
     },
     {
       "text": "Serial",
-      "link": "serial/serial.md"
+      "items": [
+        {
+          "text": "Serial (UART)",
+          "link": "serial/serial.md"
+        },
+        {
+          "text": "UDS on Serial",
+          "link": "serial/uds.md"
+        }
+      ]
     },
     {
       "text": "Network",

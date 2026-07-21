@@ -419,29 +419,6 @@ function addSubTree(vendor: CanVendor, node: tree, deviceIndexMap: Map<string, n
       })
     }
   }
-  const serialTree: tree = {
-    label: i18next.t('uds.hardware.deviceTypes.serial'),
-    append: true,
-    id: vendor + 'SERIAL',
-    vendor: vendor,
-    type: 'serial',
-    children: []
-  }
-  if (vendor == 'ecubus') {
-    node.children?.push(serialTree)
-  }
-  for (const [key, value] of Object.entries(devices.devices)) {
-    if (value.type == 'serial' && value.serialDevice && value.serialDevice.vendor == vendor) {
-      serialTree.children?.push({
-        label: value.serialDevice.name,
-        append: false,
-        vendor: vendor,
-        id: key,
-        type: 'serial',
-        index: deviceIndexMap.get(key)
-      })
-    }
-  }
   // const ethTree:tree={
   //     label:'Ethernet',
   //     append:false,
@@ -565,6 +542,58 @@ async function buildTree() {
     }
     t.push(candle)
     addSubTree('candle', candle, deviceIndexMap)
+  }
+  if (vendors.includes('uartcan')) {
+    // Standalone Serial group: a plain serial port device plus a "UDS" entry,
+    // which is the uartcan virtual CAN bus (ISO-TP frames tunneled over UART)
+    const serialTree: tree = {
+      label: i18next.t('uds.hardware.deviceTypes.serial'),
+      append: true,
+      id: 'serialSERIAL',
+      vendor: 'ecubus',
+      type: 'serial',
+      children: []
+    }
+    for (const [key, value] of Object.entries(devices.devices)) {
+      if (value.type == 'serial' && value.serialDevice) {
+        serialTree.children?.push({
+          label: value.serialDevice.name,
+          append: false,
+          vendor: value.serialDevice.vendor,
+          id: key,
+          type: 'serial',
+          index: deviceIndexMap.get(key)
+        })
+      }
+    }
+    const udsTree: tree = {
+      label: i18next.t('uds.hardware.deviceTypes.uds'),
+      append: true,
+      id: 'uartcanCAN',
+      vendor: 'uartcan',
+      type: 'can',
+      children: []
+    }
+    for (const [key, value] of Object.entries(devices.devices)) {
+      if (value.type == 'can' && value.canDevice && value.canDevice.vendor == 'uartcan') {
+        udsTree.children?.push({
+          label: value.canDevice.name,
+          append: false,
+          vendor: 'uartcan',
+          id: key,
+          type: 'can',
+          index: deviceIndexMap.get(key)
+        })
+      }
+    }
+    const serialGroup: tree = {
+      label: i18next.t('uds.hardware.deviceTypes.serial'),
+      vendor: 'uartcan',
+      append: false,
+      id: 'SERIALGROUP',
+      children: [serialTree, udsTree]
+    }
+    t.push(serialGroup)
   }
 
   tData.value = t

@@ -41,14 +41,14 @@
       "link": "pwm/pwm.md"
     },
     {
-      "text": "Serial",
+      "text": "串口",
       "link": "serial/serial.md"
     },
     {
       "text": "网络",
       "items": [
         {
-          "text": "记录器",
+          "text": "日志记录器",
           "link": "network/logger.md"
         }
       ]
@@ -58,7 +58,7 @@
       "link": "replay/replay.md"
     },
     {
-      "text": "CLI",
+      "text": "命令行",
       "link": "cli/cli.md"
     },
     {
@@ -89,7 +89,7 @@
       "link": "someip/index.md"
     },
     {
-      "text": "OSEK OS追踪",
+      "text": "OSEK OS跟踪",
       "link": "osTrace/index.md"
     },
     {
@@ -104,21 +104,21 @@
           "link": "uds/testerPresent/testerPresent.md"
         },
         {
-          "text": "UDS -> C代码",
+          "text": "UDS → C代码",
           "link": "uds/udscode/udscode.md"
         },
         {
-          "text": "UDS Bootloader实施指南",
+          "text": "UDS Bootloader实现指南",
           "link": "uds/example/example.md"
         }
       ]
     },
     {
-      "text": "追踪",
+      "text": "跟踪",
       "link": "trace/trace.md"
     },
     {
-      "text": "图表",
+      "text": "图形",
       "link": "graph/graph.md"
     },
     {
@@ -134,7 +134,7 @@
           "link": "script/SerialPort/scriptSerialPort.md"
         },
         {
-          "text": "CAPL->TS",
+          "text": "CAPL→TS",
           "link": "script/capl2ts/capl2ts.md"
         },
         {

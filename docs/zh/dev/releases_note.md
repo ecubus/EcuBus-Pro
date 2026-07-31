@@ -1,5 +1,21 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.66
+
+自 v0.8.65 以来的变化：
+
+- [opt]: 网络中的可选串口
+- 修复设备处理和 CANLE 帧定义一致性，由 @zhangjiance 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/383
+- 增强原始数据编辑器，增加自动聚焦、工具提示和上下文菜单，由 @zhangjiance 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/386
+- fix(cdd): 改进测试仪接口导入，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/387
+- 修复在测试配置中运行选定的测试用例，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/391
+- feat(serial): 添加串口 (UART) 硬件设备，支持脚本和跟踪集成。 由 @crazy0104 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/399
+- 修复 Vector LIN 初始化失败，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/401
+- 修复 LDF 解析器中可选通道名称的处理，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/402
+- 修复通过总线类型过滤 Vector CAN/LIN 通道，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/404
+
+---
+
 ## 0.8.65
 
 自v0.8.64以来的变更：

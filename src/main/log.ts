@@ -63,7 +63,7 @@ const instanceFormat = format((info, opts: any) => {
   return info
 })
 const externalTransport: { id: string; t: () => Transport }[] = []
-const deviceTransport: { id: string; t: () => Transport }[] = []
+const deviceTransport: { id: string; devices: string[]; logger: Logger }[] = []
 export function addTransport(t: () => Transport): string {
   const id = v4()
   externalTransport.push({ id, t })
@@ -71,15 +71,44 @@ export function addTransport(t: () => Transport): string {
 }
 export function addDeviceTransport(t: () => Transport): string {
   const id = v4()
-  deviceTransport.push({ id, t })
+  const transport = t()
+  const devices = (transport as Transport & { devices?: string[] }).devices ?? []
+  const logger = createLogger({ transports: [transport] })
+  deviceTransport.push({ id, devices, logger })
   return id
 }
 
 export function removeDeviceTransport(id: string) {
   const index = deviceTransport.findIndex((t) => t.id == id)
   if (index != -1) {
-    deviceTransport.splice(index, 1)
+    const [target] = deviceTransport.splice(index, 1)
+    target.logger.close()
   }
+}
+
+class DeviceTransportRouter extends Transport {
+  constructor() {
+    super({ level: 'debug' })
+  }
+
+  log(info: any, callback: () => void) {
+    const message = typeof info.message === 'object' ? info.message : undefined
+    const deviceId = message?.deviceId
+
+    if (deviceId) {
+      for (const target of deviceTransport) {
+        if (target.devices.includes(deviceId)) {
+          target.logger.log({ level: info.level, message })
+        }
+      }
+    }
+
+    callback()
+  }
+}
+
+function getDeviceTransportRouters(): Transport[] {
+  return deviceTransport.length > 0 ? [new DeviceTransportRouter()] : []
 }
 export function removeTransport(id: string) {
   const index = externalTransport.findIndex((t) => t.id == id)
@@ -110,7 +139,7 @@ export class CanLOG {
     this.deviceId = deviceId
     this.vendor = vendor
     const et1 = externalTransport.map((t) => t.t())
-    const dt1 = deviceTransport.map((t) => t.t())
+    const dt1 = getDeviceTransportRouters()
     this.log = createLogger({
       transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
@@ -120,15 +149,6 @@ export class CanLOG {
         ...externalFormat
       )
     })
-
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
-    })
-
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   close() {
     this.log.close()
@@ -312,7 +332,7 @@ export class DoipLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
-    const dt1 = deviceTransport.map((t) => t.t())
+    const dt1 = getDeviceTransportRouters()
     this.log = createLogger({
       transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
@@ -322,13 +342,6 @@ export class DoipLOG {
         ...externalFormat
       )
     })
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
-    })
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   close() {
     this.log.close()
@@ -444,7 +457,7 @@ export class LinLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
-    const dt1 = deviceTransport.map((t) => t.t())
+    const dt1 = getDeviceTransportRouters()
     this.log = createLogger({
       transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
@@ -454,14 +467,6 @@ export class LinLOG {
         ...externalFormat
       )
     })
-
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
-    })
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   close() {
     this.log.close()
@@ -513,7 +518,7 @@ export class SerialLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
-    const dt1 = deviceTransport.map((t) => t.t())
+    const dt1 = getDeviceTransportRouters()
     this.log = createLogger({
       transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
@@ -523,14 +528,6 @@ export class SerialLOG {
         ...externalFormat
       )
     })
-
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
-    })
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   close() {
     this.log.close()
@@ -659,7 +656,7 @@ export class SomeipLOG {
     this.vendor = vendor
     this.deviceId = deviceId
     const et1 = externalTransport.map((t) => t.t())
-    const dt1 = deviceTransport.map((t) => t.t())
+    const dt1 = getDeviceTransportRouters()
     this.log = createLogger({
       transports: [new Base(), ...et1, ...dt1],
       format: format.combine(
@@ -669,13 +666,6 @@ export class SomeipLOG {
         ...externalFormat
       )
     })
-    //check device id
-    const combinedLogs = this.log.transports.filter((transport) => {
-      return (transport as any).devices && (transport as any).devices.indexOf(this.deviceId) == -1
-    })
-    for (const log of combinedLogs) {
-      this.log.remove(log)
-    }
   }
   close() {
     this.log.close()

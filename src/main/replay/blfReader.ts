@@ -43,8 +43,9 @@ const MAX_OBJECT_SIZE = 64 * 1024 * 1024
 const MAX_UNCOMPRESSED_SIZE = 64 * 1024 * 1024
 
 function blfPadSize(len: number): number {
+  // Vector BLF stores padding bytes equal to the remainder, not the amount needed to align to 4.
   const mod = len % 4
-  return mod === 0 ? 0 : 4 - mod
+  return mod === 0 ? 0 : mod
 }
 
 /**

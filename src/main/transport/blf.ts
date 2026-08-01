@@ -72,6 +72,7 @@ function writeSystemTime(buf: Buffer, offset: number, tsNs?: bigint) {
 }
 
 function padData(len: number): number {
+  // Vector BLF stores padding bytes equal to the remainder, not the amount needed to align to 4.
   const mod = len % 4
   return mod === 0 ? 0 : mod
 }
@@ -93,6 +94,7 @@ class BlfWriter {
   private maxContainerSize: number
   private compressionLevel: number
   private _pendingFlush = 0
+  private compressionQueue: Promise<void> = Promise.resolve()
 
   constructor(filePath: string, opts?: { compressionLevel?: number; maxContainerSize?: number }) {
     this.filePath = filePath
@@ -185,12 +187,17 @@ class BlfWriter {
     objHeader.writeBigUInt64LE(timestampNs >= 0n ? timestampNs : 0n, 8)
 
     const paddingSize = padData(data.length)
+    const bufferedObjectSize = objSize + paddingSize
+
+    if (this.bufferSize > 0 && this.bufferSize + bufferedObjectSize > this.maxContainerSize) {
+      this.flush()
+    }
 
     this.bufferParts.push(baseHeader, objHeader, data)
     if (paddingSize) {
       this.bufferParts.push(Buffer.alloc(paddingSize))
     }
-    this.bufferSize += objSize + paddingSize
+    this.bufferSize += bufferedObjectSize
     this.objectCount += 1
 
     if (this.bufferSize >= this.maxContainerSize) {
@@ -285,10 +292,9 @@ class BlfWriter {
       return
     }
 
-    const uncompressed = buffer.subarray(0, this.maxContainerSize)
-    const tail = buffer.subarray(this.maxContainerSize)
-    this.bufferParts = tail.length ? [tail] : []
-    this.bufferSize = tail.length
+    const uncompressed = buffer
+    this.bufferParts = []
+    this.bufferSize = 0
 
     if (this.compressionLevel === 0) {
       this._writeContainer(uncompressed, uncompressed, NO_COMPRESSION)
@@ -303,23 +309,27 @@ class BlfWriter {
    */
   private _compressAndWrite(uncompressed: Buffer) {
     this._pendingFlush++
-    const chunks: Buffer[] = []
-    const deflate = zlib.createDeflate({ level: this.compressionLevel })
+    this.compressionQueue = this.compressionQueue.then(
+      () =>
+        new Promise<void>((resolve) => {
+          const chunks: Buffer[] = []
+          const deflate = zlib.createDeflate({ level: this.compressionLevel })
 
-    // Collect compressed chunks directly
-    deflate.on('data', (chunk: Buffer) => chunks.push(chunk))
-    deflate.on('end', () => {
-      const payload = Buffer.concat(chunks)
-      this._writeContainer(uncompressed, payload, ZLIB_DEFLATE)
-      this._pendingFlush--
-    })
-    deflate.on('error', (err) => {
-      console.error('BLF compression error:', err)
-      this._pendingFlush--
-    })
-
-    // Write directly to deflate stream (no intermediate PassThrough)
-    deflate.end(uncompressed)
+          deflate.on('data', (chunk: Buffer) => chunks.push(chunk))
+          deflate.on('end', () => {
+            const payload = Buffer.concat(chunks)
+            this._writeContainer(uncompressed, payload, ZLIB_DEFLATE)
+            this._pendingFlush--
+            resolve()
+          })
+          deflate.on('error', (err) => {
+            console.error('BLF compression error:', err)
+            this._pendingFlush--
+            resolve()
+          })
+          deflate.end(uncompressed)
+        })
+    )
   }
 
   /**

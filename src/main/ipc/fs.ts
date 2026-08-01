@@ -61,6 +61,12 @@ ipcMain.on('ipc-path-parse', async (event, arg) => {
 ipcMain.on('ipc-path-relative', async (event, ...args) => {
   event.returnValue = path.relative(args[0], args[1])
 })
+ipcMain.on('ipc-path-join', async (event, ...args) => {
+  event.returnValue = path.join(...args)
+})
+ipcMain.on('ipc-path-is-absolute', async (event, arg) => {
+  event.returnValue = path.isAbsolute(arg)
+})
 ipcMain.handle('ipc-glob', async (event, ...args) => {
   const par = args.shift()
   return glob(par, ...args)

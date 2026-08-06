@@ -31,7 +31,7 @@ export abstract class CanBase {
   > = {}
   txPendingNode?: NodeClass
   // Bus loading statistics
-  private busLoadingStats = {
+  protected busLoadingStats = {
     startTime: 0,
     totalBits: 0,
     lastBits: 0,
@@ -140,10 +140,13 @@ export abstract class CanBase {
   protected busloadCb = this.updateBusLoadingWithFrame.bind(this)
   updateBusLoadingWithFrame(msg: CanMessage) {
     // 统计发送/接收帧
-    if (msg.dir === 'OUT') {
-      this.busLoadingStats.sentFrames++
-    } else if (msg.dir === 'IN') {
-      this.busLoadingStats.recvFrames++
+    // noCount=true 表示调用方已在发送时直接计数，此处跳过避免重复计数
+    if (!msg.noCount) {
+      if (msg.dir === 'OUT') {
+        this.busLoadingStats.sentFrames++
+      } else if (msg.dir === 'IN') {
+        this.busLoadingStats.recvFrames++
+      }
     }
 
     // 计算不同阶段的位数量

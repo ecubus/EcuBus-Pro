@@ -1,8 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { ReplayCanFrame } from '../../src/main/replay/index'
+import { ReplayCanFrame, ReplayFrame, ReplayReader } from '../../src/main/replay/index'
 import path from 'path'
 import { AscReader } from 'src/main/replay/ascReader'
 import { BlfReader } from 'src/main/replay/blfReader'
+
+/** Helper: read all CAN frames from a reader, unwrapping the tagged union */
+async function readAllCanFrames(reader: ReplayReader): Promise<ReplayCanFrame[]> {
+  const frames: ReplayCanFrame[] = []
+  let rf: ReplayFrame | null
+  while ((rf = await reader.readFrame()) !== null) {
+    if (rf.type === 'can') frames.push(rf.frame)
+  }
+  return frames
+}
 
 describe('Replay', () => {
   const blfFilePath = path.resolve(__dirname, './Logging.blf')
@@ -24,13 +34,7 @@ describe('Replay', () => {
       const reader = new AscReader(ascFilePath, 10) // 0 = as fast as possible (no time-based delay)
       reader.init()
 
-      const frames: ReplayCanFrame[] = []
-      let frame: ReplayCanFrame | null
-
-      // Read all frames
-      while ((frame = await reader.readFrame()) !== null) {
-        frames.push(frame)
-      }
+      const frames = await readAllCanFrames(reader)
 
       expect(frames.length).toBeGreaterThan(0)
       console.log(`Read ${frames.length} CAN frames from ASC file`)
@@ -61,18 +65,14 @@ describe('Replay', () => {
       const reader = new AscReader(ascFilePath, 0)
       await reader.init()
 
+      const frames = await readAllCanFrames(reader)
       let lastTs = -1
-      let frame: ReplayCanFrame | null
-      let count = 0
-
-      while ((frame = await reader.readFrame()) !== null) {
-        // Timestamps should be non-decreasing
+      for (const frame of frames) {
         expect(frame.ts).toBeGreaterThanOrEqual(lastTs)
         lastTs = frame.ts
-        count++
       }
 
-      console.log(`Verified ${count} frames have increasing timestamps`)
+      console.log(`Verified ${frames.length} frames have increasing timestamps`)
       reader.close()
     })
 
@@ -80,10 +80,10 @@ describe('Replay', () => {
       const reader = new AscReader(ascFilePath, 0)
       const { total } = await reader.init()
 
-      let frame: ReplayCanFrame | null
+      let rf: ReplayFrame | null
       let lastProgress = 0
 
-      while ((frame = await reader.readFrame()) !== null) {
+      while ((rf = await reader.readFrame()) !== null) {
         const progress = reader.getProgress()
         expect(progress.current).toBeLessThanOrEqual(progress.total)
         expect(progress.percent).toBeGreaterThanOrEqual(lastProgress)
@@ -104,12 +104,7 @@ describe('Replay', () => {
       const reader = new AscReader(ascFilePath, 0)
       await reader.init()
 
-      const frames: ReplayCanFrame[] = []
-      let frame: ReplayCanFrame | null
-
-      while ((frame = await reader.readFrame()) !== null) {
-        frames.push(frame)
-      }
+      const frames = await readAllCanFrames(reader)
 
       // Total frames in ASC file: 37 (lines 4-40)
       expect(frames.length).toBe(36)
@@ -180,12 +175,7 @@ describe('Replay', () => {
       const reader = new BlfReader(blfFilePath, 0)
       reader.init()
 
-      const frames: ReplayCanFrame[] = []
-      let frame: ReplayCanFrame | null
-
-      while ((frame = await reader.readFrame()) !== null) {
-        frames.push(frame)
-      }
+      const frames = await readAllCanFrames(reader)
 
       expect(frames.length).toBeGreaterThan(0)
       console.log(`Read ${frames.length} CAN frames from BLF file`)
@@ -216,18 +206,15 @@ describe('Replay', () => {
       const reader = new BlfReader(blfFilePath, 0)
       await reader.init()
 
+      const frames = await readAllCanFrames(reader)
       let lastTs = -1
-      let frame: ReplayCanFrame | null
-      let count = 0
-
-      while ((frame = await reader.readFrame()) !== null) {
+      for (const frame of frames) {
         expect(frame.ts).toBeGreaterThanOrEqual(lastTs)
         lastTs = frame.ts
-        count++
       }
 
-      expect(count).toBeGreaterThan(0)
-      console.log(`Verified ${count} frames have increasing timestamps`)
+      expect(frames.length).toBeGreaterThan(0)
+      console.log(`Verified ${frames.length} frames have increasing timestamps`)
       reader.close()
     })
 
@@ -235,9 +222,9 @@ describe('Replay', () => {
       const reader = new BlfReader(blfFilePath, 0)
       await reader.init()
 
-      let frame: ReplayCanFrame | null
+      let rf: ReplayFrame | null
 
-      while ((frame = await reader.readFrame()) !== null) {
+      while ((rf = await reader.readFrame()) !== null) {
         const progress = reader.getProgress()
         expect(progress.current).toBeLessThanOrEqual(progress.total)
       }

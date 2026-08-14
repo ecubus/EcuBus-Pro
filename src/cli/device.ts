@@ -7,7 +7,7 @@ import { openLinDevice } from 'src/main/dolin'
 import LinBase from 'src/main/dolin/base'
 import { createPwmDevice, PwmBase } from 'src/main/pwm'
 import { SerialBase } from 'src/main/serial'
-import { generateConfigFile, VSomeIP_Client } from 'src/main/vsomeip'
+import { generateConfigFile, startRouterCounter, stopRouterCounter, VSomeIP_Client } from 'src/main/vsomeip'
 
 export default async function main(
   projectPath: string,
@@ -20,6 +20,7 @@ export default async function main(
   const pwmBaseMap = new Map<string, PwmBase>()
   const serialBaseMap = new Map<string, SerialBase>()
   const someipMap = new Map<string, VSomeIP_Client>()
+  let rounterInit = false
   for (const key in devices) {
     const device = devices[key]
     if (device.type == 'can' && device.canDevice) {
@@ -83,6 +84,10 @@ export default async function main(
     } else if (device.type == 'someip' && device.someipDevice) {
       const val = device.someipDevice
       const file = await generateConfigFile(val, projectPath, devices)
+      if (rounterInit == false) {
+        await startRouterCounter(file)
+        rounterInit = true
+      }
       const client = new VSomeIP_Client(val.name, file, val)
       client.init()
       someipMap.set(key, client)
@@ -115,4 +120,5 @@ export async function closeDevice(
   for (const someipBase of someipMap.values()) {
     await someipBase.stop()
   }
+  stopRouterCounter()
 }

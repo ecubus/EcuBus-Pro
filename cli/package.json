@@ -4,6 +4,9 @@
   "description": "EcbBus-Pro CLI Tool",
   "bin": "dist/ecb_cli.js",
   "pkg": {
+    "scripts": [
+      "./dist/vsomeip.js"
+    ],
     "assets": [
       "./dist/*.node"
     ],

@@ -2,22 +2,24 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
 
-// Custom plugin to preprocess ecb_cli.js before packaging
+// Custom plugin to preprocess ecb_cli.js and vsomeip.js before packaging
 class PreprocessEcbCliPlugin {
     apply(compiler) {
         compiler.hooks.afterEmit.tapAsync('PreprocessEcbCliPlugin', (compilation, callback) => {
-            const ecbCliPath = path.resolve(__dirname, 'dist', 'ecb_cli.js');
-            const content = fs.readFileSync(ecbCliPath, 'utf8');
-            let processedContent = content.replace(
-                /path\.join\(__dirname\s*,\s*([^)]*)\)\.replace\(\s*["']app\.asar["']\s*,\s*["']app\.asar\.unpacked["']\s*\)/g,
-                'path.join(path.dirname(process.execPath), $1)'
-            );
-            //require: __webpack_require__("./out sync recursive"), to require:require
-            processedContent = processedContent.replace(
-                /require:\s*__webpack_require__\s*\(\s*["']\.\/out\s+sync\s+recursive["']\s*\)/g,
-                'require:require'
-            );
-            fs.writeFileSync(ecbCliPath, processedContent, 'utf8');
+            for (const file of ['ecb_cli.js', 'vsomeip.js']) {
+                const jsPath = path.resolve(__dirname, 'dist', file);
+                const content = fs.readFileSync(jsPath, 'utf8');
+                let processedContent = content.replace(
+                    /path\.join\(__dirname\s*,\s*([^)]*)\)\.replace\(\s*["']app\.asar["']\s*,\s*["']app\.asar\.unpacked["']\s*\)/g,
+                    'path.join(path.dirname(process.execPath), $1)'
+                );
+                //require: __webpack_require__("./out sync recursive"), to require:require
+                processedContent = processedContent.replace(
+                    /require:\s*__webpack_require__\s*\(\s*["']\.\/out\s+sync\s+recursive["']\s*\)/g,
+                    'require:require'
+                );
+                fs.writeFileSync(jsPath, processedContent, 'utf8');
+            }
             callback();
         });
     }
@@ -26,6 +28,7 @@ class PreprocessEcbCliPlugin {
 module.exports = {
     entry: {
         ecb_cli: path.resolve(__dirname, 'out', 'ecb_cli.js'),
+        vsomeip: path.resolve(__dirname, 'out', 'vsomeip.js'),
     },
     mode: 'development',
     output: {

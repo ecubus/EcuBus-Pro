@@ -17,10 +17,15 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/cli/index.ts'),
-          fake: resolve(__dirname, 'src/cli/fake.ts')
+          fake: resolve(__dirname, 'src/cli/fake.ts'),
+          vsomeip: resolve(__dirname, 'src/main/vsomeip/worker.ts')
         },
         output: {
-          entryFileNames: 'ecb_cli.js',
+          entryFileNames: (chunk) => {
+            if (chunk.name === 'vsomeip') return 'vsomeip.js'
+            if (chunk.name === 'index') return 'ecb_cli.js'
+            return chunk.name + '.js'
+          },
           format: 'cjs',
           dir: resolve(__dirname, 'cli/out/')
         }

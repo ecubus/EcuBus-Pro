@@ -88,6 +88,7 @@ export class NodeClass {
   private pwmBaseId: string[] = []
   private serialBaseId: string[] = []
   private someipBaseId: string[] = []
+  private someipCbs: Map<string, (msg: SomeipMessage) => void> = new Map()
   private startTs = 0
   private boundCb: (frame: CanMessage | LinMsg | SomeipMessage | SerialMessage) => void
   private boundSomeipServiceValidCb: (info: VsomeipAvailabilityInfo) => void
@@ -229,7 +230,12 @@ export class NodeClass {
       const someipBaseItem = this.someipMap.get(c)
       if (someipBaseItem) {
         this.someipBaseId.push(c)
-        someipBaseItem.attachSomeipMessage(this.boundCb)
+        const wrappedSomeipCb = (msg: SomeipMessage) => {
+          msg.device = someipBaseItem.info.name
+          this.boundCb(msg)
+        }
+        this.someipCbs.set(c, wrappedSomeipCb)
+        someipBaseItem.attachSomeipMessage(wrappedSomeipCb)
         someipBaseItem.attachSomeipServiceValid(this.boundSomeipServiceValidCb)
       }
     }
@@ -1514,7 +1520,10 @@ export class NodeClass {
       }
       const someipBaseItem = this.someipMap.get(c)
       if (someipBaseItem) {
-        someipBaseItem.detachSomeipMessage(this.boundCb)
+        const wrappedSomeipCb = this.someipCbs.get(c)
+        if (wrappedSomeipCb) {
+          someipBaseItem.detachSomeipMessage(wrappedSomeipCb)
+        }
         someipBaseItem.detachSomeipServiceValid(this.boundSomeipServiceValidCb)
       }
       const serialBaseItem = this.serialBaseMap.get(c)

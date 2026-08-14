@@ -330,5 +330,48 @@
             }]
         ]
     },
+        {
+            'target_name': 'socketcan',
+            'conditions': [
+                ['OS=="linux"', {
+                    'include_dirs': [
+                        './socketcan/api',
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [
+                        './socketcan/socketcan.cxx',
+                        './socketcan/api/socketcan_api.c'
+                    ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                }],
+                ['OS=="win"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './socketcan/fake_socketcan.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                }],
+                ['OS=="mac"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './socketcan/fake_socketcan.cxx' ],
+                    'xcode_settings': {
+                        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+                    }
+                }]
+            ]
+        }
     ]
 }

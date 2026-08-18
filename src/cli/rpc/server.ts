@@ -67,9 +67,7 @@ async function handleSingle(
   try {
     req = validateRequest(raw)
   } catch (err) {
-    const rpc = isRpcError(err)
-      ? err
-      : new RpcError(RPC_INVALID_REQUEST, 'Invalid Request')
+    const rpc = isRpcError(err) ? err : new RpcError(RPC_INVALID_REQUEST, 'Invalid Request')
     return makeError(null, rpc.code, rpc.message, rpc.data)
   }
   const id = req.id === undefined ? undefined : (req.id as string | number | null)
@@ -116,9 +114,7 @@ function attachConnection(
     try {
       messages = framer.push(chunk)
     } catch (err) {
-      const rpc = isRpcError(err)
-        ? err
-        : new RpcError(RPC_PARSE_ERROR, 'Parse error')
+      const rpc = isRpcError(err) ? err : new RpcError(RPC_PARSE_ERROR, 'Parse error')
       writeFrame(socket, makeError(null, rpc.code, rpc.message, rpc.data))
       framer.reset()
       return
@@ -131,15 +127,18 @@ function attachConnection(
     }
   }
 
+  let chain = Promise.resolve()
   socket.on('data', (chunk) => {
-    onData(chunk).catch((err) => {
-      if (!socket.destroyed) {
-        writeFrame(
-          socket,
-          makeError(null, RPC_INTERNAL_ERROR, err instanceof Error ? err.message : String(err))
-        )
-      }
-    })
+    chain = chain
+      .then(() => onData(chunk))
+      .catch((err) => {
+        if (!socket.destroyed) {
+          writeFrame(
+            socket,
+            makeError(null, RPC_INTERNAL_ERROR, err instanceof Error ? err.message : String(err))
+          )
+        }
+      })
   })
 
   const cleanup = () => {
@@ -202,9 +201,7 @@ export async function startRpcServer(options: RpcListenOptions = {}): Promise<Rp
         try {
           messages = framer.push(chunk)
         } catch (err) {
-          const rpc = isRpcError(err)
-            ? err
-            : new RpcError(RPC_PARSE_ERROR, 'Parse error')
+          const rpc = isRpcError(err) ? err : new RpcError(RPC_PARSE_ERROR, 'Parse error')
           stdout.write(encodeResponse(makeError(null, rpc.code, rpc.message, rpc.data)) + '\n')
           framer.reset()
           return

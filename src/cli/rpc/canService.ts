@@ -13,7 +13,7 @@ import {
   getTsUs
 } from 'src/main/share/can'
 import { UdsDevice } from 'src/main/share/uds'
-import pkg from '../../package.json'
+import pkg from '../../../package.json'
 import {
   asObject,
   encodeFrame,
@@ -263,10 +263,7 @@ export class CanRpcService {
   private initialized = false
   private nextControllerId = 0
   private rxQueueSize: number
-  private baudRateConfigs = new Map<
-    string,
-    { bitrate: CanBitrate; bitratefd?: CanBitrate }
-  >()
+  private baudRateConfigs = new Map<string, { bitrate: CanBitrate; bitratefd?: CanBitrate }>()
   private pendingTx = new Map<
     string,
     { session: RpcSession; hth: number; swPduHandle?: number; controllerId: number }
@@ -612,9 +609,7 @@ export class CanRpcService {
       }
     }
 
-    const controllers = cfg.controllers?.length
-      ? cfg.controllers
-      : this.controllersFromProject()
+    const controllers = cfg.controllers?.length ? cfg.controllers : this.controllersFromProject()
     if (!controllers.length) {
       throw new RpcError(
         RPC_INVALID_PARAMS,
@@ -686,9 +681,8 @@ export class CanRpcService {
     if (hoh.inFlight >= maxPending) {
       return stdResult('CAN_BUSY')
     }
-    const id = hasKey(obj, 'id') || hasKey(obj, 'canId')
-      ? parseCanId(obj.id ?? obj.canId)
-      : hoh.canId
+    const id =
+      hasKey(obj, 'id') || hasKey(obj, 'canId') ? parseCanId(obj.id ?? obj.canId) : hoh.canId
     if (id == null) {
       return stdResult('E_NOT_OK', { reason: 'CAN id missing for BASIC HTH' })
     }
@@ -898,8 +892,7 @@ export class CanRpcService {
     if (handle == null) {
       throw new RpcError(RPC_INVALID_PARAMS, 'controller handle is required')
     }
-    const controllerId =
-      cfg.controllerId != null ? cfg.controllerId : this.allocControllerId()
+    const controllerId = cfg.controllerId != null ? cfg.controllerId : this.allocControllerId()
     if (this.controllers.has(controllerId)) {
       throw new RpcError(RPC_ALREADY, `controller ${controllerId} already open`)
     }
@@ -949,7 +942,10 @@ export class CanRpcService {
     try {
       const base = openRpcCanDevice(ctrl.info)
       if (!base) {
-        throw new RpcError(RPC_NOT_FOUND, `failed to open ${ctrl.info.vendor} handle ${ctrl.info.handle}`)
+        throw new RpcError(
+          RPC_NOT_FOUND,
+          `failed to open ${ctrl.info.vendor} handle ${ctrl.info.handle}`
+        )
       }
       ctrl.base = base
       base.attachCanMessage(ctrl.frameCb)
@@ -1048,7 +1044,10 @@ export class CanRpcService {
       throw new RpcError(RPC_ALREADY, `hardware object ${cfg.hohId} already exists`)
     }
     if (!this.controllers.has(cfg.controllerId)) {
-      throw new RpcError(RPC_NOT_FOUND, `controller ${cfg.controllerId} not found for Hoh ${cfg.hohId}`)
+      throw new RpcError(
+        RPC_NOT_FOUND,
+        `controller ${cfg.controllerId} not found for Hoh ${cfg.hohId}`
+      )
     }
     const idType = cfg.idType ?? 'STANDARD'
     const hoh: HardwareObject = {
@@ -1094,7 +1093,12 @@ export class CanRpcService {
       throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} has no hardware`)
     }
     const key = uuidv4()
-    this.pendingTx.set(key, { session, hth: hth ?? -1, swPduHandle, controllerId: ctrl.controllerId })
+    this.pendingTx.set(key, {
+      session,
+      hth: hth ?? -1,
+      swPduHandle,
+      controllerId: ctrl.controllerId
+    })
     try {
       const ts = await ctrl.base.writeBase(id, msgType, data, { name })
       this.pushTx(session, {
@@ -1168,7 +1172,9 @@ export class CanRpcService {
       return
     }
     if (errMsg) {
-      ctrl.errorState = /bus.?off/i.test(errMsg) ? 'CAN_ERRORSTATE_BUSOFF' : 'CAN_ERRORSTATE_PASSIVE'
+      ctrl.errorState = /bus.?off/i.test(errMsg)
+        ? 'CAN_ERRORSTATE_BUSOFF'
+        : 'CAN_ERRORSTATE_PASSIVE'
       const event: RpcControllerEvent = { controllerId, ts: getTsUs(), message: errMsg }
       if (ctrl.errorState === 'CAN_ERRORSTATE_BUSOFF') {
         this.broadcast((session) => {
@@ -1247,7 +1253,10 @@ export class CanRpcService {
     throw new RpcError(RPC_INVALID_PARAMS, `unknown mode/transition "${mode}"`)
   }
 
-  private transitionToMode(current: CanControllerMode, transition: CanModeTransition): CanControllerMode {
+  private transitionToMode(
+    current: CanControllerMode,
+    transition: CanModeTransition
+  ): CanControllerMode {
     if (transition === 'CAN_T_START') {
       return 'CAN_CS_STARTED'
     }
@@ -1310,13 +1319,13 @@ export class CanRpcService {
       if (!current || current.mode !== 'CAN_CS_STARTED' || !current.base) {
         return
       }
-      current.base.writeBase(message.id, message.msgType, message.data, { name: message.name }).catch(
-        (err) => {
+      current.base
+        .writeBase(message.id, message.msgType, message.data, { name: message.name })
+        .catch((err) => {
           if (typeof sysLog !== 'undefined') {
             sysLog.warn(`period send ${taskId} failed: ${err instanceof Error ? err.message : err}`)
           }
-        }
-      )
+        })
     }, periodMs)
     const task: PeriodTask = {
       taskId,

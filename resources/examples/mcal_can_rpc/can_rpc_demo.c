@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <time.h>
 #include <unistd.h>
 
 static int g_id = 1;
@@ -148,7 +149,10 @@ int main(int argc, char **argv) {
       sizeof(resp)
   );
 
-  usleep(20 * 1000);
+  {
+    struct timespec ts = {0, 20 * 1000 * 1000};
+    nanosleep(&ts, NULL);
+  }
 
   /* Can_MainFunction_Read -> CanIf_RxIndication */
   rpc_fmt_call(fd, ECB_RPC_CAN_MF_READ, "{\"max\":16}", resp, sizeof(resp));

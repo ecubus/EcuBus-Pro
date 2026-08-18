@@ -3,13 +3,20 @@ import { CanRpcService, parseControllerArg, RpcSession } from './canService'
 import { asObject, reqString } from './codec'
 import { RPC_INVALID_PARAMS, RPC_METHOD_NOT_FOUND, RpcError } from './errors'
 
-export type RpcHandler = (params: unknown, session: RpcSession, service: CanRpcService) => Promise<unknown> | unknown
+export type RpcHandler = (
+  params: unknown,
+  session: RpcSession,
+  service: CanRpcService
+) => Promise<unknown> | unknown
 
 const handlers = new Map<string, RpcHandler>()
 
 function register(name: string, handler: RpcHandler) {
   handlers.set(name, handler)
-  handlers.set(name.toLowerCase(), handler)
+  const lower = name.toLowerCase()
+  if (lower === name || !handlers.has(lower)) {
+    handlers.set(lower, handler)
+  }
 }
 
 register('sys.ping', () => ({ pong: true, ts: Date.now() }))
@@ -94,8 +101,12 @@ register('Can.SetBaudrate', (params, _s, service) => service.setBaudrate(params)
 register('Can.CheckWakeup', (params, _s, service) => {
   return service.checkWakeup(parseControllerArg(params, 'Can.CheckWakeup'))
 })
-register('Can.MainFunction_Write', (params, session, service) => service.mainFunctionWrite(params, session))
-register('Can.MainFunction_Read', (params, session, service) => service.mainFunctionRead(params, session))
+register('Can.MainFunction_Write', (params, session, service) =>
+  service.mainFunctionWrite(params, session)
+)
+register('Can.MainFunction_Read', (params, session, service) =>
+  service.mainFunctionRead(params, session)
+)
 register('Can.MainFunction_BusOff', (_p, session, service) => service.mainFunctionBusOff(session))
 register('Can.MainFunction_Wakeup', (_p, session, service) => service.mainFunctionWakeup(session))
 register('Can.MainFunction_Mode', (_p, session, service) => service.mainFunctionMode(session))
@@ -120,4 +131,3 @@ export async function dispatchRpc(
   }
   return handler(params, session, service)
 }
-

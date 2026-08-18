@@ -275,12 +275,20 @@ describe('JSON-RPC TCP server', () => {
     const unknown = await call('no.such', {}, 3)
     expect(unknown.error.code).toBe(RPC_METHOD_NOT_FOUND)
 
-    await call('can.open', { vendor: 'simulate', handle: h0, controllerId: 0 }, 4)
-    await call('can.open', { vendor: 'simulate', handle: h1, controllerId: 1 }, 5)
+    const opened0 = await call('can.open', { vendor: 'simulate', handle: h0, controllerId: 0 }, 4)
+    const opened1 = await call('can.open', { vendor: 'simulate', handle: h1, controllerId: 1 }, 5)
+    expect(opened0.result.mode).toBe('CAN_CS_STARTED')
+    expect(opened1.result.mode).toBe('CAN_CS_STARTED')
     await call('can.subscribe', { controllerId: 1 }, 6)
-    await call('can.write', { controllerId: 0, id: 0x321, data: 'de ad be ef' }, 7)
-    await waitMs(30)
-    const read = await call('can.readPoll', { controllerId: 1 }, 8)
+    const written = await call(
+      'can.write',
+      { controllerId: 0, id: 0x321, data: [0xde, 0xad, 0xbe, 0xef] },
+      7
+    )
+    expect(written.error).toBeUndefined()
+    expect(written.result.ts).toBeGreaterThanOrEqual(0)
+    const read = await call('can.read', { controllerId: 1, timeoutMs: 500, max: 8 }, 8)
+    expect(read.result.frames.length).toBeGreaterThan(0)
     expect(read.result.frames[0].id).toBe(0x321)
     expect(read.result.frames[0].data).toEqual([0xde, 0xad, 0xbe, 0xef])
     expect(notifications.some((n) => n.method === 'can.rxIndication')).toBe(true)

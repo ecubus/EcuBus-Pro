@@ -87,6 +87,8 @@ AUTOSAR 的 `Can_Write` 对 `E_NOT_OK` / `CAN_BUSY` **不会**走 JSON-RPC error
 
 `rpc.discover` 返回完整方法目录（名称、参数、AUTOSAR 对应关系）。
 
+方法名在可能冲突时区分大小写：`can.write`（底层，使用 `controllerId`）与 `Can.Write`（AUTOSAR，使用 `hth`）不是同一个方法。
+
 `sys.ping`、`sys.version`、`sys.listMethods`、`sys.shutdown` 始终可用。
 
 `hw.listVendors`、`hw.listDevices`、`hw.getVersion` 用于枚举适配器。

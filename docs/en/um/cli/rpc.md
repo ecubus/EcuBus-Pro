@@ -87,6 +87,8 @@ AUTOSAR `Can_Write` does **not** use JSON-RPC errors for `E_NOT_OK` / `CAN_BUSY`
 
 `rpc.discover` returns the full method catalog (names, params, AUTOSAR mapping).
 
+Method names are case-sensitive where they would otherwise collide: `can.write` (low-level, uses `controllerId`) is not `Can.Write` (AUTOSAR, uses `hth`).
+
 `sys.ping`, `sys.version`, `sys.listMethods`, `sys.shutdown` are always available.
 
 `hw.listVendors`, `hw.listDevices`, `hw.getVersion` enumerate adapters (`simulate`, `peak`, `kvaser`, `vector`, `zlg`, `slcan`, `candle`, …).

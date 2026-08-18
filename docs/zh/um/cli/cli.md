@@ -88,3 +88,15 @@ ecb_cli test <project> <name> [options]
 #### 示例（test）
 
 ![alt text](../../../media/um/cli/test.gif)
+
+### JSON-RPC 命令（PC 版 MCAL-CAN）
+
+启动 JSON-RPC 2.0 服务，让 PC 上的 AUTOSAR MCAL CAN 驱动（C）可以通过 EcuBus-Pro 操作 CAN 硬件。
+
+```bash
+ecb_cli rpc -h
+ecb_cli rpc
+ecb_cli rpc ./project.ecb --auto-init
+```
+
+报文格式、AUTOSAR `Can_*` 映射、通知以及 C 示例见 [JSON-RPC（PC 版 MCAL-CAN）](./rpc.md)。

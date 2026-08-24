@@ -24,7 +24,9 @@ import { TpError, CanTp, TP_ERROR_ID } from '../cantp'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
 import {
+  isPeakLoopback,
   isPeakReadEmpty,
+  mapPeakNetStatusToTpError,
   shouldEmitTpRead,
   shouldResolveTpWriteOnLoopback,
   writePeakMessageWithRetry
@@ -707,38 +709,50 @@ export class PEAK_TP extends CanBase implements CanTp {
     this._read()
   }
 
+  /**
+   * Process one queued Peak message per callback turn, then continue via setImmediate.
+   *
+   * A tight while-drain held Napi::ThreadSafeFunction::BlockingCall across the whole queue and
+   * starved Peak's ISO-TP TX path (self-receive / FC → CF), which shows up as N_TIMEOUT_BS after
+   * the ECU's FlowControl is already visible in the trace. Yielding matches the pre-#425 behavior
+   * that could complete multi-frame TX, while still eventually draining the queue and always
+   * freeing each read buffer exactly once.
+   */
   _read(): void {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const msg = new CAN_MSG()
-      const tsClass = new peak.TimeStamp()
-      const result = peak.CANTP_Read_2016(
-        this.handle,
-        msg.msg,
-        tsClass.cast(),
-        peak.PCANTP_MSGTYPE_ANY
-      )
+    const msg = new CAN_MSG()
+    const tsClass = new peak.TimeStamp()
+    const result = peak.CANTP_Read_2016(
+      this.handle,
+      msg.msg,
+      tsClass.cast(),
+      peak.PCANTP_MSGTYPE_ANY
+    )
 
-      if (isPeakReadEmpty(result, peak)) {
-        break
-      }
+    if (isPeakReadEmpty(result, peak)) {
+      return
+    }
 
-      let ts = tsClass.value()
-      if (PEAK_TP.tsOffset == undefined) {
-        PEAK_TP.tsOffset = ts - (getTsUs() - PEAK_TP.startTime!)
-      }
-      ts = ts - PEAK_TP.tsOffset
+    let ts = tsClass.value()
+    if (PEAK_TP.tsOffset == undefined) {
+      PEAK_TP.tsOffset = ts - (getTsUs() - PEAK_TP.startTime!)
+    }
+    ts = ts - PEAK_TP.tsOffset
 
-      try {
-        if (statusIsOk(result, false)) {
-          this._processReadMessage(msg, ts)
-        } else if ((msg.type & peak.PCANTP_MSGTYPE_CANINFO) == peak.PCANTP_MSGTYPE_CANINFO) {
-          this.log.error(ts, 'bus error')
-          this.close(true)
-        }
-      } finally {
-        peak.CANTP_MsgDataFree_2016(msg.msg)
+    let scheduleMore = false
+    try {
+      if (statusIsOk(result, false)) {
+        this._processReadMessage(msg, ts)
+        scheduleMore = true
+      } else if ((msg.type & peak.PCANTP_MSGTYPE_CANINFO) == peak.PCANTP_MSGTYPE_CANINFO) {
+        this.log.error(ts, 'bus error')
+        this.close(true)
       }
+    } finally {
+      peak.CANTP_MsgDataFree_2016(msg.msg)
+    }
+
+    if (scheduleMore && !this.closed) {
+      setImmediate(() => this.callback())
     }
   }
 
@@ -750,15 +764,55 @@ export class PEAK_TP extends CanBase implements CanTp {
     }
   }
 
+  _rejectPendingTpWrite(
+    id: string,
+    item: {
+      resolve: (value: number) => void
+      reject: (reason: TpError) => void
+      addr: CanAddr
+      data: Buffer
+      msg: any
+    },
+    netstatus: number
+  ) {
+    const mapped = mapPeakNetStatusToTpError(netstatus, peak)
+    let errorId = TP_ERROR_ID.TP_BUS_ERROR
+    if (mapped == 'TP_TIMEOUT_A') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_A
+    } else if (mapped == 'TP_TIMEOUT_BS') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_BS
+    } else if (mapped == 'TP_TIMEOUT_CR') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_CR
+    } else if (mapped == 'TP_WRONG_SN') {
+      errorId = TP_ERROR_ID.TP_WRONG_SN
+    } else if (mapped == 'TP_INVALID_FS') {
+      errorId = TP_ERROR_ID.TP_INVALID_FS
+    } else if (mapped == 'TP_BUFFER_OVERFLOW') {
+      errorId = TP_ERROR_ID.TP_BUFFER_OVERFLOW
+    }
+    peak.CANTP_MsgDataFree_2016(item.msg)
+    this.pendingCmds.delete(id)
+    item.reject(
+      new TpError(errorId, item.addr, item.data, `peak netstatus=0x${netstatus.toString(16)}`)
+    )
+  }
+
   _processIsotpReadMessage(msg: CAN_MSG, ts: number): void {
     const isotp = msg.get() as CAN_MSG_ISOTP
     const addr = isotp.netaddrinfo
     const flags = isotp.flags
 
-    if (flags == peak.PCANTP_MSGFLAG_LOOPBACK) {
+    if (isPeakLoopback(flags, peak)) {
       const id = `write-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
       const item = this.pendingCmds.get(id)
       if (!item) {
+        return
+      }
+
+      // Failed multi-frame TX is re-queued by Peak with a network error (PCAN-ISO-TP User Manual,
+      // Write_2016 remarks). Surface N_TIMEOUT_BS etc. instead of treating it as success.
+      if (isotp.netstatus != peak.PCANTP_NETSTATUS_OK) {
+        this._rejectPendingTpWrite(id, item, isotp.netstatus)
         return
       }
 
@@ -768,10 +822,12 @@ export class PEAK_TP extends CanBase implements CanTp {
       let progressCompleted = !hasIndicationTx
 
       if (hasIndicationTx) {
+        // Peak docs: GetMsgProgress_2016 takes the loopback/indication buffer from Read, not the
+        // original Write buffer.
         const progress = new peak.cantp_msgprogress()
         const res = peak.CANTP_GetMsgProgress_2016(
           this.handle,
-          item.msg,
+          msg.msg,
           peak.PCANTP_MSGDIRECTION_TX,
           progress
         )
@@ -793,24 +849,10 @@ export class PEAK_TP extends CanBase implements CanTp {
     const hasIndicationRx =
       (addr.msgtype & peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX) ==
       peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX
-    let progressCompleted = !hasIndicationRx
 
-    if (hasIndicationRx) {
-      const progress = new peak.cantp_msgprogress()
-      const res = peak.CANTP_GetMsgProgress_2016(
-        this.handle,
-        msg.msg,
-        peak.PCANTP_MSGDIRECTION_RX,
-        progress
-      )
-      if (res == 0) {
-        progressCompleted = progress.state == peak.PCANTP_MSGPROGRESS_STATE_COMPLETED
-      } else {
-        progressCompleted = false
-      }
-    }
-
-    if (shouldEmitTpRead(hasIndicationRx, progressCompleted)) {
+    // Peak MSG_PENDING: first message has INDICATION_RX (pending); second has no indication
+    // (complete payload). Only emit the complete message.
+    if (shouldEmitTpRead(hasIndicationRx)) {
       const id = `read-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
       this.event.emit(id, { data: isotp.data, ts })
     }
@@ -820,7 +862,7 @@ export class PEAK_TP extends CanBase implements CanTp {
     const frame = msg.get() as CAN_MSG_FRAME
     const flags = frame.flags
 
-    if (flags == peak.PCANTP_MSGFLAG_LOOPBACK) {
+    if (isPeakLoopback(flags, peak)) {
       const canId = msg.canInfo.canId
       const id = `writeBase-${canId}-${msg.canInfo.canMsgType}`
       const items = this.pendingBaseCmds.get(id)

@@ -20,12 +20,6 @@ path.parse = (path: string) => {
 path.relative = (from: string, to: string) => {
   return ipcRenderer.sendSync('ipc-path-relative', from, to)
 }
-path.join = (...paths: string[]) => {
-  return ipcRenderer.sendSync('ipc-path-join', ...paths)
-}
-path.isAbsolute = (path: string) => {
-  return ipcRenderer.sendSync('ipc-path-is-absolute', path)
-}
 
 const getPort = (id: string): void => {
   ipcRenderer.once('port', (event, id) => {

@@ -3,7 +3,6 @@ import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
 import ascTransport from '../transport/asc'
 import blfTransport from '../transport/blf'
-import { resolveLogFilePath } from '../transport/filePath'
 let esbuild_executable = esbuild
 if (process.platform === 'darwin') {
   esbuild_executable = esbuild.replace('.exe', '_mac')
@@ -798,17 +797,12 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
         log.path = path.join(projectInfo.path, log.path)
       }
 
-      const logFilePath = resolveLogFilePath(log.path, log.format, {
-        loggerName: log.name,
-        projectName: path.parse(projectInfo.name).name
-      })
-
       const id =
         log.format === 'blf'
           ? addDeviceTransport(() =>
-              blfTransport(logFilePath, log.channel, log.method, log.compression)
+              blfTransport(log.path, log.channel, log.method, log.compression)
             )
-          : addDeviceTransport(() => ascTransport(logFilePath, log.channel, log.method))
+          : addDeviceTransport(() => ascTransport(log.path, log.channel, log.method))
 
       exTransportList.push(id)
     }

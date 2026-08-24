@@ -1372,7 +1372,7 @@ function addNode(type: string, parent?: Tree) {
       id: id,
       type: 'file',
       format: 'asc',
-      path: '{LocalTime}.asc',
+      path: 'log.txt',
       channel: [],
       method: []
     }

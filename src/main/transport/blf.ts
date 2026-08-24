@@ -1,5 +1,7 @@
 import fs from 'fs'
+import path from 'path'
 import zlib from 'zlib'
+import dayjs from 'dayjs'
 import Transport from 'winston-transport'
 import { CanMessage } from '../share/can'
 
@@ -509,6 +511,14 @@ export default (
   method: string[],
   compressionLevel?: number
 ) => {
+  const timestamp = dayjs().format('YYYYMMDDHHmmss')
+  const parsedPath = path.parse(filePath)
+  const fileWithSuffix = path.format({
+    dir: parsedPath.dir,
+    name: `${parsedPath.name}_${timestamp}`,
+    ext: parsedPath.ext
+  })
+
   const channelOrder = Object.keys((global as any).dataSet?.devices || {})
-  return new BlfTransport(filePath, devices, method, channelOrder, compressionLevel)
+  return new BlfTransport(fileWithSuffix, devices, method, channelOrder, compressionLevel)
 }

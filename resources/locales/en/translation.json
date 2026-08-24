@@ -2282,8 +2282,7 @@
           "transport": "Transport",
           "format": "Format",
           "compression": "Compression",
-          "destinationFolder": "Destination Folder",
-          "fileNameRule": "File Name Rule",
+          "filePath": "File Path",
           "recordTypes": "Record Types"
         },
         "placeholders": {
@@ -2291,8 +2290,7 @@
           "transport": "Transport",
           "format": "Format",
           "compressionLevel": "Compression level",
-          "destinationFolder": "Select a destination folder",
-          "fileNameRule": "For example: {LocalTime} or CAN_{LocalTime}"
+          "logFilePath": "Log file Path"
         },
         "options": {
           "disabled": "Disabled",
@@ -2316,17 +2314,11 @@
         },
         "buttons": {
           "browse": "Browse",
-          "fieldCodes": "Field Codes",
           "cancel": "Cancel",
           "ok": "OK"
         },
         "messages": {
-          "fileNameExample": "Example"
-        },
-        "fieldCodes": {
-          "localTime": "Local System Time",
-          "loggerName": "Logger Name",
-          "projectName": "Project Name"
+          "timestampAppended": "A timestamp (YYYYMMDDHHmmss) will be automatically appended to the filename."
         },
         "transfer": {
           "valid": "Valid",
@@ -2335,12 +2327,10 @@
         "validation": {
           "logNameExists": "The log name already exists",
           "inputNodeName": "Please input node name",
-          "inputDestinationFolder": "Please select a destination folder",
-          "inputFileNameRule": "Please input a file name rule",
-          "invalidFileNameRule": "The file name rule contains invalid characters"
+          "inputLogFilePath": "Please input log file path"
         },
         "dialog": {
-          "selectLogFolder": "Select Log Destination Folder",
+          "selectLogFile": "Select Log File",
           "allFiles": "All Files",
           "logFile": "Log File"
         }

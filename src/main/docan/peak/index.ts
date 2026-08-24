@@ -23,6 +23,14 @@ import { v4 } from 'uuid'
 import { TpError, CanTp, TP_ERROR_ID } from '../cantp'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
+import {
+  isPeakLoopback,
+  isPeakReadEmpty,
+  mapPeakNetStatusToTpError,
+  shouldEmitTpRead,
+  shouldResolveTpWriteOnLoopback,
+  writePeakMessageWithRetry
+} from './helpers'
 const allDevice: Record<string, number> = {
   PCAN_NONEBUS: peak.PCAN_NONEBUS,
   //   PCAN_ISABUS1: peak.PCAN_ISABUS1,
@@ -701,223 +709,241 @@ export class PEAK_TP extends CanBase implements CanTp {
     this._read()
   }
 
+  /**
+   * Process one queued Peak message per callback turn, then continue via setImmediate.
+   *
+   * A tight while-drain held Napi::ThreadSafeFunction::BlockingCall across the whole queue and
+   * starved Peak's ISO-TP TX path (self-receive / FC → CF), which shows up as N_TIMEOUT_BS after
+   * the ECU's FlowControl is already visible in the trace. Yielding matches the pre-#425 behavior
+   * that could complete multi-frame TX, while still eventually draining the queue and always
+   * freeing each read buffer exactly once.
+   */
   _read(): void {
-    {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const msg = new CAN_MSG()
-        // peak.CANTP_MsgDataAlloc_2016(msg.msg, peak.PCANTP_MSGTYPE_ANY)
-        // Reads the first message in the queue.
-        const tsClass = new peak.TimeStamp()
-        const result = peak.CANTP_Read_2016(
+    const msg = new CAN_MSG()
+    const tsClass = new peak.TimeStamp()
+    const result = peak.CANTP_Read_2016(
+      this.handle,
+      msg.msg,
+      tsClass.cast(),
+      peak.PCANTP_MSGTYPE_ANY
+    )
+
+    if (isPeakReadEmpty(result, peak)) {
+      return
+    }
+
+    let ts = tsClass.value()
+    if (PEAK_TP.tsOffset == undefined) {
+      PEAK_TP.tsOffset = ts - (getTsUs() - PEAK_TP.startTime!)
+    }
+    ts = ts - PEAK_TP.tsOffset
+
+    let scheduleMore = false
+    try {
+      if (statusIsOk(result, false)) {
+        this._processReadMessage(msg, ts)
+        scheduleMore = true
+      } else if ((msg.type & peak.PCANTP_MSGTYPE_CANINFO) == peak.PCANTP_MSGTYPE_CANINFO) {
+        this.log.error(ts, 'bus error')
+        this.close(true)
+      }
+    } finally {
+      peak.CANTP_MsgDataFree_2016(msg.msg)
+    }
+
+    if (scheduleMore && !this.closed) {
+      setImmediate(() => this.callback())
+    }
+  }
+
+  _processReadMessage(msg: CAN_MSG, ts: number): void {
+    if ((msg.type & peak.PCANTP_MSGTYPE_ISOTP) == peak.PCANTP_MSGTYPE_ISOTP) {
+      this._processIsotpReadMessage(msg, ts)
+    } else if ((msg.type & peak.PCANTP_MSGTYPE_FRAME) != 0) {
+      this._processFrameReadMessage(msg, ts)
+    }
+  }
+
+  _rejectPendingTpWrite(
+    id: string,
+    item: {
+      resolve: (value: number) => void
+      reject: (reason: TpError) => void
+      addr: CanAddr
+      data: Buffer
+      msg: any
+    },
+    netstatus: number
+  ) {
+    const mapped = mapPeakNetStatusToTpError(netstatus, peak)
+    let errorId = TP_ERROR_ID.TP_BUS_ERROR
+    if (mapped == 'TP_TIMEOUT_A') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_A
+    } else if (mapped == 'TP_TIMEOUT_BS') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_BS
+    } else if (mapped == 'TP_TIMEOUT_CR') {
+      errorId = TP_ERROR_ID.TP_TIMEOUT_CR
+    } else if (mapped == 'TP_WRONG_SN') {
+      errorId = TP_ERROR_ID.TP_WRONG_SN
+    } else if (mapped == 'TP_INVALID_FS') {
+      errorId = TP_ERROR_ID.TP_INVALID_FS
+    } else if (mapped == 'TP_BUFFER_OVERFLOW') {
+      errorId = TP_ERROR_ID.TP_BUFFER_OVERFLOW
+    }
+    peak.CANTP_MsgDataFree_2016(item.msg)
+    this.pendingCmds.delete(id)
+    item.reject(
+      new TpError(errorId, item.addr, item.data, `peak netstatus=0x${netstatus.toString(16)}`)
+    )
+  }
+
+  _processIsotpReadMessage(msg: CAN_MSG, ts: number): void {
+    const isotp = msg.get() as CAN_MSG_ISOTP
+    const addr = isotp.netaddrinfo
+    const flags = isotp.flags
+
+    if (isPeakLoopback(flags, peak)) {
+      const id = `write-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
+      const item = this.pendingCmds.get(id)
+      if (!item) {
+        return
+      }
+
+      // Failed multi-frame TX is re-queued by Peak with a network error (PCAN-ISO-TP User Manual,
+      // Write_2016 remarks). Surface N_TIMEOUT_BS etc. instead of treating it as success.
+      if (isotp.netstatus != peak.PCANTP_NETSTATUS_OK) {
+        this._rejectPendingTpWrite(id, item, isotp.netstatus)
+        return
+      }
+
+      const hasIndicationTx =
+        (addr.msgtype & peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_TX) ==
+        peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_TX
+      let progressCompleted = !hasIndicationTx
+
+      if (hasIndicationTx) {
+        // Peak docs: GetMsgProgress_2016 takes the loopback/indication buffer from Read, not the
+        // original Write buffer.
+        const progress = new peak.cantp_msgprogress()
+        const res = peak.CANTP_GetMsgProgress_2016(
           this.handle,
           msg.msg,
-          tsClass.cast(),
-          peak.PCANTP_MSGTYPE_ANY
+          peak.PCANTP_MSGDIRECTION_TX,
+          progress
         )
-        let ts = tsClass.value()
-        if (PEAK_TP.tsOffset == undefined) {
-          PEAK_TP.tsOffset = ts - (getTsUs() - PEAK_TP.startTime!)
-        }
-        ts = ts - PEAK_TP.tsOffset
-        if (!peak.CANTP_StatusIsOk_2016(result)) {
-          return
-        }
-        if (result == peak.PCANTP_STATUS_NO_MESSAGE) {
-          //free
-          peak.CANTP_MsgDataFree_2016(msg.msg)
-          return
-        } else if (result == peak.PCANTP_STATUS_OK) {
-          if ((msg.type & peak.PCANTP_MSGTYPE_ISOTP) == peak.PCANTP_MSGTYPE_ISOTP) {
-            const isotp = msg.get() as CAN_MSG_ISOTP
-            const addr = isotp.netaddrinfo
-
-            const flags = isotp.flags
-            //tx confirm
-            if (flags == peak.PCANTP_MSGFLAG_LOOPBACK) {
-              const id = `write-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
-              const item = this.pendingCmds.get(id)
-
-              if (item) {
-                if (
-                  (addr.msgtype & peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_TX) ==
-                  peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_TX
-                ) {
-                  const progress = new peak.cantp_msgprogress()
-                  const res = peak.CANTP_GetMsgProgress_2016(
-                    this.handle,
-                    item.msg,
-                    peak.PCANTP_MSGDIRECTION_TX,
-                    progress
-                  )
-                  if (res == 0) {
-                    if (progress.state == peak.PCANTP_MSGPROGRESS_STATE_COMPLETED) {
-                      // this.emit('sendTp', {
-                      //   data: isotp.data,
-                      //   ts: ts,
-                      //   id: msg.canInfo.canId,
-                      //   idType:
-                      //     msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
-                      //       ? CAN_ID_TYPE.EXTENDED
-                      //       : CAN_ID_TYPE.STANDARD,
-                      //   canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
-                      //   brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
-                      //   remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0
-                      // })
-
-                      item.resolve(ts)
-                      peak.CANTP_MsgDataFree_2016(item.msg)
-                      this.pendingCmds.delete(id)
-                      setImmediate(this.callback.bind(this))
-                      return
-                    }
-                  }
-                } else {
-                  //return timestamp
-                  item.resolve(ts)
-                  peak.CANTP_MsgDataFree_2016(item.msg)
-                  this.pendingCmds.delete(id)
-                }
-              }
-            }
-            //recevied a frame
-            else {
-              let finished = false
-              let rts = 0
-
-              if (
-                (addr.msgtype & peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX) ==
-                peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX
-              ) {
-                const progress = new peak.cantp_msgprogress()
-                const res = peak.CANTP_GetMsgProgress_2016(
-                  this.handle,
-                  msg.msg,
-                  peak.PCANTP_MSGDIRECTION_RX,
-                  progress
-                )
-                if (res == 0) {
-                  if (progress.state == peak.PCANTP_MSGPROGRESS_STATE_COMPLETED) {
-                    peak.CANTP_MsgDataFree_2016(msg.msg)
-                  }
-                }
-              } else {
-                finished = true
-                rts = ts
-              }
-              if (finished) {
-                const id = `read-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
-                this.event.emit(id, { data: isotp.data, ts: rts })
-              }
-            }
-          } else if ((msg.type & peak.PCANTP_MSGTYPE_FRAME) != 0) {
-            const frame = msg.get() as CAN_MSG_FRAME
-            const flags = frame.flags
-            if (flags == peak.PCANTP_MSGFLAG_LOOPBACK) {
-              const canId = msg.canInfo.canId
-              const id = `writeBase-${canId}-${msg.canInfo.canMsgType}`
-              const items = this.pendingBaseCmds.get(id)
-
-              if (items) {
-                const item = items.shift()!
-                //tx notification, item always exists
-                peak.CANTP_MsgDataFree_2016(item.msg)
-                if (items.length == 0) {
-                  this.pendingBaseCmds.delete(id)
-                }
-                const message: CanMessage = {
-                  dir: 'OUT',
-                  id: msg.canInfo.canId,
-                  data: frame.data,
-                  ts: ts,
-                  database: item.extra?.database,
-                  name: item.extra?.name,
-                  msgType: {
-                    canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
-                    brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
-                    remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
-                    idType:
-                      msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
-                        ? CAN_ID_TYPE.EXTENDED
-                        : CAN_ID_TYPE.STANDARD,
-                    uuid: item.msgType.uuid
-                  },
-                  device: this.info.name
-                }
-                this.log.canBase(message)
-                this.event.emit(this.getReadBaseId(msg.canInfo.canId, message.msgType), message)
-
-                item.resolve(ts)
-                setImmediate(this.callback.bind(this))
-              } else {
-                // Check if this is a periodic send confirmation
-                const canId = msg.canInfo.canId
-                const period = this.periodIds[canId]
-                if (period) {
-                  const message: CanMessage = {
-                    dir: 'OUT',
-                    id: canId,
-                    data: frame.data,
-                    ts: ts,
-                    msgType: {
-                      canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
-                      brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
-                      remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
-                      idType:
-                        msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
-                          ? CAN_ID_TYPE.EXTENDED
-                          : CAN_ID_TYPE.STANDARD
-                    },
-                    device: this.info.name,
-                    database: period.msg.database,
-                    name: period.msg.name
-                  }
-                  this.log.canBase(message)
-                  this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
-                }
-                setImmediate(this.callback.bind(this))
-              }
-              return
-            } else {
-              //rx notification
-              const id = `readBase-${msg.canInfo.canId}-${msg.canInfo.canMsgType}`
-              const message: CanMessage = {
-                dir: 'IN',
-                id: msg.canInfo.canId,
-                data: frame.data,
-                ts: ts,
-                msgType: {
-                  canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
-                  brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
-                  remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
-                  idType:
-                    msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
-                      ? CAN_ID_TYPE.EXTENDED
-                      : CAN_ID_TYPE.STANDARD
-                },
-                device: this.info.name,
-                database: this.info.database
-              }
-
-              setImmediate(() => {
-                //log must before emit
-                this.log.canBase(message)
-                this.event.emit(id, message)
-                this.callback()
-              })
-              return
-            }
-          }
+        if (res == 0) {
+          progressCompleted = progress.state == peak.PCANTP_MSGPROGRESS_STATE_COMPLETED
         } else {
-          //error handle
-          if ((msg.type & peak.PCANTP_MSGTYPE_CANINFO) == peak.PCANTP_MSGTYPE_CANINFO) {
-            this.log.error(ts, 'bus error')
-            this.close(true)
-          }
+          progressCompleted = false
         }
-        peak.CANTP_MsgDataFree_2016(msg.msg)
       }
+
+      if (shouldResolveTpWriteOnLoopback(hasIndicationTx, progressCompleted)) {
+        item.resolve(ts)
+        peak.CANTP_MsgDataFree_2016(item.msg)
+        this.pendingCmds.delete(id)
+      }
+      return
     }
+
+    const hasIndicationRx =
+      (addr.msgtype & peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX) ==
+      peak.PCANTP_ISOTP_MSGTYPE_FLAG_INDICATION_RX
+
+    // Peak MSG_PENDING: first message has INDICATION_RX (pending); second has no indication
+    // (complete payload). Only emit the complete message.
+    if (shouldEmitTpRead(hasIndicationRx)) {
+      const id = `read-${msg.canInfo.canId}-${msg.canInfo.canMsgType}-${addr.toString()}`
+      this.event.emit(id, { data: isotp.data, ts })
+    }
+  }
+
+  _processFrameReadMessage(msg: CAN_MSG, ts: number): void {
+    const frame = msg.get() as CAN_MSG_FRAME
+    const flags = frame.flags
+
+    if (isPeakLoopback(flags, peak)) {
+      const canId = msg.canInfo.canId
+      const id = `writeBase-${canId}-${msg.canInfo.canMsgType}`
+      const items = this.pendingBaseCmds.get(id)
+
+      if (items) {
+        const item = items.shift()!
+        peak.CANTP_MsgDataFree_2016(item.msg)
+        if (items.length == 0) {
+          this.pendingBaseCmds.delete(id)
+        }
+        const message: CanMessage = {
+          dir: 'OUT',
+          id: msg.canInfo.canId,
+          data: frame.data,
+          ts: ts,
+          database: item.extra?.database,
+          name: item.extra?.name,
+          msgType: {
+            canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
+            brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
+            remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
+            idType:
+              msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
+                ? CAN_ID_TYPE.EXTENDED
+                : CAN_ID_TYPE.STANDARD,
+            uuid: item.msgType.uuid
+          },
+          device: this.info.name
+        }
+        this.log.canBase(message)
+        this.event.emit(this.getReadBaseId(msg.canInfo.canId, message.msgType), message)
+        item.resolve(ts)
+        return
+      }
+
+      const period = this.periodIds[canId]
+      if (period) {
+        const message: CanMessage = {
+          dir: 'OUT',
+          id: canId,
+          data: frame.data,
+          ts: ts,
+          msgType: {
+            canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
+            brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
+            remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
+            idType:
+              msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
+                ? CAN_ID_TYPE.EXTENDED
+                : CAN_ID_TYPE.STANDARD
+          },
+          device: this.info.name,
+          database: period.msg.database,
+          name: period.msg.name
+        }
+        this.log.canBase(message)
+        this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
+      }
+      return
+    }
+
+    const id = `readBase-${msg.canInfo.canId}-${msg.canInfo.canMsgType}`
+    const message: CanMessage = {
+      dir: 'IN',
+      id: msg.canInfo.canId,
+      data: frame.data,
+      ts: ts,
+      msgType: {
+        canfd: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_FD) != 0,
+        brs: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_BRS) != 0,
+        remote: (msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_RTR) != 0,
+        idType:
+          msg.canInfo.canMsgType & peak.PCANTP_CAN_MSGTYPE_EXTENDED
+            ? CAN_ID_TYPE.EXTENDED
+            : CAN_ID_TYPE.STANDARD
+      },
+      device: this.info.name,
+      database: this.info.database
+    }
+    this.log.canBase(message)
+    this.event.emit(id, message)
   }
   _writeTp(addr: CanAddr, data: Buffer, netAddr: PeakNetAddr, cmdId: string, msgType: number) {
     return new Promise<number>(
@@ -954,7 +980,7 @@ export class PEAK_TP extends CanBase implements CanTp {
         //swap source address and target address txid and rxid
         const cloneAddr = swapAddr(addr)
         this.addMapping(cloneAddr)
-        res = peak.CANTP_Write_2016(this.handle, msg)
+        res = writePeakMessageWithRetry(() => peak.CANTP_Write_2016(this.handle, msg), peak)
         if (!statusIsOk(res, false)) {
           this.pendingCmds.delete(cmdId)
           peak.CANTP_MsgDataFree_2016(msg)
@@ -1232,7 +1258,6 @@ export class PEAK_TP extends CanBase implements CanTp {
         if (res != 0) {
           const eStr = err2str(res)
           reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgTypeE, undefined, eStr))
-          this.close(false, eStr)
           return
         }
         res = peak.CANTP_MsgDataInit_2016(msg, id, msgType, data, null)
@@ -1240,7 +1265,6 @@ export class PEAK_TP extends CanBase implements CanTp {
           peak.CANTP_MsgDataFree_2016(msg)
           const eStr = err2str(res)
           reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgTypeE, data, eStr))
-          this.close(false, eStr)
           return
         }
         const item = this.pendingBaseCmds.get(cmdId)
@@ -1251,15 +1275,12 @@ export class PEAK_TP extends CanBase implements CanTp {
             { resolve, reject, msg, data, msgType: msgTypeE, extra }
           ])
         }
-        res = peak.CANTP_Write_2016(this.handle, msg)
+        res = writePeakMessageWithRetry(() => peak.CANTP_Write_2016(this.handle, msg), peak)
         if (!statusIsOk(res, false)) {
-          // this.pendingBaseCmds.delete(cmdId)
-          // pop last one
           this.pendingBaseCmds.get(cmdId)?.pop()
           peak.CANTP_MsgDataFree_2016(msg)
           const eStr = err2str(res)
           reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgTypeE, data, eStr))
-          this.close(false, eStr)
         }
       }
     )

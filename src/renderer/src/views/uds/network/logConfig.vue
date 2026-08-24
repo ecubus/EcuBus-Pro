@@ -99,31 +99,57 @@
             </el-form-item>
             <el-form-item
               v-if="formData.type == 'file'"
-              :label="i18next.t('uds.network.logConfig.labels.filePath')"
+              :label="i18next.t('uds.network.logConfig.labels.destinationFolder')"
               prop="path"
             >
               <el-input
-                v-model="formData.path"
-                :placeholder="i18next.t('uds.network.logConfig.placeholders.logFilePath')"
+                v-model="destinationFolder"
+                :placeholder="i18next.t('uds.network.logConfig.placeholders.destinationFolder')"
               >
                 <template #append>
-                  <el-button size="small" @click="browseFile">{{
+                  <el-button size="small" @click="browseDirectory">{{
                     i18next.t('uds.network.logConfig.buttons.browse')
                   }}</el-button>
                 </template>
               </el-input>
             </el-form-item>
-            <el-alert
+            <el-form-item
               v-if="formData.type == 'file'"
-              type="info"
-              :closable="false"
-              show-icon
-              style="margin-bottom: 15px"
+              :label="i18next.t('uds.network.logConfig.labels.fileNameRule')"
             >
-              <template #title>
-                {{ i18next.t('uds.network.logConfig.messages.timestampAppended') }}
-              </template>
-            </el-alert>
+              <div class="file-name-rule">
+                <el-input
+                  v-model="fileNameRule"
+                  :placeholder="i18next.t('uds.network.logConfig.placeholders.fileNameRule')"
+                >
+                  <template #append>
+                    <el-dropdown trigger="click" @command="insertFieldCode">
+                      <el-button size="small">
+                        {{ i18next.t('uds.network.logConfig.buttons.fieldCodes') }}
+                        <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                      </el-button>
+                      <template #dropdown>
+                        <el-dropdown-menu>
+                          <el-dropdown-item :command="LOG_FILE_FIELD_CODES.localTime">
+                            {{ i18next.t('uds.network.logConfig.fieldCodes.localTime') }}
+                          </el-dropdown-item>
+                          <el-dropdown-item :command="LOG_FILE_FIELD_CODES.loggerName">
+                            {{ i18next.t('uds.network.logConfig.fieldCodes.loggerName') }}
+                          </el-dropdown-item>
+                          <el-dropdown-item :command="LOG_FILE_FIELD_CODES.projectName">
+                            {{ i18next.t('uds.network.logConfig.fieldCodes.projectName') }}
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </template>
+                </el-input>
+                <div class="file-name-example">
+                  {{ i18next.t('uds.network.logConfig.messages.fileNameExample') }}:
+                  {{ fileNamePreview }}
+                </div>
+              </div>
+            </el-form-item>
 
             <el-form-item
               :label="i18next.t('uds.network.logConfig.labels.recordTypes')"
@@ -209,6 +235,7 @@ import { TesterInfo } from 'nodeCan/tester'
 import { getCeilInstance } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
+import { isValidLogFileNameRule, LOG_FILE_FIELD_CODES, resolveLogFileName } from 'nodeCan/logFile'
 
 const activeName = ref('general')
 const props = defineProps<{
@@ -218,9 +245,43 @@ const globalStart = useGlobalStart()
 const editIndex = toRef(props, 'editIndex')
 const dataBase = useDataStore()
 const methodRef = ref<Record<string, boolean>>({})
+const project = useProjectStore()
 const formData = ref(cloneDeep(dataBase.logs[editIndex.value]))
 if (formData.value.format === 'blf' && formData.value.compression === undefined) {
   formData.value.compression = -1
+}
+const initialPathInfo = window.path.parse(formData.value.path || '')
+const initialDirectory = initialPathInfo.dir
+  ? window.path.isAbsolute(initialPathInfo.dir) || !project.projectInfo.path
+    ? initialPathInfo.dir
+    : window.path.join(project.projectInfo.path, initialPathInfo.dir)
+  : project.projectInfo.path
+const destinationFolder = ref(initialDirectory)
+const fileNameRule = ref(initialPathInfo.name || LOG_FILE_FIELD_CODES.localTime)
+const projectName = computed(() => {
+  if (!project.projectInfo.name) return ''
+  return window.path.parse(project.projectInfo.name).name
+})
+const fileNamePreview = computed(() => {
+  const fileName = resolveLogFileName(fileNameRule.value, {
+    loggerName: formData.value.name,
+    projectName: projectName.value
+  })
+  return `${fileName}.${formData.value.format}`
+})
+
+function buildConfiguredLogPath(): string {
+  const fileName = `${fileNameRule.value.trim()}.${formData.value.format}`
+  const selectedPath = window.path.join(destinationFolder.value.trim(), fileName)
+
+  if (project.projectInfo.path && window.path.isAbsolute(selectedPath)) {
+    return window.path.relative(project.projectInfo.path, selectedPath)
+  }
+  return selectedPath
+}
+
+function insertFieldCode(fieldCode: string) {
+  fileNameRule.value += fieldCode
 }
 const nameCheck = (rule: any, value: any, callback: any) => {
   if (value) {
@@ -274,8 +335,21 @@ const rules = computed(() => {
     ],
     path: [
       {
-        required: formData.value.type == 'file' ? true : false,
-        message: i18next.t('uds.network.logConfig.validation.inputLogFilePath')
+        validator: (rule: any, value: any, callback: any) => {
+          if (formData.value.type != 'file') {
+            callback()
+          } else if (!destinationFolder.value.trim()) {
+            callback(
+              new Error(i18next.t('uds.network.logConfig.validation.inputDestinationFolder'))
+            )
+          } else if (!fileNameRule.value.trim()) {
+            callback(new Error(i18next.t('uds.network.logConfig.validation.inputFileNameRule')))
+          } else if (!isValidLogFileNameRule(fileNameRule.value)) {
+            callback(new Error(i18next.t('uds.network.logConfig.validation.invalidFileNameRule')))
+          } else {
+            callback()
+          }
+        }
       }
     ]
   }
@@ -301,42 +375,16 @@ function handleMethodChange(
     }
   }
 }
-const project = useProjectStore()
-
-async function browseFile() {
-  const formatExtensions: Record<string, string[]> = {
-    asc: ['asc'],
-    blf: ['blf'],
-    csv: ['csv']
-  }
-
-  const formatNames: Record<string, string> = {
-    asc: i18next.t('uds.network.logConfig.options.ascFormat'),
-    blf: i18next.t('uds.network.logConfig.options.blfFormat'),
-    csv: i18next.t('uds.network.logConfig.options.csvFormat')
-  }
-
-  const currentFormat = formData.value.format || 'asc'
-  const extensions = formatExtensions[currentFormat] || ['*']
-  const formatName = formatNames[currentFormat] || i18next.t('uds.network.logConfig.dialog.logFile')
-
+async function browseDirectory() {
   const r = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
-    defaultPath: project.projectInfo.path,
-    title: i18next.t('uds.network.logConfig.dialog.selectLogFile'),
-    properties: ['openFile'],
-    filters: [
-      { name: formatName, extensions: extensions },
-      { name: i18next.t('uds.network.logConfig.dialog.allFiles'), extensions: ['*'] }
-    ]
+    defaultPath: destinationFolder.value || project.projectInfo.path,
+    title: i18next.t('uds.network.logConfig.dialog.selectLogFolder'),
+    properties: ['openDirectory']
   })
 
-  const file = r.filePaths[0]
-  if (file) {
-    if (project.projectInfo.path) {
-      formData.value.path = window.path.relative(project.projectInfo.path, file)
-    } else {
-      formData.value.path = file
-    }
+  const directory = r.filePaths[0]
+  if (directory) {
+    destinationFolder.value = directory
   }
 }
 
@@ -432,6 +480,7 @@ const handleConfirm = async () => {
   await ruleFormRef.value.validate((valid, fields) => {
     if (valid) {
       // 验证通过，更新数据
+      formData.value.path = buildConfiguredLogPath()
       dataBase.logs[editIndex.value] = cloneDeep(formData.value)
 
       const ceil = getCeilInstance(editIndex.value)
@@ -466,6 +515,17 @@ onMounted(() => {
   .el-input-group__prepend {
     padding: 0 5px !important;
   }
+}
+
+.file-name-rule {
+  width: 100%;
+}
+
+.file-name-example {
+  margin-top: 4px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 18px;
 }
 </style>
 <style scoped>

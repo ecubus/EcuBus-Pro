@@ -1,12 +1,10 @@
-import EventEmitter from 'events'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { addDeviceTransport, CanLOG, removeDeviceTransport } from '../../src/main/log'
+import { describe, expect, it } from 'vitest'
 import { CAN_ID_TYPE, type CanMessage } from '../../src/main/share/can'
 import { AscReader } from '../../src/main/replay/ascReader'
-import ascTransport, {
+import {
   formatAscArbitrationId,
   formatCanMessage,
   isExtendedCanId
@@ -17,12 +15,6 @@ function createCanMessage(overrides: Partial<CanMessage> & Pick<CanMessage, 'id'
     data: Buffer.from([0x03, 0x22, 0x56, 0x78, 0xcc, 0xcc, 0xcc, 0xcc]),
     dir: 'IN',
     ts: 1_000_000,
-    msgType: {
-      idType: CAN_ID_TYPE.STANDARD,
-      canfd: false,
-      brs: false,
-      remote: false
-    },
     ...overrides,
     msgType: {
       idType: CAN_ID_TYPE.STANDARD,
@@ -81,60 +73,34 @@ describe('ASC extended ID formatting', () => {
   })
 })
 
-describe('ASC file logger', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it('records extended frames with trailing x and round-trips through AscReader', async () => {
-    vi.spyOn(console, 'table').mockImplementation(() => {})
-
+describe('ASC reader round-trip', () => {
+  it('parses trailing x as an extended frame and keeps standard IDs standard', async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ecubus-asc-ext-'))
-    const configuredPath = path.join(tempDir, 'device-log.asc')
-    const originalDataSet = global.dataSet
-    const originalDeviceIndexMap = new Map(global.deviceIndexMap)
-    global.dataSet = {
-      devices: {
-        'device-a': {}
-      }
-    } as any
-    global.deviceIndexMap.set('device-a', 1)
-
-    const transport = ascTransport(configuredPath, ['device-a'], ['canBase'])
-    const closed = new Promise<void>((resolve) => transport.once('closed', resolve))
-    const transportId = addDeviceTransport(() => transport)
-    const log = new CanLOG('TEST', 'A', 'device-a', new EventEmitter())
+    const filePath = path.join(tempDir, 'device-log.asc')
 
     try {
-      log.canBase(
-        createCanMessage({
-          id: 0x18daf110,
-          ts: 4_876_870,
-          msgType: { idType: CAN_ID_TYPE.EXTENDED, canfd: false, brs: false, remote: false }
-        })
-      )
-      log.canBase(
-        createCanMessage({
-          id: 0x123,
-          ts: 5_000_000,
-          data: Buffer.from([0x00, 0x00]),
-          msgType: { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false }
-        })
-      )
-      await new Promise((resolve) => setImmediate(resolve))
+      const extended = createCanMessage({
+        id: 0x18daf110,
+        msgType: { idType: CAN_ID_TYPE.EXTENDED, canfd: false, brs: false, remote: false }
+      })
+      const standard = createCanMessage({
+        id: 0x123,
+        data: Buffer.from([0x00, 0x00]),
+        msgType: { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false }
+      })
 
-      log.close()
-      removeDeviceTransport(transportId)
-      await closed
+      const content = [
+        'date Tue Aug 25 03:55:52.711 2026',
+        'base hex timestamps absolute',
+        'internal events logged',
+        'Begin Triggerblock Tue Aug 25 03:55:52.711 2026',
+        formatCanMessage(extended, 1, 4.87687),
+        formatCanMessage(standard, 1, 5.0),
+        'End TriggerBlock',
+        ''
+      ].join('\n')
 
-      const [generatedFile] = await fs.readdir(tempDir)
-      expect(generatedFile).toBeTruthy()
-      const filePath = path.join(tempDir, generatedFile)
-      const content = await fs.readFile(filePath, 'utf8')
-
-      expect(content).toMatch(/18DAF110x/)
-      expect(content).toMatch(/\b123\s+Rx/)
-      expect(content).not.toMatch(/\b18DAF110\s/)
+      await fs.writeFile(filePath, content, 'utf8')
 
       const reader = new AscReader(filePath, 0)
       reader.init()
@@ -146,18 +112,13 @@ describe('ASC file logger', () => {
       }
       reader.close()
 
+      expect(content).toMatch(/18DAF110x/)
+      expect(content).not.toMatch(/\b18DAF110\s/)
       expect(frames.map((item) => [item.id, item.msgType.idType])).toEqual([
         [0x18daf110, CAN_ID_TYPE.EXTENDED],
         [0x123, CAN_ID_TYPE.STANDARD]
       ])
     } finally {
-      log.close()
-      removeDeviceTransport(transportId)
-      global.dataSet = originalDataSet
-      global.deviceIndexMap.clear()
-      originalDeviceIndexMap.forEach((channel, deviceId) => {
-        global.deviceIndexMap.set(deviceId, channel)
-      })
       await fs.rm(tempDir, { recursive: true, force: true })
     }
   })

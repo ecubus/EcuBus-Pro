@@ -1,0 +1,4 @@
+{
+  "name": "EcuBus-Pro",
+  "install": "bash .cursor/install.sh"
+}

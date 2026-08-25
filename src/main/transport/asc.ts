@@ -1,7 +1,42 @@
-import { CanMessage } from '../share/can'
+import { CAN_ID_TYPE, CanMessage } from '../share/can'
 import winston, { format } from 'winston'
 import Transport from 'winston-transport'
 import { getCheckSum, LinChecksumType, LinDirection, LinError, LinMsg } from '../share/lin'
+
+/** SocketCAN / Vector BLF extended-frame flag in a 32-bit CAN ID */
+const CAN_EFF_FLAG = 0x80000000
+/** 29-bit CAN identifier mask */
+const CAN_EFF_MASK = 0x1fffffff
+
+/**
+ * Whether a CAN frame should be logged as an extended identifier in Vector ASC.
+ *
+ * Vector's CAN_LOG_TRIGGER_ASC_Format marks 29-bit IDs with a trailing `x`
+ * (e.g. `54C5638x`). An 11-bit standard ID cannot exceed 0x7FF, so IDs above
+ * that range are treated as extended even if `idType` was not set correctly.
+ */
+export function isExtendedCanId(msg: CanMessage): boolean {
+  const idType = msg.msgType?.idType
+  if (idType === CAN_ID_TYPE.EXTENDED) {
+    return true
+  }
+  const rawId = Number(msg.id) || 0
+  if ((rawId & CAN_EFF_FLAG) !== 0) {
+    return true
+  }
+  return (rawId & CAN_EFF_MASK) > 0x7ff
+}
+
+/**
+ * Format a CAN arbitration ID for Vector ASC numeric logging.
+ *
+ * @returns hex ID, with a trailing `x` for extended frames (CANoe/CANalyzer requirement)
+ */
+export function formatAscArbitrationId(msg: CanMessage): string {
+  const canId = (Number(msg.id) || 0) & CAN_EFF_MASK
+  const hex = canId.toString(16).toUpperCase()
+  return isExtendedCanId(msg) ? `${hex}x` : hex
+}
 
 // LogData interface matching the one from trace.vue
 
@@ -166,20 +201,14 @@ function formatLinMessage(msg: LinMsg, channel: number, timestamp: number): stri
   return `${timestamp.toFixed(6)} ${channelStr} ${idHex.padStart(2)} ${dir} ${dlc} ${dataHex.padEnd(24)} checksum = ${checksum} CSM = ${csm}`
 }
 
-function formatCanMessage(msg: CanMessage, channel: number, timestamp: number): string {
+export function formatCanMessage(msg: CanMessage, channel: number, timestamp: number): string {
   const dir = msg.dir === 'OUT' ? 'Tx' : 'Rx'
-
-  // Format arbitration ID with extended ID handling
-  let arbId = msg.id.toString(16).toUpperCase()
-  if (msg.msgType.idType === 'EXTENDED') {
-    arbId += 'x'
-  }
+  // Vector ASC: extended IDs are hex plus a trailing `x` (CAN_LOG_TRIGGER_ASC_Format)
+  const arbId = formatAscArbitrationId(msg)
 
   if (msg.msgType.canfd) {
-    // CAN FD format
     return formatCanFdMessage(msg, channel, timestamp, dir, arbId)
   } else {
-    // Classic CAN format
     return formatClassicCanMessage(msg, channel, timestamp, dir, arbId)
   }
 }
@@ -193,15 +222,18 @@ function formatClassicCanMessage(
 ): string {
   const dlc = msg.data.length
 
+  // Vector ASC numeric ID field is 15 characters (14 + trailing `x` for extended)
+  const idField = arbId.padEnd(15)
+
   if (msg.msgType.remote) {
     // Remote frame format: <Time> <Channel> <ID> <Dir> r <DLC>
-    return `${timestamp.toFixed(6)} ${channel}  ${arbId} ${dir} r ${dlc.toString(16)}`
+    return `${timestamp.toFixed(6)} ${channel}  ${idField} ${dir.padEnd(4)} r ${dlc.toString(16)}`
   } else {
     // Data frame format: <Time> <Channel> <ID> <Dir> d <DLC> <D0> <D1>...<D7>
     const dataHex = Array.from(msg.data)
       .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
       .join(' ')
-    return `${timestamp.toFixed(6)} ${channel}  ${arbId} ${dir} d ${dlc.toString(16)} ${dataHex}`
+    return `${timestamp.toFixed(6)} ${channel}  ${idField} ${dir.padEnd(4)} d ${dlc.toString(16)} ${dataHex}`
   }
 }
 

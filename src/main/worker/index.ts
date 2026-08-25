@@ -37,6 +37,7 @@
 export * from './uds'
 export * from './someip'
 export * from './cantp'
+export * from './xcp'
 export * from './secureAccess'
 export * from './crc'
 export * from './cryptoExt'

@@ -3,9 +3,7 @@ import { Command, program } from 'commander'
 import { version } from '../../package.json'
 import seqMain from './seq'
 import path from 'path'
-import fsP from 'fs/promises'
 import fs from 'fs'
-import { DataSet, VarItem } from 'src/preload/data'
 import { Logger, transports } from 'winston'
 import { exit } from 'process'
 import { format } from 'winston'
@@ -22,8 +20,8 @@ import testMain from './test'
 import { TestEvent } from 'node:test/reporters'
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { build as buildFunc } from './build'
-import { getAllSysVar } from '../main/share/sysVar'
-import { cloneDeep } from 'lodash'
+import { parseProject } from './project'
+import rpcMain from './rpc'
 import { pluginMain } from './plugin'
 import 'src/renderer/src/helper'
 
@@ -68,68 +66,6 @@ class FilteredConsoleTransport extends Transport {
 
     // 对于其他日志，正常处理
     callback()
-  }
-}
-
-async function parseProject(projectPath: string): Promise<{
-  data: DataSet
-  projectPath: string
-  projectName: string
-}> {
-  if (!path.isAbsolute(projectPath)) {
-    projectPath = path.join(process.cwd(), projectPath)
-  }
-  if (!fs.existsSync(projectPath)) {
-    throw new Error(`project file ${projectPath} not found`)
-  }
-
-  try {
-    const content = await fsP.readFile(projectPath, 'utf-8')
-    const data1 = JSON.parse(content)
-    const info = path.parse(projectPath)
-    global.dataSet = data1.data as DataSet
-    global.vars = {}
-
-    const vars: Record<string, VarItem> = cloneDeep(global.dataSet.vars)
-    const sysVars = getAllSysVar(
-      global.dataSet.devices,
-      global.dataSet.tester,
-      global.dataSet.database.orti
-    )
-    for (const v of Object.values(sysVars)) {
-      vars[v.id] = cloneDeep(v)
-    }
-    for (const key of Object.keys(vars)) {
-      const v = vars[key]
-
-      if (v.value) {
-        const parentName: string[] = []
-
-        // 递归查找所有父级名称
-        let currentVar = v
-        while (currentVar.parentId) {
-          const parent = vars[currentVar.parentId]
-          if (parent) {
-            parentName.unshift(parent.name) // 将父级名称添加到数组开头
-            currentVar = parent
-          } else {
-            break
-          }
-        }
-
-        parentName.push(v.name)
-        v.name = parentName.join('.')
-      }
-      global.vars[key] = v
-    }
-
-    return {
-      data: global.dataSet,
-      projectPath: info.dir,
-      projectName: info.base
-    }
-  } catch (e) {
-    throw new Error(`project file ${projectPath} is not a valid file`)
   }
 }
 
@@ -383,6 +319,42 @@ plugin.action(async (pluginDir, options) => {
     await pluginMain(pluginDir, options)
   } catch (e: any) {
     sysLog.error(e.message || 'failed to upload plugin')
+    exit(1)
+  }
+})
+
+const rpc = program
+  .command('rpc')
+  .description(
+    'start a JSON-RPC 2.0 server so a PC MCAL-CAN (C) driver can control CAN hardware'
+  )
+rpc.argument('[project]', 'optional EcuBus-Pro project path (.ecb), used by Can.Init')
+rpc.option('-H, --host <host>', 'TCP bind host', '127.0.0.1')
+rpc.option('-p, --port <port>', 'TCP bind port', '17320')
+rpc.option('--stdio', 'use stdin/stdout instead of TCP (logs go to stderr)')
+rpc.option('--socket <path>', 'listen on a Unix domain socket')
+rpc.option('--auto-init', 'call Can.Init with project devices when the server starts')
+rpc.option('--exit-on-disconnect', 'exit when the last client disconnects')
+addLoggingOption(rpc)
+rpc.action(async (project, options) => {
+  if (options.stdio) {
+    console.log = (...args: unknown[]) => {
+      console.error(...args)
+    }
+  }
+  createLog(options.logLevel, options.logFile)
+  try {
+    await rpcMain({
+      project,
+      host: options.host,
+      port: Number(options.port),
+      stdio: !!options.stdio,
+      socket: options.socket,
+      autoInit: !!options.autoInit,
+      exitOnDisconnect: !!options.exitOnDisconnect
+    })
+  } catch (e: any) {
+    sysLog.error(e.message || 'failed to start json-rpc server')
     exit(1)
   }
 })

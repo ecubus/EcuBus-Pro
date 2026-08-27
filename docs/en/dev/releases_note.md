@@ -4,6 +4,8 @@
 Changes since v0.8.65:
 
  
+* [feat]: add `ecb_cli rpc` JSON-RPC 2.0 server for PC MCAL-CAN (C) drivers
+* [feat]: GUI JSON-RPC gateway — external `Can.Write` is transmitted as Tx on live devices
 * [opt]:opt serial port in network
 * Fix device handling and CANLE frame definition consistency by @zhangjiance in https://github.com/ecubus/EcuBus-Pro/pull/383
 * Enhance raw data editor with auto-focus, tooltips, and context menu by @zhangjiance in https://github.com/ecubus/EcuBus-Pro/pull/386

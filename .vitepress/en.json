@@ -59,7 +59,17 @@
     },
     {
       "text": "CLI",
-      "link": "cli/cli.md"
+      "link": "cli/cli.md",
+      "items": [
+        {
+          "text": "Build",
+          "link": "cli/build.md"
+        },
+        {
+          "text": "JSON-RPC (MCAL-CAN)",
+          "link": "cli/rpc.md"
+        }
+      ]
     },
     {
       "text": "Ethernet",
@@ -186,6 +196,10 @@
         {
           "text": "CAN Basic",
           "link": "can/readme.md"
+        },
+        {
+          "text": "PC MCAL-CAN JSON-RPC",
+          "link": "mcal_can_rpc/readme.md"
         },
         {
           "text": "CAN High-Precision Timer",

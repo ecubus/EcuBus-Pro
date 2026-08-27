@@ -59,7 +59,17 @@
     },
     {
       "text": "命令行",
-      "link": "cli/cli.md"
+      "link": "cli/cli.md",
+      "items": [
+        {
+          "text": "构建",
+          "link": "cli/build.md"
+        },
+        {
+          "text": "JSON-RPC（MCAL-CAN）",
+          "link": "cli/rpc.md"
+        }
+      ]
     },
     {
       "text": "以太网",
@@ -186,6 +196,10 @@
         {
           "text": "CAN 基础",
           "link": "can/readme.md"
+        },
+        {
+          "text": "PC MCAL-CAN JSON-RPC",
+          "link": "mcal_can_rpc/readme.md"
         },
         {
           "text": "CAN 高精度定时器",

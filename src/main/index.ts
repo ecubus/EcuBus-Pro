@@ -10,6 +10,7 @@ import { initialize as initAnalytics, trackEvent } from './analytics'
 import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
+import { startRpcHost } from './rpcHost'
 import Transport from 'winston-transport'
 import { initMainI18n } from './i18n'
 import { setupCasdoor } from './ipc/casdoor'
@@ -239,6 +240,8 @@ app.whenReady().then(async () => {
   }
 
   createWindow()
+
+  void startRpcHost()
 
   trackEvent('app_open')
 

@@ -100,3 +100,17 @@ ecb_cli test <project> <name> [options]
 #### Example (test)
 
 ![alt text](../../../media/um/cli/test.gif)
+
+### JSON-RPC command (PC MCAL-CAN)
+
+Start a JSON-RPC 2.0 server so a PC AUTOSAR MCAL CAN driver (C) can talk to EcuBus-Pro CAN hardware.
+
+```bash
+ecb_cli rpc -h
+ecb_cli rpc
+ecb_cli rpc ./project.ecb --auto-init
+```
+
+See [JSON-RPC (PC MCAL-CAN)](./rpc.md) for the wire format, AUTOSAR `Can_*` mapping, notifications, and a C example.
+
+The same server also runs inside the **GUI** (Home → Setting → General). RPC writes are transmitted as Tx on the live devices; see the GUI gateway section in the protocol doc.

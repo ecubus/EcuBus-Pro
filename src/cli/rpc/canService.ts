@@ -164,6 +164,9 @@ interface ControllerState {
   controllerId: number
   info: CanBaseInfo
   base?: CanBase
+  /** true when this service opened the adapter (CLI). false when attached to a live GUI device. */
+  owned: boolean
+  deviceKey?: string
   mode: CanControllerMode
   errorState: CanErrorState
   txErrorCounter: number
@@ -175,10 +178,14 @@ interface ControllerState {
   closeCb: (errMsg?: string) => void
 }
 
+/** `adapter`: CLI owns hardware and writeBase is TX. `gateway`: GUI owns devices; RPC writes inject as RX. */
+export type CanRpcRole = 'adapter' | 'gateway'
+
 export interface CanRpcServiceOptions {
   projectDevices?: Record<string, UdsDevice>
   rxQueueSize?: number
   onShutdown?: () => Promise<void> | void
+  role?: CanRpcRole
 }
 
 function stdResult(result: CanStdReturn, extra?: Record<string, unknown>) {
@@ -257,12 +264,14 @@ function frameMatchesHoh(hoh: HardwareObject, msg: CanMessage): boolean {
 
 export class CanRpcService {
   readonly sessions = new Set<RpcSession>()
+  readonly role: CanRpcRole
   private controllers = new Map<number, ControllerState>()
   private hohs = new Map<number, HardwareObject>()
   private periodTasks = new Map<string, PeriodTask>()
   private initialized = false
   private nextControllerId = 0
   private rxQueueSize: number
+  private liveMap?: Map<string, CanBase>
   private baudRateConfigs = new Map<string, { bitrate: CanBitrate; bitratefd?: CanBitrate }>()
   private pendingTx = new Map<
     string,
@@ -270,10 +279,15 @@ export class CanRpcService {
   >()
 
   constructor(private options: CanRpcServiceOptions = {}) {
+    this.role = options.role ?? 'adapter'
     this.rxQueueSize = options.rxQueueSize ?? 4096
     if (!global.startTs) {
       global.startTs = getTsUs()
     }
+  }
+
+  private isGateway() {
+    return this.role === 'gateway'
   }
 
   createSession(notify: RpcSession['notify']): RpcSession {
@@ -307,7 +321,49 @@ export class CanRpcService {
       jsonrpc: '2.0',
       api: 'mcal-can',
       apiVersion: '1.0.0',
-      platform: process.platform
+      platform: process.platform,
+      role: this.role
+    }
+  }
+
+  /**
+   * Bind already-open GUI CAN devices. RPC writes inject as `dir: 'IN'` (trace Rx).
+   * Does not open or close hardware.
+   */
+  attachLiveControllers(map: Map<string, CanBase>) {
+    this.liveMap = map
+    this.unbindLiveControllers()
+    this.bindLiveMap(map)
+  }
+
+  /** Unbind GUI devices without closing them. */
+  detachLiveControllers() {
+    this.unbindLiveControllers()
+  }
+
+  private unbindLiveControllers() {
+    const ids = [...this.controllers.keys()]
+    for (const id of ids) {
+      const ctrl = this.controllers.get(id)
+      if (!ctrl || ctrl.owned) {
+        continue
+      }
+      this.clearControllerPeriod(id)
+      if (ctrl.base) {
+        ctrl.base.detachCanMessage(ctrl.frameCb)
+        ctrl.base.event.off('close', ctrl.closeCb)
+        ctrl.base = undefined
+      }
+      for (const [hohId, hoh] of [...this.hohs.entries()]) {
+        if (hoh.controllerId === id) {
+          this.hohs.delete(hohId)
+        }
+      }
+      this.controllers.delete(id)
+      ctrl.mode = 'CAN_CS_UNINIT'
+    }
+    if (this.controllers.size === 0) {
+      this.initialized = false
     }
   }
 
@@ -525,7 +581,9 @@ export class CanRpcService {
     const obj = asObject(params, 'can.reset')
     const controllerId = reqNumber(obj, 'controllerId', 'can.reset')
     const ctrl = this.requireController(controllerId)
-    await this.reopen(ctrl)
+    if (ctrl.owned) {
+      await this.reopen(ctrl)
+    }
     ctrl.errorState = 'CAN_ERRORSTATE_ACTIVE'
     ctrl.txErrorCounter = 0
     ctrl.rxErrorCounter = 0
@@ -533,7 +591,7 @@ export class CanRpcService {
     return { controllerId, mode: ctrl.mode, errorState: ctrl.errorState }
   }
 
-  startPeriodSend(params: unknown) {
+  startPeriodSend(params: unknown, session?: RpcSession) {
     const obj = asObject(params, 'can.startPeriodSend')
     const controllerId = reqNumber(obj, 'controllerId', 'can.startPeriodSend')
     const ctrl = this.requireController(controllerId)
@@ -551,10 +609,11 @@ export class CanRpcService {
     const message: CanMessage = {
       id,
       data,
-      dir: 'OUT',
+      dir: this.isGateway() ? 'IN' : 'OUT',
       msgType,
       device: ctrl.info.name,
-      name: optString(obj, 'name')
+      name: optString(obj, 'name'),
+      rpcSessionId: session?.id
     }
     const taskId = this.createPeriodTask(ctrl, message, periodMs, durationMs)
     return { taskId, periodMs }
@@ -589,6 +648,27 @@ export class CanRpcService {
 
   async canInit(params: unknown) {
     const obj = asObject(params, 'Can.Init')
+    if (this.isGateway()) {
+      if (this.controllers.size === 0 && this.liveMap && this.liveMap.size > 0) {
+        this.bindLiveMap(this.liveMap)
+      }
+      if (this.controllers.size === 0) {
+        throw new RpcError(
+          RPC_NOT_STARTED,
+          'EcuBus runtime is not started; start the project in the GUI first'
+        )
+      }
+      const config = (hasKey(obj, 'config') ? obj.config : obj) as RpcCanInitConfig
+      if (config && typeof config === 'object' && config.hardwareObjects?.length) {
+        for (const h of config.hardwareObjects) {
+          if (!this.hohs.has(h.hohId)) {
+            this.addHoh(h)
+          }
+        }
+      }
+      this.initialized = true
+      return stdResult('E_OK', this.listControllers())
+    }
     if (this.initialized && this.controllers.size > 0) {
       return stdResult('E_OK', this.listControllers())
     }
@@ -737,6 +817,9 @@ export class CanRpcService {
     const obj = asObject(params, 'Can.SetBaudrate')
     const controllerId = reqNumber(obj, 'controller', 'Can.SetBaudrate')
     const ctrl = this.requireController(controllerId)
+    if (!ctrl.owned) {
+      return stdResult('E_NOT_OK', { reason: 'cannot change baudrate of a live EcuBus device' })
+    }
     if (ctrl.mode === 'CAN_CS_STARTED') {
       return stdResult('E_NOT_OK', { reason: 'controller must be STOPPED to change baudrate' })
     }
@@ -886,6 +969,20 @@ export class CanRpcService {
   }
 
   private async openController(cfg: RpcControllerConfig): Promise<ControllerState> {
+    if (this.isGateway()) {
+      const existing = this.matchLiveController(cfg)
+      if (existing) {
+        this.ensureDefaultHoh(existing.controllerId)
+        if (existing.mode !== 'CAN_CS_STARTED') {
+          await this.applyMode(existing, 'CAN_CS_STARTED')
+        }
+        return existing
+      }
+      throw new RpcError(
+        RPC_NOT_FOUND,
+        'No matching live EcuBus CAN device; start the project in the GUI first'
+      )
+    }
     const fromProject = this.resolveFromProject(cfg)
     const vendor = normalizeVendor(String(cfg.vendor || fromProject?.vendor || ''))
     const handle = cfg.handle ?? fromProject?.handle
@@ -913,6 +1010,7 @@ export class CanRpcService {
     const ctrl: ControllerState = {
       controllerId,
       info,
+      owned: true,
       mode: 'CAN_CS_STOPPED',
       errorState: 'CAN_ERRORSTATE_ACTIVE',
       txErrorCounter: 0,
@@ -929,6 +1027,63 @@ export class CanRpcService {
       sysLog.info(`rpc can open ${info.vendor}-${info.handle} as controller ${controllerId}`)
     }
     return ctrl
+  }
+
+  private matchLiveController(cfg: RpcControllerConfig): ControllerState | undefined {
+    for (const ctrl of this.controllers.values()) {
+      if (cfg.controllerId != null && ctrl.controllerId === cfg.controllerId) {
+        return ctrl
+      }
+      if (cfg.deviceId && ctrl.deviceKey === cfg.deviceId) {
+        return ctrl
+      }
+      if (cfg.name && ctrl.info.name === cfg.name) {
+        return ctrl
+      }
+      if (cfg.deviceName && ctrl.info.name === cfg.deviceName) {
+        return ctrl
+      }
+      if (
+        cfg.handle != null &&
+        String(ctrl.info.handle) === String(cfg.handle) &&
+        (!cfg.vendor || normalizeVendor(String(cfg.vendor)) === ctrl.info.vendor)
+      ) {
+        return ctrl
+      }
+    }
+    return undefined
+  }
+
+  private bindLiveMap(map: Map<string, CanBase>) {
+    this.liveMap = map
+    this.nextControllerId = 0
+    for (const [key, base] of map) {
+      const controllerId = this.allocControllerId()
+      const ctrl: ControllerState = {
+        controllerId,
+        info: { ...base.info },
+        base,
+        owned: false,
+        deviceKey: key,
+        mode: 'CAN_CS_STARTED',
+        errorState: 'CAN_ERRORSTATE_ACTIVE',
+        txErrorCounter: 0,
+        rxErrorCounter: 0,
+        interruptDisable: 0,
+        rxOverrun: 0,
+        wakeupPending: false,
+        frameCb: (msg) => this.onFrame(controllerId, msg),
+        closeCb: (errMsg) => this.onClose(controllerId, errMsg)
+      }
+      this.controllers.set(controllerId, ctrl)
+      base.attachCanMessage(ctrl.frameCb)
+      base.event.on('close', ctrl.closeCb)
+      this.ensureDefaultHoh(controllerId)
+    }
+    this.initialized = this.controllers.size > 0
+    if (typeof sysLog !== 'undefined') {
+      sysLog.info(`rpc gateway attached ${this.controllers.size} live CAN device(s)`)
+    }
   }
 
   private allocControllerId() {
@@ -966,10 +1121,12 @@ export class CanRpcService {
     if (ctrl.base) {
       ctrl.base.detachCanMessage(ctrl.frameCb)
       ctrl.base.event.off('close', ctrl.closeCb)
-      try {
-        await Promise.resolve(ctrl.base.close())
-      } catch {
-        // ignore close errors
+      if (ctrl.owned) {
+        try {
+          await Promise.resolve(ctrl.base.close())
+        } catch {
+          // ignore close errors
+        }
       }
       ctrl.base = undefined
     }
@@ -1100,7 +1257,9 @@ export class CanRpcService {
       controllerId: ctrl.controllerId
     })
     try {
-      const ts = await ctrl.base.writeBase(id, msgType, data, { name })
+      const ts = this.isGateway()
+        ? this.injectRx(ctrl, id, msgType, data, session.id, name)
+        : await ctrl.base.writeBase(id, msgType, data, { name })
       this.pushTx(session, {
         controllerId: ctrl.controllerId,
         hth: hth ?? -1,
@@ -1125,12 +1284,41 @@ export class CanRpcService {
     }
   }
 
+  /** Inject a frame into the live EcuBus device as RX (`dir: 'IN'`). */
+  private injectRx(
+    ctrl: ControllerState,
+    id: number,
+    msgType: CanMsgType,
+    data: Buffer,
+    rpcSessionId?: string,
+    name?: string
+  ) {
+    if (!ctrl.base) {
+      throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} has no hardware`)
+    }
+    const ts = getTsUs() - (global.startTs || 0)
+    const msg: CanMessage = {
+      id,
+      data: Buffer.from(data),
+      dir: 'IN',
+      msgType,
+      device: ctrl.info.name,
+      name,
+      ts,
+      rpcSessionId,
+      database: ctrl.info.database
+    }
+    ctrl.base.log.canBase(msg)
+    ctrl.base.event.emit(ctrl.base.getReadBaseId(msg.id, msg.msgType), msg)
+    return ts
+  }
+
   private onFrame(controllerId: number, msg: CanMessage) {
     const ctrl = this.controllers.get(controllerId)
     if (!ctrl) {
       return
     }
-    if (ctrl.mode === 'CAN_CS_SLEEP' && msg.dir === 'IN') {
+    if (ctrl.mode === 'CAN_CS_SLEEP' && this.isIncomingForRpc(msg)) {
       ctrl.wakeupPending = true
       const event: RpcControllerEvent = { controllerId, ts: msg.ts ?? getTsUs(), message: 'wakeup' }
       this.broadcast((session) => {
@@ -1142,15 +1330,19 @@ export class CanRpcService {
     if (ctrl.mode !== 'CAN_CS_STARTED') {
       return
     }
-    if (msg.dir === 'OUT') {
+    if (!this.isIncomingForRpc(msg)) {
       return
     }
     const hrh = this.matchRxHoh(controllerId, msg)
     if (hrh == null && this.hasReceiveHoh(controllerId)) {
       return
     }
-    const frame = encodeFrame(msg, { controllerId, hrh })
+    const forRpc: CanMessage = { ...msg, dir: 'IN' }
+    const frame = encodeFrame(forRpc, { controllerId, hrh })
     this.broadcast((session) => {
+      if (msg.rpcSessionId && msg.rpcSessionId === session.id) {
+        return
+      }
       if (session.rxQueue.length >= this.rxQueueSize) {
         session.rxQueue.shift()
         ctrl.rxOverrun++
@@ -1158,6 +1350,14 @@ export class CanRpcService {
       session.rxQueue.push(frame)
       this.notifyIf(session, ctrl, 'can.rxIndication', frame)
     })
+  }
+
+  /** Adapter: hardware RX only. Gateway: hardware RX and EcuBus TX (virtual ECU sees tester TX as RX). */
+  private isIncomingForRpc(msg: CanMessage) {
+    if (this.isGateway()) {
+      return msg.dir === 'IN' || msg.dir === 'OUT'
+    }
+    return msg.dir === 'IN'
   }
 
   private hasReceiveHoh(controllerId: number) {
@@ -1302,7 +1502,7 @@ export class CanRpcService {
     if (!ctrl.base) {
       throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} has no hardware`)
     }
-    if (ctrl.base.startPeriodSend) {
+    if (!this.isGateway() && ctrl.base.startPeriodSend) {
       const taskId = ctrl.base.startPeriodSend(message, periodMs, durationMs)
       this.periodTasks.set(taskId, {
         taskId,
@@ -1317,6 +1517,23 @@ export class CanRpcService {
     const timer = setInterval(() => {
       const current = this.controllers.get(ctrl.controllerId)
       if (!current || current.mode !== 'CAN_CS_STARTED' || !current.base) {
+        return
+      }
+      if (this.isGateway()) {
+        try {
+          this.injectRx(
+            current,
+            message.id,
+            message.msgType,
+            message.data,
+            message.rpcSessionId,
+            message.name
+          )
+        } catch (err) {
+          if (typeof sysLog !== 'undefined') {
+            sysLog.warn(`period send ${taskId} failed: ${err instanceof Error ? err.message : err}`)
+          }
+        }
         return
       }
       current.base

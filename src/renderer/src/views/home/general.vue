@@ -46,6 +46,35 @@
           <span class="zoom-value">{{ form.zoom }}%</span>
         </div>
       </el-form-item>
+      <el-form-item>
+        <template #label>
+          <div class="label-container">
+            <span>{{ $t('general.rpcServer') }}</span>
+            <el-tooltip :content="$t('general.rpcServerTooltip')" placement="bottom" effect="light">
+              <el-icon class="question-icon"><QuestionFilled /></el-icon>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-switch v-model="form.rpcEnabled" />
+      </el-form-item>
+      <el-form-item :label="$t('general.rpcHost')">
+        <el-input v-model="form.rpcHost" style="max-width: 280px" :disabled="!form.rpcEnabled" />
+      </el-form-item>
+      <el-form-item :label="$t('general.rpcPort')">
+        <el-input-number
+          v-model="form.rpcPort"
+          :min="1"
+          :max="65535"
+          :step="1"
+          :disabled="!form.rpcEnabled"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" :loading="rpcApplying" @click="applyRpc">
+          {{ $t('general.rpcApply') }}
+        </el-button>
+        <span class="rpc-status">{{ rpcStatusText }}</span>
+      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -61,8 +90,57 @@ const isDark = useDark()
 const OldVal = window.store.get('general.settings') as any
 const form = ref({
   zoom: OldVal?.zoom || 100,
-  language: OldVal?.language || 'en'
+  language: OldVal?.language || 'en',
+  rpcEnabled: OldVal?.rpcEnabled !== false,
+  rpcHost: OldVal?.rpcHost || '127.0.0.1',
+  rpcPort: OldVal?.rpcPort || 17320
 })
+const rpcApplying = ref(false)
+const rpcStatusText = ref('')
+
+type RpcHostStatus = {
+  enabled: boolean
+  listening: boolean
+  host: string
+  port: number
+  error?: string
+  controllers: number
+}
+
+function formatRpcStatus(status: RpcHostStatus) {
+  if (!status.enabled) {
+    return 'JSON-RPC off'
+  }
+  if (status.error) {
+    return status.error
+  }
+  if (status.listening) {
+    return `tcp://${status.host}:${status.port}`
+  }
+  return 'JSON-RPC not listening'
+}
+
+async function refreshRpcStatus() {
+  try {
+    const status = (await window.electron.ipcRenderer.invoke('ipc-rpc-status')) as RpcHostStatus
+    rpcStatusText.value = formatRpcStatus(status)
+  } catch {
+    rpcStatusText.value = ''
+  }
+}
+
+async function applyRpc() {
+  rpcApplying.value = true
+  try {
+    window.store.set('general.settings', cloneDeep(form.value))
+    const status = (await window.electron.ipcRenderer.invoke('ipc-rpc-apply')) as RpcHostStatus
+    rpcStatusText.value = formatRpcStatus(status)
+  } catch (err) {
+    rpcStatusText.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    rpcApplying.value = false
+  }
+}
 
 watch(
   form,
@@ -86,7 +164,11 @@ const handleThemeChange = (value: boolean) => {
 onMounted(() => {
   if (OldVal) {
     assign(form.value, OldVal)
+    form.value.rpcEnabled = OldVal.rpcEnabled !== false
+    form.value.rpcHost = OldVal.rpcHost || '127.0.0.1'
+    form.value.rpcPort = OldVal.rpcPort || 17320
   }
+  void refreshRpcStatus()
 })
 </script>
 
@@ -109,6 +191,12 @@ onMounted(() => {
 .zoom-value {
   min-width: 60px;
   color: #606266;
+}
+
+.rpc-status {
+  margin-left: 12px;
+  color: #909399;
+  font-size: 13px;
 }
 
 .label-container {

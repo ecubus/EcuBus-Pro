@@ -8,7 +8,7 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'sys.version',
-    summary: 'Return CLI / JSON-RPC API version information.',
+    summary: 'Return JSON-RPC API version and role (adapter | gateway).',
     params: []
   },
   {
@@ -69,7 +69,8 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'can.write',
-    summary: 'Transmit a CAN / CAN-FD frame on a controller (bypasses HTH).',
+    summary:
+      'Transmit a CAN / CAN-FD frame on a controller (bypasses HTH). In GUI gateway mode the frame is injected as RX in EcuBus.',
     params: [
       { name: 'controllerId', type: 'number', required: true },
       { name: 'id', type: 'number|string', required: true },
@@ -189,7 +190,8 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'Can.SetControllerMode',
-    summary: 'AUTOSAR Can_SetControllerMode (CAN_T_START / CAN_T_STOP / CAN_T_SLEEP / CAN_T_WAKEUP).',
+    summary:
+      'AUTOSAR Can_SetControllerMode (CAN_T_START / CAN_T_STOP / CAN_T_SLEEP / CAN_T_WAKEUP).',
     autosar: 'Can_SetControllerMode',
     params: [
       { name: 'controller', type: 'number', required: true },

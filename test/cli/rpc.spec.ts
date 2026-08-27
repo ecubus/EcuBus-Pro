@@ -1,6 +1,6 @@
 import net from 'net'
 import { afterEach, describe, expect, it } from 'vitest'
-import { CanRpcService } from '../../src/cli/rpc/canService'
+import { CanRpcService, DEFAULT_CAN_BITRATE } from '../../src/cli/rpc/canService'
 import {
   findJsonEnd,
   JsonRpcFramer,
@@ -10,13 +10,20 @@ import {
 } from '../../src/cli/rpc/protocol'
 import { startRpcServer } from '../../src/cli/rpc/server'
 import { RPC_METHOD_NOT_FOUND, RPC_PARSE_ERROR } from '../../src/cli/rpc/errors'
+import { SIMULATE_CAN } from '../../src/main/docan/simulate'
+import { CAN_ID_TYPE, CanMessage } from '../../src/main/share/can'
 
-let handleSeq = 50
+let handleSeq = 0
+const SIM_BUS_MAX = 64
+
+function nextHandle() {
+  const h = handleSeq % SIM_BUS_MAX
+  handleSeq++
+  return h
+}
 
 function nextHandles() {
-  const a = handleSeq++
-  const b = handleSeq++
-  return [a, b] as const
+  return [nextHandle(), nextHandle()] as const
 }
 
 function rpcLine(method: string, params: unknown, id: number | string) {
@@ -167,7 +174,6 @@ describe('CanRpcService (simulate)', () => {
 
   it('returns CAN_BUSY for FULL HTH while in-flight', async () => {
     const [h0] = nextHandles()
-    handleSeq++
     const service = new CanRpcService()
     services.push(service)
     const session = service.createSession(() => undefined)
@@ -227,6 +233,96 @@ describe('CanRpcService (simulate)', () => {
     const { frames } = await service.canRead({ controllerId: 1, max: 8 }, session)
     expect(frames.length).toBeGreaterThan(0)
     service.enableInterrupts(1)
+  })
+})
+
+describe('CanRpcService gateway (GUI inject-as-RX)', () => {
+  const services: CanRpcService[] = []
+  const bases: SIMULATE_CAN[] = []
+
+  afterEach(async () => {
+    for (const s of services.splice(0)) {
+      await s.closeAll()
+    }
+    for (const b of bases.splice(0)) {
+      try {
+        b.close()
+      } catch {
+        // already closed
+      }
+    }
+  })
+
+  function openLive(name: string) {
+    const handle = nextHandle()
+    const base = new SIMULATE_CAN({
+      id: `gw-${handle}`,
+      handle,
+      name,
+      vendor: 'simulate',
+      canfd: false,
+      bitrate: { ...DEFAULT_CAN_BITRATE }
+    })
+    bases.push(base)
+    return base
+  }
+
+  it('injects RPC writes as dir IN and does not echo them to the originator', async () => {
+    const base = openLive('GUI_CAN')
+    const seen: CanMessage[] = []
+    base.attachCanMessage((msg) => seen.push(msg))
+
+    const service = new CanRpcService({ role: 'gateway' })
+    services.push(service)
+    const session = service.createSession(() => undefined)
+    service.attachLiveControllers(new Map([['dev1', base]]))
+
+    expect(service.getVersion().role).toBe('gateway')
+    const listed = service.listControllers()
+    expect(listed.controllers).toHaveLength(1)
+    expect(listed.controllers[0].mode).toBe('CAN_CS_STARTED')
+
+    await service.canWrite(
+      { controllerId: 0, id: '0x123', data: [1, 2, 3, 4], idType: 'STANDARD' },
+      session
+    )
+    expect(seen.some((m) => m.dir === 'IN' && m.id === 0x123)).toBe(true)
+
+    const { frames } = await service.canRead({ timeoutMs: 30, max: 8 }, session)
+    expect(frames.filter((f) => f.id === 0x123)).toHaveLength(0)
+
+    const { confirmations } = service.mainFunctionWrite({}, session)
+    expect(confirmations.some((c) => c.result === 'E_OK')).toBe(true)
+  })
+
+  it('delivers EcuBus TX (dir OUT) to RPC as RX', async () => {
+    const base = openLive('GUI_CAN')
+    const service = new CanRpcService({ role: 'gateway' })
+    services.push(service)
+    const session = service.createSession(() => undefined)
+    service.attachLiveControllers(new Map([['dev1', base]]))
+
+    await base.writeBase(
+      0x200,
+      { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false },
+      Buffer.from([9, 8, 7])
+    )
+    await waitMs(20)
+    const { frames } = await service.canRead({ timeoutMs: 50, max: 8 }, session)
+    expect(frames.some((f) => f.id === 0x200 && f.dir === 'IN')).toBe(true)
+  })
+
+  it('lets a second RPC session see another session inject as RX', async () => {
+    const base = openLive('GUI_CAN')
+    const service = new CanRpcService({ role: 'gateway' })
+    services.push(service)
+    const a = service.createSession(() => undefined)
+    const b = service.createSession(() => undefined)
+    service.attachLiveControllers(new Map([['dev1', base]]))
+
+    await service.canWrite({ controllerId: 0, id: 0x55, data: [0xaa] }, a)
+    const { frames } = await service.canRead({ timeoutMs: 30, max: 8 }, b)
+    expect(frames.some((f) => f.id === 0x55 && f.dir === 'IN')).toBe(true)
   })
 })
 

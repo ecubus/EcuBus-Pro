@@ -247,3 +247,19 @@ Open two `simulate` handles. A frame written on one appears as RX on the other (
 {"jsonrpc":"2.0","method":"can.write","params":{"controllerId":0,"id":"0x123","data":[1,2,3,4]},"id":3}
 {"jsonrpc":"2.0","method":"can.read","params":{"controllerId":1,"timeoutMs":200},"id":4}
 ```
+
+## GUI gateway (EcuBus client already running)
+
+When the **EcuBus-Pro GUI** is running, the same JSON-RPC API is served from the application (default `127.0.0.1:17320`). You do **not** start `ecb_cli rpc` in that case — the GUI already owns the CAN adapters.
+
+Enable/disable, host, and port are under **Home → Setting → General**. Click **Apply RPC** after changing bind settings. `sys.version` returns `"role": "gateway"`.
+
+Direction:
+
+| Source | What EcuBus shows | What the RPC client sees |
+| --- | --- | --- |
+| External `Can.Write` / `can.write` | **Rx** (`dir: IN`) in the trace | TX confirmation only (no echo) |
+| EcuBus TX (scripts, IA, tester) | Tx (`dir: OUT`) | RX indication |
+| Hardware RX | Rx | RX indication |
+
+RPC writes are **injected** into the live device as incoming frames. They are not transmitted on the physical bus as EcuBus Tx. Start the project in the GUI first so devices are open; `Can.Init` then returns the attached controllers. Do not run `ecb_cli rpc` on the same TCP port at the same time.

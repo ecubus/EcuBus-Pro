@@ -164,3 +164,19 @@ FULL HTH 同时只允许 1 帧在途（否则 `CAN_BUSY`）。BASIC HTH 最多 8
 {"jsonrpc":"2.0","method":"can.write","params":{"controllerId":0,"id":"0x123","data":[1,2,3,4]},"id":3}
 {"jsonrpc":"2.0","method":"can.read","params":{"controllerId":1,"timeoutMs":200},"id":4}
 ```
+
+## GUI 网关（EcuBus 客户端已在运行）
+
+当 **EcuBus-Pro 图形界面** 已启动时，同一套 JSON-RPC 由应用程序提供（默认 `127.0.0.1:17320`）。此时不要再运行 `ecb_cli rpc`，CAN 适配器已经由 GUI 占用。
+
+开关、地址和端口在 **主页 → 设置 → 常规**。修改绑定后点 **应用 RPC**。`sys.version` 会返回 `"role": "gateway"`。
+
+方向：
+
+| 来源 | EcuBus 显示 | RPC 客户端看到 |
+| --- | --- | --- |
+| 外部 `Can.Write` / `can.write` | 跟踪里为 **Rx**（`dir: IN`） | 仅 TX 确认（不回显） |
+| EcuBus 发送（脚本、IA、诊断仪） | Tx（`dir: OUT`） | RX 指示 |
+| 硬件接收 | Rx | RX 指示 |
+
+RPC 写入是作为**接收帧注入**到正在运行的设备，不会作为 EcuBus Tx 发到物理总线。请先在 GUI 里启动工程以打开设备，然后 `Can.Init` 会返回已附着的控制器。不要与 `ecb_cli rpc` 占用同一 TCP 端口。

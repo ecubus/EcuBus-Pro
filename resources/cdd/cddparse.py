@@ -9,12 +9,11 @@ _cdd_dir = str(Path(__file__).resolve().parent)
 if _cdd_dir not in sys.path:
     sys.path.insert(0, _cdd_dir)
 
-from cdd_tester_parser import CddParse
+from cddtools import parse_tester_info
 
 
 def parseTesterInfo(file_path):
-    parser = CddParse()
-    return parser.parse_tester_info(file_path)
+    return parse_tester_info(file_path)
 
 
 def main(argv=None):

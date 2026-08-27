@@ -223,6 +223,8 @@ export type ReplayChannelMap = {
   logChannel: number
   /** Device IDs to replay to (supports multiple targets) */
   deviceIds: string[]
+  /** Bus type for this channel mapping (default: 'can') */
+  busType?: 'can' | 'lin'
 }
 
 export type ReplayItem = {

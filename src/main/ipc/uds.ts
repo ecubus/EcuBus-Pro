@@ -1664,24 +1664,27 @@ ipcMain.handle(
     const frames: TraceFileFrame[] = []
     const channelSet = new Set<number>()
 
-    let frame = await reader.readFrame()
-    while (frame) {
-      channelSet.add(frame.channel)
-      frames.push({
-        channel: frame.channel,
-        ts: frame.ts,
-        id: frame.id,
-        dir: frame.dir,
-        msgType: {
-          idType: frame.msgType.idType,
-          brs: frame.msgType.brs,
-          canfd: frame.msgType.canfd,
-          remote: frame.msgType.remote
-        },
-        data: Array.from(frame.data),
-        isError: frame.isError
-      })
-      frame = await reader.readFrame()
+    let replayFrame = await reader.readFrame()
+    while (replayFrame) {
+      if (replayFrame.type === 'can') {
+        const f = replayFrame.frame
+        channelSet.add(f.channel)
+        frames.push({
+          channel: f.channel,
+          ts: f.ts,
+          id: f.id,
+          dir: f.dir,
+          msgType: {
+            idType: f.msgType.idType,
+            brs: f.msgType.brs,
+            canfd: f.msgType.canfd,
+            remote: f.msgType.remote
+          },
+          data: Array.from(f.data),
+          isError: f.isError
+        })
+      }
+      replayFrame = await reader.readFrame()
     }
 
     const measurementStartTimeMs = reader.measurementStartTimeMs ?? 0

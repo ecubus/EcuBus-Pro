@@ -62,9 +62,7 @@ register('can.getState', (params, _s, service) => service.getState(params))
 register('can.getBusLoading', (params, _s, service) => service.getBusLoading(params))
 register('can.setMode', (params, _s, service) => service.setMode(params))
 register('can.reset', (params, _s, service) => service.reset(params))
-register('can.startPeriodSend', (params, session, service) =>
-  service.startPeriodSend(params, session)
-)
+register('can.startPeriodSend', (params, _s, service) => service.startPeriodSend(params))
 register('can.stopPeriodSend', (params, _s, service) => service.stopPeriodSend(params))
 register('can.changePeriodData', (params, _s, service) => service.changePeriodData(params))
 

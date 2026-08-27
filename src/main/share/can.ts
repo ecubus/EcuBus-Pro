@@ -265,12 +265,6 @@ export type CanMessage<T = any> = {
    * internal use
    */
   signals?: T
-
-  /**
-   * JSON-RPC session that injected this frame into a live EcuBus device.
-   * Used by the GUI gateway so the originator does not see its own write as RX.
-   */
-  rpcSessionId?: string
 }
 
 /**

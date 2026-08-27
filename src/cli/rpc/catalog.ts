@@ -69,8 +69,7 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'can.write',
-    summary:
-      'Transmit a CAN / CAN-FD frame on a controller (bypasses HTH). In GUI gateway mode the frame is injected as RX in EcuBus.',
+    summary: 'Transmit a CAN / CAN-FD frame on a controller (bypasses HTH).',
     params: [
       { name: 'controllerId', type: 'number', required: true },
       { name: 'id', type: 'number|string', required: true },

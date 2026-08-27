@@ -178,7 +178,8 @@ interface ControllerState {
   closeCb: (errMsg?: string) => void
 }
 
-/** `adapter`: CLI owns hardware and writeBase is TX. `gateway`: GUI owns devices; RPC writes inject as RX. */
+/** `adapter`: CLI owns hardware. `gateway`: GUI owns devices; both roles transmit with writeBase (TX). */
+export type CanRpcRole = 'adapter' | 'gateway'
 export type CanRpcRole = 'adapter' | 'gateway'
 
 export interface CanRpcServiceOptions {
@@ -327,7 +328,7 @@ export class CanRpcService {
   }
 
   /**
-   * Bind already-open GUI CAN devices. RPC writes inject as `dir: 'IN'` (trace Rx).
+   * Bind already-open GUI CAN devices. RPC writes use writeBase (trace Tx).
    * Does not open or close hardware.
    */
   attachLiveControllers(map: Map<string, CanBase>) {
@@ -591,7 +592,7 @@ export class CanRpcService {
     return { controllerId, mode: ctrl.mode, errorState: ctrl.errorState }
   }
 
-  startPeriodSend(params: unknown, session?: RpcSession) {
+  startPeriodSend(params: unknown) {
     const obj = asObject(params, 'can.startPeriodSend')
     const controllerId = reqNumber(obj, 'controllerId', 'can.startPeriodSend')
     const ctrl = this.requireController(controllerId)
@@ -609,11 +610,10 @@ export class CanRpcService {
     const message: CanMessage = {
       id,
       data,
-      dir: this.isGateway() ? 'IN' : 'OUT',
+      dir: 'OUT',
       msgType,
       device: ctrl.info.name,
-      name: optString(obj, 'name'),
-      rpcSessionId: session?.id
+      name: optString(obj, 'name')
     }
     const taskId = this.createPeriodTask(ctrl, message, periodMs, durationMs)
     return { taskId, periodMs }
@@ -1257,9 +1257,7 @@ export class CanRpcService {
       controllerId: ctrl.controllerId
     })
     try {
-      const ts = this.isGateway()
-        ? this.injectRx(ctrl, id, msgType, data, session.id, name)
-        : await ctrl.base.writeBase(id, msgType, data, { name })
+      const ts = await ctrl.base.writeBase(id, msgType, data, { name })
       this.pushTx(session, {
         controllerId: ctrl.controllerId,
         hth: hth ?? -1,
@@ -1284,41 +1282,12 @@ export class CanRpcService {
     }
   }
 
-  /** Inject a frame into the live EcuBus device as RX (`dir: 'IN'`). */
-  private injectRx(
-    ctrl: ControllerState,
-    id: number,
-    msgType: CanMsgType,
-    data: Buffer,
-    rpcSessionId?: string,
-    name?: string
-  ) {
-    if (!ctrl.base) {
-      throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} has no hardware`)
-    }
-    const ts = getTsUs() - (global.startTs || 0)
-    const msg: CanMessage = {
-      id,
-      data: Buffer.from(data),
-      dir: 'IN',
-      msgType,
-      device: ctrl.info.name,
-      name,
-      ts,
-      rpcSessionId,
-      database: ctrl.info.database
-    }
-    ctrl.base.log.canBase(msg)
-    ctrl.base.event.emit(ctrl.base.getReadBaseId(msg.id, msg.msgType), msg)
-    return ts
-  }
-
   private onFrame(controllerId: number, msg: CanMessage) {
     const ctrl = this.controllers.get(controllerId)
     if (!ctrl) {
       return
     }
-    if (ctrl.mode === 'CAN_CS_SLEEP' && this.isIncomingForRpc(msg)) {
+    if (ctrl.mode === 'CAN_CS_SLEEP' && msg.dir === 'IN') {
       ctrl.wakeupPending = true
       const event: RpcControllerEvent = { controllerId, ts: msg.ts ?? getTsUs(), message: 'wakeup' }
       this.broadcast((session) => {
@@ -1330,19 +1299,15 @@ export class CanRpcService {
     if (ctrl.mode !== 'CAN_CS_STARTED') {
       return
     }
-    if (!this.isIncomingForRpc(msg)) {
+    if (msg.dir === 'OUT') {
       return
     }
     const hrh = this.matchRxHoh(controllerId, msg)
     if (hrh == null && this.hasReceiveHoh(controllerId)) {
       return
     }
-    const forRpc: CanMessage = { ...msg, dir: 'IN' }
-    const frame = encodeFrame(forRpc, { controllerId, hrh })
+    const frame = encodeFrame(msg, { controllerId, hrh })
     this.broadcast((session) => {
-      if (msg.rpcSessionId && msg.rpcSessionId === session.id) {
-        return
-      }
       if (session.rxQueue.length >= this.rxQueueSize) {
         session.rxQueue.shift()
         ctrl.rxOverrun++
@@ -1350,14 +1315,6 @@ export class CanRpcService {
       session.rxQueue.push(frame)
       this.notifyIf(session, ctrl, 'can.rxIndication', frame)
     })
-  }
-
-  /** Adapter: hardware RX only. Gateway: hardware RX and EcuBus TX (virtual ECU sees tester TX as RX). */
-  private isIncomingForRpc(msg: CanMessage) {
-    if (this.isGateway()) {
-      return msg.dir === 'IN' || msg.dir === 'OUT'
-    }
-    return msg.dir === 'IN'
   }
 
   private hasReceiveHoh(controllerId: number) {
@@ -1502,7 +1459,7 @@ export class CanRpcService {
     if (!ctrl.base) {
       throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} has no hardware`)
     }
-    if (!this.isGateway() && ctrl.base.startPeriodSend) {
+    if (ctrl.base.startPeriodSend) {
       const taskId = ctrl.base.startPeriodSend(message, periodMs, durationMs)
       this.periodTasks.set(taskId, {
         taskId,
@@ -1517,23 +1474,6 @@ export class CanRpcService {
     const timer = setInterval(() => {
       const current = this.controllers.get(ctrl.controllerId)
       if (!current || current.mode !== 'CAN_CS_STARTED' || !current.base) {
-        return
-      }
-      if (this.isGateway()) {
-        try {
-          this.injectRx(
-            current,
-            message.id,
-            message.msgType,
-            message.data,
-            message.rpcSessionId,
-            message.name
-          )
-        } catch (err) {
-          if (typeof sysLog !== 'undefined') {
-            sysLog.warn(`period send ${taskId} failed: ${err instanceof Error ? err.message : err}`)
-          }
-        }
         return
       }
       current.base

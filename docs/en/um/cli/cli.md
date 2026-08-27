@@ -113,4 +113,4 @@ ecb_cli rpc ./project.ecb --auto-init
 
 See [JSON-RPC (PC MCAL-CAN)](./rpc.md) for the wire format, AUTOSAR `Can_*` mapping, notifications, and a C example.
 
-The same server also runs inside the **GUI** (Home → Setting → General). In that mode RPC writes are injected as Rx; see the GUI gateway section in the protocol doc.
+The same server also runs inside the **GUI** (Home → Setting → General). RPC writes are transmitted as Tx on the live devices; see the GUI gateway section in the protocol doc.

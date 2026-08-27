@@ -101,4 +101,4 @@ ecb_cli rpc ./project.ecb --auto-init
 
 报文格式、AUTOSAR `Can_*` 映射、通知以及 C 示例见 [JSON-RPC（PC 版 MCAL-CAN）](./rpc.md)。
 
-图形界面运行时也会提供同一服务（主页 → 设置 → 常规）。该模式下 RPC 写入会作为 Rx 注入，详见协议文档中的 GUI 网关一节。
+图形界面运行时也会提供同一服务（主页 → 设置 → 常规）。该模式下 RPC 写入会作为 Tx 发到已打开的设备，详见协议文档中的 GUI 网关一节。

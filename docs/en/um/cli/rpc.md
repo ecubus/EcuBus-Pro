@@ -258,8 +258,7 @@ Direction:
 
 | Source | What EcuBus shows | What the RPC client sees |
 | --- | --- | --- |
-| External `Can.Write` / `can.write` | **Rx** (`dir: IN`) in the trace | TX confirmation only (no echo) |
-| EcuBus TX (scripts, IA, tester) | Tx (`dir: OUT`) | RX indication |
+| External `Can.Write` / `can.write` | **Tx** (`dir: OUT`) | TX confirmation (no self-echo as RX) |
 | Hardware RX | Rx | RX indication |
 
-RPC writes are **injected** into the live device as incoming frames. They are not transmitted on the physical bus as EcuBus Tx. Start the project in the GUI first so devices are open; `Can.Init` then returns the attached controllers. Do not run `ecb_cli rpc` on the same TCP port at the same time.
+RPC writes use the same `writeBase` path as the GUI, so they go out on the bus as Tx. Start the project in the GUI first so devices are open; `Can.Init` then returns the attached controllers. Do not run `ecb_cli rpc` on the same TCP port at the same time.

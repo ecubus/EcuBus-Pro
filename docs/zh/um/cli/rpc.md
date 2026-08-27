@@ -175,8 +175,7 @@ FULL HTH 同时只允许 1 帧在途（否则 `CAN_BUSY`）。BASIC HTH 最多 8
 
 | 来源 | EcuBus 显示 | RPC 客户端看到 |
 | --- | --- | --- |
-| 外部 `Can.Write` / `can.write` | 跟踪里为 **Rx**（`dir: IN`） | 仅 TX 确认（不回显） |
-| EcuBus 发送（脚本、IA、诊断仪） | Tx（`dir: OUT`） | RX 指示 |
+| 外部 `Can.Write` / `can.write` | **Tx**（`dir: OUT`） | TX 确认（不会把本帧当 RX 回显） |
 | 硬件接收 | Rx | RX 指示 |
 
-RPC 写入是作为**接收帧注入**到正在运行的设备，不会作为 EcuBus Tx 发到物理总线。请先在 GUI 里启动工程以打开设备，然后 `Can.Init` 会返回已附着的控制器。不要与 `ecb_cli rpc` 占用同一 TCP 端口。
+RPC 写入走与 GUI 相同的 `writeBase`，会作为 Tx 发到总线。请先在 GUI 里启动工程以打开设备，然后 `Can.Init` 会返回已附着的控制器。不要与 `ecb_cli rpc` 占用同一 TCP 端口。

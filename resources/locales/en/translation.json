@@ -6,7 +6,7 @@
     "uiZoomTooltip": "Adjust the overall UI scaling of the application",
     "themeTooltip": "Choose between light and dark theme",
     "rpcServer": "JSON-RPC",
-    "rpcServerTooltip": "While EcuBus is running, other programs can talk to the live CAN devices over JSON-RPC. Frames those programs write are shown as Rx in the trace. Click Apply after changing host or port.",
+    "rpcServerTooltip": "While EcuBus is running, other programs can talk to the live CAN devices over JSON-RPC. Frames those programs write are shown as Tx. Click Apply after changing host or port.",
     "rpcHost": "RPC host",
     "rpcPort": "RPC port",
     "rpcApply": "Apply RPC"

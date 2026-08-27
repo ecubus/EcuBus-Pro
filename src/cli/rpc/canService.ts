@@ -180,7 +180,6 @@ interface ControllerState {
 
 /** `adapter`: CLI owns hardware. `gateway`: GUI owns devices; both roles transmit with writeBase (TX). */
 export type CanRpcRole = 'adapter' | 'gateway'
-export type CanRpcRole = 'adapter' | 'gateway'
 
 export interface CanRpcServiceOptions {
   projectDevices?: Record<string, UdsDevice>

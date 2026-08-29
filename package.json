@@ -82,7 +82,7 @@
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.0",
     "ajv": "^8.18.0",
     "animate.css": "^4.1.1",
     "async": "^3.2.6",

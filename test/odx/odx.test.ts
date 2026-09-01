@@ -7,6 +7,9 @@ import { tmpdir } from 'os'
 
 const odxParsePy = path.join(__dirname, '../../resources/odx/odxparse.py')
 const pdxFile = path.join(__dirname, 'somersault.pdx')
+// somersault.pdx with one PHYSICAL-DEFAULT-VALUE of an A_BYTEFIELD comparam
+// rewritten as "0x3E80", the way tools other than the reference one write it.
+const bytefieldPdxFile = path.join(__dirname, 'somersault-bytefield-0x.pdx')
 
 async function runOdxCommand(command: string, odxFilePath: string, parseResp = false) {
   const pythonPath = getPythonPath()
@@ -260,5 +263,32 @@ describe('ODX parseTesterInfo - somersault.pdx', () => {
     expect(sessionStop).toBeDefined()
     expect(sessionStop.subfunc.data).toEqual([1])
     expect(sessionStop.params[0].value.data).toEqual([1])
+  })
+})
+
+describe('ODX Parser - byte fields written with a 0x prefix', () => {
+  function serviceNames(result: any) {
+    const names: string[] = []
+    for (const layers of Object.values(result.data as Record<string, any>)) {
+      for (const tester of Object.values(layers as Record<string, any>)) {
+        for (const items of Object.values((tester as any).allServiceList as Record<string, any>)) {
+          for (const item of items as any[]) {
+            names.push(item.name)
+          }
+        }
+      }
+    }
+    return names.sort()
+  }
+
+  test('reads the document the same as one without the prefix', async () => {
+    // A_BYTEFIELD is plain hexBinary, so odxtools takes it two characters at
+    // a time: "0x3E80" makes the first pair "0x" and used to abort the whole
+    // import with `invalid literal for int() with base 16: '0x'` (#422).
+    const prefixed = await runOdxCommand('parseTesterInfo', bytefieldPdxFile, true)
+    const plain = await runOdxCommand('parseTesterInfo', pdxFile, true)
+
+    expect(prefixed.error).toBe(0)
+    expect(serviceNames(prefixed)).toEqual(serviceNames(plain))
   })
 })

@@ -32,6 +32,36 @@ from odxtools.structure import Structure
 import traceback
 
 
+def _patch_bytefield_parsing():
+    """Read the byte fields real ODX files carry, not only conformant ones.
+
+    A_BYTEFIELD is plain hexBinary, so odxtools takes it two characters at a
+    time. That leaves three ways a real file breaks it: a "0x" prefix makes
+    the first pair "0x" and raises `invalid literal for int() with base 16`,
+    which is what aborts the whole import; surrounding whitespace shifts
+    every pair and silently yields the wrong bytes (" 1A2B " read as
+    01 A2 0B); and an odd digit count pads the tail instead of the head,
+    silently multiplying the value by 16. Values reach this from CODED-VALUE,
+    PHYS-CONSTANT-VALUE, PHYSICAL-DEFAULT-VALUE, COMPU-CONST and the limits
+    of a text table, none of which strip their text.
+    """
+    from odxtools import odxtypes
+
+    def bytefield_to_bytearray(bytefield):
+        text = ''.join(str(bytefield or '').split())
+        if text[:2].lower() == '0x':
+            text = text[2:]
+        if len(text) % 2:
+            text = '0' + text
+        return bytearray.fromhex(text)
+
+    odxtypes.bytefield_to_bytearray = bytefield_to_bytearray
+    odxtypes._PARSE_ODX_TYPE['A_BYTEFIELD'] = bytefield_to_bytearray
+
+
+_patch_bytefield_parsing()
+
+
 def _coded_value_to_bytes(coded_value, bit_length):
     """Convert CodedConstParameter.coded_value (int) to bytes. Avoids EncodeState API."""
     if coded_value is None:

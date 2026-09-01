@@ -10,6 +10,15 @@ const pdxFile = path.join(__dirname, 'somersault.pdx')
 // somersault.pdx with one PHYSICAL-DEFAULT-VALUE of an A_BYTEFIELD comparam
 // rewritten as "0x3E80", the way tools other than the reference one write it.
 const bytefieldPdxFile = path.join(__dirname, 'somersault-bytefield-0x.pdx')
+const exampleEcuPdxFile = path.join(__dirname, 'UDS-ExampleEcu-5.2.1.pdx')
+// UDS-ExampleEcu with its six LINEAR conversions relabelled SCALE-LINEAR,
+// which this parser does not model. LINEAR and SCALE-LINEAR carry the same
+// COMPU-SCALES structure, so the document stays valid.
+const scaleLinearPdxFile = path.join(__dirname, 'UDS-ExampleEcu-scale-linear.pdx')
+// UDS-ExampleEcu with one linear conversion scaling an integer-coded value
+// by 0.5, and somersault exported without the comparam files it references.
+const fractionalFactorPdxFile = path.join(__dirname, 'UDS-ExampleEcu-fractional-factor.pdx')
+const noComparamsPdxFile = path.join(__dirname, 'somersault-no-comparams.pdx')
 
 async function runOdxCommand(command: string, odxFilePath: string, parseResp = false) {
   const pythonPath = getPythonPath()
@@ -222,6 +231,16 @@ describe('ODX parseTesterInfo - somersault.pdx', () => {
     expect(reportStatus.respParams.length).toBeGreaterThan(0)
   })
 
+  test('names the services it could not import', () => {
+    // schroedinger has no service identifier in its request, so it cannot be
+    // filed under a SID. It used to vanish from the import with no trace.
+    expect(result.skipped.map((s: any) => [s.service, s.reason])).toEqual([
+      ['schroedinger', 'no service identifier in the request'],
+      ['schroedinger', 'no service identifier in the request'],
+      ['schroedinger', 'no service identifier in the request']
+    ])
+  })
+
   test('each tester has unique id', () => {
     const ids = Object.values(result.data['somersault']).map((t: any) => t.id)
     const uniqueIds = new Set(ids)
@@ -290,5 +309,134 @@ describe('ODX Parser - byte fields written with a 0x prefix', () => {
 
     expect(prefixed.error).toBe(0)
     expect(serviceNames(prefixed)).toEqual(serviceNames(plain))
+  })
+})
+
+describe('ODX Parser - UDS-ExampleEcu-5.2.1.pdx', () => {
+  let result: any
+
+  beforeAll(async () => {
+    result = await runOdxCommand('parseTesterInfo', exampleEcuPdxFile, true)
+    expect(result.error).toBe(0)
+  })
+
+  test('reports nothing skipped for a document it fully understands', () => {
+    expect(result.skipped).toEqual([])
+  })
+
+  test('imports every service the document declares', () => {
+    // Services used to disappear one by one, silently: the limits of a
+    // linear conversion moved onto the compu method's segment in odxtools,
+    // and encoding a single parameter outside its PDU context makes the
+    // encoder refuse documents it has every right to refuse. Neither says
+    // anything about whether the service can be imported.
+    for (const tester of Object.values(result.data.Door) as any[]) {
+      const services = Object.values(tester.allServiceList).flat()
+      expect(services.length).toBe(86)
+    }
+  })
+
+  test('a structure is as wide as its members say', () => {
+    // Codingstring_STRUCTURE declares BYTE-SIZE 2 and its members cover two
+    // bytes, but the encoder appends a third; the member layout wins.
+    const service = (result.data.Door.Door.allServiceList['0x2E'] as any[]).find(
+      (s) => s.name === 'Variant Coding Write'
+    )
+    const codingstring = service.params.find((p: any) => p.name === 'Codingstring')
+
+    expect(codingstring.bitLen).toBe(16)
+    expect(codingstring.value.data).toEqual([0x94, 0x21])
+    expect(codingstring.meta.subParams.map((p: any) => [p.name, p.bitLen])).toEqual([
+      ['CountryType', 4],
+      ['VehicleType', 4],
+      ['VehicleSpeedToLockDoor', 7],
+      ['WindowLift_Support', 1]
+    ])
+  })
+})
+
+describe('ODX Parser - a conversion the parser does not model', () => {
+  test('keeps the parameter on its coded type instead of losing the service', async () => {
+    // Sixteen services per variant used to disappear over this: the physical
+    // reading of a value is not what decides whether a service is importable.
+    const result = await runOdxCommand('parseTesterInfo', scaleLinearPdxFile, true)
+
+    expect(result.error).toBe(0)
+    expect(result.skipped).toEqual([])
+    for (const tester of Object.values(result.data.Door) as any[]) {
+      expect(Object.values(tester.allServiceList).flat().length).toBe(86)
+    }
+
+    const session = (result.data.Door.Door.allServiceList['0x10'] as any[]).find(
+      (s) => s.name === 'Default Session Start'
+    )
+    const p2Ex = session.respParams.find((p: any) => p.name === 'P2Ex')
+    expect(p2Ex.meta.cm).toBe('ScaleLinearCompuMethod')
+    expect(p2Ex.type).toBe('NUM')
+    expect(p2Ex.bitLen).toBe(16)
+  })
+})
+
+describe('ODX Parser - documents as tools in the field write them', () => {
+  test('reads a conversion that scales an integer-coded value by a fraction', async () => {
+    // COMPU-RATIONAL-COEFFS holds real numbers, but odxtools parses them
+    // with the value's own (here integer) type, so the whole file failed
+    // with "Expected an integer value, got 0.5".
+    const result = await runOdxCommand('parseTesterInfo', fractionalFactorPdxFile, true)
+
+    expect(result.error).toBe(0)
+    expect(result.notes ?? []).toEqual([])
+    for (const tester of Object.values(result.data.Door) as any[]) {
+      expect(Object.values(tester.allServiceList).flat().length).toBe(86)
+    }
+  })
+
+  test('reads a PDX exported without its comparam files', async () => {
+    // The ISO comparam subsets are commonly treated as standard and left out
+    // of the archive, which used to make the file unreadable outright.
+    const result = await runOdxCommand('parseTesterInfo', noComparamsPdxFile, true)
+
+    expect(result.error).toBe(0)
+    const services = Object.values(result.data.somersault as Record<string, any>).flatMap((t) =>
+      Object.values(t.allServiceList).flat()
+    )
+    expect(services.length).toBe(20)
+    // The services are all there; what the comparams would have supplied is
+    // not, and the user is told so rather than left guessing.
+    expect(result.notes.length).toBe(1)
+    expect(result.notes[0]).toContain('definitions it does not carry')
+  })
+})
+
+describe('ODX Parser - CAN identifiers come from the document', () => {
+  test('reads the identifier table rather than the ISO defaults', async () => {
+    // ODX keeps the physical request and response identifiers in the
+    // CP_UniqueRespIdTable complex parameter. Reading only the comparam
+    // subset defaults gave every document 0x700/0x701, which is nobody's ECU.
+    const result = await runOdxCommand('parseTesterInfo', exampleEcuPdxFile, true)
+    const tester = result.data.Door.Door
+
+    const [physical, functional] = tester.address
+    expect(physical.canAddr.canIdTx).toBe('0x701')
+    expect(physical.canAddr.canIdRx).toBe('0x601')
+    // CP_CanFuncReqId = 1872
+    expect(functional.canAddr.canIdTx).toBe('0x750')
+    // CP_StMin is stated in microseconds
+    expect(physical.canAddr.stMin).toBe(20)
+    // CP_CanFillerByteHandling = Enabled
+    expect(physical.canAddr.padding).toBe(true)
+  })
+
+  test('a 29-bit document keeps its extended identifiers', async () => {
+    // somersault states 123/456 in its table, an 11-bit pair.
+    const result = await runOdxCommand('parseTesterInfo', pdxFile, true)
+    const tester = result.data.somersault.somersault_base_variant
+
+    expect(tester.address[0].canAddr.canIdTx).toBe('0x7b')
+    expect(tester.address[0].canAddr.canIdRx).toBe('0x1c8')
+    expect(tester.address[0].canAddr.idType).toBe('STANDARD')
+    // The filler byte comes from CP_CanFillerByte, here the subset default,
+    // rather than from a hard-coded 0x00.
+    expect(tester.address[0].canAddr.paddingValue).toBe('0x55')
   })
 })

@@ -32,6 +32,170 @@ from odxtools.structure import Structure
 import traceback
 
 
+def _patch_bytefield_parsing():
+    """Read the byte fields real ODX files carry, not only conformant ones.
+
+    A_BYTEFIELD is plain hexBinary, so odxtools takes it two characters at a
+    time. That leaves three ways a real file breaks it: a "0x" prefix makes
+    the first pair "0x" and raises `invalid literal for int() with base 16`,
+    which is what aborts the whole import; surrounding whitespace shifts
+    every pair and silently yields the wrong bytes (" 1A2B " read as
+    01 A2 0B); and an odd digit count pads the tail instead of the head,
+    silently multiplying the value by 16. Values reach this from CODED-VALUE,
+    PHYS-CONSTANT-VALUE, PHYSICAL-DEFAULT-VALUE, COMPU-CONST and the limits
+    of a text table, none of which strip their text.
+    """
+    from odxtools import odxtypes
+
+    def bytefield_to_bytearray(bytefield):
+        text = ''.join(str(bytefield or '').split())
+        if text[:2].lower() == '0x':
+            text = text[2:]
+        if len(text) % 2:
+            text = '0' + text
+        return bytearray.fromhex(text)
+
+    odxtypes.bytefield_to_bytearray = bytefield_to_bytearray
+    odxtypes._PARSE_ODX_TYPE['A_BYTEFIELD'] = bytefield_to_bytearray
+
+
+_patch_bytefield_parsing()
+
+
+def _patch_rational_coefficient_parsing():
+    """Read a fractional scaling factor on an integer-coded value.
+
+    COMPU-RATIONAL-COEFFS holds real numbers -- a factor of 0.5 on a value
+    coded as an integer is ordinary -- but odxtools parses the coefficients
+    with the *internal* data type, which describes the coded value rather
+    than the conversion. Such a document fails to load outright with
+    "Expected an integer value, got 0.5".
+    """
+    from odxtools.compumethods.compurationalcoeffs import CompuRationalCoeffs
+    from odxtools.exceptions import odxrequire
+    from odxtools.odxtypes import DataType
+
+    integer_types = (DataType.A_UINT32, DataType.A_INT32)
+
+    def coeffs_from_et(et_element, context, *, value_type):
+        def coefficient(text):
+            number = float(text)
+            # A whole coefficient keeps the type the document asked for.
+            if value_type in integer_types and number.is_integer():
+                return int(number)
+            return number
+
+        return CompuRationalCoeffs(
+            value_type=value_type,
+            numerators=[coefficient(odxrequire(elem.text))
+                        for elem in et_element.iterfind('COMPU-NUMERATOR/V')],
+            denominators=[coefficient(odxrequire(elem.text))
+                          for elem in et_element.iterfind('COMPU-DENOMINATOR/V')],
+        )
+
+    CompuRationalCoeffs.coeffs_from_et = staticmethod(coeffs_from_et)
+
+
+_patch_rational_coefficient_parsing()
+
+
+def _load_document(file_path):
+    """Load an ODX/PDX document, tolerating an incomplete archive.
+
+    A PDX exported without the communication parameter files it references
+    -- the ISO comparam subsets are commonly treated as standard and left
+    out of the archive -- cannot be resolved strictly. Rather than refuse
+    the file, read it again with references allowed to stay unresolved:
+    every service is still there, only the addressing and timing the
+    comparams would have supplied are not. The caller is told, so the user
+    is not left wondering why the CAN identifiers look nothing like theirs.
+    """
+    try:
+        return odxtools.load_file(file_path), []
+    except Exception as strict_error:
+        import odxtools.exceptions as odx_exceptions
+        from odxtools.diaglayers.protocolraw import ProtocolRaw
+
+        resolve_snrefs = ProtocolRaw._resolve_snrefs
+
+        def resolve_without_comparams(self, context):
+            if getattr(self, '_comparam_spec', None) is not None:
+                return resolve_snrefs(self, context)
+            # The protocol names a comparam spec the archive does not carry.
+            super(ProtocolRaw, self)._resolve_snrefs(context)
+            self._prot_stack = None
+            for parent_ref in self.parent_refs:
+                parent_ref._resolve_snrefs(context)
+
+        odx_exceptions.strict_mode = False
+        ProtocolRaw._resolve_snrefs = resolve_without_comparams
+        try:
+            db = odxtools.load_file(file_path)
+        except Exception:
+            raise strict_error
+        finally:
+            odx_exceptions.strict_mode = True
+            ProtocolRaw._resolve_snrefs = resolve_snrefs
+
+        print(f'odxparse: strict load failed, read leniently: {strict_error}',
+              file=sys.stderr)
+        return db, [
+            'This file references communication parameter definitions it does '
+            'not carry, so it was read without them. The values the file '
+            'states are used as they are; a parameter the file leaves to a '
+            'standard default is unknown and falls back to an EcuBus default.'
+        ]
+
+
+def _zeros(bit_length):
+    return bytes(max(1, math.ceil((bit_length or 8) / 8)))
+
+
+def _encode_or_zeros(encode, bit_length):
+    """The bytes a parameter starts out with, or zeros of the right width.
+
+    Encoding one parameter on its own is only a way to obtain a starting
+    value for the editor: nothing downstream needs it to be the byte string
+    the ECU would see. So a document the encoder refuses -- a MIN-MAX-LENGTH
+    field that is not last in this fragment, a DTC default that is not in the
+    DTC list -- has to cost that one value, not the whole service.
+    """
+    try:
+        return encode()
+    except Exception as e:
+        print(f'odxparse: starting value unavailable ({e}), using zeros', file=sys.stderr)
+        return _zeros(bit_length)
+
+
+def _fit_bytes(value, bit_length):
+    """`value` as exactly the width the parameter layout says it is."""
+    expected = max(0, math.ceil((bit_length or 0) / 8))
+    if expected == 0 or len(value) == expected:
+        return value
+    if len(value) > expected:
+        return value[:expected]
+    return value + bytes(expected - len(value))
+
+
+def _is_number(text):
+    try:
+        float(text)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def _linear_limits(compu_method):
+    """The physical limits of a linear conversion.
+
+    odxtools moved them onto the method's segment; older releases carried
+    them on the method itself.
+    """
+    holder = getattr(compu_method, 'segment', compu_method)
+    return (getattr(holder, 'physical_lower_limit', None),
+            getattr(holder, 'physical_upper_limit', None))
+
+
 def _coded_value_to_bytes(coded_value, bit_length):
     """Convert CodedConstParameter.coded_value (int) to bytes. Avoids EncodeState API."""
     if coded_value is None:
@@ -197,6 +361,11 @@ class OdxParse:
     def __init__(self):
         self.serviceDict = dict()
         self.paramDict = dict()
+        # Services this document declares that could not be built, and any
+        # note about how the document itself had to be read. A caller showing
+        # "imported" without these would be lying to the user.
+        self.skipped = []
+        self.notes = []
 
     def bytes_to_hex(self, b):
         return ' '.join(f'{byte:02x}' for byte in b)
@@ -298,8 +467,7 @@ class OdxParse:
                     elif isinstance(dop.compu_method, IdenticalCompuMethod):
                         pass
                     elif isinstance(dop.compu_method, LinearCompuMethod):
-                        ll = dop.compu_method.physical_lower_limit
-                        ul = dop.compu_method.physical_upper_limit
+                        ll, ul = _linear_limits(dop.compu_method)
                         if ll is not None:
                             meta['min'] = ll.value
                         if ul is not None:
@@ -311,10 +479,15 @@ class OdxParse:
                         else:
                             val = 0
                     else:
-                        raise Exception('Not implemented compu method {}'.format(
-                            param.dop.compu_method.__class__.__name__))
+                        # A conversion this parser does not model still has a
+                        # coded type, which is what the editor works on; only
+                        # the physical reading of the value is lost.
+                        meta['cm'] = dop.compu_method.__class__.__name__
 
-            defBytesVal = _encode_param_to_bytes(param, defVal if defVal else val, is_end_of_pdu=endOfPdu)
+            defBytesVal = _encode_or_zeros(
+                lambda: _encode_param_to_bytes(
+                    param, defVal if defVal else val, is_end_of_pdu=endOfPdu),
+                bitLen)
 
             return {
                 'name': param.short_name,
@@ -347,7 +520,6 @@ class OdxParse:
             for item in pr:
                 allValue[item['name']] = item['phyValue']
 
-            bytesVal = _encode_dop_to_bytes(dop, allValue, is_end_of_pdu=endOfPdu)
             meta = {
                 'byteSIze': dop.byte_size,
                 'subParams': pr,
@@ -362,8 +534,15 @@ class OdxParse:
                     maxBytePos = p['bytePos']
                     allBitLen = math.ceil((p['bytePos'] * 8 + p['bitLen']) / 8) * 8
 
-            if len(bytesVal) * 8 != allBitLen:
-                raise Exception('bitLen not match {} {}'.format(allBitLen, len(bytesVal) * 8))
+            bytesVal = _encode_or_zeros(
+                lambda: _encode_dop_to_bytes(dop, allValue, is_end_of_pdu=endOfPdu),
+                allBitLen)
+            # The member layout, and BYTE-SIZE where the document gives one,
+            # is what says how wide the structure is; the encoder can append
+            # a byte the structure does not have. An end-of-PDU structure has
+            # no fixed width to hold it to.
+            if not endOfPdu:
+                bytesVal = _fit_bytes(bytesVal, allBitLen)
             return {
                 'name': param.short_name,
                 'longName': param.long_name,
@@ -403,8 +582,7 @@ class OdxParse:
             elif isinstance(cm, IdenticalCompuMethod):
                 pass
             elif isinstance(cm, LinearCompuMethod):
-                ll = cm.physical_lower_limit
-                ul = cm.physical_upper_limit
+                ll, ul = _linear_limits(cm)
                 if ll is not None:
                     meta['min'] = ll.value
                 if ul is not None:
@@ -416,9 +594,10 @@ class OdxParse:
                 else:
                     val = 0
             else:
-                raise Exception('Not implemented compu method {}'.format(
-                    param.dop.compu_method.__class__.__name__))
-            defBytesVal = _encode_param_to_bytes(param, defVal if defVal else val)
+                meta['cm'] = cm.__class__.__name__
+            defBytesVal = _encode_or_zeros(
+                lambda: _encode_param_to_bytes(param, defVal if defVal else val),
+                coded.bit_length)
             dtcs = dop.dtcs
             meta['dtcs'] = []
             for dtc in dtcs:
@@ -477,7 +656,7 @@ class OdxParse:
                 'dopType': dop.__class__.__name__,
                 'cases': cases,
             }
-            val = _encode_dop_to_bytes(dop, dictVal)
+            val = _encode_or_zeros(lambda: _encode_dop_to_bytes(dop, dictVal), None)
             return {
                 'name': param.short_name,
                 'longName': param.long_name,
@@ -525,7 +704,7 @@ class OdxParse:
             ret['meta'].update(meta)
             return ret
         elif isinstance(param, ReservedParameter):
-            val = _encode_param_to_bytes(param)
+            val = _encode_or_zeros(lambda: _encode_param_to_bytes(param), param.bit_length)
             meta = {
                 'type': param.parameter_type
             }
@@ -691,6 +870,11 @@ class OdxParse:
                     params.append(param)
 
                 if not sid_hex:
+                    self.skipped.append({
+                        'service': service.short_name,
+                        'layer': dl.short_name,
+                        'reason': 'no service identifier in the request',
+                    })
                     continue
 
                 reqItem['serviceId'] = sid_hex
@@ -733,6 +917,11 @@ class OdxParse:
                 services[reqItem['serviceId']].append(reqItem)
             except Exception as e:
                 traceback.print_exc()
+                self.skipped.append({
+                    'service': service.short_name,
+                    'layer': dl.short_name,
+                    'reason': str(e),
+                })
                 continue
 
         return services
@@ -750,6 +939,121 @@ class OdxParse:
         except Exception:
             pass
         return params
+
+    def _comparamRefs(self, dl):
+        """Every COMPARAM-REF that applies to a diag layer, least specific first.
+
+        Read off the raw layers rather than `dl.comparam_refs`, which drops a
+        reference whose definition is missing -- exactly what happens when an
+        archive does not carry the ISO comparam subsets.
+        """
+        refs = []
+        seen = set()
+
+        def walk(layer):
+            if layer is None or id(layer) in seen:
+                return
+            seen.add(id(layer))
+            for parent_ref in getattr(layer, 'parent_refs', []) or []:
+                walk(getattr(parent_ref, 'layer', None))
+            raw = getattr(layer, 'hierarchy_element_raw', None) or getattr(
+                layer, 'diag_layer_raw', None)
+            refs.extend(getattr(raw, 'comparam_refs', []) or [])
+
+        walk(dl)
+        return refs
+
+    @staticmethod
+    def _comparamName(ref):
+        """A COMPARAM-REF's parameter name, from the reference itself.
+
+        `ref.short_name` needs the definition, which an incomplete archive
+        does not have; the reference always carries "<subset>.<parameter>".
+        """
+        ref_id = getattr(getattr(ref, 'spec_ref', None), 'ref_id', '') or ''
+        return ref_id.rsplit('.', 1)[-1]
+
+    def _canProtocolRefs(self, dl):
+        """The COMPARAM-REFs of the one protocol this tester speaks.
+
+        A document may describe the same ECU over several protocols, and the
+        same parameter then appears once per protocol -- with different units
+        in practice. Mixing them produces timings that belong to no protocol
+        at all, so keep the refs of whichever protocol carries the CAN
+        identifiers, plus those that name no protocol.
+        """
+        refs = self._comparamRefs(dl)
+        protocols = [
+            getattr(ref, 'protocol_snref', None) for ref in refs
+            if self._comparamName(ref) in ('CP_UniqueRespIdTable', 'CP_CanPhysReqId')
+        ]
+        protocol = next((name for name in protocols if name), None)
+        if protocol is None:
+            return refs
+        return [
+            ref for ref in refs
+            if getattr(ref, 'protocol_snref', None) in (None, protocol)
+        ]
+
+    def _layerComparams(self, dl):
+        """The communication parameters that apply to a diag layer.
+
+        The values the document sets take precedence over the defaults of the
+        comparam subsets -- the whole point of a COMPARAM-REF -- and the CAN
+        identifiers are folded in from CP_UniqueRespIdTable, which is where
+        ODX keeps them.
+        """
+        params = dict(self._extractComParamDefaults())
+        refs = self._canProtocolRefs(dl)
+        for ref in refs:
+            value = getattr(ref, 'value', None)
+            if isinstance(value, str):
+                params[self._comparamName(ref)] = value
+
+        # Parent layers are walked first, so a later row is the more specific.
+        for row in self._canIdTable(refs):
+            params.update(row)
+        return params
+
+    def _canIdTable(self, refs):
+        """The CAN identifiers a layer uses, from CP_UniqueRespIdTable.
+
+        ODX keeps the physical request and response identifiers in this
+        complex parameter, one row per ECU layer, each row listing three
+        groups: physical request, USDT response, UUDT response. Documents
+        order the fields within a group differently, so the addressing format
+        -- the only element that says what it is -- anchors the reading: the
+        identifier follows it, and the group's other number is the extended
+        address.
+        """
+        rows = []
+        for ref in refs:
+            if self._comparamName(ref) != 'CP_UniqueRespIdTable':
+                continue
+            value = getattr(ref, 'value', None)
+            if value is None or isinstance(value, str):
+                continue
+            values = [v for v in value if isinstance(v, str)]
+            groups = [
+                index for index, item in enumerate(values[:-1])
+                if not _is_number(item) and _is_number(values[index + 1])
+            ]
+            row = {}
+            for group, (identifier, ext_addr) in enumerate(
+                    zip(('CP_CanPhysReqId', 'CP_CanRespUSDTId', 'CP_CanRespUUDTId'),
+                        ('CP_CanPhysReqExtAddr', 'CP_CanRespUSDTExtAddr',
+                         'CP_CanRespUUDTExtAddr'))):
+                if group >= len(groups):
+                    break
+                index = groups[group]
+                row[identifier] = values[index + 1]
+                if index > 0 and _is_number(values[index - 1]):
+                    row[ext_addr] = values[index - 1]
+                elif index + 2 < len(values) and _is_number(values[index + 2]):
+                    row[ext_addr] = values[index + 2]
+            if row:
+                rows.append(row)
+        return rows
 
     def _buildUdsTime(self, comparams):
         """Build UdsInfo timing from communication parameters.
@@ -834,7 +1138,9 @@ class OdxParse:
         for name in ['CP_StMin']:
             if name in comparams:
                 try:
-                    st_min = int(float(comparams[name]))
+                    # ISO 15765-2 states CP_StMin in microseconds
+                    # (SCALE_LINEAR_UINT8_INT32_MicroSecond_StMin).
+                    st_min = int(float(comparams[name]) / 1000)
                 except (ValueError, TypeError):
                     pass
                 break
@@ -862,6 +1168,28 @@ class OdxParse:
 
         addresses = []
 
+        padding = True
+        if comparams.get('CP_CanFillerByteHandling') is not None:
+            handling = str(comparams['CP_CanFillerByteHandling'])
+            if _is_number(handling):
+                padding = float(handling) != 0
+            else:
+                padding = 'disable' not in handling.lower()
+
+        padding_value = '0x0'
+        if comparams.get('CP_CanFillerByte') is not None:
+            try:
+                padding_value = hex(int(float(comparams['CP_CanFillerByte'])))
+            except (ValueError, TypeError):
+                pass
+
+        ext_addr = '0'
+        if comparams.get('CP_CanPhysReqExtAddr'):
+            try:
+                ext_addr = str(int(float(comparams['CP_CanPhysReqExtAddr'])))
+            except (ValueError, TypeError):
+                pass
+
         tx_id = hex(can_phys_req) if can_phys_req is not None else '0x700'
         rx_id = hex(can_resp) if can_resp is not None else '0x701'
         is_extended = (can_phys_req is not None and can_phys_req > 0x7FF) or \
@@ -875,7 +1203,7 @@ class OdxParse:
                 'addrType': 'PHYSICAL',
                 'SA': '0',
                 'TA': '0',
-                'AE': '0',
+                'AE': ext_addr,
                 'canIdTx': tx_id,
                 'canIdRx': rx_id,
                 'nAs': n_as,
@@ -886,8 +1214,8 @@ class OdxParse:
                 'bs': bs,
                 'maxWTF': 0,
                 'dlc': 8,
-                'padding': True,
-                'paddingValue': '0x00',
+                'padding': padding,
+                'paddingValue': padding_value,
                 'idType': 'EXTENDED' if is_extended else 'STANDARD',
                 'brs': False,
                 'canfd': False,
@@ -916,8 +1244,8 @@ class OdxParse:
                     'bs': bs,
                     'maxWTF': 0,
                     'dlc': 8,
-                    'padding': True,
-                    'paddingValue': '0x00',
+                    'padding': padding,
+                    'paddingValue': padding_value,
                     'idType': 'EXTENDED' if can_func_req > 0x7FF else 'STANDARD',
                     'brs': False,
                     'canfd': False,
@@ -933,7 +1261,7 @@ class OdxParse:
         self.serviceDict = dict()
         self.paramDict = dict()
         try:
-            self.db = odxtools.load_file(filePath)
+            self.db, self.notes = _load_document(filePath)
             ecu = self.db.diag_layer_containers
             ecu_dict = {}
             for i in range(len(ecu)):
@@ -949,6 +1277,8 @@ class OdxParse:
             return {
                 'error': 0,
                 'data': self.convert_complex_object(ecu_dict),
+                'skipped': self.skipped,
+                'notes': self.notes,
             }
         except Exception as e:
             traceback.print_exception(e)
@@ -973,11 +1303,7 @@ class OdxParse:
         self.serviceDict = dict()
         self.paramDict = dict()
         try:
-            self.db = odxtools.load_file(filePath)
-
-            comparams = self._extractComParamDefaults()
-            uds_time = self._buildUdsTime(comparams)
-            addresses = self._buildDefaultCanAddr(comparams)
+            self.db, self.notes = _load_document(filePath)
 
             ecu = self.db.diag_layer_containers
             result = {}
@@ -991,6 +1317,12 @@ class OdxParse:
                         continue
 
                     services = self._parseServiceList(dl, parseResp)
+                    # Communication parameters are per layer: a variant may
+                    # set its own, and the CAN identifiers come from the
+                    # table entry that names it.
+                    comparams = self._layerComparams(dl)
+                    uds_time = self._buildUdsTime(comparams)
+                    addresses = self._buildDefaultCanAddr(comparams)
 
                     tester_info = {
                         'id': str(uuid.uuid4()),
@@ -1007,6 +1339,8 @@ class OdxParse:
             return {
                 'error': 0,
                 'data': self.convert_complex_object(result),
+                'skipped': self.skipped,
+                'notes': self.notes,
             }
         except Exception as e:
             traceback.print_exception(e)

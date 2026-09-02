@@ -483,6 +483,31 @@ async function importFromOdx() {
       return
     }
 
+    // A service the parser could not build is simply absent from the import
+    // list, and nothing else would tell the user it was in the file.
+    if (result.skipped?.length) {
+      ElMessage({
+        message: `${result.skipped.length} service(s) could not be imported: ${result.skipped
+          .map((s: { service: string }) => s.service)
+          .join(', ')}`,
+        type: 'warning',
+        duration: 8000,
+        appendTo: `#win${winKey}`
+      })
+    }
+
+    // How the document itself had to be read, when that changes what the
+    // imported tester contains.
+    for (const note of result.notes ?? []) {
+      ElMessage({
+        message: note,
+        type: 'warning',
+        duration: 10000,
+        showClose: true,
+        appendTo: `#win${winKey}`
+      })
+    }
+
     const items: ImportItem[] = []
     for (const [containerName, layers] of Object.entries(result.data as Record<string, any>)) {
       for (const [layerName, tester] of Object.entries(layers as Record<string, any>)) {

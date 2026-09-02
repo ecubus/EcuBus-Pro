@@ -614,7 +614,7 @@
         },
         "dialogs": {
           "syncNodeProtocolTitle": "Sync Node Protocol",
-          "syncNodeProtocol": "A global LIN version change was detected. Sync all node Protocol values to {{version}}? Choose Yes to sync now, or No to change only the global version."
+          "syncNodeProtocol": "Sync all node Protocol values to {{version}}?"
         }
       },
       "index": {

@@ -103,6 +103,7 @@ import { useDataStore } from '@r/stores/data'
 import { Layout } from '@r/views/uds/layout'
 import { VxeGrid, VxeGridProps } from 'vxe-table'
 import i18next from 'i18next'
+import { getNodeProtocolSyncDecision, syncAllNodeProtocols } from './syncNodeProtocol'
 
 // import { validateLDF } from './validator'
 
@@ -115,6 +116,41 @@ const props = defineProps<{
 }>()
 
 const database = useDataStore()
+
+watch(
+  () => ldfObj.value.global.LIN_protocol_version,
+  async (newVersion, oldVersion) => {
+    if (!newVersion || newVersion === oldVersion) {
+      return
+    }
+
+    const decision = getNodeProtocolSyncDecision(ldfObj.value, newVersion, oldVersion)
+    if (decision === 'none') {
+      return
+    }
+
+    if (decision === 'confirm') {
+      try {
+        await ElMessageBox.confirm(
+          i18next.t('database.ldf.general.dialogs.syncNodeProtocol', { version: newVersion }),
+          i18next.t('database.ldf.general.dialogs.syncNodeProtocolTitle'),
+          {
+            confirmButtonText: i18next.t('database.ldf.general.buttons.yes'),
+            cancelButtonText: i18next.t('database.ldf.general.buttons.no'),
+            distinguishCancelAndClose: true,
+            type: 'warning',
+            buttonSize: 'small',
+            appendTo: `#win${props.editIndex}`
+          }
+        )
+      } catch {
+        return
+      }
+    }
+
+    syncAllNodeProtocols(ldfObj.value, newVersion)
+  }
+)
 
 async function validate() {
   return new Promise((resolve, reject) => {

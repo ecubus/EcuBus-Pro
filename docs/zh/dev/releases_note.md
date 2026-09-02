@@ -4,8 +4,8 @@
 
 自 v0.8.65 以来的变化：
 
-- [feat]: 新增 `ecb_cli rpc` JSON-RPC 2.0 服务，供 PC 版 MCAL-CAN（C）驱动使用
-- [feat]: 图形界面 JSON-RPC 网关 — EcuBus 运行时，外部 `Can.Write` 作为 Tx 发送
+- [功能]：为 PC MCAL-CAN（C）驱动程序添加 `ecb_cli rpc` JSON-RPC 2.0 服务器
+- [功能]：GUI JSON-RPC 网关 — 外部 `Can.Write` 作为 Tx 传输至实时设备
 - [opt]: 网络中的可选串口
 - 修复设备处理和 CANLE 帧定义一致性，由 @zhangjiance 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/383
 - 增强原始数据编辑器，增加自动聚焦、工具提示和上下文菜单，由 @zhangjiance 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/386

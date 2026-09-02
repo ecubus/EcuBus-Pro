@@ -89,9 +89,9 @@ ecb_cli test <project> <name> [options]
 
 ![alt text](../../../media/um/cli/test.gif)
 
-### JSON-RPC 命令（PC 版 MCAL-CAN）
+### JSON-RPC 命令（PC MCAL-CAN）
 
-启动 JSON-RPC 2.0 服务，让 PC 上的 AUTOSAR MCAL CAN 驱动（C）可以通过 EcuBus-Pro 操作 CAN 硬件。
+启动一个 JSON-RPC 2.0 服务器，以便 PC AUTOSAR MCAL CAN 驱动程序（C）能够与 EcuBus-Pro CAN 硬件通信。
 
 ```bash
 ecb_cli rpc -h
@@ -99,6 +99,6 @@ ecb_cli rpc
 ecb_cli rpc ./project.ecb --auto-init
 ```
 
-报文格式、AUTOSAR `Can_*` 映射、通知以及 C 示例见 [JSON-RPC（PC 版 MCAL-CAN）](./rpc.md)。
+有关线路格式、AUTOSAR `Can_*` 映射、通知和 C 示例，请参阅 [JSON-RPC (PC MCAL-CAN)](./rpc.md)。
 
-图形界面运行时也会提供同一服务（主页 → 设置 → 常规）。该模式下 RPC 写入会作为 Tx 发到已打开的设备，详见协议文档中的 GUI 网关一节。
+同一服务器也在 **GUI** 中运行（主页 → 设置 → 常规）。 RPC 写入通过实时设备的 Tx 传输；请参阅协议文档中的 GUI 网关部分。

@@ -66,7 +66,7 @@
           "link": "cli/build.md"
         },
         {
-          "text": "JSON-RPC（MCAL-CAN）",
+          "text": "JSON-RPC (MCAL-CAN)",
           "link": "cli/rpc.md"
         }
       ]
@@ -206,7 +206,7 @@
           "link": "can_timer/readme.md"
         },
         {
-          "text": "NXP UDS Bootloader",
+          "text": "NXP UDS 引导加载程序",
           "link": "nxp_bootloader/readme.md"
         }
       ],

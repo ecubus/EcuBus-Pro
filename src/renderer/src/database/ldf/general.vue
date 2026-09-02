@@ -140,7 +140,7 @@ watch(
             distinguishCancelAndClose: true,
             type: 'warning',
             buttonSize: 'small',
-            appendTo: `#win${props.editIndex}`
+            appendTo: document.body
           }
         )
       } catch {

@@ -12,6 +12,7 @@ import {
 } from '../../share/can'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
+import { resolveVkgsUsbPath } from './devicePath'
 import { VkgsUsbApi, VkgsUsbCapabilities, VkgsUsbDeviceInfo } from './protocol'
 import { NativeTransportError, VkgsUsbTransport } from './transport'
 import { normalizeVkgsData, VkgsUsbEvent, VkgsUsbFrame, VkgsWireDecoder } from './wire'
@@ -156,7 +157,9 @@ export class VKGS_USB_CAN extends CanBase {
     super()
     this.info = cloneDeep(info)
     this.log = new CanLOG('VKGS_USB', info.name, info.id, this.event)
-    const { path, channel } = splitHandle(info.handle)
+    const { path: storedPath, channel } = splitHandle(info.handle)
+    const path = resolveVkgsUsbPath(storedPath, channel, () => VkgsUsbTransport.listDevices())
+    this.info.handle = `${path}|${channel}`
     this.transport = VkgsUsbTransport.open(
       path,
       (data) => this.receive(data),

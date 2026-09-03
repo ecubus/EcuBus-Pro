@@ -12,6 +12,7 @@ import {
 } from '../../share/can'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
+import { resolveVcanUsbPath } from './devicePath'
 import { VcanUsbApi, VcanUsbCapabilities, VcanUsbDeviceInfo } from './protocol'
 import { NativeTransportError, VcanUsbTransport } from './transport'
 import { normalizeVcanData, VcanUsbEvent, VcanUsbFrame, VcanWireDecoder } from './wire'
@@ -156,7 +157,9 @@ export class VCAN_USB_CAN extends CanBase {
     super()
     this.info = cloneDeep(info)
     this.log = new CanLOG('VCAN_USB', info.name, info.id, this.event)
-    const { path, channel } = splitHandle(info.handle)
+    const { path: storedPath, channel } = splitHandle(info.handle)
+    const path = resolveVcanUsbPath(storedPath, channel, () => VcanUsbTransport.listDevices())
+    this.info.handle = `${path}|${channel}`
     this.transport = VcanUsbTransport.open(
       path,
       (data) => this.receive(data),

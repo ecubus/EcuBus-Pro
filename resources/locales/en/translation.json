@@ -607,6 +607,14 @@
         },
         "tabs": {
           "general": "General"
+        },
+        "buttons": {
+          "yes": "Yes",
+          "no": "No"
+        },
+        "dialogs": {
+          "syncNodeProtocolTitle": "Sync Node Protocol",
+          "syncNodeProtocol": "Sync all node Protocol values to {{version}}?"
         }
       },
       "index": {

@@ -461,7 +461,7 @@ function addNewSlaveNode() {
     .then(({ value }) => {
       ldfObj.value.node.salveNode.push(value)
       ldfObj.value.nodeAttrs[value] = {
-        LIN_protocol: '',
+        LIN_protocol: ldfObj.value.global.LIN_protocol_version || '',
         configured_NAD: 0,
         initial_NAD: 0,
         supplier_id: 0,

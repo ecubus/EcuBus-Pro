@@ -83,7 +83,9 @@ const VENDORS: CanVendor[] = [
   'vector',
   'slcan',
   'ecubus',
-  'candle'
+  'candle',
+  'vcan_usb',
+  'vkgs_usb'
 ]
 
 function loadNativeCan(): typeof import('src/main/docan/can') {

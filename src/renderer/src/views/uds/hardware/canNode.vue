@@ -80,6 +80,28 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-else-if="props.vendor == 'vcan_usb' && getSelectedUsbCanDevice()?.extra?.usbCan?.Res"
+      :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
+      prop="vcanUsbRes"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
+    >
+      <el-select v-model="data.vcanUsbRes" :loading="deviceLoading" style="width: 300px">
+        <el-option :label="i18next.t('uds.hardware.canNode.options.enable')" :value="true" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.disable')" :value="false" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-else-if="props.vendor == 'vkgs_usb' && getSelectedUsbCanDevice()?.extra?.usbCan?.Res"
+      :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
+      prop="vkgsUsbRes"
+      :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
+    >
+      <el-select v-model="data.vkgsUsbRes" :loading="deviceLoading" style="width: 300px">
+        <el-option :label="i18next.t('uds.hardware.canNode.options.enable')" :value="true" />
+        <el-option :label="i18next.t('uds.hardware.canNode.options.disable')" :value="false" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
       v-else-if="props.vendor == 'zlg'"
       :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="zlgRes"
@@ -91,7 +113,9 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-else-if="props.vendor == 'kvaser'"
+      v-else-if="
+        props.vendor == 'kvaser' || props.vendor == 'vcan_usb' || props.vendor == 'vkgs_usb'
+      "
       :label="i18next.t('uds.hardware.canNode.labels.silentMode')"
       prop="silent"
       :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
@@ -710,6 +734,19 @@ const configInfo: Record<CanVendor, any> = {
       }
     }
   }
+} as Record<CanVendor, any>
+
+for (const vendor of ['vcan_usb', 'vkgs_usb'] as const) {
+  const config = cloneDeep(configInfo.candle)
+  config.can.clock = [{ clock: '80', name: '80' }]
+  config.canFd.clock = [{ clock: '80', name: '80' }]
+  configInfo[vendor] = config
+}
+
+function getSelectedUsbCanDevice(): CanDevice | undefined {
+  if (props.vendor !== 'vcan_usb' && props.vendor !== 'vkgs_usb') return undefined
+  if (data.value.handle === '' || data.value.handle == null) return undefined
+  return deviceList.value.find((device) => device.handle === data.value.handle)
 }
 
 /** Look up the currently selected candle device from the device list */
@@ -779,6 +816,10 @@ const showCandleTimingTable = computed(() => {
 })
 
 const showCanFdCheckbox = computed(() => {
+  if (props.vendor === 'vcan_usb' || props.vendor === 'vkgs_usb') {
+    const device = getSelectedUsbCanDevice()
+    return !device || !!device.extra?.usbCan?.fdSupported
+  }
   if (props.vendor !== 'candle') return true
   const dev = getSelectedCandleDevice()
   return !!dev?.extra?.candle?.fdSupported
@@ -958,7 +999,9 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     props.vendor == 'kvaser' ||
     props.vendor == 'toomoss' ||
     props.vendor == 'vector' ||
-    props.vendor == 'candle'
+    props.vendor == 'candle' ||
+    props.vendor == 'vcan_usb' ||
+    props.vendor == 'vkgs_usb'
   ) {
     let f_clock = Number(speed.clock || 80) * 1000000
     if (index == 1) {
@@ -1142,7 +1185,9 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     props.vendor == 'peak' ||
     props.vendor == 'kvaser' ||
     props.vendor == 'toomoss' ||
-    props.vendor == 'candle'
+    props.vendor == 'candle' ||
+    props.vendor == 'vcan_usb' ||
+    props.vendor == 'vkgs_usb'
   ) {
     if (data.value.bitrate.clock == undefined) {
       callback(new Error(i18next.t('uds.hardware.canNode.validation.selectClock')))
@@ -1272,7 +1317,9 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       props.vendor == 'kvaser' ||
       props.vendor == 'toomoss' ||
       props.vendor == 'peak' ||
-      props.vendor == 'candle'
+      props.vendor == 'candle' ||
+      props.vendor == 'vcan_usb' ||
+      props.vendor == 'vkgs_usb'
     ) {
       const calcFreq =
         (Number(data.value.bitrate.clock || 40) * 1000000) /

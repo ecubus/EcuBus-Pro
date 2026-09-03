@@ -23,6 +23,8 @@ export type CanVendor =
   | 'slcan'
   | 'ecubus'
   | 'candle'
+  | 'vcan_usb'
+  | 'vkgs_usb'
 export interface CanBaseInfo {
   id: string
   handle: any
@@ -36,6 +38,8 @@ export interface CanBaseInfo {
   toomossRes?: boolean
   zlgRes?: boolean
   candleRes?: boolean
+  vcanUsbRes?: boolean
+  vkgsUsbRes?: boolean
   slcanDelay?: number
 }
 
@@ -495,6 +499,16 @@ export interface CanDevice {
       dataCap?: CandleCapability
       fdSupported?: boolean
       Res?: boolean
+    }
+    usbCan?: {
+      protocol?: 'vcan_usb' | 'vkgs_usb'
+      cap?: CandleCapability
+      dataCap?: CandleCapability
+      fdSupported?: boolean
+      Res?: boolean
+      termination?: boolean
+      swVersion?: number
+      hwVersion?: number
     }
   }
 }

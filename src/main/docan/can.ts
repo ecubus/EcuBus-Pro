@@ -11,6 +11,8 @@ import { CanBaseInfo } from '../share/can'
 import { CanBase } from './base'
 import { SLCAN_CAN } from './slcan'
 import { Candle_CAN } from './candle'
+import { VCAN_USB_CAN } from './vcan_usb'
+import { VKGS_USB_CAN } from './vkgs_usb'
 
 const libPath = path.dirname(dllLib)
 PEAK_TP.loadDllPath(libPath)
@@ -38,6 +40,10 @@ export function openCanDevice(canDevice: CanBaseInfo) {
     canBase = new SLCAN_CAN(canDevice)
   } else if (canDevice.vendor == 'candle') {
     canBase = new Candle_CAN(canDevice)
+  } else if (canDevice.vendor == 'vcan_usb') {
+    canBase = new VCAN_USB_CAN(canDevice)
+  } else if (canDevice.vendor == 'vkgs_usb') {
+    canBase = new VKGS_USB_CAN(canDevice)
   }
 
   return canBase
@@ -61,6 +67,10 @@ export function getCanVersion(vendor: string) {
     return SLCAN_CAN.getLibVersion()
   } else if (vendor === 'CANDLE') {
     return Candle_CAN.getLibVersion()
+  } else if (vendor === 'VCAN_USB') {
+    return VCAN_USB_CAN.getLibVersion()
+  } else if (vendor === 'VKGS_USB') {
+    return VKGS_USB_CAN.getLibVersion()
   } else {
     return 'Not supported'
   }
@@ -84,6 +94,10 @@ export function getCanDevices(vendor: string) {
     return SLCAN_CAN.getValidDevices()
   } else if (vendor === 'CANDLE') {
     return Candle_CAN.getValidDevices()
+  } else if (vendor === 'VCAN_USB') {
+    return VCAN_USB_CAN.getValidDevices()
+  } else if (vendor === 'VKGS_USB') {
+    return VKGS_USB_CAN.getValidDevices()
   } else {
     return []
   }

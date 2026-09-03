@@ -17,7 +17,9 @@
         "vector",
         "slcan",
         "ecubus",
-        "candle"
+        "candle",
+        "vcan_usb",
+        "vkgs_usb"
       ],
       "linux": [
         "simulate",

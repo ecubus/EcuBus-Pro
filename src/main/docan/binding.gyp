@@ -1,6 +1,52 @@
 {
     'targets': [   
         {
+            'target_name': 'usbcan',
+            'conditions': [
+                ['OS=="win"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'defines': [
+                        'NAPI_CPP_EXCEPTIONS'
+                    ],
+                    'sources': [
+                        './usbcan/native/transport_win.cpp'
+                    ],
+                    'libraries': [
+                        'winusb.lib',
+                        'setupapi.lib'
+                    ],
+                    'msvs_settings': {
+                        'VCCLCompilerTool': {
+                            'ExceptionHandling': 1
+                        }
+                    }
+                }, 'OS=="linux"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_linux.cxx' ],
+                    'cflags': [ '-fexceptions' ],
+                    'cflags_cc': [ '-fexceptions' ]
+                }, 'OS=="mac"', {
+                    'include_dirs': [
+                        "<!@(node -p \"require('node-addon-api').include\")"
+                    ],
+                    'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+                    'cflags!': [ '-fno-exceptions' ],
+                    'cflags_cc!': [ '-fno-exceptions' ],
+                    'sources': [ './fake_mac.cxx' ],
+                    'xcode_settings': {
+                        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+                    }
+                }]
+            ]
+        },
+        {
             'target_name': 'candle',
             'conditions': [
                 ['OS=="win"', {

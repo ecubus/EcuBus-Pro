@@ -1140,7 +1140,8 @@
         "toomoss": "TOOMOSS",
         "vector": "VECTOR",
         "slcan": "SLCAN",
-        "candle": "CANDLE"
+        "candle": "CANDLE",
+        "socketcan": "SocketCAN"
       },
       "canNode": {
         "sections": {

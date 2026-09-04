@@ -69,7 +69,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-else-if="props.vendor == 'candle' && getSelectedCandleDevice()?.extra?.candle?.Res"
+      v-else-if="isCandleCompatibleVendor() && getSelectedCandleDevice()?.extra?.candle?.Res"
       :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="candleRes"
       :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
@@ -91,7 +91,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-else-if="props.vendor == 'kvaser'"
+      v-else-if="props.vendor == 'kvaser' || isUsbCanVendor()"
       :label="i18next.t('uds.hardware.canNode.labels.silentMode')"
       prop="silent"
       :placeholder="i18next.t('uds.hardware.canNode.options.disable')"
@@ -124,7 +124,7 @@
         </el-form-item>
       </el-col>
       <!-- Non-candle: clock frequency dropdown -->
-      <el-col v-if="props.vendor !== 'candle'" :span="12">
+      <el-col v-if="!isCandleCompatibleVendor()" :span="12">
         <el-form-item
           v-if="vendorConfigLimit.clock"
           :label="i18next.t('uds.hardware.canNode.labels.clockFreq')"
@@ -257,9 +257,9 @@
     v-model="calculatorVisible"
     :height="height - 100"
     :freq="currentRow?.freq || 0"
-    :clock="Number(data.bitrate.clock || 0)"
+    :clock="calculatorClock"
     :vendor="props.vendor"
-    :ability="vendorConfigLimit"
+    :ability="calculatorAbility"
     @result="handleCalculatorResult"
   />
 </template>
@@ -297,6 +297,8 @@ const props = defineProps<{
 }>()
 const height = toRef(props, 'height')
 const ruleFormRef = ref<FormInstance>()
+const calculatorVisible = ref(false)
+const currentRow = ref<CanBitrate | null>(null)
 
 const devices = useDataStore()
 const globalStart = useGlobalStart()
@@ -335,7 +337,16 @@ const clockChange = (value: string) => {
   }
 }
 
-const configInfo: Record<CanVendor, any> = {
+const CANDLE_COMPATIBLE_VENDORS = new Set<CanVendor>(['candle', 'vcan_usb', 'vkgs_usb'])
+
+function isCandleCompatibleVendor(vendor: CanVendor = props.vendor) {
+  return CANDLE_COMPATIBLE_VENDORS.has(vendor)
+}
+
+function isUsbCanVendor() {
+  return props.vendor === 'vcan_usb' || props.vendor === 'vkgs_usb'
+}
+const configInfo = {
   ecubus: {
     clock: false,
     timeSeg1: false,
@@ -710,11 +721,15 @@ const configInfo: Record<CanVendor, any> = {
       }
     }
   }
+} as Record<CanVendor, any>
+
+for (const vendor of ['vcan_usb', 'vkgs_usb'] as const) {
+  configInfo[vendor] = cloneDeep(configInfo.candle)
 }
 
 /** Look up the currently selected candle device from the device list */
 function getSelectedCandleDevice(): CanDevice | undefined {
-  if (props.vendor !== 'candle') return undefined
+  if (!isCandleCompatibleVendor()) return undefined
   // Explicitly check for empty string or null/undefined (handle can be 0!)
   if (data.value.handle === '' || data.value.handle == null) return undefined
   return deviceList.value.find((d) => d.handle === data.value.handle)
@@ -753,17 +768,24 @@ function getCandleDynamicConfig(isFd: boolean) {
 
   if (isFd && dev?.extra?.candle?.dataCap) {
     const dataCap = dev.extra.candle?.dataCap
-    // Only add FD defaults; validation limits stay from bt_const (baseConfig)
-    // so both arb and data rows are validated against arbitration constraints
+    const dataClockStr = isUsbCanVendor()
+      ? String(Math.round(dataCap.fclk_can / 1000000))
+      : clockStr
+    const defaultDataTiming = autoPickCandleTiming(
+      2000000,
+      dataCap,
+      dataCap.fclk_can,
+      dev.extra.candle.preferredDataTimeQuanta
+    )
     return {
       ...baseConfig,
       bitratefd: {
-        sjw: Math.min(1, dataCap.sjw_max),
-        timeSeg1: Math.min(7, dataCap.tseg1_max),
-        timeSeg2: Math.max(2, dataCap.tseg2_min),
-        preScaler: Math.min(4, dataCap.brp_max),
+        sjw: defaultDataTiming?.sjw ?? Math.min(1, dataCap.sjw_max),
+        timeSeg1: defaultDataTiming?.t1 ?? Math.min(7, dataCap.tseg1_max),
+        timeSeg2: defaultDataTiming?.t2 ?? Math.max(2, dataCap.tseg2_min),
+        preScaler: defaultDataTiming?.presc ?? Math.min(4, dataCap.brp_max),
         freq: 2000000,
-        clock: clockStr
+        clock: dataClockStr
       }
     }
   }
@@ -772,31 +794,58 @@ function getCandleDynamicConfig(isFd: boolean) {
 }
 
 const showCandleTimingTable = computed(() => {
-  if (props.vendor !== 'candle') return false
+  if (!isCandleCompatibleVendor()) return false
   if (data.value.handle === '' || data.value.handle == null) return false
   const dev = getSelectedCandleDevice()
   return !!dev?.extra?.candle?.cap
 })
 
 const showCanFdCheckbox = computed(() => {
-  if (props.vendor !== 'candle') return true
+  if (!isCandleCompatibleVendor()) return true
   const dev = getSelectedCandleDevice()
   return !!dev?.extra?.candle?.fdSupported
 })
 
 const selectedCandleClock = computed(() => {
-  if (props.vendor !== 'candle') return null
+  if (!isCandleCompatibleVendor()) return null
   const dev = getSelectedCandleDevice()
   if (!dev?.extra?.candle?.cap || !dev.extra.candle.cap.fclk_can) return null
   return Math.round(dev.extra.candle.cap.fclk_can / 1000000)
 })
 
 const vendorConfigLimit = computed(() => {
-  if (props.vendor === 'candle') {
+  if (isCandleCompatibleVendor()) {
     return getCandleDynamicConfig(data.value.canfd)
   }
   return configInfo[props.vendor][data.value.canfd ? 'canFd' : 'can']
 })
+
+function getUsbDataTimingLimits() {
+  if (!isUsbCanVendor()) return undefined
+  const cap = getSelectedCandleDevice()?.extra?.candle?.dataCap
+  if (!cap) return undefined
+  return {
+    preScaler: { min: cap.brp_min, max: cap.brp_max },
+    tsg1: { min: cap.tseg1_min, max: cap.tseg1_max },
+    tsg2: { min: cap.tseg2_min, max: cap.tseg2_max }
+  }
+}
+
+const calculatorAbility = computed(() => {
+  if (!isUsbCanVendor() || currentRow.value !== data.value.bitratefd) {
+    return vendorConfigLimit.value
+  }
+  const dataLimits = getUsbDataTimingLimits()
+  return dataLimits ? { ...vendorConfigLimit.value, ...dataLimits } : vendorConfigLimit.value
+})
+
+const calculatorClock = computed(() =>
+  Number(
+    (isUsbCanVendor() ? currentRow.value?.clock : data.value.bitrate.clock) ||
+      data.value.bitrate.clock ||
+      0
+  )
+)
 
 const gridOptions = computed(() => {
   const v: VxeGridProps<CanBitrate> = {
@@ -958,10 +1007,10 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     props.vendor == 'kvaser' ||
     props.vendor == 'toomoss' ||
     props.vendor == 'vector' ||
-    props.vendor == 'candle'
+    isCandleCompatibleVendor()
   ) {
     let f_clock = Number(speed.clock || 80) * 1000000
-    if (index == 1) {
+    if (index == 1 && !isUsbCanVendor()) {
       f_clock = Number(data.value.bitrate.clock || 80) * 1000000
     }
     const nom_brp = speed.preScaler
@@ -1001,9 +1050,17 @@ function autoPickCandleTiming(
     tseg2_max: number
     sjw_max: number
   },
-  clockHz: number
+  clockHz: number,
+  preferredTimeQuanta?: number
 ) {
-  const results: { t1: number; t2: number; sp: number; sjw: number; presc: number }[] = []
+  const results: {
+    t1: number
+    t2: number
+    sp: number
+    sjw: number
+    presc: number
+    totalTq: number
+  }[] = []
   for (let presc = cap.brp_min; presc <= cap.brp_max; presc++) {
     if (clockHz % presc !== 0) continue
     const totalTq = clockHz / (presc * freq)
@@ -1017,7 +1074,8 @@ function autoPickCandleTiming(
         t2,
         sp: Math.round(((t1 + 1) / (t1 + t2 + 1)) * 10000) / 100,
         sjw: Math.min(1, cap.sjw_max),
-        presc
+        presc,
+        totalTq
       })
     }
   }
@@ -1027,13 +1085,22 @@ function autoPickCandleTiming(
   const pool = inRange.length > 0 ? inRange : results
   let best = pool[0]
   for (const r of pool) {
-    if (Math.abs(r.sp - 80) < Math.abs(best.sp - 80)) best = r
+    const sampleError = Math.abs(r.sp - 80)
+    const bestSampleError = Math.abs(best.sp - 80)
+    if (
+      sampleError < bestSampleError ||
+      (preferredTimeQuanta !== undefined &&
+        sampleError === bestSampleError &&
+        Math.abs(r.totalTq - preferredTimeQuanta) < Math.abs(best.totalTq - preferredTimeQuanta))
+    ) {
+      best = r
+    }
   }
   return best
 }
 
 watch([deviceList, () => data.value.handle], () => {
-  if (props.vendor !== 'candle') return
+  if (!isCandleCompatibleVendor()) return
   const dev = getSelectedCandleDevice()
   if (!dev?.extra?.candle?.cap) return
   // Disable CAN FD if the selected device doesn't support it
@@ -1045,21 +1112,29 @@ watch([deviceList, () => data.value.handle], () => {
   const clockChanged = data.value.bitrate.clock !== clockStr
   if (clockChanged) {
     data.value.bitrate.clock = clockStr
-    if (data.value.bitratefd) {
+  }
+  if (data.value.bitratefd) {
+    const dataCap = dev.extra.candle?.dataCap
+    if (isUsbCanVendor() && dataCap?.fclk_can) {
+      data.value.bitratefd.clock = String(Math.round(dataCap.fclk_can / 1000000))
+    } else if (clockChanged) {
       data.value.bitratefd.clock = clockStr
     }
   }
-  // Auto-pick timing params that match the current freq with device's actual clock
-  const best = autoPickCandleTiming(
-    data.value.bitrate.freq,
-    dev.extra.candle.cap,
-    clockMhz * 1000000
-  )
-  if (best) {
-    data.value.bitrate.timeSeg1 = best.t1
-    data.value.bitrate.timeSeg2 = best.t2
-    data.value.bitrate.sjw = best.sjw
-    data.value.bitrate.preScaler = best.presc
+  // Keep user-selected timing for the USB drivers when the async device list refreshes.
+  // Recalculate only if the hardware clock really changed. Candle retains its upstream behavior.
+  if (props.vendor === 'candle' || clockChanged) {
+    const best = autoPickCandleTiming(
+      data.value.bitrate.freq,
+      dev.extra.candle.cap,
+      clockMhz * 1000000
+    )
+    if (best) {
+      data.value.bitrate.timeSeg1 = best.t1
+      data.value.bitrate.timeSeg2 = best.t2
+      data.value.bitrate.sjw = best.sjw
+      data.value.bitrate.preScaler = best.presc
+    }
   }
   nextTick(() => {
     ruleFormRef.value?.validateField('bitrate')
@@ -1073,7 +1148,7 @@ watch([deviceList, () => data.value.handle], () => {
 watch(
   () => [data.value.bitrate.freq, data.value.bitratefd?.freq],
   () => {
-    if (props.vendor !== 'candle') return
+    if (!isCandleCompatibleVendor()) return
     const dev = getSelectedCandleDevice()
     if (!dev?.extra?.candle?.cap) return
     const clockHz = (selectedCandleClock.value ?? 0) * 1000000
@@ -1087,10 +1162,12 @@ watch(
       data.value.bitrate.preScaler = best.presc
     }
     if (data.value.canfd && data.value.bitratefd && dev.extra.candle?.dataCap) {
+      const dataClockHz = isUsbCanVendor() ? dev.extra.candle.dataCap.fclk_can : clockHz
       const bestFd = autoPickCandleTiming(
         data.value.bitratefd.freq,
         dev.extra.candle.dataCap,
-        clockHz
+        dataClockHz,
+        dev.extra.candle.preferredDataTimeQuanta
       )
       if (bestFd) {
         data.value.bitratefd.timeSeg1 = bestFd.t1
@@ -1142,7 +1219,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     props.vendor == 'peak' ||
     props.vendor == 'kvaser' ||
     props.vendor == 'toomoss' ||
-    props.vendor == 'candle'
+    isCandleCompatibleVendor()
   ) {
     if (data.value.bitrate.clock == undefined) {
       callback(new Error(i18next.t('uds.hardware.canNode.validation.selectClock')))
@@ -1211,6 +1288,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
     }
 
     if (data.value.canfd && data.value.bitratefd) {
+      const dataTimingLimits = getUsbDataTimingLimits() ?? vendorConfigLimit.value
       if (data.value.bitratefd.timeSeg1 + 1 <= data.value.bitratefd.timeSeg2) {
         error1.value = true
         callback(new Error(i18next.t('uds.hardware.canNode.validation.dataTseg1GreaterThanTseg2')))
@@ -1219,49 +1297,49 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
         error1.value = true
         callback(new Error(i18next.t('uds.hardware.canNode.validation.dataSjwLessThanTseg2')))
       }
-      if (vendorConfigLimit.value.preScaler) {
+      if (dataTimingLimits.preScaler) {
         if (
-          data.value.bitratefd.preScaler < vendorConfigLimit.value.preScaler.min ||
-          data.value.bitratefd.preScaler > vendorConfigLimit.value.preScaler.max
+          data.value.bitratefd.preScaler < dataTimingLimits.preScaler.min ||
+          data.value.bitratefd.preScaler > dataTimingLimits.preScaler.max
         ) {
           error1.value = true
           callback(
             new Error(
               i18next.t('uds.hardware.canNode.validation.dataPrescaleBetween', {
-                min: vendorConfigLimit.value.preScaler.min,
-                max: vendorConfigLimit.value.preScaler.max
+                min: dataTimingLimits.preScaler.min,
+                max: dataTimingLimits.preScaler.max
               })
             )
           )
         }
       }
-      if (vendorConfigLimit.value.tsg1) {
+      if (dataTimingLimits.tsg1) {
         if (
-          data.value.bitratefd.timeSeg1 < vendorConfigLimit.value.tsg1.min ||
-          data.value.bitratefd.timeSeg1 > vendorConfigLimit.value.tsg1.max
+          data.value.bitratefd.timeSeg1 < dataTimingLimits.tsg1.min ||
+          data.value.bitratefd.timeSeg1 > dataTimingLimits.tsg1.max
         ) {
           error1.value = true
           callback(
             new Error(
               i18next.t('uds.hardware.canNode.validation.dataTseg1Between', {
-                min: vendorConfigLimit.value.tsg1.min,
-                max: vendorConfigLimit.value.tsg1.max
+                min: dataTimingLimits.tsg1.min,
+                max: dataTimingLimits.tsg1.max
               })
             )
           )
         }
       }
-      if (vendorConfigLimit.value.tsg2) {
+      if (dataTimingLimits.tsg2) {
         if (
-          data.value.bitratefd.timeSeg2 < vendorConfigLimit.value.tsg2.min ||
-          data.value.bitratefd.timeSeg2 > vendorConfigLimit.value.tsg2.max
+          data.value.bitratefd.timeSeg2 < dataTimingLimits.tsg2.min ||
+          data.value.bitratefd.timeSeg2 > dataTimingLimits.tsg2.max
         ) {
           error1.value = true
           callback(
             new Error(
               i18next.t('uds.hardware.canNode.validation.dataTseg2Between', {
-                min: vendorConfigLimit.value.tsg2.min,
-                max: vendorConfigLimit.value.tsg2.max
+                min: dataTimingLimits.tsg2.min,
+                max: dataTimingLimits.tsg2.max
               })
             )
           )
@@ -1272,7 +1350,7 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       props.vendor == 'kvaser' ||
       props.vendor == 'toomoss' ||
       props.vendor == 'peak' ||
-      props.vendor == 'candle'
+      isCandleCompatibleVendor()
     ) {
       const calcFreq =
         (Number(data.value.bitrate.clock || 40) * 1000000) /
@@ -1288,7 +1366,10 @@ const bitrateCheck = (rule: any, value: any, callback: any) => {
       }
       if (data.value.canfd && data.value.bitratefd) {
         const calcFreq =
-          (Number(data.value.bitrate.clock || 40) * 1000000) /
+          (Number(
+            (isUsbCanVendor() ? data.value.bitratefd.clock : data.value.bitrate.clock) || 40
+          ) *
+            1000000) /
           (data.value.bitratefd.preScaler *
             (data.value.bitratefd.timeSeg1 + data.value.bitratefd.timeSeg2 + 1))
         if (calcFreq != data.value.bitratefd.freq) {
@@ -1421,9 +1502,6 @@ const showCalculator = (row: CanBitrate) => {
   calculatorVisible.value = true
   currentRow.value = row
 }
-
-const calculatorVisible = ref(false)
-const currentRow = ref<CanBitrate | null>(null)
 
 const handleCalculatorResult = (result: any) => {
   if (currentRow.value) {

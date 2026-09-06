@@ -141,7 +141,7 @@
     "@electron-toolkit/eslint-config": "^1.0.2",
     "@electron-toolkit/eslint-config-ts": "^1.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
-    "@electron/rebuild": "^4.0.4",
+    "@electron/rebuild": "^4.2.0",
     "@iconify/icons-ep": "^1.2.12",
     "@iconify/icons-material-symbols": "^1.2.58",
     "@iconify/icons-ph": "^1.2.5",
@@ -200,6 +200,7 @@
     "axios": "^1.8.2",
     "@babel/runtime": "^7.26.10",
     "tar-fs": "2.1.4",
-    "node-gyp": "^12.3.0"
+    "node-gyp": "^12.3.0",
+    "node-abi": "^4.35.0"
   }
 }

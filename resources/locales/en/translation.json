@@ -2582,10 +2582,14 @@
       "lini": {
         "buttons": {
           "stopSch": "Stop SCH",
-          "startSch": "Start SCH"
+          "startSch": "Start SCH",
+          "selectAllActive": "Select All",
+          "deselectAllActive": "Deselect All"
         },
         "tooltips": {
-          "editConnect": "Edit Connect"
+          "editConnect": "Edit Connect",
+          "selectAllActive": "Select All",
+          "deselectAllActive": "Deselect All"
         },
         "labels": {
           "database": "Database"

@@ -82,9 +82,30 @@
       <template #expand_content="parent">
         <div class="expand-wrapper">
           <VxeGrid v-bind="childGridOptions" :data="parent.row.childList">
+            <template #header_active>
+              <div class="active-header">
+                <span>{{ i18next.t('uds.network.lini.table.active') }}</span>
+                <el-tooltip
+                  effect="light"
+                  :content="
+                    isTableAllActive(parent.row)
+                      ? i18next.t('uds.network.lini.tooltips.deselectAllActive')
+                      : i18next.t('uds.network.lini.tooltips.selectAllActive')
+                  "
+                  placement="top"
+                >
+                  <el-checkbox
+                    :model-value="isTableAllActive(parent.row)"
+                    :indeterminate="isTableIndeterminate(parent.row)"
+                    size="small"
+                    @change="(val: boolean) => setTableFramesActive(parent.row, val)"
+                  />
+                </el-tooltip>
+              </div>
+            </template>
             <template #default_active="{ row }">
               <el-checkbox
-                v-model="activeStates[`${parent.row.Table}-${row.index}`]"
+                v-model="activeStates[frameStateKey(parent.row.Table, row.index)]"
                 size="small"
               />
             </template>
@@ -255,6 +276,35 @@ interface Table {
 // 将 activeStates 改为简单对象
 const activeStates = ref<Record<string, boolean>>({})
 
+function frameStateKey(tableName: string, index: number) {
+  return `${tableName}-${index}`
+}
+
+function isTableAllActive(table: Table) {
+  if (table.childList.length === 0) {
+    return false
+  }
+  return table.childList.every(
+    (entry) => activeStates.value[frameStateKey(table.Table, entry.index)] !== false
+  )
+}
+
+function isTableIndeterminate(table: Table) {
+  if (table.childList.length === 0) {
+    return false
+  }
+  const activeCount = table.childList.filter(
+    (entry) => activeStates.value[frameStateKey(table.Table, entry.index)] !== false
+  ).length
+  return activeCount > 0 && activeCount < table.childList.length
+}
+
+function setTableFramesActive(table: Table, active: boolean) {
+  for (const entry of table.childList) {
+    activeStates.value[frameStateKey(table.Table, entry.index)] = active
+  }
+}
+
 const props = defineProps<{
   height: number
   editIndex: string
@@ -285,7 +335,7 @@ const tableData = computed(() => {
     }
     let totalBytes = 0
     for (const [index, entry] of table.entries.entries()) {
-      const key = `${table.name}-${index}`
+      const key = frameStateKey(table.name, index)
       if (entry.isCommand) {
         //The master node shall support a diagnostic master request schedule table that contains a single master request frame.
         if (entry.name == 'DiagnosticMasterReq' && table.entries.length == 1) {
@@ -499,8 +549,8 @@ const childGridOptions = computed(() => {
       {
         field: 'Active',
         title: i18next.t('uds.network.lini.table.active'),
-        width: 80,
-        slots: { default: 'default_active' }
+        width: 110,
+        slots: { default: 'default_active', header: 'header_active' }
       },
       { field: 'Delay', title: i18next.t('uds.network.lini.table.delay'), width: 100 },
       { field: 'length', title: i18next.t('uds.network.lini.table.size'), width: 100 },
@@ -547,7 +597,7 @@ watch([() => tableData.value], () => {
   //set activeStates all true
   for (const table of tableData.value) {
     for (const entry of table.childList) {
-      activeStates.value[`${table.Table}-${entry.index}`] = true
+      activeStates.value[frameStateKey(table.Table, entry.index)] = true
     }
   }
 })
@@ -609,7 +659,7 @@ function schChanged({
     // Set activeStates all true
     for (const table of tableData.value) {
       for (const entry of table.childList) {
-        activeStates.value[`${table.Table}-${entry.index}`] = true
+        activeStates.value[frameStateKey(table.Table, entry.index)] = true
       }
     }
   }))
@@ -617,6 +667,13 @@ function schChanged({
 <style lang="scss">
 .expand-wrapper {
   padding-left: 45px;
+}
+
+.active-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 </style>
 <style scoped></style>

@@ -1,7 +1,6 @@
-import fs from 'fs'
 import path from 'path'
-import zlib from 'zlib'
 import { CAN_ID_TYPE, CanMessage, getTsUs } from '../share/can'
+import { LinChecksumType, LinDirection, LinMsg } from '../share/lin'
 import { ReplayLOG } from '../log'
 import type { ReplayItem, ReplayFileFormat, ReplayChannelMap } from 'src/preload/data'
 import { AscReader } from './ascReader'
@@ -13,34 +12,6 @@ import { EthBaseInfo } from '../share/doip'
 import { PwmBase } from '../pwm'
 import { VSomeIP_Client } from '../vsomeip'
 import i18next from 'i18next'
-
-// ---- BLF Constants (layout matches src/main/transport/blf.ts writer) ----
-const FILE_HEADER_SIZE = 144
-const OBJ_HEADER_BASE_SIZE = 16
-const OBJ_HEADER_V1_SIZE = 16
-const LOG_CONTAINER_HEADER_SIZE = 16
-
-const CAN_MESSAGE = 1
-const LOG_CONTAINER = 10
-const CAN_ERROR_EXT = 73
-const CAN_MESSAGE2 = 86
-const CAN_FD_MESSAGE = 100
-
-const NO_COMPRESSION = 0
-const ZLIB_DEFLATE = 2
-
-const CAN_MSG_EXT = 0x80000000
-const REMOTE_FLAG = 0x80
-const DIR_FLAG = 0x1
-const EDL_FLAG = 0x1
-const BRS_FLAG = 0x2
-const TIME_ONE_NANS = 0x00000002
-
-/** Object payload padding to 4-byte boundary (same as writer padData) */
-function blfPadSize(len: number): number {
-  const mod = len % 4
-  return mod === 0 ? 0 : 4 - mod
-}
 
 /**
  * Parsed CAN frame from replay file
@@ -54,6 +25,39 @@ export type ReplayCanFrame = Omit<CanMessage, 'ts'> & {
   /** Is error frame */
   isError?: boolean
 }
+
+/**
+ * Parsed LIN frame from replay file
+ */
+export type ReplayLinFrame = {
+  /** Timestamp in microseconds */
+  ts: number
+  /** Channel number from log file (LIN channels use offset 100+) */
+  channel: number
+  /** LIN Frame ID (0-63) */
+  frameId: number
+  /** Direction */
+  dir: 'Tx' | 'Rx'
+  /** Frame data */
+  data: Buffer
+  /** Data length */
+  dlc: number
+  /** Checksum type */
+  checksumType: LinChecksumType
+  /** Checksum value */
+  checksum?: number
+  /** Is error frame */
+  isError?: boolean
+  /** Error type description */
+  errorType?: string
+}
+
+/**
+ * Discriminated union for replay frames
+ */
+export type ReplayFrame =
+  | { type: 'can'; frame: ReplayCanFrame }
+  | { type: 'lin'; frame: ReplayLinFrame }
 
 /**
  * Sleep for specified milliseconds
@@ -71,7 +75,7 @@ export interface ReplayReader {
    * Read next frame with time-based backpressure
    * The reader will delay based on frame timestamps to simulate real-time playback
    */
-  readFrame(): Promise<ReplayCanFrame | null>
+  readFrame(): Promise<ReplayFrame | null>
   getProgress(): { current: number; total: number; percent: number }
   /** Set playback speed factor (1.0 = normal, 2.0 = 2x, 0 = as fast as possible) */
   setSpeedFactor(factor: number): void
@@ -206,9 +210,9 @@ export class Replay {
     while (this.state === 'running' && this.reader) {
       try {
         // Reader handles time-based backpressure internally
-        const frame = await this.reader.readFrame()
+        const result = await this.reader.readFrame()
 
-        if (frame === null) {
+        if (result === null) {
           // End of file
           await this.handleStreamEnd()
           if (this.state !== 'running') {
@@ -216,7 +220,7 @@ export class Replay {
           }
           continue
         }
-        this.processReplayFrame(frame)
+        this.processReplayFrame(result)
       } catch (error: any) {
         this.log.error(error.message)
         this.stop()
@@ -225,8 +229,8 @@ export class Replay {
     }
   }
 
-  private processReplayFrame(frame: ReplayCanFrame): void {
-    // Lazily capture measurement start time after header is parsed
+  private processReplayFrame(result: ReplayFrame): void {
+    // Common progress tracking
     if (this.measurementStartTimeMs === 0 && this.reader?.measurementStartTimeMs) {
       this.measurementStartTimeMs = this.reader.measurementStartTimeMs
     }
@@ -238,6 +242,15 @@ export class Replay {
         this.log.progress(progress.current, progress.total, intPercent, this.currentRepeat)
       }
     }
+
+    if (result.type === 'can') {
+      this.processCanFrame(result.frame)
+    } else if (result.type === 'lin') {
+      this.processLinFrame(result.frame)
+    }
+  }
+
+  private processCanFrame(frame: ReplayCanFrame): void {
     const channelMap = this.findChannelMap(frame.channel)
     if (channelMap) {
       for (const deviceId of channelMap.deviceIds) {
@@ -270,6 +283,138 @@ export class Replay {
         }
       }
     }
+  }
+
+  private processLinFrame(frame: ReplayLinFrame): void {
+    const channelMap = this.findChannelMap(frame.channel)
+    if (!channelMap) return
+
+    for (const deviceId of channelMap.deviceIds) {
+      const base = this.linBaseMap.get(deviceId)
+      if (!base) continue
+
+      const linMsg: LinMsg = {
+        frameId: frame.frameId,
+        data: frame.data,
+        direction: frame.dir === 'Tx' ? LinDirection.SEND : LinDirection.RECV,
+        checksumType: frame.checksumType,
+        checksum: frame.checksum,
+        ts: frame.ts + this.tsOffset
+      }
+
+      // Enrich with LDF database info (frame name + signal values)
+      if (base.info.database) {
+        this.enrichLinMsg(linMsg, base.info.database)
+      }
+
+      if (this.config.mode === 'offline') {
+        base.log.linBase(linMsg)
+      } else {
+        // Online mode: send via hardware (only works for Master mode)
+        base.write(linMsg).catch((e: any) => this.log.error(e.message))
+      }
+    }
+  }
+
+  /**
+   * Enrich a LinMsg with frame name and decoded signal values from LDF database.
+   */
+  private enrichLinMsg(msg: LinMsg, databaseId: string): void {
+    const cacheKey = `lin|${databaseId}|${msg.frameId}`
+    let cachedFrame = this.frameDbInfoCache.get(cacheKey)
+    if (cachedFrame === undefined) {
+      const db = global.dataSet?.database?.lin?.[databaseId]
+      if (db && db.frames) {
+        const ldfFrame = Object.values(db.frames).find((f: any) => f.id === msg.frameId) as
+          | { name: string; id: number; signals: { name: string; offset: number }[] }
+          | undefined
+        cachedFrame = ldfFrame ? { database: databaseId, name: ldfFrame.name } : null
+      } else {
+        cachedFrame = null
+      }
+      this.frameDbInfoCache.set(cacheKey, cachedFrame)
+    }
+    if (!cachedFrame) return
+
+    msg.name = cachedFrame.name
+    msg.database = cachedFrame.database
+
+    // Decode signals
+    const db = global.dataSet?.database?.lin?.[databaseId]
+    if (!db) return
+
+    const ldfFrame = Object.values(db.frames).find((f: any) => f.id === msg.frameId) as
+      | { name: string; signals: { name: string; offset: number }[] }
+      | undefined
+    if (!ldfFrame || !ldfFrame.signals) return
+
+    // Build reverse map: signalName → encodingTypeName
+    const sigToEncoding: Record<string, string> = {}
+    if (db.signalRep) {
+      for (const [encName, sigNames] of Object.entries(db.signalRep)) {
+        for (const sn of sigNames as string[]) {
+          sigToEncoding[sn] = encName
+        }
+      }
+    }
+
+    const signals: Record<string, any> = {}
+    for (const sigRef of ldfFrame.signals) {
+      const sigDef = db.signals[sigRef.name]
+      if (!sigDef) continue
+
+      const bitOffset = sigRef.offset
+      const bitLength = sigDef.signalSizeBits
+      // Read raw value (LIN is always little-endian)
+      let rawValue = 0
+      let startByte = Math.floor(bitOffset / 8)
+      let startBitInByte = bitOffset % 8
+      let remaining = bitLength
+      let valueIndex = 0
+      while (remaining > 0 && startByte < msg.data.length) {
+        const bits = Math.min(8 - startBitInByte, remaining)
+        const mask = (1 << bits) - 1
+        const v = (msg.data[startByte] >> startBitInByte) & mask
+        rawValue |= v << valueIndex
+        remaining -= bits
+        valueIndex += bits
+        startByte++
+        startBitInByte = 0
+      }
+
+      // Apply encoding type for physical value
+      let physValue: number | string = rawValue
+      let physValueEnum: string | undefined
+      const encName = sigToEncoding[sigRef.name]
+      if (encName && db.signalEncodeTypes?.[encName]) {
+        const enc = db.signalEncodeTypes[encName]
+        for (const et of enc.encodingTypes) {
+          if (et.type === 'physicalValue' && et.physicalValue) {
+            const pv = et.physicalValue
+            if (rawValue >= pv.minValue && rawValue <= pv.maxValue) {
+              physValue = rawValue * pv.scale + pv.offset
+              break
+            }
+          } else if (et.type === 'logicalValue' && et.logicalValue) {
+            if (rawValue === et.logicalValue.signalValue) {
+              physValueEnum = et.logicalValue.textInfo || ''
+              physValue = physValueEnum || rawValue
+              break
+            }
+          }
+        }
+      }
+
+      signals[sigRef.name] = {
+        signalName: sigRef.name,
+        signalSizeBits: bitLength,
+        initValue: sigDef.initValue,
+        value: rawValue,
+        physValue,
+        physValueEnum
+      }
+    }
+    msg.signals = signals
   }
 
   private async handleStreamEnd(): Promise<void> {

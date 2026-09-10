@@ -1,8 +1,9 @@
-import { ReplayCanFrame, ReplayReader } from '.'
+import { ReplayCanFrame, ReplayFrame, ReplayLinFrame, ReplayReader } from '.'
 import fs from 'fs'
 import zlib from 'zlib'
 import { Transform, TransformCallback } from 'stream'
 import { CAN_ID_TYPE } from '../share/can'
+import { LinChecksumType } from '../share/lin'
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -20,6 +21,14 @@ const CAN_ERROR_EXT = 73
 const CAN_MESSAGE2 = 86
 const CAN_FD_MESSAGE = 100
 const CAN_FD_MESSAGE_64 = 101
+
+// LIN Object Types (per Vector binlog_objects.h)
+const LIN_MESSAGE = 11
+const LIN_CRC_ERROR = 12
+const LIN_DLC_INFO = 13
+const LIN_RCV_ERROR = 14
+const LIN_SND_ERROR = 15
+const LIN_MESSAGE2 = 57
 
 const ZLIB_DEFLATE = 2
 
@@ -185,6 +194,92 @@ function parseCanFdMessage64(payload: Buffer, timestampUs: number): ReplayCanFra
 }
 
 /**
+ * Parse a LIN_MESSAGE (type 11) object payload into a ReplayLinFrame.
+ * Layout per VBLLINMessage:
+ *   channel(H:2) + id(B:1) + dlc(B:1) + data[8](8) + FSMId(B:1) + FSMState(B:1) +
+ *   headerTime(B:1) + fullTime(B:1) + CRC(H:2) + dir(B:1) + reserved(B:1) = 20 bytes
+ */
+function parseLinMessage(payload: Buffer, timestampUs: number): ReplayLinFrame | null {
+  if (payload.length < 20) return null
+  const channel = payload.readUInt16LE(0)
+  const frameId = payload.readUInt8(2) & 0x3f
+  const dlc = payload.readUInt8(3)
+  const dataLen = Math.min(dlc, 8)
+  const data = Buffer.from(payload.subarray(4, 4 + dataLen))
+  // offset 16: CRC (WORD LE)
+  const checksum = payload.readUInt16LE(16) & 0xff
+  // offset 18: dir
+  const dir = (payload.readUInt8(18) & 0x1) !== 0 ? 'Tx' : 'Rx'
+
+  return {
+    ts: timestampUs,
+    channel: 100 + channel,
+    frameId,
+    dir,
+    data,
+    dlc,
+    checksumType: LinChecksumType.ENHANCED,
+    checksum
+  }
+}
+
+/**
+ * Parse a LIN_MESSAGE2 (type 57) object payload into a ReplayLinFrame.
+ * Nested structure (after VBLObjectHeader):
+ *   VBLLINDatabyteTimestampEvent (112 bytes):
+ *     VBLLINMessageDescriptor (40):
+ *       VBLLINSynchFieldEvent (32):
+ *         VBLLINBusEvent (16): SOF(Q:8) + baudrate(D:4) + channel(H:2) + reserved(2)
+ *         synchBreakLen(Q:8) + synchDelLen(Q:8)
+ *       supplierID(H:2) + messageID(H:2) + NAD(B:1) + ID(B:1) + DLC(B:1) + checksumModel(B:1)
+ *     databyteTimestamps[9](Q*9:72)
+ *   data[8](8) + CRC(H:2) + dir(B:1) + ...
+ */
+function parseLinMessage2(payload: Buffer, timestampUs: number): ReplayLinFrame | null {
+  if (payload.length < 123) return null
+  const channel = payload.readUInt16LE(12)
+  const frameId = payload.readUInt8(37) & 0x3f
+  const dlc = payload.readUInt8(38)
+  const checksumModel = payload.readUInt8(39)
+  const dataLen = Math.min(dlc, 8)
+  const data = Buffer.from(payload.subarray(112, 112 + dataLen))
+  const checksum = payload.readUInt16LE(120) & 0xff
+  const dir = (payload.readUInt8(122) & 0x1) !== 0 ? 'Tx' : 'Rx'
+
+  return {
+    ts: timestampUs,
+    channel: 100 + channel,
+    frameId,
+    dir,
+    data,
+    dlc,
+    checksumType: checksumModel === 0 ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED,
+    checksum
+  }
+}
+
+/**
+ * Parse a LIN error (type 13 DLC_INFO / type 14 RCV_ERROR) payload into a ReplayLinFrame.
+ */
+function parseLinError(payload: Buffer, timestampUs: number): ReplayLinFrame | null {
+  if (payload.length < 4) return null
+  const channel = payload.readUInt16LE(0)
+  const frameId = payload.readUInt8(2) & 0x3f
+
+  return {
+    ts: timestampUs,
+    channel: 100 + channel,
+    frameId,
+    dir: 'Rx',
+    data: Buffer.alloc(0),
+    dlc: 0,
+    checksumType: LinChecksumType.ENHANCED,
+    isError: true,
+    errorType: 'BLF_LIN_ERROR'
+  }
+}
+
+/**
  * Extract inner LOBJ objects from (decompressed) container data.
  * Handles cross-container reassembly via the carryover buffer.
  */
@@ -285,14 +380,14 @@ export class BlfTransform extends Transform {
     this.startTime += ms
   }
 
-  private async applyTimeBackpressure(frame: ReplayCanFrame): Promise<void> {
+  private async applyTimeBackpressure(ts: number): Promise<void> {
     if (this.speedFactor <= 0) return
     if (this.firstFrameTs < 0) {
-      this.firstFrameTs = frame.ts
+      this.firstFrameTs = ts
       this.startTime = Date.now()
       return
     }
-    const frameOffsetUs = frame.ts - this.firstFrameTs
+    const frameOffsetUs = ts - this.firstFrameTs
     const expectedElapsedMs = frameOffsetUs / 1000 / this.speedFactor
     const actualElapsedMs = Date.now() - this.startTime
     const delayMs = expectedElapsedMs - actualElapsedMs
@@ -301,9 +396,10 @@ export class BlfTransform extends Transform {
     }
   }
 
-  private async pushFrame(frame: ReplayCanFrame): Promise<void> {
-    await this.applyTimeBackpressure(frame)
-    this.push(frame)
+  private async pushFrame(result: ReplayFrame): Promise<void> {
+    const ts = result.type === 'can' ? result.frame.ts : result.frame.ts
+    await this.applyTimeBackpressure(ts)
+    this.push(result)
   }
 
   _transform(chunk: Buffer, _encoding: string, callback: TransformCallback): void {
@@ -474,17 +570,44 @@ export class BlfTransform extends Transform {
     }
   }
 
-  private parseFrame(objType: number, payload: Buffer, timestampUs: number): ReplayCanFrame | null {
+  private parseFrame(objType: number, payload: Buffer, timestampUs: number): ReplayFrame | null {
     switch (objType) {
       case CAN_MESSAGE:
-      case CAN_MESSAGE2:
-        return parseCanMessage(payload, timestampUs)
-      case CAN_FD_MESSAGE:
-        return parseCanFdMessage(payload, timestampUs)
-      case CAN_FD_MESSAGE_64:
-        return parseCanFdMessage64(payload, timestampUs)
-      case CAN_ERROR_EXT:
-        return parseCanErrorExt(payload, timestampUs)
+      case CAN_MESSAGE2: {
+        const frame = parseCanMessage(payload, timestampUs)
+        return frame ? { type: 'can', frame } : null
+      }
+      case CAN_FD_MESSAGE: {
+        const frame = parseCanFdMessage(payload, timestampUs)
+        return frame ? { type: 'can', frame } : null
+      }
+      case CAN_FD_MESSAGE_64: {
+        const frame = parseCanFdMessage64(payload, timestampUs)
+        return frame ? { type: 'can', frame } : null
+      }
+      case CAN_ERROR_EXT: {
+        const frame = parseCanErrorExt(payload, timestampUs)
+        return frame ? { type: 'can', frame } : null
+      }
+      case LIN_MESSAGE:
+      case LIN_SND_ERROR:
+      case LIN_CRC_ERROR: {
+        const frame = parseLinMessage(payload, timestampUs)
+        if (frame && (objType === LIN_SND_ERROR || objType === LIN_CRC_ERROR)) {
+          frame.isError = true
+          frame.errorType = objType === LIN_SND_ERROR ? 'SndError' : 'CRCError'
+        }
+        return frame ? { type: 'lin', frame } : null
+      }
+      case LIN_MESSAGE2: {
+        const frame = parseLinMessage2(payload, timestampUs)
+        return frame ? { type: 'lin', frame } : null
+      }
+      case LIN_DLC_INFO:
+      case LIN_RCV_ERROR: {
+        const frame = parseLinError(payload, timestampUs)
+        return frame ? { type: 'lin', frame } : null
+      }
       default:
         return null
     }
@@ -500,7 +623,7 @@ export class BlfReader implements ReplayReader {
   private _closed = false
   private readStream: fs.ReadStream | null = null
   private transform: BlfTransform | null = null
-  private frameIterator: AsyncIterator<ReplayCanFrame> | null = null
+  private frameIterator: AsyncIterator<ReplayFrame> | null = null
   private _paused = false
   private pauseStartTime = 0
 
@@ -545,7 +668,7 @@ export class BlfReader implements ReplayReader {
     }
   }
 
-  async readFrame(): Promise<ReplayCanFrame | null> {
+  async readFrame(): Promise<ReplayFrame | null> {
     if (this._closed || !this.frameIterator) return null
 
     try {
@@ -556,7 +679,7 @@ export class BlfReader implements ReplayReader {
         }
         return null
       }
-      return result.value as ReplayCanFrame
+      return result.value as ReplayFrame
     } catch {
       return null
     }

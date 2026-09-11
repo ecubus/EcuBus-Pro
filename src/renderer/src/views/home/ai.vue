@@ -17,6 +17,10 @@
         <el-switch v-model="form.generateSkillDoc" />
       </el-form-item>
     </el-form>
+
+    <el-divider />
+
+    <orca-provider-panel />
   </div>
 </template>
 
@@ -24,6 +28,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import { assign, isEqual, cloneDeep } from 'lodash'
+import OrcaProviderPanel from './orca/OrcaProviderPanel.vue'
 
 const OldVal = window.store.get('ai.settings') as any
 const form = ref({

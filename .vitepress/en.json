@@ -150,6 +150,10 @@
         {
           "text": "AI Assistant",
           "link": "script/ai.md"
+        },
+        {
+          "text": "OrcaRouter Provider",
+          "link": "ai/orcarouter.md"
         }
       ]
     },

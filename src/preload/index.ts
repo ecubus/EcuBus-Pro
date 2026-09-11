@@ -3,6 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import type { Api } from './api'
 import type { GlobOptionsWithFileTypesFalse } from 'glob'
 import path from 'path-browserify'
+import { ORCA_CHANNELS } from './orcarouter'
 
 const store = {
   get(key: string) {
@@ -51,6 +52,29 @@ const api: Api = {
   getPort
 }
 
+// OrcaRouter provider bridge. The credential never crosses this boundary: the
+// renderer only sees status metadata and a masked key.
+const orca = {
+  getConfig: () => ipcRenderer.invoke(ORCA_CHANNELS.getConfig),
+  getStatus: () => ipcRenderer.invoke(ORCA_CHANNELS.getStatus),
+  setApiKey: (key: string) => ipcRenderer.invoke(ORCA_CHANNELS.setApiKey, key),
+  connectStart: () => ipcRenderer.invoke(ORCA_CHANNELS.connectStart),
+  connectAwait: (attemptId: number) => ipcRenderer.invoke(ORCA_CHANNELS.connectAwait, attemptId),
+  connectCancel: (attemptId?: number) => ipcRenderer.invoke(ORCA_CHANNELS.connectCancel, attemptId),
+  // `send`, not `invoke`: `pagehide` can freeze the page before an `invoke`
+  // promise settles, and the server-side task still has to be cancelled.
+  connectCancelKeepalive: () => ipcRenderer.send(ORCA_CHANNELS.connectCancel, undefined),
+  logout: () => ipcRenderer.invoke(ORCA_CHANNELS.logout),
+  listModels: (query: { capability?: string; modality?: string; force?: boolean }) =>
+    ipcRenderer.invoke(ORCA_CHANNELS.listModels, query),
+  chat: (request: { model: string; messages: { role: string; content: string }[] }) =>
+    ipcRenderer.invoke(ORCA_CHANNELS.chat, request),
+  onStatusChanged: (listener: (event: unknown, status: unknown) => void) =>
+    ipcRenderer.on(ORCA_CHANNELS.statusChanged, listener),
+  offStatusChanged: (listener: (event: unknown, status: unknown) => void) =>
+    ipcRenderer.removeListener(ORCA_CHANNELS.statusChanged, listener)
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -59,6 +83,7 @@ if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('api', api)
   contextBridge.exposeInMainWorld('store', store)
   contextBridge.exposeInMainWorld('path', path)
+  contextBridge.exposeInMainWorld('orca', orca)
 } else {
   throw new Error('contextBridge is not enabled')
 }

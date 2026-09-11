@@ -16,6 +16,7 @@
 
 import { ElectronAPI } from '@electron-toolkit/preload'
 import type { Api } from './api'
+import type { OrcaBridge } from './orcarouter'
 import type { Ref } from 'vue'
 import path from 'path'
 import { Logger } from 'winston'
@@ -26,6 +27,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: Api
+    orca: OrcaBridge
     jQuery: any
     logBus: Emitter<any>
     dataParseWorker: Worker

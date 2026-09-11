@@ -13,7 +13,40 @@
   },
   "ai": {
     "generateSkillDoc": "Generate skill document",
-    "generateSkillDocTooltip": "Whether to generate skill documentation for the project"
+    "generateSkillDocTooltip": "Whether to generate skill documentation for the project",
+    "orcaProviderTitle": "OrcaRouter",
+    "orcaProviderSubtitle": "OpenAI-compatible AI gateway for models and agents. Choose an authentication method below.",
+    "orcaAuthMethodApiKey": "OrcaRouter - API",
+    "orcaAuthMethodPkce": "OrcaRouter - Auth",
+    "orcaApiKeyHint": "Paste an existing OrcaRouter API key (sk-orca-...). It is stored with the same protected storage the app already uses.",
+    "orcaApiKeyPlaceholder": "sk-orca-...",
+    "orcaSaveKey": "Save key",
+    "orcaClearKey": "Clear",
+    "orcaManageKeys": "Manage or revoke issued keys",
+    "orcaPkceHint": "Sign in with your OrcaRouter account in the browser. The authorization code is exchanged at {{origin}} and the resulting key is stored locally.",
+    "orcaConnect": "Connect with OrcaRouter",
+    "orcaConnecting": "Waiting for authorization...",
+    "orcaCancel": "Cancel",
+    "orcaWaitingForBrowser": "Complete the authorization in the browser window that just opened.",
+    "orcaOpenManually": "Browser did not open? Copy this URL:",
+    "orcaStatusNone": "No OrcaRouter credential configured.",
+    "orcaStatusConfigured": "Signed in via {{source}}.",
+    "orcaNeedsReauth": "OrcaRouter rejected this credential. Sign in again to continue.",
+    "orcaNeedsReauthShort": "Credential rejected - sign in again",
+    "orcaConfigureFirst": "Configure a credential first",
+    "orcaSelectModel": "Select a model",
+    "orcaLoadingModels": "Loading models...",
+    "orcaNoModels": "No model for this capability is available. Try refreshing.",
+    "orcaModelLabel": "Model",
+    "orcaRefreshModels": "Refresh",
+    "orcaDegraded": "Degraded",
+    "orcaAttachImage": "Attach an image (multimodal)",
+    "orcaPromptPlaceholder": "Describe what the script should do...",
+    "orcaSend": "Send",
+    "orcaKeyRejected": "OrcaRouter rejected that API key.",
+    "orcaCatalogFailed": "Could not load the OrcaRouter model catalog.",
+    "orcaConnectFailed": "OrcaRouter sign-in failed.",
+    "orcaRequestFailed": "The OrcaRouter request failed."
   },
   "header": {
     "rearrangeWindows": "Rearrange Windows",
@@ -1059,12 +1092,9 @@
       "sequence": {
         "noTester": "No Tester"
       },
-     
-
       "panel": {
         "addPanel": "Add Panel"
       },
-     
       "osTrace": {
         "statistics": "{{name}} Statistics",
         "timeline": "{{name}} Timeline",
@@ -1328,142 +1358,140 @@
           "inputBaudRate": "Please input baud rate"
         }
       }
-
-
     },
     "components": {
-        "addVar": {
-          "placeholders": {
-            "searchByName": "Search by name..."
-          },
-          "tooltips": {
-            "collapseAll": "Collapse All",
-            "expandAll": "Expand All",
-            "addVariable": "Add Variable",
-            "removeAttachSignal": "Remove Attach Signal"
-          },
-          "table": {
-            "name": "Name",
-            "type": "Type",
-            "initValue": "Init Value",
-            "min": "Min",
-            "max": "Max",
-            "unit": "Unit",
-            "description": "Description"
-          }
+      "addVar": {
+        "placeholders": {
+          "searchByName": "Search by name..."
         },
-        "editSignal": {
-          "collapse": {
-            "signalInformation": "Signal Information",
-            "variableInformation": "Variable Information"
-          },
-          "labels": {
-            "database": "Database",
-            "signalName": "Signal Name",
-            "frameId": "Frame ID",
-            "startBit": "Start Bit",
-            "bitLength": "Bit Length",
-            "variableFullName": "Variable Full Name",
-            "variableName": "Variable Name",
-            "variableType": "Variable Type",
-            "name": "Name",
-            "color": "Color",
-            "yAxis": "Y Axis",
-            "yAxisMin": "Y Axis Min",
-            "yAxisMax": "Y Axis Max",
-            "splitLine": "Split Line",
-            "disableZoom": "Disable Zoom",
-            "tooltip": "Tooltip",
-            "showTooltip": "Show Tooltip",
-            "xAxis": "X Axis",
-            "showGrid": "Show Grid",
-            "gridStyle": "Grid Style",
-            "showValue": "Show Value",
-            "series": "Series",
-            "step": "Step",
-            "showPoints": "Show Points",
-            "pointSize": "Point Size",
-            "pointStyle": "Point Style",
-            "min": "Min",
-            "max": "Max"
-          },
-          "options": {
-            "solid": "Solid",
-            "dashed": "Dashed",
-            "dotted": "Dotted",
-            "step": "Step",
-            "line": "Line",
-            "circle": "Circle",
-            "rectangle": "Rectangle",
-            "triangle": "Triangle",
-            "diamond": "Diamond"
-          },
-          "messages": {
-            "variableNotFound": "Variable {{name}} Not Found",
-            "checkVariableWindow": "Please check in Variable Window"
-          },
-          "buttons": {
-            "save": "Save",
-            "cancel": "Cancel"
-          }
+        "tooltips": {
+          "collapseAll": "Collapse All",
+          "expandAll": "Expand All",
+          "addVariable": "Add Variable",
+          "removeAttachSignal": "Remove Attach Signal"
         },
-        "package": {
-          "title": "Package Manager",
-          "empty": {
-            "noPackageJson": "No package.json found",
-            "saveProjectFirst": "Please save your project first before initializing package.json",
-            "initializeFirst": "Please initialize package.json first to manage dependencies",
-            "initializeButton": "Initialize package.json"
-          },
-          "form": {
-            "enterPackageName": "Enter package name",
-            "installType": "Install type",
-            "dependencies": "Dependencies",
-            "devDependencies": "Dev Dependencies",
-            "install": "Install"
-          },
-          "terminal": {
-            "installationLog": "Installation Log",
-            "clear": "Clear"
-          },
-          "table": {
-            "installedPackages": "Installed Packages",
-            "packageName": "Package Name",
-            "version": "Version",
-            "actions": "Actions",
-            "uninstall": "Uninstall"
-          },
-          "messages": {
-            "packageJsonInitialized": "✓ package.json initialized successfully",
-            "failedToInitialize": "✗ Failed to initialize package.json: {{error}}",
-            "enterPackageName": "✗ Please enter a package name",
-            "packageInstalled": "✓ Package {{name}} installed successfully",
-            "failedToInstall": "✗ Failed to install package {{name}}: {{error}}",
-            "packageUninstalled": "✓ Package {{name}} uninstalled successfully",
-            "failedToUninstall": "✗ Failed to uninstall package {{name}}: {{error}}",
-            "failedToLoad": "✗ Failed to load package.json: {{error}}",
-            "unknownError": "Unknown error"
-          }
-        },
-        "signal": {
-          "placeholders": {
-            "searchByName": "Search by name..."
-          },
-          "tooltips": {
-            "collapseAll": "Collapse All",
-            "expandAll": "Expand All",
-            "addSignal": "Add Signal",
-            "addFrame": "Add Frame",
-            "removeAttachSignal": "Remove Attach Signal"
-          },
-          "table": {
-            "name": "Name",
-            "txNode": "Tx Node",
-            "startBit": "Start Bit",
-            "bitLength": "Bit Length"
-          }
+        "table": {
+          "name": "Name",
+          "type": "Type",
+          "initValue": "Init Value",
+          "min": "Min",
+          "max": "Max",
+          "unit": "Unit",
+          "description": "Description"
         }
       },
+      "editSignal": {
+        "collapse": {
+          "signalInformation": "Signal Information",
+          "variableInformation": "Variable Information"
+        },
+        "labels": {
+          "database": "Database",
+          "signalName": "Signal Name",
+          "frameId": "Frame ID",
+          "startBit": "Start Bit",
+          "bitLength": "Bit Length",
+          "variableFullName": "Variable Full Name",
+          "variableName": "Variable Name",
+          "variableType": "Variable Type",
+          "name": "Name",
+          "color": "Color",
+          "yAxis": "Y Axis",
+          "yAxisMin": "Y Axis Min",
+          "yAxisMax": "Y Axis Max",
+          "splitLine": "Split Line",
+          "disableZoom": "Disable Zoom",
+          "tooltip": "Tooltip",
+          "showTooltip": "Show Tooltip",
+          "xAxis": "X Axis",
+          "showGrid": "Show Grid",
+          "gridStyle": "Grid Style",
+          "showValue": "Show Value",
+          "series": "Series",
+          "step": "Step",
+          "showPoints": "Show Points",
+          "pointSize": "Point Size",
+          "pointStyle": "Point Style",
+          "min": "Min",
+          "max": "Max"
+        },
+        "options": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "step": "Step",
+          "line": "Line",
+          "circle": "Circle",
+          "rectangle": "Rectangle",
+          "triangle": "Triangle",
+          "diamond": "Diamond"
+        },
+        "messages": {
+          "variableNotFound": "Variable {{name}} Not Found",
+          "checkVariableWindow": "Please check in Variable Window"
+        },
+        "buttons": {
+          "save": "Save",
+          "cancel": "Cancel"
+        }
+      },
+      "package": {
+        "title": "Package Manager",
+        "empty": {
+          "noPackageJson": "No package.json found",
+          "saveProjectFirst": "Please save your project first before initializing package.json",
+          "initializeFirst": "Please initialize package.json first to manage dependencies",
+          "initializeButton": "Initialize package.json"
+        },
+        "form": {
+          "enterPackageName": "Enter package name",
+          "installType": "Install type",
+          "dependencies": "Dependencies",
+          "devDependencies": "Dev Dependencies",
+          "install": "Install"
+        },
+        "terminal": {
+          "installationLog": "Installation Log",
+          "clear": "Clear"
+        },
+        "table": {
+          "installedPackages": "Installed Packages",
+          "packageName": "Package Name",
+          "version": "Version",
+          "actions": "Actions",
+          "uninstall": "Uninstall"
+        },
+        "messages": {
+          "packageJsonInitialized": "✓ package.json initialized successfully",
+          "failedToInitialize": "✗ Failed to initialize package.json: {{error}}",
+          "enterPackageName": "✗ Please enter a package name",
+          "packageInstalled": "✓ Package {{name}} installed successfully",
+          "failedToInstall": "✗ Failed to install package {{name}}: {{error}}",
+          "packageUninstalled": "✓ Package {{name}} uninstalled successfully",
+          "failedToUninstall": "✗ Failed to uninstall package {{name}}: {{error}}",
+          "failedToLoad": "✗ Failed to load package.json: {{error}}",
+          "unknownError": "Unknown error"
+        }
+      },
+      "signal": {
+        "placeholders": {
+          "searchByName": "Search by name..."
+        },
+        "tooltips": {
+          "collapseAll": "Collapse All",
+          "expandAll": "Expand All",
+          "addSignal": "Add Signal",
+          "addFrame": "Add Frame",
+          "removeAttachSignal": "Remove Attach Signal"
+        },
+        "table": {
+          "name": "Name",
+          "txNode": "Tx Node",
+          "startBit": "Start Bit",
+          "bitLength": "Bit Length"
+        }
+      }
+    },
     "graph": {
       "data": {
         "tooltips": {
@@ -2186,73 +2214,73 @@
       }
     },
     "test": {
-        "tooltips": {
-          "refreshTestConfig": "Refresh Test Config",
-          "runTestConfig": "Run Test Config",
-          "stopTestConfig": "Stop Test Config"
-        },
-        "menu": {
-          "edit": "Edit",
-          "exportReportHtml": "Export Report (HTML)",
-          "exportReportPdf": "Export Report (PDF)",
-          "delete": "Delete"
-        },
-        "labels": {
-          "name": "Name",
-          "testScriptFile": "Test Script File",
-          "connectDevices": "Connect Devices",
-          "reportPath": "Report Path"
-        },
-        "sections": {
-          "report": "Report"
-        },
-        "buttons": {
-          "choose": "Choose",
-          "build": "Build",
-          "refreshEdit": "Refresh / Edit",
-          "cancel": "Cancel",
-          "save": "Save"
-        },
-        "placeholders": {
-          "select": "Select"
-        },
-        "dialogs": {
-          "editConfiguration": "Edit Configuration",
-          "error": "Error",
-          "warning": "Warning",
-          "success": "Success",
-          "ok": "OK",
-          "cancel": "Cancel",
-          "deleteConfirm": "Are you sure to delete this config?",
-          "scriptFile": "Script File",
-          "reportPath": "Report Path",
-          "typescript": "typescript",
-          "allFiles": "All Files"
-        },
-        "messages": {
-          "saveProjectFirst": "Please save the project first",
-          "selectScriptFirst": "Please select the script file first",
-          "exportSuccess": "Test report exported successfully, open it?",
-          "exportFailed": "Failed to export test report: {{msg}}"
-        },
-        "buildStatus": {
-          "buildFailed": "Build Failed",
-          "buildSuccess": "Build Success",
-          "needRebuild": "Need Rebuild",
-          "needBuild": "Need Build"
-        },
-        "validation": {
-          "nameExists": "The test config name already exists",
-          "inputName": "Please input test config name"
-        },
-        "tree": {
-          "testConfig": "Test Config"
-        },
-        "defaultName": "Test Config",
-        "tips": {
-          "emptyReportPath": "Leave empty to use project root path"
-        }
+      "tooltips": {
+        "refreshTestConfig": "Refresh Test Config",
+        "runTestConfig": "Run Test Config",
+        "stopTestConfig": "Stop Test Config"
       },
+      "menu": {
+        "edit": "Edit",
+        "exportReportHtml": "Export Report (HTML)",
+        "exportReportPdf": "Export Report (PDF)",
+        "delete": "Delete"
+      },
+      "labels": {
+        "name": "Name",
+        "testScriptFile": "Test Script File",
+        "connectDevices": "Connect Devices",
+        "reportPath": "Report Path"
+      },
+      "sections": {
+        "report": "Report"
+      },
+      "buttons": {
+        "choose": "Choose",
+        "build": "Build",
+        "refreshEdit": "Refresh / Edit",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "placeholders": {
+        "select": "Select"
+      },
+      "dialogs": {
+        "editConfiguration": "Edit Configuration",
+        "error": "Error",
+        "warning": "Warning",
+        "success": "Success",
+        "ok": "OK",
+        "cancel": "Cancel",
+        "deleteConfirm": "Are you sure to delete this config?",
+        "scriptFile": "Script File",
+        "reportPath": "Report Path",
+        "typescript": "typescript",
+        "allFiles": "All Files"
+      },
+      "messages": {
+        "saveProjectFirst": "Please save the project first",
+        "selectScriptFirst": "Please select the script file first",
+        "exportSuccess": "Test report exported successfully, open it?",
+        "exportFailed": "Failed to export test report: {{msg}}"
+      },
+      "buildStatus": {
+        "buildFailed": "Build Failed",
+        "buildSuccess": "Build Success",
+        "needRebuild": "Need Rebuild",
+        "needBuild": "Need Build"
+      },
+      "validation": {
+        "nameExists": "The test config name already exists",
+        "inputName": "Please input test config name"
+      },
+      "tree": {
+        "testConfig": "Test Config"
+      },
+      "defaultName": "Test Config",
+      "tips": {
+        "emptyReportPath": "Leave empty to use project root path"
+      }
+    },
     "network": {
       "tree": {
         "devices": "Devices",
@@ -2483,9 +2511,6 @@
           "allFiles": "All Files"
         }
       },
-
-     
-      
       "udsView": {
         "defaultDeviceName": "Device",
         "dialogs": {

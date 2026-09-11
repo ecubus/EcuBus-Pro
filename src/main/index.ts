@@ -14,6 +14,7 @@ import { startRpcHost } from './rpcHost'
 import Transport from 'winston-transport'
 import { initMainI18n } from './i18n'
 import { setupCasdoor } from './ipc/casdoor'
+import { registerOrcaRouterIpc } from './orcarouter/ipc'
 import 'src/renderer/src/helper'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
@@ -205,6 +206,10 @@ app.whenReady().then(async () => {
   })
 
   registerLocalResourceProtocol()
+
+  // OrcaRouter provider: credential store + model discovery + inference.
+  // Registered after `ready` so `safeStorage` is usable.
+  registerOrcaRouterIpc()
 
   // 初始化主进程 i18n
   try {

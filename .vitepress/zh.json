@@ -150,6 +150,10 @@
         {
           "text": "AI助手",
           "link": "script/ai.md"
+        },
+        {
+          "text": "OrcaRouter 提供商",
+          "link": "ai/orcarouter.md"
         }
       ]
     },

@@ -23,6 +23,10 @@ All valid variables from [`Variable Window`](./../var/var.md).
 
 ## Multi Signal In One Graph
 
+Add multiple signals or variables from the tree, then enable the checkboxes for each item you want to plot. All enabled traces are drawn on the same timeline and share the X (time) axis. Each trace keeps its own color and appears in the chart legend so you can distinguish overlapping series.
+
+Use the tree checkboxes to add or remove variables from the timeline without creating a separate graph window for each signal. With a single enabled item, the graph behaves the same as before (one series with that signal's Y-axis settings).
+
 ![alt text](../../../media/um/graph/image-3.png)
 ![alt text](../../../media/um/graph/image-5.png)
 ![alt text](../../../media/um/graph/image-6.png)

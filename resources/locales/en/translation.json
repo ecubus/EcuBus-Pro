@@ -1140,7 +1140,9 @@
         "toomoss": "TOOMOSS",
         "vector": "VECTOR",
         "slcan": "SLCAN",
-        "candle": "CANDLE"
+        "candle": "CANDLE",
+        "vcan_usb": "VCAN USB",
+        "vkgs_usb": "VKGS USB"
       },
       "canNode": {
         "sections": {

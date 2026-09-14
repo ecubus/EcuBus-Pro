@@ -23,6 +23,8 @@ export type CanVendor =
   | 'slcan'
   | 'ecubus'
   | 'candle'
+  | 'vcan_usb'
+  | 'vkgs_usb'
 export interface CanBaseInfo {
   id: string
   handle: any
@@ -495,6 +497,8 @@ export interface CanDevice {
       dataCap?: CandleCapability
       fdSupported?: boolean
       Res?: boolean
+      /** Optional vendor hint used only to break equal-sample-point timing ties. */
+      preferredDataTimeQuanta?: number
     }
   }
 }

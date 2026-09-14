@@ -17,15 +17,21 @@
         "vector",
         "slcan",
         "ecubus",
-        "candle"
+        "candle",
+        "vcan_usb",
+        "vkgs_usb"
       ],
       "linux": [
         "simulate",
-        "slcan"
+        "slcan",
+        "vcan_usb",
+        "vkgs_usb"
       ],
       "darwin": [
         "simulate",
-        "slcan"
+        "slcan",
+        "vcan_usb",
+        "vkgs_usb"
       ]
     }
   },
@@ -60,7 +66,7 @@
     "build:linux": "npm run build && electron-builder --linux",
     "native": "npm run docan && npm run dolin && npm run someip",
     "api": "typedoc --tsconfig tsconfig.worker.json --lang en-US",
-    "docan": "cd src/main/docan && npx node-gyp rebuild",
+    "docan": "npx node-gyp rebuild --directory src/main/docan && npx node-gyp rebuild --directory src/main/docan/vcan_usb -- -Duse_udev=0 && npx node-gyp rebuild --directory src/main/docan/vkgs_usb -- -Duse_udev=0",
     "dolin": "cd src/main/dolin && npx node-gyp rebuild",
     "someip": "cd src/main/vsomeip && npx node-gyp rebuild",
     "docs:dev": "vitepress dev",
@@ -178,6 +184,7 @@
     "ts-loader": "^9.5.4",
     "typedoc": "^0.27.6",
     "typescript": "^5.3.3",
+    "usb": "2.18.0",
     "viewerjs": "^1.11.6",
     "vite": "^5.4.21",
     "vite-plugin-conditional-compiler": "^0.3.1",

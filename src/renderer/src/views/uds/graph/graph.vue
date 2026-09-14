@@ -127,16 +127,15 @@
             >
               <Icon :icon="dragVerticalIcon" />
             </div>
-            <div
-              v-for="(chart, index) in enabledCharts"
-              :key="chart.id"
-              :style="{
-                height: `${(height - (enabledCharts.length - 1) * 5) / enabledCharts.length}px`,
-                marginTop: index === 0 ? '0' : '5px'
-              }"
-              class="chart-container"
-            >
-              <div :id="`chart-${props.editIndex}-${chart.id}`" style="width: 100%; height: 100%" />
+            <div class="chart-container" :style="{ height: height + 'px' }">
+              <div v-if="enabledCharts.length === 0" class="empty-chart">
+                {{ i18next.t('uds.graph.graph.labels.emptyChart') }}
+              </div>
+              <div
+                v-show="enabledCharts.length > 0"
+                :id="chartDomId"
+                style="width: 100%; height: 100%"
+              />
             </div>
           </div>
         </div>
@@ -202,7 +201,7 @@ import { useDataStore } from '@r/stores/data'
 import { GraphBindSignalValue, GraphBindVariableValue, GraphNode } from 'src/preload/data'
 import { use } from 'echarts/core'
 import { LineChart } from 'echarts/charts'
-import { GridComponent, DataZoomComponent } from 'echarts/components'
+import { GridComponent, DataZoomComponent, LegendComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
 import { ElNotification, formatter } from 'element-plus'
@@ -214,7 +213,7 @@ import { useGlobalStart } from '@r/stores/runtime'
 import { Layout } from '../layout'
 import i18next from 'i18next'
 
-use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer])
+use([LineChart, GridComponent, DataZoomComponent, LegendComponent, CanvasRenderer])
 
 const isPaused = ref(false)
 const hideTree = ref(false)
@@ -229,6 +228,7 @@ const graphs = useDataStore().graphs
 const appendId = computed(() => (props.editIndex ? `#win${props.editIndex}` : '#wingraph'))
 const height = computed(() => props.height - 22)
 const tableHeight = computed(() => (height.value * 2) / 3)
+const chartDomId = computed(() => `chart-${props.editIndex ?? 'graph'}-main`)
 // 修改测试数据
 const filteredTreeData = ref<
   GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>[]
@@ -286,42 +286,7 @@ const handleEditSave = (updatedNode: GraphNode<GraphBindSignalValue, LineSeriesO
   if (index !== -1) {
     filteredTreeData.value[index] = updatedNode
     graphs[updatedNode.id] = updatedNode
-
-    // 更新图表配置
-    chartInstances[updatedNode.id].setOption({
-      tooltip: {
-        show: getShowTooTip(updatedNode.id, updatedNode.tooltip?.show)
-      },
-      name: updatedNode.name,
-      yAxis: {
-        ...updatedNode.yAxis,
-        // 更新轴标签颜色
-        nameTextStyle: {
-          color: updatedNode.color
-        }
-      },
-      xAxis: updatedNode.xAxis,
-      series: {
-        ...updatedNode.series,
-        // 更新线条颜色
-        lineStyle: {
-          color: updatedNode.color
-        },
-        itemStyle: {
-          color: updatedNode.color
-        },
-        showSymbol: getShowSymbol(updatedNode.id, updatedNode.series?.showSymbol)
-      }
-    })
-
-    // 如果有缓存的数据，使用新的颜色重绘
-    if (chartDataCache[updatedNode.id]?.length > 0) {
-      chartInstances[updatedNode.id].setOption({
-        series: {
-          data: chartDataCache[updatedNode.id]
-        }
-      })
-    }
+    rebuildChartOption()
   }
 
   editDialogVisible.value = false
@@ -376,22 +341,18 @@ const updateTime = () => {
   const newMinX = minX
   const newMaxX = displayMaxX
 
-  // 更新所有图表的x轴，让其随时间移动
-  enabledCharts.value.forEach((c) => {
-    // 缓存 x 轴的 min 值，供数据清理使用
-    cachedXAxisMin[c.id] = newMinX
+  cachedXAxisMin = newMinX
 
-    chartInstances[c.id].setOption(
-      {
-        xAxis: {
-          min: newMinX,
-          max: newMaxX
-        }
-      },
-      false,
-      false
-    ) // notMerge=false, lazyUpdate=false 立即更新
-  })
+  chartInstance?.setOption(
+    {
+      xAxis: {
+        min: newMinX,
+        max: newMaxX
+      }
+    },
+    false,
+    false
+  )
 }
 watch(globalStart, (val) => {
   if (val) {
@@ -399,57 +360,52 @@ watch(globalStart, (val) => {
     Object.keys(chartDataCache).forEach((key) => {
       chartDataCache[key] = []
       chartTimeIndex[key] = new Map()
-      cachedXAxisMin[key] = 0
     })
+    cachedXAxisMin = 0
 
-    //clear all charts data and set start to 0
-    enabledCharts.value.forEach((c) => {
-      //reset datazoom
-      chartInstances[c.id].setOption({
-        dataZoom: [
-          {
-            start: 0,
-            end: 100
-          }
-        ]
-      })
-      cachedXAxisMin[c.id] = 0
-      chartInstances[c.id].setOption({
-        series: {
-          data: [],
-          showSymbol: getShowSymbol(c.id)
-        },
-        xAxis: {
-          min: 0,
-          max: 10
-        },
-        tooltip: {
-          show: getShowTooTip(c.id)
+    chartInstance?.setOption({
+      dataZoom: [
+        {
+          start: 0,
+          end: 100
         }
-      })
+      ],
+      series: enabledCharts.value.map((c) => ({
+        data: [],
+        showSymbol: getShowSymbol(c.id)
+      })),
+      xAxis: {
+        min: 0,
+        max: 10
+      },
+      tooltip: {
+        show: getShowTooTip()
+      }
     })
     if (timer) {
       clearInterval(timer)
     }
     timer = setInterval(updateTime, 100)
   } else {
-    enabledCharts.value.forEach((c) => {
-      chartInstances[c.id].setOption({
-        tooltip: {
-          show: getShowTooTip(c.id)
-        },
-        series: {
-          showSymbol: getShowSymbol(c.id)
-        }
-      })
+    chartInstance?.setOption({
+      tooltip: {
+        show: getShowTooTip()
+      },
+      series: enabledCharts.value.map((c) => ({
+        showSymbol: getShowSymbol(c.id)
+      }))
     })
     clearInterval(timer)
   }
 })
 
-const getShowTooTip = (id: string, val?: boolean) => {
+const getShowTooTip = (id?: string, val?: boolean) => {
   if (val == undefined) {
-    val = graphs[id].tooltip?.show
+    if (id && graphs[id]) {
+      val = graphs[id].tooltip?.show
+    } else {
+      val = enabledCharts.value.some((c) => c.tooltip?.show !== false)
+    }
   }
   if (val) {
     if (isPaused.value) {
@@ -479,16 +435,14 @@ const getShowSymbol = (id: string, val?: boolean) => {
     return false
   }
 }
-watch(isPaused, (val) => {
-  enabledCharts.value.forEach((c) => {
-    chartInstances[c.id].setOption({
-      tooltip: {
-        show: getShowTooTip(c.id)
-      },
-      series: {
-        showSymbol: getShowSymbol(c.id)
-      }
-    })
+watch(isPaused, () => {
+  chartInstance?.setOption({
+    tooltip: {
+      show: getShowTooTip()
+    },
+    series: enabledCharts.value.map((c) => ({
+      showSymbol: getShowSymbol(c.id)
+    }))
   })
 })
 
@@ -504,29 +458,25 @@ const layout = inject('layout') as Layout
 const pendingUpdates: Record<string, boolean> = {}
 let updateScheduled = false
 // 缓存 x 轴范围，避免频繁调用 getOption
-const cachedXAxisMin: Record<string, number> = {}
+let cachedXAxisMin = 0
 
 function scheduleBatchUpdate() {
   if (updateScheduled) return
   updateScheduled = true
 
   requestAnimationFrame(() => {
-    Object.keys(pendingUpdates).forEach((key) => {
-      const chart = chartInstances[key]
-      if (chart && chartDataCache[key]) {
-        chart.setOption(
-          {
-            series: {
-              data: chartDataCache[key]
-            }
-          },
-          false,
-          true
-        ) // notMerge=false, lazyUpdate=true
-      }
-    })
+    if (chartInstance) {
+      chartInstance.setOption(
+        {
+          series: enabledCharts.value.map((c) => ({
+            data: chartDataCache[c.id] || []
+          }))
+        },
+        false,
+        true
+      )
+    }
 
-    // 清空待更新列表
     Object.keys(pendingUpdates).forEach((key) => delete pendingUpdates[key])
     updateScheduled = false
   })
@@ -542,9 +492,7 @@ function dataUpdate({
   if (isPaused.value || !globalStart.value) {
     return
   }
-  // 获取对应的echarts实例
-  const chart = chartInstances[key]
-  if (!chart) return
+  if (!chartInstance || getSeriesIndex(key) < 0) return
 
   // 初始化或获取缓存数据
   if (!chartDataCache[key]) {
@@ -578,7 +526,7 @@ function dataUpdate({
   const MAX_POINTS = 2000 // 最大保留点数
   if (cache.length > MAX_POINTS) {
     // 优化：使用缓存的 x 轴最小值，避免调用 getOption
-    const xAxisMin = cachedXAxisMin[key]
+    const xAxisMin = cachedXAxisMin
     if (xAxisMin !== undefined) {
       const bufferTime = 10
       const minX = xAxisMin - bufferTime
@@ -638,16 +586,11 @@ const enabledCharts = computed(() => {
   return Object.values(filteredTreeData.value).filter((node) => node.enable)
 })
 
-// 修改模拟数据生成函数，返回二维数组格式
-const generateMockData = (count: number) => {
-  return Array.from({ length: count }, (_, i) => [
-    i * 0.1, // 时间
-    Math.sin(i * 0.1) * 5 // 值
-  ])
+const getSeriesIndex = (nodeId: string) => {
+  return enabledCharts.value.findIndex((c) => c.id === nodeId)
 }
 
-// 添加图表实例管理
-const chartInstances: Record<string, echarts.ECharts> = {}
+let chartInstance: echarts.ECharts | null = null
 
 // 替换拖拽相关的状态和处理函数
 const isDragging = ref(false)
@@ -656,198 +599,151 @@ const inYArea = ref(false)
 let timer
 const maxYAxisLength = ref(80)
 watch(maxYAxisLength, (newVal) => {
-  enabledCharts.value.forEach((c) => {
-    chartInstances[c.id].setOption({
-      grid: {
-        left: newVal + 'px'
-      }
-    })
+  chartInstance?.setOption({
+    grid: {
+      left: newVal + 'px'
+    }
   })
 })
-// 修改初始化图表实例函数
-const initChart = (chartId: string) => {
-  const dom = document.getElementById(`chart-${props.editIndex}-${chartId}`)
 
-  if (dom) {
-    const chart = echarts.init(dom)
-    chartInstances[chartId] = chart
-
-    // 使用 echarts 事件
-    chart.on('mousedown', (params) => {
-      if (params.componentType == 'yAxis' || params.componentType == 'series') {
-        if (params.event?.event.ctrlKey) {
-          isDragging.value = false
-        } else {
-          isDragging.value = true
-        }
-      }
-    })
-    chart.on('dataZoom', (event: any) => {
-      let dz = { start: event.start, end: event.end }
-      if (event.batch) dz = { start: event.batch[0].start, end: event.batch[0].end }
-      //update all charts except the current one
-      enabledCharts.value.forEach((c) => {
-        if (c.id !== chartId) {
-          chartInstances[c.id].setOption({
-            dataZoom: [
-              {
-                start: dz.start,
-                end: dz.end
-              }
-            ]
-          })
-        }
-      })
-    })
-    chart.on('mouseover', (params) => {
-      if (params.componentType == 'yAxis' || params.componentType == 'series') {
-        inYArea.value = true
-
-        if (params.event?.event.ctrlKey && !graphs[chartId].disZoom) {
-          isZoomY.value = true
-        }
-      }
-    })
-
-    // Add mouseout handler to reset cursor
-    chart.on('mouseout', (params) => {
-      inYArea.value = false
-      isZoomY.value = false
-    })
-
-    // Add keyup handler to reset cursor when ctrl is released
-    document.addEventListener('keyup', (event) => {
-      isZoomY.value = false
-    })
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Control' && inYArea.value && !graphs[chartId].disZoom) {
-        isZoomY.value = true
-      }
-      isDragging.value = false
-    })
-
-    dom.addEventListener('mouseup', (event) => {
-      isDragging.value = false
-      isZoomY.value = false
-      inYArea.value = false
-    })
-    dom.addEventListener('mousemove', (event) => {
-      if (event.ctrlKey) {
-        isDragging.value = false
-      }
-      if (isDragging.value) {
-        const range = chartInstances[chartId].getOption().yAxis as ECBasicOption['yAxis'] as any
-        const { min, max } = range[0]
-        const offset = max - min
-        let deltaY = event.movementY
-        if (deltaY > 0) {
-          deltaY += offset * 0.2
-        } else {
-          deltaY -= offset * 0.2
-        }
-        const newRange = {
-          min: min + deltaY * 0.05,
-          max: max + deltaY * 0.05
-        }
-
-        chartInstances[chartId].setOption({
-          yAxis: {
-            min: newRange.min,
-            max: newRange.max
-          }
-        })
-
-        // 更新graph的yAxis信息
-        const node = filteredTreeData.value.find((n) => n.id === chartId)
-        if (node) {
-          node.yAxis = {
-            ...node.yAxis,
-            min: newRange.min,
-            max: newRange.max
-          }
-          graphs[chartId].yAxis = node.yAxis
-        }
-      }
-    })
-
-    // Add wheel event handler for zooming
-    dom.addEventListener(
-      'wheel',
-      (event: WheelEvent) => {
-        if (event.ctrlKey && isZoomY.value) {
-          if (graphs[chartId].disZoom) {
-            isZoomY.value = false
-            return
-          }
-          const yAxis = (chart.getOption() as any).yAxis[0]
-          const range = yAxis.max - yAxis.min
-          const offset = range * 0.2
-
-          let newMin: number, newMax: number
-          if (event.deltaY < 0) {
-            //zoom in
-            newMin = yAxis.min + offset
-            newMax = yAxis.max - offset
-          } else {
-            //zoom out
-            newMin = yAxis.min - offset
-            newMax = yAxis.max + offset
-          }
-
-          chart.setOption({
-            yAxis: {
-              min: newMin,
-              max: newMax
-            }
-          })
-
-          // 更新graph的yAxis信息
-          const node = filteredTreeData.value.find((n) => n.id === chartId)
-          if (node) {
-            node.yAxis = {
-              ...node.yAxis,
-              min: newMin,
-              max: newMax
-            }
-            graphs[chartId].yAxis = node.yAxis
-          }
-        }
-      },
-      { passive: false }
-    )
-
-    //dom outside
-    dom.addEventListener('mouseleave', (event) => {
-      isDragging.value = false
-    })
-
-    chart.on('mouseout', (params) => {
-      //prevent mouseup event
-      params.event?.event.preventDefault()
-    })
-
-    updateChartOption(chartId)
-    if (graphs[chartId]) {
-      chart.setOption({
-        tooltip: graphs[chartId].tooltip,
-        yAxis: graphs[chartId].yAxis,
-        xAxis: graphs[chartId].xAxis,
-        series: graphs[chartId].series
-      })
-    }
-  }
+const isYAxisZoomDisabled = () => {
+  return enabledCharts.value.some((c) => c.disZoom)
 }
 
-// 更新图表配置
-const updateChartOption = (chartId: string) => {
-  const chart = enabledCharts.value.find((c) => c.id === chartId)
-  const index = enabledCharts.value.findIndex((c) => c.id === chartId)
+const persistSharedYAxis = (min: number, max: number) => {
+  enabledCharts.value.forEach((node) => {
+    node.yAxis = {
+      ...node.yAxis,
+      min,
+      max
+    }
+    graphs[node.id].yAxis = node.yAxis
+  })
+}
 
-  if (chart && chartInstances[chartId]) {
-    const option = getChartOption(chart, index)
-    chartInstances[chartId].setOption(option)
-  }
+const initChart = () => {
+  const dom = document.getElementById(chartDomId.value)
+  if (!dom || chartInstance) return
+
+  chartInstance = echarts.init(dom)
+
+  chartInstance.on('mousedown', (params) => {
+    if (params.componentType == 'yAxis' || params.componentType == 'series') {
+      if (params.event?.event.ctrlKey) {
+        isDragging.value = false
+      } else {
+        isDragging.value = true
+      }
+    }
+  })
+
+  chartInstance.on('mouseover', (params) => {
+    if (params.componentType == 'yAxis' || params.componentType == 'series') {
+      inYArea.value = true
+      if (params.event?.event.ctrlKey && !isYAxisZoomDisabled()) {
+        isZoomY.value = true
+      }
+    }
+  })
+
+  chartInstance.on('mouseout', () => {
+    inYArea.value = false
+    isZoomY.value = false
+  })
+
+  document.addEventListener('keyup', () => {
+    isZoomY.value = false
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Control' && inYArea.value && !isYAxisZoomDisabled()) {
+      isZoomY.value = true
+    }
+    isDragging.value = false
+  })
+
+  dom.addEventListener('mouseup', () => {
+    isDragging.value = false
+    isZoomY.value = false
+    inYArea.value = false
+  })
+
+  dom.addEventListener('mousemove', (event) => {
+    if (event.ctrlKey) {
+      isDragging.value = false
+    }
+    if (isDragging.value && chartInstance) {
+      const range = chartInstance.getOption().yAxis as ECBasicOption['yAxis'] as any
+      const { min, max } = range[0]
+      const offset = max - min
+      let deltaY = event.movementY
+      if (deltaY > 0) {
+        deltaY += offset * 0.2
+      } else {
+        deltaY -= offset * 0.2
+      }
+      const newRange = {
+        min: min + deltaY * 0.05,
+        max: max + deltaY * 0.05
+      }
+
+      chartInstance.setOption({
+        yAxis: {
+          min: newRange.min,
+          max: newRange.max
+        }
+      })
+      persistSharedYAxis(newRange.min, newRange.max)
+    }
+  })
+
+  dom.addEventListener(
+    'wheel',
+    (event: WheelEvent) => {
+      if (event.ctrlKey && isZoomY.value && chartInstance) {
+        if (isYAxisZoomDisabled()) {
+          isZoomY.value = false
+          return
+        }
+        const yAxis = (chartInstance.getOption() as any).yAxis[0]
+        const range = yAxis.max - yAxis.min
+        const offset = range * 0.2
+
+        let newMin: number, newMax: number
+        if (event.deltaY < 0) {
+          newMin = yAxis.min + offset
+          newMax = yAxis.max - offset
+        } else {
+          newMin = yAxis.min - offset
+          newMax = yAxis.max + offset
+        }
+
+        chartInstance.setOption({
+          yAxis: {
+            min: newMin,
+            max: newMax
+          }
+        })
+        persistSharedYAxis(newMin, newMax)
+      }
+    },
+    { passive: false }
+  )
+
+  dom.addEventListener('mouseleave', () => {
+    isDragging.value = false
+  })
+
+  chartInstance.on('mouseout', (params) => {
+    params.event?.event.preventDefault()
+  })
+
+  rebuildChartOption()
+}
+
+const rebuildChartOption = () => {
+  if (!chartInstance) return
+  chartInstance.setOption(getCombinedChartOption(), true)
 }
 
 function reszie(q?: any) {
@@ -855,9 +751,7 @@ function reszie(q?: any) {
     return
   }
   nextTick(() => {
-    Object.values(chartInstances).forEach((instance) => {
-      instance.resize()
-    })
+    chartInstance?.resize()
   })
 }
 // 监听图表容器大小变化
@@ -867,37 +761,172 @@ watch([() => canvasWidth.value, () => height.value, enabledCharts], () => {
   })
 })
 
-const getChartOption = (
+const formatSeriesValue = (
   chart: GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>,
-  index: number
-): ECBasicOption => {
-  const isLast = index === enabledCharts.value.length - 1
-  const isFirst = index === 0
-  const option: ECBasicOption = {
-    animation: false,
-    tooltip: {
-      show: globalStart.value ? false : (chart.tooltip?.show ?? true),
-      formatter: (params: any) => {
-        if (params && params.data) {
-          let value = params.data[1]
-          if (chart.bindValue.stringRange) {
-            const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
-            if (stringVal) {
-              value = stringVal.name
-            }
-          }
-          const timeStr = i18next.t('uds.graph.graph.tooltip.time', { time: params.data[0] * 1000 })
-          const valueStr = i18next.t('uds.graph.graph.tooltip.value', {
-            value: typeof value === 'number' ? value.toFixed(2) : value
-          })
-          return `${timeStr}<br/>${valueStr}`
+  value: number | string
+) => {
+  if (chart.bindValue.stringRange) {
+    const stringVal = chart.bindValue.stringRange.find((v) => v.value == value)
+    if (stringVal) {
+      return stringVal.name
+    }
+  }
+  return typeof value === 'number' ? value.toFixed(2) : value
+}
+
+const getSeriesOption = (
+  chart: GraphNode<GraphBindSignalValue | GraphBindVariableValue, LineSeriesOption>
+): LineSeriesOption => {
+  return {
+    ...chart.series,
+    id: chart.id,
+    name: chart.name,
+    type: 'line',
+    triggerLineEvent: true,
+    showSymbol: getShowSymbol(chart.id, chart.series?.showSymbol),
+    large: true,
+    sampling: 'lttb',
+    data: chartDataCache[chart.id] || [],
+    itemStyle: {
+      ...chart.series?.itemStyle,
+      color: chart.color
+    },
+    lineStyle: {
+      ...chart.series?.lineStyle,
+      color: chart.color,
+      width: chart.series?.lineStyle?.width ?? 2
+    },
+    cursor: 'ns-resize',
+    emphasis: {
+      focus: 'series',
+      lineStyle: {
+        width: 3
+      }
+    },
+    silent: false
+  } as LineSeriesOption
+}
+
+const getSharedYAxisOption = (): ECBasicOption['yAxis'] => {
+  const charts = enabledCharts.value
+  const singleChart = charts.length === 1 ? charts[0] : null
+
+  let min: number | undefined
+  let max: number | undefined
+  charts.forEach((chart) => {
+    if (chart.yAxis?.min !== undefined) {
+      min = min === undefined ? chart.yAxis.min : Math.min(min, chart.yAxis.min as number)
+    }
+    if (chart.yAxis?.max !== undefined) {
+      max = max === undefined ? chart.yAxis.max : Math.max(max, chart.yAxis.max as number)
+    }
+  })
+
+  return {
+    triggerEvent: true,
+    splitLine: {
+      show: false
+    },
+    axisLine: {
+      show: true
+    },
+    axisTick: {
+      show: true,
+      length: 4
+    },
+    scale: charts.length > 1,
+    min: min ?? (singleChart ? 0 : undefined),
+    max: max ?? (singleChart ? 20 : undefined),
+    axisLabel: {
+      fontSize: 10,
+      show: true,
+      formatter: (value: number) => {
+        const getWidth = (label: string) => {
+          const rect = echarts.format.getTextRect(label, '10px')
+          return Math.ceil(rect.width + 40)
         }
-        return ''
+
+        if (singleChart?.bindValue.stringRange) {
+          const val = singleChart.bindValue.stringRange.find((v) => v.value == value)?.name
+          if (val) {
+            const w = getWidth(val)
+            if (w > maxYAxisLength.value) {
+              maxYAxisLength.value = w
+            }
+            return val
+          }
+        }
+
+        let val = Number.isInteger(value) ? value.toFixed(0) : ''
+        if (val.length > 6) {
+          val = value.toExponential()
+        }
+        if (val.length > 0 && singleChart?.yAxis?.unit) {
+          val = val + singleChart.yAxis.unit
+        }
+        const w = getWidth(val)
+        if (w > maxYAxisLength.value) {
+          maxYAxisLength.value = w
+        }
+        return val
+      }
+    },
+    name: charts.length === 1 ? charts[0].name : i18next.t('uds.graph.graph.labels.sharedYAxis'),
+    nameLocation: 'middle',
+    nameGap: 65,
+    nameRotate: 90,
+    nameTextStyle: {
+      fontSize: 11,
+      padding: [0, 0, 0, 5],
+      align: 'center',
+      color: charts.length === 1 ? charts[0].color : undefined
+    }
+  }
+}
+
+const getCombinedChartOption = (): ECBasicOption => {
+  const charts = enabledCharts.value
+  const multiSeries = charts.length > 1
+
+  return {
+    animation: false,
+    legend: multiSeries
+      ? {
+          type: 'scroll',
+          top: 0,
+          data: charts.map((c) => c.name)
+        }
+      : undefined,
+    tooltip: {
+      show: globalStart.value ? false : getShowTooTip(),
+      trigger: multiSeries ? 'axis' : 'item',
+      formatter: (params: any) => {
+        const items = Array.isArray(params) ? params : [params]
+        if (!items.length || !items[0]?.data) {
+          return ''
+        }
+
+        const timeStr = i18next.t('uds.graph.graph.tooltip.time', {
+          time: items[0].data[0] * 1000
+        })
+        const lines = [timeStr]
+
+        items.forEach((item) => {
+          const chart = charts[item.seriesIndex]
+          if (!chart) return
+          const valueStr = i18next.t('uds.graph.graph.tooltip.seriesValue', {
+            name: item.seriesName,
+            value: formatSeriesValue(chart, item.data[1])
+          })
+          lines.push(`${item.marker}${valueStr}`)
+        })
+
+        return lines.join('<br/>')
       }
     },
     dataZoom: [
       {
-        show: isLast,
+        show: charts.length > 0,
         type: 'slider',
         height: 20,
         bottom: 10,
@@ -909,30 +938,28 @@ const getChartOption = (
     grid: {
       left: maxYAxisLength.value + 'px',
       right: '20px',
-      top: isFirst ? '20px' : '10px',
-      bottom: isLast ? '45px' : '4px',
+      top: multiSeries ? '40px' : '20px',
+      bottom: '45px',
       containLabel: false
     },
     xAxis: {
       type: 'value',
       min: 0,
       max: 10,
-      name: isLast ? '[s]' : '',
+      name: '[s]',
       nameLocation: 'end',
       nameGap: 0,
       nameTextStyle: {
         fontSize: 12,
-        padding: [0, 0, 0, 5] // 调整 [s] 的位置，上右下左
+        padding: [0, 0, 0, 5]
       },
-
       axisLabel: {
-        show: isLast,
-        // interval:1,
+        show: true,
         formatter: (value: number) =>
           Number.isInteger(value) ? value.toFixed(0) : value.toFixed(2)
       },
       axisTick: {
-        show: isLast,
+        show: true,
         interval: 10
       },
       splitLine: {
@@ -948,97 +975,9 @@ const getChartOption = (
       triggerEvent: false,
       position: 'bottom'
     },
-    yAxis: {
-      triggerEvent: true,
-      splitLine: {
-        show: false
-      },
-      axisLine: {
-        show: true
-      },
-      axisTick: {
-        show: true,
-        length: 4
-      },
-
-      min: 0,
-      max: 20,
-      axisLabel: {
-        fontSize: 10,
-        show: true,
-        formatter: (value: number) => {
-          const getWidth = (label: string) => {
-            const rect = echarts.format.getTextRect(label, '10px')
-            return Math.ceil(rect.width + 40)
-          }
-
-          if (chart.bindValue.stringRange) {
-            const val = chart.bindValue.stringRange.find((v) => v.value == value)?.name
-            if (val) {
-              const w = getWidth(val)
-
-              if (w > maxYAxisLength.value) {
-                maxYAxisLength.value = w
-              }
-              return val
-            }
-          }
-
-          let val = Number.isInteger(value) ? value.toFixed(0) : ''
-          //如果val太大，显示科学计数法
-          if (val.length > 6) {
-            val = value.toExponential()
-          }
-          if (val.length > 0) {
-            val = val + (chart.yAxis?.unit ?? '')
-          }
-          const w = getWidth(val)
-
-          if (w > maxYAxisLength.value) {
-            maxYAxisLength.value = w
-          }
-          return val
-        }
-      },
-      name: chart.name,
-      nameLocation: 'middle',
-      nameGap: 65, // 调整标题距离轴的距离
-      nameRotate: 90, // 垂直旋转文字
-      nameTextStyle: {
-        fontSize: 11,
-        padding: [0, 0, 0, 5], // 微调文字位置
-        align: 'center',
-        color: chart.color
-      }
-    },
-    series: [
-      {
-        name: chart.name,
-        type: 'line',
-        triggerLineEvent: true,
-        showSymbol: false,
-        large: true,
-        sampling: 'lttb',
-        itemStyle: {
-          color: chart.color
-        },
-        lineStyle: {
-          color: chart.color,
-          width: 2
-        },
-        cursor: 'ns-resize', // 添加鼠标样式
-        emphasis: {
-          // 添加鼠标悬停效果
-          focus: 'series',
-          lineStyle: {
-            width: 3
-          }
-        },
-        silent: false // Enable mouse events on the line
-      }
-    ]
+    yAxis: getSharedYAxisOption(),
+    series: charts.map((chart) => getSeriesOption(chart))
   }
-  return option
 }
 
 onMounted(() => {
@@ -1058,13 +997,14 @@ onMounted(() => {
 
     filteredTreeData.value.push(v)
   }
-  // 初始化所有图表
   nextTick(() => {
-    enabledCharts.value.forEach((chart) => {
-      if (!chartInstances[chart.id]) {
-        initChart(chart.id)
+    if (enabledCharts.value.length > 0) {
+      initChart()
+    }
+    filteredTreeData.value.forEach((chart) => {
+      if (chart.enable) {
+        window.logBus.on(chart.id, dataUpdate)
       }
-      window.logBus.on(chart.id, dataUpdate)
     })
   })
   if (globalStart.value) {
@@ -1073,70 +1013,37 @@ onMounted(() => {
   layout.on('show', reszie)
 })
 
-// 监听启用图表的变化
 watch(
-  () => enabledCharts.value,
+  () => enabledCharts.value.map((c) => c.id).join(','),
   () => {
     nextTick(() => {
-      // 初始化新增的图表
-      enabledCharts.value.forEach((chart) => {
-        if (!chartInstances[chart.id]) {
-          initChart(chart.id)
-        }
-      })
-      // 清理已移除的图表
-      Object.keys(chartInstances).forEach((id) => {
-        if (!enabledCharts.value.find((c) => c.id === id)) {
-          chartInstances[id].dispose()
-          delete chartInstances[id]
-        }
-      })
-      //update grid and dataZoom for all charts
-      enabledCharts.value.forEach((c, index) => {
-        const isLast = index === enabledCharts.value.length - 1
-        const isFirst = index === 0
-        chartInstances[c.id].setOption({
-          grid: {
-            top: isFirst ? '20px' : '10px',
-            bottom: isLast ? '45px' : '4px'
-          },
-          xAxis: {
-            axisLabel: {
-              show: isLast
-            }
-          },
-          dataZoom: [
-            {
-              show: isLast,
-              type: 'slider',
-              height: 12,
-              bottom: 10,
-              showDetail: true,
-              showDataShadow: false
-            }
-          ]
-        })
-      })
+      if (enabledCharts.value.length === 0) {
+        chartInstance?.dispose()
+        chartInstance = null
+        return
+      }
+      if (!chartInstance) {
+        initChart()
+        return
+      }
+      rebuildChartOption()
     })
   }
 )
 
 onUnmounted(() => {
   clearInterval(timer)
-  // 清理所有图表实例
-  Object.values(chartInstances).forEach((instance) => {
-    instance.off('mousedown')
-    instance.off('mousemove')
-    instance.off('globalout')
-    instance.off('mouseup')
-    instance.dispose()
-  })
-  // 清理数据缓存和时间索引
+  chartInstance?.off('mousedown')
+  chartInstance?.off('mousemove')
+  chartInstance?.off('globalout')
+  chartInstance?.off('mouseup')
+  chartInstance?.dispose()
+  chartInstance = null
   Object.keys(chartDataCache).forEach((key) => {
     delete chartDataCache[key]
     delete chartTimeIndex[key]
-    delete cachedXAxisMin[key]
   })
+  cachedXAxisMin = 0
   //detach
   filteredTreeData.value.forEach((key) => {
     window.logBus.off(key.id, dataUpdate)
@@ -1184,34 +1091,23 @@ const handleAddSignal = (node: GraphNode<GraphBindSignalValue | GraphBindVariabl
   }
 }
 
-// 在删除图表时也要清理对应的缓存
 const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
   popoverRefs.value[data.id]?.hide()
   const index = filteredTreeData.value.findIndex((v) => v.id == data.id)
-  // 删除图表实例
-  if (chartInstances[data.id]) {
-    chartInstances[data.id].dispose()
-    delete chartInstances[data.id]
-  }
-  // 删除数据缓存和时间索引
   delete chartDataCache[data.id]
   delete chartTimeIndex[data.id]
-  delete cachedXAxisMin[data.id]
 
   filteredTreeData.value.splice(index, 1)
   delete graphs[data.id]
   window.logBus.off(data.id, dataUpdate)
 
-  //update 底部x轴刻度显示, 只有last 才显示
-  enabledCharts.value.forEach((c, dd) => {
-    const chart = chartInstances[c.id]
-    chart.setOption({
-      xAxis: {
-        axisLabel: {
-          show: dd === enabledCharts.value.length - 1
-        }
-      }
-    })
+  nextTick(() => {
+    if (enabledCharts.value.length === 0) {
+      chartInstance?.dispose()
+      chartInstance = null
+      return
+    }
+    rebuildChartOption()
   })
 }
 </script>
@@ -1273,6 +1169,16 @@ const handleDelete = (data: GraphNode<GraphBindSignalValue>, event: Event) => {
 .canvas-container {
   position: relative;
   background-color: var(--el-bg-color);
+}
+
+.empty-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
 }
 
 .border-bottom {

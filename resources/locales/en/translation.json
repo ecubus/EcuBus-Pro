@@ -1533,7 +1533,9 @@
           "addSignals": "Add Signals"
         },
         "labels": {
-          "time": "Time: {{time}}s"
+          "time": "Time: {{time}}s",
+          "emptyChart": "Enable signals or variables from the tree to plot them on this timeline",
+          "sharedYAxis": "Value"
         },
         "tree": {
           "emptyText": "Add"
@@ -1553,7 +1555,8 @@
         },
         "tooltip": {
           "time": "Time: {{time}}ms",
-          "value": "Value: {{value}}"
+          "value": "Value: {{value}}",
+          "seriesValue": "{{name}}: {{value}}"
         }
       }
     },

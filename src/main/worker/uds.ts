@@ -3029,6 +3029,12 @@ export async function linStartScheduler(
  */
 export async function linStartScheduler(
   schName: string,
+  slot: number,
+  device: string,
+  activeCtrl: boolean[]
+): Promise<void>
+export async function linStartScheduler(
+  schName: string,
   slot?: number,
   device?: string,
   activeCtrl?: boolean[]

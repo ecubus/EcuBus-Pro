@@ -22,8 +22,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Build worker script API bundle
+        run: npm run worker:js
+
       - name: Run full TypeScript type check
         run: npm run typecheck
+
+      - name: Verify worker script API exports
+        run: npm run test -- --run test/worker/workerExports.spec.ts
 
       - name: Verify type check results
         run: |

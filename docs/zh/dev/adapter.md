@@ -47,7 +47,7 @@ ${adapter_name}/
 
 ## SWIG 接口实现
 
-SWIG 接口对于桥接 JavaScript/TypeScript 和原生 C/C++ 代码至关重要。 以下是实现方法：
+SWIG 接口对于桥接 JavaScript/TypeScript 和原生 C/C++ 代码至关重要。以下是实现方法：
 
 ### 1. 主接口文件 (${adapter_name}.i)
 
@@ -224,7 +224,7 @@ export class KVASER_CAN extends CanBase {
 
 ## 测试
 
-实现适配器后，您应在 `test/docan` 目录中创建一个测试文件（`${adapter_name}.test.ts`）。 以下是实现测试的方法：
+实现适配器后，您应在 `test/docan` 目录中创建一个测试文件（`${adapter_name}.test.ts`）。以下是实现测试的方法：
 
 ### 1. 测试设置
 

@@ -8,7 +8,7 @@
 
 ## 描述
 
-本示例演示如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用固件。 本示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
+本示例演示如何使用 EcuBus-Pro 通过 UDS CAN 协议升级应用固件。本示例使用 `KVASER Leaf V3` 作为 USB-CAN 适配器。
 
 ## CAN 配置
 
@@ -27,8 +27,8 @@
 ## 使用方法
 
 1. 下载 [NXP Bootloader](https://community.nxp.com/t5/S32K-Knowledge-Base/Unified-bootloader-Demo/ta-p/1423099)。
-   1. 下载的演示基于旧的 EcuBus 工具，该工具已弃用。 新的 EcuBus-Pro 工具具有更多功能和更好的性能。
-2. 如果您使用 `NXP S32K344EVB`，可以直接下载固件。 如果您使用 `S32K344大开发板EVB评估板`，需要修改 LPUART 引脚和 LED 引脚。
+   1. 下载的演示基于旧的 EcuBus 工具，该工具已弃用。新的 EcuBus-Pro 工具具有更多功能和更好的性能。
+2. 如果您使用 `NXP S32K344EVB`，可以直接下载固件。如果您使用 `S32K344大开发板EVB评估板`，需要修改 LPUART 引脚和 LED 引脚。
 3. 将 USB-CAN 适配器连接到计算机，并将 `KVASER Leaf V3` USB-CAN 适配器连接到 S32K344 板。
 4. 运行 Sequence-Tester_1。
 
@@ -38,7 +38,7 @@
 
 ![诊断步骤](./image.png)
 
-本示例通过 UDS 诊断协议实现固件升级。 主要步骤如下：
+本示例通过 UDS 诊断协议实现固件升级。主要步骤如下：
 
 1. 会话控制和通信控制
 
@@ -95,7 +95,7 @@
 
 ## 脚本实现细节
 
-bootloader.ts 脚本实现了诊断序列。 以下是每个部分的详细说明：
+bootloader.ts 脚本实现了诊断序列。以下是每个部分的详细说明：
 
 ### 初始化和导入
 

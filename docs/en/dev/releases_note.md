@@ -1,5 +1,25 @@
 # EcuBus-Pro Release Notes
 
+## 0.8.67
+Changes since v0.8.66:
+
+* fix(logging): prevent dropped frames in multi-device logs by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/420
+* fix(cli): package vsomeip worker so SOME/IP tests can run headless by @muchbt in https://github.com/ecubus/EcuBus-Pro/pull/423
+* fix(logging): configure log destination and file names by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/421
+* Fix Peak ISO-TP instability during large UDS transfers (#425) by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/426
+* docs: add Cursor Cloud specific setup instructions to AGENTS.md by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/429
+* fix(logging): ASC 扩展帧 ID 补上末尾 x by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/430
+* Add Cloud Agent development environment config by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/431
+* feat(cli): JSON-RPC server for PC MCAL-CAN by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/424
+* fix(cdd): rebuild CDD import on cddtools, read field values correctly (#422) by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/434
+* fix(odx): accept byte fields written with a 0x prefix, and read comparams from the document (#422) by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/437
+* New Crowdin Translations by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/433
+* feat(ldf): sync node Protocol when General LIN Version changes by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/438
+* feat(lini): add select all / deselect all for schedule frame Active column by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/442
+* Upgrade Electron to 44 and use built-in window state persistence by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/443
+* feat(graph): overlay multiple variables on a single timeline by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/445
+* fix(worker): expose linStartScheduler in worker script bundle by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/447
+
 ## 0.8.66
 Changes since v0.8.65:
 

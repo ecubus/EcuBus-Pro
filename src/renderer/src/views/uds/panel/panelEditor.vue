@@ -1,233 +1,206 @@
 <template>
-  <fc-designer
-    v-if="delayLoad"
-    ref="designer"
-    :config="config"
-    :locale="locale[targetLang]"
-    :height="h"
+  <div v-if="data.panels[id]?.fileError">
+    {{ t('panelFileFailed') }}: {{ data.panels[id].fileError }}
+    <el-button @click="relinkFile">{{ t('relinkPanel') }}</el-button>
+  </div>
+  <div v-else-if="legacy">
+    <el-button class="migration-button" @click="prepareMigration">{{
+      t('migrationCopy')
+    }}</el-button>
+    <LegacyPanelEditor :height="height - 40" :edit-index="editIndex" />
+    <el-dialog
+      v-if="migrationOpen"
+      v-model="migrationOpen"
+      :title="t('migrationCopy')"
+      width="560px"
+      :append-to="`#win${editIndex}`"
+    >
+      <template v-if="migration">
+        <p>{{ t('migrationLayout') }}</p>
+        <p>
+          {{ t('migrationConverted') }}: {{ migration.document.controls.length }} ·
+          {{ t('migrationSkipped') }}: {{ migration.skipped.length }}
+        </p>
+        <el-table v-if="migration.skipped.length" :data="migration.skipped" max-height="260">
+          <el-table-column prop="item" :label="t('components')" />
+          <el-table-column :label="t('migrationSkipped')">
+            <template #default="{ row }">{{ t(row.reason) }}</template>
+          </el-table-column>
+        </el-table>
+      </template>
+      <template #footer>
+        <el-button @click="migrationOpen = false">{{ t('cancel') }}</el-button>
+        <el-button
+          type="primary"
+          :disabled="!migration?.document.controls.length"
+          @click="createMigrationCopy"
+          >{{ t('migrationCreate') }}</el-button
+        >
+      </template>
+    </el-dialog>
+  </div>
+  <FreePanelEditor
+    v-else
+    :initial-document="savedDocument"
+    :initial-name="savedName"
+    :height="height"
+    :dialog-target="`#win${editIndex}`"
+    @dirty="layout.setWinModified(editIndex, $event)"
     @save="save"
-    @copy="edit"
-    @delete="edit"
-    @drag="edit"
-    @clear="edit"
-    @change-device="edit"
+    @save-as="saveAs"
   />
 </template>
 <script setup lang="ts">
-// import fcDesigner from './panel-designer/index.js'
-import En from './panel-designer/locale/en.js' // 导入英文语言包
-import ZH from './panel-designer/locale/zh-cn.js' // 导入中文语言包
-import {
-  ref,
-  computed,
-  toRef,
-  provide,
-  inject,
-  onMounted,
-  onUnmounted,
-  onBeforeMount,
-  nextTick
-} from 'vue'
+import { defineAsyncComponent, inject, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { v4 } from 'uuid'
 import { useDataStore } from '@r/stores/data'
 import { useProjectStore } from '@r/stores/project'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { v4 } from 'uuid'
-import { Layout } from '@r/views/uds/layout'
-import uniqueId from '@form-create/utils/lib/unique'
-
-const panels = useDataStore().panels
-
-// 可以在此处获取设计器实例或进行其他操作
-const designer = ref<any>()
-const props = defineProps<{
-  height: number
-  editIndex: string
-}>()
-
-const delayLoad = ref(false)
-const h = toRef(props, 'height')
+import {
+  bindPanelFile,
+  panelUsingFile,
+  parsePanelFile,
+  serializePanelFile
+} from '@r/stores/panelFiles'
+import type { Layout } from '../layout'
+import type { PanelDocument } from 'src/preload/panel'
+import { cloneDocument, createDocument } from './free/model'
+import { migrateLegacyPanel, migrationCopyName } from './free/migration'
+import { usePanelLocale } from './free/locale'
+import FreePanelEditor from './free/FreePanelEditor.vue'
+const LegacyPanelEditor = defineAsyncComponent(() => import('./LegacyPanelEditor.vue'))
+const props = defineProps<{ height: number; editIndex: string }>()
+const data = useDataStore()
+const project = useProjectStore()
 const layout = inject('layout') as Layout
-const locale = {
-  en: En,
-  zh: ZH
+const t = usePanelLocale()
+const existing = data.panels[props.editIndex]
+const legacy = !!existing && !existing.document && !existing.filePath
+const savedDocument = ref(existing?.document ? cloneDocument(existing.document) : createDocument())
+let nextNumber = 1
+while (Object.values(data.panels).some((panel) => panel.name === `Panel ${nextNumber}`))
+  nextNumber++
+const savedName = ref(existing?.name || `Panel ${nextNumber}`)
+const id = existing?.id || (props.editIndex === 'panel' ? v4() : props.editIndex)
+const migrationOpen = ref(false)
+const migration = ref<ReturnType<typeof migrateLegacyPanel>>()
+function prepareMigration() {
+  migration.value = migrateLegacyPanel(data.panels[props.editIndex], data.vars)
+  migrationOpen.value = true
 }
-const targetLang: string = (window.store.get('general.settings.language') as any) || 'en'
-const config = computed(() => {
-  const result: any = {
-    // 配置项
-    showDevice: false,
-    showJsonPreview: false,
-    showInputData: false,
-    showSaveBtn: true,
-    editIndex: props.editIndex,
-    formOptions: {
-      submitBtn: false
-    },
-    appendConfigData: ['signal', 'variable'],
-    componentRule: {
-      //给所有组件增加
-      default: {
-        prepend: true,
-        // append: true, // 添加到底部
-        rule(t) {
-          // if (t.type == 'grid' || t.type == 'fcRow') {
-          //   return []
-          // }
-          if (t.field) {
-            return [
-              {
-                type: 'Signal',
-                field: 'signal',
-                title: 'Signal',
-                warning: 'Please import a database before using this feature',
-                props: {
-                  onChange: (node) => {
-                    if (t.type == 'select' || t.type == 'checkbox' || t.type == 'radio') {
-                      if (node.yAxis.enums) {
-                        //confirm use enum to replace options
-                        ElMessageBox.confirm(
-                          'Use signal value table as select options?',
-                          'Confirm',
-                          {
-                            confirmButtonText: 'Yes',
-                            cancelButtonText: 'No',
-                            type: 'warning',
-                            appendTo: `#win${props.editIndex}`
-                          }
-                        ).then(() => {
-                          t.options = node.yAxis.enums
-                        })
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                type: 'Variable',
-                field: 'variable',
-                warning: 'When both signal and variable are set, only variable will take effect',
-                title: 'Variable'
-              }
-            ]
-          } else {
-            return []
-          }
-        }
-      },
-      grid: {
-        prepend: true,
-        rule(t) {
-          return [
-            {
-              type: 'elButton',
-              field: 'button',
-              title: 'Button',
-              props: {
-                icon: 'Plus',
-                type: 'primary',
-                plain: true,
-                onClick: () => {
-                  const newId = uniqueId()
-                  t.props.rule.layout.push({
-                    i: newId,
-                    x: 0,
-                    y: Math.max(...t.props.rule.layout.map((item) => item.y + item.h), 0),
-                    w: 8,
-                    h: 1
-                  })
-                }
-              },
-
-              warning: 'Add new grid item'
-            }
-          ]
-        }
-      }
-    }
+async function createMigrationCopy() {
+  if (!migration.value?.document.controls.length) return
+  const name = migrationCopyName(data.panels[props.editIndex].name, data.panels)
+  const document = cloneDocument(migration.value.document)
+  const filePath = await choosePanelFile(name)
+  if (!filePath) return
+  if (panelUsingFile(data.panels, filePath)) {
+    ElMessage.error(t('fileInUse'))
+    return
   }
-  return result
-})
-
-provide('dialogId', `#win${props.editIndex}`)
-provide('height', h)
-
-const edit = () => {
-  layout.setWinModified(props.editIndex, true)
-}
-let initId = props.editIndex
-const save = (data) => {
-  data.options = JSON.parse(data.options)
-  data.rule = JSON.parse(data.rule)
-  const name = data.options.formName
-  if (name) {
-    //check name exist in data,
-    const existingPanel = Object.values(panels).find(
-      (panel) => panel.id !== initId && panel.name === name
+  try {
+    await window.electron.ipcRenderer.invoke(
+      'ipc-fs-writeFile',
+      filePath,
+      serializePanelFile(name, document)
     )
-    if (existingPanel) {
-      ElMessage({
-        message: 'Panel name already exists',
-        plain: true,
-        offset: 30,
-        type: 'error',
-        appendTo: `#win${props.editIndex}`
-      })
-      ;(designer.value as any).activeTab = 'form'
+  } catch {
+    ElMessage.error(t('panelSaveFailed'))
+    return
+  }
+  const copyId = v4()
+  data.panels[copyId] = { id: copyId, name, filePath, document, rule: [], options: {} }
+  migrationOpen.value = false
+  layout.addWin('panel', copyId, { params: { 'edit-index': copyId } })
+}
+async function save(name: string, document: PanelDocument, filePath = data.panels[id]?.filePath) {
+  if (!name) {
+    ElMessage.error(t('nameRequired'))
+    return
+  }
+  if (Object.values(data.panels).some((panel) => panel.id !== id && panel.name === name)) {
+    ElMessage.error(t('nameExists'))
+    return
+  }
+  if (!filePath) {
+    await saveAs(name, document)
+    return
+  }
+  if (panelUsingFile(data.panels, filePath, id)) {
+    ElMessage.error(t('fileInUse'))
+    return
+  }
+  if (filePath) {
+    try {
+      await window.electron.ipcRenderer.invoke(
+        'ipc-fs-writeFile',
+        filePath,
+        serializePanelFile(name, document)
+      )
+    } catch {
+      ElMessage.error(t('panelSaveFailed'))
       return
-    } else {
-      if (initId && initId != 'panel') {
-        panels[initId] = {
-          name: name,
-          id: initId,
-          rule: data.rule,
-          options: data.options
-        }
-      } else {
-        initId = v4()
-        panels[initId] = {
-          name: name,
-          id: initId,
-          rule: data.rule,
-          options: data.options
-        }
-      }
-      layout.setWinModified(props.editIndex, false)
-      layout.changeWinName(`p${props.editIndex}`, name)
-      ElMessage({
-        message: 'Save successful',
-        plain: true,
-        offset: 30,
-        duration: 500,
-        type: 'success',
-        appendTo: `#win${props.editIndex}`
-      })
     }
-  } else {
-    ElMessage({
-      message: 'Panel name is required',
-      plain: true,
-      offset: 30,
-      type: 'error',
-      duration: 500,
-      appendTo: `#win${props.editIndex}`
-    })
-    ;(designer.value as any).activeTab = 'form'
+  }
+  data.panels[id] = {
+    ...data.panels[id],
+    id,
+    name,
+    filePath,
+    document: cloneDocument(document),
+    rule: data.panels[id]?.rule || [],
+    options: data.panels[id]?.options || {}
+  }
+  savedDocument.value = cloneDocument(document)
+  savedName.value = name
+  layout.setWinModified(props.editIndex, false)
+  layout.changeWinName(props.editIndex, name)
+  layout.changeWinName(`p${id}`, name)
+  ElMessage.success(t('saved'))
+}
+const fileFilters = [{ name: 'EcuBus Panel', extensions: ['ecpanel'] }]
+async function choosePanelFile(name: string) {
+  const result = await window.electron.ipcRenderer.invoke('ipc-show-save-dialog', {
+    title: t('savePanelAs'),
+    filters: fileFilters,
+    defaultPath: window.path.join(
+      project.projectInfo.path,
+      `${name.replace(/[<>:"/\\|?*]/g, '_') || 'Panel'}.ecpanel`
+    )
+  })
+  return result.canceled ? undefined : (result.filePath as string | undefined)
+}
+async function saveAs(name: string, document: PanelDocument) {
+  const filePath = await choosePanelFile(name)
+  if (filePath) await save(name, document, filePath)
+}
+async function relinkFile() {
+  const result = await window.electron.ipcRenderer.invoke('ipc-show-open-dialog', {
+    title: t('importPanel'),
+    filters: fileFilters,
+    properties: ['openFile']
+  })
+  if (result.canceled || !result.filePaths?.[0]) return
+  const filePath = result.filePaths[0]
+  if (panelUsingFile(data.panels, filePath, id)) {
+    ElMessage.error(t('fileInUse'))
+    return
+  }
+  try {
+    const file = parsePanelFile(
+      await window.electron.ipcRenderer.invoke('ipc-fs-readFile', filePath, 'utf-8')
+    )
+    const document = bindPanelFile(file.document, data)
+    savedDocument.value = cloneDocument(document)
+    savedName.value = data.panels[id].name
+    data.panels[id] = { ...data.panels[id], document, filePath, fileError: undefined }
+  } catch {
+    ElMessage.error(t('panelFileFailed'))
   }
 }
-onBeforeMount(() => {
-  delayLoad.value = false
-})
-onMounted(() => {
-  delayLoad.value = true
-  nextTick(() => {
-    const item = panels[props.editIndex]
-    if (item && designer.value) {
-      designer.value.setOptions(item.options)
-      designer.value.setRule(item.rule)
-    }
-  })
-})
-onUnmounted(() => {
-  delayLoad.value = false
-})
 </script>
+<style scoped>
+.migration-button {
+  margin: 4px 8px;
+}
+</style>

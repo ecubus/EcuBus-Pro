@@ -1,5 +1,26 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.67
+
+自 v0.8.66 以来的变更：
+
+- fix(logging): 防止多设备日志中的丢帧 by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/420
+- fix(cli): 打包 vsomeip worker，使 SOME/IP 测试可无头运行 by @muchbt in https://github.com/ecubus/EcuBus-Pro/pull/423
+- fix(logging): 配置日志目标和文件名 by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/421
+- 修复大 UDS 传输期间 Peak ISO-TP 不稳定的问题 (#425) by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/426
+- docs: 向 AGENTS.md 添加 Cursor Cloud 专用设置说明 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/429
+- fix(logging): ASC 扩展帧 ID 补上末尾 x by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/430
+- 添加 Cloud Agent 开发环境配置 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/431
+- feat(cli): 用于 PC MCAL-CAN 的 JSON-RPC 服务器 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/424
+- fix(cdd): 在 cddtools 上重建 CDD 导入，正确读取字段值 (#422) by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/434
+- fix(odx): 接受以 0x 前缀写入的字节字段，并从文档中读取 comparams (#422) by @crazy0104 in https://github.com/ecubus/EcuBus-Pro/pull/437
+- 来自 @frankie-zeng 的新 Crowdin 翻译 in https://github.com/ecubus/EcuBus-Pro/pull/433
+- feat(ldf): 当通用 LIN 版本变更时同步节点 Protocol by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/438
+- feat(lini): 为调度帧 Active 列添加全选/取消全选 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/442
+- 将 Electron 升级至 44 并使用内置窗口状态持久化 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/443
+- feat(graph): 在单个时间轴上叠加多个变量 by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/445
+- fix(worker): 在 worker 脚本包中暴露 linStartScheduler by @frankie-zeng in https://github.com/ecubus/EcuBus-Pro/pull/447
+
 ## 0.8.66
 
 自 v0.8.65 以来的变化：
@@ -11,7 +32,7 @@
 - 增强原始数据编辑器，增加自动聚焦、工具提示和上下文菜单，由 @zhangjiance 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/386
 - fix(cdd): 改进测试仪接口导入，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/387
 - 修复在测试配置中运行选定的测试用例，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/391
-- feat(serial): 添加串口 (UART) 硬件设备，支持脚本和跟踪集成。 由 @crazy0104 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/399
+- feat(serial): 添加串口 (UART) 硬件设备，支持脚本和跟踪集成。由 @crazy0104 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/399
 - 修复 Vector LIN 初始化失败，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/401
 - 修复 LDF 解析器中可选通道名称的处理，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/402
 - 修复通过总线类型过滤 Vector CAN/LIN 通道，由 @EclipsedWing 完成，参见 https://github.com/ecubus/EcuBus-Pro/pull/404
@@ -399,7 +420,7 @@
 从 v0.8.38 到 v0.8.39 的变更：
 
 - [feat]：添加 doip 客户端 ip 控制 [详情](https://app.whyengineer.com/docs/um/doip/doip.html#tcp-udp-source-port-control)
-- [feat]：vector lin 适配器支持。 由 @hmf1235789 在 #153
+- [feat]：vector lin 适配器支持。由 @hmf1235789 在 #153
 
 ## **完整变更日志**：https://github.com/ecubus/EcuBus-Pro/compare/v0.8.38...v0.8.39
 

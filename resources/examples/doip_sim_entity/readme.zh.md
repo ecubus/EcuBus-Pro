@@ -1,6 +1,6 @@
 # DoIP 模拟实体示例
 
-本示例演示如何使用 DoIP 协议与 ECU 通信。 使用脚本模拟一个实体并向测试仪发送 UDS 响应帧。
+本示例演示如何使用 DoIP 协议与 ECU 通信。使用脚本模拟一个实体并向测试仪发送 UDS 响应帧。
 
 ## 设备
 
@@ -36,5 +36,5 @@ Util.On('Tester_eth_1.DiagnosticSessionControl160.send', async (req) => {
 
 ## 执行
 
-启动序列并打开跟踪窗口以查看所有帧。 或者，使用 Wireshark 捕获这些帧。
+启动序列并打开跟踪窗口以查看所有帧。或者，使用 Wireshark 捕获这些帧。
 ![trace](image.png)

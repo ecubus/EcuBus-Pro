@@ -3,7 +3,7 @@
 ## 如何将UDS报文长度配置为8字节？
 
 :::details 答案
-您可以通过转到UDS Tester -> Tp Base -> Padding Enable来启用填充。 您也可以设置自己的填充值，默认为0x00。
+您可以通过转到UDS Tester -> Tp Base -> Padding Enable来启用填充。您也可以设置自己的填充值，默认为0x00。
 ![1](../../media/faq/1.png)
 :::
 
@@ -16,7 +16,7 @@
 ## 当使用序列器通过LIN发送ID为0x3C且NAD为0x55的UDS服务时，为什么之后不发送ID为0x3D的LIN报文让从节点响应？
 
 :::details 答案
-这是由于LIN调度表的实现方式。 您应该首先启动任何调度表。
+这是由于LIN调度表的实现方式。您应该首先启动任何调度表。
 ![2](../../media/faq/2.png)
 然后您可以发送ID为0x3D的LIN报文。
 ![3](../../media/faq/3.png)
@@ -25,7 +25,7 @@
 ## 如何计算报文的CRC值？
 
 :::details 答案
-您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。 该API支持多种CRC算法，包括CRC8、CRC16和CRC32，并具有可配置参数。
+您可以在脚本中使用内置的[CRC](https://app.whyengineer.com/scriptApi/classes/CRC.html) API计算CRC值。该API支持多种CRC算法，包括CRC8、CRC16和CRC32，并具有可配置参数。
 
 :::
 
@@ -74,10 +74,10 @@ setInterval(() => {
 
 :::
 
-## 我可以为预设的 `0x27 (SecurityAccess)` 命令使用自定义子功能吗？ （例如 `0x35` / `0x36`）
+## 我可以为预设的 `0x27 (SecurityAccess)` 命令使用自定义子功能吗？（例如 `0x35` / `0x36`）
 
 ::: details 答案
-是的。 配置预设的 `0x27` 服务时，将子功能设置为自定义并输入目标值，例如 `0x35`（请求种子）和 `0x36`（发送密钥）。
+是的。配置预设的 `0x27` 服务时，将子功能设置为自定义并输入目标值，例如 `0x35`（请求种子）和 `0x36`（发送密钥）。
 
 对于安全访问，请确保请求种子和发送密钥子功能正确配对（通常为奇数/偶数对）并与您的 ECU 实现匹配。
 

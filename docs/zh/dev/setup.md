@@ -6,8 +6,7 @@
 
 ## 概述
 
-EcuBus-Pro 是一个 Electron + Vue + TypeScript 项目，包含多个通过 `node-gyp` 构建的原生模块。
-典型的本地工作流程是：
+EcuBus-Pro 是一个 Electron + Vue + TypeScript 项目，包含多个通过 `node-gyp` 构建的原生模块。典型的本地工作流程是：
 
 1. 安装所需的工具链。
 2. 安装项目依赖项。
@@ -55,7 +54,7 @@ npm run dev
 
 ## 构建原生模块
 
-某些功能依赖于原生模块。 当您更改原生代码或您的环境中尚未有编译产物时，请构建它们：
+某些功能依赖于原生模块。当您更改原生代码或您的环境中尚未有编译产物时，请构建它们：
 
 ```bash
 npm run native

@@ -1,7 +1,6 @@
 # SOME/IP 远程示例（vsomeip `notify-sample`）
 
-此文件夹中的 `remote` 端基于官方的 `vsomeip` 示例应用：`notify-sample`。
-您可以将其视为远程 SOME/IP 服务，而 `ecubus-pro` 则作为发现该服务并接收通知的客户端。
+此文件夹中的 `remote` 端基于官方的 `vsomeip` 示例应用：`notify-sample`。您可以将其视为远程 SOME/IP 服务，而 `ecubus-pro` 则作为发现该服务并接收通知的客户端。
 
 ## 1. 先决条件
 

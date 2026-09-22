@@ -2,7 +2,7 @@
 
 `ecb_cli rpc` 启动一个 **JSON-RPC 2.0** 服务器，使得AUTOSAR **MCAL CAN** 驱动（通常用C语言编写）的PC实现可以打开 EcuBus-Pro CAN 适配器，收发帧，并轮询 `Can_MainFunction_*` 风格的事件。
 
-服务器是硬件后端。 您的C代码 `Can.c` 保持AUTOSAR风格（`Can_Init`、`Can_Write`、`Can_MainFunction_Read`，……） 并在每次调用时转发为一条 JSON-RPC 请求。
+服务器是硬件后端。您的C代码 `Can.c` 保持AUTOSAR风格（`Can_Init`、`Can_Write`、`Can_MainFunction_Read`，……）并在每次调用时转发为一条 JSON-RPC 请求。
 
 ````
 ```
@@ -47,9 +47,9 @@ ecb_cli rpc --stdio
 ## 线格式
 
 - 传输方式：TCP、Unix 套接字或 stdio。
-- 帧格式：**NDJSON**（一个 JSON 值 + `\n`）。 也接受拼接的 JSON 和 LSP `Content-Length` 帧。
+- 帧格式：**NDJSON**（一个 JSON 值 + `\n`）。也接受拼接的 JSON 和 LSP `Content-Length` 帧。
 - 规格：[JSON-RPC 2.0](https://www.jsonrpc.org/specification) 包括批处理与通知（无 `id`）。
-- 仅提供命名参数（`params` 为对象）。 易于从C语言构建。
+- 仅提供命名参数（`params` 为对象）。易于从C语言构建。
 
 请求：
 
@@ -86,7 +86,7 @@ CAN 有效载荷可接受为字节数组 `[1,2,3]` **或**十六进制字符串 
 | -32004 | 超时            |
 | -32005 | 已初始化          |
 
-AUTOSAR `Can_Write` **不**使用 JSON-RPC 错误来表示 `E_NOT_OK` / `CAN_BUSY`。 这些在 `result` 中返回。
+AUTOSAR `Can_Write` **不**使用 JSON-RPC 错误来表示 `E_NOT_OK` / `CAN_BUSY`。这些在 `result` 中返回。
 
 ## 两个 API 层
 
@@ -128,7 +128,7 @@ AUTOSAR `Can_Write` **不**使用 JSON-RPC 错误来表示 `E_NOT_OK` / `CAN_BUS
 
 控制器模式：`CAN_CS_UNINIT`、`CAN_CS_STOPPED`、`CAN_CS_STARTED`、`CAN_CS_SLEEP`。
 
-`Can.Init` 打开硬件但将控制器保持为 **STOPPED**（与 AUTOSAR 相同）。 在 `Can.Write` 之前，使用 `CAN_T_START` 调用 `Can.SetControllerMode`。
+`Can.Init` 打开硬件但将控制器保持为 **STOPPED**（与 AUTOSAR 相同）。在 `Can.Write` 之前，使用 `CAN_T_START` 调用 `Can.SetControllerMode`。
 
 如果省略 `hardwareObjects`，默认硬件对象为：
 
@@ -251,11 +251,11 @@ void Can_MainFunction_Read(void) {
 ```
 ````
 
-保持持久的 TCP 连接。 不要每次 `Can_Write` 都重新连接。
+保持持久的 TCP 连接。不要每次 `Can_Write` 都重新连接。
 
 ## 模拟环回（无硬件）
 
-打开两个 `simulate` 句柄。 一个句柄上写入的帧会在另一个句柄上显示为 RX（约 1 毫秒后）：
+打开两个 `simulate` 句柄。一个句柄上写入的帧会在另一个句柄上显示为 RX（约 1 毫秒后）：
 
 ````json
 ```
@@ -268,9 +268,9 @@ void Can_MainFunction_Read(void) {
 
 ## GUI 网关（EcuBus 客户端已在运行）
 
-当 **EcuBus-Pro GUI** 运行时，相同的 JSON-RPC API 由应用程序提供（默认 `127.0.0.1:17320`）。 在这种情况下，您**无需**启动 `ecb_cli rpc` — GUI 已拥有 CAN 适配器。
+当 **EcuBus-Pro GUI** 运行时，相同的 JSON-RPC API 由应用程序提供（默认 `127.0.0.1:17320`）。在这种情况下，您**无需**启动 `ecb_cli rpc` — GUI 已拥有 CAN 适配器。
 
-启用/禁用、主机和端口位于 **Home → Setting → General** 下。 更改绑定设置后，点击 **Apply RPC**。 `sys.version` 返回 `"role": "gateway"`。
+启用/禁用、主机和端口位于 **Home → Setting → General** 下。更改绑定设置后，点击 **Apply RPC**。 `sys.version` 返回 `"role": "gateway"`。
 
 方向：
 
@@ -279,4 +279,4 @@ void Can_MainFunction_Read(void) {
 | 外部 `Can.Write` / `can.write` | **Tx** (`dir: OUT`) | TX 确认（无自回显作为 RX） |
 | 硬件 RX                        | Rx                                     | RX 指示            |
 
-RPC 写入使用与 GUI 相同的 `writeBase` 路径，因此它们作为 Tx 发送到总线上。 先在 GUI 中启动项目以便设备打开；然后 `Can.Init` 返回附加的控制器。 不要同时在相同的 TCP 端口上运行 `ecb_cli rpc`。
+RPC 写入使用与 GUI 相同的 `writeBase` 路径，因此它们作为 Tx 发送到总线上。先在 GUI 中启动项目以便设备打开；然后 `Can.Init` 返回附加的控制器。不要同时在相同的 TCP 端口上运行 `ecb_cli rpc`。

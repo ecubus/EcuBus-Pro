@@ -99,6 +99,8 @@ This section captures non-obvious, durable notes for developing EcuBus-Pro in a 
 
 **Native modules on Linux:** `src/main/docan|dolin|vsomeip/binding.gyp` compile only `fake_linux.cxx` stubs on Linux — no SWIG or vendor SDKs are needed to build them, and the committed `*_wrap.cxx` files are only used on Windows. Only the `simulate` and `slcan` CAN vendors are functional on Linux (see `ecubusPro.vendor` in `package.json`); other vendors are stubbed. After changing `src/main/worker/`, rerun `npm run worker:js`.
 
+**SocketCAN tests:** `test/docan/socketcan.test.ts` and `test/xcp/xcpCanSocketcan.test.ts` pack Linux `struct can_frame` / `canfd_frame` and drive two independent sockets. This Cloud kernel is built without `CONFIG_CAN` (`socket(AF_CAN)` → `EAFNOSUPPORT`), so the kernel vcan cases skip and the helper falls back to an in-process bus that still exchanges packed SocketCAN frames. On a normal Linux host, create `vcan0` (`sudo ip link add dev vcan0 type vcan && sudo ip link set up vcan0`) to exercise real AF_CAN.
+
 **Python for diagnostic DB parsing:** ODX (`test/odx`) and CDD (`test/cdd`) parsing shell out to `resources/python/bin/python3` (see `getPythonPath()`). If that embedded Python or its packages (`odxtools`, `canmatrix`, `openpyxl`, ...) are missing, those tests and the app's ODX/CDD features fail with `spawn ... ENOENT`.
 
 **Running the GUI:** This is an Electron desktop app. Run it with `DISPLAY=:1 npm run dev` (a headless X server is already running on display `:1`). It launches without extra `--no-sandbox` flags. The `Autofill.enable`/`Autofill.setAddresses` DevTools console errors at startup are harmless.

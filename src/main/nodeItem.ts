@@ -12,6 +12,7 @@ import UdsTester, {
   SomeipApiCall
 } from './workerClient'
 import { CAN_TP, CAN_TP_SOCKET, TpError as CanTpError } from './docan/cantp'
+import { XcpMaster, XcpCanTransport } from './xcp'
 import { UdsLOG, VarLOG } from './log'
 import { applyBuffer, getRxPdu, getTxPdu, PwmBaseInfo, ServiceItem, UdsDevice } from './share/uds'
 import { findService, UDSTesterMain } from './docan/uds'
@@ -77,11 +78,58 @@ class TestTransport extends Transport {
     callback()
   }
 }
+/** Whitelist of {@link XcpMaster} methods callable through the worker `xcpApi` bridge. */
+const XCP_ALLOWED_METHODS = new Set<string>([
+  'connect',
+  'disconnect',
+  'getStatus',
+  'synch',
+  'getCommModeInfo',
+  'getVersion',
+  'getId',
+  'setRequest',
+  'getSeed',
+  'unlock',
+  'setMta',
+  'upload',
+  'shortUpload',
+  'buildChecksum',
+  'userCmd',
+  'transportLayerCmd',
+  'download',
+  'downloadNext',
+  'downloadMax',
+  'shortDownload',
+  'modifyBits',
+  'setCalPage',
+  'getCalPage',
+  'copyCalPage',
+  'setDaqPtr',
+  'writeDaq',
+  'setDaqListMode',
+  'startStopDaqList',
+  'startStopSynch',
+  'getDaqClock',
+  'freeDaq',
+  'allocDaq',
+  'allocOdt',
+  'allocOdtEntry',
+  'clearDaqList',
+  'programStart',
+  'programClear',
+  'program',
+  'programReset',
+  'programNext',
+  'programMax',
+  'programVerify'
+])
+
 export class NodeClass {
   pool?: UdsTester
   private cantp: CAN_TP[] = []
   private lintp: LIN_TP[] = []
   private cantpSocketMap: Map<string, { tp: CAN_TP; socket: CAN_TP_SOCKET }> = new Map()
+  private xcpMasterMap: Map<string, { master: XcpMaster; transport: XcpCanTransport }> = new Map()
   private linBaseId: string[] = []
   private canBaseId: string[] = []
   private ethBaseId: string[] = []
@@ -247,6 +295,7 @@ export class NodeClass {
       this.pool.registerHandler('runUdsSeq', this.runUdsSeq.bind(this))
       this.pool.registerHandler('linApi', this.linApi.bind(this))
       this.pool.registerHandler('canApi', this.canApi.bind(this))
+      this.pool.registerHandler('xcpApi', this.xcpApi.bind(this))
       this.pool.registerHandler('stopUdsSeq', this.stopUdsSeq.bind(this))
       this.pool.registerHandler('pwmApi', this.pwmApi.bind(this))
       this.pool.registerHandler('serialApi', this.serialApi.bind(this))
@@ -1030,6 +1079,65 @@ export class NodeClass {
     throw new Error(`unknown canApi op: ${op}`)
   }
 
+  /**
+   * Worker RPC: XCP-on-CAN master operations.
+   *
+   * Ops:
+   * - `createConnection` — open an {@link XcpMaster} bound to an {@link XcpCanTransport}.
+   * - `closeConnection` — dispose a previously opened connection.
+   * - `command` — invoke a whitelisted {@link XcpMaster} method by name with args.
+   */
+  async xcpApi(data: any): Promise<any> {
+    const { op } = data
+
+    const findCanBase = (device?: string) => {
+      if (device != undefined) {
+        for (const channelId of this.canBaseId) {
+          const item = this.canBaseMap.get(channelId)
+          if (item && item.info.name == device) return item
+        }
+        throw new Error(`CAN device '${device}' not found`)
+      }
+      if (this.canBaseId.length > 0) {
+        const item = this.canBaseMap.get(this.canBaseId[0])
+        if (item) return item
+      }
+      throw new Error('no CAN device attached to this node')
+    }
+
+    if (op === 'createConnection') {
+      const base = findCanBase(data.device)
+      const transport = new XcpCanTransport(base, data.addr)
+      const master = new XcpMaster(transport)
+      const handle = `xcp-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      this.xcpMasterMap.set(handle, { master, transport })
+      return handle
+    }
+
+    if (op === 'closeConnection') {
+      const entry = this.xcpMasterMap.get(data.handle)
+      if (!entry) throw new Error(`XCP handle '${data.handle}' not found`)
+      entry.master.close()
+      this.xcpMasterMap.delete(data.handle)
+      return
+    }
+
+    if (op === 'command') {
+      const entry = this.xcpMasterMap.get(data.handle)
+      if (!entry) throw new Error(`XCP handle '${data.handle}' not found`)
+      const method = data.method as string
+      if (!XCP_ALLOWED_METHODS.has(method)) {
+        throw new Error(`unknown or forbidden xcp command: ${method}`)
+      }
+      const fn = (entry.master as any)[method]
+      const result = await fn.apply(entry.master, data.args ?? [])
+      // Normalize Buffers to plain number arrays so they survive worker RPC cleanly.
+      return Buffer.isBuffer(result) ? Array.from(result) : result
+    }
+
+    throw new Error(`unknown xcpApi op: ${op}`)
+  }
+
   private resolveSomeipClient(channel?: string): VSomeIP_Client {
     if (channel) {
       const c = this.someipMap.get(channel)
@@ -1543,6 +1651,10 @@ export class NodeClass {
       tp.close(false)
     }
     this.cantpSocketMap.clear()
+    for (const { master } of this.xcpMasterMap.values()) {
+      master.close()
+    }
+    this.xcpMasterMap.clear()
     this.lintp.forEach((tp) => {
       tp.close(false)
     })

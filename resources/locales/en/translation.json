@@ -1688,6 +1688,7 @@
           "testerAddress": "Tester address",
           "connectDelay": "Connect delay",
           "activeDelay": "Active delay",
+          "oemSpecific": "OEM specific",
           "ecuAddress": "ECU address",
           "eid": "EID",
           "entityType": "Entity Type",
@@ -1766,6 +1767,7 @@
           "invalidIpAddress": "Invalid IP address",
           "requestAddressRequired": "Request address is required",
           "inputAddrName": "Please input addr name",
+          "oemSpecificFormat": "xx xx xx xx",
           "eidFormat": "xx-xx-xx-xx-xx-xx",
           "gidFormat": "xx-xx-xx-xx-xx-xx",
           "vinLength": "17 characters"

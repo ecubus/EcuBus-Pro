@@ -1312,21 +1312,24 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
       const rawsignal = message.signals.find((sig) => sig.name == signalName)
       if (rawsignal) {
         Object.assign(rawsignal, signal)
-        for (const [index, d] of timerMap.entries()) {
-          if (parseInt(d.ia.id, 16) == message.id) {
-            if (d.socket.changePeriodData) {
-              const data = send(index, false)
-              if (data && data.compare(d.data!) != 0) {
-                d.socket.changePeriodData(d.taskId!, data)
-                d.data = data
-              }
-            }
-          }
-        }
+        refreshCanPeriodData(message.id)
       }
     }
   }
 })
+export function refreshCanPeriodData(messageId: number) {
+  for (const [index, d] of timerMap.entries()) {
+    if (parseInt(d.ia.id, 16) == messageId) {
+      if (d.socket.changePeriodData) {
+        const data = send(index, false)
+        if (data && data.compare(d.data!) != 0) {
+          d.socket.changePeriodData(d.taskId!, data)
+          d.data = data
+        }
+      }
+    }
+  }
+}
 
 ipcMain.on('ipc-update-can-period', (event, ...arg) => {
   const id = arg[0] as string

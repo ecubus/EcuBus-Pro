@@ -1,0 +1,796 @@
+{
+  "data": {
+    "devices": {
+      "460eb775-d1d0-40cb-bd81-b3a59f9c328d": {
+        "type": "can",
+        "canDevice": {
+          "id": "460eb775-d1d0-40cb-bd81-b3a59f9c328d",
+          "name": "SIM_ECU",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "panel-demo-db",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80"
+          }
+        }
+      },
+      "e421b3cd-0e00-46ca-b93f-ca90366e884a": {
+        "type": "can",
+        "canDevice": {
+          "id": "e421b3cd-0e00-46ca-b93f-ca90366e884a",
+          "name": "SIM_PANEL",
+          "handle": 1,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "panel-demo-db",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80"
+          }
+        }
+      }
+    },
+    "ia": {
+      "demo-command": {
+        "id": "demo-command",
+        "name": "Panel Command",
+        "type": "can",
+        "devices": [
+          "e421b3cd-0e00-46ca-b93f-ca90366e884a"
+        ],
+        "action": [
+          {
+            "uuid": "target-cycle",
+            "trigger": {
+              "type": "periodic",
+              "period": 100
+            },
+            "database": "panel-demo-db",
+            "name": "Command",
+            "id": "101",
+            "channel": "e421b3cd-0e00-46ca-b93f-ca90366e884a",
+            "type": "can",
+            "dlc": 8,
+            "data": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "demo-ecu": {
+        "id": "demo-ecu",
+        "name": "Demo ECU",
+        "type": "can",
+        "channel": [
+          "460eb775-d1d0-40cb-bd81-b3a59f9c328d"
+        ],
+        "workNode": "",
+        "script": "simulation.ts"
+      }
+    },
+    "database": {
+      "lin": {},
+      "can": {
+        "panel-demo-db": {
+          "id": "panel-demo-db",
+          "name": "PanelDemo",
+          "version": "canmartix",
+          "filePath": "PanelDemo.dbc",
+          "attributes": {
+            "BusType": "CAN"
+          },
+          "baudrate": 500000,
+          "fd_baudrate": 0,
+          "ecus": {
+            "Panel": null,
+            "ECU": null
+          },
+          "messages": [
+            {
+              "name": "Status",
+              "id": 256,
+              "length": 8,
+              "cycle_time": 100,
+              "attributes": {},
+              "comment": "",
+              "header_id": null,
+              "is_complex_multiplexed": false,
+              "is_extended_frame": false,
+              "is_fd": false,
+              "is_j1939": false,
+              "mux_names": {},
+              "pdu_name": "",
+              "signals": [
+                {
+                  "name": "Speed",
+                  "start_bit": 0,
+                  "bit_length": 16,
+                  "factor": "0.1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "250",
+                  "unit": "km/h",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                },
+                {
+                  "name": "Temperature",
+                  "start_bit": 16,
+                  "bit_length": 8,
+                  "factor": "1",
+                  "offset": "-40",
+                  "min": "-40",
+                  "max": "215",
+                  "unit": "degC",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                },
+                {
+                  "name": "Load",
+                  "start_bit": 24,
+                  "bit_length": 8,
+                  "factor": "1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "100",
+                  "unit": "%",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                },
+                {
+                  "name": "State",
+                  "start_bit": 32,
+                  "bit_length": 8,
+                  "factor": "1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "2",
+                  "unit": "",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                },
+                {
+                  "name": "Counter",
+                  "start_bit": 40,
+                  "bit_length": 16,
+                  "factor": "1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "65535",
+                  "unit": "",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                }
+              ],
+              "transmitters": [
+                "ECU"
+              ]
+            },
+            {
+              "name": "Command",
+              "id": 257,
+              "length": 8,
+              "cycle_time": 100,
+              "attributes": {},
+              "comment": "",
+              "header_id": null,
+              "is_complex_multiplexed": false,
+              "is_extended_frame": false,
+              "is_fd": false,
+              "is_j1939": false,
+              "mux_names": {},
+              "pdu_name": "",
+              "signals": [
+                {
+                  "name": "Target",
+                  "start_bit": 0,
+                  "bit_length": 16,
+                  "factor": "0.1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "100",
+                  "unit": "%",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                }
+              ],
+              "transmitters": [
+                "Panel"
+              ]
+            }
+          ],
+          "enumerations": {},
+          "env_vars": {},
+          "value_tables": {},
+          "ecu_defines": [],
+          "env_defines": [],
+          "frame_defines": [],
+          "global_defines": [],
+          "signal_defines": []
+        }
+      },
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {
+      "DemoAuto": {
+        "id": "DemoAuto",
+        "name": "DemoAuto",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 1,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      },
+      "DemoEnabled": {
+        "id": "DemoEnabled",
+        "name": "DemoEnabled",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 1,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      },
+      "DemoLevel": {
+        "id": "DemoLevel",
+        "name": "DemoLevel",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 40,
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        }
+      },
+      "DemoMode": {
+        "id": "DemoMode",
+        "name": "DemoMode",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 1,
+          "min": 0,
+          "max": 2,
+          "unit": "",
+          "enum": [
+            {
+              "name": "Eco",
+              "value": 0
+            },
+            {
+              "name": "Normal",
+              "value": 1
+            },
+            {
+              "name": "Sport",
+              "value": 2
+            }
+          ]
+        }
+      },
+      "DemoPulse": {
+        "id": "DemoPulse",
+        "name": "DemoPulse",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      },
+      "DemoToggle": {
+        "id": "DemoToggle",
+        "name": "DemoToggle",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      },
+      "DemoCounter": {
+        "id": "DemoCounter",
+        "name": "DemoCounter",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100000,
+          "unit": ""
+        }
+      },
+      "DemoProgress": {
+        "id": "DemoProgress",
+        "name": "DemoProgress",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        }
+      },
+      "DemoAlarm": {
+        "id": "DemoAlarm",
+        "name": "DemoAlarm",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      },
+      "DemoTemperature": {
+        "id": "DemoTemperature",
+        "name": "DemoTemperature",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 25,
+          "min": -40,
+          "max": 120,
+          "unit": "°C"
+        }
+      },
+      "DemoHex": {
+        "id": "DemoHex",
+        "name": "DemoHex",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 42,
+          "min": 0,
+          "max": 255,
+          "unit": ""
+        }
+      },
+      "DemoDirection": {
+        "id": "DemoDirection",
+        "name": "DemoDirection",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 2,
+          "unit": ""
+        }
+      },
+      "DemoText": {
+        "id": "DemoText",
+        "name": "DemoText",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "string",
+          "initValue": "Hello Panel"
+        }
+      },
+      "DemoBytes": {
+        "id": "DemoBytes",
+        "name": "DemoBytes",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "array",
+          "initValue": [
+            72,
+            101,
+            108,
+            108,
+            111,
+            33
+          ]
+        }
+      },
+      "DemoPath": {
+        "id": "DemoPath",
+        "name": "DemoPath",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "string",
+          "initValue": ""
+        }
+      },
+      "DemoStatus": {
+        "id": "DemoStatus",
+        "name": "DemoStatus",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "string",
+          "initValue": "Ready"
+        }
+      },
+      "DemoSpeed": {
+        "id": "DemoSpeed",
+        "name": "DemoSpeed",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 250,
+          "unit": "km/h"
+        }
+      },
+      "DemoDirectory": {
+        "id": "DemoDirectory",
+        "name": "DemoDirectory",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "string",
+          "initValue": ""
+        }
+      },
+      "DemoSavePath": {
+        "id": "DemoSavePath",
+        "name": "DemoSavePath",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "string",
+          "initValue": ""
+        }
+      },
+      "DemoFill": {
+        "id": "DemoFill",
+        "name": "DemoFill",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 50,
+          "min": 0,
+          "max": 100,
+          "unit": "%"
+        }
+      },
+      "DemoFillHigh": {
+        "id": "DemoFillHigh",
+        "name": "DemoFillHigh",
+        "type": "user",
+        "desc": "",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1,
+          "unit": ""
+        }
+      }
+    },
+    "datas": {},
+    "panels": {
+      "demo-showcase": {
+        "id": "demo-showcase",
+        "name": "Panel Showcase",
+        "filePath": "showcase.ecpanel",
+        "rule": [],
+        "options": {}
+      },
+      "demo-detail": {
+        "id": "demo-detail",
+        "name": "Telemetry Detail",
+        "filePath": "detail.ecpanel",
+        "rule": [],
+        "options": {}
+      }
+    },
+    "logs": {},
+    "traces": {
+      "trace": {
+        "id": "trace",
+        "name": "Trace",
+        "filter": [
+          "canBase",
+          "ipBase",
+          "linBase",
+          "serialBase",
+          "uds",
+          "someipBase",
+          "osTrace"
+        ],
+        "filterDevice": [
+          "VECTOR_0",
+          "VECTOR_1"
+        ],
+        "filterId": [],
+        "columnConfig": [
+          {
+            "key": "seqIndex",
+            "visible": true,
+            "width": 80
+          },
+          {
+            "key": "ts",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "deltaTs",
+            "visible": true,
+            "width": 120
+          },
+          {
+            "key": "absTimeStr",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "name",
+            "visible": true,
+            "width": 200
+          },
+          {
+            "key": "data",
+            "visible": true,
+            "width": 300
+          },
+          {
+            "key": "dir",
+            "visible": true,
+            "width": 50
+          },
+          {
+            "key": "id",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "dlc",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "len",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "msgType",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "channel",
+            "visible": true,
+            "width": 100
+          },
+          {
+            "key": "device",
+            "visible": true,
+            "width": 200
+          }
+        ]
+      }
+    },
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "displayName": "Panel Showcase",
+    "wins": {
+      "pdemo-showcase": {
+        "id": "pdemo-showcase",
+        "title": "panelPreview",
+        "label": "Panel Showcase",
+        "pos": {
+          "x": 7,
+          "y": 0,
+          "w": 1391,
+          "h": 797
+        },
+        "isMax": false,
+        "options": {
+          "name": "Panel Showcase",
+          "params": {
+            "edit-index": "pdemo-showcase"
+          }
+        },
+        "hide": false,
+        "backupPos": {
+          "x": 0,
+          "y": 0,
+          "w": 2560,
+          "h": 1269
+        }
+      },
+      "pdemo-detail": {
+        "pos": {
+          "x": 1671,
+          "y": 72.5,
+          "w": 800,
+          "h": 550
+        },
+        "title": "panelPreview",
+        "label": "PanelPreview",
+        "id": "pdemo-detail",
+        "options": {
+          "params": {
+            "edit-index": "pdemo-detail"
+          },
+          "name": "Telemetry Detail"
+        },
+        "hide": false
+      },
+      "network": {
+        "pos": {
+          "x": 88,
+          "y": 813.5,
+          "w": 600,
+          "h": 400
+        },
+        "title": "network",
+        "label": "Network",
+        "id": "network",
+        "options": {}
+      },
+      "trace": {
+        "pos": {
+          "x": 1459,
+          "y": 684.5000305175781,
+          "w": 1016,
+          "h": 512
+        },
+        "title": "trace",
+        "label": "Trace",
+        "id": "trace",
+        "options": {
+          "params": {
+            "edit-index": "trace"
+          },
+          "name": "Trace"
+        }
+      },
+      "demo-command_ia": {
+        "pos": {
+          "x": 720,
+          "y": 782.5000305175781,
+          "w": 700,
+          "h": 400
+        },
+        "title": "cani",
+        "label": "IA",
+        "id": "demo-command_ia",
+        "options": {
+          "params": {
+            "edit-index": "demo-command"
+          },
+          "name": "Panel Command"
+        }
+      },
+      "message": {
+        "pos": {
+          "x": 1479,
+          "y": 704.5000305175781,
+          "w": 600,
+          "h": 300
+        },
+        "title": "message",
+        "label": "Message",
+        "id": "message",
+        "options": {},
+        "layoutType": "bottom"
+      }
+    }
+  }
+}

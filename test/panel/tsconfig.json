@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.web.json",
+  "include": ["../../src/renderer/src/**/*", "../../src/preload/*.d.ts", "./preview.mts", "./project-file.spec.mts", "./external-file.spec.mts"],
+  "compilerOptions": { "composite": false }
+}

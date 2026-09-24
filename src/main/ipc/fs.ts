@@ -74,7 +74,8 @@ ipcMain.handle('ipc-glob', async (event, ...args) => {
 
 ipcMain.handle('ipc-open-path', async (event, targetPath: string) => {
   try {
-    await shell.openPath(targetPath)
+    const error = await shell.openPath(targetPath)
+    if (error) throw new Error(error)
     return true
   } catch (error) {
     console.error(`Failed to open path ${targetPath}:`, error)

@@ -5,6 +5,7 @@ import { VarLOG } from '../log'
 import { getTsUs } from '../share/can'
 import { setSignal } from '../util'
 import { setVar } from '../var'
+import { refreshCanPeriodData } from './uds'
 const varEvent = new EventEmitter<VarEvent>()
 global.varEvent = varEvent
 
@@ -21,8 +22,9 @@ ipcMain.on('ipc-var-set', (event, arg) => {
   varLOG.setVar(arg.name, arg.value, getTsUs() - global.startTs)
 })
 ipcMain.on('ipc-signal-set', (event, arg) => {
-  setSignal({
+  const messageId = setSignal({
     signal: arg.name,
     value: arg.value
   })
+  if (messageId != undefined) refreshCanPeriodData(messageId)
 })

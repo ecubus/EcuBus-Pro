@@ -1,6 +1,7 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import path, { resolve } from 'path'
 import fs from 'fs/promises'
+import vue from '@vitejs/plugin-vue'
 import { normalizePath, Plugin } from 'vite'
 
 export const nodejsPolarsDirnamePlugin = () => {
@@ -65,5 +66,5 @@ export default defineConfig({
     // 全局清理，在整个测试套件结束后执行一次
     // globalTeardown: './test/global-teardown.ts',
   },
-  plugins: [nodejsPolarsDirnamePlugin()]
+  plugins: [nodejsPolarsDirnamePlugin(), vue()]
 })

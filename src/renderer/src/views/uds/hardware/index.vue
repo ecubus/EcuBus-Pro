@@ -566,6 +566,18 @@ async function buildTree() {
     t.push(candle)
     addSubTree('candle', candle, deviceIndexMap)
   }
+  for (const vendor of ['vcan_usb', 'vkgs_usb'] as const) {
+    if (!vendors.includes(vendor)) continue
+    const usbCan: tree = {
+      label: i18next.t(`uds.hardware.vendors.${vendor}`),
+      vendor,
+      append: false,
+      id: vendor.toUpperCase(),
+      children: []
+    }
+    t.push(usbCan)
+    addSubTree(vendor, usbCan, deviceIndexMap)
+  }
 
   tData.value = t
 }

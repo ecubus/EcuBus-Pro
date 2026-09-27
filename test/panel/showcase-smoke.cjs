@@ -5,6 +5,7 @@ const os = require('node:os')
 const assert = require('node:assert/strict')
 
 const artifacts = fs.mkdtempSync(path.join(os.tmpdir(), 'ecubus-panel-electron-'))
+require('./smoke-console.cjs')(artifacts)
 for (const key of ['APPDATA', 'LOCALAPPDATA']) {
   process.env[key] = path.join(artifacts, key)
   fs.mkdirSync(process.env[key], { recursive: true })
@@ -21,26 +22,32 @@ const checks = []
 let started = false
 const timeout = setTimeout(() => finish(new Error('Electron smoke test timed out')), 90000)
 
+let finished = false
 function finish(error) {
+  if (finished) return
+  finished = true
   clearTimeout(timeout)
-  fs.writeFileSync(
-    path.join(artifacts, 'result.json'),
-    JSON.stringify(
-      {
-        artifacts,
-        checks,
-        error: error ? String(error.stack || error) : null
-      },
-      null,
-      2
+  try {
+    fs.writeFileSync(
+      path.join(artifacts, 'result.json'),
+      JSON.stringify(
+        {
+          artifacts,
+          checks,
+          error: error ? String(error.stack || error) : null
+        },
+        null,
+        2
+      )
     )
-  )
-  console.log(JSON.stringify({ artifacts, checks, error: error ? String(error) : null }))
-  for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.closeDevTools()
-    win.destroy()
+    console.log(JSON.stringify({ artifacts, checks, error: error ? String(error) : null }))
+    for (const win of BrowserWindow.getAllWindows()) {
+      win.webContents.closeDevTools()
+      win.destroy()
+    }
+  } finally {
+    app.exit(error ? 1 : 0)
   }
-  app.exit(error ? 1 : 0)
 }
 
 async function waitFor(win, expression) {
@@ -110,6 +117,10 @@ app.on('browser-window-created', (_event, win) => {
         `panelTest.project.openProjectByPath(${JSON.stringify(path.join(demo, 'PanelShowcase.ecb'))})`
       )
       await waitFor(win, `!!document.querySelector('[data-control-id="measurement"]')`)
+      await win.webContents.executeJavaScript(
+        `panelTest.data.vars.DemoDirectory.rememberValue = false`
+      )
+
       const build = await win.webContents.executeJavaScript(
         `window.electron.ipcRenderer.invoke('ipc-build-project',${JSON.stringify(demo)},'PanelShowcase.ecb',JSON.parse(JSON.stringify(panelTest.data.getData())),'simulation.ts',false)`
       )
@@ -242,6 +253,39 @@ app.on('browser-window-created', (_event, win) => {
         `document.querySelector('.runtime-status').textContent.includes('Stopped')`
       )
       checks.push({ name: 'stop-simulation', passed: true })
+      const remembered = await win.webContents.executeJavaScript(
+        `window.electron.ipcRenderer.invoke('ipc-panel-var-values', {...panelTest.project.projectInfo}, JSON.parse(JSON.stringify(panelTest.data.vars)), false)`
+      )
+      assert.equal(remembered.DemoPath, path.join(demo, 'PanelDemo.dbc'))
+      assert.equal(remembered.DemoDirectory, undefined)
+      await win.webContents.executeJavaScript(
+        `document.querySelector('[data-control-id="measurement"] .el-button--success').click()`
+      )
+      await waitFor(
+        win,
+        `document.querySelector('.runtime-status').textContent.includes('Running')`
+      )
+      await waitFor(
+        win,
+        `(async () => (await window.electron.ipcRenderer.invoke('ipc-panel-var-values', {...panelTest.project.projectInfo}, {DemoPath:{type:'user',value:{type:'string'}}}, true)).DemoPath === ${JSON.stringify(path.join(demo, 'PanelDemo.dbc'))})()`
+      )
+      await win.webContents.executeJavaScript(
+        `Array.from(document.querySelectorAll('.container-tabs button')).find(el=>el.textContent.includes('02')).click()`
+      )
+      await waitFor(
+        win,
+        `document.querySelector('[data-control-id="path-file"] input').value.endsWith('PanelDemo.dbc')`
+      )
+      await capture(win, 'remembered-path')
+      await win.webContents.executeJavaScript(
+        `document.querySelector('[data-control-id="measurement"] .el-button--danger').click()`
+      )
+      await waitFor(
+        win,
+        `document.querySelector('.runtime-status').textContent.includes('Stopped')`
+      )
+      checks.push({ name: 'remembered-path-after-restart', passed: true })
+
       finish()
     } catch (error) {
       await capture(win, 'failure').catch(() => {})

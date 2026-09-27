@@ -2,6 +2,18 @@ import i18next from 'i18next'
 import { onUnmounted, ref } from 'vue'
 
 const labels = {
+  memoryFiles: ['记忆文件', 'Remembered values'],
+  memoryProject: ['工程 / 文件', 'Project / file'],
+  memoryModified: ['保存时间', 'Last saved'],
+  memoryState: ['状态', 'Status'],
+  memoryInUse: ['使用中', 'In use'],
+  memoryStored: ['已保存', 'Stored'],
+  memoryReadFailed: ['读取失败', 'Read failed'],
+  memoryDelete: ['删除所选记忆', 'Delete selected values'],
+  memoryDeleteConfirm: [
+    '删除所选工程的记忆值？',
+    'Delete remembered values for the selected projects?'
+  ],
   newPanel: ['新增 Panel', 'New Panel'],
   importPanel: ['导入 Panel', 'Import Panel'],
   savePanelAs: ['另存为 Panel', 'Save Panel As'],

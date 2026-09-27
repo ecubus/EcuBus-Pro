@@ -44,6 +44,7 @@ import {
 } from './runtime'
 import ControlTree from './ControlTree.vue'
 import { usePanelLocale } from './locale'
+import { readPanelVariables } from './variableValues'
 const props = defineProps<{ document: PanelDocument; height: number }>()
 const data = useDataStore()
 const project = useProjectStore()
@@ -145,19 +146,38 @@ const validIds = computed(() =>
     .map((c) => c.id)
     .join('\n')
 )
+const bindingState = computed(() =>
+  JSON.stringify(
+    props.document.controls.map((control) => {
+      const variable =
+        control.binding?.kind === 'variable'
+          ? data.vars[control.binding.node.bindValue.variableId]
+          : undefined
+      return [
+        control.id,
+        control.type,
+        control.binding,
+        control.numberValueType,
+        variable?.rememberValue,
+        variable?.value?.type
+      ]
+    })
+  )
+)
 let session = 0
 const connection = new PanelConnection(window.logBus, (id, value) => {
   values.value[id] = value
 })
 watch(
-  [() => props.document, running, validIds],
+  [bindingState, running, validIds, () => project.projectInfo.path, () => project.projectInfo.name],
   () => {
     session++
     connection.disconnect()
     values.value = {}
+    void restoreInputs().catch((error) => ElMessage.error(String(error)))
     if (running.value) connection.connect(props.document.controls.filter((c) => valid.value[c.id]))
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 )
 function write(control: PanelControl, value: PanelValue) {
   if (
@@ -172,6 +192,28 @@ function write(control: PanelControl, value: PanelValue) {
     )
   )
     values.value[control.id] = value
+}
+async function restoreInputs() {
+  const currentSession = session
+  const variables = Object.fromEntries(
+    props.document.controls.flatMap((control) => {
+      if (control.binding?.kind !== 'variable') return []
+      const id = control.binding.node.bindValue.variableId
+      const variable = data.vars[id]
+      if (variable?.type !== 'user' || variable.rememberValue === false || !variable.value)
+        return []
+      return [[id, variable]]
+    })
+  )
+  if (!Object.keys(variables).length) return
+  const restored = await readPanelVariables(project.projectInfo, variables, running.value)
+  if (currentSession !== session) return
+  for (const control of props.document.controls) {
+    if (control.binding?.kind !== 'variable') continue
+    const value = restored[control.binding.node.bindValue.variableId]
+    if (value !== undefined && values.value[control.id] === undefined)
+      values.value[control.id] = value
+  }
 }
 let disposed = false
 async function performAction(id: string) {

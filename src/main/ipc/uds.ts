@@ -1,3 +1,4 @@
+import { restoreVariables, stopRememberedVariables } from '../var/persistence'
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
@@ -746,107 +747,108 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     return
   }
   isGlobalStarting = true
-  const projectInfo = arg[0] as {
-    path: string
-    name: string
-  }
-  const data = arg[1] as DataSet
+  try {
+    const projectInfo = arg[0] as {
+      path: string
+      name: string
+    }
+    const data = arg[1] as DataSet
 
-  global.dataSet = data
-  for (const t of exTransportList) {
-    removeDeviceTransport(t)
-  }
-  exTransportList.splice(0, exTransportList.length)
+    restoreVariables(projectInfo, data.vars)
+    global.dataSet = data
+    for (const t of exTransportList) {
+      removeDeviceTransport(t)
+    }
+    exTransportList.splice(0, exTransportList.length)
 
-  //can signal as proxy
-  Object.values(global.dataSet.database.can).forEach((db) => {
-    Object.values(db.messages).forEach((msg) => {
-      const x = (target: any, prop: string, value: any) => {
-        const ret = Reflect.set(target, prop, value)
-        if (ret) {
-          for (const [index, d] of timerMap.entries()) {
-            if (parseInt(d.ia.id, 16) == msg.id) {
-              if (d.socket.changePeriodData) {
-                const data = send(index, false)
-                if (data && data.compare(d.data!) != 0) {
-                  d.socket.changePeriodData(d.taskId!, data)
-                  d.data = data
+    //can signal as proxy
+    Object.values(global.dataSet.database.can).forEach((db) => {
+      Object.values(db.messages).forEach((msg) => {
+        const x = (target: any, prop: string, value: any) => {
+          const ret = Reflect.set(target, prop, value)
+          if (ret) {
+            for (const [index, d] of timerMap.entries()) {
+              if (parseInt(d.ia.id, 16) == msg.id) {
+                if (d.socket.changePeriodData) {
+                  const data = send(index, false)
+                  if (data && data.compare(d.data!) != 0) {
+                    d.socket.changePeriodData(d.taskId!, data)
+                    d.data = data
+                  }
                 }
               }
             }
           }
+          return ret
         }
-        return ret
-      }
-      msg.signals.forEach((signal, index) => {
-        msg.signals[index] = new Proxy(signal, {
-          set: x
+        msg.signals.forEach((signal, index) => {
+          msg.signals[index] = new Proxy(signal, {
+            set: x
+          })
         })
       })
     })
-  })
 
-  global.vars = {}
+    global.vars = {}
 
-  const devices = data.devices
-  const testers = data.tester
+    const devices = data.devices
+    const testers = data.tester
 
-  const vars: Record<string, VarItem> = cloneDeep(data.vars)
-  const logs = data.logs
+    const vars: Record<string, VarItem> = cloneDeep(data.vars)
+    const logs = data.logs
 
-  for (const log of Object.values(logs)) {
-    if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
-      if (!path.isAbsolute(log.path)) {
-        log.path = path.join(projectInfo.path, log.path)
-      }
-
-      const logFilePath = resolveLogFilePath(log.path, log.format, {
-        loggerName: log.name,
-        projectName: path.parse(projectInfo.name).name
-      })
-
-      const id =
-        log.format === 'blf'
-          ? addDeviceTransport(() =>
-              blfTransport(logFilePath, log.channel, log.method, log.compression)
-            )
-          : addDeviceTransport(() => ascTransport(logFilePath, log.channel, log.method))
-
-      exTransportList.push(id)
-    }
-  }
-
-  /* --------- */
-  const sysVars = getAllSysVar(devices, testers, data.database.orti)
-
-  for (const v of Object.values(sysVars)) {
-    vars[v.id] = cloneDeep(v)
-  }
-
-  for (const key of Object.keys(vars)) {
-    const v = vars[key]
-
-    if (v.value) {
-      const parentName: string[] = []
-
-      // 递归查找所有父级名称
-      let currentVar = v
-      while (currentVar.parentId) {
-        const parent = vars[currentVar.parentId]
-        if (parent) {
-          parentName.unshift(parent.name) // 将父级名称添加到数组开头
-          currentVar = parent
-        } else {
-          break
+    for (const log of Object.values(logs)) {
+      if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
+        if (!path.isAbsolute(log.path)) {
+          log.path = path.join(projectInfo.path, log.path)
         }
-      }
 
-      parentName.push(v.name)
-      v.name = parentName.join('.')
+        const logFilePath = resolveLogFilePath(log.path, log.format, {
+          loggerName: log.name,
+          projectName: path.parse(projectInfo.name).name
+        })
+
+        const id =
+          log.format === 'blf'
+            ? addDeviceTransport(() =>
+                blfTransport(logFilePath, log.channel, log.method, log.compression)
+              )
+            : addDeviceTransport(() => ascTransport(logFilePath, log.channel, log.method))
+
+        exTransportList.push(id)
+      }
     }
-    global.vars[key] = v
-  }
-  try {
+
+    /* --------- */
+    const sysVars = getAllSysVar(devices, testers, data.database.orti)
+
+    for (const v of Object.values(sysVars)) {
+      vars[v.id] = cloneDeep(v)
+    }
+
+    for (const key of Object.keys(vars)) {
+      const v = vars[key]
+
+      if (v.value) {
+        const parentName: string[] = []
+
+        // 递归查找所有父级名称
+        let currentVar = v
+        while (currentVar.parentId) {
+          const parent = vars[currentVar.parentId]
+          if (parent) {
+            parentName.unshift(parent.name) // 将父级名称添加到数组开头
+            currentVar = parent
+          } else {
+            break
+          }
+        }
+
+        parentName.push(v.name)
+        v.name = parentName.join('.')
+      }
+      global.vars[key] = v
+    }
     await globalStart(data, projectInfo)
   } catch (err: any) {
     globalStop(true)
@@ -1021,6 +1023,7 @@ export function globalStop(emit = false) {
   }
 
   monitor?.disable()
+  return stopRememberedVariables()
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {

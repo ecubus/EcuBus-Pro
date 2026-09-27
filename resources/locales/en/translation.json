@@ -993,6 +993,7 @@
         "description": "Description",
         "dataType": "Data Type",
         "initialValue": "Initial Value",
+        "rememberValue": "Remember last value",
         "minimum": "Minimum",
         "maximum": "Maximum",
         "unit": "Unit"

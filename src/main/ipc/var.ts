@@ -1,3 +1,8 @@
+import {
+  panelVariableValues,
+  listRememberedProjects,
+  deleteRememberedProjects
+} from '../var/persistence'
 import { ipcMain } from 'electron'
 import EventEmitter from 'events'
 import { VarEvent } from '../global'
@@ -28,3 +33,10 @@ ipcMain.on('ipc-signal-set', (event, arg) => {
   })
   if (messageId != undefined) refreshCanPeriodData(messageId)
 })
+
+ipcMain.handle('ipc-panel-var-values', (_event, project, variables, running) =>
+  panelVariableValues(project, variables, running)
+)
+
+ipcMain.handle('ipc-var-memory-list', () => listRememberedProjects())
+ipcMain.handle('ipc-var-memory-delete', (_event, ids: string[]) => deleteRememberedProjects(ids))

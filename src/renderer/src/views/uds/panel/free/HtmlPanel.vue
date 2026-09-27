@@ -11,7 +11,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getAllSysVar } from 'nodeCan/sysVar'
+import { useProjectStore } from '@r/stores/project'
 import { useDataStore } from '@r/stores/data'
+import { readPanelVariables } from './variableValues'
 import type { PanelControl } from 'src/preload/panel'
 
 const props = defineProps<{
@@ -21,6 +23,7 @@ const props = defineProps<{
 }>()
 
 const data = useDataStore()
+const project = useProjectStore()
 const frame = ref<HTMLIFrameElement>()
 const latest = new Map<string, unknown>()
 const subscriptions = new Map<number, { key: string; name: string; kind: 'variable' | 'signal' }>()
@@ -188,14 +191,22 @@ function respond(id: number, result?: unknown, error?: unknown) {
   post({ type: 'response', id, result, error: error instanceof Error ? error.message : error })
 }
 
-function handleRequest(message: { id: number; method: string; args: any[] }) {
+async function handleRequest(message: { id: number; method: string; args: any[] }) {
   const [name, value] = message.args || []
   try {
     if (message.method === 'isRunning') return respond(message.id, !!props.running)
     if (message.method === 'getVar') {
       const variable = findVariable(String(name))
       if (!variable) throw new Error(`Variable ${name} not found`)
-      return respond(message.id, latest.get(variable.id) ?? variableValue(variable.item))
+      const restored = await readPanelVariables(
+        project.projectInfo,
+        { [variable.id]: variable.item },
+        !!props.running
+      )
+      return respond(
+        message.id,
+        restored[variable.id] ?? latest.get(variable.id) ?? variableValue(variable.item)
+      )
     }
     if (message.method === 'setVar') {
       if (!props.running) throw new Error('Panel is stopped')

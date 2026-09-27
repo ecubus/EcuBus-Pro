@@ -5,6 +5,7 @@ const os = require('node:os')
 const assert = require('node:assert/strict')
 
 const artifacts = fs.mkdtempSync(path.join(os.tmpdir(), 'ecubus-panel-electron-'))
+require('./smoke-console.cjs')(artifacts)
 for (const key of ['APPDATA', 'LOCALAPPDATA']) {
   process.env[key] = path.join(artifacts, key)
   fs.mkdirSync(process.env[key], { recursive: true })
@@ -21,26 +22,32 @@ const checks = []
 let started = false
 const timeout = setTimeout(() => finish(new Error('Electron smoke test timed out')), 90000)
 
+let finished = false
 function finish(error) {
+  if (finished) return
+  finished = true
   clearTimeout(timeout)
-  fs.writeFileSync(
-    path.join(artifacts, 'result.json'),
-    JSON.stringify(
-      {
-        artifacts,
-        checks,
-        error: error ? String(error.stack || error) : null
-      },
-      null,
-      2
+  try {
+    fs.writeFileSync(
+      path.join(artifacts, 'result.json'),
+      JSON.stringify(
+        {
+          artifacts,
+          checks,
+          error: error ? String(error.stack || error) : null
+        },
+        null,
+        2
+      )
     )
-  )
-  console.log(JSON.stringify({ artifacts, checks, error: error ? String(error) : null }))
-  for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.closeDevTools()
-    win.destroy()
+    console.log(JSON.stringify({ artifacts, checks, error: error ? String(error) : null }))
+    for (const win of BrowserWindow.getAllWindows()) {
+      win.webContents.closeDevTools()
+      win.destroy()
+    }
+  } finally {
+    app.exit(error ? 1 : 0)
   }
-  app.exit(error ? 1 : 0)
 }
 
 async function waitFor(win, expression) {
@@ -344,7 +351,7 @@ app.on('browser-window-created', (_event, win) => {
       checks.push({ name: 'editor-add-and-save', passed: true })
       await capture(win, 'editor')
       await win.webContents.executeJavaScript(`(async () => {
-        panelTest.data.vars.level = {id:'level', name:'Level', type:'user', value:{type:'number', min:0, max:100, initValue:0}};
+        panelTest.data.vars.level = {id:'level', name:'Level', type:'user', rememberValue:false, value:{type:'number', min:0, max:100, initValue:0}};
         const controls = panelTest.data.panels['smoke-panel'].document.controls;
         controls.forEach((c, i) => {
           c.x = 32; c.y = 32 + i * 100;
@@ -893,7 +900,7 @@ app.on('browser-window-created', (_event, win) => {
       await win.webContents.executeJavaScript(`panelTest.project.saveProject()`)
       await waitFor(win, `!panelTest.project.projectDirty`)
       const legacySampleText = fs.readFileSync(
-        path.resolve(__dirname, '../../resources/examples/script_demo_2/script_demo_2.ecb'),
+        path.resolve(__dirname, './fixtures/script-demo-2.ecb'),
         'utf8'
       )
       const legacySample = JSON.parse(legacySampleText)

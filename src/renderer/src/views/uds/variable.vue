@@ -49,6 +49,7 @@
                   </el-button>
                 </el-tooltip>
               </el-button-group>
+              <RememberedProjects />
             </div>
           </template>
           <template #default_name="{ row }">
@@ -148,6 +149,12 @@
         </el-form-item>
 
         <template v-if="newVariableForm.value">
+          <el-form-item :label="i18next.t('uds.variable.labels.rememberValue')">
+            <el-switch
+              :model-value="newVariableForm.rememberValue !== false"
+              @update:model-value="newVariableForm.rememberValue = Boolean($event)"
+            />
+          </el-form-item>
           <el-form-item
             :label="i18next.t('uds.variable.labels.dataType')"
             required
@@ -216,6 +223,7 @@ import { cloneDeep } from 'lodash'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
+import RememberedProjects from './panel/free/RememberedProjects.vue'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()

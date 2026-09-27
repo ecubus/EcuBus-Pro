@@ -100,3 +100,31 @@ node node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p test/panel/tsconfig.json
 `numeric.spec.ts` 覆盖数值格式与严格解析、范围限制、单位/范围标签、报警恢复、同源原始值/物理值订阅和 CAN 物理值逆向换算。Electron 使用实际文本输入验证 Hex 数值通过变量 IPC 写入，并检查十进制/二进制显示及上下限报警背景恢复，生成 `numeric-formats.png`。这些检查不覆盖真实 CAN/LIN 设备通信。
 
 `external-file.spec.mts` 覆盖 `.ecpanel` 格式、跨工程绑定匹配与歧义处理、相对引用和缺失文件。工程文件测试验证真实磁盘保存/重开时仅保存引用、载入外部修改及保留丢失引用；编辑入口测试验证文件写入失败时不替换已保存内容。Electron 覆盖另存为、再次保存写回、重启载入和导入另一个文件，使用测试对话框结果和真实文件 IPC。
+
+## 新版示例与 HTML Control
+
+`remembered-values.spec.ts` 覆盖记忆值缓存、500 ms 合并写入、切换工程和显式补写、旧存储键兼容及批量读取。运行值先更新内存，每 500 ms 异步合并写入配置目录下的 `remembered-variables/<工程哈希>.json`，临时文件写完后再替换。停止测量等待补写；正常退出最多等待 2 秒，超时记录错误后退出，未完成的更新可能丢失。读取失败使用初始值并保留原文件，该次会话不覆盖它；下次启动测量重试读取。HTML 冒烟脚本同时检查原生控件按变量去重查询，以及 HTML 单变量读取只产生一次 IPC 且不携带整个变量表。
+
+缓存按工程路径隔离，最多保留 16 个可淘汰的工程缓存，正在使用或尚未保存的缓存不淘汰。交替查询不会触发写盘，未保存工程不持久化。启动测量时按完整变量表清理已删除或关闭保留的变量；旧工程文件可在“用户变量 → 记忆文件”中选择删除，当前使用中或尚未写完的记录不可删除；不按年龄自动删除。新文件记录工程路径，旧版纯变量映射仍可读取。旧配置值迁移成功后才删除对应旧记录。写盘失败会记录错误并保留脏数据，后续变量更新或生命周期补写时重试，不阻断停止测量。测试覆盖写入异常、多工程交替读取和失败后的补写；面板只使用 `ipc-panel-var-values` 批量接口，纯布局变化不查询变量。`remembered-disk.spec.ts` 验证真实文件保存及新缓存读取。持久化只在主进程 VarLOG 入口触发；worker 打包后可检查 `dist/index.js.map` 不包含 persistence、store 和 conf。
+
+Windows 下使用 `node node_modules/electron/cli.js` 启动冒烟脚本，不直接运行 `electron.exe`。四个脚本的控制台日志同步写入各自临时目录的 `console.log`，结果保存在同目录的 `result.json`，不依赖启动终端的输出管道。临时目录为 `%TEMP%/ecubus-panel-electron-*`。`smoke-console.spec.ts` 验证输出管道断开时日志仍能保存。
+
+`examples.spec.mts` 检查六个旧示例转为 `.ecpanel` 后的控件数、绑定和按钮语义，以及 HTML 源文件与独立面板的一致性。旧面板原始数据保存在 `fixtures/` 中，用于继续验证旧版兼容。
+
+独立 HTML 示例的 Electron 验证：
+
+```powershell
+node node_modules/electron/cli.js test/panel/html-smoke.cjs
+```
+
+使用当前构建，或通过 `PANEL_SMOKE_BUILD_DIR` 指定独立构建目录。脚本在临时目录复制 `panel_html`，编译 ECU 脚本并验证 HTML/原生控件双向联动、两个 simulate 通道的信号写入和接收、取消/恢复订阅、停止时拒绝写入。它通过 IPC 启动交互节点周期发送，不覆盖用户点击该发送按钮的路径。
+
+六个迁移示例的渲染验证：
+
+```powershell
+node node_modules/electron/cli.js test/panel/migrated-smoke.cjs
+```
+
+此脚本只打开临时副本，检查控件数量、绑定状态并截图，不启动硬件测量。Program 示例中不受支持的旧 DBC 在临时副本中过滤；原工程数据库不改动。停止后清空显示的通用冒烟用例显式关闭测试变量保留；默认保留行为由 `remembered-values.spec.ts` 和 `showcase-smoke.cjs` 验证。
+
+`shutdown.spec.ts` 覆盖同步清理异常、写入拒绝以及停止/写入不返回时的退出超时。HTML 冒烟验证损坏文件回退、启动锁释放、手动清理和正常退出落盘。

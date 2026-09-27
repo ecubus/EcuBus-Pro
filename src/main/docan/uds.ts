@@ -101,6 +101,7 @@ import { LIN_ADDR_TYPE, LinMode } from '../share/lin'
 import { LDF } from 'src/renderer/src/database/ldfParse'
 import { DataSet, NodeItem } from 'src/preload/data'
 import { getJsPath } from '../util'
+import { testSentinelFooterJs } from './testSentinelFooter'
 
 const NRCMsg: Record<number, string> = {
   0x10: 'General Reject',
@@ -1486,9 +1487,9 @@ async function compileTscEntry(
     `--external:*.node`
   ]
   if (isTest) {
-    cmaArray.push(
-      `--footer:js=const { test: ____ecubus_pro_test___} = require('node:test');____ecubus_pro_test___.only('____ecubus_pro_test___',()=>{})`
-    )
+    // Conditional sentinel: see testSentinelFooter.ts. Always using test.only()
+    // skips every user test on Node 24+.
+    cmaArray.push(`--footer:js=${testSentinelFooterJs}`)
   }
   const v = await exec(path.resolve(esbuildPath), cmaArray, {
     cwd: projectPath

@@ -48,18 +48,68 @@
           "min": 0,
           "max": 1
         },
-        "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
-        "rememberValue": false
+        "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f"
       }
     },
     "datas": {},
     "panels": {
       "9226deb1-108e-4492-8dec-49cd8871a380": {
-        "id": "9226deb1-108e-4492-8dec-49cd8871a380",
         "name": "LinControl",
-        "filePath": "script_demo_2.ecpanel",
-        "rule": [],
-        "options": {}
+        "id": "9226deb1-108e-4492-8dec-49cd8871a380",
+        "rule": [
+          {
+            "type": "BButton",
+            "props": {
+              "releaseValue": 0,
+              "pressValue": 1,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+                "name": "EnvChecksumError",
+                "color": "#19996a",
+                "yAxis": {
+                  "min": 0,
+                  "max": 1
+                },
+                "bindValue": {
+                  "variableId": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+                  "variableType": "user",
+                  "variableName": "EnvChecksumError",
+                  "variableFullName": "EnvChecksumError"
+                }
+              },
+              "type": "primary"
+            },
+            "children": [
+              "发送ChecSum错误帧"
+            ],
+            "_fc_id": "id_Fmilmfkdw246abc",
+            "name": "ref_Fcb0mfkdw246acc",
+            "field": "Fslimfkdw246adc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "BButton"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "LinControl"
+        }
       }
     },
     "logs": {}

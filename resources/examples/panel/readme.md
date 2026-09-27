@@ -41,11 +41,14 @@ This example demonstrates a simple program execution panel in EcuBus-Pro, includ
 
 ## Example Panel
 
-![Demo](demo.gif)
+The panel now uses `panel.ecpanel`; the GIF below records the legacy UI.
+
+![Legacy program demonstration](demo.gif)
 
 ## Code Overview
 
-- **panel.ecb**: Defines the panel layout, variables, and UI elements.
+- **panel.ecb**: Stores the project, variables, and external panel reference.
+- **panel.ecpanel**: Stores the free-layout panel, LEDs, button, and message display.
 - **program.ts**: Handles the logic for starting, stopping, and simulating program failure.
 
 ```typescript

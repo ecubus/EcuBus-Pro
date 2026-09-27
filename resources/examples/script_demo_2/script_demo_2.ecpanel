@@ -1,0 +1,58 @@
+{
+  "format": "ecubus-panel",
+  "version": 1,
+  "name": "LinControl",
+  "document": {
+    "schemaVersion": 2,
+    "width": 800,
+    "height": 420,
+    "controls": [
+      {
+        "id": "control-1",
+        "type": "button",
+        "label": "发送ChecSum错误帧",
+        "x": 24,
+        "y": 24,
+        "width": 300,
+        "height": 56,
+        "labelPosition": "top",
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "binding": {
+          "kind": "variable",
+          "node": {
+            "type": "variable",
+            "enable": true,
+            "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+            "name": "EnvChecksumError",
+            "color": "#19996a",
+            "yAxis": {
+              "min": 0,
+              "max": 1
+            },
+            "bindValue": {
+              "variableId": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+              "variableType": "user",
+              "variableName": "EnvChecksumError",
+              "variableFullName": "EnvChecksumError",
+              "variableValueType": "number"
+            }
+          }
+        },
+        "buttonVariant": "primary",
+        "buttonPlain": false
+      }
+    ]
+  }
+}

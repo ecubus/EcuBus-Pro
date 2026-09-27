@@ -1,0 +1,151 @@
+{
+  "format": "ecubus-panel",
+  "version": 1,
+  "name": "Demo",
+  "document": {
+    "schemaVersion": 2,
+    "width": 800,
+    "height": 420,
+    "controls": [
+      {
+        "id": "control-1",
+        "type": "gauge",
+        "label": "MotorSpeed",
+        "x": 24,
+        "y": 24,
+        "width": 240,
+        "height": 220,
+        "labelPosition": "top",
+        "locked": false,
+        "fontSize": 14,
+        "color": "#409EFF",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "binding": {
+          "kind": "variable",
+          "node": {
+            "type": "variable",
+            "enable": true,
+            "id": "60a2d996-ca92-4276-bb35-92574e959209",
+            "name": "MotorSpeed",
+            "color": "#6aa3ca",
+            "yAxis": {
+              "min": 0,
+              "max": 100
+            },
+            "bindValue": {
+              "variableId": "60a2d996-ca92-4276-bb35-92574e959209",
+              "variableType": "user",
+              "variableName": "MotorSpeed",
+              "variableFullName": "MotorSpeed",
+              "variableValueType": "number"
+            }
+          }
+        },
+        "progressText": "percent",
+        "progressValuePosition": "right",
+        "progressShowLimits": true
+      },
+      {
+        "id": "control-2",
+        "type": "button",
+        "label": "Speed+",
+        "x": 300,
+        "y": 58,
+        "width": 180,
+        "height": 58,
+        "labelPosition": "top",
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "binding": {
+          "kind": "variable",
+          "node": {
+            "type": "variable",
+            "enable": true,
+            "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+            "name": "MotorSpeedPlus",
+            "color": "#54941c",
+            "yAxis": {
+              "min": 0,
+              "max": 1
+            },
+            "bindValue": {
+              "variableId": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+              "variableType": "user",
+              "variableName": "MotorSpeedPlus",
+              "variableFullName": "MotorSpeedPlus",
+              "variableValueType": "number"
+            }
+          }
+        },
+        "buttonVariant": "primary",
+        "buttonPlain": false
+      },
+      {
+        "id": "control-3",
+        "type": "button",
+        "label": "Speed-",
+        "x": 300,
+        "y": 140,
+        "width": 180,
+        "height": 58,
+        "labelPosition": "top",
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "binding": {
+          "kind": "variable",
+          "node": {
+            "type": "variable",
+            "enable": true,
+            "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+            "name": "MotorSpeedMinus",
+            "color": "#d7f5cb",
+            "yAxis": {
+              "min": 0,
+              "max": 1
+            },
+            "bindValue": {
+              "variableId": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+              "variableType": "user",
+              "variableName": "MotorSpeedMinus",
+              "variableFullName": "MotorSpeedMinus",
+              "variableValueType": "number"
+            }
+          }
+        },
+        "buttonVariant": "warning",
+        "buttonPlain": false
+      }
+    ]
+  }
+}

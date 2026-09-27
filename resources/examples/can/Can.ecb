@@ -88447,101 +88447,11 @@
     },
     "panels": {
       "c10776a8-fc8c-45a3-8787-d5467bdcd26a": {
-        "name": "test",
         "id": "c10776a8-fc8c-45a3-8787-d5467bdcd26a",
-        "rule": [
-          {
-            "type": "LocalImage",
-            "title": "",
-            "style": {
-              "width": "100px",
-              "height": "100px"
-            },
-            "props": {
-              "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
-            },
-            "_fc_id": "id_F4q5mbhpxhxxaec",
-            "name": "ref_Fzvmmbhpxhxxafc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "LocalImage"
-          },
-          {
-            "type": "TText",
-            "title": "",
-            "field": "Fcwcmbhpn68iabc",
-            "style": {
-              "whiteSpace": "pre-line",
-              "width": "100%"
-            },
-            "_fc_id": "id_F26jmbhpn68iacc",
-            "name": "ref_F5hgmbhpn68iadc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "text",
-            "props": {
-              "signal": {
-                "type": "signal",
-                "enable": true,
-                "id": "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest",
-                "name": "VCLEFT_liftgateLatchRequest",
-                "color": "#0b75b0",
-                "yAxis": {
-                  "min": 0,
-                  "max": 7,
-                  "enums": [
-                    {
-                      "label": "LATCH_REQUEST_CINCH",
-                      "value": 1
-                    },
-                    {
-                      "label": "LATCH_REQUEST_FORCE_RELEASE",
-                      "value": 3
-                    },
-                    {
-                      "label": "LATCH_REQUEST_NONE",
-                      "value": 0
-                    },
-                    {
-                      "label": "LATCH_REQUEST_RELEASE",
-                      "value": 2
-                    },
-                    {
-                      "label": "LATCH_REQUEST_RESET",
-                      "value": 4
-                    }
-                  ]
-                },
-                "bindValue": {
-                  "signalName": "VCLEFT_liftgateLatchRequest",
-                  "startBit": 61,
-                  "bitLength": 3,
-                  "dbKey": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
-                  "dbName": "Model3CAN",
-                  "frameId": 322
-                }
-              }
-            }
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "test"
-        }
+        "name": "test",
+        "filePath": "Can.ecpanel",
+        "rule": [],
+        "options": {}
       }
     },
     "logs": {

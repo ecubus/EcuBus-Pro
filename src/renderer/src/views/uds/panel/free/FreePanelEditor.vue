@@ -1122,15 +1122,10 @@ const symbols: Record<PanelControlType, string> = {
   group: '▣',
   tabs: '▤'
 }
-watch(
-  [document, name],
-  () =>
-    emit(
-      'dirty',
-      JSON.stringify(document.value) !== JSON.stringify(props.initialDocument) ||
-        name.value !== props.initialName
-    ),
-  { deep: true }
+const savedDocumentJson = computed(() => JSON.stringify(props.initialDocument))
+const documentJson = computed(() => JSON.stringify(document.value))
+watch([documentJson, name, savedDocumentJson, () => props.initialName], () =>
+  emit('dirty', documentJson.value !== savedDocumentJson.value || name.value !== props.initialName)
 )
 function commit(value: PanelDocument) {
   document.value = value
@@ -1222,6 +1217,10 @@ function importImage(event: Event) {
   if (!file || !id || !active.value || isLocked(document.value, active.value)) return
   if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) {
     ElMessage.error(t('imageFailed'))
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error(t('imageTooLarge'))
     return
   }
   const reader = new FileReader()

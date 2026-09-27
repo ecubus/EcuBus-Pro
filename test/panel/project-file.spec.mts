@@ -93,9 +93,7 @@ it('reopens external Panel references from disk and retains missing references w
 })
 
 it('upgrades an actual legacy sample on open without rewriting the file and preserves its original rules on save', async () => {
-  const source = JSON.parse(
-    await readFile('resources/examples/script_demo_2/script_demo_2.ecb', 'utf8')
-  )
+  const source = JSON.parse(await readFile('test/panel/fixtures/script-demo-2.ecb', 'utf8'))
   const originalPanels = JSON.parse(JSON.stringify(source.data.panels))
   const id = Object.keys(originalPanels)[0]
   await writeFile(file, JSON.stringify(source), 'utf8')
@@ -134,7 +132,9 @@ it('keeps complex real legacy panels intact and does not overwrite existing V2 d
     'canopen_pdo/canopen_pdo',
     'uds_bin_file/uds_bin_file'
   ]) {
-    const source = JSON.parse(await readFile(`resources/examples/${example}.ecb`, 'utf8'))
+    const source = {
+      data: JSON.parse(await readFile('test/panel/fixtures/legacy-panels.json', 'utf8'))[example]
+    }
     const before = JSON.stringify(source.data.panels)
     upgradeLegacyPanels(source.data)
     expect(JSON.stringify(source.data.panels)).toBe(before)
@@ -153,9 +153,7 @@ it('keeps complex real legacy panels intact and does not overwrite existing V2 d
 })
 
 it('uses the same conversion for example projects', async () => {
-  const source = JSON.parse(
-    await readFile('resources/examples/script_demo_2/script_demo_2.ecb', 'utf8')
-  )
+  const source = JSON.parse(await readFile('test/panel/fixtures/script-demo-2.ecb', 'utf8'))
   await writeFile(file, JSON.stringify(source), 'utf8')
   const project = useProjectStore()
   project.router = { push: vi.fn() } as unknown as typeof project.router

@@ -434,168 +434,18 @@
           "max": 1
         },
         "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
-        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada"
+        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada",
+        "rememberValue": false
       }
     },
     "datas": {},
     "panels": {
       "5913dcc1-8356-415f-88ef-384f32f480d9": {
-        "name": "UDS Donwload",
         "id": "5913dcc1-8356-415f-88ef-384f32f480d9",
-        "rule": [
-          {
-            "type": "grid",
-            "props": {
-              "rule": {
-                "layout": [
-                  {
-                    "i": "Ftesmac6skjzaec",
-                    "x": 0,
-                    "y": 0,
-                    "w": 9,
-                    "h": 2
-                  },
-                  {
-                    "i": "F1kumac6skjzafc",
-                    "x": 9,
-                    "y": 0,
-                    "w": 14,
-                    "h": 2
-                  },
-                  {
-                    "i": "F0y5mac6skjzagc",
-                    "x": 0,
-                    "y": 2,
-                    "w": 24,
-                    "h": 1
-                  }
-                ],
-                "row": 24,
-                "rowHeight": 80,
-                "margin": 10,
-                "style": {},
-                "class": {},
-                "col": 1
-              }
-            },
-            "children": [
-              {
-                "type": "LocalImage",
-                "title": "",
-                "style": {
-                  "width": "100px",
-                  "height": "100px"
-                },
-                "props": {
-                  "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
-                },
-                "_fc_id": "id_F8hbmac6sys9aoc",
-                "name": "ref_Frhimac6sys9apc",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "LocalImage",
-                "slot": "Ftesmac6skjzaec"
-              },
-              {
-                "type": "BButton",
-                "props": {
-                  "releaseValue": 0,
-                  "pressValue": 1,
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
-                    "name": "start",
-                    "color": "#c57c6e",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 1
-                    },
-                    "bindValue": {
-                      "variableId": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
-                      "variableType": "user",
-                      "variableName": "start",
-                      "variableFullName": "UDS.start"
-                    }
-                  },
-                  "toggleMode": true,
-                  "type": "primary",
-                  "plain": false
-                },
-                "children": [
-                  "Button"
-                ],
-                "_fc_id": "id_F8iymac6t9foauc",
-                "name": "ref_Ffydmac6t9foavc",
-                "field": "Fiyamac6t9foawc",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "BButton",
-                "slot": "F1kumac6skjzafc"
-              },
-              {
-                "type": "xProgress",
-                "field": "Fapsmabx5vf9aec",
-                "style": {
-                  "width": "100%"
-                },
-                "props": {
-                  "strokeWidth": 20,
-                  "textInside": true,
-                  "showText": true,
-                  "color": "#409EFF",
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "Statistics.f304259b-dc7d-460b-9729-4eee2d1156de.0",
-                    "name": "Seq #0",
-                    "color": "#7e02e3",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 100,
-                      "unit": "%"
-                    },
-                    "bindValue": {
-                      "variableId": "Statistics.f304259b-dc7d-460b-9729-4eee2d1156de.0",
-                      "variableType": "system",
-                      "variableName": "Seq #0",
-                      "variableFullName": "Statistics.Tester.Seq #0"
-                    }
-                  }
-                },
-                "_fc_id": "id_Ffh9mabx5vf9afc",
-                "name": "ref_F2hzmabx5vf9agc",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "xProgress",
-                "slot": "F0y5mac6skjzagc"
-              }
-            ],
-            "_fc_id": "id_Fsxfmac6skjnabc",
-            "name": "ref_Fagemac6skjnacc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "grid"
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "UDS Donwload"
-        }
+        "name": "UDS Donwload",
+        "filePath": "uds_bin_file.ecpanel",
+        "rule": [],
+        "options": {}
       }
     }
   },

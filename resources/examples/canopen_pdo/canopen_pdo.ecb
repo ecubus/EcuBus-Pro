@@ -63,7 +63,8 @@
           "min": 0,
           "max": 1
         },
-        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181"
+        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+        "rememberValue": false
       },
       "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd": {
         "name": "MotorSpeedMinus",
@@ -75,7 +76,8 @@
           "min": 0,
           "max": 1
         },
-        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd"
+        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+        "rememberValue": false
       },
       "60a2d996-ca92-4276-bb35-92574e959209": {
         "name": "MotorSpeed",
@@ -93,183 +95,11 @@
     "datas": {},
     "panels": {
       "237463d4-1c35-4300-a316-0c6029db353c": {
-        "name": "Demo",
         "id": "237463d4-1c35-4300-a316-0c6029db353c",
-        "rule": [
-          {
-            "type": "grid",
-            "props": {
-              "rule": {
-                "layout": [
-                  {
-                    "i": "F0wzmnebckbfamc",
-                    "x": 0,
-                    "y": 0,
-                    "w": 8,
-                    "h": 2
-                  },
-                  {
-                    "i": "Fxxhmnebckbfaoc",
-                    "x": 8,
-                    "y": 0,
-                    "w": 6,
-                    "h": 2
-                  },
-                  {
-                    "i": "Fnw2mnebckbfarc",
-                    "x": 14,
-                    "y": 0,
-                    "w": 6,
-                    "h": 2
-                  }
-                ],
-                "row": 24,
-                "rowHeight": 80,
-                "margin": 10,
-                "style": {},
-                "class": {},
-                "col": 1
-              }
-            },
-            "children": [
-              {
-                "type": "xProgress",
-                "field": "Fx0xmnebcvykayc",
-                "style": {
-                  "width": "100%"
-                },
-                "props": {
-                  "strokeWidth": 20,
-                  "textInside": true,
-                  "showText": true,
-                  "color": "#409EFF",
-                  "type": "circle",
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "60a2d996-ca92-4276-bb35-92574e959209",
-                    "name": "MotorSpeed",
-                    "color": "#6aa3ca",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 100
-                    },
-                    "bindValue": {
-                      "variableId": "60a2d996-ca92-4276-bb35-92574e959209",
-                      "variableType": "user",
-                      "variableName": "MotorSpeed",
-                      "variableFullName": "MotorSpeed",
-                      "variableValueType": "number"
-                    }
-                  }
-                },
-                "_fc_id": "id_Fu0omnebcvykazc",
-                "name": "ref_Ftrpmnebcvykb0c",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "xProgress",
-                "slot": "F0wzmnebckbfamc"
-              },
-              {
-                "type": "BButton",
-                "props": {
-                  "releaseValue": 0,
-                  "pressValue": 1,
-                  "type": "primary",
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
-                    "name": "MotorSpeedPlus",
-                    "color": "#54941c",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 1
-                    },
-                    "bindValue": {
-                      "variableId": "b29cadb8-7f8a-48b1-8a15-95c959384181",
-                      "variableType": "user",
-                      "variableName": "MotorSpeedPlus",
-                      "variableFullName": "MotorSpeedPlus",
-                      "variableValueType": "number"
-                    }
-                  }
-                },
-                "children": [
-                  "Speed+"
-                ],
-                "_fc_id": "id_F84nmnebdg7xb4c",
-                "name": "ref_Fa7kmnebdg7xb5c",
-                "field": "F3k8mnebdg7xb6c",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "BButton",
-                "title": "",
-                "info": "",
-                "slot": "Fxxhmnebckbfaoc"
-              },
-              {
-                "type": "BButton",
-                "props": {
-                  "releaseValue": 0,
-                  "pressValue": 1,
-                  "type": "warning",
-                  "variable": {
-                    "type": "variable",
-                    "enable": true,
-                    "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
-                    "name": "MotorSpeedMinus",
-                    "color": "#d7f5cb",
-                    "yAxis": {
-                      "min": 0,
-                      "max": 1
-                    },
-                    "bindValue": {
-                      "variableId": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
-                      "variableType": "user",
-                      "variableName": "MotorSpeedMinus",
-                      "variableFullName": "MotorSpeedMinus",
-                      "variableValueType": "number"
-                    }
-                  }
-                },
-                "children": [
-                  "Speed-"
-                ],
-                "_fc_id": "id_Fy5kmnebebiwb7c",
-                "name": "ref_F461mnebebiwb8c",
-                "field": "F64kmnebebiwb9c",
-                "display": true,
-                "hidden": false,
-                "_fc_drag_tag": "BButton",
-                "slot": "Fnw2mnebckbfarc"
-              }
-            ],
-            "_fc_id": "id_Fkx7mnebckbcakc",
-            "name": "ref_Fd81mnebckbcalc",
-            "display": true,
-            "hidden": false,
-            "_fc_drag_tag": "grid"
-          }
-        ],
-        "options": {
-          "submitBtn": {
-            "show": false,
-            "innerText": "Submit"
-          },
-          "form": {
-            "inline": false,
-            "hideRequiredAsterisk": false,
-            "labelPosition": "right",
-            "size": "default",
-            "labelWidth": "125px"
-          },
-          "resetBtn": {
-            "show": false,
-            "innerText": "Reset"
-          },
-          "formName": "Demo"
-        }
+        "name": "Demo",
+        "filePath": "canopen_pdo.ecpanel",
+        "rule": [],
+        "options": {}
       }
     },
     "logs": {},

@@ -144,6 +144,7 @@ const labels = {
   fill: ['拉伸', 'Stretch'],
   noImage: ['无图片', 'No image'],
   imageFailed: ['图片读取失败', 'Image load failed'],
+  imageTooLarge: ['图片不能超过 5 MiB', 'Image must not exceed 5 MiB'],
   save: ['保存', 'Save'],
   undo: ['撤销', 'Undo'],
   redo: ['重做', 'Redo'],

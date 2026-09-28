@@ -1,3 +1,4 @@
+import { setProjectSimulateCount } from 'src/cli/rpc/lifecycle'
 import { openCanDevice } from 'src/main/docan/can'
 import { UDSTesterMain } from 'src/main/docan/uds'
 import { TesterInfo } from 'src/main/share/tester'
@@ -24,39 +25,38 @@ async function runSeq(
     //initialize the can device
     const canBase = openCanDevice(device.canDevice)
     if (canBase) {
-      await uds.setCanBase(canBase)
-    } else {
-      throw new Error('can device not found')
-    }
-    //find sequence index
-    let seqIndex = 0
-    if (seqName) {
-      let found = false
-      for (let i = 0; i < tester.seqList.length; i++) {
-        if (tester.seqList[i].name == seqName) {
-          seqIndex = i
-          found = true
-          break
-        }
+      if (device.canDevice.vendor === 'simulate') {
+        await setProjectSimulateCount(1)
       }
-      if (!found) {
-        throw new Error(`sequence name ${seqName} not found`)
-      }
-    }
-    if (tester.seqList[seqIndex]) {
       try {
+        await uds.setCanBase(canBase)
+        let seqIndex = 0
+        if (seqName) {
+          let found = false
+          for (let i = 0; i < tester.seqList.length; i++) {
+            if (tester.seqList[i].name == seqName) {
+              seqIndex = i
+              found = true
+              break
+            }
+          }
+          if (!found) {
+            throw new Error(`sequence name ${seqName} not found`)
+          }
+        }
+        if (!tester.seqList[seqIndex]) {
+          if (seqName) {
+            throw new Error(`sequence ${seqName} not found`)
+          }
+          throw new Error(`sequence 0 not found`)
+        }
         await uds.runSequence(seqIndex, cycle)
-      } catch (e) {
-        throw e
       } finally {
         canBase.close()
+        await setProjectSimulateCount(0)
       }
     } else {
-      if (seqName) {
-        throw new Error(`sequence ${seqName} not found`)
-      } else {
-        throw new Error(`sequence 0 not found`)
-      }
+      throw new Error('can device not found')
     }
   }
 }

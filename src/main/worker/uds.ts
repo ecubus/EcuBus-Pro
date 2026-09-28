@@ -2659,6 +2659,47 @@ export async function output(msg: CanMessage | LinMsg | SomeipMessageBase): Prom
 }
 
 /**
+ * AUTOSAR controller error state injected onto a Simulate CAN controller.
+ * @category CAN
+ */
+export type CanInjectErrorState = 'ACTIVE' | 'PASSIVE' | 'BUSOFF'
+
+/**
+ * Inject an AUTOSAR controller error (Error Active, Error Passive, or Bus-off) from a node script.
+ *
+ * @category CAN
+ * @param errorState - `ACTIVE`, `PASSIVE`, or `BUSOFF`
+ * @param options.device - Simulate device name on this node. Required when the node has more than one CAN device.
+ *   The device handle is the bus. The error is applied to every Can.c controller open on that bus.
+ * @param options.txErrorCounter - TEC. Defaults are 0 (active), 128 (passive), 256 (bus-off).
+ * @param options.rxErrorCounter - REC. Defaults to 0 for active, otherwise unchanged.
+ * @returns One result per open Can.c controller: error state, counters, and controller mode.
+ * @throws If the device is not Simulate CAN, the listener is down, or Can.c has not opened a controller.
+ *
+ * @example
+ * ```ts
+ * await injectCanError('BUSOFF')
+ * await injectCanError('ACTIVE', { device: 'SIM0' })
+ * ```
+ */
+export async function injectCanError(
+  errorState: CanInjectErrorState,
+  options?: {
+    device?: string
+    txErrorCounter?: number
+    rxErrorCounter?: number
+  }
+) {
+  return emitWorkerEventWithReply('canApi', {
+    op: 'injectError',
+    errorState,
+    device: options?.device,
+    txErrorCounter: options?.txErrorCounter,
+    rxErrorCounter: options?.rxErrorCounter
+  })
+}
+
+/**
  * Set a signal value
  *
  * @category LIN

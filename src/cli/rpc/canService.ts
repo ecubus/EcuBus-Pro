@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { CanBase } from 'src/main/docan/base'
-import { SIMULATE_CAN } from 'src/main/docan/simulate'
+import { isSimulateHandleOpen, SIMULATE_CAN, SIMULATE_HANDLE_MAX } from 'src/main/docan/simulate'
 import {
   CAN_ERROR_ID,
   CAN_ID_TYPE,
@@ -9,10 +9,8 @@ import {
   CanError,
   CanMessage,
   CanMsgType,
-  CanVendor,
   getTsUs
 } from 'src/main/share/can'
-import { UdsDevice } from 'src/main/share/uds'
 import pkg from '../../../package.json'
 import {
   asObject,
@@ -74,54 +72,10 @@ export const DEFAULT_CANFD_BITRATE: CanBitrate = {
   clock: '80'
 }
 
-const VENDORS: CanVendor[] = [
-  'peak',
-  'simulate',
-  'zlg',
-  'kvaser',
-  'toomoss',
-  'vector',
-  'slcan',
-  'ecubus',
-  'candle'
-]
+const SIMULATE_VENDOR = 'simulate'
 
-function loadNativeCan(): typeof import('src/main/docan/can') {
-  if (!nativeCan) {
-    throw new RpcError(
-      RPC_INTERNAL_ERROR,
-      `vendor requires native CAN modules; use vendor "simulate" or start via ecb_cli rpc`
-    )
-  }
-  return nativeCan
-}
-
-let nativeCan: typeof import('src/main/docan/can') | undefined
-
-/** Register Peak/Kvaser/… helpers. Called by the CLI entry so unit tests can stay simulate-only. */
-export function setNativeCanApi(api: typeof import('src/main/docan/can')) {
-  nativeCan = api
-}
-
-function openRpcCanDevice(info: CanBaseInfo): CanBase | undefined {
-  if (info.vendor === 'simulate') {
-    return new SIMULATE_CAN(info)
-  }
-  return loadNativeCan().openCanDevice(info)
-}
-
-function listRpcCanDevices(vendor: string) {
-  if (vendor.toLowerCase() === 'simulate') {
-    return SIMULATE_CAN.getValidDevices()
-  }
-  return loadNativeCan().getCanDevices(vendor)
-}
-
-function getRpcCanVersion(vendor: string) {
-  if (vendor.toLowerCase() === 'simulate') {
-    return SIMULATE_CAN.getLibVersion()
-  }
-  return loadNativeCan().getCanVersion(vendor)
+function openRpcCanDevice(info: CanBaseInfo): CanBase {
+  return new SIMULATE_CAN(info, { hideTrace: true })
 }
 
 export interface RpcSession {
@@ -164,9 +118,8 @@ interface ControllerState {
   controllerId: number
   info: CanBaseInfo
   base?: CanBase
-  /** true when this service opened the adapter (CLI). false when attached to a live GUI device. */
+  /** RPC-opened simulate handle. Project (GUI/CLI) devices are never stored here. */
   owned: boolean
-  deviceKey?: string
   mode: CanControllerMode
   errorState: CanErrorState
   txErrorCounter: number
@@ -178,14 +131,9 @@ interface ControllerState {
   closeCb: (errMsg?: string) => void
 }
 
-/** `adapter`: CLI owns hardware. `gateway`: GUI owns devices; both roles transmit with writeBase (TX). */
-export type CanRpcRole = 'adapter' | 'gateway'
-
 export interface CanRpcServiceOptions {
-  projectDevices?: Record<string, UdsDevice>
   rxQueueSize?: number
   onShutdown?: () => Promise<void> | void
-  role?: CanRpcRole
 }
 
 function stdResult(result: CanStdReturn, extra?: Record<string, unknown>) {
@@ -216,12 +164,26 @@ function normalizeBitrate(input: unknown, fd: boolean): CanBitrate {
   throw new RpcError(RPC_INVALID_PARAMS, 'Invalid bitrate')
 }
 
-function normalizeVendor(vendor: string): CanVendor {
-  const v = vendor.toLowerCase() as CanVendor
-  if (!VENDORS.includes(v)) {
-    throw new RpcError(RPC_INVALID_PARAMS, `Unsupported vendor "${vendor}"`)
+function requireSimulateVendor(vendor: string | undefined) {
+  const v = (vendor || SIMULATE_VENDOR).toLowerCase()
+  if (v !== SIMULATE_VENDOR) {
+    throw new RpcError(
+      RPC_INVALID_PARAMS,
+      `JSON-RPC only supports vendor "${SIMULATE_VENDOR}" (got "${vendor}")`
+    )
   }
-  return v
+  return SIMULATE_VENDOR as const
+}
+
+function parseSimulateHandle(raw: unknown, method: string): number {
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN
+  if (!Number.isInteger(n) || n < 0 || n >= SIMULATE_HANDLE_MAX) {
+    throw new RpcError(
+      RPC_INVALID_PARAMS,
+      `${method} requires simulate handle 0..${SIMULATE_HANDLE_MAX - 1}`
+    )
+  }
+  return n
 }
 
 function canErrorToRpc(err: unknown): RpcError {
@@ -249,7 +211,8 @@ function frameMatchesHoh(hoh: HardwareObject, msg: CanMessage): boolean {
   if (hoh.objectType !== 'RECEIVE') {
     return false
   }
-  if (toIdTypeName(msg.msgType.idType) !== hoh.idType) {
+  const hohIdType = String(hoh.idType).toUpperCase()
+  if (hohIdType !== 'MIXED' && toIdTypeName(msg.msgType.idType) !== hoh.idType) {
     return false
   }
   if (hoh.canfd != null && !!msg.msgType.canfd !== hoh.canfd) {
@@ -264,14 +227,11 @@ function frameMatchesHoh(hoh: HardwareObject, msg: CanMessage): boolean {
 
 export class CanRpcService {
   readonly sessions = new Set<RpcSession>()
-  readonly role: CanRpcRole
   private controllers = new Map<number, ControllerState>()
   private hohs = new Map<number, HardwareObject>()
   private periodTasks = new Map<string, PeriodTask>()
   private initialized = false
-  private nextControllerId = 0
   private rxQueueSize: number
-  private liveMap?: Map<string, CanBase>
   private baudRateConfigs = new Map<string, { bitrate: CanBitrate; bitratefd?: CanBitrate }>()
   private pendingTx = new Map<
     string,
@@ -279,15 +239,10 @@ export class CanRpcService {
   >()
 
   constructor(private options: CanRpcServiceOptions = {}) {
-    this.role = options.role ?? 'adapter'
     this.rxQueueSize = options.rxQueueSize ?? 4096
     if (!global.startTs) {
       global.startTs = getTsUs()
     }
-  }
-
-  private isGateway() {
-    return this.role === 'gateway'
   }
 
   createSession(notify: RpcSession['notify']): RpcSession {
@@ -322,48 +277,7 @@ export class CanRpcService {
       api: 'mcal-can',
       apiVersion: '1.0.0',
       platform: process.platform,
-      role: this.role
-    }
-  }
-
-  /**
-   * Bind already-open GUI CAN devices. RPC writes use writeBase (trace Tx).
-   * Does not open or close hardware.
-   */
-  attachLiveControllers(map: Map<string, CanBase>) {
-    this.liveMap = map
-    this.unbindLiveControllers()
-    this.bindLiveMap(map)
-  }
-
-  /** Unbind GUI devices without closing them. */
-  detachLiveControllers() {
-    this.unbindLiveControllers()
-  }
-
-  private unbindLiveControllers() {
-    const ids = [...this.controllers.keys()]
-    for (const id of ids) {
-      const ctrl = this.controllers.get(id)
-      if (!ctrl || ctrl.owned) {
-        continue
-      }
-      this.clearControllerPeriod(id)
-      if (ctrl.base) {
-        ctrl.base.detachCanMessage(ctrl.frameCb)
-        ctrl.base.event.off('close', ctrl.closeCb)
-        ctrl.base = undefined
-      }
-      for (const [hohId, hoh] of [...this.hohs.entries()]) {
-        if (hoh.controllerId === id) {
-          this.hohs.delete(hohId)
-        }
-      }
-      this.controllers.delete(id)
-      ctrl.mode = 'CAN_CS_UNINIT'
-    }
-    if (this.controllers.size === 0) {
-      this.initialized = false
+      role: 'simulate'
     }
   }
 
@@ -382,22 +296,17 @@ export class CanRpcService {
   }
 
   listVendors() {
-    const list = (pkg as { ecubusPro?: { vendor?: Record<string, string[]> } }).ecubusPro?.vendor?.[
-      process.platform
-    ]
-    if (Array.isArray(list) && list.length > 0) {
-      return { vendors: list }
-    }
-    return { vendors: VENDORS }
+    return { vendors: [SIMULATE_VENDOR] }
   }
 
   async listDevices(vendor: string) {
-    const devices = await Promise.resolve(listRpcCanDevices(vendor))
-    return { vendor: normalizeVendor(vendor), devices }
+    requireSimulateVendor(vendor)
+    return { vendor: SIMULATE_VENDOR, devices: SIMULATE_CAN.getValidDevices() }
   }
 
   getHwVersion(vendor: string) {
-    return { vendor: normalizeVendor(vendor), version: getRpcCanVersion(vendor) }
+    requireSimulateVendor(vendor)
+    return { vendor: SIMULATE_VENDOR, version: SIMULATE_CAN.getLibVersion() }
   }
 
   async canOpen(params: unknown, _session: RpcSession) {
@@ -647,27 +556,6 @@ export class CanRpcService {
 
   async canInit(params: unknown) {
     const obj = asObject(params, 'Can.Init')
-    if (this.isGateway()) {
-      if (this.controllers.size === 0 && this.liveMap && this.liveMap.size > 0) {
-        this.bindLiveMap(this.liveMap)
-      }
-      if (this.controllers.size === 0) {
-        throw new RpcError(
-          RPC_NOT_STARTED,
-          'EcuBus runtime is not started; start the project in the GUI first'
-        )
-      }
-      const config = (hasKey(obj, 'config') ? obj.config : obj) as RpcCanInitConfig
-      if (config && typeof config === 'object' && config.hardwareObjects?.length) {
-        for (const h of config.hardwareObjects) {
-          if (!this.hohs.has(h.hohId)) {
-            this.addHoh(h)
-          }
-        }
-      }
-      this.initialized = true
-      return stdResult('E_OK', this.listControllers())
-    }
     if (this.initialized && this.controllers.size > 0) {
       return stdResult('E_OK', this.listControllers())
     }
@@ -688,11 +576,11 @@ export class CanRpcService {
       }
     }
 
-    const controllers = cfg.controllers?.length ? cfg.controllers : this.controllersFromProject()
+    const controllers = cfg.controllers || []
     if (!controllers.length) {
       throw new RpcError(
         RPC_INVALID_PARAMS,
-        'Can.Init requires config.controllers[] or a CLI project with CAN devices'
+        'Can.Init requires config.controllers[] with vendor simulate and a free handle'
       )
     }
     for (const c of controllers) {
@@ -722,8 +610,68 @@ export class CanRpcService {
   async setControllerMode(controllerId: number, transition: CanModeTransition) {
     const ctrl = this.requireController(controllerId)
     const next = this.transitionToMode(ctrl.mode, transition)
+    if (next === 'CAN_CS_STARTED' && ctrl.errorState === 'CAN_ERRORSTATE_BUSOFF') {
+      ctrl.errorState = 'CAN_ERRORSTATE_ACTIVE'
+      ctrl.txErrorCounter = 0
+      ctrl.rxErrorCounter = 0
+    }
     await this.applyMode(ctrl, next)
-    return stdResult('E_OK', { controller: controllerId, mode: ctrl.mode })
+    return stdResult('E_OK', {
+      controller: controllerId,
+      mode: ctrl.mode,
+      errorState: ctrl.errorState
+    })
+  }
+
+  injectControllerError(params: unknown) {
+    const obj = asObject(params, 'Can.InjectControllerError')
+    const controllerId = parseControllerArg(params, 'Can.InjectControllerError')
+    const ctrl = this.requireController(controllerId)
+    const raw = String(obj.errorState ?? obj.state ?? '')
+      .toUpperCase()
+      .replace(/-/g, '')
+    let errorState: CanErrorState
+    if (raw === 'ACTIVE' || raw === 'CAN_ERRORSTATE_ACTIVE') {
+      errorState = 'CAN_ERRORSTATE_ACTIVE'
+    } else if (raw === 'PASSIVE' || raw === 'CAN_ERRORSTATE_PASSIVE') {
+      errorState = 'CAN_ERRORSTATE_PASSIVE'
+    } else if (raw === 'BUSOFF' || raw === 'CAN_ERRORSTATE_BUSOFF') {
+      errorState = 'CAN_ERRORSTATE_BUSOFF'
+    } else {
+      throw new RpcError(
+        RPC_INVALID_PARAMS,
+        `Can.InjectControllerError errorState must be ACTIVE, PASSIVE, or BUSOFF`
+      )
+    }
+    const txGiven = optNumber(obj, 'txErrorCounter')
+    const rxGiven = optNumber(obj, 'rxErrorCounter')
+    ctrl.errorState = errorState
+    if (errorState === 'CAN_ERRORSTATE_ACTIVE') {
+      ctrl.txErrorCounter = txGiven ?? 0
+      ctrl.rxErrorCounter = rxGiven ?? 0
+    } else if (errorState === 'CAN_ERRORSTATE_PASSIVE') {
+      ctrl.txErrorCounter = txGiven ?? 128
+      ctrl.rxErrorCounter = rxGiven ?? ctrl.rxErrorCounter
+    } else {
+      ctrl.txErrorCounter = txGiven ?? 256
+      ctrl.rxErrorCounter = rxGiven ?? ctrl.rxErrorCounter
+      const event: RpcControllerEvent = {
+        controllerId,
+        ts: getTsUs(),
+        message: 'bus-off'
+      }
+      this.broadcast((session) => {
+        this.pushBounded(session.busOffQueue, event)
+        this.notifyIf(session, ctrl, 'can.controllerBusOff', event)
+      })
+    }
+    return stdResult('E_OK', {
+      controller: controllerId,
+      errorState: ctrl.errorState,
+      txErrorCounter: ctrl.txErrorCounter,
+      rxErrorCounter: ctrl.rxErrorCounter,
+      mode: ctrl.mode
+    })
   }
 
   getControllerMode(controllerId: number) {
@@ -753,6 +701,9 @@ export class CanRpcService {
       return stdResult('E_NOT_OK', { reason: 'invalid HTH' })
     }
     const ctrl = this.controllers.get(hoh.controllerId)
+    if (ctrl?.errorState === 'CAN_ERRORSTATE_BUSOFF') {
+      return stdResult('E_NOT_OK', { reason: 'bus-off' })
+    }
     if (!ctrl || ctrl.mode !== 'CAN_CS_STARTED' || !ctrl.base) {
       return stdResult('E_NOT_OK', { reason: 'controller not started' })
     }
@@ -852,7 +803,8 @@ export class CanRpcService {
   mainFunctionRead(params: unknown, session: RpcSession) {
     const obj = asObject(params, 'Can.MainFunction_Read')
     const max = optNumber(obj, 'max') ?? 64
-    return { indications: this.drainQueue(session.rxQueue, max) }
+    const indications = this.drainQueue(session.rxQueue, max)
+    return { indications }
   }
 
   mainFunctionWrite(params: unknown, session: RpcSession) {
@@ -921,90 +873,36 @@ export class CanRpcService {
     }
   }
 
-  private controllersFromProject(): RpcControllerConfig[] {
-    const devices = this.options.projectDevices
-    if (!devices) {
-      return []
-    }
-    const list: RpcControllerConfig[] = []
-    let index = 0
-    for (const [id, device] of Object.entries(devices)) {
-      if (device.type === 'can' && device.canDevice) {
-        list.push({
-          controllerId: index,
-          vendor: device.canDevice.vendor,
-          handle: device.canDevice.handle,
-          name: device.canDevice.name,
-          deviceId: id,
-          canfd: device.canDevice.canfd,
-          silent: device.canDevice.silent,
-          bitrate: device.canDevice.bitrate,
-          bitratefd: device.canDevice.bitratefd,
-          database: device.canDevice.database
-        })
-        index++
-      }
-    }
-    return list
-  }
-
-  private resolveFromProject(cfg: RpcControllerConfig): Partial<CanBaseInfo> | undefined {
-    const devices = this.options.projectDevices
-    if (!devices) {
-      return undefined
-    }
-    for (const [id, device] of Object.entries(devices)) {
-      if (device.type !== 'can' || !device.canDevice) {
-        continue
-      }
-      if (cfg.deviceId && id === cfg.deviceId) {
-        return device.canDevice
-      }
-      if (cfg.deviceName && device.canDevice.name === cfg.deviceName) {
-        return device.canDevice
-      }
-    }
-    return undefined
-  }
-
   private async openController(cfg: RpcControllerConfig): Promise<ControllerState> {
-    if (this.isGateway()) {
-      const existing = this.matchLiveController(cfg)
-      if (existing) {
-        this.ensureDefaultHoh(existing.controllerId)
-        if (existing.mode !== 'CAN_CS_STARTED') {
-          await this.applyMode(existing, 'CAN_CS_STARTED')
-        }
-        return existing
-      }
+    requireSimulateVendor(cfg.vendor)
+    const handle = parseSimulateHandle(cfg.handle, 'can.open')
+    if (cfg.controllerId != null && cfg.controllerId !== handle) {
       throw new RpcError(
-        RPC_NOT_FOUND,
-        'No matching live EcuBus CAN device; start the project in the GUI first'
+        RPC_INVALID_PARAMS,
+        `controllerId must equal simulate handle (${handle}), got ${cfg.controllerId}`
       )
     }
-    const fromProject = this.resolveFromProject(cfg)
-    const vendor = normalizeVendor(String(cfg.vendor || fromProject?.vendor || ''))
-    const handle = cfg.handle ?? fromProject?.handle
-    if (handle == null) {
-      throw new RpcError(RPC_INVALID_PARAMS, 'controller handle is required')
-    }
-    const controllerId = cfg.controllerId != null ? cfg.controllerId : this.allocControllerId()
+    const controllerId = handle
     if (this.controllers.has(controllerId)) {
       throw new RpcError(RPC_ALREADY, `controller ${controllerId} already open`)
     }
-    const canfd = cfg.canfd ?? fromProject?.canfd ?? false
+    if (isSimulateHandleOpen(handle)) {
+      throw new RpcError(
+        RPC_ALREADY,
+        `simulate handle ${handle} is already open (project device); Can.c must use a free handle`
+      )
+    }
+    const canfd = cfg.canfd ?? false
     const info: CanBaseInfo = {
-      id: fromProject?.id || uuidv4(),
+      id: uuidv4(),
       handle,
-      name: cfg.name || fromProject?.name || `${vendor}-${handle}`,
-      vendor,
+      name: cfg.name || `simulate-${handle}`,
+      vendor: 'simulate',
       canfd,
-      silent: cfg.silent ?? fromProject?.silent,
-      bitrate: normalizeBitrate(cfg.bitrate ?? fromProject?.bitrate, false),
-      bitratefd: canfd
-        ? normalizeBitrate(cfg.bitratefd ?? fromProject?.bitratefd, true)
-        : undefined,
-      database: cfg.database ?? fromProject?.database
+      silent: cfg.silent,
+      bitrate: normalizeBitrate(cfg.bitrate, false),
+      bitratefd: canfd ? normalizeBitrate(cfg.bitratefd, true) : undefined,
+      database: cfg.database
     }
     const ctrl: ControllerState = {
       controllerId,
@@ -1022,85 +920,12 @@ export class CanRpcService {
     }
     this.controllers.set(controllerId, ctrl)
     await this.attachHardware(ctrl)
-    if (typeof sysLog !== 'undefined') {
-      sysLog.info(`rpc can open ${info.vendor}-${info.handle} as controller ${controllerId}`)
-    }
     return ctrl
-  }
-
-  private matchLiveController(cfg: RpcControllerConfig): ControllerState | undefined {
-    for (const ctrl of this.controllers.values()) {
-      if (cfg.controllerId != null && ctrl.controllerId === cfg.controllerId) {
-        return ctrl
-      }
-      if (cfg.deviceId && ctrl.deviceKey === cfg.deviceId) {
-        return ctrl
-      }
-      if (cfg.name && ctrl.info.name === cfg.name) {
-        return ctrl
-      }
-      if (cfg.deviceName && ctrl.info.name === cfg.deviceName) {
-        return ctrl
-      }
-      if (
-        cfg.handle != null &&
-        String(ctrl.info.handle) === String(cfg.handle) &&
-        (!cfg.vendor || normalizeVendor(String(cfg.vendor)) === ctrl.info.vendor)
-      ) {
-        return ctrl
-      }
-    }
-    return undefined
-  }
-
-  private bindLiveMap(map: Map<string, CanBase>) {
-    this.liveMap = map
-    this.nextControllerId = 0
-    for (const [key, base] of map) {
-      const controllerId = this.allocControllerId()
-      const ctrl: ControllerState = {
-        controllerId,
-        info: { ...base.info },
-        base,
-        owned: false,
-        deviceKey: key,
-        mode: 'CAN_CS_STARTED',
-        errorState: 'CAN_ERRORSTATE_ACTIVE',
-        txErrorCounter: 0,
-        rxErrorCounter: 0,
-        interruptDisable: 0,
-        rxOverrun: 0,
-        wakeupPending: false,
-        frameCb: (msg) => this.onFrame(controllerId, msg),
-        closeCb: (errMsg) => this.onClose(controllerId, errMsg)
-      }
-      this.controllers.set(controllerId, ctrl)
-      base.attachCanMessage(ctrl.frameCb)
-      base.event.on('close', ctrl.closeCb)
-      this.ensureDefaultHoh(controllerId)
-    }
-    this.initialized = this.controllers.size > 0
-    if (typeof sysLog !== 'undefined') {
-      sysLog.info(`rpc gateway attached ${this.controllers.size} live CAN device(s)`)
-    }
-  }
-
-  private allocControllerId() {
-    while (this.controllers.has(this.nextControllerId)) {
-      this.nextControllerId++
-    }
-    return this.nextControllerId++
   }
 
   private async attachHardware(ctrl: ControllerState) {
     try {
       const base = openRpcCanDevice(ctrl.info)
-      if (!base) {
-        throw new RpcError(
-          RPC_NOT_FOUND,
-          `failed to open ${ctrl.info.vendor} handle ${ctrl.info.handle}`
-        )
-      }
       ctrl.base = base
       base.attachCanMessage(ctrl.frameCb)
       base.event.on('close', ctrl.closeCb)
@@ -1226,13 +1051,14 @@ export class CanRpcService {
     this.hohs.set(hoh.hohId, hoh)
   }
 
-  private matchRxHoh(controllerId: number, msg: CanMessage): number | undefined {
+  private matchRxHohs(controllerId: number, msg: CanMessage): number[] {
+    const matched: number[] = []
     for (const hoh of this.hohs.values()) {
       if (hoh.controllerId === controllerId && frameMatchesHoh(hoh, msg)) {
-        return hoh.hohId
+        matched.push(hoh.hohId)
       }
     }
-    return undefined
+    return matched
   }
 
   private async transmit(
@@ -1301,25 +1127,21 @@ export class CanRpcService {
     if (msg.dir === 'OUT') {
       return
     }
-    const hrh = this.matchRxHoh(controllerId, msg)
-    if (hrh == null && this.hasReceiveHoh(controllerId)) {
+    const hrhs = this.matchRxHohs(controllerId, msg)
+    if (hrhs.length === 0) {
       return
     }
-    const frame = encodeFrame(msg, { controllerId, hrh })
     this.broadcast((session) => {
-      if (session.rxQueue.length >= this.rxQueueSize) {
-        session.rxQueue.shift()
-        ctrl.rxOverrun++
+      for (const hrh of hrhs) {
+        const frame = encodeFrame(msg, { controllerId, hrh })
+        if (session.rxQueue.length >= this.rxQueueSize) {
+          session.rxQueue.shift()
+          ctrl.rxOverrun++
+        }
+        session.rxQueue.push(frame)
+        this.notifyIf(session, ctrl, 'can.rxIndication', frame)
       }
-      session.rxQueue.push(frame)
-      this.notifyIf(session, ctrl, 'can.rxIndication', frame)
     })
-  }
-
-  private hasReceiveHoh(controllerId: number) {
-    return [...this.hohs.values()].some(
-      (h) => h.controllerId === controllerId && h.objectType === 'RECEIVE'
-    )
   }
 
   private onClose(controllerId: number, errMsg?: string) {

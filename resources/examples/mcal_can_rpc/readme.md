@@ -1,18 +1,14 @@
-# PC MCAL-CAN over JSON-RPC
+# PC MCAL-CAN over JSON-RPC (Simulate CAN)
 
-This example shows how a **C** PC implementation of AUTOSAR MCAL CAN talks to EcuBus-Pro hardware through `ecb_cli rpc`.
+This example shows how a **C** PC implementation of AUTOSAR MCAL CAN talks to EcuBus-Pro **Simulate CAN** through JSON-RPC.
 
-If the **EcuBus-Pro GUI** is already running, skip `ecb_cli rpc` and connect to the same TCP port (`127.0.0.1:17320` by default). In that mode your `Can_Write` frames show up as **Tx** in the EcuBus trace. Start the project in the GUI first.
+Start a project that contains **Simulate-0** (GUI start, or `ecb_cli seq` / `ecb_cli test`). EcuBus then listens on `127.0.0.1:17320`. Your `Can.c` must open **free** handles (`1`, `2`, …). It cannot reopen Simulate-0. Frames from `Can.c` appear as **RX** on the Simulate-0 trace.
 
-Your production `Can.c` should keep the AUTOSAR signatures (`Can_Init`, `Can_Write`, `Can_MainFunction_Read`, …) and implement each of them as one JSON-RPC call. `can_rpc_demo.c` is a small POSIX client that performs that sequence on two `simulate` controllers.
+Your production `Can.c` should keep the AUTOSAR signatures (`Can_Init`, `Can_Write`, `Can_MainFunction_Read`, …) and implement each of them as one JSON-RPC call. `can_rpc_demo.c` inits Simulate-1 and Simulate-2.
 
 ## Run
 
-Terminal 1:
-
-```bash
-ecb_cli rpc --log-level=info
-```
+Terminal 1: start EcuBus with a Simulate-0 device (GUI or CLI seq/test).
 
 Terminal 2:
 
@@ -23,7 +19,7 @@ make
 # or: ./can_rpc_demo 127.0.0.1 17320
 ```
 
-You should see `Can.Init`, `Can.SetControllerMode`, `Can.Write`, then `Can.MainFunction_Read` returning the loopback frame on controller 1.
+You should see `Can.Init` for handles 1 and 2, `Can.SetControllerMode`, `Can.Write` on handle 1, then `Can.MainFunction_Read` returning the loopback frame on handle 2.
 
 ## Files
 
@@ -33,4 +29,4 @@ You should see `Can.Init`, `Can.SetControllerMode`, `Can.Write`, then `Can.MainF
 | `can_rpc_demo.c` | POSIX TCP NDJSON client |
 | `Makefile` | `cc -std=c11` |
 
-Full protocol: [CLI JSON-RPC](/docs/en/um/cli/rpc.md).
+Full protocol: [Simulate CAN](/docs/en/um/can/simulate.md).

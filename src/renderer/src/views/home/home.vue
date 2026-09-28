@@ -355,6 +355,19 @@
                   }"
                 />
               </el-tab-pane>
+              <el-tab-pane :label="$t('home.simCan')">
+                <template #label>
+                  <span class="custom-tabs-label">
+                    <Icon :icon="simCanIcon" />
+                    <span>{{ $t('home.simCan') }}</span>
+                  </span>
+                </template>
+                <simCan
+                  :style="{
+                    height: height - 170 + 'px'
+                  }"
+                />
+              </el-tab-pane>
               <el-tab-pane label="plugin">
                 <template #label>
                   <span class="custom-tabs-label">
@@ -516,8 +529,10 @@ import update from './update.vue'
 import updateIcon from '@iconify/icons-material-symbols/browser-updated-sharp'
 import baseIcon from '@iconify/icons-material-symbols/align-start'
 import generalIcon from '@iconify/icons-material-symbols/settings-outline'
+import simCanIcon from '@iconify/icons-mdi/lan'
 import aiIcon from '@iconify/icons-material-symbols/psychology'
 import general from './general.vue'
+import simCan from './simCan.vue'
 import ai from './ai.vue'
 import plugin from './plugin.vue'
 import user from './user.vue'

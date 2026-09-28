@@ -9,6 +9,7 @@ Supported Hardware:
 
 | Manufacturer | Protocols |
 |--------|-------------------|
+| Simulate | CAN, CAN-FD — [software virtual bus](./simulate.md) |
 | PEAK | CAN, CAN-FD |
 | KVASER | CAN, CAN-FD |
 | ZLG | CAN, CAN-FD |

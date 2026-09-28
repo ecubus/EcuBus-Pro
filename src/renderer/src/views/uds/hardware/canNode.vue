@@ -58,6 +58,28 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-if="props.vendor == 'simulate'"
+      :label="i18next.t('uds.hardware.canNode.labels.mcalControllerId')"
+    >
+      <span class="vm" style="display: flex; align-items: center; gap: 8px">
+        <span>{{ data.handle }}</span>
+        <el-tooltip>
+          <template #content>
+            {{ i18next.t('uds.hardware.canNode.tooltips.simulateRpc') }}
+          </template>
+          <el-icon>
+            <InfoFilled />
+          </el-icon>
+        </el-tooltip>
+        <el-tag v-if="globalStart" type="success" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcListening') }}
+        </el-tag>
+        <el-tag v-else type="info" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcIdle') }}
+        </el-tag>
+      </span>
+    </el-form-item>
+    <el-form-item
       v-if="props.vendor == 'toomoss'"
       :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="toomossRes"

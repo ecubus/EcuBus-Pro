@@ -1,13 +1,19 @@
 import { EthBaseInfo } from 'nodeCan/doip'
 import { UdsDevice } from 'nodeCan/uds'
 import { exit } from 'process'
+import { setProjectSimulateCount } from 'src/cli/rpc/lifecycle'
 import { CanBase } from 'src/main/docan/base'
 import { openCanDevice } from 'src/main/docan/can'
 import { openLinDevice } from 'src/main/dolin'
 import LinBase from 'src/main/dolin/base'
 import { createPwmDevice, PwmBase } from 'src/main/pwm'
 import { SerialBase } from 'src/main/serial'
-import { generateConfigFile, startRouterCounter, stopRouterCounter, VSomeIP_Client } from 'src/main/vsomeip'
+import {
+  generateConfigFile,
+  startRouterCounter,
+  stopRouterCounter,
+  VSomeIP_Client
+} from 'src/main/vsomeip'
 
 export default async function main(
   projectPath: string,
@@ -93,6 +99,8 @@ export default async function main(
       someipMap.set(key, client)
     }
   }
+  const simulateCount = [...canBaseMap.values()].filter((b) => b.info.vendor === 'simulate').length
+  await setProjectSimulateCount(simulateCount)
   return { canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap }
 }
 
@@ -104,6 +112,7 @@ export async function closeDevice(
   serialBaseMap: Map<string, SerialBase>,
   someipMap: Map<string, VSomeIP_Client>
 ) {
+  await setProjectSimulateCount(0)
   for (const canBase of canBaseMap.values()) {
     await canBase.close()
   }

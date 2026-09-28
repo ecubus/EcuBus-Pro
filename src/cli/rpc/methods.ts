@@ -101,6 +101,9 @@ register('Can.SetBaudrate', (params, _s, service) => service.setBaudrate(params)
 register('Can.CheckWakeup', (params, _s, service) => {
   return service.checkWakeup(parseControllerArg(params, 'Can.CheckWakeup'))
 })
+register('Can.InjectControllerError', (params, _s, service) =>
+  service.injectControllerError(params)
+)
 register('Can.MainFunction_Write', (params, session, service) =>
   service.mainFunctionWrite(params, session)
 )

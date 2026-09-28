@@ -84,7 +84,7 @@ import {
 
 import TraceItem from '../ostrace/item'
 import { startPlugins, stopPlugins } from './plugin'
-import { attachRpcCanDevices, detachRpcCanDevices } from '../rpcHost'
+import { setProjectSimulateCount } from 'src/cli/rpc/lifecycle'
 import Replay, { ReplayReader } from '../replay'
 import { BlfReader } from '../replay/blfReader'
 import { AscReader } from '../replay/ascReader'
@@ -697,7 +697,8 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     serialBaseMap,
     data.tester
   )
-  attachRpcCanDevices(canBaseMap)
+  const simulateCount = [...canBaseMap.values()].filter((b) => b.info.vendor === 'simulate').length
+  await setProjectSimulateCount(simulateCount)
   canBaseMap.forEach((base) => {
     base.resetStartTs?.()
   })
@@ -960,7 +961,7 @@ export function globalStop(emit = false) {
     value.close()
   })
   testMap.clear()
-  detachRpcCanDevices()
+  void setProjectSimulateCount(0)
   canBaseMap.forEach((value) => {
     value.close()
     sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)

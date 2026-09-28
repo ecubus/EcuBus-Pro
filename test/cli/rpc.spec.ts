@@ -85,23 +85,17 @@ describe('CanRpcService (simulate)', () => {
     services.push(service)
     const session = service.createSession(() => undefined)
 
-    const a = await service.canOpen(
-      { vendor: 'simulate', handle: h0, name: 'SIM_A', controllerId: 0 },
-      session
-    )
-    const b = await service.canOpen(
-      { vendor: 'simulate', handle: h1, name: 'SIM_B', controllerId: 1 },
-      session
-    )
-    expect(a.controllerId).toBe(0)
+    const a = await service.canOpen({ vendor: 'simulate', handle: h0, name: 'SIM_A' }, session)
+    const b = await service.canOpen({ vendor: 'simulate', handle: h1, name: 'SIM_B' }, session)
+    expect(a.controllerId).toBe(h0)
     expect(b.mode).toBe('CAN_CS_STARTED')
 
     await service.canWrite(
-      { controllerId: 0, id: '0x123', data: [1, 2, 3, 4], idType: 'STANDARD' },
+      { controllerId: h0, id: '0x123', data: [1, 2, 3, 4], idType: 'STANDARD' },
       session
     )
     await waitMs(20)
-    const { frames } = await service.canRead({ controllerId: 1, timeoutMs: 200, max: 8 }, session)
+    const { frames } = await service.canRead({ controllerId: h1, timeoutMs: 200, max: 8 }, session)
     expect(frames.length).toBeGreaterThan(0)
     expect(frames[0].id).toBe(0x123)
     expect(frames[0].data).toEqual([1, 2, 3, 4])
@@ -116,20 +110,20 @@ describe('CanRpcService (simulate)', () => {
 
     const init = await service.canInit({
       controllers: [
-        { controllerId: 0, vendor: 'simulate', handle: h0, name: 'MCU' },
-        { controllerId: 1, vendor: 'simulate', handle: h1, name: 'BUS' }
+        { vendor: 'simulate', handle: h0, name: 'MCU' },
+        { vendor: 'simulate', handle: h1, name: 'BUS' }
       ],
       hardwareObjects: [
         {
           hohId: 0,
-          controllerId: 0,
+          controllerId: h0,
           objectType: 'TRANSMIT',
           handleType: 'BASIC',
           idType: 'STANDARD'
         },
         {
           hohId: 1,
-          controllerId: 1,
+          controllerId: h1,
           objectType: 'RECEIVE',
           handleType: 'BASIC',
           idType: 'STANDARD',
@@ -138,7 +132,7 @@ describe('CanRpcService (simulate)', () => {
         },
         {
           hohId: 2,
-          controllerId: 1,
+          controllerId: h1,
           objectType: 'RECEIVE',
           handleType: 'BASIC',
           idType: 'STANDARD',
@@ -149,8 +143,8 @@ describe('CanRpcService (simulate)', () => {
     })
     expect(init.result).toBe('E_OK')
 
-    await service.setControllerMode(0, 'CAN_T_START')
-    await service.setControllerMode(1, 'CAN_T_START')
+    await service.setControllerMode(h0, 'CAN_T_START')
+    await service.setControllerMode(h1, 'CAN_T_START')
 
     const write = await service.canWriteHth(
       { hth: 0, id: 0x100, sdu: '11 22 33 44 55 66 77 88', swPduHandle: 7 },
@@ -167,9 +161,58 @@ describe('CanRpcService (simulate)', () => {
     const { confirmations } = service.mainFunctionWrite({}, session)
     expect(confirmations.some((c) => c.swPduHandle === 7 && c.result === 'E_OK')).toBe(true)
 
-    await service.setControllerMode(0, 'CAN_T_STOP')
+    await service.setControllerMode(h0, 'CAN_T_STOP')
     const busy = await service.canWriteHth({ hth: 0, id: 0x100, sdu: [1] }, session)
     expect(busy.result).toBe('E_NOT_OK')
+  })
+
+  it('injects error passive and bus-off without changing mode', async () => {
+    const h0 = nextHandle()
+    const service = new CanRpcService()
+    services.push(service)
+    const session = service.createSession(() => undefined)
+    await service.canInit({
+      controllers: [{ vendor: 'simulate', handle: h0, name: 'MCU' }],
+      hardwareObjects: [
+        {
+          hohId: 0,
+          controllerId: h0,
+          objectType: 'TRANSMIT',
+          handleType: 'BASIC',
+          idType: 'STANDARD'
+        }
+      ]
+    })
+    await service.setControllerMode(h0, 'CAN_T_START')
+    service.mainFunctionMode(session)
+
+    const passive = service.injectControllerError({ controller: h0, errorState: 'PASSIVE' })
+    expect(passive.errorState).toBe('CAN_ERRORSTATE_PASSIVE')
+    expect(passive.mode).toBe('CAN_CS_STARTED')
+    expect(passive.txErrorCounter).toBe(128)
+    expect(service.mainFunctionBusOff(session).events).toHaveLength(0)
+    const passiveWrite = await service.canWriteHth({ hth: 0, id: 0x1, sdu: [1] }, session)
+    expect(passiveWrite.result).toBe('E_OK')
+
+    const busoff = service.injectControllerError({ controller: h0, errorState: 'BUSOFF' })
+    expect(busoff.errorState).toBe('CAN_ERRORSTATE_BUSOFF')
+    expect(busoff.mode).toBe('CAN_CS_STARTED')
+    expect(busoff.txErrorCounter).toBe(256)
+    expect(service.mainFunctionMode(session).indications).toHaveLength(0)
+    expect(service.mainFunctionBusOff(session).events).toHaveLength(1)
+    const dropped = await service.canWriteHth({ hth: 0, id: 0x1, sdu: [1] }, session)
+    expect(dropped.result).toBe('E_NOT_OK')
+
+    await service.setControllerMode(h0, 'CAN_T_STOP')
+    expect(service.getControllerMode(h0).mode).toBe('CAN_CS_STOPPED')
+    const stopped = service.mainFunctionMode(session).indications
+    expect(stopped.some((item) => item.mode === 'CAN_CS_STOPPED')).toBe(true)
+    expect(service.getErrorState(h0).errorState).toBe('CAN_ERRORSTATE_BUSOFF')
+
+    const started = await service.setControllerMode(h0, 'CAN_T_START')
+    expect(started.errorState).toBe('CAN_ERRORSTATE_ACTIVE')
+    expect(service.getTxErrorCounter(h0).count).toBe(0)
+    expect(service.getRxErrorCounter(h0).count).toBe(0)
   })
 
   it('returns CAN_BUSY for FULL HTH while in-flight', async () => {
@@ -178,11 +221,11 @@ describe('CanRpcService (simulate)', () => {
     services.push(service)
     const session = service.createSession(() => undefined)
     await service.canInit({
-      controllers: [{ controllerId: 0, vendor: 'simulate', handle: h0 }],
+      controllers: [{ vendor: 'simulate', handle: h0 }],
       hardwareObjects: [
         {
           hohId: 10,
-          controllerId: 0,
+          controllerId: h0,
           objectType: 'TRANSMIT',
           handleType: 'FULL',
           idType: 'STANDARD',
@@ -190,7 +233,7 @@ describe('CanRpcService (simulate)', () => {
         }
       ]
     })
-    await service.setControllerMode(0, 'CAN_T_START')
+    await service.setControllerMode(h0, 'CAN_T_START')
     const first = service.canWriteHth({ hth: 10, sdu: [1, 2] }, session)
     const second = await service.canWriteHth({ hth: 10, sdu: [3, 4] }, session)
     // simulate write is async (setImmediate); second may be BUSY or OK depending on timing
@@ -203,18 +246,18 @@ describe('CanRpcService (simulate)', () => {
     const service = new CanRpcService()
     services.push(service)
     const session = service.createSession(() => undefined)
-    await service.canOpen({ vendor: 'simulate', handle: h0, controllerId: 0 }, session)
-    await service.canOpen({ vendor: 'simulate', handle: h1, controllerId: 1 }, session)
+    await service.canOpen({ vendor: 'simulate', handle: h0 }, session)
+    await service.canOpen({ vendor: 'simulate', handle: h1 }, session)
     const { taskId } = service.startPeriodSend({
-      controllerId: 0,
+      controllerId: h0,
       id: 0x42,
       data: [0xaa],
       periodMs: 10
     })
     await waitMs(45)
-    const { frames } = await service.canRead({ controllerId: 1, timeoutMs: 50, max: 32 }, session)
+    const { frames } = await service.canRead({ controllerId: h1, timeoutMs: 50, max: 32 }, session)
     expect(frames.filter((f) => f.id === 0x42).length).toBeGreaterThan(1)
-    service.stopPeriodSend({ controllerId: 0, taskId })
+    service.stopPeriodSend({ controllerId: h0, taskId })
   })
 
   it('nested interrupt disable blocks notifications but not polling', async () => {
@@ -223,20 +266,28 @@ describe('CanRpcService (simulate)', () => {
     services.push(service)
     const notes: string[] = []
     const session = service.createSession((method) => notes.push(method))
-    await service.canOpen({ vendor: 'simulate', handle: h0, controllerId: 0 }, session)
-    await service.canOpen({ vendor: 'simulate', handle: h1, controllerId: 1 }, session)
-    service.subscribe({ controllerId: 1 }, session)
-    service.disableInterrupts(1)
-    await service.canWrite({ controllerId: 0, id: 0x10, data: [9] }, session)
+    await service.canOpen({ vendor: 'simulate', handle: h0 }, session)
+    await service.canOpen({ vendor: 'simulate', handle: h1 }, session)
+    service.subscribe({ controllerId: h1 }, session)
+    service.disableInterrupts(h1)
+    await service.canWrite({ controllerId: h0, id: 0x10, data: [9] }, session)
     await waitMs(20)
     expect(notes.filter((m) => m === 'can.rxIndication')).toHaveLength(0)
-    const { frames } = await service.canRead({ controllerId: 1, max: 8 }, session)
+    const { frames } = await service.canRead({ controllerId: h1, max: 8 }, session)
     expect(frames.length).toBeGreaterThan(0)
-    service.enableInterrupts(1)
+    service.enableInterrupts(h1)
+  })
+  it('rejects non-simulate vendors', async () => {
+    const service = new CanRpcService()
+    services.push(service)
+    const session = service.createSession(() => undefined)
+    await expect(service.canOpen({ vendor: 'peak', handle: 0 }, session)).rejects.toThrow(
+      /simulate/
+    )
   })
 })
 
-describe('CanRpcService gateway (GUI live TX)', () => {
+describe('CanRpcService exclusive simulate handles', () => {
   const services: CanRpcService[] = []
   const bases: SIMULATE_CAN[] = []
 
@@ -253,71 +304,49 @@ describe('CanRpcService gateway (GUI live TX)', () => {
     }
   })
 
-  function openLive(name: string) {
-    const handle = nextHandle()
-    const base = new SIMULATE_CAN({
-      id: `gw-${handle}`,
-      handle,
-      name,
+  it('refuses a handle the project already opened; Can.c uses a free handle', async () => {
+    const h0 = nextHandle()
+    const h1 = nextHandle()
+    const project = new SIMULATE_CAN({
+      id: `proj-${h0}`,
+      handle: h0,
+      name: 'GUI_SIM0',
       vendor: 'simulate',
       canfd: false,
       bitrate: { ...DEFAULT_CAN_BITRATE }
     })
-    bases.push(base)
-    return base
-  }
-
-  it('transmits RPC writes as dir OUT and does not echo them as RX', async () => {
-    const base = openLive('GUI_CAN')
+    bases.push(project)
     const seen: CanMessage[] = []
-    base.attachCanMessage((msg) => seen.push(msg))
+    project.attachCanMessage((msg) => seen.push(msg))
 
-    const service = new CanRpcService({ role: 'gateway' })
+    const service = new CanRpcService()
     services.push(service)
     const session = service.createSession(() => undefined)
-    service.attachLiveControllers(new Map([['dev1', base]]))
 
-    expect(service.getVersion().role).toBe('gateway')
-    const listed = service.listControllers()
-    expect(listed.controllers).toHaveLength(1)
-    expect(listed.controllers[0].mode).toBe('CAN_CS_STARTED')
+    await expect(service.canOpen({ vendor: 'simulate', handle: h0 }, session)).rejects.toThrow(
+      /already open/
+    )
+
+    const opened = await service.canOpen({ vendor: 'simulate', handle: h1, name: 'MCU' }, session)
+    expect(opened.controllerId).toBe(h1)
 
     await service.canWrite(
-      { controllerId: 0, id: '0x123', data: [1, 2, 3, 4], idType: 'STANDARD' },
+      { controllerId: h1, id: '0x123', data: [1, 2, 3, 4], idType: 'STANDARD' },
       session
     )
     await waitMs(20)
-    expect(seen.some((m) => m.dir === 'OUT' && m.id === 0x123)).toBe(true)
-    expect(seen.some((m) => m.dir === 'IN' && m.id === 0x123)).toBe(false)
+    expect(seen.some((m) => m.dir === 'IN' && m.id === 0x123)).toBe(true)
+    expect(seen.some((m) => m.dir === 'OUT' && m.id === 0x123)).toBe(false)
 
-    const { frames } = await service.canRead({ timeoutMs: 30, max: 8 }, session)
-    expect(frames.filter((f) => f.id === 0x123)).toHaveLength(0)
+    await service.closeAll()
+    expect(project.closed).toBe(false)
 
-    const { confirmations } = service.mainFunctionWrite({}, session)
-    expect(confirmations.some((c) => c.result === 'E_OK')).toBe(true)
-  })
-
-  it('delivers hardware RX from a peer simulate bus as RPC RX', async () => {
-    const a = openLive('GUI_A')
-    const b = openLive('GUI_B')
-    const service = new CanRpcService({ role: 'gateway' })
-    services.push(service)
-    const session = service.createSession(() => undefined)
-    service.attachLiveControllers(
-      new Map([
-        ['devA', a],
-        ['devB', b]
-      ])
-    )
-
-    await a.writeBase(
+    await project.writeBase(
       0x200,
       { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false },
       Buffer.from([9, 8, 7])
     )
     await waitMs(20)
-    const { frames } = await service.canRead({ controllerId: 1, timeoutMs: 50, max: 8 }, session)
-    expect(frames.some((f) => f.id === 0x200 && f.dir === 'IN')).toBe(true)
   })
 })
 
@@ -366,19 +395,20 @@ describe('JSON-RPC TCP server', () => {
     const unknown = await call('no.such', {}, 3)
     expect(unknown.error.code).toBe(RPC_METHOD_NOT_FOUND)
 
-    const opened0 = await call('can.open', { vendor: 'simulate', handle: h0, controllerId: 0 }, 4)
-    const opened1 = await call('can.open', { vendor: 'simulate', handle: h1, controllerId: 1 }, 5)
+    const opened0 = await call('can.open', { vendor: 'simulate', handle: h0 }, 4)
+    const opened1 = await call('can.open', { vendor: 'simulate', handle: h1 }, 5)
     expect(opened0.result.mode).toBe('CAN_CS_STARTED')
     expect(opened1.result.mode).toBe('CAN_CS_STARTED')
-    await call('can.subscribe', { controllerId: 1 }, 6)
+    expect(opened0.result.controllerId).toBe(h0)
+    await call('can.subscribe', { controllerId: h1 }, 6)
     const written = await call(
       'can.write',
-      { controllerId: 0, id: 0x321, data: [0xde, 0xad, 0xbe, 0xef] },
+      { controllerId: h0, id: 0x321, data: [0xde, 0xad, 0xbe, 0xef] },
       7
     )
     expect(written.error).toBeUndefined()
     expect(written.result.ts).toBeGreaterThanOrEqual(0)
-    const read = await call('can.read', { controllerId: 1, timeoutMs: 500, max: 8 }, 8)
+    const read = await call('can.read', { controllerId: h1, timeoutMs: 500, max: 8 }, 8)
     expect(read.result.frames.length).toBeGreaterThan(0)
     expect(read.result.frames[0].id).toBe(0x321)
     expect(read.result.frames[0].data).toEqual([0xde, 0xad, 0xbe, 0xef])

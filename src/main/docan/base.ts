@@ -10,25 +10,30 @@ import {
   CanMessage,
   CanMsgType,
   CAN_ID_TYPE,
-  getTsUs
+  getTsUs,
+  swapAddr
 } from '../share/can'
 import { CanLOG } from '../log'
 import { cloneDeep } from 'lodash'
 import { TesterInfo } from 'nodeCan/tester'
 import { NodeClass } from '../nodeItem'
 
+type TesterPresentRuntime = {
+  enable: boolean
+  addr: CanAddr
+  tester: TesterInfo
+  timeout: number
+  timer?: NodeJS.Timeout
+  action: () => Promise<void>
+  /**
+   * ISO-TP writes currently holding this heartbeat off the bus.
+   * The timer is armed again only after every holder has released it.
+   */
+  suppressCount: number
+}
+
 export abstract class CanBase {
-  enableTesterPresent: Record<
-    string,
-    {
-      enable: boolean
-      addr: CanAddr
-      tester: TesterInfo
-      timeout: number
-      timer?: NodeJS.Timeout
-      action: () => Promise<void>
-    }
-  > = {}
+  enableTesterPresent: Record<string, TesterPresentRuntime> = {}
   txPendingNode?: NodeClass
   // Bus loading statistics
   private busLoadingStats = {
@@ -85,6 +90,49 @@ export abstract class CanBase {
     })
     this.detachCanMessage(this.busloadCb)
   }
+  /**
+   * Tester present is stored under its own address (often functional), while
+   * diagnostic requests use another address on the same tester (often physical).
+   * Pause and resume must follow the tester, not the request id alone.
+   */
+  private testerPresentMatches(present: TesterPresentRuntime, addr: CanAddr): boolean {
+    const key = addrToStr(addr)
+    if (addrToStr(present.addr) === key) {
+      return true
+    }
+    for (const item of present.tester?.address ?? []) {
+      const canAddr = item.canAddr
+      if (!canAddr) {
+        continue
+      }
+      if (addrToStr(canAddr) === key || addrToStr(swapAddr(canAddr)) === key) {
+        return true
+      }
+    }
+    return false
+  }
+  private eachTesterPresent(addr: CanAddr, fn: (present: TesterPresentRuntime) => void) {
+    for (const present of Object.values(this.enableTesterPresent)) {
+      if (this.testerPresentMatches(present, addr)) {
+        fn(present)
+      }
+    }
+  }
+  private armTesterPresent(present: TesterPresentRuntime) {
+    if (!present.enable || present.suppressCount > 0 || present.timer != undefined) {
+      return
+    }
+    this.log.setOption('startTesterPresent', present.tester)
+    const addr = present.addr
+    present.timer = setTimeout(() => {
+      present.timer = undefined
+      present.action().finally(() => {
+        // The action's own write already released its suppress. Scheduling here
+        // must not release a pause held by another in-flight request.
+        this._setOption('scheduleTesterPresent', addr)
+      })
+    }, present.timeout)
+  }
   protected _setOption(cmd: string, val: any): any {
     if (cmd == 'testerPresent') {
       const id = addrToStr(val.addr)
@@ -92,26 +140,21 @@ export abstract class CanBase {
       clearTimeout(present?.timer)
       const cval = cloneDeep(val)
       cval.enable = true
+      cval.suppressCount = 0
       this.enableTesterPresent[id] = cval
-    } else if (cmd == 'startTesterPresent') {
-      const id = addrToStr(val)
-      const present = this.enableTesterPresent[id]
-      if (present && present.enable && present.timer == undefined) {
-        this.log.setOption(cmd, present.tester)
-        present.timer = setTimeout(() => {
-          present.timer = undefined
-          present.action().finally(() => {
-            this._setOption('startTesterPresent', val)
-          })
-        }, present.timeout)
-      }
+    } else if (cmd == 'startTesterPresent' || cmd == 'scheduleTesterPresent') {
+      this.eachTesterPresent(val, (present) => {
+        if (cmd == 'startTesterPresent' && present.suppressCount > 0) {
+          present.suppressCount--
+        }
+        this.armTesterPresent(present)
+      })
     } else if (cmd == 'stopTesterPresent') {
-      const id = addrToStr(val)
-      const present = this.enableTesterPresent[id]
-      if (present) {
+      this.eachTesterPresent(val, (present) => {
+        present.suppressCount++
         clearTimeout(present.timer)
         present.timer = undefined
-      }
+      })
     } else if (cmd == 'disableTesterPresent') {
       const id = addrToStr(val)
       const present = this.enableTesterPresent[id]
@@ -125,7 +168,7 @@ export abstract class CanBase {
       if (present) {
         present.enable = true
         present.action().finally(() => {
-          this._setOption('startTesterPresent', val)
+          this._setOption('scheduleTesterPresent', val)
         })
       }
     } else if (cmd == 'getTesterPresent') {

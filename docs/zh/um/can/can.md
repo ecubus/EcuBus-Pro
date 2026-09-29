@@ -7,15 +7,15 @@ CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可
 
 支持的硬件：
 
-| 制造商     | 协议          |
-| ------- | ----------- |
-| Simulate | CAN, CAN-FD — [软件虚拟总线](./simulate.md) |
-| PEAK    | CAN, CAN-FD |
-| KVASER  | CAN, CAN-FD |
-| ZLG     | CAN, CAN-FD |
-| Toomoss | CAN, CAN-FD |
-| VECTOR  | CAN, CAN-FD |
-| SLCAN   | CAN, CAN-FD |
+| 制造商      | 协议                                                  |
+| -------- | --------------------------------------------------- |
+| Simulate | CAN, CAN-FD — [software virtual bus](./simulate.md) |
+| PEAK     | CAN, CAN-FD                                         |
+| KVASER   | CAN, CAN-FD                                         |
+| ZLG      | CAN, CAN-FD                                         |
+| Toomoss  | CAN, CAN-FD                                         |
+| VECTOR   | CAN, CAN-FD                                         |
+| SLCAN    | CAN, CAN-FD                                         |
 
 ## SLCAN 特殊说明
 

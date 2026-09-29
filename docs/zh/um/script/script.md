@@ -1,6 +1,6 @@
 # 脚本
 
-基于node.js环境中TypeScript/JavaScript的脚本。 我们使用`ts`进行语法检查，使用esbuild构建脚本，构建脚本位于`.ScriptBuild`文件夹中。
+基于node.js环境中TypeScript/JavaScript的脚本。我们使用`ts`进行语法检查，使用esbuild构建脚本，构建脚本位于`.ScriptBuild`文件夹中。
 
 ## 编辑器
 
@@ -39,7 +39,7 @@ Util.Init(() => {
 
 #### 定时器
 
-定时器是node.js的内置功能，您可以使用它来执行一些周期性工作。 有关定时器的更多详细信息，请参阅[Timer](https://nodejs.org/api/timers.html)
+定时器是node.js的内置功能，您可以使用它来执行一些周期性工作。有关定时器的更多详细信息，请参阅[Timer](https://nodejs.org/api/timers.html)
 
 ```typescript
 // periodical output can message

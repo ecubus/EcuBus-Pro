@@ -18,6 +18,7 @@ import { TesterInfo } from '../share/tester'
 import { findService } from '../docan/uds'
 import fs from 'fs'
 import path from 'path'
+import { buildRouteActivePayload, parseOemSpecific } from './routeActive'
 
 // DoIP v3 TLS port
 const DOIP_TLS_PORT = 3496
@@ -190,6 +191,11 @@ export interface clientTcp {
   }
   timeout?: NodeJS.Timeout
   keyLogFile?: fs.WriteStream
+}
+
+function oemSpecificParamError(err: unknown): DoipError {
+  const msg = err instanceof Error ? err.message : 'oem specific must be 4 bytes'
+  return new DoipError(DOIP_ERROR_ID.DOIP_PARAM_ERR, undefined, msg)
 }
 
 export class DOIP {
@@ -685,8 +691,16 @@ export class DOIP {
         socket.setNoDelay(true)
         socket.setKeepAlive(true, 0)
         this.tcpClientMap.set(key, item)
+        let oemSpec: Buffer | undefined
+        try {
+          oemSpec = parseOemSpecific(item.addr.tester.oemSpecific)
+        } catch (err) {
+          reject(oemSpecificParamError(err))
+          this.closeClientTcp(item)
+          return
+        }
         setTimeout(() => {
-          this.routeActiveRequest(item)
+          this.routeActiveRequest(item, 0, oemSpec)
             .then((val) => {
               resolve(item)
             })
@@ -755,11 +769,12 @@ export class DOIP {
   }
   async routeActiveRequest(client: clientTcp, activeType = 0, oemSpec?: Buffer) {
     return new Promise<{ ts: number; data: Buffer }>((resolve, reject) => {
-      const data = Buffer.alloc(7 + (oemSpec ? 4 : 0))
-      data.writeUInt16BE(client.addr.tester.testerLogicalAddr, 0)
-      data.writeUint8(activeType & 0xff, 2)
-      if (oemSpec) {
-        oemSpec.copy(data, 7, 0, 4)
+      let data: Buffer
+      try {
+        data = buildRouteActivePayload(client.addr.tester.testerLogicalAddr, activeType, oemSpec)
+      } catch (err) {
+        reject(oemSpecificParamError(err))
+        return
       }
       client.pendingPromise = { resolve, reject }
       const allData = this.buildMessage(PayloadType.DoIP_RouteActivationRequest, data)

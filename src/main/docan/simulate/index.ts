@@ -10,12 +10,12 @@ import {
   CanMessage
 } from '../../share/can'
 import { EventEmitter } from 'events'
-import { cloneDeep, set } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { TpError, CanTp } from '../cantp'
 import { CanLOG } from '../../log'
 import { CanBase } from '../base'
-const vBusCount = 64
+export const SIMULATE_HANDLE_MAX = 64
+const vBusCount = SIMULATE_HANDLE_MAX
 
 const vBusCountEvent: Record<number, EventEmitter> = {}
 for (let i = 0; i < vBusCount; i++) {
@@ -24,6 +24,29 @@ for (let i = 0; i < vBusCount; i++) {
 }
 
 const busInitStatus = new Array(vBusCount).fill(false)
+
+export function isSimulateHandleOpen(handle: number): boolean {
+  return handle >= 0 && handle < vBusCount && busInitStatus[handle] === true
+}
+
+export function getOpenSimulateHandles(): number[] {
+  const open: number[] = []
+  for (let i = 0; i < vBusCount; i++) {
+    if (busInitStatus[i]) {
+      open.push(i)
+    }
+  }
+  return open
+}
+
+function copyCanMessage(msg: CanMessage, dir: CanMessage['dir']): CanMessage {
+  return {
+    ...msg,
+    dir,
+    data: Buffer.from(msg.data),
+    msgType: { ...msg.msgType }
+  }
+}
 
 export class SIMULATE_CAN extends CanBase {
   event: EventEmitter
@@ -34,6 +57,8 @@ export class SIMULATE_CAN extends CanBase {
   busCb: any
   startTime = getTsUs()
   private readAbort = new AbortController()
+  /** When true, frames are not written to EcuBus trace (RPC-owned virtual ECUs). */
+  private hideTrace = false
 
   rejectBaseMap = new Map<
     number,
@@ -44,24 +69,32 @@ export class SIMULATE_CAN extends CanBase {
   >()
 
   rejectMap = new Map<number, Function>()
-  constructor(info: CanBaseInfo) {
+  constructor(info: CanBaseInfo, options?: { hideTrace?: boolean }) {
     super()
     if (busInitStatus[info.handle]) {
       throw new Error('BUS ALREADY INIT')
     }
     busInitStatus[info.handle] = true
     this.info = info
+    this.hideTrace = !!options?.hideTrace
     this.event = vBusCountEvent[info.handle]
     this.log = new CanLOG('SIMULATE', info.name, this.info.id, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
     this.attachCanMessage(this.busloadCb)
   }
+  private emitTrace(msg: CanMessage) {
+    if (this.hideTrace) {
+      this.event.emit('can-frame', msg)
+      return
+    }
+    this.log.canBase(msg)
+  }
   busCbFunction(val: CanMessage) {
     //rxNotify
     val.dir = 'IN'
     val.database = this.info.database
-    this.log.canBase(val)
+    this.emitTrace(val)
     val.ts = getTsUs() - this.startTime
     const cmdId = this.getReadBaseId(val.id, val.msgType)
     this.event.emit(cmdId, val)
@@ -152,20 +185,16 @@ export class SIMULATE_CAN extends CanBase {
           name: extra?.name
         }
         setTimeout(() => {
-          //txNotify
-          for (let i = 0; i < busInitStatus.length; i++) {
-            if (busInitStatus[i]) {
-              const event = vBusCountEvent[i]
-              if (i != this.info.handle) {
-                event.emit('bus', cloneDeep(msg))
-              }
-            }
+          // Snapshot at delivery time so a handle opened during the delay still receives the frame.
+          const peers = getOpenSimulateHandles().filter((h) => h !== this.info.handle)
+          for (const i of peers) {
+            vBusCountEvent[i].emit('bus', copyCanMessage(msg, 'IN'))
           }
         }, 1)
         setImmediate(() => {
           const us = getTsUs() - this.startTime
           msg.ts = us
-          this.log.canBase(msg)
+          this.emitTrace(msg)
           //txNotify emit/ trigger internal
           const tmpId = this.getReadBaseId(id, msgType)
           this.event.emit(tmpId, msg)

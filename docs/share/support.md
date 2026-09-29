@@ -8,3 +8,4 @@
 | 2025-8-31 | X.Gong | 微信 | ¥100 | 赞助一下 | 
 | 2025-9-02 | Hongtao | 微信 | ¥200 | 支持大佬，继续加油 | 
 | 2026-7-31 | Smile| 微信 | ¥50 | 感谢您做出了这么好的作品 |
+| 2026-9-22 | [0xbadc0fee](https://github.com/0xbadc0fee) | GitHub Sponsor | $5 | |

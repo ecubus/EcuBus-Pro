@@ -1,6 +1,6 @@
 # CAN 模糊测试示例
 
-基于 [can-hax](https://github.com/rybolov/can-hax) 指纹格式的 CAN 总线模糊测试示例。 使用 ECB 的 `fingerprintFromCanMessages` 和 `fuzz` API 对 CAN 流量进行指纹识别和模糊测试，并监控 ECU 健康状态。
+基于 [can-hax](https://github.com/rybolov/can-hax) 指纹格式的 CAN 总线模糊测试示例。使用 ECB 的 `fingerprintFromCanMessages` 和 `fuzz` API 对 CAN 流量进行指纹识别和模糊测试，并监控 ECU 健康状态。
 
 ## 概述
 
@@ -47,7 +47,7 @@ can_fuzz/
 1. 记录`*** VULNERABILITY TRIGGERED ***`
 2. 在总线上发送崩溃信号**0x7FF#DEAD**
 
-模糊测试监听0x7FF。 当接收到时，`onAfterSend`返回`false`且模糊测试停止。
+模糊测试监听0x7FF。当接收到时，`onAfterSend`返回`false`且模糊测试停止。
 
 ## 快速测试
 
@@ -83,4 +83,4 @@ const fp = fingerprintFromCanMessages(frames);
 
 ## 真实硬件
 
-在项目中用真实CAN设备替换SIMULATE_0。 确保`fuzz.ts`中的`DEVICE`与设备名称匹配。
+在项目中用真实CAN设备替换SIMULATE_0。确保`fuzz.ts`中的`DEVICE`与设备名称匹配。

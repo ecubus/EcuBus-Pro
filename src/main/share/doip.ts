@@ -63,6 +63,11 @@ export interface TesterAddr {
   routeActiveTime: number
   createConnectDelay: number
   testerLogicalAddr: number
+  /**
+   * Optional 4-byte OEM-specific field for the routing activation request.
+   * Store 8 hex digits (`00112233` or `00 11 22 33`). Empty or missing omits the field.
+   */
+  oemSpecific?: string
 }
 
 export interface VinInfo {

@@ -4,7 +4,7 @@
 
 本示例展示了单 CAN 通道上的**过程数据对象 (PDO)**：一个脚本在对象字典值发生变化时**发送**一个 TPDO，另一个脚本**接收**该帧作为 RPDO 并打印解码后的映射。
 
-与 SDO 相比，PDO 通信开销低，适用于周期性或事件驱动的过程数据。 此处两个节点都连接到 `canopen_pdo.ecb` 中定义的同一模拟 CAN 设备（`SIMULATE_0`，500 kbit/s）。
+与 SDO 相比，PDO 通信开销低，适用于周期性或事件驱动的过程数据。此处两个节点都连接到 `canopen_pdo.ecb` 中定义的同一模拟 CAN 设备（`SIMULATE_0`，500 kbit/s）。
 
 ![image](./image.png)
 
@@ -48,6 +48,6 @@
 
 ## 更多示例
 
-底层堆栈遵循常见的 CANopen PDO 模式。 更多独立场景（NMT、SDO、SYNC、TIME、LSS、EMCY 等）请参阅 **node-canopen** 示例：
+底层堆栈遵循常见的 CANopen PDO 模式。更多独立场景（NMT、SDO、SYNC、TIME、LSS、EMCY 等）请参阅 **node-canopen** 示例：
 
 [https://github.com/Daxbot/node-canopen/tree/main/examples](https://github.com/Daxbot/node-canopen/tree/main/examples)

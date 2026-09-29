@@ -1,11 +1,11 @@
 # CAN-TP 示例
 
-演示了用于 ISO 15765-2（CAN 传输层协议）通信的 `CanTpCreateConnection` / `CanTpSendData` / `CanTpRecvData` 工作器 API。 无需硬件——两个节点均运行在单个虚拟 CAN 总线上。
+演示了用于 ISO 15765-2（CAN 传输层协议）通信的 `CanTpCreateConnection` / `CanTpSendData` / `CanTpRecvData` 工作器 API。无需硬件——两个节点均运行在单个虚拟 CAN 总线上。
 
 ## 概述
 
-- **节点 1 (tester.ts)**：使用 `CanTp*` API 发送请求并接收响应。 启动时运行四个测试，涵盖单帧和多帧场景，最多 500 字节。
-- **节点 2 (ecu.ts)**：使用 `Util.OnCan` + `output()` 实现的模拟 ECU。 手动处理 ISO 15765-2 SF / FF / CF / FC 帧，并回显肯定响应（`service_id + 0x40`）。
+- **节点 1 (tester.ts)**：使用 `CanTp*` API 发送请求并接收响应。启动时运行四个测试，涵盖单帧和多帧场景，最多 500 字节。
+- **节点 2 (ecu.ts)**：使用 `Util.OnCan` + `output()` 实现的模拟 ECU。手动处理 ISO 15765-2 SF / FF / CF / FC 帧，并回显肯定响应（`service_id + 0x40`）。
 - **设备**：SIMULATE_0（虚拟 CAN 总线——无需硬件）
 
 ## 寻址
@@ -117,4 +117,4 @@ can_tp/
 
 ## 真实硬件
 
-将 `SIMULATE_0` 替换为真实的 CAN 设备。 对于在同一物理总线上设置两个节点的情况，两个通道必须能够相互确认（背对背连接的独立通道，或总线上的真实 ECU）。 有关硬件配置，请参阅 [EcuBus-Pro 文档](https://ecubus.org)。
+将 `SIMULATE_0` 替换为真实的 CAN 设备。对于在同一物理总线上设置两个节点的情况，两个通道必须能够相互确认（背对背连接的独立通道，或总线上的真实 ECU）。有关硬件配置，请参阅 [EcuBus-Pro 文档](https://ecubus.org)。

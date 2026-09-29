@@ -58,6 +58,34 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-if="props.vendor == 'simulate'"
+      :label="i18next.t('uds.hardware.canNode.labels.mcalControllerId')"
+    >
+      <span class="vm" style="display: flex; align-items: center; gap: 8px">
+        <span>{{ data.handle }}</span>
+        <el-tooltip>
+          <template #content>
+            {{ i18next.t('uds.hardware.canNode.tooltips.simulateRpc') }}
+          </template>
+          <el-icon>
+            <InfoFilled />
+          </el-icon>
+        </el-tooltip>
+        <el-tag v-if="rpcTag === 'listening'" type="success" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcListening') }}
+        </el-tag>
+        <el-tag v-else-if="rpcTag === 'error'" type="danger" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcError') }}
+        </el-tag>
+        <el-tag v-else-if="rpcTag === 'disabled'" type="info" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcDisabled') }}
+        </el-tag>
+        <el-tag v-else type="info" size="small">
+          {{ i18next.t('uds.hardware.canNode.messages.rpcIdle') }}
+        </el-tag>
+      </span>
+    </el-form-item>
+    <el-form-item
       v-if="props.vendor == 'toomoss'"
       :label="i18next.t('uds.hardware.canNode.labels.res120Enable')"
       prop="toomossRes"
@@ -300,6 +328,33 @@ const ruleFormRef = ref<FormInstance>()
 
 const devices = useDataStore()
 const globalStart = useGlobalStart()
+type SimulateRpcTag = 'listening' | 'idle' | 'disabled' | 'error'
+const rpcTag = ref<SimulateRpcTag>('idle')
+let rpcStatusTimer: ReturnType<typeof setInterval> | undefined
+
+async function refreshSimulateRpcTag() {
+  if (props.vendor !== 'simulate') {
+    return
+  }
+  try {
+    const status = (await window.electron.ipcRenderer.invoke('ipc-rpc-status')) as {
+      enabled: boolean
+      listening: boolean
+      error?: string
+    }
+    if (!status.enabled) {
+      rpcTag.value = 'disabled'
+    } else if (status.error) {
+      rpcTag.value = 'error'
+    } else if (status.listening) {
+      rpcTag.value = 'listening'
+    } else {
+      rpcTag.value = 'idle'
+    }
+  } catch {
+    rpcTag.value = 'idle'
+  }
+}
 
 const data = ref<CanBaseInfo>({
   id: '',
@@ -1412,9 +1467,21 @@ onMounted(() => {
       { deep: true }
     )
   })
+  if (props.vendor === 'simulate') {
+    void refreshSimulateRpcTag()
+    rpcStatusTimer = setInterval(() => {
+      void refreshSimulateRpcTag()
+    }, 1000)
+  }
+})
+watch(globalStart, () => {
+  void refreshSimulateRpcTag()
 })
 onUnmounted(() => {
   watcher?.()
+  if (rpcStatusTimer) {
+    clearInterval(rpcStatusTimer)
+  }
 })
 
 const showCalculator = (row: CanBitrate) => {

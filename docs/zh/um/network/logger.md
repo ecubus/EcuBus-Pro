@@ -31,7 +31,7 @@
 
 ## BLF 格式
 
-BLF 格式是一种用于记录 CAN 帧的二进制格式。 它受 Vector 工具支持，可用于分析 CAN 帧。
+BLF 格式是一种用于记录 CAN 帧的二进制格式。它受 Vector 工具支持，可用于分析 CAN 帧。
 ![configLogger](./../../../media/um/network/blf.png)
 
 ### 使用 CANoe 进行测试

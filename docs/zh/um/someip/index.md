@@ -4,7 +4,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ## 配置
 
-> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。 有关不清楚的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
+> EcuBus-Pro 的 SOME/IP 功能基于 [vSomeIP](https://github.com/GENIVI/vsomeip)。有关不清楚的配置细节，请参阅 [vSomeIP 配置文档](https://github.com/COVESA/vsomeip/blob/master/documentation/vsomeipConfiguration.md)。
 
 ### 添加 SOME/IP 配置
 
@@ -104,7 +104,7 @@ EcuBus-Pro 支持 SOME/IP 协议，可用于开发和测试支持 SOME/IP 的设
 
 ### [Util.OnSomeipMessage](https://app.whyengineer.com/scriptApi/classes/UtilClass.html#onsomeipmessage) 监听 SOME/IP 消息
 
-监听 SOME/IP 消息。 当接收到 SOME/IP 消息时，将调用回调函数。
+监听 SOME/IP 消息。当接收到 SOME/IP 消息时，将调用回调函数。
 
 ```typescript
 // Listen to all SOME/IP messages
@@ -125,7 +125,7 @@ Util.OnSomeipMessage('0034.*.*', (msg) => {
 
 ### [output](https://app.whyengineer.com/scriptApi/functions/output.html) 输出 SOME/IP 消息
 
-输出 SOME/IP 消息。 您可以输出 SOME/IP 请求和 SOME/IP 响应。
+输出 SOME/IP 消息。您可以输出 SOME/IP 请求和 SOME/IP 响应。
 
 ```typescript
 import { SomeipMessageRequest, SomeipMessageResponse, output } from 'ECB'

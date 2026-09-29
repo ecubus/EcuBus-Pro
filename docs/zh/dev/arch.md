@@ -1,7 +1,6 @@
 # 架构
 
-该项目的架构基于 `Electron` 框架，这是一个使用 JavaScript、HTML 和 CSS 构建跨平台桌面应用程序的流行框架。
-有关 `Electron` 框架的更多信息，请参阅 [electronjs](https://www.electronjs.org/)。
+该项目的架构基于 `Electron` 框架，这是一个使用 JavaScript、HTML 和 CSS 构建跨平台桌面应用程序的流行框架。有关 `Electron` 框架的更多信息，请参阅 [electronjs](https://www.electronjs.org/)。
 
 ## 技术栈
 

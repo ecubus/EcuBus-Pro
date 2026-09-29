@@ -21,7 +21,6 @@ import { TestEvent } from 'node:test/reporters'
 import dllLib from '../../resources/lib/zlgcan.dll?asset&asarUnpack'
 import { build as buildFunc } from './build'
 import { parseProject } from './project'
-import rpcMain from './rpc'
 import { pluginMain } from './plugin'
 import 'src/renderer/src/helper'
 
@@ -319,42 +318,6 @@ plugin.action(async (pluginDir, options) => {
     await pluginMain(pluginDir, options)
   } catch (e: any) {
     sysLog.error(e.message || 'failed to upload plugin')
-    exit(1)
-  }
-})
-
-const rpc = program
-  .command('rpc')
-  .description(
-    'start a JSON-RPC 2.0 server so a PC MCAL-CAN (C) driver can control CAN hardware'
-  )
-rpc.argument('[project]', 'optional EcuBus-Pro project path (.ecb), used by Can.Init')
-rpc.option('-H, --host <host>', 'TCP bind host', '127.0.0.1')
-rpc.option('-p, --port <port>', 'TCP bind port', '17320')
-rpc.option('--stdio', 'use stdin/stdout instead of TCP (logs go to stderr)')
-rpc.option('--socket <path>', 'listen on a Unix domain socket')
-rpc.option('--auto-init', 'call Can.Init with project devices when the server starts')
-rpc.option('--exit-on-disconnect', 'exit when the last client disconnects')
-addLoggingOption(rpc)
-rpc.action(async (project, options) => {
-  if (options.stdio) {
-    console.log = (...args: unknown[]) => {
-      console.error(...args)
-    }
-  }
-  createLog(options.logLevel, options.logFile)
-  try {
-    await rpcMain({
-      project,
-      host: options.host,
-      port: Number(options.port),
-      stdio: !!options.stdio,
-      socket: options.socket,
-      autoInit: !!options.autoInit,
-      exitOnDisconnect: !!options.exitOnDisconnect
-    })
-  } catch (e: any) {
-    sysLog.error(e.message || 'failed to start json-rpc server')
     exit(1)
   }
 })

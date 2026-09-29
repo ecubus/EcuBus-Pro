@@ -1,6 +1,6 @@
 # CAN DBC 与 ARXML
 
-EcuBus-Pro 使用 [python-canmatrix](https://github.com/canmatrix/canmatrix) 来解析和转换 CAN 数据库文件。 如果您遇到任何导入或解析问题，请在我们的 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面上报告，或者如果问题似乎出在解析器本身，请直接在 [canmatrix Issues](https://github.com/canmatrix/canmatrix/issues) 上报告。
+EcuBus-Pro 使用 [python-canmatrix](https://github.com/canmatrix/canmatrix) 来解析和转换 CAN 数据库文件。如果您遇到任何导入或解析问题，请在我们的 [Github Issues](https://github.com/ecubus/EcuBus-Pro/issues) 页面上报告，或者如果问题似乎出在解析器本身，请直接在 [canmatrix Issues](https://github.com/canmatrix/canmatrix/issues) 上报告。
 
 **导入：** 支持 DBC 和 ARXML 格式。  
 **导出：** 数据库可以导出为 DBC、ARXML、Excel、JSON、YAML、KCD、DBF 和 SYM 格式。
@@ -35,6 +35,6 @@ EcuBus-Pro 使用 [python-canmatrix](https://github.com/canmatrix/canmatrix) 来
 
 ## 导出
 
-将加载的数据库导出为其他格式：DBC、ARXML、Excel (XLSX)、JSON、YAML、KCD、DBF 或 SYM。 选择所需的格式并保存文件。
+将加载的数据库导出为其他格式：DBC、ARXML、Excel (XLSX)、JSON、YAML、KCD、DBF 或 SYM。选择所需的格式并保存文件。
 
 ![export](../../../../media/um/database/dbc/export.png)

@@ -63,6 +63,18 @@
         </el-col>
       </el-row>
     </el-form-item>
+    <el-form-item label-width="0">
+      <el-row>
+        <el-col :span="12">
+          <el-form-item
+            :label="i18next.t('uds.tester.ethAddr.labels.oemSpecific')"
+            prop="tester.oemSpecific"
+          >
+            <el-input v-model="data.tester.oemSpecific" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form-item>
     <el-divider content-position="left">
       {{ i18next.t('uds.tester.ethAddr.sections.ecu') }}
     </el-divider>
@@ -583,6 +595,13 @@ const rules: FormRules<EthAddr> = {
       type: 'number',
       transform: (v) => Number(v),
       validator: taddrCheck
+    }
+  ],
+  'tester.oemSpecific': [
+    {
+      trigger: 'change',
+      message: i18next.t('uds.tester.ethAddr.validation.oemSpecificFormat'),
+      pattern: /^\s*$|^\s*(?:[0-9A-Fa-f]{2}\s*){4}$/
     }
   ],
   'entity.eid': [

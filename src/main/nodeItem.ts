@@ -33,6 +33,7 @@ import { PwmBase } from './pwm'
 import { SerialBase } from './serial'
 import { SerialMessage } from './share/serial'
 import { setSignal } from './util'
+import { injectSimulateControllerError } from '../cli/rpc/lifecycle'
 import { VSomeIP_Client } from './vsomeip'
 import { SomeipMessage, SomeipMessageType, VsomeipAvailabilityInfo } from './share/someip'
 type TestTree = {
@@ -1025,6 +1026,20 @@ export class NodeClass {
       if (!entry) throw new Error(`CAN-TP handle '${data.handle}' not found`)
       const result = await entry.socket.read(data.timeout ?? 5000)
       return { data: Array.from(result.data), ts: result.ts }
+    }
+
+    if (op === 'injectError') {
+      const base = findCanBase(data.device)
+      if (base.info.vendor !== 'simulate') {
+        throw new Error(
+          `CAN error injection only supports simulate devices, got ${base.info.vendor}`
+        )
+      }
+      return injectSimulateControllerError({
+        errorState: String(data.errorState ?? ''),
+        txErrorCounter: data.txErrorCounter,
+        rxErrorCounter: data.rxErrorCounter
+      })
     }
 
     throw new Error(`unknown canApi op: ${op}`)

@@ -2,10 +2,11 @@
 #define ECB_CAN_RPC_H
 
 /*
- * JSON-RPC method names for a PC AUTOSAR MCAL CAN driver talking to `ecb_cli rpc`.
+ * JSON-RPC method names for a PC AUTOSAR MCAL CAN driver talking to EcuBus Simulate CAN.
  * Transport: TCP NDJSON (one JSON object + '\n' per message), default 127.0.0.1:17320.
+ * Start a project with Simulate-0 first; Can.c opens free handles (1..N).
  *
- * See docs/en/um/cli/rpc.md
+ * See docs/en/um/can/simulate.md
  */
 
 #define ECB_RPC_DEFAULT_HOST "127.0.0.1"

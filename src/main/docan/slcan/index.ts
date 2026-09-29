@@ -44,6 +44,59 @@ const SLCAN_CANFD_BITRATE_COMMANDS: Record<number, string> = {
   5000000: 'Y5'
 }
 
+// WeAct Studio USB2CANFD V2 (STM32G431, 60MHz FDCAN clock)
+// https://github.com/WeActStudio/WeActStudio.USB2CANFDV2.SLCAN_Firmware
+const WEACT_CAN_CLOCK = 60000000
+const WEACT_BITRATE_COMMANDS: Record<number, string> = {
+  10000: 'S0',
+  20000: 'S1',
+  50000: 'S2',
+  100000: 'S3',
+  125000: 'S4',
+  250000: 'S5',
+  500000: 'S6',
+  800000: 'S7',
+  1000000: 'S8',
+  83333: 'S9',
+  75000: 'SA',
+  62500: 'SB',
+  33333: 'SC',
+  5000: 'SD'
+}
+const WEACT_CANFD_BITRATE_COMMANDS: Record<number, string> = {
+  1000000: 'Y1',
+  2000000: 'Y2',
+  3000000: 'Y3',
+  4000000: 'Y4',
+  5000000: 'Y5'
+}
+
+// SLCAN error response (BEL), sent without a trailing CR
+const SLCAN_ERR_BYTE = 0x07
+
+type SlcanDeviceKind = 'canable1' | 'canable2' | 'weact'
+
+/**
+ * Build a custom `Sddxxyy`/`Yddxxyy` bit timing command for the WeAct firmware.
+ * bitrate = clock / (div * (1 + seg1 + seg2)), sample point ~80%
+ */
+function weactCustomBitrateCmd(
+  cmd: 'S' | 'Y',
+  freq: number,
+  limit: { div: number; seg1: [number, number]; seg2: [number, number] }
+): string | undefined {
+  const hex = (v: number) => v.toString(16).toUpperCase().padStart(2, '0')
+  for (let div = 1; div <= limit.div; div++) {
+    const total = WEACT_CAN_CLOCK / (div * freq)
+    if (!Number.isInteger(total)) continue
+    const seg2 = Math.max(limit.seg2[0], Math.round(total * 0.2))
+    const seg1 = total - 1 - seg2
+    if (seg2 > limit.seg2[1] || seg1 < limit.seg1[0] || seg1 > limit.seg1[1]) continue
+    return cmd + hex(div) + hex(seg1) + hex(seg2)
+  }
+  return undefined
+}
+
 // Write operation interface
 interface WriteOperation {
   id: number
@@ -81,6 +134,11 @@ export class SLCAN_CAN extends CanBase {
   private writeQueue: QueueObject<WriteOperation>
   private isWriting = false
 
+  // Device kind by serial port path, filled by getValidDevices()
+  private static deviceKinds = new Map<string, SlcanDeviceKind>()
+  private kind?: SlcanDeviceKind
+  private lastErrLogTs = 0
+
   constructor(baseInfo: CanBaseInfo) {
     super()
     this.info = baseInfo
@@ -105,7 +163,126 @@ export class SLCAN_CAN extends CanBase {
     })
 
     // Set up event handlers
+    this.kind = SLCAN_CAN.deviceKinds.get(this.info.handle)
 
+    if (this.kind) {
+      this.initDevice()
+    } else {
+      // Device list not scanned yet (e.g. project opened directly), detect by VID/PID first.
+      // Hold outgoing frames until the channel has been configured and opened.
+      this.writeQueue.pause()
+      SerialPort.list()
+        .then((ports) => {
+          const port = ports.find((p) => p.path === this.info.handle)
+          const kind =
+            (port && SLCAN_CAN.detectKind(port.vendorId, port.productId)?.kind) || 'canable2'
+          this.kind = kind
+          SLCAN_CAN.deviceKinds.set(this.info.handle, kind)
+        })
+        .catch(() => {
+          this.kind = 'canable2'
+        })
+        .then(() => {
+          if (this.closed) return
+          try {
+            this.initDevice()
+          } catch (e) {
+            this.log.error(this.getTs(), e instanceof Error ? e.message : String(e))
+          }
+          this.writeQueue.resume()
+        })
+    }
+
+    // Start reading
+    this.startReading()
+
+    this.serialPort.on('error', (err) => {
+      if (!this.closed) {
+        this.log.error(this.getTs(), `Serial port error: ${err.message}`)
+        this.close(true, err.message)
+      }
+    })
+
+    this.serialPort.on('close', () => {
+      if (!this.closed) {
+        this.log.error(this.getTs(), 'Serial port closed')
+        this.close(true, 'Serial port closed')
+      }
+    })
+  }
+
+  private initDevice() {
+    if (this.kind === 'weact') {
+      this.initWeAct()
+    } else {
+      this.initCanable()
+    }
+  }
+
+  static detectKind(
+    vendorId?: string,
+    productId?: string
+  ): { kind: SlcanDeviceKind; name: string } | undefined {
+    const vid = parseInt(vendorId ?? '0', 16)
+    const pid = parseInt(productId ?? '0', 16)
+    if (vid === 0xad50 && pid === 0x60c4) {
+      // CANable 1.0 or similar ST USB CDC device
+      return { kind: 'canable1', name: 'CANable 1.0' }
+    } else if (vid === 0x16d0 && pid === 0x117e) {
+      // CANable 2.0
+      return { kind: 'canable2', name: 'CANable 2.0' }
+    } else if (vid === 0x0483 && pid === 0x5740) {
+      // WeAct Studio USB2CANFD V2 (STM32 virtual COM port)
+      return { kind: 'weact', name: 'WeAct USB2CANFD' }
+    }
+    return undefined
+  }
+
+  private initWeAct() {
+    const nominalCmd =
+      WEACT_BITRATE_COMMANDS[this.info.bitrate.freq] ??
+      weactCustomBitrateCmd('S', this.info.bitrate.freq, {
+        div: 255,
+        seg1: [2, 255],
+        seg2: [2, 128]
+      })
+    if (!nominalCmd) {
+      throw new CanError(
+        CAN_ERROR_ID.CAN_PARAM_ERROR,
+        { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false },
+        undefined,
+        `Unsupported CAN bitrate: ${this.info.bitrate.freq} Hz`
+      )
+    }
+    let dataCmd: string | undefined
+    if (this.info.canfd && this.info.bitratefd) {
+      dataCmd =
+        WEACT_CANFD_BITRATE_COMMANDS[this.info.bitratefd.freq] ??
+        weactCustomBitrateCmd('Y', this.info.bitratefd.freq, {
+          div: 32,
+          seg1: [1, 32],
+          seg2: [1, 16]
+        })
+      if (!dataCmd) {
+        throw new CanError(
+          CAN_ERROR_ID.CAN_PARAM_ERROR,
+          { idType: CAN_ID_TYPE.STANDARD, canfd: true, brs: false, remote: false },
+          undefined,
+          `Unsupported CANFD bitrate: ${this.info.bitratefd.freq} Hz`
+        )
+      }
+    }
+    // Channel must be closed before changing bitrate/mode (it may be left open by a previous session)
+    this.serialPort.write('C\r')
+    this.serialPort.write(nominalCmd + '\r')
+    if (dataCmd) {
+      this.serialPort.write(dataCmd + '\r')
+    }
+    this.serialPort.write(this.info.silent ? 'M1\r' : 'M0\r')
+    this.serialPort.write('O\r')
+  }
+
+  private initCanable() {
     // Set CAN bitrate
     const bitrateCmd = SLCAN_BITRATE_COMMANDS[this.info.bitrate.freq]
     if (bitrateCmd) {
@@ -138,23 +315,6 @@ export class SLCAN_CAN extends CanBase {
 
     // Open CAN port
     this.serialPort.write('O\r')
-
-    // Start reading
-    this.startReading()
-
-    this.serialPort.on('error', (err) => {
-      if (!this.close) {
-        this.log.error(this.getTs(), `Serial port error: ${err.message}`)
-        this.close(true, err.message)
-      }
-    })
-
-    this.serialPort.on('close', () => {
-      if (!this.close) {
-        this.log.error(this.getTs(), 'Serial port closed')
-        this.close(true, 'Serial port closed')
-      }
-    })
   }
 
   static getValidDevices(): Promise<CanDevice[]> {
@@ -165,29 +325,13 @@ export class SLCAN_CAN extends CanBase {
       SerialPort.list()
         .then((ports) => {
           ports.forEach((port, index) => {
-            // Check if this is a CANable device based on vendor and product IDs
-            let isCanable = false
-            let supportsCanFd = false
+            // Check if this is a supported SLCAN device based on vendor and product IDs
+            const detected = SLCAN_CAN.detectKind(port.vendorId, port.productId)
 
-            if (
-              parseInt(port.vendorId ?? '0', 16) === 0xad50 &&
-              parseInt(port.productId ?? '0', 16) === 0x60c4
-            ) {
-              // CANable 1.0 or similar ST USB CDC device
-              isCanable = true
-              supportsCanFd = false
-            } else if (
-              parseInt(port.vendorId ?? '0', 16) === 0x16d0 &&
-              parseInt(port.productId ?? '0', 16) === 0x117e
-            ) {
-              // CANable 2.0
-              isCanable = true
-              supportsCanFd = true
-            }
-
-            if (isCanable) {
+            if (detected) {
+              SLCAN_CAN.deviceKinds.set(port.path, detected.kind)
               devices.push({
-                label: `${port.path} (CANable${supportsCanFd ? ' 2.0' : ' 1.0'})`,
+                label: `${port.path} (${detected.name})`,
                 id: port.path,
                 handle: port.path,
                 busy: false,
@@ -210,6 +354,15 @@ export class SLCAN_CAN extends CanBase {
     if (!this.serialPort) return
 
     this.serialPort.on('data', (data: Buffer) => {
+      // Error responses (BEL) have no trailing CR, strip them so they don't corrupt the next frame
+      if (data.includes(SLCAN_ERR_BYTE)) {
+        data = Buffer.from(data.filter((b) => b !== SLCAN_ERR_BYTE))
+        const ts = this.getTs()
+        if (ts - this.lastErrLogTs > 1000000) {
+          this.lastErrLogTs = ts
+          this.log.error(ts, 'SLCAN device returned error (command rejected or transmit failed)')
+        }
+      }
       this.rxBuffer = Buffer.concat([this.rxBuffer, data])
       this.processRxBuffer()
     })
@@ -367,6 +520,11 @@ export class SLCAN_CAN extends CanBase {
           this.log.error(this.getTs(), `Invalid CANFD DLC: ${dlc}`)
           return
       }
+    }
+
+    // Remote frames carry only the DLC, no data bytes
+    if (isRemote) {
+      dataLength = 0
     }
 
     // Validate data length
@@ -656,6 +814,11 @@ export class SLCAN_CAN extends CanBase {
     const dlc = getDlcByLen(data.length, msgType.canfd)
 
     const dlcHex = dlc.toString(16)
+
+    // Remote frames carry only the DLC, no data bytes
+    if (msgType.remote) {
+      return command + idHex + dlcHex
+    }
 
     // Format data
     const dataHex = Array.from(data)

@@ -21,7 +21,7 @@
 
 ## `doip-custom-simulation` 设置
 
-`doip-custom-simulation` 是 DOIP 协议的定制仿真，充当实体。 有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
+`doip-custom-simulation` 是 DOIP 协议的定制仿真，充当实体。有关更详细信息，请访问 [doip-custom-simulation GitHub 仓库](https://github.com/doip/doip-custom-simulation)。
 
 ### 安装
 
@@ -82,5 +82,5 @@ java "-Dlog4j.configurationFile=log4j2.xml" -jar libs/doip-custom-simulation-2.0
 
 ## 执行
 
-启动序列并打开跟踪窗口以查看所有帧。 或者，使用 Wireshark 捕获这些帧。
+启动序列并打开跟踪窗口以查看所有帧。或者，使用 Wireshark 捕获这些帧。
 ![trace](trace.png)

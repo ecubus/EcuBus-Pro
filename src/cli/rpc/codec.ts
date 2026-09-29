@@ -130,11 +130,24 @@ export function parseIdType(input: unknown, fallback: CanIdTypeName = 'STANDARD'
   if (input == null) {
     return fallback === 'EXTENDED' ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD
   }
-  if (input === CAN_ID_TYPE.EXTENDED || input === 'EXTENDED' || input === 'extended' || input === 1) {
+  if (
+    input === CAN_ID_TYPE.EXTENDED ||
+    input === 'EXTENDED' ||
+    input === 'extended' ||
+    input === 1
+  ) {
     return CAN_ID_TYPE.EXTENDED
   }
-  if (input === CAN_ID_TYPE.STANDARD || input === 'STANDARD' || input === 'standard' || input === 0) {
+  if (
+    input === CAN_ID_TYPE.STANDARD ||
+    input === 'STANDARD' ||
+    input === 'standard' ||
+    input === 0
+  ) {
     return CAN_ID_TYPE.STANDARD
+  }
+  if (input === 'MIXED' || input === 'mixed') {
+    return fallback === 'EXTENDED' ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD
   }
   throw new RpcError(RPC_INVALID_PARAMS, `Invalid idType: ${String(input)}`)
 }
@@ -161,6 +174,7 @@ export function encodeFrame(
     id: msg.id,
     idHex: '0x' + msg.id.toString(16),
     data: Array.from(data),
+    sdu: Array.from(data),
     dataHex: encodeDataHex(data),
     dlc: getDlcByLen(data.length, canfd),
     length: data.length,
@@ -175,7 +189,10 @@ export function encodeFrame(
   }
 }
 
-export function toMsgType(obj: Record<string, unknown>, defaults?: Partial<CanMsgType>): CanMsgType {
+export function toMsgType(
+  obj: Record<string, unknown>,
+  defaults?: Partial<CanMsgType>
+): CanMsgType {
   return {
     idType: parseIdType(obj.idType, toIdTypeName(defaults?.idType ?? CAN_ID_TYPE.STANDARD)),
     brs: optBool(obj, 'brs') ?? defaults?.brs ?? false,

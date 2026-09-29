@@ -961,6 +961,7 @@ export function globalStop(emit = false) {
     value.close()
   })
   testMap.clear()
+  // Queued with the next start so the port is free before listen.
   void setProjectSimulateCount(0)
   canBaseMap.forEach((value) => {
     value.close()

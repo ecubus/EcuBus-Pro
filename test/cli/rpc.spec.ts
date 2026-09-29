@@ -215,6 +215,44 @@ describe('CanRpcService (simulate)', () => {
     expect(service.getRxErrorCounter(h0).count).toBe(0)
   })
 
+  it('bus-off blocks can.write and pauses period send', async () => {
+    const [h0, h1] = nextHandles()
+    const service = new CanRpcService()
+    services.push(service)
+    const session = service.createSession(() => undefined)
+    await service.canOpen({ vendor: 'simulate', handle: h0, name: 'MCU' }, session)
+    await service.canOpen({ vendor: 'simulate', handle: h1, name: 'PEER' }, session)
+
+    service.injectControllerError({ controller: h0, errorState: 'BUSOFF' })
+    await expect(
+      service.canWrite({ controllerId: h0, id: 0x11, data: [1] }, session)
+    ).rejects.toThrow(/bus-off/)
+    expect(() =>
+      service.startPeriodSend({
+        controllerId: h0,
+        id: 0x55,
+        data: [1],
+        periodMs: 10
+      })
+    ).toThrow(/bus-off/)
+
+    await service.setControllerMode(h0, 'CAN_T_START')
+    const { taskId } = service.startPeriodSend({
+      controllerId: h0,
+      id: 0x55,
+      data: [2],
+      periodMs: 15
+    })
+    await waitMs(25)
+    service.injectControllerError({ controller: h0, errorState: 'BUSOFF' })
+    await waitMs(30)
+    await service.canRead({ controllerId: h1, timeoutMs: 0, max: 64 }, session)
+    await waitMs(50)
+    const { frames } = await service.canRead({ controllerId: h1, timeoutMs: 0, max: 64 }, session)
+    expect(frames.filter((f) => f.id === 0x55)).toHaveLength(0)
+    service.stopPeriodSend({ controllerId: h0, taskId })
+  })
+
   it('returns CAN_BUSY for FULL HTH while in-flight', async () => {
     const [h0] = nextHandles()
     const service = new CanRpcService()
@@ -338,15 +376,19 @@ describe('CanRpcService exclusive simulate handles', () => {
     expect(seen.some((m) => m.dir === 'IN' && m.id === 0x123)).toBe(true)
     expect(seen.some((m) => m.dir === 'OUT' && m.id === 0x123)).toBe(false)
 
-    await service.closeAll()
-    expect(project.closed).toBe(false)
-
     await project.writeBase(
       0x200,
       { idType: CAN_ID_TYPE.STANDARD, canfd: false, brs: false, remote: false },
       Buffer.from([9, 8, 7])
     )
     await waitMs(20)
+    const { frames } = await service.canRead({ controllerId: h1, timeoutMs: 50, max: 8 }, session)
+    const rx = frames.find((f) => f.id === 0x200)
+    expect(rx?.dir).toBe('IN')
+    expect(rx?.hrh).toBeTypeOf('number')
+
+    await service.closeAll()
+    expect(project.closed).toBe(false)
   })
 })
 
@@ -413,6 +455,14 @@ describe('JSON-RPC TCP server', () => {
     expect(read.result.frames[0].id).toBe(0x321)
     expect(read.result.frames[0].data).toEqual([0xde, 0xad, 0xbe, 0xef])
     expect(notifications.some((n) => n.method === 'can.rxIndication')).toBe(true)
+
+    const shutdown = await call('sys.shutdown', {}, 11)
+    expect(shutdown.result.shutdown).toBe(true)
+    await waitMs(40)
+    const stillUp = await call('sys.ping', {}, 12)
+    expect(stillUp.result.pong).toBe(true)
+    const closedWrite = await call('can.write', { controllerId: h0, id: 1, data: [1] }, 13)
+    expect(closedWrite.error).toBeTruthy()
 
     const batch = await new Promise<any>((resolve) => {
       pending.set(9, resolve)

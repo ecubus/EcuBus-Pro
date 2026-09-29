@@ -184,9 +184,9 @@ export class SIMULATE_CAN extends CanBase {
           database: extra?.database,
           name: extra?.name
         }
-        const peers = getOpenSimulateHandles().filter((h) => h !== this.info.handle)
         setTimeout(() => {
-          //txNotify
+          // Snapshot at delivery time so a handle opened during the delay still receives the frame.
+          const peers = getOpenSimulateHandles().filter((h) => h !== this.info.handle)
           for (const i of peers) {
             vBusCountEvent[i].emit('bus', copyCanMessage(msg, 'IN'))
           }

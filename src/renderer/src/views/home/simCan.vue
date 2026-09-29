@@ -51,8 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { QuestionFilled } from '@element-plus/icons-vue'
+import i18next from 'i18next'
 
 const stored = (window.store.get('general.settings') as Record<string, unknown> | undefined) || {}
 const form = ref({
@@ -85,15 +86,19 @@ function persistRpc() {
 
 function formatRpcStatus(status: RpcHostStatus) {
   if (!status.enabled) {
-    return 'JSON-RPC disabled'
+    return i18next.t('general.rpcStatusDisabled')
   }
   if (status.error) {
     return status.error
   }
   if (status.listening) {
-    return `listening tcp://${status.host}:${status.port} (${status.projectSimulateCount} simulate)`
+    return i18next.t('general.rpcStatusListening', {
+      host: status.host,
+      port: status.port,
+      count: status.projectSimulateCount
+    })
   }
-  return 'idle (starts when Simulate CAN is running)'
+  return i18next.t('general.rpcStatusIdle')
 }
 
 async function refreshRpcStatus() {
@@ -120,8 +125,19 @@ async function applyRpc() {
 
 watch(form, persistRpc, { deep: true })
 
+let rpcStatusTimer: ReturnType<typeof setInterval> | undefined
+
 onMounted(() => {
   void refreshRpcStatus()
+  rpcStatusTimer = setInterval(() => {
+    void refreshRpcStatus()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (rpcStatusTimer) {
+    clearInterval(rpcStatusTimer)
+  }
 })
 </script>
 

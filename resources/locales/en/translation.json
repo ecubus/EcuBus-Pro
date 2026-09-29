@@ -6,7 +6,10 @@
     "uiZoomTooltip": "Adjust the overall UI scaling of the application",
     "themeTooltip": "Choose between light and dark theme",
     "rpcServer": "JSON-RPC",
-    "rpcServerTooltip": "Allow a PC Can.c (AUTOSAR MCAL) to join Simulate CAN over TCP. The server starts only when a Simulate device is running. Can.c opens free handles (sim1–N); project Simulate-0 is not reopened.",
+    "rpcServerTooltip": "Allow a PC Can.c (AUTOSAR MCAL) to join Simulate CAN over TCP. The server starts only when a Simulate device is running and this switch is on. Can.c must open a free handle; it cannot reopen a handle the project already owns.",
+    "rpcStatusDisabled": "JSON-RPC disabled",
+    "rpcStatusListening": "listening tcp://{{host}}:{{port}} ({{count}} simulate)",
+    "rpcStatusIdle": "idle (starts when Simulate CAN is running)",
     "rpcHost": "Listen address",
     "rpcHostTooltip": "TCP bind address. 127.0.0.1 (default) accepts Can.c only on this PC. 0.0.0.0 listens on all interfaces so another machine can connect. This is not a remote EcuBus hostname.",
     "rpcPort": "Listen port",
@@ -1170,7 +1173,7 @@
         },
         "tooltips": {
           "silentMode": "Silent mode will not send any message, only receive message",
-          "simulateRpc": "This handle is the AUTOSAR ControllerId. JSON-RPC for PC Can.c starts when the project is running with this Simulate device. Can.c must open a different free handle (sim1–N).",
+          "simulateRpc": "This handle is the AUTOSAR ControllerId for this project node. JSON-RPC listens while the project is running, this Simulate device is open, and SIM-CAN JSON-RPC is enabled. Can.c must open a different free handle.",
           "clockFreq": "If you can't find the frequency you need, you can input it manually",
           "bitTimingCalculator": "Bit Timing Calculator"
         },
@@ -1212,7 +1215,9 @@
           "dontCare": "(Don't care)",
           "zlgCheckCalculator": "ZLG (check the ZLG Baud Calculator)",
           "rpcListening": "JSON-RPC listening",
-          "rpcIdle": "JSON-RPC idle until start"
+          "rpcIdle": "JSON-RPC idle",
+          "rpcDisabled": "JSON-RPC off",
+          "rpcError": "JSON-RPC bind failed"
         }
       },
       "bitTimingCalculator": {

@@ -67,7 +67,8 @@ A C `Can.c` keeps AUTOSAR signatures (`Can_Init`, `Can_Write`, `Can_MainFunction
 The server is **not** started at application boot.
 
 - **GUI:** starts listening when the project starts with **at least one** Simulate CAN device. Stops when the last project simulate device closes.
-- **CLI:** `ecb_cli seq` or `ecb_cli test` on a `.ecb` that contains Simulate CAN does the same for the lifetime of that command.
+- **CLI `ecb_cli test`:** opens every device in the project. The listener runs for that command when at least one opened device is Simulate CAN.
+- **CLI `ecb_cli seq`:** opens only that tester's CAN device. The listener runs when **that** device is Simulate. A project that merely contains another Simulate node does not listen.
 
 Default bind: `127.0.0.1:17320` (Home → Setting → **SIM-CAN**). Listen address/port are bind settings only; they do not turn the server on by themselves.
 
@@ -81,6 +82,10 @@ Peak / Kvaser / Vector are **not** exposed on this API.
 | `Can.c` | Simulate-0 (already open) | **Rejected** (`already open`) |
 | `Can.c` | Simulate-1 … 63 if free | Opens in the same process. `controllerId` **equals** `handle` |
 | `Can.DeInit` | | Closes only RPC-owned handles. Never closes project Simulate-0 |
+
+The table is the usual lab layout, with the project on Simulate-0. Any free handle works: if the project uses Simulate-5, `Can.c` may open handle 0. `controllerId` is always that handle.
+
+`sys.shutdown` closes the controllers `Can.c` opened and leaves the TCP listener up. Stopping the project is what closes the port.
 
 Start the EcuBus project (or CLI seq/test) first, then connect `Can.c`.
 
@@ -197,7 +202,7 @@ await injectCanError('ACTIVE', { device: 'SIM0' })
 | --- | --- | --- |
 | `ACTIVE` | TEC 0, REC 0 | none; mode unchanged |
 | `PASSIVE` | TEC 128 | none; mode stays `CAN_CS_STARTED`; TX and RX still work |
-| `BUSOFF` | TEC 256 | `CanIf_ControllerBusOff` only. Mode stays unchanged. `Can_Write` returns `E_NOT_OK` |
+| `BUSOFF` | TEC 256 | `CanIf_ControllerBusOff` only. Mode stays unchanged. `Can_Write` returns `E_NOT_OK`. `can.write` and `can.startPeriodSend` are rejected, and a running period task stops transmitting |
 
 `Can_SetControllerMode(CAN_CS_STOPPED)` after bus-off is what produces `CanIf_ControllerModeIndication(STOPPED)`. A later `CAN_CS_STARTED` clears the error state to Active and zeros the counters.
 

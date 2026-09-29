@@ -90,4 +90,4 @@ ecb_cli test <project> <name> [options]
 
 ### Simulate CAN（PC MCAL）
 
-当工程（或 `ecb_cli seq` / `ecb_cli test`）打开 **Simulate CAN** 设备时，EcuBus 会监听 JSON-RPC，以便 PC 端 `Can.c` 加入虚拟总线。详见 [Simulate CAN](../can/simulate.md)。
+当 `ecb_cli test` 打开了工程中的 **Simulate CAN** 设备，或 `ecb_cli seq` 运行在 CAN 设备为 Simulate 的 tester 上时，EcuBus 会监听 JSON-RPC，以便 PC 端 `Can.c` 加入虚拟总线。详见 [Simulate CAN](../can/simulate.md)。

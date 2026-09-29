@@ -21,4 +21,4 @@ TCP **bind address** of the local server — the interface EcuBus listens on. It
 
 TCP port `Can.c` connects to. Default `17320`.
 
-Click **Apply** after changing address or port. See [Simulate CAN](../can/simulate.md) for handle ownership (`Can.c` opens sim1–N, not project Simulate-0).
+Click **Apply** after changing address or port. See [Simulate CAN](../can/simulate.md) for handle ownership. `Can.c` must open a free handle and cannot reopen the handle the project already owns.

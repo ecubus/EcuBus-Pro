@@ -23,7 +23,8 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'sys.shutdown',
-    summary: 'Close all CAN controllers and stop the JSON-RPC server.',
+    summary:
+      'Close RPC-owned simulate controllers (same as Can.DeInit). The TCP listener stays up until the project Simulate device closes.',
     params: []
   },
   {

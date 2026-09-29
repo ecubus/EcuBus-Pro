@@ -19,6 +19,8 @@ make
 # 或: ./can_rpc_demo 127.0.0.1 17320
 ```
 
+您将看到句柄 1 与 2 的 `Can.Init`、`Can.SetControllerMode`、句柄 1 上的 `Can.Write`，然后 `Can.MainFunction_Read` 在句柄 2 上返回回环帧。
+
 ## 文件
 
 | 文件 | 作用 |

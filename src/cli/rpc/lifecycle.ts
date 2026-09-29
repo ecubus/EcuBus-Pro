@@ -19,6 +19,17 @@ let enabled = true
 let host = DEFAULT_SIMULATE_RPC_HOST
 let port = DEFAULT_SIMULATE_RPC_PORT
 let lastError: string | undefined
+let opChain: Promise<void> = Promise.resolve()
+
+/** Run bind/close steps one at a time so stop and start cannot overlap on the port. */
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const run = opChain.then(task, task)
+  opChain = run.then(
+    () => undefined,
+    () => undefined
+  )
+  return run
+}
 
 function logInfo(msg: string) {
   if (typeof sysLog !== 'undefined') {
@@ -90,15 +101,18 @@ async function ensureListening() {
 }
 
 /** Start TCP when the first project simulate device is open; stop when the last one closes. */
-export async function setProjectSimulateCount(count: number): Promise<SimulateRpcStatus> {
-  projectSimulateCount = Math.max(0, count)
-  if (projectSimulateCount > 0 && enabled) {
-    await ensureListening()
-  } else {
-    await stopListening()
-    lastError = undefined
-  }
-  return getSimulateRpcStatus()
+export function setProjectSimulateCount(count: number): Promise<SimulateRpcStatus> {
+  const next = Math.max(0, count)
+  return enqueue(async () => {
+    projectSimulateCount = next
+    if (projectSimulateCount > 0 && enabled) {
+      await ensureListening()
+    } else {
+      await stopListening()
+      lastError = undefined
+    }
+    return getSimulateRpcStatus()
+  })
 }
 
 /** Inject an AUTOSAR controller error onto every Can.c controller open on the simulate bus. */
@@ -125,18 +139,20 @@ export function injectSimulateControllerError(params: {
 }
 
 /** Rebind host/port. Only listens when a project simulate device is open and enabled. */
-export async function applySimulateRpcListen(opts?: {
+export function applySimulateRpcListen(opts?: {
   host?: string
   port?: number
   enabled?: boolean
 }): Promise<SimulateRpcStatus> {
-  if (opts) {
-    configureSimulateRpc(opts)
-  }
-  await stopListening()
-  lastError = undefined
-  if (projectSimulateCount > 0 && enabled) {
-    await ensureListening()
-  }
-  return getSimulateRpcStatus()
+  return enqueue(async () => {
+    if (opts) {
+      configureSimulateRpc(opts)
+    }
+    await stopListening()
+    lastError = undefined
+    if (projectSimulateCount > 0 && enabled) {
+      await ensureListening()
+    }
+    return getSimulateRpcStatus()
+  })
 }

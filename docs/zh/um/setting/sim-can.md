@@ -21,4 +21,4 @@
 
 `Can.c` 连接的 TCP 端口。默认 `17320`。
 
-修改地址或端口后点击 **应用**。句柄归属（`Can.c` 打开 sim1–N，不能占用工程的 Simulate-0）见 [Simulate CAN](../can/simulate.md)。
+修改地址或端口后点击 **应用**。句柄归属见 [Simulate CAN](../can/simulate.md)。`Can.c` 必须打开空闲句柄，不能再次打开工程已经占用的句柄。

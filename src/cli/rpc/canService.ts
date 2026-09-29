@@ -373,7 +373,7 @@ export class CanRpcService {
     const obj = asObject(params, 'can.write')
     const controllerId = reqNumber(obj, 'controllerId', 'can.write')
     const ctrl = this.requireController(controllerId)
-    this.requireStarted(ctrl)
+    this.requireTransmit(ctrl)
     const id = parseCanId(obj.id)
     const data = parseCanData(obj.data ?? obj.sdu)
     const msgType = toMsgType(obj, {
@@ -504,7 +504,7 @@ export class CanRpcService {
     const obj = asObject(params, 'can.startPeriodSend')
     const controllerId = reqNumber(obj, 'controllerId', 'can.startPeriodSend')
     const ctrl = this.requireController(controllerId)
-    this.requireStarted(ctrl)
+    this.requireTransmit(ctrl)
     const id = parseCanId(obj.id)
     const data = parseCanData(obj.data ?? obj.sdu)
     const periodMs = reqNumber(obj, 'periodMs', 'can.startPeriodSend')
@@ -870,6 +870,13 @@ export class CanRpcService {
   private requireStarted(ctrl: ControllerState) {
     if (ctrl.mode !== 'CAN_CS_STARTED' || !ctrl.base) {
       throw new RpcError(RPC_NOT_STARTED, `controller ${ctrl.controllerId} is ${ctrl.mode}`)
+    }
+  }
+
+  private requireTransmit(ctrl: ControllerState) {
+    this.requireStarted(ctrl)
+    if (ctrl.errorState === 'CAN_ERRORSTATE_BUSOFF') {
+      throw new RpcError(RPC_CAN_ERROR, `controller ${ctrl.controllerId} is bus-off`)
     }
   }
 
@@ -1294,7 +1301,12 @@ export class CanRpcService {
     const taskId = uuidv4()
     const timer = setInterval(() => {
       const current = this.controllers.get(ctrl.controllerId)
-      if (!current || current.mode !== 'CAN_CS_STARTED' || !current.base) {
+      if (
+        !current ||
+        current.mode !== 'CAN_CS_STARTED' ||
+        !current.base ||
+        current.errorState === 'CAN_ERRORSTATE_BUSOFF'
+      ) {
         return
       }
       current.base

@@ -67,7 +67,8 @@ C 语言 `Can.c` 保持 AUTOSAR 签名（`Can_Init`、`Can_Write`、`Can_MainFun
 **不会**在应用启动时监听。
 
 - **GUI：** 工程启动且至少有一个 Simulate CAN 设备时开始监听；最后一个工程 simulate 关闭时停止。
-- **CLI：** 对包含 Simulate CAN 的 `.ecb` 运行 `ecb_cli seq` 或 `ecb_cli test` 时，在该命令生命周期内同样监听。
+- **CLI `ecb_cli test`：** 打开工程里的全部设备。其中至少有一个 Simulate CAN 被打开时，该命令在运行期间监听。
+- **CLI `ecb_cli seq`：** 只打开该 tester 的 CAN 设备。仅当**这个**设备是 Simulate 时才监听。工程里另有 Simulate 节点、但本序列没用到它时，不会监听。
 
 默认绑定：`127.0.0.1:17320`（主页 → 设置 → **SIM-CAN**）。监听地址/端口只是绑定配置，不会单独打开服务器。
 
@@ -81,6 +82,10 @@ Peak / Kvaser / Vector **不会**出现在此 API 中。
 | `Can.c` | 已被打开的 Simulate-0 | **拒绝**（already open） |
 | `Can.c` | 空闲的 Simulate-1 … 63 | 在同一进程中打开。`controllerId` **等于** `handle` |
 | `Can.DeInit` | | 只关闭 RPC 打开的句柄，绝不关闭工程的 Simulate-0 |
+
+上表是常见实验布局：工程占用 Simulate-0。任意空闲句柄都可以。若工程使用 Simulate-5，`Can.c` 可以打开句柄 0。`controllerId` 始终等于该句柄。
+
+`sys.shutdown` 关闭 `Can.c` 打开的控制器，TCP 监听保持不变。停止工程才会关闭端口。
 
 先启动 EcuBus 工程（或 CLI seq/test），再连接 `Can.c`。
 
@@ -146,7 +151,7 @@ await injectCanError('ACTIVE', { device: 'SIM0' })
 | --- | --- | --- |
 | `ACTIVE` | TEC 0，REC 0 | 无回调；模式不变 |
 | `PASSIVE` | TEC 128 | 无回调；模式保持 `CAN_CS_STARTED`；收发仍可用 |
-| `BUSOFF` | TEC 256 | 只调用 `CanIf_ControllerBusOff`。模式不变。`Can_Write` 返回 `E_NOT_OK` |
+| `BUSOFF` | TEC 256 | 只调用 `CanIf_ControllerBusOff`。模式不变。`Can_Write` 返回 `E_NOT_OK`。`can.write` 与 `can.startPeriodSend` 会被拒绝，已经在跑的周期发送也会停发 |
 
 Bus-off 之后由 `Can_SetControllerMode(CAN_CS_STOPPED)` 产生 `CanIf_ControllerModeIndication(STOPPED)`。随后的 `CAN_CS_STARTED` 把错误状态清回 Active，并把计数清零。
 

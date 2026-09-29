@@ -487,17 +487,14 @@ app.on('browser-window-created', (_event, win) => {
         panelTest.data.panels['legacy-smoke'] = ${JSON.stringify(legacy)};
         panelTest.getLayout().addWin('panel', 'legacy-smoke', {params:{'edit-index':'legacy-smoke'}});
       `)
-      await waitFor(win, `!!document.querySelector('.migration-button')`)
-      await win.webContents.executeJavaScript(`panelTest.getLayout().maxWin('legacy-smoke')`)
-      await capture(win, 'legacy-editor')
-      await win.webContents.executeJavaScript(`document.querySelector('.migration-button').click()`)
       await waitFor(
         win,
-        `document.querySelector('#winlegacy-smoke .el-dialog__body')?.textContent.includes('Unsupported')`
+        `document.querySelector('#winlegacy-smoke .migration-report')?.textContent.includes('Unsupported')`
       )
+      await win.webContents.executeJavaScript(`panelTest.getLayout().maxWin('legacy-smoke')`)
       await capture(win, 'migration-report')
       await win.webContents.executeJavaScript(
-        `document.querySelector('#winlegacy-smoke .el-dialog__footer .el-button--primary').click()`
+        `document.querySelector('#winlegacy-smoke .migration-report .el-button--primary').click()`
       )
       await waitFor(
         win,
@@ -876,6 +873,7 @@ app.on('browser-window-created', (_event, win) => {
         actionWrites.some((p) => p.name === 'Bytes' && JSON.stringify(p.value) === '[65,0,255]')
       )
       ipcMain.off('ipc-var-set', actionListener)
+      fs.writeFileSync(path.join(artifacts, 'notes.txt'), '')
       let openedPath
       shell.openPath = async (file) => {
         openedPath = file

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createSSRApp, h } from 'vue'
+import { createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import path from 'node:path'
 import type { PanelItem } from '../../src/preload/data'
@@ -36,14 +36,6 @@ vi.mock('../../src/renderer/src/views/uds/panel/free/FreePanelView.vue', () => (
       return () => null
     }
   }
-}))
-vi.mock('../../src/renderer/src/views/uds/panel/LegacyPanelEditor.vue', () => ({
-  __esModule: true,
-  default: { render: () => h('div', 'legacy-editor') }
-}))
-vi.mock('../../src/renderer/src/views/uds/panel/LegacyPanelView.vue', () => ({
-  __esModule: true,
-  default: { render: () => h('div', 'legacy-view') }
 }))
 
 async function render(editIndex: string, preview = false) {
@@ -152,11 +144,13 @@ describe('panel persistence entry points', () => {
     expect(fileInvoke.mock.calls.every((c) => c[0] === 'ipc-show-save-dialog')).toBe(true)
   })
 
-  it('keeps legacy panels on the legacy path without rewriting them', async () => {
+  it('shows the migration report for legacy panels without rewriting them', async () => {
     const legacy = { id: 'old', name: 'Old', rule: [{ type: 'input' }], options: {} }
     state.panels.old = legacy
-    expect(await render('old')).toContain('legacy-editor')
-    expect(await render('pold', true)).toContain('legacy-view')
+    expect(await render('old')).toContain('migration-report')
+    expect(state.editor).toBeUndefined()
+    expect(await render('pold', true)).toContain('Legacy Panel')
+    expect(state.view).toBeUndefined()
     expect(state.panels.old).toEqual(legacy)
     expect(state.panels.old.document).toBeUndefined()
   })

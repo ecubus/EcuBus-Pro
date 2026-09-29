@@ -22,9 +22,7 @@ await import('jquery-ui/dist/jquery-ui.js')
 import 'jquery-ui/dist/themes/base/jquery-ui.css'
 import mitt from 'mitt'
 import '@vxe-ui/plugin-render-element/dist/style.css'
-import formCreate from '@form-create/element-ui' // 引入 FormCreate
 import DataParseWorker from './worker/dataParse.ts?worker'
-import fcDesigner from './views/uds/panel/panel-designer/index.js'
 import log from 'electron-log'
 import { useDataStore } from './stores/data'
 
@@ -104,8 +102,6 @@ app.use(ElementPlus)
 app.use(router)
 app.use(VxeTooltip)
 app.use(VxeLoading)
-app.use(formCreate)
-app.use(fcDesigner)
 app.use(wujieVue)
 
 // 初始化 i18n

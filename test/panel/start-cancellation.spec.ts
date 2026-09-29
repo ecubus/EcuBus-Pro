@@ -80,8 +80,7 @@ it.each([
     formatError: String,
     getTsUs: () => 0,
     startTs: 0,
-    attachRpcCanDevices: vi.fn(),
-    detachRpcCanDevices: vi.fn(),
+    setProjectSimulateCount: vi.fn(async () => {}),
     stopRememberedVariables: async () => {},
     monitorEventLoopDelay: vi.fn(() => ({ enable: vi.fn() })),
     setInterval: vi.fn(),
@@ -161,7 +160,7 @@ it.each([
   release()
   await new Promise((resolve) => setImmediate(resolve))
   expect(context.openCanDevice).not.toHaveBeenCalled()
-  expect(context.attachRpcCanDevices).not.toHaveBeenCalled()
+  expect(context.setProjectSimulateCount.mock.calls).toEqual([[0]])
   expect(context.monitorEventLoopDelay).not.toHaveBeenCalled()
   expect(context.setInterval).not.toHaveBeenCalled()
   expect(context.serialBaseMap.size).toBe(0)

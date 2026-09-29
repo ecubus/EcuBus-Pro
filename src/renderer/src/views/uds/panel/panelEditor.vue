@@ -3,41 +3,24 @@
     {{ t('panelFileFailed') }}: {{ data.panels[id].fileError }}
     <el-button @click="relinkFile">{{ t('relinkPanel') }}</el-button>
   </div>
-  <div v-else-if="legacy">
-    <el-button class="migration-button" @click="prepareMigration">{{
-      t('migrationCopy')
-    }}</el-button>
-    <LegacyPanelEditor :height="height - 40" :edit-index="editIndex" />
-    <el-dialog
-      v-if="migrationOpen"
-      v-model="migrationOpen"
-      :title="t('migrationCopy')"
-      width="560px"
-      :append-to="`#win${editIndex}`"
+  <div v-else-if="migration" class="migration-report">
+    <p>{{ t('migrationLayout') }}</p>
+    <p>
+      {{ t('migrationConverted') }}: {{ migration.document.controls.length }} ·
+      {{ t('migrationSkipped') }}: {{ migration.skipped.length }}
+    </p>
+    <el-table v-if="migration.skipped.length" :data="migration.skipped" max-height="260">
+      <el-table-column prop="item" :label="t('components')" />
+      <el-table-column :label="t('migrationSkipped')">
+        <template #default="{ row }">{{ t(row.reason) }}</template>
+      </el-table-column>
+    </el-table>
+    <el-button
+      type="primary"
+      :disabled="!migration.document.controls.length"
+      @click="createMigrationCopy"
+      >{{ t('migrationCreate') }}</el-button
     >
-      <template v-if="migration">
-        <p>{{ t('migrationLayout') }}</p>
-        <p>
-          {{ t('migrationConverted') }}: {{ migration.document.controls.length }} ·
-          {{ t('migrationSkipped') }}: {{ migration.skipped.length }}
-        </p>
-        <el-table v-if="migration.skipped.length" :data="migration.skipped" max-height="260">
-          <el-table-column prop="item" :label="t('components')" />
-          <el-table-column :label="t('migrationSkipped')">
-            <template #default="{ row }">{{ t(row.reason) }}</template>
-          </el-table-column>
-        </el-table>
-      </template>
-      <template #footer>
-        <el-button @click="migrationOpen = false">{{ t('cancel') }}</el-button>
-        <el-button
-          type="primary"
-          :disabled="!migration?.document.controls.length"
-          @click="createMigrationCopy"
-          >{{ t('migrationCreate') }}</el-button
-        >
-      </template>
-    </el-dialog>
   </div>
   <FreePanelEditor
     v-else
@@ -51,7 +34,7 @@
   />
 </template>
 <script setup lang="ts">
-import { defineAsyncComponent, inject, ref } from 'vue'
+import { inject, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { v4 } from 'uuid'
 import { useDataStore } from '@r/stores/data'
@@ -68,30 +51,26 @@ import { cloneDocument, createDocument } from './free/model'
 import { migrateLegacyPanel, migrationCopyName } from './free/migration'
 import { usePanelLocale } from './free/locale'
 import FreePanelEditor from './free/FreePanelEditor.vue'
-const LegacyPanelEditor = defineAsyncComponent(() => import('./LegacyPanelEditor.vue'))
 const props = defineProps<{ height: number; editIndex: string }>()
 const data = useDataStore()
 const project = useProjectStore()
 const layout = inject('layout') as Layout
 const t = usePanelLocale()
 const existing = data.panels[props.editIndex]
-const legacy = !!existing && !existing.document && !existing.filePath
+const migration =
+  existing && !existing.document && !existing.filePath
+    ? migrateLegacyPanel(existing, data.vars)
+    : undefined
 const savedDocument = ref(existing?.document ? cloneDocument(existing.document) : createDocument())
 let nextNumber = 1
 while (Object.values(data.panels).some((panel) => panel.name === `Panel ${nextNumber}`))
   nextNumber++
 const savedName = ref(existing?.name || `Panel ${nextNumber}`)
 const id = existing?.id || (props.editIndex === 'panel' ? v4() : props.editIndex)
-const migrationOpen = ref(false)
-const migration = ref<ReturnType<typeof migrateLegacyPanel>>()
-function prepareMigration() {
-  migration.value = migrateLegacyPanel(data.panels[props.editIndex], data.vars)
-  migrationOpen.value = true
-}
 async function createMigrationCopy() {
-  if (!migration.value?.document.controls.length) return
+  if (!migration?.document.controls.length) return
   const name = migrationCopyName(data.panels[props.editIndex].name, data.panels)
-  const document = cloneDocument(migration.value.document)
+  const document = cloneDocument(migration.document)
   const filePath = await choosePanelFile(name)
   if (!filePath) return
   if (panelUsingFile(data.panels, filePath)) {
@@ -110,7 +89,6 @@ async function createMigrationCopy() {
   }
   const copyId = v4()
   data.panels[copyId] = { id: copyId, name, filePath, document, rule: [], options: {} }
-  migrationOpen.value = false
   layout.addWin('panel', copyId, { params: { 'edit-index': copyId } })
 }
 async function save(name: string, document: PanelDocument, filePath = data.panels[id]?.filePath) {
@@ -212,7 +190,7 @@ async function relinkFile() {
 }
 </script>
 <style scoped>
-.migration-button {
-  margin: 4px 8px;
+.migration-report {
+  padding: 8px 12px;
 }
 </style>

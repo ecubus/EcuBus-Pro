@@ -55,6 +55,7 @@ export interface PanelControl {
   actionPanelId?: string
   pathMode?: 'file' | 'directory' | 'save'
   initialText?: string
+  rememberValue?: boolean
   editorMode?: 'text' | 'hex' | 'both'
   ledShape?: 'ellipse' | 'rectangle' | 'up' | 'down' | 'left' | 'right'
   ledOnColor?: string

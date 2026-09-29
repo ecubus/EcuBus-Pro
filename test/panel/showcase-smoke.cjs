@@ -118,7 +118,7 @@ app.on('browser-window-created', (_event, win) => {
       )
       await waitFor(win, `!!document.querySelector('[data-control-id="measurement"]')`)
       await win.webContents.executeJavaScript(
-        `panelTest.data.vars.DemoDirectory.rememberValue = false`
+        `panelTest.data.panels['demo-showcase'].document.controls.find(control => control.id === 'path-directory').rememberValue = false`
       )
 
       const build = await win.webContents.executeJavaScript(
@@ -253,11 +253,14 @@ app.on('browser-window-created', (_event, win) => {
         `document.querySelector('.runtime-status').textContent.includes('Stopped')`
       )
       checks.push({ name: 'stop-simulation', passed: true })
-      const remembered = await win.webContents.executeJavaScript(
-        `window.electron.ipcRenderer.invoke('ipc-panel-var-values', {...panelTest.project.projectInfo}, JSON.parse(JSON.stringify(panelTest.data.vars)), false)`
+      await waitFor(
+        win,
+        `panelTest.data.vars.DemoPath.value.value === ${JSON.stringify(path.join(demo, 'PanelDemo.dbc'))}`
       )
-      assert.equal(remembered.DemoPath, path.join(demo, 'PanelDemo.dbc'))
-      assert.equal(remembered.DemoDirectory, undefined)
+      assert.equal(
+        await win.webContents.executeJavaScript(`panelTest.data.vars.DemoDirectory.value.value`),
+        undefined
+      )
       await win.webContents.executeJavaScript(
         `document.querySelector('[data-control-id="measurement"] .el-button--success').click()`
       )
@@ -267,7 +270,7 @@ app.on('browser-window-created', (_event, win) => {
       )
       await waitFor(
         win,
-        `(async () => (await window.electron.ipcRenderer.invoke('ipc-panel-var-values', {...panelTest.project.projectInfo}, {DemoPath:{type:'user',value:{type:'string'}}}, true)).DemoPath === ${JSON.stringify(path.join(demo, 'PanelDemo.dbc'))})()`
+        `(async () => (await window.electron.ipcRenderer.invoke('ipc-var-values', ['DemoPath'])).DemoPath === ${JSON.stringify(path.join(demo, 'PanelDemo.dbc'))})()`
       )
       await win.webContents.executeJavaScript(
         `Array.from(document.querySelectorAll('.container-tabs button')).find(el=>el.textContent.includes('02')).click()`

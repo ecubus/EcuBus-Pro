@@ -213,7 +213,6 @@
         "id": "HtmlLevel",
         "name": "HtmlLevel",
         "type": "user",
-        "rememberValue": true,
         "value": {
           "type": "number",
           "initValue": 30,
@@ -225,7 +224,6 @@
         "id": "HtmlEnabled",
         "name": "HtmlEnabled",
         "type": "user",
-        "rememberValue": true,
         "value": {
           "type": "number",
           "initValue": 1,
@@ -237,7 +235,6 @@
         "id": "HtmlRxTarget",
         "name": "HtmlRxTarget",
         "type": "user",
-        "rememberValue": false,
         "value": {
           "type": "number",
           "initValue": 0,
@@ -249,7 +246,6 @@
         "id": "HtmlRxCount",
         "name": "HtmlRxCount",
         "type": "user",
-        "rememberValue": false,
         "value": {
           "type": "number",
           "initValue": 0,

@@ -38,7 +38,6 @@ export interface VarValueArray {
 }
 
 export interface VarItem {
-  rememberValue?: boolean
   type: 'user' | 'system'
   id: string
   name: string

@@ -103,9 +103,7 @@ node node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p test/panel/tsconfig.json
 
 ## 新版示例与 HTML Control
 
-`remembered-values.spec.ts` 覆盖记忆值缓存、500 ms 合并写入、切换工程和显式补写、文件格式校验及批量读取。运行值先更新内存，每 500 ms 异步合并写入配置目录下的 `remembered-variables/<工程哈希>.json`，临时文件写完后再替换。停止测量等待补写；正常退出最多等待 2 秒，超时记录错误后退出，未完成的更新可能丢失。读取失败使用初始值并保留原文件，该次会话不覆盖它；下次启动测量重试读取。HTML 冒烟脚本同时检查原生控件按变量去重查询，以及 HTML 单变量读取只产生一次 IPC 且不携带整个变量表。
-
-缓存按工程路径隔离，最多保留 16 个可淘汰的工程缓存，正在使用或尚未保存的缓存不淘汰。交替查询不会触发写盘，未保存工程不持久化。启动测量时按完整变量表清理已删除或关闭保留的变量；旧工程文件可在“用户变量 → 记忆文件”中选择删除，当前使用中或尚未写完的记录不可删除；不按年龄自动删除。记忆文件统一记录工程路径和变量值。写盘失败会记录错误并保留脏数据，后续变量更新或生命周期补写时重试，不阻断停止测量。测试覆盖写入异常、多工程交替读取和失败后的补写；面板只使用 `ipc-panel-var-values` 批量接口，纯布局变化不查询变量。`remembered-disk.spec.ts` 验证真实文件保存及新缓存读取。持久化只在主进程 VarLOG 入口触发；worker 打包后可检查 `dist/index.js.map` 不包含 persistence、store 和 conf。
+`variable-start.spec.ts` 覆盖 Panel 控件"记住值"：关闭时按控件初始值（数值、文本、十六进制字节）启动，默认 0 或空文本；同一变量任一控件关闭即使用初始值；停止时只写回可写且开启记住值的控件所绑定的用户变量，值未变化时不修改工程。HTML 冒烟验证停止后写回工程并标记已修改、重启沿用该值、关闭记住值后从控件初始值启动且不写回；停止时读取本地工程值不产生 IPC，运行时单变量读取只查询该变量。
 
 Windows 下使用 `node node_modules/electron/cli.js` 启动冒烟脚本，不直接运行 `electron.exe`。四个脚本的控制台日志同步写入各自临时目录的 `console.log`，结果保存在同目录的 `result.json`，不依赖启动终端的输出管道。临时目录为 `%TEMP%/ecubus-panel-electron-*`。`smoke-console.spec.ts` 验证输出管道断开时日志仍能保存。
 
@@ -125,9 +123,7 @@ node node_modules/electron/cli.js test/panel/html-smoke.cjs
 node node_modules/electron/cli.js test/panel/migrated-smoke.cjs
 ```
 
-此脚本只打开临时副本，检查控件数量、绑定状态并截图，不启动硬件测量。Program 示例中不受支持的旧 DBC 在临时副本中过滤；原工程数据库不改动。停止后清空显示的通用冒烟用例显式关闭测试变量保留；默认保留行为由 `remembered-values.spec.ts` 和 `showcase-smoke.cjs` 验证。
-
-`shutdown.spec.ts` 覆盖同步清理异常、写入拒绝以及停止/写入不返回时的退出超时。HTML 冒烟验证损坏文件回退、启动锁释放、手动清理和正常退出落盘。
+此脚本只打开临时副本，检查控件数量、绑定状态并截图，不启动硬件测量。Program 示例中不受支持的旧 DBC 在临时副本中过滤；原工程数据库不改动。停止后清空显示的通用冒烟用例在控件上关闭记住值；默认记住行为由 `variable-start.spec.ts`、`html-smoke.cjs` 和 `showcase-smoke.cjs` 验证。HTML 冒烟同时验证启动失败后释放启动锁。
 
 `start-cancellation.spec.ts` 提取实际启动/停止函数，以设备和脚本替身挂起串口、SOME/IP 配置与路由、节点及插件启动，验证停止后清理未登记资源，不再启动后续设备、RPC 或定时器；不替代真实串口及 SOME/IP 硬件验证。
 

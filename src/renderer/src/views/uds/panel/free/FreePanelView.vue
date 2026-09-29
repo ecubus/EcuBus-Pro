@@ -44,7 +44,7 @@ import {
 } from './runtime'
 import ControlTree from './ControlTree.vue'
 import { usePanelLocale } from './locale'
-import { readPanelVariables } from './variableValues'
+import { panelStartValues } from './variableStart'
 const props = defineProps<{ document: PanelDocument; height: number }>()
 const data = useDataStore()
 const project = useProjectStore()
@@ -158,8 +158,10 @@ const bindingState = computed(() =>
         control.type,
         control.binding,
         control.numberValueType,
-        variable?.rememberValue,
-        variable?.value?.type
+        control.rememberValue,
+        control.initialValue,
+        control.initialText,
+        variable?.value
       ]
     })
   )
@@ -195,18 +197,29 @@ function write(control: PanelControl, value: PanelValue) {
 }
 async function restoreInputs() {
   const currentSession = session
-  const variables = Object.fromEntries(
-    props.document.controls.flatMap((control) => {
-      if (control.binding?.kind !== 'variable') return []
-      const id = control.binding.node.bindValue.variableId
-      const variable = data.vars[id]
-      if (variable?.type !== 'user' || variable.rememberValue === false || !variable.value)
-        return []
-      return [[id, variable]]
-    })
-  )
-  if (!Object.keys(variables).length) return
-  const restored = await readPanelVariables(project.projectInfo, variables, running.value)
+  const ids = [
+    ...new Set(
+      props.document.controls.flatMap((control) =>
+        control.binding?.kind === 'variable' &&
+        data.vars[control.binding.node.bindValue.variableId]?.type === 'user'
+          ? [control.binding.node.bindValue.variableId]
+          : []
+      )
+    )
+  ]
+  if (!ids.length) return
+  let restored: Record<string, PanelValue>
+  if (running.value) {
+    restored = await window.electron.ipcRenderer.invoke('ipc-var-values', ids)
+  } else {
+    const start = panelStartValues(data.panels, data.vars)
+    restored = Object.fromEntries(
+      ids.flatMap((id) => {
+        const value = start[id] ?? data.vars[id].value?.value ?? data.vars[id].value?.initValue
+        return value === undefined ? [] : [[id, value]]
+      })
+    )
+  }
   if (currentSession !== session) return
   for (const control of props.document.controls) {
     if (control.binding?.kind !== 'variable') continue

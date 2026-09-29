@@ -351,10 +351,10 @@ app.on('browser-window-created', (_event, win) => {
       checks.push({ name: 'editor-add-and-save', passed: true })
       await capture(win, 'editor')
       await win.webContents.executeJavaScript(`(async () => {
-        panelTest.data.vars.level = {id:'level', name:'Level', type:'user', rememberValue:false, value:{type:'number', min:0, max:100, initValue:0}};
+        panelTest.data.vars.level = {id:'level', name:'Level', type:'user', value:{type:'number', min:0, max:100, initValue:0}};
         const controls = panelTest.data.panels['smoke-panel'].document.controls;
         controls.forEach((c, i) => {
-          c.x = 32; c.y = 32 + i * 100;
+          c.x = 32; c.y = 32 + i * 100; c.rememberValue = false;
           c.binding = {kind:'variable', node:{id:'level', name:'Level', type:'variable', enable:true, color:'', bindValue:{variableId:'level', variableType:'user', variableName:'Level', variableFullName:'Level', variableValueType:'number'}}};
         });
         await window.electron.ipcRenderer.invoke('ipc-fs-writeFile',panelTest.data.panels['smoke-panel'].filePath,JSON.stringify({format:'ecubus-panel',version:1,name:panelTest.data.panels['smoke-panel'].name,document:panelTest.data.panels['smoke-panel'].document}));
@@ -464,7 +464,7 @@ app.on('browser-window-created', (_event, win) => {
         await external.webContents.executeJavaScript(
           `document.querySelector('.panel-reading strong')?.textContent`
         ),
-        '—'
+        '0'
       )
       checks.push({ name: 'stop-disconnects-external-runtime', passed: true })
       const legacy = {
@@ -609,7 +609,7 @@ app.on('browser-window-created', (_event, win) => {
       )
       await waitFor(
         win,
-        `document.querySelector('#winpprogress [aria-label="Current"]')?.getAttribute('aria-valuetext') === '—'`
+        `document.querySelector('#winpprogress [aria-label="Current"]')?.getAttribute('aria-valuetext') === '0.0 A'`
       )
       const stoppedWidths = await win.webContents.executeJavaScript(
         `Array.from(document.querySelectorAll('#winpprogress .panel-progress-track > div')).map(e=>e.style.width || e.style.height)`

@@ -434,8 +434,7 @@
           "max": 1
         },
         "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
-        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada",
-        "rememberValue": false
+        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada"
       }
     },
     "datas": {},

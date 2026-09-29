@@ -11,10 +11,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getAllSysVar } from 'nodeCan/sysVar'
-import { useProjectStore } from '@r/stores/project'
 import { useDataStore } from '@r/stores/data'
 import { currentSignalValue } from '@r/stores/signalValues'
-import { readPanelVariables } from './variableValues'
 import type { PanelControl } from 'src/preload/panel'
 
 const props = defineProps<{
@@ -24,7 +22,6 @@ const props = defineProps<{
 }>()
 
 const data = useDataStore()
-const project = useProjectStore()
 const frame = ref<HTMLIFrameElement>()
 const latest = new Map<string, unknown>()
 const subscriptions = new Map<number, { key: string; name: string; kind: 'variable' | 'signal' }>()
@@ -199,15 +196,10 @@ async function handleRequest(message: { id: number; method: string; args: any[] 
     if (message.method === 'getVar') {
       const variable = findVariable(String(name))
       if (!variable) throw new Error(`Variable ${name} not found`)
-      const restored = await readPanelVariables(
-        project.projectInfo,
-        { [variable.id]: variable.item },
-        !!props.running
-      )
-      return respond(
-        message.id,
-        restored[variable.id] ?? latest.get(variable.id) ?? variableValue(variable.item)
-      )
+      const current = props.running
+        ? (await window.electron.ipcRenderer.invoke('ipc-var-values', [variable.id]))[variable.id]
+        : undefined
+      return respond(message.id, current ?? latest.get(variable.id) ?? variableValue(variable.item))
     }
     if (message.method === 'setVar') {
       if (!props.running) throw new Error('Panel is stopped')

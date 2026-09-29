@@ -34,6 +34,7 @@
       },
       {
         "id": "control-2",
+        "rememberValue": false,
         "type": "button",
         "label": "Button",
         "x": 210,

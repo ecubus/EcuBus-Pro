@@ -24,9 +24,9 @@ const handle = ipcMain.handle.bind(ipcMain)
 ipcMain.handle = (channel, listener) =>
   handle(
     channel,
-    channel === 'ipc-panel-var-values'
+    channel === 'ipc-var-values'
       ? (...args) => {
-          variableRequests.push(args[2])
+          variableRequests.push(args[1])
           return listener(...args)
         }
       : listener
@@ -131,17 +131,6 @@ app.on('browser-window-created', (_event, win) => {
     try {
       win.setSize(1400, 1000)
       await connectStores(win)
-      const conf = require('conf')
-      const Conf = conf.default || conf
-      const config = new Conf({ projectName: 'ecubuspro', projectSuffix: '' })
-      const hash = (value) =>
-        require('node:crypto').createHash('sha256').update(value).digest('hex')
-      let filename = path.join(demo, 'HtmlControl.ecb')
-      if (process.platform === 'win32') filename = filename.toLowerCase()
-      const memoryDirectory = path.join(path.dirname(config.path), 'remembered-variables')
-      fs.mkdirSync(memoryDirectory, { recursive: true })
-      const memoryFile = path.join(memoryDirectory, hash(filename) + '.json')
-      fs.writeFileSync(memoryFile, '{broken')
       await win.webContents.executeJavaScript(
         `panelTest.project.openProjectByPath(${JSON.stringify(path.join(demo, 'HtmlControl.ecb'))})`
       )
@@ -155,28 +144,16 @@ app.on('browser-window-created', (_event, win) => {
       )
       assert(frame)
       await waitHtml(frame, `document.querySelector('#level-value').textContent === '30 %'`)
-      assert(
-        variableRequests.some(
-          (variables) =>
-            Object.keys(variables).length === 2 && variables.HtmlLevel && variables.HtmlEnabled
-        )
-      )
-      const beforeRead = variableRequests.length
       assert.equal(await frame.executeJavaScript(`window.panel.getVar('HtmlLevel')`), 30)
-      assert.equal(variableRequests.length, beforeRead + 1)
-      assert.deepEqual(Object.keys(variableRequests.at(-1)), ['HtmlLevel'])
-      assert.deepEqual(variableRequests.at(-1).HtmlLevel.value, { type: 'number' })
-      checks.push({ name: 'batched-native-restore-and-single-html-read', passed: true })
-      const nativeReads = () =>
-        variableRequests.filter((variables) => Object.keys(variables).length === 2).length
-      const beforeLayout = nativeReads()
+      assert.equal(variableRequests.length, 0)
+      checks.push({ name: 'stopped-reads-use-project-values', passed: true })
       await win.webContents.executeJavaScript(`
         const panelDocument = panelTest.data.panels['html-demo'].document;
         panelDocument.width += 10;
         panelDocument.controls.find(control => control.id === 'load').x += 5;
       `)
       await new Promise((resolve) => setTimeout(resolve, 200))
-      assert.equal(nativeReads(), beforeLayout)
+      assert.equal(variableRequests.length, 0)
       checks.push({ name: 'layout-change-does-not-query-variables', passed: true })
       checks.push({ name: 'html-initial-read-and-script-build', passed: true })
       assert.equal(
@@ -205,50 +182,6 @@ app.on('browser-window-created', (_event, win) => {
       }
       checks.push({ name: 'panel-file-types-checked-before-shell-open', passed: true })
 
-      const io = require('node:fs/promises')
-      const originalUnlink = io.unlink
-      let releaseDelete
-      let enteredDelete
-      const deleting = new Promise((resolve) => {
-        enteredDelete = resolve
-      })
-      const deletionGate = new Promise((resolve) => {
-        releaseDelete = resolve
-      })
-      io.unlink = async (file) => {
-        if (file === memoryFile) {
-          enteredDelete()
-          await deletionGate
-        }
-        return originalUnlink(file)
-      }
-      const previousDataSet = global.dataSet
-      try {
-        await win.webContents.executeJavaScript(`
-          window.pendingMemoryDelete = window.electron.ipcRenderer.invoke('ipc-var-memory-delete',
-            [${JSON.stringify(path.basename(memoryFile))}]); void 0;
-        `)
-        await deleting
-        await win.webContents.executeJavaScript(`
-          window.pendingCancelledStart = window.electron.ipcRenderer.invoke('ipc-global-start',
-            {...panelTest.project.projectInfo}, JSON.parse(JSON.stringify(panelTest.data.getData())))
-            .then(() => 'unexpected success', error => error.message); void 0;
-        `)
-        await win.webContents.executeJavaScript(
-          `window.electron.ipcRenderer.invoke('ipc-global-stop')`
-        )
-        const cancelled = await win.webContents.executeJavaScript('window.pendingCancelledStart')
-        assert.match(cancelled, /Measurement start cancelled/)
-        assert.equal(global.dataSet, previousDataSet)
-        releaseDelete()
-        await win.webContents.executeJavaScript('window.pendingMemoryDelete')
-        assert.equal(global.dataSet, previousDataSet)
-        checks.push({ name: 'stop-cancels-start-waiting-for-memory-deletion', passed: true })
-      } finally {
-        releaseDelete()
-        io.unlink = originalUnlink
-      }
-      fs.writeFileSync(memoryFile, '{broken')
       const startError = await win.webContents.executeJavaScript(`
         window.electron.ipcRenderer.invoke('ipc-global-start', {...panelTest.project.projectInfo},
           {vars:{}, database:{can:null}}).then(() => false, () => true)
@@ -273,7 +206,7 @@ app.on('browser-window-created', (_event, win) => {
       assert.equal(await frame.executeJavaScript(`panel.setSignal('HtmlDemo.Target', 20)`), true)
       checks.push({ name: 'html-signal-validation-and-main-process-acknowledgement', passed: true })
 
-      checks.push({ name: 'corrupt-memory-fallback-and-start-lock-release', passed: true })
+      checks.push({ name: 'start-lock-release-after-failure', passed: true })
       await frame.executeJavaScript(
         `document.querySelector('#level').value = '65'; document.querySelector('#level').dispatchEvent(new Event('change'))`
       )
@@ -347,73 +280,48 @@ app.on('browser-window-created', (_event, win) => {
         'Panel is stopped'
       )
       checks.push({ name: 'html-stopped-writes-rejected', passed: true })
-      assert.equal(fs.readFileSync(memoryFile, 'utf8'), '{broken')
-      const obsoleteFile = path.join(memoryDirectory, 'f'.repeat(64) + '.json')
-      fs.writeFileSync(
-        obsoleteFile,
-        JSON.stringify({ projectPath: path.join(demo, 'deleted.ecb'), values: {} })
-      )
-      await win.webContents.executeJavaScript(
-        `panelTest.getLayout().addWin('variable','memory-test',{})`
-      )
       await waitFor(
         win,
-        `Array.from(document.querySelectorAll('button')).some(button => button.textContent.trim() === 'Remembered values')`
+        `panelTest.data.vars.HtmlLevel.value.value === 70 && panelTest.project.projectDirty`
       )
-      await win.webContents.executeJavaScript(
-        `Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === 'Remembered values').click()`
+      checks.push({ name: 'stop-writes-panel-value-to-project', passed: true })
+      const start = async () => {
+        await win.webContents.executeJavaScript(
+          `document.querySelector('[data-control-id="measurement"] .el-button--success').click()`
+        )
+        await waitHtml(frame, `document.querySelector('#status').textContent === 'Running'`)
+      }
+      const stop = async () => {
+        await win.webContents.executeJavaScript(
+          `document.querySelector('[data-control-id="measurement"] .el-button--danger').click()`
+        )
+        await waitHtml(frame, `document.querySelector('#status').textContent === 'Stopped'`)
+      }
+      await start()
+      const beforeRunningRead = variableRequests.length
+      assert.equal(await frame.executeJavaScript(`panel.getVar('HtmlLevel')`), 70)
+      assert(
+        variableRequests
+          .slice(beforeRunningRead)
+          .some((ids) => JSON.stringify(ids) === '["HtmlLevel"]')
       )
-      await waitFor(
-        win,
-        `document.querySelector('.el-dialog__body')?.textContent.includes('deleted.ecb')`
+      checks.push({ name: 'restart-uses-project-value', passed: true })
+      await stop()
+      await win.webContents.executeJavaScript(`
+        const levelControl = panelTest.data.panels['html-demo'].document.controls.find(control => control.id === 'level');
+        levelControl.rememberValue = false;
+        levelControl.initialValue = 12;
+      `)
+      await start()
+      assert.equal(await frame.executeJavaScript(`panel.getVar('HtmlLevel')`), 12)
+      await stop()
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      assert.equal(
+        await win.webContents.executeJavaScript(`panelTest.data.vars.HtmlLevel.value.value`),
+        70
       )
-      await capture(win, 'remembered-projects')
-      await win.webContents.executeJavaScript(
-        `Array.from(document.querySelectorAll('.el-table__row')).find(row => row.textContent.includes('deleted.ecb')).querySelector('.el-checkbox__input').click()`
-      )
-      await win.webContents.executeJavaScript(
-        `Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === 'Delete selected values').click()`
-      )
-      await waitFor(win, `!!document.querySelector('.el-message-box__btns .el-button--primary')`)
-      await win.webContents.executeJavaScript(
-        `document.querySelector('.el-message-box__btns .el-button--primary').click()`
-      )
-      await waitFor(
-        win,
-        `!document.querySelector('.el-table__body')?.textContent.includes('deleted.ecb')`
-      )
-      assert.equal(fs.existsSync(obsoleteFile), false)
-      checks.push({ name: 'manual-memory-cleanup', passed: true })
-      await win.webContents.executeJavaScript(
-        `document.querySelector('.el-dialog__footer button').click()`
-      )
-      fs.writeFileSync(memoryFile, JSON.stringify({ projectPath: filename, values: {} }))
-      await win.webContents.executeJavaScript(
-        `document.querySelector('[data-control-id="measurement"] .el-button--success').click()`
-      )
-      await waitHtml(frame, `document.querySelector('#status').textContent === 'Running'`)
-      await frame.executeJavaScript(`panel.setVar('HtmlLevel', 73)`)
-      assert.equal(await frame.executeJavaScript(`panel.getVar('HtmlLevel')`), 73)
-      app.once('will-quit', () => {
-        try {
-          const persisted = JSON.parse(
-            fs.readFileSync(
-              path.join(
-                path.dirname(config.path),
-                'remembered-variables',
-                hash(filename) + '.json'
-              ),
-              'utf8'
-            )
-          )
-          assert.equal(persisted.values[hash('HtmlLevel')], 73)
-          checks.push({ name: 'normal-quit-flushes-pending-variable', passed: true })
-          finish()
-        } catch (error) {
-          finish(error)
-        }
-      })
-      app.quit()
+      checks.push({ name: 'remember-off-starts-from-control-initial-value', passed: true })
+      finish()
     } catch (error) {
       await capture(win, 'failure').catch(() => {})
       finish(error)

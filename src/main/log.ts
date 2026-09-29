@@ -1,4 +1,3 @@
-import { rememberVariable } from './var/persistence'
 /* eslint-disable no-var */
 import { transport, createLogger, format, Logger, transports } from 'winston'
 import type { Format } from 'logform'
@@ -570,7 +569,6 @@ export class VarLOG {
   setVarByKey(key: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarByKey(key, value)
     if (found && target) {
-      rememberVariable(target)
       this.log.info({
         method: 'setVar',
         data: [{ name: target.name, value, id: target.id, uuid: this.id }],
@@ -588,8 +586,7 @@ export class VarLOG {
     const founds: { index: number; var: VarItem }[] = []
     for (const [index, item] of data.entries()) {
       const found = setVarByKey(item.key, item.value)
-      if (found?.found && found.target) {
-        rememberVariable(found.target)
+      if (found) {
         founds.push({
           index,
           var: found.target
@@ -622,7 +619,6 @@ export class VarLOG {
   setVar(name: string, value: number | string | number[], ts: number) {
     const { found, target } = setVarMain(name, value)
     if (found && target) {
-      rememberVariable(target)
       this.log.info({
         method: 'setVar',
         data: [{ name: target.name, value, id: target.id, uuid: this.id }],

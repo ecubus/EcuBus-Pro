@@ -3,8 +3,6 @@ import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { store } from './store'
-import { flushRememberedVariables } from './var/persistence'
-import { finishVariableShutdown } from './var/shutdown'
 import './ipc'
 import log from 'electron-log/main'
 import { initialize as initAnalytics, trackEvent } from './analytics'
@@ -24,23 +22,6 @@ log.initialize()
 
 // Track app exit once (user closes window / app quits).
 let exitTracked = false
-let persistenceFlushed = false
-let persistenceFlushing = false
-app.on('before-quit', (event) => {
-  if (persistenceFlushed) return
-  event.preventDefault()
-  if (persistenceFlushing) return
-  persistenceFlushing = true
-  void finishVariableShutdown(globalStop, flushRememberedVariables, (error) =>
-    log.error(error)
-  ).then((completed) => {
-    persistenceFlushed = true
-    if (!completed) {
-      log.error('Variable persistence shutdown timed out; pending values may not be saved')
-    }
-    app.quit()
-  })
-})
 app.once('before-quit', async () => {
   if (exitTracked) return
   exitTracked = true

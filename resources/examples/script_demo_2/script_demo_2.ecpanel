@@ -9,6 +9,7 @@
     "controls": [
       {
         "id": "control-1",
+        "rememberValue": false,
         "type": "button",
         "label": "发送ChecSum错误帧",
         "x": 24,

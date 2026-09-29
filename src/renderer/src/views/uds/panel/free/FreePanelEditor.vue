@@ -865,6 +865,13 @@
                   :disabled="isLocked(document, active)"
                   @change="patch('readOnly', $event)"
               /></label>
+              <label v-if="active.binding?.kind === 'variable' && canWrite(active)"
+                >{{ t('rememberValue')
+                }}<el-switch
+                  :model-value="active.rememberValue !== false"
+                  :disabled="isLocked(document, active)"
+                  @change="patch('rememberValue', $event)"
+              /></label>
               <label
                 v-if="
                   active.type === 'button' &&
@@ -972,6 +979,7 @@ import { useDataStore } from '@r/stores/data'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { panelSources, applyBinding, acceptsBinding } from './sources'
 import { commonProperties, patchControls } from './properties'
+import { canWrite } from './runtime'
 const workspace = ref<HTMLElement>()
 const sidebarWidths = reactive({ left: 164, right: 242 })
 let sidebarDrag:

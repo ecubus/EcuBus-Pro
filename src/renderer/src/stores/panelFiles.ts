@@ -47,6 +47,7 @@ export function parsePanelFile(text: string): { name: string; document: PanelDoc
         'alarmLower',
         'alarmUpper'
       ].some((k) => c[k] != null && !finite(c[k])) ||
+      (c.rememberValue != null && typeof c.rememberValue !== 'boolean') ||
       (c.options != null &&
         (!Array.isArray(c.options) ||
           c.options.some((o: any) => !o || typeof o.label !== 'string' || !finite(o.value)))) ||

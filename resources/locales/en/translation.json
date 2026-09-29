@@ -984,17 +984,6 @@
       "packages": "Packages"
     },
     "variable": {
-      "memory": {
-        "files": "Remembered values",
-        "project": "Project / file",
-        "modified": "Last saved",
-        "state": "Status",
-        "inUse": "In use",
-        "stored": "Stored",
-        "readFailed": "Read failed",
-        "delete": "Delete selected values",
-        "deleteConfirm": "Delete remembered values for the selected projects?"
-      },
       "tabs": {
         "userVariables": "User Variables",
         "systemVariables": "System Variables"
@@ -1010,7 +999,6 @@
         "description": "Description",
         "dataType": "Data Type",
         "initialValue": "Initial Value",
-        "rememberValue": "Remember last value",
         "minimum": "Minimum",
         "maximum": "Maximum",
         "unit": "Unit"

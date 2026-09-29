@@ -182,6 +182,7 @@ const labels = {
   initialValue: ['初始值', 'Initial value'],
   locked: ['锁定', 'Locked'],
   readOnly: ['只读', 'Read only'],
+  rememberValue: ['记住值', 'Remember value'],
   toggle: ['切换模式', 'Toggle'],
   pressValue: ['按下值', 'Pressed value'],
   releaseValue: ['释放值', 'Released value'],

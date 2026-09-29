@@ -1,5 +1,4 @@
 import { waitForStart } from '../startCancellation'
-import { restoreVariables, stopRememberedVariables } from '../var/persistence'
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
@@ -792,8 +791,6 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     }
     const data = arg[1] as DataSet
 
-    await restoreVariables(projectInfo, data.vars, controller.signal)
-    controller.signal.throwIfAborted()
     logQ.signalSession = arg[2]
     global.dataSet = data
     for (const t of exTransportList) {
@@ -1057,7 +1054,6 @@ export function globalStop(emit = false) {
   }
 
   monitor?.disable()
-  return stopRememberedVariables()
 }
 
 ipcMain.handle('ipc-global-stop', async (event, ...arg) => {

@@ -53,6 +53,7 @@
       },
       {
         "id": "control-2",
+        "rememberValue": false,
         "type": "button",
         "label": "Start",
         "x": 520,

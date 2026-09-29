@@ -99,6 +99,7 @@
       },
       {
         "id": "control-3",
+        "rememberValue": false,
         "type": "button",
         "label": "Start",
         "x": 24,

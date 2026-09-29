@@ -72,5 +72,4 @@ it('ships the standalone HTML control with matching editable source and isolated
     'simulate',
     'simulate'
   ])
-  expect(project.vars.HtmlRxCount.rememberValue).toBe(false)
 })

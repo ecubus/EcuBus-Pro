@@ -26,15 +26,11 @@ Panel **Open file** buttons support folders and PDF, TXT, Markdown, CSV, PNG, JP
 
 `getSignal()` returns the latest decoded transmitted or received frame sample in the current measurement, independently of HTML subscriptions. Without a sample it falls back to the project database value, which may be unset. `setSignal()` updates the transmit database; success does not confirm transmission or ECU processing. Reading immediately after writing therefore does not guarantee the newly written value. Signal recording starts with measurement so a first read or a newly opened window can retrieve earlier one-shot samples.
 
-### Remember last value
+### Remember value
 
-User-defined variables have **Remember last value** enabled by default, including existing variables without an explicit setting. After a saved project has run, remembered values override initial values on the next measurement. Changing an initial value alone does not replace an existing remembered value.
+Controls that write a user variable have **Remember value** enabled by default. When measurement stops, the variable's last value is written back to the project; save the project to keep it in the `.ecb`, and the next measurement starts from it. Turn it off to start every measurement from the control's **Initial value** (0 by default, or empty text for input and path controls). If several controls write the same variable and any of them has it off, that control's initial value is used.
 
-To always use the initial value, open the user variable editor and turn off **Remember last value**. To clear stored values, stop measurement, open **Remembered values** in the variable page, select the project and delete its record. The next start uses initial values; enabled variables will be remembered again. Active or still-writing records cannot be deleted.
-
-Values are stored locally per project path, separately from `.ecb` and `.ecpanel`. Unsaved projects, built-in system variables and CAN/LIN signal values are not persisted. Moving or renaming a project starts a separate memory record; obsolete records can be deleted in the same dialog.
-
-Remembered-value files apply only to desktop GUI measurement. The CLI does not load them: it starts from the variable definitions in the project file (normally the initial values), without restoring values remembered by the GUI.
+Only user variables written by Panel controls are stored; system variables and CAN/LIN signal values are not. The CLI starts from the values saved in the `.ecb` and does not apply Panel initial values.
 
 ## Panel Capabilities
 

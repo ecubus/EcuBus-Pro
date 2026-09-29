@@ -63,8 +63,7 @@
           "min": 0,
           "max": 1
         },
-        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
-        "rememberValue": false
+        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181"
       },
       "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd": {
         "name": "MotorSpeedMinus",
@@ -76,8 +75,7 @@
           "min": 0,
           "max": 1
         },
-        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
-        "rememberValue": false
+        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd"
       },
       "60a2d996-ca92-4276-bb35-92574e959209": {
         "name": "MotorSpeed",

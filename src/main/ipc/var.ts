@@ -1,8 +1,3 @@
-import {
-  panelVariableValues,
-  listRememberedProjects,
-  deleteRememberedProjects
-} from '../var/persistence'
 import { ipcMain } from 'electron'
 import EventEmitter from 'events'
 import { VarEvent } from '../global'
@@ -32,12 +27,15 @@ ipcMain.on('ipc-signal-set', (event, arg) => {
   })
 })
 
-ipcMain.handle('ipc-panel-var-values', (_event, project, variables, running) =>
-  panelVariableValues(project, variables, running)
+ipcMain.handle('ipc-var-values', (_event, ids: string[]) =>
+  Object.fromEntries(
+    ids.flatMap((id) => {
+      const value = global.vars?.[id]?.value
+      const current = value?.value ?? value?.initValue
+      return current === undefined ? [] : [[id, current]]
+    })
+  )
 )
-
-ipcMain.handle('ipc-var-memory-list', () => listRememberedProjects())
-ipcMain.handle('ipc-var-memory-delete', (_event, ids: string[]) => deleteRememberedProjects(ids))
 
 ipcMain.handle('ipc-panel-signal-set', (_event, arg) => {
   if (

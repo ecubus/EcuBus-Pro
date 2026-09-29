@@ -36,6 +36,7 @@ import {
   restoreSignalSnapshot
 } from './stores/signalValues'
 import { assign, cloneDeep } from 'lodash'
+import { rememberedVariableIds, storeVariableValues } from './views/uds/panel/free/variableStart'
 import wujieVue from 'wujie-vue3'
 import { initRendererI18n, i18nPlugin } from './i18n'
 
@@ -189,6 +190,18 @@ if (window.params.id) {
     logChannel.postMessage(event.data)
     receiveLogBatch(event.data)
   }
+  watch(
+    () => runtimeStore.globalStart,
+    async (running, previous) => {
+      if (running || !previous) return
+      const ids = rememberedVariableIds(dataStore.panels, dataStore.vars)
+      if (!ids.length) return
+      storeVariableValues(
+        dataStore.vars,
+        await window.electron.ipcRenderer.invoke('ipc-var-values', ids)
+      )
+    }
+  )
   window.onmessage = (event) => {
     // event.source === window means the message is coming from the preload
     // script, as opposed to from an <iframe> or other source.

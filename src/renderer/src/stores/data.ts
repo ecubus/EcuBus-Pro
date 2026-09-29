@@ -7,6 +7,7 @@ import { DataSet, NodeItem } from 'src/preload/data'
 import { useGlobalStart, useRuntimeStore } from './runtime'
 import { nextTick, h, ref } from 'vue'
 import i18next from 'i18next'
+import { panelStartValues, storeVariableValues } from '../views/uds/panel/free/variableStart'
 
 export type { DataSet }
 
@@ -135,13 +136,10 @@ export const useDataStore = defineStore('useDataStore', {
                 text: i18next.t('runtime.messages.loading'),
                 background: 'rgba(0, 0, 0, 0.7)'
               })
+              const dataSet = cloneDeep(this.getData())
+              storeVariableValues(dataSet.vars, panelStartValues(this.panels, this.vars))
               window.electron.ipcRenderer
-                .invoke(
-                  'ipc-global-start',
-                  cloneDeep(project.projectInfo),
-                  cloneDeep(this.getData()),
-                  signalSession
-                )
+                .invoke('ipc-global-start', cloneDeep(project.projectInfo), dataSet, signalSession)
                 .then(() => {
                   window.startTime = Date.now()
                 })

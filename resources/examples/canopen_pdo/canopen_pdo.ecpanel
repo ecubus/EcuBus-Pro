@@ -56,6 +56,7 @@
       },
       {
         "id": "control-2",
+        "rememberValue": false,
         "type": "button",
         "label": "Speed+",
         "x": 300,
@@ -102,6 +103,7 @@
       },
       {
         "id": "control-3",
+        "rememberValue": false,
         "type": "button",
         "label": "Speed-",
         "x": 300,

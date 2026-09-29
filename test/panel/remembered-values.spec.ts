@@ -3,11 +3,11 @@ import type { VarItem } from '../../src/preload/data'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 
-const saved = vi.hoisted(() => new Map<string, unknown>())
 const counts = vi.hoisted(() => ({ reads: 0, writes: 0, failWrites: false, readError: '' }))
 const files = vi.hoisted(() => new Map<string, string>())
 vi.mock('node:fs', () => ({
   readFileSync: (filename: string) => {
+    counts.reads++
     if (counts.readError) throw Object.assign(new Error('read failed'), { code: counts.readError })
     if (!files.has(filename)) throw Object.assign(new Error('not found'), { code: 'ENOENT' })
     return files.get(filename)
@@ -27,13 +27,7 @@ vi.mock('node:fs/promises', () => ({
 }))
 vi.mock('../../src/main/store', () => ({
   store: {
-    path: 'test-config/config.json',
-    get: (key: string) => {
-      counts.reads++
-      const value = saved.get(key)
-      return value === undefined ? undefined : JSON.parse(JSON.stringify(value))
-    },
-    delete: (key: string) => saved.delete(key)
+    path: 'test-config/config.json'
   }
 }))
 import {
@@ -73,17 +67,16 @@ beforeEach(() => {
   project.name = `project-${++projectNumber}.ecb`
   counts.readError = ''
   counts.reads = counts.writes = 0
-  saved.clear()
   files.clear()
   global.vars = {}
 })
 
 it('restores a user input after runtime state is discarded without changing its initial value', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'C:/firmware.hex')
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   expect(global.vars.input.value).toEqual({
     type: 'string',
     initValue: 'default',
@@ -95,7 +88,7 @@ it('isolates projects and restores empty strings and zero', async () => {
     input: variable(),
     number: { ...variable('number'), value: { type: 'number', initValue: 10 } }
   }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', '')
   setVarByKey('number', 0)
   expect(rememberedValues(project, global.vars)).toEqual({ input: '', number: 0 })
@@ -106,19 +99,20 @@ it('never saves system variables or explicitly disabled variables', async () => 
     input: { ...variable(), rememberValue: false },
     system: { ...variable('system'), type: 'system' }
   }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'ignored')
   setVarByKey('system', 'ignored')
-  expect(saved.size).toBe(0)
+  await flushRememberedVariables()
+  expect(files.size).toBe(0)
 })
 it('rejects stale types and clears values when retention is disabled', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'text')
   const changed = { input: { ...variable(), value: { type: 'number' as const, initValue: 5 } } }
   expect(rememberedValues(project, changed)).toEqual({})
   global.vars.input.rememberValue = false
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   await flushRememberedVariables()
   expect(rememberedValues(project, global.vars)).toEqual({})
   expect([...files.values()].map((value) => JSON.parse(value).values)).toEqual([{}])
@@ -128,7 +122,7 @@ it('copies arrays and ignores nonfinite numeric values', async () => {
     input: { ...variable(), value: { type: 'array', initValue: [] } },
     number: { ...variable('number'), value: { type: 'number' } }
   }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   const bytes = [1, 2]
   setVarByKey('input', bytes)
   bytes[0] = 9
@@ -138,31 +132,16 @@ it('copies arrays and ignores nonfinite numeric values', async () => {
 
 it('also honors explicit enablement', async () => {
   global.vars = { input: { ...variable(), rememberValue: true } }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'saved')
   expect(rememberedValues(project, global.vars)).toEqual({ input: 'saved' })
-})
-
-it('loads values written under the original project and variable hashes', async () => {
-  let filename = path.resolve(project.path, project.name)
-  if (process.platform === 'win32') filename = filename.toLowerCase()
-  const projectHash = createHash('sha256').update(filename).digest('hex')
-  const idHash = createHash('sha256').update('input').digest('hex')
-  saved.set(`rememberedVariables.${projectHash}`, { [idHash]: 'previous version' })
-  expect(rememberedValues(project, { input: variable() })).toEqual({ input: 'previous version' })
-  expect(saved.size).toBe(1)
-  await flushRememberedVariables()
-  expect(saved.size).toBe(0)
-  expect([...files.values()].map((value) => JSON.parse(value).values)).toEqual([
-    { [idHash]: 'previous version' }
-  ])
 })
 
 it('batches continuous updates and reads all variables from one cached snapshot', async () => {
   global.vars = Object.fromEntries(
     Array.from({ length: 100 }, (_, i) => [String(i), variable(String(i))])
   )
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   expect(counts.reads).toBe(1)
   for (let i = 0; i < 100; i++) setVarByKey(String(i), String(i))
   expect(counts.writes).toBe(0)
@@ -177,9 +156,9 @@ it('batches continuous updates and reads all variables from one cached snapshot'
 
 it('flushes pending values when switching projects and on explicit shutdown flush', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'first')
-  restoreVariables({ ...project, name: `other-${project.name}` }, global.vars)
+  await restoreVariables({ ...project, name: `other-${project.name}` }, global.vars)
   await flushRememberedVariables()
   expect(counts.writes).toBe(1)
   setVar('input', 'second')
@@ -193,7 +172,7 @@ it('flushes pending values when switching projects and on explicit shutdown flus
 
 it('returns current values in one batch and does not leak them into another project', async () => {
   global.vars = { input: variable(), disabled: { ...variable('disabled'), rememberValue: false } }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'remembered')
   global.vars.input.value!.value = 'current'
   setVar('disabled', 'runtime only')
@@ -207,7 +186,7 @@ it('returns current values in one batch and does not leak them into another proj
 
 it('does not flush or reload caches when reads alternate between project paths', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   const renamed = { ...project, name: `saved-${project.name}` }
   for (let i = 0; i < 20; i++) {
     setVar('input', String(i))
@@ -223,13 +202,13 @@ it('does not flush or reload caches when reads alternate between project paths',
 it('keeps dirty values after a failed shutdown flush and retries without blocking other projects', async () => {
   const error = vi.spyOn(console, 'error').mockImplementation(() => {})
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'pending')
   counts.failWrites = true
   await expect(flushRememberedVariables()).resolves.toBeUndefined()
   expect(error).toHaveBeenCalled()
   const other = { ...project, name: `retry-${project.name}` }
-  expect(() => restoreVariables(other, global.vars)).not.toThrow()
+  await expect(restoreVariables(other, global.vars)).resolves.toBeUndefined()
   setVar('input', 'other')
   expect(rememberedValues(project, global.vars)).toEqual({ input: 'pending' })
   counts.failWrites = false
@@ -246,7 +225,7 @@ it('keeps dirty values after a failed shutdown flush and retries without blockin
 
 it('does not load or persist unsaved projects', async () => {
   global.vars = { input: variable() }
-  restoreVariables({ path: '', name: 'Untitled' }, global.vars)
+  await restoreVariables({ path: '', name: 'Untitled' }, global.vars)
   setVar('input', 'temporary')
   expect(rememberedValues({ path: '', name: 'Untitled' }, global.vars)).toEqual({})
   await flushRememberedVariables()
@@ -256,13 +235,13 @@ it('does not load or persist unsaved projects', async () => {
 
 it('prunes deleted variables only with a full project restore, not a partial query', async () => {
   global.vars = { input: variable(), removed: variable('removed') }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'kept')
   setVar('removed', 'obsolete')
   rememberedValues(project, { input: global.vars.input })
   expect(rememberedValues(project, global.vars).removed).toBe('obsolete')
   delete global.vars.removed
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   await flushRememberedVariables()
   expect([...files.values()].flatMap((value) => Object.values(JSON.parse(value).values))).toEqual([
     'kept'
@@ -271,7 +250,7 @@ it('prunes deleted variables only with a full project restore, not a partial que
 
 it('keeps worker variable setters independent of storage', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   assignVar('input', 'worker local')
   await flushRememberedVariables()
   expect(files.size).toBe(0)
@@ -280,7 +259,7 @@ it('keeps worker variable setters independent of storage', async () => {
 
 it('flushes an update arriving while the previous write is pending', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'first')
   const pending = flushRememberedVariables()
   await Promise.resolve()
@@ -291,7 +270,7 @@ it('flushes an update arriving while the previous write is pending', async () =>
   ])
 })
 
-it.each(['invalid json', 'EPERM'])(
+it.each(['invalid json', 'EPERM', 'invalid format'])(
   'starts with initial values after %s and preserves the unreadable file',
   async (failure) => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -302,25 +281,26 @@ it.each(['invalid json', 'EPERM'])(
       'remembered-variables',
       createHash('sha256').update(filename).digest('hex') + '.json'
     )
-    files.set(target, '{broken')
+    const original = failure === 'invalid format' ? JSON.stringify({ obsolete: 1 }) : '{broken'
+    files.set(target, original)
     if (failure === 'EPERM') counts.readError = 'EPERM'
     global.vars = { input: variable() }
-    expect(() => restoreVariables(project, global.vars)).not.toThrow()
+    await expect(restoreVariables(project, global.vars)).resolves.toBeUndefined()
     expect(global.vars.input.value!.value).toBeUndefined()
     setVar('input', 'runtime')
     await flushRememberedVariables()
-    expect(files.get(target)).toBe('{broken')
+    expect(files.get(target)).toBe(original)
     counts.readError = ''
     const id = createHash('sha256').update('input').digest('hex')
-    files.set(target, JSON.stringify({ [id]: 'recovered' }))
-    restoreVariables(project, global.vars)
+    files.set(target, JSON.stringify({ projectPath: filename, values: { [id]: 'recovered' } }))
+    await restoreVariables(project, global.vars)
     expect(global.vars.input.value!.value).toBe('recovered')
   }
 )
 
 it('does not resolve or hash the project path on frequent assignments', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   const resolve = vi.spyOn(path, 'resolve')
   const stringify = vi.spyOn(JSON, 'stringify')
   for (let i = 0; i < 100; i++) setVar('input', String(i))
@@ -330,10 +310,10 @@ it('does not resolve or hash the project path on frequent assignments', async ()
 
 it('does not release a new session when an earlier stop finishes', async () => {
   global.vars = { input: variable() }
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   setVar('input', 'first')
   const stopping = stopRememberedVariables()
-  restoreVariables(project, global.vars)
+  await restoreVariables(project, global.vars)
   await stopping
   setVar('input', 'new session')
   expect(rememberedValues(project, global.vars)).toEqual({ input: 'new session' })

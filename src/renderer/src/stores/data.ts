@@ -4,7 +4,7 @@ import { cloneDeep, result } from 'lodash'
 import { ElLoading, ElMessageBox, ElProgress } from 'element-plus'
 import { useProjectStore } from './project'
 import { DataSet, NodeItem } from 'src/preload/data'
-import { useGlobalStart } from './runtime'
+import { useGlobalStart, useRuntimeStore } from './runtime'
 import { nextTick, h, ref } from 'vue'
 import i18next from 'i18next'
 
@@ -36,11 +36,14 @@ export const useDataStore = defineStore('useDataStore', {
     globalRun(type: 'start' | 'stop') {
       const globalStart = useGlobalStart()
       if (type == 'start' && globalStart.value == false) {
+        const signalSession = crypto.randomUUID()
+        useRuntimeStore().signalSession = signalSession
         globalStart.value = true
 
         const project = useProjectStore()
         window.dataParseWorker.postMessage({
           method: 'initDataBase',
+          signalSession,
           data: cloneDeep(this.database)
         })
         nextTick(() => {
@@ -136,7 +139,8 @@ export const useDataStore = defineStore('useDataStore', {
                 .invoke(
                   'ipc-global-start',
                   cloneDeep(project.projectInfo),
-                  cloneDeep(this.getData())
+                  cloneDeep(this.getData()),
+                  signalSession
                 )
                 .then(() => {
                   window.startTime = Date.now()

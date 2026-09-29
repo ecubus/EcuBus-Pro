@@ -10,7 +10,6 @@ import { VarLOG } from '../log'
 import { getTsUs } from '../share/can'
 import { setSignal } from '../util'
 import { setVar } from '../var'
-import { refreshCanPeriodData } from './uds'
 const varEvent = new EventEmitter<VarEvent>()
 global.varEvent = varEvent
 
@@ -27,11 +26,10 @@ ipcMain.on('ipc-var-set', (event, arg) => {
   varLOG.setVar(arg.name, arg.value, getTsUs() - global.startTs)
 })
 ipcMain.on('ipc-signal-set', (event, arg) => {
-  const messageId = setSignal({
+  setSignal({
     signal: arg.name,
     value: arg.value
   })
-  if (messageId != undefined) refreshCanPeriodData(messageId)
 })
 
 ipcMain.handle('ipc-panel-var-values', (_event, project, variables, running) =>
@@ -40,3 +38,14 @@ ipcMain.handle('ipc-panel-var-values', (_event, project, variables, running) =>
 
 ipcMain.handle('ipc-var-memory-list', () => listRememberedProjects())
 ipcMain.handle('ipc-var-memory-delete', (_event, ids: string[]) => deleteRememberedProjects(ids))
+
+ipcMain.handle('ipc-panel-signal-set', (_event, arg) => {
+  if (
+    typeof arg?.name !== 'string' ||
+    (typeof arg.value !== 'string' &&
+      (typeof arg.value !== 'number' || !Number.isFinite(arg.value)))
+  )
+    throw new Error('Invalid signal value')
+  setSignal({ signal: arg.name, value: arg.value })
+  return true
+})

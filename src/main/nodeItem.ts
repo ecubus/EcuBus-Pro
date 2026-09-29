@@ -1570,10 +1570,11 @@ export class NodeClass {
     this.canBaseId.length = 0
     this.ethBaseId.length = 0
   }
-  async start(testControl?: Record<number, boolean>) {
+  async start(testControl?: Record<number, boolean>, signal?: AbortSignal) {
     this.pool?.updateTs(0)
     if (this.pool) {
-      await this.pool.start(this.projectPath, this.nodeItem.name, testControl)
+      await this.pool.start(this.projectPath, this.nodeItem.name, testControl, signal)
+      signal?.throwIfAborted()
       if (this.pool.methods.includes('__setTxPending')) {
         //can
         this.canBaseMap.forEach((base) => {

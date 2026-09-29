@@ -1,24 +1,37 @@
 <template>
-  <el-button link @click="open">{{ t('memoryFiles') }}</el-button>
-  <el-dialog v-model="visible" :title="t('memoryFiles')" width="800px" append-to-body>
+  <el-button link @click="open">{{ i18next.t('uds.variable.memory.files') }}</el-button>
+  <el-dialog
+    v-model="visible"
+    :title="i18next.t('uds.variable.memory.files')"
+    width="800px"
+    append-to-body
+  >
     <el-table :data="records" row-key="id" @selection-change="selected = $event">
       <el-table-column type="selection" :selectable="(row: RecordInfo) => !row.protected" />
-      <el-table-column :label="t('memoryProject')" min-width="320">
+      <el-table-column :label="i18next.t('uds.variable.memory.project')" min-width="320">
         <template #default="{ row }">{{ row.projectPath || row.id }}</template>
       </el-table-column>
-      <el-table-column :label="t('memoryModified')" width="180">
-        <template #default="{ row }">{{ new Date(row.modifiedAt).toLocaleString() }}</template>
-      </el-table-column>
-      <el-table-column :label="t('memoryState')" width="100">
+      <el-table-column :label="i18next.t('uds.variable.memory.modified')" width="180">
         <template #default="{ row }">{{
-          t(row.loadFailed ? 'memoryReadFailed' : row.protected ? 'memoryInUse' : 'memoryStored')
+          row.modifiedAt === null ? '—' : new Date(row.modifiedAt).toLocaleString()
+        }}</template>
+      </el-table-column>
+      <el-table-column :label="i18next.t('uds.variable.memory.state')" width="100">
+        <template #default="{ row }">{{
+          i18next.t(
+            row.loadFailed
+              ? 'uds.variable.memory.readFailed'
+              : row.protected
+                ? 'uds.variable.memory.inUse'
+                : 'uds.variable.memory.stored'
+          )
         }}</template>
       </el-table-column>
     </el-table>
     <template #footer>
-      <el-button @click="visible = false">{{ t('cancel') }}</el-button>
+      <el-button @click="visible = false">{{ i18next.t('uds.variable.buttons.cancel') }}</el-button>
       <el-button type="danger" :disabled="!selected.length || busy" @click="remove">{{
-        t('memoryDelete')
+        i18next.t('uds.variable.memory.delete')
       }}</el-button>
     </template>
   </el-dialog>
@@ -27,15 +40,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { usePanelLocale } from './locale'
+import i18next from 'i18next'
 type RecordInfo = {
   id: string
   projectPath: string
-  modifiedAt: number
+  modifiedAt: number | null
   protected: boolean
   loadFailed: boolean
 }
-const t = usePanelLocale()
 const visible = ref(false)
 const busy = ref(false)
 const records = ref<RecordInfo[]>([])
@@ -54,7 +66,11 @@ async function open() {
 }
 async function remove() {
   try {
-    await ElMessageBox.confirm(t('memoryDeleteConfirm'), t('memoryFiles'), { type: 'warning' })
+    await ElMessageBox.confirm(
+      i18next.t('uds.variable.memory.deleteConfirm'),
+      i18next.t('uds.variable.memory.files'),
+      { type: 'warning' }
+    )
   } catch {
     return
   }

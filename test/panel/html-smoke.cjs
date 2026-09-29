@@ -109,6 +109,14 @@ async function capture(win, name) {
 const example = path.resolve(__dirname, '../../resources/examples/panel_html')
 const demo = path.join(artifacts, 'demo')
 fs.cpSync(example, demo, { recursive: true })
+const panelFile = path.join(demo, 'html.ecpanel')
+const panelDocument = JSON.parse(fs.readFileSync(panelFile, 'utf8'))
+const htmlControl = panelDocument.document.controls.find((control) => control.id === 'html')
+htmlControl.htmlContent += '<script>window.inlineScriptRan = true;</script>'
+htmlControl.scriptContent =
+  'window.separateScriptRan = window.inlineScriptRan === true;\n' + htmlControl.scriptContent
+fs.writeFileSync(panelFile, JSON.stringify(panelDocument))
+
 async function waitHtml(frame, expression) {
   for (let i = 0; i < 100; i++) {
     if (await frame.executeJavaScript(expression)) return
@@ -171,6 +179,76 @@ app.on('browser-window-created', (_event, win) => {
       assert.equal(nativeReads(), beforeLayout)
       checks.push({ name: 'layout-change-does-not-query-variables', passed: true })
       checks.push({ name: 'html-initial-read-and-script-build', passed: true })
+      assert.equal(
+        await frame.executeJavaScript('window.inlineScriptRan && window.separateScriptRan'),
+        true
+      )
+      checks.push({ name: 'html-inline-and-separate-scripts', passed: true })
+      const originalOpenPath = shell.openPath
+      const opened = []
+      shell.openPath = async (file) => {
+        opened.push(file)
+        return ''
+      }
+      try {
+        for (const extension of ['exe', 'bat', 'cmd', 'lnk', 'ps1', 'url', 'html', 'PDF', 'txt']) {
+          const target = path.join(artifacts, 'manual.' + extension)
+          fs.writeFileSync(target, '')
+          const result = await win.webContents.executeJavaScript(
+            `window.electron.ipcRenderer.invoke('ipc-panel-open-path', ${JSON.stringify(target)}).then(() => true, () => false)`
+          )
+          assert.equal(result, extension === 'PDF' || extension === 'txt')
+        }
+        assert.equal(opened.length, 2)
+      } finally {
+        shell.openPath = originalOpenPath
+      }
+      checks.push({ name: 'panel-file-types-checked-before-shell-open', passed: true })
+
+      const io = require('node:fs/promises')
+      const originalUnlink = io.unlink
+      let releaseDelete
+      let enteredDelete
+      const deleting = new Promise((resolve) => {
+        enteredDelete = resolve
+      })
+      const deletionGate = new Promise((resolve) => {
+        releaseDelete = resolve
+      })
+      io.unlink = async (file) => {
+        if (file === memoryFile) {
+          enteredDelete()
+          await deletionGate
+        }
+        return originalUnlink(file)
+      }
+      const previousDataSet = global.dataSet
+      try {
+        await win.webContents.executeJavaScript(`
+          window.pendingMemoryDelete = window.electron.ipcRenderer.invoke('ipc-var-memory-delete',
+            [${JSON.stringify(path.basename(memoryFile))}]); void 0;
+        `)
+        await deleting
+        await win.webContents.executeJavaScript(`
+          window.pendingCancelledStart = window.electron.ipcRenderer.invoke('ipc-global-start',
+            {...panelTest.project.projectInfo}, JSON.parse(JSON.stringify(panelTest.data.getData())))
+            .then(() => 'unexpected success', error => error.message); void 0;
+        `)
+        await win.webContents.executeJavaScript(
+          `window.electron.ipcRenderer.invoke('ipc-global-stop')`
+        )
+        const cancelled = await win.webContents.executeJavaScript('window.pendingCancelledStart')
+        assert.match(cancelled, /Measurement start cancelled/)
+        assert.equal(global.dataSet, previousDataSet)
+        releaseDelete()
+        await win.webContents.executeJavaScript('window.pendingMemoryDelete')
+        assert.equal(global.dataSet, previousDataSet)
+        checks.push({ name: 'stop-cancels-start-waiting-for-memory-deletion', passed: true })
+      } finally {
+        releaseDelete()
+        io.unlink = originalUnlink
+      }
+      fs.writeFileSync(memoryFile, '{broken')
       const startError = await win.webContents.executeJavaScript(`
         window.electron.ipcRenderer.invoke('ipc-global-start', {...panelTest.project.projectInfo},
           {vars:{}, database:{can:null}}).then(() => false, () => true)
@@ -182,6 +260,19 @@ app.on('browser-window-created', (_event, win) => {
       await waitHtml(frame, `document.querySelector('#status').textContent === 'Running'`)
       await waitHtml(frame, `document.querySelector('#speed').textContent === '60.0'`)
       checks.push({ name: 'html-can-telemetry', passed: true })
+      for (const value of ['[1,2]', 'undefined', 'null', 'true', '{}', 'NaN', 'Infinity']) {
+        const rejected = await frame.executeJavaScript(
+          `panel.setSignal('HtmlDemo.Target', ${value}).then(() => false, () => true)`
+        )
+        assert.equal(rejected, true)
+        const mainRejected = await win.webContents.executeJavaScript(
+          `window.electron.ipcRenderer.invoke('ipc-panel-signal-set', {name:'HtmlDemo.Target', value:${value}}).then(() => false, () => true)`
+        )
+        assert.equal(mainRejected, true)
+      }
+      assert.equal(await frame.executeJavaScript(`panel.setSignal('HtmlDemo.Target', 20)`), true)
+      checks.push({ name: 'html-signal-validation-and-main-process-acknowledgement', passed: true })
+
       checks.push({ name: 'corrupt-memory-fallback-and-start-lock-release', passed: true })
       await frame.executeJavaScript(
         `document.querySelector('#level').value = '65'; document.querySelector('#level').dispatchEvent(new Event('change'))`
@@ -222,6 +313,15 @@ app.on('browser-window-created', (_event, win) => {
         await frame.executeJavaScript(`document.querySelector('#count').textContent`),
         count
       )
+      await frame.executeJavaScript(`panel.setSignal('HtmlDemo.Target', '70')`)
+      await waitHtml(frame, `panel.getVar('HtmlLevel').then(value => value === 70)`)
+      await waitHtml(
+        frame,
+        `panel.getSignal('HtmlDemo.Speed').then(signal => Number(signal.physicalValue) === 140)`
+      )
+      const freshSignal = await frame.executeJavaScript(`panel.getSignal('HtmlDemo.Speed')`)
+      assert.equal(Number(freshSignal.rawValue), 1400)
+      checks.push({ name: 'html-signal-read-updates-without-subscription', passed: true })
       await frame.executeJavaScript(`document.querySelector('#read').click()`)
       await waitHtml(
         frame,
@@ -287,7 +387,7 @@ app.on('browser-window-created', (_event, win) => {
       await win.webContents.executeJavaScript(
         `document.querySelector('.el-dialog__footer button').click()`
       )
-      fs.writeFileSync(memoryFile, '{}')
+      fs.writeFileSync(memoryFile, JSON.stringify({ projectPath: filename, values: {} }))
       await win.webContents.executeJavaScript(
         `document.querySelector('[data-control-id="measurement"] .el-button--success').click()`
       )

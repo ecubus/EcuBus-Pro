@@ -7,32 +7,34 @@ import { store } from '../store'
 
 type Value = number | string | number[]
 type Project = { path: string; name: string }
-let activeProject: Project | undefined
-let activeKey: string | undefined
-let activeCache: ProjectCache | undefined
 type ProjectCache = {
   projectPath: string
   values: Record<string, unknown>
   revision: number
   savedRevision: number
-  legacy: boolean
   loadFailed: boolean
   writing?: Promise<void>
 }
-const projects = new Map<string, ProjectCache>()
-const variableKeys = new Map<string, string>()
-let flushTimer: ReturnType<typeof setTimeout> | undefined
-const directory = path.join(path.dirname(store.path), 'remembered-variables')
+const state = {
+  activeProject: undefined as Project | undefined,
+  activeKey: undefined as string | undefined,
+  activeCache: undefined as ProjectCache | undefined,
+  deleting: new Map<string, Promise<void>>(),
+  projects: new Map<string, ProjectCache>(),
+  variableKeys: new Map<string, string>(),
+  flushTimer: undefined as ReturnType<typeof setTimeout> | undefined,
+  directory: path.join(path.dirname(store.path), 'remembered-variables')
+}
 
 async function flushProject(target: string, cache: ProjectCache) {
   if (cache.writing) return cache.writing
-  if (cache.revision === cache.savedRevision && !cache.legacy) return
+  if (cache.revision === cache.savedRevision) return
   cache.writing = (async () => {
     try {
-      await mkdir(directory, { recursive: true })
+      await mkdir(state.directory, { recursive: true })
       while (cache.revision !== cache.savedRevision) {
         const revision = cache.revision
-        const filename = path.join(directory, target + '.json')
+        const filename = path.join(state.directory, target + '.json')
         const temporary = filename + '.tmp'
         await writeFile(
           temporary,
@@ -41,10 +43,6 @@ async function flushProject(target: string, cache: ProjectCache) {
         )
         await rename(temporary, filename)
         cache.savedRevision = revision
-      }
-      if (cache.legacy) {
-        store.delete(`rememberedVariables.${target}`)
-        cache.legacy = false
       }
     } catch (error) {
       console.error('Failed to save remembered variables', error)
@@ -58,83 +56,85 @@ async function flushProject(target: string, cache: ProjectCache) {
 }
 
 export async function flushRememberedVariables() {
-  clearTimeout(flushTimer)
-  flushTimer = undefined
-  await Promise.all([...projects].map(([target, cache]) => flushProject(target, cache)))
+  clearTimeout(state.flushTimer)
+  state.flushTimer = undefined
+  await Promise.all([...state.projects].map(([target, cache]) => flushProject(target, cache)))
 }
 
 export async function stopRememberedVariables() {
-  const session = activeProject
+  const session = state.activeProject
   await flushRememberedVariables()
-  if (activeProject === session) {
-    activeProject = undefined
-    activeKey = undefined
-    activeCache = undefined
+  if (state.activeProject === session) {
+    state.activeProject = undefined
+    state.activeKey = undefined
+    state.activeCache = undefined
   }
 }
 
 function scheduleFlush(cache: ProjectCache) {
   if (cache.loadFailed) return
   cache.revision++
-  if (flushTimer) return
-  flushTimer = setTimeout(() => void flushRememberedVariables(), 500)
-  flushTimer.unref()
+  if (state.flushTimer) return
+  state.flushTimer = setTimeout(() => void flushRememberedVariables(), 500)
+  state.flushTimer.unref()
+}
+
+function parseRememberedFile(text: string): {
+  projectPath: string
+  values: Record<string, unknown>
+} {
+  const content = JSON.parse(text)
+  if (
+    !content ||
+    typeof content.projectPath !== 'string' ||
+    !content.values ||
+    typeof content.values !== 'object' ||
+    Array.isArray(content.values)
+  )
+    throw new Error('Invalid remembered variables file')
+  return content
 }
 
 function projectCache(project: Project) {
   if (!project.path || !project.name) return undefined
   const target = key(project)
-  let cache = projects.get(target)
+  if (state.deleting.has(target)) return undefined
+  let cache = state.projects.get(target)
   if (!cache) {
-    let saved: unknown
-    let legacy = false
+    let saved: Record<string, unknown> = {}
     let loadFailed = false
     try {
-      saved = JSON.parse(readFileSync(path.join(directory, target + '.json'), 'utf8'))
-      if (saved && typeof saved === 'object' && typeof (saved as any).projectPath === 'string')
-        saved = (saved as any).values
+      saved = parseRememberedFile(
+        readFileSync(path.join(state.directory, target + '.json'), 'utf8')
+      ).values
     } catch (error) {
-      try {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
-        saved = store.get(`rememberedVariables.${target}`)
-        legacy = saved !== undefined
-      } catch (readError) {
-        console.error('Failed to load remembered variables; using initial values', readError)
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        console.error('Failed to load remembered variables; using initial values', error)
         loadFailed = true
       }
     }
     cache = {
       projectPath: path.resolve(project.path, project.name),
-      values:
-        saved && typeof saved === 'object' && !Array.isArray(saved)
-          ? (saved as Record<string, unknown>)
-          : {},
+      values: saved,
       revision: 0,
       savedRevision: 0,
-      legacy,
       loadFailed
     }
-    for (const [id, entry] of projects) {
-      if (projects.size < 16) break
-      if (
-        !entry.writing &&
-        !entry.legacy &&
-        entry.revision === entry.savedRevision &&
-        id !== activeKey
-      )
-        projects.delete(id)
+    for (const [id, entry] of state.projects) {
+      if (state.projects.size < 16) break
+      if (!entry.writing && entry.revision === entry.savedRevision && id !== state.activeKey)
+        state.projects.delete(id)
     }
-    projects.set(target, cache)
-    if (legacy) scheduleFlush(cache)
+    state.projects.set(target, cache)
   }
   return cache
 }
 
 function variableKey(id: string) {
-  let hash = variableKeys.get(id)
+  let hash = state.variableKeys.get(id)
   if (!hash) {
     hash = createHash('sha256').update(id).digest('hex')
-    variableKeys.set(id, hash)
+    state.variableKeys.set(id, hash)
   }
   return hash
 }
@@ -173,14 +173,40 @@ export function rememberedValues(project: Project, variables: Record<string, Var
   return result
 }
 
-export function restoreVariables(project: Project, variables: Record<string, VarItem>) {
+export async function restoreVariables(
+  project: Project,
+  variables: Record<string, VarItem>,
+  signal?: AbortSignal
+) {
+  signal?.throwIfAborted()
+  const target = project.path && project.name ? key(project) : undefined
+  while (target && state.deleting.has(target)) {
+    const deletion = state.deleting.get(target)!.catch(() => {})
+    if (!signal) {
+      await deletion
+      continue
+    }
+    let onAbort!: () => void
+    const aborted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => reject(signal.reason)
+      signal.addEventListener('abort', onAbort, { once: true })
+    })
+    try {
+      await Promise.race([deletion, aborted])
+    } finally {
+      signal.removeEventListener('abort', onAbort)
+    }
+    signal.throwIfAborted()
+  }
+  signal?.throwIfAborted()
   void flushRememberedVariables()
-  activeProject = { ...project }
-  activeKey = project.path && project.name ? key(project) : undefined
-  if (activeKey && projects.get(activeKey)?.loadFailed) projects.delete(activeKey)
-  activeCache = projectCache(project)
+  state.activeProject = { ...project }
+  state.activeKey = project.path && project.name ? key(project) : undefined
+  if (state.activeKey && state.projects.get(state.activeKey)?.loadFailed)
+    state.projects.delete(state.activeKey)
+  state.activeCache = projectCache(project)
   const values = rememberedValues(project, variables)
-  const cache = activeCache
+  const cache = state.activeCache
   if (!cache) return
   const allowed = new Set(
     Object.entries(variables)
@@ -203,8 +229,8 @@ export function restoreVariables(project: Project, variables: Record<string, Var
 
 export function rememberVariable(variable: VarItem) {
   const value = variable.value?.value
-  if (!activeProject || !valid(variable, value)) return
-  const cache = activeCache
+  if (!state.activeProject || !valid(variable, value)) return
+  const cache = state.activeCache
   if (!cache) return
   const saved = cache.values
   const target = variableKey(variable.id)
@@ -228,10 +254,10 @@ export function panelVariableValues(
 ) {
   const values = rememberedValues(project, variables)
   const currentProject =
-    activeProject &&
-    (activeKey
-      ? key(project) === activeKey
-      : project.path === activeProject.path && project.name === activeProject.name)
+    state.activeProject &&
+    (state.activeKey
+      ? key(project) === state.activeKey
+      : project.path === state.activeProject.path && project.name === state.activeProject.name)
   if (running && currentProject) {
     for (const id of Object.keys(variables)) {
       const variable = global.vars?.[id]?.value
@@ -247,39 +273,42 @@ const rememberedFilename = /^[a-f0-9]{64}\.json$/
 export async function listRememberedProjects() {
   let entries
   try {
-    entries = await readdir(directory, { withFileTypes: true })
+    entries = await readdir(state.directory, { withFileTypes: true })
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
     throw error
   }
-  return Promise.all(
+  const records = await Promise.all(
     entries
       .filter((entry) => entry.isFile() && rememberedFilename.test(entry.name))
       .map(async (entry) => {
         const target = entry.name.slice(0, -5)
-        const filename = path.join(directory, entry.name)
-        const details = await stat(filename)
+        const filename = path.join(state.directory, entry.name)
+        let modifiedAt: number | null = null
         let projectPath = ''
         let loadFailed = false
         try {
-          const content = JSON.parse(await readFile(filename, 'utf8'))
-          if (typeof content.projectPath === 'string') projectPath = content.projectPath
-        } catch {
+          modifiedAt = (await stat(filename)).mtimeMs
+          projectPath = parseRememberedFile(await readFile(filename, 'utf8')).projectPath
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
           loadFailed = true
         }
-        const cache = projects.get(target)
+        const cache = state.projects.get(target)
         return {
           id: entry.name,
           projectPath,
-          modifiedAt: details.mtimeMs,
+          modifiedAt,
           loadFailed: loadFailed || !!cache?.loadFailed,
           protected:
-            target === activeKey ||
+            state.deleting.has(target) ||
+            target === state.activeKey ||
             !!cache?.writing ||
             !!(cache && cache.revision !== cache.savedRevision)
         }
       })
   )
+  return records.filter((record) => record !== null)
 }
 
 export async function deleteRememberedProjects(ids: string[]) {
@@ -291,11 +320,22 @@ export async function deleteRememberedProjects(ids: string[]) {
   }
   for (const id of new Set(ids)) {
     const target = id.slice(0, -5)
-    const cache = projects.get(target)
-    if (target === activeKey || cache?.writing || (cache && cache.revision !== cache.savedRevision))
+    const cache = state.projects.get(target)
+    if (
+      state.deleting.has(target) ||
+      target === state.activeKey ||
+      cache?.writing ||
+      (cache && cache.revision !== cache.savedRevision)
+    )
       throw new Error('Remembered project is in use')
-    store.delete(`rememberedVariables.${target}`)
-    await unlink(path.join(directory, id))
-    if (target !== activeKey) projects.delete(target)
+    const deletion = unlink(path.join(state.directory, id))
+      .then(() => {
+        state.projects.delete(target)
+      })
+      .finally(() => {
+        state.deleting.delete(target)
+      })
+    state.deleting.set(target, deletion)
+    await deletion
   }
 }

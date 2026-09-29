@@ -1,4 +1,4 @@
-import { createApp, markRaw } from 'vue'
+import { createApp, markRaw, watch } from 'vue'
 import App from './App.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -31,11 +31,18 @@ import { useDataStore } from './stores/data'
 import { Layout } from './views/uds/layout'
 import { useProjectStore } from './stores/project'
 import { useRuntimeStore } from './stores/runtime'
+import {
+  clearSignalValues,
+  recordSignalValues,
+  signalValueSnapshot,
+  restoreSignalSnapshot
+} from './stores/signalValues'
 import { assign, cloneDeep } from 'lodash'
 import wujieVue from 'wujie-vue3'
 import { initRendererI18n, i18nPlugin } from './i18n'
 
 const logChannel = new BroadcastChannel('ipc-log')
+const signalChannel = new BroadcastChannel('ipc-panel-signals')
 const formatReason = (reason: unknown) => {
   if (reason instanceof Error) {
     return reason.stack ?? `${reason.name}: ${reason.message}`
@@ -109,6 +116,20 @@ app.use(i18nPlugin)
 const dataStore = useDataStore()
 const projectStore = useProjectStore()
 const runtimeStore = useRuntimeStore()
+watch(
+  () => [
+    runtimeStore.globalStart,
+    runtimeStore.signalSession,
+    projectStore.projectInfo.path,
+    projectStore.projectInfo.name
+  ],
+  () => {
+    clearSignalValues()
+    if (window.params?.id && runtimeStore.globalStart && runtimeStore.signalSession)
+      signalChannel.postMessage({ type: 'request', session: runtimeStore.signalSession })
+  },
+  { flush: 'sync' }
+)
 
 // 直接解析URL参数并赋值给window.params
 const urlParams = new URLSearchParams(window.location.search)
@@ -117,15 +138,33 @@ urlParams.forEach((value, key) => {
   window.params[key] = value
 })
 const id = window.params.id || 'main'
+signalChannel.onmessage = ({ data }) => {
+  if (!runtimeStore.globalStart || data.session !== runtimeStore.signalSession) return
+  if (!window.params.id && data.type === 'request') {
+    signalChannel.postMessage({
+      type: 'snapshot',
+      session: data.session,
+      values: signalValueSnapshot()
+    })
+  } else if (window.params.id && data.type === 'snapshot') {
+    restoreSignalSnapshot(data.values)
+  }
+}
+
+function receiveLogBatch(batch: Record<string, any>) {
+  const current = runtimeStore.globalStart && batch.__signalSession === runtimeStore.signalSession
+  if (current) recordSignalValues(batch)
+  for (const key of Object.keys(batch)) {
+    if (key === '__signalSession') continue
+    window.logBus.emit(key, { key, values: batch[key] })
+  }
+}
 
 //单向的
 if (window.params.id) {
   router.push(`/${window.params.path}`)
   logChannel.onmessage = (event) => {
-    //main tab
-    for (const key of Object.keys(event.data)) {
-      window.logBus.emit(key, { key, values: event.data[key] })
-    }
+    receiveLogBatch(event.data)
   }
   dataChannel.onmessage = (event) => {
     dataStore.$patch((state) => {
@@ -152,10 +191,7 @@ if (window.params.id) {
   window.dataParseWorker = dataParseWorker
   dataParseWorker.onmessage = (event) => {
     logChannel.postMessage(event.data)
-    //main tab
-    for (const key of Object.keys(event.data)) {
-      window.logBus.emit(key, { key, values: event.data[key] })
-    }
+    receiveLogBatch(event.data)
   }
   window.onmessage = (event) => {
     // event.source === window means the message is coming from the preload

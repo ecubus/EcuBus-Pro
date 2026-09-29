@@ -191,9 +191,21 @@ async function relinkFile() {
       await window.electron.ipcRenderer.invoke('ipc-fs-readFile', filePath, 'utf-8')
     )
     const document = bindPanelFile(file.document, data)
+    let name = file.name
+    let suffix = 2
+    while (Object.values(data.panels).some((panel) => panel.id !== id && panel.name === name))
+      name = `${file.name} (${suffix++})`
     savedDocument.value = cloneDocument(document)
-    savedName.value = data.panels[id].name
-    data.panels[id] = { ...data.panels[id], document, filePath, fileError: undefined }
+    savedName.value = name
+    data.panels[id] = {
+      ...data.panels[id],
+      name,
+      document,
+      filePath,
+      fileError: undefined
+    }
+    layout.changeWinName(props.editIndex, name)
+    layout.changeWinName(`p${id}`, name)
   } catch {
     ElMessage.error(t('panelFileFailed'))
   }

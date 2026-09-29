@@ -978,6 +978,17 @@
       "packages": "Packages"
     },
     "variable": {
+      "memory": {
+        "files": "Remembered values",
+        "project": "Project / file",
+        "modified": "Last saved",
+        "state": "Status",
+        "inUse": "In use",
+        "stored": "Stored",
+        "readFailed": "Read failed",
+        "delete": "Delete selected values",
+        "deleteConfirm": "Delete remembered values for the selected projects?"
+      },
       "tabs": {
         "userVariables": "User Variables",
         "systemVariables": "System Variables"

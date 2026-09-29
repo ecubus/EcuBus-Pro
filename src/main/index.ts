@@ -35,11 +35,10 @@ app.on('before-quit', (event) => {
     log.error(error)
   ).then((completed) => {
     persistenceFlushed = true
-    if (completed) app.quit()
-    else {
+    if (!completed) {
       log.error('Variable persistence shutdown timed out; pending values may not be saved')
-      app.exit(0)
     }
+    app.quit()
   })
 })
 app.once('before-quit', async () => {
@@ -125,7 +124,7 @@ class ElectronLog extends Transport {
         message: info.message
       }
     }
-    this.q.list.push(info)
+    this.q.list.push({ ...info, signalSession: this.q.signalSession })
     callback()
   }
 }

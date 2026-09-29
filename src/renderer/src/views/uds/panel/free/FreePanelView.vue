@@ -250,7 +250,7 @@ async function performAction(id: string) {
             project.projectInfo.path,
             control.actionPath
           )
-      await window.electron.ipcRenderer.invoke('ipc-open-path', path)
+      await window.electron.ipcRenderer.invoke('ipc-panel-open-path', path)
     } else if (control.buttonAction === 'openPanel') {
       const target = control.actionPanelId!
       if (layout) {

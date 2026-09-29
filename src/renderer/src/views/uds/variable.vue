@@ -223,7 +223,7 @@ import { cloneDeep } from 'lodash'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
-import RememberedProjects from './panel/free/RememberedProjects.vue'
+import RememberedProjects from './RememberedProjects.vue'
 const variableForm = ref()
 // Initialize data store
 const dataStore = useDataStore()

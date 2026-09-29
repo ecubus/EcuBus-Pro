@@ -13,6 +13,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useProjectStore } from '@r/stores/project'
 import { useDataStore } from '@r/stores/data'
+import { currentSignalValue } from '@r/stores/signalValues'
 import { readPanelVariables } from './variableValues'
 import type { PanelControl } from 'src/preload/panel'
 
@@ -78,7 +79,7 @@ function escapeScript(value: string) {
 const SCRIPT_END = '<' + '/script>'
 const srcdoc = computed(
   () => `<!doctype html>
-<html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:auto;color:#303133;background:transparent}*{box-sizing:border-box}</style><script>${escapeScript(BRIDGE_BOOTSTRAP)}${SCRIPT_END}</head><body>${escapeScript(props.control.htmlContent || '')}<script>${escapeScript(props.editing ? '' : props.control.scriptContent || '')}${SCRIPT_END}</body></html>`
+<html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:auto;color:#303133;background:transparent}*{box-sizing:border-box}</style><script>${escapeScript(BRIDGE_BOOTSTRAP)}${SCRIPT_END}</head><body>${props.control.htmlContent || ''}<script>${escapeScript(props.editing ? '' : props.control.scriptContent || '')}${SCRIPT_END}</body></html>`
 )
 
 function allVariables() {
@@ -231,14 +232,19 @@ async function handleRequest(message: { id: number; method: string; args: any[] 
     if (message.method === 'getSignal') {
       const target = findSignal(String(name))
       if (!target) throw new Error(`Signal ${name} not found or is ambiguous`)
-      const current = latest.get(target.key)
-      return respond(message.id, current || signalValue(target.signal))
+      const current = props.running ? currentSignalValue(target.key) : undefined
+      return respond(message.id, signalValue(current || target.signal))
     }
     if (message.method === 'setSignal') {
       if (!props.running) throw new Error('Panel is stopped')
+      if (typeof value !== 'string' && (typeof value !== 'number' || !Number.isFinite(value)))
+        throw new Error(`Invalid value for signal ${name}`)
       const target = findSignal(String(name))
       if (!target) throw new Error(`Signal ${name} not found or is ambiguous`)
-      window.electron.ipcRenderer.send('ipc-signal-set', { name: String(name), value })
+      await window.electron.ipcRenderer.invoke('ipc-panel-signal-set', {
+        name: String(name),
+        value
+      })
       return respond(message.id, true)
     }
     if (message.method === 'subscribe') {

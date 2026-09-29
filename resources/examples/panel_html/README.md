@@ -57,7 +57,7 @@ const offSignal = await panel.onSignal('HtmlDemo.Speed', signal => console.log(s
 offSignal()
 ```
 
-变量回调参数直接是值，信号回调参数是包含 `rawValue`、`physicalValue` 的对象。变量名称使用完整路径；信号名称是 `数据库名.信号名`，同一库里同名信号有歧义时会拒绝操作。信号的实时读取依赖订阅收到的样本，本示例先订阅再读取。
+变量回调参数直接是值，信号回调参数是包含 `rawValue`、`physicalValue` 的对象。变量名称使用完整路径；信号名称是 `数据库名.信号名`，同一库里同名信号有歧义时会拒绝操作。`getSignal()` 返回当前测量中最近解析的发送或接收报文样本，不依赖 HTML 订阅；没有样本时回退到工程数据库中的已有值，可能为空。`setSignal()` 更新发送数据库，成功返回不代表报文已发送或 ECU 已处理，因此紧接着调用 `getSignal()` 不保证读到刚写入的值。缓存从测量开始持续记录，以保留首次读取或打开独立窗口之前出现过的单次报文。
 
 `HtmlLevel`、`HtmlEnabled` 保留上次值；`HtmlRxTarget`、`HtmlRxCount` 是运行状态，显式关闭保留。HTML 在沙箱 iframe 中执行，使用 `window.panel`，不能直接使用 Node、Electron IPC、`require` 或 `import ... from 'ECB'`。`ECB` 仅用于 `ecu.ts` 这类节点脚本。
 

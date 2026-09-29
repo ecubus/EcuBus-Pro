@@ -62,7 +62,7 @@
           "84b30943-78ee-4b95-a8b9-365b16855abc"
         ],
         "workNode": "",
-        "script": "E:\\Joe\\Git\\EcuBus-Pro\\resources\\examples\\lin_aa\\lin_aa.ts"
+        "script": "lin_aa.ts"
       }
     },
     "database": {

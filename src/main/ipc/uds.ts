@@ -1,3 +1,4 @@
+import { waitForStart } from '../startCancellation'
 import { restoreVariables, stopRememberedVariables } from '../var/persistence'
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
@@ -342,7 +343,12 @@ function getDeviceSymbol(data: UdsDevice) {
   }
   return `${data.type}-${vendor || 'N/A'}`
 }
-async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
+async function globalStart(
+  data: DataSet,
+  projectInfo: { path: string; name: string },
+  signal: AbortSignal
+) {
+  signal.throwIfAborted()
   const deviceSymboCnt: Record<string, number> = {}
   for (const key in data.devices) {
     const device = data.devices[key]
@@ -377,6 +383,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
   try {
     let cntIndex = 1
     for (const key in data.devices) {
+      signal.throwIfAborted()
       const device = data.devices[key]
       global.deviceIndexMap.set(key, cntIndex++)
       if (device.type == 'can' && device.canDevice) {
@@ -456,7 +463,18 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
         const serialDevice = device.serialDevice
         activeKey = serialDevice.name
         const serialBase = new SerialBase(serialDevice)
-        await serialBase.open()
+        try {
+          await waitForStart(
+            serialBase.open().then(async () => {
+              if (signal.aborted) await serialBase.close()
+            }),
+            signal
+          )
+          signal.throwIfAborted()
+        } catch (error) {
+          await serialBase.close()
+          throw error
+        }
         sysLog.info(
           `start serial device ${serialDevice.vendor}-${serialDevice.device.handle} success`
         )
@@ -471,9 +489,19 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       } else if (device.type == 'someip' && device.someipDevice) {
         channleList.push(device.someipDevice.id)
         const val = device.someipDevice
-        const file = await generateConfigFile(val, projectInfo.path, data.devices)
+        const file = await waitForStart(
+          generateConfigFile(val, projectInfo.path, data.devices),
+          signal
+        )
+        signal.throwIfAborted()
         if (rounterInit == false) {
-          await startRouterCounter(file)
+          try {
+            await waitForStart(startRouterCounter(file), signal)
+            signal.throwIfAborted()
+          } catch (error) {
+            stopRouterCounter()
+            throw error
+          }
           rounterInit = true
         }
         const client = new VSomeIP_Client(val.name, file, val)
@@ -654,6 +682,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
 
   //nodes
   for (const key in data.nodes) {
+    signal.throwIfAborted()
     const node = data.nodes[key]
     if (node.isTest) {
       continue
@@ -671,11 +700,13 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       data.tester
     )
     try {
-      await nodeItem.start()
+      await waitForStart(nodeItem.start(undefined, signal), signal)
+      signal.throwIfAborted()
       nodeMap.set(key, nodeItem)
     } catch (err: any) {
-      nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+      if (!signal.aborted) nodeItem.log?.systemMsg(formatError(err), 0, 'error')
       nodeItem.close()
+      signal.throwIfAborted()
     }
   }
 
@@ -696,8 +727,10 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     pwmBaseMap,
     someipMap,
     serialBaseMap,
-    data.tester
+    data.tester,
+    signal
   )
+  signal.throwIfAborted()
   attachRpcCanDevices(canBaseMap)
   canBaseMap.forEach((base) => {
     base.resetStartTs?.()
@@ -742,11 +775,14 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
 
 const exTransportList: string[] = []
 let isGlobalStarting = false
+let startController: AbortController | undefined
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   if (isGlobalStarting) {
     return
   }
   isGlobalStarting = true
+  const controller = new AbortController()
+  startController = controller
   try {
     const projectInfo = arg[0] as {
       path: string
@@ -754,7 +790,9 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     }
     const data = arg[1] as DataSet
 
-    restoreVariables(projectInfo, data.vars)
+    await restoreVariables(projectInfo, data.vars, controller.signal)
+    controller.signal.throwIfAborted()
+    logQ.signalSession = arg[2]
     global.dataSet = data
     for (const t of exTransportList) {
       removeDeviceTransport(t)
@@ -767,17 +805,7 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
         const x = (target: any, prop: string, value: any) => {
           const ret = Reflect.set(target, prop, value)
           if (ret) {
-            for (const [index, d] of timerMap.entries()) {
-              if (parseInt(d.ia.id, 16) == msg.id) {
-                if (d.socket.changePeriodData) {
-                  const data = send(index, false)
-                  if (data && data.compare(d.data!) != 0) {
-                    d.socket.changePeriodData(d.taskId!, data)
-                    d.data = data
-                  }
-                }
-              }
-            }
+            refreshCanPeriodData(msg.id)
           }
           return ret
         }
@@ -849,11 +877,13 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
       }
       global.vars[key] = v
     }
-    await globalStart(data, projectInfo)
+    controller.signal.throwIfAborted()
+    await globalStart(data, projectInfo, controller.signal)
   } catch (err: any) {
-    globalStop(true)
+    if (!controller.signal.aborted) globalStop(true)
     throw err
   } finally {
+    if (startController === controller) startController = undefined
     isGlobalStarting = false
   }
 })
@@ -925,6 +955,7 @@ const timerMap = new Map<string, timerType>()
 const someipPeriodMap = new Map<string, { clientKey: string }>()
 
 export function globalStop(emit = false) {
+  startController?.abort(new Error('Measurement start cancelled'))
   trackEvent('app_stop')
   stopPlugins()
   //clear all replay

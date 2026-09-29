@@ -25,6 +25,7 @@ ipcMain.on('ipc-get-port', (event, id: string) => {
 class LogQueue {
   private static instance: LogQueue | null = null
   list: any[] = []
+  signalSession: string | undefined
   timer: any
   mainWin: BrowserWindow | undefined
 

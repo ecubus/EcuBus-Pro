@@ -136,8 +136,12 @@ export interface CanRpcServiceOptions {
   onShutdown?: () => Promise<void> | void
 }
 
-function stdResult(result: CanStdReturn, extra?: Record<string, unknown>) {
-  return { result, resultCode: CAN_STD_RETURN_CODE[result], ...extra }
+function stdResult<T extends Record<string, unknown>>(result: CanStdReturn, extra?: T) {
+  return {
+    result,
+    resultCode: CAN_STD_RETURN_CODE[result],
+    ...extra
+  } as { result: CanStdReturn; resultCode: number } & T
 }
 
 function normalizeBitrate(input: unknown, fd: boolean): CanBitrate {
@@ -172,7 +176,7 @@ function requireSimulateVendor(vendor: string | undefined) {
       `JSON-RPC only supports vendor "${SIMULATE_VENDOR}" (got "${vendor}")`
     )
   }
-  return SIMULATE_VENDOR as const
+  return SIMULATE_VENDOR
 }
 
 function parseSimulateHandle(raw: unknown, method: string): number {

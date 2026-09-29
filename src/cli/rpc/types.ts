@@ -3,7 +3,11 @@ import type { CanBitrate, CanVendor, CAN_ID_TYPE } from 'src/main/share/can'
 export type CanIdTypeName = 'STANDARD' | 'EXTENDED'
 export type CanObjectType = 'TRANSMIT' | 'RECEIVE'
 export type CanHandleType = 'BASIC' | 'FULL'
-export type CanControllerMode = 'CAN_CS_UNINIT' | 'CAN_CS_STARTED' | 'CAN_CS_STOPPED' | 'CAN_CS_SLEEP'
+export type CanControllerMode =
+  | 'CAN_CS_UNINIT'
+  | 'CAN_CS_STARTED'
+  | 'CAN_CS_STOPPED'
+  | 'CAN_CS_SLEEP'
 export type CanErrorState =
   | 'CAN_ERRORSTATE_ACTIVE'
   | 'CAN_ERRORSTATE_PASSIVE'
@@ -53,7 +57,10 @@ export interface RpcCanInitConfig {
   controllers?: RpcControllerConfig[]
   hardwareObjects?: RpcHardwareObjectConfig[]
   rxQueueSize?: number
-  baudRateConfigs?: Record<string, { bitrate: RpcBitrate | number; bitratefd?: RpcBitrate | number }>
+  baudRateConfigs?: Record<
+    string,
+    { bitrate: RpcBitrate | number; bitratefd?: RpcBitrate | number }
+  >
 }
 
 export interface RpcCanFrame {
@@ -64,6 +71,7 @@ export interface RpcCanFrame {
   id: number
   idHex: string
   data: number[]
+  sdu?: number[]
   dataHex: string
   dlc: number
   length: number

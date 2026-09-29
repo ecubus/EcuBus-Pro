@@ -157,13 +157,7 @@ export async function startRpcServer(options: RpcListenOptions = {}): Promise<Rp
   let server: net.Server | undefined
   let closed = false
 
-  const service = new CanRpcService({
-    ...options.serviceOptions,
-    onShutdown: async () => {
-      await options.serviceOptions?.onShutdown?.()
-      await close()
-    }
-  })
+  const service = new CanRpcService(options.serviceOptions)
 
   const close = async () => {
     if (closed) {

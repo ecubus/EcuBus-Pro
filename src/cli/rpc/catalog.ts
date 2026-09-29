@@ -8,7 +8,7 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'sys.version',
-    summary: 'Return JSON-RPC API version and role (adapter | gateway).',
+    summary: 'Return JSON-RPC API version. role is always "simulate".',
     params: []
   },
   {
@@ -23,20 +23,19 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'sys.shutdown',
-    summary: 'Close all CAN controllers and stop the JSON-RPC server.',
+    summary:
+      'Close RPC-owned simulate controllers (same as Can.DeInit). The TCP listener stays up until the project Simulate device closes.',
     params: []
   },
   {
     name: 'hw.listVendors',
-    summary: 'List CAN vendors supported on this platform.',
+    summary: 'List CAN vendors for this RPC API (simulate only).',
     params: []
   },
   {
     name: 'hw.listDevices',
     summary: 'Enumerate available CAN adapters for a vendor.',
-    params: [
-      { name: 'vendor', type: 'string', required: true, summary: 'peak | kvaser | simulate | ...' }
-    ]
+    params: [{ name: 'vendor', type: 'string', required: true, summary: 'simulate' }]
   },
   {
     name: 'hw.getVersion',
@@ -45,11 +44,12 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'can.open',
-    summary: 'Open a CAN controller (low-level). Returns controllerId.',
+    summary:
+      'Open a simulate controller. controllerId equals handle (0..63). Fails if the handle is already open.',
     params: [
       { name: 'vendor', type: 'string', required: true },
       { name: 'handle', type: 'number|string', required: true },
-      { name: 'controllerId', type: 'number', summary: 'Optional fixed controller id' },
+      { name: 'controllerId', type: 'number', summary: 'Must equal handle if set' },
       { name: 'name', type: 'string' },
       { name: 'canfd', type: 'boolean' },
       { name: 'silent', type: 'boolean' },
@@ -169,7 +169,8 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'Can.Init',
-    summary: 'AUTOSAR Can_Init: create controllers and hardware objects.',
+    summary:
+      'AUTOSAR Can_Init: open free simulate handles (controllerId = handle). Occupied project handles are rejected.',
     autosar: 'Can_Init',
     params: [
       { name: 'config', type: 'object', summary: 'controllers[], hardwareObjects[], rxQueueSize' }
@@ -177,7 +178,7 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
   },
   {
     name: 'Can.DeInit',
-    summary: 'AUTOSAR Can_DeInit: close all controllers.',
+    summary: 'AUTOSAR Can_DeInit: close RPC-owned simulate controllers (not project sim0).',
     autosar: 'Can_DeInit',
     params: []
   },
@@ -265,6 +266,17 @@ export const RPC_METHOD_CATALOG: RpcMethodDescriptor[] = [
     summary: 'AUTOSAR Can_CheckWakeup. Returns E_OK if a wakeup event is pending.',
     autosar: 'Can_CheckWakeup',
     params: [{ name: 'controller', type: 'number', required: true }]
+  },
+  {
+    name: 'Can.InjectControllerError',
+    summary:
+      'Inject AUTOSAR controller error state (ACTIVE / PASSIVE / BUSOFF) and TEC/REC. BUSOFF queues CanIf_ControllerBusOff and does not change controller mode.',
+    params: [
+      { name: 'controller', type: 'number', required: true },
+      { name: 'errorState', type: 'ACTIVE|PASSIVE|BUSOFF', required: true },
+      { name: 'txErrorCounter', type: 'number' },
+      { name: 'rxErrorCounter', type: 'number' }
+    ]
   },
   {
     name: 'Can.MainFunction_Write',

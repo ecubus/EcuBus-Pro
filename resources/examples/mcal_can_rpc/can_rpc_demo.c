@@ -1,10 +1,11 @@
 /*
- * Minimal POSIX JSON-RPC client demo for `ecb_cli rpc`.
+ * Minimal POSIX JSON-RPC client demo for EcuBus Simulate CAN.
  *
- *   1. Start the server:  ecb_cli rpc
- *   2. Build:             make
- *   3. Run:               ./can_rpc_demo
+ *   1. Start EcuBus with Simulate-0 (GUI or ecb_cli seq/test)
+ *   2. Build:  make
+ *   3. Run:    ./can_rpc_demo
  *
+ * Opens free handles 1 and 2. Handle 0 is owned by EcuBus.
  * This is a reference for a PC MCAL Can.c — not a full AUTOSAR stack.
  */
 #define _POSIX_C_SOURCE 200809L
@@ -100,7 +101,7 @@ int main(int argc, char **argv) {
 
   int fd = rpc_connect(host, port);
   if (fd < 0) {
-    fprintf(stderr, "start the server first: ecb_cli rpc -p %d\n", port);
+    fprintf(stderr, "start EcuBus with Simulate-0 first (listens on %d)\n", port);
     return 1;
   }
 
@@ -110,13 +111,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  /* Two simulate controllers: TX on 0, RX on 1 (virtual bus loopback). */
+  /* Two simulate controllers on free handles: TX on 1, RX on 2 (virtual bus loopback). */
   if (rpc_fmt_call(
           fd,
           ECB_RPC_CAN_INIT,
           "{\"controllers\":["
-          "{\"controllerId\":0,\"vendor\":\"simulate\",\"handle\":0,\"name\":\"MCU\"},"
-          "{\"controllerId\":1,\"vendor\":\"simulate\",\"handle\":1,\"name\":\"PEER\"}"
+          "{\"vendor\":\"simulate\",\"handle\":1,\"name\":\"MCU\"},"
+          "{\"vendor\":\"simulate\",\"handle\":2,\"name\":\"PEER\"}"
           "]}",
           resp,
           sizeof(resp)
@@ -128,23 +129,23 @@ int main(int argc, char **argv) {
   rpc_fmt_call(
       fd,
       ECB_RPC_CAN_SET_CONTROLLER_MODE,
-      "{\"controller\":0,\"transition\":\"CAN_T_START\"}",
+      "{\"controller\":1,\"transition\":\"CAN_T_START\"}",
       resp,
       sizeof(resp)
   );
   rpc_fmt_call(
       fd,
       ECB_RPC_CAN_SET_CONTROLLER_MODE,
-      "{\"controller\":1,\"transition\":\"CAN_T_START\"}",
+      "{\"controller\":2,\"transition\":\"CAN_T_START\"}",
       resp,
       sizeof(resp)
   );
 
-  /* Can_Write(Hth=0, id=0x123, 4 bytes) */
+  /* Default HTH for handle 1 is handle*2 = 2 */
   rpc_fmt_call(
       fd,
       ECB_RPC_CAN_WRITE_HTH,
-      "{\"hth\":0,\"id\":\"0x123\",\"sdu\":[1,2,3,4],\"swPduHandle\":1}",
+      "{\"hth\":2,\"id\":\"0x123\",\"sdu\":[1,2,3,4],\"swPduHandle\":1}",
       resp,
       sizeof(resp)
   );

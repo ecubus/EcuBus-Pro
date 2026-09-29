@@ -30,7 +30,13 @@
     },
     {
       "text": "CAN",
-      "link": "can/can.md"
+      "link": "can/can.md",
+      "items": [
+        {
+          "text": "Simulate CAN",
+          "link": "can/simulate.md"
+        }
+      ]
     },
     {
       "text": "LIN",
@@ -64,10 +70,6 @@
         {
           "text": "构建",
           "link": "cli/build.md"
-        },
-        {
-          "text": "JSON-RPC (MCAL-CAN)",
-          "link": "cli/rpc.md"
         }
       ]
     },
@@ -185,6 +187,10 @@
         {
           "text": "通用",
           "link": "setting/general.md"
+        },
+        {
+          "text": "SIM-CAN",
+          "link": "setting/sim-can.md"
         }
       ]
     }

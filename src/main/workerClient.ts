@@ -516,15 +516,24 @@ export default class UdsTester {
       throw formatError(e)
     }
   }
-  async start(projectPath: string, testerName?: string, testControl?: Record<number, boolean>) {
+  async start(
+    projectPath: string,
+    testerName?: string,
+    testControl?: Record<number, boolean>,
+    signal?: AbortSignal
+  ) {
     await this.exec('__start', [
       cloneDeep(global.dataSet),
       this.serviceMap,
       testerName,
       testControl
     ])
+    signal?.throwIfAborted()
     await this.workerEmit('__varFc', null)
-    this.methods = await this.exec('methods', [])
+    signal?.throwIfAborted()
+    const methods = await this.exec('methods', [])
+    signal?.throwIfAborted()
+    this.methods = methods
   }
   async stopEmit() {
     if (this.selfStop) {

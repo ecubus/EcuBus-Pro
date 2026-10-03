@@ -1,0 +1,13 @@
+VERSION "HTML Control 1"
+
+NS_ :
+
+BS_:
+
+BU_: Panel ECU
+
+BO_ 256 Status: 8 ECU
+ SG_ Speed : 0|16@1+ (0.1,0) [0|250] "km/h" Panel
+
+BO_ 257 Command: 8 Panel
+ SG_ Target : 0|16@1+ (0.1,0) [0|100] "%" ECU

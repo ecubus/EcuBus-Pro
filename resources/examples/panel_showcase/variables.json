@@ -1,0 +1,278 @@
+{
+  "DemoAuto": {
+    "id": "DemoAuto",
+    "name": "DemoAuto",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 1,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  },
+  "DemoEnabled": {
+    "id": "DemoEnabled",
+    "name": "DemoEnabled",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 1,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  },
+  "DemoLevel": {
+    "id": "DemoLevel",
+    "name": "DemoLevel",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 40,
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    }
+  },
+  "DemoMode": {
+    "id": "DemoMode",
+    "name": "DemoMode",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 1,
+      "min": 0,
+      "max": 2,
+      "unit": "",
+      "enum": [
+        {
+          "name": "Eco",
+          "value": 0
+        },
+        {
+          "name": "Normal",
+          "value": 1
+        },
+        {
+          "name": "Sport",
+          "value": 2
+        }
+      ]
+    }
+  },
+  "DemoPulse": {
+    "id": "DemoPulse",
+    "name": "DemoPulse",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  },
+  "DemoToggle": {
+    "id": "DemoToggle",
+    "name": "DemoToggle",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  },
+  "DemoCounter": {
+    "id": "DemoCounter",
+    "name": "DemoCounter",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 100000,
+      "unit": ""
+    }
+  },
+  "DemoProgress": {
+    "id": "DemoProgress",
+    "name": "DemoProgress",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    }
+  },
+  "DemoAlarm": {
+    "id": "DemoAlarm",
+    "name": "DemoAlarm",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  },
+  "DemoTemperature": {
+    "id": "DemoTemperature",
+    "name": "DemoTemperature",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 25,
+      "min": -40,
+      "max": 120,
+      "unit": "°C"
+    }
+  },
+  "DemoHex": {
+    "id": "DemoHex",
+    "name": "DemoHex",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 42,
+      "min": 0,
+      "max": 255,
+      "unit": ""
+    }
+  },
+  "DemoDirection": {
+    "id": "DemoDirection",
+    "name": "DemoDirection",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 2,
+      "unit": ""
+    }
+  },
+  "DemoText": {
+    "id": "DemoText",
+    "name": "DemoText",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "string",
+      "initValue": "Hello Panel"
+    }
+  },
+  "DemoBytes": {
+    "id": "DemoBytes",
+    "name": "DemoBytes",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "array",
+      "initValue": [
+        72,
+        101,
+        108,
+        108,
+        111,
+        33
+      ]
+    }
+  },
+  "DemoPath": {
+    "id": "DemoPath",
+    "name": "DemoPath",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "string",
+      "initValue": ""
+    }
+  },
+  "DemoStatus": {
+    "id": "DemoStatus",
+    "name": "DemoStatus",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "string",
+      "initValue": "Ready"
+    }
+  },
+  "DemoSpeed": {
+    "id": "DemoSpeed",
+    "name": "DemoSpeed",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 250,
+      "unit": "km/h"
+    }
+  },
+  "DemoDirectory": {
+    "id": "DemoDirectory",
+    "name": "DemoDirectory",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "string",
+      "initValue": ""
+    }
+  },
+  "DemoSavePath": {
+    "id": "DemoSavePath",
+    "name": "DemoSavePath",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "string",
+      "initValue": ""
+    }
+  },
+  "DemoFill": {
+    "id": "DemoFill",
+    "name": "DemoFill",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 50,
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    }
+  },
+  "DemoFillHigh": {
+    "id": "DemoFillHigh",
+    "name": "DemoFillHigh",
+    "type": "user",
+    "desc": "",
+    "value": {
+      "type": "number",
+      "initValue": 0,
+      "min": 0,
+      "max": 1,
+      "unit": ""
+    }
+  }
+}

@@ -1,0 +1,18 @@
+VERSION "Panel showcase 1"
+
+NS_ :
+
+BS_:
+
+BU_: Panel ECU
+
+BO_ 256 Status: 8 ECU
+ SG_ Speed : 0|16@1+ (0.1,0) [0|250] "km/h" Panel
+ SG_ Temperature : 16|8@1+ (1,-40) [-40|215] "degC" Panel
+ SG_ Load : 24|8@1+ (1,0) [0|100] "%" Panel
+ SG_ State : 32|8@1+ (1,0) [0|2] "" Panel
+ SG_ Counter : 40|16@1+ (1,0) [0|65535] "" Panel
+
+BO_ 257 Command: 8 Panel
+ SG_ Target : 0|16@1+ (0.1,0) [0|100] "%" Panel
+

@@ -4,9 +4,10 @@ import { cloneDeep, result } from 'lodash'
 import { ElLoading, ElMessageBox, ElProgress } from 'element-plus'
 import { useProjectStore } from './project'
 import { DataSet, NodeItem } from 'src/preload/data'
-import { useGlobalStart } from './runtime'
+import { useGlobalStart, useRuntimeStore } from './runtime'
 import { nextTick, h, ref } from 'vue'
 import i18next from 'i18next'
+import { panelStartValues, storeVariableValues } from '../views/uds/panel/free/variableStart'
 
 export type { DataSet }
 
@@ -36,11 +37,14 @@ export const useDataStore = defineStore('useDataStore', {
     globalRun(type: 'start' | 'stop') {
       const globalStart = useGlobalStart()
       if (type == 'start' && globalStart.value == false) {
+        const signalSession = crypto.randomUUID()
+        useRuntimeStore().signalSession = signalSession
         globalStart.value = true
 
         const project = useProjectStore()
         window.dataParseWorker.postMessage({
           method: 'initDataBase',
+          signalSession,
           data: cloneDeep(this.database)
         })
         nextTick(() => {
@@ -132,12 +136,10 @@ export const useDataStore = defineStore('useDataStore', {
                 text: i18next.t('runtime.messages.loading'),
                 background: 'rgba(0, 0, 0, 0.7)'
               })
+              const dataSet = cloneDeep(this.getData())
+              storeVariableValues(dataSet.vars, panelStartValues(this.panels, this.vars))
               window.electron.ipcRenderer
-                .invoke(
-                  'ipc-global-start',
-                  cloneDeep(project.projectInfo),
-                  cloneDeep(this.getData())
-                )
+                .invoke('ipc-global-start', cloneDeep(project.projectInfo), dataSet, signalSession)
                 .then(() => {
                   window.startTime = Date.now()
                 })

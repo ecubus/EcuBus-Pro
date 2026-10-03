@@ -1,0 +1,32 @@
+<style>
+  body { color: #243247; font: 14px system-ui, sans-serif; }
+  .dashboard { padding: 18px; background: #f5f7fa; min-height: 100%; }
+  header, .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h2 { margin: 0; font-size: 20px; }
+  .card { margin-top: 16px; padding: 16px; background: white; border: 1px solid #dce3eb; border-radius: 8px; }
+  .row + .row { margin-top: 14px; }
+  input[type=number] { width: 88px; padding: 6px; border: 1px solid #b9c7d8; border-radius: 4px; }
+  input[type=range] { width: 100%; margin: 18px 0 6px; }
+  button { padding: 7px 12px; border: 0; border-radius: 4px; color: white; background: #2563eb; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  output { font-variant-numeric: tabular-nums; }
+  .reading { font-size: 30px; font-weight: 600; color: #156c88; }
+  #status { color: #64748b; }
+  #error { min-height: 20px; margin-top: 12px; color: #c53030; }
+</style>
+<main class="dashboard">
+  <header><h2>HTML Control</h2><output id="status">Stopped</output></header>
+  <section class="card">
+    <div class="row"><label for="level">Load</label><output id="level-value">—</output></div>
+    <input id="level" type="range" min="0" max="100" step="1" disabled>
+    <div class="row"><label for="enabled">Enabled</label><input id="enabled" type="checkbox" disabled></div>
+  </section>
+  <section class="card">
+    <div class="row"><span>CAN speed</span><output><span id="speed" class="reading">—</span> km/h</output></div>
+    <div class="row"><label for="target">CAN target (%)</label><input id="target" type="number" min="0" max="100" value="25" disabled><button id="send" disabled>Set signal</button></div>
+    <div class="row"><span>ECU received</span><output id="received">—</output></div>
+    <div class="row"><span>Command frames</span><output id="count">0</output></div>
+    <div class="row"><button id="read">Read values</button><button id="listen">Unsubscribe</button></div>
+  </section>
+  <div id="error" role="status"></div>
+</main>

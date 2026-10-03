@@ -74,12 +74,38 @@ ipcMain.handle('ipc-glob', async (event, ...args) => {
 
 ipcMain.handle('ipc-open-path', async (event, targetPath: string) => {
   try {
-    await shell.openPath(targetPath)
+    const error = await shell.openPath(targetPath)
+    if (error) throw new Error(error)
     return true
   } catch (error) {
     console.error(`Failed to open path ${targetPath}:`, error)
     throw error
   }
+})
+ipcMain.handle('ipc-panel-open-path', async (_event, targetPath: string) => {
+  const resolved = await fsP.realpath(targetPath)
+  const info = await fsP.stat(resolved)
+  const documents = new Set([
+    '.pdf',
+    '.txt',
+    '.md',
+    '.csv',
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.gif',
+    '.bmp',
+    '.webp'
+  ])
+  if (
+    path.extname(resolved).toLowerCase() === '.app' ||
+    (!info.isDirectory() &&
+      (!info.isFile() || !documents.has(path.extname(resolved).toLowerCase())))
+  )
+    throw new Error('Panel can only open folders, PDF, text, CSV and image files')
+  const error = await shell.openPath(resolved)
+  if (error) throw new Error(error)
+  return true
 })
 ipcMain.handle('ipc-fs-readFile', async (event, ...args) => {
   const buffer = await fsP.readFile(args[0])

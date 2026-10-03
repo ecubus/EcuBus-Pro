@@ -105,7 +105,7 @@ class ElectronLog extends Transport {
         message: info.message
       }
     }
-    this.q.list.push(info)
+    this.q.list.push({ ...info, signalSession: this.q.signalSession })
     callback()
   }
 }

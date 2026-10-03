@@ -1,3 +1,4 @@
+import { waitForStart } from '../startCancellation'
 import { ipcMain, app, shell } from 'electron'
 import runtimeDom from '../../../resources/lib/js/runtime-dom.esm-browser.min.js?asset&asarUnpack'
 import path from 'path'
@@ -88,9 +89,11 @@ export async function startPlugins(
   pwmBaseMap: Map<string, PwmBase>,
   someipMap: Map<string, VSomeIP_Client>,
   serialBaseMap: Map<string, SerialBase>,
-  testers: Record<string, TesterInfo>
+  testers: Record<string, TesterInfo>,
+  signal?: AbortSignal
 ) {
   for (const entry of Object.values(plugins)) {
+    signal?.throwIfAborted()
     const node = entry.nodeItem
     node.nodeItem.channel = channleList
 
@@ -106,8 +109,13 @@ export async function startPlugins(
       testers
     )
     try {
-      await entry.nodeItem.start()
+      await waitForStart(entry.nodeItem.start(undefined, signal), signal)
+      signal?.throwIfAborted()
     } catch (error) {
+      if (signal?.aborted) {
+        entry.stop()
+        signal.throwIfAborted()
+      }
       global.sysLog.error(`Failed to start plugin: ${entry.name}`, error)
     }
   }

@@ -92,7 +92,12 @@
         @action="emit('action', control.id)"
         @write="emit('write', control.id, $event)"
       />
-      <span v-if="editing && control.binding" class="panel-bound-mark"></span>
+      <span
+        v-if="editing && control.binding"
+        class="panel-bound-mark"
+        :title="bindingName(control)"
+        >{{ control.binding.kind === 'variable' ? 'V' : 'S' }}</span
+      >
       <span v-if="errors?.[control.id]" class="binding-error">{{ errors[control.id] }}</span>
     </template>
   </div>
@@ -128,6 +133,13 @@ const children = computed(() =>
     (c) => c.parentId === props.parentId && (!props.pageId || c.tabId === props.pageId)
   )
 )
+function bindingName(control: PanelControl) {
+  const binding = control.binding
+  if (!binding) return ''
+  return binding.kind === 'variable'
+    ? binding.node.bindValue.variableFullName
+    : `${binding.node.bindValue.dbName}.${binding.node.bindValue.signalName}`
+}
 function tabKey(event: KeyboardEvent, control: PanelControl, page: string) {
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
   event.preventDefault()
@@ -224,9 +236,16 @@ function tabKey(event: KeyboardEvent, control: PanelControl, page: string) {
   position: absolute;
   right: 2px;
   top: 2px;
-  width: 4px;
-  height: 4px;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
   background: var(--el-color-primary);
+  color: var(--el-color-white);
+  font-size: 9px;
+  line-height: 12px;
+  text-align: center;
+  cursor: default;
 }
 .binding-error {
   position: absolute;

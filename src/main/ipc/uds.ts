@@ -111,7 +111,12 @@ ipcMain.handle('ipc-get-build-status', async (event, ...arg) => {
   const projectPath = arg[0] as string
   const projectName = arg[1] as string
   const testerScript = arg[2] as string
-  return await getBuildStatus(projectPath, projectName, testerScript)
+  try {
+    return await getBuildStatus(projectPath, projectName, testerScript)
+  } catch (err: any) {
+    sysLog.error(err?.message || String(err))
+    throw err
+  }
 })
 
 ipcMain.handle('ipc-create-project', async (event, ...arg) => {
@@ -131,21 +136,26 @@ ipcMain.handle('ipc-build-project', async (event, ...arg) => {
   const entry = arg[3] as string
   const isTest = arg[4] || false
 
-  const result = await compileTsc(
-    projectPath,
-    projectName,
-    data,
-    entry,
-    esbuild_executable,
-    path.join(libPath, 'js'),
-    isTest
-  )
-  if (result.length > 0) {
-    for (const err of result) {
-      sysLog.error(`${err.file}:${err.line} build error: ${err.message}`)
+  try {
+    const result = await compileTsc(
+      projectPath,
+      projectName,
+      data,
+      entry,
+      esbuild_executable,
+      path.join(libPath, 'js'),
+      isTest
+    )
+    if (result.length > 0) {
+      for (const err of result) {
+        sysLog.error(`${err.file}:${err.line} build error: ${err.message}`)
+      }
     }
+    return result
+  } catch (err: any) {
+    sysLog.error(err?.message || String(err))
+    throw err
   }
-  return result
 })
 
 ipcMain.handle('ipc-get-test-info', async (event, ...arg) => {
@@ -532,6 +542,7 @@ async function globalStart(
     }
   } catch (err: any) {
     sysLog.error(`${activeKey} - ${err.toString()}`)
+    if (err && typeof err === 'object') err.sysLogged = true
     throw err
   }
 
@@ -879,7 +890,10 @@ ipcMain.handle('ipc-global-start', async (event, ...arg) => {
     controller.signal.throwIfAborted()
     await globalStart(data, projectInfo, controller.signal)
   } catch (err: any) {
-    if (!controller.signal.aborted) globalStop(true)
+    if (!controller.signal.aborted) {
+      if (!err?.sysLogged) sysLog.error(err?.message || String(err))
+      globalStop(true)
+    }
     throw err
   } finally {
     if (startController === controller) startController = undefined

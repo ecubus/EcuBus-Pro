@@ -10,6 +10,7 @@ global.varEvent = varEvent
 
 let varLOG: VarLOG | undefined
 ipcMain.on('ipc-var-set', (event, arg) => {
+  if (!global.vars) return
   if (!varLOG) {
     varLOG = new VarLOG('frontVar')
   }
@@ -21,6 +22,7 @@ ipcMain.on('ipc-var-set', (event, arg) => {
   varLOG.setVar(arg.name, arg.value, getTsUs() - global.startTs)
 })
 ipcMain.on('ipc-signal-set', (event, arg) => {
+  if (!global.dataSet) return
   setSignal({
     signal: arg.name,
     value: arg.value

@@ -13,6 +13,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import { useDataStore } from '@r/stores/data'
 import { currentSignalValue } from '@r/stores/signalValues'
+import { useMeasurementStarted } from '@r/stores/runtime'
 import type { PanelControl } from 'src/preload/panel'
 
 const props = defineProps<{
@@ -22,6 +23,8 @@ const props = defineProps<{
 }>()
 
 const data = useDataStore()
+const started = useMeasurementStarted()
+const active = computed(() => !!props.running && started.value)
 const frame = ref<HTMLIFrameElement>()
 const latest = new Map<string, unknown>()
 const subscriptions = new Map<number, { key: string; name: string; kind: 'variable' | 'signal' }>()
@@ -192,17 +195,17 @@ function respond(id: number, result?: unknown, error?: unknown) {
 async function handleRequest(message: { id: number; method: string; args: any[] }) {
   const [name, value] = message.args || []
   try {
-    if (message.method === 'isRunning') return respond(message.id, !!props.running)
+    if (message.method === 'isRunning') return respond(message.id, active.value)
     if (message.method === 'getVar') {
       const variable = findVariable(String(name))
       if (!variable) throw new Error(`Variable ${name} not found`)
-      const current = props.running
+      const current = active.value
         ? (await window.electron.ipcRenderer.invoke('ipc-var-values', [variable.id]))[variable.id]
         : undefined
       return respond(message.id, current ?? latest.get(variable.id) ?? variableValue(variable.item))
     }
     if (message.method === 'setVar') {
-      if (!props.running) throw new Error('Panel is stopped')
+      if (!active.value) throw new Error('Panel is stopped')
       const variable = findVariable(String(name))
       if (!variable) throw new Error(`Variable ${name} not found`)
       const variableType = variable.item.value?.type
@@ -224,11 +227,11 @@ async function handleRequest(message: { id: number; method: string; args: any[] 
     if (message.method === 'getSignal') {
       const target = findSignal(String(name))
       if (!target) throw new Error(`Signal ${name} not found or is ambiguous`)
-      const current = props.running ? currentSignalValue(target.key) : undefined
+      const current = active.value ? currentSignalValue(target.key) : undefined
       return respond(message.id, signalValue(current || target.signal))
     }
     if (message.method === 'setSignal') {
-      if (!props.running) throw new Error('Panel is stopped')
+      if (!active.value) throw new Error('Panel is stopped')
       if (typeof value !== 'string' && (typeof value !== 'number' || !Number.isFinite(value)))
         throw new Error(`Invalid value for signal ${name}`)
       const target = findSignal(String(name))

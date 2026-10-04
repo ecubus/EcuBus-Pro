@@ -148,6 +148,7 @@ export const useDataStore = defineStore('useDataStore', {
                 .invoke('ipc-global-start', cloneDeep(project.projectInfo), dataSet, signalSession)
                 .then(() => {
                   window.startTime = Date.now()
+                  useRuntimeStore().startedSession = signalSession
                 })
                 .catch((e: any) => {
                   globalStart.value = false

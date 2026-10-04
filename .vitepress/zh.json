@@ -33,7 +33,7 @@
       "link": "can/can.md",
       "items": [
         {
-          "text": "Simulate CAN",
+          "text": "模拟 CAN",
           "link": "can/simulate.md"
         }
       ]

@@ -41,14 +41,14 @@
 
 ## 示例面板
 
-The panel now uses `panel.ecpanel`; the GIF below records the legacy UI.
+该面板现在使用 `panel.ecpanel`；下面的 GIF 记录的是旧版 UI。
 
 ![Legacy program demonstration](demo.gif)
 
 ## 代码概览
 
-- **panel.ecb**: Stores the project, variables, and external panel reference.
-- **panel.ecpanel**: Stores the free-layout panel, LEDs, button, and message display.
+- **panel.ecb**：存储项目、变量和外部面板引用。
+- **panel.ecpanel**：存储自由布局面板、LED、按钮和消息显示。
 - **program.ts**：处理启动、停止和模拟程序失败的逻辑。
 
 ```typescript

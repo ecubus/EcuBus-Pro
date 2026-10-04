@@ -1,3 +1,4 @@
+import { waitForStart } from '../startCancellation'
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import scriptIndex from '../../../resources/docs/.gitkeep?asset&asarUnpack'
 import esbuild from '../../../resources/bin/esbuild.exe?asset&asarUnpack'
@@ -341,7 +342,12 @@ function getDeviceSymbol(data: UdsDevice) {
   }
   return `${data.type}-${vendor || 'N/A'}`
 }
-async function globalStart(data: DataSet, projectInfo: { path: string; name: string }) {
+async function globalStart(
+  data: DataSet,
+  projectInfo: { path: string; name: string },
+  signal: AbortSignal
+) {
+  signal.throwIfAborted()
   const deviceSymboCnt: Record<string, number> = {}
   for (const key in data.devices) {
     const device = data.devices[key]
@@ -376,6 +382,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
   try {
     let cntIndex = 1
     for (const key in data.devices) {
+      signal.throwIfAborted()
       const device = data.devices[key]
       global.deviceIndexMap.set(key, cntIndex++)
       if (device.type == 'can' && device.canDevice) {
@@ -455,7 +462,18 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
         const serialDevice = device.serialDevice
         activeKey = serialDevice.name
         const serialBase = new SerialBase(serialDevice)
-        await serialBase.open()
+        try {
+          await waitForStart(
+            serialBase.open().then(async () => {
+              if (signal.aborted) await serialBase.close()
+            }),
+            signal
+          )
+          signal.throwIfAborted()
+        } catch (error) {
+          await serialBase.close()
+          throw error
+        }
         sysLog.info(
           `start serial device ${serialDevice.vendor}-${serialDevice.device.handle} success`
         )
@@ -470,9 +488,19 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       } else if (device.type == 'someip' && device.someipDevice) {
         channleList.push(device.someipDevice.id)
         const val = device.someipDevice
-        const file = await generateConfigFile(val, projectInfo.path, data.devices)
+        const file = await waitForStart(
+          generateConfigFile(val, projectInfo.path, data.devices),
+          signal
+        )
+        signal.throwIfAborted()
         if (rounterInit == false) {
-          await startRouterCounter(file)
+          try {
+            await waitForStart(startRouterCounter(file), signal)
+            signal.throwIfAborted()
+          } catch (error) {
+            stopRouterCounter()
+            throw error
+          }
           rounterInit = true
         }
         const client = new VSomeIP_Client(val.name, file, val)
@@ -653,6 +681,7 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
 
   //nodes
   for (const key in data.nodes) {
+    signal.throwIfAborted()
     const node = data.nodes[key]
     if (node.isTest) {
       continue
@@ -670,11 +699,13 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
       data.tester
     )
     try {
-      await nodeItem.start()
+      await waitForStart(nodeItem.start(undefined, signal), signal)
+      signal.throwIfAborted()
       nodeMap.set(key, nodeItem)
     } catch (err: any) {
-      nodeItem.log?.systemMsg(formatError(err), 0, 'error')
+      if (!signal.aborted) nodeItem.log?.systemMsg(formatError(err), 0, 'error')
       nodeItem.close()
+      signal.throwIfAborted()
     }
   }
 
@@ -695,10 +726,13 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
     pwmBaseMap,
     someipMap,
     serialBaseMap,
-    data.tester
+    data.tester,
+    signal
   )
+  signal.throwIfAborted()
   const simulateCount = [...canBaseMap.values()].filter((b) => b.info.vendor === 'simulate').length
   await setProjectSimulateCount(simulateCount)
+  signal.throwIfAborted()
   canBaseMap.forEach((base) => {
     base.resetStartTs?.()
   })
@@ -742,117 +776,113 @@ async function globalStart(data: DataSet, projectInfo: { path: string; name: str
 
 const exTransportList: string[] = []
 let isGlobalStarting = false
+let startController: AbortController | undefined
 ipcMain.handle('ipc-global-start', async (event, ...arg) => {
   if (isGlobalStarting) {
     return
   }
   isGlobalStarting = true
-  const projectInfo = arg[0] as {
-    path: string
-    name: string
-  }
-  const data = arg[1] as DataSet
+  const controller = new AbortController()
+  startController = controller
+  try {
+    const projectInfo = arg[0] as {
+      path: string
+      name: string
+    }
+    const data = arg[1] as DataSet
 
-  global.dataSet = data
-  for (const t of exTransportList) {
-    removeDeviceTransport(t)
-  }
-  exTransportList.splice(0, exTransportList.length)
+    logQ.signalSession = arg[2]
+    global.dataSet = data
+    for (const t of exTransportList) {
+      removeDeviceTransport(t)
+    }
+    exTransportList.splice(0, exTransportList.length)
 
-  //can signal as proxy
-  Object.values(global.dataSet.database.can).forEach((db) => {
-    Object.values(db.messages).forEach((msg) => {
-      const x = (target: any, prop: string, value: any) => {
-        const ret = Reflect.set(target, prop, value)
-        if (ret) {
-          for (const [index, d] of timerMap.entries()) {
-            if (parseInt(d.ia.id, 16) == msg.id) {
-              if (d.socket.changePeriodData) {
-                const data = send(index, false)
-                if (data && data.compare(d.data!) != 0) {
-                  d.socket.changePeriodData(d.taskId!, data)
-                  d.data = data
-                }
-              }
-            }
+    //can signal as proxy
+    Object.values(global.dataSet.database.can).forEach((db) => {
+      Object.values(db.messages).forEach((msg) => {
+        const x = (target: any, prop: string, value: any) => {
+          const ret = Reflect.set(target, prop, value)
+          if (ret) {
+            refreshCanPeriodData(msg.id)
           }
+          return ret
         }
-        return ret
-      }
-      msg.signals.forEach((signal, index) => {
-        msg.signals[index] = new Proxy(signal, {
-          set: x
+        msg.signals.forEach((signal, index) => {
+          msg.signals[index] = new Proxy(signal, {
+            set: x
+          })
         })
       })
     })
-  })
 
-  global.vars = {}
+    global.vars = {}
 
-  const devices = data.devices
-  const testers = data.tester
+    const devices = data.devices
+    const testers = data.tester
 
-  const vars: Record<string, VarItem> = cloneDeep(data.vars)
-  const logs = data.logs
+    const vars: Record<string, VarItem> = cloneDeep(data.vars)
+    const logs = data.logs
 
-  for (const log of Object.values(logs)) {
-    if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
-      if (!path.isAbsolute(log.path)) {
-        log.path = path.join(projectInfo.path, log.path)
-      }
-
-      const logFilePath = resolveLogFilePath(log.path, log.format, {
-        loggerName: log.name,
-        projectName: path.parse(projectInfo.name).name
-      })
-
-      const id =
-        log.format === 'blf'
-          ? addDeviceTransport(() =>
-              blfTransport(logFilePath, log.channel, log.method, log.compression)
-            )
-          : addDeviceTransport(() => ascTransport(logFilePath, log.channel, log.method))
-
-      exTransportList.push(id)
-    }
-  }
-
-  /* --------- */
-  const sysVars = getAllSysVar(devices, testers, data.database.orti)
-
-  for (const v of Object.values(sysVars)) {
-    vars[v.id] = cloneDeep(v)
-  }
-
-  for (const key of Object.keys(vars)) {
-    const v = vars[key]
-
-    if (v.value) {
-      const parentName: string[] = []
-
-      // 递归查找所有父级名称
-      let currentVar = v
-      while (currentVar.parentId) {
-        const parent = vars[currentVar.parentId]
-        if (parent) {
-          parentName.unshift(parent.name) // 将父级名称添加到数组开头
-          currentVar = parent
-        } else {
-          break
+    for (const log of Object.values(logs)) {
+      if (log.type == 'file' && (log.format == 'asc' || log.format == 'blf')) {
+        if (!path.isAbsolute(log.path)) {
+          log.path = path.join(projectInfo.path, log.path)
         }
-      }
 
-      parentName.push(v.name)
-      v.name = parentName.join('.')
+        const logFilePath = resolveLogFilePath(log.path, log.format, {
+          loggerName: log.name,
+          projectName: path.parse(projectInfo.name).name
+        })
+
+        const id =
+          log.format === 'blf'
+            ? addDeviceTransport(() =>
+                blfTransport(logFilePath, log.channel, log.method, log.compression)
+              )
+            : addDeviceTransport(() => ascTransport(logFilePath, log.channel, log.method))
+
+        exTransportList.push(id)
+      }
     }
-    global.vars[key] = v
-  }
-  try {
-    await globalStart(data, projectInfo)
+
+    /* --------- */
+    const sysVars = getAllSysVar(devices, testers, data.database.orti)
+
+    for (const v of Object.values(sysVars)) {
+      vars[v.id] = cloneDeep(v)
+    }
+
+    for (const key of Object.keys(vars)) {
+      const v = vars[key]
+
+      if (v.value) {
+        const parentName: string[] = []
+
+        // 递归查找所有父级名称
+        let currentVar = v
+        while (currentVar.parentId) {
+          const parent = vars[currentVar.parentId]
+          if (parent) {
+            parentName.unshift(parent.name) // 将父级名称添加到数组开头
+            currentVar = parent
+          } else {
+            break
+          }
+        }
+
+        parentName.push(v.name)
+        v.name = parentName.join('.')
+      }
+      global.vars[key] = v
+    }
+    controller.signal.throwIfAborted()
+    await globalStart(data, projectInfo, controller.signal)
   } catch (err: any) {
-    globalStop(true)
+    if (!controller.signal.aborted) globalStop(true)
     throw err
   } finally {
+    if (startController === controller) startController = undefined
     isGlobalStarting = false
   }
 })
@@ -924,6 +954,7 @@ const timerMap = new Map<string, timerType>()
 const someipPeriodMap = new Map<string, { clientKey: string }>()
 
 export function globalStop(emit = false) {
+  startController?.abort(new Error('Measurement start cancelled'))
   trackEvent('app_stop')
   stopPlugins()
   //clear all replay
@@ -1314,21 +1345,24 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
       const rawsignal = message.signals.find((sig) => sig.name == signalName)
       if (rawsignal) {
         Object.assign(rawsignal, signal)
-        for (const [index, d] of timerMap.entries()) {
-          if (parseInt(d.ia.id, 16) == message.id) {
-            if (d.socket.changePeriodData) {
-              const data = send(index, false)
-              if (data && data.compare(d.data!) != 0) {
-                d.socket.changePeriodData(d.taskId!, data)
-                d.data = data
-              }
-            }
-          }
-        }
+        refreshCanPeriodData(message.id)
       }
     }
   }
 })
+export function refreshCanPeriodData(messageId: number) {
+  for (const [index, d] of timerMap.entries()) {
+    if (parseInt(d.ia.id, 16) == messageId) {
+      if (d.socket.changePeriodData) {
+        const data = send(index, false)
+        if (data && data.compare(d.data!) != 0) {
+          d.socket.changePeriodData(d.taskId!, data)
+          d.data = data
+        }
+      }
+    }
+  }
+}
 
 ipcMain.on('ipc-update-can-period', (event, ...arg) => {
   const id = arg[0] as string

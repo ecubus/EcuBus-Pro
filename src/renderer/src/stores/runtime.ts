@@ -23,6 +23,7 @@ export type RunTimeStatus = {
     realActiveId?: string
     isRunning: Record<string, boolean>
   }
+  signalSession: string
   globalStart: boolean
   canPeriods: Record<string, boolean>
   someipPeriods: Record<string, boolean>
@@ -39,6 +40,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     },
     canPeriods: {},
     someipPeriods: {},
+    signalSession: '',
     globalStart: false,
     rearrangeWindows: false,
     traceLinkId: '',

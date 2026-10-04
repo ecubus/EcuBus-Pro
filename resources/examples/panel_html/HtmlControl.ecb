@@ -1,0 +1,311 @@
+{
+  "data": {
+    "devices": {
+      "html-ecu-can": {
+        "type": "can",
+        "canDevice": {
+          "id": "html-ecu-can",
+          "name": "HTML_ECU",
+          "handle": 0,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "html-demo-db",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80"
+          }
+        }
+      },
+      "html-panel-can": {
+        "type": "can",
+        "canDevice": {
+          "id": "html-panel-can",
+          "name": "HTML_PANEL",
+          "handle": 1,
+          "vendor": "simulate",
+          "canfd": false,
+          "database": "html-demo-db",
+          "bitrate": {
+            "sjw": 1,
+            "timeSeg1": 13,
+            "timeSeg2": 2,
+            "preScaler": 10,
+            "freq": 500000,
+            "clock": "80"
+          }
+        }
+      }
+    },
+    "ia": {
+      "html-command": {
+        "id": "html-command",
+        "name": "HTML Command",
+        "type": "can",
+        "devices": [
+          "html-panel-can"
+        ],
+        "action": [
+          {
+            "uuid": "html-target-cycle",
+            "trigger": {
+              "type": "periodic",
+              "period": 100
+            },
+            "database": "html-demo-db",
+            "name": "Command",
+            "id": "101",
+            "channel": "html-panel-can",
+            "type": "can",
+            "dlc": 8,
+            "data": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        ]
+      }
+    },
+    "tester": {},
+    "subFunction": {},
+    "nodes": {
+      "html-ecu": {
+        "id": "html-ecu",
+        "name": "HTML ECU",
+        "type": "can",
+        "channel": [
+          "html-ecu-can"
+        ],
+        "workNode": "",
+        "script": "ecu.ts"
+      }
+    },
+    "database": {
+      "can": {
+        "html-demo-db": {
+          "id": "html-demo-db",
+          "name": "HtmlDemo",
+          "version": "canmartix",
+          "filePath": "HtmlDemo.dbc",
+          "attributes": {
+            "BusType": "CAN"
+          },
+          "baudrate": 500000,
+          "fd_baudrate": 0,
+          "ecus": {
+            "Panel": null,
+            "ECU": null
+          },
+          "messages": [
+            {
+              "name": "Status",
+              "id": 256,
+              "length": 8,
+              "cycle_time": 100,
+              "attributes": {},
+              "comment": "",
+              "header_id": null,
+              "is_complex_multiplexed": false,
+              "is_extended_frame": false,
+              "is_fd": false,
+              "is_j1939": false,
+              "mux_names": {},
+              "pdu_name": "",
+              "signals": [
+                {
+                  "name": "Speed",
+                  "start_bit": 0,
+                  "bit_length": 16,
+                  "factor": "0.1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "250",
+                  "unit": "km/h",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                }
+              ],
+              "transmitters": [
+                "ECU"
+              ]
+            },
+            {
+              "name": "Command",
+              "id": 257,
+              "length": 8,
+              "cycle_time": 100,
+              "attributes": {},
+              "comment": "",
+              "header_id": null,
+              "is_complex_multiplexed": false,
+              "is_extended_frame": false,
+              "is_fd": false,
+              "is_j1939": false,
+              "mux_names": {},
+              "pdu_name": "",
+              "signals": [
+                {
+                  "name": "Target",
+                  "start_bit": 0,
+                  "bit_length": 16,
+                  "factor": "0.1",
+                  "offset": "0",
+                  "min": "0",
+                  "max": "100",
+                  "unit": "%",
+                  "initial_value": "0",
+                  "is_big_endian": false,
+                  "is_float": false,
+                  "is_signed": false,
+                  "is_multiplexer": false,
+                  "multiplex": null,
+                  "mux_value": null,
+                  "attributes": {},
+                  "comments": {},
+                  "values": {},
+                  "receivers": [
+                    "Panel"
+                  ]
+                }
+              ],
+              "transmitters": [
+                "Panel"
+              ]
+            }
+          ],
+          "enumerations": {},
+          "env_vars": {},
+          "value_tables": {},
+          "ecu_defines": [],
+          "env_defines": [],
+          "frame_defines": [],
+          "global_defines": [],
+          "signal_defines": []
+        }
+      },
+      "lin": {},
+      "orti": {}
+    },
+    "graphs": {},
+    "guages": {},
+    "vars": {
+      "HtmlLevel": {
+        "id": "HtmlLevel",
+        "name": "HtmlLevel",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 30,
+          "min": 0,
+          "max": 100
+        }
+      },
+      "HtmlEnabled": {
+        "id": "HtmlEnabled",
+        "name": "HtmlEnabled",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 1,
+          "min": 0,
+          "max": 1
+        }
+      },
+      "HtmlRxTarget": {
+        "id": "HtmlRxTarget",
+        "name": "HtmlRxTarget",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        }
+      },
+      "HtmlRxCount": {
+        "id": "HtmlRxCount",
+        "name": "HtmlRxCount",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100000
+        }
+      }
+    },
+    "datas": {},
+    "panels": {
+      "html-demo": {
+        "id": "html-demo",
+        "name": "HTML Control",
+        "filePath": "html.ecpanel",
+        "rule": [],
+        "options": {}
+      }
+    },
+    "logs": {},
+    "traces": {},
+    "pluginData": {},
+    "replays": {}
+  },
+  "project": {
+    "displayName": "HTML Control",
+    "wins": {
+      "phtml-demo": {
+        "id": "phtml-demo",
+        "title": "panelPreview",
+        "label": "HTML Control",
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1100,
+          "h": 650
+        },
+        "options": {
+          "name": "HTML Control",
+          "params": {
+            "edit-index": "phtml-demo"
+          }
+        }
+      },
+      "html-command_ia": {
+        "id": "html-command_ia",
+        "title": "cani",
+        "label": "IA",
+        "pos": {
+          "x": 0,
+          "y": 655,
+          "w": 900,
+          "h": 260
+        },
+        "options": {
+          "name": "HTML Command",
+          "params": {
+            "edit-index": "html-command"
+          }
+        }
+      }
+    }
+  }
+}

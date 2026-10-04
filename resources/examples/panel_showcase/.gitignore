@@ -1,0 +1,4 @@
+.build-cache/
+.ScriptBuild/
+node_modules/
+.claude/

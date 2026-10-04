@@ -576,8 +576,10 @@ export class Layout {
         minWidth: this.validLayout[data.title].minW || 200,
         minHeight: this.validLayout[data.title].minH || 100,
         resize: (e, ui) => {
-          data.pos.w = ui.size.width
-          data.pos.h = ui.size.height
+          const current = this.data.project.wins[id]
+          if (!current) return
+          current.pos.w = ui.size.width
+          current.pos.h = ui.size.height
           if (layoutType == 'bottom') {
             //remove element height and top style
             this.winEl[id].css('height', '')
@@ -607,8 +609,10 @@ export class Layout {
           //   }
           // },
           stop: (e, ui) => {
-            data.pos.x = ui.position.left
-            data.pos.y = ui.position.top
+            const current = this.data.project.wins[id]
+            if (!current) return
+            current.pos.x = ui.position.left
+            current.pos.y = ui.position.top
           }
         })
 

@@ -1,0 +1,1107 @@
+{
+  "can/Can": {
+    "panels": {
+      "c10776a8-fc8c-45a3-8787-d5467bdcd26a": {
+        "name": "test",
+        "id": "c10776a8-fc8c-45a3-8787-d5467bdcd26a",
+        "rule": [
+          {
+            "type": "LocalImage",
+            "title": "",
+            "style": {
+              "width": "100px",
+              "height": "100px"
+            },
+            "props": {
+              "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
+            },
+            "_fc_id": "id_F4q5mbhpxhxxaec",
+            "name": "ref_Fzvmmbhpxhxxafc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "LocalImage"
+          },
+          {
+            "type": "TText",
+            "title": "",
+            "field": "Fcwcmbhpn68iabc",
+            "style": {
+              "whiteSpace": "pre-line",
+              "width": "100%"
+            },
+            "_fc_id": "id_F26jmbhpn68iacc",
+            "name": "ref_F5hgmbhpn68iadc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "text",
+            "props": {
+              "signal": {
+                "type": "signal",
+                "enable": true,
+                "id": "can.Model3CAN.signals.VCLEFT_liftgateLatchRequest",
+                "name": "VCLEFT_liftgateLatchRequest",
+                "color": "#0b75b0",
+                "yAxis": {
+                  "min": 0,
+                  "max": 7,
+                  "enums": [
+                    {
+                      "label": "LATCH_REQUEST_CINCH",
+                      "value": 1
+                    },
+                    {
+                      "label": "LATCH_REQUEST_FORCE_RELEASE",
+                      "value": 3
+                    },
+                    {
+                      "label": "LATCH_REQUEST_NONE",
+                      "value": 0
+                    },
+                    {
+                      "label": "LATCH_REQUEST_RELEASE",
+                      "value": 2
+                    },
+                    {
+                      "label": "LATCH_REQUEST_RESET",
+                      "value": 4
+                    }
+                  ]
+                },
+                "bindValue": {
+                  "signalName": "VCLEFT_liftgateLatchRequest",
+                  "startBit": 61,
+                  "bitLength": 3,
+                  "dbKey": "bb0c0fb5-3e24-403a-9fb0-ce9e5a927e13",
+                  "dbName": "Model3CAN",
+                  "frameId": 322
+                }
+              }
+            }
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "test"
+        }
+      }
+    },
+    "vars": {}
+  },
+  "canopen_pdo/canopen_pdo": {
+    "panels": {
+      "237463d4-1c35-4300-a316-0c6029db353c": {
+        "name": "Demo",
+        "id": "237463d4-1c35-4300-a316-0c6029db353c",
+        "rule": [
+          {
+            "type": "grid",
+            "props": {
+              "rule": {
+                "layout": [
+                  {
+                    "i": "F0wzmnebckbfamc",
+                    "x": 0,
+                    "y": 0,
+                    "w": 8,
+                    "h": 2
+                  },
+                  {
+                    "i": "Fxxhmnebckbfaoc",
+                    "x": 8,
+                    "y": 0,
+                    "w": 6,
+                    "h": 2
+                  },
+                  {
+                    "i": "Fnw2mnebckbfarc",
+                    "x": 14,
+                    "y": 0,
+                    "w": 6,
+                    "h": 2
+                  }
+                ],
+                "row": 24,
+                "rowHeight": 80,
+                "margin": 10,
+                "style": {},
+                "class": {},
+                "col": 1
+              }
+            },
+            "children": [
+              {
+                "type": "xProgress",
+                "field": "Fx0xmnebcvykayc",
+                "style": {
+                  "width": "100%"
+                },
+                "props": {
+                  "strokeWidth": 20,
+                  "textInside": true,
+                  "showText": true,
+                  "color": "#409EFF",
+                  "type": "circle",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "60a2d996-ca92-4276-bb35-92574e959209",
+                    "name": "MotorSpeed",
+                    "color": "#6aa3ca",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100
+                    },
+                    "bindValue": {
+                      "variableId": "60a2d996-ca92-4276-bb35-92574e959209",
+                      "variableType": "user",
+                      "variableName": "MotorSpeed",
+                      "variableFullName": "MotorSpeed",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "_fc_id": "id_Fu0omnebcvykazc",
+                "name": "ref_Ftrpmnebcvykb0c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "xProgress",
+                "slot": "F0wzmnebckbfamc"
+              },
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "type": "primary",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+                    "name": "MotorSpeedPlus",
+                    "color": "#54941c",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "variableId": "b29cadb8-7f8a-48b1-8a15-95c959384181",
+                      "variableType": "user",
+                      "variableName": "MotorSpeedPlus",
+                      "variableFullName": "MotorSpeedPlus",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "children": [
+                  "Speed+"
+                ],
+                "_fc_id": "id_F84nmnebdg7xb4c",
+                "name": "ref_Fa7kmnebdg7xb5c",
+                "field": "F3k8mnebdg7xb6c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "title": "",
+                "info": "",
+                "slot": "Fxxhmnebckbfaoc"
+              },
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "type": "warning",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+                    "name": "MotorSpeedMinus",
+                    "color": "#d7f5cb",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "variableId": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd",
+                      "variableType": "user",
+                      "variableName": "MotorSpeedMinus",
+                      "variableFullName": "MotorSpeedMinus",
+                      "variableValueType": "number"
+                    }
+                  }
+                },
+                "children": [
+                  "Speed-"
+                ],
+                "_fc_id": "id_Fy5kmnebebiwb7c",
+                "name": "ref_F461mnebebiwb8c",
+                "field": "F64kmnebebiwb9c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "slot": "Fnw2mnebckbfarc"
+              }
+            ],
+            "_fc_id": "id_Fkx7mnebckbcakc",
+            "name": "ref_Fd81mnebckbcalc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "grid"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "Demo"
+        }
+      }
+    },
+    "vars": {
+      "b29cadb8-7f8a-48b1-8a15-95c959384181": {
+        "name": "MotorSpeedPlus",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "b29cadb8-7f8a-48b1-8a15-95c959384181"
+      },
+      "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd": {
+        "name": "MotorSpeedMinus",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "6d70aa14-4e8e-4b67-90a1-426f3f09f4dd"
+      },
+      "60a2d996-ca92-4276-bb35-92574e959209": {
+        "name": "MotorSpeed",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "60a2d996-ca92-4276-bb35-92574e959209"
+      }
+    }
+  },
+  "lin_aa/lin_aa": {
+    "panels": {
+      "72b0ec7c-bc37-49ce-b36a-dce564d99482": {
+        "name": "lin_aa",
+        "id": "72b0ec7c-bc37-49ce-b36a-dce564d99482",
+        "rule": [
+          {
+            "type": "input",
+            "field": "Fbeemfzn6l8aaqc",
+            "title": "{{$t.AFh01EJy}}",
+            "info": "Add the NAD you need to allocate here.",
+            "$required": false,
+            "props": {
+              "type": "text",
+              "maxlength": 128,
+              "placeholder": "    Default:7FFF",
+              "clearable": true,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "2665e061-e921-4d57-bfd3-9eada719fa13",
+                "name": "SupplierID",
+                "color": "#505b3b",
+                "yAxis": {
+                  "min": 0,
+                  "max": 65535
+                },
+                "bindValue": {
+                  "variableId": "2665e061-e921-4d57-bfd3-9eada719fa13",
+                  "variableType": "user",
+                  "variableName": "SupplierID",
+                  "variableFullName": "LIN_AA.SupplierID"
+                }
+              },
+              "disabled": false
+            },
+            "_fc_id": "id_Fuhvmfzn6l8aarc",
+            "name": "ref_Fh7nmfzn6l8aasc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "input",
+            "wrap": {
+              "labelWidth": "20px"
+            }
+          },
+          {
+            "type": "input",
+            "field": "Fiekmg0klntyabc",
+            "title": "{{$t.AaREz7nZ}}",
+            "info": "Add the NAD you need to allocate here.",
+            "$required": false,
+            "props": {
+              "type": "text",
+              "maxlength": 128,
+              "placeholder": "    Default:01 02 03",
+              "clearable": true,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+                "name": "NadTable",
+                "color": "#92f403",
+                "yAxis": {
+                  "min": 0,
+                  "max": 100
+                },
+                "bindValue": {
+                  "variableId": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+                  "variableType": "user",
+                  "variableName": "NadTable",
+                  "variableFullName": "LIN_AA.NadTable"
+                }
+              },
+              "disabled": false
+            },
+            "_fc_id": "id_F2bxmg0klntyacc",
+            "name": "ref_Fwjmmg0klntyadc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "input",
+            "wrap": {
+              "labelWidth": "20px"
+            }
+          },
+          {
+            "type": "BButton",
+            "props": {
+              "releaseValue": 0,
+              "pressValue": 1,
+              "plain": false,
+              "circle": false,
+              "round": false,
+              "loading": false,
+              "size": "default",
+              "type": "primary",
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+                "name": "StartAA",
+                "color": "#c9ddf1",
+                "yAxis": {
+                  "min": 0,
+                  "max": 1
+                },
+                "bindValue": {
+                  "variableId": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+                  "variableType": "user",
+                  "variableName": "StartAA",
+                  "variableFullName": "LIN_AA.StartAA"
+                }
+              }
+            },
+            "children": [
+              "Start "
+            ],
+            "_fc_id": "id_Fhmkmfzn0n4iakc",
+            "name": "ref_F7hsmfzn0n4ialc",
+            "field": "Faecmfzn0n4iamc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "BButton",
+            "title": "",
+            "info": "Start Auto Addressing.",
+            "style": {
+              "color": "#000000ff",
+              "backgroundColor": "#dbe0ebff",
+              "boxShadow": "4px 4px 3px -2px #E7E5E5FF",
+              "marginTop": "15px",
+              "marginRight": "20px",
+              "marginLeft": "130px",
+              "height": "40px",
+              "width": "200px"
+            }
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "top",
+            "size": "default",
+            "labelWidth": "125px",
+            "labelSuffix": "(hex):"
+          },
+          "language": {
+            "zh-cn": {
+              "AFh01EJy": "供应商ID",
+              "AaREz7nZ": "地址列表"
+            },
+            "en": {
+              "AFh01EJy": "Supplier ID",
+              "AaREz7nZ": "NadTable"
+            }
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "lin_aa"
+        }
+      }
+    },
+    "vars": {
+      "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1": {
+        "type": "user",
+        "id": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1",
+        "name": "LIN_AA"
+      },
+      "2665e061-e921-4d57-bfd3-9eada719fa13": {
+        "name": "SupplierID",
+        "desc": "SupplierId",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "7fff",
+          "min": 0,
+          "max": 65535
+        },
+        "id": "2665e061-e921-4d57-bfd3-9eada719fa13",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      },
+      "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0": {
+        "name": "NadTable",
+        "desc": "Store NAD that needs to be allocated.",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": "01 02 03",
+          "min": 0,
+          "max": 100
+        },
+        "id": "4c02e1e7-7ef6-4b77-a78a-9b4be48630c0",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      },
+      "0a6047db-6861-4cf9-9660-ba7d90a0ea25": {
+        "name": "StartAA",
+        "desc": "Start auto addressing steps.",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "0a6047db-6861-4cf9-9660-ba7d90a0ea25",
+        "parentId": "a4f1d1ba-50e8-42da-85f9-bce1f656f7e1"
+      }
+    }
+  },
+  "panel/panel": {
+    "panels": {
+      "bd0961dd-27ba-48fc-beb6-d2fe24962808": {
+        "name": "Program",
+        "id": "bd0961dd-27ba-48fc-beb6-d2fe24962808",
+        "rule": [
+          {
+            "type": "TText",
+            "title": "",
+            "field": "F1hkmbuvmrb7abc",
+            "style": {
+              "whiteSpace": "pre-line",
+              "width": "100%"
+            },
+            "_fc_id": "id_Fvqnmbuvmrb7acc",
+            "name": "ref_F9vcmbuvmrb7adc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "text",
+            "props": {
+              "initValue": "Message",
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "6462ee46-419f-456a-931c-a117d4bf5adb",
+                "name": "msg",
+                "color": "#82a987",
+                "yAxis": {
+                  "min": 0,
+                  "max": 100
+                },
+                "bindValue": {
+                  "variableId": "6462ee46-419f-456a-931c-a117d4bf5adb",
+                  "variableType": "user",
+                  "variableName": "msg",
+                  "variableFullName": "Program.msg"
+                }
+              }
+            }
+          },
+          {
+            "type": "grid",
+            "props": {
+              "rule": {
+                "layout": [
+                  {
+                    "i": "Fmsrmbuuljy2akc",
+                    "x": 0,
+                    "y": 0,
+                    "w": 8,
+                    "h": 3
+                  },
+                  {
+                    "i": "F43nmbuuljy2alc",
+                    "x": 8,
+                    "y": 0,
+                    "w": 8,
+                    "h": 3
+                  },
+                  {
+                    "i": "F3xcmbuuljy2amc",
+                    "x": 16,
+                    "y": 0,
+                    "w": 8,
+                    "h": 2
+                  },
+                  {
+                    "i": "F9lrmbuuljy2apc",
+                    "x": 16,
+                    "y": 2,
+                    "w": 8,
+                    "h": 1
+                  }
+                ],
+                "row": 24,
+                "rowHeight": 80,
+                "margin": 10,
+                "style": {},
+                "class": {},
+                "col": 1
+              }
+            },
+            "children": [
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "size": "large",
+                  "toggleMode": true,
+                  "type": "primary",
+                  "plain": true,
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "b796a779-8e6a-4037-a4a5-c598b916d14d",
+                    "name": "run",
+                    "color": "#63e063",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100
+                    },
+                    "bindValue": {
+                      "variableId": "b796a779-8e6a-4037-a4a5-c598b916d14d",
+                      "variableType": "user",
+                      "variableName": "run",
+                      "variableFullName": "Program.run"
+                    }
+                  }
+                },
+                "children": [
+                  "Start"
+                ],
+                "_fc_id": "id_Fie1mbuur882bbc",
+                "name": "ref_Fphkmbuur882bcc",
+                "field": "Fe30mbuur882bdc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "slot": "F9lrmbuuljy2apc"
+              },
+              {
+                "field": "Fyokmbuuqepzb3c",
+                "type": "Led",
+                "props": {
+                  "size": 200,
+                  "onColor": "#FF0000",
+                  "offColor": "#031E3C",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "9a5b9891-eb96-4be1-9313-9da926e0b710",
+                    "name": "failed",
+                    "color": "#9d5948",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100
+                    },
+                    "bindValue": {
+                      "variableId": "9a5b9891-eb96-4be1-9313-9da926e0b710",
+                      "variableType": "user",
+                      "variableName": "failed",
+                      "variableFullName": "Program.failed"
+                    }
+                  }
+                },
+                "_fc_id": "id_F9pgmbuuqepzb4c",
+                "name": "ref_Fuc2mbuuqepzb5c",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "Led",
+                "title": "",
+                "slot": "F43nmbuuljy2alc"
+              },
+              {
+                "type": "LocalImage",
+                "title": "",
+                "style": {
+                  "width": "100px",
+                  "height": "100px"
+                },
+                "props": {
+                  "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
+                },
+                "_fc_id": "id_Fhtrmbuuvv8mbic",
+                "name": "ref_Fj0xmbuuvv8mbjc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "LocalImage",
+                "slot": "F3xcmbuuljy2amc"
+              },
+              {
+                "type": "TText",
+                "title": "",
+                "field": "Fc1vmbuuqs5ub8c",
+                "style": {
+                  "whiteSpace": "pre-line",
+                  "width": "100%"
+                },
+                "_fc_id": "id_Flkbmbuuqs5ub9c",
+                "name": "ref_F37xmbuuqs5ubac",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "text",
+                "props": {
+                  "initValue": "EcuBus-Pro Program Test"
+                },
+                "slot": "F3xcmbuuljy2amc"
+              },
+              {
+                "field": "Fsesmbuuiuwzafc",
+                "type": "Led",
+                "props": {
+                  "size": 200,
+                  "onColor": "#00ff00",
+                  "offColor": "#031E3C",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "68033fb4-770a-4c69-b5fd-dd025c9a4f09",
+                    "name": "success",
+                    "color": "#414aa6",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100
+                    },
+                    "bindValue": {
+                      "variableId": "68033fb4-770a-4c69-b5fd-dd025c9a4f09",
+                      "variableType": "user",
+                      "variableName": "success",
+                      "variableFullName": "Program.success"
+                    }
+                  }
+                },
+                "_fc_id": "id_Fe21mbuuiuwzagc",
+                "name": "ref_Fre8mbuuiuwzahc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "Led",
+                "title": "",
+                "slot": "Fmsrmbuuljy2akc"
+              }
+            ],
+            "_fc_id": "id_Fux7mbuuljxxaic",
+            "name": "ref_F993mbuuljxxajc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "grid"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "Program"
+        }
+      }
+    },
+    "vars": {
+      "92cf3f2e-a132-495b-959a-63a35c84d080": {
+        "type": "user",
+        "id": "92cf3f2e-a132-495b-959a-63a35c84d080",
+        "name": "Program"
+      },
+      "b796a779-8e6a-4037-a4a5-c598b916d14d": {
+        "name": "run",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "b796a779-8e6a-4037-a4a5-c598b916d14d",
+        "parentId": "92cf3f2e-a132-495b-959a-63a35c84d080"
+      },
+      "68033fb4-770a-4c69-b5fd-dd025c9a4f09": {
+        "name": "success",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "68033fb4-770a-4c69-b5fd-dd025c9a4f09",
+        "parentId": "92cf3f2e-a132-495b-959a-63a35c84d080"
+      },
+      "9a5b9891-eb96-4be1-9313-9da926e0b710": {
+        "name": "failed",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "9a5b9891-eb96-4be1-9313-9da926e0b710",
+        "parentId": "92cf3f2e-a132-495b-959a-63a35c84d080"
+      },
+      "6462ee46-419f-456a-931c-a117d4bf5adb": {
+        "name": "msg",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "string",
+          "initValue": 0,
+          "min": 0,
+          "max": 100
+        },
+        "id": "6462ee46-419f-456a-931c-a117d4bf5adb",
+        "parentId": "92cf3f2e-a132-495b-959a-63a35c84d080"
+      }
+    }
+  },
+  "script_demo_2/script_demo_2": {
+    "panels": {
+      "9226deb1-108e-4492-8dec-49cd8871a380": {
+        "name": "LinControl",
+        "id": "9226deb1-108e-4492-8dec-49cd8871a380",
+        "rule": [
+          {
+            "type": "BButton",
+            "props": {
+              "releaseValue": 0,
+              "pressValue": 1,
+              "variable": {
+                "type": "variable",
+                "enable": true,
+                "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+                "name": "EnvChecksumError",
+                "color": "#19996a",
+                "yAxis": {
+                  "min": 0,
+                  "max": 1
+                },
+                "bindValue": {
+                  "variableId": "1dd88fae-c74e-40a1-90d6-7179a92c383f",
+                  "variableType": "user",
+                  "variableName": "EnvChecksumError",
+                  "variableFullName": "EnvChecksumError"
+                }
+              },
+              "type": "primary"
+            },
+            "children": [
+              "发送ChecSum错误帧"
+            ],
+            "_fc_id": "id_Fmilmfkdw246abc",
+            "name": "ref_Fcb0mfkdw246acc",
+            "field": "Fslimfkdw246adc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "BButton"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "LinControl"
+        }
+      }
+    },
+    "vars": {
+      "1dd88fae-c74e-40a1-90d6-7179a92c383f": {
+        "name": "EnvChecksumError",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "1dd88fae-c74e-40a1-90d6-7179a92c383f"
+      }
+    }
+  },
+  "uds_bin_file/uds_bin_file": {
+    "panels": {
+      "5913dcc1-8356-415f-88ef-384f32f480d9": {
+        "name": "UDS Donwload",
+        "id": "5913dcc1-8356-415f-88ef-384f32f480d9",
+        "rule": [
+          {
+            "type": "grid",
+            "props": {
+              "rule": {
+                "layout": [
+                  {
+                    "i": "Ftesmac6skjzaec",
+                    "x": 0,
+                    "y": 0,
+                    "w": 9,
+                    "h": 2
+                  },
+                  {
+                    "i": "F1kumac6skjzafc",
+                    "x": 9,
+                    "y": 0,
+                    "w": 14,
+                    "h": 2
+                  },
+                  {
+                    "i": "F0y5mac6skjzagc",
+                    "x": 0,
+                    "y": 2,
+                    "w": 24,
+                    "h": 1
+                  }
+                ],
+                "row": 24,
+                "rowHeight": 80,
+                "margin": 10,
+                "style": {},
+                "class": {},
+                "col": 1
+              }
+            },
+            "children": [
+              {
+                "type": "LocalImage",
+                "title": "",
+                "style": {
+                  "width": "100px",
+                  "height": "100px"
+                },
+                "props": {
+                  "src": "https://ecubus.oss-cn-chengdu.aliyuncs.com/img/logo256.png"
+                },
+                "_fc_id": "id_F8hbmac6sys9aoc",
+                "name": "ref_Frhimac6sys9apc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "LocalImage",
+                "slot": "Ftesmac6skjzaec"
+              },
+              {
+                "type": "BButton",
+                "props": {
+                  "releaseValue": 0,
+                  "pressValue": 1,
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
+                    "name": "start",
+                    "color": "#c57c6e",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 1
+                    },
+                    "bindValue": {
+                      "variableId": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
+                      "variableType": "user",
+                      "variableName": "start",
+                      "variableFullName": "UDS.start"
+                    }
+                  },
+                  "toggleMode": true,
+                  "type": "primary",
+                  "plain": false
+                },
+                "children": [
+                  "Button"
+                ],
+                "_fc_id": "id_F8iymac6t9foauc",
+                "name": "ref_Ffydmac6t9foavc",
+                "field": "Fiyamac6t9foawc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "BButton",
+                "slot": "F1kumac6skjzafc"
+              },
+              {
+                "type": "xProgress",
+                "field": "Fapsmabx5vf9aec",
+                "style": {
+                  "width": "100%"
+                },
+                "props": {
+                  "strokeWidth": 20,
+                  "textInside": true,
+                  "showText": true,
+                  "color": "#409EFF",
+                  "variable": {
+                    "type": "variable",
+                    "enable": true,
+                    "id": "Statistics.f304259b-dc7d-460b-9729-4eee2d1156de.0",
+                    "name": "Seq #0",
+                    "color": "#7e02e3",
+                    "yAxis": {
+                      "min": 0,
+                      "max": 100,
+                      "unit": "%"
+                    },
+                    "bindValue": {
+                      "variableId": "Statistics.f304259b-dc7d-460b-9729-4eee2d1156de.0",
+                      "variableType": "system",
+                      "variableName": "Seq #0",
+                      "variableFullName": "Statistics.Tester.Seq #0"
+                    }
+                  }
+                },
+                "_fc_id": "id_Ffh9mabx5vf9afc",
+                "name": "ref_F2hzmabx5vf9agc",
+                "display": true,
+                "hidden": false,
+                "_fc_drag_tag": "xProgress",
+                "slot": "F0y5mac6skjzagc"
+              }
+            ],
+            "_fc_id": "id_Fsxfmac6skjnabc",
+            "name": "ref_Fagemac6skjnacc",
+            "display": true,
+            "hidden": false,
+            "_fc_drag_tag": "grid"
+          }
+        ],
+        "options": {
+          "submitBtn": {
+            "show": false,
+            "innerText": "Submit"
+          },
+          "form": {
+            "inline": false,
+            "hideRequiredAsterisk": false,
+            "labelPosition": "right",
+            "size": "default",
+            "labelWidth": "125px"
+          },
+          "resetBtn": {
+            "show": false,
+            "innerText": "Reset"
+          },
+          "formName": "UDS Donwload"
+        }
+      }
+    },
+    "vars": {
+      "af7af829-5aea-4f27-93c7-1f2e34a35ada": {
+        "type": "user",
+        "id": "af7af829-5aea-4f27-93c7-1f2e34a35ada",
+        "name": "UDS"
+      },
+      "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c": {
+        "name": "start",
+        "desc": "",
+        "type": "user",
+        "value": {
+          "type": "number",
+          "initValue": 0,
+          "min": 0,
+          "max": 1
+        },
+        "id": "16fb6eca-aa6a-4b37-beb0-a3429f4f4b4c",
+        "parentId": "af7af829-5aea-4f27-93c7-1f2e34a35ada"
+      }
+    }
+  }
+}

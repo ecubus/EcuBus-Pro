@@ -167,6 +167,9 @@ export type PanelItem = {
   name: string
   rule: any[]
   options: Object
+  document?: import('./panel').PanelDocument
+  filePath?: string
+  fileError?: string
 }
 
 export type LogItem = {

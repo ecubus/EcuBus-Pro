@@ -1,0 +1,202 @@
+{
+  "format": "ecubus-panel",
+  "version": 1,
+  "name": "Telemetry Detail",
+  "document": {
+    "schemaVersion": 2,
+    "width": 500,
+    "height": 380,
+    "controls": [
+      {
+        "id": "detail-title",
+        "type": "text",
+        "label": "LIVE TELEMETRY",
+        "x": 20,
+        "y": 16,
+        "width": 460,
+        "height": 40,
+        "locked": false,
+        "fontSize": 22,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": []
+      },
+      {
+        "id": "detail-Speed",
+        "type": "display",
+        "label": "Speed km/h",
+        "x": 20,
+        "y": 78,
+        "width": 440,
+        "height": 50,
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "numberValueType": "physical",
+        "numberDecimals": 1,
+        "binding": {
+          "kind": "signal",
+          "node": {
+            "type": "signal",
+            "enable": true,
+            "color": "",
+            "id": "can.PanelDemo.Status.signals.Speed",
+            "name": "Speed",
+            "bindValue": {
+              "dbKey": "panel-demo-db",
+              "dbName": "PanelDemo",
+              "frameId": 256,
+              "signalName": "Speed",
+              "startBit": 0,
+              "bitLength": 16
+            }
+          }
+        }
+      },
+      {
+        "id": "detail-Temperature",
+        "type": "display",
+        "label": "Temperature °C",
+        "x": 20,
+        "y": 143,
+        "width": 440,
+        "height": 50,
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "numberValueType": "physical",
+        "numberDecimals": 1,
+        "binding": {
+          "kind": "signal",
+          "node": {
+            "type": "signal",
+            "enable": true,
+            "color": "",
+            "id": "can.PanelDemo.Status.signals.Temperature",
+            "name": "Temperature",
+            "bindValue": {
+              "dbKey": "panel-demo-db",
+              "dbName": "PanelDemo",
+              "frameId": 256,
+              "signalName": "Temperature",
+              "startBit": 16,
+              "bitLength": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "detail-Load",
+        "type": "display",
+        "label": "Load %",
+        "x": 20,
+        "y": 208,
+        "width": 440,
+        "height": 50,
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "numberValueType": "physical",
+        "numberDecimals": 1,
+        "binding": {
+          "kind": "signal",
+          "node": {
+            "type": "signal",
+            "enable": true,
+            "color": "",
+            "id": "can.PanelDemo.Status.signals.Load",
+            "name": "Load",
+            "bindValue": {
+              "dbKey": "panel-demo-db",
+              "dbName": "PanelDemo",
+              "frameId": 256,
+              "signalName": "Load",
+              "startBit": 24,
+              "bitLength": 8
+            }
+          }
+        }
+      },
+      {
+        "id": "detail-Counter",
+        "type": "display",
+        "label": "CAN counter",
+        "x": 20,
+        "y": 273,
+        "width": 440,
+        "height": 50,
+        "locked": false,
+        "fontSize": 14,
+        "color": "",
+        "unit": "",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "initialValue": 0,
+        "pressValue": 1,
+        "releaseValue": 0,
+        "toggle": false,
+        "readOnly": false,
+        "options": [],
+        "numberValueType": "physical",
+        "numberDecimals": 1,
+        "binding": {
+          "kind": "signal",
+          "node": {
+            "type": "signal",
+            "enable": true,
+            "color": "",
+            "id": "can.PanelDemo.Status.signals.Counter",
+            "name": "Counter",
+            "bindValue": {
+              "dbKey": "panel-demo-db",
+              "dbName": "PanelDemo",
+              "frameId": 256,
+              "signalName": "Counter",
+              "startBit": 40,
+              "bitLength": 16
+            }
+          }
+        }
+      }
+    ]
+  }
+}

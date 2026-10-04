@@ -48,6 +48,14 @@ import { useProjectStore } from '@r/stores/project'
 import type { TestEvent } from 'node:test/reporters'
 import { useGlobalStart } from '@r/stores/runtime'
 import i18next from 'i18next'
+import {
+  beginTestLogEntry,
+  createTestLogSeparatorState,
+  endTestLogEntry,
+  noteTestLogWritten,
+  resetTestLogSeparator,
+  testLogMessageIndent
+} from './testLogSeparator'
 interface LogData {
   time: string
   label: string
@@ -64,9 +72,11 @@ const globalStart = useGlobalStart()
 const isDark = useDark()
 const logContainer = ref<HTMLElement>()
 const logBuffer: string[] = []
+const testSeparator = createTestLogSeparatorState()
 function clearLog() {
   terminal.value?.clear()
   logBuffer.length = 0
+  resetTestLogSeparator(testSeparator)
 }
 
 const props = withDefaults(
@@ -190,7 +200,23 @@ const colorCodes = {
   reset: '\x1b[0m' // Reset
 }
 
-function writeToTerminal(time: string, label: string, level: string, message: string) {
+function indentLogMessage(message: string) {
+  const spaces = props.captureTest ? testLogMessageIndent(testSeparator) : 0
+  if (spaces <= 0) return message
+  const pad = ' '.repeat(spaces)
+  return message
+    .split('\n')
+    .map((line) => pad + line)
+    .join('\n')
+}
+
+function writeToTerminal(
+  time: string,
+  label: string,
+  level: string,
+  message: string,
+  kind: 'group' | 'text' = 'text'
+) {
   if (!terminal.value) return
 
   const color = colorCodes[level as keyof typeof colorCodes] || colorCodes.reset
@@ -208,11 +234,18 @@ function writeToTerminal(time: string, label: string, level: string, message: st
       const relativePath = window.path.relative(project.projectInfo.path, path)
       return relativePath
     })
-    line += `${color}${processedMessage}${colorCodes.reset}`
+    line += `${color}${indentLogMessage(processedMessage)}${colorCodes.reset}`
   }
 
   terminal.value.writeln(line)
-  logBuffer.push(`[${time}] [${label}] ${message}`)
+  logBuffer.push(`[${time}] [${label}] ${indentLogMessage(message)}`)
+  if (props.captureTest) noteTestLogWritten(testSeparator, kind)
+}
+
+function writeCaseGap() {
+  if (!terminal.value) return
+  terminal.value.writeln('')
+  logBuffer.push('')
 }
 
 function saveLog() {
@@ -259,73 +292,65 @@ function testLog({
       continue
     }
     if (item.message.data.type == 'test:dequeue') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-      if (testId.value != undefined && !testId.value.includes(key)) {
-        continue
-      }
+      const payload = item.message.data.data
+      const key = payload.name + ':' + payload.line + ':' + payload.column
+      const hidden = testId.value != undefined && !testId.value.includes(key)
+      const { separate } = beginTestLogEntry(testSeparator, payload)
+      if (hidden) continue
+      if (separate) writeCaseGap()
       writeToTerminal(
         time,
-        item.message.data.data.name,
+        payload.name,
         'primary',
-        i18next.t('uds.message.testLog.testStarting', { name: item.message.data.data.name })
+        i18next.t('uds.message.testLog.testStarting', { name: payload.name }),
+        (payload.nesting ?? 0) === 0 ? 'group' : 'text'
       )
     } else if (item.message.data.type == 'test:pass') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-      if (testId.value != undefined && !testId.value.includes(key)) {
-        continue
+      const payload = item.message.data.data
+      const key = payload.name + ':' + payload.line + ':' + payload.column
+      const hidden = testId.value != undefined && !testId.value.includes(key)
+      if (!hidden) {
+        if (payload.skip) {
+          writeToTerminal(
+            time,
+            payload.name,
+            'warning',
+            i18next.t('uds.message.testLog.testSkipped', {
+              name: payload.name,
+              duration: payload.details.duration_ms
+            })
+          )
+        } else {
+          writeToTerminal(
+            time,
+            payload.name,
+            'success',
+            i18next.t('uds.message.testLog.testPassed', {
+              name: payload.name,
+              duration: payload.details.duration_ms
+            })
+          )
+        }
       }
-      if (item.message.data.data.skip) {
-        writeToTerminal(
-          time,
-          item.message.data.data.name,
-          'warning',
-          i18next.t('uds.message.testLog.testSkipped', {
-            name: item.message.data.data.name,
-            duration: item.message.data.data.details.duration_ms
-          })
-        )
-      } else {
-        writeToTerminal(
-          time,
-          item.message.data.data.name,
-          'success',
-          i18next.t('uds.message.testLog.testPassed', {
-            name: item.message.data.data.name,
-            duration: item.message.data.data.details.duration_ms
-          })
-        )
-      }
+      endTestLogEntry(testSeparator, payload)
     } else if (item.message.data.type == 'test:fail') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-      if (testId.value != undefined && !testId.value.includes(key)) {
-        continue
+      const payload = item.message.data.data
+      const key = payload.name + ':' + payload.line + ':' + payload.column
+      const hidden = testId.value != undefined && !testId.value.includes(key)
+      if (!hidden) {
+        const errorMessage = payload.details.error.message
+        writeToTerminal(
+          time,
+          payload.name,
+          'error',
+          i18next.t('uds.message.testLog.testFailed', {
+            name: payload.name,
+            duration: payload.details.duration_ms,
+            error: errorMessage
+          })
+        )
       }
-      const errorMessage = item.message.data.data.details.error.message
-      writeToTerminal(
-        time,
-        item.message.data.data.name,
-        'error',
-        i18next.t('uds.message.testLog.testFailed', {
-          name: item.message.data.data.name,
-          duration: item.message.data.data.details.duration_ms,
-          error: errorMessage
-        })
-      )
+      endTestLogEntry(testSeparator, payload)
     } else if (item.message.data.type == 'test:diagnostic') {
       writeToTerminal(
         time,

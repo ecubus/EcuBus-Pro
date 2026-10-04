@@ -43,7 +43,7 @@
 
 该面板现在使用 `panel.ecpanel`；下面的 GIF 记录的是旧版 UI。
 
-![旧版程序演示](demo.gif)
+![Legacy program demonstration](demo.gif)
 
 ## 代码概览
 

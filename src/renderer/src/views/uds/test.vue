@@ -341,6 +341,13 @@ import { useProjectStore } from '@r/stores/project'
 import editIcon from '@iconify/icons-material-symbols/edit-outline'
 import deleteIcon from '@iconify/icons-material-symbols/delete-outline'
 import type { TestEvent } from 'node:test/reporters'
+import {
+  appendDiscoveredTest,
+  buildTestSubTree,
+  TEST_SENTINEL_NAME,
+  TestTreeMatcher,
+  type DiscoveredTestNode
+} from './testTreeMatch'
 import lightIcon from '@iconify/icons-material-symbols/play-circle-outline-rounded'
 import playIcon from '@iconify/icons-material-symbols/play-arrow'
 import stopIcon from '@iconify/icons-material-symbols/stop-circle-outline'
@@ -413,6 +420,8 @@ const model = ref<NodeItem>({
 })
 
 const isSingleRun = ref<string[] | undefined>(undefined)
+const selectedTestNodeIds = ref<string[] | undefined>(undefined)
+const testMatchers = new Map<string, TestTreeMatcher>()
 function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) {
   handleRefresh(data)
     .then(() => {
@@ -435,30 +444,36 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
           cnt.push(testCnt)
         }
       }
-      const getChildren = (val: TestTree, ids?: string[]) => {
+      const getChildren = (val: TestTree, keys?: string[], nodeIds?: string[]) => {
         for (const item of val.children) {
           if (item.testCnt != undefined) {
             pushCnt(item.testCnt)
-            if (ids) {
-              ids.push(item.id)
+            if (keys) {
+              keys.push(item.eventKey ?? item.id)
+            }
+            if (nodeIds) {
+              nodeIds.push(item.id)
             }
           }
           if (item.children) {
-            getChildren(item, ids)
+            getChildren(item, keys, nodeIds)
           }
         }
       }
       if (runNode.type == 'config') {
         isSingleRun.value = undefined
+        selectedTestNodeIds.value = undefined
         //get node from the tree
 
         getChildren(runNode)
       } else {
-        isSingleRun.value = [id]
+        const nodeIds = [runNode.id]
+        isSingleRun.value = [runNode.eventKey ?? id]
+        selectedTestNodeIds.value = nodeIds
 
         const node = treeRef.value.getNode(id)
         pushCnt(runNode.testCnt)
-        getChildren(runNode, isSingleRun.value)
+        getChildren(runNode, isSingleRun.value, nodeIds)
         if (node) {
           const getParent = (val: any) => {
             if (val.parent && val.parent.data && val.parent.data.type == 'test') {
@@ -471,6 +486,11 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
           getParent(node)
         }
       }
+
+      testMatchers.set(
+        configId,
+        new TestTreeMatcher(configNode.children, selectedTestNodeIds.value)
+      )
 
       const EnableObj: Record<number, boolean> = {}
       for (let i = 0; i < cnt.length; i++) {
@@ -835,62 +855,15 @@ function testLog({
   const data = values
 
   for (const item of data) {
-    if (item.message.data.type == 'test:dequeue') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-
-      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
-        continue
-      }
-      const node = treeRef.value.getNode(key)
-      if (node) {
-        node.data.status = 'running'
-      }
-    } else if (item.message.data.type == 'test:pass') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
-        continue
-      }
-      const node = treeRef.value.getNode(key)
-      if (node) {
-        node.data.status = 'pass'
-        if (item.message.data.data.skip) {
-          node.data.status = 'skip'
-        }
-        // if(item.message.data.data.todo){
-        //     node.data.status='todo'
-        // }
-
-        node.data.time = Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
-      }
-    } else if (item.message.data.type == 'test:fail') {
-      const key =
-        item.message.data.data.name +
-        ':' +
-        item.message.data.data.line +
-        ':' +
-        item.message.data.data.column
-      if (isSingleRun.value != undefined && !isSingleRun.value.includes(key)) {
-        continue
-      }
-      const node = treeRef.value.getNode(key)
-      if (node) {
-        node.data.status = 'fail'
-        // if(item.message.data.data.todo){
-        //     node.data.status='todo'
-        // }
-        node.data.time = Number(item.message.data.data.details.duration_ms / 1000).toFixed(3)
-      }
+    const configId = item.message.id
+    let matcher = testMatchers.get(configId)
+    if (!matcher) {
+      const configNode = tData.value[0]?.children?.find((node) => node.id === configId)
+      if (!configNode) continue
+      matcher = new TestTreeMatcher(configNode.children, selectedTestNodeIds.value)
+      testMatchers.set(configId, matcher)
     }
+    matcher.apply(item.message.data)
   }
 }
 onMounted(() => {
@@ -1000,84 +973,20 @@ function getBuildStatusText() {
   return statusTexts[buildStatus.value as keyof typeof statusTexts]
 }
 
-function buildSubTree(infos: TestEvent[]) {
-  let currentSuite: TestTree | undefined
-  const roots: TestTree[] = []
-  function startTest(event: any) {
-    const originalSuite = currentSuite
-
-    const testId = `${event.name}:${event.line || 0}:${event.column || 0}`
-
-    currentSuite = {
-      id: testId,
+const root2tree = (cnt: number, parent: TestTree, root: DiscoveredTestNode) => {
+  return appendDiscoveredTest(
+    cnt,
+    parent,
+    root,
+    (source): TestTree => ({
+      id: source.id,
       type: 'test',
       canAdd: false,
-      label: event.name,
-      nesting: event.nesting,
-      parent: currentSuite,
+      label: source.label,
+      eventKey: source.eventKey,
       children: []
-    }
-    if (originalSuite?.children) {
-      originalSuite.children.push(currentSuite)
-    }
-    if (!currentSuite.parent) {
-      roots.push(currentSuite)
-    }
-  }
-  for (const event of infos) {
-    switch (event.type) {
-      case 'test:dequeue': {
-        startTest(event.data)
-        break
-      }
-      case 'test:pass':
-      case 'test:fail': {
-        if (!currentSuite) {
-          startTest({ name: 'root', nesting: 0, line: 0, column: 0 })
-        }
-        if (
-          currentSuite!.label !== event.data.name ||
-          currentSuite!.nesting !== event.data.nesting
-        ) {
-          startTest(event.data)
-        }
-        const currentTest: TestTree = currentSuite!
-        if (currentSuite?.nesting === event.data.nesting) {
-          currentSuite = currentSuite.parent
-        }
-
-        const nonCommentChildren = currentTest!.children.filter((c: any) => c.comment == null)
-        // if (nonCommentChildren.length > 0) {
-
-        // } else {
-
-        // }
-        break
-      }
-    }
-  }
-  return roots
-}
-
-const root2tree = (cnt: number, parent: TestTree, root: TestTree) => {
-  const newNode: TestTree = {
-    id: root.id,
-    type: 'test',
-    canAdd: false,
-    label: root.label,
-    children: []
-  }
-  parent.children.push(newNode)
-
-  if (root.children && root.children.length > 0) {
-    for (const child of root.children) {
-      cnt = root2tree(cnt, newNode, child)
-    }
-  } else {
-    newNode.testCnt = cnt
-    cnt++
-  }
-  return cnt
+    })
+  )
 }
 
 async function handleRefresh(data: TestTree) {
@@ -1118,8 +1027,8 @@ async function handleRefresh(data: TestTree) {
       const target = tData.value[0].children?.find((item) => item.id == data.id)
       if (!target) return
 
-      const newtestInfo = testInfo.filter((item: any) => item.data.name != '____ecubus_pro_test___')
-      const roots = buildSubTree(newtestInfo)
+      const newtestInfo = testInfo.filter((item: any) => item.data?.name != TEST_SENTINEL_NAME)
+      const roots = buildTestSubTree(newtestInfo, data.id)
 
       target.children = []
       let cnt = 0

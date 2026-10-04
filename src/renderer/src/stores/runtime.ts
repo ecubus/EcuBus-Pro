@@ -10,6 +10,8 @@ export type TestTree = {
   children: TestTree[]
   time?: string
   status?: 'pass' | 'fail' | 'skip' | 'running'
+  /** `name:line:column` from discovery. Not a tree key; same-named cases share it. */
+  eventKey?: string
   disabled?: boolean
   testCnt?: number
   nesting?: number

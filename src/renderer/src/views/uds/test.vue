@@ -143,7 +143,12 @@
                   </div>
                 </div>
               </el-popover>
-              <div v-else-if="data.type === 'test'" class="tree-node">
+              <div
+                v-else-if="data.type === 'test'"
+                class="tree-node"
+                @mouseenter="highlightLog(data)"
+                @mouseleave="highlightLog(null)"
+              >
                 <span
                   :class="{
                     treeLabel: true,
@@ -405,6 +410,10 @@ function getParentConfigId(node: any): string {
   return currentNode?.data?.id || ''
 }
 
+function highlightLog(data: TestTree | null) {
+  traceRef.value?.highlightTest(data?.type === 'test' ? data.id : null)
+}
+
 function nodeClick(data: TestTree) {
   // if (data.type === 'config') {
   //     handleEdit(data)
@@ -438,6 +447,7 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
       if (clearLog) {
         traceRef.value.clearLog()
       }
+      traceRef.value?.setTestLogPrefix(configId)
       const cnt: number[] = []
       const pushCnt = (testCnt?: number) => {
         if (testCnt != undefined && !cnt.includes(testCnt)) {
@@ -449,7 +459,7 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
           if (item.testCnt != undefined) {
             pushCnt(item.testCnt)
             if (keys) {
-              keys.push(item.eventKey ?? item.id)
+              keys.push(item.id)
             }
             if (nodeIds) {
               nodeIds.push(item.id)
@@ -468,7 +478,7 @@ function handleRun(data: TestTree, clearLog: boolean = true, singleId?: string) 
         getChildren(runNode)
       } else {
         const nodeIds = [runNode.id]
-        isSingleRun.value = [runNode.eventKey ?? id]
+        isSingleRun.value = [runNode.id]
         selectedTestNodeIds.value = nodeIds
 
         const node = treeRef.value.getNode(id)

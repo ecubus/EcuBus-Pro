@@ -239,17 +239,11 @@ export default class UdsTester {
     })
 
     this.worker.stdout.on('data', (data: any) => {
-      if (!this.selfStop) {
-        if (this.env.MODE == 'test') {
-          const testStartRegex = /^<<< TEST START .+>>>$/
-          const testEndRegex = /^<<< TEST END .+>>>$/
-          const str = data.toString().trim()
-          if (testStartRegex.test(str) || testEndRegex.test(str)) {
-            return
-          }
-        }
-        this.log.scriptMsg(data.toString().replace(/\n$/, ''), this.ts)
-      }
+      if (this.selfStop) return
+      // Test mode prints are forwarded with their case. Raw stdout repeats
+      // them after the run, which would look like a second unscoped copy.
+      if (this.env.MODE == 'test') return
+      this.log.scriptMsg(data.toString().replace(/\n$/, ''), this.ts)
     })
 
     this.worker.stderr.on('data', (data: any) => {
@@ -376,7 +370,10 @@ export default class UdsTester {
         // Add the missing third parameter (message) to fix the linter error
         this.log.testInfo(this.testOptions?.id, testEvent)
       }
-      this.testEvents.push(testEvent)
+      // User prints are not part of the test tree.
+      if ((testEvent.type as string) !== 'test:stdout') {
+        this.testEvents.push(testEvent)
+      }
       if (this.getInfoPromise) {
         if (testEvent.type == 'test:pass' && testEvent.data.name == '____ecubus_pro_test___') {
           this.getInfoPromise.resolve(this.testEvents)

@@ -688,6 +688,9 @@
   },
   "project": {
     "displayName": "Panel Showcase",
+    "example": {
+      "catalog": "PANEL"
+    },
     "wins": {
       "pdemo-showcase": {
         "id": "pdemo-showcase",

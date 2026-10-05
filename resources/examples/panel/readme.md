@@ -41,9 +41,9 @@ This example demonstrates a simple program execution panel in EcuBus-Pro, includ
 
 ## Example Panel
 
-The panel now uses `panel.ecpanel`; the GIF below records the legacy UI.
+The panel is stored in `panel.ecpanel`. The screenshot shows it running right after **Start** is pressed.
 
-![Legacy program demonstration](demo.gif)
+![Program panel](panel.png)
 
 ## Code Overview
 

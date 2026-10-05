@@ -271,6 +271,9 @@
   },
   "project": {
     "displayName": "HTML Control",
+    "example": {
+      "catalog": "PANEL"
+    },
     "wins": {
       "phtml-demo": {
         "id": "phtml-demo",

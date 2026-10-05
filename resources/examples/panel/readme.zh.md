@@ -41,9 +41,9 @@
 
 ## 示例面板
 
-该面板现在使用 `panel.ecpanel`；下面的 GIF 记录的是旧版 UI。
+面板保存在 `panel.ecpanel` 中。截图为按下 **Start** 后的运行状态。
 
-![Legacy program demonstration](demo.gif)
+![Program 面板](panel.png)
 
 ## 代码概览
 

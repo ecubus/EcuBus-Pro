@@ -33,24 +33,24 @@ describe('test log case grouping', () => {
     expect(start(state, 'CAN Test', 0)).toMatchObject({ nesting: 0, indent: 0 })
     expect(openTestLogFrames(state).map((frame) => frame.band)).toEqual([false])
 
-    expect(start(state, 'pass case', 1)).toMatchObject({ indent: 2 })
+    expect(start(state, 'pass case', 1)).toMatchObject({ indent: 8 })
     expect(openTestLogFrames(state).map((frame) => frame.band)).toEqual([false, true])
     finish(state, 'pass case', 1)
 
-    expect(start(state, 'fail case', 1).indent).toBe(2)
+    expect(start(state, 'fail case', 1).indent).toBe(8)
     expect(openTestLogFrames(state).at(-1)?.band).toBe(true)
     finish(state, 'fail case', 1)
 
     start(state, 'parent with subtests', 1)
-    expect(start(state, 'nested one', 2)).toMatchObject({ indent: 4 })
-    expect(currentTestLogIndent(state)).toBe(4)
+    expect(start(state, 'nested one', 2)).toMatchObject({ indent: 16 })
+    expect(currentTestLogIndent(state)).toBe(16)
     expect(openTestLogFrames(state).at(-1)?.band).toBe(false)
     expect(openTestLogFrames(state).at(-2)?.band).toBe(true)
     finish(state, 'nested one', 2)
-    expect(currentTestLogIndent(state)).toBe(2)
+    expect(currentTestLogIndent(state)).toBe(8)
 
     start(state, 'nested two', 2)
-    expect(currentTestLogIndent(state)).toBe(4)
+    expect(currentTestLogIndent(state)).toBe(16)
     finish(state, 'nested two', 2)
     finish(state, 'parent with subtests', 1)
     expect(finish(state, 'CAN Test', 0)).toEqual({
@@ -70,11 +70,11 @@ describe('test log case grouping', () => {
     const state = createTestLogSeparatorState()
     start(state, 'suite', 0)
     start(state, 'parent', 1)
-    expect(start(state, 'child', 2).indent).toBe(4)
-    expect(start(state, 'grandchild', 3).indent).toBe(6)
+    expect(start(state, 'child', 2).indent).toBe(16)
+    expect(start(state, 'grandchild', 3).indent).toBe(24)
     finish(state, 'grandchild', 3)
     finish(state, 'child', 2)
-    expect(currentTestLogIndent(state)).toBe(2)
+    expect(currentTestLogIndent(state)).toBe(8)
   })
 
   it('keeps a file root open when a same-nesting suite finishes', () => {

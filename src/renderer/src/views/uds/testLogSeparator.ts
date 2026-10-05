@@ -51,11 +51,8 @@ export function formatTestLogId(node: TestLogNode, seq: number) {
   return `${node.name}:${seq}`
 }
 
-/**
- * Columns per tree level. The test tree steps each child by 18px, which is
- * two columns of the 14px log font. Nesting 0 is the left edge.
- */
-export const testLogIndentStep = 2
+/** Columns of message indent per tree level. Nesting 0 stays at the left. */
+export const testLogIndentStep = 8
 
 export function testLogMessageIndent(nesting: number) {
   if (nesting <= 0) return 0

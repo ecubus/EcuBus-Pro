@@ -103,11 +103,6 @@ const railColors = {
   dark: ['#7eb6e0', '#e0c07a'],
   light: ['#3d7eae', '#b8893a']
 }
-const hoverColors = {
-  dark: 'rgba(90, 170, 255, 0.32)',
-  light: 'rgba(40, 120, 220, 0.22)'
-}
-
 function bufferLine() {
   const buffer = terminal.value?.buffer.active
   if (!buffer) return 0
@@ -119,7 +114,7 @@ function disposeHover() {
   hoverDecorations.length = 0
 }
 
-function decorateRow(marker: IMarker, color: string, first: boolean, hover = false, rail = '') {
+function decorateRow(marker: IMarker, color: string, first: boolean, rail?: string) {
   if (!terminal.value || marker.isDisposed) return undefined
   const decoration = terminal.value.registerDecoration({
     marker,
@@ -131,14 +126,32 @@ function decorateRow(marker: IMarker, color: string, first: boolean, hover = fal
   decoration?.onRender((element) => {
     element.style.pointerEvents = 'none'
     element.style.background = color
-    const edge = rail || (isDark.value ? '#8ec7ff' : '#2f6fed')
-    element.style.boxShadow = hover
-      ? `inset 3px 0 0 ${edge}`
-      : first
-        ? `inset 3px 0 0 ${edge}, inset 0 1px 0 rgba(255,255,255,0.35)`
-        : `inset 3px 0 0 ${edge}`
+    if (!rail) {
+      element.style.boxShadow = 'none'
+      return
+    }
+    element.style.boxShadow = first
+      ? `inset 3px 0 0 ${rail}, inset 0 1px 0 rgba(255,255,255,0.35)`
+      : `inset 3px 0 0 ${rail}`
   })
   return decoration
+}
+
+/** A little more of the same band tint. Hover stays in the band's color. */
+function liftBandColor(color: string) {
+  const match = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/)
+  if (!match) return color
+  const alpha = Math.min(0.34, Number(match[4]) + 0.12)
+  return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${alpha.toFixed(2)})`
+}
+
+function restingBandAt(line: number) {
+  for (const block of logBlocks.values()) {
+    if (!block.band || block.shade < 0) continue
+    const index = block.rows.findIndex((row) => row.marker.line === line)
+    if (index >= 0) return { paint: bandPaint(block.shade), first: index === 0 }
+  }
+  return undefined
 }
 
 function bandPaint(shade: number) {
@@ -154,7 +167,7 @@ function paintBlock(block: LogBlock) {
   const paint = bandPaint(block.shade)
   block.rows.forEach((row, index) => {
     row.decoration?.dispose()
-    row.decoration = decorateRow(row.marker, paint.color, index === 0, false, paint.rail)
+    row.decoration = decorateRow(row.marker, paint.color, index === 0, paint.rail)
   })
 }
 
@@ -185,13 +198,7 @@ function extendBlock(id: string, band: boolean, start: number, end: number) {
     if (block.band && block.shade >= 0) {
       const paint = bandPaint(block.shade)
       try {
-        row.decoration = decorateRow(
-          marker,
-          paint.color,
-          block.rows.length === 0,
-          false,
-          paint.rail
-        )
+        row.decoration = decorateRow(marker, paint.color, block.rows.length === 0, paint.rail)
       } catch {
         row.decoration = undefined
       }
@@ -250,10 +257,15 @@ function highlightTest(id: string | null) {
       }
     }
   }
-  const color = isDark.value ? hoverColors.dark : hoverColors.light
-  const rail = isDark.value ? '#b9dcff' : '#1d4f91'
-  block.rows.forEach((row, index) => {
-    const decoration = decorateRow(row.marker, color, index === 0, true, rail)
+  const plain = isDark.value ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.045)'
+  block.rows.forEach((row) => {
+    const resting = restingBandAt(row.marker.line)
+    const decoration = decorateRow(
+      row.marker,
+      resting ? liftBandColor(resting.paint.color) : plain,
+      resting?.first ?? false,
+      resting?.paint.rail
+    )
     if (decoration) hoverDecorations.push(decoration)
   })
 }

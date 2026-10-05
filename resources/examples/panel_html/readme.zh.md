@@ -1,47 +1,47 @@
-# HTML Control Example
+# HTML 控制示例
 
-Open `HtmlControl.ecb`. It uses its own two simulate CAN channels, so no hardware is required. An EcuBus-Pro build with the new Panel is needed.
+打开 `HtmlControl.ecb`。它使用自身两个模拟 CAN 通道，因此无需硬件。需要带有新 Panel 的 EcuBus-Pro 构建版本。
 
-![HTML Control running](html-control.png)
+![HTML 控制运行中](html-control.png)
 
-## Run
+## 运行
 
-1. Click **START** on the panel. The first run compiles `ecu.ts`.
-2. Drag Load inside the HTML control: the native slider on the left and the progress bar follow, and CAN speed shows twice the load.
-3. Toggle the native Enabled switch on the left: the HTML checkbox follows, and the speed drops to 0 when disabled.
-4. In the **HTML Command** interactive window, start periodic sending of `0x101 Command`. If the window is hidden, open it from the interactive node menu.
-5. Enter `45` in the HTML CAN target and click **Set signal**. ECU received shows `45 %`, Command frames keep increasing, and the speed becomes `90.0 km/h`.
-6. Click **Unsubscribe**: the HTML stops updating automatically; **Read values** reads once; **Subscribe** restores the subscription.
-7. Click **STOP**: write controls are disabled. Calling the write API directly also returns `Panel is stopped`.
+1. 在面板上点击 **START**。首次运行会编译 `ecu.ts`。
+2. 在 HTML 控件内拖动 Load：左侧的原生滑块和进度条会跟随变化，CAN 速度显示为负载的两倍。
+3. 切换左侧的原生 Enabled 开关：HTML 复选框会跟随变化，禁用时速度降至 0。
+4. 在 **HTML Command** 交互窗口中，启动 `0x101 Command` 的周期发送。如果窗口已隐藏，请从交互节点菜单中将其打开。
+5. 在 HTML CAN target 中输入 `45`，然后点击 **Set signal**。 ECU received 显示 `45 %`，Command 帧持续增加，速度变为 `90.0 km/h`。
+6. 点击 **Unsubscribe**：HTML 停止自动更新；**Read values** 执行一次读取；**Subscribe** 恢复订阅。
+7. 点击 **STOP**：写入控件被禁用。直接调用写入 API 也会返回 `Panel is stopped`。
 
-Before periodic sending starts, Load is controlled by the slider. Once it starts, the ECU takes the Target from every Command it receives, overriding the manual Load. Stop periodic Command sending before testing the slider again.
+在周期发送开始之前，Load 由滑块控制。一旦开始，ECU 会从接收到的每个 Command 中获取 Target，覆盖手动设置的 Load。再次测试滑块之前，请先停止周期 Command 发送。
 
-| Channel                                      | Node                              | Role                                     |
-| -------------------------------------------- | --------------------------------- | ---------------------------------------- |
-| HTML_ECU / simulate 0   | HTML ECU / ecu.ts | Sends 0x100 every 100 ms, receives 0x101 |
-| HTML_PANEL / simulate 1 | HTML Command                      | Sends 0x101 every 100 ms, receives 0x100 |
+| 通道                                     | 节点                                | 角色                         |
+| -------------------------------------- | --------------------------------- | -------------------------- |
+| HTML_ECU / 模拟 0   | HTML ECU / ecu.ts | 每 100 ms 发送 0x100，接收 0x101 |
+| HTML_PANEL / 模拟 1 | HTML 命令                           | 每 100 ms 发送 0x101，接收 0x100 |
 
-`panel.setSignal` updates the signal cache and does not send a frame by itself. Success does not mean the ECU received it; check ECU received and Command frames to confirm bus traffic.
+`panel.setSignal` 更新信号缓存，其本身不会发送帧。成功并不意味着 ECU 已接收；请检查 ECU received 和 Command 帧以确认总线通信。
 
-## Files
+## 文件
 
-| File                            | Content                                                         |
-| ------------------------------- | --------------------------------------------------------------- |
-| HtmlControl.ecb | Variables, database, simulate channels and panel reference      |
-| html.ecpanel    | Standalone panel with embedded HTML/CSS and JavaScript          |
-| control.html    | Editable HTML/CSS source                                        |
-| control.js      | Editable bridge API example                                     |
-| ecu.ts          | Simulated ECU script                                            |
-| HtmlDemo.dbc    | Status.Speed and Command.Target |
-| sync-panel.mjs  | Copies both source files into html.ecpanel      |
+| 文件                              | 内容                                                            |
+| ------------------------------- | ------------------------------------------------------------- |
+| HtmlControl.ecb | 变量、数据库、模拟通道和面板引用                                              |
+| html.ecpanel    | 带有嵌入式 HTML/CSS 和 JavaScript 的独立面板                             |
+| control.html    | 可编辑的 HTML/CSS 源文件                                             |
+| control.js      | 可编辑的桥接 API 示例                                                 |
+| ecu.ts          | 模拟 ECU 脚本                                                     |
+| HtmlDemo.dbc    | Status.Speed 和 Command.Target |
+| sync-panel.mjs  | 将两个源文件复制到 html.ecpanel 中                      |
 
-After editing `control.html` or `control.js`, run from the repository root:
+编辑 `control.html` 或 `control.js` 后，请从仓库根目录运行：
 
 ```powershell
 node resources/examples/panel_html/sync-panel.mjs
 ```
 
-Then close and reopen the example project so the app reads the `.ecpanel` again. Close any window editing this panel before syncing so it does not save older content over the file later. At runtime only the content inside `.ecpanel` is used; the `.html` / `.js` source files are not loaded.
+然后关闭并重新打开示例项目，以便应用再次读取 `.ecpanel`。同步之前，请关闭任何正在编辑此面板的窗口，以免之后将较旧的内容保存并覆盖该文件。运行时仅使用 `.ecpanel` 中的内容；不会加载 `.html` / `.js` 源文件。
 
 ## API
 
@@ -59,8 +59,8 @@ const offSignal = await panel.onSignal('HtmlDemo.Speed', signal => console.log(s
 offSignal()
 ```
 
-Variable callbacks receive the value itself; signal callbacks receive an object with `rawValue` and `physicalValue`. Variable names use the full path; signal names are `database.signal`, and ambiguous signal names in the same database are rejected. `getSignal()` returns the latest decoded transmitted or received frame sample in the current measurement, independent of HTML subscriptions; without a sample it falls back to the project database value, which may be unset. `setSignal()` updates the transmit database; success does not confirm transmission or ECU processing, so reading immediately after writing is not guaranteed to return the new value. Signal recording starts with measurement so a first read or a newly opened window can retrieve earlier one-shot samples.
+变量回调接收值本身；信号回调接收一个包含 `rawValue` 和 `physicalValue` 的对象。变量名使用完整路径；信号名为 `database.signal`，同一数据库中含义模糊的信号名会被拒绝。 `getSignal()` 返回当前测量中最新解码的发送或接收帧采样，与 HTML 订阅无关；在没有采样时，它会回退到项目数据库值，该值可能未设置。 `setSignal()` 更新发送数据库；成功并不能确认已发送或 ECU 已处理，因此写入后立即读取不保证会返回新值。信号记录随测量一起开始，因此首次读取或新打开的窗口可以获取到更早的一次性采样。
 
-`HtmlLevel` and `HtmlEnabled` are bound to native controls with Remember value on, so their values are written back to the project when measurement stops; `HtmlRxTarget` and `HtmlRxCount` are runtime state and are not written back. The HTML runs in a sandboxed iframe through `window.panel` and cannot use Node, Electron IPC, `require` or `import ... from 'ECB'` directly. `ECB` is only for node scripts such as `ecu.ts`.
+`HtmlLevel` 和 `HtmlEnabled` 绑定到启用了 Remember value 的原生控件，因此它们的值会在测量停止时写回项目；`HtmlRxTarget` 和 `HtmlRxCount` 是运行时状态，不会写回。 HTML 通过 `window.panel` 在沙箱化的 iframe 中运行，不能使用 Node、Electron IPC、`require` 或 `import`…… from 'ECB'`。 `ECB`仅用于诸如`ecu.ts\` 之类的 node 脚本。
 
-See the [Panel documentation](../../../docs/um/panel/index.md) for usage.
+有关用法，请参阅 [Panel 文档](../../../docs/um/panel/index.md)。

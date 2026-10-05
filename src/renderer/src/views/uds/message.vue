@@ -573,6 +573,16 @@ function testLog({
       }
       const ended = endTestLogEntry(testSeparator, payload)
       if (ended?.promoteBand) afterTerminalWrite(() => promoteBlock(ended.id))
+    } else if (item.message.data.type == 'test:stdout') {
+      const message = String((item.message.data.data as { message?: string }).message ?? '')
+        .split(/\r?\n/)
+        .filter((line) => {
+          const trimmed = line.trim()
+          return trimmed.length > 0 && !/^<<< TEST (START|END) .+>>>$/.test(trimmed)
+        })
+        .join('\n')
+      if (!message) continue
+      writeToTerminal(time, 'print', 'info', message)
     } else if (item.message.data.type == 'test:diagnostic') {
       writeToTerminal(
         time,

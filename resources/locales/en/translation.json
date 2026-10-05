@@ -2684,10 +2684,10 @@
         "saveMessage": "Save Message"
       },
       "testLog": {
-        "testStarting": "----- Test {{name}} starting -----",
-        "testPassed": "----- Test {{name}} passed, {{duration}}ms -----",
-        "testSkipped": "----- Test {{name}} skipped, {{duration}}ms -----",
-        "testFailed": "----- Test {{name}} failed, {{duration}}ms, details: {{error}} -----",
+        "testStarting": "START  Test {{name}} starting",
+        "testPassed": "PASS   Test {{name}} passed, {{duration}}ms",
+        "testSkipped": "SKIP   Test {{name}} skipped, {{duration}}ms",
+        "testFailed": "FAIL   Test {{name}} failed, {{duration}}ms, details: {{error}}",
         "testDiagnostic": "Test Diagnostic"
       }
     },

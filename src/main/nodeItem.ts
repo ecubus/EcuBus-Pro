@@ -168,11 +168,7 @@ export class NodeClass {
         this.testOptions
       )
       if (this.testOptions) {
-        this.log?.systemMsg(
-          `----- Test Config ${this.nodeItem.name} starting -----`,
-          getTsUs(),
-          'info'
-        )
+        this.log?.systemMsg(`START  Test Config ${this.nodeItem.name} starting`, getTsUs(), 'info')
       }
     }
   }
@@ -829,7 +825,7 @@ export class NodeClass {
     const info = await this.pool?.getTestInfo()
     if (this.testOptions) {
       this.log?.systemMsg(
-        `----- Test Config ${this.nodeItem.name} finished, total time: ${((getTsUs() - this.startTs) / 1000).toFixed(2)}ms -----`,
+        `DONE   Test Config ${this.nodeItem.name} finished, total time: ${((getTsUs() - this.startTs) / 1000).toFixed(2)}ms`,
         getTsUs(),
         'info'
       )

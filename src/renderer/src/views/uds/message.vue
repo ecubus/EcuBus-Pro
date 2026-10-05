@@ -36,7 +36,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, shallowRef, onMounted, onUnmounted, computed, toRef, watch, nextTick } from 'vue'
-import { Terminal } from '@xterm/xterm'
+import { Terminal, IDecoration, IMarker } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { CanvasAddon } from '@xterm/addon-canvas'
 import '@xterm/xterm/css/xterm.css'
@@ -51,10 +51,11 @@ import i18next from 'i18next'
 import {
   beginTestLogEntry,
   createTestLogSeparatorState,
+  currentTestLogIndent,
   endTestLogEntry,
-  noteTestLogWritten,
-  resetTestLogSeparator,
-  testLogMessageIndent
+  findOpenTestLogId,
+  openTestLogFrames,
+  resetTestLogSeparator
 } from './testLogSeparator'
 interface LogData {
   time: string
@@ -73,7 +74,194 @@ const isDark = useDark()
 const logContainer = ref<HTMLElement>()
 const logBuffer: string[] = []
 const testSeparator = createTestLogSeparatorState()
+
+interface LogRow {
+  marker: IMarker
+  decoration?: IDecoration
+}
+
+interface LogBlock {
+  id: string
+  band: boolean
+  shade: number
+  rows: LogRow[]
+  coveredEnd: number
+}
+
+const logBlocks = new Map<string, LogBlock>()
+const hoverDecorations: IDecoration[] = []
+let hoveredTestId: string | null = null
+let nextBandShade = 0
+let writeChain: Promise<void> = Promise.resolve()
+let writeGeneration = 0
+
+const bandColors = {
+  dark: ['rgba(126, 178, 220, 0.18)', 'rgba(214, 176, 108, 0.16)'],
+  light: ['rgba(70, 130, 180, 0.16)', 'rgba(180, 140, 60, 0.14)']
+}
+const railColors = {
+  dark: ['#7eb6e0', '#e0c07a'],
+  light: ['#3d7eae', '#b8893a']
+}
+const hoverColors = {
+  dark: 'rgba(90, 170, 255, 0.32)',
+  light: 'rgba(40, 120, 220, 0.22)'
+}
+
+function bufferLine() {
+  const buffer = terminal.value?.buffer.active
+  if (!buffer) return 0
+  return buffer.baseY + buffer.cursorY
+}
+
+function disposeHover() {
+  for (const decoration of hoverDecorations) decoration.dispose()
+  hoverDecorations.length = 0
+}
+
+function decorateRow(marker: IMarker, color: string, first: boolean, hover = false, rail = '') {
+  if (!terminal.value || marker.isDisposed) return undefined
+  const decoration = terminal.value.registerDecoration({
+    marker,
+    x: 0,
+    width: Math.max(terminal.value.cols, 1),
+    height: 1,
+    layer: 'bottom'
+  })
+  decoration?.onRender((element) => {
+    element.style.pointerEvents = 'none'
+    element.style.background = color
+    const edge = rail || (isDark.value ? '#8ec7ff' : '#2f6fed')
+    element.style.boxShadow = hover
+      ? `inset 3px 0 0 ${edge}`
+      : first
+        ? `inset 3px 0 0 ${edge}, inset 0 1px 0 rgba(255,255,255,0.35)`
+        : `inset 3px 0 0 ${edge}`
+  })
+  return decoration
+}
+
+function bandPaint(shade: number) {
+  const theme = isDark.value ? 'dark' : 'light'
+  return {
+    color: bandColors[theme][shade % 2],
+    rail: railColors[theme][shade % 2]
+  }
+}
+
+function paintBlock(block: LogBlock) {
+  if (!block.band || block.shade < 0) return
+  const paint = bandPaint(block.shade)
+  block.rows.forEach((row, index) => {
+    row.decoration?.dispose()
+    row.decoration = decorateRow(row.marker, paint.color, index === 0, false, paint.rail)
+  })
+}
+
+function ensureBlock(id: string, band: boolean) {
+  let block = logBlocks.get(id)
+  if (!block) {
+    block = {
+      id,
+      band,
+      shade: band ? nextBandShade++ : -1,
+      rows: [],
+      coveredEnd: -1
+    }
+    logBlocks.set(id, block)
+  }
+  return block
+}
+
+function extendBlock(id: string, band: boolean, start: number, end: number) {
+  if (!terminal.value || end < start) return
+  const block = ensureBlock(id, band)
+  const from = block.coveredEnd < 0 ? start : block.coveredEnd + 1
+  const cursor = bufferLine()
+  for (let line = from; line <= end; line++) {
+    const marker = terminal.value.registerMarker(line - cursor)
+    if (!marker || marker.isDisposed) continue
+    const row: LogRow = { marker }
+    if (block.band && block.shade >= 0) {
+      const paint = bandPaint(block.shade)
+      try {
+        row.decoration = decorateRow(
+          marker,
+          paint.color,
+          block.rows.length === 0,
+          false,
+          paint.rail
+        )
+      } catch {
+        row.decoration = undefined
+      }
+    }
+    block.rows.push(row)
+  }
+  if (end > block.coveredEnd) block.coveredEnd = end
+}
+
+function promoteBlock(id: string) {
+  const block = logBlocks.get(id)
+  if (!block || block.band) return
+  block.band = true
+  block.shade = nextBandShade++
+  paintBlock(block)
+}
+
+function repaintBands() {
+  const hovered = hoveredTestId
+  disposeHover()
+  hoveredTestId = null
+  for (const block of logBlocks.values()) paintBlock(block)
+  if (hovered) highlightTest(hovered)
+}
+
+function disposeBlocks() {
+  disposeHover()
+  hoveredTestId = null
+  for (const block of logBlocks.values()) {
+    for (const row of block.rows) {
+      row.decoration?.dispose()
+      row.marker.dispose()
+    }
+  }
+  logBlocks.clear()
+  nextBandShade = 0
+}
+
+function highlightTest(id: string | null) {
+  const previous = hoveredTestId
+  disposeHover()
+  hoveredTestId = null
+  if (previous) {
+    for (const block of logBlocks.values()) paintBlock(block)
+  }
+  if (!id) return
+  const block = logBlocks.get(id)
+  if (!block) return
+  hoveredTestId = id
+  const lines = new Set(block.rows.map((row) => row.marker.line))
+  for (const other of logBlocks.values()) {
+    for (const row of other.rows) {
+      if (row.decoration && lines.has(row.marker.line)) {
+        row.decoration.dispose()
+        row.decoration = undefined
+      }
+    }
+  }
+  const color = isDark.value ? hoverColors.dark : hoverColors.light
+  const rail = isDark.value ? '#b9dcff' : '#1d4f91'
+  block.rows.forEach((row, index) => {
+    const decoration = decorateRow(row.marker, color, index === 0, true, rail)
+    if (decoration) hoverDecorations.push(decoration)
+  })
+}
+
 function clearLog() {
+  writeGeneration++
+  writeChain = Promise.resolve()
+  disposeBlocks()
   terminal.value?.clear()
   logBuffer.length = 0
   resetTestLogSeparator(testSeparator)
@@ -106,7 +294,8 @@ const testId = toRef(props, 'testId')
 
 defineExpose({
   clearLog,
-  getData
+  getData,
+  highlightTest
 })
 
 watch(globalStart, (val) => {
@@ -177,6 +366,7 @@ const terminalTheme = computed(() => {
 watch(isDark, () => {
   if (terminal.value && terminalTheme.value) {
     terminal.value.options.theme = terminalTheme.value
+    repaintBands()
   }
 })
 
@@ -201,7 +391,7 @@ const colorCodes = {
 }
 
 function indentLogMessage(message: string) {
-  const spaces = props.captureTest ? testLogMessageIndent(testSeparator) : 0
+  const spaces = props.captureTest ? currentTestLogIndent(testSeparator) : 0
   if (spaces <= 0) return message
   const pad = ' '.repeat(spaces)
   return message
@@ -210,16 +400,13 @@ function indentLogMessage(message: string) {
     .join('\n')
 }
 
-function writeToTerminal(
-  time: string,
-  label: string,
-  level: string,
-  message: string,
-  kind: 'group' | 'text' = 'text'
-) {
+function writeToTerminal(time: string, label: string, level: string, message: string) {
   if (!terminal.value) return
 
   const color = colorCodes[level as keyof typeof colorCodes] || colorCodes.reset
+  const owned = props.captureTest
+    ? openTestLogFrames(testSeparator).map((frame) => ({ ...frame }))
+    : []
 
   let line = ''
   if (props.fields.includes('time')) {
@@ -237,15 +424,37 @@ function writeToTerminal(
     line += `${color}${indentLogMessage(processedMessage)}${colorCodes.reset}`
   }
 
-  terminal.value.writeln(line)
   logBuffer.push(`[${time}] [${label}] ${indentLogMessage(message)}`)
-  if (props.captureTest) noteTestLogWritten(testSeparator, kind)
+  // xterm parses writes asynchronously, so the cursor only moves in the callback.
+  const generation = writeGeneration
+  writeChain = writeChain.then(
+    () =>
+      new Promise((resolve) => {
+        if (!terminal.value || generation !== writeGeneration) {
+          resolve()
+          return
+        }
+        const start = bufferLine()
+        terminal.value.writeln(line, () => {
+          if (generation !== writeGeneration) {
+            resolve()
+            return
+          }
+          const end = bufferLine() - 1
+          for (const frame of owned) extendBlock(frame.id, frame.band, start, end)
+          if (hoveredTestId) highlightTest(hoveredTestId)
+          resolve()
+        })
+      })
+  )
 }
 
-function writeCaseGap() {
-  if (!terminal.value) return
-  terminal.value.writeln('')
-  logBuffer.push('')
+function afterTerminalWrite(fn: () => void) {
+  const generation = writeGeneration
+  writeChain = writeChain.then(() => {
+    if (generation !== writeGeneration) return
+    fn()
+  })
 }
 
 function saveLog() {
@@ -293,22 +502,20 @@ function testLog({
     }
     if (item.message.data.type == 'test:dequeue') {
       const payload = item.message.data.data
-      const key = payload.name + ':' + payload.line + ':' + payload.column
-      const hidden = testId.value != undefined && !testId.value.includes(key)
-      const { separate } = beginTestLogEntry(testSeparator, payload)
+      const begun = beginTestLogEntry(testSeparator, payload)
+      const hidden = testId.value != undefined && !testId.value.includes(begun.id)
       if (hidden) continue
-      if (separate) writeCaseGap()
       writeToTerminal(
         time,
         payload.name,
         'primary',
-        i18next.t('uds.message.testLog.testStarting', { name: payload.name }),
-        (payload.nesting ?? 0) === 0 ? 'group' : 'text'
+        i18next.t('uds.message.testLog.testStarting', { name: payload.name })
       )
     } else if (item.message.data.type == 'test:pass') {
       const payload = item.message.data.data
-      const key = payload.name + ':' + payload.line + ':' + payload.column
-      const hidden = testId.value != undefined && !testId.value.includes(key)
+      const openId = findOpenTestLogId(testSeparator, payload)
+      const hidden =
+        testId.value != undefined && (openId == undefined || !testId.value.includes(openId))
       if (!hidden) {
         if (payload.skip) {
           writeToTerminal(
@@ -332,11 +539,13 @@ function testLog({
           )
         }
       }
-      endTestLogEntry(testSeparator, payload)
+      const ended = endTestLogEntry(testSeparator, payload)
+      if (ended?.promoteBand) afterTerminalWrite(() => promoteBlock(ended.id))
     } else if (item.message.data.type == 'test:fail') {
       const payload = item.message.data.data
-      const key = payload.name + ':' + payload.line + ':' + payload.column
-      const hidden = testId.value != undefined && !testId.value.includes(key)
+      const openId = findOpenTestLogId(testSeparator, payload)
+      const hidden =
+        testId.value != undefined && (openId == undefined || !testId.value.includes(openId))
       if (!hidden) {
         const errorMessage = payload.details.error.message
         writeToTerminal(
@@ -350,7 +559,8 @@ function testLog({
           })
         )
       }
-      endTestLogEntry(testSeparator, payload)
+      const ended = endTestLogEntry(testSeparator, payload)
+      if (ended?.promoteBand) afterTerminalWrite(() => promoteBlock(ended.id))
     } else if (item.message.data.type == 'test:diagnostic') {
       writeToTerminal(
         time,
@@ -363,6 +573,7 @@ function testLog({
 }
 
 let keydownHandler: ((event: KeyboardEvent) => void) | undefined
+let resizeListener: { dispose: () => void } | undefined
 
 let resizeObserver: ResizeObserver | null = null
 let resizeRaf = 0
@@ -384,6 +595,7 @@ onMounted(async () => {
 
   // Initialize terminal
   terminal.value = new Terminal({
+    allowProposedApi: true,
     theme: terminalTheme.value,
     fontSize: 14,
     fontFamily: 'Consolas, "Courier New", monospace',
@@ -405,6 +617,9 @@ onMounted(async () => {
     terminal.value.loadAddon(canvasAddon.value)
 
     fitAddon.value.fit()
+    resizeListener = terminal.value.onResize(() => {
+      repaintBands()
+    })
 
     // Enable keyboard shortcuts on document level
     keydownHandler = (event: KeyboardEvent) => {
@@ -476,6 +691,9 @@ onUnmounted(() => {
     resizeObserver.disconnect()
     resizeObserver = null
   }
+
+  disposeBlocks()
+  resizeListener?.dispose()
 
   // Safely dispose terminal (which will dispose all loaded addons)
   if (terminal.value) {

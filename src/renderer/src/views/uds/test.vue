@@ -143,7 +143,12 @@
                   </div>
                 </div>
               </el-popover>
-              <div v-else-if="data.type === 'test'" class="tree-node">
+              <div
+                v-else-if="data.type === 'test'"
+                class="tree-node"
+                @mouseenter="highlightLog(data)"
+                @mouseleave="highlightLog(null)"
+              >
                 <span
                   :class="{
                     treeLabel: true,
@@ -352,6 +357,7 @@ import todoIcon from '@iconify/icons-material-symbols/assignment-late-outline'
 import exportIcon from '@iconify/icons-material-symbols/export-notes-outline'
 import errorParse from '@r/util/ipcError'
 import TraceComponent from './message.vue'
+import { formatTestLogId } from './testLogSeparator'
 import i18next from 'i18next'
 
 const loading = ref(false)
@@ -396,6 +402,10 @@ function getParentConfigId(node: any): string {
     currentNode = currentNode.parent
   }
   return currentNode?.data?.id || ''
+}
+
+function highlightLog(data: TestTree | null) {
+  traceRef.value?.highlightTest(data?.type === 'test' ? data.id : null)
 }
 
 function nodeClick(data: TestTree) {
@@ -1003,10 +1013,11 @@ function getBuildStatusText() {
 function buildSubTree(infos: TestEvent[]) {
   let currentSuite: TestTree | undefined
   const roots: TestTree[] = []
-  function startTest(event: any) {
+  let seq = 0
+  function startTest(event: any, index: number) {
     const originalSuite = currentSuite
 
-    const testId = `${event.name}:${event.line || 0}:${event.column || 0}`
+    const testId = formatTestLogId(event, index)
 
     currentSuite = {
       id: testId,
@@ -1027,19 +1038,19 @@ function buildSubTree(infos: TestEvent[]) {
   for (const event of infos) {
     switch (event.type) {
       case 'test:dequeue': {
-        startTest(event.data)
+        startTest(event.data, seq++)
         break
       }
       case 'test:pass':
       case 'test:fail': {
         if (!currentSuite) {
-          startTest({ name: 'root', nesting: 0, line: 0, column: 0 })
+          startTest({ name: 'root', nesting: 0, line: 0, column: 0 }, seq++)
         }
         if (
           currentSuite!.label !== event.data.name ||
           currentSuite!.nesting !== event.data.nesting
         ) {
-          startTest(event.data)
+          startTest(event.data, seq++)
         }
         const currentTest: TestTree = currentSuite!
         if (currentSuite?.nesting === event.data.nesting) {

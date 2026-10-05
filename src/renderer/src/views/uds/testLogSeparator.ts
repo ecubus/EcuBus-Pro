@@ -1,88 +1,126 @@
 /**
- * Visual grouping for the Test module terminal.
+ * Grouping for the Test module terminal.
  *
  * Node's test:dequeue `type` field is not reliable here: queued siblings are
- * reported with their parent's type (see processPendingSubtests in the Node 24
- * test runner). Nesting is stable:
- * - 0: a top-level suite or test
- * - 1: a case inside a suite, or a subtest of a top-level test
+ * reported with their parent's type. Nesting is stable:
+ * - 0: a top-level suite, or a test that is not inside a suite
+ * - 1: a case inside a suite
  * - 2+: a subtest of a case
  *
- * Cases (nesting <= 1) are separated with a blank line. Subtests (nesting >= 2)
- * stay in the parent case and are inset.
+ * A case (nesting 1, or a nesting-0 test that never gains a child) is one
+ * block. Nested subtests stay inside that block. A suite is not its own block
+ * once it has children; hovering it still covers the lines from its start
+ * through its result.
  */
 
 export interface TestLogFrame {
+  id: string
   name: string
   nesting: number
+  /** This frame owns a resting background band. */
+  band: boolean
+  hadChild: boolean
 }
 
 export interface TestLogSeparatorState {
   open: TestLogFrame[]
-  hasOutput: boolean
-  /** The previous visible line was a top-level banner, so its first case stays attached. */
-  attachChild: boolean
+  seq: number
 }
 
 export interface TestLogNode {
   name: string
   nesting?: number
+  line?: number
+  column?: number
 }
 
 export function createTestLogSeparatorState(): TestLogSeparatorState {
-  return {
-    open: [],
-    hasOutput: false,
-    attachChild: false
-  }
+  return { open: [], seq: 0 }
 }
 
 export function resetTestLogSeparator(state: TestLogSeparatorState) {
   state.open.length = 0
-  state.hasOutput = false
-  state.attachChild = false
-}
-
-export function isNestedSubtest(nesting: number) {
-  return nesting >= 2
+  state.seq = 0
 }
 
 /**
- * Record that a test or suite has started. Returns whether a blank line should
- * precede its "starting" line. Hidden entries must still be recorded so later
- * siblings keep the right parent.
+ * Shared with the test tree. Sequence, not source line, distinguishes two
+ * cases that share a name: discovery and the run can report different lines.
  */
-export function beginTestLogEntry(state: TestLogSeparatorState, node: TestLogNode) {
-  const nesting = node.nesting ?? 0
-  let separate = !isNestedSubtest(nesting) && state.hasOutput
-  if (separate && nesting === 1 && state.attachChild) {
-    separate = false
-  }
-  state.open.push({ name: node.name, nesting })
-  return { separate }
+export function formatTestLogId(node: TestLogNode, seq: number) {
+  return `${node.name}:${seq}`
 }
 
-/** A visible log line was written. Group banners keep the following case attached. */
-export function noteTestLogWritten(state: TestLogSeparatorState, kind: 'group' | 'text') {
-  state.hasOutput = true
-  state.attachChild = kind === 'group'
+export function testLogMessageIndent(nesting: number) {
+  if (nesting < 2) return 0
+  return (nesting - 1) * 2
+}
+
+export function currentTestLogIndent(state: TestLogSeparatorState) {
+  const top = state.open[state.open.length - 1]
+  if (!top) return 0
+  return testLogMessageIndent(top.nesting)
+}
+
+export interface BeginTestLogResult {
+  id: string
+  nesting: number
+  indent: number
+}
+
+/** Record that a test or suite has started. Hidden entries must still be recorded. */
+export function beginTestLogEntry(
+  state: TestLogSeparatorState,
+  node: TestLogNode
+): BeginTestLogResult {
+  const nesting = node.nesting ?? 0
+  const parent = state.open[state.open.length - 1]
+  if (parent) parent.hadChild = true
+  const id = formatTestLogId(node, state.seq++)
+  state.open.push({
+    id,
+    name: node.name,
+    nesting,
+    band: nesting === 1,
+    hadChild: false
+  })
+  return { id, nesting, indent: testLogMessageIndent(nesting) }
+}
+
+export function findOpenTestLogId(state: TestLogSeparatorState, node: TestLogNode) {
+  const nesting = node.nesting ?? 0
+  for (let i = state.open.length - 1; i >= 0; i--) {
+    const frame = state.open[i]
+    if (frame.nesting === nesting && frame.name === node.name) return frame.id
+  }
+  return undefined
+}
+
+/** Frames that should include the line about to be written, outermost last. */
+export function openTestLogFrames(state: TestLogSeparatorState) {
+  return state.open
+}
+
+export interface EndTestLogResult {
+  id: string
+  /** A top-level test with no children becomes its own band when it finishes. */
+  promoteBand: boolean
 }
 
 /** Record that a test or suite finished, after its pass/fail line is written. */
-export function endTestLogEntry(state: TestLogSeparatorState, node: TestLogNode) {
+export function endTestLogEntry(
+  state: TestLogSeparatorState,
+  node: TestLogNode
+): EndTestLogResult | undefined {
   const nesting = node.nesting ?? 0
   for (let i = state.open.length - 1; i >= 0; i--) {
     const frame = state.open[i]
     if (frame.nesting === nesting && frame.name === node.name) {
+      const promoteBand = frame.nesting === 0 && !frame.hadChild
+      if (promoteBand) frame.band = true
       state.open.length = i
-      return
+      return { id: frame.id, promoteBand }
     }
   }
-}
-
-/** Extra spaces in front of the message while a nested subtest is open. */
-export function testLogMessageIndent(state: TestLogSeparatorState) {
-  const nesting = state.open.length ? state.open[state.open.length - 1].nesting : 0
-  if (nesting < 2) return 0
-  return (nesting - 1) * 2
+  return undefined
 }

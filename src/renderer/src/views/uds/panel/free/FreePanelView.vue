@@ -33,7 +33,7 @@ import { actionAvailable, isActionButton, selectPath } from './actions'
 import { getAllSysVar } from 'nodeCan/sysVar'
 import type { PanelControl, PanelDocument } from 'src/preload/panel'
 import { useDataStore } from '@r/stores/data'
-import { useGlobalStart } from '@r/stores/runtime'
+import { useGlobalStart, useMeasurementStarted } from '@r/stores/runtime'
 import {
   canWrite,
   physicalWriteAvailable,
@@ -51,6 +51,7 @@ const project = useProjectStore()
 const layout = inject<Layout | undefined>('layout', undefined)
 const pending = ref<Record<string, boolean>>({})
 const running = useGlobalStart()
+const started = useMeasurementStarted()
 const t = usePanelLocale()
 const values = ref<Record<string, PanelValue>>({})
 const pages = ref<Record<string, string>>({})
@@ -61,7 +62,7 @@ const disabledControls = computed(() =>
       !!pending.value[c.id] ||
         (isActionButton(c)
           ? !actionAvailable(c, running.value, (id) => !!data.panels[id])
-          : !running.value ||
+          : !started.value ||
             !valid.value[c.id] ||
             ambiguous.value[c.id] ||
             !physicalWriteAvailable(c, data.database) ||
@@ -171,13 +172,13 @@ const connection = new PanelConnection(window.logBus, (id, value) => {
   values.value[id] = value
 })
 watch(
-  [bindingState, running, validIds, () => project.projectInfo.path, () => project.projectInfo.name],
+  [bindingState, started, validIds, () => project.projectInfo.path, () => project.projectInfo.name],
   () => {
     session++
     connection.disconnect()
     values.value = {}
     void restoreInputs().catch((error) => ElMessage.error(String(error)))
-    if (running.value) connection.connect(props.document.controls.filter((c) => valid.value[c.id]))
+    if (started.value) connection.connect(props.document.controls.filter((c) => valid.value[c.id]))
   },
   { immediate: true }
 )
@@ -189,7 +190,7 @@ function write(control: PanelControl, value: PanelValue) {
   )
     return
   if (
-    sendControlValue(control, value, running.value, (channel, payload) =>
+    sendControlValue(control, value, started.value, (channel, payload) =>
       window.electron.ipcRenderer.send(channel, payload)
     )
   )
@@ -209,7 +210,7 @@ async function restoreInputs() {
   ]
   if (!ids.length) return
   let restored: Record<string, PanelValue>
-  if (running.value) {
+  if (started.value) {
     restored = await window.electron.ipcRenderer.invoke('ipc-var-values', ids)
   } else {
     const start = panelStartValues(data.panels, data.vars)

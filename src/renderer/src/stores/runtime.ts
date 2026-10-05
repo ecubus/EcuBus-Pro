@@ -1,6 +1,6 @@
 // stores/counter.js
 import { defineStore } from 'pinia'
-import { toRef } from 'vue'
+import { computed, toRef } from 'vue'
 
 export type TestTree = {
   label: string
@@ -26,6 +26,7 @@ export type RunTimeStatus = {
     isRunning: Record<string, boolean>
   }
   signalSession: string
+  startedSession: string
   globalStart: boolean
   canPeriods: Record<string, boolean>
   someipPeriods: Record<string, boolean>
@@ -43,6 +44,7 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
     canPeriods: {},
     someipPeriods: {},
     signalSession: '',
+    startedSession: '',
     globalStart: false,
     rearrangeWindows: false,
     traceLinkId: '',
@@ -74,4 +76,14 @@ export const useRuntimeStore = defineStore('useRuntimeStore', {
 export function useGlobalStart() {
   const runtime = useRuntimeStore()
   return toRef(runtime, 'globalStart')
+}
+
+export function useMeasurementStarted() {
+  const runtime = useRuntimeStore()
+  return computed(
+    () =>
+      runtime.globalStart &&
+      !!runtime.startedSession &&
+      runtime.startedSession === runtime.signalSession
+  )
 }

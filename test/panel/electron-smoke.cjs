@@ -58,6 +58,13 @@ async function waitFor(win, expression) {
   throw new Error(`Timed out: ${expression}`)
 }
 
+function waitStarted(win) {
+  return waitFor(
+    win,
+    `(() => { const runtime = panelTest.pinia._s.get('useRuntimeStore'); return !!runtime.startedSession && runtime.startedSession === runtime.signalSession })()`
+  )
+}
+
 async function connectStores(win) {
   await waitFor(
     win,
@@ -402,8 +409,29 @@ app.on('browser-window-created', (_event, win) => {
       )
       await waitFor(win, `!!document.querySelector('.free-panel-runtime')`)
       await win.webContents.executeJavaScript(`panelTest.getLayout().maxWin('psmoke-panel')`)
-      await win.webContents.executeJavaScript(`panelTest.data.globalRun('start')`)
-      await waitFor(win, `document.querySelector('.runtime-status')?.innerText.includes('Running')`)
+      await win.webContents.executeJavaScript(`
+        window.electron.ipcRenderer.send('ipc-var-set', {name:'Level', value:5});
+        window.electron.ipcRenderer.send('ipc-signal-set', {name:'Db.Signal', value:5});
+      `)
+      assert.deepEqual(
+        await win.webContents.executeJavaScript(
+          `window.electron.ipcRenderer.invoke('ipc-var-values', ['level'])`
+        ),
+        {}
+      )
+      checks.push({ name: 'writes-before-first-start-are-ignored', passed: true })
+      const startup = await win.webContents.executeJavaScript(`(async () => {
+        panelTest.data.globalRun('start');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        return {
+          running: document.querySelector('.runtime-status').innerText.includes('Running'),
+          disabled: document.querySelector('.free-panel-runtime .panel-action').disabled
+        };
+      })()`)
+      assert.deepEqual(startup, { running: true, disabled: true })
+      await waitStarted(win)
+      await waitFor(win, `!document.querySelector('.free-panel-runtime .panel-action').disabled`)
+      checks.push({ name: 'panel-writes-wait-for-measurement-start', passed: true })
       await win.webContents.executeJavaScript(
         `window.logBus.emit('level', {key:'level', values:[[0,{rawValue:42}]]})`
       )
@@ -542,6 +570,7 @@ app.on('browser-window-created', (_event, win) => {
         win,
         `document.querySelector('#winpprogress .runtime-status')?.innerText.includes('Running')`
       )
+      await waitStarted(win)
       await win.webContents.executeJavaScript(
         `window.logBus.emit('level',{key:'level',values:[[0,{rawValue:42}]]})`
       )

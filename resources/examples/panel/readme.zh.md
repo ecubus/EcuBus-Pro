@@ -41,9 +41,9 @@
 
 ## 示例面板
 
-面板保存在 `panel.ecpanel` 中。截图为按下 **Start** 后的运行状态。
+The panel is stored in `panel.ecpanel`. The screenshot shows it running right after **Start** is pressed.
 
-![Program 面板](panel.png)
+![Program panel](panel.png)
 
 ## 代码概览
 

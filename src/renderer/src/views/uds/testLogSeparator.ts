@@ -25,6 +25,11 @@ export interface TestLogFrame {
 export interface TestLogSeparatorState {
   open: TestLogFrame[]
   seq: number
+  /**
+   * Config id shared with `buildTestSubTree`. When set, frame ids are
+   * `${prefix}:${seq}`, the same string as the tree node id.
+   */
+  prefix: string
 }
 
 export interface TestLogNode {
@@ -35,7 +40,7 @@ export interface TestLogNode {
 }
 
 export function createTestLogSeparatorState(): TestLogSeparatorState {
-  return { open: [], seq: 0 }
+  return { open: [], seq: 0, prefix: '' }
 }
 
 export function resetTestLogSeparator(state: TestLogSeparatorState) {
@@ -46,9 +51,11 @@ export function resetTestLogSeparator(state: TestLogSeparatorState) {
 /**
  * Shared with the test tree. Sequence, not source line, distinguishes two
  * cases that share a name: discovery and the run can report different lines.
+ * A prefix (the config id) makes the id identical to `buildTestSubTree`.
  */
-export function formatTestLogId(node: TestLogNode, seq: number) {
-  return `${node.name}:${seq}`
+export function formatTestLogId(node: TestLogNode, seq: number, prefix = '') {
+  const id = `${node.name}:${seq}`
+  return prefix ? `${prefix}:${seq}` : id
 }
 
 /** Columns of message indent per tree level. Nesting 0 stays at the left. */
@@ -79,7 +86,8 @@ export function beginTestLogEntry(
   const nesting = node.nesting ?? 0
   const parent = state.open[state.open.length - 1]
   if (parent) parent.hadChild = true
-  const id = formatTestLogId(node, state.seq++)
+  const id = formatTestLogId(node, state.seq, state.prefix)
+  state.seq++
   state.open.push({
     id,
     name: node.name,

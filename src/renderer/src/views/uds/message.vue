@@ -304,10 +304,15 @@ function getData() {
 const testId = toRef(props, 'testId')
 // const start = toRef(props, 'start')
 
+function setTestLogPrefix(prefix: string) {
+  testSeparator.prefix = prefix
+}
+
 defineExpose({
   clearLog,
   getData,
-  highlightTest
+  highlightTest,
+  setTestLogPrefix
 })
 
 watch(globalStart, (val) => {
@@ -582,6 +587,9 @@ function testLog({
         })
         .join('\n')
       if (!message) continue
+      const openIds = openTestLogFrames(testSeparator).map((frame) => frame.id)
+      const hidden = testId.value != undefined && !openIds.some((id) => testId.value?.includes(id))
+      if (hidden) continue
       writeToTerminal(time, 'print', 'info', message)
     } else if (item.message.data.type == 'test:diagnostic') {
       writeToTerminal(

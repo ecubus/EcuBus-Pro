@@ -6,7 +6,7 @@ import {
   endTestLogEntry,
   openTestLogFrames,
   resetTestLogSeparator
-} from '@r/views/uds/testLogSeparator'
+} from '../../src/renderer/src/views/uds/testLogSeparator'
 
 function start(
   state: ReturnType<typeof createTestLogSeparatorState>,
@@ -87,6 +87,13 @@ describe('test log case grouping', () => {
     expect(openTestLogFrames(state).map((frame) => frame.name)).toEqual(['/tmp/suite.js'])
     expect(openTestLogFrames(state)[0].band).toBe(false)
     expect(openTestLogFrames(state)[0].hadChild).toBe(true)
+  })
+
+  it('matches tree node ids when a config prefix is set', () => {
+    const state = createTestLogSeparatorState()
+    state.prefix = 'cfg'
+    expect(start(state, 'CAN Test', 0).id).toBe('cfg:0')
+    expect(start(state, 'pass case', 1).id).toBe('cfg:1')
   })
 
   it('resets grouping after the log is cleared', () => {

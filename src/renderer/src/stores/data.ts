@@ -99,10 +99,10 @@ export const useDataStore = defineStore('useDataStore', {
                 closeOnClickModal: false,
                 closeOnPressEscape: false
               })
-              let hasError = false
+              const buildErrors: string[] = []
               for (const node of needBuild) {
                 try {
-                  await window.electron.ipcRenderer.invoke(
+                  const buildResult = await window.electron.ipcRenderer.invoke(
                     'ipc-build-project',
                     project.projectInfo.path,
                     project.projectInfo.name,
@@ -110,8 +110,14 @@ export const useDataStore = defineStore('useDataStore', {
                     node.script,
                     false
                   )
-                } catch (e: any) {
-                  hasError = true
+                  if (Array.isArray(buildResult)) {
+                    for (const err of buildResult) {
+                      const where = [err?.file || node.script, err?.line].filter(Boolean).join(':')
+                      buildErrors.push(`${where} ${err?.message || ''}`.trim())
+                    }
+                  }
+                } catch {
+                  buildErrors.push(node.script || 'build failed')
                 }
                 process.value += Math.round(100 / totalScripts)
                 // Force update the dialog content
@@ -123,8 +129,8 @@ export const useDataStore = defineStore('useDataStore', {
               await delay
               ElMessageBox.close()
 
-              if (hasError) {
-                throw new Error(i18next.t('runtime.messages.buildScriptsFailed'))
+              if (buildErrors.length > 0) {
+                throw new Error(buildErrors.join('\n'))
               }
             }
           }

@@ -6,7 +6,7 @@
     :aria-label="control.label"
     :aria-invalid="invalid || undefined"
     @focus="editing = true"
-    @blur="editing = false"
+    @blur="blur"
     @change="commit"
   />
 </template>
@@ -32,6 +32,11 @@ watch(
   },
   { immediate: true }
 )
+function blur() {
+  editing.value = false
+  if (!invalid.value)
+    draft.value = formatNumber(props.control, props.value ?? props.control.initialValue)
+}
 function commit() {
   if (props.disabled) return
   try {

@@ -38,6 +38,7 @@ type HandlerMap = {
   ) => void | Promise<number> | Promise<void>
   pwmApi: (data: pwmApiSetDuty) => void
   canApi: (data: any) => Promise<any>
+  xcpApi: (data: any) => Promise<any>
   pluginEvent: (data: { name: string; data: any }) => void
   serialApi: (data: SerialApi) => Promise<number>
   someipApi: (data: SomeipApiCall) => Promise<any>

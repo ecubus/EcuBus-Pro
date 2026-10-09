@@ -1,5 +1,13 @@
 <template>
-  <div style="display: relative" @click="hideContextMenu" @contextmenu.prevent="onContextMenu">
+  <div
+    ref="rootEl"
+    class="ia-key-root"
+    tabindex="-1"
+    style="display: relative"
+    @mousedown="onIaPointerDown"
+    @click="hideContextMenu"
+    @contextmenu.prevent="onContextMenu"
+  >
     <VxeGrid
       ref="xGrid"
       v-bind="gridOptions"
@@ -516,6 +524,7 @@ import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { cloneDeep, isEqual } from 'lodash'
 import { onKeyStroke, onKeyUp } from '@vueuse/core'
+import { isEditableKeyEvent, shouldFocusIaRoot, shouldHandleIaShortcut } from './iaKeyGuard'
 import Signal from '../components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
@@ -526,6 +535,7 @@ import { v4 } from 'uuid'
 import i18next from 'i18next'
 
 const xGrid = ref()
+const rootEl = ref<HTMLElement | null>(null)
 const tooltipRowIndex = ref(-1)
 const tooltipTarget = ref<HTMLElement | null>(null)
 let tooltipTimer: ReturnType<typeof setTimeout> | null = null
@@ -996,8 +1006,20 @@ function hideContextMenu() {
 
 const pressedKey = ref('')
 const animate = ref(false)
+const iaShortcutListener = { target: rootEl }
+
+function onIaPointerDown(event: MouseEvent) {
+  if (!shouldFocusIaRoot(event.target, rootEl.value)) return
+  rootEl.value?.focus({ preventScroll: true })
+}
+
+function iaDialogOpen() {
+  return editV.value || connectV.value || selectFrameVisible.value
+}
+
 onKeyStroke(true, (e) => {
-  // e.preventDefault()
+  // Bound send keys stay global while a run is active, but must not fire from a text field.
+  if (isEditableKeyEvent(e)) return
   if (globalStart.value) {
     const key = e.key
     pressedKey.value = key.toLocaleUpperCase()
@@ -1019,51 +1041,68 @@ onKeyUp(true, () => {
   }, 200)
 })
 
-// Ctrl+C / Ctrl+V keyboard shortcuts for copy/paste frame
-onKeyStroke(['c', 'C'], (e) => {
-  if ((e.ctrlKey || e.metaKey) && !editV.value && !connectV.value && !selectFrameVisible.value) {
+// Ctrl+C / Ctrl+V copy or paste a frame only when this interaction table is focused.
+onKeyStroke(
+  ['c', 'C'],
+  (e) => {
+    if (!e.ctrlKey && !e.metaKey) return
+    if (iaDialogOpen() || !shouldHandleIaShortcut(e, rootEl.value)) return
     e.preventDefault()
     copyFrame()
-  }
-})
-onKeyStroke(['v', 'V'], (e) => {
-  if ((e.ctrlKey || e.metaKey) && !editV.value && !connectV.value && !selectFrameVisible.value) {
+  },
+  iaShortcutListener
+)
+onKeyStroke(
+  ['v', 'V'],
+  (e) => {
+    if (!e.ctrlKey && !e.metaKey) return
+    if (iaDialogOpen() || !shouldHandleIaShortcut(e, rootEl.value)) return
     e.preventDefault()
     pasteFrame()
-  }
-})
+  },
+  iaShortcutListener
+)
 
 // Arrow Up/Down: navigate between frame rows
-onKeyStroke('ArrowUp', (e) => {
-  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+onKeyStroke(
+  'ArrowUp',
+  (e) => {
+    if (iaDialogOpen() || !shouldHandleIaShortcut(e, rootEl.value)) return
     const actions = dataBase.ia[editIndex.value].action
     if (actions.length > 0 && popoverIndex.value > 0) {
       e.preventDefault()
       popoverIndex.value--
       xGrid.value?.setCurrentRow(actions[popoverIndex.value])
     }
-  }
-})
-onKeyStroke('ArrowDown', (e) => {
-  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+  },
+  iaShortcutListener
+)
+onKeyStroke(
+  'ArrowDown',
+  (e) => {
+    if (iaDialogOpen() || !shouldHandleIaShortcut(e, rootEl.value)) return
     const actions = dataBase.ia[editIndex.value].action
     if (actions.length > 0 && popoverIndex.value < actions.length - 1) {
       e.preventDefault()
       popoverIndex.value++
       xGrid.value?.setCurrentRow(actions[popoverIndex.value])
     }
-  }
-})
+  },
+  iaShortcutListener
+)
 
 // Delete key: delete selected frame
-onKeyStroke('Delete', (e) => {
-  if (!editV.value && !connectV.value && !selectFrameVisible.value) {
+onKeyStroke(
+  'Delete',
+  (e) => {
+    if (iaDialogOpen() || !shouldHandleIaShortcut(e, rootEl.value)) return
     if (popoverIndex.value >= 0 && !periodTimer.value[popoverIndex.value]) {
       e.preventDefault()
       deleteFrame()
     }
-  }
-})
+  },
+  iaShortcutListener
+)
 
 function sendFrame(index: number) {
   const frame = dataBase.ia[editIndex.value]?.action[index]
@@ -1297,6 +1336,10 @@ function openFrameSelect() {
 }
 </style>
 <style scoped>
+.ia-key-root:focus {
+  outline: none;
+}
+
 .key-box {
   position: absolute;
   bottom: 20px;

@@ -596,6 +596,7 @@ import editIcon from '@iconify/icons-material-symbols/edit-square-outline'
 import { useDataStore } from '@r/stores/data'
 import { cloneDeep, isEqual } from 'lodash'
 import { onKeyStroke, onKeyUp } from '@vueuse/core'
+import { isEditableKeyEvent } from '../ia/iaKeyGuard'
 // import Signal from './components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import type { GraphBindFrameValue, GraphNode, SomeipAction } from 'src/preload/data'
@@ -938,7 +939,8 @@ function deleteFrame() {
 const pressedKey = ref('')
 const animate = ref(false)
 onKeyStroke(true, (e) => {
-  // e.preventDefault()
+  // Bound send keys stay global while a run is active, but must not fire from a text field.
+  if (isEditableKeyEvent(e)) return
   if (globalStart.value) {
     const key = e.key
     pressedKey.value = key.toLocaleUpperCase()

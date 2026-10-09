@@ -68,10 +68,12 @@
         />
         <el-input
           v-else-if="control.type === 'path'"
-          :model-value="value == null ? '' : String(value)"
+          v-model="pathDraft"
           :disabled="disabled"
           size="small"
           :aria-label="control.label"
+          @focus="pathEditing = true"
+          @blur="pathBlur"
           @change="emit('write', $event)"
         >
           <template v-if="control.type === 'path'" #append>
@@ -193,15 +195,16 @@
         </div>
         <el-slider
           v-else-if="control.type === 'slider'"
+          v-model="sliderValue"
           class="panel-slider"
-          :model-value="numeric"
           :min="control.min"
           :max="control.max"
           :step="control.step"
           :disabled="disabled"
           :show-tooltip="false"
           :aria-label="control.label"
-          @change="change"
+          @pointerdown="slideStart"
+          @change="slideChange"
         />
         <el-select
           v-else-if="control.type === 'select'"
@@ -297,7 +300,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { PanelControl } from 'src/preload/panel'
 import type { PanelValue } from './runtime'
 import { rangeFraction, labelPosition, supportsLabelPosition } from './model'
@@ -349,6 +352,41 @@ const gaugeText = computed(() =>
   fraction.value == null ? '—' : gaugeValueText(props.control, props.value)
 )
 const numeric = computed(() => Number(props.value ?? props.control.initialValue))
+const sliderValue = ref(numeric.value)
+const sliding = ref(false)
+watch(numeric, (value) => {
+  if (!sliding.value) sliderValue.value = value
+})
+function slideStart() {
+  if (props.disabled) return
+  sliding.value = true
+  window.addEventListener('pointerup', () => setTimeout(() => setTimeout(slideEnd)), {
+    once: true
+  })
+}
+function slideEnd() {
+  sliding.value = false
+  sliderValue.value = numeric.value
+}
+async function slideChange(value: number | number[]) {
+  change(value)
+  await nextTick()
+  slideEnd()
+}
+const pathDraft = ref('')
+const pathEditing = ref(false)
+watch(
+  () => [props.value, props.disabled],
+  () => {
+    if (pathEditing.value && !props.disabled) return
+    pathDraft.value = props.value == null ? '' : String(props.value)
+  },
+  { immediate: true }
+)
+function pathBlur() {
+  pathEditing.value = false
+  pathDraft.value = props.value == null ? '' : String(props.value)
+}
 const pressed = computed(
   () => held.value || (props.value != null && numeric.value === props.control.pressValue)
 )

@@ -46,6 +46,10 @@ node node_modules/vite/bin/vite.js --config test/panel/vite.config.ts
 
 打开 http://127.0.0.1:5199/。使用产品 FreePanelEditor/PanelCanvas/ControlView 组件；画布保存仅更新内存中的测试文档。变量选择器提供 Level 数值变量。
 
+保持该 Vite 服务运行，执行 `node node_modules/electron/cli.js test/panel/slider-smoke.cjs` 可验证滑块拖动释放、拖动中接收值不覆盖拖动值、轨道点击、方向键、数值输入联动、接收值不回写以及停止后禁止写入。测试使用真实 Element Plus 控件和 Electron 鼠标/键盘事件，变量 IPC 由浏览器入口模拟，不连接硬件。
+
+同一服务下执行 `node node_modules/electron/cli.js test/panel/controls-smoke.cjs` 可检查数值、复选框、开关、单选、下拉框、按钮、文本、字节数组与路径输入，以及显示、进度条和仪表的接收值。覆盖键盘输入路径与数值、输入时保留草稿、失焦后同步最新接收值、非法输入拒绝和停止/只读限制；使用真实控件及 DOM 事件，变量 IPC 为模拟。
+
 - `?dark=1`：深色主题。
 - `?en=1`：英文界面，示例控件标签仍为测试文档原文。
 - `?runtime=1`：运行组件的模拟验证，Start / Stop 切换运行状态，Receive 42 注入更新。写入调用只记录在页面底部，并回显到控件，不连接 Electron 或硬件。

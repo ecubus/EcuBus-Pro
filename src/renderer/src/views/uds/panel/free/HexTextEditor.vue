@@ -10,7 +10,7 @@
       :aria-label="`${control.label} HEX`"
       :aria-invalid="invalid || undefined"
       @focus="editing = true"
-      @blur="editing = false"
+      @blur="blur"
       @change="commit(true)"
     />
     <el-input
@@ -21,7 +21,7 @@
       :readonly="disabled"
       :aria-label="`${control.label} Text`"
       @focus="editing = true"
-      @blur="editing = false"
+      @blur="blur"
       @change="commit(false)"
     />
   </div>
@@ -67,6 +67,10 @@ watch(
   },
   { immediate: true, deep: true }
 )
+function blur() {
+  editing.value = false
+  if (!invalid.value) display(typeof props.value === 'number' ? undefined : props.value)
+}
 function commit(isHex: boolean) {
   if (props.disabled) return
   try {

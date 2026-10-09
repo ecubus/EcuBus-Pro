@@ -1,7 +1,8 @@
-import { ReplayCanFrame, ReplayReader } from '.'
+import { ReplayCanFrame, ReplayFrame, ReplayLinFrame, ReplayReader } from '.'
 import fs from 'fs'
 import { Transform, TransformCallback } from 'stream'
 import { CAN_ID_TYPE } from '../share/can'
+import { LinChecksumType } from '../share/lin'
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -49,14 +50,14 @@ export class AscTransform extends Transform {
     this.startTime += ms
   }
 
-  private async applyTimeBackpressure(frame: ReplayCanFrame): Promise<void> {
+  private async applyTimeBackpressure(ts: number): Promise<void> {
     if (this.speedFactor <= 0) return
     if (this.firstFrameTs < 0) {
-      this.firstFrameTs = frame.ts
+      this.firstFrameTs = ts
       this.startTime = Date.now()
       return
     }
-    const frameOffsetUs = frame.ts - this.firstFrameTs
+    const frameOffsetUs = ts - this.firstFrameTs
     const expectedElapsedMs = frameOffsetUs / 1000 / this.speedFactor
     const actualElapsedMs = Date.now() - this.startTime
     const delayMs = expectedElapsedMs - actualElapsedMs
@@ -68,9 +69,10 @@ export class AscTransform extends Transform {
   /**
    * Apply time backpressure, then push frame.
    */
-  private async pushFrame(frame: ReplayCanFrame): Promise<void> {
-    await this.applyTimeBackpressure(frame)
-    this.push(frame)
+  private async pushFrame(result: ReplayFrame): Promise<void> {
+    const ts = result.type === 'can' ? result.frame.ts : result.frame.ts
+    await this.applyTimeBackpressure(ts)
+    this.push(result)
   }
 
   _transform(chunk: Buffer, _encoding: string, callback: TransformCallback): void {
@@ -82,9 +84,9 @@ export class AscTransform extends Transform {
       for (const line of lines) {
         // Approximate bytes consumed for this line (+ newline) for progress tracking
         this.bytesRead += Buffer.byteLength(line, 'utf8') + 1
-        const frame = this.parseLine(line)
-        if (frame) {
-          await this.pushFrame(frame)
+        const result = this.parseLine(line)
+        if (result) {
+          await this.pushFrame(result)
         }
       }
       callback()
@@ -99,9 +101,9 @@ export class AscTransform extends Transform {
       if (trimmed) {
         // Count remaining buffered line bytes towards progress
         this.bytesRead += Buffer.byteLength(lineText, 'utf8')
-        const frame = this.parseLine(trimmed)
-        if (frame) {
-          await this.pushFrame(frame)
+        const result = this.parseLine(trimmed)
+        if (result) {
+          await this.pushFrame(result)
         }
       }
       callback()
@@ -109,7 +111,7 @@ export class AscTransform extends Transform {
     run().catch((err) => callback(err))
   }
 
-  private parseLine(line: string): ReplayCanFrame | null {
+  private parseLine(line: string): ReplayFrame | null {
     const trimmed = line.trim()
     if (!trimmed || trimmed.startsWith('base')) {
       return null
@@ -133,36 +135,55 @@ export class AscTransform extends Transform {
 
     this.lineCount++
 
+    // Try LIN message match first (channel is "Li" or "L<n>")
+    const linMatch = trimmed.match(
+      /^\s*([\d.]+)\s+(Li|L\d+)\s+([0-9a-f]{1,2})\s+(Tx|Rx)\s+(\d+)\s+((?:[0-9a-f]{2}\s*)*)\s*checksum\s*=\s*([0-9a-f]{2})\s*(?:CSM\s*=\s*(enhanced|standard))?/i
+    )
+    if (linMatch) {
+      return { type: 'lin', frame: this.parseLinLine(linMatch) }
+    }
+
+    // Try LIN error match
+    const linErrorMatch = trimmed.match(
+      /^\s*([\d.]+)\s+(Li|L\d+)\s+([0-9a-f]{1,2})\s+(CSErr|TransmErr|SyncError|RcvError)/i
+    )
+    if (linErrorMatch) {
+      return { type: 'lin', frame: this.parseLinErrorLine(linErrorMatch) }
+    }
+
     const canFdMatch = trimmed.match(
       /^\s*([\d.]+)\s+CANFD\s+(\d+)\s+(Rx|Tx)\s+([0-9A-Fa-fx]+)\s+.*?\s+([01])\s+([01])\s+([0-9a-f])\s+(\d+)\s+((?:[0-9A-Fa-f]{2}\s*)*)/i
     )
     if (canFdMatch) {
-      return this.parseCanFdLine(canFdMatch)
+      return { type: 'can', frame: this.parseCanFdLine(canFdMatch) }
     }
 
     const canMatch = trimmed.match(
       /^\s*([\d.]+)\s+(\d+)\s+([0-9A-Fa-fx]+)\s+(Rx|Tx)\s+([dr])\s+([0-9a-f])\s*((?:[0-9A-Fa-f]{2}\s*)*)/i
     )
     if (canMatch) {
-      return this.parseCanLine(canMatch)
+      return { type: 'can', frame: this.parseCanLine(canMatch) }
     }
 
     if (trimmed.includes('ErrorFrame')) {
       const errorMatch = trimmed.match(/^\s*([\d.]+)\s+(\d+)\s+ErrorFrame/i)
       if (errorMatch) {
         return {
-          channel: parseInt(errorMatch[2]),
-          ts: Math.round(parseFloat(errorMatch[1]) * 1_000_000),
-          id: 0,
-          dir: 'IN',
-          msgType: {
-            idType: CAN_ID_TYPE.STANDARD,
-            brs: false,
-            canfd: false,
-            remote: false
-          },
-          data: Buffer.alloc(0),
-          isError: true
+          type: 'can',
+          frame: {
+            channel: parseInt(errorMatch[2]),
+            ts: Math.round(parseFloat(errorMatch[1]) * 1_000_000),
+            id: 0,
+            dir: 'IN',
+            msgType: {
+              idType: CAN_ID_TYPE.STANDARD,
+              brs: false,
+              canfd: false,
+              remote: false
+            },
+            data: Buffer.alloc(0),
+            isError: true
+          }
         }
       }
     }
@@ -234,6 +255,62 @@ export class AscTransform extends Transform {
       data
     }
   }
+
+  /** Parse LIN channel string (Li -> 101, L2 -> 102, etc.) */
+  private parseLinChannel(channelStr: string): number {
+    if (channelStr.toLowerCase() === 'li') return 101
+    const num = parseInt(channelStr.substring(1))
+    return 100 + (isNaN(num) ? 1 : num)
+  }
+
+  private parseLinLine(match: RegExpMatchArray): ReplayLinFrame {
+    const timestamp = parseFloat(match[1])
+    const channelStr = match[2]
+    const frameId = parseInt(match[3], 16)
+    const dir = match[4] as 'Tx' | 'Rx'
+    const dlc = parseInt(match[5])
+    const dataStr = match[6]?.trim() || ''
+    const checksum = parseInt(match[7], 16)
+    const csmStr = match[8]?.toLowerCase()
+
+    let data = Buffer.alloc(0)
+    if (dataStr) {
+      const bytes = dataStr.split(/\s+/).filter((b) => b.length > 0)
+      data = Buffer.from(bytes.map((b) => parseInt(b, 16)))
+    }
+
+    const checksumType = csmStr === 'standard' ? LinChecksumType.CLASSIC : LinChecksumType.ENHANCED
+
+    return {
+      ts: Math.round(timestamp * 1_000_000),
+      channel: this.parseLinChannel(channelStr),
+      frameId,
+      dir,
+      data,
+      dlc,
+      checksumType,
+      checksum
+    }
+  }
+
+  private parseLinErrorLine(match: RegExpMatchArray): ReplayLinFrame {
+    const timestamp = parseFloat(match[1])
+    const channelStr = match[2]
+    const frameId = parseInt(match[3], 16)
+    const errorType = match[4]
+
+    return {
+      ts: Math.round(timestamp * 1_000_000),
+      channel: this.parseLinChannel(channelStr),
+      frameId,
+      dir: 'Rx',
+      data: Buffer.alloc(0),
+      dlc: 0,
+      checksumType: LinChecksumType.ENHANCED,
+      isError: true,
+      errorType
+    }
+  }
 }
 
 /**
@@ -245,7 +322,7 @@ export class AscReader implements ReplayReader {
   private _closed = false
   private readStream: fs.ReadStream | null = null
   private transform: AscTransform | null = null
-  private frameIterator: AsyncIterator<ReplayCanFrame> | null = null
+  private frameIterator: AsyncIterator<ReplayFrame> | null = null
 
   private _paused = false
   private pauseStartTime = 0
@@ -296,7 +373,7 @@ export class AscReader implements ReplayReader {
     }
   }
 
-  async readFrame(): Promise<ReplayCanFrame | null> {
+  async readFrame(): Promise<ReplayFrame | null> {
     if (this._closed || !this.frameIterator) {
       return null
     }
@@ -310,7 +387,7 @@ export class AscReader implements ReplayReader {
         }
         return null
       }
-      return result.value as ReplayCanFrame
+      return result.value as ReplayFrame
     } catch {
       return null
     }

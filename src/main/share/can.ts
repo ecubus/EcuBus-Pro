@@ -23,6 +23,7 @@ export type CanVendor =
   | 'slcan'
   | 'ecubus'
   | 'candle'
+  | 'socketcan'
 export interface CanBaseInfo {
   id: string
   handle: any

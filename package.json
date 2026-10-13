@@ -21,7 +21,8 @@
       ],
       "linux": [
         "simulate",
-        "slcan"
+        "slcan",
+        "socketcan"
       ],
       "darwin": [
         "simulate",

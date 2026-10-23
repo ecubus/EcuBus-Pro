@@ -58,7 +58,7 @@ class CddDtcParser:
         return values
 
     def _record_template_fields(self, record_tmpl):
-        """{RECORDITEMTMPL@id: {"name", "kind": "enum"|"text", "values"}}."""
+        """Record template fields with their enum, number or text representation."""
         fields = {}
         if record_tmpl is None:
             return fields
@@ -75,6 +75,8 @@ class CddDtcParser:
                     if self._shared.cdd_int(etag.attrib.get("v")) is not None
                 }
                 fields[child.attrib.get("id")] = {"name": name, "kind": "enum", "values": values}
+            elif child.tag == "UNSRECORDITEMTMPL":
+                fields[child.attrib.get("id")] = {"name": name, "kind": "number"}
             else:
                 fields[child.attrib.get("id")] = {"name": name, "kind": "text"}
         return fields
@@ -90,6 +92,8 @@ class CddDtcParser:
                 properties[field["name"]] = (
                     field["values"].get(value_index) if value_index is not None else None
                 )
+            elif field["kind"] == "number":
+                properties[field["name"]] = self._shared.cdd_int(child.attrib.get("v"))
             else:
                 properties[field["name"]] = self._shared.text_by_path(child, "TEXT/TUV")
         return properties
@@ -135,16 +139,34 @@ class CddDtcParser:
             None,
         )
         template_fields = self._record_template_fields(record_tmpl)
-        record_dt = next(
-            (dt for dt in ecu_doc.iter("RECORDDT") if dt.attrib.get("rtSpec") == rt_spec),
-            None,
-        )
-        if record_dt is None:
-            return []
         return [
-            self.parse_record(record, byte_length, template_fields, failure_types, used_ids)
+            {
+                **self.parse_record(record, byte_length, template_fields, failure_types, used_ids),
+                "source": rt_spec,
+                "bitLength": byte_length,
+            }
+            for record_dt in ecu_doc.iter("RECORDDT")
+            if record_dt.attrib.get("rtSpec") == rt_spec
             for record in self._shared.direct_children(record_dt, "RECORD")
         ]
+
+    def for_variant(self, entries, variant):
+        """Resolve the variant's record references, including referenced data types."""
+        used_ids = set()
+        visited = set()
+
+        def visit(element):
+            if element is None or id(element) in visited:
+                return
+            visited.add(id(element))
+            if element.tag == "RECORDREF":
+                used_ids.add(element.attrib.get("idref"))
+            for child in element:
+                visit(child)
+            visit(self._shared.by_id(element.attrib.get("dtref")))
+
+        visit(variant)
+        return [{**entry, "used": True} for entry in entries if entry["id"] in used_ids]
 
     def parse_status_mask(self, ecu_doc):
         """The DTC status byte and the meaning of each of its bits.

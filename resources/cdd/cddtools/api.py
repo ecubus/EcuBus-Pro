@@ -22,6 +22,7 @@ from .cdd_parser_shared import CddParserShared
 from .cdd_services_parser import CddServicesParser
 from .cdd_states_parser import CddStatesParser
 from .cdd_tester import CddTester
+from .cdd_snapshot import CddSnapshotParser
 
 
 def load_ecu_doc(file_path):
@@ -106,6 +107,17 @@ def parse_supported_interfaces(file_path):
 def parse_tester_info(file_path, parse_resp=True):
     """Connection-oriented view: addressing, timing, DIDs, DTCs, services."""
     return _run(file_path, lambda shared, doc: CddTester(shared).build(doc))
+
+
+def parse_snapshot(file_path):
+    """Read variant-specific DID/DTC definitions without requiring a bus interface.
+
+    Type references are expanded and document-local IDs are omitted, so the
+    result can be compared across separately saved versions of a document.
+    Unknown lengths remain None; variable lengths retain their minimum/maximum.
+    No CDD file is modified.
+    """
+    return _run(file_path, lambda shared, doc: CddSnapshotParser(shared).parse(doc))
 
 
 def parse(file_path, parse_resp=False):

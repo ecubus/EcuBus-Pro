@@ -953,6 +953,15 @@
     }
   },
   "uds": {
+    "cdd": {
+      "noData": "No data",
+      "faultCodes": "Fault codes",
+      "searchFaultCodes": "Search fault codes",
+      "rawCode": "Raw code",
+      "failureType": "Failure type",
+      "failureTypeText": "Failure description",
+      "description": "Description"
+    },
     "tabs": {
       "home": "Home",
       "hardware": "Hardware",

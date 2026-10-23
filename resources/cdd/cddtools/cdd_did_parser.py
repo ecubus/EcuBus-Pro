@@ -20,6 +20,15 @@ class CddDidParser:
             } if didrefs is not None else set()
         return refs
 
+    def for_variant(self, entries, variant):
+        """DIDs declared or referenced by this variant, independent of XML IDs."""
+        refs = {
+            ref.attrib.get("didRef")
+            for ref in variant.iter()
+            if ref.tag in ("DIDREF", "DIDDATAREF")
+        }
+        return [entry for entry in entries if entry["id"] in refs]
+
     def _used_ids(self, ecu_doc):
         """DID ids referenced by a DIDDATAREF/DIDREF anywhere outside the
         per-variant DIDREFS list, i.e. actually used by a diagnostic

@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { execBinary } from 'src/main/util'
 import { getPythonPath } from 'src/main/python'
+import { getTxPdu, paramSetVal } from 'src/main/share/uds'
 import path from 'path'
 import fs from 'fs'
 import { tmpdir } from 'os'
@@ -18,16 +19,20 @@ async function runCddCommand(command: string, cddFilePath: string) {
     : process.platform === 'win32'
       ? 'python'
       : 'python3'
-  const outputPath = path.join(tmpdir(), `cdd_test_${Date.now()}.json`)
-  const result = await execBinary(pythonPath, [cddParsePy, command, cddFilePath, outputPath], {
-    timeout: 120000
-  })
-  if (!result.success) {
-    throw new Error(result.stderr || 'CDD parse failed')
+  const outputDir = fs.mkdtempSync(path.join(tmpdir(), 'cdd_test_'))
+  const outputPath = path.join(outputDir, 'result.json')
+  try {
+    const result = await execBinary(pythonPath, [cddParsePy, command, cddFilePath, outputPath], {
+      timeout: 120000
+    })
+    if (!result.success) {
+      throw new Error(result.stderr || 'CDD parse failed')
+    }
+    return JSON.parse(fs.readFileSync(outputPath, 'utf-8'))
+  } finally {
+    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath)
+    fs.rmdirSync(outputDir)
   }
-  const jsonStr = fs.readFileSync(outputPath, 'utf-8')
-  fs.unlinkSync(outputPath)
-  return JSON.parse(jsonStr)
 }
 
 describe('CDD parseTesterInfo', () => {
@@ -52,6 +57,24 @@ describe('CDD parseTesterInfo', () => {
     expect(testers['Base_Variant.DoIP_ISO13400'].type).toBe('eth')
     expect(testers['Base_Variant.CAN'].didList.length).toBe(16)
     expect(testers['Base_Variant.CAN'].dtcList.length).toBe(4)
+    expect(testers['Base_Variant1.CAN'].dtcList).toEqual([])
+  })
+
+  test.each([
+    ['0x04', 'DTCSnapshotRecordNumber', 4],
+    ['0x06', 'DTCExtendedDataRecordNumber', 6]
+  ])('preserves the record number in %s requests', (subfunc, recordName, subfuncValue) => {
+    const service = structuredClone(
+      testers['Base_Variant.CAN'].allServiceList['0x19'].find((s: any) => s.subfunc === subfunc)
+    )
+    const dtc = service.params.find((p: any) => p.name === 'DTC')
+    const record = service.params.find((p: any) => p.name === recordName)
+    expect(record).toBeDefined()
+    expect(record.bitLen).toBe(8)
+    expect(dtc.DTC_Table.some((entry: any) => entry.hexValue === 0x010017)).toBe(true)
+    paramSetVal(dtc, '01 00 17')
+    paramSetVal(record, 1)
+    expect(Array.from(getTxPdu(service))).toEqual([0x19, subfuncValue, 1, 0, 0x17, 1])
   })
 
   test('reads CAN identifiers and timing the ECU overrides', () => {

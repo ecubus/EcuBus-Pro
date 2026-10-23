@@ -14,6 +14,7 @@ PRIMITIVE_KINDS = {
 # placeholder in the telegram byte sequence.
 PROXY_TAGS = (
     "SIMPLEPROXYCOMP",
+    "DOMAINDATAPROXYCOMP",
     "GROUPOFDTCPROXYCOMP",
     "STATUSDTCPROXYCOMP",
     "CONTENTCOMP",
@@ -281,6 +282,8 @@ class CddServicesParser:
         item["role"] = "Payload"
         item["dest"] = component.attrib.get("dest")
         item["bytes"] = PLACEHOLDER_BY_DEST.get(component.attrib.get("dest"), "..")
+        if component.tag == "DOMAINDATAPROXYCOMP" and item["dest"] in ("srn", "edrn"):
+            item["bitLength"] = 8
         slot_id = context["proxyRefs"].get(component.attrib.get("id"))
         item["telegram"] = context["telegramNames"].get(slot_id)
         if component.attrib.get("dest") == "resCode":

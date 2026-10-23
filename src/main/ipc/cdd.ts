@@ -1,5 +1,4 @@
 import { ipcMain, app } from 'electron'
-import fs from 'fs'
 import fsP from 'fs/promises'
 import path from 'path'
 
@@ -13,19 +12,18 @@ async function runCddParse(
   parseResp: boolean
 ): Promise<{ error: number; data?: any; message?: string }> {
   const pythonPath = getPythonPath()
-  const tmpDir = app.getPath('temp')
-  const outputPath = path.join(tmpDir, `cdd_result_${Date.now()}.json`)
+  const tmpDir = await fsP.mkdtemp(path.join(app.getPath('temp'), 'cdd-'))
+  const outputPath = path.join(tmpDir, 'result.json')
 
   const args = [cddPyFile, command, cddFilePath, outputPath]
   if (parseResp) {
     args.push('--parseResp')
   }
 
-  const result = await execBinary(pythonPath, args, {
-    cwd: path.dirname(cddPyFile)
-  })
-
   try {
+    const result = await execBinary(pythonPath, args, {
+      cwd: path.dirname(cddPyFile)
+    })
     if (result.success) {
       const jsonStr = await fsP.readFile(outputPath, 'utf-8')
       return JSON.parse(jsonStr)
@@ -33,7 +31,8 @@ async function runCddParse(
       throw new Error(result.stderr || 'CDD parse failed')
     }
   } finally {
-    fsP.unlink(outputPath).catch(() => {})
+    await fsP.unlink(outputPath).catch(() => {})
+    await fsP.rmdir(tmpDir).catch(() => {})
   }
 }
 

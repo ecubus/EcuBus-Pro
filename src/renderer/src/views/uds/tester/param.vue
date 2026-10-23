@@ -268,6 +268,7 @@ import { Folder } from '@element-plus/icons-vue'
 import { useProjectStore } from '@r/stores/project'
 import { error } from 'winston'
 import i18next from 'i18next'
+import { getDtcOptions } from './dtcSelection'
 
 const serviceDetail = window.serviceDetail
 const paramError = ref<Record<string, string>>({})
@@ -330,13 +331,15 @@ interface EditParam extends Param {
 }
 const infoParam = computed(() => {
   if (editIndex.value >= 0) {
+    const dtcOptions = getDtcOptions(editValue.value, props.id === 'req', props.serviceId)
+    if (dtcOptions?.length) return dtcOptions
     if (props.id == 'req') {
-      return serviceDetail[props.serviceId].defaultParams[editIndex.value].enum?.map((item) => ({
+      return serviceDetail[props.serviceId].defaultParams[editIndex.value]?.enum?.map((item) => ({
         name: item.name,
         value: Number(item.value).toString()
       }))
     } else {
-      return serviceDetail[props.serviceId].defaultRespParams[editIndex.value].enum?.map(
+      return serviceDetail[props.serviceId].defaultRespParams[editIndex.value]?.enum?.map(
         (item) => ({
           name: item.name,
           value: Number(item.value).toString()
@@ -498,7 +501,7 @@ function saveParam(index: number, justValid: boolean) {
             if (index == editIndex.value) {
               newBuffer = Buffer.concat([newBuffer, Buffer.from(d.value)])
             } else {
-              newBuffer = Buffer.concat([newBuffer, Buffer.from(editParam[index].value)])
+              newBuffer = Buffer.concat([newBuffer, Buffer.from(editParam[index]?.value ?? [])])
             }
           }
         }

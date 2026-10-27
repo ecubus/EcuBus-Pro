@@ -2377,7 +2377,11 @@
       },
       "replayConfig": {
         "messages": {
-          "startFailed": "Failed to start replay: {{msg}}"
+          "startFailed": "Failed to start replay: {{msg}}",
+          "unmappedChannel": "Replay \"{{name}}\": log channel {{channel}} is not in the channel map (mapped: {{mapped}}). Frames on this channel are dropped.",
+          "droppedFrames": "Replay \"{{name}}\": dropped {{count}} frame(s) on unmapped log channel(s) {{channels}}.",
+          "noMappedChannels": "none",
+          "scanFailed": "Failed to scan replay log channels in {{file}}: {{msg}}"
         },
         "tabs": {
           "general": "General",
@@ -2427,7 +2431,10 @@
           "assigned": "Assigned"
         },
         "channelMap": {
-          "hint": "Map log file channels to connected devices. One channel can send to multiple devices.",
+          "hint": "Map log file channels to connected devices. One channel can send to multiple devices. Frames on a log channel that is not listed here are dropped.",
+          "detected": "Log channels in this file: {{channels}}. Map each one to a device, or frames on it are dropped.",
+          "detectedPartial": "Log channels in the first {{scanned}} frames: {{channels}}. Map each one to a device, or frames on it are dropped.",
+          "noFrames": "No CAN frames were found in this file.",
           "logChannel": "Log Channel",
           "channel": "Channel",
           "arrow": "",

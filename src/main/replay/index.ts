@@ -3,7 +3,12 @@ import path from 'path'
 import zlib from 'zlib'
 import { CAN_ID_TYPE, CanMessage, getTsUs } from '../share/can'
 import { ReplayLOG } from '../log'
-import type { ReplayItem, ReplayFileFormat, ReplayChannelMap } from 'src/preload/data'
+import type {
+  ReplayItem,
+  ReplayFileFormat,
+  ReplayChannelMap,
+  ReplayLogChannelScan
+} from 'src/preload/data'
 import { AscReader } from './ascReader'
 import { BlfReader } from './blfReader'
 import { DOIP } from '../doip'
@@ -102,9 +107,13 @@ export class Replay {
   private speedFactor: number = 1.0
   private runningPromise: Promise<void> | null = null
   private lastProgressPercent: number | null = null
-  private channelIdMap: Map<number, ReplayChannelMap> = new Map()
+  private channelIdMap: Map<number, ReplayChannelMap | undefined> = new Map()
   private tsOffset: number = 0
   private measurementStartTimeMs: number = 0
+  /** Log channels that already produced an unmapped-channel warning. */
+  private warnedMissingChannels: Set<number> = new Set()
+  private droppedUnmappedFrames = 0
+  private dropSummaryEmitted = false
   /** Cache: `${databaseId}|${frameId}|${idType}` -> { database, name } or null (not found) */
   private frameDbInfoCache: Map<string, { database: string; name: string } | null> = new Map()
   constructor(
@@ -141,10 +150,55 @@ export class Replay {
       return this.channelIdMap.get(logChannel)
     }
     const channelMap = this.config.channelMap?.find((m) => m.logChannel === logChannel)
-    if (channelMap) {
-      this.channelIdMap.set(logChannel, channelMap)
-    }
+    // Cache misses too. A log on the wrong channel can be hundreds of thousands of frames.
+    this.channelIdMap.set(logChannel, channelMap)
     return channelMap
+  }
+
+  private mappedChannelList(): string {
+    const mapped = [...new Set((this.config.channelMap ?? []).map((item) => item.logChannel))].sort(
+      (a, b) => a - b
+    )
+    if (mapped.length === 0) {
+      return i18next.t('uds.network.replayConfig.messages.noMappedChannels')
+    }
+    return mapped.join(', ')
+  }
+
+  private emitReplayWarning(msg: string): void {
+    this.log.warn(msg)
+    global.sysLog.warn(msg)
+  }
+
+  /**
+   * Frames with no channelMap row are ignored. Warn once per missing channel so a
+   * long log does not flood the system log, and count the drops for the summary.
+   */
+  private noteUnmappedFrame(logChannel: number): void {
+    this.droppedUnmappedFrames++
+    if (this.warnedMissingChannels.has(logChannel)) return
+    this.warnedMissingChannels.add(logChannel)
+    this.emitReplayWarning(
+      i18next.t('uds.network.replayConfig.messages.unmappedChannel', {
+        name: this.config.name,
+        channel: logChannel,
+        mapped: this.mappedChannelList()
+      })
+    )
+  }
+
+  private finishDropReport(): void {
+    if (this.dropSummaryEmitted) return
+    this.dropSummaryEmitted = true
+    if (this.droppedUnmappedFrames === 0) return
+    const channels = [...this.warnedMissingChannels].sort((a, b) => a - b).join(', ')
+    this.emitReplayWarning(
+      i18next.t('uds.network.replayConfig.messages.droppedFrames', {
+        name: this.config.name,
+        count: this.droppedUnmappedFrames,
+        channels
+      })
+    )
   }
 
   /**
@@ -183,6 +237,10 @@ export class Replay {
     try {
       this.reader = this.createReader()
       this.reader.init()
+      this.channelIdMap.clear()
+      this.warnedMissingChannels.clear()
+      this.droppedUnmappedFrames = 0
+      this.dropSummaryEmitted = false
 
       this.state = 'running'
       this.currentRepeat = 0
@@ -239,34 +297,36 @@ export class Replay {
       }
     }
     const channelMap = this.findChannelMap(frame.channel)
-    if (channelMap) {
-      for (const deviceId of channelMap.deviceIds) {
-        const base = this.canBaseMap.get(deviceId)
-        if (base) {
-          if (base.info.database) {
-            const dbInfo = this.getFrameDbInfo(base.info.database, frame)
-            if (dbInfo) {
-              frame.database = dbInfo.database
-              frame.name = dbInfo.name
-            }
+    if (!channelMap) {
+      this.noteUnmappedFrame(frame.channel)
+      return
+    }
+    for (const deviceId of channelMap.deviceIds) {
+      const base = this.canBaseMap.get(deviceId)
+      if (base) {
+        if (base.info.database) {
+          const dbInfo = this.getFrameDbInfo(base.info.database, frame)
+          if (dbInfo) {
+            frame.database = dbInfo.database
+            frame.name = dbInfo.name
           }
-          if (this.config.mode == 'offline') {
-            // Attach original recording time (enabled by default, can be disabled via config)
-            if (this.config.useOriginalTime !== false && this.measurementStartTimeMs > 0) {
-              frame.originalTs = frame.ts
-              const d = new Date(this.measurementStartTimeMs + frame.ts / 1000)
-              const y = d.getUTCFullYear()
-              const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
-              const day = String(d.getUTCDate()).padStart(2, '0')
-              const h = String(d.getUTCHours()).padStart(2, '0')
-              const mi = String(d.getUTCMinutes()).padStart(2, '0')
-              const s = String(d.getUTCSeconds()).padStart(2, '0')
-              const ms = String(d.getUTCMilliseconds()).padStart(3, '0')
-              frame.absTimeStr = `${y}-${mo}-${day} ${h}:${mi}:${s}.${ms}`
-            }
-            frame.ts += this.tsOffset
-            base.log.canBase(frame)
+        }
+        if (this.config.mode == 'offline') {
+          // Attach original recording time (enabled by default, can be disabled via config)
+          if (this.config.useOriginalTime !== false && this.measurementStartTimeMs > 0) {
+            frame.originalTs = frame.ts
+            const d = new Date(this.measurementStartTimeMs + frame.ts / 1000)
+            const y = d.getUTCFullYear()
+            const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
+            const day = String(d.getUTCDate()).padStart(2, '0')
+            const h = String(d.getUTCHours()).padStart(2, '0')
+            const mi = String(d.getUTCMinutes()).padStart(2, '0')
+            const s = String(d.getUTCSeconds()).padStart(2, '0')
+            const ms = String(d.getUTCMilliseconds()).padStart(3, '0')
+            frame.absTimeStr = `${y}-${mo}-${day} ${h}:${mi}:${s}.${ms}`
           }
+          frame.ts += this.tsOffset
+          base.log.canBase(frame)
         }
       }
     }
@@ -286,6 +346,7 @@ export class Replay {
       this.tsOffset = getTsUs() - global.startTs
     } else {
       // Completed
+      this.finishDropReport()
       this.state = 'completed'
       this.log.stop('completed')
       this.cleanup()
@@ -300,6 +361,7 @@ export class Replay {
       return
     }
 
+    this.finishDropReport()
     this.state = 'stopped'
     this.log.stop(reason || 'user stopped')
     this.cleanup()
@@ -358,3 +420,45 @@ export class Replay {
 }
 
 export default Replay
+
+/** Frames inspected when suggesting channel-map rows from a log file. */
+export const REPLAY_CHANNEL_SCAN_LIMIT = 4096
+
+/**
+ * Collect distinct CAN log channels from the start of a replay file.
+ * Stops after `limit` frames so picking a large BLF does not read the whole log.
+ */
+export async function scanReplayLogChannels(
+  filePath: string,
+  format: 'asc' | 'blf',
+  limit = REPLAY_CHANNEL_SCAN_LIMIT
+): Promise<ReplayLogChannelScan> {
+  const reader: ReplayReader =
+    format === 'asc' ? new AscReader(filePath, 0) : new BlfReader(filePath, 0)
+  const channels = new Set<number>()
+  let scanned = 0
+  let truncated = false
+  try {
+    reader.init()
+    let frame: ReplayCanFrame | null
+    while (scanned < limit && (frame = await reader.readFrame()) !== null) {
+      channels.add(frame.channel)
+      scanned++
+    }
+    if (scanned >= limit) {
+      const extra = await reader.readFrame()
+      if (extra) {
+        channels.add(extra.channel)
+        scanned++
+        truncated = true
+      }
+    }
+  } finally {
+    reader.close()
+  }
+  return {
+    channels: [...channels].sort((a, b) => a - b),
+    truncated,
+    scanned
+  }
+}

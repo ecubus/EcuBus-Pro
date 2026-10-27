@@ -50,6 +50,7 @@
                 </template>
               </el-input>
             </el-form-item>
+            <div v-if="detectedHint" class="channel-hint">{{ detectedHint }}</div>
 
             <el-form-item
               :label="i18next.t('uds.network.replayConfig.labels.format')"
@@ -156,6 +157,9 @@
             <template #title>
               {{ i18next.t('uds.network.replayConfig.channelMap.hint') }}
             </template>
+            <template v-if="detectedHint" #default>
+              {{ detectedHint }}
+            </template>
           </el-alert>
 
           <el-table :data="channelMapData" size="small" style="width: 100%">
@@ -232,9 +236,13 @@
       <el-button size="small" @click="handleCancel">{{
         i18next.t('uds.network.replayConfig.buttons.cancel')
       }}</el-button>
-      <el-button size="small" type="primary" :disabled="globalStart" @click="handleConfirm">{{
-        i18next.t('uds.network.replayConfig.buttons.ok')
-      }}</el-button>
+      <el-button
+        size="small"
+        type="primary"
+        :disabled="globalStart || channelScanPending"
+        @click="handleConfirm"
+        >{{ i18next.t('uds.network.replayConfig.buttons.ok') }}</el-button
+      >
     </div>
   </div>
 </template>
@@ -253,7 +261,8 @@ import stopIcon from '@iconify/icons-material-symbols/stop-rounded'
 import arrowIcon from '@iconify/icons-material-symbols/arrow-forward-rounded'
 import addIcon from '@iconify/icons-material-symbols/add-rounded'
 import deleteIcon from '@iconify/icons-material-symbols/delete-rounded'
-import type { ReplayChannelMap } from 'src/preload/data'
+import type { ReplayChannelMap, ReplayLogChannelScan } from 'src/preload/data'
+import { mergeReplayChannelMap } from './replayChannelMap'
 
 const activeName = ref('general')
 const props = defineProps<{
@@ -360,6 +369,7 @@ async function browseFile() {
     if (ext && ['asc', 'blf', 'trc', 'mf4'].includes(ext)) {
       formData.value.format = ext as 'asc' | 'blf' | 'trc' | 'mf4'
     }
+    await scanLogChannels(file, formData.value.format)
   }
 }
 
@@ -414,6 +424,68 @@ const assignedDevices = computed(() => {
 
 // Channel map data for the table
 const channelMapData = ref<ReplayChannelMap[]>([])
+const detectedLogChannels = ref<number[]>([])
+const detectedTruncated = ref(false)
+const detectedScanned = ref(0)
+const channelScanDone = ref(false)
+const channelScanPending = ref(false)
+let channelScanGen = 0
+let channelMapRevision = 0
+
+const detectedHint = computed(() => {
+  if (!channelScanDone.value) return ''
+  if (detectedLogChannels.value.length === 0) {
+    return i18next.t('uds.network.replayConfig.channelMap.noFrames')
+  }
+  const channels = detectedLogChannels.value.join(', ')
+  if (detectedTruncated.value) {
+    return i18next.t('uds.network.replayConfig.channelMap.detectedPartial', {
+      channels,
+      scanned: detectedScanned.value
+    })
+  }
+  return i18next.t('uds.network.replayConfig.channelMap.detected', { channels })
+})
+
+function applyDetectedChannels(scan: ReplayLogChannelScan, revisionAtStart: number) {
+  detectedLogChannels.value = scan.channels
+  detectedTruncated.value = scan.truncated
+  detectedScanned.value = scan.scanned
+  channelScanDone.value = true
+  if (scan.channels.length === 0) return
+  // Ignore a late scan if the user already edited the table.
+  if (revisionAtStart !== channelMapRevision) return
+  channelMapData.value = mergeReplayChannelMap(channelMapData.value, scan.channels, {
+    allowRetarget: !scan.truncated
+  })
+}
+
+async function scanLogChannels(filePath: string, format: string | undefined) {
+  const gen = ++channelScanGen
+  const revisionAtStart = channelMapRevision
+  if (!filePath || (format !== 'asc' && format !== 'blf')) {
+    detectedLogChannels.value = []
+    detectedTruncated.value = false
+    detectedScanned.value = 0
+    channelScanDone.value = false
+    channelScanPending.value = false
+    return
+  }
+  channelScanPending.value = true
+  try {
+    const scan = (await window.electron.ipcRenderer.invoke('ipc-replay-scan-channels', {
+      filePath,
+      format
+    })) as ReplayLogChannelScan
+    if (gen !== channelScanGen) return
+    applyDetectedChannels(scan, revisionAtStart)
+  } catch {
+    if (gen !== channelScanGen) return
+    channelScanDone.value = false
+  } finally {
+    if (gen === channelScanGen) channelScanPending.value = false
+  }
+}
 
 // Initialize channel map from formData
 if (formData.value.channelMap && formData.value.channelMap.length > 0) {
@@ -425,6 +497,7 @@ if (formData.value.channelMap && formData.value.channelMap.length > 0) {
 
 // Add a new channel mapping row (logChannel starts from 1)
 const addChannelMapping = () => {
+  channelMapRevision++
   const existingChannels = channelMapData.value.map((m) => m.logChannel)
   let nextChannel = 1
   while (existingChannels.includes(nextChannel)) {
@@ -435,11 +508,13 @@ const addChannelMapping = () => {
 
 // Remove a channel mapping row
 const removeChannelMapping = (index: number) => {
+  channelMapRevision++
   channelMapData.value.splice(index, 1)
 }
 
 // Update channel mapping
 const updateChannelMap = (index: number, logChannel: number, deviceIds: string[]) => {
+  channelMapRevision++
   channelMapData.value[index] = { logChannel, deviceIds }
 }
 
@@ -480,7 +555,17 @@ const handleConfirm = async () => {
 }
 
 onMounted(() => {
-  // Initialize if needed
+  const format = formData.value.format
+  const filePath = formData.value.filePath
+  if (!filePath || (format !== 'asc' && format !== 'blf')) return
+  const abs = window.path.isAbsolute(filePath)
+    ? filePath
+    : project.projectInfo.path
+      ? window.path.join(project.projectInfo.path, filePath)
+      : ''
+  if (abs) {
+    void scanLogChannels(abs, format)
+  }
 })
 </script>
 <style lang="scss">
@@ -501,5 +586,12 @@ onMounted(() => {
   align-items: center;
   margin-top: 10px;
   padding-right: 10px;
+}
+
+.channel-hint {
+  margin: -6px 0 10px 100px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.4;
 }
 </style>

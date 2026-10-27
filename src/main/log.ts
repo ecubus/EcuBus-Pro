@@ -931,4 +931,13 @@ export class ReplayLOG {
       data: { msg }
     })
   }
+
+  warn(msg: string) {
+    if (this.closeFlag) return
+    this.log.warn({
+      method: 'replayWarn',
+      replayId: this.replayId,
+      data: { msg }
+    })
+  }
 }

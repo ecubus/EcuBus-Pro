@@ -1,5 +1,6 @@
 import { HardwareType, Sequence, ServiceItem, UdsAddress, UdsInfo, ServiceId } from './uds'
 import { EntityAddr, TlsConfig } from './doip'
+import type { CddDtc } from './cdd'
 
 /**
  * @category UDS
@@ -15,6 +16,7 @@ export interface TesterInfo {
   address: UdsAddress[]
   simulateBy?: string
   allServiceList: Partial<Record<ServiceId, ServiceItem[]>>
+  dtcList?: CddDtc[]
   //speical for doip
   doipVersion?: number
   /** TLS configuration for DoIP v3 server (entity simulation) */

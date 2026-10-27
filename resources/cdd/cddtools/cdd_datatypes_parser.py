@@ -109,14 +109,16 @@ class CddDataTypesParser:
         return self._shared.hex_value(bitmask) if bitmask not in (None, "") else None
 
     def _text_table(self, data_type):
+        coded_type = self._shared.first_child(data_type, "CVALUETYPE")
+        element_bits = self._int_or_none(coded_type.attrib.get("bl")) if coded_type is not None else None
         entries = []
         for text_map in self._shared.direct_children(data_type, "TEXTMAP"):
             start = text_map.attrib.get("s")
             end = text_map.attrib.get("e")
             entries.append(
                 {
-                    "start": self._shared.hex_value(start),
-                    "end": self._shared.hex_value(end) if end != start else None,
+                    "start": self._shared.hex_value(start, element_bits or 8),
+                    "end": self._shared.hex_value(end, element_bits or 8) if end != start else None,
                     "text": self._shared.text_by_path(text_map, "TEXT/TUV") or "",
                     "addInfo": self._shared.text_by_path(text_map, "ADDINFO/TUV"),
                 }

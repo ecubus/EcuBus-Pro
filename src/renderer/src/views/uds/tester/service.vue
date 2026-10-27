@@ -30,15 +30,25 @@
                   >({{ data.serviceId }})</span
                 ></span
               >
-              <el-button
-                v-if="data.parent"
-                :disabled="globalStart"
-                link
-                type="primary"
-                @click.stop="addNewService(data.label, data.serviceId)"
-              >
-                <Icon :icon="circlePlusFilled" />
-              </el-button>
+              <span v-if="data.parent">
+                <el-button
+                  v-if="data.serviceId == '0x19' && dtcList !== undefined"
+                  link
+                  type="primary"
+                  :title="i18next.t('uds.cdd.faultCodes', { defaultValue: 'Fault codes' })"
+                  @click.stop="dtcVisible = true"
+                >
+                  <Icon :icon="listIcon" />
+                </el-button>
+                <el-button
+                  :disabled="globalStart"
+                  link
+                  type="primary"
+                  @click.stop="addNewService(data.label, data.serviceId)"
+                >
+                  <Icon :icon="circlePlusFilled" />
+                </el-button>
+              </span>
               <el-button
                 v-else
                 :disabled="globalStart"
@@ -233,6 +243,16 @@
       </div>
     </div>
     <el-dialog
+      v-if="dtcVisible"
+      v-model="dtcVisible"
+      :title="i18next.t('uds.cdd.faultCodes', { defaultValue: 'Fault codes' })"
+      width="90%"
+      :append-to="`#win${editIndex}_services`"
+      align-center
+    >
+      <dtcTable :rows="dtcList ?? []" />
+    </el-dialog>
+    <el-dialog
       v-if="dialogVisible"
       v-model="dialogVisible"
       :title="i18next.t('uds.tester.service.odx.title')"
@@ -296,12 +316,14 @@ import { v4, validate } from 'uuid'
 import { Ref, computed, inject, nextTick, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import paramVue from './param.vue'
 import configVue from './config.vue'
+import dtcTable from './dtcTable.vue'
 import closeIcon from '@iconify/icons-material-symbols/close'
 import { Icon } from '@iconify/vue'
 import { type FormRules, type FormInstance, ElMessageBox, ElMessage } from 'element-plus'
 import circlePlusFilled from '@iconify/icons-ep/circle-plus-filled'
 import removeIcon from '@iconify/icons-ep/remove'
 import loadIcon from '@iconify/icons-material-symbols/upload'
+import listIcon from '@iconify/icons-material-symbols/format-list-bulleted'
 import { ServiceId, checkServiceId } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -324,6 +346,8 @@ const leftWidth = ref(300)
 const activeName = ref('request')
 const dataBase = useDataStore()
 const editIndex = toRef(props, 'editIndex')
+const dtcList = computed(() => dataBase.tester[editIndex.value]?.dtcList)
+const dtcVisible = ref(false)
 const serviceList = toRef(dataBase.tester[editIndex.value], 'allServiceList')
 const sequence = toRef(dataBase.tester[editIndex.value], 'seqList')
 const treeRef = ref()
@@ -731,7 +755,7 @@ watch(
 function suppressChange() {
   if (model.value.serviceId.startsWith('0x')) {
     if (serviceDetail[model.value.serviceId]?.hasSubFunction) {
-      const lastVal = model.value.params[0].value[0]
+      const lastVal = Buffer.from(model.value.params[0].value)[0]
       if (model.value.suppress) {
         activeName.value = 'request'
         paramSetVal(model.value.params[0], lastVal | 0x80)

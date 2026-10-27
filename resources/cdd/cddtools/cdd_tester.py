@@ -148,6 +148,7 @@ class CddTester:
     def __init__(self, shared=None):
         self._shared = shared or CddParserShared()
         self._attributes = CddAttributesParser(self._shared)
+        self._record_numbers = {}
 
     # -- helpers -------------------------------------------------------------
 
@@ -805,6 +806,22 @@ class CddTester:
         if component["role"] == "ServiceId":
             return []
 
+        if component["kind"] == "DOMAINDATAPROXYCOMP" and component.get("dest") in ("srn", "edrn"):
+            choices = self._record_numbers.get(component["dest"], {})
+            return [
+                self._param({
+                    "name": component["name"],
+                    "startBit": 0,
+                    "bitLength": 8,
+                    "minBitLength": 8,
+                    "maxBitLength": 8,
+                    "variableLength": False,
+                    "encoding": "uns",
+                    "value": min((int(key) for key in choices), default=0),
+                    "choices": choices or None,
+                })
+            ]
+
         if component["kind"] == "CONSTCOMP":
             data = [int(part, 16) for part in (component.get("bytes") or "").split() if part]
             if not data:
@@ -907,7 +924,9 @@ class CddTester:
             return
         for param in params:
             if _normalize(param["name"]) in DTC_TABLE_PARAM_NAMES:
-                param["DTC_Table"] = dtc_table
+                param["DTC_Table"] = [
+                    entry for entry in dtc_table if entry["bitLength"] == param["bitLen"]
+                ]
 
     # -- services -------------------------------------------------------------
 
@@ -990,10 +1009,19 @@ class CddTester:
         data_types = CddDataTypesParser(self._shared).parse(ecu_doc)
         by_qual = {entry["qual"]: entry for entry in data_types}
         by_name = {entry["name"]: entry for entry in data_types}
-        dtc_table = self._dtc_table(ecu_doc)
-        did_list = CddDidParser(self._shared).parse(ecu_doc)
-        dtc_list = CddDtcParser(self._shared).parse(ecu_doc)
+        did_parser = CddDidParser(self._shared)
+        dtc_parser = CddDtcParser(self._shared)
+        did_list = did_parser.parse(ecu_doc)
+        dtc_list = dtc_parser.parse(ecu_doc)
         self._dids = {did["qual"]: did for did in did_list}
+        self._record_numbers = {}
+        for dest, tag in (("srn", "SPECIFICSNAPSHOTRECORD"), ("edrn", "EXTENDEDDATARECORD")):
+            self._record_numbers[dest] = {
+                str(number): self._shared.name(record) or f"0x{number:02X}"
+                for record in ecu.iter(tag)
+                if (number := self._shared.cdd_int(record.attrib.get("rn"))) is not None
+                and 0 <= number <= 255
+            }
 
         variants = self._shared.direct_children(ecu, "VAR") or [ecu]
         result = {ecu_name: {}}
@@ -1003,6 +1031,9 @@ class CddTester:
                 if variant is not ecu
                 else ecu_name
             ) or f"{ecu_name}_{index + 1}"
+            variant_dids = did_parser.for_variant(did_list, variant)
+            variant_dtcs = dtc_parser.for_variant(dtc_list, variant)
+            dtc_table = self._dtc_table(variant_dtcs)
             service_map = self._service_map(
                 instances, variant_qual, {**by_qual, **by_name}, dtc_table
             )
@@ -1029,8 +1060,8 @@ class CddTester:
                     "udsTime": uds_time,
                     "seqList": [],
                     "address": addresses,
-                    "didList": did_list,
-                    "dtcList": dtc_list,
+                    "didList": variant_dids,
+                    "dtcList": variant_dtcs,
                     "allServiceList": service_map,
                 }
         return result
@@ -1052,9 +1083,9 @@ class CddTester:
                 service_map.setdefault(built["serviceId"], []).append(built)
         return service_map
 
-    def _dtc_table(self, ecu_doc):
+    def _dtc_table(self, dtcs):
         entries = []
-        for dtc in CddDtcParser(self._shared).parse(ecu_doc):
+        for dtc in dtcs:
             value = dtc["raw"] & 0xFFFFFF
             entries.append(
                 {
@@ -1063,6 +1094,8 @@ class CddTester:
                     "hexNumber": f"0x{value:06X}",
                     "hexValue": value,
                     "codeText": dtc["dtc"],
+                    "bitLength": dtc["bitLength"],
+                    "source": dtc["source"],
                 }
             )
         entries.sort(key=lambda entry: entry["hexValue"])

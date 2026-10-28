@@ -442,6 +442,7 @@
             <CanISignal
               :message-id="formData.id"
               :database="formData.database"
+              :raw-data="formData.data"
               @change="handleDataChange"
             />
           </el-tab-pane>
@@ -505,6 +506,7 @@ import {
   CanMsgType,
   getDlcByLen
 } from 'nodeCan/can'
+import { interactionPayloadLength } from 'nodeCan/canIaData'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -529,7 +531,7 @@ import Signal from '../components/signal.vue'
 import databaseIcon from '@iconify/icons-material-symbols/database'
 import { GraphBindFrameValue, GraphNode } from 'src/preload/data'
 import { Message } from 'nodeCan/can'
-import { writeMessageData } from '@r/database/dbc/calc'
+import { writeRawHexToMessage } from '@r/database/dbc/calc'
 import { useGlobalStart, useRuntimeStore } from '@r/stores/runtime'
 import { v4 } from 'uuid'
 import i18next from 'i18next'
@@ -785,56 +787,11 @@ watch(globalStart, (v) => {
     }
   }
 })
-function getLenByDlc(dlc: number, canFd: boolean) {
-  const map: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 8,
-    10: 8,
-    11: 8,
-    12: 8,
-    13: 8,
-    14: 8,
-    15: 8
-  }
-  const mapFd: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 12,
-    10: 16,
-    11: 20,
-    12: 24,
-    13: 32,
-    14: 48,
-    15: 64
-  }
-  if (canFd) {
-    return mapFd[dlc] || 0
-  } else {
-    return map[dlc] || 0
-  }
-}
 const dlcToLen = computed(() => {
   if (formData.value == undefined) {
     return 0
   }
-  const fd = formData.value.type.includes('fd')
-  const dlc = formData.value.dlc
-  return getLenByDlc(dlc, fd)
+  return interactionPayloadLength(formData.value.dlc, formData.value.type.includes('fd'))
 })
 function ceilClick(val: any) {
   popoverIndex.value = val.rowIndex
@@ -879,11 +836,8 @@ function dataChangeDone() {
   if (formData.value && formData.value.database) {
     const db = dataBase.database.can[formData.value.database]
     if (db) {
-      const message = db.messages[parseInt(formData.value.id, 16)]
-      if (message) {
-        const data = Buffer.from(formData.value.data.map((v) => parseInt(v, 16)))
-        writeMessageData(message, data, db)
-      }
+      // messages is an array; indexing by CAN id missed the frame and left signals at 0.
+      writeRawHexToMessage(db, parseInt(formData.value.id, 16), formData.value.data)
     }
   }
 }
@@ -921,7 +875,7 @@ function dataChange(index: number, v: string) {
 function handleDataChange(data: Buffer) {
   if (formData.value) {
     for (let i = 0; i < data.length; i++) {
-      formData.value.data[i] = data[i].toString(16)
+      formData.value.data[i] = data[i].toString(16).padStart(2, '0')
     }
   }
 }

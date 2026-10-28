@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -100,10 +100,11 @@ import {
   getMessageData,
   getMaxRawValue,
   getActiveSignals,
-  rawToPhys,
   updateSignalPhys,
-  updateSignalRaw
+  updateSignalRaw,
+  writeRawHexToMessage
 } from '@r/database/dbc/calc'
+import { rawPayloadIsBlank } from 'nodeCan/canIaData'
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
 import { cloneDeep } from 'lodash'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -111,6 +112,8 @@ import i18next from 'i18next'
 const props = defineProps<{
   database: string
   messageId: string
+  /** Raw bytes of the interaction row. Non-zero edits must survive reopening this dialog. */
+  rawData?: string[]
 }>()
 
 const dataStore = useDataStore()
@@ -223,6 +226,19 @@ function editGenerator(row: Signal) {
 }
 
 const globalStart = useGlobalStart()
+// Set while this pane is copying signal values into the raw editor, so that echo
+// does not decode the raw bytes back over the signal the user just edited.
+let suppressRawApply = 0
+
+function publishEncoded() {
+  if (!message.value) return
+  suppressRawApply++
+  emits('change', getMessageData(message.value))
+  nextTick(() => {
+    suppressRawApply = 0
+  })
+}
+
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
   updateSignalRaw(row)
@@ -238,7 +254,7 @@ function handleRawValueChange(row: Signal) {
       )
     }
 
-    emits('change', getMessageData(message.value))
+    publishEncoded()
   }
 }
 
@@ -256,7 +272,7 @@ function handlePhysValueChange(row: Signal, db: CanDB) {
         cloneDeep(row)
       )
     }
-    emits('change', getMessageData(message.value))
+    publishEncoded()
   }
 }
 
@@ -272,16 +288,38 @@ function initializeSignal(signal: Signal) {
   updateSignalRaw(signal)
 }
 
-onMounted(() => {
-  // Initialize all signals (signals is array)
-  if (message.value) {
-    ;(message.value.signals || []).forEach((signal) => {
+function adoptRawOrInitials(firstOpen: boolean) {
+  const msg = message.value
+  if (!msg) return
+  const db = dataStore.database.can[props.database]
+  if (!db) return
+  const id = parseInt(props.messageId, 16)
+  // A zero payload has never been edited: show DBC initial values in the raw editor.
+  // Any other payload is the user's raw edit and must not be replaced by signal encoding.
+  if (firstOpen && rawPayloadIsBlank(props.rawData)) {
+    ;(msg.signals || []).forEach((signal) => {
       initializeSignal(signal)
     })
     signalVersion.value++
-    emits('change', getMessageData(message.value))
+    publishEncoded()
+    return
   }
+  if (writeRawHexToMessage(db, id, props.rawData)) {
+    signalVersion.value++
+  }
+}
+
+onMounted(() => {
+  adoptRawOrInitials(true)
 })
+
+watch(
+  () => (props.rawData || []).join(','),
+  () => {
+    if (suppressRawApply) return
+    adoptRawOrInitials(false)
+  }
+)
 
 //
 

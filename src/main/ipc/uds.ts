@@ -25,15 +25,14 @@ import {
 } from '../docan/uds'
 import {
   CAN_ID_TYPE,
-  CanDB,
   CanInterAction,
-  Message as CanDbMessage,
   Signal as CanSignal,
   formatError,
   getTsUs,
   swapAddr,
   CanMessage
 } from '../share/can'
+import { buildCanInterPayload } from '../share/canIaData'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
@@ -1202,56 +1201,12 @@ ipcMain.on('ipc-pwm-set-duty', async (event, ...arg) => {
   }
 })
 
-function getLenByDlc(dlc: number, canFd: boolean) {
-  const map: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 8,
-    10: 8,
-    11: 8,
-    12: 8,
-    13: 8,
-    14: 8,
-    15: 8
-  }
-  const mapFd: Record<number, number> = {
-    0: 0,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6,
-    7: 7,
-    8: 8,
-    9: 12,
-    10: 16,
-    11: 20,
-    12: 24,
-    13: 32,
-    14: 48,
-    15: 64
-  }
-  if (canFd) {
-    return mapFd[dlc] || 0
-  } else {
-    return map[dlc] || 0
-  }
-}
 ipcMain.on('ipc-send-can', (event, ...arg) => {
   const ia = arg[0] as CanInterAction
 
   const canBase = canBaseMap.get(ia.channel)
   if (canBase) {
     const fd = ia.type.includes('fd')
-    const len = getLenByDlc(ia.dlc, fd)
     if (fd) {
       if (canBase.info.canfd == false) {
         sysLog.error(`can device ${canBase.info.vendor}-${canBase.info.handle} not enable canfd`)
@@ -1273,22 +1228,9 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
         name: ia.name
       }
     )
-    let b: Buffer = Buffer.alloc(len)
-    let db: CanDB | undefined
-    let message: CanDbMessage | undefined
-    if (ia.database) {
-      db = global.dataSet.database.can[ia.database]
-      if (db) {
-        message = db.messages.find((msg) => msg.id == parseInt(ia.id, 16))
-        if (message) {
-          b = getMessageData(message)
-        }
-      }
-    } else {
-      for (const [index, d] of ia.data.entries()) {
-        b[index] = parseInt(d, 16)
-      }
-    }
+    // Interaction rows store the bytes the user edited. Rebuilding from DBC signals
+    // drops raw-data edits on frames added from a database (signals stay at 0).
+    const b = buildCanInterPayload(ia)
 
     socket
       .write(b)
@@ -1309,42 +1251,12 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 //     return info
 // })
 
-function send(id: string, send: boolean): Buffer | null {
+function send(id: string) {
   const item = timerMap.get(id)
-  if (!item) return null
-  let db: CanDB | undefined
-  let message: CanDbMessage | undefined
-  if (item.ia.database) {
-    db = global.dataSet.database.can[item.ia.database]
-    if (db) {
-      message = db.messages.find((msg) => msg.id == parseInt(item.ia.id, 16))
-    }
-  }
-
-  if (message) {
-    const data = getMessageData(message)
-    if (send) {
-      item.socket.write(data).catch(() => {
-        null
-      })
-    } else {
-      return data
-    }
-  } else {
-    const len = getLenByDlc(item.ia.dlc, item.ia.type.includes('fd'))
-    const b = Buffer.alloc(len)
-    for (const [index, d] of item.ia.data.entries()) {
-      b[index] = parseInt(d, 16)
-    }
-    if (send) {
-      item.socket.write(b).catch(() => {
-        null
-      })
-    } else {
-      return b
-    }
-  }
-  return null
+  if (!item) return
+  item.socket.write(buildCanInterPayload(item.ia)).catch(() => {
+    null
+  })
 }
 ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
   const dbName = arg[0] as string
@@ -1364,17 +1276,25 @@ ipcMain.on('ipc-update-can-signal', (event, ...arg) => {
     }
   }
 })
+function pushPeriodPayload(item: timerType, data: Buffer) {
+  const changed = !item.data || data.compare(item.data) != 0
+  item.data = data
+  if (changed && item.taskId && item.socket.changePeriodData) {
+    item.socket.changePeriodData(item.taskId, data)
+  }
+}
+
 export function refreshCanPeriodData(messageId: number) {
-  for (const [index, d] of timerMap.entries()) {
-    if (parseInt(d.ia.id, 16) == messageId) {
-      if (d.socket.changePeriodData) {
-        const data = send(index, false)
-        if (data && data.compare(d.data!) != 0) {
-          d.socket.changePeriodData(d.taskId!, data)
-          d.data = data
-        }
-      }
-    }
+  for (const [, d] of timerMap.entries()) {
+    if (parseInt(d.ia.id, 16) != messageId) continue
+    const db = d.ia.database ? global.dataSet.database.can[d.ia.database] : undefined
+    const message = db?.messages.find((msg) => msg.id == parseInt(d.ia.id, 16))
+    if (!message) continue
+    // Script / signal-pane updates still flow through signal values. Mirror them into the
+    // row payload so interval sends (which transmit ia.data) follow setSignal.
+    const encoded = getMessageData(message)
+    d.ia.data = Array.from(encoded, (byte) => byte.toString(16).padStart(2, '0'))
+    pushPeriodPayload(d, buildCanInterPayload(d.ia))
   }
 }
 
@@ -1385,6 +1305,7 @@ ipcMain.on('ipc-update-can-period', (event, ...arg) => {
   const item = timerMap.get(id)
   if (item) {
     item.ia = ia
+    pushPeriodPayload(item, buildCanInterPayload(ia))
   }
 })
 ipcMain.on('ipc-send-can-period', (event, ...arg) => {
@@ -1429,13 +1350,7 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
     let newTimer: NodeJS.Timeout | undefined
     let dataSent: Buffer | null = null
     if (socket.startPeriodSend) {
-      dataSent = send(id, false)
-      if (dataSent == undefined) {
-        dataSent = Buffer.alloc(getLenByDlc(ia.dlc, fd))
-        for (const [index, d] of ia.data.entries()) {
-          dataSent[index] = parseInt(d, 16)
-        }
-      }
+      dataSent = buildCanInterPayload(ia)
       const initMsg: CanMessage = {
         id: parseInt(ia.id, 16),
         name: ia.name,
@@ -1452,7 +1367,7 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
       taskId = socket.startPeriodSend(initMsg, ia.trigger.period || 10)
     } else {
       newTimer = setInterval(() => {
-        send(id, true)
+        send(id)
       }, ia.trigger.period || 10)
     }
 

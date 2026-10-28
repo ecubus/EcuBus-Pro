@@ -1,4 +1,5 @@
 import type { CanDB, Message, Signal } from 'src/main/share/can'
+import { bufferFromRawHex } from 'src/main/share/canIaData'
 
 // Convert two's complement to signed value
 function fromTwosComplement(value: number, bits: number): number {
@@ -438,6 +439,59 @@ export function getMessageData(message: Message): Buffer {
   })
 
   return data
+}
+
+/**
+ * Decode interaction raw bytes into the DBC message with this CAN id.
+ * `messages` is an array, so the id must not be used as an index.
+ */
+export function writeRawHexToMessage(db: CanDB, id: number, hex: string[] | undefined): boolean {
+  if (!db?.messages || !Number.isFinite(id)) return false
+  const message = db.messages.find((msg) => msg.id === id)
+  if (!message) return false
+  writeMessageData(message, bufferFromRawHex(hex, message.length), db)
+  return true
+}
+
+/** Fill signals that have never been edited from their DBC initial value. */
+export function ensureSignalDefaults(message: Message) {
+  for (const signal of message.signals || []) {
+    if (signal.value === undefined || signal.value === '') {
+      signal.value = signal.initial_value || '0'
+      updateSignalRaw(signal)
+    }
+  }
+}
+
+/** Hex view of a message, sized to the interaction payload (DLC) length. */
+export function messagePayloadHex(message: Message, length: number): string[] {
+  const encoded = getMessageData(message)
+  const hex: string[] = []
+  const size = Math.max(0, length)
+  for (let i = 0; i < size; i++) {
+    hex.push((encoded[i] ?? 0).toString(16).padStart(2, '0'))
+  }
+  return hex
+}
+
+/**
+ * Write interaction raw bytes into the DBC message with this CAN id, then
+ * return the canonical hex those signals encode.
+ * Bits no signal owns become 0, so `ia.data` and `getMessageData()` stay the same payload.
+ * Returns undefined when the id is not in `db.messages`.
+ */
+export function linkRawHexToSignals(
+  db: CanDB,
+  id: number,
+  hex: string[] | undefined,
+  payloadLength: number
+): string[] | undefined {
+  if (!writeRawHexToMessage(db, id, hex)) return undefined
+  const message = db.messages.find((msg) => msg.id === id)
+  if (!message) return undefined
+  const canonical = messagePayloadHex(message, payloadLength)
+  writeRawHexToMessage(db, id, canonical)
+  return messagePayloadHex(message, payloadLength)
 }
 
 // 将信号写入缓冲区的辅助函数

@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -100,10 +100,10 @@ import {
   getMessageData,
   getMaxRawValue,
   getActiveSignals,
-  rawToPhys,
   updateSignalPhys,
   updateSignalRaw
 } from '@r/database/dbc/calc'
+import { rawPayloadIsBlank } from 'nodeCan/canIaData'
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
 import { cloneDeep } from 'lodash'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -111,6 +111,8 @@ import i18next from 'i18next'
 const props = defineProps<{
   database: string
   messageId: string
+  /** Raw bytes of the interaction row. Non-zero edits must survive reopening this dialog. */
+  rawData?: string[]
 }>()
 
 const dataStore = useDataStore()
@@ -223,6 +225,12 @@ function editGenerator(row: Signal) {
 }
 
 const globalStart = useGlobalStart()
+
+function publishEncoded() {
+  if (!message.value) return
+  emits('change', getMessageData(message.value))
+}
+
 // Raw value change handler
 function handleRawValueChange(row: Signal) {
   updateSignalRaw(row)
@@ -238,7 +246,7 @@ function handleRawValueChange(row: Signal) {
       )
     }
 
-    emits('change', getMessageData(message.value))
+    publishEncoded()
   }
 }
 
@@ -256,7 +264,7 @@ function handlePhysValueChange(row: Signal, db: CanDB) {
         cloneDeep(row)
       )
     }
-    emits('change', getMessageData(message.value))
+    publishEncoded()
   }
 }
 
@@ -273,14 +281,19 @@ function initializeSignal(signal: Signal) {
 }
 
 onMounted(() => {
-  // Initialize all signals (signals is array)
-  if (message.value) {
-    ;(message.value.signals || []).forEach((signal) => {
+  const msg = message.value
+  if (!msg) return
+  // A payload that already has bytes was linked to signals before this pane opened.
+  // A still-zero row shows the current signal values (DBC initials the first time).
+  if (rawPayloadIsBlank(props.rawData)) {
+    ;(msg.signals || []).forEach((signal) => {
       initializeSignal(signal)
     })
     signalVersion.value++
-    emits('change', getMessageData(message.value))
+    publishEncoded()
+    return
   }
+  signalVersion.value++
 })
 
 //

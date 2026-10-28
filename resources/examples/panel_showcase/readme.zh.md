@@ -17,7 +17,7 @@
 - 输入 / 操作：十六进制/文本编辑器、字节编辑器、文件/目录/保存路径选择、十六进制和二进制输入，以及普通按钮操作。
 - 外观：六种 LED 形状、三种按钮形状、四个进度方向、一张嵌入图片和一个 HTML + JavaScript 控件。三个按钮切换 `DemoToggle`，六个 LED 跟随它；填充滑块、四个进度条和 HTML 控件共享 `DemoFill`，因此更改其中一个会更新其他项，并且当 `DemoFill` ≥ 80 时脚本会点亮填充 ≥ 80 指示器。 HTML 控件还订阅 `PanelDemo.Speed` 信号。
 
-`simulation.ts` 是模拟 ECU：它周期性地生成速度、温度、负载、状态和计数器，并接收面板变量和 CAN 命令。 `PanelDemo.dbc` 是演示 DBC，`variables.json` 列出变量。两个面板都保存在工程文件中。
+`simulation.ts` 是模拟 ECU：它周期性地生成速度、温度、负载、状态和计数器，并接收面板变量和 CAN 命令。 `PanelDemo.dbc` 是演示 DBC，`variables.json` 列出了变量。两个面板都存储在项目文件中。
 
 项目：`PanelShowcase.ecb`  
 面板：Panel Showcase、Telemetry Detail  

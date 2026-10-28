@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { VxeGridProps } from 'vxe-table'
 import { VxeGrid } from 'vxe-table'
 import { Icon } from '@iconify/vue'
@@ -101,8 +101,7 @@ import {
   getMaxRawValue,
   getActiveSignals,
   updateSignalPhys,
-  updateSignalRaw,
-  writeRawHexToMessage
+  updateSignalRaw
 } from '@r/database/dbc/calc'
 import { rawPayloadIsBlank } from 'nodeCan/canIaData'
 import copyIcon from '@iconify/icons-material-symbols/content-copy-outline'
@@ -226,17 +225,10 @@ function editGenerator(row: Signal) {
 }
 
 const globalStart = useGlobalStart()
-// Set while this pane is copying signal values into the raw editor, so that echo
-// does not decode the raw bytes back over the signal the user just edited.
-let suppressRawApply = 0
 
 function publishEncoded() {
   if (!message.value) return
-  suppressRawApply++
   emits('change', getMessageData(message.value))
-  nextTick(() => {
-    suppressRawApply = 0
-  })
 }
 
 // Raw value change handler
@@ -288,15 +280,12 @@ function initializeSignal(signal: Signal) {
   updateSignalRaw(signal)
 }
 
-function adoptRawOrInitials(firstOpen: boolean) {
+onMounted(() => {
   const msg = message.value
   if (!msg) return
-  const db = dataStore.database.can[props.database]
-  if (!db) return
-  const id = parseInt(props.messageId, 16)
-  // A zero payload has never been edited: show DBC initial values in the raw editor.
-  // Any other payload is the user's raw edit and must not be replaced by signal encoding.
-  if (firstOpen && rawPayloadIsBlank(props.rawData)) {
+  // A payload that already has bytes was linked to signals before this pane opened.
+  // A still-zero row shows the current signal values (DBC initials the first time).
+  if (rawPayloadIsBlank(props.rawData)) {
     ;(msg.signals || []).forEach((signal) => {
       initializeSignal(signal)
     })
@@ -304,22 +293,8 @@ function adoptRawOrInitials(firstOpen: boolean) {
     publishEncoded()
     return
   }
-  if (writeRawHexToMessage(db, id, props.rawData)) {
-    signalVersion.value++
-  }
-}
-
-onMounted(() => {
-  adoptRawOrInitials(true)
+  signalVersion.value++
 })
-
-watch(
-  () => (props.rawData || []).join(','),
-  () => {
-    if (suppressRawApply) return
-    adoptRawOrInitials(false)
-  }
-)
 
 //
 

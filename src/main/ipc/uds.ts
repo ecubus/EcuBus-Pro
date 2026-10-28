@@ -32,7 +32,7 @@ import {
   swapAddr,
   CanMessage
 } from '../share/can'
-import { buildCanInterPayload } from '../share/canIaData'
+import { buildCanInterPayload, interactionPayloadLength } from '../share/canIaData'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
@@ -64,7 +64,7 @@ import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
 
-import { getMessageData } from 'src/renderer/src/database/dbc/calc'
+import { linkRawHexToSignals, messagePayloadHex } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
 import { getJsPath } from '../util'
 import UdsTester from '../workerClient'
@@ -1228,9 +1228,8 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
         name: ia.name
       }
     )
-    // Interaction rows store the bytes the user edited. Rebuilding from DBC signals
-    // drops raw-data edits on frames added from a database (signals stay at 0).
-    const b = buildCanInterPayload(ia)
+    // Decode the row into DBC signals, then send the encode so the bus matches both editors.
+    const b = linkedPayload(ia)
 
     socket
       .write(b)
@@ -1250,6 +1249,38 @@ ipcMain.on('ipc-send-can', (event, ...arg) => {
 //     })
 //     return info
 // })
+
+function runWithoutPeriodRefresh(fn: () => void) {
+  deferPeriodRefresh++
+  try {
+    fn()
+  } finally {
+    deferPeriodRefresh--
+    if (deferPeriodRefresh === 0) {
+      const ids = [...deferredPeriodIds]
+      deferredPeriodIds.clear()
+      for (const pending of ids) refreshPeriodPayload(pending)
+    }
+  }
+}
+
+/** Decode ia.data into DBC signals and return the canonical payload those signals encode. */
+function linkedPayload(ia: CanInterAction): Buffer {
+  const db = ia.database ? global.dataSet.database.can[ia.database] : undefined
+  if (!db) return buildCanInterPayload(ia)
+  let canonical: string[] | undefined
+  runWithoutPeriodRefresh(() => {
+    canonical = linkRawHexToSignals(
+      db,
+      parseInt(ia.id, 16),
+      ia.data,
+      interactionPayloadLength(ia.dlc, ia.type.includes('fd'))
+    )
+  })
+  if (!canonical) return buildCanInterPayload(ia)
+  ia.data = canonical
+  return buildCanInterPayload(ia)
+}
 
 function send(id: string) {
   const item = timerMap.get(id)
@@ -1284,19 +1315,47 @@ function pushPeriodPayload(item: timerType, data: Buffer) {
   }
 }
 
-export function refreshCanPeriodData(messageId: number) {
+const deferredPeriodIds = new Set<number>()
+let deferPeriodRefresh = 0
+
+function refreshPeriodPayload(messageId: number) {
   for (const [, d] of timerMap.entries()) {
     if (parseInt(d.ia.id, 16) != messageId) continue
     const db = d.ia.database ? global.dataSet.database.can[d.ia.database] : undefined
     const message = db?.messages.find((msg) => msg.id == parseInt(d.ia.id, 16))
     if (!message) continue
-    // Script / signal-pane updates still flow through signal values. Mirror them into the
-    // row payload so interval sends (which transmit ia.data) follow setSignal.
-    const encoded = getMessageData(message)
-    d.ia.data = Array.from(encoded, (byte) => byte.toString(16).padStart(2, '0'))
+    // Signal edits and raw edits both end as signal values. The row payload follows
+    // that encode so interval sends stay on the same bytes as the editors.
+    d.ia.data = messagePayloadHex(
+      message,
+      interactionPayloadLength(d.ia.dlc, d.ia.type.includes('fd'))
+    )
     pushPeriodPayload(d, buildCanInterPayload(d.ia))
   }
 }
+
+export function refreshCanPeriodData(messageId: number) {
+  if (deferPeriodRefresh > 0) {
+    deferredPeriodIds.add(messageId)
+    return
+  }
+  refreshPeriodPayload(messageId)
+}
+
+ipcMain.on(
+  'ipc-sync-can-message-signals',
+  (event, dbName: string, id: number, signals: CanSignal[]) => {
+    const db = global.dataSet.database.can[dbName]
+    const message = db?.messages.find((msg) => msg.id === id)
+    if (!message || !Array.isArray(signals)) return
+    runWithoutPeriodRefresh(() => {
+      for (const signal of signals) {
+        const target = message.signals.find((item) => item.name === signal.name)
+        if (target) Object.assign(target, signal)
+      }
+    })
+  }
+)
 
 ipcMain.on('ipc-update-can-period', (event, ...arg) => {
   const id = arg[0] as string
@@ -1305,7 +1364,7 @@ ipcMain.on('ipc-update-can-period', (event, ...arg) => {
   const item = timerMap.get(id)
   if (item) {
     item.ia = ia
-    pushPeriodPayload(item, buildCanInterPayload(ia))
+    pushPeriodPayload(item, linkedPayload(item.ia))
   }
 })
 ipcMain.on('ipc-send-can-period', (event, ...arg) => {
@@ -1345,12 +1404,13 @@ ipcMain.on('ipc-send-can-period', (event, ...arg) => {
         timer.socket.stopPeriodSend?.(timer.taskId)
       }
       timer.socket.close()
+      timerMap.delete(id)
     }
     let taskId: string | undefined
     let newTimer: NodeJS.Timeout | undefined
-    let dataSent: Buffer | null = null
+    // Link raw bytes to signals before the first tick so interval and hardware periods match.
+    const dataSent: Buffer | null = linkedPayload(ia)
     if (socket.startPeriodSend) {
-      dataSent = buildCanInterPayload(ia)
       const initMsg: CanMessage = {
         id: parseInt(ia.id, 16),
         name: ia.name,

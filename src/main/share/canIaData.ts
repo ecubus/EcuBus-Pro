@@ -12,6 +12,12 @@ export function interactionPayloadLength(dlc: number, canFd: boolean): number {
   return table[dlc]
 }
 
+/** True while the user is still typing a single hex nibble. */
+export function rawHexIsPartial(data: string[] | undefined | null): boolean {
+  if (!data) return false
+  return data.some((byte) => String(byte ?? '').trim().length === 1)
+}
+
 /** True when every stored nibble is empty or zero, so the row has no raw edit yet. */
 export function rawPayloadIsBlank(data: string[] | undefined | null): boolean {
   if (!data || data.length === 0) return true
@@ -37,9 +43,8 @@ export function bufferFromRawHex(data: string[] | undefined | null, length: numb
 
 /**
  * Payload for one CAN interaction row.
- * Database frames used to be rebuilt from DBC signal values, which stayed 0 when a raw-data
- * edit never reached those signals. The row's raw bytes are what the editor shows and what
- * single-shot and periodic sends put on the bus.
+ * For a database frame this hex is kept equal to the DBC signal encode
+ * (`linkRawHexToSignals`). Manual frames are the bytes the user typed.
  */
 export function buildCanInterPayload(ia: Pick<CanInterAction, 'dlc' | 'type' | 'data'>): Buffer {
   return bufferFromRawHex(ia.data, interactionPayloadLength(ia.dlc, ia.type.includes('fd')))

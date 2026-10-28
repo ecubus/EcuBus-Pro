@@ -226,6 +226,13 @@ export type ReplayChannelMap = {
   deviceIds: string[]
 }
 
+/** Distinct log channels seen while sampling the start of a replay file. */
+export type ReplayLogChannelScan = {
+  channels: number[]
+  truncated: boolean
+  scanned: number
+}
+
 export type ReplayItem = {
   id: string
   name: string

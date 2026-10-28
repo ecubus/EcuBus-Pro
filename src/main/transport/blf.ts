@@ -1,7 +1,7 @@
 import fs from 'fs'
 import zlib from 'zlib'
 import Transport from 'winston-transport'
-import { CanMessage } from '../share/can'
+import { CAN_ID_TYPE, CanMessage } from '../share/can'
 
 // ---- BLF constants ----
 const FILE_HEADER_SIZE = 144
@@ -77,6 +77,36 @@ function padData(len: number): number {
 
 function clampLen(len: number, max: number): number {
   return Math.max(0, Math.min(len, max))
+}
+
+export type BlfCanFrameInput = {
+  id: number
+  data: Buffer
+  channel: number
+  tsUs?: number
+  extended?: boolean
+}
+
+/** Write a small uncompressed BLF of classic CAN frames. Used by replay tests. */
+export function writeBlfCanFrames(filePath: string, frames: BlfCanFrameInput[]): Promise<void> {
+  const writer = new BlfWriter(filePath, { compressionLevel: 0 })
+  for (const frame of frames) {
+    const msg: CanMessage = {
+      id: frame.id,
+      dir: 'OUT',
+      data: frame.data,
+      msgType: {
+        idType: frame.extended ? CAN_ID_TYPE.EXTENDED : CAN_ID_TYPE.STANDARD,
+        brs: false,
+        canfd: false,
+        remote: false
+      }
+    }
+    writer.writeCanMessage(msg, frame.channel, frame.tsUs ?? 0)
+  }
+  return new Promise((resolve) => {
+    writer.stop(() => resolve())
+  })
 }
 
 class BlfWriter {

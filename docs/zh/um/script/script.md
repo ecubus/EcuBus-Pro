@@ -98,9 +98,9 @@ Util.On('Can.DiagRequest.send', (msg) => {
 
 #### runUdsSeq 进度
 
-`runUdsSeq` 运行一条已配置的序列（`TesterName.SequenceName`）。不传回调时行为与原来完全一致。传入 `onProgress` 后，可以知道当前正在执行哪一条已启用的步骤，以及整体百分比。回调在步骤开始时触发（`phase: 'start'`），在步骤完成时再次触发（`phase: 'finish'`）。
+`runUdsSeq` 运行一个已配置的序列（`TesterName.SequenceName`）。不带回调的调用保持不变。传入 `onProgress` 可获知当前正在运行的是哪个已启用项以及整体百分比。该回调在项开始时（`phase: 'start'`）运行，并在项完成时（`phase: 'finish'`）再次运行。
 
-`index` 是已启用步骤中的序号（从 0 开始），`total` 是将要执行的已启用步骤数，`pct` 从第一步开始时的 `0` 到最后一步完成时的 `100`。被禁用的步骤会跳过。若某一步失败并导致序列停止，该步只有 `start` 事件，返回的 Promise 会拒绝。回调抛出异常或返回被拒绝的 Promise 时，错误会被记录，序列继续执行。回调不会被等待。
+`index` 是已启用项中从 0 开始的位置，`total` 是将要运行的这些项的总数，`pct` 从第一个开始时的 `0` 变化到最后一次完成后的 `100`。禁用的项会被跳过。如果某项失败并导致序列停止，该项只有 `start` 事件，并且 promise 会被拒绝。抛出异常或返回被拒绝 promise 的回调会被记录，且不会停止序列。不会等待回调完成。
 
 ```typescript
 import { runUdsSeq } from 'ECB'
@@ -111,7 +111,7 @@ await runUdsSeq('Tester.Seq0', {
   }
 })
 
-// 设备名和进度回调一起传入
+// 设备名称与进度一起
 await runUdsSeq('Tester.Seq0', 'Device1', {
   onProgress(info) {
     console.log(info.serviceId, info.pct)

@@ -300,11 +300,15 @@ export class VECTOR_CAN extends CanBase {
     }
   }
 
-  _read(frame: CANFrame, ts: number) {
+  private toRelativeTs(ts: number) {
     if (this.tsOffset == undefined) {
       this.tsOffset = ts - (getTsUs() - this.startTime)
     }
-    ts = ts - this.tsOffset
+    return ts - this.tsOffset
+  }
+
+  _read(frame: CANFrame, ts: number) {
+    ts = this.toRelativeTs(ts)
     const cmdId = this.getReadBaseId(frame.canId, frame.msgType) //获取ID
     if (frame.isEcho) {
       //回传
@@ -394,7 +398,7 @@ export class VECTOR_CAN extends CanBase {
             //
             if (msg.flags & (0x4 | 0x1 | 0x2)) {
               //error
-              this.log.error(frame.timeStamp, 'bus error')
+              this.log.error(this.toRelativeTs(frame.timeStamp / 1000), 'bus error')
               this.close(true, 'bus error')
               break
             }
@@ -497,7 +501,7 @@ export class VECTOR_CAN extends CanBase {
           break
       }
 
-      this.log.error(ts, 'bus error ' + msg)
+      this.log.error(this.toRelativeTs(ts), 'bus error ' + msg)
       this.close(true, 'bus error ' + msg)
 
       // //让出时间片

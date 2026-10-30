@@ -1,89 +1,29 @@
-import { CAN_ID_TYPE, CanMessage } from '../share/can'
+import { getTsUs } from '../share/can'
 import winston, { format } from 'winston'
-import Transport from 'winston-transport'
-import { getCheckSum, LinChecksumType, LinDirection, LinError, LinMsg } from '../share/lin'
+import {
+  ASC_END,
+  ASC_EOL,
+  formatAscHeader,
+  formatCanError,
+  formatCanMessage,
+  formatLinError,
+  formatLinEvent,
+  formatLinMessage
+} from '../share/asc'
 
-/** SocketCAN / Vector BLF extended-frame flag in a 32-bit CAN ID */
-const CAN_EFF_FLAG = 0x80000000
-/** 29-bit CAN identifier mask */
-const CAN_EFF_MASK = 0x1fffffff
-
-/**
- * Whether a CAN frame should be logged as an extended identifier in Vector ASC.
- *
- * Vector's CAN_LOG_TRIGGER_ASC_Format marks 29-bit IDs with a trailing `x`
- * (e.g. `54C5638x`). An 11-bit standard ID cannot exceed 0x7FF, so IDs above
- * that range are treated as extended even if `idType` was not set correctly.
- */
-export function isExtendedCanId(msg: CanMessage): boolean {
-  const idType = msg.msgType?.idType
-  if (idType === CAN_ID_TYPE.EXTENDED) {
-    return true
-  }
-  const rawId = Number(msg.id) || 0
-  if ((rawId & CAN_EFF_FLAG) !== 0) {
-    return true
-  }
-  return (rawId & CAN_EFF_MASK) > 0x7ff
-}
+export { formatAscArbitrationId, formatCanMessage, isExtendedCanId } from '../share/asc'
 
 /**
- * Format a CAN arbitration ID for Vector ASC numeric logging.
- *
- * @returns hex ID, with a trailing `x` for extended frames (CANoe/CANalyzer requirement)
+ * Wall-clock time (ms since epoch) of `global.startTs`, the origin of logged frame timestamps.
  */
-export function formatAscArbitrationId(msg: CanMessage): string {
-  const canId = (Number(msg.id) || 0) & CAN_EFF_MASK
-  const hex = canId.toString(16).toUpperCase()
-  return isExtendedCanId(msg) ? `${hex}x` : hex
-}
-
-// LogData interface matching the one from trace.vue
-
-// Extended winston info interface
-interface AscLogInfo {
-  message: {
-    method: string
-    data: any
-    deviceId?: string
+export function getMeasurementStartMs(): number {
+  if (typeof global.startTs !== 'number') {
+    return Date.now()
   }
+  return Date.now() - (getTsUs() - global.startTs) / 1000
 }
 
-// DLC calculation helper functions
-function len2dlc(len: number): number {
-  if (len <= 8) return len
-  if (len <= 12) return 9
-  if (len <= 16) return 10
-  if (len <= 20) return 11
-  if (len <= 24) return 12
-  if (len <= 32) return 13
-  if (len <= 48) return 14
-  return 15
-}
-
-function dlc2len(dlc: number): number {
-  if (dlc <= 8) return dlc
-  switch (dlc) {
-    case 9:
-      return 12
-    case 10:
-      return 16
-    case 11:
-      return 20
-    case 12:
-      return 24
-    case 13:
-      return 32
-    case 14:
-      return 48
-    case 15:
-      return 64
-    default:
-      return dlc
-  }
-}
-
-function ascFormat(method: string[], channel: string[], initTs: number): winston.Logform.Format {
+function ascFormat(method: string[]): winston.Logform.Format {
   return format((info: any, opts: any) => {
     if (typeof info.message === 'string') {
       return info
@@ -94,229 +34,47 @@ function ascFormat(method: string[], channel: string[], initTs: number): winston
     }
 
     const channel = global.deviceIndexMap.get(info.message.deviceId) ?? 1
+    const data = info.message.data
+    const seconds = data.ts / 1000_000
 
     let messageLine = ''
 
     switch (method) {
-      case 'canBase': {
-        const logData = info.message.data
-        const msg = logData as CanMessage
-        const relativeTime = logData.ts / 1000_000 // Convert to seconds
-        messageLine = formatCanMessage(msg, channel, relativeTime)
+      case 'canBase':
+        messageLine = formatCanMessage(data, channel, seconds)
         break
-      }
-      case 'linBase': {
-        const logData = info.message.data
-        const msg = logData as LinMsg
-        const relativeTime = logData.ts / 1000_000 // Convert to seconds
-        messageLine = formatLinMessage(msg, channel, relativeTime)
+      case 'linBase':
+        messageLine = formatLinMessage(data, channel, seconds)
         break
-      }
-      case 'linError': {
-        const logData = info.message.data.msg as string
-
-        const relativeTime = info.message.data.ts / 1000_000 // Convert to seconds
-        messageLine = formatLinError(logData, info.message.data.data, channel, relativeTime)
+      case 'linError':
+        messageLine = formatLinError(data.msg, data.data, channel, seconds)
         break
-      }
-      case 'canError': {
-        const relativeTime = info.message.data.ts / 1000_000 // Convert to seconds
-        messageLine = `${relativeTime.toFixed(6)} ${channel}  ErrorFrame`
+      case 'linEvent':
+        messageLine = formatLinEvent(data.msg, channel, seconds)
         break
-      }
-      default:
-        return false
+      case 'canError':
+        messageLine = formatCanError(channel, seconds)
+        break
+    }
+    if (!messageLine) {
+      return false
     }
 
     info[Symbol.for('message')] = messageLine
     return info
   })({
-    method: method,
-    channel: channel
+    method: method
   })
-}
-
-function formatLinError(
-  errorStr: string,
-  msg: LinMsg | undefined,
-  channel: number,
-  timestamp: number
-): string {
-  const channelStr = channel === 1 ? 'Li' : `L${channel}`
-  const id = (msg?.frameId ?? 0).toString(16).toLowerCase()
-  const dir = msg?.direction === LinDirection.SEND ? 'Tx' : 'Rx'
-  const dlc = msg?.data?.length || 0
-  const tsStr = timestamp.toFixed(6)
-
-  // 1. 校验和错误 (CSErr)
-  if (errorStr.toLowerCase().includes('checksum error')) {
-    const dataHex = Array.from(msg?.data || [])
-      .map((b: any) => b.toString(16).padStart(2, '0'))
-      .join(' ')
-    // 格式: <Time> <Channel> <ID> CSErr <Dir> <DLC> <D0>...<D7> checksum = <checksum>
-    return `${tsStr} ${channelStr} ${id} CSErr ${dir} ${dlc} ${dataHex} checksum = ${(msg?.checksum ?? 0).toString(16)}`
-  }
-
-  // 2. 传输错误/无响应 (TransmErr)
-  if (errorStr.toLowerCase().includes('no response')) {
-    // 格式: <Time> <Channel> <ID> TransmErr
-    return `${tsStr} ${channelStr} ${id} TransmErr`
-  }
-
-  // 3. 同步错误 (SyncError)
-  if (
-    errorStr.toLowerCase().includes('sync val') ||
-    errorStr.toLowerCase().includes('sync error')
-  ) {
-    // 格式: <Time> <Channel> SyncError <Intervals...>
-    return `${tsStr} ${channelStr} SyncError 0 0 0 0`
-  }
-
-  // 4. 其他接收错误 (RcvError)
-  // 格式: <Time> <Channel> (<ID> <DLC>) RcvError: <description>
-  let description = 'unidentified error'
-  if (errorStr.includes('parity')) description = 'parity error in identifier'
-  else if (errorStr.includes('format')) description = 'framing error'
-  else description = errorStr
-
-  return `${tsStr} ${channelStr} (${id} ${dlc}) RcvError: ${description}`
-}
-function formatLinMessage(msg: LinMsg, channel: number, timestamp: number): string {
-  const channelStr = channel === 1 ? 'Li' : `L${channel}`
-  const dir = msg.direction === LinDirection.SEND ? 'Tx' : 'Rx'
-  const idHex = msg.frameId.toString(16).toLowerCase()
-  const dlc = msg.data.length
-
-  const dataHex = Array.from(msg.data)
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join(' ')
-
-  const csm = msg.checksumType === LinChecksumType.ENHANCED ? 'enhanced' : 'standard'
-  const checksum = getCheckSum(msg.data, msg.checksumType, msg.frameId)
-    .toString(16)
-    .padStart(2, '0')
-  // 简化版 v7.2 格式：主要包含必需的物理层数据
-  // 格式: <Time> <Channel> <ID> <Dir> <DLC> <D0>...<D7> checksum = <checksum> ... CSM = <model>
-  // 注意：根据规范，Li 和 ID 之间通常有空格
-  return `${timestamp.toFixed(6)} ${channelStr} ${idHex.padStart(2)} ${dir} ${dlc} ${dataHex.padEnd(24)} checksum = ${checksum} CSM = ${csm}`
-}
-
-export function formatCanMessage(msg: CanMessage, channel: number, timestamp: number): string {
-  const dir = msg.dir === 'OUT' ? 'Tx' : 'Rx'
-  // Vector ASC: extended IDs are hex plus a trailing `x` (CAN_LOG_TRIGGER_ASC_Format)
-  const arbId = formatAscArbitrationId(msg)
-
-  if (msg.msgType.canfd) {
-    return formatCanFdMessage(msg, channel, timestamp, dir, arbId)
-  } else {
-    return formatClassicCanMessage(msg, channel, timestamp, dir, arbId)
-  }
-}
-
-function formatClassicCanMessage(
-  msg: CanMessage,
-  channel: number,
-  timestamp: number,
-  dir: string,
-  arbId: string
-): string {
-  const dlc = msg.data.length
-
-  // Vector ASC numeric ID field is 15 characters (14 + trailing `x` for extended)
-  const idField = arbId.padEnd(15)
-
-  if (msg.msgType.remote) {
-    // Remote frame format: <Time> <Channel> <ID> <Dir> r <DLC>
-    return `${timestamp.toFixed(6)} ${channel}  ${idField} ${dir.padEnd(4)} r ${dlc.toString(16)}`
-  } else {
-    // Data frame format: <Time> <Channel> <ID> <Dir> d <DLC> <D0> <D1>...<D7>
-    const dataHex = Array.from(msg.data)
-      .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
-      .join(' ')
-    return `${timestamp.toFixed(6)} ${channel}  ${idField} ${dir.padEnd(4)} d ${dlc.toString(16)} ${dataHex}`
-  }
-}
-
-function formatCanFdMessage(
-  msg: CanMessage,
-  channel: number,
-  timestamp: number,
-  dir: string,
-  arbId: string
-): string {
-  const brs = msg.msgType.brs ? '1' : '0'
-  const esi = '0' // Error State Indicator - would need to be tracked separately
-  const dlc = len2dlc(msg.data.length)
-  const dataLength = msg.data.length
-  const dataHex = Array.from(msg.data)
-    .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
-    .join(' ')
-
-  // Calculate message flags according to spec
-  let flags = 0
-  flags |= 1 << 12 // FDF bit (CAN FD flag)
-  if (msg.msgType.brs) {
-    flags |= 1 << 13 // BRS flag
-  }
-  // if (esi == '1') {
-  //   flags |= 1 << 14 // ESI flag
-  // }
-
-  // Fields that would need to be provided by hardware/driver
-  const symbolicName = '' // Would need message name from DBC, padded to 32 chars
-  const messageDuration = '0' // In nanoseconds
-  const messageLength = '0' // Total bit count
-  const crc = '0' // CRC checksum (8 hex digits)
-  const bitTimingConfArb = '0' // Arbitration bit timing (8 hex digits)
-  const bitTimingConfData = '0' // Data bit timing (8 hex digits)
-  const bitTimingConfExtArb = '0' // Extended arbitration bit timing (8 hex digits)
-  const bitTimingConfExtData = '0' // Extended data bit timing (8 hex digits)
-
-  // CAN FD format according to spec:
-  // <Time> CANFD <Channel> <Dir> <ID> <SymbolicName> <BRS> <ESI> <DLC> <DataLength> <D1>...<D64> <MessageDuration> <MessageLength> <Flags> <CRC> <BitTimingConfArb> <BitTimingConfData> <BitTimingConfExtArb> <BitTimingConfExtData>
-  return `${timestamp.toFixed(6)} CANFD ${channel.toString().padStart(3)} ${dir} ${arbId.padStart(8)} ${symbolicName.padEnd(32)} ${brs} ${esi} ${dlc.toString(16).toLowerCase()} ${dataLength.toString()} ${dataHex} ${messageDuration.padStart(8)} ${messageLength.padStart(4)} ${flags.toString(16).toUpperCase().padStart(8)} ${crc.padStart(8)} ${bitTimingConfArb.padStart(8)} ${bitTimingConfData.padStart(8)} ${bitTimingConfExtArb.padStart(8)} ${bitTimingConfExtData.padStart(8)}`
 }
 
 class FileTransport extends winston.transports.File {
   devices: string[]
   isinit = false
-  initTs: number
   closed = false
 
-  constructor(opts: winston.transports.FileTransportOptions, devices: string[], initTs: number) {
+  constructor(opts: winston.transports.FileTransportOptions, devices: string[]) {
     super(opts)
     this.devices = devices
-    this.initTs = initTs
-  }
-
-  private formatHeaderDateTime(dt: Date): string {
-    // Format according to ASC specification: "Mon Jul 14 09:29:58.492 2008"
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ]
-
-    const weekday = weekdays[dt.getDay()]
-    const month = months[dt.getMonth()]
-    const day = dt.getDate().toString()
-    const hour = dt.getHours().toString().padStart(2, '0')
-    const minute = dt.getMinutes().toString().padStart(2, '0')
-    const second = dt.getSeconds().toString().padStart(2, '0')
-    const msec = dt.getMilliseconds()
-    const year = dt.getFullYear()
-
-    return `${weekday} ${month} ${day} ${hour}:${minute}:${second}.${msec.toString().padStart(3, '0')} ${year}`
   }
 
   log(info: any, callback: any) {
@@ -326,15 +84,7 @@ class FileTransport extends winston.transports.File {
     }
     if (super.log) {
       if (this.isinit == false) {
-        // Write initial header according to ASC spec
-        const now = new Date(this.initTs)
-        const dateStr = this.formatHeaderDateTime(now)
-
-        const header =
-          `date ${dateStr}\n` +
-          'base hex timestamps absolute\n' +
-          'internal events logged\n' +
-          `Begin Triggerblock ${dateStr}\n`
+        const header = formatAscHeader(new Date(getMeasurementStartMs()))
         super.log({ level: 'info', [Symbol.for('message')]: header }, () => {})
         this.isinit = true
       }
@@ -344,9 +94,8 @@ class FileTransport extends winston.transports.File {
   }
 
   public close(): void {
-    // Write end trigger block according to ASC spec
     if (this.isinit && super.log) {
-      super.log({ level: 'info', [Symbol.for('message')]: 'End TriggerBlock\n' }, () => {})
+      super.log({ level: 'info', [Symbol.for('message')]: ASC_END }, () => {})
     }
     if (super.close) {
       super.close()
@@ -356,18 +105,16 @@ class FileTransport extends winston.transports.File {
 }
 
 export default (filePath: string, devices: string[], method: string[]) => {
-  const now = new Date()
-  const keys = Object.keys(global.dataSet.devices)
   return new FileTransport(
     {
-      format: ascFormat(method, keys, now.getTime()),
+      format: ascFormat(method),
       filename: filePath,
+      eol: ASC_EOL,
       options: {
         flags: 'w'
       },
       level: 'debug'
     },
-    devices,
-    now.getTime()
+    devices
   )
 }

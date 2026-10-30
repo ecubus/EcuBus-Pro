@@ -161,7 +161,7 @@
                   :key="city"
                   v-model="methodRef[city.value]"
                   border
-                  :disabled="city.disabled"
+                  :disabled="city.disabled || (city.value == 'LIN' && formData.format == 'blf')"
                   :label="city.label"
                   :value="city.value"
                   @change="handleMethodChange(city, $event)"
@@ -422,6 +422,11 @@ watch(
   (val) => {
     if (val === 'blf' && formData.value.compression === undefined) {
       formData.value.compression = -1
+    }
+    // The BLF writer only supports CAN
+    if (val === 'blf' && methodRef.value.LIN) {
+      methodRef.value.LIN = false
+      handleMethodChange(methods.find((m) => m.value == 'LIN')!, false)
     }
   }
 )

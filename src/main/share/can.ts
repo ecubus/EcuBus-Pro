@@ -224,6 +224,13 @@ export type CanMessage<T = any> = {
   data: Buffer
 
   /**
+   * The raw DLC code. Set when it cannot be derived from `data.length`,
+   * e.g. a remote frame or a classic CAN frame with DLC 9-15.
+   * When omitted, the DLC is derived from `data.length`.
+   */
+  dlc?: number
+
+  /**
    * The timestamp of when the CAN message was sent/recv.
    */
   ts?: number
@@ -331,6 +338,11 @@ export interface CanMsgType {
    * Indicates if the message is a remote frame.
    */
   remote: boolean
+
+  /**
+   * Indicates if the Error State Indicator (ESI) bit of a CAN FD frame is set.
+   */
+  esi?: boolean
 
   /**
    * Optional unique identifier for the message.

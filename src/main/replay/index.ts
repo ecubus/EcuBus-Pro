@@ -1,6 +1,4 @@
-import fs from 'fs'
 import path from 'path'
-import zlib from 'zlib'
 import { CAN_ID_TYPE, CanMessage, getTsUs } from '../share/can'
 import { ReplayLOG } from '../log'
 import type {
@@ -18,34 +16,6 @@ import { EthBaseInfo } from '../share/doip'
 import { PwmBase } from '../pwm'
 import { VSomeIP_Client } from '../vsomeip'
 import i18next from 'i18next'
-
-// ---- BLF Constants (layout matches src/main/transport/blf.ts writer) ----
-const FILE_HEADER_SIZE = 144
-const OBJ_HEADER_BASE_SIZE = 16
-const OBJ_HEADER_V1_SIZE = 16
-const LOG_CONTAINER_HEADER_SIZE = 16
-
-const CAN_MESSAGE = 1
-const LOG_CONTAINER = 10
-const CAN_ERROR_EXT = 73
-const CAN_MESSAGE2 = 86
-const CAN_FD_MESSAGE = 100
-
-const NO_COMPRESSION = 0
-const ZLIB_DEFLATE = 2
-
-const CAN_MSG_EXT = 0x80000000
-const REMOTE_FLAG = 0x80
-const DIR_FLAG = 0x1
-const EDL_FLAG = 0x1
-const BRS_FLAG = 0x2
-const TIME_ONE_NANS = 0x00000002
-
-/** Object payload padding to 4-byte boundary (same as writer padData) */
-function blfPadSize(len: number): number {
-  const mod = len % 4
-  return mod === 0 ? 0 : 4 - mod
-}
 
 /**
  * Parsed CAN frame from replay file
@@ -303,7 +273,11 @@ export class Replay {
     }
     for (const deviceId of channelMap.deviceIds) {
       const base = this.canBaseMap.get(deviceId)
-      if (base) {
+      if (base && frame.isError) {
+        if (this.config.mode == 'offline') {
+          base.log.error(frame.ts + this.tsOffset, 'error frame')
+        }
+      } else if (base) {
         if (base.info.database) {
           const dbInfo = this.getFrameDbInfo(base.info.database, frame)
           if (dbInfo) {

@@ -34,6 +34,7 @@ import {
   swapAddr,
   CanMessage
 } from '../share/can'
+import { ASC_END, ASC_EOL, formatAscHeader, formatCanError, formatCanMessage } from '../share/asc'
 import { CAN_SOCKET, CanBase } from '../docan/base'
 import { CAN_TP, TpError } from '../docan/cantp'
 import { getParamBuffer, getTxPdu, UdsAddress, UdsDevice } from '../share/uds'
@@ -1681,7 +1682,8 @@ type TraceFileFrame = {
   ts: number
   id: number
   dir: string
-  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean }
+  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean; esi?: boolean }
+  dlc?: number
   data: number[]
   isError?: boolean
 }
@@ -1729,8 +1731,10 @@ ipcMain.handle(
           idType: frame.msgType.idType,
           brs: frame.msgType.brs,
           canfd: frame.msgType.canfd,
-          remote: frame.msgType.remote
+          remote: frame.msgType.remote,
+          esi: frame.msgType.esi
         },
+        dlc: frame.dlc,
         data: Array.from(frame.data),
         isError: frame.isError
       })
@@ -1769,6 +1773,26 @@ ipcMain.handle(
     }
   }
 )
+
+// Export every frame of an opened trace file, keeping its channels and measurement start
+ipcMain.handle('ipc-trace-file-export-asc', async (_event, sessionId: string): Promise<string> => {
+  const session = traceFileSessions.get(sessionId)
+  if (!session) throw new Error('Session not found')
+
+  const start = session.measurementStartTimeMs > 0 ? session.measurementStartTimeMs : Date.now()
+  const lines = [formatAscHeader(new Date(start))]
+  for (const frame of session.frames) {
+    const seconds = frame.ts / 1000_000
+    if (frame.isError) {
+      lines.push(formatCanError(frame.channel, seconds))
+    } else {
+      const msg = { ...frame, data: Buffer.from(frame.data) } as CanMessage
+      lines.push(formatCanMessage(msg, frame.channel, seconds))
+    }
+  }
+  lines.push(ASC_END, '')
+  return lines.join(ASC_EOL)
+})
 
 ipcMain.handle('ipc-trace-file-close', async (_event, sessionId: string) => {
   traceFileSessions.delete(sessionId)

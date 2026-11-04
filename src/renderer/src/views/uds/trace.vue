@@ -452,6 +452,16 @@ import ExcelJS from 'exceljs'
 import { ServiceItem, Sequence, getTxPduStr, getTxPdu } from 'nodeCan/uds'
 import { useDataStore } from '@r/stores/data'
 import { LinDirection, LinMsg, LinSignal } from 'nodeCan/lin'
+import {
+  ASC_END,
+  ASC_EOL,
+  formatAscHeader,
+  formatCanError,
+  formatCanMessage,
+  formatLinError,
+  formatLinEvent,
+  formatLinMessage
+} from 'nodeCan/asc'
 import { SerialMessage } from 'nodeCan/serial'
 import EVirtTable, { Column } from 'e-virt-table'
 import { ElLoading, ElMessageBox, ElMessage } from 'element-plus'
@@ -490,6 +500,10 @@ interface LogData {
   deltaTime?: string
   previousTs?: number
   count?: number
+  /** Source device, used for the ASC channel number */
+  deviceId?: string
+  /** Original CAN/LIN frame, used for ASC export */
+  raw?: CanMessage | LinMsg
 }
 const isOverwrite = ref(false)
 function toggleOverwrite() {
@@ -570,6 +584,7 @@ function addToIdList(id: string) {
 
 interface CanBaseLog {
   method: 'canBase'
+  deviceId?: string
   data: CanMessage<Record<string, CanSignal>>
 }
 interface IpBaseLog {
@@ -600,6 +615,7 @@ interface SomeipServiceValidLog {
 
 interface LinBaseLog {
   method: 'linBase'
+  deviceId?: string
   data: LinMsg<Record<string, LinSignal>>
 }
 
@@ -615,10 +631,12 @@ interface UdsLog {
 }
 interface UdsErrorLog {
   method: 'udsError' | 'udsScript' | 'udsSystem' | 'canError' | 'linEvent'
+  deviceId?: string
   data: { msg: string; ts: number }
 }
 interface LinErrorLog {
   method: 'linError'
+  deviceId?: string
   data: { msg: string; ts: number; data?: LinMsg }
 }
 
@@ -897,10 +915,18 @@ function logDisplay({ values }: { values: LogItem[] }) {
         data: data2str(canData.data),
         ts: canData.originalTs ?? canData.ts!,
         id: '0x' + canData.id.toString(16),
-        dlc: getDlcByLen(canData.data.length, canData.msgType.canfd),
+        dlc: canData.dlc ?? getDlcByLen(canData.data.length, canData.msgType.canfd),
         len: canData.data.length,
         device: val.label,
         channel: val.instance,
+        deviceId: val.message.deviceId,
+        raw: {
+          id: canData.id,
+          dir: canData.dir,
+          data: canData.data,
+          dlc: canData.dlc,
+          msgType: canData.msgType
+        },
         msgType: CanMsgType2Str(canData.msgType),
         name: canData.name,
         absTimeStr: canData.absTimeStr,
@@ -935,6 +961,13 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: val.message.data.data.length,
         device: val.label,
         channel: val.instance,
+        deviceId: val.message.deviceId,
+        raw: {
+          frameId: val.message.data.frameId,
+          data: val.message.data.data,
+          direction: val.message.data.direction,
+          checksumType: val.message.data.checksumType
+        },
         msgType: `LIN ${val.message.data.checksumType}`,
         dlc: val.message.data.data.length,
         name: val.message.data.name,
@@ -1018,6 +1051,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
+        deviceId: val.message.deviceId,
         msgType: i18next.t('uds.trace.messageTypes.canError')
       })
     } else if (val.message.method == 'linError') {
@@ -1037,6 +1071,8 @@ function logDisplay({ values }: { values: LogItem[] }) {
           dir: val.message.data.data.direction == LinDirection.SEND ? 'Tx' : 'Rx',
           device: val.label,
           channel: val.instance,
+          deviceId: val.message.deviceId,
+          raw: val.message.data.data,
           msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       } else {
@@ -1049,6 +1085,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
           len: 0,
           device: val.label,
           channel: val.instance,
+          deviceId: val.message.deviceId,
           msgType: i18next.t('uds.trace.messageTypes.linError')
         })
       }
@@ -1062,6 +1099,7 @@ function logDisplay({ values }: { values: LogItem[] }) {
         len: 0,
         device: val.label,
         channel: val.instance,
+        deviceId: val.message.deviceId,
         msgType: i18next.t('uds.trace.messageTypes.linEvent')
       })
     } else if (val.message.method == 'udsScript') {
@@ -1416,17 +1454,6 @@ function formatHexDump(bytes: number[]): string {
   }
   return lines.join('\n')
 }
-// DLC 计算辅助函数
-function len2dlc(len: number) {
-  if (len <= 8) return len
-  if (len <= 12) return 9
-  if (len <= 16) return 10
-  if (len <= 20) return 11
-  if (len <= 24) return 12
-  if (len <= 32) return 13
-  if (len <= 48) return 14
-  return 15
-}
 function saveAll(command: string) {
   isPaused.value = true
   const loadingInstance = ElLoading.service()
@@ -1482,114 +1509,52 @@ function saveAll(command: string) {
         loadingInstance.close()
       })
   } else if (command == 'asc') {
-    //参考https://github.com/hardbyte/python-can/blob/main/can/io/asc.py
-    // 生成 ASC 格式的日志内容
-    let ascContent = ''
-
-    // 添加文件头
-    const now = new Date()
-    const dateStr = now.toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      year: 'numeric'
-    })
-    ascContent += `date ${dateStr}\n`
-    ascContent += 'base hex  timestamps absolute\n'
-    ascContent += 'internal events logged\n'
-
-    // 开始测量块
-    ascContent += `Begin Triggerblock ${dateStr}\n`
-    ascContent += '0.000000 Start of measurement\n'
-
-    // 添加数据
-    let startTime = 0
-    if (allLogData.length > 0) {
-      startTime = allLogData[0].ts
+    const download = (content: string) => {
+      const blob = new Blob([content], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.asc`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
     }
 
-    allLogData.forEach((log) => {
-      const timestamp = log.ts
-      const relativeTime = timestamp - startTime
+    // A dropped log file is exported from all frames held by the main process
+    if (traceFileSessionId.value) {
+      window.electron.ipcRenderer
+        .invoke('ipc-trace-file-export-asc', traceFileSessionId.value)
+        .then(download)
+        .catch((err: any) => ElMessage.error(err.message || String(err)))
+        .finally(() => loadingInstance.close())
+      return
+    }
 
-      // 格式化通道号
-      const channel = log.channel && Number.isInteger(log.channel) ? parseInt(log.channel) + 1 : 1
-
-      // 格式化 ID
-      let id = ''
-      if (log.id) {
-        id = log.id.replace('0x', '').toUpperCase()
-        if (log.msgType && log.msgType.includes('EXT')) {
-          id += 'x' // 扩展帧标记
-        }
-      }
-
-      // 格式化数据
-      let data = ''
-      if (log.data) {
-        data = log.data.replace(/\s+/g, ' ').trim()
-      }
-
-      // 构建消息行
-      let messageLine = ''
-
-      if (log.method === 'canBase') {
-        // CAN 消息
-        const dlc = log.dlc ? log.dlc.toString(16) : '0'
-        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
-
-        if (log.msgType && log.msgType.includes('CANFD')) {
-          // CANFD 消息
-          const brs = log.msgType.includes('BRS') ? '1' : '0'
-          const esi = '0' // 假设 ESI 始终为 0
-          const dataLength = log.len || 0
-
-          messageLine = `CANFD ${channel}  ${dir} ${id}                                 ${brs} ${esi} ${dlc} ${dataLength} ${data} 0 0 1000 0 0 0 0 0`
-        } else {
-          // 普通 CAN 消息
-          const dtype = log.data ? `d ${dlc}` : `r ${dlc}`
-          messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} ${dtype} ${data}`
-        }
+    const deviceKeys = Object.keys(database.devices)
+    const lines = [formatAscHeader(new Date(liveStartMs > 0 ? liveStartMs : Date.now()))]
+    for (const log of allLogData) {
+      // Same numbering as the main-process log transports
+      const channel = (log.deviceId ? deviceKeys.indexOf(log.deviceId) : -1) + 1 || 1
+      const seconds = log.ts / 1000_000
+      let line = ''
+      if (log.method === 'canBase' && log.raw) {
+        line = formatCanMessage(log.raw as CanMessage, channel, seconds)
       } else if (log.method === 'canError') {
-        messageLine = `${channel}  ErrorFrame`
-      } else if (log.method === 'linBase') {
-        // LIN 消息 (按照 CAN 格式处理)
-        const dlc = log.dlc ? log.dlc.toString(16) : '0'
-        const dir = log.dir === 'Tx' ? 'Tx' : 'Rx'
-        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
-      } else if (
-        log.method === 'udsSent' ||
-        log.method === 'udsRecv' ||
-        log.method === 'udsNegRecv'
-      ) {
-        // UDS 消息 (按照 CAN 格式处理)
-        const dlc = log.len ? len2dlc(log.len).toString(16) : '0'
-        const dir = log.method === 'udsSent' ? 'Tx' : 'Rx'
-        messageLine = `${channel}  ${id.padEnd(15)} ${dir.padEnd(4)} d ${dlc} ${data}`
+        line = formatCanError(channel, seconds)
+      } else if (log.method === 'linBase' && log.raw) {
+        line = formatLinMessage(log.raw as LinMsg, channel, seconds)
+      } else if (log.method === 'linError' || log.method === 'linWarning') {
+        line = formatLinError(log.data, log.raw as LinMsg | undefined, channel, seconds)
+      } else if (log.method === 'linEvent') {
+        line = formatLinEvent(log.data, channel, seconds)
       }
-
-      if (messageLine) {
-        ascContent += `${relativeTime.toFixed(6)} ${messageLine}\n`
+      if (line) {
+        lines.push(line)
       }
-    })
-
-    // 添加文件尾
-    ascContent += 'End TriggerBlock\n'
-
-    // 下载文件
-    const blob = new Blob([ascContent], { type: 'text/plain' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `log_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.asc`
-    document.body.appendChild(a)
-    a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
+    }
+    lines.push(ASC_END, '')
+    download(lines.join(ASC_EOL))
     loadingInstance.close()
   }
 }
@@ -1711,7 +1676,8 @@ type ParsedFrame = {
   ts: number
   id: number
   dir: string
-  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean }
+  msgType: { idType: string; brs: boolean; canfd: boolean; remote: boolean; esi?: boolean }
+  dlc?: number
   data: number[]
   isError?: boolean
 }
@@ -1770,7 +1736,26 @@ function framesToLogData(
 
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i]
-    if (frame.isError) continue
+    if (frame.isError) {
+      const errorIndex = indexOffset + i + 1
+      const errorDeltaTs = prevLastTs >= 0 ? frame.ts - prevLastTs : undefined
+      prevLastTs = frame.ts
+      result.push({
+        method: 'canError',
+        data: '',
+        ts: frame.ts,
+        id: 'canError',
+        len: 0,
+        device: channelDbcMapCache.get(frame.channel)?.deviceName || `CH${frame.channel}`,
+        channel: `CH${frame.channel}`,
+        msgType: i18next.t('uds.trace.messageTypes.canError'),
+        seqIndex: errorIndex,
+        deltaTs: errorDeltaTs,
+        absTimeStr: formatAbsTime(frame.ts),
+        key: `${errorIndex}-CH${frame.channel}-canError`
+      })
+      continue
+    }
 
     const msgType: CanMsgType = {
       idType: frame.msgType.idType as CAN_ID_TYPE,
@@ -1800,7 +1785,7 @@ function framesToLogData(
       data: data2str(dataArr),
       ts: frame.ts,
       id: idStr,
-      dlc: getDlcByLen(dataArr.length, msgType.canfd),
+      dlc: frame.dlc ?? getDlcByLen(dataArr.length, msgType.canfd),
       len: dataArr.length,
       device: deviceName,
       channel: `CH${frame.channel}`,

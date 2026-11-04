@@ -1,10 +1,7 @@
 # cddtools (vendored)
 
-Source: https://github.com/crazy0104/cddtools, based on
-`b803f41dda93b459b1cc08d74544f7baf2ae51e7` plus the local read-only snapshot,
-variant filtering, DTC properties and record-number fixes. These changes were
-implemented and tested in the cddtools source repository before being copied
-here; their source commit is pending.
+Source: https://github.com/crazy0104/cddtools at
+`8d735f02757fd251f06da8559f93a4adc3aa9ff0`.
 
 The parser modules are copied verbatim. `cli.py`, `__main__.py` and
 `cdd_viewer.py` are left out: EcuBus has its own entry point in

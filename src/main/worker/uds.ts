@@ -136,6 +136,7 @@ import { cloneDeep } from 'lodash'
 import { v4 } from 'uuid'
 import { checkServiceId, ServiceId } from './../share/uds'
 import { CAN_ID_TYPE, CanMessage, Signal as CanSignal } from '../share/can'
+import { collectCanOnSignalEvents } from '../share/canScriptNotify'
 import { SerialMessage } from '../share/serial'
 export type { SerialMessage } from '../share/serial'
 
@@ -2501,14 +2502,10 @@ export class UtilClass {
   private async canMsg(msg: CanMessage) {
     // Convert Buffer objects if needed
     msg.data = Buffer.from(msg.data)
-    //signal emit
+    //signal emit — same decode OnSignal sees for RX and for IA TX logged as can-frame
     msg = createCanMessageWrapper(msg)
-    if (msg.signals) {
-      const dbName = global.dataSet.database.can[msg.database!].name
-      //emit signal
-      for (const signal of Object.values(msg.signals as Record<string, CanSignal>)) {
-        await this.event.emit(`${dbName}.${signal.name}` as any, signal)
-      }
+    for (const update of collectCanOnSignalEvents(msg, global.dataSet.database.can)) {
+      await this.event.emit(update.event as any, update.signal)
     }
 
     await this.event.emit(`can.${msg.id}` as any, msg)

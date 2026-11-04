@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { CanAddr, CanMessage, formatError, getTsUs, swapAddr } from './share/can'
+import { shouldDeliverCanFrameToNode } from './share/canScriptNotify'
 import { TesterInfo } from './share/tester'
 import UdsTester, {
   linApiBaudRateCtrl,
@@ -1610,7 +1611,9 @@ export class NodeClass {
       this.log?.scriptMsg(e.toString(), getTsUs(), 'error')
     }
     if ('msgType' in frame) {
-      if (frame.msgType.uuid != this.nodeItem.id) {
+      // IA TX is logged as can-frame with no node uuid, so OnSignal sees it like an RX frame.
+      // A script's own output() is stamped with this node id and is not echoed back.
+      if (shouldDeliverCanFrameToNode(frame, this.nodeItem.id)) {
         void this.pool?.triggerCanFrame(frame).catch(reportAsyncError)
       }
     } else if ('dir' in frame) {

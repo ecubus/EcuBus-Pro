@@ -736,7 +736,10 @@ export class SLCAN_CAN extends CanBase {
         id: id,
         data: data,
         ts: ts,
-        msgType: msgType
+        msgType: msgType,
+        device: this.info.name,
+        database: extra?.database,
+        name: extra?.name
       }
       this.log.canBase(message)
       this.event.emit(this.getReadBaseId(id, message.msgType), message)

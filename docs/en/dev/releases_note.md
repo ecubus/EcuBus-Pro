@@ -1,5 +1,36 @@
 # EcuBus-Pro Release Notes
 
+## Unreleased
+
+## 0.8.68
+Changes since v0.8.67:
+
+* fix(can-ia): keep raw-data edits when sending database frames ([#484](https://github.com/ecubus/EcuBus-Pro/pull/484))
+* feat(replay): improve asc and blf logging ([#486](https://github.com/ecubus/EcuBus-Pro/pull/486))
+* docs(cdd): point vendored cddtools to its source commit ([#485](https://github.com/ecubus/EcuBus-Pro/pull/485))
+* fix(replay): warn when a log channel is missing from the channel map ([#483](https://github.com/ecubus/EcuBus-Pro/pull/483))
+* feat(cdd): add read-only fault code table and dtc selection for read dtc requests ([#482](https://github.com/ecubus/EcuBus-Pro/pull/482))
+* feat(worker): add an optional progress callback to runUdsSeq ([#478](https://github.com/ecubus/EcuBus-Pro/pull/478))
+* fix(test): show each case log without clearing the terminal ([#477](https://github.com/ecubus/EcuBus-Pro/pull/477))
+* refactor(panel): store panels in the project file and drop .ecpanel files ([#475](https://github.com/ecubus/EcuBus-Pro/pull/475))
+* fix(panel): open binding dialog in editor windows and fix README doc links ([#473](https://github.com/ecubus/EcuBus-Pro/pull/473))
+* fix(test): stream console output while a test is still running ([#472](https://github.com/ecubus/EcuBus-Pro/pull/472))
+* fix(can-ia): keep clipboard keys working while an interaction window is open ([#471](https://github.com/ecubus/EcuBus-Pro/pull/471))
+* fix(panel): keep slider, path and numeric drafts in sync with received values ([#470](https://github.com/ecubus/EcuBus-Pro/pull/470))
+* docs(panel): add panel examples to the PANEL catalog and refresh readme screenshots ([#467](https://github.com/ecubus/EcuBus-Pro/pull/467))
+* fix(panel): ignore variable writes until measurement has started ([#466](https://github.com/ecubus/EcuBus-Pro/pull/466))
+* Group each case in the Test log and highlight it from the tree ([#465](https://github.com/ecubus/EcuBus-Pro/pull/465))
+* fix(ipc): enhance error handling in build and global start processes
+* Update support.md ([#464](https://github.com/ecubus/EcuBus-Pro/pull/464))
+* fix(test): show status and duration for duplicate test names ([#463](https://github.com/ecubus/EcuBus-Pro/pull/463))
+* feat(panel): add free-layout panels and remember value option ([#450](https://github.com/ecubus/EcuBus-Pro/pull/450))
+* Serve PC MCAL JSON-RPC from Simulate CAN ([#459](https://github.com/ecubus/EcuBus-Pro/pull/459))
+* fix(can): pause tester present across physical and functional addresses ([#458](https://github.com/ecubus/EcuBus-Pro/pull/458))
+* fix(test): stop Node 24 from skipping every test in test_simple ([#457](https://github.com/ecubus/EcuBus-Pro/pull/457))
+* feat(slcan): support WeAct Studio USB2CANFD V2 firmware ([#456](https://github.com/ecubus/EcuBus-Pro/pull/456))
+* feat(doip): add optional OEM-specific routing activation field ([#453](https://github.com/ecubus/EcuBus-Pro/pull/453))
+* Update support.md
+
 ## 0.8.67
 Changes since v0.8.66:
 

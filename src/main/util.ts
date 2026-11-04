@@ -117,6 +117,18 @@ export function getJsPath(tsPath: string, projectPath: string) {
   return jsPath
 }
 
+type CanSignalChanged = (messageId: number) => void
+let canSignalChanged: CanSignalChanged | undefined
+
+/**
+ * Main process hook. CAN `setSignal` calls this with the message id after the
+ * signal value is stored, so interaction period rows can refresh `ia.data`
+ * even when the measurement-start signal Proxy is not installed.
+ */
+export function onCanSignalChanged(handler?: CanSignalChanged) {
+  canSignalChanged = handler
+}
+
 export function setSignal(data: {
   signal: string
   value: number | number[] | string
@@ -154,6 +166,7 @@ export function setSignal(data: {
       ss.value = data.value.toString()
       updateSignalRaw(ss)
     }
+    if (messageId != undefined) canSignalChanged?.(messageId)
     return messageId
   } else {
     const linDb = Object.values(global.dataSet.database.lin).find((db) => db.name == s[0])

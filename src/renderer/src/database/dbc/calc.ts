@@ -1,5 +1,5 @@
 import type { CanDB, Message, Signal } from 'src/main/share/can'
-import { bufferFromRawHex } from 'src/main/share/canIaData'
+import { bufferFromRawHex, interactionPayloadLength } from 'src/main/share/canIaData'
 
 // Convert two's complement to signed value
 function fromTwosComplement(value: number, bits: number): number {
@@ -471,6 +471,16 @@ export function messagePayloadHex(message: Message, length: number): string[] {
   for (let i = 0; i < size; i++) {
     hex.push((encoded[i] ?? 0).toString(16).padStart(2, '0'))
   }
+  return hex
+}
+
+/** Point an interaction row's raw bytes at the current signal encode. */
+export function writePeriodRowEncode(
+  ia: { dlc: number; type: string; data: string[] },
+  message: Message
+): string[] {
+  const hex = messagePayloadHex(message, interactionPayloadLength(ia.dlc, ia.type.includes('fd')))
+  ia.data = hex
   return hex
 }
 

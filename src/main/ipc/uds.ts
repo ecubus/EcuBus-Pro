@@ -65,9 +65,9 @@ import { LinMode } from '../share/lin'
 import { LIN_TP } from '../dolin/lintp'
 import { TpError as LinTpError } from '../dolin/lintp'
 
-import { linkRawHexToSignals, messagePayloadHex } from 'src/renderer/src/database/dbc/calc'
+import { linkRawHexToSignals, writePeriodRowEncode } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
-import { getJsPath } from '../util'
+import { getJsPath, onCanSignalChanged } from '../util'
 import UdsTester from '../workerClient'
 import { serviceDetail } from '../uds/service'
 import { getAllSysVar } from '../share/sysVar'
@@ -1325,12 +1325,9 @@ function refreshPeriodPayload(messageId: number) {
     const db = d.ia.database ? global.dataSet.database.can[d.ia.database] : undefined
     const message = db?.messages.find((msg) => msg.id == parseInt(d.ia.id, 16))
     if (!message) continue
-    // Signal edits and raw edits both end as signal values. The row payload follows
-    // that encode so interval sends stay on the same bytes as the editors.
-    d.ia.data = messagePayloadHex(
-      message,
-      interactionPayloadLength(d.ia.dlc, d.ia.type.includes('fd'))
-    )
+    // Signal edits, raw edits, and setSignal all end as signal values. The row
+    // payload follows that encode so the next interval tick matches the editors.
+    writePeriodRowEncode(d.ia, message)
     pushPeriodPayload(d, buildCanInterPayload(d.ia))
   }
 }
@@ -1342,6 +1339,11 @@ export function refreshCanPeriodData(messageId: number) {
   }
   refreshPeriodPayload(messageId)
 }
+
+// Script setSignal does not rely on the measurement-start signal Proxy.
+onCanSignalChanged((messageId) => {
+  refreshCanPeriodData(messageId)
+})
 
 ipcMain.on(
   'ipc-sync-can-message-signals',

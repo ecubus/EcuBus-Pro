@@ -10,8 +10,10 @@ import {
   ensureSignalDefaults,
   getMessageData,
   linkRawHexToSignals,
-  messagePayloadHex
+  messagePayloadHex,
+  writePeriodRowEncode
 } from 'src/renderer/src/database/dbc/calc'
+import { onCanSignalChanged, setSignal } from 'src/main/util'
 
 /**
  * Bytes from the CAN interaction edit dialog in the bug report
@@ -152,6 +154,39 @@ describe('CAN interaction raw payload', () => {
     expect(messagePayloadHex(message, 8)[7]).toBe('83')
     ensureSignalDefaults(message)
     expect(message.signals[0].value).toBe('80')
+  })
+
+  test('setSignal refreshes a period row ia.data to the signal encode', () => {
+    const message = nmMessage()
+    const db = { name: 'NmDb', messages: [message] }
+    const previous = global.dataSet
+    global.dataSet = { database: { can: { nm: db }, lin: {} } } as unknown as typeof global.dataSet
+    const ia = {
+      id: '550',
+      database: 'nm',
+      dlc: 8,
+      type: 'can' as const,
+      data: ['ff', 'ff', 'ff', 'ff', 'ff', 'ff', 'ff', 'ff']
+    }
+    // Same registration ipc/uds.ts installs for the real timerMap.
+    onCanSignalChanged((messageId) => {
+      const live = Object.values(global.dataSet.database.can)
+        .flatMap((item) => item.messages)
+        .find((item) => item.id === messageId)
+      writePeriodRowEncode(ia, live!)
+    })
+    try {
+      expect(setSignal({ signal: 'NmDb.byte0', value: 80 })).toBe(0x550)
+      expect(message.signals[0].value).toBe('80')
+      expect(ia.data).toEqual(messagePayloadHex(message, 8))
+      expect(ia.data[0]).toBe('50')
+      expect(ia.data[2]).toBe('00')
+      expect(ia.data[7]).toBe('00')
+      expect(buildCanInterPayload(ia)).toEqual(getMessageData(message))
+    } finally {
+      onCanSignalChanged(undefined)
+      global.dataSet = previous
+    }
   })
 
   test('CAN FD DLC sizes the buffer and invalid nibbles become 0', () => {

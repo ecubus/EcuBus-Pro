@@ -37,7 +37,8 @@ export enum TP_ERROR_ID {
   TP_INTERNAL_ERROR,
   TP_PARAM_ERROR,
   TP_WRONG_SN,
-  TP_BUS_BUSY
+  TP_BUS_BUSY,
+  TP_UNEXP_PDU
 }
 
 const tpErrorMap: Record<TP_ERROR_ID, string> = {
@@ -53,7 +54,16 @@ const tpErrorMap: Record<TP_ERROR_ID, string> = {
   [TP_ERROR_ID.TP_INTERNAL_ERROR]: 'dll lib internal error',
   [TP_ERROR_ID.TP_BUS_BUSY]: 'tp layer bus busy',
   [TP_ERROR_ID.TP_WRONG_SN]: 'wrong SN',
-  [TP_ERROR_ID.TP_PARAM_ERROR]: 'param error'
+  [TP_ERROR_ID.TP_PARAM_ERROR]: 'param error',
+  [TP_ERROR_ID.TP_UNEXP_PDU]: 'N_UNEXP_PDU unexpected PDU'
+}
+
+/**
+ * Event emitted on {@link CanTp.event} when a First Frame is accepted for `readId`,
+ * i.e. ISO 15765-2 N_USData_FF.indication.
+ */
+export function firstFrameIndicationId(readId: string) {
+  return `${readId}-ff`
 }
 
 export class TpError extends Error {
@@ -67,6 +77,17 @@ export class TpError extends Error {
     this.data = data
   }
 }
+type RxFcInfo = {
+  ts: number
+  bs: number
+  stMin: number
+  bc: number
+  leftLen: number
+  curBs: number
+  crTimer?: NodeJS.Timeout
+  brTimer?: NodeJS.Timeout
+}
+
 export class CAN_TP_SOCKET {
   inst: CanTp
   addr: CanAddr
@@ -81,14 +102,36 @@ export class CAN_TP_SOCKET {
     resolve: (value: { data: Buffer; ts: number }) => void
     reject: (reason: TpError) => void
   } | null = null
-  constructor(inst: CanTp, addr: CanAddr) {
+  /**
+   * When set, the `read` timeout only covers the wait for the response to start (SF or FF
+   * indication), as ISO 14229-2 defines P2/P2* for a UDS client. A segmented reception that has
+   * started is then supervised by the transport layer timers (N_Cr) alone.
+   */
+  timeoutUntilResponseStart: boolean
+  rxInProgress = false
+  ffCb: () => void
+  constructor(inst: CanTp, addr: CanAddr, opts?: { timeoutUntilResponseStart?: boolean }) {
     this.inst = inst
     this.addr = addr
+    this.timeoutUntilResponseStart = opts?.timeoutUntilResponseStart ?? false
     this.recvId = this.inst.getReadId(swapAddr(addr))
     this.cb = this.recvHandle.bind(this)
     this.inst.event.on(this.recvId, this.cb)
+    this.ffCb = this.firstFrameHandle.bind(this)
+    this.inst.event.on(firstFrameIndicationId(this.recvId), this.ffCb)
+  }
+  firstFrameHandle() {
+    if (!this.timeoutUntilResponseStart) {
+      return
+    }
+    this.rxInProgress = true
+    if (this.pendingRecv && this.recvTimer) {
+      clearTimeout(this.recvTimer)
+      this.recvTimer = undefined
+    }
   }
   recvHandle(val: { data: Buffer; ts: number } | TpError) {
+    this.rxInProgress = false
     if (this.pendingRecv) {
       if (this.recvTimer) {
         clearTimeout(this.recvTimer)
@@ -110,6 +153,7 @@ export class CAN_TP_SOCKET {
   clear() {
     //clear recvBuffer
     this.recvBuffer = []
+    this.rxInProgress = false
   }
   async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
     return new Promise((resolve, reject) => {
@@ -131,12 +175,14 @@ export class CAN_TP_SOCKET {
         }
       } else {
         this.pendingRecv = { resolve, reject }
-        this.recvTimer = setTimeout(() => {
-          if (this.pendingRecv) {
-            reject(this.error(TP_ERROR_ID.TP_TIMEOUT_UPPER_READ))
-            this.pendingRecv = null
-          }
-        }, timeout)
+        if (!this.rxInProgress) {
+          this.recvTimer = setTimeout(() => {
+            if (this.pendingRecv) {
+              reject(this.error(TP_ERROR_ID.TP_TIMEOUT_UPPER_READ))
+              this.pendingRecv = null
+            }
+          }, timeout)
+        }
       }
     })
   }
@@ -151,6 +197,7 @@ export class CAN_TP_SOCKET {
       this.pendingRecv.reject(this.error(TP_ERROR_ID.TP_BUS_CLOSED))
     }
     this.inst.event.off(this.recvId, this.cb)
+    this.inst.event.off(firstFrameIndicationId(this.recvId), this.ffCb)
     this.abortController.abort()
     this.closed = true
   }
@@ -166,18 +213,7 @@ export class CAN_TP implements CanTp {
   abortAllController = new AbortController()
   tpStatus: Record<string, number> = {}
   tpDataBuffer: Record<string, Buffer> = {}
-  tpDataFc: Record<
-    string,
-    {
-      ts: number
-      bs: number
-      stMin: number
-      bc: number
-      leftLen: number
-      curBs: number
-      crTimer?: NodeJS.Timeout
-    }
-  > = {}
+  tpDataFc: Record<string, RxFcInfo> = {}
   lastWriteError?: TpError
   constructor(base: CanBase, uuid?: string) {
     this.base = base
@@ -646,7 +682,7 @@ function baseHandle(val: CanMessage) {
   }
   const tpCmdId = _this.inst.getReadId(_this.addr)
 
-  const status = _this.inst.tpStatus[tpCmdId] || 0
+  let status = _this.inst.tpStatus[tpCmdId] || 0
   let index = 0
   if (
     _this.addr.addrFormat == CAN_ADDR_FORMAT.EXTENDED ||
@@ -667,6 +703,21 @@ function baseHandle(val: CanMessage) {
   // const dlcLen = getLenByDlc(_this.inst.base.info.dlc,_this.addr.canfd)
   if (canDl >= index + 1) {
     const pci = (val.data[index] & 0xf0) >> 4
+    // ISO 15765-2:2016 9.8.3: a valid SF or FF received during a segmented reception terminates
+    // it with N_UNEXP_PDU and is processed as the start of a new reception.
+    const unexpectedStart = status != 0 && (pci == 0 || pci == 1)
+    if (unexpectedStart) {
+      status = 0
+    }
+    const terminateRx = () => {
+      if (unexpectedStart) {
+        resetRx(_this.inst, tpCmdId)
+        _this.inst.event.emit(
+          tpCmdId,
+          new TpError(TP_ERROR_ID.TP_UNEXP_PDU, _this.addr, val.data, 'reception terminated')
+        )
+      }
+    }
     if (status == 0) {
       //idle,only SF or FF
       if (pci == 0) {
@@ -687,6 +738,7 @@ function baseHandle(val: CanMessage) {
             return
           }
           const data = val.data.subarray(index, index + len)
+          terminateRx()
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
           this.inst.event.emit(tpCmdId, {
@@ -714,6 +766,7 @@ function baseHandle(val: CanMessage) {
             return
           }
           index++
+          terminateRx()
 
           _this.inst.event.emit(tpCmdId, {
             addr: {
@@ -733,59 +786,47 @@ function baseHandle(val: CanMessage) {
           return
         } else {
           const len = ((val.data[index] & 0xf) << 8) | val.data[index + 1]
+          // ISO 15765-2:2016 9.6.3: FF_DLmin = SF_DLmax + 1 for the FF's CAN_DL
+          // (8 with normal and 7 with extended/mixed addressing at CAN_DL 8, CAN_DL - 1 resp.
+          // CAN_DL - 2 above). If FF_DL < FF_DLmin, ignore the FF and do not transmit a FC.
+          const ffDlMin = (canDl == 8 ? 8 : canDl - 1) - index
           index += 2
-          if (len < 7) {
+          if (len < ffDlMin) {
             return
           }
-          /* If the network layer receives a FirstFrame with an FF_DL that is less than FF_DLmin, the network layer
-shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
           const dlc = getDlcByLen(canDl, _this.addr.canfd)
           if (dlc == 0) {
             return
           }
+          terminateRx()
           const data = val.data.subarray(index)
           // this.inst.event.emit(tpCmdId,{data,ts:val.ts})
           _this.inst.tpDataBuffer[tpCmdId] = data
-          _this.inst.tpStatus[tpCmdId] = 2
-          const nbrTImer = setTimeout(() => {
-            //write flow control
-            _this.inst
-              .sendFC(swapAddr(_this.addr), 0, _this.listenOnly)
-              .then((val) => {
-                _this.inst.tpStatus[tpCmdId] = 1
-                _this.inst.tpDataFc[tpCmdId] = {
-                  ...val,
-                  bc: 1,
-                  leftLen: len - data.length,
-                  curBs: 0,
-                  crTimer: setTimeout(() => {
-                    _this.inst.event.emit(
-                      tpCmdId,
-                      new TpError(TP_ERROR_ID.TP_TIMEOUT_CR, _this.addr)
-                    )
-                    delete _this.inst.tpDataBuffer[tpCmdId]
-                    delete _this.inst.tpStatus[tpCmdId]
-                    delete _this.inst.tpDataFc[tpCmdId]
-                  }, _this.addr.nCr)
-                }
-              })
-              .catch((e: any) => {
-                if (e instanceof TpError) {
-                  _this.inst.event.emit(tpCmdId, e)
-                }
-                delete _this.inst.tpDataFc[tpCmdId]
-                delete _this.inst.tpDataBuffer[tpCmdId]
-                delete _this.inst.tpStatus[tpCmdId]
-              })
+          // The ECU may answer the FC before its TX confirmation is processed here,
+          // so consecutive frames must be accepted as soon as the FF is accepted.
+          _this.inst.tpStatus[tpCmdId] = 1
+          const fcInfo: RxFcInfo = {
+            ts: 0,
+            bs: _this.addr.bs,
+            stMin: _this.addr.stMin,
+            bc: 1,
+            leftLen: len - data.length,
+            curBs: 0
+          }
+          _this.inst.tpDataFc[tpCmdId] = fcInfo
+          _this.inst.event.emit(firstFrameIndicationId(tpCmdId))
+          fcInfo.brTimer = setTimeout(() => {
+            fcInfo.brTimer = undefined
+            sendRxFc(_this, tpCmdId, fcInfo)
           }, _this.addr.nBr || 0)
 
           _this.inst.abortAllController.signal.onabort = () => {
-            clearTimeout(nbrTImer)
+            resetRx(_this.inst, tpCmdId)
             _this.inst.event.emit(tpCmdId, new TpError(TP_ERROR_ID.TP_BUS_CLOSED, _this.addr))
           }
         }
       }
-    } else if (status == 1) {
+    } else if (status == 1 && pci == 2) {
       const fcInfo = _this.inst.tpDataFc[tpCmdId]
       const dlc = getDlcByLen(canDl, _this.addr.canfd)
       if (dlc == 0) {
@@ -795,7 +836,9 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
         const needBc = fcInfo.bc
         const curBc = val.data[index] & 0xf
         clearTimeout(fcInfo.crTimer)
+        fcInfo.crTimer = undefined
         if (curBc != needBc) {
+          resetRx(_this.inst, tpCmdId)
           _this.inst.event.emit(
             tpCmdId,
             new TpError(
@@ -805,9 +848,6 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
               `received block counter ${curBc} not equal to need block counter ${needBc}`
             )
           )
-          delete _this.inst.tpDataBuffer[tpCmdId]
-          delete _this.inst.tpStatus[tpCmdId]
-          delete _this.inst.tpDataFc[tpCmdId]
           return
         } else {
           index++
@@ -816,74 +856,31 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
           if (data.length >= leftLen) {
             data = data.subarray(0, leftLen)
             //finish
-
+            const allData = Buffer.concat([_this.inst.tpDataBuffer[tpCmdId], data])
+            resetRx(_this.inst, tpCmdId)
             _this.inst.event.emit(tpCmdId, {
               addr: {
                 ..._this.addr,
                 uuid: val.msgType.uuid
               },
-              data: Buffer.concat([_this.inst.tpDataBuffer[tpCmdId], data]),
+              data: allData,
               ts: val.ts
             })
-            delete _this.inst.tpDataBuffer[tpCmdId]
-            delete _this.inst.tpStatus[tpCmdId]
-            delete _this.inst.tpDataFc[tpCmdId]
           } else {
             //continue
             _this.inst.tpDataBuffer[tpCmdId] = Buffer.concat([
               _this.inst.tpDataBuffer[tpCmdId],
               data
             ])
-            _this.inst.tpDataFc[tpCmdId].leftLen -= data.length
+            fcInfo.leftLen -= data.length
             if (fcInfo.bs != 0) {
               fcInfo.curBs++
-
-              if (fcInfo.curBs == fcInfo.bs) {
-                fcInfo.curBs = 0
-                //send flow control
-                _this.inst.tpStatus[tpCmdId] = 2
-                //TODO:add delay here?
-                _this.inst
-                  .sendFC(swapAddr(_this.addr), 0, _this.listenOnly)
-                  .then((val) => {
-                    _this.inst.tpStatus[tpCmdId] = 1
-                    fcInfo.stMin = val.stMin
-                    fcInfo.bs = val.bs
-                    //start cr timer
-                    fcInfo.crTimer = setTimeout(() => {
-                      _this.inst.event.emit(
-                        tpCmdId,
-                        new TpError(TP_ERROR_ID.TP_TIMEOUT_CR, _this.addr)
-                      )
-                      delete _this.inst.tpDataBuffer[tpCmdId]
-                      delete _this.inst.tpStatus[tpCmdId]
-                      delete _this.inst.tpDataFc[tpCmdId]
-                    }, _this.addr.nCr)
-                  })
-                  .catch((e: any) => {
-                    if (e instanceof TpError) {
-                      _this.inst.event.emit(tpCmdId, e)
-                    }
-                    delete _this.inst.tpDataBuffer[tpCmdId]
-                    delete _this.inst.tpStatus[tpCmdId]
-                    delete _this.inst.tpDataFc[tpCmdId]
-                  })
-              } else {
-                //start cr timer
-                fcInfo.crTimer = setTimeout(() => {
-                  _this.inst.event.emit(tpCmdId, new TpError(TP_ERROR_ID.TP_TIMEOUT_CR, _this.addr))
-                  delete _this.inst.tpDataBuffer[tpCmdId]
-                  delete _this.inst.tpStatus[tpCmdId]
-                  delete _this.inst.tpDataFc[tpCmdId]
-                }, _this.addr.nCr)
-              }
+            }
+            if (fcInfo.bs != 0 && fcInfo.curBs == fcInfo.bs) {
+              fcInfo.curBs = 0
+              sendRxFc(_this, tpCmdId, fcInfo)
             } else {
-              fcInfo.crTimer = setTimeout(() => {
-                _this.inst.event.emit(tpCmdId, new TpError(TP_ERROR_ID.TP_TIMEOUT_CR, _this.addr))
-                delete _this.inst.tpDataBuffer[tpCmdId]
-                delete _this.inst.tpStatus[tpCmdId]
-                delete _this.inst.tpDataFc[tpCmdId]
-              }, _this.addr.nCr)
+              armCrTimer(_this, tpCmdId, fcInfo)
             }
             //update block counter
             fcInfo.bc++
@@ -895,4 +892,52 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
       }
     }
   }
+}
+
+type RxContext = { addr: CanAddr; inst: CAN_TP; listenOnly: boolean }
+
+function resetRx(inst: CAN_TP, tpCmdId: string) {
+  const fcInfo = inst.tpDataFc[tpCmdId]
+  if (fcInfo) {
+    clearTimeout(fcInfo.crTimer)
+    clearTimeout(fcInfo.brTimer)
+  }
+  delete inst.tpDataBuffer[tpCmdId]
+  delete inst.tpStatus[tpCmdId]
+  delete inst.tpDataFc[tpCmdId]
+}
+
+function armCrTimer(ctx: RxContext, tpCmdId: string, fcInfo: RxFcInfo) {
+  clearTimeout(fcInfo.crTimer)
+  fcInfo.crTimer = setTimeout(() => {
+    if (ctx.inst.tpDataFc[tpCmdId] !== fcInfo) {
+      return
+    }
+    resetRx(ctx.inst, tpCmdId)
+    ctx.inst.event.emit(tpCmdId, new TpError(TP_ERROR_ID.TP_TIMEOUT_CR, ctx.addr))
+  }, ctx.addr.nCr)
+}
+
+function sendRxFc(ctx: RxContext, tpCmdId: string, fcInfo: RxFcInfo) {
+  ctx.inst
+    .sendFC(swapAddr(ctx.addr), 0, ctx.listenOnly)
+    .then((val) => {
+      // the reception may have completed or been replaced while the FC was in flight
+      if (ctx.inst.tpDataFc[tpCmdId] !== fcInfo) {
+        return
+      }
+      fcInfo.ts = val.ts
+      fcInfo.stMin = val.stMin
+      fcInfo.bs = val.bs
+      armCrTimer(ctx, tpCmdId, fcInfo)
+    })
+    .catch((e: any) => {
+      if (ctx.inst.tpDataFc[tpCmdId] !== fcInfo) {
+        return
+      }
+      resetRx(ctx.inst, tpCmdId)
+      if (e instanceof TpError) {
+        ctx.inst.event.emit(tpCmdId, e)
+      }
+    })
 }

@@ -472,7 +472,8 @@ export class UDSTesterMain {
           if (addr.canAddr == undefined) {
             throw new Error('address not found')
           }
-          return new CAN_TP_SOCKET(tp, addr.canAddr)
+          // ISO 14229-2: P2/P2* end at the SF/FF indication, N_Cr supervises the rest
+          return new CAN_TP_SOCKET(tp, addr.canAddr, { timeoutUntilResponseStart: true })
         },
         close: (base: boolean) => {
           tp.close(base)
@@ -538,7 +539,9 @@ export class UDSTesterMain {
             throw new Error('aborted')
           }
 
-          return new LIN_TP_SOCKET(tp, addr.linAddr, LinMode.MASTER)
+          return new LIN_TP_SOCKET(tp, addr.linAddr, LinMode.MASTER, {
+            timeoutUntilResponseStart: true
+          })
         },
         close: (base: boolean) => {
           tp.close(base)

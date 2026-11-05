@@ -37,7 +37,8 @@ export enum TP_ERROR_ID {
   TP_INTERNAL_ERROR,
   TP_PARAM_ERROR,
   TP_WRONG_SN,
-  TP_BUS_BUSY
+  TP_BUS_BUSY,
+  TP_UNEXP_PDU
 }
 
 const tpErrorMap: Record<TP_ERROR_ID, string> = {
@@ -53,7 +54,16 @@ const tpErrorMap: Record<TP_ERROR_ID, string> = {
   [TP_ERROR_ID.TP_INTERNAL_ERROR]: 'dll lib internal error',
   [TP_ERROR_ID.TP_BUS_BUSY]: 'tp layer bus busy',
   [TP_ERROR_ID.TP_WRONG_SN]: 'wrong SN',
-  [TP_ERROR_ID.TP_PARAM_ERROR]: 'param error'
+  [TP_ERROR_ID.TP_PARAM_ERROR]: 'param error',
+  [TP_ERROR_ID.TP_UNEXP_PDU]: 'N_UNEXP_PDU unexpected PDU'
+}
+
+/**
+ * Event emitted on {@link CanTp.event} when a First Frame is accepted for `readId`,
+ * i.e. ISO 15765-2 N_USData_FF.indication.
+ */
+export function firstFrameIndicationId(readId: string) {
+  return `${readId}-ff`
 }
 
 export class TpError extends Error {
@@ -92,14 +102,36 @@ export class CAN_TP_SOCKET {
     resolve: (value: { data: Buffer; ts: number }) => void
     reject: (reason: TpError) => void
   } | null = null
-  constructor(inst: CanTp, addr: CanAddr) {
+  /**
+   * When set, the `read` timeout only covers the wait for the response to start (SF or FF
+   * indication), as ISO 14229-2 defines P2/P2* for a UDS client. A segmented reception that has
+   * started is then supervised by the transport layer timers (N_Cr) alone.
+   */
+  timeoutUntilResponseStart: boolean
+  rxInProgress = false
+  ffCb: () => void
+  constructor(inst: CanTp, addr: CanAddr, opts?: { timeoutUntilResponseStart?: boolean }) {
     this.inst = inst
     this.addr = addr
+    this.timeoutUntilResponseStart = opts?.timeoutUntilResponseStart ?? false
     this.recvId = this.inst.getReadId(swapAddr(addr))
     this.cb = this.recvHandle.bind(this)
     this.inst.event.on(this.recvId, this.cb)
+    this.ffCb = this.firstFrameHandle.bind(this)
+    this.inst.event.on(firstFrameIndicationId(this.recvId), this.ffCb)
+  }
+  firstFrameHandle() {
+    if (!this.timeoutUntilResponseStart) {
+      return
+    }
+    this.rxInProgress = true
+    if (this.pendingRecv && this.recvTimer) {
+      clearTimeout(this.recvTimer)
+      this.recvTimer = undefined
+    }
   }
   recvHandle(val: { data: Buffer; ts: number } | TpError) {
+    this.rxInProgress = false
     if (this.pendingRecv) {
       if (this.recvTimer) {
         clearTimeout(this.recvTimer)
@@ -121,6 +153,7 @@ export class CAN_TP_SOCKET {
   clear() {
     //clear recvBuffer
     this.recvBuffer = []
+    this.rxInProgress = false
   }
   async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
     return new Promise((resolve, reject) => {
@@ -142,12 +175,14 @@ export class CAN_TP_SOCKET {
         }
       } else {
         this.pendingRecv = { resolve, reject }
-        this.recvTimer = setTimeout(() => {
-          if (this.pendingRecv) {
-            reject(this.error(TP_ERROR_ID.TP_TIMEOUT_UPPER_READ))
-            this.pendingRecv = null
-          }
-        }, timeout)
+        if (!this.rxInProgress) {
+          this.recvTimer = setTimeout(() => {
+            if (this.pendingRecv) {
+              reject(this.error(TP_ERROR_ID.TP_TIMEOUT_UPPER_READ))
+              this.pendingRecv = null
+            }
+          }, timeout)
+        }
       }
     })
   }
@@ -162,6 +197,7 @@ export class CAN_TP_SOCKET {
       this.pendingRecv.reject(this.error(TP_ERROR_ID.TP_BUS_CLOSED))
     }
     this.inst.event.off(this.recvId, this.cb)
+    this.inst.event.off(firstFrameIndicationId(this.recvId), this.ffCb)
     this.abortController.abort()
     this.closed = true
   }
@@ -667,11 +703,20 @@ function baseHandle(val: CanMessage) {
   // const dlcLen = getLenByDlc(_this.inst.base.info.dlc,_this.addr.canfd)
   if (canDl >= index + 1) {
     const pci = (val.data[index] & 0xf0) >> 4
-    if (status != 0 && (pci == 0 || pci == 1)) {
-      // ISO 15765-2: an SF or FF received during a segmented reception terminates it
-      // and is processed as the start of a new reception.
-      resetRx(_this.inst, tpCmdId)
+    // ISO 15765-2:2016 9.8.3: a valid SF or FF received during a segmented reception terminates
+    // it with N_UNEXP_PDU and is processed as the start of a new reception.
+    const unexpectedStart = status != 0 && (pci == 0 || pci == 1)
+    if (unexpectedStart) {
       status = 0
+    }
+    const terminateRx = () => {
+      if (unexpectedStart) {
+        resetRx(_this.inst, tpCmdId)
+        _this.inst.event.emit(
+          tpCmdId,
+          new TpError(TP_ERROR_ID.TP_UNEXP_PDU, _this.addr, val.data, 'reception terminated')
+        )
+      }
     }
     if (status == 0) {
       //idle,only SF or FF
@@ -693,6 +738,7 @@ function baseHandle(val: CanMessage) {
             return
           }
           const data = val.data.subarray(index, index + len)
+          terminateRx()
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
           this.inst.event.emit(tpCmdId, {
@@ -720,6 +766,7 @@ function baseHandle(val: CanMessage) {
             return
           }
           index++
+          terminateRx()
 
           _this.inst.event.emit(tpCmdId, {
             addr: {
@@ -739,16 +786,19 @@ function baseHandle(val: CanMessage) {
           return
         } else {
           const len = ((val.data[index] & 0xf) << 8) | val.data[index + 1]
+          // ISO 15765-2:2016 9.6.3: FF_DLmin = SF_DLmax + 1 for the FF's CAN_DL
+          // (8 with normal and 7 with extended/mixed addressing at CAN_DL 8, CAN_DL - 1 resp.
+          // CAN_DL - 2 above). If FF_DL < FF_DLmin, ignore the FF and do not transmit a FC.
+          const ffDlMin = (canDl == 8 ? 8 : canDl - 1) - index
           index += 2
-          if (len < 7) {
+          if (len < ffDlMin) {
             return
           }
-          /* If the network layer receives a FirstFrame with an FF_DL that is less than FF_DLmin, the network layer
-shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
           const dlc = getDlcByLen(canDl, _this.addr.canfd)
           if (dlc == 0) {
             return
           }
+          terminateRx()
           const data = val.data.subarray(index)
           // this.inst.event.emit(tpCmdId,{data,ts:val.ts})
           _this.inst.tpDataBuffer[tpCmdId] = data
@@ -764,6 +814,7 @@ shall ignore the received FF N_PDU and not transmit a FC N_PDU.*/
             curBs: 0
           }
           _this.inst.tpDataFc[tpCmdId] = fcInfo
+          _this.inst.event.emit(firstFrameIndicationId(tpCmdId))
           fcInfo.brTimer = setTimeout(() => {
             fcInfo.brTimer = undefined
             sendRxFc(_this, tpCmdId, fcInfo)

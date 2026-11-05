@@ -16,7 +16,12 @@ export interface LinTp {
   writeTp(mode: LinMode, addr: LinAddr, data: Buffer, id?: string): Promise<number>
   getReadId(mode: LinMode, addr: LinAddr): string
   setOption(cmd: string, val: any): void
-  readTp(mode: LinMode, addr: LinAddr, timeout?: number): Promise<{ data: Buffer; ts: number }>
+  readTp(
+    mode: LinMode,
+    addr: LinAddr,
+    timeout?: number,
+    timeoutUntilResponseStart?: boolean
+  ): Promise<{ data: Buffer; ts: number }>
   event: EventEmitter
 }
 
@@ -64,6 +69,14 @@ export class TpError extends Error {
   }
 }
 
+/**
+ * Event emitted on {@link LinTp.event} when a First Frame is accepted for `readId`
+ * (N_USData_FF.indication).
+ */
+export function firstFrameIndicationId(readId: string) {
+  return `${readId}-ff`
+}
+
 export class LIN_TP_SOCKET {
   inst: LinTp
   addr: LinAddr
@@ -78,13 +91,21 @@ export class LIN_TP_SOCKET {
     resolve: (value: { data: Buffer; ts: number }) => void
     reject: (reason: TpError) => void
   } | null = null
+  /**
+   * When set, the `read` timeout only covers the wait for the response to start (SF or FF
+   * indication), as ISO 14229-2 defines P2/P2* for a UDS client. A segmented reception that has
+   * started is then supervised by the transport layer N_Cr timer alone.
+   */
+  timeoutUntilResponseStart: boolean
   constructor(
     inst: LinTp,
     addr: LinAddr,
-    public mode: LinMode
+    public mode: LinMode,
+    opts?: { timeoutUntilResponseStart?: boolean }
   ) {
     this.inst = inst
     this.addr = addr
+    this.timeoutUntilResponseStart = opts?.timeoutUntilResponseStart ?? false
     //TODO:
     this.recvId = '0'
     this.cb = this.recvHandle.bind(this)
@@ -113,7 +134,7 @@ export class LIN_TP_SOCKET {
     return new TpError(id, this.addr)
   }
   async read(timeout: number): Promise<{ data: Buffer; ts: number }> {
-    return await this.inst.readTp(this.mode, this.addr, timeout)
+    return await this.inst.readTp(this.mode, this.addr, timeout, this.timeoutUntilResponseStart)
   }
   async write(data: Buffer): Promise<number> {
     if (this.closed) {
@@ -356,7 +377,7 @@ export class LIN_TP implements LinTp {
     }
     return tpIdStr
   }
-  readTp(mode: LinMode, addr: LinAddr, timeout = 1000) {
+  readTp(mode: LinMode, addr: LinAddr, timeout = 1000, timeoutUntilResponseStart = false) {
     return new Promise<{ data: Buffer; ts: number }>(
       (
         resolve: (value: { data: Buffer; ts: number }) => void,
@@ -398,8 +419,14 @@ export class LIN_TP implements LinTp {
         this.rejectMap.set(cnt, reject)
         const cmdId = this.getReadId(mode == LinMode.MASTER ? LinMode.SLAVE : LinMode.MASTER, addr)
         this.base.setPendingDiagRead(cnt, mode, addr)
+        const ffId = firstFrameIndicationId(cmdId)
+        let timer: NodeJS.Timeout | undefined = undefined
+        const onFirstFrame = () => {
+          clearTimeout(timer)
+        }
         const cb = (val: { data: Buffer; ts: number } | TpError) => {
           clearTimeout(timer)
+          this.event.off(ffId, onFirstFrame)
           if (this.rejectMap.has(cnt)) {
             this.base.clearPendingDiagRead(cnt)
             if (val instanceof TpError) {
@@ -424,12 +451,18 @@ export class LIN_TP implements LinTp {
           }
 
           this.event.off(cmdId, cb)
+          this.event.off(ffId, onFirstFrame)
         }
-        const timer = setTimeout(() => {
-          clear()
-        }, timeout)
+        if (!(timeoutUntilResponseStart && this.tpStatus[cmdId] == 1)) {
+          timer = setTimeout(() => {
+            clear()
+          }, timeout)
+        }
 
         this.event.once(cmdId, cb)
+        if (timeoutUntilResponseStart) {
+          this.event.on(ffId, onFirstFrame)
+        }
 
         this.abortAllController.signal.onabort = () => {
           clear()
@@ -509,6 +542,7 @@ function baseHandle(val: LinMsg) {
           delete _this.inst.tpDataFc[tpCmdId]
         }, _this.addr.nCr)
       }
+      _this.inst.event.emit(firstFrameIndicationId(tpCmdId))
       _this.inst.abortAllController.signal.onabort = () => {
         _this.inst.event.emit(tpCmdId, new TpError(LIN_TP_ERROR_ID.TP_BUS_CLOSED, _this.addr))
       }

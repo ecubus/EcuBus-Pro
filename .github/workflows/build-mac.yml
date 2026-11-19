@@ -18,6 +18,8 @@ jobs:
           fetch-depth: 0
       - name: Setup Embedding Python
         uses: ./.github/actions/setup-python-build
+      - name: Use official Electron downloads
+        run: npm config delete electron_mirror electron_builder_binaries_mirror --location=project
       - name: Build App
         uses: ./.github/actions/build-app
         env:
@@ -31,7 +33,11 @@ jobs:
       - name: Load packaged Toomoss CAN SDK on Apple Silicon
         shell: bash
         run: |
-          app="dist/mac-arm64/EcuBus-Pro.app/Contents"
+          volume="$RUNNER_TEMP/toomoss-dmg"
+          mkdir -p "$volume"
+          hdiutil attach -readonly -nobrowse -mountpoint "$volume" dist/*-arm64.dmg
+          trap 'hdiutil detach "$volume"' EXIT
+          app="$volume/EcuBus-Pro.app/Contents"
           addon=("$app"/Resources/app.asar.unpacked/out/main/chunks/toomoss-*.node)
           ELECTRON_RUN_AS_NODE=1 "$app/MacOS/EcuBus-Pro" -e '
             const assert = require("node:assert/strict")

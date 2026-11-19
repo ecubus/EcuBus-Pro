@@ -502,6 +502,7 @@ export interface CanDevice {
   busy?: boolean
   /** Vendor-specific metadata, keyed by vendor name */
   extra?: {
+    toomoss?: { fdSupported: boolean }
     candle?: {
       cap?: CandleCapability
       dataCap?: CandleCapability

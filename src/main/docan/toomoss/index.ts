@@ -14,8 +14,10 @@ import { cloneDeep } from 'lodash'
 import { addrToId, CanError } from '../../share/can'
 import { CanLOG } from '../../log'
 import TOOMOSS from './../build/Release/toomoss.node'
-import { platform } from 'os'
+import { arch, platform } from 'node:process'
 import { CanBase } from '../base'
+
+const isMacArm64 = platform === 'darwin' && arch === 'arm64'
 
 interface CANFrame {
   canId: number
@@ -24,20 +26,19 @@ interface CANFrame {
   ts: number
 }
 
-let txCnt = 0
-const pendingBaseCmds = new Map<
-  number,
-  {
-    resolve: (value: number) => void
-    reject: (reason: CanError) => void
-    msgType: CanMsgType
-    id: number
-    data: Buffer
-    extra?: { database?: string; name?: string }
-  }
->()
-
 export class TOOMOSS_CAN extends CanBase {
+  private txCnt = 0
+  private pendingBaseCmds = new Map<
+    number,
+    {
+      resolve: (value: number) => void
+      reject: (reason: CanError) => void
+      msgType: CanMsgType
+      id: number
+      data: Buffer
+      extra?: { database?: string; name?: string }
+    }
+  >()
   event: EventEmitter
   info: CanBaseInfo
   handle: number
@@ -71,6 +72,9 @@ export class TOOMOSS_CAN extends CanBase {
     const target = devices.find((item) => item.handle == info.handle)
     if (!target) {
       throw new Error('Invalid handle')
+    }
+    if (info.canfd && target.extra?.toomoss?.fdSupported === false) {
+      throw new Error('This Toomoss device does not support CAN FD')
     }
     if (this.info.bitrate.clock == undefined) {
       throw new Error('Clock frequency is not set')
@@ -130,7 +134,6 @@ export class TOOMOSS_CAN extends CanBase {
     this.handle = parseInt(info.handle.split(':')[0])
     this.deviceIndex = parseInt(info.handle.split(':')[1])
 
-    let ret = 0
     // 检查设备是否已经打开
     if (global.toomossDeviceHandles == undefined) {
       global.toomossDeviceHandles = new Map<
@@ -144,7 +147,7 @@ export class TOOMOSS_CAN extends CanBase {
     let deviceInfo = global.toomossDeviceHandles.get(this.handle)
     if (!deviceInfo) {
       // 首次打开设备
-      ret = TOOMOSS.USB_OpenDevice(this.handle)
+      const ret = TOOMOSS.USB_OpenDevice(this.handle)
       if (ret != 1) {
         throw new Error('Open device failed')
       }
@@ -161,6 +164,16 @@ export class TOOMOSS_CAN extends CanBase {
       deviceInfo.refCount++
       deviceInfo.channels.add(this.deviceIndex)
     }
+    try {
+      this.startChannel(info)
+    } catch (err) {
+      this.releaseDevice()
+      throw err
+    }
+  }
+
+  private startChannel(info: CanBaseInfo) {
+    let ret: number
     TOOMOSS.DEV_ResetTimestamp(this.handle)
     // 初始化CAN配置
     if (info.canfd && info.bitratefd) {
@@ -236,6 +249,20 @@ export class TOOMOSS_CAN extends CanBase {
   }
   txCallback(obj: any) {
     const { id, timestamp, result } = obj
+    const pendingCmds = this.pendingBaseCmds.get(id)
+    if (!pendingCmds) return
+    this.pendingBaseCmds.delete(id)
+    if (result !== 1) {
+      pendingCmds.reject(
+        new CanError(
+          CAN_ERROR_ID.CAN_INTERNAL_ERROR,
+          pendingCmds.msgType,
+          pendingCmds.data,
+          `Send failed (${result})`
+        )
+      )
+      return
+    }
 
     // 更新时间戳偏移
     if (this.tsOffset == undefined) {
@@ -243,30 +270,22 @@ export class TOOMOSS_CAN extends CanBase {
     }
     const ts = timestamp * 10 - this.tsOffset
 
-    // 从待发送队列中找到对应的消息
-    const cmdId = Number(id)
-
-    const pendingCmds = pendingBaseCmds.get(cmdId)
-
-    if (pendingCmds) {
-      const message: CanMessage = {
-        device: this.info.name,
-        dir: 'OUT',
-        id: pendingCmds.id,
-        data: pendingCmds.data,
-        ts: ts,
-        msgType: pendingCmds.msgType,
-        database: pendingCmds.extra?.database,
-        name: pendingCmds.extra?.name
-      }
-      this.log.canBase(message)
-      this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
-      pendingCmds.resolve(ts)
-      pendingBaseCmds.delete(cmdId)
+    const message: CanMessage = {
+      device: this.info.name,
+      dir: 'OUT',
+      id: pendingCmds.id,
+      data: pendingCmds.data,
+      ts: ts,
+      msgType: pendingCmds.msgType,
+      database: pendingCmds.extra?.database,
+      name: pendingCmds.extra?.name
     }
+    this.log.canBase(message)
+    this.event.emit(this.getReadBaseId(message.id, message.msgType), message)
+    pendingCmds.resolve(ts)
   }
   callback(msg: any) {
-    if (msg.id == 0xffffffff) {
+    if (this.closed || msg.id == 0xffffffff) {
       return
     }
 
@@ -279,7 +298,7 @@ export class TOOMOSS_CAN extends CanBase {
         brs: false
       },
       data: msg.Data,
-      ts: ((msg.TimeStampHigh << 32) | msg.TimeStamp) * 10
+      ts: (msg.TimeStampHigh * 0x100000000 + msg.TimeStamp) * 10
     }
 
     if (this.info.canfd) {
@@ -301,6 +320,7 @@ export class TOOMOSS_CAN extends CanBase {
   }
 
   callbackError(err: any) {
+    if (this.closed) return
     this.log.error(getTsUs() - this.startTime, 'bus error')
     this.close(true)
   }
@@ -330,44 +350,53 @@ export class TOOMOSS_CAN extends CanBase {
   }
 
   static loadDllPath(dllPath: string) {
-    if (process.platform == 'win32') {
+    if (platform === 'win32') {
       TOOMOSS.LoadDll(dllPath)
     }
   }
 
   static override getValidDevices(): CanDevice[] {
     const devices: CanDevice[] = []
-    if (process.platform == 'win32') {
-      const deviceHandle = new TOOMOSS.I32Array(10)
-      const ret = TOOMOSS.USB_ScanDevice(deviceHandle)
-      if (ret > 0) {
-        for (let i = 0; i < ret; i++) {
-          const v = deviceHandle.getitem(i)
-          devices.push({
-            label: `TOOMOSS_USB_${i}_INDEX_0`,
-            id: `TOOMOSS_USB_${i}_INDEX_0`,
-            handle: `${v}:0`
-          })
-          devices.push({
-            label: `TOOMOSS_USB_${i}_INDEX_1`,
-            id: `TOOMOSS_USB_${i}_INDEX_1`,
-            handle: `${v}:1`
-          })
+    if (platform !== 'win32' && !isMacArm64) return devices
+
+    const handles = new TOOMOSS.I32Array(256)
+    const count = TOOMOSS.USB_ScanDevice(handles)
+    for (let i = 0; i < count; i++) {
+      const handle = handles.getitem(i)
+      let channels = 2
+      let extra: CanDevice['extra']
+      if (isMacArm64) {
+        const alreadyOpen = global.toomossDeviceHandles?.has(handle)
+        if (!alreadyOpen && !TOOMOSS.USB_OpenDevice(handle)) continue
+        try {
+          const hardware = new TOOMOSS.HARDWARE_INFO()
+          if (TOOMOSS.DEV_GetHardwareInfo(handle, hardware)) {
+            channels = hardware.CANChannelNum
+            extra = { toomoss: { fdSupported: Boolean(hardware.HaveCANFD) } }
+          }
+        } finally {
+          if (!alreadyOpen) TOOMOSS.USB_CloseDevice(handle)
         }
+      }
+      for (let channel = 0; channel < channels; channel++) {
+        const id = `TOOMOSS_USB_${i}_INDEX_${channel}`
+        devices.push({ label: id, id, handle: `${handle}:${channel}`, extra })
       }
     }
     return devices
   }
 
   static override getLibVersion(): string {
-    if (process.platform == 'win32') {
+    if (isMacArm64) return 'USB2XXX (9b2fc59e)'
+    if (platform === 'win32') {
       return '1.8.6.0'
     } else {
-      return 'only support windows'
+      return 'Not supported'
     }
   }
 
   close(isReset = false, msg?: string) {
+    if (this.closed) return
     this.readAbort.abort()
 
     for (const [key, value] of this.rejectBaseMap) {
@@ -376,10 +405,10 @@ export class TOOMOSS_CAN extends CanBase {
 
     this.rejectBaseMap.clear()
 
-    for (const [key, val] of pendingBaseCmds) {
+    for (const val of this.pendingBaseCmds.values()) {
       val.reject(new CanError(CAN_ERROR_ID.CAN_BUS_CLOSED, val.msgType))
     }
-    pendingBaseCmds.clear()
+    this.pendingBaseCmds.clear()
 
     if (isReset) {
       if (this.info.canfd) {
@@ -407,7 +436,11 @@ export class TOOMOSS_CAN extends CanBase {
       }
     }
 
-    // 更新设备引用计数
+    this.releaseDevice()
+    this._close()
+  }
+
+  private releaseDevice() {
     const deviceInfo = global.toomossDeviceHandles?.get(this.handle)
     if (deviceInfo) {
       deviceInfo.channels.delete(this.deviceIndex)
@@ -419,7 +452,6 @@ export class TOOMOSS_CAN extends CanBase {
         global.toomossDeviceHandles?.delete(this.handle)
       }
     }
-    this._close()
   }
 
   writeBase(
@@ -429,10 +461,10 @@ export class TOOMOSS_CAN extends CanBase {
     extra?: { database?: string; name?: string }
   ): Promise<number> {
     return new Promise((resolve, reject) => {
-      const cmdId = txCnt++
+      const cmdId = this.txCnt++
 
       try {
-        pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
+        this.pendingBaseCmds.set(cmdId, { resolve, reject, msgType, id, data, extra })
         TOOMOSS.SendCANMsg(
           this.handle,
           this.deviceIndex,
@@ -454,7 +486,7 @@ export class TOOMOSS_CAN extends CanBase {
           }
         )
       } catch (err: any) {
-        pendingBaseCmds.delete(cmdId)
+        this.pendingBaseCmds.delete(cmdId)
         reject(new CanError(CAN_ERROR_ID.CAN_INTERNAL_ERROR, msgType, data, err))
       }
     })

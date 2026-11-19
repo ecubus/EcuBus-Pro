@@ -13,7 +13,7 @@ Supported Hardware:
 | PEAK | CAN, CAN-FD |
 | KVASER | CAN, CAN-FD |
 | ZLG | CAN, CAN-FD |
-| Toomoss | CAN, CAN-FD |
+| Toomoss | CAN, CAN-FD on Windows and Apple Silicon (macOS 13 or later, [USB2XXX SDK](https://gitee.com/toomoss/usb2can_lin_pwm_example/tree/9b2fc59e622ae912e63dee1620404d56ac4f2e2b/sdk/libs/mac_os)) |
 | VECTOR | CAN, CAN-FD |
 | SLCAN | CAN, CAN-FD |
 

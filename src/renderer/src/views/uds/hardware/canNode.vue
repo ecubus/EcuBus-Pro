@@ -834,6 +834,10 @@ const showCandleTimingTable = computed(() => {
 })
 
 const showCanFdCheckbox = computed(() => {
+  if (props.vendor === 'toomoss') {
+    const device = deviceList.value.find((item) => item.handle === data.value.handle)
+    return device?.extra?.toomoss?.fdSupported !== false
+  }
   if (props.vendor !== 'candle') return true
   const dev = getSelectedCandleDevice()
   return !!dev?.extra?.candle?.fdSupported
@@ -1040,6 +1044,13 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
 }
 
 const deviceList = ref<CanDevice[]>([])
+
+watch(showCanFdCheckbox, (supported) => {
+  if (props.vendor === 'toomoss' && !supported && data.value.canfd) {
+    data.value.canfd = false
+    canFdChange()
+  }
+})
 const deviceLoading = ref(false)
 
 // Sync clock frequency from the selected candle device's actual hardware capability.

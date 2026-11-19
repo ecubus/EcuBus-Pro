@@ -26,6 +26,11 @@
       "darwin": [
         "simulate",
         "slcan"
+      ],
+      "darwin-arm64": [
+        "simulate",
+        "slcan",
+        "toomoss"
       ]
     }
   },

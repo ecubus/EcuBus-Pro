@@ -377,7 +377,7 @@ function addSubTree(vendor: CanVendor, node: tree, deviceIndexMap: Map<string, n
   }
   if (
     vendor == 'peak' ||
-    vendor == 'toomoss' ||
+    (vendor == 'toomoss' && window.electron.process.platform === 'win32') ||
     vendor == 'kvaser' ||
     vendor == 'vector' ||
     vendor == 'ecubus'

@@ -1,7 +1,6 @@
 %module xmlpp
 
 %header %{
-#include <windows.h>
 #include <stdlib.h>
 #include "usb2can.h"
 #include "usb2canfd.h"
@@ -47,7 +46,9 @@
 
 %inline %{
 void LoadDll(const char* path) {
+#ifdef _WIN32
   SetDllDirectory(path);
+#endif
 }
 
 %}

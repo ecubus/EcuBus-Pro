@@ -15,8 +15,11 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+  - out/main/chunks/toomoss-*.node
 nodeGypRebuild: false
 win:
+  files:
+    - '!resources/lib/toomoss/macos/**'
   target:
     - target: nsis
       arch:
@@ -49,6 +52,8 @@ mac:
   identity: null
   artifactName: EcuBus-Pro-${version}-${arch}.dmg
 linux:
+  files:
+    - '!resources/lib/toomoss/macos/**'
   target:
     - target: deb
     - target: rpm

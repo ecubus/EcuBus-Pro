@@ -20,6 +20,8 @@ jobs:
         uses: ./.github/actions/setup-python-build
       - name: Build App
         uses: ./.github/actions/build-app
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         with:
           platform: mac
           run-sdk-build: 'false'

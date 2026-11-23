@@ -8,7 +8,8 @@ export default defineConfig({
     resolve: {
       // src
       alias: {
-        src: resolve(__dirname, 'src')
+        src: resolve(__dirname, 'src'),
+        nodeCan: resolve(__dirname, 'src/main/share')
       }
     },
     build: {

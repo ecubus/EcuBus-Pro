@@ -468,10 +468,47 @@ export class udsCeil {
   }
   setEnable(enable: boolean) {
     this.enable = enable
+    const typeColor = colorMap[this.data.type] || { fill: '#FFFFFF', color: '#333333' }
     if (enable) {
-      this.rect.attr('body/opacity', 1)
+      this.rect.attr({
+        body: {
+          opacity: 1,
+          fill: typeColor.fill,
+          stroke: '#000000',
+          strokeWidth: 2,
+          strokeDasharray: 'none'
+        },
+        label: { opacity: 1, fill: typeColor.color },
+        labelBottom: { opacity: 1, fill: typeColor.color },
+        title: { opacity: 1, fill: typeColor.color },
+        line: { opacity: 1, stroke: '#000000', strokeDasharray: 'none' },
+        labelTop: { text: '', opacity: 0 }
+      })
     } else {
-      this.rect.attr('body/opacity', 0.2)
+      // Gray fill + dashed border + OFF tag so disabled nodes are obvious on the canvas
+      this.rect.attr({
+        body: {
+          opacity: 0.55,
+          fill: '#BDBDBD',
+          stroke: '#757575',
+          strokeWidth: 2,
+          strokeDasharray: '6,4'
+        },
+        label: { opacity: 0.7, fill: '#616161' },
+        labelBottom: { opacity: 0.7, fill: '#616161' },
+        title: { opacity: 0.7, fill: '#616161' },
+        line: { opacity: 0.7, stroke: '#757575', strokeDasharray: '4,3' },
+        labelTop: {
+          text: 'OFF',
+          opacity: 1,
+          fill: '#424242',
+          fontSize: 9,
+          fontWeight: 700,
+          x: 'calc(w - 4)',
+          y: 10,
+          textAnchor: 'end'
+        }
+      })
     }
   }
   destroy() {

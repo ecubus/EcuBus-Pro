@@ -127,7 +127,6 @@
             >
               <el-switch
                 v-model="formData.disabled"
-                disabled
                 :active-text="i18next.t('uds.network.nodeConfig.options.disabled')"
                 :inactive-text="i18next.t('uds.network.nodeConfig.options.enabled')"
               />
@@ -502,6 +501,7 @@ const handleConfirm = async () => {
       if (ceil) {
         ceil.changeName(dataBase.nodes[editIndex.value].name)
         ceil.changeNameBottom(dataBase.nodes[editIndex.value].workNode || '')
+        ceil.setEnable(!dataBase.nodes[editIndex.value].disabled)
       }
 
       ElMessageBox.close()

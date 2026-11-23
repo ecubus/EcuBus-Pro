@@ -694,7 +694,7 @@ async function globalStart(
   for (const key in data.nodes) {
     signal.throwIfAborted()
     const node = data.nodes[key]
-    if (node.isTest) {
+    if (node.isTest || node.disabled) {
       continue
     }
     const nodeItem = new NodeClass(node, projectInfo.path, projectInfo.name)

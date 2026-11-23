@@ -48,7 +48,7 @@ export const useDataStore = defineStore('useDataStore', {
           data: cloneDeep(this.database)
         })
         nextTick(() => {
-          const nodes = Object.values(this.nodes).filter((e) => !e.isTest)
+          const nodes = Object.values(this.nodes).filter((e) => !e.isTest && !e.disabled)
 
           const checkScriptStatus = async () => {
             const needBuild: NodeItem[] = []

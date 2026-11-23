@@ -725,6 +725,7 @@ export class Node extends udsCeil {
     )
     const t = this.getNodeBottomName()
     this.changeNameBottom(t)
+    this.setEnable(!ig.disabled)
 
     // Add test icon if isTest is true
     if (this.ig.isTest) {

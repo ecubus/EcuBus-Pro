@@ -225,6 +225,9 @@
         },
         {   
             'target_name': 'toomoss',
+            'variables': {
+                'mac_sdk_dir': '<(module_root_dir)/../../../resources/lib/toomoss/macos'
+            },
             'conditions': [
                 ['OS=="win"', {
                     'include_dirs': [
@@ -269,7 +272,33 @@
                     'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
                     'cflags!': [ '-fno-exceptions' ],
                     'cflags_cc!': [ '-fno-exceptions' ],
-                    'sources': [ './fake_mac.cxx' ],
+                    'conditions': [
+                        ['target_arch=="arm64"', {
+                            'include_dirs': [ './toomoss/inc' ],
+                            'sources': [
+                                './toomoss/swig/toomoss_wrap.cxx',
+                                './toomoss/swig/tsfn.cxx'
+                            ],
+                            'libraries': [ '<(mac_sdk_dir)/libUSB2XXX.dylib' ],
+                            'copies': [{
+                                'destination': '<(PRODUCT_DIR)',
+                                'files': [
+                                    '<(mac_sdk_dir)/libUSB2XXX.dylib',
+                                    '<(mac_sdk_dir)/libusb-1.0.0.dylib'
+                                ]
+                            }],
+                            'xcode_settings': {
+                                'MACOSX_DEPLOYMENT_TARGET': '13.0',
+                                'LD_RUNPATH_SEARCH_PATHS': [
+                                    '@loader_path',
+                                    '@loader_path/../../../resources/lib/toomoss/macos',
+                                    '@executable_path/toomoss/macos'
+                                ]
+                            }
+                        }, {
+                            'sources': [ './fake_mac.cxx' ]
+                        }]
+                    ],
                     'xcode_settings': {
                         'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
                     }

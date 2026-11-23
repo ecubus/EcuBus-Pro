@@ -1352,7 +1352,6 @@ template <typename T> T SwigValueInit() {
 #include <assert.h>
 
 
-#include <windows.h>
 #include <stdlib.h>
 #include "usb2can.h"
 #include "usb2canfd.h"
@@ -1794,7 +1793,9 @@ SWIG_AsVal_char (Napi::Value obj, char *val)
 
 
 void LoadDll(const char* path) {
+#ifdef _WIN32
   SetDllDirectory(path);
+#endif
 }
 
 
@@ -17429,4 +17430,3 @@ fail:
 }
 
 NODE_API_MODULE(xmlpp, Init)
-

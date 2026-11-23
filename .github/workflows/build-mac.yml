@@ -9,7 +9,7 @@ on:
 jobs:
   # Build job
   build:
-    runs-on: macos-13
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -18,14 +18,39 @@ jobs:
           fetch-depth: 0
       - name: Setup Embedding Python
         uses: ./.github/actions/setup-python-build
+      - name: Use official Electron downloads
+        run: npm config delete electron_mirror electron_builder_binaries_mirror --location=project
       - name: Build App
         uses: ./.github/actions/build-app
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         with:
           platform: mac
           run-sdk-build: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           main_vite_client_id: ${{ secrets.CLIENT_ID }}
           main_vite_client_secret: ${{ secrets.CLIENT_SECRET }}
+      - name: Load packaged Toomoss CAN SDK on Apple Silicon
+        shell: bash
+        run: |
+          volume="$RUNNER_TEMP/toomoss-dmg"
+          mkdir -p "$volume"
+          hdiutil attach -readonly -nobrowse -mountpoint "$volume" dist/*-arm64.dmg
+          trap 'hdiutil detach "$volume"' EXIT
+          app="$volume/EcuBus-Pro.app/Contents"
+          addon=("$app"/Resources/app.asar.unpacked/out/main/chunks/toomoss-*.node)
+          ELECTRON_RUN_AS_NODE=1 "$app/MacOS/EcuBus-Pro" -e '
+            const assert = require("node:assert/strict")
+            assert.equal(process.arch, "arm64")
+            const sdk = require(require("node:path").resolve(process.argv[1]))
+            for (const name of ["CAN_Init", "CAN_SendMsg", "CAN_GetMsgWithSize",
+                                "CANFD_Init", "CANFD_SendMsg", "CANFD_GetMsg"]) {
+              assert.equal(typeof sdk[name], "function", name)
+            }
+            const count = sdk.USB_ScanDevice(new sdk.I32Array(256))
+            assert.ok(count >= 0, `USB_ScanDevice returned ${count}`)
+            console.log(`Loaded Toomoss CAN/CAN FD on ${process.arch}, USB devices: ${count}`)
+          ' "${addon[0]}"
       - uses: actions/upload-artifact@v4
         with:
           name: artifact

@@ -3,7 +3,7 @@
 #include "napi.h"
 #include <chrono>
 #include <thread>
-#include <windows.h>
+#include <atomic>
 #include <map>
 #include <cstring>
 #include <queue>
@@ -23,12 +23,6 @@ struct TxMessage {
     };
 };
 
-// 定义队列节点结构
-struct TxQueueEntry {
-    SLIST_ENTRY ItemEntry;
-    TxMessage msg;
-};
-
 struct TxResult {
     uint32_t id;      // 发送计数
     uint64_t timestamp;// 时间戳
@@ -37,7 +31,7 @@ struct TxResult {
 
 // 1. 首先定义完整的 TsfnContext 结构体
 struct TsfnContext {
-    bool closed;
+    std::atomic<bool> closed;
     bool isCanFd;
     int DevHandle;
     uint8_t CanIndex;
@@ -45,17 +39,9 @@ struct TsfnContext {
     // 接收线程相关
     std::thread rxThread;
     Napi::ThreadSafeFunction tsfn;
-    CAN_MSG canMsg;
-    CANFD_MSG canfdMsg;
-
     // 错误监控线程相关
     std::thread errorThread;
     Napi::ThreadSafeFunction tserror;
-    union {
-        CAN_STATUS canStatus;
-        CANFD_BUS_ERROR canfdError;
-    } statusData;
-
     // 发送线程相关
     std::thread txThread;
     Napi::ThreadSafeFunction txtsfn;
@@ -66,7 +52,7 @@ struct TsfnContext {
 std::map<std::string, TsfnContext *> tsfnContextMap;
 
 // 2. 然后定义回调函数
-auto callback = []( Napi::Env env, Napi::Function jsCallback, CAN_MSG* value ) {
+auto callback = []( Napi::Env env, Napi::Function jsCallback, const CAN_MSG* value ) {
     // 创建返回对象
     Napi::Object msgObj = Napi::Object::New(env);
     unsigned int id = value->ID;
@@ -93,7 +79,7 @@ auto callback = []( Napi::Env env, Napi::Function jsCallback, CAN_MSG* value ) {
     jsCallback.Call( {msgObj} );
 };
 
-auto callbackFd = []( Napi::Env env, Napi::Function jsCallback, CANFD_MSG* value ) {
+auto callbackFd = []( Napi::Env env, Napi::Function jsCallback, const CANFD_MSG* value ) {
     // 创建返回对象
     Napi::Object msgObj = Napi::Object::New(env);
     
@@ -114,38 +100,33 @@ auto callbackFd = []( Napi::Env env, Napi::Function jsCallback, CANFD_MSG* value
     jsCallback.Call( {msgObj} );
 };
 
-auto statusCallback = []( Napi::Env env, Napi::Function jsCallback, void* value ) {
+auto fdStatusCallback = [](Napi::Env env, Napi::Function jsCallback, const CANFD_BUS_ERROR* busError) {
     Napi::Object statusObj = Napi::Object::New(env);
-    
-    if(!value) {
-      jsCallback.Call( {env.Null()} );
-      return;
-    }
-
-    // 获取上下文
-    TsfnContext* context = (TsfnContext*)value;
-
-    if(context->isCanFd) {
-      // CANFD总线错误信息
-      CANFD_BUS_ERROR* busError = (CANFD_BUS_ERROR*)&context->statusData.canfdError;
-      statusObj.Set("type", Napi::String::New(env, "CANFD_BUS_ERROR"));
-      statusObj.Set("TEC", Napi::Number::New(env, busError->TEC));
-      statusObj.Set("REC", Napi::Number::New(env, busError->REC));
-      statusObj.Set("Flags", Napi::Number::New(env, busError->Flags));
-    } else {
-      // 普通CAN状态信息
-      CAN_STATUS* canStatus = (CAN_STATUS*)&context->statusData.canStatus;
-      statusObj.Set("type", Napi::String::New(env, "CAN_STATUS")); 
-      statusObj.Set("TSR", Napi::Number::New(env, canStatus->TSR));
-      statusObj.Set("ESR", Napi::Number::New(env, canStatus->ESR));
-      statusObj.Set("RECounter", Napi::Number::New(env, canStatus->RECounter));
-      statusObj.Set("TECounter", Napi::Number::New(env, canStatus->TECounter));
-      statusObj.Set("LECode", Napi::Number::New(env, canStatus->LECode));
-      statusObj.Set("ErrFlag", Napi::Number::New(env, canStatus->ErrFlag));
-    }
-
-    jsCallback.Call( {statusObj} );
+    statusObj.Set("type", "CANFD_BUS_ERROR");
+    statusObj.Set("TEC", busError->TEC);
+    statusObj.Set("REC", busError->REC);
+    statusObj.Set("Flags", busError->Flags);
+    jsCallback.Call({statusObj});
 };
+
+auto statusCallback = [](Napi::Env env, Napi::Function jsCallback, const CAN_STATUS* canStatus) {
+    Napi::Object statusObj = Napi::Object::New(env);
+    statusObj.Set("type", "CAN_STATUS");
+    statusObj.Set("TSR", canStatus->TSR);
+    statusObj.Set("ESR", canStatus->ESR);
+    statusObj.Set("RECounter", canStatus->RECounter);
+    statusObj.Set("TECounter", canStatus->TECounter);
+    statusObj.Set("LECode", canStatus->LECode);
+    statusObj.Set("ErrFlag", canStatus->ErrFlag);
+    jsCallback.Call({statusObj});
+};
+
+template <typename T, typename Callback>
+void queue_callback(Napi::ThreadSafeFunction& target, const T& value, Callback callback) {
+    target.NonBlockingCall([value, callback](Napi::Env env, Napi::Function jsCallback) {
+        callback(env, jsCallback, &value);
+    });
+}
 
 auto txCallback = [](Napi::Env env, Napi::Function jsCallback, TxResult* result) {
     if(!result) {
@@ -265,27 +246,28 @@ void SendCANMsg(const Napi::CallbackInfo& info) {
         uint32_t index=info[4].As<Napi::Number>().Uint32Value();
         
         // 创建消息
-        TxMessage msg;
+        TxMessage msg{};
         msg.devHandle = info[0].As<Napi::Number>().Int32Value();
         msg.canIndex = info[1].As<Napi::Number>().Uint32Value();
         msg.isCanFd = info[2].As<Napi::Boolean>().Value();
         msg.cnt = info[4].As<Napi::Number>().Uint32Value();
 
         auto msgObj = info[5].As<Napi::Object>();
+        auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
+        if (dataBuffer.Length() > (msg.isCanFd ? sizeof(msg.canfdMsg.Data) : sizeof(msg.canMsg.Data))) {
+            throw Napi::RangeError::New(env, "CAN payload exceeds frame capacity");
+        }
         if (!msg.isCanFd) {
             msg.canMsg.ID = msgObj.Get("ID").As<Napi::Number>().Uint32Value();
             msg.canMsg.RemoteFlag = msgObj.Get("RemoteFlag").As<Napi::Number>().Uint32Value();
             msg.canMsg.ExternFlag = msgObj.Get("ExternFlag").As<Napi::Number>().Uint32Value();
-            msg.canMsg.DataLen = msgObj.Get("DataLen").As<Napi::Number>().Uint32Value();
-            
-            auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
+            msg.canMsg.DataLen = static_cast<uint8_t>(dataBuffer.Length());
             memcpy(msg.canMsg.Data, dataBuffer.Data(), msg.canMsg.DataLen);
         } else {
             msg.canfdMsg.ID = msgObj.Get("ID").As<Napi::Number>().Uint32Value();
-            msg.canfdMsg.DLC = msgObj.Get("DLC").As<Napi::Number>().Uint32Value();
+            msg.canfdMsg.DLC = static_cast<uint8_t>(dataBuffer.Length());
             msg.canfdMsg.Flags = msgObj.Get("Flags").As<Napi::Number>().Uint32Value();
             
-            auto dataBuffer = msgObj.Get("Data").As<Napi::Buffer<uint8_t>>();
             memcpy(msg.canfdMsg.Data, dataBuffer.Data(), dataBuffer.Length());
         }
 
@@ -305,14 +287,16 @@ void rxThreadEntry(TsfnContext *context) {
     
     while (!context->closed) {
         if(!context->isCanFd) {
-            ret = CAN_GetMsgWithSize(context->DevHandle, context->CanIndex, &context->canMsg, 1);
-            if(ret > 0 && ((context->canMsg.ExternFlag&0x80)==0)) {
-                context->tsfn.NonBlockingCall(&context->canMsg, callback);
+            CAN_MSG frame;
+            ret = CAN_GetMsgWithSize(context->DevHandle, context->CanIndex, &frame, 1);
+            if(ret > 0 && !(frame.ExternFlag & 0x80) && frame.DataLen <= sizeof(frame.Data)) {
+                queue_callback(context->tsfn, frame, callback);
             }
         } else {
-            ret = CANFD_GetMsg(context->DevHandle, context->CanIndex, &context->canfdMsg, 1);
-            if(ret > 0) {
-                context->tsfn.NonBlockingCall(&context->canfdMsg, callbackFd);
+            CANFD_MSG frame;
+            ret = CANFD_GetMsg(context->DevHandle, context->CanIndex, &frame, 1);
+            if(ret > 0 && frame.DLC <= sizeof(frame.Data)) {
+                queue_callback(context->tsfn, frame, callbackFd);
             }
         }
         std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -328,18 +312,16 @@ void errorThreadEntry(TsfnContext *context) {
             CAN_STATUS status;
             ret = CAN_GetStatus(context->DevHandle, context->CanIndex, &status);
             if(ret == 0) {
-                memcpy(&context->statusData.canStatus, &status, sizeof(CAN_STATUS));
                 if(status.ErrFlag != 0 || status.TECounter != 0 || status.RECounter != 0) {
-                    context->tserror.NonBlockingCall(context, statusCallback);
+                    queue_callback(context->tserror, status, statusCallback);
                 }
             }
         } else {
             CANFD_BUS_ERROR error;
             ret = CANFD_GetBusError(context->DevHandle, context->CanIndex, &error);
             if(ret == 0) {
-                memcpy(&context->statusData.canfdError, &error, sizeof(CANFD_BUS_ERROR));
                 if(error.Flags != 0 || error.REC != 0 || error.TEC != 0) {
-                    context->tserror.NonBlockingCall(context, statusCallback);
+                    queue_callback(context->tserror, error, fdStatusCallback);
                 }
             }
         }

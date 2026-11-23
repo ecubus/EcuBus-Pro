@@ -24,6 +24,10 @@ interface EcuBusPro {
   vendor: Record<string, string[]>
 }
 
+function getPlatformVendors(input: EcuBusPro) {
+  return input.vendor[`${platform}-${process.arch}`] ?? input.vendor[platform] ?? []
+}
+
 ipcMain.handle('ipc-get-version', async (event, arg) => {
   const input = arg as EcuBusPro
   const list: {
@@ -38,7 +42,7 @@ ipcMain.handle('ipc-get-version', async (event, arg) => {
     name: 'Chrome',
     version: process.versions.chrome
   })
-  const vendors = input.vendor[platform] || []
+  const vendors = getPlatformVendors(input)
   for (const vendor of vendors) {
     try {
       list.push({
@@ -77,7 +81,7 @@ ipcMain.on('ipc-open-um', (event, arg) => {
 
 ipcMain.handle('ipc-get-vendor', (event, arg) => {
   const input = arg as EcuBusPro
-  const vendors = input.vendor[platform] || []
+  const vendors = getPlatformVendors(input)
   return vendors.map((vendor) => {
     let linVersion = 'Not supported'
     try {

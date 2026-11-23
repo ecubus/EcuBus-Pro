@@ -8,6 +8,7 @@ import { useGlobalStart, useRuntimeStore } from './runtime'
 import { nextTick, h, ref } from 'vue'
 import i18next from 'i18next'
 import { panelStartValues, storeVariableValues } from '../views/uds/panel/free/variableStart'
+import { isRunnableScriptNode } from 'nodeCan/nodeEnable'
 
 export type { DataSet }
 
@@ -48,7 +49,7 @@ export const useDataStore = defineStore('useDataStore', {
           data: cloneDeep(this.database)
         })
         nextTick(() => {
-          const nodes = Object.values(this.nodes).filter((e) => !e.isTest)
+          const nodes = Object.values(this.nodes).filter((e) => isRunnableScriptNode(e))
 
           const checkScriptStatus = async () => {
             const needBuild: NodeItem[] = []

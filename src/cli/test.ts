@@ -1,3 +1,5 @@
+import { formatError } from 'nodeCan/can'
+import { isRunnableScriptNode } from 'nodeCan/nodeEnable'
 import { TesterInfo } from 'nodeCan/tester'
 import { exit } from 'process'
 import { UdsLOG } from 'src/main/log'
@@ -32,6 +34,10 @@ export default async function main(
     sysLog.error(`test config ${testName} script is required`)
     exit(-1)
   }
+  if (testItem.disabled) {
+    sysLog.error(`test config ${testName} is disabled`)
+    exit(-1)
+  }
   const status = await getBuild(projectPath, projectName, testItem.script)
   if (status != 'success') {
     forceBuild = true
@@ -53,293 +59,369 @@ export default async function main(
     }
   }
 
-  const node = new NodeClass(
-    testItem,
-
+  const scriptNodes = await startEnabledScriptNodes(
     projectPath,
     projectName,
-
-    {
-      testOnly: true,
-      id: testItem.id
-    }
-  )
-  node.init(
-    testItem,
+    data,
     canBaseMap,
     linBaseMap,
     doips,
     ethBaseMap,
     pwmBaseMap,
     someipMap,
-    serialBaseMap,
-    data.tester
+    serialBaseMap
   )
-  //surpress log this stage
-  node.log!.log.silent = true
-
-  await node.start({})
-  let testInfo: TestEvent[] | undefined = undefined
 
   try {
-    testInfo = await node.getTestInfo()
-  } catch (e) {
-    exit(-1)
-  }
-  if (!testInfo) {
-    exit(-1)
-  }
+    const node = new NodeClass(
+      testItem,
 
-  if (justShowTree) {
-    printTestTree(testInfo)
-    node.close()
-    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
-    return
-  }
-  node.close()
+      projectPath,
+      projectName,
 
-  const node1 = new NodeClass(testItem, projectPath, projectName, {
-    id: testItem.id
-  })
-  node1.init(
-    testItem,
-    canBaseMap,
-    linBaseMap,
-    doips,
-    ethBaseMap,
-    pwmBaseMap,
-    someipMap,
-    serialBaseMap,
-    data.tester
-  )
-  // Generate EnableObj and isSingleRun based on pattern (matching test.vue logic)
-  const EnableObj: Record<number, boolean> = {}
-  let isSingleRun: string[] | undefined = undefined
+      {
+        testOnly: true,
+        id: testItem.id
+      }
+    )
+    node.init(
+      testItem,
+      canBaseMap,
+      linBaseMap,
+      doips,
+      ethBaseMap,
+      pwmBaseMap,
+      someipMap,
+      serialBaseMap,
+      data.tester
+    )
+    //surpress log this stage
+    node.log!.log.silent = true
 
-  //filter
-  const filter = format((info: any, opts: any) => {
-    // Skip internal test markers
-    if ((info.message.data?.data as any)?.name === '____ecubus_pro_test___') {
-      return false
+    await node.start({})
+    let testInfo: TestEvent[] | undefined = undefined
+
+    try {
+      testInfo = await node.getTestInfo()
+    } catch (e) {
+      closeScriptNodes(scriptNodes)
+      exit(-1)
+    }
+    if (!testInfo) {
+      closeScriptNodes(scriptNodes)
+      exit(-1)
     }
 
-    // Handle different test event types like testLog function
-    if (
-      info.message.data.type === 'test:dequeue' ||
-      info.message.data.type === 'test:pass' ||
-      info.message.data.type === 'test:fail'
-    ) {
-      if (isSingleRun) {
-        const key =
-          info.message.data.data.name +
-          ':' +
-          info.message.data.data.line +
-          ':' +
-          info.message.data.data.column
+    if (justShowTree) {
+      printTestTree(testInfo)
+      node.close()
+      closeScriptNodes(scriptNodes)
+      await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
+      return
+    }
+    node.close()
 
-        if (isSingleRun.includes(key)) {
-          return info
-        }
+    const node1 = new NodeClass(testItem, projectPath, projectName, {
+      id: testItem.id
+    })
+    node1.init(
+      testItem,
+      canBaseMap,
+      linBaseMap,
+      doips,
+      ethBaseMap,
+      pwmBaseMap,
+      someipMap,
+      serialBaseMap,
+      data.tester
+    )
+    // Generate EnableObj and isSingleRun based on pattern (matching test.vue logic)
+    const EnableObj: Record<number, boolean> = {}
+    let isSingleRun: string[] | undefined = undefined
+
+    //filter
+    const filter = format((info: any, opts: any) => {
+      // Skip internal test markers
+      if ((info.message.data?.data as any)?.name === '____ecubus_pro_test___') {
         return false
       }
-    }
 
-    return info
-  })
+      // Handle different test event types like testLog function
+      if (
+        info.message.data.type === 'test:dequeue' ||
+        info.message.data.type === 'test:pass' ||
+        info.message.data.type === 'test:fail'
+      ) {
+        if (isSingleRun) {
+          const key =
+            info.message.data.data.name +
+            ':' +
+            info.message.data.data.line +
+            ':' +
+            info.message.data.data.column
 
-  node1.log!.log.format = format.combine(filter(), node1.log!.log.format)
-  if (testInfo && testInfo.length > 0) {
-    // Build test tree structure similar to test.vue
-    const filteredTestInfo = testInfo.filter(
-      (item: any) =>
-        typeof item === 'object' && item.data && item.data.name !== '____ecubus_pro_test___'
-    ) as TestEvent[]
+          if (isSingleRun.includes(key)) {
+            return info
+          }
+          return false
+        }
+      }
 
-    const roots = buildSubTree(filteredTestInfo)
+      return info
+    })
 
-    // Create tree structure with testCnt like in test.vue
-    interface TestTreeWithCnt extends TestTreeNode {
-      testCnt?: number
-    }
+    node1.log!.log.format = format.combine(filter(), node1.log!.log.format)
+    if (testInfo && testInfo.length > 0) {
+      // Build test tree structure similar to test.vue
+      const filteredTestInfo = testInfo.filter(
+        (item: any) =>
+          typeof item === 'object' && item.data && item.data.name !== '____ecubus_pro_test___'
+      ) as TestEvent[]
 
-    const root2tree = (cnt: number, parent: TestTreeWithCnt, root: TestTreeNode): number => {
-      const newNode: TestTreeWithCnt = {
-        testCnt: cnt,
-        id: root.id,
-        type: 'test',
-        label: root.label,
+      const roots = buildSubTree(filteredTestInfo)
+
+      // Create tree structure with testCnt like in test.vue
+      interface TestTreeWithCnt extends TestTreeNode {
+        testCnt?: number
+      }
+
+      const root2tree = (cnt: number, parent: TestTreeWithCnt, root: TestTreeNode): number => {
+        const newNode: TestTreeWithCnt = {
+          testCnt: cnt,
+          id: root.id,
+          type: 'test',
+          label: root.label,
+          children: []
+        }
+        cnt++
+        parent.children.push(newNode)
+
+        if (root.children && root.children.length > 0) {
+          for (const child of root.children) {
+            cnt = root2tree(cnt, newNode, child)
+          }
+        }
+        return cnt
+      }
+
+      // Build tree with test counts
+      const configNode: TestTreeWithCnt = {
+        id: testItem.id,
+        type: 'config',
+        label: testItem.name,
         children: []
       }
-      cnt++
-      parent.children.push(newNode)
 
-      if (root.children && root.children.length > 0) {
-        for (const child of root.children) {
-          cnt = root2tree(cnt, newNode, child)
-        }
+      let cnt = 0
+      for (const root of roots) {
+        cnt = root2tree(cnt, configNode, root)
       }
-      return cnt
-    }
 
-    // Build tree with test counts
-    const configNode: TestTreeWithCnt = {
-      id: testItem.id,
-      type: 'config',
-      label: testItem.name,
-      children: []
-    }
-
-    let cnt = 0
-    for (const root of roots) {
-      cnt = root2tree(cnt, configNode, root)
-    }
-
-    // Build parent references for tree navigation
-    const buildParentReferences = (node: TestTreeWithCnt, parent?: TestTreeWithCnt) => {
-      if (parent) {
-        ;(node as any).parent = parent
-      }
-      if (node.children) {
-        for (const child of node.children) {
-          buildParentReferences(child as TestTreeWithCnt, node)
-        }
-      }
-    }
-
-    // Build parent references for the entire tree
-    buildParentReferences(configNode)
-
-    // Implement getChildren function from test.vue
-    const getChildren = (val: TestTreeWithCnt, ids?: string[]) => {
-      const cntArray: number[] = []
-      for (const item of val.children) {
-        const childWithCnt = item as TestTreeWithCnt
-        if (childWithCnt.testCnt !== undefined) {
-          cntArray.push(childWithCnt.testCnt)
-          if (ids) {
-            ids.push(childWithCnt.id)
-          }
-        }
-        if (childWithCnt.children) {
-          const childCnts = getChildren(childWithCnt, ids)
-          cntArray.push(...childCnts)
-        }
-      }
-      return cntArray
-    }
-
-    // Find a node by id in the tree
-    const findNodeById = (tree: TestTreeWithCnt, id: string): TestTreeWithCnt | null => {
-      if (tree.id === id) {
-        return tree
-      }
-      if (tree.children) {
-        for (const child of tree.children) {
-          const found = findNodeById(child as TestTreeWithCnt, id)
-          if (found) {
-            return found
-          }
-        }
-      }
-      return null
-    }
-
-    // Implement getParent function similar to Vue component
-    const getParent = (node: TestTreeWithCnt, cntArray: number[]) => {
-      const parent = (node as any).parent as TestTreeWithCnt
-      if (parent && parent.type === 'test') {
-        if (parent.testCnt !== undefined) {
-          cntArray.push(parent.testCnt)
-        }
-        getParent(parent, cntArray)
-      }
-    }
-
-    // Logic similar to handleRun in test.vue
-    if (pattern) {
-      // Single run mode - find specific test by pattern
-      isSingleRun = []
-      const collectTestCnts: number[] = []
-
-      // Find test nodes that match the pattern (simplified - just collect IDs)
-      const findMatchingTests = (node: TestTreeWithCnt) => {
-        if (node.type === 'test') {
-          try {
-            const regex = new RegExp(pattern)
-            if (regex.test(node.label)) {
-              isSingleRun!.push(node.id)
-            }
-          } catch (e) {
-            // If pattern is not a valid regex, treat it as a simple string match
-            if (node.label.includes(pattern)) {
-              isSingleRun!.push(node.id)
-            }
-          }
+      // Build parent references for tree navigation
+      const buildParentReferences = (node: TestTreeWithCnt, parent?: TestTreeWithCnt) => {
+        if (parent) {
+          ;(node as any).parent = parent
         }
         if (node.children) {
           for (const child of node.children) {
-            findMatchingTests(child as TestTreeWithCnt)
+            buildParentReferences(child as TestTreeWithCnt, node)
           }
         }
       }
 
-      findMatchingTests(configNode)
+      // Build parent references for the entire tree
+      buildParentReferences(configNode)
 
-      // For each found test, also add its parents to EnableObj (like Vue component)
-      for (const testId of isSingleRun) {
-        const node = findNodeById(configNode, testId)
-        if (node) {
-          // Add the test itself if it has a testCnt
-          if (node.testCnt !== undefined) {
-            collectTestCnts.push(node.testCnt)
+      // Implement getChildren function from test.vue
+      const getChildren = (val: TestTreeWithCnt, ids?: string[]) => {
+        const cntArray: number[] = []
+        for (const item of val.children) {
+          const childWithCnt = item as TestTreeWithCnt
+          if (childWithCnt.testCnt !== undefined) {
+            cntArray.push(childWithCnt.testCnt)
+            if (ids) {
+              ids.push(childWithCnt.id)
+            }
           }
-          // Add all children
-          const childCnts = getChildren(node)
-          collectTestCnts.push(...childCnts)
+          if (childWithCnt.children) {
+            const childCnts = getChildren(childWithCnt, ids)
+            cntArray.push(...childCnts)
+          }
+        }
+        return cntArray
+      }
 
-          // Add all parents (this was missing!)
-          const parentCnts: number[] = []
-          getParent(node, parentCnts)
-          collectTestCnts.push(...parentCnts)
+      // Find a node by id in the tree
+      const findNodeById = (tree: TestTreeWithCnt, id: string): TestTreeWithCnt | null => {
+        if (tree.id === id) {
+          return tree
+        }
+        if (tree.children) {
+          for (const child of tree.children) {
+            const found = findNodeById(child as TestTreeWithCnt, id)
+            if (found) {
+              return found
+            }
+          }
+        }
+        return null
+      }
+
+      // Implement getParent function similar to Vue component
+      const getParent = (node: TestTreeWithCnt, cntArray: number[]) => {
+        const parent = (node as any).parent as TestTreeWithCnt
+        if (parent && parent.type === 'test') {
+          if (parent.testCnt !== undefined) {
+            cntArray.push(parent.testCnt)
+          }
+          getParent(parent, cntArray)
         }
       }
 
-      // Remove duplicates and generate EnableObj from collected test counts
-      const uniqueTestCnts = [...new Set(collectTestCnts)]
-      for (const testCnt of uniqueTestCnts) {
-        EnableObj[testCnt] = true
-      }
-    } else {
-      // Run all tests (config mode)
-      isSingleRun = undefined
-      const allCnts = getChildren(configNode)
+      // Logic similar to handleRun in test.vue
+      if (pattern) {
+        // Single run mode - find specific test by pattern
+        isSingleRun = []
+        const collectTestCnts: number[] = []
 
-      for (const testCnt of allCnts) {
-        EnableObj[testCnt] = true
+        // Find test nodes that match the pattern (simplified - just collect IDs)
+        const findMatchingTests = (node: TestTreeWithCnt) => {
+          if (node.type === 'test') {
+            try {
+              const regex = new RegExp(pattern)
+              if (regex.test(node.label)) {
+                isSingleRun!.push(node.id)
+              }
+            } catch (e) {
+              // If pattern is not a valid regex, treat it as a simple string match
+              if (node.label.includes(pattern)) {
+                isSingleRun!.push(node.id)
+              }
+            }
+          }
+          if (node.children) {
+            for (const child of node.children) {
+              findMatchingTests(child as TestTreeWithCnt)
+            }
+          }
+        }
+
+        findMatchingTests(configNode)
+
+        // For each found test, also add its parents to EnableObj (like Vue component)
+        for (const testId of isSingleRun) {
+          const node = findNodeById(configNode, testId)
+          if (node) {
+            // Add the test itself if it has a testCnt
+            if (node.testCnt !== undefined) {
+              collectTestCnts.push(node.testCnt)
+            }
+            // Add all children
+            const childCnts = getChildren(node)
+            collectTestCnts.push(...childCnts)
+
+            // Add all parents (this was missing!)
+            const parentCnts: number[] = []
+            getParent(node, parentCnts)
+            collectTestCnts.push(...parentCnts)
+          }
+        }
+
+        // Remove duplicates and generate EnableObj from collected test counts
+        const uniqueTestCnts = [...new Set(collectTestCnts)]
+        for (const testCnt of uniqueTestCnts) {
+          EnableObj[testCnt] = true
+        }
+      } else {
+        // Run all tests (config mode)
+        isSingleRun = undefined
+        const allCnts = getChildren(configNode)
+
+        for (const testCnt of allCnts) {
+          EnableObj[testCnt] = true
+        }
       }
     }
+
+    await node1.start(EnableObj)
+    const finalTestInfo = await node1.getTestInfo()
+
+    // 统计测试结果
+    const testSummary = analyzeTestResults(finalTestInfo, isSingleRun)
+    printTestSummary(testSummary)
+
+    if (reportPath) {
+      const html = await node1.generateHtml(reportPath, true)
+      reportPath = path.join(process.cwd(), reportPath)
+      await fsP.writeFile(reportPath, html)
+      sysLog.info(`test report saved to ${reportPath}`)
+    }
+    node1.close()
+    closeScriptNodes(scriptNodes)
+
+    await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
+
+    if (testSummary.failed > 0) {
+      exit(-1)
+    }
+  } finally {
+    closeScriptNodes(scriptNodes)
   }
+}
 
-  await node1.start(EnableObj)
-  const finalTestInfo = await node1.getTestInfo()
-
-  // 统计测试结果
-  const testSummary = analyzeTestResults(finalTestInfo, isSingleRun)
-  printTestSummary(testSummary)
-
-  if (reportPath) {
-    const html = await node1.generateHtml(reportPath, true)
-    reportPath = path.join(process.cwd(), reportPath)
-    await fsP.writeFile(reportPath, html)
-    sysLog.info(`test report saved to ${reportPath}`)
+function closeScriptNodes(nodes: NodeClass[]) {
+  while (nodes.length) {
+    const node = nodes.pop()
+    try {
+      node?.close()
+    } catch (err: any) {
+      sysLog.error(formatError(err))
+    }
   }
-  node1.close()
+}
 
-  await closeDevice(canBaseMap, linBaseMap, ethBaseMap, pwmBaseMap, serialBaseMap, someipMap)
-
-  if (testSummary.failed > 0) {
-    exit(-1)
+async function startEnabledScriptNodes(
+  projectPath: string,
+  projectName: string,
+  data: DataSet,
+  canBaseMap: Awaited<ReturnType<typeof deviceMain>>['canBaseMap'],
+  linBaseMap: Awaited<ReturnType<typeof deviceMain>>['linBaseMap'],
+  doips: DOIP[],
+  ethBaseMap: Awaited<ReturnType<typeof deviceMain>>['ethBaseMap'],
+  pwmBaseMap: Awaited<ReturnType<typeof deviceMain>>['pwmBaseMap'],
+  someipMap: Awaited<ReturnType<typeof deviceMain>>['someipMap'],
+  serialBaseMap: Awaited<ReturnType<typeof deviceMain>>['serialBaseMap']
+) {
+  const started: NodeClass[] = []
+  for (const node of Object.values(data.nodes)) {
+    if (!isRunnableScriptNode(node)) {
+      if (!node.isTest && node.disabled) {
+        sysLog.info(`skip disabled node ${node.name}`)
+      }
+      continue
+    }
+    const scriptNode = new NodeClass(node, projectPath, projectName)
+    scriptNode.init(
+      node,
+      canBaseMap,
+      linBaseMap,
+      doips,
+      ethBaseMap,
+      pwmBaseMap,
+      someipMap,
+      serialBaseMap,
+      data.tester
+    )
+    try {
+      await scriptNode.start()
+      started.push(scriptNode)
+      sysLog.info(`start node ${node.name}`)
+    } catch (err: any) {
+      scriptNode.log?.systemMsg(formatError(err), 0, 'error')
+      scriptNode.close()
+    }
   }
+  return started
 }
 
 // Tree structure interface (similar to TestTree in Vue component)

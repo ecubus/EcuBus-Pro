@@ -67,6 +67,7 @@ import { TpError as LinTpError } from '../dolin/lintp'
 
 import { linkRawHexToSignals, writePeriodRowEncode } from 'src/renderer/src/database/dbc/calc'
 import { NodeClass } from '../nodeItem'
+import { isRunnableScriptNode } from '../share/nodeEnable'
 import { getJsPath, onCanSignalChanged } from '../util'
 import UdsTester from '../workerClient'
 import { serviceDetail } from '../uds/service'
@@ -694,7 +695,7 @@ async function globalStart(
   for (const key in data.nodes) {
     signal.throwIfAborted()
     const node = data.nodes[key]
-    if (node.isTest) {
+    if (!isRunnableScriptNode(node)) {
       continue
     }
     const nodeItem = new NodeClass(node, projectInfo.path, projectInfo.name)

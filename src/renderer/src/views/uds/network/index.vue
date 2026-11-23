@@ -97,6 +97,7 @@ import {
   udsHardware,
   Node as UdsNode,
   Replay as UdsReplay,
+  getCeilInstance,
   getCeilInstanceAs
 } from './udsView'
 import { useGlobalStart } from '@r/stores/runtime'
@@ -1059,6 +1060,7 @@ watchEffect(() => {
       if (dataBase.nodes[key].isTest) {
         udsView.changeName(key, dataBase.nodes[key].name)
       }
+      getCeilInstance(key)?.setEnable(!dataBase.nodes[key].disabled)
     }
     //check link
     for (const from of Object.keys(dataBase.ia)) {

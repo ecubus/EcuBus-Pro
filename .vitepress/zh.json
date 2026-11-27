@@ -200,11 +200,11 @@
           "link": "can/readme.md"
         },
         {
-          "text": "CAN 高精度定时器",
+          "text": "CAN High-Precision Timer",
           "link": "can_timer/readme.md"
         },
         {
-          "text": "NXP UDS 引导加载程序",
+          "text": "NXP UDS Bootloader",
           "link": "nxp_bootloader/readme.md"
         }
       ],

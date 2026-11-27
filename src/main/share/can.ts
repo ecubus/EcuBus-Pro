@@ -23,6 +23,13 @@ export type CanVendor =
   | 'slcan'
   | 'ecubus'
   | 'candle'
+  | 'renode'
+
+export const RENODE_DEFAULT_HOST = '127.0.0.1'
+export const RENODE_DEFAULT_PORT = 1234
+export const RENODE_DEFAULT_MACHINE = 'machine-0'
+export const RENODE_DEFAULT_BUS = 'sysbus.can_external'
+
 export interface CanBaseInfo {
   id: string
   handle: any
@@ -37,6 +44,14 @@ export interface CanBaseInfo {
   zlgRes?: boolean
   candleRes?: boolean
   slcanDelay?: number
+  /** Renode External Control server host. Default 127.0.0.1. */
+  renodeHost?: string
+  /** Renode External Control TCP port. Default 1234. */
+  renodePort?: number
+  /** Renode machine name, for example machine-0. */
+  renodeMachine?: string
+  /** CANExternalControlBus path, for example sysbus.can_external. */
+  renodeBus?: string
 }
 
 export interface SignalDefine {

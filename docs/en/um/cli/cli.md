@@ -100,7 +100,3 @@ ecb_cli test <project> <name> [options]
 #### Example (test)
 
 ![alt text](../../../media/um/cli/test.gif)
-
-### Simulate CAN (PC MCAL)
-
-When `ecb_cli test` opens a project **Simulate CAN** device, or `ecb_cli seq` runs on a tester whose CAN device is Simulate, EcuBus listens for JSON-RPC so a PC `Can.c` can join the virtual bus. See [Simulate CAN](../can/simulate.md).

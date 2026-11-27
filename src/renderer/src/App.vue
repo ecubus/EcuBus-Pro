@@ -34,6 +34,10 @@ const pluginStore = usePluginStore()
 const { width, height } = useWindowSize()
 const globalStart = useGlobalStart()
 const isDark = useDark()
+const savedGeneralSettings = window.store?.get('general.settings') as { dark?: boolean } | undefined
+if (typeof savedGeneralSettings?.dark === 'boolean') {
+  isDark.value = savedGeneralSettings.dark
+}
 const params = ref<any>({})
 
 let isExternalUpdate = false

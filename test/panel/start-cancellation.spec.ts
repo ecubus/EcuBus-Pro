@@ -80,7 +80,7 @@ it.each([
     formatError: String,
     getTsUs: () => 0,
     startTs: 0,
-    setProjectSimulateCount: vi.fn(async () => {}),
+    isRunnableScriptNode: () => true,
     monitorEventLoopDelay: vi.fn(() => ({ enable: vi.fn() })),
     setInterval: vi.fn(),
     clearTimeout: vi.fn(),
@@ -159,7 +159,6 @@ it.each([
   release()
   await new Promise((resolve) => setImmediate(resolve))
   expect(context.openCanDevice).not.toHaveBeenCalled()
-  expect(context.setProjectSimulateCount.mock.calls).toEqual([[0]])
   expect(context.monitorEventLoopDelay).not.toHaveBeenCalled()
   expect(context.setInterval).not.toHaveBeenCalled()
   expect(context.serialBaseMap.size).toBe(0)

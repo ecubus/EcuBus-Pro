@@ -16,6 +16,21 @@ Supported Hardware:
 | Toomoss | CAN, CAN-FD |
 | VECTOR | CAN, CAN-FD |
 | SLCAN | CAN, CAN-FD |
+| Renode | CAN, CAN-FD — External Control client for a Renode CANHub |
+
+## Renode
+
+The Renode device is a TCP client for Renode 1.17 or newer. It joins a `CANHub` through `CANExternalControlBus`.
+
+Defaults are host `127.0.0.1`, port `1234`, machine `machine-0`, and bus `sysbus.can_external`. Bitrate is ignored; the simulated controllers own the timing. One channel sees every controller on that hub, so `can0` and `can1` on the same hub share it. An id above `0x7FF` is an extended frame. A payload longer than 8 bytes is CAN FD. Classical CAN controllers drop frames longer than 8 bytes. The API has no remote-frame bit, so only data frames are sent.
+
+The board script has to publish the hub before EcuBus connects:
+
+```
+can_external: CAN.CANExternalControlBus @ sysbus
+emulation CreateExternalControlServer "server" 1234
+connector Connect sysbus.can_external canHub
+```
 
 ## SLCAN Special
 

@@ -10,15 +10,64 @@ import { initialize as initAnalytics, trackEvent } from './analytics'
 import { createLogs } from './log'
 import './update'
 import { globalStop } from './ipc/uds'
-import { startRpcHost } from './rpcHost'
 import Transport from 'winston-transport'
 import { initMainI18n } from './i18n'
-import { setupCasdoor } from './ipc/casdoor'
+import { handleIncomingProtocolUrl, setupCasdoor } from './ipc/casdoor'
+import {
+  createInstanceSession,
+  extractProtocolUrl,
+  forwardProtocolUrl,
+  listLiveInstances,
+  type InstanceSession
+} from './multiInstance'
 import 'src/renderer/src/helper'
 
 import { closeAllWindows, closeWindow, logQ, maximizeWindow, minimizeWindow } from './multiWin'
-initAnalytics('A-EU-6409047217')
-log.initialize()
+
+const userDataDir = app.getPath('userData')
+const initialProtocolUrl = extractProtocolUrl(process.argv)
+let instanceSession: InstanceSession | undefined
+let runtimeInitialized = false
+
+function initializeRuntimeInstance(): void {
+  if (runtimeInitialized) return
+  runtimeInitialized = true
+
+  instanceSession = createInstanceSession(userDataDir, (req) =>
+    handleIncomingProtocolUrl(req.url, req.matchStateOnly)
+  )
+
+  if (instanceSession.sessionDataPath) {
+    if (!app.isReady()) {
+      app.setPath('sessionData', instanceSession.sessionDataPath)
+    }
+    log.transports.file.fileName = `main-inst-${instanceSession.record.slot}.log`
+  }
+
+  app.once('will-quit', () => {
+    instanceSession?.dispose()
+  })
+  process.once('exit', () => {
+    instanceSession?.dispose()
+  })
+
+  initAnalytics('A-EU-6409047217')
+  log.initialize()
+  setupCasdoor(userDataDir)
+  log.info(
+    `Instance started (pid=${instanceSession.record.pid}, slot=${instanceSession.record.slot})`
+  )
+  log.info(app.getGPUFeatureStatus())
+}
+
+const protocolForwardPromise =
+  initialProtocolUrl && listLiveInstances(userDataDir).length > 0
+    ? forwardProtocolUrl(userDataDir, initialProtocolUrl)
+    : undefined
+
+if (!protocolForwardPromise) {
+  initializeRuntimeInstance()
+}
 
 // Track app exit once (user closes window / app quits).
 let exitTracked = false
@@ -48,10 +97,6 @@ eProtocol.registerSchemesAsPrivileged([
     }
   }
 ])
-
-setupCasdoor()
-
-log.info(app.getGPUFeatureStatus())
 
 function registerLocalResourceProtocol() {
   eProtocol.handle('local-resource', (request) => {
@@ -194,6 +239,15 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  if (protocolForwardPromise) {
+    const forwarded = await protocolForwardPromise
+    if (forwarded) {
+      app.exit(0)
+      return
+    }
+    initializeRuntimeInstance()
+  }
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -217,7 +271,11 @@ app.whenReady().then(async () => {
 
   createWindow()
 
-  void startRpcHost()
+  if (initialProtocolUrl && global.mainWindow) {
+    global.mainWindow.webContents.once('did-finish-load', () => {
+      handleIncomingProtocolUrl(initialProtocolUrl, false)
+    })
+  }
 
   trackEvent('app_open')
 

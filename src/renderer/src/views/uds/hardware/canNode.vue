@@ -58,32 +58,80 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="props.vendor == 'simulate'"
-      :label="i18next.t('uds.hardware.canNode.labels.mcalControllerId')"
+      v-if="props.vendor == 'renode'"
+      :label="i18next.t('uds.hardware.canNode.labels.renodeHost')"
+      prop="renodeHost"
     >
-      <span class="vm" style="display: flex; align-items: center; gap: 8px">
-        <span>{{ data.handle }}</span>
-        <el-tooltip>
-          <template #content>
-            {{ i18next.t('uds.hardware.canNode.tooltips.simulateRpc') }}
-          </template>
-          <el-icon>
-            <InfoFilled />
-          </el-icon>
-        </el-tooltip>
-        <el-tag v-if="rpcTag === 'listening'" type="success" size="small">
-          {{ i18next.t('uds.hardware.canNode.messages.rpcListening') }}
-        </el-tag>
-        <el-tag v-else-if="rpcTag === 'error'" type="danger" size="small">
-          {{ i18next.t('uds.hardware.canNode.messages.rpcError') }}
-        </el-tag>
-        <el-tag v-else-if="rpcTag === 'disabled'" type="info" size="small">
-          {{ i18next.t('uds.hardware.canNode.messages.rpcDisabled') }}
-        </el-tag>
-        <el-tag v-else type="info" size="small">
-          {{ i18next.t('uds.hardware.canNode.messages.rpcIdle') }}
-        </el-tag>
-      </span>
+      <template #label="{ label }">
+        <span class="vm">
+          <span>{{ label }}</span>
+          <el-tooltip
+            :content="i18next.t('uds.hardware.canNode.tooltips.renodeHost')"
+            placement="bottom"
+            effect="light"
+          >
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-input v-model="data.renodeHost" style="width: 300px" />
+    </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'renode'"
+      :label="i18next.t('uds.hardware.canNode.labels.renodePort')"
+      prop="renodePort"
+    >
+      <template #label="{ label }">
+        <span class="vm">
+          <span>{{ label }}</span>
+          <el-tooltip
+            :content="i18next.t('uds.hardware.canNode.tooltips.renodePort')"
+            placement="bottom"
+            effect="light"
+          >
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-input-number v-model="data.renodePort" :min="1" :max="65535" :step="1" />
+    </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'renode'"
+      :label="i18next.t('uds.hardware.canNode.labels.renodeMachine')"
+      prop="renodeMachine"
+    >
+      <template #label="{ label }">
+        <span class="vm">
+          <span>{{ label }}</span>
+          <el-tooltip
+            :content="i18next.t('uds.hardware.canNode.tooltips.renodeMachine')"
+            placement="bottom"
+            effect="light"
+          >
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-input v-model="data.renodeMachine" style="width: 300px" />
+    </el-form-item>
+    <el-form-item
+      v-if="props.vendor == 'renode'"
+      :label="i18next.t('uds.hardware.canNode.labels.renodeBus')"
+      prop="renodeBus"
+    >
+      <template #label="{ label }">
+        <span class="vm">
+          <span>{{ label }}</span>
+          <el-tooltip
+            :content="i18next.t('uds.hardware.canNode.tooltips.renodeBus')"
+            placement="bottom"
+            effect="light"
+          >
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </span>
+      </template>
+      <el-input v-model="data.renodeBus" style="width: 300px" />
     </el-form-item>
     <el-form-item
       v-if="props.vendor == 'toomoss'"
@@ -306,9 +354,18 @@ import {
   watch
 } from 'vue'
 import { v4 } from 'uuid'
-import { CanVendor, CanBaseInfo, CanDevice, CanBitrate } from 'nodeCan/can'
+import {
+  CanVendor,
+  CanBaseInfo,
+  CanDevice,
+  CanBitrate,
+  RENODE_DEFAULT_BUS,
+  RENODE_DEFAULT_HOST,
+  RENODE_DEFAULT_MACHINE,
+  RENODE_DEFAULT_PORT
+} from 'nodeCan/can'
 import { type FormRules, type FormInstance, ElMessageBox } from 'element-plus'
-import { InfoFilled } from '@element-plus/icons-vue'
+import { InfoFilled, QuestionFilled } from '@element-plus/icons-vue'
 import { assign, cloneDeep } from 'lodash'
 import { useDataStore } from '@r/stores/data'
 import { VxeGridProps, VxeGrid } from 'vxe-table'
@@ -328,33 +385,6 @@ const ruleFormRef = ref<FormInstance>()
 
 const devices = useDataStore()
 const globalStart = useGlobalStart()
-type SimulateRpcTag = 'listening' | 'idle' | 'disabled' | 'error'
-const rpcTag = ref<SimulateRpcTag>('idle')
-let rpcStatusTimer: ReturnType<typeof setInterval> | undefined
-
-async function refreshSimulateRpcTag() {
-  if (props.vendor !== 'simulate') {
-    return
-  }
-  try {
-    const status = (await window.electron.ipcRenderer.invoke('ipc-rpc-status')) as {
-      enabled: boolean
-      listening: boolean
-      error?: string
-    }
-    if (!status.enabled) {
-      rpcTag.value = 'disabled'
-    } else if (status.error) {
-      rpcTag.value = 'error'
-    } else if (status.listening) {
-      rpcTag.value = 'listening'
-    } else {
-      rpcTag.value = 'idle'
-    }
-  } catch {
-    rpcTag.value = 'idle'
-  }
-}
 
 const data = ref<CanBaseInfo>({
   id: '',
@@ -764,6 +794,17 @@ const configInfo: Record<CanVendor, any> = {
         max: 256
       }
     }
+  },
+  renode: {
+    clock: false,
+    timeSeg1: false,
+    timeSeg2: false,
+    sjw: false,
+    preScaler: false,
+    freq: true,
+    zlgSpec: false,
+    can: {},
+    canFd: {}
   }
 }
 
@@ -1026,7 +1067,7 @@ function getBaudrateSP(speed: CanBitrate, index: number) {
     const sample_point = (nom_tseg1 + 1) / (nom_tseg1 + nom_tseg2 + 1)
     const baudrate = f_clock / (nom_brp * (nom_tseg1 + nom_tseg2 + 1))
     return `${(baudrate / 1000).toFixed(0)}K / ${(sample_point * 100).toFixed(2)}%`
-  } else if (props.vendor == 'simulate') {
+  } else if (props.vendor == 'simulate' || props.vendor == 'renode') {
     return `${speed.freq / 1000}K/ ${i18next.t('uds.hardware.canNode.messages.dontCare')}`
   } else if (props.vendor == 'zlg') {
     if (data.value.bitrate.zlgSpec) {
@@ -1454,6 +1495,12 @@ onBeforeMount(() => {
       editIndex.value = ''
     }
   }
+  if (props.vendor === 'renode') {
+    data.value.renodeHost ??= RENODE_DEFAULT_HOST
+    data.value.renodePort ??= RENODE_DEFAULT_PORT
+    data.value.renodeMachine ??= RENODE_DEFAULT_MACHINE
+    data.value.renodeBus ??= RENODE_DEFAULT_BUS
+  }
 })
 onMounted(() => {
   // Defer watcher to next tick so VXE-Table's _X_ROW_KEY injection
@@ -1467,21 +1514,9 @@ onMounted(() => {
       { deep: true }
     )
   })
-  if (props.vendor === 'simulate') {
-    void refreshSimulateRpcTag()
-    rpcStatusTimer = setInterval(() => {
-      void refreshSimulateRpcTag()
-    }, 1000)
-  }
-})
-watch(globalStart, () => {
-  void refreshSimulateRpcTag()
 })
 onUnmounted(() => {
   watcher?.()
-  if (rpcStatusTimer) {
-    clearInterval(rpcStatusTimer)
-  }
 })
 
 const showCalculator = (row: CanBitrate) => {
@@ -1554,6 +1589,13 @@ defineExpose({ save })
   display: flex;
   align-items: center;
   /* 垂直居中对齐 */
+}
+
+.question-icon {
+  margin-left: 4px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  cursor: help;
 }
 </style>
 <style>

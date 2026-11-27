@@ -25,10 +25,6 @@ for (let i = 0; i < vBusCount; i++) {
 
 const busInitStatus = new Array(vBusCount).fill(false)
 
-export function isSimulateHandleOpen(handle: number): boolean {
-  return handle >= 0 && handle < vBusCount && busInitStatus[handle] === true
-}
-
 export function getOpenSimulateHandles(): number[] {
   const open: number[] = []
   for (let i = 0; i < vBusCount; i++) {
@@ -57,8 +53,6 @@ export class SIMULATE_CAN extends CanBase {
   busCb: any
   startTime = getTsUs()
   private readAbort = new AbortController()
-  /** When true, frames are not written to EcuBus trace (RPC-owned virtual ECUs). */
-  private hideTrace = false
 
   rejectBaseMap = new Map<
     number,
@@ -69,32 +63,24 @@ export class SIMULATE_CAN extends CanBase {
   >()
 
   rejectMap = new Map<number, Function>()
-  constructor(info: CanBaseInfo, options?: { hideTrace?: boolean }) {
+  constructor(info: CanBaseInfo) {
     super()
     if (busInitStatus[info.handle]) {
       throw new Error('BUS ALREADY INIT')
     }
     busInitStatus[info.handle] = true
     this.info = info
-    this.hideTrace = !!options?.hideTrace
     this.event = vBusCountEvent[info.handle]
     this.log = new CanLOG('SIMULATE', info.name, this.info.id, this.event)
     this.busCb = this.busCbFunction.bind(this)
     this.event.on('bus', this.busCb)
     this.attachCanMessage(this.busloadCb)
   }
-  private emitTrace(msg: CanMessage) {
-    if (this.hideTrace) {
-      this.event.emit('can-frame', msg)
-      return
-    }
-    this.log.canBase(msg)
-  }
   busCbFunction(val: CanMessage) {
     //rxNotify
     val.dir = 'IN'
     val.database = this.info.database
-    this.emitTrace(val)
+    this.log.canBase(val)
     val.ts = getTsUs() - this.startTime
     const cmdId = this.getReadBaseId(val.id, val.msgType)
     this.event.emit(cmdId, val)
@@ -194,7 +180,7 @@ export class SIMULATE_CAN extends CanBase {
         setImmediate(() => {
           const us = getTsUs() - this.startTime
           msg.ts = us
-          this.emitTrace(msg)
+          this.log.canBase(msg)
           //txNotify emit/ trigger internal
           const tmpId = this.getReadBaseId(id, msgType)
           this.event.emit(tmpId, msg)

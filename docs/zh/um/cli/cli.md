@@ -87,7 +87,3 @@ ecb_cli test <project> <name> [options]
 #### 示例（test）
 
 ![alt text](../../../media/um/cli/test.gif)
-
-### 模拟 CAN（PC MCAL）
-
-当 `ecb_cli test` 打开一个 **模拟 CAN** 设备的项目，或者 `ecb_cli seq` 在 CAN 设备为模拟的测试仪上运行时，EcuBus 会监听 JSON-RPC，以便 PC 上的 `Can.c` 可以加入虚拟总线。参见 [模拟 CAN](../can/simulate.md)。

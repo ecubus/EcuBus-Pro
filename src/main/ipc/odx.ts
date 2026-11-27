@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { getPythonPath } from '../python'
 import { execBinary } from '../util'
+import { randomUUID } from 'crypto'
 import fsP from 'fs/promises'
 import path from 'path'
 import { app } from 'electron'
@@ -13,7 +14,10 @@ async function runOdxParse(
 ): Promise<{ error: number; data?: any; message?: string }> {
   const pythonPath = getPythonPath()
   const tmpDir = app.getPath('temp')
-  const outputPath = path.join(tmpDir, `odx_result_${Date.now()}.json`)
+  const outputPath = path.join(
+    tmpDir,
+    `odx_result_${process.pid}_${Date.now()}_${randomUUID()}.json`
+  )
 
   const args = [odxPyFile, command, odxFilePath, outputPath]
   if (parseResp) {

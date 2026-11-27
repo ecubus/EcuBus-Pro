@@ -69,6 +69,8 @@ export abstract class CanBase {
   abstract setOption(cmd: string, val: any): any
 
   abstract event: EventEmitter
+  /** Set when the device finishes opening after the constructor returns. */
+  ready?: Promise<void>
   static getValidDevices(): CanDevice[] | Promise<CanDevice[]> {
     throw new Error('Method not implemented.')
   }

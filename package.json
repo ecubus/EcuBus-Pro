@@ -10,6 +10,7 @@
     "vendor": {
       "win32": [
         "simulate",
+        "renode",
         "kvaser",
         "peak",
         "zlg",
@@ -21,10 +22,12 @@
       ],
       "linux": [
         "simulate",
+        "renode",
         "slcan"
       ],
       "darwin": [
         "simulate",
+        "renode",
         "slcan"
       ]
     }

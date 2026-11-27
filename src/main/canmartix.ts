@@ -1,6 +1,7 @@
 import { CanDB } from './share/can'
 import { execBinary } from './util'
 import { getPythonPath } from './python'
+import { randomUUID } from 'crypto'
 import fsP from 'fs/promises'
 import path from 'path'
 import iconv from 'iconv-lite'
@@ -97,25 +98,32 @@ export async function exportOtherFile(
   outputFilePath: string
 ): Promise<void> {
   //covert candb to json firstly, then conver the json file to the other file
-  const jsonFilePath = path.join(tmpDir, 'canmatrix.json')
+  const jsonFilePath = path.join(
+    tmpDir,
+    `canmatrix_${process.pid}_${Date.now()}_${randomUUID()}.json`
+  )
   await fsP.writeFile(jsonFilePath, JSON.stringify(candb, null, 2))
   const pythonPath = getPythonPath()
   // Omit -f to infer format from output path extension; avoids KeyError when a
   // format module failed to load (e.g. arxml when lxml is missing)
-  const result = await execBinary(pythonPath, [
-    '-m',
-    'canmatrix.cli.convert',
-    jsonFilePath,
-    outputFilePath
-  ])
-  if (result.success) {
-    if (result.stdout.toLowerCase().includes('error')) {
-      throw new Error(result.stdout)
-    }
-    if (result.stderr.toLowerCase().includes('error')) {
+  try {
+    const result = await execBinary(pythonPath, [
+      '-m',
+      'canmatrix.cli.convert',
+      jsonFilePath,
+      outputFilePath
+    ])
+    if (result.success) {
+      if (result.stdout.toLowerCase().includes('error')) {
+        throw new Error(result.stdout)
+      }
+      if (result.stderr.toLowerCase().includes('error')) {
+        throw new Error(result.stderr)
+      }
+    } else {
       throw new Error(result.stderr)
     }
-  } else {
-    throw new Error(result.stderr)
+  } finally {
+    await fsP.unlink(jsonFilePath).catch(() => {})
   }
 }

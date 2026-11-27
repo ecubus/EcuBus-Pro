@@ -1,4 +1,3 @@
-import { setProjectSimulateCount } from 'src/cli/rpc/lifecycle'
 import { openCanDevice } from 'src/main/docan/can'
 import { UDSTesterMain } from 'src/main/docan/uds'
 import { TesterInfo } from 'src/main/share/tester'
@@ -25,10 +24,8 @@ async function runSeq(
     //initialize the can device
     const canBase = openCanDevice(device.canDevice)
     if (canBase) {
-      if (device.canDevice.vendor === 'simulate') {
-        await setProjectSimulateCount(1)
-      }
       try {
+        if (canBase.ready) await canBase.ready
         await uds.setCanBase(canBase)
         let seqIndex = 0
         if (seqName) {
@@ -53,7 +50,6 @@ async function runSeq(
         await uds.runSequence(seqIndex, cycle)
       } finally {
         canBase.close()
-        await setProjectSimulateCount(0)
       }
     } else {
       throw new Error('can device not found')

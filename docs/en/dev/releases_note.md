@@ -1,6 +1,13 @@
 # EcuBus-Pro Release Notes
 
 ## Unreleased
+Changes since v0.8.68:
+
+* feat(can): add Renode External Control CAN/CAN-FD client and remove Simulate CAN JSON-RPC server
+* feat(app): support running multiple EcuBus-Pro instances concurrently with isolated sessions, OAuth routing, and persisted theme preference
+* fix(cli): resolve nodeCan imports in the CLI production build
+* feat(network): wire Node Active enable/disable control ([#491](https://github.com/ecubus/EcuBus-Pro/pull/491))
+* fix(cantp,uds): ISO 15765-2 reception fixes and ISO 14229-2 P2 (stop at SF/FF) for [#487](https://github.com/ecubus/EcuBus-Pro/pull/487) ([#488](https://github.com/ecubus/EcuBus-Pro/pull/488))
 
 ## 0.8.68
 Changes since v0.8.67:

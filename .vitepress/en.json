@@ -187,10 +187,6 @@
         {
           "text": "General",
           "link": "setting/general.md"
-        },
-        {
-          "text": "SIM-CAN",
-          "link": "setting/sim-can.md"
         }
       ]
     }
@@ -202,10 +198,6 @@
         {
           "text": "CAN Basic",
           "link": "can/readme.md"
-        },
-        {
-          "text": "PC MCAL-CAN JSON-RPC",
-          "link": "mcal_can_rpc/readme.md"
         },
         {
           "text": "CAN High-Precision Timer",

@@ -118,6 +118,7 @@ async function openLogin() {
   // Generate and store random state for CSRF protection
   const state = uuidv4()
   sessionStorage.setItem('auth_state', state)
+  window.electron.ipcRenderer.send('ipc-casdoor-login-start', state)
 
   // Clear existing timer if any
   if (loginTimer.value) clearTimeout(loginTimer.value)

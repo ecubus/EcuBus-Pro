@@ -31,6 +31,18 @@
                   />
                 </span>
 
+                <span v-else-if="data.vendor == 'renode' && node.level == 1" class="renode-label">
+                  <span>{{ node.label }}</span>
+                  <Icon
+                    :icon="hoveredRenode ? questionIcon1 : questionIcon"
+                    class="tree-question"
+                    width="16"
+                    height="16"
+                    @click.stop="openRenodeCan"
+                    @mouseenter="hoveredRenode = true"
+                    @mouseleave="hoveredRenode = false"
+                  />
+                </span>
                 <span v-else>{{ node.label }}</span>
                 <el-tag
                   v-if="node.level == 3 && data.index !== undefined"
@@ -149,6 +161,7 @@ import i18next from 'i18next'
 const loading = ref(false)
 const activeTree = ref<tree>()
 const hoveredEcuBus = ref(false)
+const hoveredRenode = ref(false)
 const props = defineProps<{
   height: number
   width: number
@@ -172,6 +185,14 @@ const serialNodeRef = ref()
 
 function openEcuBusHardware() {
   window.electron.ipcRenderer.send('ipc-open-link', 'https://app.whyengineer.com/docs/um/hardware/')
+}
+
+function openRenodeCan() {
+  const prefix = i18next.language?.toLowerCase().startsWith('zh') ? '/zh' : ''
+  window.electron.ipcRenderer.send(
+    'ipc-open-link',
+    `https://app.whyengineer.com${prefix}/docs/um/can/can.html#renode`
+  )
 }
 
 // Helper function to show save dialog with three buttons
@@ -521,6 +542,17 @@ async function buildTree() {
     t.push(simulate)
     addSubTree('simulate', simulate, deviceIndexMap)
   }
+  if (vendors.includes('renode')) {
+    const renode: tree = {
+      label: i18next.t('uds.hardware.vendors.renode'),
+      vendor: 'renode',
+      append: false,
+      id: 'RENODE',
+      children: []
+    }
+    t.push(renode)
+    addSubTree('renode', renode, deviceIndexMap)
+  }
   if (vendors.includes('toomoss')) {
     const toomoss: tree = {
       label: i18next.t('uds.hardware.vendors.toomoss'),
@@ -785,6 +817,19 @@ onMounted(() => {
 .ecubus-logo img {
   height: 16px;
   /* width: 100px; */
+}
+
+.renode-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tree-question {
+  display: inline-flex;
+  color: var(--el-color-primary);
+  cursor: help;
+  flex: none;
 }
 
 .ecubus-logo span {

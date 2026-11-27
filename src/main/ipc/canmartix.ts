@@ -1,17 +1,20 @@
 import { ipcMain, app } from 'electron'
 import { exportOtherFile, parseFile } from '../canmartix'
+import { randomUUID } from 'crypto'
 import path from 'path'
 import fs from 'fs'
 
 ipcMain.handle('ipc-canmartix-parse', async (event, arg) => {
-  //try remove file if exists
   const tmpDir = app.getPath('temp')
-  const filePath = path.join(tmpDir, 'canmartix.json')
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath)
+  const filePath = path.join(tmpDir, `canmartix_${process.pid}_${Date.now()}_${randomUUID()}.json`)
+  try {
+    const result = await parseFile(arg, filePath)
+    return result
+  } finally {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
   }
-  const result = await parseFile(arg, filePath)
-  return result
 })
 
 ipcMain.handle('ipc-canmartix-exportOtherFile', async (event, arg) => {

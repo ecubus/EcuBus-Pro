@@ -90,6 +90,11 @@ const handleZoomChange = (value: number) => {
 
 const handleThemeChange = (value: boolean) => {
   isDark.value = value
+  const current = (window.store.get('general.settings') as Record<string, unknown>) || {}
+  window.store.set('general.settings', {
+    ...current,
+    dark: value
+  })
 }
 
 onMounted(() => {

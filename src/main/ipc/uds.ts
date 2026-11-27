@@ -86,7 +86,6 @@ import {
 
 import TraceItem from '../ostrace/item'
 import { startPlugins, stopPlugins } from './plugin'
-import { setProjectSimulateCount } from 'src/cli/rpc/lifecycle'
 import Replay, { ReplayReader } from '../replay'
 import { BlfReader } from '../replay/blfReader'
 import { AscReader } from '../replay/ascReader'
@@ -401,6 +400,15 @@ async function globalStart(
         const canDevice = device.canDevice
         activeKey = canDevice.name
         const canBase = openCanDevice(canDevice)
+        if (canBase?.ready) {
+          try {
+            await waitForStart(canBase.ready, signal)
+            signal.throwIfAborted()
+          } catch (error) {
+            canBase.close()
+            throw error
+          }
+        }
 
         sysLog.info(`start can device ${canDevice.vendor}-${canDevice.handle} success`)
         if (canBase) {
@@ -742,9 +750,6 @@ async function globalStart(
     signal
   )
   signal.throwIfAborted()
-  const simulateCount = [...canBaseMap.values()].filter((b) => b.info.vendor === 'simulate').length
-  await setProjectSimulateCount(simulateCount)
-  signal.throwIfAborted()
   canBaseMap.forEach((base) => {
     base.resetStartTs?.()
   })
@@ -1007,8 +1012,6 @@ export function globalStop(emit = false) {
     value.close()
   })
   testMap.clear()
-  // Queued with the next start so the port is free before listen.
-  void setProjectSimulateCount(0)
   canBaseMap.forEach((value) => {
     value.close()
     sysLog.info(`stop can device ${value.info.vendor}-${value.info.handle}`)

@@ -3,9 +3,51 @@ import axios from 'axios'
 import { store } from '../store'
 import log from 'electron-log/main'
 import url from 'url'
+import path from 'path'
+import {
+  PROTOCOL_REGEXP,
+  PROTOCOL_SCHEME,
+  extractAuthState,
+  forwardProtocolUrl
+} from '../multiInstance'
 
-const protocol = 'ecubuspro'
-const ProtocolRegExp = new RegExp(`^${protocol}://`)
+const protocol = PROTOCOL_SCHEME
+const ProtocolRegExp = PROTOCOL_REGEXP
+
+const AUTH_STATE_TTL_MS = 5 * 60 * 1000
+const pendingAuthStates = new Map<string, number>()
+
+function pruneExpiredAuthStates(now = Date.now()) {
+  for (const [state, expiresAt] of pendingAuthStates.entries()) {
+    if (expiresAt <= now) {
+      pendingAuthStates.delete(state)
+    }
+  }
+}
+
+export function registerPendingAuthState(state: string) {
+  if (!state) return
+  pruneExpiredAuthStates()
+  pendingAuthStates.set(state, Date.now() + AUTH_STATE_TTL_MS)
+}
+
+export function hasPendingAuthState(state?: string): boolean {
+  if (!state) return false
+  pruneExpiredAuthStates()
+  return pendingAuthStates.has(state)
+}
+
+export function consumePendingAuthState(state?: string): boolean {
+  if (!state) return false
+  pruneExpiredAuthStates()
+  return pendingAuthStates.delete(state)
+}
+
+ipcMain.on('ipc-casdoor-login-start', (_event, state: string) => {
+  if (typeof state === 'string' && state) {
+    registerPendingAuthState(state)
+  }
+})
 
 // Casdoor integration config
 const serverUrl = 'https://door.whyengineer.com'
@@ -309,42 +351,56 @@ ipcMain.handle('ipc-authenticated-request', async (event, url: string, options: 
   }
 })
 
-export function handleProtocolUrl(protocolUrl: string) {
+function focusMainWindow() {
+  if (global.mainWindow && !global.mainWindow.isDestroyed()) {
+    if (global.mainWindow.isMinimized()) global.mainWindow.restore()
+    global.mainWindow.focus()
+  }
+}
+
+export function handleProtocolUrl(protocolUrl: string): boolean {
   try {
     const params = url.parse(protocolUrl, true).query
     if (params && params.code) {
       // Send code directly to renderer, no need to store
-      if (global.mainWindow) {
+      if (global.mainWindow && !global.mainWindow.isDestroyed()) {
+        focusMainWindow()
         global.mainWindow.webContents.send('receiveCode', params.code, params.state)
+        return true
       }
     }
   } catch (e) {
     log.error('Error handling protocol URL:', e)
   }
+  return false
 }
 
-export function setupCasdoor() {
-  /* single instance */
-  const gotTheLock = app.requestSingleInstanceLock()
-  if (!gotTheLock) {
-    app.quit()
-  } else {
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
-      // Someone tried to run a second instance, we should focus our window.
-      if (global.mainWindow) {
-        if (global.mainWindow.isMinimized()) global.mainWindow.restore()
-        global.mainWindow.focus()
-      }
-      // Protocol handler for second instance
-      commandLine.forEach((str) => {
-        if (ProtocolRegExp.test(str)) {
-          handleProtocolUrl(str)
-        }
-      })
-    })
+export function handleIncomingProtocolUrl(protocolUrl: string, matchStateOnly: boolean): boolean {
+  if (!ProtocolRegExp.test(protocolUrl)) {
+    return false
   }
+  const state = extractAuthState(protocolUrl)
+  if (matchStateOnly) {
+    if (!consumePendingAuthState(state)) {
+      return false
+    }
+    return handleProtocolUrl(protocolUrl)
+  }
+  if (state) {
+    consumePendingAuthState(state)
+  }
+  if (handleProtocolUrl(protocolUrl)) {
+    return true
+  }
+  if (global.mainWindow && !global.mainWindow.isDestroyed()) {
+    focusMainWindow()
+    return true
+  }
+  return false
+}
 
-  /* login */
+export function setupCasdoor(userDataDir?: string) {
+  /* login protocol registration */
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
       app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])])
@@ -358,9 +414,18 @@ export function setupCasdoor() {
     const isProtocol = ProtocolRegExp.test(openUrl)
     if (isProtocol) {
       event.preventDefault()
-      handleProtocolUrl(openUrl)
+      if (handleIncomingProtocolUrl(openUrl, true)) {
+        return
+      }
+      const baseDir = userDataDir || app.getPath('userData')
+      void forwardProtocolUrl(baseDir, openUrl, {
+        excludePid: process.pid,
+        matchStateOnly: true
+      }).then((forwarded) => {
+        if (!forwarded) {
+          handleIncomingProtocolUrl(openUrl, false)
+        }
+      })
     }
   })
 }
-
-import path from 'path'

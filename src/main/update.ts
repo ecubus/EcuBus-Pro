@@ -13,19 +13,34 @@ let cancellationToken: CancellationToken | undefined
 autoUpdater.setFeedURL(feedUrl)
 
 autoUpdater.on('update-available', (info) => {
-  BrowserWindow.getAllWindows()[0].webContents.send('ipc-update-available', info)
+  ;(global.mainWindow ?? BrowserWindow.getAllWindows()[0])?.webContents.send(
+    'ipc-update-available',
+    info
+  )
 })
 autoUpdater.on('update-not-available', (info) => {
-  BrowserWindow.getAllWindows()[0].webContents.send('ipc-update-not-available', info)
+  ;(global.mainWindow ?? BrowserWindow.getAllWindows()[0])?.webContents.send(
+    'ipc-update-not-available',
+    info
+  )
 })
 autoUpdater.on('error', (err) => {
-  BrowserWindow.getAllWindows()[0].webContents.send('ipc-update-error', err)
+  ;(global.mainWindow ?? BrowserWindow.getAllWindows()[0])?.webContents.send(
+    'ipc-update-error',
+    err
+  )
 })
 autoUpdater.on('download-progress', (progressObj) => {
-  BrowserWindow.getAllWindows()[0].webContents.send('ipc-update-download-progress', progressObj)
+  ;(global.mainWindow ?? BrowserWindow.getAllWindows()[0])?.webContents.send(
+    'ipc-update-download-progress',
+    progressObj
+  )
 })
 autoUpdater.on('update-downloaded', (info) => {
-  BrowserWindow.getAllWindows()[0].webContents.send('ipc-update-downloaded', info)
+  ;(global.mainWindow ?? BrowserWindow.getAllWindows()[0])?.webContents.send(
+    'ipc-update-downloaded',
+    info
+  )
 })
 
 ipcMain.on('ipc-check-update', () => {

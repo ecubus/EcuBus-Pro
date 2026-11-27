@@ -187,10 +187,6 @@
         {
           "text": "通用",
           "link": "setting/general.md"
-        },
-        {
-          "text": "SIM-CAN",
-          "link": "setting/sim-can.md"
         }
       ]
     }
@@ -202,10 +198,6 @@
         {
           "text": "CAN 基础",
           "link": "can/readme.md"
-        },
-        {
-          "text": "PC MCAL-CAN JSON-RPC",
-          "link": "mcal_can_rpc/readme.md"
         },
         {
           "text": "CAN 高精度定时器",

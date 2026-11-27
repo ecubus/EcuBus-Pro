@@ -16,6 +16,21 @@ CAN/CAN-FD 是一种行业标准的车辆总线协议，专为汽车应用中可
 | Toomoss | CAN, CAN-FD                          |
 | VECTOR  | CAN, CAN-FD                          |
 | SLCAN   | CAN, CAN-FD                          |
+| Renode  | CAN、CAN-FD — Renode CANHub 的 External Control 客户端 |
+
+## Renode
+
+Renode 设备是 Renode 1.17 及以上版本的 TCP 客户端。它通过 `CANExternalControlBus` 加入 `CANHub`。
+
+默认值是主机 `127.0.0.1`、端口 `1234`、机器 `machine-0`、总线 `sysbus.can_external`。比特率不参与通信，时序由仿真控制器自己决定。一个通道能看到挂在同一个 hub 上的全部控制器，因此同一 hub 上的 `can0` 和 `can1` 共用这一路。大于 `0x7FF` 的 id 是扩展帧。超过 8 字节的载荷是 CAN FD。经典 CAN 控制器会丢掉超过 8 字节的帧。这套接口没有远程帧位，只发送数据帧。
+
+板级脚本需要先把 hub 暴露出来，EcuBus 才能连上：
+
+```
+can_external: CAN.CANExternalControlBus @ sysbus
+emulation CreateExternalControlServer "server" 1234
+connector Connect sysbus.can_external canHub
+```
 
 ## SLCAN 特殊说明
 

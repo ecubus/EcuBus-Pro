@@ -1,6 +1,6 @@
 # EcuBus-Pro Release Notes
 
-## Unreleased
+## 0.8.69
 Changes since v0.8.68:
 
 * feat(can): add Renode External Control CAN/CAN-FD client and remove Simulate CAN JSON-RPC server

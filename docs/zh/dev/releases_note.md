@@ -1,5 +1,45 @@
 # EcuBus-Pro 发布说明
 
+## 0.8.69
+
+自 v0.8.68 以来的变更：
+
+- feat(can)：新增 Renode External Control CAN/CAN-FD 客户端，并移除 Simulate CAN JSON-RPC 服务器
+- feat(app)：支持同时运行多个 EcuBus-Pro 实例，具备隔离会话、OAuth 路由和持久化主题偏好
+- fix(cli)：修复 CLI 生产构建中的 nodeCan 导入问题
+- feat(network)：接入 Node Active 启用/禁用控制（[#491](https://github.com/ecubus/EcuBus-Pro/pull/491)）
+- fix(cantp,uds)：修复 ISO 15765-2 接收问题以及 ISO 14229-2 P2（在 SF/FF 处停止），针对 [#487](https://github.com/ecubus/EcuBus-Pro/pull/487)（[#488](https://github.com/ecubus/EcuBus-Pro/pull/488)）
+
+## 0.8.68
+
+自 v0.8.67 以来的变更：
+
+- fix(can-ia)：发送数据库帧时保留原始数据编辑（[#484](https://github.com/ecubus/EcuBus-Pro/pull/484)）
+- feat(replay)：改进 asc 和 blf 日志记录（[#486](https://github.com/ecubus/EcuBus-Pro/pull/486)）
+- docs(cdd)：将内置的 cddtools 指向其源代码提交（[#485](https://github.com/ecubus/EcuBus-Pro/pull/485)）
+- fix(replay)：当通道映射中缺少日志通道时发出警告（[#483](https://github.com/ecubus/EcuBus-Pro/pull/483)）
+- feat(cdd)：添加只读故障码表以及用于读取 DTC 请求的 DTC 选择（[#482](https://github.com/ecubus/EcuBus-Pro/pull/482)）
+- feat(worker)：为 runUdsSeq 添加可选的进度回调（[#478](https://github.com/ecubus/EcuBus-Pro/pull/478)）
+- fix(test)：显示每个用例的日志而不清空终端（[#477](https://github.com/ecubus/EcuBus-Pro/pull/477)）
+- refactor(panel)：将面板存储在项目文件中并移除 .ecpanel 文件（[#475](https://github.com/ecubus/EcuBus-Pro/pull/475)）
+- fix(panel)：在编辑器窗口中打开绑定对话框并修复 README 文档链接（[#473](https://github.com/ecubus/EcuBus-Pro/pull/473)）
+- fix(test)：在测试仍在运行时流式输出控制台输出（[#472](https://github.com/ecubus/EcuBus-Pro/pull/472)）
+- fix(can-ia)：在交互窗口打开时保持剪贴板按键可用（[#471](https://github.com/ecubus/EcuBus-Pro/pull/471)）
+- fix(panel)：保持滑块、路径和数值草稿与接收到的值同步（[#470](https://github.com/ecubus/EcuBus-Pro/pull/470)）
+- docs(panel)：将面板示例添加到 PANEL 目录并更新 readme 截图（[#467](https://github.com/ecubus/EcuBus-Pro/pull/467)）
+- fix(panel)：在测量开始前忽略变量写入（[#466](https://github.com/ecubus/EcuBus-Pro/pull/466)）
+- 在测试日志中分组每个用例并从树中高亮显示（[#465](https://github.com/ecubus/EcuBus-Pro/pull/465)）
+- fix(ipc)：增强构建和全局启动进程中的错误处理
+- 更新 support.md（[#464](https://github.com/ecubus/EcuBus-Pro/pull/464)）
+- fix(test)：为重复的测试名称显示状态和持续时间（[#463](https://github.com/ecubus/EcuBus-Pro/pull/463)）
+- feat(panel)：新增自由布局面板并记住取值选项（[#450](https://github.com/ecubus/EcuBus-Pro/pull/450)）
+- 从 Simulate CAN 提供 PC MCAL JSON-RPC（[#459](https://github.com/ecubus/EcuBus-Pro/pull/459)）
+- fix(can)：跨物理地址和功能地址暂停 tester present（[#458](https://github.com/ecubus/EcuBus-Pro/pull/458)）
+- fix(test)：阻止 Node 24 跳过 test_simple 中的每个测试（[#457](https://github.com/ecubus/EcuBus-Pro/pull/457)）
+- feat(slcan)：支持 WeAct Studio USB2CANFD V2 固件（[#456](https://github.com/ecubus/EcuBus-Pro/pull/456)）
+- feat(doip)：新增可选的 OEM 专用路由激活字段（[#453](https://github.com/ecubus/EcuBus-Pro/pull/453)）
+- 更新 support.md
+
 ## 0.8.67
 
 自 v0.8.66 以来的变更：
